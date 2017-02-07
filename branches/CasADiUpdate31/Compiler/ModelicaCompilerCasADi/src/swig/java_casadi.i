@@ -42,10 +42,8 @@ using namespace std;
 
 %casadi_wrap(casadi::PrintableObject)
 %casadi_wrap(casadi::SharedObject)
-%casadi_wrap(casadi::OptionsFunctionality)
 %casadi_wrap(casadi::MX)
 %casadi_wrap(casadi::Function)
-%casadi_wrap(casadi::MXFunction)
 
 %casadi_wrap( std::vector<casadi::MX> )
 
@@ -56,9 +54,7 @@ using namespace std;
 %rename(__neg__) operator-;
 %rename(_null) casadi::Sparsity::null;
 %rename(toString) __repr__;
-%rename(deref1)  casadi::MXFunction::operator->;
 %rename(deref2)  casadi::Function::operator->;
-%rename(__call__) operator();
 
 #define CASADI_EXPORT
 
@@ -66,10 +62,7 @@ using namespace std;
 
 %include "casadi/core/printable_object.hpp"
 %include "casadi/core/shared_object.hpp"
-%include "casadi/core/options_functionality.hpp"
 %include "casadi/core/mx/mx.hpp"
-%include "casadi/core/function/function.hpp"
-%include "casadi/core/function/mx_function.hpp"
 
 
 %include "ifcasadi.hpp"
@@ -77,6 +70,9 @@ using namespace std;
 namespace std {
     %template(MXVector) vector<casadi::MX>;
 };
+
+%rename(JFunction) casadi::Function;
+%include "casadi/core/function/function.hpp"
 
 namespace casadi {
     %extend MX {
@@ -122,13 +118,13 @@ namespace casadi {
         MX fmin(const MX& y) { return fmin(*$self, y); }
         MX fmax(const MX& y) { return fmax(*$self, y); }
         MX simplify() { return simplify(*$self); } //
-        bool isEqual(const MX& y, int depth=0) { return isEqual(*$self, y, depth); } //
-        bool iszero() { return iszero(*$self); } //
+        bool is_equal(const MX& y, int depth=0) { return is_equal(*$self, y, depth); } //
+        bool is_zero() { return is_zero(*$self); } //
         MX copysign(const MX& y) { return copysign(*$self, y); }
         MX constpow(const MX& y) { return constpow(*$self, y); }
-        MX if_else(const MX& if_true, 
+        MX if_else(const MX& if_true,
                    const MX& if_false, bool short_circuit=true) {
-          return if_else(*$self, if_true, if_false, short_circuit);   
+          return if_else(*$self, if_true, if_false, short_circuit);
         }
     }
 };
@@ -141,7 +137,22 @@ std::vector< casadi::MX > subst(const std::vector< casadi::MX >& ex,
                                 const std::vector< casadi::MX >& vdef) {
     return substitute(ex, v, vdef);
 }
+
+// Wrapping Function constructor doesn't appear to work
+casadi::Function
+mxfunction(const std::string& name,
+           const std::vector<casadi::MX>& arg,
+           const std::vector<casadi::MX>& res) {
+    return casadi::Function(name, arg, res);
+}
+
+// Hack to avoid append (inefficient!)
+casadi::MX vertcat2(const casadi::MX& a, casadi::MX& b) {
+    return vertcat(a, b);
+}
 %}
+
+
 
 %{
     // To avoid having to set up separate compilation of ifcasadi.cpp

@@ -20,10 +20,10 @@ namespace ModelicaCasADi
 {
     const casadi::MX FlatEquations::getDaeResidual() const
     {
-        casadi::MX daeRes;
+        std::vector<casadi::MX> daeRes;
         for (std::vector< Ref<Equation> >::const_iterator it = daeEquations.begin(); it != daeEquations.end(); ++it) {
-            daeRes.append((*it)->getResidual());
+            daeRes.push_back((*it)->getResidual());
         }
-        return daeRes;
+        return vertcat(daeRes);
     }
 }; //End namespace

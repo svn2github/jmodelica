@@ -241,17 +241,17 @@ class Model(CI_Model):
                 if val is None:
                     if var.getVariability() != var.PARAMETER:
                         raise ValueError("%s is not a parameter." %
-                                         var.getName())
+                                         var.name())
                     else:
                         raise RuntimeError("BUG: Unable to evaluate " +
-                                           "value of %s." % var.getName())
+                                           "value of %s." % var.name())
             return float(val)
         elif attr == "comment":
             var_desc = var.getAttribute("comment")
             if var_desc is None:
                 return ""
             else:
-                return var_desc.getName()
+                return var_desc.name()
         elif attr == "nominal":
             if var.isDerivative():
                 var = var.getMyDifferentiatedVariable()
@@ -266,7 +266,7 @@ class Model(CI_Model):
                     return self.get_attr(var, "start")
                 else:
                     raise ValueError("Variable %s does not have attribute %s."
-                                     % (var.getName(), attr))
+                                     % (var.name(), attr))
             return self.evaluateExpression(val_expr)
 
     def augment_sensitivities(self, parameters):
@@ -303,7 +303,7 @@ class Model(CI_Model):
             for mvar in mvar_vectors['x']:
                 # States
                 mvar_var = mvar.getVar()
-                name = "d%s/d%s" % (mvar.getName(), par.getName())
+                name = "d%s/d%s" % (mvar.name(), par.name())
                 sens_var = casadi.MX.sym(name)
                 sens = ci.RealVariable(self, sens_var, ci.RealVariable.INTERNAL, ci.RealVariable.CONTINUOUS)
                 self.addVariable(sens)
@@ -311,14 +311,14 @@ class Model(CI_Model):
                 # State derivatives
                 dx_mvar = mvar.getMyDerivativeVariable()
                 dx_mvar_var = dx_mvar.getVar()
-                dx_name = "der(d%s/d%s)" % (mvar.getName(), par.getName())
+                dx_name = "der(d%s/d%s)" % (mvar.name(), par.name())
                 dx_sens_var = casadi.MX.sym(dx_name)
                 dx_sens = ci.DerivativeVariable(self, dx_sens_var, sens)
                 self.addVariable(dx_sens)
             for mvar in mvar_vectors['w']:
                 # Algebraics
                 mvar_var = mvar.getVar()
-                name = "d%s/d%s" % (mvar.getName(), par.getName())
+                name = "d%s/d%s" % (mvar.name(), par.name())
                 sens_var = casadi.MX.sym(name)
                 sens = ci.RealVariable(self, sens_var, ci.RealVariable.INTERNAL, ci.RealVariable.CONTINUOUS)
                 self.addVariable(sens)
@@ -331,8 +331,8 @@ class Model(CI_Model):
             df0dx[vk] = {}
             for mvar in mvar_vectors[vk]:
                 mvar_var = mvar.getVar()
-                dfdx[vk][mvar.getName()] = N.array([casadi.jacobian(dae_eq, mvar_var) for dae_eq in dae])
-                df0dx[vk][mvar.getName()] = N.array([casadi.jacobian(init_eq, mvar_var) for init_eq in init])
+                dfdx[vk][mvar.name()] = N.array([casadi.jacobian(dae_eq, mvar_var) for dae_eq in dae])
+                df0dx[vk][mvar.name()] = N.array([casadi.jacobian(init_eq, mvar_var) for init_eq in init])
         
         # Add sensitivity differential equations
         mx_zero = casadi.MX(0.)
@@ -342,11 +342,11 @@ class Model(CI_Model):
                 for vk in var_kinds:
                     for mvar in mvar_vectors[vk]:
                         if vk == "dx":
-                            name = "der(d%s/d%s)" % (mvar.getMyDifferentiatedVariable().getName(), par.getName())
+                            name = "der(d%s/d%s)" % (mvar.getMyDifferentiatedVariable().name(), par.name())
                         else:
-                            name = "d%s/d%s" % (mvar.getName(), par.getName())
+                            name = "d%s/d%s" % (mvar.name(), par.name())
                         sens_var = self.getVariable(name).getVar()
-                        eq += dfdx[vk][mvar.getName()][i] * sens_var
+                        eq += dfdx[vk][mvar.name()][i] * sens_var
                 eq += casadi.jacobian(dae[i], par.getVar())
                 sens_eq = ci.Equation(eq, mx_zero)
                 self.addDaeEquation(sens_eq)
@@ -358,11 +358,11 @@ class Model(CI_Model):
                 for vk in var_kinds:
                     for mvar in mvar_vectors[vk]:
                         if vk == "dx":
-                            name = "der(d%s/d%s)" % (mvar.getMyDifferentiatedVariable().getName(), par.getName())
+                            name = "der(d%s/d%s)" % (mvar.getMyDifferentiatedVariable().name(), par.name())
                         else:
-                            name = "d%s/d%s" % (mvar.getName(), par.getName())
+                            name = "d%s/d%s" % (mvar.name(), par.name())
                         sens_var = self.getVariable(name).getVar()
-                        init_eq += df0dx[vk][mvar.getName()][i] * sens_var
+                        init_eq += df0dx[vk][mvar.name()][i] * sens_var
                 init_eq += casadi.jacobian(init[i], par.getVar())
                 sens_init_eq = ci.Equation(init_eq, mx_zero)
                 self.addInitialEquation(sens_init_eq)
@@ -467,7 +467,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
                                     algorithm, options)
 
     def get_state_names(self):
-        return [var.getName() for var in self.getVariables(self.DIFFERENTIATED)\
+        return [var.name() for var in self.getVariables(self.DIFFERENTIATED)\
          if not var.isAlias()]
 
     def generate_static_guess(self, fmu, static_external_data):
@@ -521,7 +521,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         """
         time_points = map(casadi.MX, time_points)
         sensitivities = N.array([[self.getVariable('d%s/d%s' % (var, par)) for par in parameters] for var in outputs])
-        timed_mx_vars = [N.array([[casadi.MX.sym(sens.getName() + "(%s)" % float(tp)) for sens in sensitivities[i]]
+        timed_mx_vars = [N.array([[casadi.MX.sym(sens.name() + "(%s)" % float(tp)) for sens in sensitivities[i]]
                                   for i in xrange(len(outputs))]) for tp in time_points]
         timed_sens = []
         for i in xrange(len(time_points)):

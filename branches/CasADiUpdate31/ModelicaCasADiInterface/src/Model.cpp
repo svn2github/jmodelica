@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <fstream>
 
-using casadi::MX; using casadi::MXFunction;
+using casadi::MX;
+using casadi::Function;
+using casadi::DM;
 using std::vector; using std::ostream;
 using std::string; using std::pair;
 
@@ -116,7 +118,7 @@ namespace ModelicaCasADi
             case(Variable::PARAMETER):
             {
                 if(var->hasAttributeSet("bindingExpression")) {
-                    if (!var->getAttribute("bindingExpression")->isConstant()) {
+                    if (!var->getAttribute("bindingExpression")->is_constant()) {
                         return REAL_PARAMETER_DEPENDENT;
                     }
                 }
@@ -137,7 +139,7 @@ namespace ModelicaCasADi
             case(Variable::PARAMETER):
             {
                 if(var->hasAttributeSet("bindingExpression")) {
-                    if (!var->getAttribute("bindingExpression")->isConstant()) {
+                    if (!var->getAttribute("bindingExpression")->is_constant()) {
                         return INTEGER_PARAMETER_DEPENDENT;
                     }
                 }
@@ -158,7 +160,7 @@ namespace ModelicaCasADi
             case(Variable::PARAMETER):
             {
                 if(var->hasAttributeSet("bindingExpression")) {
-                    if (!var->getAttribute("bindingExpression")->isConstant()) {
+                    if (!var->getAttribute("bindingExpression")->is_constant()) {
                         return BOOLEAN_PARAMETER_DEPENDENT;
                     }
                 }
@@ -281,7 +283,7 @@ namespace ModelicaCasADi
 
     void Model::addVariable(Ref<Variable> var) {
         assert(var->isOwnedBy(this));
-        if (!var->getVar().isSymbolic()) {
+        if (!var->getVar().is_symbolic()) {
             throw std::runtime_error("The supplied variable is not symbolic and can not be variable");
         }
         dirty = true;            // todo: only if (dependent) parameter, or with dependent attributes?
@@ -359,22 +361,12 @@ namespace ModelicaCasADi
         expVec.push_back(exp);
         try
         {
-            MXFunction f(paramAndConstMXVec, expVec);
-            f.init();
+            Function f("f" , {vertcat(paramAndConstMXVec)}, expVec);
             // Would be preferable to pass in a vector with values,
             // but that does not seem possible unless the passsed in
             // MX is vector-valued as well.
-            for (int i = 0; i < paramAndConstValVec.size(); ++i) {
-                f.setInput(paramAndConstValVec[i], i);
-            }
-            f.evaluate();
-            MX out = f.output();
-            if (out.isConstant()) {
-                return out.getValue();
-            }
-            else {
-                throw std::runtime_error("The evaluated expression could not be determined");
-            }
+            vector<DM> res = f(vector<DM>{paramAndConstValVec});
+            return double(res.at(0));
         }
         catch (const std::exception& ex) {
             std::stringstream ss;
@@ -399,7 +391,7 @@ namespace ModelicaCasADi
             if ((var->getVariability() == Variable::PARAMETER) && !var->isAlias()) {
                 if (var->hasAttributeSet("bindingExpression")) {
                     bindingExpression = *var->getAttribute("bindingExpression");
-                    if (!bindingExpression.isConstant()) {
+                    if (!bindingExpression.is_constant()) {
                         val = evalMX(bindingExpression);
                         paramAndConstMXVec.push_back(var->getVar());
                         paramAndConstValVec.push_back(val);
@@ -424,13 +416,13 @@ namespace ModelicaCasADi
                     // If it's a parameter with a non constant binding expression it
                     // is a dependent parameter, and its value needs to be calculated.
                     MX bindingExpression = *(*it)->getAttribute("bindingExpression");
-                    if (bindingExpression.isConstant()) {
+                    if (bindingExpression.is_constant()) {
                         paramAndConstMXVec.push_back((*it)->getVar());
-                        paramAndConstValVec.push_back(bindingExpression.getValue());
+                        paramAndConstValVec.push_back(double(bindingExpression));
                     }
                 }
                 else {
-                    paramAndConstValVec.push_back((*it)->getAttribute("start")->getValue());
+                    paramAndConstValVec.push_back(double(*(*it)->getAttribute("start")));
                     paramAndConstMXVec.push_back((*it)->getVar());
                 }
             }
@@ -441,7 +433,7 @@ namespace ModelicaCasADi
     {
         MX intialRes;
         for (vector< Ref<Equation> >::const_iterator it = initialEquations.begin(); it != initialEquations.end(); ++it) {
-            intialRes.append((*it)->getResidual());
+            intialRes = vertcat(intialRes, (*it)->getResidual());
         }
         return intialRes;
     }
@@ -460,7 +452,7 @@ namespace ModelicaCasADi
 
         using std::endl;
         os << "------------------------------- Variables -------------------------------\n" << endl;
-        if (!timeVar.isempty()) {
+        if (!timeVar.is_empty()) {
             os << "Time variable: ";
             os << ModelicaCasADi::normalizeMXRespresentation(timeVar);
             os << endl;
@@ -506,7 +498,7 @@ namespace ModelicaCasADi
         for(std::vector<Variable*>::const_iterator it=z.begin();it!=z.end();++it) {
             if((*it)->isEliminable()){
                 rVec.push_back((*it));
-            }        
+            }
         }
         return rVec;
     }
@@ -524,7 +516,7 @@ namespace ModelicaCasADi
     void Model::addDaeEquation(Ref<Equation> eq) {
         equations_->addDaeEquation(eq);
     }
-    
+
     void Model::setEliminableVariables(){
         if(equations_->hasBLT()) {
             std::vector< Ref<Variable> > alias_vars = getAliases();
@@ -540,14 +532,14 @@ namespace ModelicaCasADi
                     (*it)->setAsEliminable();
                 }
             }
-        }    
+        }
     }
 
     void Model::setEquations(Ref<Equations> eqCont) {
         equations_ = eqCont;
         setEliminableVariables();
     }
-    
+
     bool compareFunction(const std::pair<int, const Variable*>& a, const std::pair<int, const Variable*>& b) {
         return a.first < b.first;
     }
@@ -560,8 +552,8 @@ namespace ModelicaCasADi
                 int id_block = equations_->getBlockIDWithSolutionOf(*it);
                 if(id_block>=0) {
                     toSubstituteList.push_back(std::pair<int, const Variable*>(id_block,const_cast<const Variable*>((*it).getNode())));
-                }    
-            }            
+                }
+            }
             toSubstituteList.sort(compareFunction);
             std::map<const Variable*,casadi::MX> tmpMap;
             equations_->getSubstitues(toSubstituteList, tmpMap);
@@ -574,13 +566,13 @@ namespace ModelicaCasADi
 
     void Model::eliminateAlgebraics() {
         if(!hasBLT()) {
-            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");
         }
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
         std::vector< Ref<Variable> > eliminable_algebraics;
         for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
             if((*it)->isEliminable() && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")){
-                eliminable_algebraics.push_back(*it);        
+                eliminable_algebraics.push_back(*it);
             }
         }
         markVariablesForElimination(eliminable_algebraics);
@@ -590,7 +582,7 @@ namespace ModelicaCasADi
     std::vector< Ref<Variable> > Model::getEliminatedVariables() {
         std::vector< Ref<Variable> > elimVars;
         for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
-            if((*it)->wasEliminated()){            
+            if((*it)->wasEliminated()){
                 elimVars.push_back(*it);
             }
         }
@@ -599,13 +591,13 @@ namespace ModelicaCasADi
 
     void Model::eliminateVariables() {
         if(!hasBLT()) {
-            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");
         }
         //Ensures eliminate variables is called only once
         if(call_count_eliminations<1){
             //Sort the list first
             listToEliminate.sort(compareFunction);
-    
+
             //Mark variables as Eliminated
             std::vector< Variable* >::iterator fit;
             for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
@@ -663,23 +655,23 @@ namespace ModelicaCasADi
             std::cout<<"Only Models with BLT can eliminate variables.\n";
         }
     }
-    
+
     casadi::MX Model::getSolutionOfEliminatedVariable(Ref<Variable> var){
         if(var->wasEliminated()) {
             std::map<const Variable*,casadi::MX>::iterator it = eliminatedVariableToSolution.find(var.getNode());
             if(it!=eliminatedVariableToSolution.end()){
-                return it->second;            
+                return it->second;
             }
             else{
-                return casadi::MX();            
+                return casadi::MX();
             }
         }
         else {
             std::cout<<"The variable is not an eliminated variable.\n";
-            return casadi::MX();  
+            return casadi::MX();
         }
     }
 
-    
+
 
 };   // End namespace

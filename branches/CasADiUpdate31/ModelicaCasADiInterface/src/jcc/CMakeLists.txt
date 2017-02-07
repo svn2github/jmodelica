@@ -33,7 +33,7 @@ set(CLASSES_common
   java.util.HashSet
   java.util.LinkedHashSet
   ifcasadi.MX
-  ifcasadi.MXFunction
+  ifcasadi.JFunction
   ifcasadi.MXVector
   ifcasadi.ifcasadi
   org.jmodelica.util.OptionRegistry
@@ -114,7 +114,7 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FIfStmt
   org.jmodelica.optimica.compiler.FFunctionCallStmt
   org.jmodelica.optimica.compiler.FFunctionVariable
-  org.jmodelica.optimica.compiler.FAlgorithm 
+  org.jmodelica.optimica.compiler.FAlgorithm
   org.jmodelica.optimica.compiler.BaseNode
   org.jmodelica.optimica.compiler.Root
   org.jmodelica.optimica.compiler.BLT

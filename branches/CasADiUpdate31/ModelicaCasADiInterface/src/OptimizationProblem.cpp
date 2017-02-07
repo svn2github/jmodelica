@@ -50,27 +50,27 @@ namespace ModelicaCasADi
     void OptimizationProblem::print(ostream& os) const
     {
         //    os << "OptimizationProblem<" << this << ">"; return;
-    
+
         using namespace std;
         os << "Model contained in OptimizationProblem:\n" << endl;
         Model::print(os);
         os << "----------------------- Optimization information ------------------------\n\n";
         os << "Start time = ";
-        if (startTime.isempty()) {
+        if (startTime.is_empty()) {
             os << "not set";
         }
         else {
             os << ModelicaCasADi::normalizeMXRespresentation(startTime);
         }
-    
+
         os << "\nFinal time = ";
-        if (finalTime.isempty()) {
+        if (finalTime.is_empty()) {
             os << "not set";
         }
         else {
             os << ModelicaCasADi::normalizeMXRespresentation(finalTime);
         }
-    
+
         os << "\n\n";
         for (vector< Ref<Constraint> >::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
             if (it == pathConstraints.begin()) {
@@ -90,51 +90,51 @@ namespace ModelicaCasADi
             }
             os << **it << endl;
         }
-    
+
         os << "\n-- Objective integrand term --\n";
-        if (objectiveIntegrand.isempty()) {
+        if (objectiveIntegrand.is_empty()) {
             os << "not set";
         }
         else {
             os << ModelicaCasADi::normalizeMXRespresentation(objectiveIntegrand);
         }
-    
+
         os << "\n-- Objective term --\n";
-        if (objective.isempty()) {
+        if (objective.is_empty()) {
             os << "not set";
         }
         else {
             os << ModelicaCasADi::normalizeMXRespresentation(objective);
         }
     }
-    
+
     void OptimizationProblem::setEliminableVariables(){
         if(equations_->hasBLT()) {
             std::vector< Ref<TimedVariable> > timedVars = getTimedVariables();
             std::vector< Ref<Variable> > alias_vars = getAliases();
             for(std::vector<Variable*>::iterator it=z.begin();it!=z.end();++it) {
-    
+
                 bool hasAlias=false;
                 for(std::vector< Ref<Variable> >::iterator it_alias = alias_vars.begin();
                 it_alias!=alias_vars.end() && !hasAlias;++it_alias) {
                     if((*it)==(*it_alias)->getModelVariable()) {
                         hasAlias=true;
                     }
-                }                
-                
+                }
+
                 bool isTimed=false;
                 for(std::vector< Ref<TimedVariable> >::iterator tit=timedVars.begin();tit!=timedVars.end() && !isTimed;++tit) {
                     if(*it==(*tit)->getBaseVariable()) {
                         isTimed=true;
                     }
-                }                
+                }
                 if(equations_->isBLTEliminable((*it)) && classifyVariable(*it) != DERIVATIVE && !isTimed && !hasAlias /*&& !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")*/) {
                     (*it)->setAsEliminable();
                 }
             }
-        }    
+        }
     }
-    
+
     void OptimizationProblem::setEquations(Ref<Equations> eqCont) {
         equations_ = eqCont;
         setEliminableVariables();
@@ -143,13 +143,13 @@ namespace ModelicaCasADi
 
     void OptimizationProblem::eliminateAlgebraics() {
         if(!hasBLT()) {
-            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");
         }
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
         std::vector< Ref<Variable> > eliminable_algebraics;
         for(std::vector< Ref<Variable> >::iterator it = algebraics.begin(); it!=algebraics.end(); ++it){
             if((*it)->isEliminable() && !(*it)->hasAttributeSet("min") && !(*it)->hasAttributeSet("max")){
-                eliminable_algebraics.push_back(*it);        
+                eliminable_algebraics.push_back(*it);
             }
         }
         markVariablesForElimination(eliminable_algebraics);
@@ -162,15 +162,15 @@ namespace ModelicaCasADi
 
     void OptimizationProblem::substituteAllEliminables() {
         if(hasBLT()) {
-            
+
             std::vector< Ref<Variable> > eliminateables = getEliminableVariables();
             std::list< std::pair<int, const Variable*> > toSubstituteList;
             for(std::vector<Ref<Variable> >::iterator it=eliminateables.begin();it!=eliminateables.end();++it) {
                 int id_block = equations_->getBlockIDWithSolutionOf(*it);
                 if(id_block>=0) {
                     toSubstituteList.push_back(std::pair<int, const Variable*>(id_block,const_cast<const Variable*>((*it).getNode())));
-                }    
-            }                   
+                }
+            }
             toSubstituteList.sort(compareFunction2);
             std::map<const Variable*,casadi::MX> tmpMap;
             equations_->getSubstitues(toSubstituteList, tmpMap);
@@ -181,14 +181,14 @@ namespace ModelicaCasADi
                 eliminatedMXs.push_back(it->first->getVar());
                 subtitutes.push_back(it->second);
             }
-    
+
             //Substitutes in the optimization expressions
             std::vector<casadi::MX> expressions;
             expressions.push_back(startTime);
             expressions.push_back(finalTime);
             expressions.push_back(objectiveIntegrand);
             expressions.push_back(objective);
-    
+
             if(pathConstraints.size()>0) {
                 for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin();
                 path_it!=pathConstraints.end();++path_it) {
@@ -203,15 +203,15 @@ namespace ModelicaCasADi
                     expressions.push_back((*point_it)->getRhs());
                 }
             }
-    
+
             std::vector<casadi::MX> subtitutedExpressions = substitute(expressions,eliminatedMXs,subtitutes);
-    
+
             int counter=0;
             startTime = subtitutedExpressions[counter++];
             finalTime = subtitutedExpressions[counter++];
             objectiveIntegrand = subtitutedExpressions[counter++];
             objective = subtitutedExpressions[counter++];
-    
+
             if(pathConstraints.size()>0) {
                 for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin();
                 path_it!=pathConstraints.end();++path_it) {
@@ -226,7 +226,7 @@ namespace ModelicaCasADi
                     (*point_it)->setRhs(subtitutedExpressions[counter++]);
                 }
             }
-    
+
             //Substitutes in DAE
             equations_->substitute(tmpMap);
         }
@@ -276,15 +276,15 @@ namespace ModelicaCasADi
 
     void OptimizationProblem::eliminateVariables() {
         if(!hasBLT()) {
-            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");        
+            throw std::runtime_error("Only Models with BLT can eliminate variables. Please enable the equation_sorting compiler option.\n");
         }
         if(call_count_eliminations<1){
             //Sort the list first
             listToEliminate.sort(compareFunction2);
-        
+
             equations_->getSubstitues(listToEliminate,eliminatedVariableToSolution);
             equations_->eliminateVariables(eliminatedVariableToSolution);
-        
+
             //Mark variables as Eliminated
             std::vector< Variable* >::iterator fit;
             for(std::list< std::pair<int, const Variable*> >::iterator it_var=listToEliminate.begin();
@@ -298,39 +298,39 @@ namespace ModelicaCasADi
                     //z.erase(fit);
                 }
             }
-        
+
             std::vector<casadi::MX> eliminatedMXs;
             std::vector<casadi::MX> subtitutes;
             for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
             it!=eliminatedVariableToSolution.end();++it) {
-                if(!it->second.isempty()) {
+                if(!it->second.is_empty()) {
                     eliminatedMXs.push_back(it->first->getVar());
                     subtitutes.push_back(it->second);
-                    
-                    //This does not work for problems with scaling 
+
+                    //This does not work for problems with scaling
                     /*if(it->first->hasAttributeSet("min")){
                         casadi::MX min = *(const_cast<Variable*>(it->first)->getMin());
                         std::cout<<it->first->getName()<<" min "<< min <<"\n";
-                        pathConstraints.push_back(new Constraint(min,it->second,Constraint::GEQ));                    
+                        pathConstraints.push_back(new Constraint(min,it->second,Constraint::GEQ));
                     }
                     if(it->first->hasAttributeSet("max")){
                         casadi::MX max = *(const_cast<Variable*>(it->first)->getMax());
                         std::cout<<it->first->getName()<<" max "<< max <<"\n";
-                        pathConstraints.push_back(new Constraint(it->second,max,Constraint::LEQ));                    
+                        pathConstraints.push_back(new Constraint(it->second,max,Constraint::LEQ));
                     }*/
                 }
             }
-    
+
             for(std::vector< Ref<Constraint> >::iterator it_path=pathConstraints.begin();it_path!=pathConstraints.end();++it_path){
-                std::cout<<*it_path<<"\n";            
+                std::cout<<*it_path<<"\n";
             }
-            
+
             std::vector<casadi::MX> expressions;
             expressions.push_back(startTime);
             expressions.push_back(finalTime);
             expressions.push_back(objectiveIntegrand);
             expressions.push_back(objective);
-        
+
             if(pathConstraints.size()>0) {
                 for(std::vector< Ref<Constraint> >::const_iterator path_it = pathConstraints.begin();
                 path_it!=pathConstraints.end();++path_it) {
@@ -345,15 +345,15 @@ namespace ModelicaCasADi
                     expressions.push_back((*point_it)->getRhs());
                 }
             }
-        
+
             std::vector<casadi::MX> subtitutedExpressions = substitute(expressions,eliminatedMXs,subtitutes);
-        
+
             int counter=0;
             startTime = subtitutedExpressions[counter++];
             finalTime = subtitutedExpressions[counter++];
             objectiveIntegrand = subtitutedExpressions[counter++];
             objective = subtitutedExpressions[counter++];
-        
+
             if(pathConstraints.size()>0) {
                 for(std::vector< Ref<Constraint> >::iterator path_it = pathConstraints.begin();
                 path_it!=pathConstraints.end();++path_it) {
@@ -385,7 +385,7 @@ namespace ModelicaCasADi
         else{
             return strnomx;
         }*/
-    } 
+    }
 
     void OptimizationProblem::printPyomoModel(const std::string& modelName /*="model"*/)
     {
@@ -436,14 +436,14 @@ namespace ModelicaCasADi
             name = (*it)->getName();
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
-            std::replace(name.begin(), name.end(), ')','_');  
+            std::replace(name.begin(), name.end(), ')','_');
             modelFile << name <<" = "<< evaluateExpression((*it)->getVar())<<"\n";
             JMIndParams.push_back((*it)->getVar());
             pyomoIndParams.push_back(casadi::MX::sym(name));
         }
 
         modelFile << "\n# Sets\n";
-        modelFile << modelName << ".t = ContinuousSet(bounds = (startTime, finalTime))\n"; 
+        modelFile << modelName << ".t = ContinuousSet(bounds = (startTime, finalTime))\n";
 
         std::vector< Ref<Variable> > states = getVariables(DIFFERENTIATED);
 
@@ -460,21 +460,21 @@ namespace ModelicaCasADi
             }
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
-            std::replace(name.begin(), name.end(), ')','_');  
+            std::replace(name.begin(), name.end(), ')','_');
             Ref<RealVariable> casted = dynamic_cast<RealVariable*>((*it).getNode());
             Ref<Variable> derivative = casted->getMyDerivativeVariable();
             std::string name_der = derivative->getName();
             std::replace(name_der.begin(), name_der.end(), '.', '_');
             std::replace(name_der.begin(), name_der.end(), '(', '_');
             std::replace(name_der.begin(), name_der.end(), ')', '_');
-            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
+            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){
                 modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, initialize = "<<initialGuess<<")\n";
             }
             else{
                 modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, bounds = ("<< min << "," << max <<"), initialize = "<<initialGuess<<")\n";
             }
             modelFile << modelName << "." << name_der <<" = DerivativeVar("<< modelName <<"."<< name <<")\n";
-            
+
             JMStates.push_back((*it)->getVar());
             JMDerivatives.push_back(derivative->getVar());
             pyomoStates.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
@@ -495,8 +495,8 @@ namespace ModelicaCasADi
             }
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
-            std::replace(name.begin(), name.end(), ')','_');  
-            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
+            std::replace(name.begin(), name.end(), ')','_');
+            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){
                 modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, initialize = "<<initialGuess<<")\n";
             }
             else{
@@ -505,7 +505,7 @@ namespace ModelicaCasADi
             JMInputs.push_back((*it)->getVar());
             pyomoInputs.push_back(casadi::MX::sym(modelName+"."+name+"[i]"));
         }
-        
+
         std::vector< Ref<Variable> > algebraics = getVariables(REAL_ALGEBRAIC);
         if(!algebraics.empty()){modelFile << "\n# Algebraics\n";}
         for(std::vector<Ref<Variable> >::iterator it=algebraics.begin();it!=algebraics.end();++it)
@@ -520,8 +520,8 @@ namespace ModelicaCasADi
             }
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
-            std::replace(name.begin(), name.end(), ')','_');  
-            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){   
+            std::replace(name.begin(), name.end(), ')','_');
+            if(casadi::casadi_limits<double>::isInf(max) && casadi::casadi_limits<double>::isMinusInf(min)){
                 modelFile << modelName << "." << name <<" = Var("<< modelName <<".t, initialize = "<<initialGuess<<")\n";
             }
             else{
@@ -538,7 +538,7 @@ namespace ModelicaCasADi
             name = (*it)->getName();
             std::replace(name.begin(), name.end(), '.', '_');
             std::replace(name.begin(), name.end(), '(','_');
-            std::replace(name.begin(), name.end(), ')','_');  
+            std::replace(name.begin(), name.end(), ')','_');
             modelFile << modelName << "." << name <<" = Var()\n";
             JMDepParams.push_back((*it)->getVar());
             pyomoDepParams.push_back(casadi::MX::sym(modelName+"."+name));
@@ -571,7 +571,7 @@ namespace ModelicaCasADi
             daeRHS.push_back(casadi::MX((*it)->getRhs()));
         }
 
-        // All of this can be avoided if the loop is done over all variables .... to be improved later 
+        // All of this can be avoided if the loop is done over all variables .... to be improved later
         std::vector<casadi::MX> allVarsJM;
         allVarsJM.insert(allVarsJM.end(), JMStates.begin(), JMStates.end());
         allVarsJM.insert(allVarsJM.end(), JMDerivatives.begin(), JMDerivatives.end());
@@ -580,7 +580,7 @@ namespace ModelicaCasADi
         allVarsJM.insert(allVarsJM.end(), JMDepParams.begin(), JMDepParams.end());
         allVarsJM.insert(allVarsJM.end(), JMIndParams.begin(), JMIndParams.end());
         allVarsJM.insert(allVarsJM.end(), JMTimedVars.begin(), JMTimedVars.end());
-        
+
 
         std::vector<casadi::MX> allVarsPY;
         allVarsPY.insert(allVarsPY.end(), pyomoStates.begin(), pyomoStates.end());
@@ -604,7 +604,7 @@ namespace ModelicaCasADi
             modelFile << "def dae_constraint_rule_" << i << "("<<modelName<<",i):\n";
             modelFile << "\tif i == 0:\n\t\treturn Constraint.Skip\n";
             modelFile << "\treturn " << removesMXprint(pyLHS[i].getRepresentation()) << " == " << removesMXprint(pyRHS[i].getRepresentation()) <<"\n";
-            modelFile << modelName << ".dae_constraint_" << i << " = " 
+            modelFile << modelName << ".dae_constraint_" << i << " = "
             << "Constraint(" << modelName << ".t, rule = "<< "dae_constraint_rule_" << i << ")\n\n";
         }
 
@@ -629,7 +629,7 @@ namespace ModelicaCasADi
         modelFile << "def _init_rule("<<modelName<<"):\n\ti=0\n";
         for(int i=0;i<dae_initRHS.size();++i)
         {
-            modelFile << "\tyield " << removesMXprint(pyinitLHS[i].getRepresentation()) << " == " 
+            modelFile << "\tyield " << removesMXprint(pyinitLHS[i].getRepresentation()) << " == "
             << removesMXprint(pyinitRHS[i].getRepresentation())<<"\n";
         }
         modelFile << "\tyield ConstraintList.End\n";
@@ -665,7 +665,7 @@ namespace ModelicaCasADi
             else{
                 modelFile << "\treturn " << removesMXprint(pypathLHS[i].getRepresentation()) << " >= " << removesMXprint(pypathRHS[i].getRepresentation()) <<"\n";
             }
-            modelFile << modelName << ".path_constraint_" << i << " = " 
+            modelFile << modelName << ".path_constraint_" << i << " = "
             << "Constraint(" << modelName << ".t, rule = "<< "path_constraint_rule_" << i << ")\n\n";
         }
 
@@ -699,7 +699,7 @@ namespace ModelicaCasADi
             else{
                 modelFile << "\treturn " << removesMXprint(pypointLHS[i].getRepresentation()) << " >= " << removesMXprint(pypointLHS[i].getRepresentation()) <<"\n";
             }
-            modelFile << modelName << ".point_constraint_" << i << " = " 
+            modelFile << modelName << ".point_constraint_" << i << " = "
             << "Constraint(" << modelName << ".t, rule = "<< "point_constraint_rule_" << i << ")\n\n";
         }
 
@@ -707,20 +707,20 @@ namespace ModelicaCasADi
         std::vector<casadi::MX> Boltza;
         Boltza.push_back(casadi::MX(objectiveIntegrand));
         Boltza.push_back(casadi::MX(objective));
-        
+
         std::vector<casadi::MX> pyObjective = substitute(Boltza,
         allVarsJM,
         allVarsPY);
 
-        if(!pyObjective.front().isZero()){
+        if(!pyObjective.front().is_zero()){
             modelFile << "def _integralExp("<<modelName<<",i):\n";
             modelFile << "\treturn " << removesMXprint(pyObjective.front().getRepresentation()) << "\n";
             modelFile << modelName << ".initExp = Integral(" << modelName << ".t, rule = _integralExp, wrt = "<<modelName <<".t)\n";
         }
         modelFile << "\ndef _obj_rule("<<modelName<<"):\n";
         modelFile << "\treturn " << removesMXprint(pyObjective.back().getRepresentation());
-        if(!pyObjective.front().isZero()){ 
-        modelFile << " + " << modelName <<".initExp\n"; 
+        if(!pyObjective.front().is_zero()){
+        modelFile << " + " << modelName <<".initExp\n";
         }
         else{
             modelFile << "\n";

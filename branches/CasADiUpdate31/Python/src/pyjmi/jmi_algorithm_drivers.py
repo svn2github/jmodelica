@@ -1902,12 +1902,12 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'verbosity': 3,
                 'explicit_hessian': False,
                 'order': "default",
-                'IPOPT_options': {'dual_inf_tol': 1e100,
-                                  'constr_viol_tol': 1e100,
-                                  'compl_inf_tol': 1e100,
-                                  'acceptable_dual_inf_tol': 1e100,
-                                  'acceptable_constr_viol_tol': 1e100,
-                                  'acceptable_compl_inf_tol': 1e100},
+                'IPOPT_options': {'ipopt.dual_inf_tol': 1e100,
+                                  'ipopt.constr_viol_tol': 1e100,
+                                  'ipopt.compl_inf_tol': 1e100,
+                                  'ipopt.acceptable_dual_inf_tol': 1e100,
+                                  'ipopt.acceptable_constr_viol_tol': 1e100,
+                                  'ipopt.acceptable_compl_inf_tol': 1e100},
                 'WORHP_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
@@ -2190,12 +2190,12 @@ class StaticOptimizationAlgOptions(OptionBase):
                 'external_data': None,
                 'solver': 'IPOPT',
                 'verbosity': 3,
-                'IPOPT_options': {'dual_inf_tol': 1e100,
-                                  'constr_viol_tol': 1e100,
-                                  'compl_inf_tol': 1e100,
-                                  'acceptable_dual_inf_tol': 1e100,
-                                  'acceptable_constr_viol_tol': 1e100,
-                                  'acceptable_compl_inf_tol': 1e100},
+                'IPOPT_options': {'ipopt.dual_inf_tol': 1e100,
+                                  'ipopt.constr_viol_tol': 1e100,
+                                  'ipopt.compl_inf_tol': 1e100,
+                                  'ipopt.acceptable_dual_inf_tol': 1e100,
+                                  'ipopt.acceptable_constr_viol_tol': 1e100,
+                                  'ipopt.acceptable_compl_inf_tol': 1e100},
                 'WORHP_options': {}}
         
         super(StaticOptimizationAlgOptions, self).__init__(_defaults)

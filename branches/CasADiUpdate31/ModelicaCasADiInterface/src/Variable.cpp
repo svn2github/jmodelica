@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 using std::ostream; using casadi::MX;
-namespace ModelicaCasADi 
+namespace ModelicaCasADi
 {
 Variable::Variable(Model *owner) : negated(false), eliminable(false), eliminated(false), tearing(false), OwnedNode(owner) {
     var = MX();
@@ -27,11 +27,11 @@ Variable::Variable(Model *owner) : negated(false), eliminable(false), eliminated
     declaredType = Ref<VariableType>(NULL);
 }
 
-Variable::Variable(Model *owner, MX var, Variable::Causality causality, 
+Variable::Variable(Model *owner, MX var, Variable::Causality causality,
                    Variable::Variability variability,
-                   Ref<VariableType> declaredType /* Ref<VariableType>() */) : 
+                   Ref<VariableType> declaredType /* Ref<VariableType>() */) :
   causality(causality), variability(variability), negated(false), eliminable(false), eliminated(false), tearing(false), OwnedNode(owner) {
-    if (var.isConstant()) {
+    if (var.is_constant()) {
         throw std::runtime_error("A variable must have a symbolic MX");
     }
     myModelVariable = Ref<Variable>(NULL);
@@ -76,7 +76,7 @@ casadi::MX* Variable::getFixed() { return getAttribute("fixed"); }
 
 
 
-Variable::AttributeValue* Variable::getAttribute(AttributeKey key) { 
+Variable::AttributeValue* Variable::getAttribute(AttributeKey key) {
     if (isAlias()) {
         return getAttributeForAlias(key);
     } else {
@@ -85,11 +85,11 @@ Variable::AttributeValue* Variable::getAttribute(AttributeKey key) {
     }
 }
 
-bool Variable::hasAttributeSet(AttributeKey key) const { 
+bool Variable::hasAttributeSet(AttributeKey key) const {
     if (isAlias()) {
         return myModelVariable->hasAttributeSet(key);
     } else {
-        return attributes.find(AttributeKeyInternal(key)) != attributes.end(); 
+        return attributes.find(AttributeKeyInternal(key)) != attributes.end();
     }
 }
 
@@ -99,9 +99,9 @@ bool isNegatedAttributeKey(Variable::AttributeKey key) {
 }
 
 /// Assumes that this is an alias, and that the attribute should be retrieved from
-/// the alias variable. 
+/// the alias variable.
 Variable::AttributeValue* Variable::getAttributeForAlias(AttributeKey key) {
-    AttributeValue* val = myModelVariable->getAttribute(keyForAlias(key)); // Note that keyForAlias can change key for min/max. 
+    AttributeValue* val = myModelVariable->getAttribute(keyForAlias(key)); // Note that keyForAlias can change key for min/max.
     if (val == NULL) return val;
     if (isNegated() && isNegatedAttributeKey(key)) {
         val = new MX(val->operator-());
@@ -110,7 +110,7 @@ Variable::AttributeValue* Variable::getAttributeForAlias(AttributeKey key) {
 }
 
 /// Helper method for handling of alias variables. Assumes that this is an alias.
-/// The attributes min and max needs to be interchanged for negated alias variables. 
+/// The attributes min and max needs to be interchanged for negated alias variables.
 Variable::AttributeKey Variable::keyForAlias(AttributeKey key)  const{
     if (isNegated()) {
         if (key == "min") {
@@ -131,38 +131,38 @@ void Variable::setAttributeForAlias(AttributeKey key, AttributeValue val) {
     myModelVariable->setAttribute(key, val);
 }
 
-void Variable::setAttribute(AttributeKey key, AttributeValue val) { 
+void Variable::setAttribute(AttributeKey key, AttributeValue val) {
     if (key == "bindingExpression") {
         myModel().setDirty();
         if (hasAttributeSet("bindingExpression")) {
             MX bindingExpression = *getAttribute(key);
-            if (bindingExpression.isConstant() && (!val.isConstant())) {
+            if (bindingExpression.is_constant() && (!val.is_constant())) {
                 throw std::runtime_error("It is not allowed to make independent parameters dependent");
-            } else if (!bindingExpression.isConstant()) {
+            } else if (!bindingExpression.is_constant()) {
                 throw std::runtime_error("It is not allowed to change binding expression of dependent parameters");
             }
         }
     }
-    
+
     if (isAlias()) {
         setAttributeForAlias(key, val);
     } else {
-        attributes[AttributeKeyInternal(key)]=val; 
+        attributes[AttributeKeyInternal(key)]=val;
     }
 }
-void Variable::setAttribute(AttributeKey key, double val) { 
+void Variable::setAttribute(AttributeKey key, double val) {
     setAttribute(key, MX(val));
 }
 
 
 void Variable::print(ostream& os) const {
     os << (getCausality() == INPUT ? "input " : (getCausality() == OUTPUT ? "output " : "" ));
-    os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "discrete " : (getVariability() == PARAMETER ? "parameter " : 
+    os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "discrete " : (getVariability() == PARAMETER ? "parameter " :
            (getVariability() == CONSTANT ? "constant " : (getVariability() == TIMED ? "constant " : "")))));
     if (declaredType != Ref<VariableType>(NULL)) {
         os << declaredType->getName() << " ";
     } else {
-        os << (getType() == REAL ? "Real " : (getType() == INTEGER ? "Integer " : (getType() == BOOLEAN ? "Boolean " : 
+        os << (getType() == REAL ? "Real " : (getType() == INTEGER ? "Integer " : (getType() == BOOLEAN ? "Boolean " :
               (getType() == STRING ? "String " : ""))));
     }
     os<<ModelicaCasADi::normalizeMXRespresentation(var);
@@ -180,17 +180,17 @@ void Variable::print(ostream& os) const {
         }
         os << ")";
     }
-    if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) { 
+    if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) {
         os << " = ";
         os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("bindingExpression"))->second));
-    } 
-    if (attributes.find(AttributeKeyInternal("comment")) != attributes.end()) { 
+    }
+    if (attributes.find(AttributeKeyInternal("comment")) != attributes.end()) {
         os << " \"";
         os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("comment"))->second));
         os << "\"";
     }
     if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) {
-        if (attributes.find(AttributeKeyInternal("bindingExpression"))->second.isConstant()) {
+        if (attributes.find(AttributeKeyInternal("bindingExpression"))->second.is_constant()) {
             os << " /* ";
             os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("bindingExpression"))->second));
             os << " */";
@@ -199,7 +199,7 @@ void Variable::print(ostream& os) const {
             os<<ModelicaCasADi::normalizeMXRespresentation((attributes.find(AttributeKeyInternal("evaluatedBindingExpression"))->second));
             os << " */";
         }
-    } 
+    }
     os << ";";
 }
 }; // End namespace

@@ -71,9 +71,9 @@ namespace ModelicaCasADi
                 std::vector<casadi::MX> inner_subs;
                 std::vector<casadi::MX> inner_elim;
                 for(std::map<const Variable*,casadi::MX>::const_iterator it_prev=storageMap.begin(); it_prev!=storageMap.end();++it_prev) {
-                    int ndeps =tmp_subs.getNdeps();
+                    int ndeps =tmp_subs.n_dep();
                     for(int j=0;j<ndeps;++j) {
-                        if(isEqual(tmp_subs.getDep(j), it_prev->first->getVar(), 0) && !it_prev->second.isempty()) {
+                        if(is_equal(tmp_subs.dep(j), it_prev->first->getVar(), 0) && !it_prev->second.is_empty()) {
                             inner_subs.push_back(it_prev->second);
                             inner_elim.push_back(it_prev->first->getVar());
                         }
@@ -127,12 +127,12 @@ namespace ModelicaCasADi
 
     const casadi::MX BLT::getDaeResidual() const
     {
-        casadi::MX residual;
+        std::vector<casadi::MX> residual;
         std::vector< Ref<Equation> > modelEquations = getDaeEquations();
         for(std::vector< Ref<Equation> >::const_iterator it=modelEquations.begin();it!=modelEquations.end();++it) {
-            residual.append((*it)->getResidual());
+            residual.push_back((*it)->getResidual());
         }
-        return residual;
+        return vertcat(residual);
     }
 
     void BLT::removeSolutionOfVariable(const Variable* var) {
@@ -181,15 +181,15 @@ namespace ModelicaCasADi
         }
         return -1;
     }
-    
+
     void BLT::solveBlocksWithLinearSystems(){
-        bool first=0;         
+        bool first=0;
         for(std::vector< Ref<Block> >::iterator it=blt.begin();
         it!=blt.end() /*&& !first*/;++it) {
             if((*it)->getNumUnsolvedVariables()>1){
                 (*it)->solveLinearSystem();
                 //first=1;
             }
-        }    
+        }
     }
 }; //End namespace

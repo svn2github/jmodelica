@@ -18,7 +18,7 @@
 
 This script sets items in the 'jmodelica.environ' dictionary. The
 values are set from system environment variables if defined, otherwise
-to default values.  
+to default values. 
 
 Values can be overriden by a user startup script (optional):
 

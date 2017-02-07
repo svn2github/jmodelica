@@ -16,20 +16,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ModelFunction.hpp"
 using std::ostream; using std::vector; using std::string;
-using casadi::MX;  using casadi::MXFunction;
+using casadi::MX;  using casadi::Function;
 
-namespace ModelicaCasADi 
+namespace ModelicaCasADi
 {
- 
+
 vector<MX> ModelFunction::call(const vector<MX> &arg) {
     return myFunction(arg);
 }
 
 string ModelFunction::getName() const {
-    return myFunction.getOption("name");
+    return myFunction.name();
 }
 
-void ModelFunction::print(ostream& os) const { 
+void ModelFunction::print(ostream& os) const {
     os << "ModelFunction : " << myFunction << "\n";
     myFunction.print(os);
 }

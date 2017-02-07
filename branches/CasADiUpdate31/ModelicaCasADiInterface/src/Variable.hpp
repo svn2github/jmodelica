@@ -31,19 +31,19 @@ namespace ModelicaCasADi
 class Model;
 
 
-/** 
- * Abstract class for Variables, using symolic MX. A variable holds data 
+/**
+ * Abstract class for Variables, using symolic MX. A variable holds data
  * so that it can represent a Modelica or Optimica variable. This data
  * consists of attributes and enum variables that tells the variable's
- * primitive data type and its causality and variability. 
- * 
- * A variable can also hold a VariableType that contains information about 
- * its default attributes or the attributes of its user defined type. 
+ * primitive data type and its causality and variability.
+ *
+ * A variable can also hold a VariableType that contains information about
+ * its default attributes or the attributes of its user defined type.
  */
 
 class Variable : public OwnedNode {
     public:
-        typedef std::string AttributeKey; 
+        typedef std::string AttributeKey;
         typedef casadi::MX AttributeValue;
     protected:
         typedef boost::flyweights::flyweight<std::string> AttributeKeyInternal;
@@ -69,17 +69,17 @@ class Variable : public OwnedNode {
         };
         Variable(Model *owner);
         /**
-         * The Variable class should not be used, use subclasses such 
+         * The Variable class should not be used, use subclasses such
          * as RealVariable instead.
          * @param A symbolic MX.
          * @param An entry of the enum Causality
          * @param An entry of the enum Variability
-         * @param A VariableType, default is a reference to NULL. 
+         * @param A VariableType, default is a reference to NULL.
          */
         Variable(Model *owner, casadi::MX var, Causality causality,
-                Variability variability, 
+                Variability variability,
                 Ref<VariableType> declaredType = Ref<VariableType>());
-        
+
         /** @return True if this variable is an alias */
         bool isAlias() const;
         /** @return True if this variable is negated */
@@ -93,9 +93,9 @@ class Variable : public OwnedNode {
         /** @param Bool negated . Only possible for Alias variables*/
         void setNegated(bool negated);
         /** @param bool. */
-        void setTearing(bool);       
+        void setTearing(bool);
         /** @param none. */
-        void setAsEliminable();       
+        void setAsEliminable();
         /** @param none. */
         void setAsEliminated();
         /** @param Sets an alias for this variable, making this an alias variable */
@@ -103,55 +103,55 @@ class Variable : public OwnedNode {
         /** @return This variable's model variable if it is an alias, or itself otherwise */
         Ref<Variable> getModelVariable();
         // const Ref<Variable> getModelVariable() const; // will we need this one?
-        
-        
+
+
         /* Getters and setters for standard Modelica attributes */
         void setQuantity(std::string quantity);
         void setQuantity(casadi::MX quantity);
         casadi::MX* getQuantity();
-        
+
         void setNominal(double nominal);
         void setNominal(casadi::MX nominal);
         casadi::MX* getNominal();
-        
+
         void setUnit(std::string unit);
         void setUnit(casadi::MX unit);
         casadi::MX* getUnit();
-        
+
         void setDisplayUnit(std::string displayUnit);
         void setDisplayUnit(casadi::MX displayUnit);
         casadi::MX* getDisplayUnit();
-        
+
         void setMin(double min);
         void setMin(casadi::MX min);
         casadi::MX* getMin();
-        
+
         void setMax(double max);
         void setMax(casadi::MX max);
         casadi::MX* getMax();
-        
+
         void setStart(double start);
         void setStart(casadi::MX start);
         casadi::MX* getStart();
-        
+
         void setFixed(bool fixed);
         void setFixed(casadi::MX fixed);
         casadi::MX* getFixed();
-        
-        
-        
+
+
+
         /**
-         * @return The string name of this Variable 
+         * @return The string name of this Variable
          */
         std::string getName() const;
-        
+
         /**
          * @return A MX
-         */        
+         */
         const casadi::MX getVar() const;
         /**
          * @return An enum for the primitive data type.
-         */ 
+         */
         virtual const Type getType() const;
         /**
          * @return An enum for the causality
@@ -163,9 +163,9 @@ class Variable : public OwnedNode {
         const Variability getVariability() const;
         /**
          * Returns the Variable's declared type. This may be one of Modelica's
-         * built in types such as Real, which holds Real's default attributes, 
+         * built in types such as Real, which holds Real's default attributes,
          * or it may be a user defined type.
-         * @return A pointer to a VariableType. 
+         * @return A pointer to a VariableType.
          */
         Ref<VariableType> getDeclaredType() const;
         /**
@@ -173,44 +173,44 @@ class Variable : public OwnedNode {
          * @param A pointer to a VariableType
          */
         void setDeclaredType(Ref<VariableType> declaredType);
-        
-        /** 
+
+        /**
          * Looks at local attributes, then at attributes for is declared type,
-         * OR at the attributes of its alias if this is an alias variable. 
+         * OR at the attributes of its alias if this is an alias variable.
          * Returns NULL if not present.
          * @param An AttributeKey
-         * @return A pointer to an AttributeValue 
+         * @return A pointer to an AttributeValue
          */
         virtual AttributeValue* getAttribute(AttributeKey key);
-        /** 
+        /**
          * A check whether a certain attribute is set in this variable,
-         * OR in its alias if this is an alias variable. 
-         * @return A bool.  
+         * OR in its alias if this is an alias variable.
+         * @return A bool.
          */
-        bool hasAttributeSet(AttributeKey key) const; 
-        /** 
-         * Sets an attribute in the local Variable's attribute map, 
+        bool hasAttributeSet(AttributeKey key) const;
+        /**
+         * Sets an attribute in the local Variable's attribute map,
          * or it propagates the attribute to its alias if this is an
-         * alias variable. 
+         * alias variable.
          * @param An AttributeKey
          * @param An AttributeValue
          */
         void setAttribute(AttributeKey key, AttributeValue val);
-        /** 
-         * Sets an attribute in the local Variable's attribute map, 
+        /**
+         * Sets an attribute in the local Variable's attribute map,
          * or it propagates the attribute to its alias if this is an
-         * alias variable. 
+         * alias variable.
          * @param An AttributeKey
          * @param A double.
          */
         void setAttribute(AttributeKey key, double val);
-        
+
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
-        
+
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:
-        Ref<Variable> myModelVariable; /// If this Variable is an alias, this is its corresponding model variable. 
+        Ref<Variable> myModelVariable; /// If this Variable is an alias, this is its corresponding model variable.
         bool negated;
         bool tearing;
         bool eliminable;
@@ -228,20 +228,20 @@ class Variable : public OwnedNode {
 };
 inline bool Variable::isAlias() const { return myModelVariable != Ref<Variable>(NULL); }
 inline bool Variable::isNegated() const { return negated; }
-inline void Variable::setNegated(bool negated) { 
+inline void Variable::setNegated(bool negated) {
     if (!isAlias()) {
         throw std::runtime_error("Only alias variables may be negated");
     }
-    this->negated = negated; 
+    this->negated = negated;
 }
 inline void Variable::setTearing(bool ntearing) {
-    this->tearing = ntearing; 
+    this->tearing = ntearing;
 }
-inline void Variable::setAsEliminated() { 
+inline void Variable::setAsEliminated() {
     if (!isEliminable() && !isAlias()) {
         throw std::runtime_error("Only eliminable and alias variables may be eliminated. Eliminable variables are set from BLT information.");
     }
-    this->eliminated = true; 
+    this->eliminated = true;
 }
 inline bool Variable::getTearing() const {return tearing;}
 inline bool Variable::isEliminable() const {return eliminable;}
@@ -249,7 +249,7 @@ inline bool Variable::wasEliminated() const {return eliminated;}
 inline void Variable::setAsEliminable() {eliminable=true;}
 inline void Variable::setAlias(Ref<Variable> modelVariable) { this->myModelVariable = modelVariable; }
 inline Ref<Variable> Variable::getModelVariable() { return isAlias() ? myModelVariable : this; }
-inline std::string Variable::getName() const { return var.getName(); }
+inline std::string Variable::getName() const { return var.name(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 inline void Variable::setDeclaredType(Ref<VariableType> declaredType) { this->declaredType = declaredType; }
 inline Ref<VariableType> Variable::getDeclaredType() const { return declaredType; }

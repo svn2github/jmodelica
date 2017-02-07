@@ -17,46 +17,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_MODEL_FUNCTION
 #define _MODELICACASADI_MODEL_FUNCTION
 
-#include <iostream> 
+#include <iostream>
 #include <vector>
 #define WITH_DEPRECATED_FEATURES
 #include "casadi/casadi.hpp"
 #include "RefCountedNode.hpp"
-namespace ModelicaCasADi 
+namespace ModelicaCasADi
 {
 class ModelFunction : public RefCountedNode {
     public:
-        /** 
-         * Create a ModelFunction, which is basically a wrapper around an MXFunction
-         * that may be called and printed. 
-         * @param A MXFunction 
+        /**
+         * Create a ModelFunction, which is basically a wrapper around an Function
+         * that may be called and printed.
+         * @param A Function
          */
-        ModelFunction(casadi::MXFunction myFunction); 
+        ModelFunction(casadi::Function myFunction);
 #ifndef SWIG
         // We don't have a useable SWIG typemap to take in a vector of MX right now,
         // the call can be done by going through getFunc instead.
         /**
-         * Call the MXFunction kept in this class with a vector of MX as arguments.
+         * Call the Function kept in this class with a vector of MX as arguments.
          * Returns a vector of MX representing the outputs of the function call, if successful.
          * @param A vector of MX
          * @return A vector of MX
          */
         std::vector<casadi::MX> call(const std::vector<casadi::MX> &arg);
 #endif
-        /** Return the underlying MXFunction */
-        casadi::MXFunction getFunc() const;
-        /** Returns the name of the MXFunction */
+        /** Return the underlying Function */
+        casadi::Function getFunc() const;
+        /** Returns the name of the Function */
         std::string getName() const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        casadi::MXFunction myFunction;
+        casadi::Function myFunction;
 };
-inline ModelFunction::ModelFunction(casadi::MXFunction myFunction) : myFunction(myFunction) {}
-inline casadi::MXFunction ModelFunction::getFunc() const { return myFunction; }
+inline ModelFunction::ModelFunction(casadi::Function myFunction) : myFunction(myFunction) {}
+inline casadi::Function ModelFunction::getFunc() const { return myFunction; }
 }; // End namespace
 #endif
-
-

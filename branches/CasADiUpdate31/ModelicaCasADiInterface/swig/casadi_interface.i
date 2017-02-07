@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %{
 // to perhaps play more nicely with numpy.i
 #define SWIG_FILE_WITH_INIT
-#include "python/numpy.hpp"
+#include "python/casadi_numpy.hpp"
 #define SWIG_PYTHON_CAST_MODE 1
 %}
 

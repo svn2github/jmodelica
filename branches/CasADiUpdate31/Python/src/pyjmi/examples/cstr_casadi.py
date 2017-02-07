@@ -174,7 +174,7 @@ def run_demo(with_plots=True):
     opt_opts['n_e'] = 19 # Number of elements
     opt_opts['init_traj'] = init_res
     opt_opts['nominal_traj'] = init_res
-    opt_opts['IPOPT_options']['tol'] = 1e-10
+    opt_opts['IPOPT_options']['ipopt.tol'] = 1e-10
     opt_opts['verbosity'] = 1
     
     # Solve the optimal control problem
@@ -195,7 +195,7 @@ def run_demo(with_plots=True):
     except:
         pass
     else:
-        cost = float(res.solver.solver_object.getOutput('f'))
+        cost = float(res.solver.solver_res['f'])
         assert(N.abs(cost/1.e3 - 1.86162353098) < 1e-3)
 
     # Plot the results
