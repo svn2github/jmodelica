@@ -696,11 +696,16 @@ aspect ConstantEvaluation {
 				res.values[i] = values[i].clone();
 	    	return res;
 	    }
-    	
-    	public boolean isArray() {
-    		return true;
-    	}
-    	
+
+        public boolean isArray() {
+            return true;
+        }
+
+        @Override
+        public int ndims() {
+            return indices.ndims();
+        }
+
         /**
          * Check if there was an error in any part of the evaluation.
          *
@@ -760,20 +765,6 @@ aspect ConstantEvaluation {
             boolean res = true;
             for (CValue cvalue : values)
                 res &= cvalue.isEnum();
-            return res;
-        }
-
-        @Override
-        public boolean isArray(int pos, int[] dims) {
-            if (dims[pos] >= 0 && dims[pos] != values.length)
-                return false;
-            boolean res = true;
-            for (CValue cvalue : values) {
-                if (pos + 1 == dims.length)
-                    res &= cvalue.isScalar();
-                else
-                    res &= cvalue.isArray(pos + 1, dims);
-            }
             return res;
         }
 

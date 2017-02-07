@@ -625,7 +625,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             }
         }
         ConstValue value = evaluatedValue();
-        if (type.check(value) && type.check(value)) {
+        if (type.check(value) && size.check(value)) {
             return value;
         } else if (throwOnIncorrect) {
             throw new ConstantEvaluationException(value, "Cannot convert to " + size + " " + type);
