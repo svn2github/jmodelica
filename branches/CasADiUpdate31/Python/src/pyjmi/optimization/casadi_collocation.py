@@ -170,7 +170,18 @@ class CasadiCollocator(object):
                 k - Name of the option
                 v - Value of the option (int, double, string)
         """
-        self.solver_object.setOption(k,v)
+        self.solver_opts[k] = v
+
+    def initialize(self):
+        """Create solver instance"""
+        if self.solver == "IPOPT":
+            plugin = 'ipopt'
+        elif self.solver == "WORHP":
+            plugin = 'worhp'
+        else:
+            raise CasadiCollocatorException(
+                    "Unknown nonlinear programming solver %s." % self.solver)
+        self.solver_object = casadi.NlpSolver('solver', plugin, self.nlp, self.solver_opts)
 
     def _get_xml_variable_by_name(self, name):
         """
@@ -540,8 +551,8 @@ class CasadiCollocator(object):
         
         # 'Maximum_CPU_Time_Exceeded' and 'Feasible_Point_for_Square_Problem_Found' fail
                 # to fill in stats['return_status'].
-        if (self.solver_object.hasSetOption('max_cpu_time') and
-            total_exec_time >= self.solver_object.getOption('max_cpu_time')):
+        if ('max_cpu_time' in self.solver_opts and
+            total_exec_time >= self.solver_opts['max_cpu_time']):
             return_status = 'Maximum_CPU_Time_Exceeded'
         else:
             try:
@@ -3269,22 +3280,15 @@ class LocalDAECollocator(CasadiCollocator):
                 # Define DAEResideual level1
                 input_dae_l1 = s_sym_input_l1
                 output_dae_element = casadi.vertcat(output_dae_element)
-                dae_l1_fcn = casadi.MXFunction(input_dae_l1,
+                dae_l1_fcn = casadi.MXFunction('dae_l1_fcn', input_dae_l1,
                                                [output_dae_element])
-                dae_l1_fcn.setOption("name", "dae_l1_fcn")
-                raise DeprecationWarning('Function::init() is deprecated')
-                dae_l1_fcn.init()
                 self.dae_l1_fcn = dae_l1_fcn
 
                 # Define Collocation equation level1
                 output_coll_element = casadi.vertcat(output_coll_element)
-                coll_eq_l1_fcn = casadi.MXFunction([l1_mvar_struct["x"]]\
-                                                   +[element_der_vals,h_i]\
-                                                   +[dx_i],
-                                                   [output_coll_element])
-                coll_eq_l1_fcn.setOption("name", "coll_l1_eq_fcn")
-                raise DeprecationWarning('Function::init() is deprecated')
-                coll_eq_l1_fcn.init()                
+                coll_eq_l1_fcn = casadi.MXFunction('coll_l1_eq_fcn',
+                        [l1_mvar_struct["x"]]+[element_der_vals,h_i]+[dx_i],
+                        [output_coll_element])
                 self.coll_eq_l1_fcn = coll_eq_l1_fcn
 
                 if not self.lterm.isConstant() or float(self.lterm) != 0.:
@@ -3294,11 +3298,8 @@ class LocalDAECollocator(CasadiCollocator):
                     input_lterm_l1 = [sym_g_weights]
                     input_lterm_l1 += s_sym_input_l1
                     input_lterm_l1 += self._timed_variables
-                    lterm_l1 = casadi.MXFunction(input_lterm_l1,
+                    lterm_l1 = casadi.MXFunction('lterm_l1_fcn', input_lterm_l1,
                                                  [output_lag_element])
-                    lterm_l1.setOption("name", "lterm_l1_fcn")
-                    raise DeprecationWarning('Function::init() is deprecated')
-                    lterm_l1.init()
                     self.lterm_l1 = lterm_l1
         else:
             # Define symbolic scaling factors for dae
@@ -3357,11 +3358,8 @@ class LocalDAECollocator(CasadiCollocator):
                 if sym_l1_sf.shape[0]>0:
                     input_dae_l1 += [sym_l1_sf]
                 
-                dae_l1_fcn = casadi.MXFunction(input_dae_l1,
+                dae_l1_fcn = casadi.MXFunction('dae_l1_fcn', input_dae_l1,
                                                [output_dae_element])
-                dae_l1_fcn.setOption("name", "dae_l1_fcn")
-                raise DeprecationWarning('Function::init() is deprecated')
-                dae_l1_fcn.init()                    
                 self.dae_l1_fcn = dae_l1_fcn
 
                 # Define Collocation equation level1
@@ -3372,10 +3370,8 @@ class LocalDAECollocator(CasadiCollocator):
                 if sdx_sf_d_i.shape[0] > 0:
                     var_inputs += [sdx_sf_d_i] + [sdx_sf_e_i]
                 
-                coll_eq_l1_fcn = casadi.MXFunction(var_inputs, [output_coll_element])
-                coll_eq_l1_fcn.setOption("name", "coll_l1_eq_fcn")
-                raise DeprecationWarning('Function::init() is deprecated')
-                coll_eq_l1_fcn.init() 
+                coll_eq_l1_fcn = casadi.MXFunction('coll_l1_eq_fcn', 
+                                        var_inputs, [output_coll_element])
                 self.coll_eq_l1_fcn = coll_eq_l1_fcn 
 
                 if not self.lterm.isConstant() or float(self.lterm) != 0.:
@@ -3387,11 +3383,8 @@ class LocalDAECollocator(CasadiCollocator):
                     input_lterm_l1 += copy.copy(self._timed_variables)
                     if sym_l1_sf.shape[0]>0:
                         input_lterm_l1 += [sym_l1_sf]
-                    lterm_l1 = casadi.MXFunction(input_lterm_l1,
+                    lterm_l1 = casadi.MXFunction('lterm_l1_fcn', input_lterm_l1,
                                                  [output_lag_element])
-                    lterm_l1.setOption("name", "lterm_l1_fcn")
-                    raise DeprecationWarning('Function::init() is deprecated')
-                    lterm_l1.init()
                     self.lterm_l1 = lterm_l1
 
     def _add_c(self, kind, eqtype, pos, i, k):
@@ -4721,31 +4714,20 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Create solver object
         self.constraints = constraints
-        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp),
+        self.nlp = casadi.MXFunction('nlp', casadi.nlpIn(x=self.xx, p=self.pp),
                                 casadi.nlpOut(f=self.cost, g=constraints))
-        if self.solver == "IPOPT":
-            self.solver_object = casadi.NlpSolver("ipopt",nlp)
-        elif self.solver == "WORHP":
-            self.solver_object = casadi.NlpSolver("worhp",nlp)
-        else:
-            raise CasadiCollocatorException(
-                    "Unknown nonlinear programming solver %s." % self.solver)
+        self.solver_opts = {}
         self.solver_arg = {}
 
         # Expand to SX
-        self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
+        self.solver_opts['expand'] = self.expand_to_sx == "NLP"
         if self.equation_scaling:
-            raise DeprecationWarning('Function::init() is deprecated')
-            self.solver_object.init() # Probably needed before extracting the nlp function
-            nlp = self.solver_object.nlp()
-            self.residual_jac_fcn = nlp.jacobian(0,1)
-            raise DeprecationWarning('Function::init() is deprecated')
-            self.residual_jac_fcn.init()
+            self.residual_jac_fcn = self.nlp.jacobian(0,1)
 
         # Circumvent CasADi bug, see #4313
         if self.explicit_hessian:
             self._calc_Lagrangian_Hessian()
-            self.solver_object.setOption("hess_lag", self.H)        
+            self.solver_opts['hess_lag'] = self.H
 
     def get_equality_constraint(self):
         return self.c_e
@@ -6237,7 +6219,7 @@ class OptimizationSolver(object):
         self.init_traj_set = True
         self.collocator._create_initial_trajectories()        
         self.extra_update = time.clock() - t0
-        
+
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
         t0 = time.clock()
@@ -6248,7 +6230,7 @@ class OptimizationSolver(object):
         self.collocator._recalculate_model_parameters()
 
         if self.solver_options_changed:
-            self.collocator.solver_object.init()
+            self.collocator.initialize()
             self.solver_options_changed = False
 
         if self.collocator.warm_start:
