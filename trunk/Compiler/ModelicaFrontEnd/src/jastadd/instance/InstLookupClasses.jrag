@@ -117,22 +117,15 @@ aspect InstLookupClasses {
     inh InstLookupResult<InstClassDecl> InstExtendsShortClass.lookupInstClassInChain(String name);
     inh InstLookupResult<InstClassDecl> InstReplacingExtendsShortClass.lookupInstClassInChain(String name);
 
-    /*
-     * Default to using normal lookup.
-     */
-    eq List.getChild(int index).lookupInstClassInChain(String name) {
-        InstLookupResult<InstClassDecl> result = null;
-        for (ASTNode child : this) {
-            result = ((InstNode) child).lookupInstClass(name);
-            if (result.successful()) {
-                return result;
-            }
-        }
-        return result;
-    }
-    eq InstNode.getChild(int index).lookupInstClassInChain(String name) {
-        return ((InstNode) getChild(index)).lookupInstClass(name);
-    }
+    eq InstNode.getInstClassDecl(int index).lookupInstClassInChain(String name)             =
+            getInstClassDecl(index).lookupInstClass(name);
+    eq InstNode.getInstExtends(int index).lookupInstClassInChain(String name)               =
+            getInstExtends(index).lookupInstClass(name);
+    eq InstNode.getRedeclaredInstClassDecl(int index).lookupInstClassInChain(String name)   =
+            getRedeclaredInstClassDecl(index).lookupInstClass(name);
+    eq InstNode.getInstComponentDecl(int index).lookupInstClassInChain(String name)         =
+            getInstComponentDecl(index).lookupInstClass(name);
+
     eq InstRecordConstructor.getInstComponentDecl().lookupInstClassInChain(String name)    = 
         myInstClassDecl().genericLookupInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupInstClassInChain(String name) = 
