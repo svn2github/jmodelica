@@ -24,7 +24,7 @@ public abstract class TransformerIterable<A, B> implements Iterable<B> {
      * @param a the A object
      * @return the B object
      */
-    protected abstract B transform(A a);
+    protected abstract B transform(A a) throws SkipException;
 
     @Override
     public Iterator<B> iterator() {
@@ -38,13 +38,26 @@ public abstract class TransformerIterable<A, B> implements Iterable<B> {
 
             @Override
             public B next() {
-                return transform(it.next());
+                while (true) {
+                    try {
+                        return transform(it.next());
+                    } catch (SkipException e) {
+                        // Okay, let's skip this one!
+                    }
+                }
             }
 
             @Override
             public void remove() {
                 it.remove();
             }};
+    }
+    
+    /**
+     * Thrown when the element should be skipped for various reasons.
+     */
+    public static class SkipException extends Exception {
+        private static final long serialVersionUID = 1L;
     }
 
 }

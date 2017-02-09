@@ -23,11 +23,11 @@ import java.util.NoSuchElementException;
  */
 public final class SubClassIterator<U, T extends U> implements Iterator<T> {
 
-    private final Iterator<U> subIterator;
+    private final Iterator<? extends U> subIterator;
     private final Class<T> typeOfClass;
     private T next = null;
 
-    public SubClassIterator(Class<T> typeOfClass, Iterator<U> subIterator) {
+    public SubClassIterator(Class<T> typeOfClass, Iterator<? extends U> subIterator) {
         this.typeOfClass = typeOfClass;
         this.subIterator = subIterator;
         updateNext();
