@@ -261,6 +261,9 @@ aspect Logging {
 
 aspect NodeMethods {
 
+    /**
+     * Implementing {@link ASTNode#iterator()} is required as of JastAdd 2.2.0.
+     */
     public class ASTNode<T extends ASTNode> implements Iterable<T> {
         @Override
         public Iterator<T> iterator() {
@@ -387,10 +390,9 @@ aspect NodeMethods {
     public String InstComponentDecl.getNodeName() {
         return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
     }
-    
-    
-   	public class List {
-   		
+
+    public class List {
+
 	    /**
 	     * Creates a new ArrayList containing all the elements in this list, in the same order.
 	     */
@@ -536,6 +538,52 @@ aspect NodeMethods {
             
         }
         
+    }
+
+}
+
+/**
+ * Utility methods.
+ */
+aspect Utility {
+
+    /**
+     * Utility methods available from every class.
+     */
+    public class ASTNode {
+        /**
+         * Returns the intersection of two sets.
+         * 
+         * @param a
+         *          A set.
+         * @param b
+         *          A set.
+         * @return
+         *          A set containing elements that exist in both {@code a} and {@code b}.
+         */
+        public static <T> Set<T> intersection(Set<T> a, Set<T> b) {
+            // TODO: use runtime type of a instead - problematic if it is something like HashMap.KeySet.
+            Set<T> res = new HashSet<T>();
+            res.addAll(a);
+            res.retainAll(b);
+            return res;
+        }
+
+        /**
+         * Short-hand method for sorting a collection.
+         * 
+         * @param elems
+         *          The elements to sort.
+         * @param cmp
+         *          The {@link Comparator} to use when calculating the ordering of {@code elems}.
+         */
+        public static <T> ArrayList<T> toSortedList(Collection<T> elems, Comparator<? super T> cmp) {
+            ArrayList<T> res = new ArrayList<T>(elems.size());
+            res.addAll(elems);
+            Collections.sort(res, cmp);
+            return res;
+        }
+
     }
 
 }

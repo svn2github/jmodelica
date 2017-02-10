@@ -4515,11 +4515,11 @@ end TransformCanonicalTests.IfEqu15;
           z1 + z2 = x - y;
       end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu16",
-			description="Nestled if equations with mixed assignment equations and non-assignment equations",
-			flatModel="
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="IfEqu16",
+      description="Nested if equations with mixed assignment equations and non-assignment equations",
+      flatModel="
 fclass TransformCanonicalTests.IfEqu16
  Real x;
  Real y;

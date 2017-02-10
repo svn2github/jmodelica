@@ -486,11 +486,13 @@ aspect ContentCheck {
 	
 	syn boolean FIfWhenEquation.elseIsBalancedAssignments() = 
 		assignedSet().equals(getElse().assignedSet()) && getElse().isBalancedAssignments();
-	
-	inh boolean FIfEquation.isTopWhenIfEquation();
-	eq ASTNode.getChild().isTopWhenIfEquation()        = true;
-	eq FIfWhenEquation.getElse().isTopWhenIfEquation() = false;
-	
+
+    inh boolean FIfEquation.isTopWhenIfEquation();
+    eq FClass.getChild().isTopWhenIfEquation()              = true;
+    eq InstClassDecl.getChild().isTopWhenIfEquation()       = true;
+    eq FIfWhenElseEquation.getChild().isTopWhenIfEquation() = true;
+    eq FIfWhenEquation.getElse().isTopWhenIfEquation()      = false;
+
     syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
     eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().variability().fixedParameterOrLess() 
             && (!hasElse() || getElse().hasOnlyFixedParamTests());

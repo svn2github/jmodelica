@@ -746,12 +746,30 @@ aspect Arrays {
  		return new FIfExp(exp, new FIntegerLitExp(2), new FIntegerLitExp(1));
  	}
 
-    syn boolean FExp.isIntegerLiteral(int v)    = false;
-    eq FIntegerLitExp.isIntegerLiteral(int v)   = getValue() == v;
-
     syn boolean FExp.isIntegerLiteral()         = false;
     eq FIntegerLitExp.isIntegerLiteral()        = true;
+
+    syn boolean FExp.isIntegerLiteral(int v)    = false;
+    eq FIntegerLitExp.isIntegerLiteral(int v)   = getValue() == v;
  
+    syn boolean FExp.isRealLiteral()            = false;
+    eq FRealLitExp.isRealLiteral()              = true;
+
+    syn boolean FExp.isRealLiteral(double v)    = false;
+    eq FRealLitExp.isRealLiteral(double v)      = getValue() == v;
+    
+    syn boolean FExp.isZeroLiteral()  = isIntegerLiteral(0);
+    eq FRealLitExp.isZeroLiteral()    = isRealLiteral(0.0);
+
+    eq FArray.isZeroLiteral() {
+        for (FExp e : getFExps()) {
+            if (!e.isZeroLiteral()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
  	eq FLinspace.size() {
 		MutableSize s = new MutableSize(ndims());
  		s.append(getN());
