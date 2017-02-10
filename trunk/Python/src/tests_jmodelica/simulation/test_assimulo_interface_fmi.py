@@ -104,6 +104,12 @@ class Test_Sparse_Linear_Block:
         nose.tools.assert_almost_equal(res1.final("J1.w"), res2.final("J1.w"), 3)
         
     @testattr(stddist = True)
+    def test_multiple_sparse_systems(self):
+        file_name = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+
+        fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0)
+        
+    @testattr(stddist = True)
     def test_no_sparse_generation(self):
         model = load_fmu("TearingTests_TearingTest1.fmu")
         model.set("_le_sparse_jacobian_threshold", 1)

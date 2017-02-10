@@ -328,7 +328,7 @@ aspect CCodeGenJacobian{
      *  Constants.
      */
     protected static String AbstractEquationBlock.STRUCT_TYPE_TAG               = "_t";
-    protected static String AbstractEquationBlock.JACOBIAN_STRUCT_C             = "jacobian";
+    protected static String AbstractEquationBlock.JACOBIAN_STRUCT_C             = "jmi_jacobian_quadrants";
     protected static String AbstractEquationBlock.JACOBIAN_FUNCTION_C           = "jacobian";
     protected static String AbstractEquationBlock.JACOBIAN_STRUCT_FUNCTION_C    = "jacobian_struct";
     protected static String AbstractEquationBlock.JACOBIAN_INIT_FUNCTION_C      = "jacobian_init";
@@ -337,7 +337,7 @@ aspect CCodeGenJacobian{
     protected static String AbstractEquationBlock.JACOBIAN_INSTANCE_C           = "jc";
     protected static String AbstractEquationBlock.INT_TYPE_C                    = "jmi_int_t";
     protected static String AbstractEquationBlock.REAL_TYPE_C                   = "jmi_real_t";
-    protected static String AbstractEquationBlock.QUADRANT_STRUCT_C             = "jacobian_quadrant";
+    protected static String AbstractEquationBlock.QUADRANT_STRUCT_C             = "jmi_jacobian_quadrant";
     protected static String AbstractEquationBlock.QUADRANT_TYPE_C               = QUADRANT_STRUCT_C + STRUCT_TYPE_TAG;
     protected static String AbstractEquationBlock.EVAL_BASE                     = "JMI_BLOCK_JACOBIAN";
     protected static String AbstractEquationBlock.EVAL                          = EVAL_BASE + "_EVALUATE_";
@@ -364,9 +364,6 @@ aspect CCodeGenJacobian{
         SparseJacobian jacobian = new SparseJacobian(jacobian(),
                 localSolvedRealVariables().size(), unsolvedVariables().size());
 
-        genUniTypeStruct(p, str, indent, QUADRANT_STRUCT_C, "void ", EvaluationFunction.vars, "%s%s (*%s)();\n");
-        genUniTypeStruct(p, str, indent, JACOBIAN_STRUCT_C, QUADRANT_TYPE_C, Quadrant.names, "%s%s %s;\n");
-
         String initialSuffix = initial ? INIT_TAG : "";
 
         for (EvaluationFunction eval : EvaluationFunction.values()) {
@@ -380,31 +377,6 @@ aspect CCodeGenJacobian{
 
         generateJacobianFunction(p, str, indent, jacobian, initialSuffix);
         generateJacobianStructFunction(p, str, indent, jacobian, initialSuffix);
-    }
-    
-    /**
-     * Prints a struct definition with all members of equal type.
-     * 
-     * @param structName
-     *          The name of the struct.
-     * @param memberTypes
-     *          The members' type.
-     * @param memberNames
-     *          The names of the struct members.
-     * @param memberFormat
-     *          The format string to use when printing a member entry.
-     */
-    protected void AbstractEquationBlock.genUniTypeStruct(CodePrinter p, CodeStream str, String indent,
-        String structName, String memberType, String[] memberNames, String memberFormat) {
-
-        String innerIndent = p.indent(indent);
-        str.format("%stypedef struct %s {\n", indent, structName);
-
-        for (int i = 0; i < memberNames.length; ++i) {
-            str.format(memberFormat, innerIndent, memberType, memberNames[i]);
-        }
-        
-        str.format("%s} %s;\n\n", indent, structName + STRUCT_TYPE_TAG);
     }
 
     /**
