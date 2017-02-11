@@ -251,15 +251,13 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
         b[2] = x[1] + F(p1) * x[3];
         b[3] = 2 * x[2] + x[3];
         
-        annotation(__JModelica(UnitTesting(tests={
-            CCodeGenTestCase(
-                name="SparseBlockJacobian_Simple2",
-                description="Test generation of temporary variables in sparse block jacobians",
-                generate_sparse_block_jacobian=true,
-                template="
-$C_dae_blocks_residual_functions$
-",
-                generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="SparseBlockJacobian_Simple2",
+            description="Test generation of temporary variables in sparse block jacobians",
+            generate_sparse_block_jacobian=true,
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -385,8 +383,8 @@ void A22_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = -1.0;
 }
 
-jacobian_t *jacobian_init_0() {
-    jacobian_t *jc = (jacobian_t *) malloc(sizeof(jacobian_t));
+jmi_jacobian_quadrants_t *jacobian_init_0() {
+    jmi_jacobian_quadrants_t *jc = (jmi_jacobian_quadrants_t *) malloc(sizeof(jmi_jacobian_quadrants_t));
     jc->L.dim = &L_0_dim;
     jc->L.col = &L_0_col;
     jc->L.row = &L_0_row;
@@ -408,7 +406,7 @@ jacobian_t *jacobian_init_0() {
 
 static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
     int ef = 0;
-    jacobian_t *jc = jacobian_init_0();
+    jmi_jacobian_quadrants_t *jc = jacobian_init_0();
     int evaluation_mode = mode;
 
     if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_L) {
@@ -427,7 +425,7 @@ static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
 
 static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
     int ef = 0;
-    jacobian_t *jc = jacobian_init_0();
+    jmi_jacobian_quadrants_t *jc = jacobian_init_0();
     int evaluation_mode = mode;
 
     if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_DIMENSIONS) {
@@ -477,15 +475,13 @@ equation
     der(z) = integer(time);
     der(z) = x;
         
-        annotation(__JModelica(UnitTesting(tests={
-            CCodeGenTestCase(
-                name="MultipleSolvedRealInAlgorithm",
-                description="Test bug in #5252",
-                generate_sparse_block_jacobian=true,
-                template="
-$C_dae_blocks_residual_functions$
-",
-                generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="MultipleSolvedRealInAlgorithm",
+            description="Test bug in #5252",
+            generate_sparse_block_jacobian=true,
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -677,8 +673,8 @@ void A22_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = -1.0;
 }
 
-jacobian_t *jacobian_init_0() {
-    jacobian_t *jc = (jacobian_t *) malloc(sizeof(jacobian_t));
+jmi_jacobian_quadrants_t *jacobian_init_0() {
+    jmi_jacobian_quadrants_t *jc = (jmi_jacobian_quadrants_t *) malloc(sizeof(jmi_jacobian_quadrants_t));
     jc->L.dim = &L_0_dim;
     jc->L.col = &L_0_col;
     jc->L.row = &L_0_row;
@@ -700,7 +696,7 @@ jacobian_t *jacobian_init_0() {
 
 static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
     int ef = 0;
-    jacobian_t *jc = jacobian_init_0();
+    jmi_jacobian_quadrants_t *jc = jacobian_init_0();
     int evaluation_mode = mode;
 
     if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_L) {
@@ -719,7 +715,7 @@ static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
 
 static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
     int ef = 0;
-    jacobian_t *jc = jacobian_init_0();
+    jmi_jacobian_quadrants_t *jc = jacobian_init_0();
     int evaluation_mode = mode;
 
     if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_DIMENSIONS) {
@@ -751,7 +747,6 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
     free(jc);
     return ef;
 }
-
 
 ")})));
 end MultipleSolvedRealInAlgorithm;
