@@ -64,7 +64,7 @@ public class IntegerCost implements MunkresCost<IntegerCost> {
         IntegerCost[][] costs = new IntegerCost[values.length][];
         for (int j = 0; j < values.length; j++) {
             costs[j] = new IntegerCost[values[j].length];
-            for (int i = 0; i < values[j].length; i++)
+            for (int i = 0; i < values.length; i++)
                 costs[j][i] = new IntegerCost(values[j][i]);
         }
         return costs;

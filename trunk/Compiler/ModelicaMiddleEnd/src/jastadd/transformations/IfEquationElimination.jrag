@@ -48,6 +48,14 @@ aspect IfEquationElimination {
 
     }
 
+    syn List<FAbstractEquation> FIfWhenElseEquation.myIfEliminatedEquations() {
+        List<FAbstractEquation> equations = new List<FAbstractEquation>();
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            equation.eliminateIfEquations(equations);
+        }
+        return equations;
+    }
+
     public void ASTNode.eliminateIfEquations(List<FAbstractEquation> equations) {}
     public void FAbstractEquation.eliminateIfEquations(List<FAbstractEquation> equations) { equations.add(this); }
     public FIfWhenElseEquation FIfWhenElseEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations,
@@ -104,7 +112,7 @@ aspect IfEquationElimination {
 
         try {
             if (getTest().ceval().booleanValue() && !falseBranchesOnly) {
-                equations.addAll(getFAbstractEquations());
+                equations.addAll(myIfEliminatedEquations());
                 return null;
             } else if (hasElse()) {
                 return getElse().eliminateIfEquationsLocal(equations, falseBranchesOnly);
@@ -138,7 +146,7 @@ aspect IfEquationElimination {
             return this;
         }
 
-        equations.addAll(getFAbstractEquations());
+        equations.addAll(myIfEliminatedEquations());
         return null;
     }
 
