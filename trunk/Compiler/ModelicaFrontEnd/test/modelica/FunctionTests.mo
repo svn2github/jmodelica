@@ -11349,6 +11349,33 @@ end FunctionTests.UnknownArray53;
 ")})));
 end UnknownArray53;
 
+model UnknownArray54
+    function f1
+        input Integer n;
+        Real[:] t = 1:n;
+        output Real y = f2({f2(t[1:1]) for i in 1:n});
+        algorithm
+    end f1;
+    
+    function f2
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+    end f2;
+    
+    Real y = f1(2);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray54",
+            description="Bug in #5291",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray54
+ constant Real y = 2.0;
+end FunctionTests.UnknownArray54;
+")})));
+end UnknownArray54;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
