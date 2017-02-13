@@ -4636,6 +4636,34 @@ end FunctionInlining.ChainedCallInlining13;
 ")})));
 end ChainedCallInlining13;
 
+model ChainedCallInlining14
+    function f1
+        input Integer n;
+        output Real y = if n > 0 then f2(1:n) else n;
+        algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    Real y = f1(2);
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining14",
+            description="Test bug in #5292",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining14
+ constant Real y = 3.0;
+end FunctionInlining.ChainedCallInlining14;
+")})));
+end ChainedCallInlining14;
+
 
 model InputAsIndex1
     function f

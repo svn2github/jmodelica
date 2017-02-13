@@ -1403,6 +1403,10 @@ aspect FunctionInlining {
      */
     public void FStatement.inlinePrepare(AbstractFunctionInliner fi, List<FStatement> stmts) {}
 
+    public void FInitArrayStmt.inlinePrepare(AbstractFunctionInliner fi, List<FStatement> stmts) {
+        inline(fi);
+    }
+
     public void FAssignStmt.inlinePrepare(AbstractFunctionInliner fi, List<FStatement> stmts) {
         stmts.add(fullCopy());
     }
