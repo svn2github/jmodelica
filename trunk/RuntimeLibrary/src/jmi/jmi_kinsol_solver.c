@@ -1644,9 +1644,11 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
 }
 
 /* Perform LU factorization with different linear algebra packages */
-static int jmi_LU_factorization(jmi_block_solver_t * block, DlsMat matrix, int lin_alg_package) {
+static int jmi_LU_factorization(jmi_block_solver_t * block, DlsMat matrix) {
     jmi_kinsol_solver_t* solver = block->solver;
     int info = 0, N = block->n;
+    int lin_alg_package = block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0;
+    
     if(lin_alg_package == 0) {
         dgetrf_(  &N, &N, matrix->data, &N, solver->lapack_ipiv, &info);
     } else if (lin_alg_package == 1) {
@@ -1657,9 +1659,11 @@ static int jmi_LU_factorization(jmi_block_solver_t * block, DlsMat matrix, int l
 }
 
 /* Solve with an LU factorized matrix with different linear algebra packages */
-static int jmi_LU_solve(jmi_block_solver_t * block, DlsMat matrix, realtype* xd, int lin_alg_package) {
+static int jmi_LU_solve(jmi_block_solver_t * block, DlsMat matrix, realtype* xd) {
     jmi_kinsol_solver_t* solver = block->solver;
     int ret = 0, N = block->n;
+    int lin_alg_package = block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0;
+    
     if(lin_alg_package == 1) {
         DenseGETRS(matrix, solver->sundials_permutationwork, xd);
     } else if (lin_alg_package == 0){
@@ -1687,9 +1691,8 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
             "Calculated condition number in <block: %s>. Regularizing if <cond: %E> is greater than <regtol: %E>", block->label, cond, solver->kin_reg_tol);
         if (cond > solver->kin_reg_tol) {
             if(N > 1 && solver->handling_of_singular_jacobian_flag == JMI_REGULARIZATION) {
-                int info;
                 jmi_kinsol_reg_matrix(block);
-                dgetrf_(  &block->n, &block->n, solver->JTJ->data, &block->n, solver->lapack_ipiv, &info);
+                jmi_LU_factorization(block, solver->JTJ);
             }
             solver->J_is_singular_flag = 1;
         }
@@ -1732,17 +1735,14 @@ static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * blo
     /* Copy Jacobian to factorization matrix */
     DenseCopy(block->J, solver->J_LU);
     /* Perform LU factorization to be used with dgecon */
-    dgetrf_(&N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
+    info = jmi_LU_factorization(block, solver->J_LU); 
     if (info != 0 ) {
         /* If matrix i singular, return something very large to be evaluated*/
         return 1e100;
     }
     /* Compute reciprocal condition number */
     dgecon_(&norm, &N, solver->J_LU->data, &N, &J_norm, &J_recip_cond, solver->lapack_work, solver->lapack_iwork,&info);
-    /* To be evaluated - why is this needed? Error handling due to J being used instead of J_LU?
-    if(Jcond < 0) Jcond = -Jcond;
-    if(Jcond == 0.0) Jcond = 1e-30;
-    */
+
     return 1.0/J_recip_cond;
 }
 
@@ -1846,12 +1846,6 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
     if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "BroydenJacobianUpdate", "<block:%s>", block->label);
         if (block->callbacks->log_options.log_level >= 6) {
-#if 0
-            jmi_log_reals(block->log, node, logInfo, "last_residual", N_VGetArrayPointer(solver->last_residual), N);
-            jmi_log_reals(block->log, node, logInfo, "current_residual", N_VGetArrayPointer(b), N);
-            jmi_log_reals(block->log, node, logInfo, "last_step", N_VGetArrayPointer(kin_mem->kin_pp), N);
-            jmi_log_fmt(block->log, node,logInfo, "Update denominator <step_norm: %g>", denom);
-#endif
             jmi_log_real_matrix(block->log, node, logInfo, "jacobian", block->J->data, N, N);
         }
         jmi_log_leave(block->log, node);
@@ -1904,13 +1898,6 @@ static int jmi_kin_make_sparse_Broyden_update(jmi_block_solver_t *block, N_Vecto
     if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "SparseBroydenJacobianUpdate", "<block:%s>", block->label);
         if (block->callbacks->log_options.log_level >= 6) {
-#if 0
-            jmi_log_reals(block->log, node, logInfo, "last_residual", N_VGetArrayPointer(solver->last_residual), N);
-            jmi_log_reals(block->log, node, logInfo, "current_residual", N_VGetArrayPointer(b), N);
-            jmi_log_reals(block->log, node, logInfo, "last_step", N_VGetArrayPointer(kin_mem->kin_pp), N);
-            jmi_log_reals(block->log, node,logInfo, "denoms", N_VGetArrayPointer(solver->work_vector2), N);
-            jmi_log_reals(block->log, node,logInfo, "res_JacStep", N_VGetArrayPointer(solver->work_vector), N);
-#endif
             jmi_log_real_matrix(block->log, node, logInfo, "jacobian", block->J->data, N, N);
         }
         jmi_log_leave(block->log, node);
@@ -1958,17 +1945,6 @@ static int jmi_kin_make_modifiedBFGS_update(jmi_block_solver_t *block, N_Vector 
     if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "ModifiedBFGSJacobianUpdate", "<block:%s>", block->label);
         if (block->callbacks->log_options.log_level >= 6) {
-#if 0
-            jmi_log_reals(block->log, node, logInfo, "last_residual", N_VGetArrayPointer(solver->last_residual), N);
-            jmi_log_reals(block->log, node, logInfo, "Jac_step", N_VGetArrayPointer(solver->work_vector), N);
-            jmi_log_reals(block->log, node, logInfo, "res_diff_f_scale2_Jac", N_VGetArrayPointer(solver->work_vector2), N);
-            jmi_log_reals(block->log, node, logInfo, "current_residual", N_VGetArrayPointer(b), N);
-            jmi_log_reals(block->log, node, logInfo, "last_step", N_VGetArrayPointer(kin_mem->kin_pp), N);
-            jmi_log_reals(block->log, node, logInfo, "y_scale", N_VGetArrayPointer(solver->kin_y_scale), N);
-            jmi_log_reals(block->log, node, logInfo, "f_scale", N_VGetArrayPointer(solver->kin_f_scale), N);
-            jmi_log_fmt(block->log, node,logInfo, "Update denominator <step_norm: %g>", denom1);
-            jmi_log_fmt(block->log, node,logInfo, "Update denominator <denom2: %g>", denom2);
-#endif
             jmi_log_real_matrix(block->log, node, logInfo, "jacobian", block->J->data, N, N);
         }
         jmi_log_leave(block->log, node);
@@ -2011,11 +1987,11 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
         }
     }
     
-    info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+    info = jmi_LU_factorization(block, solver->J_LU);
     if(info != 0) {
         if(jmi_kinsol_zero_column_jacobian_handling(block)) {
             DenseCopy(block->J, solver->J_LU); /* make a copy of the Jacobian that will be used for LU factorization */
-            info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+            info = jmi_LU_factorization(block, solver->J_LU);
         }
     }
     
@@ -2047,7 +2023,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
                 
                 if(N > 1) {
                     jmi_kinsol_reg_matrix(block);
-                    info = jmi_LU_factorization(block, solver->JTJ, block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials? 1:0);
+                    info = jmi_LU_factorization(block, solver->JTJ);
                 }
             } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
                 jmi_log_node(block->log, logWarning, "MinimumNorm", "Singular Jacobian detected when factorizing in linear solver. "
@@ -2092,34 +2068,16 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     KINGetNumNonlinSolvIters(kin_mem, &nniters);
     solver->current_nni = nniters;
 
-    if(block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode) {
-        if(!solver->updated_jacobian_flag) {
-            /* Never do update in the first iteration */
-            if (nniters > 0) {        
-                ret = jmi_kin_make_Broyden_update(block, b);
-                if(ret != 0) return ret;
-            }
-        }
-    }
+    
+    if (!solver->updated_jacobian_flag && nniters > 0) {
+        if(block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode)
+            ret = jmi_kin_make_Broyden_update(block, b);
+        if (block->options->experimental_mode & jmi_block_solver_experimental_use_modifiedBFGS)
+            ret = jmi_kin_make_modifiedBFGS_update(block, b);
+        if (block->options->experimental_mode & jmi_block_solver_experimental_Sparse_Broyden)
+            ret = jmi_kin_make_sparse_Broyden_update(block, b);
 
-    if(block->options->experimental_mode & jmi_block_solver_experimental_use_modifiedBFGS) {
-        if(!solver->updated_jacobian_flag) {
-            /* Never do update in the first iteration */
-            if (nniters > 0) {        
-                ret = jmi_kin_make_modifiedBFGS_update(block, b);
-                if(ret != 0) return ret;
-            }
-        }
-    }
-
-    if(block->options->experimental_mode & jmi_block_solver_experimental_Sparse_Broyden) {
-        if(!solver->updated_jacobian_flag) {
-            /* Never do update in the first iteration */
-            if (nniters > 0) {        
-                ret = jmi_kin_make_sparse_Broyden_update(block, b);
-                if(ret != 0) return ret;
-            }
-        }
+        if(ret != 0) return ret;
     }
 
     if(((block->options->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto) &&
@@ -2238,7 +2196,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
             /* Back-solve and get solution in x */
             t = jmi_block_solver_start_clock(block);
-            ret = jmi_LU_solve(block, solver->JTJ, xd, block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+            ret = jmi_LU_solve(block, solver->JTJ, xd);
             kin_char_log(solver, 'r');
             solver->force_new_J_flag = 1;
             if(block->options->rescale_after_singular_jac_flag)
@@ -2304,7 +2262,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             jmi_log_reals(block->log, node, logInfo, "rhs", xd, N);
         }
         
-        ret = jmi_LU_solve(block, solver->J_LU, xd, block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+        ret = jmi_LU_solve(block, solver->J_LU, xd);
 
         if((block->callbacks->log_options.log_level >= 6)) {
             jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
@@ -2825,29 +2783,10 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         solver->use_steepest_descent_flag = 0;
     }
     
-    /* Brent is called for 1D to get higher accuracy. It is called independently on the KINSOL success */ 
-    if((block->n == 1) && block->options->use_Brent_in_1d_flag) {
-        jmi_log_node(log, logInfo, "Brent", "Trying Brent's method in <block: %s>", block->label);
-        if(( solver->f_pos_min_1d != BIG_REAL) &&
-                ( solver->f_neg_max_1d != -BIG_REAL)) {
-            
-            realtype u, f;
-            if(!jmi_brent_search(brentf, solver->y_neg_max_1d,  solver->y_pos_min_1d, 
-                                 solver->f_neg_max_1d,  solver->f_pos_min_1d, 0, &u, &f,block)) {
-                block->x[0] = u;
-                flag = KIN_SUCCESS;
-            }                
-        }
-        if(flag != KIN_SUCCESS) {
-            jmi_log_node(log, logError, "Error", "Could neither iterate to required accuracy "
-                         "nor bracket the root of 1D equation in <block: %s>", block->label);
-        }
-    } 
-    
+    /* If Kinsol failed, try to solve with steepest descent instead */
     if((block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent) &&
         (flag != KIN_SUCCESS)) {
-        /* try to solve with steepest descent instead */
-
+        
         jmi_log_node(log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
                      "jmi_kinsol_solver", block->label, "Attempting steepest descent iterations");        
 
@@ -2913,50 +2852,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                                  block->label);
                 }
             }
-#ifdef JMI_KINSOL_PRINT_ON_FAIL
-            {
-                realtype* x = block->x;
-                int i;
-                struct KINMemRec * kin_mem = solver->kin_mem;
-                
-                printf("Could not converge in block %s,KINSOL error:%s,fnorm=%g,stol=%g,ftol=%g:\n"
-                       "x = N.array([\n",block->label, jmi_kinsol_flag_to_name(flag), fnorm, solver->kin_stol,solver->kin_ftol);
-                for (i=0;i<block->n;i++) {
-                    printf("%.16e\n",x[i]);
-                }
-                printf("]);\n");
-                printf("x_scale = N.array([\n");
-                for (i=0;i<block->n;i++) {
-                    printf("%.16e\n",Ith(solver->kin_y_scale,i));
-                }
-                printf("]);\n");
-                printf("f = N.array([\n");
-                for (i=0;i<block->n;i++) {
-                    printf("%.16e\n",Ith(kin_mem->kin_fval,i));
-                }
-                printf("]);\n");
-                N_VScale( 1+2*UNIT_ROUNDOFF,solver->kin_y,solver->kin_y);
-                kin_f(solver->kin_y,kin_mem->kin_fval,block);
-                printf("f_inc = N.array([\n");
-                for (i=0;i<block->n;i++) {
-                    printf("%.16e\n",Ith(kin_mem->kin_fval,i));
-                }
-                printf("]);\n");
-                N_VScale( 1-4*UNIT_ROUNDOFF,solver->kin_y,solver->kin_y);
-                kin_f(solver->kin_y,kin_mem->kin_fval,block);
-                printf("f_dec = N.array([\n");
-                for (i=0;i<block->n;i++) {
-                    printf("%.16e\n",Ith(kin_mem->kin_fval,i));
-                }
-                printf("]);\n");
-
-                printf("f_scale = N.array([\n");
-                for (i=0;i<block->n;i++) {
-                    printf("%.16e\n",Ith(solver->kin_f_scale,i));
-                }
-                printf("]);\n");
-            }
-#endif
         }
     }
 
