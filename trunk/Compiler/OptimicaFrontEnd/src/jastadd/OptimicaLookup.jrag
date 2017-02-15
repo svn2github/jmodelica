@@ -16,21 +16,6 @@
 
 import java.util.HashMap;
 
-aspect OptimicaFlatNameBinding {
-	
-	inh FAbstractVariable FForClauseC.lookupFV(FQName fqn);
-	eq FForClauseC.getChild().lookupFV(FQName fqn) {
-		String name = fqn.name();
-		for (FForIndex fi : getFForIndexs()) {
-			if (fi.getFVariable().name().equals(name)) {
-				return fi.getFVariable();
-			}
-		}
-		return lookupFV(fqn);
-	}
-	
-}
-
 aspect OptimicaInstLookupComponents {
 
     inh lazy InstLookupResult<InstComponentDecl> InstForClauseC.lookupInstComponent(String name);

@@ -715,10 +715,6 @@ aspect FlatNames {
             res.setFQNamePart(getFQNamePart(i).fullCopy(), i + n);
         return res;
     }
-    
-    public FQNameFullScalarize FQNameFullScalarize.copyAndPrepend(String name) {
-        return new FQNameFullScalarize(super.copyAndPrepend(name).getFQNamePartList());
-     }
    
     /**
      * Create a copy of the name, with a prefix added to the first name part.
@@ -977,14 +973,6 @@ aspect FlatNames {
         for (int i = first; i <= last; i++)
             res.addFQNamePart(getFQNamePart(i).fullCopy());
         return res;
-    }
-
-    public FQName FQNameFullScalarize.copyPart(int first, int last) {
-        FQName res = super.copyPart(first, last);
-        if (res instanceof FQNameFull)
-            return new FQNameFullScalarize(((FQNameFull) res).getFQNamePartList());
-        else 
-            return res;
     }
 
     /**

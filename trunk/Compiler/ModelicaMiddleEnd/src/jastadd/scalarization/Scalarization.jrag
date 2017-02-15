@@ -366,22 +366,25 @@ aspect Scalarization {
         try {
             if (size().isZero())
                 return;
-            
             createArrayTemporaries(s);
-            
-            if (isRecord()) {
-                scalarRecordFVariables(s, new ScalarizingVariableInstance(this));
-            } else {
-                Scalarizer.Equation se = s.select(variability());
-                for (Index i : indices()) {
-                    createScalarFVariable(se, i);
-                }
-            }
+            doScalarize(s);
         } catch (ModelicaException e) {
             throw e;
         } catch (Exception e) {
             throw new org.jmodelica.util.exceptions.InternalCompilerError("Exception caught while scalarizing component'" + name() + "'", e);
         }
+    }
+    
+    public void FVariable.doScalarize(Scalarizer.Variable s) {
+        Scalarizer.Equation se = s.select(variability());
+        for (Index i : indices()) {
+            createScalarFVariable(se, i);
+        }
+    }
+    
+    @Override
+    public void FRecordVariable.doScalarize(Scalarizer.Variable s) {
+        scalarRecordFVariables(s, new ScalarizingVariableInstance(this));
     }
     
     public void FVariable.createArrayTemporaries(Scalarizer.Variable s) {
@@ -423,24 +426,19 @@ aspect Scalarization {
 			fv.setFTypePrefixInputOutput((FTypePrefixInputOutput) getFTypePrefixInputOutput().fullCopy());
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
-		
-        // Copy name and replace last array subscripts
-        FQName name = (i == Index.NULL) ? 
-                getFQName().fullCopy() : 
-                getFQName().copyAndAddFas(i.createFArraySubscripts());
-        name.scalarized = true;
-        fv.setFQName(name);
-        
+
+        fv.setFQName(scalarizeVariableName(i));
+
         // Scalarize binding expressions
         if (hasBindingExp()) {
-            FExp bexp = getBindingExp().getArray().get(i).scalarize(s);
+            FExp bexp = getBindingExp().cell(i).scalarize(s);
             if (keepBExp(variability(), getBindingExp())) {
                 fv.setBindingExp(bexp);
             } else {
-                s.add(new FIdUseExp(name), bexp);
+                s.add(new FIdUseExp(scalarizeVariableUse(i)), bexp);
             }
-		}
-		
+        }
+
 		// Iterate over all attributes and scalarize.
         for (FAttribute a : getFAttributes()) {
             a.scalarize(fv.getFAttributes(), i, Collections.<String,FExp>emptyMap());
@@ -451,7 +449,27 @@ aspect Scalarization {
         s.add(fv);
         return fv;
 	}
-	
+
+    /**
+     * Create an FQName for the scalarized variable.
+     * Separate method for extensibility.
+     */
+    protected FQName FVariable.scalarizeVariableName(Index i) {
+        String name = getFQName().name();
+        if (i.ndims() > 0) {
+            name = name + i;
+        }
+        return new FQNameString(name);
+    }
+
+    /**
+     * Create an FQName for the scalarized binding equation.
+     * Separate method for extensibility.
+     */
+    protected FQName FVariable.scalarizeVariableUse(Index i) {
+        return scalarizeVariableName(i);
+    }
+
     @Override
     protected FExternalObjectVariable FExternalObjectVariable.createScalarFVariable(Scalarizer.Equation s, Index i) {
         FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(s, i);
@@ -581,30 +599,30 @@ aspect Scalarization {
         private Map<String, FAttribute> mattrs; 
         
         // Full name of this variable
-        private FQName name;
+        private String name;
         
         // input/output prefix of top-level variable
         private Opt<FTypePrefixInputOutput> inputOutput;
         
         private Index index;
         
-        private ScalarizingVariableInstance(FQName n, Map<String, FAttribute> mattrs, FExp be,
+        private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
                 FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
             bExp = be;
-            name = n;
+            this.name = name;
             index = i;
             this.mattrs = mattrs;
             this.variability = variability;
             this.inputOutput = inputOutput;
         }
         
-        private ScalarizingVariableInstance(FQName n, List<FAttribute> attrs, FExp be,
+        private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,
                 FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
-            this(n, ScalarizingVariableInstance.mapped(attrs), be, variability, inputOutput, i);
+            this(name, ScalarizingVariableInstance.mapped(attrs), be, variability, inputOutput, i);
         }
         
         public ScalarizingVariableInstance(FVariable fv) {
-            this(fv.getFQName(), fv.getFAttributes(),
+            this(fv.name(), fv.getFAttributes(),
                     fv.hasBindingExp() ? fv.getBindingExp().dynamicFExp(fv.getBindingExp().scalarize(Collections.<String,FExp>emptyMap())) : null,
                     fv.variability(), fv.getFTypePrefixInputOutputOpt(), Index.NULL);
         }
@@ -638,8 +656,8 @@ aspect Scalarization {
                 Index ni = ti.subIndex(ti.ndims() - nbexp.ndims());
                 nbexp = nbexp.getArray().get(ni);
             }
-            return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), 
-                    mattrs, nbexp, variability, inputOutput, ti);
+            return new ScalarizingVariableInstance(i.ndims() > 0 ? name + i : name, mattrs, nbexp, variability,
+                    inputOutput, ti);
         }
         
         public ScalarizingVariableInstance create(Scalarizer.Variable s, FVariable comp) {
@@ -662,21 +680,22 @@ aspect Scalarization {
                     nbexp = nbexp.dynamicFExp(nbexp.scalarize(Collections.<String,FExp>emptyMap()));
                 }
             } else {
-                nbexp = nbexp.component(comp.name());
+                nbexp = nbexp.component(cName);
             }
             
-            return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nv, inputOutput, index);
+            return new ScalarizingVariableInstance(name + "." + cName, attrs, nbexp, nv, inputOutput, index);
         }
         
         public void createScalarized(Scalarizer.Variable s, FVariable comp) {
             Scalarizer.Equation se = s.select(variability);
-            FVariable fv = comp.copyForName(name);
+            Index cell = index.subIndex(index.ndims() - comp.ndims());
+            FVariable fv = comp.copyForName(name, cell);
             Map<String,FExp> im = Collections.<String,FExp>emptyMap();
             if (bExp != null) {
                 if (comp.keepBExp(variability, bExp)) {
                     fv.setBindingExp(bExp);
                 } else {
-                    se.add(new FIdUseExp(name.scalarize(im)), bExp);
+                    se.add(new FIdUseExp(name), bExp);
                     fv.setBindingExpOpt(new Opt());
                 }
             } else {
@@ -689,16 +708,8 @@ aspect Scalarization {
                 attr.scalarize(attrs, index, Collections.<String,FExp>emptyMap());
             }
             fv.setFAttributeList(attrs);
-            fv.addArrayAttributesFromType(myCell(), comp.myFDerivedType());
+            fv.addArrayAttributesFromType(cell, comp.myFDerivedType());
             se.add(fv);
-        }
-
-        private Index myCell() {
-            if (name.hasFArraySubscripts()) {
-                return name.getFArraySubscripts().asIndex();
-            } else {
-                return Index.NULL;
-            }
         }
     }
     
@@ -708,9 +719,9 @@ aspect Scalarization {
 	 * The new variable is marked as scalarized, and if it refers to a specific cell in an array, 
 	 * then attributes are updated accordingly.
 	 */
-	public FVariable FVariable.copyForName(FQName name) {
+    public FVariable FVariable.copyForName(String name, Index cell) {
 		FVariable fv = createEmptyNode();
-		fv.setFQName(name.fullCopy());
+        fv.setFQName(new FQNameString(name));
 		fv.getFQName().scalarized = true;
 		fv.setFVisibilityType(getFVisibilityType().fullCopy());
 		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
@@ -722,23 +733,20 @@ aspect Scalarization {
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
 		
-        Index myCell = Index.NULL;
-		if (name.hasFArraySubscripts()) 
-			myCell = name.getFArraySubscripts().asIndex();
 		for (FAttribute a : getFAttributes())
 			if (!a.isInternal())
-				fv.addFAttribute(a.copyForCell(myCell));
+                fv.addFAttribute(a.copyForCell(cell));
 		return fv;
 	}
 
-	public FEnumVariable FEnumVariable.copyForName(FQName name) {
-		FEnumVariable fv = (FEnumVariable) super.copyForName(name);
+    public FEnumVariable FEnumVariable.copyForName(String name, Index cell) {
+        FEnumVariable fv = (FEnumVariable) super.copyForName(name, cell);
 		fv.setEnum(getEnum().fullCopy());
 		return fv;
 	}
     
-    public FExternalObjectVariable FExternalObjectVariable.copyForName(FQName name) {
-        FExternalObjectVariable fv = (FExternalObjectVariable) super.copyForName(name);
+    public FExternalObjectVariable FExternalObjectVariable.copyForName(String name, Index cell) {
+        FExternalObjectVariable fv = (FExternalObjectVariable) super.copyForName(name, cell);
         fv.setConstructor(getConstructor().fullCopy());
         return fv;
     }
@@ -840,14 +848,7 @@ aspect Scalarization {
     public FExp FAttribute.scalarizeValue(Index i, Map<String,FExp> indexMap) {
         if (!hasValue()) 
             return null;
-        FExp v = getValue();
-        if (inFunction())
-            return v.scalarizeExp(indexMap);
-        if (v.isArray()) {
-            i = i.subIndex(i.ndims() - v.ndims());
-            v = v.getArray().get(i);
-        }
-        return v.scalarize(indexMap);
+        return getValue().cell(i).scalarize(indexMap);
     }
     
     syn FExp FIdTempExp.scalarize(Map<String,FExp> indexMap) =
@@ -1585,21 +1586,39 @@ aspect Scalarization {
 	public FQName FQNameString.scalarize(Map<String,FExp> indexMap) {
 		return new FQNameString(getName());
 	}
-	
-	public FQName FQNameFull.scalarize(Map<String,FExp> indexMap) {
-		FQNameFull fqn = new FQNameFullScalarize(new List());
-		for (FQNamePart fqnp : getFQNameParts()) 
-			fqn.addFQNamePart(fqnp.scalarize(indexMap));
-		fqn.scalarized = true;
-		return fqn;
-	}
-	
-	rewrite FQNameFullScalarize {
-        to FQName inFunction() || !indexVariability().constantVariability() ? new FQNameFull(getFQNamePartList()) : new FQNameString(scalarName());
-	}
-	
-    syn FTypePrefixVariability FQNameFullScalarize.indexVariability() = hasFArraySubscripts() ? getFArraySubscripts().variability() : fConstant();
-    
+
+    public FQName FQNameFull.scalarize(Map<String,FExp> indexMap) {
+        if (scalarizeAsString()) {
+            StringBuilder name = new StringBuilder();
+            getFQNamePart(0).scalarizeAsString(name);
+            for (int i = 1; i < getNumFQNamePart(); i++) {
+                name.append(".");
+                getFQNamePart(i).scalarizeAsString(name);
+            }
+            return new FQNameString(name.toString());
+        } else {
+            FQNameFull fqn = new FQNameFull(new List());
+            for (FQNamePart fqnp : getFQNameParts()) 
+                fqn.addFQNamePart(fqnp.scalarize(indexMap));
+            return fqn;
+        }
+    }
+
+    /**
+     * Should this FQNameFull be scalarized to FQNameFull or FQNameString?
+     * Separate method for extensibility.
+     */
+    syn boolean FQNameFull.scalarizeAsString() = !inFunction();
+
+    public void FQNamePart.scalarizeAsString(StringBuilder sb) {
+        sb.append(name());
+    }
+
+    public void FQNamePartArray.scalarizeAsString(StringBuilder sb) {
+        super.scalarizeAsString(sb);
+        sb.append(getFArraySubscripts().createIndex());
+    }
+
     public FIdUse FIdUse.scalarize(Map<String,FExp> indexMap) {
     	return new FIdUse(getFQName().scalarize(indexMap));
     }

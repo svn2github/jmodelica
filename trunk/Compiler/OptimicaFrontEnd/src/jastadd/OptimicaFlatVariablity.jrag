@@ -73,7 +73,6 @@ aspect OptimicaVariability {
     
     syn FTypePrefixVariability FConstraint.variability();
     eq FRelationConstraint.variability() = getLeft().variability().combine(getRight().variability());
-    eq FForClauseC.variability()    = combineFConstraintsListVariability(getFConstraints());
     eq InstForClauseC.variability() = combineFConstraintsListVariability(getFConstraints());
     
     syn FTypePrefixVariability FConstraint.combineFConstraintsListVariability(List<FConstraint> l) {

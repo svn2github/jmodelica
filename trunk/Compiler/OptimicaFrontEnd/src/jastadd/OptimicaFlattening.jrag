@@ -143,19 +143,17 @@ aspect OptimicaFlattening {
 	}
 
 	public void InstForClauseC.flatten(FQName prefix, FClass fc) {
-		FOptClass foc = (FOptClass)fc;
-		List forIndex = new List();
-		List cons = new List();
-		for (InstForIndex ifi : getInstForIndexs()) 
-			forIndex.add(ifi.flatten(prefix));
-		
-		FOptClass focc = new FOptClass();
-		focc.setFQName(new FQNameString("tmp")); 
-		focc.setFConstraintList(cons);
-		for (FConstraint c : getFConstraints()) 
-			c.flatten(prefix, focc);
-		
-		foc.addFConstraint(new FForClauseC(forIndex, cons));
+        Indices ind = Indices.create(getInstForIndexs());
+        for (Index i : ind) {
+            ind.translate(i).setValues(getInstForIndexs());
+            getFConstraints().flushAllRecursive();
+            for (FConstraint c : getFConstraints()) {
+                c.flatten(prefix, fc);
+            }
+        }
+        for (InstForIndex ifi : getInstForIndexs()) {
+            ifi.clearEvaluationValue();
+        }
 	}
 
 	/*

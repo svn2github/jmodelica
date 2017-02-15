@@ -2284,9 +2284,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices FAbstractVariable.indices() = null;
-	eq FVariable.indices()      = isScalarized() ? null : Indices.create(size());
-	eq FFunctionArray.indices() = Indices.create(size());
+    syn lazy Indices FAbstractVariable.indices() = Indices.create(size());
 
 	/**
 	 * Get the set of all array indices of an InstComponentDecl. 

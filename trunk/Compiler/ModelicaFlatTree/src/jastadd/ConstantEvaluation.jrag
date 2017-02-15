@@ -2071,10 +2071,8 @@ aspect ConstantEvaluation {
         FAbstractVariable var = myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
-            if (hasFArraySubscripts() && !name.isScalarized() && !isArray()) {
+            if (var.ndims() > 0 && hasFArraySubscripts()) {
                 i = name.getFArraySubscripts().createIndex();
-            } else if (var.isFVariable() && name.isScalarized() && !var.asFVariable().isScalarized()) {
-                i = var.asFVariable().getFQName().getFArraySubscripts().createIndex();
             }
             if (i != Index.NULL) {
                 return var.inRecord() ? cevalRecordMember(evaluator, name).array().getCell(i) : evaluator.ceval(var, i);
