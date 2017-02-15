@@ -14,14 +14,14 @@
 
 from tests_jmodelica import testattr
 try:
-    from casadi import isEqual
+    from casadi import is_equal
     from modelicacasadi_transfer import *
 except (NameError, ImportError):
     pass
 
 def MX_equal(x, y):
     eq = (x == y)
-    return eq.isConstant() and float(eq) == 1
+    return eq.is_constant() and float(eq) == 1
 
 def strnorm(StringnotNorm):
     caracters = ['\n','\t',' ']
@@ -181,8 +181,7 @@ def test_DependentParameters():
     d = MX.sym("d")
     e = MX.sym("e")
     funcVar = MX.sym("funcVar")
-    f = MXFunction([funcVar], [funcVar*2])
-    f.init()
+    f = Function("f", [funcVar], [funcVar*2])
 
 
     eq2 = a + MX(2)
@@ -221,8 +220,7 @@ def test_DependentParameters_old():
     c = MX.sym("c")
     d = MX.sym("d")
     funcVar = MX.sym("funcVar")
-    f = MXFunction([funcVar], [funcVar*2])
-    f.init()
+    f = Function("f", [funcVar], [funcVar*2])
 
 
     eq1 = MX(10)
@@ -304,8 +302,7 @@ def test_NumericalEvaluation():
     c = MX.sym("c")
     d = MX.sym("d")
     funcVar = MX.sym("funcVar")
-    f = MXFunction([funcVar], [funcVar*2])
-    f.init()
+    f = Function("f", [funcVar], [funcVar*2])
     
     eq1 = MX(10)
     eq2 = a + MX(2)
@@ -797,9 +794,7 @@ def test_TimedVariableInvalidBaseVarType():
 def test_ModelFunctionGetName():
     funcVar = MX.sym("node")
     functionName = "myFunction"
-    function = MXFunction([funcVar],[funcVar+2])
-    function.setOption("name", functionName)
-    function.init()
+    function = Function(functionName, [funcVar],[funcVar+2])
     modelFunction = ModelFunction(function)
     assert( strnorm(modelFunction.getName()) == strnorm(functionName) )
 
@@ -807,45 +802,36 @@ def test_ModelFunctionGetName():
 def test_ModelFunctionGetNameCall():
     funcVar = MX.sym("node")
     functionName = "myFunction"
-    function = MXFunction([funcVar],[funcVar+2])
-    function.setOption("name", functionName)
-    function.init()
+    function = Function(functionName, [funcVar],[funcVar+2])
     modelFunction = ModelFunction(function)
     arg = MX.sym("arg")
     mfCall = modelFunction.getFunc().call([arg])
-    assert( MX_equal(mfCall[0].getDep(0).getDep(0), arg) )
+    assert( MX_equal(mfCall[0].dep(0).dep(0), arg) )
 
 @testattr(casadi = True)    
 def test_ModelFunctionCallAndUse():
     funcVar = MX.sym("node")
     functionName = "myFunction"
-    function = MXFunction([funcVar],[funcVar+2])
-    function.setOption("name", functionName)
-    function.init()
+    function = Function(functionName, [funcVar], [funcVar+2])
     modelFunction = ModelFunction(function)
     arg = MX.sym("arg")
     call = modelFunction.getFunc().call([arg])
-    evaluateCall = MXFunction([arg], [call[0]])
-    evaluateCall.init()
-    evaluateCall.setInput(0.0)
-    evaluateCall.evaluate()        
-    assert( float(evaluateCall.getOutput()) == 2 )
+    evaluateCall = Function("evaluateCall", [arg], [call[0]])
+    assert( float(evaluateCall.call([0.0])[0]) == 2.0 )
     
 @testattr(casadi = True)    
 def test_ModelFunctionPrinting():
     funcVar = MX.sym("node")
     functionName = "myFunction"
-    function = MXFunction([funcVar],[funcVar+2])
-    function.setOption("name", functionName)
-    function.init()
+    function = Function(functionName, [funcVar], [funcVar+2])
     modelFunction = ModelFunction(function)
     expectedPrint = (
 """
 ModelFunction : myFunction
  Number of inputs: 1
- 0. i0, 1-by-1 (dense), No description available
+  Input 0 ("i0"): 1-by-1 (dense)
  Number of outputs: 1
- 0. o0, 1-by-1 (dense), No description available
+  Output 0 ("o0"): 1-by-1 (dense)
 @0 = 2
 @1 = input[0][0]
 @0 = (@0+@1)
@@ -1171,24 +1157,21 @@ def test_ModelEqutionFunctionality():
 
     # Should return an MX with a null node (default MX value 
     # for default/empty constructor), if there are no equations
-    assert( model.getDaeResidual().isempty() )
+    assert( model.getDaeResidual().is_empty() )
      # Add equations and check residuals
     model.addDaeEquation(eq1)
     model.addDaeEquation(eq2)
     model.addInitialEquation(eq1)
     assert( MX_equal(res1, model.getInitialResidual()) )
     # Also test residuals with more than one residual equation
-    res1.append(res2)
-    assert( isEqual(res1, model.getDaeResidual(), 2) )
+    assert( is_equal(casadi.vertcat(res1, res2), model.getDaeResidual(), 2) )
 
 @testattr(casadi = True)    
 def test_ModelWithModelFunction():
     model = Model()
     funcVar = MX.sym("node")
     functionName = "myFunction"
-    f = MXFunction([funcVar],[funcVar+2])
-    f.setOption("name", functionName)
-    f.init()
+    f = Function(functionName, [funcVar],[funcVar+2])
     modelFunction = ModelFunction(f)
     assert( model.getModelFunction(functionName) == None )
     model.setModelFunctionByItsName(modelFunction)

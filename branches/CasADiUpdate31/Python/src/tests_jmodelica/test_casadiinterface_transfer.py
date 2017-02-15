@@ -16,7 +16,7 @@ import os
 from tests_jmodelica import testattr, get_files_path
 try:
     import casadi
-    from casadi import isEqual
+    from casadi import is_equal
     from modelicacasadi_transfer import *
     # Common variables used in the tests
     x1 = MX.sym("x1")
@@ -355,7 +355,7 @@ class ModelicaTransfer(object):
         model = self.load_model("atomicModelTime", modelFile)
         t = model.getTimeVariable()
         eq = model.getDaeResidual()
-        assert isEqual(eq[1].getDep(1).getDep(1), t) and isEqual(eq[0].getDep(1), t)
+        assert is_equal(eq[1].getDep(1).getDep(1), t) and is_equal(eq[0].getDep(1), t)
 
     ##############################################
     #                                            # 
@@ -471,7 +471,7 @@ class ModelicaTransfer(object):
         x1_eq = model.getDaeResidual()[1].getDep(1)
         x1_var = model.getVariables(Model.DIFFERENTIATED)[0].getVar()
         x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
-        assert isEqual(x1_var, x1_eq) and isEqual(x2_var, x2_eq)
+        assert is_equal(x1_var, x1_eq) and is_equal(x2_var, x2_eq)
 
     @testattr(casadi = True)
     def test_ConstructArrayInOutFunction1(self):
@@ -1604,15 +1604,15 @@ def test_OptimicaTimedVariables():
     tv3 = timedVars[2].getVar()
     tv4 = timedVars[3].getVar()
 
-    assert isEqual(tp1.getDep(1), startTime.getVar())
-    assert isEqual(tp2.getDep(1), startTime.getVar())
-    assert isEqual(tp3.getDep(0), finalTime.getVar())
-    assert isEqual(tp4, finalTime.getVar())
+    assert is_equal(tp1.getDep(1), startTime.getVar())
+    assert is_equal(tp2.getDep(1), startTime.getVar())
+    assert is_equal(tp3.getDep(0), finalTime.getVar())
+    assert is_equal(tp4, finalTime.getVar())
 
-    assert isEqual(tv1, point_constraints[0].getLhs())
-    assert isEqual(tv2, path_constraints[0].getLhs())
-    assert isEqual(tv3, path_constraints[1].getLhs())
-    assert isEqual(tv4, optProblem.getObjective())
+    assert is_equal(tv1, point_constraints[0].getLhs())
+    assert is_equal(tv2, path_constraints[0].getLhs())
+    assert is_equal(tv3, path_constraints[1].getLhs())
+    assert is_equal(tv4, optProblem.getObjective())
 
 @testattr(casadi = True)
 def test_OptimicaStartTime():
