@@ -381,7 +381,7 @@ The indexing and reallocation functions below must be kept consistent with this.
 
 
 /** \brief (Re)initialize the buffer as empty, without changing the current allocation */
-static void clear(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
+static void clear_delay_buffer(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
     buffer->size = buffer->head_index = 0;
     buffer->max_delay = max_delay;
 }
@@ -651,7 +651,7 @@ static int jmi_delaybuffer_new(jmi_t *jmi, jmi_delaybuffer_t *buffer) {
     buffer->event_buf = (int *)calloc(buffer->event_capacity, sizeof(int));
     if (buffer->event_buf == NULL) jmi_internal_error(jmi, "Unable to allocate space for delay buffer");
 
-    clear(buffer, 0); /* sets max_delay to zero; will be set to correct value in jmi_delaybuffer_init */
+    clear_delay_buffer(buffer, 0); /* sets max_delay to zero; will be set to correct value in jmi_delaybuffer_init */
     return 0;
 }
 static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer) {
@@ -664,7 +664,7 @@ static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer) {
 }
 
 static int jmi_delaybuffer_init(jmi_delaybuffer_t *buffer, jmi_real_t max_delay) {
-    clear(buffer, max_delay);
+    clear_delay_buffer(buffer, max_delay);
     return 0;
 }
 
