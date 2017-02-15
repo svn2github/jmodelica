@@ -65,17 +65,16 @@ static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * blo
 
 /* Calculate matrix vector product vv = M*v or vv = M^T*v */
 static void jmi_kinsol_calc_Mv(DlsMat M, int transpose, N_Vector v, N_Vector vv) {
-    realtype **m = M->cols;
     realtype*  vd = N_VGetArrayPointer(v);
     realtype*  vvd = N_VGetArrayPointer(vv);
-    long int N = M->N;
+    long int N = NV_LENGTH_S(v);
     long int i,j;
 
     if(transpose) {
         for (i=0;i<N;i++) {
             vvd[i] = 0;
             for (j=0;j<N;j++){
-                vvd[i] += m[i][j] * vd[j];
+                vvd[i] += DENSE_ELEM(M, j, i) * vd[j];
             }
         }
     } else {
@@ -84,7 +83,8 @@ static void jmi_kinsol_calc_Mv(DlsMat M, int transpose, N_Vector v, N_Vector vv)
         }
         for (i=0;i<N;i++) {
             for (j=0;j<N;j++){
-                vvd[j] += m[i][j] * vd[i];
+                vvd[j] += DENSE_ELEM(M, j, i) * vd[i];
+                
             }
         }
     }
@@ -686,7 +686,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 realtype dres = block->dres[j];
                 (J->data)[i*N+j] = dres;
             }
-            J->cols[i] = &(J->data)[i*N];
+            DENSE_COL(J,i) = &(J->data)[i*N];
             block->dx[i] = 0;
         }       
     }
@@ -983,7 +983,10 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
             jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
             if(solver->iterationProgressFlag || nniters == 0) {
-                jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
+                realtype fnorm;
+                KINGetFuncNorm(solver->kin_mem, &fnorm);
+                
+                jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", fnorm);
                 if (block->callbacks->log_options.log_level >= 5) {
                     jmi_log_node_t node;
                     node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
@@ -1002,12 +1005,12 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
                     jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
                 }
-                if (solver->last_fnorm < kin_mem->kin_fnorm && nniters > 0) { /* This is not ment to happen */
+                if (solver->last_fnorm < fnorm && nniters > 0) { /* This is not ment to happen */
                     jmi_log_node_t warning_node_top;
                     jmi_log_node_t warning_node;
                     realtype* last_f = N_VGetArrayPointer(solver->last_residual);
                     warning_node_top = jmi_log_enter_fmt(log, logWarning, "ResidualIncreaseAfterLineSearch", "The residual L2 norm has increased, from <norm_old: %E> to <norm_new: %E>",
-                        solver->last_fnorm, kin_mem->kin_fnorm);
+                        solver->last_fnorm, fnorm);
                     warning_node = jmi_log_enter_index_vector_(log, warning_node_top, logWarning,"increased_residuals", 'R');
                     for (i=0; i<block->n; i++) { /* Go through the residuals and log which ones increased */
                         if (RAbs(last_f[i]) < RAbs(f[i])) {
@@ -1017,7 +1020,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     jmi_log_leave(log, warning_node);
                     jmi_log_leave(log, warning_node_top);
                 }
-                solver->last_fnorm = kin_mem->kin_fnorm;
+                solver->last_fnorm = fnorm;
                 solver->last_max_residual= max_residual;
                 solver->last_max_residual_index = max_index;
             } 
@@ -1614,23 +1617,21 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
     int i,j,k;
-    realtype **JTJ_c =  solver->JTJ->cols;
-    realtype **jac = block->J->cols;
     int N = block->n;
     realtype * uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
     realtype * fscale_data = N_VGetArrayPointer(block->f_scale);    
 
     for (i=0;i<N;i++) {
         /* Add the regularization parameter on the diagonal.   */        
-        JTJ_c[i][i] = uscale_data[i]*uscale_data[i];
+        DENSE_ELEM(solver->JTJ,i,i) = uscale_data[i]*uscale_data[i];
         /*Calculate value at RTR(i,i) */
-        for (k=0;k<N;k++) JTJ_c[i][i] += jac[i][k]*jac[i][k]*fscale_data[k]*fscale_data[k];
+        for (k=0;k<N;k++) DENSE_ELEM(solver->JTJ,i,i) += DENSE_ELEM(block->J,k,i)*DENSE_ELEM(block->J,k,i)*fscale_data[k]*fscale_data[k];
         for (j=i+1;j<N;j++){
             
             /*Calculate value at RTR(i,j) */
-            JTJ_c[j][i] = 0;
-            for (k=0;k<N;k++) JTJ_c[j][i] += jac[j][k]*jac[i][k]*fscale_data[k]*fscale_data[k];
-            JTJ_c[i][j] = JTJ_c[j][i];
+            DENSE_ELEM(solver->JTJ,i,j) = 0;
+            for (k=0;k<N;k++) DENSE_ELEM(solver->JTJ,i,j) += DENSE_ELEM(block->J,k,j)*DENSE_ELEM(block->J,k,i)*fscale_data[k]*fscale_data[k];
+            DENSE_ELEM(solver->JTJ,j,i) = DENSE_ELEM(solver->JTJ,i,j);
         }
     }
 
@@ -1831,7 +1832,7 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
     }
 
     for(j=0; j < N; j++) {
-        realtype *jacCol_j = block->J->cols[j];
+        realtype *jacCol_j = DENSE_COL(block->J,j); 
         double tempj = Ith(kin_mem->kin_pp, j)*Ith(solver->kin_y_scale,j)*Ith(solver->kin_y_scale,j);
         for(i = 0; i < N; i++) {
             if( Ith(solver->work_vector,i) != 0.0) {
@@ -1878,16 +1879,16 @@ static int jmi_kin_make_sparse_Broyden_update(jmi_block_solver_t *block, N_Vecto
     }
 
     /* work_vector2(i) = sum(k=1:n) step(k)*Jac(i,k) */
-    for(i = 0; i < N; i++) {
+    for(i = 0; i < N; i++) {  
         double denom = 0;
         for(j=0; j < N; j++) {
-            denom += Ith(kin_mem->kin_pp, j)*Ith(kin_mem->kin_pp, j)*block->J->cols[j][i]*block->J->cols[j][i];
+            denom += Ith(kin_mem->kin_pp, j)*Ith(kin_mem->kin_pp, j)*DENSE_ELEM(block->J,i,j)*DENSE_ELEM(block->J,i,j);
         }
         Ith(solver->work_vector2,i) = denom;
     }
 
     for(j=0; j < N; j++) {
-        realtype *jacCol_j = block->J->cols[j];
+        realtype *jacCol_j = DENSE_COL(block->J,j); 
         for(i = 0; i < N; i++) {
             if( Ith(solver->work_vector2,i) >= UNIT_ROUNDOFF) {
                 jacCol_j[i] += Ith(solver->work_vector,i) * Ith(kin_mem->kin_pp, i)*jacCol_j[i]*jacCol_j[i]/Ith(solver->work_vector2,i);
@@ -1934,7 +1935,7 @@ static int jmi_kin_make_modifiedBFGS_update(jmi_block_solver_t *block, N_Vector 
     }
     
     for(j=0; j < N; j++) {
-        realtype *jacCol_j = block->J->cols[j];
+        realtype *jacCol_j = DENSE_COL(block->J,j); 
         double tempj1 = Ith(kin_mem->kin_pp,j)*Ith(solver->kin_y_scale,j)*Ith(solver->kin_y_scale,j)/denom1;
         double tempj2 = Ith(solver->work_vector2,j)/denom2;
         for(i = 0; i < N; i++) {
@@ -2161,9 +2162,8 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         ret = 0;
     }
     else if(solver->J_is_singular_flag) {
-        realtype** jac = block->J->cols;
         if (N == 1) {
-            xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
+            xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((DENSE_ELEM(block->J,0,0) > 0)?1:-1);
             ret = 0;
         } else if (solver->handling_of_singular_jacobian_flag == JMI_REGULARIZATION) {
             /* solve the regularized problem */
@@ -2173,9 +2173,9 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
             for (i=0;i<N;i++){
                 xd[i] = 0;
-                for (j=0;j<N;j++) xd[i] += jac[i][j]*bd[j]*fscale_data[j]*fscale_data[j];
+                for (j=0;j<N;j++) xd[i] += DENSE_ELEM(block->J,j,i)*bd[j]*fscale_data[j]*fscale_data[j];
             }
-
+            
             gnorm = N_VWL2Norm(x, kin_mem->kin_uscale);
             if((block->callbacks->log_options.log_level >= 5)) {
                 jmi_log_node(block->log, logInfo, "Gradient", 
@@ -2637,6 +2637,10 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         realtype* f;
         char msg[256];
         realtype* residual_scaling_factors = NV_DATA_S(block->f_scale);
+        long int nni = 0, nfe = 0;
+        
+        KINGetNumFuncEvals(solver->kin_mem, &nfe);
+        KINGetNumNonlinSolvIters(solver->kin_mem, &nni);
 
         /*kin_f(solver->kin_y, solver->work_vector, block); */
         f = NV_DATA_S(kin_mem->kin_fval);
@@ -2655,7 +2659,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         solver->last_max_residual_index = max_index;
         solver->last_fnorm = N_VWL2Norm(kin_mem->kin_fval, block->f_scale);
         kin_mem->kin_fnorm = solver->last_fnorm;
-        sprintf(msg, "nni = %4ld   nfe = %6ld   fnorm = %26.16g", kin_mem->kin_nni, kin_mem->kin_nfe, solver->last_fnorm);
+        sprintf(msg, "nni = %4ld   nfe = %6ld   fnorm = %26.16g", nni, nfe, solver->last_fnorm);
         kin_info("", "KINSolInit", msg, kin_mem->kin_ih_data);
         jmi_kinsol_print_progress(block, 2);
     } else {
@@ -2872,6 +2876,7 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_t *log = block->log;
     jmi_log_node_t node;
+    long int nniters = 0;
     
     flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
     if(flag) {        
@@ -2899,16 +2904,18 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     block->scale_update_time = solver->saved_state->kin_scale_update_time;
     block->force_rescaling        = solver->saved_state->force_rescaling;
 
+    KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
+
     solver->force_new_J_flag = solver->saved_state->force_new_J_flag;
     solver->handling_of_singular_jacobian_flag = solver->saved_state->handling_of_singular_jacobian_flag;
     solver->J_is_singular_flag = solver->saved_state->J_is_singular_flag;
-    ((struct KINMemRec *)solver->kin_mem)->kin_nnilset = ((struct KINMemRec *)solver->kin_mem)->kin_nni - solver->saved_state->mbset;
+    ((struct KINMemRec *)solver->kin_mem)->kin_nnilset = nniters - solver->saved_state->mbset;
     memcpy(N_VGetArrayPointer(block->f_scale), N_VGetArrayPointer(solver->saved_state->kin_f_scale), block->n*sizeof(realtype));
     memcpy(N_VGetArrayPointer(solver->kin_y_scale), N_VGetArrayPointer(solver->saved_state->kin_y_scale), block->n*sizeof(realtype));
     memcpy(solver->lapack_ipiv, solver->saved_state->lapack_ipiv, (block->n+2)*sizeof(int)); 
     
     if((block->callbacks->log_options.log_level >= 6)) {
-        jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, &(((struct KINMemRec *)solver->kin_mem)->kin_nni), &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
+        jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, nniters, &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
         jmi_log_ints(block->log, node, logInfo, "handling_singular", &(solver->handling_of_singular_jacobian_flag), 1);
         jmi_log_ints(block->log, node, logInfo, "is_singular", &(block->force_rescaling), 1);
         jmi_log_ints(block->log, node, logInfo, "force_rescaling", &(solver->J_is_singular_flag), 1);
@@ -2931,6 +2938,7 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         int flag;
         jmi_kinsol_solver_t* solver = block->solver;
         jmi_log_node_t node;
+        long int nniters = 0;
         
         flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
         if (flag) {
@@ -2959,15 +2967,17 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         solver->saved_state->force_rescaling       = block->force_rescaling;
         solver->saved_state->force_new_J_flag      = solver->force_new_J_flag;
         
+        KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);
+        
         solver->saved_state->handling_of_singular_jacobian_flag = solver->handling_of_singular_jacobian_flag;
         solver->saved_state->J_is_singular_flag = solver->J_is_singular_flag;
-        solver->saved_state->mbset = ((struct KINMemRec *)solver->kin_mem)->kin_nni - ((struct KINMemRec *)solver->kin_mem)->kin_nnilset;
+        solver->saved_state->mbset = nniters - ((struct KINMemRec *)solver->kin_mem)->kin_nnilset;
         memcpy(N_VGetArrayPointer(solver->saved_state->kin_f_scale),N_VGetArrayPointer(block->f_scale), block->n*sizeof(realtype));
         memcpy(N_VGetArrayPointer(solver->saved_state->kin_y_scale),N_VGetArrayPointer(solver->kin_y_scale), block->n*sizeof(realtype));
         memcpy(solver->saved_state->lapack_ipiv, solver->lapack_ipiv, (block->n+2)*sizeof(int)); 
         
         if((block->callbacks->log_options.log_level >= 6)) {
-            jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, &(((struct KINMemRec *)solver->kin_mem)->kin_nni), &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
+            jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, nniters, &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
             jmi_log_ints(block->log, node, logInfo, "handling_singular", &(solver->handling_of_singular_jacobian_flag), 1);
             jmi_log_ints(block->log, node, logInfo, "is_singular", &(solver->J_is_singular_flag), 1);
             jmi_log_ints(block->log, node, logInfo, "force_rescaling", &(solver->J_is_singular_flag), 1);

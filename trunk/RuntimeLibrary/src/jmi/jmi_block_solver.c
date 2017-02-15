@@ -874,12 +874,11 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
                 scale_ptr[i] = block->residual_heuristic_nominal[i];
             } else if(scale_ptr[i] < 1/bsop->max_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
-                realtype **jac = block->J_scale->cols;
-                realtype maxInJac = RAbs(jac[0][i]); 
+                realtype maxInJac = RAbs(DENSE_ELEM(block->J_scale, i, 0));
                 block->using_max_min_scaling_flag = 1; /* Using maximum scaling, singular Jacobian? */
                 for(j = 0; j < N; j++) {
-                    if(RAbs(maxInJac) < RAbs(jac[j][i])) {
-                        maxInJac = jac[j][i];
+                    if(RAbs(maxInJac) < RAbs(DENSE_ELEM(block->J_scale, i, j))) {
+                        maxInJac = DENSE_ELEM(block->J_scale, i, j);
                         maxInJacIndex = j;
                     }
                 }
@@ -891,12 +890,11 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
-                realtype **jac = block->J_scale->cols;
-                realtype maxInJac = RAbs(jac[0][i]);
+                realtype maxInJac = RAbs(DENSE_ELEM(block->J_scale, i, 0));
                 /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
                 for(j = 0; j < N; j++) {
-                    if(RAbs(maxInJac) < RAbs(jac[j][i])) {
-                        maxInJac = jac[j][i];
+                    if(RAbs(maxInJac) < RAbs(DENSE_ELEM(block->J_scale, i, j))) {
+                        maxInJac = DENSE_ELEM(block->J_scale, i, j);
                         maxInJacIndex = j;
                     }
                 }
