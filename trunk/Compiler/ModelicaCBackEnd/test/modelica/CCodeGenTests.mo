@@ -21983,4 +21983,26 @@ jmi_ad_var_t func_CCodeGenTests_ForOfUnknownSize3_f_exp0(jmi_ad_var_t n_v) {
 ")})));
 end ForOfUnknownSize3;
 
+model AliasNegParam1
+    parameter Real x = 1;
+    parameter Real y = x + 1;
+    parameter Real z = -y;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="AliasNegParam1",
+            description="",
+            eliminate_alias_parameters=true,
+            template="$C_DAE_initial_dependent_parameter_assignments$",
+            generatedCode="
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _z_1 = - (_x_0 + 1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end AliasNegParam1;
+
+
 end CCodeGenTests;

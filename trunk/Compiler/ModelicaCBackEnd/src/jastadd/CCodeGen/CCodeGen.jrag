@@ -3119,7 +3119,7 @@ aspect CCodeGen {
             FExternalObjectVariable eo = (FExternalObjectVariable) fv;
             eo.genDestructorCall_C(p, str, indent);
         }
-        fv.genAssignment_C(p, str, indent, fv.name_C(), getRight());
+        fv.genAssignment_C(p, str, indent, fv.name_C(), getRight(), getLeft().isNegated());
         p.printPostSteps(this, str, indent);
     }
 
@@ -3551,13 +3551,14 @@ aspect CCodeGen {
         boolean noExp = exp == null;
         if (noExp)
             setBindingExp(exp = type().zeroLiteral());
-        genAssignment_C(p, str, indent, name_C(), exp);
+        genAssignment_C(p, str, indent, name_C(), exp, false);
         if (noExp)
             setBindingExpOpt(new Opt());
         p.printPostSteps(this, str, indent);
     }
 
-    public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right) {
+    public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right,
+            boolean neg) {
         str.print(indent);
         if (isString()) {
              str.print("JMI_ASG(STR_Z, ");
@@ -3566,6 +3567,9 @@ aspect CCodeGen {
         } else {
             str.print(name);
             str.print(" = ");
+        }
+        if (neg) {
+            str.print("-");
         }
         str.print("(");
         p.print(right, str, "");
