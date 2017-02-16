@@ -50,8 +50,6 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver, jmi_block_solver_t* bloc
 
 int jmi_linear_solver_solve(jmi_block_solver_t* block);
 
-int jmi_linear_solver_evaluate_jacobian(jmi_block_solver_t* block, jmi_real_t* jacobian);
-
 int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_solver_t* block, jmi_real_t* factorization);
 
 void jmi_linear_solver_delete(jmi_block_solver_t* block);
@@ -69,6 +67,9 @@ int jmi_linear_completed_integrator_step(jmi_block_solver_t* block);
 /** \brief Computes C (dense) = -A (sparse)*B (sparse) */
 int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C);
 
+/** \brief Computes C(:,col) (dense) = -A (sparse)*B(:,col) (sparse) */
+int jmi_linear_solver_sparse_multiply_column(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, jmi_int_t B_col, double *C);
+
 /** \brief Computes C (dense) += A (sparse) */
 int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A, double *C);
 
@@ -83,7 +84,9 @@ struct jmi_linear_solver_sparse_t {
     jmi_matrix_sparse_csc_t *M1;
     jmi_int_t** nz_patterns;
     jmi_int_t* nz_sizes;
-    double *work_x;
+	jmi_int_t* nz_offsets;
+    double **work_x;
+	jmi_int_t max_threads;
 };
 
 struct jmi_linear_solver_t {
