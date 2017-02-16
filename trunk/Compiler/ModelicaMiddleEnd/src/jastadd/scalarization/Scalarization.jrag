@@ -848,6 +848,9 @@ aspect Scalarization {
     public FExp FAttribute.scalarizeValue(Index i, Map<String,FExp> indexMap) {
         if (!hasValue()) 
             return null;
+        if (i.ndims() > getValue().ndims()) {
+            i = i.subIndex(i.ndims() - getValue().ndims());
+        }
         return getValue().cell(i).scalarize(indexMap);
     }
     

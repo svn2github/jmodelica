@@ -1347,6 +1347,26 @@ end ArrayTests.General.ArrayTest48;
 ")})));
 end ArrayTest48;
 
+model ArrayTest49
+    record R
+        Real[:] x;
+    end R;
+    
+    R[:] r(x(start={1})) = {R({time})};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest49",
+            description="",
+            flatModel="
+fclass ArrayTests.General.ArrayTest49
+ Real r[1].x[1](start = 1);
+equation
+ r[1].x[1] = time;
+end ArrayTests.General.ArrayTest49;
+")})));
+end ArrayTest49;
+
 end General;
 
 
