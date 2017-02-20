@@ -2669,10 +2669,6 @@ public abstract class CCompilerDelegator {
         for (String path : paths) {
             expandLibraries(libraries, subDirs, path, 0);
         }
-        System.out.println("Made expanded libraries: ");
-        for (String path : libraries) {
-            System.out.println("\t" + path);
-        }
         return libraries;
     }
 
