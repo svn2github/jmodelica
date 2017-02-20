@@ -1197,30 +1197,16 @@ aspect FlatAPI {
         return n;
     }
     eq FFunctionCall.numScalarTemporaries() {
-        int n = 0;
+        int n = super.numScalarTemporaries();
         for (FExp exp : getArgs()) { 
             if (exp.replaceWithTemp(false)) {
-                ++n;
+                n = n + exp.type().numScalarElements();
             }
         }
         if (isStringExp()) {
             ++n;
         }
         return n;
-    }
-    
-    eq Size.numScalarTemporaries() = 0;
-    eq MutableSize.numScalarTemporaries() {
-        int n = 0;
-        if (isUnknown()) {
-            for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
-                    ++n;
-                }
-            }
-        } else {
-            return super.numScalarTemporaries();
-        }
     }
     eq FFunctionCallLeft.numScalarTemporaries() = replaceWithTemp() ? 1 : 0;
     eq FAbstractEquation.numScalarTemporaries() {
