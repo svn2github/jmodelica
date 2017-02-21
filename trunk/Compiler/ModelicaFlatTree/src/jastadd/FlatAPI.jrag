@@ -75,7 +75,7 @@ aspect FlatAPI {
             public void add(Iterable<? extends FVariable> list) {
                 for (FVariable fv : list) {
                     map.put(fv, new Integer(index + type));
-                    index++;
+                    index = fv.incrementValueReferenceIndex(index);
                 }
             }
             
@@ -89,6 +89,10 @@ aspect FlatAPI {
                 return (i == null) ? -1 : i.intValue();
             }
         }
+    }
+    
+    public int FVariable.incrementValueReferenceIndex(int i) {
+        return i + 1;
     }
     
     syn lazy ValueReferenceMap FClass.valueReferenceMap() {
@@ -2509,7 +2513,12 @@ aspect Attributes {
             attr = attr.findAttribute(getFQNamePart(i).getName());
         return attr;
     }
-    
+
+    syn CValue FVariable.attributeCValue(String name) {
+        FAttribute a = findAttribute(name);
+        return attributeSet(a) ? attributeExp(a).ceval() : CValue.UNKNOWN;
+    }
+
     syn CValue FVariable.attributeCValueString(String name) {
         FAttribute a = findAttribute(name);
         return (attributeSet(a) ? attributeExp(a).ceval() : new CValueString("")).expandArray(size());
