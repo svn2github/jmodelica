@@ -3025,7 +3025,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         StringOperation libOp = new ChainedOperations(
                 new PlatformDirOperation(platform),
                 new QuoteOperation("-L"));
-        Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, "gcc", compilerVersionNumber(), platform);
+        Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
     
