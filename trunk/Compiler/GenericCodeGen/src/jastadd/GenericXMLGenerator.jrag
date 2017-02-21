@@ -214,7 +214,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     protected void generateAttributeIfSet(String name, FVariable variable, CodeStream printer) {
         if (variable.attributeSet(name)) {
-            String value = variable.type().convert(variable.attributeCValue(name)).xmlValue();
+            String value = variable.attributeCValue(name).xmlValue();
             generateAttribute(name, value, printer);
         }
     }
