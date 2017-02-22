@@ -222,7 +222,7 @@ int jmi_brent_test_best_guess(jmi_block_solver_t *block, double xBest, double fB
 
     jmi_block_solver_options_t* bsop = block->options;
     flag = brentdf(xBest, fBest, &dfBest, block);
-    block->J->data[0] = dfBest;
+    DENSE_ELEM(block->J, 0, 0) = dfBest;
     jmi_update_f_scale(block);
         
     flag = jmi_scaled_vector_norm(&fBest, N_VGetArrayPointer(block->f_scale), block->n, JMI_NORM_MAX, &scaled_max_norm);

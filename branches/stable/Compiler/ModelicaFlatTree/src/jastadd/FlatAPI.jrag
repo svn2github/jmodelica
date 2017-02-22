@@ -75,7 +75,7 @@ aspect FlatAPI {
             public void add(Iterable<? extends FVariable> list) {
                 for (FVariable fv : list) {
                     map.put(fv, new Integer(index + type));
-                    index++;
+                    index = fv.incrementValueReferenceIndex(index);
                 }
             }
             
@@ -89,6 +89,10 @@ aspect FlatAPI {
                 return (i == null) ? -1 : i.intValue();
             }
         }
+    }
+    
+    public int FVariable.incrementValueReferenceIndex(int i) {
+        return i + 1;
     }
     
     syn lazy ValueReferenceMap FClass.valueReferenceMap() {
@@ -1197,30 +1201,16 @@ aspect FlatAPI {
         return n;
     }
     eq FFunctionCall.numScalarTemporaries() {
-        int n = 0;
+        int n = super.numScalarTemporaries();
         for (FExp exp : getArgs()) { 
             if (exp.replaceWithTemp(false)) {
-                ++n;
+                n = n + exp.type().numScalarElements();
             }
         }
         if (isStringExp()) {
             ++n;
         }
         return n;
-    }
-    
-    eq Size.numScalarTemporaries() = 0;
-    eq MutableSize.numScalarTemporaries() {
-        int n = 0;
-        if (isUnknown()) {
-            for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
-                    ++n;
-                }
-            }
-        } else {
-            return super.numScalarTemporaries();
-        }
     }
     eq FFunctionCallLeft.numScalarTemporaries() = replaceWithTemp() ? 1 : 0;
     eq FAbstractEquation.numScalarTemporaries() {
@@ -2523,7 +2513,12 @@ aspect Attributes {
             attr = attr.findAttribute(getFQNamePart(i).getName());
         return attr;
     }
-    
+
+    syn CValue FVariable.attributeCValue(String name) {
+        FAttribute a = findAttribute(name);
+        return attributeSet(a) ? attributeExp(a).ceval() : CValue.UNKNOWN;
+    }
+
     syn CValue FVariable.attributeCValueString(String name) {
         FAttribute a = findAttribute(name);
         return (attributeSet(a) ? attributeExp(a).ceval() : new CValueString("")).expandArray(size());

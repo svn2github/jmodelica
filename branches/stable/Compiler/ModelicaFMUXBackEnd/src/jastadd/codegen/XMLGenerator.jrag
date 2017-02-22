@@ -326,7 +326,7 @@ public class XMLGenerator extends GenericXMLGenerator {
             Collections.sort(variables, new VariableNameComparator());
             
             for (FVariable variable : variables) {	
-                if (variable.isXMLVariable()) {
+                if (variable.generateXMLVariable()) {
                     generateTagStart("ScalarVariable", genPrinter);
                     generateAttribute("name", variable.name(), genPrinter);
                     generateAttribute("valueReference", variable.valueReference(), genPrinter);

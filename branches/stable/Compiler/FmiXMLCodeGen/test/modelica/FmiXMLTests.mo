@@ -1566,7 +1566,7 @@ model StringStartValueIllegalChars2
   
   annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
-            name="StringStartValueIllegalChars1",
+            name="StringStartValueIllegalChars2",
             description="Test that no illegal XML characters are generated",
             fmi_version="2.0",
             template="$modelVariables$",
@@ -1578,4 +1578,22 @@ model StringStartValueIllegalChars2
 </ModelVariables>
 ")})));
 end StringStartValueIllegalChars2;
+
+model Quantity1
+    Real x(quantity="Time") = time;
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Quantity1",
+            description="Quantity attribute",
+            fmi_version="2.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real quantity=\"Time\" relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Quantity1;
+
 end FmiXMLTests;

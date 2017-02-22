@@ -4,10 +4,10 @@ import java.util.Iterator;
 
 public class SubClassIterable<U, T extends U> implements Iterable<T> {
 
-    private final Iterable<U> parent;
+    private final Iterable<? extends U> parent;
     private final Class<T> typeOfClass;
 
-    public SubClassIterable(Class<T> typeOfClass, Iterable<U> parent) {
+    public SubClassIterable(Class<T> typeOfClass, Iterable<? extends U> parent) {
         this.parent = parent;
         this.typeOfClass = typeOfClass;
     }

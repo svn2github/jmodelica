@@ -235,7 +235,7 @@ public abstract class ConstValue {
      * @return True if the constant is a vector
      */
     public final boolean isVector() {
-        return isArray(-1);
+        return ndims() == 1;
     }
 
     /**
@@ -244,27 +244,15 @@ public abstract class ConstValue {
      * @return True if the constant is a matrix
      */
     public final boolean isMatrix() {
-        return isArray(-1, -1);
+        return ndims() == 2;
     }
 
     /**
-     * Returns true if the constant value is an array with the given
-     * dimention sizes.
-     * It is possible to allow dimention of unknown size by providing a
-     * negative number for that dimention.
-     * 
-     * @param dims Sizes of each dimention. 
-     * @return True if the constant is an array with given dimention sizes.
+     * Returns the number of dimensions of the value. 
+     * A scalar value will return 0.
      */
-    public final boolean isArray(int ... dims) {
-        return isArray(0, dims);
-    }
-
-    /**
-     * Internal method for doing array dimention size check.
-     */
-    public boolean isArray(int pos, int[] dims) {
-        return false;
+    public int ndims() {
+        return 0;
     }
 
     /**

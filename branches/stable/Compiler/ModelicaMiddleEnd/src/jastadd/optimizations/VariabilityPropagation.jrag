@@ -669,20 +669,35 @@ aspect ConstantFolding {
             childExp.enableConstantFolding();
         }
     }
-    
+
     public void FPartialFunctionCall.enableConstantFolding() {
         for (ASTNode n : this)
             n.enableConstantFolding();
     }
-	
-	public void FIfExp.enableConstantFolding() {
-		super.enableConstantFolding();
+
+    public void FIfExp.enableConstantFolding() {
+        super.enableConstantFolding();
         if (!constantFoldingEnabled && getIfExp().variability().knownParameterOrLess()) {
-			eliminateIfEquation = true;
-			is$Final = false;
-		}
-	}
-	
+            rewriteIfExp = true;
+            is$Final = false;
+        }
+    }
+
+    private boolean FIfExp.rewriteIfExp = false;
+
+    rewrite FIfExp {
+        when (rewriteIfExp) to FExp {
+            rewriteIfExp = false;
+
+            try {
+                if (getIfExp().isConstantExp()) {
+                    return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+                }
+            } catch (ConstantEvaluationException e) {}
+                return this;
+            }
+    }
+
 	public void FAbstractExp.enableConstantFolding() {
         if (variability().knownParameterOrLess()) {
 			constantFoldingEnabled = true;

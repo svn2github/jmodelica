@@ -3111,42 +3111,17 @@ aspect CCodeGen {
     }
 
     @Override
-	public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
+    public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
         FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
-        FAbstractVariable fv = left.myFV();
-        if (left.myFV().isExternalObject()) {
+        FVariable fv = (FVariable)left.myFV();
+        if (fv.isExternalObject()) {
             FExternalObjectVariable eo = (FExternalObjectVariable) fv;
             eo.genDestructorCall_C(p, str, indent);
         }
-        str.print(indent);
-        if (left.type().isString()) {
-             str.print("JMI_ASG(STR_Z, ");
-             p.print(left.getFIdUse(), str, "");
-             str.print(", ");
-        } else {
-            p.print(left.getFIdUse(), str, "");
-            str.print(" = ");
-        }
-        if (getLeft().isNegated()) {
-            str.print("-");
-        }
-        str.print("(");
-        p.print(getRight(), str, "");
-        str.print(")");
-        if (left.myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
-            str.print("/sf(");
-            str.print(left.myFV().valueReference());
-            str.print(")");
-        }
-        if (left.type().isString()) {
-            str.print(")");
-        } else {
-            str.print(";\n");
-        }
-        
+        fv.genAssignment_C(p, str, indent, fv.name_C(), getRight(), getLeft().isNegated());
         p.printPostSteps(this, str, indent);
-	}
+    }
 
     public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
         if (hasConstructorCall(Index.NULL)) {
@@ -3572,33 +3547,43 @@ aspect CCodeGen {
 
     public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
+        FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
+        boolean noExp = exp == null;
+        if (noExp)
+            setBindingExp(exp = type().zeroLiteral());
+        genAssignment_C(p, str, indent, name_C(), exp, false);
+        if (noExp)
+            setBindingExpOpt(new Opt());
+        p.printPostSteps(this, str, indent);
+    }
+
+    public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right,
+            boolean neg) {
         str.print(indent);
         if (isString()) {
              str.print("JMI_ASG(STR_Z, ");
-             str.print(name_C());
+             str.print(name);
              str.print(", ");
         } else {
-            str.print(name_C());
+            str.print(name);
             str.print(" = ");
         }
-		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
-		boolean noExp = exp == null;
-		if (noExp)
-			setBindingExp(exp = type().zeroLiteral());
-		OptionRegistry opt = myOptions();
-		str.print("(");
-        p.print(exp, str, indent);
-		str.print(")");
-		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
-			str.format("/sf(%d)", valueReference());
+        if (neg) {
+            str.print("-");
+        }
+        str.print("(");
+        p.print(right, str, "");
+        str.print(")");
+        if (isReal() && myOptions().getBooleanOption("enable_variable_scaling")) {
+            str.print("/sf(");
+            str.print(valueReference());
+            str.print(")");
+        }
         if (isString()) {
             str.print(")");
         }
-		if (noExp)
-			setBindingExpOpt(new Opt());
-		str.print(";\n");
-        p.printPostSteps(this, str, indent);
-	}
+        str.print(";\n");
+    }
 
 	public void BLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
 		for (AbstractEquationBlock block : this) {

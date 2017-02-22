@@ -2093,10 +2093,17 @@ aspect FlatExpressions {
      */
     public FExp InstComponentDecl.flattenAccess(FQName prefix, FIdUseExp exp) {
         if (isEnumLiteral())
-            return new FIdUseExp(getFQName().fullCopy());
+            return createFIdUseExp(getFQName().fullCopy());
         InstAccess ia = exp.asInstAccess();
         FQName fqn = inOrIsInner() ? ia.flattenOuterAccess(prefix) : ia.flatten(prefix);
-        return new FIdUseExp(fqn);
+        return createFIdUseExp(fqn);
+    }
+    
+    /**
+     * Separate method for extensibility.
+     */
+    private FIdUseExp InstComponentDecl.createFIdUseExp(FQName name) {
+        return new FIdUseExp(name);
     }
 
     public FExp InstAssignable.flattenAccess(FQName prefix, FIdUseExp iae) {
@@ -2450,7 +2457,7 @@ aspect FlatExpressions {
         return new FArray(l);
     }
     
-    public void Index.setValues(Iterable<CommonForIndex> forIndices) {
+    public void Index.setValues(Iterable<? extends CommonForIndex> forIndices) {
         int i = 0;
         for (CommonForIndex fi : forIndices) {
             fi.setEvaluationValue(new CValueInteger(index[i++]));

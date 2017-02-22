@@ -245,7 +245,7 @@ aspect SimpleClassLookup {
         if (equalsLowerCase(name(), str)) {
             myClass();
         }
-        return getName().matches(str);
+        return name().equals(str);
     }
 
 }

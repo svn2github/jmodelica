@@ -554,9 +554,9 @@ aspect SizesUtil {
         }
         return this;
     }
-    
-    syn FExp FExp.cell(Index i) = getArray().get(i);
-    eq FDeferExp.cell(Index i)  = getFExp().getArray().get(i);
+
+    syn FExp FExp.cell(Index i) = i.ndims() > 0 ? getArray().get(i) : this;
+    eq FDeferExp.cell(Index i)  = getFExp().cell(i);
 
     public FArraySubscripts FArraySubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
         FArraySubscripts res = new FArraySubscripts();

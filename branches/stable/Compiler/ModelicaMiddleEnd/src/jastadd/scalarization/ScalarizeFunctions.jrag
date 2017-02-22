@@ -696,7 +696,9 @@ aspect FunctionScalarization {
      * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(FExp[] names)}.
      */
     public void ASTNode.addArrayUsesToIndexMap(Scalarizer s) {
-        addArrayUsesToIndexMap(s.getNames().createFExpArray());
+        if (s.getNames().size() > 0) {
+            addArrayUsesToIndexMap(s.getNames().createFExpArray());
+        }
     }
     
     /**

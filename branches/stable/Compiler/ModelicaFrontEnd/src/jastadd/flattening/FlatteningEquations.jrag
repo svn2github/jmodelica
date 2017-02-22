@@ -52,14 +52,9 @@ aspect FlatEquations {
     }
     
     public void InstForClauseE.flattenEqn(List<FAbstractEquation> l, FQName prefix, FClass fc) {
-        ArrayList<CommonForIndex> lt = new ArrayList<CommonForIndex>();
-        for (InstForIndex ifi : getInstForIndexs()) {
-            lt.add(ifi);
-        }
-        Iterable<CommonForIndex> forIndices = lt;
-        Indices ind = Indices.create(forIndices);
+        Indices ind = Indices.create(getInstForIndexs());
         for (Index i : ind) {
-            ind.translate(i).setValues(forIndices);
+            ind.translate(i).setValues(getInstForIndexs());
             getFAbstractEquations().flushAllRecursive();
             FAbstractEquation.flattenEqnList(l, prefix, fc, getFAbstractEquations());
         }

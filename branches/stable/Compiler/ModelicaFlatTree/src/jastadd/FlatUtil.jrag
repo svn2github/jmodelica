@@ -136,6 +136,7 @@ aspect FlatNames {
     /**
      * Get a string representation of a prefix of this name.
      * 
+     * @param start The first sub part to include
      * @param n     the number of parts to include. If <code>n <= 0</code>, then 
      *              all but the last <code>-n</code> parts are included.
      * @param op    if not <code>null</code>, generate a name with an operator applied (e.g. "der(a.b)")
@@ -143,7 +144,7 @@ aspect FlatNames {
      * @param index if greater or equal to two, then the index added as a second argument (eg "der(a.b,2)").
      *              This only works if op is not null. 
      */
-    private String FQNameFull.prefixName(int n, String op, boolean eval, int index) {
+    private String FQNameFull.prefixName(int start, int n, String op, boolean eval, int index) {
         int tot = getNumFQNamePart();
         if (n <= 0)
             n = tot + n;
@@ -152,7 +153,7 @@ aspect FlatNames {
             str.append(op);
             str.append("(");
         }
-        for (int i = 0; i < n; i++) {
+        for (int i = start; i < n; i++) {
             FQNamePart part = getFQNamePart(i);
             boolean last = i == n - 1;
             str.append(part.getName());
@@ -202,7 +203,7 @@ aspect FlatNames {
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */
     syn String FQName.prefixActualPartName();
-    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false, -1);
+    eq FQNameFull.prefixActualPartName()   = prefixName(0, -1, null, false, -1);
     eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
     eq FQNameEmpty.prefixActualPartName() {
         throw new UnsupportedOperationException();
@@ -296,11 +297,11 @@ aspect FlatNames {
     syn lazy String FQNameString.dynDerName(int index) = applyOpToName(getName(), DYN_DER, index);
     syn lazy String FQNameString.preName()             = applyOpToName(getName(), PRE, -1);
     
-    syn lazy String FQNameFull.name()                = prefixName(0, null, false, -1);
-    syn lazy String FQNameFull.resolvedName()        = prefixName(0, null, true, -1);
-    syn lazy String FQNameFull.derName(int index)    = prefixName(0, DER, false, index);
-    syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, DYN_DER, false, index);
-    syn lazy String FQNameFull.preName()             = prefixName(0, PRE, false, -1);
+    syn lazy String FQNameFull.name()                = prefixName(0, 0, null, false, -1);
+    syn lazy String FQNameFull.resolvedName()        = prefixName(0, 0, null, true, -1);
+    syn lazy String FQNameFull.derName(int index)    = prefixName(0, 0, DER, false, index);
+    syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, 0, DYN_DER, false, index);
+    syn lazy String FQNameFull.preName()             = prefixName(0, 0, PRE, false, -1);
     
     protected static final String FQName.DER = "der";
     protected static final String FQName.PRE = "pre";
@@ -311,11 +312,13 @@ aspect FlatNames {
     }
 
     syn String FQName.scalarName() = scalarName(true);
-    syn String FQName.scalarName(boolean eval) = name();
-    eq FQNameFull.scalarName(boolean eval) {
+    syn String FQName.scalarName(boolean eval) = scalarName(eval, false);
+    syn String FQName.scalarName(boolean eval, boolean onlyLast) = name();
+    eq FQNameFull.scalarName(boolean eval, boolean onlyLast) {
         boolean scalar = scalarized;
         scalarized = true;
-        String res = prefixName(0, null, eval, -1);
+        int start = onlyLast ? numParts() - 1 : 0;
+        String res = prefixName(start, 0, null, eval, -1);
         scalarized = scalar;
         return res;
     }
@@ -712,10 +715,6 @@ aspect FlatNames {
             res.setFQNamePart(getFQNamePart(i).fullCopy(), i + n);
         return res;
     }
-    
-    public FQNameFullScalarize FQNameFullScalarize.copyAndPrepend(String name) {
-        return new FQNameFullScalarize(super.copyAndPrepend(name).getFQNamePartList());
-     }
    
     /**
      * Create a copy of the name, with a prefix added to the first name part.
@@ -974,14 +973,6 @@ aspect FlatNames {
         for (int i = first; i <= last; i++)
             res.addFQNamePart(getFQNamePart(i).fullCopy());
         return res;
-    }
-
-    public FQName FQNameFullScalarize.copyPart(int first, int last) {
-        FQName res = super.copyPart(first, last);
-        if (res instanceof FQNameFull)
-            return new FQNameFullScalarize(((FQNameFull) res).getFQNamePartList());
-        else 
-            return res;
     }
 
     /**
@@ -2155,24 +2146,24 @@ aspect JastAddHacks{
             return var;
         }
     }
-    
+
     public class FClass {
         public <V extends FDynamicResolver> V dynamicResolver(V res) {
             getFDynamicResolverOpt().setChild(res, 0);
             return (V) getFDynamicResolverOpt().getChild(0);
         }
     }
-    
-    syn nta Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
-    syn nta Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
-    syn nta Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
-    
+
+    syn lazy Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
+    syn lazy Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
+    syn lazy Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
+
     /**
      * Dynamic resolver used during index reduction to handle differentiated
      * variables and equations.
      */
     public class FIndexReductionResolver {
-        
+
         private final Map<String, FVariable> lookupMap = new HashMap<String, FVariable>();
         /**
          * This method takes a variable and adds it to the tree. This is done by

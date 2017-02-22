@@ -696,11 +696,16 @@ aspect ConstantEvaluation {
 				res.values[i] = values[i].clone();
 	    	return res;
 	    }
-    	
-    	public boolean isArray() {
-    		return true;
-    	}
-    	
+
+        public boolean isArray() {
+            return true;
+        }
+
+        @Override
+        public int ndims() {
+            return indices.ndims();
+        }
+
         /**
          * Check if there was an error in any part of the evaluation.
          *
@@ -760,20 +765,6 @@ aspect ConstantEvaluation {
             boolean res = true;
             for (CValue cvalue : values)
                 res &= cvalue.isEnum();
-            return res;
-        }
-
-        @Override
-        public boolean isArray(int pos, int[] dims) {
-            if (dims[pos] >= 0 && dims[pos] != values.length)
-                return false;
-            boolean res = true;
-            for (CValue cvalue : values) {
-                if (pos + 1 == dims.length)
-                    res &= cvalue.isScalar();
-                else
-                    res &= cvalue.isArray(pos + 1, dims);
-            }
             return res;
         }
 
@@ -2080,10 +2071,8 @@ aspect ConstantEvaluation {
         FAbstractVariable var = myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
-            if (hasFArraySubscripts() && !name.isScalarized() && !isArray()) {
+            if (var.ndims() > 0 && hasFArraySubscripts()) {
                 i = name.getFArraySubscripts().createIndex();
-            } else if (var.isFVariable() && name.isScalarized() && !var.asFVariable().isScalarized()) {
-                i = var.asFVariable().getFQName().getFArraySubscripts().createIndex();
             }
             if (i != Index.NULL) {
                 return var.inRecord() ? cevalRecordMember(evaluator, name).array().getCell(i) : evaluator.ceval(var, i);
@@ -4500,12 +4489,8 @@ aspect SourceCeval {
     eq BooleanLitExpFalse.ceval() = CValueBoolean.FALSE;
     eq IntegerLitExp.ceval()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
     eq RealLitExp.ceval()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
-    eq ArrayConstructor.ceval() {
-        CValueArray arrayValue = new CValueArray(new Size(getFunctionArguments().getNumExp()));
-        for (Exp exp : getFunctionArguments().getExps())
-            arrayValue.addCell(exp.ceval());
-        return arrayValue;
-    }
+    eq ArrayConstructor.ceval()   = cevalArray();
+    eq Matrix.ceval()             = cevalArray();
     eq NegExp.ceval() {
         CValue value = getExp().ceval();
         if (value.isInteger())
@@ -4516,13 +4501,61 @@ aspect SourceCeval {
             return CValue.UNKNOWN;
     }
     
+    syn CValue Exp.cevalArray() = fillArrayCValue(new CValueArray(sizeCeval()));
+    
+    public CValue Exp.fillArrayCValue(CValueArray arrayValue) {
+        List<? extends Exp> exps = arrayChildrenForCeval();
+        if (exps == null) {
+            arrayValue.addCell(ceval());
+        } else {
+            for (Exp exp : exps) {
+                exp.fillArrayCValue(arrayValue);
+            }
+        }
+        return arrayValue;
+    }
+    
     /**
      * It is currently not possible to use an VariableEvaluator for source node
-     * expressions. This implementation simply dellegates to ceval() without
+     * expressions. This implementation simply delegates to ceval() without
      * arguments.
      */
     syn CValue Exp.ceval(VariableEvaluator evaluator) = ceval();
-    
+
+    syn int Exp.ndimsCeval() {
+        List<? extends Exp> exps = arrayChildrenForCeval();
+        if (exps == null) {
+            return 0;
+        } else if (exps.getNumChild() == 0) {
+            return 1;
+        } else {
+            return 1 + exps.getChild(0).ndimsCeval();
+        }
+    }
+
+    syn Size Exp.sizeCeval() {
+        int n = ndimsCeval();
+        if (n == 0) {
+            return Size.SCALAR;
+        } else {
+            int[] dims = new int[n];
+            fillSizeCeval(dims, 0);
+            return new Size(dims);
+        }
+    }
+
+    public void Exp.fillSizeCeval(int[] dims, int i) {
+        List<? extends Exp> exps = arrayChildrenForCeval();
+        dims[i] = exps.getNumChild();
+        if (i + 1 < dims.length && dims[i] > 0) {
+            exps.getChild(0).fillSizeCeval(dims, i + 1);
+        }
+    }
+
+    syn List<? extends Exp> Exp.arrayChildrenForCeval()   = null;
+    eq ArrayConstructor.arrayChildrenForCeval() = getFunctionArguments().getExps();
+    eq Matrix.arrayChildrenForCeval()           = getRows();
+    eq MatrixRow.arrayChildrenForCeval()        = getExps();
 }
 
 aspect ConstantEvaluable {

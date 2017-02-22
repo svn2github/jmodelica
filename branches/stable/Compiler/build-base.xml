@@ -530,6 +530,7 @@
                     <arg value="--visitCheck=false" />
                     <arg value="--lazyMaps" />
                     <arg value="--indent=4space" />
+                	<arg value="--inhEqCheck=false" />
                     <arg line="${jastadd_files}" />
                 </java>
             	<!-- delete stale java files created in earlier runs -->
@@ -784,11 +785,32 @@
                                         srcfile="${@{module}.path}/src/parser/${@{module}.@{scanner}}" 
                                         targetfile="${parser_output}/@{scanner}.java" />
                                 <if>
+                                    <isset property="@{module}.@{scanner}.package" />
+                                    <then>
+                                        <var name="scanners.package" value="${@{module}.@{scanner}.package}" />
+                                        <propertyregex property="scanners.package_dir" input="${scanners.package}" defaultValue="${scanners.package}" regexp="\." replace="/" global="true" />
+                                        <var name="scanners.output" value="${java_output}/${scanners.package_dir}" />
+                                        <mkdir dir="${scanners.output}" />
+                                    </then>
+                                    <else>
+                                        <var name="scanners.package" value="${parser_package}" />
+                                        <var name="scanners.output" value="${parser_output}" />
+                                    </else>
+                                </if>
+                                <var name="scanners.file" value="${scanners.output}/@{scanner}.flex" />
+                                <if>
                                     <not><isset property="@{module}.@{scanner}.uptodate" /></not>
                                     <then>
-                                        <copy file="${@{module}.path}/src/parser/${@{module}.@{scanner}}" tofile="${parser_output}/@{scanner}.flex" overwrite="true" />
-                                        <replace file="${parser_output}/@{scanner}.flex" token="$PARSER_PACKAGE$" value="${parser_package}" />
-                                        <jflex file="${parser_output}/@{scanner}.flex" outdir="${parser_output}" nobak="yes" />
+                                        <copy file="${@{module}.path}/src/parser/${@{module}.@{scanner}}" tofile="${scanners.file}" overwrite="true" />
+                                        <replace file="${scanners.file}" token="$PARSER_PACKAGE$" value="${scanners.package}" />
+                                        <jflex file="${scanners.file}" outdir="${scanners.output}" nobak="yes" />
+                                        <!-- clean up intermediate file
+                                    	<echo>
+                                            scanners.file=${scanners.file}
+                                    		scanners.output=${scanners.output}
+                                            scanners.package=${scanners.package}
+                                    	</echo> -->
+                                        <delete deleteonexit="true" file="${scanners.file}" />
                                     </then>
                                 </if>
                             </sequential>
@@ -797,17 +819,6 @@
                 </if>
             </sequential>
         </for>
-        <!-- clean up intermediate files -->
-        <if>
-            <available file="${parser_output}" type="dir" />
-            <then>
-                <delete deleteonexit="true">
-                    <fileset dir="${parser_output}">
-                         <include name="*.flex" />
-                    </fileset>
-                </delete>
-            </then>
-        </if>
     </target>
 
     <!-- Generate JUnit test class. -->

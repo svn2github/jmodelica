@@ -23,7 +23,6 @@ FConstraintEq : FRelationConstraint;
 FConstraintLeq : FRelationConstraint;
 FConstraintGeq : FRelationConstraint;
 
-FForClauseC : FConstraint ::= FForIndex* FConstraint*;
 InstForClauseC : FConstraint ::= InstForIndex* FConstraint*;
 
 FTimedVariable : FExp ::= Name:FIdUse Arg:FExp;

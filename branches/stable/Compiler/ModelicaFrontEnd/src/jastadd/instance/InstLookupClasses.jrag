@@ -116,10 +116,16 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstExtendsShortClass.lookupInstClassInChain(String name);
     inh InstLookupResult<InstClassDecl> InstReplacingExtendsShortClass.lookupInstClassInChain(String name);
-    // Default to using normal lookup
-    // TODO: don't use JastAdd internal stuff (child)
-    eq InstNode.getChild().lookupInstClassInChain(String name)                             = 
-        ((InstNode) child).lookupInstClass(name);
+
+    eq InstNode.getInstClassDecl(int index).lookupInstClassInChain(String name)             =
+            getInstClassDecl(index).lookupInstClass(name);
+    eq InstNode.getInstExtends(int index).lookupInstClassInChain(String name)               =
+            getInstExtends(index).lookupInstClass(name);
+    eq InstNode.getRedeclaredInstClassDecl(int index).lookupInstClassInChain(String name)   =
+            getRedeclaredInstClassDecl(index).lookupInstClass(name);
+    eq InstNode.getInstComponentDecl(int index).lookupInstClassInChain(String name)         =
+            getInstComponentDecl(index).lookupInstClass(name);
+
     eq InstRecordConstructor.getInstComponentDecl().lookupInstClassInChain(String name)    = 
         myInstClassDecl().genericLookupInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupInstClassInChain(String name) = 
@@ -549,7 +555,7 @@ aspect InstLookupClasses {
         if (equalsLowerCase(name(), str)) {
             resolveLib();
         }
-        return name().matches(str);
+        return name().equals(str);
     }
 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();

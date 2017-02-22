@@ -168,7 +168,6 @@ aspect OptimicaArrays {
 	 */
 	syn Indices FConstraint.indices()      = null;
 	eq FRelationConstraint.indices()       = getLeft().indices();
-	syn lazy Indices FForClauseC.indices() = Indices.create(getFForIndexs());
 	
 	eq InstTimedVariable.ndims() = getName().ndims();
 	eq FTimedVariable.ndims() = getName().ndims();

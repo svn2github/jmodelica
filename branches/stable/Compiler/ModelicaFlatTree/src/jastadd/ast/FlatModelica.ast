@@ -450,11 +450,6 @@ FQNameString : FQName ::= <Name:String>;
 FQNameFull : FQName ::= FQNamePart*;
 
 /**
- * A temporary FQNameFull, rewritten to an FQNameFull if in a function, and FQNameString otherwise.
- */
-FQNameFullScalarize : FQNameFull;
-
-/**
  * A name part without array subscripts.
  * 
  * To be used in FQName:s.
