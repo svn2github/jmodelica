@@ -317,34 +317,22 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     }
 
     /**
-     * Checks if a variable is real and has a unit associated with it.
-     *
-     * @param FVariable A variable class.
-     */
-    private boolean realVariableWithUnit(FVariable variable) {
-        return variable instanceof FRealVariable && variable.unitAttributeSet();
-    }
-    
-    /**
      * Adds the unit data of a real variable to the unit HashMap.
      *
      * @param HashMap A HashMap that data about units should be added.
      * @param FRealVariable A real variable class with unit attribute(s).
      */
-    private void addToUnitMap(HashMap<String,HashSet<String>> unitMap, FRealVariable variable) {
-        String attribute = variable.unitAttribute();
-        if (variable.displayUnitAttributeSet()) {
-            if(unitMap.containsKey(attribute)) {
-                HashSet<String> displayUnitsSet = unitMap.get(attribute);
-                displayUnitsSet.add(variable.displayUnitAttribute());
-            } else {
-                HashSet<String> displayUnitsSet = new LinkedHashSet<String>();
-                displayUnitsSet.add(variable.displayUnitAttribute());
+    private void addToUnitMap(HashMap<String,HashSet<String>> unitMap, FVariable variable) {
+        if (variable.isReal() && variable.attributeSet(FAttribute.UNIT)) {
+            String attribute = variable.attributeCValue(FAttribute.UNIT).xmlValue();
+            HashSet<String> displayUnitsSet = unitMap.get(attribute);
+            if(displayUnitsSet == null) {
+                displayUnitsSet = new LinkedHashSet<String>();
                 unitMap.put(attribute, displayUnitsSet);
             }
-        } else if(!unitMap.containsKey(attribute)) {
-            HashSet<String> emptySet = new LinkedHashSet<String>();
-            unitMap.put(attribute, emptySet);
+            if (variable.attributeSet(FAttribute.DISPLAY_UNIT)) {
+                displayUnitsSet.add(variable.attributeCValue(FAttribute.DISPLAY_UNIT).xmlValue());
+            }
         }
     }
     
@@ -356,9 +344,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     protected HashMap<String,HashSet<String>> extractUnits(FClass fclass) {
         HashMap<String,HashSet<String>> unitMap = new LinkedHashMap<String,HashSet<String>>();
         for(FVariable variable:fclass.allVariables()) {
-            if(realVariableWithUnit(variable)) {
-                addToUnitMap(unitMap, (FRealVariable)variable);
-            }
+            addToUnitMap(unitMap, variable);
         }
         
         return unitMap;
@@ -392,11 +378,11 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     }
 
     protected void generateUnitAndDisplayUnitAttribute(CodeStream genPrinter, FVariable var) {
-        if (var.unitAttributeSet()) {
-            generateAttribute("unit", var.unit_XML(), genPrinter);
-            if (var.displayUnitAttributeSet()) {
-                generateAttribute("displayUnit", var.displayUnit_XML(), genPrinter);
-            }
+        String name = FAttribute.UNIT;
+        if (var.attributeSet(name)) {
+            String value = var.attributeCValue(name).xmlValue();
+            generateAttribute(name, value, genPrinter);
+            generateAttributeIfSet(FAttribute.DISPLAY_UNIT, var, genPrinter);
         }
     }
 
