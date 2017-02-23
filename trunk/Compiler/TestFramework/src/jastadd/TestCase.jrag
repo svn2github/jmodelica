@@ -60,7 +60,7 @@ abstract public class TestCase implements GenericTestCase {
 	 * Options may be further changed by test annotation.
 	 */
 	protected OptionRegistry createOptionRegistry() {
-		OptionRegistry or = ModelicaCompiler.createOptions();
+		OptionRegistry or = new TestOptions();
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
 		or.setStringOption("MODELICAPATH", modelica_path);

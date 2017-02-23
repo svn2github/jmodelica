@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +85,7 @@ abstract public class OptionRegistry {
     public static class DefaultValue<T> extends Default<T> {
         private final T value;
         
+        @SuppressWarnings("unchecked")
         public DefaultValue(T val) {
             super((Class<T>) val.getClass());
             value = val;
@@ -105,7 +105,7 @@ abstract public class OptionRegistry {
     public abstract class DefaultCopy<T> extends Default<T> {
         protected final String key;
 
-        public DefaultCopy(String key, Class type) {
+        public DefaultCopy(String key, Class<T> type) {
             super(type);
             this.key = key;
         }
@@ -248,8 +248,19 @@ abstract public class OptionRegistry {
 
     public enum Category { common, user, uncommon, experimental, debug, internal, deprecated }
 
+    /**
+     * The listing of options for:
+     * <ul>
+     * <li>Compiler options.</li>
+     * <li>Runtime options.</li>
+     * </ul>
+     */
     private enum OptionSpecification {
-        // Compiler options
+
+        /* ================== *
+         *  Compiler options. *
+         * ================== */
+
         GENERATE_ONLY_INITIAL_SYSTEM 
             ("generate_only_initial_system", 
              OptionType.compiler, 
@@ -356,10 +367,10 @@ abstract public class OptionRegistry {
              "though the fixed attribute is equal to fixed. Setting this option to true is, however, often " +
              "practical in optimization problems."),
         ELIM_ALIAS
-            ("eliminate_alias_variables", 
+            ("eliminate_alias_variables",
              OptionType.compiler, 
              Category.uncommon,
-             true, 
+             true,
              "If enabled, then alias variables are eliminated from the model."),
         ELIM_ALIAS_PARAM
             ("eliminate_alias_parameters", 
@@ -572,7 +583,7 @@ abstract public class OptionRegistry {
              "Controlles what function calls are inlined. " + 
              "'none' - no function calls are inlined. " + 
              "'trivial' - inline function calls that will not increase the number of variables in the system. " + 
-             "'all' - inline all function calls that are possible.", 
+             "'all' - inline all function calls that are possible.",
              Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
         HOMOTOPY 
             ("homotopy_type", 
@@ -707,11 +718,11 @@ abstract public class OptionRegistry {
              4,
              "The maximum number of processes used during c-code compilation."),
         COPY_SOURCE_FILES_TO_FMU
-        	("copy_source_files_to_fmu",
-        	OptionType.compiler,
-        	Category.user,
-        	false,
-        	"If enabled, the generated source files will be copied to the FMU."),
+            ("copy_source_files_to_fmu",
+            OptionType.compiler,
+            Category.user,
+            false,
+            "If enabled, the generated source files will be copied to the FMU."),
         CC_EXTRA_FLAGS_APPLIES_TO
             ("cc_extra_flags_applies_to",
             OptionType.compiler,
@@ -753,7 +764,10 @@ abstract public class OptionRegistry {
              "",
              "The MODELICAPATH to use during compilation."),
 
-        // Runtime options
+        /* ================== *
+         *  Runtime options.  *
+         * ================== */
+
         /*
          * Note: Two JUnit tests are affected by changes to runtime options:
          * ModelicaCompiler : TransformCanonicalTests.mo : TestRuntimeOptions1
@@ -1039,28 +1053,43 @@ abstract public class OptionRegistry {
         public OptionType type;
         public Category cat;
         public String desc;
-        public Default val;
+        public Default<?> val;
+        public Default<?> testDefault;
         public Object[] lim;
 
-        private OptionSpecification(String k, OptionType t, Category c, Default v, String d, Object[] l) {
+        private <T> OptionSpecification(String k, OptionType t, Category c, Default<T> v, Default<T> td,
+                String d, Object[] l) {
+
             key = k;
             type = t;
             desc = d;
             val = v;
             cat = c;
+            testDefault = td;
             lim = (l != null && l.length > 0) ? l : null;
         }
 
-        private OptionSpecification(String k, OptionType t, Category c, Default v, String d) {
-            this(k, t, c, v, d, null);
+        private <T> OptionSpecification(String key, OptionType optionType, Category category, T defaultValue,
+                T testDefault, String description) {
+
+            this(key, optionType, category, new DefaultValue<T>(defaultValue), new DefaultValue<T>(testDefault),
+                    description, null);
+        }
+
+        private <T> OptionSpecification(String k, OptionType t, Category c, Default<T> v, String d, Object[] l) {
+            this(k, t, c, v, v, d, l);
+        }
+
+        private <T> OptionSpecification(String k, OptionType t, Category c, Default<T> v, String d) {
+            this(k, t, c, v, d, new Object[] {});
         }
 
         private OptionSpecification(String k, OptionType t, Category c, String v, String d) {
-            this(k, t, c, new DefaultValue(v), d);
+            this(k, t, c, new DefaultValue<String>(v), d);
         }
 
         private OptionSpecification(String k, OptionType t, Category c, String v, String d, String... l) {
-            this(k, t, c, new DefaultValue(v), d, l);
+            this(k, t, c, new DefaultValue<String>(v), d, l);
         }
 
         private OptionSpecification(String k, OptionType t, Category c, DefaultValue<String> v, String d, String... l) {
@@ -1068,15 +1097,15 @@ abstract public class OptionRegistry {
         }
 
         private OptionSpecification(String k, OptionType t, Category c, boolean v, String d) {
-            this(k, t, c, new DefaultValue(v), d);
+            this(k, t, c, new DefaultValue<Boolean>(v), d);
         }
 
         private OptionSpecification(String k, OptionType t, Category c, double v, String d) {
-            this(k, t, c, new DefaultValue(v), d);
+            this(k, t, c, new DefaultValue<Double>(v), d);
         }
 
         private OptionSpecification(String k, OptionType t, Category c, double v, String d, double min, double max) {
-            this(k, t, c, new DefaultValue(v), d, new Object[] {min, max});
+            this(k, t, c, new DefaultValue<Double>(v), d, new Object[] {min, max});
         }
 
         private OptionSpecification(String k, OptionType t, Category c, DefaultValue<Double> v, String d, double min, double max) {
@@ -1084,17 +1113,18 @@ abstract public class OptionRegistry {
         }
 
         private OptionSpecification(String k, OptionType t, Category c, int v, String d) {
-            this(k, t, c, new DefaultValue(v), d);
+            this(k, t, c, new DefaultValue<Integer>(v), d);
         }
 
         private OptionSpecification(String k, OptionType t, Category c, int v, String d, int min, int max) {
-            this(k, t, c, new DefaultValue(v), d, new Object[] {min, max});
+            this(k, t, c, new DefaultValue<Integer>(v), d, new Object[] {min, max});
         }
 
         private OptionSpecification(String k, OptionType t, Category c, DefaultValue<Integer> v, String d, int min, int max) {
             this(k, t, c, v, d, new Object[] {min, max});
         }
 
+        @Override
         public String toString() {
             return key;
         }
@@ -1103,29 +1133,42 @@ abstract public class OptionRegistry {
     /**
      * Contributor for base options.
      */
-    private static final OptionContributor BASE_CONTRIBUTOR = addContributor(new OptionContributor() {
-        public void addOptions(OptionRegistry opt) {
-            for (OptionSpecification o : OptionSpecification.values())
-                opt.defaultOption(o);
-        }
+    static {
+        addContributor(
+            new OptionContributor() {
+                public void addOptions(OptionRegistry opt) {
+                    for (OptionSpecification o : OptionSpecification.values()) {
+                        opt.defaultOption(o);
+                    }
+                }
 
-        public Object identity() {
-            return "org.jmodelica.util.OptionRegistry.BASE_CONTRIBUTOR";
-        }
-    });
+                public Object identity() {
+                    return "org.jmodelica.util.OptionRegistry.BASE_CONTRIBUTOR";
+                }
+        });
+    }
 
-    private Map<String,Option> optionsMap;
+    protected Map<String, Option<?>> optionsMap;
 
+    /**
+     * Constructs an {@code OptionRegistry} instance by collecting the {@code Option}s
+     * from each {@link OptionContributor}.
+     */
     public OptionRegistry() {
-        optionsMap = new HashMap<String,Option>();
-        for (OptionContributor oc : CONTRIBUTORS)
+        optionsMap = new HashMap<String, Option<?>>();
+        for (OptionContributor oc : CONTRIBUTORS) {
             oc.addOptions(this);
-        for (OptionContributor oc : CONTRIBUTORS)
+        }
+        for (OptionContributor oc : CONTRIBUTORS) {
             oc.modifyOptions(this);
+        }
     }
 
     /**
      * Create a copy of this OptionRegistry.
+     * 
+     * @return
+     *          a new {@code OptionRegistry} with the same options and settings as {@code this}.
      */
     public OptionRegistry copy() {
         OptionRegistry res = new OptionRegistry() {};
@@ -1133,9 +1176,12 @@ abstract public class OptionRegistry {
         return res;
     }
 
+    @SuppressWarnings({
+        "unchecked", "rawtypes"
+    })
     private List<Option> sortedOptions() {
-        List<Option> opts = new ArrayList<OptionRegistry.Option>(optionsMap.values());
-        Collections.sort(opts);
+        List<Option> opts = new ArrayList<Option>(optionsMap.values());
+        Collections.<Option> sort(opts);
         return opts;
     }
 
@@ -1149,7 +1195,7 @@ abstract public class OptionRegistry {
         XMLPrinter out = new XMLPrinter(outStream, "", "    ");
         out.enter("OptionsRegistry");
         out.enter("Options");
-        for (Option o : sortedOptions()) {
+        for (Option<?> o : sortedOptions()) {
             if (o.getCategory().compareTo(maxCat) <= 0) {
                 o.exportXML(out);
             }
@@ -1165,7 +1211,7 @@ abstract public class OptionRegistry {
      */
     public void exportPlainText(PrintStream out, Category maxCat) {
         out.format("%-30s  %-15s\n    Description\n", "Name", "Default value");
-        for (Option o : sortedOptions()) {
+        for (Option<?> o : sortedOptions()) {
             if (o.getCategory().compareTo(maxCat) <= 0) {
                 o.exportPlainText(out);
             }
@@ -1202,7 +1248,7 @@ abstract public class OptionRegistry {
         }
         out.exit(2);
         out.enter("tbody");
-        for (Option o : sortedOptions()) {
+        for (Option<?> o : sortedOptions()) {
             if (o.getCategory().compareTo(maxCat) <= 0) {
                 o.exportDocBook(out);
             }
@@ -1210,32 +1256,38 @@ abstract public class OptionRegistry {
         out.exit(3);
     }
 
+    @SuppressWarnings("unchecked")
     protected void defaultOption(OptionSpecification o) {
         if (o.val.type == Integer.class) {
             if (o.lim != null)
-                createIntegerOption(o.key, o.type, o.cat, o.desc, (Default<Integer>) o.val, iv(o.lim[0]), iv(o.lim[1]));
+                createIntegerOption(o.key, o.type, o.cat, o.desc, (Default<Integer>) o.val,
+                        (Default<Integer>) o.testDefault, iv(o.lim[0]), iv(o.lim[1]));
             else
-                createIntegerOption(o.key, o.type, o.cat, o.desc, (Default<Integer>) o.val);
+                createIntegerOption(o.key, o.type, o.cat, o.desc,
+                        (Default<Integer>) o.val, (Default<Integer>) o.testDefault);
         } else if (o.val.type == String.class) {
             String[] lim = (o.lim == null) ? null : Arrays.copyOf(o.lim, o.lim.length, String[].class);
-            createStringOption(o.key, o.type, o.cat, o.desc, (Default<String>) o.val, lim);
+            createStringOption(o.key, o.type, o.cat, o.desc, (Default<String>) o.val,
+                    (Default<String>) o.testDefault, lim);
         } else if (o.val.type == Double.class) {
             if (o.lim != null)
-                createRealOption(o.key, o.type, o.cat, o.desc, (Default<Double>) o.val, dv(o.lim[0]), dv(o.lim[1]));
+                createRealOption(o.key, o.type, o.cat, o.desc, (Default<Double>) o.val, (Default<Double>) o.testDefault,
+                        dv(o.lim[0]), dv(o.lim[1]));
             else
-                createRealOption(o.key, o.type, o.cat, o.desc, (Default<Double>) o.val);
+                createRealOption(o.key, o.type, o.cat, o.desc, (Default<Double>) o.val, (Default<Double>) o.testDefault);
         } else if (o.val.type == Boolean.class) {
-            createBooleanOption(o.key, o.type, o.cat, o.desc, (Default<Boolean>) o.val);
+            createBooleanOption(o.key, o.type, o.cat, o.desc,
+                    (Default<Boolean>) o.val, (Default<Boolean>) o.testDefault);
         }
     }
 
-    private String unknownOptionMessage(String key) {
+    protected String unknownOptionMessage(String key) {
         String[] parts = key.split("_");
         for (int i = 0; i < parts.length; i++)
             parts[i] = parts[i].replaceAll("(ion|ing|s|e)$", "");
         String best = null;
         int bestScore = 0;
-        for (Option opt : sortedOptions()) {
+        for (Option<?> opt : sortedOptions()) {
             String name = opt.getKey();
             int score = -name.split("_").length;
             for (String part : parts)
@@ -1259,45 +1311,242 @@ abstract public class OptionRegistry {
         return ((Double) o).doubleValue();
     }
 
-
+    /**
+     * Checks whether or not an option with the specified key exists in this registry.
+     * 
+     * @param key
+     *          The key to the option.
+     * @return
+     *          {@code true} if the option exists in this registry, {@code false} otherwise.
+     */
     public boolean hasOption(String key) {
         return optionsMap.containsKey(key);
     }
 
+    /** ================================================== **
+     **  Addition, creation, and modification of options.  **
+     **  via the {@code OptionRegistry} instance.          **
+     ** ================================================== **/
+
+    /* ========== *
+     *  General.  *
+     * ========== */
+
+    /**
+     * Sets the value of an option using the string representation of its new value.
+     * 
+     * @param key
+     *          The key to the option.
+     * @param value
+     *          The string representation of the new value to set the option to.
+     */
     public void setOption(String key, String value) {
-        Option o = optionsMap.get(key);
+        Option<?> o = optionsMap.get(key);
         if (o == null)
             throw new UnknownOptionException(unknownOptionMessage(key));
         o.setValue(value);
     }
 
-    protected void createIntegerOption(String key, OptionType type, Category cat, String description, Default<Integer> def) {
-        optionsMap.put(key, new IntegerOption(key, type, cat, description, def));
+    protected StringOption findStringOption(String key, boolean allowMissing) {
+        Option<?> o = optionsMap.get(key);
+        if (o instanceof StringOption)
+            return (StringOption) o;
+        if (o != null)
+            throw new UnknownOptionException("Option: " + key + " is not of string type");
+        if (allowMissing)
+            return null;
+        throw new UnknownOptionException(unknownOptionMessage(key));
     }
 
-    protected void createIntegerOption(String key, OptionType type, Category cat, String description, Default<Integer> def, int min, int max) {
-        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, min, max));
+    public Boolean isLimited(String key) {
+        Option<?> o = optionsMap.get(key);
+        if (o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.isLimited();
+    }
+
+    public String getDescription(String key){
+        Option<?> o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getDescription();
+    }
+
+    public OptionType getOptionType(String key){
+        Option<?> o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getOptionType();
+    }
+
+    public Category getCategory(String key){
+        Option<?> o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getCategory();
+    }
+
+    private Set<Map.Entry<String, Option<?>>> getAllOptions() {
+        return optionsMap.entrySet();
+    }
+
+    public Collection<String> getOptionKeys() {
+        return getFilteredOptionName(NULL_OPTION_FILTER);
+    }
+
+    public Collection<String> getCompilerOptionKeys() {
+        return getTypeOptionKeys(OptionType.compiler);
+    }
+
+    public Collection<String> getRuntimeOptionKeys() {
+        return getTypeOptionKeys(OptionType.runtime);
+    }
+
+    public Collection<String> getTypeOptionKeys(OptionType type) {
+        return getFilteredOptionName(new TypeOptionFilter(type));
+    }
+
+    public Collection<String> getFilteredOptionName(OptionFilter filter) {
+        List<String> res = new ArrayList<String>();
+        for (Option<?> o : sortedOptions())
+            if (filter.filter(o))
+                res.add(o.key);
+        Collections.sort(res);
+        return res;
+    }
+
+    /**
+     * Copies all of a registry's options to {@code this}'.
+     * 
+     * @param registry
+     *          The {@code OptionRegistry} from which to copy options.
+     * @throws UnknownOptionException
+     *          if an unknown option was found in {@code registry}.
+     */
+    public void copyAllOptions(OptionRegistry registry) throws UnknownOptionException{
+        /*
+         * Copy all options in parameter registry to this option registry and overwrite it if it already exists.
+         */
+        for (Map.Entry<String, Option<?>> entry : registry.getAllOptions()) {
+            entry.getValue().copyTo(this, entry.getKey());
+        }
+    }
+
+    /* ================== *
+     *  Boolean options.  *
+     * ================== */
+
+    protected void createBooleanOption(String key, OptionType type, Category cat, String description,
+            Default<Boolean> def, Default<Boolean> testDefault) {
+
+        optionsMap.put(key, new BooleanOption(key, type, cat, description, def, testDefault));
+    }
+
+    public void addBooleanOption(String key, OptionType type, Category cat, boolean def, String description) {
+        addBooleanOption(key, type, cat, def, def, description);
+    }
+
+    public void addBooleanOption(String key, OptionType type, Category cat, boolean def,
+            boolean testDefault, String description) {
+
+        addBooleanOption(key, type, cat, new DefaultValue<Boolean>(def),
+                new DefaultValue<Boolean>(testDefault), description);
+    }
+
+    public void addBooleanOption(String key, OptionType type, Category cat, Default<Boolean> def,
+            Default<Boolean> testDefault, String description) {
+
+        if (findBooleanOption(key, true) != null)
+            throw new IllegalArgumentException("The option " + key + " already exists.");
+        createBooleanOption(key, type, cat, description, def, testDefault);
     }
 
 
-    public void addIntegerOption(String key, OptionType type, Category cat, int def, String description) {
-        addIntegerOption(key, type, cat, new DefaultValue(def), description);
+    public void setBooleanOption(String key, boolean value) {
+        findBooleanOption(key, false).setValue(value);
     }
 
-    public void addIntegerOption(String key, OptionType type, Category cat, int def, String description, int min, int max) {
-        addIntegerOption(key, type, cat, new DefaultValue(def), description, min, max);
+    public void setBooleanOptionDefault(String key, Default<Boolean> def) {
+        findBooleanOption(key, false).setDefault(def);
     }
 
-    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def, String description) {
+    public Boolean getBooleanOptionDefault(String key) {
+        return findBooleanOption(key, false).getDefault();
+    }
+
+    public boolean getBooleanOption(String key) {
+        return findBooleanOption(key, false).getValue();
+    }
+
+    public boolean isBooleanOption(String key) {
+        return optionsMap.get(key) instanceof BooleanOption;
+    }
+
+    protected BooleanOption findBooleanOption(String key, boolean allowMissing) {
+        Option<?> o = optionsMap.get(key);
+        if (o instanceof BooleanOption)
+            return (BooleanOption) o;
+        if (o != null)
+            throw new UnknownOptionException("Option: " + key + " is not of boolean type");
+        if (allowMissing)
+            return null;
+        throw new UnknownOptionException(unknownOptionMessage(key));
+    }
+
+    /* ================== *
+     *  Integer options.  *
+     * ================== */
+
+    protected void createIntegerOption(String key, OptionType type, Category cat,
+            String description, Default<Integer> def, Default<Integer> testDefault) {
+
+        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, testDefault));
+    }
+
+    protected void createIntegerOption(String key, OptionType type, Category cat, String description,
+            Default<Integer> def, Default<Integer> testDefault, int min, int max) {
+
+        optionsMap.put(key, new IntegerOption(key, type, cat, description, def, testDefault, min, max));
+    }
+
+    public void addIntegerOption(String key, OptionType type, Category cat, int def, String description,
+            int min, int max) {
+
+        addIntegerOption(key, type, cat, def, def, description, min, max);
+    }
+
+    public void addIntegerOption(String key, OptionType type, Category cat, int def,
+            int testDefault, String description) {
+
+        addIntegerOption(key, type, cat, new DefaultValue<Integer>(def),
+                new DefaultValue<Integer>(testDefault), description);
+    }
+
+    public void addIntegerOption(String key, OptionType type, Category cat, int def, int testDefault,
+            String description, int min, int max) {
+
+        addIntegerOption(key, type, cat, new DefaultValue<Integer>(def), new DefaultValue<Integer>(testDefault),
+                description, min, max);
+    }
+
+    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def,
+            Default<Integer> testDefault, String description) {
+
         if (findIntegerOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createIntegerOption(key, type, cat, description, def);
+        createIntegerOption(key, type, cat, description, def, testDefault);
     }
 
-    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def, String description, int min, int max) {
+    public void addIntegerOption(String key, OptionType type, Category cat, Default<Integer> def,
+            Default<Integer> testDefault, String description, int min, int max) {
+
         if (findIntegerOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createIntegerOption(key, type, cat, description, def, min, max);
+        createIntegerOption(key, type, cat, description, def, testDefault, min, max);
     }
 
     public void setIntegerOption(String key, int value) {
@@ -1305,7 +1554,7 @@ abstract public class OptionRegistry {
     }
 
     public void setIntegerOptionDefault(String key, int def) {
-        findIntegerOption(key, false).setDefault(new DefaultValue(def));
+        findIntegerOption(key, false).setDefault(new DefaultValue<Integer>(def));
     }
 
     public void setIntegerOptionDefault(String key, Default<Integer> def) {
@@ -1333,7 +1582,7 @@ abstract public class OptionRegistry {
     }
 
     protected IntegerOption findIntegerOption(String key, boolean allowMissing) {
-        Option o = optionsMap.get(key);
+        Option<?> o = optionsMap.get(key);
         if (o instanceof IntegerOption)
             return (IntegerOption) o;
         if (o != null)
@@ -1343,99 +1592,51 @@ abstract public class OptionRegistry {
         throw new UnknownOptionException(unknownOptionMessage(key));
     }
 
-    protected void createStringOption(String key, OptionType type, Category cat, String description, Default<String> def, String[] vals) {
-        optionsMap.put(key, new StringOption(key, type, cat, description, def, vals));
+    /* =============== *
+     *  Real options.  *
+     * =============== */
+
+    protected void createRealOption(String key, OptionType type, Category cat, String description,
+            Default<Double> def, Default<Double> testDefault) {
+
+        optionsMap.put(key, new RealOption(key, type, cat, description, def, testDefault));
+    }
+
+    protected void createRealOption(String key, OptionType type, Category cat, String description, Default<Double> def,
+            Default<Double> testDefault, double min, double max) {
+
+        optionsMap.put(key, new RealOption(key, type, cat, description, def, testDefault, min, max));
     }
 
 
-    public void addStringOption(String key, OptionType type, Category cat, String def, String description) {
-        addStringOption(key, type, cat, new DefaultValue(def), description);
+    public void addRealOption(String key, OptionType type, Category cat, double def,
+            double testDefault, String description) {
+
+        addRealOption(key, type, cat, new DefaultValue<Double>(def),
+                new DefaultValue<Double>(testDefault), description);
     }
 
-    public void addStringOption(String key, OptionType type, Category cat, String def, String description, String... allowed) {
-        addStringOption(key, type, cat, new DefaultValue(def), description, allowed);
+    public void addRealOption(String key, OptionType type, Category cat, double def, double testDefault,
+            String description, double min, double max) {
+
+        addRealOption(key, type, cat, new DefaultValue<Double>(def), new DefaultValue<Double>(testDefault), description,
+                min, max);
     }
 
-    public void addStringOption(String key, OptionType type, Category cat, Default<String> def, String description) {
-        addStringOption(key, type, cat, def, description, (String[]) null);
-    }
+    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def,
+            Default<Double> testDefault, String description) {
 
-    public void addStringOption(String key, OptionType type, Category cat, Default<String> def, String description, String... allowed) {
-        if (findStringOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createStringOption(key, type, cat, description, def, allowed);
-    }
-
-    public void setStringOption(String key, String value) {
-        findStringOption(key, false).setValue(value);
-    }
-
-    public void setStringOptionDefault(String key, String def) {
-        findStringOption(key, false).setDefault(new DefaultValue(def));
-    }
-
-    public void setStringOptionDefault(String key, Default<String> def) {
-        findStringOption(key, false).setDefault(def);
-    }
-
-    public String getStringOptionDefault(String key) {
-        return findStringOption(key, false).getDefault();
-    }
-
-    public Set<String> getStringOptionAllowed(String key) {
-        return findStringOption(key, false).getAllowed();
-    }
-
-    public void addStringOptionAllowed(String key, String val) {
-        findStringOption(key, false).addAllowed(val);
-    }
-
-    public String getStringOption(String key) {
-        return findStringOption(key, false).getValue();
-    }
-
-    public boolean isStringOption(String key) {
-        return optionsMap.get(key) instanceof StringOption;
-    }
-
-    protected StringOption findStringOption(String key, boolean allowMissing) {
-        Option o = optionsMap.get(key);
-        if (o instanceof StringOption)
-            return (StringOption) o;
-        if (o != null)
-            throw new UnknownOptionException("Option: " + key + " is not of string type");
-        if (allowMissing)
-            return null;
-        throw new UnknownOptionException(unknownOptionMessage(key));
-    }
-
-    protected void createRealOption(String key, OptionType type, Category cat, String description, Default<Double> def) {
-        optionsMap.put(key, new RealOption(key, type, cat, description, def));
-    }
-
-    protected void createRealOption(String key, OptionType type, Category cat, String description, Default<Double> def, double min, double max) {
-        optionsMap.put(key, new RealOption(key, type, cat, description, def, min, max));
-    }
-
-
-    public void addRealOption(String key, OptionType type, Category cat, double def, String description) {
-        addRealOption(key, type, cat, new DefaultValue(def), description);
-    }
-
-    public void addRealOption(String key, OptionType type, Category cat, double def, String description, double min, double max) {
-        addRealOption(key, type, cat, new DefaultValue(def), description, min, max);
-    }
-
-    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def, String description) {
         if (findRealOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createRealOption(key, type, cat, description, def);
+        createRealOption(key, type, cat, description, def, testDefault);
     }
 
-    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def, String description, double min, double max) {
+    public void addRealOption(String key, OptionType type, Category cat, Default<Double> def,
+            Default<Double> testDefault, String description, double min, double max) {
+
         if (findRealOption(key, true) != null)
             throw new IllegalArgumentException("The option " + key + " already exists.");
-        createRealOption(key, type, cat, description, def, min, max);
+        createRealOption(key, type, cat, description, def, testDefault, min, max);
     }
 
     public void setRealOption(String key, double value) {
@@ -1443,7 +1644,7 @@ abstract public class OptionRegistry {
     }
 
     public void setRealOptionDefault(String key, double def) {
-        findRealOption(key, false).setDefault(new DefaultValue(def));
+        findRealOption(key, false).setDefault(new DefaultValue<Double>(def));
     }
 
     public void setRealOptionDefault(String key, Default<Double> def) {
@@ -1471,58 +1672,11 @@ abstract public class OptionRegistry {
     }
 
     protected RealOption findRealOption(String key, boolean allowMissing) {
-        Option o = optionsMap.get(key);
+        Option<?> o = optionsMap.get(key);
         if (o instanceof RealOption)
             return (RealOption) o;
         if (o != null)
             throw new UnknownOptionException("Option: " + key + " is not of real type");
-        if (allowMissing)
-            return null;
-        throw new UnknownOptionException(unknownOptionMessage(key));
-    }
-
-    protected void createBooleanOption(String key, OptionType type, Category cat, String description, Default<Boolean> def) {
-        optionsMap.put(key, new BooleanOption(key, type, cat, description, def));
-    }
-
-
-    public void addBooleanOption(String key, OptionType type, Category cat, boolean def, String description) {
-        addBooleanOption(key, type, cat, new DefaultValue(def), description);
-    }
-
-    public void addBooleanOption(String key, OptionType type, Category cat, Default<Boolean> def, String description) {
-        if (findBooleanOption(key, true) != null)
-            throw new IllegalArgumentException("The option " + key + " already exists.");
-        createBooleanOption(key, type, cat, description, def);
-    }
-
-
-    public void setBooleanOption(String key, boolean value) {
-        findBooleanOption(key, false).setValue(value);
-    }
-
-    public void setBooleanOptionDefault(String key, Default<Boolean> def) {
-        findBooleanOption(key, false).setDefault(def);
-    }
-
-    public Boolean getBooleanOptionDefault(String key) {
-        return findBooleanOption(key, false).getDefault();
-    }
-
-    public boolean getBooleanOption(String key) {
-        return findBooleanOption(key, false).getValue();
-    }
-
-    public boolean isBooleanOption(String key) {
-        return optionsMap.get(key) instanceof BooleanOption;
-    }
-
-    protected BooleanOption findBooleanOption(String key, boolean allowMissing) {
-        Option o = optionsMap.get(key);
-        if (o instanceof BooleanOption)
-            return (BooleanOption) o;
-        if (o != null)
-            throw new UnknownOptionException("Option: " + key + " is not of boolean type");
         if (allowMissing)
             return null;
         throw new UnknownOptionException(unknownOptionMessage(key));
@@ -1544,104 +1698,186 @@ abstract public class OptionRegistry {
         return findRealOption(key, false).getMin();
     }
 
-    public Boolean isLimited(String key) {
-        Option o = optionsMap.get(key);
-        if (o == null) {
-            throw new UnknownOptionException(unknownOptionMessage(key));
-        }
-        return o.isLimited();
+    /* ================= *
+     *  String options.  *
+     * ================= */
+
+    protected void createStringOption(String key, OptionType type, Category cat, String description, Default<String> def,
+            Default<String> testDefault, String[] vals) {
+
+        optionsMap.put(key, new StringOption(key, type, cat, description, def, testDefault, vals));
     }
 
-    public String getDescription(String key){
-        Option o = optionsMap.get(key);
-        if(o == null) {
-            throw new UnknownOptionException(unknownOptionMessage(key));
-        }
-        return o.getDescription();
+    public void addStringOption(String key, OptionType type, Category cat, String def, String description) {
+        addStringOption(key, type, cat, def, def, description);
     }
 
-    public OptionType getOptionType(String key){
-        Option o = optionsMap.get(key);
-        if(o == null) {
-            throw new UnknownOptionException(unknownOptionMessage(key));
-        }
-        return o.getOptionType();
+    public void addStringOption(String key, OptionType type, Category cat, String def,
+            String description, String[] allowed) {
+
+        addStringOption(key, type, cat, new DefaultValue<String>(def), new DefaultValue<String>(def),
+                description, allowed);
     }
 
-    public Category getCategory(String key){
-        Option o = optionsMap.get(key);
-        if(o == null) {
-            throw new UnknownOptionException(unknownOptionMessage(key));
-        }
-        return o.getCategory();
+    public void addStringOption(String key, OptionType type, Category cat, String def,
+            String testDefault, String description) {
+
+        addStringOption(key, type, cat, new DefaultValue<String>(def),
+                new DefaultValue<String>(testDefault), description);
     }
 
-    private Set<Map.Entry<String, Option>> getAllOptions() {
-        return optionsMap.entrySet();
+    public void addStringOption(String key, OptionType type, Category cat, String def, String testDefault,
+            String description, String[] allowed) {
+
+        addStringOption(key, type, cat, new DefaultValue<String>(def), new DefaultValue<String>(testDefault),
+                description, allowed);
     }
 
-    public Collection<String> getOptionKeys() {
-        return getFilteredOptionName(NULL_OPTION_FILTER);
+    public void addStringOption(String key, OptionType type, Category cat, Default<String> def,
+            Default<String> testDefault, String description) {
+
+        addStringOption(key, type, cat, def, testDefault, description, (String[]) null);
     }
 
-    public Collection<String> getCompilerOptionKeys() {
-        return getTypeOptionKeys(OptionType.compiler);
+    public void addStringOption(String key, OptionType type, Category cat, Default<String> def,
+            Default<String> testDefault, String description, String[] allowed) {
+
+        if (findStringOption(key, true) != null)
+            throw new IllegalArgumentException("The option " + key + " already exists.");
+        createStringOption(key, type, cat, description, def, testDefault, allowed);
     }
 
-    public Collection<String> getRuntimeOptionKeys() {
-        return getTypeOptionKeys(OptionType.runtime);
+    public void setStringOption(String key, String value) {
+        findStringOption(key, false).setValue(value);
     }
 
-    public Collection<String> getTypeOptionKeys(OptionType type) {
-        return getFilteredOptionName(new TypeOptionFilter(type));
+    public void setStringOptionDefault(String key, String def) {
+        findStringOption(key, false).setDefault(new DefaultValue<String>(def));
     }
 
-    public Collection<String> getFilteredOptionName(OptionFilter filter) {
-        List<String> res = new ArrayList<String>();
-        for (Option o : sortedOptions())
-            if (filter.filter(o))
-                res.add(o.key);
-        Collections.sort(res);
-        return res;
+    public void setStringOptionDefault(String key, Default<String> def) {
+        findStringOption(key, false).setDefault(def);
     }
 
-    public void copyAllOptions(OptionRegistry registry) throws UnknownOptionException{
-        // copy all options in parameter registry to this 
-        // optionregistry and overwrite if exists before.
-        for (Map.Entry<String, Option> entry : registry.getAllOptions()) {
-            entry.getValue().copyTo(this, entry.getKey());
-        }
+    public String getStringOptionDefault(String key) {
+        return findStringOption(key, false).getDefault();
+    }
+
+    public Set<String> getStringOptionAllowed(String key) {
+        return findStringOption(key, false).getAllowed();
+    }
+
+    public void addStringOptionAllowed(String key, String val) {
+        findStringOption(key, false).addAllowed(val);
+    }
+
+    public String getStringOption(String key) {
+        return findStringOption(key, false).getValue();
+    }
+
+    public boolean isStringOption(String key) {
+        return optionsMap.get(key) instanceof StringOption;
     }
 
     /**
      * \brief Make the first letter in a string capital.
+     * 
+     * @param string
+     *          The string to capitalize. 
+     * @return
+     *          {@code string} with its first character in upper case.
      */
-    public static Object capitalize(String str) {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    public static String capitalize(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
-
-    private abstract static class Option implements Comparable<Option> {
+    /**
+     * Base class for options.
+     *
+     * @param <T>
+     *          The type of option ({@code Boolean}, {@code Double} (real), {@code Integer}, or {@code String}).
+     */
+    protected abstract static class Option<T> implements Comparable<Option<T>> {
         protected final String key;
-        protected boolean isSet;
+        protected Default<T> defaultValue;
+        protected Default<T> testDefault;
+        protected T value;
+
+        private OptionType type;
+        private Category category;
         private String description;
+
+        protected boolean isSet;
         private boolean descriptionChanged = false;
         private boolean defaultChanged = false;
-        private OptionType type;
-        private Category cat;
 
-        public Option(String key, String description, OptionType type, Category cat) {
+        /**
+         * Creates an option with an initial value, as well as a different default value to use when under test.
+         * 
+         * @param key
+         *          The key to (name of) the option.
+         * @param type
+         *          The type of option.
+         * @param category
+         *          The category of the option.
+         * @param description
+         *          A description of the option.
+         * @param defaultValue
+         *          The option's default value.
+         * @param testDefault
+         *          The option's default value when under test.
+         * @param value
+         *          The initial value of the option.
+         */
+        public Option(String key, OptionType optionType, Category category, String description,
+                Default<T> defaultValue, Default<T> testDefault, T value) {
+
             this.key = key;
             this.description = description;
-            this.type = type;
-            this.cat = cat;
-            isSet = false;
+            this.type = optionType;
+            this.category = category;
+            this.value = value;
+            this.defaultValue = defaultValue;
+            this.testDefault = testDefault;
+            this.isSet = false;
         }
 
+        /* =========== *
+         *  Abstract.  *
+         * =========== */
+
+        /**
+         * Retrieves the name of the option's type.
+         * 
+         * @return
+         *           the name of the option's type.
+         */
+        public abstract String getType();
+
+        /**
+         * Retrieves the string representation of the option's value.
+         * 
+         * @return
+         *           the string representation of the option's value.
+         */
+        public abstract String getValueString();
+
+        protected abstract void copyTo(OptionRegistry registry, String key);
+        protected abstract void setValue(String string);
+
+        /**
+         * Resets the option, enabling resetting its value.
+         */
         public void clear() {
-            isSet = false;
+            this.isSet = false;
         }
 
+        /**
+         * Prints the option's DocBook documentation entry.
+         * 
+         * @param out
+         *          The {@link DocBookPrinter} to which to print this option's entry.
+         */
         public void exportDocBook(DocBookPrinter out) {
             out.enter("row");
             out.oneLine("entry", out.lit(StringUtil.wrapUnderscoreName(key, 26)));
@@ -1650,11 +1886,23 @@ abstract public class OptionRegistry {
             out.exit();
         }
 
+        /**
+         * Prints a string representation of the option to a {@link PrintStream}.
+         * 
+         * @param out
+         *          The print stream to which to print the option.
+         */
         public void exportPlainText(PrintStream out) {
             out.format("%-30s  %-15s\n", key, getValueForDoc());
             StringUtil.wrapText(out, description, "    ", 80);
         }
 
+        /**
+         * Prints the option's XML entry.
+         * 
+         * @param out
+         *          The {@link XMLPrinter} to which to print this option's entry.
+         */
         public void exportXML(XMLPrinter out) {
             String type = getType();
             out.enter("Option", "type", type);
@@ -1670,86 +1918,221 @@ abstract public class OptionRegistry {
             out.exit();
         }
 
-        public abstract String getType();
-        public abstract String getValueString();
+        /**
+         * Retrieves the default value of this option.
+         * 
+         * @return
+         *          the default value of this option.
+         */
+        public T getDefault() {
+            return defaultValue.value();
+        }
 
+        /**
+         * Sets the default value of this option.
+         * 
+         * @param newDefault
+         *          the new default value of this option.
+         */
+        public void setDefault(Default<T> newDefault) {
+            changeDefault();
+            this.defaultValue = newDefault;
+        }
+
+        /**
+         * Retrieves this option's current value.
+         * 
+         * @return
+         *          this option's current value.
+         */
+        public T getValue() {
+            return isSet ? value : defaultValue.value();
+        }
+
+        /**
+         * Retrieves this option's current value when under test.
+         * 
+         * @return
+         *          this option's current value when under test.
+         */
+        public T getTestValue() {
+            return isSet ? value : testDefault.value();
+        }
+
+        /**
+         * Sets this option's value to a new value.
+         * 
+         * @param value
+         *          the new value to set the option to.
+         */
+        public void setValue(T value) {
+            this.isSet = true;
+            this.value = value;
+        }
+
+        /**
+         * Retrieves the key to this option.
+         * 
+         * @return
+         *          the key to this option.
+         */
         public String getKey() {
             return key;
         }
 
+        /**
+         * Retrieves the description text of this option.
+         * 
+         * @return
+         *          the description text of this option.
+         */
         public String getDescription() {
             return description;
         }
 
+        /**
+         * Retrieves the option type of this option.
+         * 
+         * @return
+         *          the option type of this option.
+         */
         public OptionType getOptionType() {
             return type;
         }
 
+        /**
+         * Checks whether or not this option's possible values are limited.
+         * 
+         * @return
+         *          {@code true} if this option's values are limited, {@code false} otherwise.
+         */
         public Boolean isLimited() {
             return false;
         }
 
+        /**
+         * Retrieves this option's category.
+         * 
+         * @return
+         *          this option's category.
+         */
         public Category getCategory() {
-            return cat;
+            return category;
         }
 
+        /**
+         * Retrieves the option values' string representation as to be used within documentation.
+         * 
+         * @return
+         *          a string of the option values' representation as to be used within documentation.
+         */
         public String getValueForDoc() {
             return getValueString();
         }
 
-        public int compareTo(Option o) {
+        @Override
+        public int compareTo(Option<T> o) {
             int res = type.compareTo(o.type);
-            if (res != 0)
+            if (res != 0) {
                 return res;
-            res = cat.compareTo(o.cat);
-            if (res != 0)
+            }
+            if ((res = category.compareTo(o.category)) != 0) {
                 return res;
+            }
             return key.compareTo(o.key);
         }
 
-        public void changeDescription(String desc) {
+        /**
+         * Sets a new description for this option.
+         * 
+         * @param newDescription
+         *          The new description of this option.
+         */
+        public void changeDescription(String newDescription) {
             if (descriptionChanged)
                 throw new UnsupportedOperationException("Description of " + key + " has already been changed.");
             descriptionChanged = true;
-            description = desc;
+            this.description = newDescription;
         }
 
+        @Override
         public String toString() {
             return "\'"+key+"\': " + description; 
         }
 
-        protected abstract void copyTo(OptionRegistry reg, String key);
-
-        protected void invalidValue(Object value, String allowedMsg) {
+        protected void invalidValue(Object value, String allowedMessage) {
             throw new InvalidOptionValueException("Option '" + key + "' does not allow the value '" +
-                    value + "'" + allowedMsg);
+                    value + "'" + allowedMessage);
         }
 
-        protected abstract void setValue(String str);
-
         protected void changeDefault() {
-            if (defaultChanged)
+            if (defaultChanged) {
                 throw new IllegalArgumentException("Default value for " + key + " has already been changed.");
+            }
             defaultChanged = true;
         }
     }
 
-    private static class IntegerOption extends Option {
-        protected int value;
-        protected Default<Integer> def;
+    private static class IntegerOption extends Option<Integer> {
         private int min;
         private int max;
 
-        public IntegerOption(String key, OptionType type, Category cat, String description, Default<Integer> def) {
-            this(key, type, cat, description, def, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        /**
+         * Creates an option for real values.
+         * 
+         * @param key
+         *          The key to (name of) the option.
+         * @param type
+         *          The type of option.
+         * @param category
+         *          The category of the option.
+         * @param description
+         *          A description of the option.
+         * @param defaultValue
+         *          The option's default value.
+         * @param testDefeault
+         *          The option's default value when under test.
+         */
+        public IntegerOption(String key, OptionType type, Category category, String description,
+                Default<Integer> defaultValue, Default<Integer> testDefault) {
+
+            this(key, type, category, description, defaultValue, testDefault, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
 
-        public IntegerOption(String key, OptionType type, Category cat, String description, Default<Integer> def, int min, int max) {
-            super(key, description, type, cat);
-            this.value = 0;
-            this.def = def;
+        /**
+         * Creates an option for real values.
+         * 
+         * @param key
+         *          The key to (name of) the option.
+         * @param type
+         *          The type of option.
+         * @param category
+         *          The category of the option.
+         * @param description
+         *          A description of the option.
+         * @param defaultValue
+         *          The option's default value.
+         * @param testDefeault
+         *          The option's default value when under test.
+         * @param min
+         *          The minimum allowed value for this option.
+         * @param max
+         *          The maximum allowed value for this option.
+         */
+        public IntegerOption(String key, OptionType type, Category category, String description, 
+                Default<Integer> defaultValue, Default<Integer> testDefault, int min, int max) {
+
+            super(key, type, category, description, defaultValue, testDefault, null);
             this.min = min;
             this.max = max;
+        }
+
+        @Override
+        public void setValue(Integer value) {
+            if (value < min || value > max) {
+                invalidValue(value, minMaxStr());
+            }
+            super.setValue(value);
         }
 
         @Override
@@ -1761,21 +2144,26 @@ abstract public class OptionRegistry {
             }
         }
 
-        public void setValue(int value) {
-            if (value < min || value > max)
-                invalidValue(value, minMaxStr());
-            this.value = value;
-            isSet = true;
-        }
-
         private String minMaxStr() {
             return (min == Integer.MIN_VALUE ? "" : ", min: " + min) + (max == Integer.MAX_VALUE ? "" : ", max: " + max);
         }
 
+        /**
+         * Retrieves the minimum allowed value for this option.
+         * 
+         * @return
+         *          the minimum allowed value for this option.
+         */
         public int getMin() {
             return min;
         }
 
+        /**
+         * Retrieves the maximum allowed value for this option.
+         * 
+         * @return
+         *          the maximum allowed value for this option.
+         */
         public int getMax() {
             return max;
         }
@@ -1785,24 +2173,23 @@ abstract public class OptionRegistry {
             return (min != Integer.MIN_VALUE) || (max != Integer.MAX_VALUE);
         }
 
-        public void setDefault(Default<Integer> def) {
-            changeDefault();
-            this.def = def;
-        }
-
-        public int getDefault() {
-            return def.value();
-        }
-
-        public int getValue() {
-            return isSet ? value : def.value();
-        }
-
+        /**
+         * Lowers the minimum allowed value for this option. Will not raise it.
+         * 
+         * @param val
+         *          The new minimum allowed value.
+         */
         public void expandMin(int val) {
             if (val < min)
                 min = val;
         }
 
+        /**
+         * Raises the maximum allowed value for this option. Will not lower it.
+         * 
+         * @param val
+         *          The new minimum allowed value.
+         */
         public void expandMax(int val) {
             if (val > max)
                 max = val;
@@ -1821,49 +2208,65 @@ abstract public class OptionRegistry {
         @Override
         protected void copyTo(OptionRegistry reg, String key) {
             if (!reg.hasOption(key)) {
-                reg.addIntegerOption(key, getOptionType(), getCategory(), def, getDescription(), min, max);
+                reg.addIntegerOption(key, getOptionType(), getCategory(), defaultValue, testDefault, getDescription(),
+                        min, max);
             }
             if (isSet) {
                 reg.setIntegerOption(key, value);
             }
         }
+
     }
 
-    private static class StringOption extends Option {
-        protected String value;
-        private Default<String> def;
-        protected Map<String,String> vals;
-        private String[] valsArray;
+    private static class StringOption extends Option<String> {
+        protected Map<String,String> values;
+        private String[] valueArray;
 
-        public StringOption(String key, OptionType type, Category cat, String description, Default<String> def) {
-            this(key, type, cat, description, def, null);
-        }
+        /**
+         * Creates an option for string values.
+         * 
+         * @param key
+         *          The key to (name of) the option.
+         * @param type
+         *          The type of option.
+         * @param category
+         *          The category of the option.
+         * @param description
+         *          A description of the option.
+         * @param defaultValue
+         *          The option's default value.
+         * @param testDefault
+         *          The option's default value when under test.
+         * @param values
+         *          The option's possible values (settings).
+         */
+        public StringOption(String key, OptionType type, Category category, String description,
+                Default<String> defaultValue, Default<String> testDefault, String[] values) {
 
-        public StringOption(String key, OptionType type, Category cat, String description, Default<String> def, String[] vals) {
-            super(key, description, type, cat);
+            super(key, type, category, description, defaultValue, testDefault, null);
+
             this.value = null;
-            this.def = def;
-            if (vals == null) {
-                this.vals = null;
+            if (values == null) {
+                this.values = null;
             } else {
-                this.vals = new LinkedHashMap<String,String>(8);
-                for (String v : vals)
-                    this.vals.put(v, v);
+                this.values = new LinkedHashMap<String,String>(8);
+                for (String v : values)
+                    this.values.put(v, v);
             }
-            valsArray = vals;
+            valueArray = values;
         }
 
         @Override
         public void setValue(String value) {
-            if (vals != null) {
-                String v = vals.get(value);
+            if (values != null) {
+                String v = values.get(value);
                 if (v != null) {
                     this.value = v;
                     isSet = true;
                     return;
                 }
                 StringBuilder buf = new StringBuilder(", allowed values: ");
-                Object[] arr = vals.keySet().toArray();
+                Object[] arr = values.keySet().toArray();
                 Arrays.sort(arr);
                 buf.append(Arrays.toString(arr).substring(1));
                 invalidValue(value, buf.substring(0, buf.length() - 1));
@@ -1873,41 +2276,47 @@ abstract public class OptionRegistry {
             }
         }
 
-        public void setDefault(Default<String> def) {
-            changeDefault();
-            this.def = def;
-        }
-
+        @Override
         public String getDefault() {
-            if (vals != null) {
-                String d = def.value();
-                String v = vals.get(d);
+            if (values != null) {
+                String d = defaultValue.value();
+                String v = values.get(d);
                 return (v == null) ? d : v;
             } else {
-                return def.value();
+                return defaultValue.value();
             }
         }
 
+        /**
+         * Allows an additional value (setting) for this option.
+         * 
+         * @param value
+         *          The value to allow.
+         * @return
+         *          the value to allow.
+         */
         public String addAllowed(String value) {
-            if (vals == null)
-                throw new IllegalArgumentException("This option allows any value");
-            if (vals.containsKey(value)) {
-                return vals.get(value);
+            if (values == null)
+                throw new IllegalArgumentException("This option allows any value.");
+            if (values.containsKey(value)) {
+                return values.get(value);
             } else {
-                vals.put(value, value);
+                values.put(value, value);
                 return value;
             }
         }
 
+        /**
+         * Retrieves the allowed values (settings) for this option.
+         * 
+         * @return
+         *          the allowed values for this option.
+         */
         public Set<String> getAllowed() {
-            if (vals == null) {
+            if (values == null) {
                 return Collections.unmodifiableSet(Collections.<String> emptySet());
             }
-            return Collections.<String> unmodifiableSet(vals.keySet());
-        }
-
-        public String getValue() {
-            return isSet ? value : getDefault();
+            return Collections.<String> unmodifiableSet(values.keySet());
         }
 
         @Override
@@ -1920,6 +2329,9 @@ abstract public class OptionRegistry {
             return getValue();
         }
 
+        /**
+         * Retrieves the documentation string for this option's current value.
+         */
         public String getValueForDoc() {
             return String.format("'%s'", value);
         }
@@ -1927,30 +2339,74 @@ abstract public class OptionRegistry {
         @Override
         protected void copyTo(OptionRegistry reg, String key) {
             if (!reg.hasOption(key)) {
-                reg.addStringOption(key, getOptionType(), getCategory(), def, getDescription(), valsArray);
+                reg.addStringOption(key, getOptionType(), getCategory(), defaultValue, testDefault,
+                        getDescription(), valueArray);
             }
             if (isSet) {
                 reg.setStringOption(key, value);
             }
         }
+
     }
 
-    private static class RealOption extends Option {
-        protected double value;
-        private Default<Double> def;
+    private static class RealOption extends Option<Double> {
         protected double min;
         protected double max;
 
-        public RealOption(String key, OptionType type, Category cat, String description, Default<Double> def) {
-            this(key, type, cat, description, def, Double.MIN_VALUE, Double.MAX_VALUE);
+        /**
+         * Creates an option for real values.
+         * 
+         * @param key
+         *          The key to (name of) the option.
+         * @param type
+         *          The type of option.
+         * @param category
+         *          The category of the option.
+         * @param description
+         *          A description of the option.
+         * @param defaultValue
+         *          The option's default value.
+         * @param testDefault
+         *          The option's default value when under test.
+         */
+        public RealOption(String key, OptionType type, Category category, String description,
+                Default<Double> defaultValue, Default<Double> testDefault) {
+
+            this(key, type, category, description, defaultValue, testDefault, Double.MIN_VALUE, Double.MAX_VALUE);
         }
 
-        public RealOption(String key, OptionType type, Category cat, String description, Default<Double> def, double min, double max) {
-            super(key, description, type, cat);
-            this.value = 0.0;
-            this.def = def;
+        /**
+         * Creates an option for real values.
+         * 
+         * @param key
+         *          The key to (name of) the option.
+         * @param type
+         *          The type of option.
+         * @param category
+         *          The category of the option.
+         * @param description
+         *          A description of the option.
+         * @param defaultValue
+         *          The option's default value.
+         * @param testDefault
+         *          The option's default value when under test.
+         * @param min
+         *          The minimum allowed value for this option.
+         * @param max
+         *          The maximum allowed value for this option.
+         */
+        public RealOption(String key, OptionType type, Category category, String description,
+                Default<Double> defaultValue, Default<Double> testDefault, double min, double max) {
+
+            super(key, type, category, description, defaultValue, testDefault, 0.0);
             this.min = min;
             this.max = max;
+        }
+
+        @Override
+        public void setValue(Double d) {
+            this.isSet = true;
+            this.value = d.doubleValue();
         }
 
         @Override
@@ -1962,21 +2418,39 @@ abstract public class OptionRegistry {
             }
         }
 
+        /**
+         * Sets the value for this option.
+         * <p>
+         * This method is required to avoid auto-boxing {@code double}s to {@link Double} and lose precision.
+         */
         public void setValue(double value) {
-            if (value < min || value > max)
+            if (value < min || value > max) {
                 invalidValue(value, minMaxStr());
+            }
+            this.isSet = true;
             this.value = value;
-            isSet = true;
         }
 
         private String minMaxStr() {
             return (min == Double.MIN_VALUE ? "" : ", min: " + min) + (max == Double.MAX_VALUE ? "" : ", max: " + max);
         }
 
+        /**
+         * Retrieves the minimum allowed value for this option.
+         * 
+         * @return
+         *          the minimum allowed value for this option.
+         */
         public double getMin() {
             return min;
         }
 
+        /**
+         * Retrieves the maximum allowed value for this option.
+         * 
+         * @return
+         *          the maximum allowed value for this option.
+         */
         public double getMax() {
             return max;
         }
@@ -1986,24 +2460,23 @@ abstract public class OptionRegistry {
             return (min != Double.MIN_VALUE) || (max != Double.MAX_VALUE);
         }
 
-        public void setDefault(Default<Double> def) {
-            changeDefault();
-            this.def = def;
-        }
-
-        public double getDefault() {
-            return def.value();
-        }
-
-        public double getValue() {
-            return isSet ? value : def.value();
-        }
-
+        /**
+         * Lowers the minimum allowed value for this option. Will not raise it.
+         * 
+         * @param val
+         *          The new minimum allowed value.
+         */
         public void expandMin(double val) {
             if (val < min)
                 min = val;
         }
 
+        /**
+         * Raises the maximum allowed value for this option. Will not lower it.
+         * 
+         * @param val
+         *          The new maximum allowed value.
+         */
         public void expandMax(double val) {
             if (val > max)
                 max = val;
@@ -2022,22 +2495,22 @@ abstract public class OptionRegistry {
         @Override
         protected void copyTo(OptionRegistry reg, String key) {
             if (!reg.hasOption(key)) {
-                reg.addRealOption(key, getOptionType(), getCategory(), def, getDescription(), min, max);
+                reg.addRealOption(key, getOptionType(), getCategory(), defaultValue, testDefault,
+                        getDescription(), min, max);
             }
             if (isSet) {
                 reg.setRealOption(key, value);
             }
         }
+
     }
 
-    private static class BooleanOption extends Option {
-        protected boolean value;
-        private Default<Boolean> def;
+    private static class BooleanOption extends Option<Boolean> {
 
-        public BooleanOption(String key, OptionType type, Category cat, String description, Default<Boolean> def) {
-            super(key, description, type, cat);
-            this.value = false;
-            this.def = def;
+        public BooleanOption(String key, OptionType type, Category cat, String description,
+                Default<Boolean> def, Default<Boolean> testDefault) {
+
+            super(key, type, cat, description, def, testDefault, false);
         }
 
         @Override
@@ -2048,24 +2521,6 @@ abstract public class OptionRegistry {
                 setValue(false);
             else
                 invalidValue(str, ", expecting boolean value.");
-        }
-
-        public void setValue(boolean value) {
-            this.value = value;
-            isSet = true;
-        }
-
-        public void setDefault(Default<Boolean> def) {
-            changeDefault();
-            this.def = def;
-        }
-
-        public boolean getDefault() {
-            return def.value();
-        }
-
-        public boolean getValue() {
-            return isSet ? value : def.value();
         }
 
         @Override
@@ -2081,16 +2536,17 @@ abstract public class OptionRegistry {
         @Override
         protected void copyTo(OptionRegistry reg, String key) {
             if (!reg.hasOption(key)) {
-                reg.addBooleanOption(key, getOptionType(), getCategory(), def, getDescription());
+                reg.addBooleanOption(key, getOptionType(), getCategory(), defaultValue, testDefault, getDescription());
             }
             if (isSet) {
                 reg.setBooleanOption(key, value);
             }
         }
+
     }
 
     public interface OptionFilter {
-        public boolean filter(Option o);
+        public boolean filter(Option<?> o);
     }
 
     public class TypeOptionFilter implements OptionFilter {
@@ -2100,13 +2556,13 @@ abstract public class OptionRegistry {
             type = t;
         }
 
-        public boolean filter(Option o) {
+        public boolean filter(Option<?> o) {
             return o.type == type;
         }
     }
 
     public static final OptionFilter NULL_OPTION_FILTER = new OptionFilter() {
-        public boolean filter(Option o) {
+        public boolean filter(Option<?> o) {
             return true;
         }
     };
@@ -2126,4 +2582,5 @@ abstract public class OptionRegistry {
             super(message);
         }
     }
+
 }
