@@ -192,6 +192,41 @@ constraint
     x1 >=  1.00;
 end atomicWithInitialGuess;
 
+optimization InStream(objectiveIntegrand=x^2+u^2)
+    connector StreamConnector 
+        Real p(start=1); 
+        flow Real f(start=1.5); 
+        stream Real s(start=2.5); 
+    end StreamConnector; 
+    model A 
+        StreamConnector c1(f(nominal=0.1)); 
+        StreamConnector c2; 
+        StreamConnector c3(f(nominal=2)); 
+        Real x1(start=0.4) = inStream(c1.s); 
+        Real x2(start=0.7) = inStream(c2.s); 
+        Real x3(start=0.9) = inStream(c3.s); 
+    equation 
+        connect(c1, c2); 
+        connect(c1, c3); 
+    end A; 
+       
+    model B 
+        StreamConnector c4(p = 7, f = 8, s = 4); 
+        StreamConnector c5(s = 5); 
+        StreamConnector c6(s = 6, f = 9); 
+    end B; 
+     
+    A a; 
+    B b;
+    Real x(start=1, fixed=true);
+    input Real u;
+equation 
+    der(x) = x + a.x1 + b.c4.p + u;
+    connect(a.c1, b.c4); 
+    connect(a.c2, b.c5); 
+    connect(a.c3, b.c6);
+end InStream;
+
 package identifierTest
 
     optimization identfierTestModel(objectiveIntegrand=x1, finalTime=10) 
