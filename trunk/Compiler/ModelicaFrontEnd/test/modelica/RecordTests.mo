@@ -5545,7 +5545,7 @@ fclass RecordTests.RecordScalarize54
 initial equation 
  pre(temp_1) = 0;
 equation
- y.x[1] = ({1.0, 2.0})[temp_1];
+ y.x[1] = ({{1.0}, {2.0}})[temp_1,1];
  temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
 end RecordTests.RecordScalarize54;
 ")})));
