@@ -7098,6 +7098,62 @@ end FunctionTests.ArrayExpInFunc46;
 ")})));
 end ArrayExpInFunc46;
 
+model ArrayExpInFunc47
+    function f1
+        input Real[:,:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f1;
+    
+    function f2
+        input Real[2] x;
+        output Real y = f1({x,x});
+        algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    Real y = f2({time,time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc47",
+            description="",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc47
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc47.f2({time, time});
+
+public
+ function FunctionTests.ArrayExpInFunc47.f2
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := FunctionTests.ArrayExpInFunc47.f1({{x[1], x[2]}, {x[1], x[2]}});
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc47.f2;
+
+ function FunctionTests.ArrayExpInFunc47.f1
+  input Real[:,:] x;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:size(x, 2) loop
+    temp_1 := temp_1 + x[i1,i2];
+   end for;
+  end for;
+  y := temp_1;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc47.f1;
+
+end FunctionTests.ArrayExpInFunc47;
+")})));
+end ArrayExpInFunc47;
 
 
 model ArrayOutputScalarization1

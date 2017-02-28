@@ -1524,15 +1524,21 @@ aspect Scalarization {
     
     syn boolean FExp.scalarizeExpanded()       = 
         isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
-    eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
+    eq FIdUseExp.scalarizeExpanded()           = super.scalarizeExpanded() && scalarizeExpandedContext();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();
     eq FRecordConstructor.scalarizeExpanded()  = useTempVar && super.scalarizeExpanded();
     eq FIfExp.scalarizeExpanded()              = false;
-    eq FSubscriptedExp.scalarizeExpanded()     = false;
     
     syn boolean FFunctionCall.isVectorized() = false;
     eq FVectorFunctionCall.isVectorized() = true;
+    
+    inh boolean FIdUseExp.scalarizeExpandedContext();
+    eq BaseNode.getChild().scalarizeExpandedContext()           = true;
+    eq FFunctionCall.getChild().scalarizeExpandedContext()      = !inFunction();
+    eq FFunctionCallLeft.getChild().scalarizeExpandedContext() = !inFunction();
+    eq FAssignStmt.getLeft().scalarizeExpandedContext()         = !inFunction();
+    eq FSizeExp.getChild().scalarizeExpandedContext()           = !inFunction();
     
 	/**
 	 * Scalarize expressions.

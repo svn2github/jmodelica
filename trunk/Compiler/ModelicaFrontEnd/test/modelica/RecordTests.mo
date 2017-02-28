@@ -5526,31 +5526,6 @@ end RecordTests.RecordScalarize53;
 ")})));
 end RecordScalarize53;
 
-model RecordScalarize54
-    record R
-        Real[1] x;
-    end R;
-    R x[2] = {R(1:1),R(2:2)};
-    R y = x[integer(time)];
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="RecordScalarize54",
-            description="",
-            flatModel="
-fclass RecordTests.RecordScalarize54
- constant Real x[1].x[1] = 1;
- constant Real x[2].x[1] = 2;
- Real y.x[1];
- discrete Integer temp_1;
-initial equation 
- pre(temp_1) = 0;
-equation
- y.x[1] = ({{1.0}, {2.0}})[temp_1,1];
- temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
-end RecordTests.RecordScalarize54;
-")})));
-end RecordScalarize54;
-
 model RecordScalarize55
 
 function f

@@ -399,11 +399,10 @@ aspect CodeFuncCallInOutArgPrinters {
 }
 
 aspect CodeFuncCallInOutArg {
-    
-    syn FExp FExp.fArrayCell(Index i, int d) = this;
+
+    syn FExp FExp.fArrayCell(Index i, int d) = cell(i);
     eq FArray.fArrayCell(Index i, int d)     = getFExp(i.get(d) - 1).fArrayCell(i, d + 1);
-    eq FIdUseExp.fArrayCell(Index i, int d)  = cell(i);
-    
+
     public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
         if (isArray()) {
             if (size().isUnknown()) {
