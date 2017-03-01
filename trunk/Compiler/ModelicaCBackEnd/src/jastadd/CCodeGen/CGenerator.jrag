@@ -385,9 +385,12 @@ public class CGenerator extends GenericGenerator {
         }
         private void generateVarList(CodeStream genPrinter, String offset, boolean pre, Iterable<? extends FVariable>... lists) {
             int index = 0;
-            for (Iterable<? extends FVariable> list : lists)
-                for (FVariable fv : list)
-                    generateVar(genPrinter, fv, offset, index++, pre);
+            for (Iterable<? extends FVariable> list : lists) {
+                for (FVariable fv : list) {
+                    generateVar(genPrinter, fv, offset, index, pre);
+                    index = index + fv.numScalars();
+                }
+            }
         }
         
         private void generateExtObject(CodeStream genPrinter, FVariable fv, int index) {
