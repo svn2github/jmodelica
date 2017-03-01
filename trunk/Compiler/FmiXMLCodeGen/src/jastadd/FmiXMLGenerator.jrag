@@ -65,6 +65,39 @@ aspect FmiXML {
             return null; //Default value
     }
 
+    /**
+     * Contains all variables that are supposed to be generated in the XML.
+     * Also sorted correctly.
+     */
+    syn lazy Collection<FVariable> FClass.xmlVariables() {
+        // get and sort all FVariables
+        // TODO: Not very nice!
+        ArrayList<FVariable> variables = new ArrayList<FVariable>(allVariables());
+        VariableNameComparator comp = new VariableNameComparator();
+        Iterator<FVariable> it = variables.iterator();
+        while (it.hasNext()) {
+            if (!it.next().generateXMLVariable()) {
+                it.remove();
+            }
+        }
+        Collections.sort(variables, comp);
+        return variables;
+    }
+
+    /**
+     * Used for finding the indices for scalar variable tags.
+     */
+    syn lazy Map<String, Integer> FClass.xmlVariableIndexMap() {
+        //Create map for the indices of the scalar variables.
+        Map<String, Integer> res = new LinkedHashMap<String, Integer>();
+        Enumerator enumerator = new Enumerator(1);
+        for (FVariable var : xmlVariables()) {
+            var.generateXMLVariableIndex(res, enumerator);
+        }
+        return res;
+    }
+
+
 }
 
 aspect FmiXMLGenerator {
@@ -264,10 +297,6 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 	}
     
-    /**
-     * Used for finding the indices for scalar variable tags.
-     */
-    protected HashMap<String, Integer> variableIndexMap;
 
     /**
      * Abstract class for handling printing of variables. Things that are
@@ -285,24 +314,9 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         public String[] children() { return new String[] {"variables"}; }
         
         public void generateChildren(CodeStream genPrinter) {
-            // get and sort all FVariables
-            ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
-            VariableNameComparator comp = new VariableNameComparator();
-            Collections.sort(variables, comp);
-            
-            //Create map for the indices of the scalar variables.
-            variableIndexMap = new HashMap<String, Integer>();
-            Enumerator enumerator = new Enumerator(1);
-            for (FVariable var : variables) {
-                if (var.generateXMLVariable()) {
-                    var.generateXMLVariableIndex(variableIndexMap, enumerator);
-                }
-            }
-
-            for (FVariable var : variables) {
-                if (var.generateXMLVariable()) {
-                    var.generateXMLVariable(genPrinter, this);
-                }
+            fclass.xmlVariableIndexMap();
+            for (FVariable var : fclass.xmlVariables()) {
+                var.generateXMLVariable(genPrinter, this);
             }
         }
 
@@ -1384,7 +1398,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			}
             
             private int getDerivativeIdx(FVariable var) {
-                return variableIndexMap.get(((FDerivativeVariable)var).myDifferentiatedVariable().generateXMLName());
+                return fclass.xmlVariableIndexMap().get(((FDerivativeVariable)var).myDifferentiatedVariable().generateXMLName());
             }
 
 			public void generateAttributes(CodeStream genPrinter) {
@@ -1603,13 +1617,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             
             public void generateAttributes(CodeStream genPrinter) {
 				
-				generateAttribute("index", variableIndexMap.get(variable.generateXMLName()), genPrinter);
+				generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
 				
 				//Find the dependencies.
 				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
                 for (FVariable vv : dependentVariables(variable)) {
                     if (isInitialKnown(vv)) {
-                        vv.generateXMLDependencyIndex(dependencyIndex, variableIndexMap);
+                        vv.generateXMLDependencyIndex(dependencyIndex, fclass.xmlVariableIndexMap());
                     }
                 }
                 generateListAttribute("dependencies", dependencyIndex , genPrinter);
