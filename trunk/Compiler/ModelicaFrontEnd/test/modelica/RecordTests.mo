@@ -502,6 +502,38 @@ end RecordTests.RecordFlat13;
 ")})));
 end RecordFlat13;
 
+model RecordFlat14
+    record R
+        parameter Integer n = 1 annotation(Evaluate=true);
+        Real[n] x = 1:n;
+    end R;
+    
+    R r1 = R(n=2);
+    R r2 = r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFlat14",
+            description="Records: eval true on in record declaration",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordFlat14
+ eval parameter Integer r1.n = 2 /* 2 */;
+ Real r1.x[1];
+ Real r1.x[2];
+ eval parameter Integer r2.n = 2 /* 2 */;
+ Real r2.x[1];
+ Real r2.x[2];
+equation
+ r1.x[1] = 1;
+ r1.x[2] = 2;
+ r2.x[1] = r1.x[1];
+ r2.x[2] = r1.x[2];
+end RecordTests.RecordFlat14;
+")})));
+end RecordFlat14;
+
 model RecordType1
  record A
   Real a;
@@ -7792,7 +7824,7 @@ public
  record RecordTests.RecordEval7.SB
   parameter Real x;
   parameter Real y;
-  final parameter Integer n;
+  parameter Integer n;
  end RecordTests.RecordEval7.SB;
 
  record RecordTests.RecordEval7.A

@@ -57,7 +57,8 @@ aspect InstVariability {
         FTypePrefixVariability v =  super.calcVariability();
         if (v.constantVariability() && isInput() && inFunction() && isTopLevelInputOutput()) {
             return fDiscrete();
-        } if (v.parameterVariability()) {
+        }
+        if (v.parameterVariability() && !inRecordDecl()) {
             
             if (isSetAsInitial()) {
                 v = fInitialParameter();
