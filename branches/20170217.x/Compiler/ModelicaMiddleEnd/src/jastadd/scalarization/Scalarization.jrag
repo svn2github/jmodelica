@@ -1340,10 +1340,16 @@ aspect Scalarization {
 		boolean last = dim == ndims() - 1;
 		for (int i = 0, n = size().get(dim); i < n; i++) {
 			FExp res;
-			if (last)
-				res = createRecordConstructorCell(indexMap, exp.extractArrayCell(indexMap, it.next()));
-			else
-				res = createRecordConstructorArray(indexMap, exp, it, dim + 1);
+            if (last) {
+                if (exp.type().isUnknown()) {
+                    // Work around for expanding FIdTempExp which doesnt know its type
+                    res = createRecordConstructorCell(indexMap, exp.extractArrayCell(indexMap, it.next()));
+                } else {
+                    res = createRecordConstructorCell(indexMap, exp.cell(it.next()));
+                }
+            } else {
+                res = createRecordConstructorArray(indexMap, exp, it, dim + 1);
+            }
 			arr.addFExp(res);
 		}
 		return arr;
@@ -1374,7 +1380,7 @@ aspect Scalarization {
 		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
 		for (FRecordComponentType comp : getComponents()) {
              FExp next = exp.scalarRecordFExp(indexMap, comp.getName());
-             if (exp.type().isUnknown()) {
+             if (exp.type().isUnknown() || exp.useTempVar) {
                  // Work around for expanding FIdTempExp which doesnt know its type
                  next = comp.getFType().createRecordConstructor(indexMap, exp.dynamicFExp(next));
              }
@@ -1526,10 +1532,7 @@ aspect Scalarization {
         isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
     eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
-    eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();
-    eq FRecordConstructor.scalarizeExpanded()  = useTempVar && super.scalarizeExpanded();
     eq FIfExp.scalarizeExpanded()              = false;
-    eq FSubscriptedExp.scalarizeExpanded()     = false;
     
     syn boolean FFunctionCall.isVectorized() = false;
     eq FVectorFunctionCall.isVectorized() = true;

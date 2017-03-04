@@ -342,8 +342,7 @@ aspect eliminateLinearEquations {
             getLeft().isSimpleLinearExp() && getRight().isSimpleLinearExp();
 
     syn boolean FExp.isSimpleLinearExp()    = false;
-    eq FBinExp.isSimpleLinearExp()          = (getLeft().isAccess() || getLeft().isSimpleLinearExp()) &&
-                                                    (getRight().isAccess() || getRight().isSimpleLinearExp());
+    eq FBinExp.isSimpleLinearExp()          = getLeft().isSimpleLinearExp() && getRight().isSimpleLinearExp();
     eq FBoolBinExp.isSimpleLinearExp()      = false;
     eq FDotDivExp.isSimpleLinearExp()       = false;
     eq FDotMulExp.isSimpleLinearExp()       = getLiteral() != null && super.isSimpleLinearExp();

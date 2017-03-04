@@ -206,6 +206,20 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     }
     
     /**
+     * Generate an XML attribute.
+     * 
+     * @param name     the name of the attribute
+     * @param variable variable to fetch the value of the attribute from
+     * @param printer  the print stream to use
+     */
+    protected void generateAttributeIfSet(String name, FVariable variable, CodeStream printer) {
+        if (variable.attributeSet(name)) {
+            String value = variable.attributeCValue(name).xmlValue();
+            generateAttribute(name, value, printer);
+        }
+    }
+    
+    /**
      * Generate and XML attribute representing a list, the entires will be
      * space separated.
      * 

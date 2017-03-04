@@ -807,10 +807,15 @@ public class ModelicaCompiler {
      */
     protected String compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        // Always set certain options when compiling
-        // First save these options in temp options registry to reset when compiling has finished
+        /*
+         * Always set certain options when compiling.
+         * First save these options in the temporary options' registry to reset when compiling has finished.
+         */
         OptionRegistry tempOptions = options.copy();
-        //Set options for the target.
+
+        /*
+         * Set options for the target.
+         */
         target.setDefaultOptions(options);
         
         boolean doTearDown = true;
@@ -819,7 +824,9 @@ public class ModelicaCompiler {
             return doCompileUnit(className, fileName, target, compileTo);
         } finally {
             tryTearDown(doTearDown);
-            // set back all options
+            /*
+             * Reset all options.
+             */
             options.copyAllOptions(tempOptions);
         }
     }
@@ -1885,84 +1892,151 @@ public class ModelicaCompiler {
         public boolean getCodeGenFlag() {
             return codeGen;
         }
-        
+
         /**
          * Sets the default options that should be used for this target object. 
-         * 
-         * Should be updated when new default options are added.
          */
         public void setDefaultOptions(OptionRegistry options) {
-        
-            switch (this) {
-                case FMUME10:
-                case FMUME20:
-                case CHECK:
-                    options.setBooleanOption("generate_ode", true);
-                    options.setBooleanOption("generate_dae", false);
-                    options.setBooleanOption("equation_sorting", true);
-                    options.setBooleanOption("generate_fmi_me_xml", true);
-                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    break;
-                case FMUCS10:
-                case FMUCS20:
-                    options.setBooleanOption("generate_ode", true);
-                    options.setBooleanOption("generate_dae", false);
-                    options.setBooleanOption("equation_sorting", true);
-                    options.setBooleanOption("generate_fmi_me_xml", false);
-                    options.setBooleanOption("generate_fmi_cs_xml", true);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    break;
-                case FMUMECS20:
-                    options.setBooleanOption("generate_ode", true);
-                    options.setBooleanOption("generate_dae", false);
-                    options.setBooleanOption("equation_sorting", true);
-                    options.setBooleanOption("generate_fmi_me_xml", true);
-                    options.setBooleanOption("generate_fmi_cs_xml", true);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    break;
-                case JMU:
-                    options.setBooleanOption("generate_ode", false);
-                    options.setBooleanOption("generate_dae", true);
-                    options.setBooleanOption("equation_sorting", false);
-                    options.setBooleanOption("generate_fmi_me_xml", false);
-                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    options.setBooleanOption("relational_time_events", false);
-                    options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
-                    break;
-                case FMUX:
-                    options.setBooleanOption("generate_ode", false);
-                    options.setBooleanOption("generate_dae", true);
-                    options.setBooleanOption("equation_sorting", false);
-                    options.setBooleanOption("generate_fmi_me_xml", false);
-                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                    options.setBooleanOption("generate_xml_equations", true);
-                    break;
-                case NOCODEGEN:
-                    options.setBooleanOption("generate_runtime_option_parameters", false);
-                    options.setBooleanOption("equation_sorting", false);
-                    options.setBooleanOption("automatic_tearing", false);
-                    break;
-                default:
-                    break;
-            }
-            
-            switch (this) {
-                case FMUME10:
-                case FMUCS10:
-                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
-                    break;
-                case FMUME20:
-                case FMUCS20:
-                case FMUMECS20:
-                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
-                    break;
-                default:
-                    break;
+            for (TargetOptionContributor contributor :
+                    TargetOptionContributor.TARGET_DEFAULT_OPTION_CONTRIBUTORS.values()) {
+
+                contributor.setOptions(this, options);
             }
         }
+
     }
+
+    public static TargetOptionContributor addTargetOptionContributor(TargetOptionContributor contributor) {
+        Map<String, TargetOptionContributor> contributors = TargetOptionContributor.TARGET_DEFAULT_OPTION_CONTRIBUTORS;
+        String identity = contributor.identity();
+
+        if (contributors.containsKey(identity)) {
+            return contributors.get(identity);
+        }
+
+        contributors.put(identity, contributor);
+        return contributor;
+    }
+
+    private static final TargetOptionContributor TARGET_DEFAULT_BASE_CONTRIBUTOR = addTargetOptionContributor(
+                    new ModelicaCompiler.TargetOptionContributor() {
+
+                        @Override
+                        public void setOptions(TargetObject object, OptionRegistry options) {
+                            switch (object) {
+                                case FMUME10:
+                                case FMUME20:
+                                case CHECK:
+                                    options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", true);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    break;
+                                case FMUCS10:
+                                case FMUCS20:
+                                    options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    break;
+                                case FMUMECS20:
+                                    options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", true);
+                                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    break;
+                                case JMU:
+                                    options.setBooleanOption("generate_ode", false);
+                                    options.setBooleanOption("generate_dae", true);
+                                    options.setBooleanOption("equation_sorting", false);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    options.setBooleanOption("relational_time_events", false);
+                                    options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
+                                    break;
+                                case FMUX:
+                                    options.setBooleanOption("generate_ode", false);
+                                    options.setBooleanOption("generate_dae", true);
+                                    options.setBooleanOption("equation_sorting", false);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", true);
+                                    break;
+                                case NOCODEGEN:
+                                    options.setBooleanOption("generate_runtime_option_parameters", false);
+                                    options.setBooleanOption("equation_sorting", false);
+                                    options.setBooleanOption("automatic_tearing", false);
+                                    break;
+                                default:
+                                    break;
+                                }
+                        }
+
+                        @Override
+                        public String identity() {
+                            return "org.jmodelica.modelica.compiler.ModelicaCompiler.TARGET_DEFAULT_BASE_CONTRIBUTOR";
+                        }
+                    });
+
+    private static final TargetOptionContributor TARGET_FMI_VERSION_CONTRIBUTOR = addTargetOptionContributor(
+                    new ModelicaCompiler.TargetOptionContributor() {
+
+                        @Override
+                        public void setOptions(TargetObject object, OptionRegistry options) {
+                            switch (object) {
+                                case FMUME10:
+                                case FMUCS10:
+                                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
+                                    break;
+                                case FMUME20:
+                                case FMUCS20:
+                                case FMUMECS20:
+                                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        @Override
+                        public String identity() {
+                            return "org.jmodelica.modelica.compiler.ModelicaCompiler.TARGET_FMI_VERSION_CONTRIBUTOR";
+                        }
+                    });
+
+    /**
+     * Contributor class for additional default options dependent on compilation target.
+     */
+    public static abstract class TargetOptionContributor implements Comparable<TargetOptionContributor> {
+
+        private static final Map<String, TargetOptionContributor> TARGET_DEFAULT_OPTION_CONTRIBUTORS =
+            new HashMap<String, TargetOptionContributor>();
+
+        protected abstract String identity();
+        protected abstract void setOptions(TargetObject object, OptionRegistry options);
+
+        @Override
+        public int compareTo(TargetOptionContributor other) {
+            return identity().compareTo(other.identity());
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof TargetOptionContributor)) {
+                return false;
+            }
+            return compareTo((TargetOptionContributor) other) == 0;
+        }
+
+    }
+
 }
 
     /**

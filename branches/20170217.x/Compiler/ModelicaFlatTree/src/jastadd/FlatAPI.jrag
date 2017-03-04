@@ -75,7 +75,7 @@ aspect FlatAPI {
             public void add(Iterable<? extends FVariable> list) {
                 for (FVariable fv : list) {
                     map.put(fv, new Integer(index + type));
-                    index++;
+                    index = fv.incrementValueReferenceIndex(index);
                 }
             }
             
@@ -89,6 +89,10 @@ aspect FlatAPI {
                 return (i == null) ? -1 : i.intValue();
             }
         }
+    }
+    
+    public int FVariable.incrementValueReferenceIndex(int i) {
+        return i + 1;
     }
     
     syn lazy ValueReferenceMap FClass.valueReferenceMap() {
@@ -435,7 +439,7 @@ aspect FlatAPI {
     syn lazy Collection<FStringVariable> FClass.dependentStringConstants() =
             filterCollection(dependentConstants(), STRING_VARIABLE_FILTER);
 
-    syn int FClass.numIndependentParameters() = independentParameters().size();
+    syn int FClass.numIndependentParameters() = numScalars(independentParameters());
     syn lazy ArrayList<FVariable> FClass.independentParameters() {
         ArrayList<FVariable> l = new ArrayList<FVariable>();
         l.addAll(regularIndependentParameters());
@@ -445,7 +449,15 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numIndependentIntegerEnumParameters() = independentIntegerEnumParameters().size();
+    public static int FClass.numScalars(Collection<? extends FVariable> l) {
+        int res = 0;
+        for (FVariable fv : l) {
+            res = res + fv.numScalars();
+        }
+        return res;
+    }
+    
+    syn int FClass.numIndependentIntegerEnumParameters() = numScalars(independentIntegerEnumParameters());
     syn lazy ArrayList<FVariable> FClass.independentIntegerEnumParameters() {
         ArrayList<FVariable> l = new ArrayList<FVariable>();
         l.addAll(regularIndependentIntegerParameters());
@@ -459,7 +471,7 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
+    syn int FClass.numIndependentRealParameters() = numScalars(independentRealParameters());
     syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() {
         ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
         l.addAll(regularIndependentRealParameters());
@@ -469,7 +481,7 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
+    syn int FClass.numIndependentIntegerParameters() = numScalars(independentIntegerParameters());
     syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() {
         ArrayList<FIntegerVariable> l = new ArrayList<FIntegerVariable>();
         l.addAll(regularIndependentIntegerParameters());
@@ -479,7 +491,7 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numIndependentEnumParameters() = independentEnumParameters().size();
+    syn int FClass.numIndependentEnumParameters() = numScalars(independentEnumParameters());
     syn lazy ArrayList<FEnumVariable> FClass.independentEnumParameters() {
         ArrayList<FEnumVariable> l = new ArrayList<FEnumVariable>();
         l.addAll(regularIndependentEnumParameters());
@@ -489,7 +501,7 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
+    syn int FClass.numIndependentBooleanParameters() = numScalars(independentBooleanParameters());
     syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() {
         ArrayList<FBooleanVariable> l = new ArrayList<FBooleanVariable>();
         l.addAll(regularIndependentBooleanParameters());
@@ -499,7 +511,7 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
+    syn int FClass.numIndependentStringParameters() = numScalars(independentStringParameters());
     syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() {
         ArrayList<FStringVariable> l = new ArrayList<FStringVariable>();
         l.addAll(regularIndependentStringParameters());
@@ -509,138 +521,138 @@ aspect FlatAPI {
         return l;
     }
     
-    syn int FClass.numRegularIndependentParameters() = regularIndependentParameters().size();
+    syn int FClass.numRegularIndependentParameters() = numScalars(regularIndependentParameters());
     coll ArrayList<FVariable> FClass.regularIndependentParameters() 
       [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isRegularIndependentParameter() && shouldContribute()
     to FClass.regularIndependentParameters() for myFClass();
     
-    syn int FClass.numRegularIndependentRealParameters() = regularIndependentRealParameters().size();
+    syn int FClass.numRegularIndependentRealParameters() = numScalars(regularIndependentRealParameters());
     syn lazy Collection<FRealVariable> FClass.regularIndependentRealParameters() =
             filterCollection(regularIndependentParameters(), REAL_VARIABLE_FILTER);
 
-    syn int FClass.numRegularIndependentIntegerParameters() = regularIndependentIntegerParameters().size();
+    syn int FClass.numRegularIndependentIntegerParameters() = numScalars(regularIndependentIntegerParameters());
     syn lazy Collection<FIntegerVariable> FClass.regularIndependentIntegerParameters() =
             filterCollection(regularIndependentParameters(), INTEGER_VARIABLE_FILTER);
 
-    syn int FClass.numRegularIndependentEnumParameters() = regularIndependentEnumParameters().size();
+    syn int FClass.numRegularIndependentEnumParameters() = numScalars(regularIndependentEnumParameters());
     syn lazy Collection<FEnumVariable> FClass.regularIndependentEnumParameters() =
             filterCollection(regularIndependentParameters(), ENUM_VARIABLE_FILTER);
     
-    syn int FClass.numRegularIndependentBooleanParameters() = regularIndependentBooleanParameters().size();
+    syn int FClass.numRegularIndependentBooleanParameters() = numScalars(regularIndependentBooleanParameters());
     syn lazy Collection<FBooleanVariable> FClass.regularIndependentBooleanParameters() =
             filterCollection(regularIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
 
-    syn int FClass.numRegularIndependentStringParameters() = regularIndependentStringParameters().size();
+    syn int FClass.numRegularIndependentStringParameters() = numScalars(regularIndependentStringParameters());
     syn lazy Collection<FStringVariable> FClass.regularIndependentStringParameters() =
             filterCollection(regularIndependentParameters(), STRING_VARIABLE_FILTER);
     
-    syn int FClass.numStructuralIndependentParameters() = structuralIndependentParameters().size();
+    syn int FClass.numStructuralIndependentParameters() = numScalars(structuralIndependentParameters());
     coll ArrayList<FVariable> FClass.structuralIndependentParameters() 
       [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isStructuralIndependentParameter() && shouldContribute()
     to FClass.structuralIndependentParameters() for myFClass();
     
-    syn int FClass.numStructuralIndependentRealParameters() = structuralIndependentRealParameters().size();
+    syn int FClass.numStructuralIndependentRealParameters() = numScalars(structuralIndependentRealParameters());
     syn lazy Collection<FRealVariable> FClass.structuralIndependentRealParameters() =
             filterCollection(structuralIndependentParameters(), REAL_VARIABLE_FILTER);
     
-    syn int FClass.numStructuralIndependentIntegerParameters() = structuralIndependentIntegerParameters().size();
+    syn int FClass.numStructuralIndependentIntegerParameters() = numScalars(structuralIndependentIntegerParameters());
     syn lazy Collection<FIntegerVariable> FClass.structuralIndependentIntegerParameters() =
             filterCollection(structuralIndependentParameters(), INTEGER_VARIABLE_FILTER);
     
-    syn int FClass.numStructuralIndependentEnumParameters() = structuralIndependentEnumParameters().size();
+    syn int FClass.numStructuralIndependentEnumParameters() = numScalars(structuralIndependentEnumParameters());
     syn lazy Collection<FEnumVariable> FClass.structuralIndependentEnumParameters() =
             filterCollection(structuralIndependentParameters(), ENUM_VARIABLE_FILTER);
     
-    syn int FClass.numStructuralIndependentBooleanParameters() = structuralIndependentBooleanParameters().size();
+    syn int FClass.numStructuralIndependentBooleanParameters() = numScalars(structuralIndependentBooleanParameters());
     syn lazy Collection<FBooleanVariable> FClass.structuralIndependentBooleanParameters() =
             filterCollection(structuralIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
     
-    syn int FClass.numStructuralIndependentStringParameters() = structuralIndependentStringParameters().size();
+    syn int FClass.numStructuralIndependentStringParameters() = numScalars(structuralIndependentStringParameters());
     syn lazy Collection<FStringVariable> FClass.structuralIndependentStringParameters() =
             filterCollection(structuralIndependentParameters(), STRING_VARIABLE_FILTER);
     
-    syn int FClass.numFinalIndependentParameters() = finalIndependentParameters().size();
+    syn int FClass.numFinalIndependentParameters() = numScalars(finalIndependentParameters());
     coll ArrayList<FVariable> FClass.finalIndependentParameters()
       [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isFinalIndependentParameter() && shouldContribute()
     to FClass.finalIndependentParameters() for myFClass();
     
-    syn int FClass.numFinalIndependentRealParameters() = finalIndependentRealParameters().size();
+    syn int FClass.numFinalIndependentRealParameters() = numScalars(finalIndependentRealParameters());
     syn lazy Collection<FRealVariable> FClass.finalIndependentRealParameters() =
             filterCollection(finalIndependentParameters(), REAL_VARIABLE_FILTER);
     
-    syn int FClass.numFinalIndependentIntegerParameters() = finalIndependentIntegerParameters().size();
+    syn int FClass.numFinalIndependentIntegerParameters() = numScalars(finalIndependentIntegerParameters());
     syn lazy Collection<FIntegerVariable> FClass.finalIndependentIntegerParameters() =
             filterCollection(finalIndependentParameters(), INTEGER_VARIABLE_FILTER);
     
-    syn int FClass.numFinalIndependentEnumParameters() = finalIndependentEnumParameters().size();
+    syn int FClass.numFinalIndependentEnumParameters() = numScalars(finalIndependentEnumParameters());
     syn lazy Collection<FEnumVariable> FClass.finalIndependentEnumParameters() =
             filterCollection(finalIndependentParameters(), ENUM_VARIABLE_FILTER);
     
-    syn int FClass.numFinalIndependentBooleanParameters() = finalIndependentBooleanParameters().size();
+    syn int FClass.numFinalIndependentBooleanParameters() = numScalars(finalIndependentBooleanParameters());
     syn lazy Collection<FBooleanVariable> FClass.finalIndependentBooleanParameters() =
             filterCollection(finalIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
     
-    syn int FClass.numFinalIndependentStringParameters() = finalIndependentStringParameters().size();
+    syn int FClass.numFinalIndependentStringParameters() = numScalars(finalIndependentStringParameters());
     syn lazy Collection<FStringVariable> FClass.finalIndependentStringParameters() =
             filterCollection(finalIndependentParameters(), STRING_VARIABLE_FILTER);
     
-    syn int FClass.numEvalIndependentParameters() = evalIndependentParameters().size();
+    syn int FClass.numEvalIndependentParameters() = numScalars(evalIndependentParameters());
     coll ArrayList<FVariable> FClass.evalIndependentParameters()
       [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isEvalIndependentParameter() && shouldContribute()
     to FClass.evalIndependentParameters() for myFClass();
     
-    syn int FClass.numEvalIndependentRealParameters() = evalIndependentRealParameters().size();
+    syn int FClass.numEvalIndependentRealParameters() = numScalars(evalIndependentRealParameters());
     syn lazy Collection<FRealVariable> FClass.evalIndependentRealParameters() =
             filterCollection(evalIndependentParameters(), REAL_VARIABLE_FILTER);
     
-    syn int FClass.numEvalIndependentIntegerParameters() = evalIndependentIntegerParameters().size();
+    syn int FClass.numEvalIndependentIntegerParameters() = numScalars(evalIndependentIntegerParameters());
     syn lazy Collection<FIntegerVariable> FClass.evalIndependentIntegerParameters() =
             filterCollection(evalIndependentParameters(), INTEGER_VARIABLE_FILTER);
     
-    syn int FClass.numEvalIndependentEnumParameters() = evalIndependentEnumParameters().size();
+    syn int FClass.numEvalIndependentEnumParameters() = numScalars(evalIndependentEnumParameters());
     syn lazy Collection<FEnumVariable> FClass.evalIndependentEnumParameters() =
             filterCollection(evalIndependentParameters(), ENUM_VARIABLE_FILTER);
     
-    syn int FClass.numEvalIndependentBooleanParameters() = evalIndependentBooleanParameters().size();
+    syn int FClass.numEvalIndependentBooleanParameters() = numScalars(evalIndependentBooleanParameters());
     syn lazy Collection<FBooleanVariable> FClass.evalIndependentBooleanParameters() =
             filterCollection(evalIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
     
-    syn int FClass.numEvalIndependentStringParameters() = evalIndependentStringParameters().size();
+    syn int FClass.numEvalIndependentStringParameters() = numScalars(evalIndependentStringParameters());
     syn lazy Collection<FStringVariable> FClass.evalIndependentStringParameters() =
             filterCollection(evalIndependentParameters(), STRING_VARIABLE_FILTER);
     
-    syn int FClass.numDependentParameters() = dependentParameters().size();
+    syn int FClass.numDependentParameters() = numScalars(dependentParameters());
     coll ArrayList<FVariable> FClass.dependentParameters() 
       [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isDependentParameter() && shouldContribute()
     to FClass.dependentParameters() for myFClass();
 
-    syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
+    syn int FClass.numDependentRealParameters() = numScalars(dependentRealParameters());
     syn lazy Collection<FRealVariable> FClass.dependentRealParameters() =
             filterCollection(dependentParameters(), REAL_VARIABLE_FILTER);
 
-    syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
+    syn int FClass.numDependentIntegerParameters() = numScalars(dependentIntegerParameters());
     syn lazy Collection<FIntegerVariable> FClass.dependentIntegerParameters() =
             filterCollection(dependentParameters(), INTEGER_VARIABLE_FILTER);
 
-    syn int FClass.numDependentEnumParameters() = dependentEnumParameters().size();
+    syn int FClass.numDependentEnumParameters() = numScalars(dependentEnumParameters());
     syn lazy Collection<FEnumVariable> FClass.dependentEnumParameters() =
             filterCollection(dependentParameters(), ENUM_VARIABLE_FILTER);
     
-    syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
+    syn int FClass.numDependentBooleanParameters() = numScalars(dependentBooleanParameters());
     syn lazy Collection<FBooleanVariable> FClass.dependentBooleanParameters() =
             filterCollection(dependentParameters(), BOOLEAN_VARIABLE_FILTER);
     
-    syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
+    syn int FClass.numDependentStringParameters() = numScalars(dependentStringParameters());
     syn lazy Collection<FStringVariable> FClass.dependentStringParameters() =
             filterCollection(dependentParameters(), STRING_VARIABLE_FILTER);
 
@@ -1197,30 +1209,16 @@ aspect FlatAPI {
         return n;
     }
     eq FFunctionCall.numScalarTemporaries() {
-        int n = 0;
+        int n = super.numScalarTemporaries();
         for (FExp exp : getArgs()) { 
             if (exp.replaceWithTemp(false)) {
-                ++n;
+                n = n + exp.type().numScalarElements();
             }
         }
         if (isStringExp()) {
             ++n;
         }
         return n;
-    }
-    
-    eq Size.numScalarTemporaries() = 0;
-    eq MutableSize.numScalarTemporaries() {
-        int n = 0;
-        if (isUnknown()) {
-            for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
-                    ++n;
-                }
-            }
-        } else {
-            return super.numScalarTemporaries();
-        }
     }
     eq FFunctionCallLeft.numScalarTemporaries() = replaceWithTemp() ? 1 : 0;
     eq FAbstractEquation.numScalarTemporaries() {
@@ -2523,7 +2521,12 @@ aspect Attributes {
             attr = attr.findAttribute(getFQNamePart(i).getName());
         return attr;
     }
-    
+
+    syn CValue FVariable.attributeCValue(String name) {
+        FAttribute a = findAttribute(name);
+        return attributeSet(a) ? attributeExp(a).ceval() : CValue.UNKNOWN;
+    }
+
     syn CValue FVariable.attributeCValueString(String name) {
         FAttribute a = findAttribute(name);
         return (attributeSet(a) ? attributeExp(a).ceval() : new CValueString("")).expandArray(size());

@@ -763,7 +763,7 @@ initial equation
  x1[2] = 0.0;
 equation
  der(x1[1]) .+ der(x1[1]) = 1;
- 2 * der(x1[2]) = 2 * der(x1[1]);
+ der(x1[2]) .+ der(x1[2]) = 1;
 end Differentiation.Expressions.DotSub;
 ")})));
         end DotSub;

@@ -2150,8 +2150,10 @@ void func_CADCodeGenTests_CADFunction10_F1_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_
     jmi_array_ref_1(m_der_a, 8) = AD_WRAP_LITERAL(0);
     y_var_v = 0;
     y_der_v = AD_WRAP_LITERAL(0);
+    v_0 = jmi_divide_function(\"CADCodeGenTests.CADFunction10.F1\", 8,2,\"8 / 2\");
     i_0ie = v_0 + 1 / 2.0;
     for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        v_1 = jmi_divide_function(\"CADCodeGenTests.CADFunction10.F1\", 8,2,\"8 / 2\");
         j_1ie = v_1 + 1 / 2.0;
         for (j_1i = 1; j_1i < j_1ie; j_1i += 1) {
             if (COND_EXP_GT(jmi_array_val_1(m_var_a, floor(i_0i + j_1i * AD_WRAP_LITERAL(2))), x_var_v, JMI_TRUE, JMI_FALSE)) {

@@ -399,7 +399,10 @@ aspect CodeFuncCallInOutArgPrinters {
 }
 
 aspect CodeFuncCallInOutArg {
-    
+
+    syn FExp FExp.fArrayCell(Index i, int d) = cell(i);
+    eq FArray.fArrayCell(Index i, int d)     = getFExp(i.get(d) - 1).fArrayCell(i, d + 1);
+
     public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
         if (isArray()) {
             if (size().isUnknown()) {
@@ -410,10 +413,9 @@ aspect CodeFuncCallInOutArg {
             } else {
                 String type = isRecord() ? C_ARRAY_RECORD : p.arrayAccessConst();
                 String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-                Array arr = exp.getArray();
-                for (Index i : arr.indices()) {
+                for (Index i : exp.indices()) {
                     String cellName = pre + i.toUnclosedString() + ")";
-                    genFuncCallCellInOutArg_C(p, str, indent, cellName, arr.get(i));
+                    genFuncCallCellInOutArg_C(p, str, indent, cellName, exp.fArrayCell(i, 0));
                 }
             }
         } else {
