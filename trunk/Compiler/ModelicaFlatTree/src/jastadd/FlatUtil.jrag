@@ -1465,7 +1465,12 @@ aspect FlatFunctionUtils {
             return res;
         }
     }
-    
+
+    public <T extends CommonVariableDecl> ArrayList<T> InstPartialFunctionCall.filterPartialInputs(ArrayList<T> decls) {
+        myInstCallable().actualInstClassDecl().getFunctionType_computed = false;
+        return super.filterPartialInputs(decls);
+    }
+
     /**
      * \brief List of CommonVariableDecl used as outputs in this function call
      */

@@ -393,35 +393,26 @@ aspect NodeMethods {
 
     public class List {
 
-	    /**
-	     * Creates a new ArrayList containing all the elements in this list, in the same order.
-	     */
-	    public ArrayList<T> toArrayList() {
-	        ArrayList<T> l = new ArrayList<T>(getNumChild());
-	        for (T e : this)
-	            l.add(e);
-	        return l;
-	    }
-	    
-	    /**
-	     * Adds all nodes in an iterable to the list.
-	     */
-	    public void addAll(Iterable<? extends T> list) {
-	        for (T e : list)
-	            add(e);
-	    }
-	    
-	    /**
-	     * Adds all nodes in an array to the list.
-	     */
-	     public <S extends T> void addAll(S[] list) {
-	         for (S e : list)
-	             add(e);
-	    }
-	    
+        /**
+         * Creates a new ArrayList containing all the elements in this list, in the same order.
+         */
+        public ArrayList<T> toArrayList() {
+            ArrayList<T> l = new ArrayList<T>(getNumChild());
+            for (T e : this)
+                l.add(e);
+            return l;
+        }
+
+        /**
+         * Adds all nodes in an array to the list.
+         */
+         public <S extends T> void addAll(S[] list) {
+             for (S e : list)
+                 add(e);
+        }
+        
     }
 
-    
     /**
      * Replace <code>from</code> with <code>to</code>.
      * 
