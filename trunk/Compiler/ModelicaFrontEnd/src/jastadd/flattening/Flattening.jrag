@@ -2431,17 +2431,20 @@ aspect FlatExpressions {
         return createNode(l);
     }
     
-    public FArray FIterExp.flattenArray(FQName prefix) {
+    public FExp FIterExp.flattenArray(FQName prefix) {
         Iterable<CommonForIndex> forIndices = getForIndexs();
         Indices ind = Indices.create(forIndices);
-        FArray res = flattenArray(prefix, forIndices, ind, ind.iterator(), ind.size(), 0);
+        FExp res = flattenArray(prefix, forIndices, ind, ind.iterator(), ind.size(), 0);
         for (CommonForIndex fi : forIndices) {
             fi.clearEvaluationValue();
         }
         return res;
     }
     
-    public FArray FIterExp.flattenArray(FQName prefix, Iterable<CommonForIndex> forIndices, Indices ind, Iterator<Index> indIt, Size s, int dim) {
+    public FExp FIterExp.flattenArray(FQName prefix, Iterable<CommonForIndex> forIndices, Indices ind, Iterator<Index> indIt, Size s, int dim) {
+        if (size().isEmpty()) {
+            return type().createEmptyExp();
+        }
         List<FExp> l = new List<FExp>();
         if (dim == s.ndims() - 1) {
             for (int i = 0; i < s.get(dim); i++) {
