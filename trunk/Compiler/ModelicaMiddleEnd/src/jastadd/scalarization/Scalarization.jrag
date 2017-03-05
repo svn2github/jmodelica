@@ -1124,8 +1124,9 @@ aspect Scalarization {
 	public FExp FQNameFull.scalarRecordFExpForCon(Map<String,FExp> indexMap, FRecordConstructor con) {
 		FQNamePart first = getFQNamePart(0);
         FExp arg = con.component(first.getName());
-		if (first.hasFArraySubscripts())
-		    arg = arg.extractArrayCell(indexMap, first.getFArraySubscripts().asIndex());
+        if (first.hasFArraySubscripts()) {
+            arg = arg.extractArrayCell(indexMap, first.getFArraySubscripts().asIndex());
+        }
 		return copySuffix().scalarRecordFExp(indexMap, arg);
 	}
 	
@@ -1139,7 +1140,7 @@ aspect Scalarization {
     
     
     public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        if (size().isUnknown()) {
+        if (type().isUnknown() || size().isUnknown()) {
             int[] ind = i.index();
             FExp[] subs = new FExp[ind.length];
             for (int k = 0; k < ind.length; k++) {
@@ -1147,7 +1148,7 @@ aspect Scalarization {
             }
             return extractArrayCell(indexMap, subs);
         } else {
-            return dynamicFExp(getArray().get(i).scalarize(indexMap));
+            return cell(i);
         }
     }
     
@@ -1167,7 +1168,7 @@ aspect Scalarization {
         res.setElseExp(getElseExp().extractArrayCell(indexMap, i));
         return dynamicFExp(res);
     }
-	
+
 	/**
 	 * Scalarize equation and put all scalarized equations in list eqns.
 	 */
@@ -1341,12 +1342,7 @@ aspect Scalarization {
 		for (int i = 0, n = size().get(dim); i < n; i++) {
 			FExp res;
             if (last) {
-                if (exp.type().isUnknown()) {
-                    // Work around for expanding FIdTempExp which doesnt know its type
-                    res = createRecordConstructorCell(indexMap, exp.extractArrayCell(indexMap, it.next()));
-                } else {
-                    res = createRecordConstructorCell(indexMap, exp.cell(it.next()));
-                }
+                res = createRecordConstructorCell(indexMap, exp.extractArrayCell(indexMap, it.next()));
             } else {
                 res = createRecordConstructorArray(indexMap, exp, it, dim + 1);
             }
@@ -1845,7 +1841,7 @@ aspect Scalarization {
     public FExp FScalarExp.scalarizeExp(Map<String,FExp> indexMap) {
         int[] t = new int[getFExp().ndims()];
         Arrays.fill(t, 1);
-        return getFExp().extractArrayCell(indexMap, new Index(t));
+        return dynamicFExp(getFExp().extractArrayCell(indexMap, new Index(t))).scalarize(indexMap);
     }
     
 	public FExp FFillExp.scalarizeExp(Map<String,FExp> indexMap) {

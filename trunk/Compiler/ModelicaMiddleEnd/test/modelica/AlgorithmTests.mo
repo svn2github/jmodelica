@@ -873,4 +873,34 @@ end AlgorithmTests.UnusedBranch5;
 ")})));
 end UnusedBranch5;
 
+model VariableSubscriptAssign1
+    Real[2,2] y;
+algorithm
+    y[integer(time),:] := {time,time+1};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableSubscriptAssign1",
+            description="",
+            flatModel="
+fclass AlgorithmTests.VariableSubscriptAssign1
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ discrete Integer temp_1;
+ discrete Integer temp_2;
+initial equation 
+ pre(temp_1) = 0;
+ pre(temp_2) = 0;
+algorithm
+ temp_2 := if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then integer(time) else pre(temp_2);
+ ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_2,1] := time;
+ temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+ ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_1,2] := time + 1;
+end AlgorithmTests.VariableSubscriptAssign1;
+")})));
+end VariableSubscriptAssign1;
+
+
 end AlgorithmTests;
