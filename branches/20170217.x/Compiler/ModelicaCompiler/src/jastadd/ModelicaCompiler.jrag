@@ -2717,22 +2717,43 @@ public abstract class CCompilerDelegator {
     public void setModuleLibraryNames(java.util.List<String> names) {
         moduleLibNames = names;
     }
-    
-    public Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
-        Set<String> newPaths = new LinkedHashSet<String>();
+
+    /**
+     * "Expands" libraries, i.e., generates path strings for a directory and all the subdirectories within it where
+     * libraries should be searched for.
+     * <p>
+     * E.g. for the path set ["/dir"] and with the {@code subDir} argument equal to ["dir1", "dir2"],
+     * the following paths are generated:
+     * <ul>
+     * <li>"/dir/dir1/dir2"</li>
+     * <li>"/dir/dir1"</li>
+     * <li>"/dir"</li>
+     * </ul>
+     * 
+     * @param paths
+     *          The paths to the library directories which to expand.
+     * @param subDirs
+     *          The sub-directories of the paths in {@code paths} for which to generate library sub-directories.
+     * @return
+     *          a set of all sub-directories 
+     */
+    public Set<String> expandLibraries(Set<String> paths, String... subDirs) {
+        Set<String> libraries = new LinkedHashSet<String>();
+
         for (String path : paths) {
-            String platformed = path + "/" + platform;
-            
-            if (versionNumber != null) {
-                String compilered = platformed + "/" + compilerType + versionNumber;
-                newPaths.add(compilered);
-            }
-            
-            newPaths.add(platformed);
+            expandLibraries(libraries, subDirs, path, 0);
         }
-        return newPaths;
+        return libraries;
     }
-    
+
+    private void expandLibraries(Set<String> newPaths, String[] subDirs, String workingPath, int currentIndex) {
+        String newPath = workingPath + "/" + subDirs[currentIndex];
+        if (currentIndex < subDirs.length - 1) {
+            expandLibraries(newPaths, subDirs, newPath, currentIndex + 1);
+        }
+        newPaths.add(newPath);
+    }
+
     public static class Arguments {
         private String fileName;
         private OptionRegistry options;
@@ -3078,7 +3099,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         StringOperation libOp = new ChainedOperations(
                 new PlatformDirOperation(platform),
                 new QuoteOperation("-L"));
-        Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, "gcc", compilerVersionNumber(), platform);
+        Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
     

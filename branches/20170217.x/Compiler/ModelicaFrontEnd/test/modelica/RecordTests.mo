@@ -5609,6 +5609,63 @@ end RecordTests.RecordScalarize55;
 ")})));
 end RecordScalarize55;
 
+model RecordScalarize56
+record R
+    Real[:] x;
+end R;
+
+R r(x={i for i in 1:0});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize56",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize56
+end RecordTests.RecordScalarize56;
+")})));
+end RecordScalarize56;
+
+
+model RecordScalarize57
+record R
+    Real t = time;
+    constant Real[:] x;
+end R;
+
+R r(x=fill(1,0));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize57",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize57
+ Real r.t;
+equation
+ r.t = time;
+end RecordTests.RecordScalarize57;
+")})));
+end RecordScalarize57;
+
+model RecordScalarize58
+record R
+    Real[:] x;
+end R;
+
+constant R r(x=1:0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize58",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize58
+end RecordTests.RecordScalarize58;
+")})));
+end RecordScalarize58;
+
+
 model RecordFunc1
  record A
   Real x;
