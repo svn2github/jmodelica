@@ -1323,10 +1323,11 @@ aspect Scalarization {
 	 *        with the arguments taken from a record variable with the given name.
 	 */
 	public FExp FType.createRecordConstructor(Map<String,FExp> indexMap, FExp exp) {
-		if (isArray()) 
-			return createRecordConstructorArray(indexMap, exp, indices().iterator(), 0);
-		else 
-			return createRecordConstructorCell(indexMap, exp);
+        if (isArray() || exp.isArray()) {
+            return createRecordConstructorArray(indexMap, exp, indices().iterator(), 0);
+        } else {
+            return createRecordConstructorCell(indexMap, exp);
+        }
 	}
 	
 	/**
