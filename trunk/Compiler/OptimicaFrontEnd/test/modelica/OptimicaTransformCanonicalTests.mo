@@ -56,9 +56,9 @@ Dependent constants:
 
 Independent parameters: 
  p1: number of uses: 3, isLinear: true, evaluated binding exp: 1
- p2: number of uses: 1, isLinear: false
  startTime: number of uses: 0, isLinear: true, evaluated binding exp: 0
  finalTime: number of uses: 1, isLinear: true, evaluated binding exp: 1
+ p2: number of uses: 1, isLinear: false
 
 Dependent parameters: 
  x2: number of uses: 2, isLinear: true

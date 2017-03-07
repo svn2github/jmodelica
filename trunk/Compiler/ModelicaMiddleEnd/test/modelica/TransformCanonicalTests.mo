@@ -2662,9 +2662,9 @@ initial equation
  pre(m.b1) = false;
  pre(m.i1) = 4;
  m.t = 0;
- pre(m.ub1) = false;
- pre(m.ui1) = 0;
  pre(m.x2) = 2;
+ pre(m.ui1) = 0;
+ pre(m.ub1) = false;
  pre(temp_1) = false;
 equation
  der(m.t) = 1;

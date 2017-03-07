@@ -6295,8 +6295,8 @@ fclass FunctionTests.ArrayExpInFunc31
  discrete FunctionTests.ArrayExpInFunc31.E d;
 initial equation 
  pre(b) = 0;
- pre(c) = false;
  pre(d) = FunctionTests.ArrayExpInFunc31.E.A;
+ pre(c) = false;
 equation
  (a, b, c, d) = FunctionTests.ArrayExpInFunc31.f({1}, {1}, {true}, {FunctionTests.ArrayExpInFunc31.E.A});
 
@@ -6378,8 +6378,8 @@ fclass FunctionTests.ArrayExpInFunc32
  discrete FunctionTests.ArrayExpInFunc32.E d;
 initial equation 
  pre(b) = 0;
- pre(c) = false;
  pre(d) = FunctionTests.ArrayExpInFunc32.E.A;
+ pre(c) = false;
 equation
  (a, b, c, d) = FunctionTests.ArrayExpInFunc32.f({{1}}, {1}, {true}, {FunctionTests.ArrayExpInFunc32.E.A});
 

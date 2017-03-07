@@ -169,7 +169,6 @@ aspect VariabilityPropagation {
             public void perform() {
                 variabilityPropagation();
                 enableConstantFolding();
-                forceRewrites();
                 root().flushAllRecursiveClearFinal(); // Enable expression rewrites
             }
         }

@@ -151,7 +151,7 @@ public abstract class DAETag extends AbstractTag {
             return x < 1 ? Integer.MAX_VALUE : x;
         }
         
-        public void add(Collection<T> coll) {
+        public void add(Collection<? extends T> coll) {
             for (T element : coll) {
                 add(element);
             }

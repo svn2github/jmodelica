@@ -189,7 +189,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numDependentRealParameters());
+			genPrinter.print(fclass.numDependentRealParameters() + fclass.numRealInitialParameters());
 		}
 	
 	}
@@ -384,7 +384,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numDependentIntegerParameters());
+			genPrinter.print(fclass.numDependentIntegerParameters() + fclass.numIntegerInitialParameters());
 		}
 	
 	}
@@ -399,7 +399,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numDependentEnumParameters());
+			genPrinter.print(fclass.numDependentEnumParameters() + fclass.numEnumInitialParameters());
 		}
 	
 	}
@@ -504,7 +504,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numDependentBooleanParameters());
+			genPrinter.print(fclass.numDependentBooleanParameters() + fclass.numBooleanInitialParameters());
 		}
 	
 	}
@@ -609,7 +609,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-			genPrinter.print(fclass.numDependentStringParameters());
+			genPrinter.print(fclass.numDependentStringParameters() + fclass.numStringInitialParameters());
 		}
 	
 	}

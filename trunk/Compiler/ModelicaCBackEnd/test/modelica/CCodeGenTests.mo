@@ -1322,19 +1322,19 @@ $C_set_start_values$
 ",
             generatedCode="
 N_real_pi = 6;
-N_real_pi_s = 3;
-N_real_pi_f = 0;
-N_real_pi_e = 0;
+N_real_pi_s = 1;
+N_real_pi_f = 1;
+N_real_pi_e = 1;
 
 N_integer_pi = 5 + 4;
-N_integer_pi_s = 4 + 3;
-N_integer_pi_f = 0 + 0;
-N_integer_pi_e = 0 + 0;
+N_integer_pi_s = 2 + 1;
+N_integer_pi_f = 1 + 1;
+N_integer_pi_e = 1 + 1;
 
 N_boolean_pi = 4;
-N_boolean_pi_s = 3;
-N_boolean_pi_f = 0;
-N_boolean_pi_e = 0;
+N_boolean_pi_s = 1;
+N_boolean_pi_f = 1;
+N_boolean_pi_e = 1;
 
 o->o_ci = 0;
 o->n_ci = 0;
@@ -1361,11 +1361,11 @@ o->n = 4;
 #define _final1_10 ((*(jmi->z))[jmi->offs_real_pi+4])
 #define _eval1_15 ((*(jmi->z))[jmi->offs_real_pi+5])
 #define _reg2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+2])
 #define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+3])
 #define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+4])
-#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+5])
+#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+5])
 #define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+6])
 #define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+7])
 #define _eval3_17 ((*(jmi->z))[jmi->offs_integer_pi+8])
@@ -1395,28 +1395,28 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _reg1_0 = (1);
-    _reg2_1 = (1);
-    _reg3_2 = (1);
-    _reg4_3 = (JMI_TRUE);
     _dummy_1_20 = (0.0);
     _dummy_2_21 = (0.0);
-    JMI_ASG(STR_Z, _s_pi_reg5_4, (\"string\"));
     _struct1_5 = (1);
-    _struct2_6 = (1);
-    _struct3_7 = (1);
-    _struct4_8 = (JMI_TRUE);
-    JMI_ASG(STR_Z, _s_pi_struct5_9, (\"string\"));
     _final1_10 = (1);
+    _eval1_15 = (1);
+    _reg2_1 = (1);
+    _reg3_2 = (1);
+    _struct2_6 = (1);
+    _n_22 = (2);
+    _struct3_7 = (1);
     _final2_11 = (1);
     _final3_12 = (1);
-    _final4_13 = (JMI_TRUE);
-    JMI_ASG(STR_Z, _s_pi_final5_14, (\"string\"));
-    _eval1_15 = (1);
     _eval2_16 = (1);
     _eval3_17 = (1);
+    _reg4_3 = (JMI_TRUE);
+    _struct4_8 = (JMI_TRUE);
+    _final4_13 = (JMI_TRUE);
     _eval4_18 = (JMI_TRUE);
+    JMI_ASG(STR_Z, _s_pi_reg5_4, (\"string\"));
+    JMI_ASG(STR_Z, _s_pi_struct5_9, (\"string\"));
+    JMI_ASG(STR_Z, _s_pi_final5_14, (\"string\"));
     JMI_ASG(STR_Z, _s_pi_eval5_19, (\"string\"));
-    _n_22 = (2);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1468,8 +1468,8 @@ $C_set_start_values$
 #define _s_pi_pi_2 jmi->z_t.strings.values[2]
 #define _s_pi_ps_3 jmi->z_t.strings.values[3]
 #define _s_pi_pf_4 jmi->z_t.strings.values[4]
-#define _s_pi_pe_5 jmi->z_t.strings.values[5]
-#define _s_pi_pd_6 jmi->z_t.strings.values[6]
+#define _s_pi_pd_6 jmi->z_t.strings.values[5]
+#define _s_pi_pe_5 jmi->z_t.strings.values[6]
 
 o->o_ci = 0;
 o->n_ci = 2;
@@ -1495,8 +1495,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     JMI_ASG(STR_Z, _s_pi_pi_2, (\"s2\"));
     JMI_ASG(STR_Z, _s_pi_ps_3, (\"s3\"));
     JMI_ASG(STR_Z, _s_pi_pf_4, (\"s4\"));
-    JMI_ASG(STR_Z, _s_pi_pe_5, (\"s5\"));
     JMI_ASG(STR_Z, _s_pi_pd_6, (\"s2\"));
+    JMI_ASG(STR_Z, _s_pi_pe_5, (\"s5\"));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -14386,8 +14386,8 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     _temp_1_6 = (0);
     _der_r_10 = (0.0);
     pre_i_4 = (10);
-    pre_b_5 = (JMI_FALSE);
     pre_temp_1_6 = (0);
+    pre_b_5 = (JMI_FALSE);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -15764,43 +15764,43 @@ const int fmi_runtime_options_map_length = 40;
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    __block_jacobian_check_1 = (JMI_FALSE);
     __block_jacobian_check_tol_2 = (1.0E-6);
-    __block_solver_experimental_mode_3 = (0);
-    __block_solver_profiling_4 = (JMI_FALSE);
-    __cs_experimental_mode_5 = (0);
     __cs_rel_tol_6 = (1.0E-6);
-    __cs_solver_7 = (0);
     __cs_step_size_8 = (0.0011);
-    __enforce_bounds_9 = (JMI_TRUE);
     __events_default_tol_10 = (1.0E-10);
     __events_tol_factor_11 = (1.0E-4);
-    __iteration_variable_scaling_12 = (1);
-    __le_sparse_jacobian_threshold_13 = (-1);
-    __log_level_14 = (3);
-    __nle_active_bounds_mode_15 = (0);
-    __nle_brent_ignore_error_16 = (JMI_FALSE);
-    __nle_jacobian_calculation_mode_17 = (0);
     __nle_jacobian_finite_difference_delta_18 = (1.490116119384766E-8);
-    __nle_jacobian_update_mode_19 = (2);
-    __nle_solver_check_jac_cond_20 = (JMI_FALSE);
     __nle_solver_default_tol_21 = (1.0E-10);
-    __nle_solver_exit_criterion_22 = (3);
-    __nle_solver_max_iter_23 = (100);
-    __nle_solver_max_iter_no_jacobian_24 = (10);
     __nle_solver_max_residual_scaling_factor_25 = (1.0E10);
     __nle_solver_min_residual_scaling_factor_26 = (1.0E-10);
     __nle_solver_min_tol_27 = (1.0E-12);
     __nle_solver_regularization_tolerance_28 = (-1.0);
     __nle_solver_step_limit_factor_29 = (10.0);
     __nle_solver_tol_factor_30 = (1.0E-4);
+    __time_events_default_tol_37 = (2.220446049250313E-14);
+    __block_solver_experimental_mode_3 = (0);
+    __cs_experimental_mode_5 = (0);
+    __cs_solver_7 = (0);
+    __iteration_variable_scaling_12 = (1);
+    __le_sparse_jacobian_threshold_13 = (-1);
+    __log_level_14 = (3);
+    __nle_active_bounds_mode_15 = (0);
+    __nle_jacobian_calculation_mode_17 = (0);
+    __nle_jacobian_update_mode_19 = (2);
+    __nle_solver_exit_criterion_22 = (3);
+    __nle_solver_max_iter_23 = (100);
+    __nle_solver_max_iter_no_jacobian_24 = (10);
+    __residual_equation_scaling_35 = (1);
+    __block_jacobian_check_1 = (JMI_FALSE);
+    __block_solver_profiling_4 = (JMI_FALSE);
+    __enforce_bounds_9 = (JMI_TRUE);
+    __nle_brent_ignore_error_16 = (JMI_FALSE);
+    __nle_solver_check_jac_cond_20 = (JMI_FALSE);
     __nle_solver_use_last_integrator_step_31 = (JMI_TRUE);
     __nle_solver_use_nominals_as_fallback_32 = (JMI_TRUE);
     __rescale_after_singular_jac_33 = (JMI_TRUE);
     __rescale_each_step_34 = (JMI_FALSE);
-    __residual_equation_scaling_35 = (1);
     __runtime_log_to_file_36 = (JMI_FALSE);
-    __time_events_default_tol_37 = (2.220446049250313E-14);
     __use_Brent_in_1d_38 = (JMI_TRUE);
     __use_jacobian_equilibration_39 = (JMI_FALSE);
     __use_newton_for_brent_40 = (JMI_TRUE);

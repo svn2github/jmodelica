@@ -3116,11 +3116,14 @@ aspect CCodeGen {
         FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
         FVariable fv = (FVariable)left.myFV();
         if (fv.isExternalObject()) {
-            FExternalObjectVariable eo = (FExternalObjectVariable) fv;
-            eo.genDestructorCall_C(p, str, indent);
+            fv.genDestructorCall_C(p, str, indent);
         }
         fv.genAssignment_C(p, str, indent, fv.name_C(), getRight(), getLeft().isNegated());
         p.printPostSteps(this, str, indent);
+    }
+
+    public void FVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
+        throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
     }
 
     public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {

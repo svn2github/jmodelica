@@ -153,17 +153,17 @@ public class CGenerator extends GenericGenerator {
     /**
      * C: nominal values
      */
-    public class DAETag_C_nominals extends DAEArrayTag<FRealVariable> {
+    public class DAETag_C_nominals extends DAEArrayTag<FVariable> {
         
         public DAETag_C_nominals(AbstractGenerator myGenerator, FClass fclass) {
             super("C_DAE_nominals", myGenerator, fclass, "nominals", "jmi_real_t", "0.0");
         }
         
-        protected Collection<FRealVariable> elements() {
+        protected Collection<FVariable> elements() {
             return fclass.differentiatedRealVariables();
         }
         
-        protected void generateFor(FRealVariable e, CodeStream genPrinter) {
+        protected void generateFor(FVariable e, CodeStream genPrinter) {
             genPrinter.print(StrictMath.abs(e.nominalAttribute()));
         }
     
@@ -401,9 +401,9 @@ public class CGenerator extends GenericGenerator {
             genPrinter.print("])\n");
         }
         
-        private void generateExtObjectList(CodeStream genPrinter, Iterable<? extends FExternalObjectVariable> list) {
+        private void generateExtObjectList(CodeStream genPrinter, Iterable<FVariable> list) {
             int index = 0;
-            for (FExternalObjectVariable fv : list)
+            for (FVariable fv : list)
                 generateExtObject(genPrinter, fv, index++);
         }
         
@@ -411,16 +411,17 @@ public class CGenerator extends GenericGenerator {
             generateVarList(genPrinter, "real_ci",    fclass.independentRealConstants());
             generateVarList(genPrinter, "real_cd",    fclass.dependentRealConstants());
             generateVarList(genPrinter, "real_pi",    fclass.independentRealParameters());
-            generateVarList(genPrinter, "real_pd",    fclass.dependentRealParameters());
+            generateVarList(genPrinter, "real_pd",    fclass.dependentRealParameters(), fclass.realInitialParameters());
             // Handle enums as Integers
             generateVarList(genPrinter, "integer_ci", fclass.independentIntegerConstants(),  fclass.independentEnumConstants());
             generateVarList(genPrinter, "integer_cd", fclass.dependentIntegerConstants(),    fclass.dependentEnumConstants());
-            generateVarList(genPrinter, "integer_pi", fclass.independentIntegerEnumParameters());
-            generateVarList(genPrinter, "integer_pd", fclass.dependentIntegerParameters(),   fclass.dependentEnumParameters());
+            generateVarList(genPrinter, "integer_pi", fclass.independentIntegerParameters(), fclass.independentEnumParameters());
+            generateVarList(genPrinter, "integer_pd", fclass.dependentIntegerParameters(), fclass.integerInitialParameters(),
+                                                      fclass.dependentEnumParameters(), fclass.enumInitialParameters());
             generateVarList(genPrinter, "boolean_ci", fclass.independentBooleanConstants());
             generateVarList(genPrinter, "boolean_cd", fclass.dependentBooleanConstants());
             generateVarList(genPrinter, "boolean_pi", fclass.independentBooleanParameters());
-            generateVarList(genPrinter, "boolean_pd", fclass.dependentBooleanParameters());
+            generateVarList(genPrinter, "boolean_pd", fclass.dependentBooleanParameters(), fclass.booleanInitialParameters());
             generateVarList(genPrinter, "real_dx",    fclass.derivativeVariables());
             generateVarList(genPrinter, "real_x",     fclass.differentiatedRealVariables());
             generateVarList(genPrinter, "real_u",     fclass.realInputs());
@@ -451,7 +452,7 @@ public class CGenerator extends GenericGenerator {
         private LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable> m = 
                 new LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable>();
         
-        public ZOffsets(ArrayList<? extends FVariable> fvs) {
+        public ZOffsets(Collection<? extends FVariable> fvs) {
             for (FVariable fv : fvs) {
                 m.add(fv.variabilityCausality_C(), fv);
             }
@@ -1354,7 +1355,7 @@ public class CGenerator extends GenericGenerator {
 
         public void generate(CodeStream str) {
             CodePrinter p = ASTNode.printer_C;
-            for (FExternalObjectVariable eo : fclass.externalObjectVariables()) {
+            for (FVariable eo : fclass.externalObjectVariables()) {
                 eo.genDestructorCall_C(p, str, p.indent(""));
             }
         }

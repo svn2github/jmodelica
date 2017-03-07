@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,127 +38,865 @@ import org.jmodelica.util.streams.StreamGobbler;
 aspect FlatAPI {
 
     public class FClass {
+        
         /**
-         * Calculates and holds value references for all variables.
+         * Enum like object which represents the most specific categorisation
+         * of a variable that is represented in our z-vector.
          */
-        private class ValueReferenceMap {
-            private int index = 0;
-            private int type = 0;
-            private HashMap<FVariable, Integer> map = new HashMap<FVariable, Integer>();
+        public static interface ZCategory {
+            public static final ZCategory TIME = new FixedSizeCategory(1, "TIME");
+            public static final ZCategory HOMOTOPY_LAMBDA = new FixedSizeCategory(1, "HOMOTOPY_LAMBDA");
             
-            /**
-             * Start a new variable vector, i.e. reset the index part to 0.
-             */
-            public void resetIndex() {
-                index = 0;
+            public ZStructVector zStructVector();
+            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator);
+            public Comparator<FVariable> sorter(Collection<FVariable> vars, FClass fclass);
+        }
+
+        /**
+         * Implementation of ZCategory used by special constructs such as
+         * time and homotopy lambda.
+         */
+        public static class FixedSizeCategory implements ZCategory {
+            private final int size;
+            private final String name;
+
+            public FixedSizeCategory(int size, String name) {
+                this.size = size;
+                this.name = name;
+            }
+
+            @Override
+            public ZStructVector zStructVector() {
+                return ZStructVector.DEFAULT;
+            }
+
+            @Override
+            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator) {
+                if (vars.size() > 0) {
+                    throw new IllegalArgumentException("Special z index categories are not allowed to have entries!");
+                }
+                return new ZCategoryEntry(size, enumerator);
+            }
+
+            @Override
+            public Comparator<FVariable> sorter(Collection<FVariable> vars, FClass fclass) {
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        }
+
+        /**
+         * Used for specifying which z-vector is used for enumerating the
+         * specific variable category.
+         */
+        public static enum ZStructVector {
+            DEFAULT,
+            STRING,
+            EXTERNAL
+        }
+
+        /**
+         * Used in when specifying category for parameters (and constants).
+         * Parameters can be either independent or dependent. Dependent
+         * parameters are those which are calculated by a binding expression
+         * which references other parameters.
+         * 
+         * Currently there is only independent constants.
+         */
+        public static enum ParaDependency {
+            INDEPENDENT,
+            DEPENDENT
+        }
+
+        /**
+         * Enum like object which represents the different variable types we
+         * have in our z-vector.
+         * 
+         * Can't be enum since we wan't to use generics. Makes list retrieval
+         * easier!
+         */
+        public static enum ZType {
+            REAL,
+            INTEGER(1 << 28),
+            BOOLEAN(2 << 28),
+            ENUM(1 << 28),
+            STRING(3 << 28, ZStructVector.STRING),
+            EXTERNAL(0, ZStructVector.EXTERNAL);
+
+            private final int valueReferenceMask;
+            private final ZStructVector zStructVector;
+
+            private ZType() {
+                this(0);
+            }
+
+            private ZType(int valueReferenceMask) {
+                this(valueReferenceMask, ZStructVector.DEFAULT);
+            }
+
+            private ZType(int valueReferenceMask, ZStructVector zStructVector) {
+                this.valueReferenceMask = valueReferenceMask;
+                this.zStructVector = zStructVector;
+            }
+
+            public ZStructVector zStructVector() {
+                return zStructVector;
             }
 
             /**
-             * Increase the index counter by one.
+             * Takes a variable index and adds the types valuereference mask
              */
-            public void incIndex() {
-                index++;
+            public int mask(int index) {
+                return index ^ valueReferenceMask;
             }
-            
-            /**
-             * Set the value to use for the type bits.
-             */
-            public void setType(int t) {
-                type = t << 28;
+
+        }
+
+        /**
+         * Represents the different variabilities that are possible in the z-vector
+         */
+        public static enum ZVariability {
+            CONSTANT(),
+            REGULAR_PARAMETER(true),
+            STRUCTURAL_PARAMETER(true),
+            FINAL_PARAMETER(true),
+            EVAL_PARAMETER(true),
+            FREE_PARAMETER(true), // Only for Optimica!
+            INITIAL_PARAMETER(true),
+            DISCRETE,
+            INPUT,
+            DIFFERENTIATED,
+            DERIVATIVE,
+            CONTINUOUS;
+
+            private final boolean isParameter;
+
+            private ZVariability() {
+                this(false);
             }
+
+            private ZVariability(boolean isParameter) {
+                this.isParameter = isParameter;
+            }
+
+            public boolean isParameter() {
+                return isParameter;
+            }
+        }
+
+        /**
+         * Class representing ordinary z-vector categories.
+         */
+        public static class ZOrdinaryCategory implements ZCategory {
+            private final static Map<Integer, ZOrdinaryCategory> lookupMap = new HashMap<Integer, ZOrdinaryCategory>();
             
+            private static ZOrdinaryCategory create(ParaDependency dependency, ZType type, ZVariability variability) {
+                ZOrdinaryCategory category = new ZOrdinaryCategory(dependency, type, variability);
+                return category;
+            }
+
+            public static final ZOrdinaryCategory INDEPENDENT_REAL_CONSTANT                = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_CONSTANT                  = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory INDEPENDENT_REAL_REGULAR_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_REAL_STRUCTURAL_PARAMETER    = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_REAL_FINAL_PARAMETER         = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_REAL_EVAL_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.EVAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_REAL_FREE_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_PARAMETER                 = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_FREE_PARAMETER            = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory REAL_INITIAL_PARAMETER                   = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.INITIAL_PARAMETER);
+
+            public static final ZOrdinaryCategory INDEPENDENT_INTEGER_CONSTANT             = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory INDEPENDENT_ENUM_CONSTANT                = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_CONSTANT               = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_CONSTANT                  = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory INDEPENDENT_INTEGER_REGULAR_PARAMETER    = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_ENUM_REGULAR_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_INTEGER_STRUCTURAL_PARAMETER = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_ENUM_STRUCTURAL_PARAMETER    = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_INTEGER_FINAL_PARAMETER      = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_ENUM_FINAL_PARAMETER         = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_INTEGER_EVAL_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.EVAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_ENUM_EVAL_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.EVAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_INTEGER_FREE_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_ENUM_FREE_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_PARAMETER              = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_PARAMETER                 = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_FREE_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_FREE_PARAMETER            = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory INTEGER_INITIAL_PARAMETER                = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.INITIAL_PARAMETER);
+            public static final ZOrdinaryCategory ENUM_INITIAL_PARAMETER                   = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.INITIAL_PARAMETER);
+
+            public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_CONSTANT             = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_CONSTANT               = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_REGULAR_PARAMETER    = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_STRUCTURAL_PARAMETER = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_FINAL_PARAMETER      = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_EVAL_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.EVAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_FREE_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_PARAMETER              = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_FREE_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.FREE_PARAMETER);
+            public static final ZOrdinaryCategory BOOLEAN_INITIAL_PARAMETER                = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.INITIAL_PARAMETER);
+
+            public static final ZOrdinaryCategory INDEPENDENT_STRING_CONSTANT              = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory DEPENDENT_STRING_CONSTANT                = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.CONSTANT);
+            public static final ZOrdinaryCategory INDEPENDENT_STRING_REGULAR_PARAMETER     = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_STRING_STRUCTURAL_PARAMETER  = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_STRING_FINAL_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory INDEPENDENT_STRING_EVAL_PARAMETER        = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.EVAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_STRING_PARAMETER               = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory STRING_INITIAL_PARAMETER                 = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.INITIAL_PARAMETER);
+
+            public static final ZOrdinaryCategory INDEPENDENT_EXTERNAL_OBJECT              = create(ParaDependency.INDEPENDENT, ZType.EXTERNAL,ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_EXTERNAL_OBJECT                = create(ParaDependency.DEPENDENT,   ZType.EXTERNAL,ZVariability.REGULAR_PARAMETER);
+
+            public static final ZOrdinaryCategory REAL_INPUT                               = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.INPUT);
+            public static final ZOrdinaryCategory INTEGER_INPUT                            = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.INPUT);
+            public static final ZOrdinaryCategory ENUM_INPUT                               = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.INPUT);
+            public static final ZOrdinaryCategory BOOLEAN_INPUT                            = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.INPUT);
+            public static final ZOrdinaryCategory STRING_INPUT                             = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.INPUT);
+
+            public static final ZOrdinaryCategory DISCRETE_REAL                            = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.DISCRETE);
+            public static final ZOrdinaryCategory DISCRETE_INTEGER                         = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.DISCRETE);
+            public static final ZOrdinaryCategory DISCRETE_ENUM                            = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.DISCRETE);
+            public static final ZOrdinaryCategory DISCRETE_BOOLEAN                         = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.DISCRETE);
+            public static final ZOrdinaryCategory DISCRETE_STRING                          = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.DISCRETE);
+
+            public static final ZOrdinaryCategory DIFFERENTIATED                           = new ZOrdinaryCategory(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.DIFFERENTIATED) {
+                /**
+                 * This is needed since optimization and some simulation models
+                 * are extremely picky about the order of the states!
+                 */
+                @Override
+                public Comparator<FVariable> sorter(Collection<FVariable> vars, FClass fclass) {
+                    final Map<FVariable, Integer> posMap = new HashMap<FVariable, Integer>();
+                    int i = 0;
+                    for (FVariable var : fclass.differentiatedByFDerExp()) {
+                        posMap.put(var,  i++);
+                    }
+                    return new Comparator<FVariable>() {
+                        @Override
+                        public int compare(FVariable a, FVariable b) {
+                            Integer aPos = posMap.get(a);
+                            if (aPos == null) {
+                                throw new InternalCompilerError("Unable to determine index for differentiated variable " + a);
+                            }
+                            Integer bPos = posMap.get(b);
+                            if (bPos == null) {
+                                throw new InternalCompilerError("Unable to determine index for differentiated variable " + b);
+                            }
+                            return aPos - bPos;
+                        }};
+                };
+            };
+            public static final ZOrdinaryCategory DERIVATIVE                               = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.DERIVATIVE);
+            public static final ZOrdinaryCategory CONTINUOUS                               = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.CONTINUOUS);
+
+            public final ParaDependency dependency;
+            public final ZType type;
+            public final ZVariability variability;
+
             /**
-             * Calculate indices for the variables in a list and add them to the map.
-             * 
-             * Indices are assigned in the order variable lists are added. Within a list, 
-             * they are assigned in iterator order.
+             * Use create method instead!
              */
-            public void add(Iterable<? extends FVariable> list) {
-                for (FVariable fv : list) {
-                    map.put(fv, new Integer(index + type));
-                    index = fv.incrementValueReferenceIndex(index);
+            private ZOrdinaryCategory(ParaDependency dependency, ZType type, ZVariability variability) {
+                this.dependency = dependency;
+                this.type = type;
+                this.variability = variability;
+                lookupMap.put(computeLookupKey(this), this);
+            }
+
+            @Override
+            public ZStructVector zStructVector() {
+                return type.zStructVector();
+            }
+
+            @Override
+            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator) {
+                return new ZCategoryEntry(vars, enumerator);
+            }
+
+            private static int computeLookupKey(ZOrdinaryCategory category) {
+                return computeLookupKey(category.dependency, category.type, category.variability);
+            }
+
+            private static int computeLookupKey(ParaDependency dependency, ZType type, ZVariability variability) {
+                return dependency.hashCode() ^ type.hashCode() ^ variability.hashCode();
+            }
+
+            public static ZOrdinaryCategory resolve(FVariable var) {
+                if (var.isPreVariable()) {
+                    // Pre variables should be excluded!
+                    return null;
+                }
+                ParaDependency dependency;
+                if (var.isIndependentConstant() || var.isIndependentParameter()) {
+                    dependency = ParaDependency.INDEPENDENT;
+                } else {
+                    dependency = ParaDependency.DEPENDENT;
+                }
+                ZType type = var.type().genType();
+                ZVariability variability = var.zVariability();
+                // If any of these are null, then this variable is not of
+                // interest and should be ignored, indicate this with null.
+                if (dependency == null || type == null || variability == null) {
+                    return null;
+                }
+                return lookupMap.get(computeLookupKey(dependency, type, variability));
+            }
+
+            @Override
+            public Comparator<FVariable> sorter(Collection<FVariable> vars, FClass fclass) {
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return dependency + "_" + type + "_" + variability;
+            }
+        }
+
+        /**
+         * Manages value references for variables
+         */
+        public static class VarRefMap {
+            private static final ZCategory[] zIndexOrder = new ZCategory[] {
+                    ZOrdinaryCategory.INDEPENDENT_REAL_CONSTANT,
+                    ZOrdinaryCategory.DEPENDENT_REAL_CONSTANT,
+                    ZOrdinaryCategory.INDEPENDENT_REAL_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_REAL_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_REAL_FINAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_REAL_EVAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_REAL_FREE_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_REAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_REAL_FREE_PARAMETER,
+                    ZOrdinaryCategory.REAL_INITIAL_PARAMETER,
+
+                    ZOrdinaryCategory.INDEPENDENT_INTEGER_CONSTANT,
+                    ZOrdinaryCategory.INDEPENDENT_ENUM_CONSTANT,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_CONSTANT,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_CONSTANT,
+                    ZOrdinaryCategory.INDEPENDENT_INTEGER_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_ENUM_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_INTEGER_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_ENUM_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_INTEGER_FINAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_ENUM_FINAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_INTEGER_EVAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_ENUM_EVAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_INTEGER_FREE_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_ENUM_FREE_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_FREE_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_FREE_PARAMETER,
+                    ZOrdinaryCategory.INTEGER_INITIAL_PARAMETER,
+                    ZOrdinaryCategory.ENUM_INITIAL_PARAMETER,
+
+                    ZOrdinaryCategory.INDEPENDENT_BOOLEAN_CONSTANT,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_CONSTANT,
+                    ZOrdinaryCategory.INDEPENDENT_BOOLEAN_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_BOOLEAN_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_BOOLEAN_FINAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_BOOLEAN_EVAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_BOOLEAN_FREE_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_FREE_PARAMETER,
+                    ZOrdinaryCategory.BOOLEAN_INITIAL_PARAMETER,
+
+                    ZOrdinaryCategory.DERIVATIVE,
+                    ZOrdinaryCategory.DIFFERENTIATED,
+                    ZOrdinaryCategory.REAL_INPUT,
+                    ZOrdinaryCategory.CONTINUOUS,
+
+                    ZCategory.TIME,
+                    ZCategory.HOMOTOPY_LAMBDA,
+
+                    ZOrdinaryCategory.DISCRETE_REAL,
+
+                    ZOrdinaryCategory.DISCRETE_INTEGER,
+                    ZOrdinaryCategory.DISCRETE_ENUM,
+
+                    ZOrdinaryCategory.INTEGER_INPUT,
+                    ZOrdinaryCategory.ENUM_INPUT,
+
+                    ZOrdinaryCategory.DISCRETE_BOOLEAN,
+                    ZOrdinaryCategory.BOOLEAN_INPUT,
+
+                    ZOrdinaryCategory.INDEPENDENT_STRING_CONSTANT,
+                    ZOrdinaryCategory.DEPENDENT_STRING_CONSTANT,
+                    ZOrdinaryCategory.INDEPENDENT_STRING_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_STRING_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_STRING_FINAL_PARAMETER,
+                    ZOrdinaryCategory.INDEPENDENT_STRING_EVAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_STRING_PARAMETER,
+                    ZOrdinaryCategory.STRING_INITIAL_PARAMETER,
+
+                    ZOrdinaryCategory.DISCRETE_STRING,
+                    ZOrdinaryCategory.STRING_INPUT,
+
+                    ZOrdinaryCategory.INDEPENDENT_EXTERNAL_OBJECT,
+                    ZOrdinaryCategory.DEPENDENT_EXTERNAL_OBJECT,
+            };
+
+            private final Map<ZCategory, ZCategoryEntry> categoryMap;
+
+            public VarRefMap(Iterable<FVariable> vars, FClass fclass) {
+                Map<ZCategory, java.util.List<FVariable>> varMap = new HashMap<ZCategory, java.util.List<FVariable>>(zIndexOrder.length);
+                Map<ZStructVector, Enumerator> vectorEnumerators = new HashMap<ZStructVector, Enumerator>(zIndexOrder.length);
+                for (ZCategory category : zIndexOrder) {
+                    if (varMap.put(category, new ArrayList<FVariable>()) != null) {
+                        throw new IllegalArgumentException("There are multiple entries for " + category + " in z index map");
+                    }
+                    ZStructVector zStructVector = category.zStructVector();
+                    if (!vectorEnumerators.containsKey(zStructVector)) {
+                        vectorEnumerators.put(zStructVector, new Enumerator());
+                    }
+                }
+                for (FVariable var : vars) {
+                    ZCategory category = var.zCategory();
+                    if (category == null) {
+                        // Ignore, not supposed to be in any index map!
+                        continue;
+                    }
+                    Collection<FVariable> catVars = varMap.get(category);
+                    if (catVars == null) {
+                        // Ignore, not of interest in this index map!
+                        continue;
+                    }
+                    catVars.add(var);
+                }
+                categoryMap = new LinkedHashMap<ZCategory, ZCategoryEntry>(zIndexOrder.length);
+                for (ZCategory category : zIndexOrder) {
+                    java.util.List<FVariable> categoryVars = varMap.get(category);
+                    Comparator<FVariable> sorter = category.sorter(categoryVars, fclass);
+                    if (sorter != null) {
+                        Collections.sort(categoryVars, sorter);
+                    }
+                    Enumerator enumerator = vectorEnumerators.get(category.zStructVector());
+                    categoryMap.put(category, category.createEntry(categoryVars, enumerator));
                 }
             }
-            
+
             /**
-             * Get the index for a variable.
-             * 
-             * If it is not in the map, -1 is returned.
+             * Used for filtering on specific categories
              */
-            public int get(FVariable fv) {
-                Integer i = map.get(fv);
-                return (i == null) ? -1 : i.intValue();
+            public static abstract class CategoryFilter implements Criteria<Map.Entry<ZCategory, ZCategoryEntry>> {
+                @Override
+                public boolean test(Entry<ZCategory, ZCategoryEntry> elem) {
+                    if (elem.getKey() instanceof ZOrdinaryCategory) {
+                        return test((ZOrdinaryCategory) elem.getKey());
+                    } else {
+                        return false;
+                    }
+                }
+
+                /**
+                 * Null safe version of test(ZOrdinaryCategory). E.g. if null
+                 * is given, then false is returned.
+                 */
+                public boolean testSingle(ZOrdinaryCategory category) {
+                    return category != null && test(category);
+                }
+
+                protected abstract boolean test(ZOrdinaryCategory category);
+            }
+
+            /**
+             * Provides a collection containing all variables with specified
+             * type. This collection is read only and only support a small
+             * number of operations that collection supports.
+             */
+            public Collection<FVariable> getBy(final ZType type) {
+                return getBy(new CategoryFilter() {
+                    @Override
+                    protected boolean test(ZOrdinaryCategory category) {
+                        return category.type == type;
+                    }
+                });
+            }
+
+            /**
+             * Provides a collection containing all variables with specified
+             * variability. This collection is read only and only support a
+             * small number of operations that collection supports.
+             */
+            public Collection<FVariable> getBy(final ZVariability variability) {
+                return getBy(new CategoryFilter() {
+                    @Override
+                    protected boolean test(ZOrdinaryCategory category) {
+                        return category.variability == variability;
+                    }
+                    
+                });
+            }
+
+            /**
+             * Provides a collection containing all variables with specified
+             * dependency and variability. This collection is read only and 
+             * only support a small number of operations that collection supports.
+             */
+            public Collection<FVariable> getBy(final ParaDependency dependency, final ZVariability variability) {
+                return getBy(new CategoryFilter() {
+                    @Override
+                    protected boolean test(ZOrdinaryCategory category) {
+                        return category.dependency == dependency && category.variability == variability;
+                    }
+                    
+                });
+            }
+
+            private static final CategoryFilter PARAMETER_FILTER = new CategoryFilter() {
+                @Override
+                public boolean test(ZOrdinaryCategory category) {
+                    return category.variability.isParameter();
+                }
+                
+            };
+
+            /**
+             * Provides a collection containing all parameters with specified
+             * dependency. This collection is read only and only support a
+             * small number of operations that collection supports.
+             */
+            public Collection<FVariable> getParameterBy(final ParaDependency dependency) {
+                return getBy(new CategoryFilter() {
+                    @Override
+                    protected boolean test(ZOrdinaryCategory category) {
+                        return category.dependency == dependency && PARAMETER_FILTER.test(category);
+                    }
+                    
+                });
+            }
+
+            /**
+             * Provides a collection containing all parameters with specified
+             * dependency and type. This collection is read only and only
+             * support a small number of operations that collection supports.
+             */
+            public Collection<FVariable> getParameterBy(final ParaDependency dependency, final ZType type) {
+                return getBy(new CategoryFilter() {
+                    @Override
+                    protected boolean test(ZOrdinaryCategory category) {
+                        return category.dependency == dependency && category.type == type && PARAMETER_FILTER.test(category);
+                    }
+                    
+                });
+            }
+
+            public Collection<FVariable> getBy(CategoryFilter filter) {
+                return new SelectiveCollection(filter);
+            }
+
+            public ZCategoryEntry getBy(ZCategory category) {
+                return categoryMap.get(category);
+            }
+
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<ZCategory, ZCategoryEntry> entry : categoryMap.entrySet()) {
+                    if (entry.getValue().size > 0) {
+                        sb.append(entry.getKey());
+                        sb.append(" (");
+                        sb.append(entry.getValue().size);
+                        sb.append(" scalars, ");
+                        sb.append(entry.getValue().indexMap.size());
+                        sb.append(" entries):\n");
+                        for (Map.Entry<FVariable, Integer> varEntry : entry.getValue().indexMap.entrySet()) {
+                            sb.append("  ");
+                            sb.append(varEntry.getValue());
+                            sb.append(": ");
+                            sb.append(varEntry.getKey().name());
+                            sb.append("\n");
+                        }
+                    }
+                }
+                return sb.toString();
+            }
+
+            /**
+             * Class which is returned when selecting a sub-set of the
+             * categories.
+             */
+            private class SelectiveCollection implements Collection<FVariable> {
+                private final Iterable<Map.Entry<ZCategory, ZCategoryEntry>> entries;
+
+                private SelectiveCollection(CategoryFilter filter) {
+                    entries = new FilteredIterable<Map.Entry<ZCategory, ZCategoryEntry>>(categoryMap.entrySet(), filter);
+                }
+
+                public int size() {
+                    int size = 0;
+                    for (Map.Entry<ZCategory, ZCategoryEntry> entry : entries) {
+                        size += entry.getValue().size;
+                    }
+                    return size;
+                }
+
+                @Override
+                public Iterator<FVariable> iterator() {
+                    return new Iterator<FVariable>() {
+
+                        private Iterator<FVariable> current;
+                        private Iterator<Map.Entry<ZCategory, ZCategoryEntry>> entryIter = entries.iterator();
+
+                        @Override
+                        public boolean hasNext() {
+                            while ((current == null || !current.hasNext()) && entryIter.hasNext()) {
+                                current = entryIter.next().getValue().iterator();
+                            }
+                            return current.hasNext();
+                        }
+
+                        @Override
+                        public FVariable next() {
+                            if (!hasNext()) {
+                                throw new NoSuchElementException();
+                            }
+                            return current.next();
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException();
+                        }
+                    };
+                }
+
+                @Override
+                public boolean add(FVariable arg0) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public boolean addAll(Collection<? extends FVariable> c) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public void clear() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public boolean contains(Object o) {
+                    throw new UnsupportedOperationException("Don't use, inefficient!");
+                }
+
+                @Override
+                public boolean containsAll(Collection<?> c) {
+                    throw new UnsupportedOperationException("Don't use, inefficient!");
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return size() == 0;
+                }
+
+                @Override
+                public boolean remove(Object o) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public boolean removeAll(Collection<?> c) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public boolean retainAll(Collection<?> c) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public Object[] toArray() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public <T> T[] toArray(T[] a) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
+
+        /**
+         * Represents an entry of ZCategory and contains the offset, size and
+         * variables which falls into the specified category.
+         * 
+         * This class only implements a sub-set of the collection interface.
+         */
+        public static class ZCategoryEntry implements Collection<FVariable> {
+            private final int offset;
+            private final int size;
+            private final Map<FVariable, Integer> indexMap;
+
+            public ZCategoryEntry(int size, Enumerator enumerator) {
+                offset = enumerator.peek();
+                this.size = size;
+                this.indexMap = Collections.emptyMap();
+                // Now wind forward the enumerator
+                for (int i = 0; i < size; i++, enumerator.next());
+            }
+            public ZCategoryEntry(Collection<FVariable> vars, Enumerator enumerator) {
+                Map<FVariable, Integer> indexMap = new LinkedHashMap<FVariable, Integer>(vars.size());
+                offset = enumerator.peek();
+                for (FVariable var : vars) {
+                    indexMap.put(var, var.incrementValueReferenceIndex(enumerator));
+                }
+                size = enumerator.peek() - offset;
+                this.indexMap = Collections.unmodifiableMap(indexMap);
+            }
+
+            public int getIndexFor(FVariable var) {
+                return indexMap.get(var);
+            }
+
+            public int offset() {
+                return offset;
+            }
+            
+            @Override
+            public Iterator<FVariable> iterator() {
+                return indexMap.keySet().iterator();
+            }
+
+            @Override
+            public boolean add(FVariable e) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean addAll(Collection<? extends FVariable> c) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void clear() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                throw new UnsupportedOperationException("Don't use, inefficient!");
+            }
+
+            @Override
+            public boolean containsAll(Collection<?> c) {
+                throw new UnsupportedOperationException("Don't use, inefficient!");
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return size() == 0;
+            }
+
+            @Override
+            public boolean remove(Object o) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean removeAll(Collection<?> c) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean retainAll(Collection<?> c) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public int size() {
+                return size;
+            }
+
+            @Override
+            public Object[] toArray() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> T[] toArray(T[] a) {
+                throw new UnsupportedOperationException();
             }
         }
     }
-    
-    public int FVariable.incrementValueReferenceIndex(int i) {
-        return i + 1;
+
+    /**
+     * Returns the z variability enum for this variability and supplied
+     * variable.
+     */
+    syn FClass.ZVariability FTypePrefixVariability.zVariability(FVariable var) = null;
+    eq FConstant.zVariability(FVariable var)         = FClass.ZVariability.CONSTANT;
+    eq FFixedParameter.zVariability(FVariable var)   = FClass.ZVariability.REGULAR_PARAMETER;
+    eq FStructParameter.zVariability(FVariable var)  = FClass.ZVariability.STRUCTURAL_PARAMETER;
+    eq FFinalParameter.zVariability(FVariable var)   = FClass.ZVariability.FINAL_PARAMETER;
+    eq FEvalParameter.zVariability(FVariable var)    = FClass.ZVariability.EVAL_PARAMETER;
+    eq FInitialParameter.zVariability(FVariable var) = FClass.ZVariability.INITIAL_PARAMETER;
+    eq FDiscrete.zVariability(FVariable var) {
+        if (var.isInput()) {
+            return FClass.ZVariability.INPUT;
+        } else {
+            return FClass.ZVariability.DISCRETE;
+        }
     }
-    
-    syn lazy ValueReferenceMap FClass.valueReferenceMap() {
-        ValueReferenceMap map = new ValueReferenceMap();
-        map.setType(0);
-        map.add(independentRealConstants());
-        map.add(dependentRealConstants());
-        map.add(independentRealParameters());
-        map.add(dependentRealParameters());
-        
-        map.setType(1);
-        // Handle enums as Integers
-        map.add(independentIntegerConstants());
-        map.add(independentEnumConstants());
-        map.add(dependentIntegerConstants());
-        map.add(dependentEnumConstants());
-        map.add(independentIntegerEnumParameters());
-        map.add(dependentIntegerParameters());
-        map.add(dependentEnumParameters());
-        
-        map.setType(2);
-        map.add(independentBooleanConstants());
-        map.add(dependentBooleanConstants());
-        map.add(independentBooleanParameters());
-        map.add(dependentBooleanParameters());
-        
-        map.setType(0);
-        map.add(derivativeVariables());
-        map.add(differentiatedRealVariables());
-        map.add(realInputs());
-        map.add(algebraicContinousRealVariables());
-        
-        // Need to increase the index counter by one since the
-        // 'time' variable is stored in this position
-        map.incIndex();
-        
-        // Need to increase the index counter by one since the
-        // '_homotopy_lambda' variable is stored in this position
-        map.incIndex();
-        
-        map.add(discreteRealVariables());
-        
-        map.setType(1);
-        // Handle enums as Integers
-        map.add(discreteIntegerVariables());
-        map.add(discreteEnumVariables());
-        map.add(integerInputs());
-        map.add(enumInputs());
-        
-        map.setType(2);
-        map.add(discreteBooleanVariables());
-        map.add(booleanInputs());
-        
-        map.resetIndex();
-        map.setType(3);
-        map.add(independentStringConstants());
-        map.add(dependentStringConstants());
-        map.add(independentStringParameters());
-        map.add(dependentStringParameters());
-        map.add(stringInputs());
-        map.add(discreteStringVariables());
-        
-        return map;
+    eq FContinuous.zVariability(FVariable var) {
+        if (var.isInput()) {
+            return FClass.ZVariability.INPUT;
+        } else if (var.differentiatedByFDerExp()) {
+            return FClass.ZVariability.DIFFERENTIATED;
+        } else if (var.isDerivativeVariable()) {
+            return FClass.ZVariability.DERIVATIVE;
+        } else {
+            return FClass.ZVariability.CONTINUOUS;
+        }
     }
-    
+
+    /**
+     * Util for finding all differentiated variables. Can't use the fact that
+     * for var x there is a variable der(x), not true before additon of
+     * derivative variables!
+     */
+    coll LinkedHashSet<FVariable> FClass.differentiatedByFDerExp() 
+    [new LinkedHashSet<FVariable>()] with add root FClass;
+    FDerExp contributes getFIdUse().myFV().asFVariable() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
+    to FClass.differentiatedByFDerExp() for myFClass();
+            FDerivativeVariable contributes myDifferentiatedVariable() when (shouldContribute())
+            to FClass.differentiatedByFDerExp() for myFClass();
+
+    syn boolean FVariable.differentiatedByFDerExp() = myFClass().differentiatedByFDerExp().contains(this);
+
+    /**
+     * Calculates the z variability enum for this variable.
+     */
+    syn FClass.ZVariability FVariable.zVariability() = getFTypePrefixVariability().zVariability(this);
+
+    syn FClass.ZType FType.genType() = null;
+    eq FBooleanType.genType()          = FClass.ZType.BOOLEAN;
+    eq FEnumLiteralType.genType()      = FClass.ZType.ENUM;
+    eq FEnumType.genType()             = FClass.ZType.ENUM;
+    eq FIntegerType.genType()          = FClass.ZType.INTEGER;
+    eq FRealType.genType()             = FClass.ZType.REAL;
+    eq FStringType.genType()           = FClass.ZType.STRING;
+    eq FExternalObjectType.genType()   = FClass.ZType.EXTERNAL;
+
+    /**
+     * Lazy attribute which holds the variable reference map.
+     */
+    syn lazy VarRefMap FClass.varRefMap() = new VarRefMap(getFVariables(), this);
+
+    syn FClass.ZOrdinaryCategory FVariable.zCategory() = FClass.ZOrdinaryCategory.resolve(this);
+
+    public int FVariable.incrementValueReferenceIndex(Enumerator e) {
+        return e.next();
+    }
+
     /**
      * The value reference value is represented by a 32 bit unsigned integer 
      * variable. The lowest 27 bits is used to represent the index of a 
@@ -174,118 +913,48 @@ aspect FlatAPI {
      *
      */
     inh lazy int FAbstractVariable.valueReference();
-    eq FClass.getFVariable(int i).valueReference()     = valueReferenceMap().get(getFVariable(i));
+    eq FClass.getFVariable(int i).valueReference() {
+        FVariable var = getFVariable(i);
+        ZOrdinaryCategory category = ZOrdinaryCategory.resolve(var);
+        if (category == null) {
+            return -1;
+        }
+        return category.type.mask(varRefMap().getBy(category).getIndexFor(var));
+    }
     eq FClass.getAliasVariable(int i).valueReference() = getAliasVariable(i).aliasValueReference();
     eq FClass.getAliasConstant(int i).valueReference() = getAliasConstant(i).aliasValueReference();
     eq FClass.getFAbstractEquation().valueReference()  = -1;
     eq Root.getChild().valueReference()                = -1;
     
-    syn int FVariable.aliasValueReference() = alias()!=null? 
-        alias().valueReference(): -1;
+    syn int FVariable.aliasValueReference() = alias() != null ? alias().valueReference() : -1;
 
     syn int FAbstractVariable.indexInZ() = -1;
     eq FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
-    
+
     syn boolean FIdUseExp.isConsecutiveInZ(FIdUseExp use) = myFV().isConsecutiveInZ(use.myFV());
-    
+
     syn boolean FAbstractVariable.isConsecutiveInZ(FAbstractVariable fv) = false;
     eq FVariable.isConsecutiveInZ(FAbstractVariable fv) = indexInZ() + 1 == fv.indexInZ();
 
-    syn int FClass.independentRealConstantsOffset() = 0;
-    syn int FClass.independentIntegerConstantsOffset() = 
-        numIndependentRealConstants();  
-    syn int FClass.independentEnumConstantsOffset() =
-        independentIntegerConstantsOffset() +     
-        numIndependentIntegerConstants();   
-    syn int FClass.independentBooleanConstantsOffset() =
-        independentEnumConstantsOffset() +    
-        numIndependentEnumConstants();  
-        
-    syn int FClass.dependentRealConstantsOffset() = 
-        independentBooleanConstantsOffset() + 
-        numIndependentBooleanConstants();
-    syn int FClass.dependentIntegerConstantsOffset() =
-        dependentRealConstantsOffset() +     
-        numDependentRealConstants();    
-    syn int FClass.dependentEnumConstantsOffset() =
-        dependentIntegerConstantsOffset() +       
-        numDependentIntegerConstants(); 
-    syn int FClass.dependentBooleanConstantsOffset() =
-        dependentEnumConstantsOffset() +      
-        numDependentEnumConstants();    
+    
+    syn int FClass.derivativeVariablesOffset() = varRefMap().getBy(ZOrdinaryCategory.DERIVATIVE).offset();
+    syn int FClass.realInputsOffset() = varRefMap().getBy(ZOrdinaryCategory.REAL_INPUT).offset();
+    syn int FClass.algebraicContinousRealVariablesOffset() = varRefMap().getBy(ZOrdinaryCategory.CONTINUOUS).offset();
 
-    syn int FClass.independentRealParametersOffset() = 
-        dependentBooleanConstantsOffset() + 
-        numDependentBooleanConstants();
-    syn int FClass.independentIntegerParametersOffset() =
-        independentRealParametersOffset() +      
-        numIndependentRealParameters(); 
-    syn int FClass.independentEnumParametersOffset() =
-        independentIntegerParametersOffset() +    
-        numIndependentIntegerParameters();  
-    syn int FClass.independentBooleanParametersOffset() =
-        independentEnumParametersOffset() +       
-        numIndependentEnumParameters(); 
-        
-    syn int FClass.dependentRealParametersOffset() = 
-        independentBooleanParametersOffset() + 
-        numIndependentBooleanParameters();
-    syn int FClass.dependentIntegerParametersOffset() =
-        dependentRealParametersOffset() +    
-        numDependentRealParameters();   
-    syn int FClass.dependentEnumParametersOffset() =
-        dependentIntegerParametersOffset() +      
-        numDependentIntegerParameters();    
-    syn int FClass.dependentBooleanParametersOffset() =
-        dependentEnumParametersOffset() +     
-        numDependentEnumParameters();   
 
-    syn int FClass.derivativeVariablesOffset() = 
-        dependentBooleanParametersOffset() + 
-        numDependentBooleanParameters();
-    syn int FClass.differentiatedRealVariablesOffset() = 
-        derivativeVariablesOffset() + 
-        numDerivativeVariables();
-    syn int FClass.realInputsOffset() = 
-        differentiatedRealVariablesOffset() + 
-        numDifferentiatedRealVariables();
-    syn int FClass.algebraicContinousRealVariablesOffset() = 
-        realInputsOffset() + 
-        numRealInputs();
+    syn int FClass.integerInputsOffset() = varRefMap().getBy(ZOrdinaryCategory.INTEGER_INPUT).offset();
+    syn int FClass.enumInputsOffset() = varRefMap().getBy(ZOrdinaryCategory.ENUM_INPUT).offset();
 
-    syn int FClass.timeOffset() =
-        algebraicContinousRealVariablesOffset() + 
-        numAlgebraicContinousRealVariables();
+    syn int FClass.booleanInputsOffset() = varRefMap().getBy(ZOrdinaryCategory.BOOLEAN_INPUT).offset();
 
-    syn int FClass.homotopyLambdaOffset() =
-        timeOffset() + 1;
+    syn int FClass.timeOffset() = varRefMap().getBy(ZCategory.TIME).offset();
 
-    syn int FClass.discreteRealVariablesOffset() = 
-        homotopyLambdaOffset() + 1;
+    syn int FClass.homotopyLambdaOffset() = varRefMap().getBy(ZCategory.HOMOTOPY_LAMBDA).offset();
 
-    syn int FClass.discreteIntegerVariablesOffset() = 
-        discreteRealVariablesOffset() + 
-        numDiscreteRealVariables();
-    syn int FClass.discreteEnumVariablesOffset() = 
-        discreteIntegerVariablesOffset() + 
-        numDiscreteIntegerVariables();
-
-    syn int FClass.integerInputsOffset() = 
-        discreteEnumVariablesOffset() + 
-        numDiscreteEnumVariables();
-    syn int FClass.enumInputsOffset() = 
-        integerInputsOffset() + 
-        numIntegerInputs();
-
-    syn int FClass.discreteBooleanVariablesOffset() = 
-        enumInputsOffset() + 
-        numEnumInputs();
-    syn int FClass.booleanInputsOffset() = 
-        discreteBooleanVariablesOffset() + 
-        numDiscreteBooleanVariables();
-
+    // TODO: Remove!?
     syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
     
+    // TODO: Remove?!?
     syn boolean FDerivativeVariable.shouldContributeFiltered() = shouldContribute() && (myDifferentiatedVariable().stateSelectAttributeSet() || uses().size() > 0);
     
     public class FClass {
@@ -298,6 +967,7 @@ aspect FlatAPI {
             return res;
         }
         
+        // TODO: Remove?!
         public static <T extends FVariable, C extends Set<T>> C intersectFVSet(
                 C a, Collection<? extends FVariable> b) {
             try {
@@ -348,361 +1018,254 @@ aspect FlatAPI {
         };
         
     }
-    
-    
-    
+
+
+
+
+
 
     syn int FClass.numReals() = reals().size();
-    coll ArrayList<FRealVariable> FClass.reals() 
-      [new ArrayList<FRealVariable>()] with add root FClass;
-    FRealVariable contributes this when shouldContribute() to FClass.reals() for myFClass();
+    syn Collection<FVariable> FClass.reals() = varRefMap().getBy(ZType.REAL);
 
     syn int FClass.numIntegers() = integers().size();
-    coll ArrayList<FIntegerVariable> FClass.integers() 
-      [new ArrayList<FIntegerVariable>()] with add root FClass;
-    FIntegerVariable contributes this when shouldContribute() to FClass.integers() for myFClass();
+    syn Collection<FVariable> FClass.integers() = varRefMap().getBy(ZType.INTEGER);
 
     syn int FClass.numEnums() = enums().size();
-    coll ArrayList<FEnumVariable> FClass.enums() 
-      [new ArrayList<FEnumVariable>()] with add root FClass;
-    FEnumVariable contributes this when shouldContribute() to FClass.enums() for myFClass();
+    syn Collection<FVariable> FClass.enums() = varRefMap().getBy(ZType.ENUM);
 
     syn int FClass.numBooleans() = booleans().size();
-    coll ArrayList<FBooleanVariable> FClass.booleans() 
-      [new ArrayList<FBooleanVariable>()] with add root FClass;
-    FBooleanVariable contributes this when shouldContribute() to FClass.booleans() for myFClass();
+    syn Collection<FVariable> FClass.booleans() = varRefMap().getBy(ZType.BOOLEAN);
 
     syn int FClass.numStrings() = strings().size();
-    coll ArrayList<FStringVariable> FClass.strings() 
-      [new ArrayList<FStringVariable>()] with add root FClass;
-    FStringVariable contributes this when shouldContribute() to FClass.strings() for myFClass();
+    syn Collection<FVariable> FClass.strings() = varRefMap().getBy(ZType.STRING);
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
-    coll ArrayList<FVariable> FClass.independentConstants() 
-      [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes this 
-      when isIndependentConstant() && shouldContribute() 
-      to FClass.independentConstants() for myFClass();
+    syn Collection<FVariable> FClass.independentConstants() = varRefMap().getBy(ParaDependency.INDEPENDENT, ZVariability.CONSTANT);
 
     syn int FClass.numExternalObjectVariables() = externalObjectVariables().size();
-    coll ArrayList<FExternalObjectVariable> FClass.externalObjectVariables()
-      [new ArrayList<FExternalObjectVariable>()] with add root FClass;
-    FExternalObjectVariable contributes this when shouldContribute() to FClass.externalObjectVariables() for myFClass();
+    syn Collection<FVariable> FClass.externalObjectVariables() = varRefMap().getBy(ZType.EXTERNAL);
 
+    syn int FClass.independentRealConstantsOffset() = independentRealConstants().offset();
     syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
-    syn lazy Collection<FRealVariable> FClass.independentRealConstants() =
-            filterCollection(independentConstants(), REAL_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.independentRealConstants() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_REAL_CONSTANT);
+
+    syn int FClass.independentIntegerConstantsOffset() = independentIntegerConstants().offset();
     syn int FClass.numIndependentIntegerConstants() = independentIntegerConstants().size();
-    syn lazy Collection<FRealVariable> FClass.independentIntegerConstants() =
-            filterCollection(independentConstants(), INTEGER_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.independentIntegerConstants() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_INTEGER_CONSTANT);
+
+    syn int FClass.independentEnumConstantsOffset() = independentEnumConstants().offset();
     syn int FClass.numIndependentEnumConstants() = independentEnumConstants().size();
-    syn lazy Collection<FRealVariable> FClass.independentEnumConstants() =
-            filterCollection(independentConstants(), ENUM_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.independentEnumConstants() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_ENUM_CONSTANT);
+
+    syn int FClass.independentBooleanConstantsOffset() = independentBooleanConstants().offset();
     syn int FClass.numIndependentBooleanConstants() = independentBooleanConstants().size();
-    syn lazy Collection<FRealVariable> FClass.independentBooleanConstants() =
-            filterCollection(independentConstants(), BOOLEAN_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.independentBooleanConstants() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_BOOLEAN_CONSTANT);
     
     syn int FClass.numIndependentStringConstants() = independentStringConstants().size();
-    syn lazy Collection<FRealVariable> FClass.independentStringConstants() =
-            filterCollection(independentConstants(), STRING_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.independentStringConstants() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_STRING_CONSTANT);
 
     // TODO: Is there such a thing as a dependent constant??
     syn int FClass.numDependentConstants() = dependentConstants().size();
-    syn ArrayList<FVariable> FClass.dependentConstants() = new ArrayList<FVariable>(0);
-// This collection would never contain anything, replacing with just an empty list.
-//  coll ArrayList<FVariable> FClass.dependentConstants() 
-//    [new ArrayList<FVariable>()] with add root FClass;
-//  FVariable contributes
-//      this when false
-//  to FClass.dependentConstants() for myFClass();
-    
+    syn Collection<FVariable> FClass.dependentConstants() = varRefMap().getBy(ParaDependency.DEPENDENT, ZVariability.CONSTANT);
+
+    syn int FClass.dependentRealConstantsOffset() = dependentRealConstants().offset();
     syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
-    syn lazy Collection<FRealVariable> FClass.dependentRealConstants() =
-            filterCollection(dependentConstants(), REAL_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.dependentRealConstants() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_REAL_CONSTANT);
+
+    syn int FClass.dependentIntegerConstantsOffset() = dependentIntegerConstants().offset();
     syn int FClass.numDependentIntegerConstants() = dependentIntegerConstants().size();
-    syn lazy Collection<FIntegerVariable> FClass.dependentIntegerConstants() =
-            filterCollection(dependentConstants(), INTEGER_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.dependentIntegerConstants() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_INTEGER_CONSTANT);
+
+    syn int FClass.dependentEnumConstantsOffset() = dependentEnumConstants().offset();
     syn int FClass.numDependentEnumConstants() = dependentEnumConstants().size();
-    syn lazy Collection<FEnumVariable> FClass.dependentEnumConstants() =
-            filterCollection(dependentConstants(), ENUM_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.dependentEnumConstants() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_ENUM_CONSTANT);
+
+    syn int FClass.dependentBooleanConstantsOffset() = dependentBooleanConstants().offset();
     syn int FClass.numDependentBooleanConstants() = dependentBooleanConstants().size();
-    syn lazy Collection<FBooleanVariable> FClass.dependentBooleanConstants() =
-            filterCollection(dependentConstants(), BOOLEAN_VARIABLE_FILTER);
-    
+    syn ZCategoryEntry FClass.dependentBooleanConstants() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_BOOLEAN_CONSTANT);
+
     syn int FClass.numDependentStringConstants() = dependentStringConstants().size();
-    syn lazy Collection<FStringVariable> FClass.dependentStringConstants() =
-            filterCollection(dependentConstants(), STRING_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.dependentStringConstants() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_STRING_CONSTANT);
 
-    syn int FClass.numIndependentParameters() = numScalars(independentParameters());
-    syn lazy ArrayList<FVariable> FClass.independentParameters() {
-        ArrayList<FVariable> l = new ArrayList<FVariable>();
-        l.addAll(regularIndependentParameters());
-        l.addAll(structuralIndependentParameters());
-        l.addAll(finalIndependentParameters());
-        l.addAll(evalIndependentParameters());
-        return l;
-    }
+    syn int FClass.numIndependentParameters() = independentParameters().size();
+    syn Collection<FVariable> FClass.independentParameters() = varRefMap().getParameterBy(ParaDependency.INDEPENDENT);
     
-    public static int FClass.numScalars(Collection<? extends FVariable> l) {
-        int res = 0;
-        for (FVariable fv : l) {
-            res = res + fv.numScalars();
-        }
-        return res;
-    }
+    syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
+    syn Collection<FVariable> FClass.independentRealParameters() = varRefMap().getParameterBy(ParaDependency.INDEPENDENT, ZType.REAL);
     
-    syn int FClass.numIndependentIntegerEnumParameters() = numScalars(independentIntegerEnumParameters());
-    syn lazy ArrayList<FVariable> FClass.independentIntegerEnumParameters() {
-        ArrayList<FVariable> l = new ArrayList<FVariable>();
-        l.addAll(regularIndependentIntegerParameters());
-        l.addAll(regularIndependentEnumParameters());
-        l.addAll(structuralIndependentIntegerParameters());
-        l.addAll(structuralIndependentEnumParameters());
-        l.addAll(finalIndependentIntegerParameters());
-        l.addAll(finalIndependentEnumParameters());
-        l.addAll(evalIndependentIntegerParameters());
-        l.addAll(evalIndependentEnumParameters());
-        return l;
-    }
+    syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
+    syn Collection<FVariable> FClass.independentIntegerParameters() = varRefMap().getParameterBy(ParaDependency.INDEPENDENT, ZType.INTEGER);
     
-    syn int FClass.numIndependentRealParameters() = numScalars(independentRealParameters());
-    syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() {
-        ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
-        l.addAll(regularIndependentRealParameters());
-        l.addAll(structuralIndependentRealParameters());
-        l.addAll(finalIndependentRealParameters());
-        l.addAll(evalIndependentRealParameters());
-        return l;
-    }
+    syn int FClass.numIndependentEnumParameters() = independentEnumParameters().size();
+    syn Collection<FVariable> FClass.independentEnumParameters() = varRefMap().getParameterBy(ParaDependency.INDEPENDENT, ZType.ENUM);
     
-    syn int FClass.numIndependentIntegerParameters() = numScalars(independentIntegerParameters());
-    syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() {
-        ArrayList<FIntegerVariable> l = new ArrayList<FIntegerVariable>();
-        l.addAll(regularIndependentIntegerParameters());
-        l.addAll(structuralIndependentIntegerParameters());
-        l.addAll(finalIndependentIntegerParameters());
-        l.addAll(evalIndependentIntegerParameters());
-        return l;
-    }
+    syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
+    syn Collection<FVariable> FClass.independentBooleanParameters() = varRefMap().getParameterBy(ParaDependency.INDEPENDENT, ZType.BOOLEAN);
     
-    syn int FClass.numIndependentEnumParameters() = numScalars(independentEnumParameters());
-    syn lazy ArrayList<FEnumVariable> FClass.independentEnumParameters() {
-        ArrayList<FEnumVariable> l = new ArrayList<FEnumVariable>();
-        l.addAll(regularIndependentEnumParameters());
-        l.addAll(structuralIndependentEnumParameters());
-        l.addAll(finalIndependentEnumParameters());
-        l.addAll(evalIndependentEnumParameters());
-        return l;
-    }
+    syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
+    syn Collection<FVariable> FClass.independentStringParameters() = varRefMap().getParameterBy(ParaDependency.INDEPENDENT, ZType.STRING);
     
-    syn int FClass.numIndependentBooleanParameters() = numScalars(independentBooleanParameters());
-    syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() {
-        ArrayList<FBooleanVariable> l = new ArrayList<FBooleanVariable>();
-        l.addAll(regularIndependentBooleanParameters());
-        l.addAll(structuralIndependentBooleanParameters());
-        l.addAll(finalIndependentBooleanParameters());
-        l.addAll(evalIndependentBooleanParameters());
-        return l;
-    }
+    syn int FClass.numRegularIndependentParameters() = regularIndependentParameters().size();
+    syn Collection<FVariable> FClass.regularIndependentParameters() = varRefMap().getBy(ParaDependency.INDEPENDENT, ZVariability.REGULAR_PARAMETER);
     
-    syn int FClass.numIndependentStringParameters() = numScalars(independentStringParameters());
-    syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() {
-        ArrayList<FStringVariable> l = new ArrayList<FStringVariable>();
-        l.addAll(regularIndependentStringParameters());
-        l.addAll(structuralIndependentStringParameters());
-        l.addAll(finalIndependentStringParameters());
-        l.addAll(evalIndependentStringParameters());
-        return l;
-    }
-    
-    syn int FClass.numRegularIndependentParameters() = numScalars(regularIndependentParameters());
-    coll ArrayList<FVariable> FClass.regularIndependentParameters() 
-      [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes
-        this when isRegularIndependentParameter() && shouldContribute()
-    to FClass.regularIndependentParameters() for myFClass();
-    
-    syn int FClass.numRegularIndependentRealParameters() = numScalars(regularIndependentRealParameters());
-    syn lazy Collection<FRealVariable> FClass.regularIndependentRealParameters() =
-            filterCollection(regularIndependentParameters(), REAL_VARIABLE_FILTER);
+    syn int FClass.independentRealParametersOffset() = regularIndependentRealParameters().offset();
+    syn int FClass.numRegularIndependentRealParameters() = regularIndependentRealParameters().size();
+    syn ZCategoryEntry FClass.regularIndependentRealParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_REAL_REGULAR_PARAMETER);
 
-    syn int FClass.numRegularIndependentIntegerParameters() = numScalars(regularIndependentIntegerParameters());
-    syn lazy Collection<FIntegerVariable> FClass.regularIndependentIntegerParameters() =
-            filterCollection(regularIndependentParameters(), INTEGER_VARIABLE_FILTER);
+    syn int FClass.independentIntegerParametersOffset() = regularIndependentIntegerParameters().offset();
+    syn int FClass.numRegularIndependentIntegerParameters() = regularIndependentIntegerParameters().size();
+    syn ZCategoryEntry FClass.regularIndependentIntegerParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_INTEGER_REGULAR_PARAMETER);
 
-    syn int FClass.numRegularIndependentEnumParameters() = numScalars(regularIndependentEnumParameters());
-    syn lazy Collection<FEnumVariable> FClass.regularIndependentEnumParameters() =
-            filterCollection(regularIndependentParameters(), ENUM_VARIABLE_FILTER);
+    syn int FClass.independentEnumParametersOffset() = regularIndependentEnumParameters().offset();
+    syn int FClass.numRegularIndependentEnumParameters() = regularIndependentEnumParameters().size();
+    syn ZCategoryEntry FClass.regularIndependentEnumParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_ENUM_REGULAR_PARAMETER);
     
-    syn int FClass.numRegularIndependentBooleanParameters() = numScalars(regularIndependentBooleanParameters());
-    syn lazy Collection<FBooleanVariable> FClass.regularIndependentBooleanParameters() =
-            filterCollection(regularIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
+    syn int FClass.independentBooleanParametersOffset() = regularIndependentBooleanParameters().offset();
+    syn int FClass.numRegularIndependentBooleanParameters() = regularIndependentBooleanParameters().size();
+    syn ZCategoryEntry FClass.regularIndependentBooleanParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_BOOLEAN_REGULAR_PARAMETER);
 
-    syn int FClass.numRegularIndependentStringParameters() = numScalars(regularIndependentStringParameters());
-    syn lazy Collection<FStringVariable> FClass.regularIndependentStringParameters() =
-            filterCollection(regularIndependentParameters(), STRING_VARIABLE_FILTER);
+    syn int FClass.numRegularIndependentStringParameters() = regularIndependentStringParameters().size();
+    syn ZCategoryEntry FClass.regularIndependentStringParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_STRING_REGULAR_PARAMETER);
     
-    syn int FClass.numStructuralIndependentParameters() = numScalars(structuralIndependentParameters());
-    coll ArrayList<FVariable> FClass.structuralIndependentParameters() 
-      [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes
-        this when isStructuralIndependentParameter() && shouldContribute()
-    to FClass.structuralIndependentParameters() for myFClass();
+    syn int FClass.numStructuralIndependentParameters() = structuralIndependentParameters().size();
+    syn Collection<FVariable> FClass.structuralIndependentParameters() = varRefMap().getBy(ParaDependency.INDEPENDENT, ZVariability.STRUCTURAL_PARAMETER);
     
-    syn int FClass.numStructuralIndependentRealParameters() = numScalars(structuralIndependentRealParameters());
-    syn lazy Collection<FRealVariable> FClass.structuralIndependentRealParameters() =
-            filterCollection(structuralIndependentParameters(), REAL_VARIABLE_FILTER);
+    syn int FClass.numStructuralIndependentRealParameters() = structuralIndependentRealParameters().size();
+    syn ZCategoryEntry FClass.structuralIndependentRealParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_REAL_STRUCTURAL_PARAMETER);
     
-    syn int FClass.numStructuralIndependentIntegerParameters() = numScalars(structuralIndependentIntegerParameters());
-    syn lazy Collection<FIntegerVariable> FClass.structuralIndependentIntegerParameters() =
-            filterCollection(structuralIndependentParameters(), INTEGER_VARIABLE_FILTER);
+    syn int FClass.numStructuralIndependentIntegerParameters() = structuralIndependentIntegerParameters().size();
+    syn ZCategoryEntry FClass.structuralIndependentIntegerParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_INTEGER_STRUCTURAL_PARAMETER);
     
-    syn int FClass.numStructuralIndependentEnumParameters() = numScalars(structuralIndependentEnumParameters());
-    syn lazy Collection<FEnumVariable> FClass.structuralIndependentEnumParameters() =
-            filterCollection(structuralIndependentParameters(), ENUM_VARIABLE_FILTER);
+    syn int FClass.numStructuralIndependentEnumParameters() = structuralIndependentEnumParameters().size();
+    syn ZCategoryEntry FClass.structuralIndependentEnumParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_ENUM_STRUCTURAL_PARAMETER);
     
-    syn int FClass.numStructuralIndependentBooleanParameters() = numScalars(structuralIndependentBooleanParameters());
-    syn lazy Collection<FBooleanVariable> FClass.structuralIndependentBooleanParameters() =
-            filterCollection(structuralIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
+    syn int FClass.numStructuralIndependentBooleanParameters() = structuralIndependentBooleanParameters().size();
+    syn ZCategoryEntry FClass.structuralIndependentBooleanParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_BOOLEAN_STRUCTURAL_PARAMETER);
     
-    syn int FClass.numStructuralIndependentStringParameters() = numScalars(structuralIndependentStringParameters());
-    syn lazy Collection<FStringVariable> FClass.structuralIndependentStringParameters() =
-            filterCollection(structuralIndependentParameters(), STRING_VARIABLE_FILTER);
+    syn int FClass.numStructuralIndependentStringParameters() = structuralIndependentStringParameters().size();
+    syn ZCategoryEntry FClass.structuralIndependentStringParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_STRING_STRUCTURAL_PARAMETER);
     
-    syn int FClass.numFinalIndependentParameters() = numScalars(finalIndependentParameters());
-    coll ArrayList<FVariable> FClass.finalIndependentParameters()
-      [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes
-        this when isFinalIndependentParameter() && shouldContribute()
-    to FClass.finalIndependentParameters() for myFClass();
+    syn int FClass.numFinalIndependentParameters() = finalIndependentParameters().size();
+    syn Collection<FVariable> FClass.finalIndependentParameters() = varRefMap().getBy(ParaDependency.INDEPENDENT, ZVariability.FINAL_PARAMETER);
     
-    syn int FClass.numFinalIndependentRealParameters() = numScalars(finalIndependentRealParameters());
-    syn lazy Collection<FRealVariable> FClass.finalIndependentRealParameters() =
-            filterCollection(finalIndependentParameters(), REAL_VARIABLE_FILTER);
+    syn int FClass.numFinalIndependentRealParameters() = finalIndependentRealParameters().size();
+    syn ZCategoryEntry FClass.finalIndependentRealParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_REAL_FINAL_PARAMETER);
     
-    syn int FClass.numFinalIndependentIntegerParameters() = numScalars(finalIndependentIntegerParameters());
-    syn lazy Collection<FIntegerVariable> FClass.finalIndependentIntegerParameters() =
-            filterCollection(finalIndependentParameters(), INTEGER_VARIABLE_FILTER);
+    syn int FClass.numFinalIndependentIntegerParameters() = finalIndependentIntegerParameters().size();
+    syn ZCategoryEntry FClass.finalIndependentIntegerParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_INTEGER_FINAL_PARAMETER);
     
-    syn int FClass.numFinalIndependentEnumParameters() = numScalars(finalIndependentEnumParameters());
-    syn lazy Collection<FEnumVariable> FClass.finalIndependentEnumParameters() =
-            filterCollection(finalIndependentParameters(), ENUM_VARIABLE_FILTER);
+    syn int FClass.numFinalIndependentEnumParameters() = finalIndependentEnumParameters().size();
+    syn ZCategoryEntry FClass.finalIndependentEnumParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_ENUM_FINAL_PARAMETER);
     
-    syn int FClass.numFinalIndependentBooleanParameters() = numScalars(finalIndependentBooleanParameters());
-    syn lazy Collection<FBooleanVariable> FClass.finalIndependentBooleanParameters() =
-            filterCollection(finalIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
+    syn int FClass.numFinalIndependentBooleanParameters() = finalIndependentBooleanParameters().size();
+    syn ZCategoryEntry FClass.finalIndependentBooleanParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_BOOLEAN_FINAL_PARAMETER);
     
-    syn int FClass.numFinalIndependentStringParameters() = numScalars(finalIndependentStringParameters());
-    syn lazy Collection<FStringVariable> FClass.finalIndependentStringParameters() =
-            filterCollection(finalIndependentParameters(), STRING_VARIABLE_FILTER);
+    syn int FClass.numFinalIndependentStringParameters() = finalIndependentStringParameters().size();
+    syn ZCategoryEntry FClass.finalIndependentStringParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_STRING_FINAL_PARAMETER);
     
-    syn int FClass.numEvalIndependentParameters() = numScalars(evalIndependentParameters());
-    coll ArrayList<FVariable> FClass.evalIndependentParameters()
-      [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes
-        this when isEvalIndependentParameter() && shouldContribute()
-    to FClass.evalIndependentParameters() for myFClass();
+    syn int FClass.numEvalIndependentParameters() = evalIndependentParameters().size();
+    syn Collection<FVariable> FClass.evalIndependentParameters() = varRefMap().getBy(ParaDependency.INDEPENDENT, ZVariability.STRUCTURAL_PARAMETER);
     
-    syn int FClass.numEvalIndependentRealParameters() = numScalars(evalIndependentRealParameters());
-    syn lazy Collection<FRealVariable> FClass.evalIndependentRealParameters() =
-            filterCollection(evalIndependentParameters(), REAL_VARIABLE_FILTER);
+    syn int FClass.numEvalIndependentRealParameters() = evalIndependentRealParameters().size();
+    syn ZCategoryEntry FClass.evalIndependentRealParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_REAL_EVAL_PARAMETER);
     
-    syn int FClass.numEvalIndependentIntegerParameters() = numScalars(evalIndependentIntegerParameters());
-    syn lazy Collection<FIntegerVariable> FClass.evalIndependentIntegerParameters() =
-            filterCollection(evalIndependentParameters(), INTEGER_VARIABLE_FILTER);
+    syn int FClass.numEvalIndependentIntegerParameters() = evalIndependentIntegerParameters().size();
+    syn ZCategoryEntry FClass.evalIndependentIntegerParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_INTEGER_EVAL_PARAMETER);
     
-    syn int FClass.numEvalIndependentEnumParameters() = numScalars(evalIndependentEnumParameters());
-    syn lazy Collection<FEnumVariable> FClass.evalIndependentEnumParameters() =
-            filterCollection(evalIndependentParameters(), ENUM_VARIABLE_FILTER);
+    syn int FClass.numEvalIndependentEnumParameters() = evalIndependentEnumParameters().size();
+    syn ZCategoryEntry FClass.evalIndependentEnumParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_ENUM_EVAL_PARAMETER);
     
-    syn int FClass.numEvalIndependentBooleanParameters() = numScalars(evalIndependentBooleanParameters());
-    syn lazy Collection<FBooleanVariable> FClass.evalIndependentBooleanParameters() =
-            filterCollection(evalIndependentParameters(), BOOLEAN_VARIABLE_FILTER);
+    syn int FClass.numEvalIndependentBooleanParameters() = evalIndependentBooleanParameters().size();
+    syn ZCategoryEntry FClass.evalIndependentBooleanParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_BOOLEAN_EVAL_PARAMETER);
     
-    syn int FClass.numEvalIndependentStringParameters() = numScalars(evalIndependentStringParameters());
-    syn lazy Collection<FStringVariable> FClass.evalIndependentStringParameters() =
-            filterCollection(evalIndependentParameters(), STRING_VARIABLE_FILTER);
+    syn int FClass.numEvalIndependentStringParameters() = evalIndependentStringParameters().size();
+    syn ZCategoryEntry FClass.evalIndependentStringParameters() = varRefMap().getBy(ZOrdinaryCategory.INDEPENDENT_STRING_EVAL_PARAMETER);
     
-    syn int FClass.numDependentParameters() = numScalars(dependentParameters());
-    coll ArrayList<FVariable> FClass.dependentParameters() 
-      [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes
-        this when isDependentParameter() && shouldContribute()
-    to FClass.dependentParameters() for myFClass();
+    syn int FClass.numDependentParameters() = dependentParameters().size();
+    syn Collection<FVariable> FClass.dependentParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT);
 
-    syn int FClass.numDependentRealParameters() = numScalars(dependentRealParameters());
-    syn lazy Collection<FRealVariable> FClass.dependentRealParameters() =
-            filterCollection(dependentParameters(), REAL_VARIABLE_FILTER);
+    syn int FClass.dependentRealParametersOffset() = dependentRealParameters().offset();
+    syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
+    syn ZCategoryEntry FClass.dependentRealParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_REAL_PARAMETER);
 
-    syn int FClass.numDependentIntegerParameters() = numScalars(dependentIntegerParameters());
-    syn lazy Collection<FIntegerVariable> FClass.dependentIntegerParameters() =
-            filterCollection(dependentParameters(), INTEGER_VARIABLE_FILTER);
+    syn int FClass.dependentIntegerParametersOffset() = dependentIntegerParameters().offset();
+    syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
+    syn ZCategoryEntry FClass.dependentIntegerParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_INTEGER_PARAMETER);
 
-    syn int FClass.numDependentEnumParameters() = numScalars(dependentEnumParameters());
-    syn lazy Collection<FEnumVariable> FClass.dependentEnumParameters() =
-            filterCollection(dependentParameters(), ENUM_VARIABLE_FILTER);
+    syn int FClass.dependentEnumParametersOffset() = dependentEnumParameters().offset();
+    syn int FClass.numDependentEnumParameters() = dependentEnumParameters().size();
+    syn ZCategoryEntry FClass.dependentEnumParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_ENUM_PARAMETER);
     
-    syn int FClass.numDependentBooleanParameters() = numScalars(dependentBooleanParameters());
-    syn lazy Collection<FBooleanVariable> FClass.dependentBooleanParameters() =
-            filterCollection(dependentParameters(), BOOLEAN_VARIABLE_FILTER);
+    syn int FClass.dependentBooleanParametersOffset() = dependentBooleanParameters().offset();
+    syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
+    syn ZCategoryEntry FClass.dependentBooleanParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_BOOLEAN_PARAMETER);
     
-    syn int FClass.numDependentStringParameters() = numScalars(dependentStringParameters());
-    syn lazy Collection<FStringVariable> FClass.dependentStringParameters() =
-            filterCollection(dependentParameters(), STRING_VARIABLE_FILTER);
+    syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
+    syn ZCategoryEntry FClass.dependentStringParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_STRING_PARAMETER);
+    
+    syn int FClass.realInitialParametersOffset() = realInitialParameters().offset();
+    syn int FClass.numRealInitialParameters() = realInitialParameters().size();
+    syn ZCategoryEntry FClass.realInitialParameters() = varRefMap().getBy(ZOrdinaryCategory.REAL_INITIAL_PARAMETER);
+    
+    syn int FClass.integerInitialParametersOffset() = integerInitialParameters().offset();
+    syn int FClass.numIntegerInitialParameters() = integerInitialParameters().size();
+    syn ZCategoryEntry FClass.integerInitialParameters() = varRefMap().getBy(ZOrdinaryCategory.INTEGER_INITIAL_PARAMETER);
+    
+    syn int FClass.enumInitialParametersOffset() = enumInitialParameters().offset();
+    syn int FClass.numEnumInitialParameters() = enumInitialParameters().size();
+    syn ZCategoryEntry FClass.enumInitialParameters() = varRefMap().getBy(ZOrdinaryCategory.ENUM_INITIAL_PARAMETER);
+    
+    syn int FClass.booleanInitialParametersOffset() = booleanInitialParameters().offset();
+    syn int FClass.numBooleanInitialParameters() = booleanInitialParameters().size();
+    syn ZCategoryEntry FClass.booleanInitialParameters() = varRefMap().getBy(ZOrdinaryCategory.BOOLEAN_INITIAL_PARAMETER);
+    
+    syn int FClass.numStringInitialParameters() = stringInitialParameters().size();
+    syn ZCategoryEntry FClass.stringInitialParameters() = varRefMap().getBy(ZOrdinaryCategory.STRING_INITIAL_PARAMETER);
 
+    /**
+     * Optimica specific but used in Modelica...
+     */
+    syn int FClass.numFreeParameters() = freeParameters().size();
+    syn Collection<FVariable> FClass.freeParameters() = varRefMap().getBy(ZVariability.FREE_PARAMETER);
+
+
+    syn int FClass.discreteRealVariablesOffset() = discreteRealVariables().offset();
     syn int FClass.numDiscreteRealVariables() = discreteRealVariables().size();
-    syn lazy Collection<FRealVariable> FClass.discreteRealVariables() =
-            filterCollection(discreteVariables(), REAL_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.discreteRealVariables() = varRefMap().getBy(ZOrdinaryCategory.DISCRETE_REAL);
 
+    syn int FClass.discreteIntegerVariablesOffset() = discreteIntegerVariables().offset();
     syn int FClass.numDiscreteIntegerVariables() = discreteIntegerVariables().size();
-    syn lazy Collection<FIntegerVariable> FClass.discreteIntegerVariables() =
-            filterCollection(discreteVariables(), INTEGER_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.discreteIntegerVariables() = varRefMap().getBy(ZOrdinaryCategory.DISCRETE_INTEGER);
 
+    syn int FClass.discreteEnumVariablesOffset() = discreteEnumVariables().offset();
     syn int FClass.numDiscreteEnumVariables() = discreteEnumVariables().size();
-    syn lazy Collection<FEnumVariable> FClass.discreteEnumVariables() =
-            filterCollection(discreteVariables(), ENUM_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.discreteEnumVariables() = varRefMap().getBy(ZOrdinaryCategory.DISCRETE_ENUM);
 
+    syn int FClass.discreteBooleanVariablesOffset() = discreteBooleanVariables().offset();
     syn int FClass.numDiscreteBooleanVariables() = discreteBooleanVariables().size();
-    syn lazy Collection<FBooleanVariable> FClass.discreteBooleanVariables() =
-            filterCollection(discreteVariables(), BOOLEAN_VARIABLE_FILTER);
+    syn ZCategoryEntry FClass.discreteBooleanVariables() = varRefMap().getBy(ZOrdinaryCategory.DISCRETE_BOOLEAN);
 
     syn int FClass.numDiscreteStringVariables() = discreteStringVariables().size();
-    syn lazy Collection<FStringVariable> FClass.discreteStringVariables() =
-            filterCollection(discreteVariables(), STRING_VARIABLE_FILTER);
-        
-    syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
-    // The LinkedHashSet is used here to avoid duplicates.
-    coll LinkedHashSet<FRealVariable> FClass.allDifferentiatedRealVariables() 
-      [new LinkedHashSet<FRealVariable>()] with add root FClass;
-    FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
-    to FClass.allDifferentiatedRealVariables() for myFClass();
-    FDerivativeVariable contributes
-        myDifferentiatedVariable() when (shouldContribute())
-    to FClass.allDifferentiatedRealVariables() for myFClass();
-    FDynamicDerivativeVariable contributes
-        myDifferentiatedVariable() when (shouldContribute())
-        to FClass.allDifferentiatedRealVariables() for myFClass();
-    FDynamicStateVariable contributes this when (shouldContribute())
-    to FClass.allDifferentiatedRealVariables() for myFClass();
+    syn ZCategoryEntry FClass.discreteStringVariables() = varRefMap().getBy(ZOrdinaryCategory.DISCRETE_STRING);
 
-    syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariablesList() {
-        ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
-        for (FRealVariable fv : differentiatedRealVariables()) 
+    syn int FClass.differentiatedRealVariablesOffset() = differentiatedRealVariables().offset();
+    syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
+    syn ZCategoryEntry FClass.differentiatedRealVariables() = varRefMap().getBy(ZOrdinaryCategory.DIFFERENTIATED);
+
+    // TODO: This should be removed!
+    syn lazy ArrayList<FVariable> FClass.differentiatedRealVariablesList() {
+        ArrayList<FVariable> l = new ArrayList<FVariable>();
+        for (FVariable fv : differentiatedRealVariables()) 
             l.add(fv);
         return l;
     }
     syn int FVariable.differentiatedRealVariableIndex() =
         myFClass().differentiatedRealVariablesList().indexOf(this);
 
-    syn lazy LinkedHashSet<FRealVariable> FClass.differentiatedRealVariables() {
-        LinkedHashSet<FRealVariable> set = new LinkedHashSet<FRealVariable>(allDifferentiatedRealVariables());
-        set.removeAll(dynamicStates());
+    syn lazy LinkedHashSet<FVariable> FClass.allDifferentiatedRealVariables() {
+        LinkedHashSet<FVariable> set = new LinkedHashSet<FVariable>();
+        set.addAll(differentiatedRealVariables());
+        set.addAll(dynamicStates());
         return set;
     }
 
@@ -808,29 +1371,10 @@ aspect FlatAPI {
     to FClass.variables() for myFClass();
 
     syn int FClass.numDiscreteVariables() = discreteVariables().size();
-    coll ArrayList<FVariable> FClass.discreteVariables() 
-      [new ArrayList<FVariable>()] with add root FClass;
-    FRealVariable contributes
-        this when isDiscrete() && !isInput() && !isPreVariable() && shouldContribute()
-    to FClass.discreteVariables() for myFClass();   
-    FIntegerVariable contributes
-        this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
-    to FClass.discreteVariables() for myFClass();   
-    FEnumVariable contributes
-        this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
-    to FClass.discreteVariables() for myFClass();   
-    FBooleanVariable contributes
-        this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
-    to FClass.discreteVariables() for myFClass();   
-    FStringVariable contributes
-        this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
-    to FClass.discreteVariables() for myFClass();   
+    syn Collection<FVariable> FClass.discreteVariables() = varRefMap().getBy(ZVariability.DISCRETE);
 
     syn int FClass.numInitialParameters() = initialParameters().size();
-    coll ArrayList<FVariable> FClass.initialParameters()
-        [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes this when isInitialParameter() && shouldContribute()
-    to FClass.initialParameters() for myFClass();
+    syn Collection<FVariable> FClass.initialParameters() = varRefMap().getBy(ZVariability.INITIAL_PARAMETER);
     
     syn boolean FAbstractVariable.isFixed() = true;
     eq FVariable.isFixed() = !isInitialParameter() && fixedAttribute();
@@ -867,8 +1411,8 @@ aspect FlatAPI {
     }
     
     syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
-    syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
-        ArrayList<FVariable> l = new ArrayList<FVariable>();
+    syn lazy Collection<FVariable> FClass.discretePreVariables() {
+        Collection<FVariable> l = new ArrayList<FVariable>();
         for (FVariable fv : discreteVariables()) {
             l.add((FVariable) lookupFV(fv.getFQName().preName()));
         }
@@ -905,7 +1449,7 @@ aspect FlatAPI {
     to FClass.tempVariables() for myFClass();
 
     syn int FClass.numRealVariables() = realVariables().size();
-    syn lazy Collection<FRealVariable> FClass.realVariables() =
+    syn lazy Collection<FRealVariable> FClass.realVariables() = 
             filterCollection(variables(), REAL_VARIABLE_FILTER);
 
     syn int FClass.numIntegerVariables() = integerVariables().size();
@@ -923,30 +1467,30 @@ aspect FlatAPI {
     syn int FClass.numStringVariables() = stringVariables().size();
     syn lazy Collection<FStringVariable> FClass.stringVariables() =
             filterCollection(variables(), STRING_VARIABLE_FILTER);
-    
+
     syn int FClass.numAlgebraicContinousRealVariables() = algebraicContinousRealVariables().size();
-    syn lazy Collection<FRealVariable> FClass.algebraicContinousRealVariables() {
-        Collection<FRealVariable> set = new LinkedHashSet<FRealVariable>(realVariables());
-        set.removeAll(differentiatedRealVariables());
-        set.removeAll(derivativeVariables());
-        set.removeAll(discreteVariables());
-        set.removeAll(inputs());
-        return set;
-    }
+    syn Collection<FVariable> FClass.algebraicContinousRealVariables() = varRefMap().getBy(ZOrdinaryCategory.CONTINUOUS);
 
     syn int FClass.numNormalAlgebraicContinousRealVariables() = normalAlgebraicContinousRealVariables().size();
-    syn lazy Collection<FRealVariable> FClass.normalAlgebraicContinousRealVariables() {
-        Collection<FRealVariable> set = new LinkedHashSet<FRealVariable>(algebraicContinousRealVariables());
+    syn lazy Collection<FVariable> FClass.normalAlgebraicContinousRealVariables() {
+        // TODO: Refactor to new framework!
+        Collection<FVariable> set = new LinkedHashSet<FVariable>();
+        for (FVariable var : algebraicContinousRealVariables()) {
+            set.add(var);
+        }
         set.removeAll(dynamicStates());
         return set;
     }
 
-    syn lazy ArrayList<FVariable> FClass.algebraicVariables() {
-        ArrayList<FVariable> set = new ArrayList<FVariable>();
-        set.addAll(algebraicContinousRealVariables());
-        set.addAll(discreteVariables());
-        return set;
-    }
+    public static final VarRefMap.CategoryFilter FClass.ALGEBRAIC_FILTER = new VarRefMap.CategoryFilter() {
+        @Override
+        protected boolean test(ZOrdinaryCategory category) {
+            return category == ZOrdinaryCategory.CONTINUOUS || category.variability == ZVariability.DISCRETE;
+        }
+        
+    };
+
+    syn Collection<FVariable> FClass.algebraicVariables() = varRefMap().getBy(ALGEBRAIC_FILTER);
 
     syn lazy Collection<FVariable> FClass.normalAlgebraicVariables() {
         Collection<FVariable> set = new LinkedHashSet<FVariable>(algebraicVariables());
@@ -954,42 +1498,6 @@ aspect FlatAPI {
         return set;
     }
 
-    // There are no free parameters in the Modelica compiler
-    // but these attributes are refined in the Optimica compiler
-    syn int FClass.numFreeParameters() {
-        return 0;
-    }
-
-
-    /*
-    syn int FClass.numAlgebraicContinousRealVariables() = algebraicContinousRealVariables().size();
-    syn lazy ArrayList<FVariable> FClass.algebraicContinousRealVariables() { 
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(algebraicVariables());
-      set.retainAll(reals());
-      set.removeAll(discreteVariables());
-      return set;
-    }
-    */
-    
-    /*
-    syn int FClass.numAlgebraicIntegerVariables() = algebraicIntegerVariables().size();
-    syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() = 
-      intersectFVColl(algebraicVariables(), integers());
-    
-    syn int FClass.numAlgebraicEnumVariables() = algebraicEnumVariables().size();
-    syn lazy ArrayList<FVariable> FClass.algebraicEnumVariables() = 
-      intersectFVColl(algebraicVariables(), enums());
-    
-    syn int FClass.numAlgebraicBooleanVariables() = algebraicBooleanVariables().size();
-    syn lazy ArrayList<FVariable> FClass.algebraicBooleanVariables() = 
-      intersectFVColl(algebraicVariables(), booleans());
-
-    syn int FClass.numAlgebraicStringVariables() = algebraicStringVariables().size();
-    syn lazy ArrayList<FVariable> FClass.algebraicStringVariables() = 
-      intersectFVColl(algebraicVariables(), strings());
-*/
-    
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
     coll ArrayList<FVariable> FClass.variablesWithBindingExp() 
         [new ArrayList<FVariable>()] with add root FClass;
@@ -1974,8 +2482,7 @@ aspect FlatAPI {
     eq FFunctionVariable.isFFunctionVariable()          = true;
 
     syn boolean FAbstractVariable.isDifferentiatedVariable() = false;
-    syn lazy boolean FVariable.isDifferentiatedVariable() = 
-      myFClass().differentiatedRealVariables().contains(this);
+    syn lazy boolean FVariable.isDifferentiatedVariable() = zVariability() == FClass.ZVariability.DIFFERENTIATED;
     syn boolean FDynamicStateVariable.isDifferentiatedVariable() = true;
 
     syn boolean FAbstractVariable.isAbstractDerivativeVariable() = false;
@@ -2013,14 +2520,13 @@ aspect FlatAPI {
     eq FPreEnumVariable.isPreVariable() = true;
     
     syn boolean FAbstractVariable.isAlgebraicVariable() = false;
-    syn lazy boolean FVariable.isAlgebraicVariable()    = myFClass().algebraicVariables().contains(this);
+    syn boolean FVariable.isAlgebraicVariable()    = FClass.ALGEBRAIC_FILTER.testSingle(zCategory());
 
     syn boolean FAbstractVariable.isDiscreteVariable() = false;
-    syn lazy boolean FVariable.isDiscreteVariable()    = myFClass().discreteVariables().contains(this);
+    syn boolean FVariable.isDiscreteVariable()    = zVariability() == FClass.ZVariability.DISCRETE;
 
     syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
-    syn lazy boolean FVariable.isAlgebraicContinousRealVariable()    =
-            myFClass().algebraicContinousRealVariables().contains(this);
+    syn boolean FVariable.isAlgebraicContinousRealVariable()    = zCategory() == FClass.ZOrdinaryCategory.CONTINUOUS;
 
     syn lazy String FClass.guid() {
         try {
@@ -2645,10 +3151,10 @@ aspect Attributes {
     public void FVariable.setFixedAttribute(FExp value)    { setAttribute(FAttribute.FIXED, "Boolean", value); }
         
     // Nominal attribute
-    syn boolean FRealVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);
-    syn FExp    FRealVariable.nominalAttributeExp()    = attributeExp(FAttribute.NOMINAL);
-    syn CValue  FRealVariable.nominalAttributeCValue() = attributeCValueReal(FAttribute.NOMINAL, 1.0);
-    syn double  FRealVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
+    syn boolean FVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);
+    syn FExp    FVariable.nominalAttributeExp()    = attributeExp(FAttribute.NOMINAL);
+    syn CValue  FVariable.nominalAttributeCValue() = attributeCValueReal(FAttribute.NOMINAL, 1.0);
+    syn double  FVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
 
     syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().nominalAttributeSet();
     syn FExp    FDerivativeVariable.nominalAttributeExp()    = myDifferentiatedVariable().nominalAttributeExp();
@@ -3050,7 +3556,7 @@ aspect FVariableUses {
     eq FAbstractEquation.getChild().inAlgebraicAccessLocation() = true;
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
-        FClass.intersectFVSet(algebraicVariables(), myFClass().algebraicContinousRealVariables());
+        FClass.intersectFVSet(algebraicVariables(), myFClass().normalAlgebraicContinousRealVariables());
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.discreteRealVariables() = 
         FClass.intersectFVSet(algebraicVariables(), myFClass().discreteRealVariables());
@@ -3379,6 +3885,13 @@ aspect FlatDiagnostics {
         modelDiagnosticsPrintRow(str, "  Number of Enum dependent parameters:", dependentEnumParameters());
         modelDiagnosticsPrintRow(str, "  Number of Boolean dependent parameters:", dependentBooleanParameters());
         modelDiagnosticsPrintRow(str, "  Number of String dependent parameters:", dependentStringParameters());
+        
+        modelDiagnosticsPrintRow(str, "Number of initial parameters:", initialParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Real dependent parameters:", realInitialParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Integer dependent parameters:", integerInitialParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Enum dependent parameters:", enumInitialParameters());
+        modelDiagnosticsPrintRow(str, "  Number of Boolean dependent parameters:", booleanInitialParameters());
+        modelDiagnosticsPrintRow(str, "  Number of String dependent parameters:", stringInitialParameters());
         
         modelDiagnosticsPrintRow(str, "Number of variables:", variables());
         modelDiagnosticsPrintRow(str, "  Number of Real variables:", realVariables());

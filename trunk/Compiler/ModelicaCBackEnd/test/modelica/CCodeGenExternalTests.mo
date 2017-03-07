@@ -3078,9 +3078,9 @@ $C_destruct_external_object$
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    _z1_8 = (5);
     _myEO1_0 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
     _myEO2_1 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
-    _z1_8 = (5);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -3370,8 +3370,7 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1, 2)
-    jmi_array_ref_1(tmp_1, 1) = _myEOs_1_0;
-    jmi_array_ref_1(tmp_1, 2) = _myEOs_2_1;
+    memcpy(&jmi_array_ref_1(tmp_1, 1), &_myEOs_1_0, 2 * sizeof(jmi_extobj_t));
     _z_2 = (func_CCodeGenExternalTests_TestExtObjectArray1_get_y_exp2(tmp_1));
     JMI_DYNAMIC_FREE()
     return ef;

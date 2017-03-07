@@ -1965,9 +1965,9 @@ fclass TypeTests.AlgorithmType1
  Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0;
- pre(b) = false;
- pre(i) = 0;
  pre(r) = 0.0;
+ pre(i) = 0;
+ pre(b) = false;
 algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
@@ -2017,12 +2017,12 @@ initial equation
  pre(outerR[1].r) = 0.0;
  pre(outerR[2].r) = 0.0;
  pre(outerR[3].r) = 0.0;
- pre(outerInteger[1]) = 0;
- pre(outerInteger[2]) = 0;
- pre(outerInteger[3]) = 0;
  pre(i.innerR[1].r) = 0.0;
  pre(i.innerR[2].r) = 0.0;
  pre(i.innerR[3].r) = 0.0;
+ pre(outerInteger[1]) = 0;
+ pre(outerInteger[2]) = 0;
+ pre(outerInteger[3]) = 0;
  pre(i.innerInteger[1]) = 0;
  pre(i.innerInteger[2]) = 0;
  pre(i.innerInteger[3]) = 0;
