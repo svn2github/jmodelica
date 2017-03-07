@@ -133,7 +133,7 @@ aspect OverdeterminedInitialSystem {
             
             @Override
             public CValue ceval(CommonVariableDecl variable, Index i) {
-                return CValue.UNKNOWN;
+                return ceval(variable).array().getCell(i);
             }
         }
     }

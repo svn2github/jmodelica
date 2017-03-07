@@ -1576,6 +1576,15 @@ aspect Arrays {
             return new ScalarAsArray(this);
         }
         
+        if (!getFExp().variability().knownParameterOrLess() && !getFArraySubscripts().variability().knownParameterOrLess()) {
+            FArraySubscripts fas = getFArraySubscripts();
+            Array arr = new Array(indices());
+            for (Index i : indices()) {
+                arr.set(i, new FSubscriptedExp(getFExp().treeCopy(), fas.specifyAll(i)));
+            }
+            return arr;
+        }
+        
         NonConsecutiveIndices expIs = NonConsecutiveIndices.expIndices(getFExp().size(), getFArraySubscripts());
         NonConsecutiveIndices fasIs = NonConsecutiveIndices.fasIndices(getFArraySubscripts());
         Array arr = new Array(indices());
@@ -1618,7 +1627,21 @@ aspect Arrays {
         }
         return res;
     }
-	
+    
+    syn FArraySubscripts FArraySubscripts.specifyAll(Index index) {
+        FArraySubscripts res = new FArraySubscripts();
+        int j = 0;
+        for (FSubscript fs : getFSubscripts()) {
+            if (fs.ndims() > 0) {
+                fs = fs.specify(index.get(j++));
+            } else {
+                fs = fs.treeCopy();
+            }
+            res.addFSubscript(fs);
+        }
+        return res;
+    }
+
 	eq FSmoothExp.getArray() {
 		if (!isArray())
 			return super.getArray();

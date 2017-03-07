@@ -316,14 +316,11 @@ aspect CADCodeGen {
 
 	@Override
 	public void FExp.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
-		if (isArray() && !size().isUnknown()) {
-			getArray().genTempVars_CAD(p, str, indent);
-		} else {
-			if (autoGenChildADStatements_CAD())
-				super.genTempVars_CAD(p, str, indent);
-			genADStatement_CAD(p , str, indent);
-		}
-	}
+        if (autoGenChildADStatements_CAD()) {
+            super.genTempVars_CAD(p, str, indent);
+        }
+        genADStatement_CAD(p , str, indent);
+    }
 	
 	/**
 	 * Determines if the expression type genereates ad statments
@@ -340,14 +337,16 @@ aspect CADCodeGen {
 	inh boolean FExp.inlineVar_CAD();
 	eq BaseNode.getChild().inlineVar_CAD() = true;
 	eq FExp.getChild().inlineVar_CAD()     = false;
-	
+    eq FArray.getChild().inlineVar_CAD()   = true;
+
 	/**
 	 * The der expression for this type will be inlined if true
 	 */
 	inh boolean FExp.inlineDer_CAD();
 	eq BaseNode.getChild().inlineDer_CAD() = true;
 	eq FExp.getChild().inlineDer_CAD()     = false;
-	
+    eq FArray.getChild().inlineDer_CAD()   = true;
+
 	/**
 	 * Generates var expression or prints reference to evaluated expression
 	 */
@@ -1543,7 +1542,12 @@ aspect CADCodeGen {
      */
     @Override
     public void FArray.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-        getArray().genVarDecls_CAD(p, str, indent);
+        p.printVarDecls(getFExps(), str, indent);
+    }
+    
+    @Override
+    public void FArray.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(getFExps(), str, indent);
     }
     
     @Override

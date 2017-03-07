@@ -24,34 +24,10 @@ aspect CCodeGenExpressions {
      =========================================================================*/
 
     @Override
-    public void FExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (isArray() && !size().isUnknown())
-            getArray().genVarDecls_C(p, str, indent);
-        else
-            super.genVarDecls_C(p, str, indent);
-    }
-
-    @Override
-    public void FExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        if (isArray() && !size().isUnknown())
-            p.printPreSteps(getArray(), str, indent);
-        else
-            super.genTempVars_C(p, str, indent);
-    }
-
-    @Override
     public void FAbsExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print("jmi_abs(");
         p.print(getFExp(), str, indent);
         str.print(")");
-    }
-
-    @Override
-    public void FExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        if (isArray() && !size().isUnknown())
-            p.printPostSteps(getArray(), str, indent);
-        else
-            super.genTempFree_C(p, str, indent);
     }
 
     @Override
@@ -1507,27 +1483,81 @@ aspect CCodeGenExpressions {
     @Override
     public void FSubscriptedExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         super.genVarDecls_C(p, str, indent);
-        getFExp().type().printDecl_C(p, str, indent, getFExp().tempName_C(), this);
+        if (needsTemp()) {
+            getFExp().genTempInputDecl_C(p, str, indent);
+        }
     }
 
     @Override
     public void FSubscriptedExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
-        getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), this);
-        p.printTempInputAssigns(str, indent, getFExp());
+        if (needsTemp()) {
+            getFExp().genTempInputAssigns_C(p, str, indent);
+        }
     }
 
     @Override
     public void FSubscriptedExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempFree_C(p, str, indent);
-        if (isAssignedTo()) {
+        if (needsTemp() && isAssignedTo()) {
             p.printWriteBackAssignment(str, indent, this, null);
         }
     }
 
     @Override
     public void FSubscriptedExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(getFArraySubscripts().genFunctionArrayUse_C(p, getFExp().tempName_C(), C_ARRAY_VALUE));
+        if (needsTemp()) {
+            getFExp().genSubscriptedUse_C(p, str, indent, getFArraySubscripts());
+        } else {
+            getFExp().first().genDirectSubscriptedUse_C(p, str, indent, getFArraySubscripts());
+        }
     }
 
+    syn FIdUseExp FExp.first() = null;
+    eq FArray.first()          = getFExp(0).first();
+    eq FIdUseExp.first()       = this;
+    
+    syn lazy boolean FSubscriptedExp.needsTemp() = (getFExp().consecutiveArray(null) == null);
+    
+    syn FAbstractVariable FExp.consecutiveArray(FAbstractVariable last) = null;
+    eq FArray.consecutiveArray(FAbstractVariable last) {
+        for (FExp exp : getFExps()) {
+            last = exp.consecutiveArray(last);
+            if (last == null) {
+                break;
+            }
+        }
+        return last;
+    }
+    eq FIdUseExp.consecutiveArray(FAbstractVariable last) {
+        if (last == null || last.isConsecutiveInZ(myFV())) {
+            return myFV();
+        }
+        return null;
+    }
+
+    public void FExp.genSubscriptedUse_C(CodePrinter p, CodeStream str, String indent, FArraySubscripts fas) {
+        str.print(fas.genFunctionArrayUse_C(p, tempName_C(), C_ARRAY_VALUE));
+    }
+    
+    public void FIdUseExp.genDirectSubscriptedUse_C(CodePrinter p, CodeStream str, String indent, FArraySubscripts fas) {
+        str.print("(&");
+        p.print(this, str, indent);
+        str.print(")");
+        str.print("[(int)(");
+        Size s = fas.mySize();
+        for (int i = fas.getNumFSubscript() - 1; i >= 0; i--) {
+            p.print(fas.getFSubscript(i), str, indent);
+            str.print(" - 1");
+            if (i > 0) {
+                str.print(" + ");
+                str.print(s.get(i));
+                str.print(" * (");
+            }
+        }
+        for (int i = 0; i < fas.getNumFSubscript() - 1; i++) {
+            str.print(")");
+        }
+        str.print(")]");
+    }
 }

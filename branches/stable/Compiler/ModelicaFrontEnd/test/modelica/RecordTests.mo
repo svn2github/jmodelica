@@ -502,6 +502,38 @@ end RecordTests.RecordFlat13;
 ")})));
 end RecordFlat13;
 
+model RecordFlat14
+    record R
+        parameter Integer n = 1 annotation(Evaluate=true);
+        Real[n] x = 1:n;
+    end R;
+    
+    R r1 = R(n=2);
+    R r2 = r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFlat14",
+            description="Records: eval true on in record declaration",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordFlat14
+ eval parameter Integer r1.n = 2 /* 2 */;
+ Real r1.x[1];
+ Real r1.x[2];
+ eval parameter Integer r2.n = 2 /* 2 */;
+ Real r2.x[1];
+ Real r2.x[2];
+equation
+ r1.x[1] = 1;
+ r1.x[2] = 2;
+ r2.x[1] = r1.x[1];
+ r2.x[2] = r1.x[2];
+end RecordTests.RecordFlat14;
+")})));
+end RecordFlat14;
+
 model RecordType1
  record A
   Real a;
@@ -5526,31 +5558,6 @@ end RecordTests.RecordScalarize53;
 ")})));
 end RecordScalarize53;
 
-model RecordScalarize54
-    record R
-        Real[1] x;
-    end R;
-    R x[2] = {R(1:1),R(2:2)};
-    R y = x[integer(time)];
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="RecordScalarize54",
-            description="",
-            flatModel="
-fclass RecordTests.RecordScalarize54
- constant Real x[1].x[1] = 1;
- constant Real x[2].x[1] = 2;
- Real y.x[1];
- discrete Integer temp_1;
-initial equation 
- pre(temp_1) = 0;
-equation
- y.x[1] = ({1.0, 2.0})[temp_1];
- temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
-end RecordTests.RecordScalarize54;
-")})));
-end RecordScalarize54;
-
 model RecordScalarize55
 
 function f
@@ -5601,6 +5608,63 @@ equation
 end RecordTests.RecordScalarize55;
 ")})));
 end RecordScalarize55;
+
+model RecordScalarize56
+record R
+    Real[:] x;
+end R;
+
+R r(x={i for i in 1:0});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize56",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize56
+end RecordTests.RecordScalarize56;
+")})));
+end RecordScalarize56;
+
+
+model RecordScalarize57
+record R
+    Real t = time;
+    constant Real[:] x;
+end R;
+
+R r(x=fill(1,0));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize57",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize57
+ Real r.t;
+equation
+ r.t = time;
+end RecordTests.RecordScalarize57;
+")})));
+end RecordScalarize57;
+
+model RecordScalarize58
+record R
+    Real[:] x;
+end R;
+
+constant R r(x=1:0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize58",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize58
+end RecordTests.RecordScalarize58;
+")})));
+end RecordScalarize58;
+
 
 model RecordFunc1
  record A
@@ -7817,7 +7881,7 @@ public
  record RecordTests.RecordEval7.SB
   parameter Real x;
   parameter Real y;
-  final parameter Integer n;
+  parameter Integer n;
  end RecordTests.RecordEval7.SB;
 
  record RecordTests.RecordEval7.A
