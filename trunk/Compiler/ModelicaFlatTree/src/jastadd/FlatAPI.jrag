@@ -206,7 +206,10 @@ aspect FlatAPI {
             public static final ZOrdinaryCategory INDEPENDENT_REAL_FINAL_PARAMETER         = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.FINAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_REAL_EVAL_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_REAL_FREE_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.REAL,    ZVariability.FREE_PARAMETER);
-            public static final ZOrdinaryCategory DEPENDENT_REAL_PARAMETER                 = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_REGULAR_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_STRUCTURAL_PARAMETER      = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_FINAL_PARAMETER           = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_REAL_EVAL_PARAMETER            = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory DEPENDENT_REAL_FREE_PARAMETER            = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.FREE_PARAMETER);
             public static final ZOrdinaryCategory REAL_INITIAL_PARAMETER                   = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.INITIAL_PARAMETER);
 
@@ -224,8 +227,14 @@ aspect FlatAPI {
             public static final ZOrdinaryCategory INDEPENDENT_ENUM_EVAL_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_INTEGER_FREE_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.INTEGER, ZVariability.FREE_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_ENUM_FREE_PARAMETER          = create(ParaDependency.INDEPENDENT, ZType.ENUM,    ZVariability.FREE_PARAMETER);
-            public static final ZOrdinaryCategory DEPENDENT_INTEGER_PARAMETER              = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.REGULAR_PARAMETER);
-            public static final ZOrdinaryCategory DEPENDENT_ENUM_PARAMETER                 = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_REGULAR_PARAMETER      = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_REGULAR_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_STRUCTURAL_PARAMETER   = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_STRUCTURAL_PARAMETER      = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_FINAL_PARAMETER        = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_FINAL_PARAMETER           = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_INTEGER_EVAL_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.EVAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_ENUM_EVAL_PARAMETER            = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory DEPENDENT_INTEGER_FREE_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.FREE_PARAMETER);
             public static final ZOrdinaryCategory DEPENDENT_ENUM_FREE_PARAMETER            = create(ParaDependency.DEPENDENT,   ZType.ENUM,    ZVariability.FREE_PARAMETER);
             public static final ZOrdinaryCategory INTEGER_INITIAL_PARAMETER                = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.INITIAL_PARAMETER);
@@ -238,7 +247,10 @@ aspect FlatAPI {
             public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_FINAL_PARAMETER      = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.FINAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_EVAL_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_BOOLEAN_FREE_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.BOOLEAN, ZVariability.FREE_PARAMETER);
-            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_PARAMETER              = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_REGULAR_PARAMETER      = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_STRUCTURAL_PARAMETER   = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_FINAL_PARAMETER        = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_EVAL_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory DEPENDENT_BOOLEAN_FREE_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.FREE_PARAMETER);
             public static final ZOrdinaryCategory BOOLEAN_INITIAL_PARAMETER                = create(ParaDependency.DEPENDENT,   ZType.BOOLEAN, ZVariability.INITIAL_PARAMETER);
 
@@ -248,7 +260,10 @@ aspect FlatAPI {
             public static final ZOrdinaryCategory INDEPENDENT_STRING_STRUCTURAL_PARAMETER  = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.STRUCTURAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_STRING_FINAL_PARAMETER       = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.FINAL_PARAMETER);
             public static final ZOrdinaryCategory INDEPENDENT_STRING_EVAL_PARAMETER        = create(ParaDependency.INDEPENDENT, ZType.STRING,  ZVariability.EVAL_PARAMETER);
-            public static final ZOrdinaryCategory DEPENDENT_STRING_PARAMETER               = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_STRING_REGULAR_PARAMETER       = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_STRING_STRUCTURAL_PARAMETER    = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.STRUCTURAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_STRING_FINAL_PARAMETER         = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.FINAL_PARAMETER);
+            public static final ZOrdinaryCategory DEPENDENT_STRING_EVAL_PARAMETER          = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.EVAL_PARAMETER);
             public static final ZOrdinaryCategory STRING_INITIAL_PARAMETER                 = create(ParaDependency.DEPENDENT,   ZType.STRING,  ZVariability.INITIAL_PARAMETER);
 
             public static final ZOrdinaryCategory INDEPENDENT_EXTERNAL_OBJECT              = create(ParaDependency.INDEPENDENT, ZType.EXTERNAL,ZVariability.REGULAR_PARAMETER);
@@ -372,7 +387,10 @@ aspect FlatAPI {
                     ZOrdinaryCategory.INDEPENDENT_REAL_FINAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_REAL_EVAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_REAL_FREE_PARAMETER,
-                    ZOrdinaryCategory.DEPENDENT_REAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_REAL_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_REAL_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_REAL_FINAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_REAL_EVAL_PARAMETER,
                     ZOrdinaryCategory.DEPENDENT_REAL_FREE_PARAMETER,
                     ZOrdinaryCategory.REAL_INITIAL_PARAMETER,
 
@@ -390,8 +408,14 @@ aspect FlatAPI {
                     ZOrdinaryCategory.INDEPENDENT_ENUM_EVAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_INTEGER_FREE_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_ENUM_FREE_PARAMETER,
-                    ZOrdinaryCategory.DEPENDENT_INTEGER_PARAMETER,
-                    ZOrdinaryCategory.DEPENDENT_ENUM_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_FINAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_FINAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_INTEGER_EVAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_ENUM_EVAL_PARAMETER,
                     ZOrdinaryCategory.DEPENDENT_INTEGER_FREE_PARAMETER,
                     ZOrdinaryCategory.DEPENDENT_ENUM_FREE_PARAMETER,
                     ZOrdinaryCategory.INTEGER_INITIAL_PARAMETER,
@@ -404,7 +428,10 @@ aspect FlatAPI {
                     ZOrdinaryCategory.INDEPENDENT_BOOLEAN_FINAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_BOOLEAN_EVAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_BOOLEAN_FREE_PARAMETER,
-                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_FINAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_BOOLEAN_EVAL_PARAMETER,
                     ZOrdinaryCategory.DEPENDENT_BOOLEAN_FREE_PARAMETER,
                     ZOrdinaryCategory.BOOLEAN_INITIAL_PARAMETER,
 
@@ -433,7 +460,10 @@ aspect FlatAPI {
                     ZOrdinaryCategory.INDEPENDENT_STRING_STRUCTURAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_STRING_FINAL_PARAMETER,
                     ZOrdinaryCategory.INDEPENDENT_STRING_EVAL_PARAMETER,
-                    ZOrdinaryCategory.DEPENDENT_STRING_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_STRING_REGULAR_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_STRING_STRUCTURAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_STRING_FINAL_PARAMETER,
+                    ZOrdinaryCategory.DEPENDENT_STRING_EVAL_PARAMETER,
                     ZOrdinaryCategory.STRING_INITIAL_PARAMETER,
 
                     ZOrdinaryCategory.DISCRETE_STRING,
@@ -1184,24 +1214,39 @@ aspect FlatAPI {
     syn int FClass.numDependentParameters() = dependentParameters().size();
     syn Collection<FVariable> FClass.dependentParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT);
 
-    syn int FClass.dependentRealParametersOffset() = dependentRealParameters().offset();
     syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
-    syn ZCategoryEntry FClass.dependentRealParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_REAL_PARAMETER);
+    syn Collection<FVariable> FClass.dependentRealParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT, ZType.REAL);
 
-    syn int FClass.dependentIntegerParametersOffset() = dependentIntegerParameters().offset();
     syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
-    syn ZCategoryEntry FClass.dependentIntegerParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_INTEGER_PARAMETER);
+    syn Collection<FVariable> FClass.dependentIntegerParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT, ZType.INTEGER);
 
-    syn int FClass.dependentEnumParametersOffset() = dependentEnumParameters().offset();
     syn int FClass.numDependentEnumParameters() = dependentEnumParameters().size();
-    syn ZCategoryEntry FClass.dependentEnumParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_ENUM_PARAMETER);
-    
-    syn int FClass.dependentBooleanParametersOffset() = dependentBooleanParameters().offset();
+    syn Collection<FVariable> FClass.dependentEnumParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT, ZType.ENUM);
+
     syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
-    syn ZCategoryEntry FClass.dependentBooleanParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_BOOLEAN_PARAMETER);
+    syn Collection<FVariable> FClass.dependentBooleanParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT, ZType.BOOLEAN);
     
     syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
-    syn ZCategoryEntry FClass.dependentStringParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_STRING_PARAMETER);
+    syn Collection<FVariable> FClass.dependentStringParameters() = varRefMap().getParameterBy(ParaDependency.DEPENDENT, ZType.STRING);
+    
+    syn int FClass.dependentRealRegularParametersOffset() = dependentRealRegularParameters().offset();
+    syn int FClass.numDependentRealRegularParameters() = dependentRealRegularParameters().size();
+    syn ZCategoryEntry FClass.dependentRealRegularParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_REAL_REGULAR_PARAMETER);
+
+    syn int FClass.dependentIntegerRegularParametersOffset() = dependentIntegerRegularParameters().offset();
+    syn int FClass.numDependentIntegerRegularParameters() = dependentIntegerRegularParameters().size();
+    syn ZCategoryEntry FClass.dependentIntegerRegularParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_INTEGER_REGULAR_PARAMETER);
+
+    syn int FClass.dependentEnumRegularParametersOffset() = dependentEnumRegularParameters().offset();
+    syn int FClass.numDependentEnumRegularParameters() = dependentEnumRegularParameters().size();
+    syn ZCategoryEntry FClass.dependentEnumRegularParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_ENUM_REGULAR_PARAMETER);
+    
+    syn int FClass.dependentBooleanRegularParametersOffset() = dependentBooleanRegularParameters().offset();
+    syn int FClass.numDependentBooleanRegularParameters() = dependentBooleanRegularParameters().size();
+    syn ZCategoryEntry FClass.dependentBooleanRegularParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_BOOLEAN_REGULAR_PARAMETER);
+    
+    syn int FClass.numDependentStringRegularParameters() = dependentStringRegularParameters().size();
+    syn ZCategoryEntry FClass.dependentStringRegularParameters() = varRefMap().getBy(ZOrdinaryCategory.DEPENDENT_STRING_REGULAR_PARAMETER);
     
     syn int FClass.realInitialParametersOffset() = realInitialParameters().offset();
     syn int FClass.numRealInitialParameters() = realInitialParameters().size();

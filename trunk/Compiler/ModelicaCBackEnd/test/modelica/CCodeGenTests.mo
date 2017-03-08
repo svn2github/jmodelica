@@ -795,6 +795,27 @@ jmi_ad_var_t func_CCodeGenTests_CCodeGenTest20_mysum_exp2(jmi_array_t* x_a) {
 ")})));
 end CCodeGenTest20;
 
+model CCodeGenTest21
+    parameter Real p = 1;
+    parameter Real ip1(fixed = false) = p;
+    parameter Real ip2(fixed = false) = 1;
+initial equation
+    ip1 = ip2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest21",
+            description="Test alias generation for structural dependent variables",
+            template="$C_variable_aliases$",
+            generatedCode="
+#define _p_0 ((*(jmi->z))[jmi->offs_real_pi+0])
+#define _ip2_2 ((*(jmi->z))[jmi->offs_real_pi+1])
+#define _ip1_1 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
+")})));
+end CCodeGenTest21;
+
 model CLogExp1
  Boolean x = true;
  Boolean y = false;
@@ -1361,13 +1382,13 @@ o->n = 4;
 #define _final1_10 ((*(jmi->z))[jmi->offs_real_pi+4])
 #define _eval1_15 ((*(jmi->z))[jmi->offs_real_pi+5])
 #define _reg2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+2])
-#define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+3])
-#define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+4])
-#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+5])
-#define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+6])
-#define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+7])
+#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+3])
+#define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+4])
+#define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+5])
+#define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+6])
+#define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+7])
 #define _eval3_17 ((*(jmi->z))[jmi->offs_integer_pi+8])
 #define _reg4_3 ((*(jmi->z))[jmi->offs_boolean_pi+0])
 #define _struct4_8 ((*(jmi->z))[jmi->offs_boolean_pi+1])
