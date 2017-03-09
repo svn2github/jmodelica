@@ -567,11 +567,6 @@ aspect ExternalConstantEvaluationCaching {
                 public void destroyProcess(int timeout) {
                     if (com != null) {
                         livingCachedExternals.remove(this);
-                        try {
-                            teardown(timeout, com);
-                        } catch (IOException e) {
-                        } catch (ConstantEvaluationException e) {
-                        }
                         com.destroy();
                         com = null;
                     }
