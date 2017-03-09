@@ -1581,4 +1581,8 @@ int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
 #ifdef JMI_AD_NONE_AND_CPP
 }
 #endif /* JMI_AD_NONE_AND_CPP */
+
+/* Evaluate and assign expression only if computed flag is false. Sets computed flag to true. */
+#define JMI_CACHED(var, exp) ((!var##_computed && (var##_computed = 1)) ? (var = exp) : var)
+
 #endif /* _JMI_COMMON_H */

@@ -570,10 +570,10 @@ public class CGenerator extends GenericGenerator {
 
         public void generate(CodeStream genPrinter) {
             String indent = "";
-            CodePrinter printer = ASTNode.blockPrinter_C;
             boolean generateSparse = fclass.myOptions().getBooleanOption("generate_sparse_block_jacobian");
 
             for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
+                CodePrinter printer = block.blockPrinter();
                 block.genBlockResidualFunction_C(printer, genPrinter, indent);
                 if (block.isLinear() && generateSparse) {
                     block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, false);
@@ -649,10 +649,11 @@ public class CGenerator extends GenericGenerator {
 
         public void generate(CodeStream genPrinter) {
             String indent = "";
-            CodePrinter printer = ASTNode.blockPrinter_C.initialSystemPrinter();
+            
             boolean generateSparse = fclass.myOptions().getBooleanOption("generate_sparse_block_jacobian");
 
             for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
+                CodePrinter printer = block.blockPrinter().initialSystemPrinter();
                 block.genBlockResidualFunction_C(printer, genPrinter, indent);
 
                 if (block.isLinear() && generateSparse) {

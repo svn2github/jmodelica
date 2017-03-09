@@ -34,22 +34,22 @@ aspect CCodeGen {
     public class CPrettyPrinter extends CodePrinter {
 
         public CPrettyPrinter() {
-            this(false);
+            this(null);
         }
         
-        public CPrettyPrinter(boolean inBlock) {
-            this(inBlock, false, Homotopy.HOMOTOPY, true);
+        public CPrettyPrinter(AbstractEquationBlock block) {
+            this(block, false, Homotopy.HOMOTOPY, true);
         }
 
-        protected CPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+        protected CPrettyPrinter(AbstractEquationBlock block, boolean inInitialSystem, Homotopy homotopyType,
                 boolean writeSwitches) {
-            super(inBlock, inInitialSystem, homotopyType, writeSwitches);
+            super(block, inInitialSystem, homotopyType, writeSwitches);
         }
 
         @Override
-        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+        protected CodePrinter createPrinter(AbstractEquationBlock block, boolean inInitialSystem, Homotopy homotopyType,
                 boolean writeSwitches) {
-            return new CPrettyPrinter(inBlock, inInitialSystem, homotopyType, writeSwitches);
+            return new CPrettyPrinter(block, inInitialSystem, homotopyType, writeSwitches);
         }
 
         @Override
@@ -111,7 +111,6 @@ aspect CCodeGen {
     }
 	
     static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
-    static CPrettyPrinter ASTNode.blockPrinter_C = new CPrettyPrinter(true);
 	
 	public String ASTNode.prettyPrint_C(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -142,7 +141,22 @@ aspect CCodeGen {
         for (ASTNode node : this)
             p.printPostSteps(node, str, indent);
     }
-    
+
+    syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
+            inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
+    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
+
+    public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent);
+        str.print("static ");
+        type().printScalarDecl_C(str, indent, false, tempName_C());
+        str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
+    }
+
+    public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        str.format("%s%s = 0;\n", indent, tempNameComputed_C());
+    }
+
     @Override
     public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         getArgs().genTempArg(p.DeclStep, str, indent);
@@ -170,6 +184,10 @@ aspect CCodeGen {
     public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (isStringExp()) {
             str.print(tempName_C());
+        } else if (impureCodeGen(p)) {
+            str.format("JMI_CACHED(%s, ", tempName_C());
+            myFCallable().prettyPrintCall_C(p, str, indent, this);
+            str.print(")");
         } else {
             myFCallable().prettyPrintCall_C(p, str, indent, this);
         }
@@ -2055,10 +2073,12 @@ aspect CCodeGen {
 
         Map<FVariable,String> solverArrayMap = createSolverArrayMap(localUnsolvedVariables());
         
+        genBlockResidualSetUpFunctionDecl_C(p, str, outerIndent);
+        
         String indent = p.indent(outerIndent);
         String nextIndent = p.indent(indent);
-        str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
-                outerIndent, (p.inInitialSystem() ? "init_": ""), getSequenceNumber());
+        str.format("%sstatic int %s(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
+                outerIndent, genBlockResidualFunctionName_C(p));
         String label = getLabel();
         if (label == null) {
             label = getClass().getSimpleName();
@@ -2113,7 +2133,7 @@ aspect CCodeGen {
             genCloseEvalMode_C(str, indent);
         }
 
-        // Loop over all active variables and write their value to x	
+        // Loop over all active variables and write their value to x
         if (localUnsolvedVariables().size() > 0) {
             genOpenEvalMode_C(str, indent, "JMI_BLOCK_INITIALIZE");
             for (FVariable fv : localUnsolvedVariables()) 
