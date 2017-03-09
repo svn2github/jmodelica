@@ -1536,6 +1536,104 @@ int jmi_set_start_values_base(jmi_t* jmi) {
 ")})));
 end CCodeGenParameters3;
 
+model CCodeGenParameters4
+    type E = enumeration(A,B,C);
+    
+    // Initial parameters
+    parameter Real    initial1(fixed = false) = time;
+    parameter Integer initial2(fixed = false) = if time < 1 then 1 else 2;
+    parameter E       initial3(fixed = false) = if time < 1 then E.A else E.B;
+    parameter Boolean initial4(fixed = false) = time < 1;
+    // Strings are not supported:
+//    parameter String  initial5(fixed = false) = if time < 1 then "A" else "B";
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenParameters4",
+            description="Code generated for initial parameters",
+            template="
+
+N_real_pd = $n_real_pd$;
+N_integer_pd = $n_integer_pd$ + $n_enum_pd$;
+N_boolean_pd = $n_boolean_pd$;
+
+$C_z_offsets_strings$
+
+---
+$C_variable_aliases$
+$C_z_aliases_strings$
+---
+$C_DAE_initial_dependent_parameter_assignments$
+---
+$C_set_start_values$
+",
+            generatedCode="
+N_real_pd = 1;
+N_integer_pd = 1 + 1;
+N_boolean_pd = 1;
+
+o->o_ci = 0;
+o->n_ci = 0;
+o->o_cd = 0;
+o->n_cd = 0;
+o->o_pi = 0;
+o->n_pi = 0;
+o->o_ps = 0;
+o->n_ps = 0;
+o->o_pf = 0;
+o->n_pf = 0;
+o->o_pe = 0;
+o->n_pe = 0;
+o->o_pd = 0;
+o->n_pd = 0;
+o->n = 0;
+
+
+---
+#define _initial1_0 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _initial2_1 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _initial3_2 ((*(jmi->z))[jmi->offs_integer_pd+1])
+#define _initial4_3 ((*(jmi->z))[jmi->offs_boolean_pd+0])
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
+
+
+---
+
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+---
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _initial1_0 = (0.0);
+    _initial2_1 = (0);
+    _initial3_2 = (1);
+    _initial4_3 = (JMI_FALSE);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end CCodeGenParameters4;
+
 model CCodeGenUniqueNames
  model A
   Real y;
