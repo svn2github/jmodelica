@@ -143,7 +143,7 @@ casadi::Function
 mxfunction(const std::string& name,
            const std::vector<casadi::MX>& arg,
            const std::vector<casadi::MX>& res) {
-    return casadi::Function(name, arg, res);
+    return casadi::Function(casadi::Function::fix_name(name), arg, res);
 }
 
 // Hack to avoid append (inefficient!)

@@ -281,7 +281,6 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
     }
 }
 
-
 /************************
  *                      *
  *      Equations       *
