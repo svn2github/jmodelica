@@ -1231,10 +1231,67 @@ aspect Flattening {
         throw new UnsupportedOperationException("Partial function component only allowed in functions");
     }
 
+    /*
+     * Flattening of string comments.
+     */
+
+    private static final char[][] StringComment.ESCAPE_CHARS = {
+        {'b', '\b'}, {'\"', '\"'}, {'f', '\f'}, {'n', '\n'}, {'r', '\r'}, {'t', '\t'}, { '\'', '\''}
+    };
+    private static final Map<Character, Character> StringComment.ESCAPE_MAP = initializeEscapeMap();
+    private static final char StringComment.BACKSLASH = '\\';
+
+    /**
+     * Creates a {@link Map} instance mapping all the pairs in {@code ESCAPE_CHARS}.
+     * <p>
+     * The first character in each pair of {@code ESCAPE_CHARS} is a key to the value,
+     * i.e. the second character in the pair.
+     */ 
+    private static final Map<Character, Character> StringComment.initializeEscapeMap() {
+        Map<Character, Character> map = new HashMap<Character, Character>();
+        for (char[] pair : ESCAPE_CHARS) {
+            map.put(pair[0], pair[1]);
+        }
+        return Collections.<Character, Character> unmodifiableMap(map);
+    }
+
+    /**
+     * Flattens this comment, removing all escape sequences and replacing them with the corresponding character.
+     * <p>
+     * Note that this method also removes stray backslashes, or double backslashes.
+     * 
+     * @return
+     *          a {@link FStringComment} instance (a comment node in the flat tree).
+     */
+    public FStringComment StringComment.flatten() {
+        String comment = getComment();
+        StringBuilder escapedComment = new StringBuilder();
+        int length = comment.length();
+
+        for (int i = 0; i < length; ++i) {
+            char c = comment.charAt(i);
+
+            if (c == BACKSLASH) {
+                if (++i < length) {
+                    char c2 = comment.charAt(i);
+                    if (ESCAPE_MAP.containsKey(c2)) {
+                        c2 = ESCAPE_MAP.get(c2);
+                    } else if (c2 == BACKSLASH) {
+                        continue;
+                    }
+                    escapedComment.append(c2);
+                }
+            } else {
+                escapedComment.append(c);
+            }
+        }
+        return new FStringComment(escapedComment.toString().replaceAll("\\\\", ""));
+    }
+
     public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
         FEnumLiteral e = new FEnumLiteral(new FIdUse(name()),new Opt());
         if (getComponentDecl().getComment().hasStringComment())
-            e.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+            e.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
         return e;
     }
 
@@ -1251,7 +1308,7 @@ aspect Flattening {
             ClassDecl classDecl = getClassDecl();
             Opt comment = null;
             if (classDecl.hasStringComment()) 
-                comment = new Opt(new FStringComment(classDecl.getStringComment().getComment()));
+                comment = new Opt(classDecl.getStringComment().flatten());
             else 
                 comment = new Opt();
             fc.addFEnumDecl(new FEnumDecl(id, l, comment)); 
@@ -1451,7 +1508,7 @@ aspect Flattening {
         }
 
         if (getComponentDecl().getComment().hasStringComment())
-            fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+            fv.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
 
         fv.setFQName(name);
 
@@ -2934,7 +2991,7 @@ aspect InstantiatedExpressions {
     public FAbstractEquation ConnectClause.instantiate() {
         Opt o = null;
         if (getComment().hasStringComment())
-           o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
+           o = new Opt(getComment().getStringComment().flatten());
         else
             o = new Opt();
         FConnectClause c = new FConnectClause(equationType(), o, this,

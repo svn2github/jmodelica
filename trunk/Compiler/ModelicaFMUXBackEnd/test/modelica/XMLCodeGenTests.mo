@@ -1231,4 +1231,95 @@ model SpecialCharacter1
 ")})));
 end SpecialCharacter1;
 
+model Comment1
+  Real x = time "A \comment \t\\without\\\ backslashes\\\\.";
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment1",
+            description="Verifies that backslashes do not exist in the description attribute of a model variable.",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A comment    without backslashes.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment1;
+
+model Comment2
+  Real x = time "A \&comment\" \'with \<escaped \>characters\\.";
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment2",
+            description="Verifies that XML special characters preceded by backslash(es) are generated correctly.",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment2;
+
+model Comment3
+    Real x = time "\"A comment.\\\"";
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment3",
+            description="Verifies that citation marks surrounding a comment are preserved.",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A comment.&quot;\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment3;
+
+model Comment4
+    Real x = time "\\\"A \&comment\" \'with \<escaped \>characters\\.\"";
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment4",
+            description="Extra comment generation check for FMI 2.0.",
+            fmi_version="2.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.&quot;\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment4;
+
+model CommentFlattening1
+    Real x = time "\&\<\>\'\" \\&\\<\\>\\' \\\&\\\<\\\>\\\'\\\"";
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CommentFlattening1",
+            description="Verifies that comment flattening removes backslashes from characters to be escaped for XML.",
+            flatModel="
+fclass XMLCodeGenTests.CommentFlattening1
+  Real x = time \"&<>'\" &<>' &<>'\"\";
+end XMLCodeGenTests.CommentFlattening1;
+")})));
+end CommentFlattening1;
+
+model CommentFlattening2
+    Real x = time "\'\"\b\f\n\t\r \\'\\b\\f\\n\\t\\r \\\'\\\"\\\b\\\f\\\n\\\t\\\r";
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CommentFlattening2",
+            description="Verifies that comment flattening removes backslashes from general characters to be escaped.",
+            flatModel="
+fclass XMLCodeGenTests.CommentFlattening2
+ Real x = time \"'\"\b\f\n\t\r 'bfntr '\"\b\f\n\t\r\";
+end XMLCodeGenTests.CommentFlattening2;
+")})));
+end CommentFlattening2;
+
 end XMLCodeGenTests;
