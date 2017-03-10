@@ -350,7 +350,7 @@ model RecordFlat10
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat10
- eval parameter RecordTests.RecordFlat10.R2 r.r2 = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ structural parameter RecordTests.RecordFlat10.R2 r.r2 = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
  eval parameter Real r.x = 3 /* 3 */;
 
 public
