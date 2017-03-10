@@ -560,7 +560,8 @@ FInitialEquation : FEquationType;
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FAbstractEquation*/
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
-                                          FAttribute*;
+                                          FAttribute*
+                                          [FStringComment];
 
 /**
  * Unsupported equation.
@@ -600,8 +601,7 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * connect statements has been transformed into regular equations, but only
  * as an intermediate node type.
  */
-FConnectClause : FAbstractEquation ::= [FStringComment]
-                                       <ConnectClause:ConnectClause>
+FConnectClause : FAbstractEquation ::= <ConnectClause:ConnectClause>
                                        Connector1:FIdUseInstAccess 
                                        Connector2:FIdUseInstAccess;
 

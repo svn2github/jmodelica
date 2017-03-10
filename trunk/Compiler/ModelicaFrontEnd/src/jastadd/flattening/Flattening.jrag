@@ -2972,6 +2972,7 @@ aspect FlatExpressions {
 
 aspect InstantiatedExpressions {
 
+    
     public FEquationType AbstractEquation.equationType() {
         return isInitial() ? new FInitialEquation() : new FNormalEquation();
     }
@@ -2980,25 +2981,31 @@ aspect InstantiatedExpressions {
         return hasInitial() ? new FInitialEquation() : new FNormalEquation();
     }
 
+    public <T extends FAbstractEquation> T AbstractEquation.copyStringComment(T eqn) {
+        if (getComment().hasStringComment()) {
+            eqn.setFStringComment(getComment().getStringComment().flatten());
+        }
+        return eqn;
+    }
+
+    syn String AbstractEquation.stringComment() =
+            getComment().hasStringComment() ? getComment().getStringComment().getComment() : null;
+
     public FAbstractEquation AbstractEquation.instantiate() {
         return contribute(copyLocationTo(new FUnsupportedEquation(equationType())));
     }
 
     public FAbstractEquation Equation.instantiate() {
-        return contribute(copyLocationTo(new FEquation(equationType(), getLeft().instantiate(), getRight().instantiate())));
+        return contribute(copyLocationTo(copyStringComment(new FEquation(
+                equationType(), getLeft().instantiate(), getRight().instantiate()))));
     }
     
     public FAbstractEquation ConnectClause.instantiate() {
-        Opt o = null;
-        if (getComment().hasStringComment())
-           o = new Opt(getComment().getStringComment().flatten());
-        else
-            o = new Opt();
-        FConnectClause c = new FConnectClause(equationType(), o, this,
+        FConnectClause c = new FConnectClause(equationType(), this,
                 new FIdUseInstAccess(getConnector1().newInstAccess()),
                 new FIdUseInstAccess(getConnector2().newInstAccess()));
         c.setLocation(this);
-        return contribute(c);
+        return contribute(copyStringComment(c));
     }
     
     protected FIfWhenElseEquation IfWhenElseEquation.instantiate(FIfWhenElseEquation res) {
@@ -3006,7 +3013,7 @@ aspect InstantiatedExpressions {
         for (AbstractEquation eqn : getAbstractEquations())
             res.addFAbstractEquation(eqn.instantiate());
         res.setLocation(this);
-        return contribute(res);
+        return contribute(copyStringComment(res));
     }
     
     protected FIfWhenEquation IfWhenEquation.instantiate(FIfWhenEquation res) {
@@ -3035,7 +3042,8 @@ aspect InstantiatedExpressions {
         List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
         for (FunctionCallLeft a : getLefts()) 
             l.add(a.instantiate());
-        return contribute(copyLocationTo(new FFunctionCallEquation(equationType(), l, getCall().instantiate())));
+        return contribute(copyLocationTo(copyStringComment(
+                new FFunctionCallEquation(equationType(), l, getCall().instantiate()))));
     }
     
     public  FFunctionCallLeft FunctionCallLeft.instantiate() {
@@ -3420,7 +3428,7 @@ aspect InstantiatedExpressions {
         for (AbstractEquation ae : getAbstractEquations()) {
             eqns.add(ae.instantiate());
         }
-        return new InstForClauseE(equationType(), forIndex, eqns);
+        return copyStringComment(new InstForClauseE(equationType(), forIndex, eqns));
     }
 
 }
