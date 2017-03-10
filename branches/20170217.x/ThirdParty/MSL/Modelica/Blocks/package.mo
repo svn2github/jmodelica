@@ -1748,9 +1748,9 @@ generator. Simulation results are shown in the next figure:
     model ActuatorWithNoise
       "Demonstrates how to model measurement noise in an actuator"
     extends Modelica.Icons.Example;
-      Utilities.Parts.MotorWithCurrentControl motor(y1(stateSelect=StateSelect.always))
+      Utilities.Parts.MotorWithCurrentControl motor
         annotation (Placement(transformation(extent={{-86,-10},{-66,10}})));
-      Utilities.Parts.Controller controller
+      Utilities.Parts.Controller controller(y1(stateSelect=StateSelect.always))
         annotation (Placement(transformation(extent={{-60,40},{-80,60}})));
       Modelica.Blocks.Sources.Step speed(startTime=0.5, height=50)
         annotation (Placement(transformation(extent={{20,40},{0,60}})));
