@@ -24,6 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 aspect CCodeGenBlocks {
     
+    public CodePrinter AbstractEquationBlock.blockPrinter() {
+        return new CPrettyPrinter(this);
+    }
+
     /**
      * Generates variable declarations for a block, used both when printing the
      * dae but also residual functions.
@@ -67,6 +71,31 @@ aspect CCodeGenBlocks {
             seb.genVarDecls(p, str, indent, visited);
         for (SimpleEquationBlock seb : unsolvedBlocks())
             seb.genVarDecls(p, str, indent, visited);
+    }
+
+    protected Collection<AbstractEquationBlock> AbstractEquationBlock.blockResidualBlocks() {
+        Collection<AbstractEquationBlock> res = new LinkedHashSet<AbstractEquationBlock>();
+        blockResidualBlocks(res);
+        return res;
+    }
+
+    protected void AbstractEquationBlock.blockResidualBlocks(Collection<AbstractEquationBlock> res) {
+        res.add(this);
+    }
+
+    @Override
+    protected void AlgorithmBlock.blockResidualBlocks(Collection<AbstractEquationBlock> res) {
+        res.add(this);
+    }
+
+    @Override
+    protected void EquationBlock.blockResidualBlocks(Collection<AbstractEquationBlock> res) {
+        for (SimpleEquationBlock seb : localSolvedBlocks()) {
+            res.add(seb);
+        }
+        for (SimpleEquationBlock seb : unsolvedBlocks()) {
+            res.add(seb);
+        }
     }
 
     /**
@@ -309,6 +338,7 @@ aspect CCodeGenBlocks {
      */
     public void AbstractEquationBlock.genBlockResidualCall_C(CodePrinter p, CodeStream str, String indent) {
         String var = p.inInitialSystem() ? "dae_init_block_residuals" : "dae_block_residuals";
+        genBlockResidualSetUpFunctionCall_C(p, str, indent);
         str.formatln("%sef |= jmi_solve_block_residual(jmi->%s[%d]);", indent, var, getSequenceNumber());
     }
 
@@ -389,4 +419,61 @@ aspect CCodeGenBlocks {
                 assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
     }
 
+}
+
+aspect BlockSetup {
+
+    public String AbstractEquationBlock.genBlockResidualFunctionName_C(CodePrinter p) {
+        return "dae_" + (p.inInitialSystem() ? "init_": "") + "block_" + getSequenceNumber();
+    }
+
+    public String AbstractEquationBlock.genBlockResidualSetUpFunctionName_C(CodePrinter p) {
+        return genBlockResidualFunctionName_C(p) + "_set_up";
+    }
+
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String outerIndent) {
+        if (setupNodes().size() > 0) {
+            str.formatln("%s%s(jmi);", outerIndent, genBlockResidualSetUpFunctionName_C(p));
+        }
+    }
+    
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String outerIndent) {
+        if (setupNodes().size() > 0) {
+            String indent = p.indent(outerIndent);
+            for (FFunctionCall call : setupNodes()) {
+                call.genStaticVarDecls_C(p, str, outerIndent);
+            }
+            str.format("%sstatic void %s(jmi_t* jmi) {\n", outerIndent, genBlockResidualSetUpFunctionName_C(p));
+            for (FFunctionCall call : setupNodes()) {
+                call.genStaticTempVars_C(p, str, indent);
+            }
+            str.format("%s}\n\n", outerIndent);
+        }
+    }
+    
+    private Collection<FFunctionCall> AbstractEquationBlock.setupNodes = null;
+    public Collection<FFunctionCall> AbstractEquationBlock.setupNodes() {
+        if (setupNodes == null) {
+            setupNodes = new LinkedHashSet<FFunctionCall>();
+            for (AbstractEquationBlock b : blockResidualBlocks()) {
+                for (ASTNode n : b.blockResidualNodes()) {
+                    n.gatherBlockSetupNodes(blockPrinter(), setupNodes);
+                }
+            }
+        }
+        return setupNodes;
+    }
+    
+    public void ASTNode.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
+        for (ASTNode n : this) {
+            n.gatherBlockSetupNodes(p, res);
+        }
+    }
+
+    public void FFunctionCall.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
+        super.gatherBlockSetupNodes(p, res);
+        if (impureCodeGen(p)) {
+            res.add(this);
+        }
+    }
 }

@@ -42,17 +42,17 @@ aspect CodePrinter {
             else
                 return providers;
         }
-        
-        private final boolean inBlock;
+
+        private final AbstractEquationBlock block;
         private final boolean inInitialSystem;
         private final Homotopy homotopyType;
         private final boolean writeSwitches;
 
-        public CodePrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType, boolean writeSwitches) {
+        public CodePrinter(AbstractEquationBlock block, boolean inInitialSystem, Homotopy homotopyType, boolean writeSwitches) {
             super("    ");
             for (CodeGeneratorProvider provider : getProviders())
                 provider.provide(this);
-            this.inBlock = inBlock;
+            this.block = block;
             this.inInitialSystem = inInitialSystem;
             this.homotopyType = homotopyType;
             this.writeSwitches = writeSwitches;
@@ -103,36 +103,40 @@ aspect CodePrinter {
         public abstract void printPostSteps(ASTNode node, CodeStream str, String indent);
 
         public boolean inBlock() {
-            return inBlock;
+            return block != null;
+        }
+        
+        public AbstractEquationBlock getBlock() {
+            return block;
         }
 
-        protected abstract CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+        protected abstract CodePrinter createPrinter(AbstractEquationBlock block, boolean inInitialSystem, Homotopy homotopyType,
                 boolean writeSwitches);
 
         public final CodePrinter initialSystemPrinter() {
             if (inInitialSystem())
                 return this;
             else
-                return createPrinter(inBlock, true, homotopyType, writeSwitches);
+                return createPrinter(block, true, homotopyType, writeSwitches);
         }
 
         public final CodePrinter normalSystemPrinter() {
             if (!inInitialSystem())
                 return this;
             else
-                return createPrinter(inBlock, false, homotopyType, writeSwitches);
+                return createPrinter(block, false, homotopyType, writeSwitches);
         }
 
         public final CodePrinter homotopySimplifiedPrinter() {
             if (homotopyType == Homotopy.SIMPLIFIED)
                 return this;
             else
-                return createPrinter(inBlock, inInitialSystem, Homotopy.SIMPLIFIED, writeSwitches);
+                return createPrinter(block, inInitialSystem, Homotopy.SIMPLIFIED, writeSwitches);
         }
         
         public final CodePrinter eventIndicatorPrinter() {
             if (writeSwitches) {
-                return createPrinter(inBlock, inInitialSystem, homotopyType, false);
+                return createPrinter(block, inInitialSystem, homotopyType, false);
             }
             return this;
         }
