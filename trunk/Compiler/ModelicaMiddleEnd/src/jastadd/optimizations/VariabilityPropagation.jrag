@@ -526,7 +526,7 @@ aspect VariabilityPropagation {
         
         // Declaration
         // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
-        if (variability.evalTrueParameterVariability())
+        if (variability.evalParameterVariability())
             variability = fStructParameter();
         setFTypePrefixVariability(variability);
         if (variability.knownParameterOrLess()) {

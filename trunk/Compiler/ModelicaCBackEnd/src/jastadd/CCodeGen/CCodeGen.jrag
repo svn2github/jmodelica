@@ -777,11 +777,11 @@ aspect CCodeGen {
     syn VariabilityCausality_C FTypePrefixVariability.variabilityCausality_C(FVariable fv) {
         throw new UnsupportedOperationException();
     }
-    eq FConstant.variabilityCausality_C(FVariable fv)          = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
-    eq FParameter.variabilityCausality_C(FVariable fv)         = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
-    eq FStructParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
-    eq FFinalParameter.variabilityCausality_C(FVariable fv)    = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
-    eq FEvalTrueParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
+    eq FConstant.variabilityCausality_C(FVariable fv)        = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
+    eq FParameter.variabilityCausality_C(FVariable fv)       = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
+    eq FStructParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
+    eq FFinalParameter.variabilityCausality_C(FVariable fv)  = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
+    eq FEvalParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
     
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
