@@ -398,33 +398,29 @@ aspect Arrays {
 	 */
 	syn lazy ArrayList<FArraySubscripts> FIdUse.allFArraySubscripts() {
 		ArrayList<FArraySubscripts> res = getFQName().createFArraySubscriptsList();
-		if (!hasFArraySubscripts() && myFV().isArray()) 
-			res.set(res.size() - 1, getExpandedSubscripts());
+        if (!hasFArraySubscripts() && myFV().isArray()) {
+            res.add(getExpandedSubscripts());
+        }
 		return res;
 	}
 	
 	/**
 	 * Create a list with an FArraySubscripts for each part of this access, empty for parts that has none.
 	 */
-	public ArrayList<FArraySubscripts> FQName.createFArraySubscriptsList() {
-		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(numParts());
-		for (int i = 0, n = numParts(); i < n; i++)
-			res.add(createFArraySubscriptsForPart(i));
-		return res;
-	}
-	
-	/**
-	 * Get an FArraySubscripts for part <code>i</code> of this access, creating an empty one if it has none.
-	 */
-	public FArraySubscripts FQName.createFArraySubscriptsForPart(int i) {
-		return new FArraySubscripts();
-	}
-	
-	public FArraySubscripts FQNameFull.createFArraySubscriptsForPart(int i) {
-		FQNamePart part = getFQNamePart(i);
-		return part.hasFArraySubscripts() ? part.getFArraySubscripts() : new FArraySubscripts();
-	}
-	
+    public ArrayList<FArraySubscripts> FQName.createFArraySubscriptsList() {
+        return new ArrayList<FArraySubscripts>();
+    }
+
+    public ArrayList<FArraySubscripts> FQNameFull.createFArraySubscriptsList() {
+        ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>();
+        for (FQNamePart fqnp : getFQNameParts()) {
+            if (fqnp.hasFArraySubscripts()) {
+                res.add(fqnp.getFArraySubscripts());
+            }
+        }
+        return res;
+    }
+
 	/**
 	 * Get the expanded array subscripts of this access.
 	 * 
@@ -438,7 +434,7 @@ aspect Arrays {
 	 * 
 	 * @return  an FArraySubscripts that spans the entire FV this access points to.
 	 */
-	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
+    syn lazy FArraySubscripts FIdUse.getExpandedSubscripts() {
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
             s = getFQName().calcMySize(getFQName().numParts());

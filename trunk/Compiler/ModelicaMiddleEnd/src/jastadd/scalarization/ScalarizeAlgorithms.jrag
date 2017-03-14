@@ -181,9 +181,6 @@ aspect AssignmentScalarization {
         if (size().isUnknown()) {
             names.addLayer(ndims());
             names.fillLayer(expInAst);
-        }
-        
-        if (size().isUnknown()) {
             left.addArrayUsesToIndexMap(s);
             right.addArrayUsesToIndexMap(s);
             List<FStatement> stmts = s.createForLoops(expInAst);

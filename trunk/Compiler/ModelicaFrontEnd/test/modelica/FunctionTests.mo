@@ -11432,6 +11432,53 @@ end FunctionTests.UnknownArray54;
 ")})));
 end UnknownArray54;
 
+model UnknownArray55
+record R
+    Real x;
+end R;
+
+function f
+    input R[:] r;
+    output Real y = sum(r[:].x);
+algorithm
+end f;
+
+Real y = f({R(1),R(2)});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray55",
+            description="Bug in #5317",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.UnknownArray55
+ Real y;
+equation
+ y = FunctionTests.UnknownArray55.f({FunctionTests.UnknownArray55.R(1), FunctionTests.UnknownArray55.R(2)});
+
+public
+ function FunctionTests.UnknownArray55.f
+  input FunctionTests.UnknownArray55.R[:] r;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(r, 1) loop
+   temp_1 := temp_1 + r[i1].x;
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.UnknownArray55.f;
+
+ record FunctionTests.UnknownArray55.R
+  Real x;
+ end FunctionTests.UnknownArray55.R;
+
+end FunctionTests.UnknownArray55;
+")})));
+end UnknownArray55;
+
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

@@ -1550,36 +1550,31 @@ aspect Scalarization {
 		return res;
 	}
 
-	public FSubscript FSubscript.scalarize(Map<String,FExp> indexMap) {
-		return (FSubscript) fullCopy();
-	}
-	
-	public FSubscript FColonSubscript.scalarize(Map<String,FExp> indexMap) {
-		if (indexName == null)
-			throw new UnsupportedOperationException("Colon subscript without index name");
-		return new FExpSubscript(indexName.fullCopy());
-	}
-	
-	public FSubscript FExpSubscript.scalarize(Map<String,FExp> indexMap) {
-		return new FExpSubscript(getFExp().scalarize(indexMap));
-	}
-	
-	public FArraySubscripts FArraySubscripts.scalarize(Map<String,FExp> indexMap) {
-		FArraySubscripts fas = new FArraySubscripts();
-		for (FSubscript fs : getFSubscripts()) {
-			fas.addFSubscript(fs.scalarize(indexMap));
-		}
-		return fas;
-	}
-	
-	public FQNamePart FQNamePart.scalarize(Map<String,FExp> indexMap) {
-		return new FQNamePart(getName());
-	}
-	
-	public FQNamePartArray FQNamePartArray.scalarize(Map<String,FExp> indexMap) {
-		return new FQNamePartArray(getName(), getFArraySubscripts().scalarize(indexMap));
-	}
-	
+    public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
+        if (indexMap.containsKey(name())) {
+            return indexMap.get(name()).fullCopy();
+        }
+        return new FIdUseExp(getFIdUse().scalarize(indexMap, indexNames));
+    }
+    
+    @Override
+    public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) {
+        return new FDerExp(getFIdUse().scalarize(indexMap, indexNames), order());
+    }
+    
+    @Override
+    public FExp FPreExp.scalarizeExp(Map<String,FExp> indexMap) {
+        return new FPreExp(getFIdUse().scalarize(indexMap, indexNames));
+    }
+
+    public FIdUse FIdUse.scalarize(Map<String,FExp> indexMap, FExp[] indexNames) {
+        FQName fqn = getFQName().scalarize(indexMap);
+        if (indexNames != null) {
+            fqn = fqn.asFQNameFull().addFArraySubscripts(getExpandedSubscripts().scalarize(indexMap));
+        }
+        return new FIdUse(fqn);
+    }
+
 	public abstract FQName FQName.scalarize(Map<String,FExp> indexMap);
 	
 	public FQName FQNameEmpty.scalarize(Map<String,FExp> indexMap) {
@@ -1591,7 +1586,7 @@ aspect Scalarization {
 	}
 
     public FQName FQNameFull.scalarize(Map<String,FExp> indexMap) {
-        if (scalarizeAsString()) {
+        if (!inFunction()) {
             StringBuilder name = new StringBuilder();
             getFQNamePart(0).scalarizeAsString(name);
             for (int i = 1; i < getNumFQNamePart(); i++) {
@@ -1607,12 +1602,6 @@ aspect Scalarization {
         }
     }
 
-    /**
-     * Should this FQNameFull be scalarized to FQNameFull or FQNameString?
-     * Separate method for extensibility.
-     */
-    syn boolean FQNameFull.scalarizeAsString() = !inFunction();
-
     public void FQNamePart.scalarizeAsString(StringBuilder sb) {
         sb.append(name());
     }
@@ -1622,19 +1611,39 @@ aspect Scalarization {
         sb.append(getFArraySubscripts().createIndex());
     }
 
-    public FIdUse FIdUse.scalarize(Map<String,FExp> indexMap) {
-    	return new FIdUse(getFQName().scalarize(indexMap));
-    }
-
-    public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
-        if (indexMap.containsKey(name())) {
-            return indexMap.get(name()).fullCopy();
-        }
-        if (indexNames != null)
-            return createUseFas(name());
-        return new FIdUseExp(getFIdUse().scalarize(indexMap));
+    public FQNamePart FQNamePart.scalarize(Map<String,FExp> indexMap) {
+        return new FQNamePart(getName());
     }
     
+    public FQNamePartArray FQNamePartArray.scalarize(Map<String,FExp> indexMap) {
+        return new FQNamePartArray(getName(), getFArraySubscripts().scalarize(indexMap));
+    }
+
+    public FArraySubscripts FArraySubscripts.scalarize(Map<String,FExp> indexMap) {
+        FArraySubscripts fas = new FArraySubscripts();
+        for (FSubscript fs : getFSubscripts()) {
+            fas.addFSubscript(fs.scalarize(indexMap));
+        }
+        return fas;
+    }
+
+    public FSubscript FSubscript.scalarize(Map<String,FExp> indexMap) {
+        return (FSubscript) fullCopy();
+    }
+    
+    public FSubscript FColonSubscript.scalarize(Map<String,FExp> indexMap) {
+        if (indexName == null)
+            throw new UnsupportedOperationException("Colon subscript without index name");
+        return new FExpSubscript(indexName.fullCopy());
+    }
+    
+    public FSubscript FExpSubscript.scalarize(Map<String,FExp> indexMap) {
+        return new FExpSubscript(getFExp().scalarize(indexMap));
+    }
+
+
+
+
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (getIfExp().variability().indexParameterOrLess()) {
             try {
@@ -1794,8 +1803,6 @@ aspect Scalarization {
 	public FExp FBooleanLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
 	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
     }
-    public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap), order()); }
-    public FExp FPreExp.scalarizeExp(Map<String,FExp> indexMap) { return new FPreExp(getFIdUse().scalarize(indexMap)); }
 	
 	public FExp FSmoothExp.scalarizeExp(Map<String,FExp> indexMap)     { return new FSmoothExp(getOrder().scalarize(indexMap), getFExp().scalarize(indexMap)); }
 	public FExp FSampleExp.scalarizeExp(Map<String,FExp> indexMap)     { return new FSampleExp(getOffset().scalarize(indexMap), getInterval().scalarize(indexMap)); }
@@ -1824,7 +1831,7 @@ aspect Scalarization {
     }
 	
 	public FExp FRecordConstructor.scalarizeExp(Map<String,FExp> indexMap) {
-		FRecordConstructor rc = new FRecordConstructor(getRecord().scalarize(indexMap), new List());
+        FRecordConstructor rc = new FRecordConstructor(getRecord().scalarize(indexMap, null), new List());
         for (FExp arg : getArgs()) {
             rc.addArg(arg.scalarize(indexMap));
         }
