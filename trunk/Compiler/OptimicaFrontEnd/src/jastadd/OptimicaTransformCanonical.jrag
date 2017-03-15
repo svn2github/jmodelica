@@ -186,7 +186,7 @@ aspect OptimicaTransformCanonical {
 	}
 	
 	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 
-		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 
+        return new FTimedVariable(getName().scalarize(indexMap, null), getArg().scalarize(indexMap));  
 	}
 	
 	public FExp FStartTimeExp.scalarize(Map<String,FExp> indexMap) { return new FStartTimeExp(); } 
