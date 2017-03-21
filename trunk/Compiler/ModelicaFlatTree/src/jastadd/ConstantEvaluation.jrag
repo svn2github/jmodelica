@@ -2012,13 +2012,11 @@ aspect ConstantEvaluation {
     eq FSumExp.reduceStartValue()     = type().createCValue(0);
     eq FProductExp.reduceStartValue() = type().createCValue(1);
 
-    syn CValue FReductionExp.scalarReduceStartValue();
+    syn CValue FBuiltInFunctionCall.scalarReduceStartValue() = CValue.UNKNOWN;
     eq FSumExp.scalarReduceStartValue()     = type().createCValueScalar(0);
     eq FProductExp.scalarReduceStartValue() = type().createCValueScalar(1);
-
-    syn CValue FMinMaxExp.scalarReduceStartValue();
-    eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);
-    eq FMinExp.scalarReduceStartValue() = type().limitCValueScalar(true);
+    eq FMaxExp.scalarReduceStartValue()     = type().limitCValueScalar(false);
+    eq FMinExp.scalarReduceStartValue()     = type().limitCValueScalar(true);
 
     syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
     eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);

@@ -771,7 +771,9 @@ aspect Flattening {
                 }
                 names.addLayer(ndims());
                 names.fillLayer(null);
-                rec.addFInitArrayStmtCell(names.createForLoops(l, fqn), input, fqn.copyAndAddFas(names.createFArraySubscripts()), names);
+                List<FStatement> ll = new List<FStatement>();
+                rec.addFInitArrayStmtCell(ll, input, fqn.copyAndAddFas(names.createFArraySubscripts()), names);
+                names.createForLoops(l, ll, fqn);
                 names.removeLayer();
             } else {
                 addFInitArrayStmtCell(l, input, fqn, names);
