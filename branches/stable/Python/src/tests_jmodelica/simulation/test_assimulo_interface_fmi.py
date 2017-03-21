@@ -24,7 +24,7 @@ from scipy.io.matlab.mio import loadmat
 
 from pymodelica.compiler import compile_jmu, compile_fmu
 from pyfmi.fmi_deprecated import FMUModel2
-from pyfmi.fmi import FMUModel, load_fmu, FMUException
+from pyfmi.fmi import FMUModel, load_fmu, FMUException, TimeLimitExceeded
 from pyfmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
 
@@ -1057,7 +1057,25 @@ class Test_FMI_ODE_CS:
 
         _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs", version=1.0)
         _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs", version=1.0)
-       
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version=1.0)
+    
+    @testattr(stddist = True)
+    def test_time_out(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        
+        res = model.simulate() #Verify that it works to simulate
+        model.reset()
+        
+        opts = model.simulate_options()
+        opts["time_limit"] = 0.001
+        
+        nose.tools.assert_raises(TimeLimitExceeded, model.simulate, options=opts)
+        model.reset()
+        
+        opts["time_limit"] = 10
+        res = model.simulate() #Verify that it works with a high time out
+        
+    
     @testattr(stddist = True)
     def test_time_event_at_do_step_end(self):
         model = load_fmu("TimeEvents_Advanced5.fmu")

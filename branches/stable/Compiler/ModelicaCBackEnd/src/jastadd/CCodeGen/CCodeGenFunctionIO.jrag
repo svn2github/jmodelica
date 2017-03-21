@@ -474,8 +474,16 @@ aspect CodeFuncCallInOutArg {
         genAssignedRef_C(ASTNode.printer_C, str, indent);
         str.print(", ");
         str.print(n);
-        str.print(" * sizeof(jmi_real_t));\n");
+        str.print(" * sizeof(");
+        str.print(type().memcpyObject());
+        str.print("));\n");
     }
+    
+    syn String FType.memcpyObject() {
+        throw new InternalCompilerError("FType.memcpyObject() is not implemented for " + getClass().getSimpleName());
+    }
+    eq FPrimitiveType.memcpyObject() = "jmi_real_t";
+    eq FExternalObjectType.memcpyObject() = "jmi_extobj_t";
     
     /**
      * Helper interface for ASTNodes which handles writebacks to multiple

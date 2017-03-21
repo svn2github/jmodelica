@@ -375,13 +375,13 @@ $modelVariables$",
     <ScalarVariable name=\"dependent3\" valueReference=\"5\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent4\" valueReference=\"9\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"dependent4\" valueReference=\"11\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent5\" valueReference=\"10\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"dependent5\" valueReference=\"9\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent6\" valueReference=\"11\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"dependent6\" valueReference=\"10\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"independent1\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
@@ -492,13 +492,13 @@ $modelVariables$",
     <ScalarVariable name=\"dependent3\" valueReference=\"5\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent4\" valueReference=\"9\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependent4\" valueReference=\"11\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent5\" valueReference=\"10\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependent5\" valueReference=\"9\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent6\" valueReference=\"11\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependent6\" valueReference=\"10\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"independent1\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
@@ -986,19 +986,19 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"dependentParameter1\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter1\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter2\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter2\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter3\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter3\" valueReference=\"5\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter4\" valueReference=\"5\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter4\" valueReference=\"6\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter5\" valueReference=\"6\" description=\"parameter equation\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter5\" valueReference=\"2\" description=\"parameter equation\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"independentParameter1\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">

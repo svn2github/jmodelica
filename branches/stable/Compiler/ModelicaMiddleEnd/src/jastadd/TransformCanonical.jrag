@@ -2741,7 +2741,7 @@ aspect StateInitialEquations {
     public void FClass.addStateInitialEquations() {
         setFInitialEquationList(new List());
         
-        for (FRealVariable fv : differentiatedRealVariables()) {
+        for (FVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
             FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fFixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
@@ -2834,8 +2834,8 @@ aspect RuntimeOptions {
 	}
 	
 	syn int FClass.numRuntimeOptionParameters() = runtimeOptionParameters().size();
-	syn lazy ArrayList<FVariable> FClass.runtimeOptionParameters() {
-		ArrayList<FVariable> res = new ArrayList<FVariable>();
+	syn lazy SortedSet<FVariable> FClass.runtimeOptionParameters() {
+	    SortedSet<FVariable> res = new TreeSet<FVariable>(new VariableNameComparator());
 		for (FVariable fv : independentParameters())  // They are always independent
 			if (fv.isRuntimeOption())
 				res.add(fv);

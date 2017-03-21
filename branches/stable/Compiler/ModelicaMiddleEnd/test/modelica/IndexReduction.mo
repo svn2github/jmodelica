@@ -978,7 +978,6 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction51",
             description="Test of complicated index reduction, alias elimination, expression simplification and variability propagation issue",
-			eliminate_alias_variables=true,
             flatModel="
 fclass IndexReduction.IndexReduction51
  parameter StateSelect c1_ss = StateSelect.default /* StateSelect.default */;

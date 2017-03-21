@@ -732,6 +732,23 @@ aspect FunctionScalarization {
             indexNames = names;
         super.addArrayUsesToIndexMap(names);
     }
+    
+    public void FIdUse.addArrayUsesToIndexMap(FExp[] names) {
+        if (isArray()) {
+            int i = 0;
+            for (FArraySubscripts fas : allFArraySubscripts()) {
+                for (FSubscript fs : fas.getFSubscripts()) {
+                    if (fs.ndims() > 0) {
+                        FExp[] indexNames = new FExp[1];
+                        indexNames[0] = names[i];
+                        fs.addArrayUsesToIndexMap(indexNames);
+                        i++;
+                    }
+                }
+            }
+        }
+    }
+
     public void FIdTempExp.addArrayUsesToIndexMap(FExp[] names) {
         indexNames = names;
     }
@@ -750,17 +767,6 @@ aspect FunctionScalarization {
         indexName = names[0];
     }
 
-    public void FArraySubscripts.addArrayUsesToIndexMap(FExp[] names) {
-        int i = 0;
-        for (FSubscript fs : getFSubscripts()) {
-            if (fs.type().isArray()) {
-                FExp[] local = new FExp[1];
-                local[0] = names[i++];
-                fs.addArrayUsesToIndexMap(local);
-            }
-        }
-    }
-
     public void FTranspose.addArrayUsesToIndexMap(FExp[] names) {
         FExp[] local = names.clone();
         local[0] = names[1];
@@ -770,12 +776,16 @@ aspect FunctionScalarization {
 
     public void FFunctionCall.addArrayUsesToIndexMap(FExp[] names) {
         // No names available as a function call arg.
-        super.addArrayUsesToIndexMap(extractTemp() ? names : new FExp[0]);
+        if (extractTemp()) {
+            super.addArrayUsesToIndexMap(names);
+        }
     }
 
     public void FRecordConstructor.addArrayUsesToIndexMap(FExp[] names) {
         // No names available as record con arg.
-        super.addArrayUsesToIndexMap(extractTemp() ? names : new FExp[0]);
+        if (extractTemp()) {
+            super.addArrayUsesToIndexMap(names);
+        }
     }
 
 }

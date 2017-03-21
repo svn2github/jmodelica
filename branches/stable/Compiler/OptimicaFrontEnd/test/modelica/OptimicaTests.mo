@@ -310,6 +310,7 @@ Free independent parameters:
 p1
 Free dependent parameters:
 p2
+p5
 p3
 x3
 ")})));
@@ -336,6 +337,7 @@ Free independent parameters:
 p1
 Free dependent parameters:
 p2
+p5
 p3
 x3
 ")})));
@@ -364,10 +366,10 @@ Independent constants:
 Dependent constants: 
 
 Independent parameters: 
- p1: number of uses: 3, isLinear: false, evaluated binding exp: 1
  p4: number of uses: 1, isLinear: true, evaluated binding exp: 1
  startTime: number of uses: 0, isLinear: true, evaluated binding exp: 0
  finalTime: number of uses: 0, isLinear: true, evaluated binding exp: 1
+ p1: number of uses: 3, isLinear: false, evaluated binding exp: 1
 
 Dependent parameters: 
  p2: number of uses: 4, isLinear: false
