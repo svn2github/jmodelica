@@ -17,6 +17,7 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+#include <string.h>
 #include <cvode/cvode.h>             /* main integrator header file */
 #include <cvode/cvode_dense.h>       /* use CVDENSE linear solver */
 #include <nvector/nvector_serial.h>  /* serial N_Vector types, fct. and macros */
@@ -87,7 +88,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
     realtype time;
     char step_event = 0; /* boolean step_event = FALSE */
     
-    if (initialize==JMI_TRUE){
+    if (initialize == TRUE){
         /* statements unused*/
         /*
         if (problem->n_real_x > 0) {

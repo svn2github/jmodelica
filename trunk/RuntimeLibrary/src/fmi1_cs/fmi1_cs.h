@@ -41,6 +41,7 @@ typedef struct fmi1_cs_t fmi1_cs_t;
 
 struct fmi1_cs_t {
     jmi_ode_problem_t* ode_problem;      /**< \brief A jmi ode problem pointer. */
+    jmi_cs_data_t* cs_data;              /**< \brief A jmi cs data pointer. */
     
     fmiString instance_name;             /**< \brief The fmi1_cs instance name. */
     fmiString encoded_instance_name;     /**< \brief The encoded instance name provided to the fmi1_me instance. */
@@ -50,7 +51,6 @@ struct fmi1_cs_t {
     fmiEventInfo event_info;
     fmiBoolean logging_on;                      /** < \brief The logging on / off attribute. */
     int initialize_solver;               /** < \brief Flag indicating if the solver shall be initialized. */
-    int triggered_external_event;        /** < \brief Flag indicating if the user have sat discrete inputs. */
 };
 
 /**
@@ -336,11 +336,11 @@ fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time);
 /**
  * \brief Sets the real inputs.
  * 
- * @param ode_problem The ODE problem struct
+ * @param cs_data The CS data struct
  * @param time The time for which the input is set.
  * @return Error code.
  */
-fmiStatus fmi1_cs_set_real_inputs(jmi_ode_problem_t* ode_problem, fmiReal time);
+fmiStatus fmi1_cs_set_real_inputs(jmi_cs_data_t* cs_data, fmiReal time);
 
 
 /**

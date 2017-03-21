@@ -23,6 +23,7 @@
 #include "fmi2Functions.h"
 #include "fmi2_me.h"
 #include "jmi_ode_problem.h"
+#include "jmi_cs.h"
 
 /** \file fmi2_me.h
  *  \brief The public FMI 2.0 model interface.
@@ -35,8 +36,8 @@ typedef struct fmi2_cs_t fmi2_cs_t;      /**< \brief Forward declaration of stru
 struct fmi2_cs_t {
     fmi2_me_t          fmi2_me;                     /**< \brief Must be the first one in this struct so that a fmi2_cs_t pointer can be used in place of a fmi2_me_t pointer. */
     jmi_ode_problem_t* ode_problem;                 /**< \brief A jmi ode problem pointer. */
+    jmi_cs_data_t*     cs_data;                     /**< \brief A jmi CS data pointer. */
     fmi2EventInfo      event_info;                  /**< \brief The event information struct. */
-    int                triggered_external_event;    /**< \brief Flag indicating if the user have sat discrete inputs. */
 };
 
 /**
@@ -192,7 +193,7 @@ int fmi2_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y,
 
 int fmi2_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *root);
 
-fmi2Status fmi2_cs_set_real_inputs(jmi_ode_problem_t* ode_problem, fmi2Real time);
+fmi2Status fmi2_cs_set_real_inputs(jmi_cs_data_t* cs_data, fmi2Real time);
 
 int fmi2_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event);
 

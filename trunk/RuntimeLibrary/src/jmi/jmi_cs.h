@@ -35,7 +35,15 @@ struct jmi_cs_real_input_t {
     jmi_real_t input_derivatives_factor[JMI_CS_MAX_INPUT_DERIVATIVES];
 };
 
-int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
+typedef struct {
+    jmi_cs_real_input_t* real_inputs;   /**< \brief List of real inputs with derivative information */
+    size_t n_real_inputs;               /**< \brief Number of real inputs in real_inputs list */
+    
+    int triggered_external_event;       /**< \brief Flag indicating if any discrete inputs have been changed */
+    void* fmix_me;                      /**< \brief The underlying Model Exchange/ODE implementation */
+} jmi_cs_data_t;
+
+int jmi_cs_set_real_input_derivatives(jmi_cs_data_t* cs_data, jmi_log_t* log, 
         const jmi_value_reference vr[], size_t nvr, const int order[],
         const jmi_real_t value[]);
         
@@ -55,5 +63,21 @@ int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
                                        const jmi_value_reference    vr[],
                                        size_t                       nvr,
                                        const void*                  value);
+
+/**
+ * \brief Frees all data for struct allocated by the jmi_new_cs_data function.
+ * 
+ * @param cs_data The jmi_cs_data_t struct.
+ */
+void jmi_free_cs_data(jmi_cs_data_t* cs_data);
+
+/**
+ * \brief Allocates all data for the jmi_cs_data_t struct.
+ * 
+ * @param fmix_me A pointer to the ME struct that the CS data should be used to wrap.
+ * @param n_real_inputs The number of real inputs of the model.
+ * @return A pointer to the allocated jmi_cs_data struct, NULL on failure.
+ */
+jmi_cs_data_t* jmi_new_cs_data(void* fmix_me, size_t n_real_inputs);
 
 #endif /* JMI_CS_H */

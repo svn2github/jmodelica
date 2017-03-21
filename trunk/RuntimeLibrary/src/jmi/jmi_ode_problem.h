@@ -25,9 +25,7 @@
 #ifndef _JMI_ODE_PROBLEM_H
 #define _JMI_ODE_PROBLEM_H
 
-#include "jmi.h"
 #include "jmi_log.h"
-#include "jmi_cs.h"
 #include "jmi_ode_solver.h"
 
 
@@ -64,7 +62,7 @@ typedef int (*complete_step_func_t)(jmi_ode_problem_t* ode_problem, char* step_e
 
 struct jmi_ode_problem_t {
     jmi_callbacks_t*      jmi_callbacks;
-    void*                 fmix_me;                     /**< \brief Reference to a fmix_me instance. */
+    void*                 problem_data;                /**< \brief Reference to opaque callback data. */
     jmi_ode_solver_t*     ode_solver;                  /**< \brief Struct containing the ODE solver. */
     jmi_log_t*            log;                         /**< \brief A pointer to the corresponding log_t struct */
     
@@ -73,7 +71,6 @@ struct jmi_ode_problem_t {
     complete_step_func_t  complete_step_func;          /**< \brief A callback function for completing the step, checks for step-events. */
     
     size_t                n_real_x;                    /**< \brief Number of differentiated states. */
-    size_t                n_real_u;                    /**< \brief Number of inputs. */
     size_t                n_sw;                        /**< \brief Number of switching functions. */
     jmi_real_t            time;                        /**< \brief The time, independent variable of the ODE. */
     jmi_real_t*           states;                      /**< \brief The states of the ODE. */
@@ -81,7 +78,6 @@ struct jmi_ode_problem_t {
     jmi_real_t*           nominal;                     /**< \brief The nominals for the states. */
     jmi_real_t*           event_indicators;            /**< \brief The evaluated event indicators at the current time. */
     jmi_real_t*           event_indicators_previous;   /**< \brief The evaluated event indicators at the previous time. */
-    jmi_cs_real_input_t*  real_inputs;                 /**< \brief The real inputs to the ODE. */
 };
 
 /**
@@ -89,14 +85,14 @@ struct jmi_ode_problem_t {
  *
  * @param ode_problem A jmi_ode_problem_t struct.
  * @param cb A jmi_callbacks_t pointer.
- * @param fmix_me A pointer to a FMI ME struct. 
+ * @param problem_data A pointer to opaque callback data. 
  * @param n_real_x The number of continuous states.
  * @param n_sw The number of switches.
  * @param n_real_u The number of inputs.
  * @param log A pointer to a log struct.
  * @return Error code.
   */
-int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* fmix_me, int n_real_x, int n_sw, int n_real_u, jmi_log_t* log);
+int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* problem_data, int n_real_x, int n_sw, jmi_log_t* log);
 
 /**
  * \brief Initializes the jmi_ode_problem_t instance.

@@ -25,11 +25,12 @@
 #ifndef _JMI_ODE_SOLVER_H
 #define _JMI_ODE_SOLVER_H
 
-#include "jmi_util.h"
 #include "jmi_ode_problem.h"
-#include "jmi.h"
 #include "jmi_log.h"
 
+#define JMI_ODE_OK 0
+#define JMI_ODE_EVENT 1
+#define JMI_ODE_ERROR -1
 
 /**
  * \brief A ode solver function signature.

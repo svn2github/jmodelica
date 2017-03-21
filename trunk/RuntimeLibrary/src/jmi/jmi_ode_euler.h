@@ -25,6 +25,7 @@
 #ifndef _JMI_ODE_EULER_H
 #define _JMI_ODE_EULER_H
 
+#include <string.h>
 #include "jmi_ode_solver.h"
 
 typedef struct jmi_ode_euler_t jmi_ode_euler_t;

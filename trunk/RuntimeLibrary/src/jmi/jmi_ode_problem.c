@@ -20,30 +20,22 @@
 
 #include "jmi_ode_problem.h"
 
-int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* fmix_me,
-                       int n_real_x, int n_sw, int n_real_u, jmi_log_t* log){
-    int i;
+int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* problem_data,
+                       int n_real_x, int n_sw, jmi_log_t* log){
     jmi_ode_problem_t* problem;
     
     *ode_problem = (jmi_ode_problem_t*)calloc(1,sizeof(jmi_ode_problem_t));
     problem = *ode_problem;
     problem -> jmi_callbacks = cb;
-    problem -> fmix_me  = fmix_me;     
+    problem -> problem_data  = problem_data;
     problem -> n_real_x = n_real_x;
     problem -> n_sw     = n_sw;
-    problem -> n_real_u = n_real_u;
     problem -> states                    = (jmi_real_t*)calloc(n_real_x, sizeof(jmi_real_t));
     problem -> states_derivative         = (jmi_real_t*)calloc(n_real_x, sizeof(jmi_real_t));
     problem -> nominal                   = (jmi_real_t*)calloc(n_real_x, sizeof(jmi_real_t));
     problem -> event_indicators          = (jmi_real_t*)calloc(n_sw, sizeof(jmi_real_t));
     problem -> event_indicators_previous = (jmi_real_t*)calloc(n_sw, sizeof(jmi_real_t));
     problem -> log = log;
-    
-    problem -> real_inputs = (jmi_cs_real_input_t*)calloc(n_real_u, sizeof(jmi_cs_real_input_t));
-    /* Initialize real inputs */
-    for (i = 0; i < n_real_u; i++) {
-        jmi_cs_init_real_input_struct(&(problem -> real_inputs[i]));
-    }
     
     return 0;
 }
@@ -61,14 +53,13 @@ int jmi_init_ode_problem(jmi_ode_problem_t* problem, jmi_real_t t_start,
 }
 
 
-void jmi_free_ode_problem(jmi_ode_problem_t* problem){
+void jmi_free_ode_problem(jmi_ode_problem_t* problem) {
     if (problem) {
         free(problem -> states);
         free(problem -> states_derivative);
         free(problem -> nominal);
         free(problem -> event_indicators);
         free(problem -> event_indicators_previous);
-        free(problem -> real_inputs);
         free(problem);
     }
 }

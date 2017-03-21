@@ -242,6 +242,7 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     fmi2Integer retval;
     jmi_ode_problem_t* ode_problem;
     jmi_t* jmi;
+    jmi_cs_data_t* cs_data;
     jmi_ode_method_t ode_method;
     jmi_real_t ode_step_size;
     jmi_real_t ode_rel_tol;
@@ -266,11 +267,12 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     
     if (((fmi2_me_t *)c) -> fmu_type == fmi2CoSimulation) {
         ode_problem = ((fmi2_cs_t *)c) -> ode_problem; 
+        cs_data = ((fmi2_cs_t *)c)->cs_data;
         /*Get the states, event indicators and the nominals for the ODE problem. Initialization. */
-        fmi2_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
-        fmi2_get_event_indicators(ode_problem->fmix_me, ode_problem->event_indicators, ode_problem->n_sw);
-        fmi2_get_event_indicators(ode_problem->fmix_me, ode_problem->event_indicators_previous, ode_problem->n_sw);
-        fmi2_get_nominals_of_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
+        fmi2_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->n_real_x);
+        fmi2_get_event_indicators(cs_data->fmix_me, ode_problem->event_indicators, ode_problem->n_sw);
+        fmi2_get_event_indicators(cs_data->fmix_me, ode_problem->event_indicators_previous, ode_problem->n_sw);
+        fmi2_get_nominals_of_continuous_states(cs_data->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
         
         
         /* These options for the solver need to be found in a better way. */
@@ -338,6 +340,7 @@ fmi2Status fmi2_reset(fmi2Component c) {
     /* Clear the ode_solver in case of CoSimulation */
     if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
         jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
+        jmi_free_cs_data(((fmi2_cs_t *)c)->cs_data);
     }
     
     /* Save some information from the jmi struct */
@@ -359,9 +362,10 @@ fmi2Status fmi2_reset(fmi2Component c) {
     if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
         jmi_ode_problem_t* ode_problem = 0;
         fmi2_cs_t* fmi2_cs = (fmi2_cs_t*)c;
-
-        jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
-                            jmi->n_relations, jmi->n_real_u, jmi->log);
+        
+        fmi2_cs->cs_data = jmi_new_cs_data(c, jmi->n_real_u);
+        jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, fmi2_cs->cs_data,
+                            jmi->n_real_x, jmi->n_relations, jmi->log);
         fmi2_cs -> ode_problem = ode_problem;
     }
     
@@ -478,7 +482,7 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t *)c)->triggered_external_event =
+        ((fmi2_cs_t *)c)->cs_data->triggered_external_event =
             jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
                                                (void*)fmi2_me->work_real_array);
     }
@@ -511,7 +515,7 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t *)c)->triggered_external_event =
+        ((fmi2_cs_t *)c)->cs_data->triggered_external_event =
             jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
                                                (void*)fmi2_me->work_int_array);
     }
@@ -541,7 +545,7 @@ fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t *)c)->triggered_external_event =
+        ((fmi2_cs_t *)c)->cs_data->triggered_external_event =
             jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
                                                (void*)jmi_boolean_values);
     }
