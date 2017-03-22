@@ -61,6 +61,10 @@ struct jmi_ode_solver_t {
     int experimental_mode;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
+    
+    jmi_real_t*           event_indicators;            /**< \brief The evaluated event indicators at the current time. */
+    jmi_real_t*           event_indicators_previous;   /**< \brief The evaluated event indicators at the previous time. */
+    jmi_real_t*           states_derivative;           /**< \brief The state derivatives of the ODE. */
 };
 
 /** \brief Experimental features in the solver */

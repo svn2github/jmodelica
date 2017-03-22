@@ -25,8 +25,8 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     int flag = 0;
     jmi_ode_euler_t* integrator = (jmi_ode_euler_t*)solver->integrator;
     jmi_ode_problem_t* problem = solver -> ode_problem;
-    int n_real_x = problem->n_real_x;
-    int n_sw = problem->n_sw;
+    int n_real_x = problem->sizes.states;
+    int n_sw = problem->sizes.root_fnc;
     char step_event = 0; /* boolean step_event = FALSE */
     
     jmi_real_t tcur, tnext;
@@ -42,12 +42,12 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 
     /* if(n_real_x) { */
     y = problem->states;
-    ydot = problem->states_derivative;
+    ydot = solver->states_derivative;
     
     
     if(n_sw) {
-        event_indicators = problem->event_indicators;
-        event_indicators_previous = problem->event_indicators_previous;
+        event_indicators = solver->event_indicators;
+        event_indicators_previous = solver->event_indicators_previous;
     }
     
     tcur = problem->time;
@@ -55,7 +55,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     
     /* Get the first event indicators */
     if(n_sw > 0){
-        flag = problem->root_func(problem, tcur, y, event_indicators_previous);
+        flag = problem->ode_callbacks.root_func(problem, tcur, y, event_indicators_previous);
             
         if (flag != 0){
             jmi_log_comment(problem->log, logError, "Could not retrieve event indicators");
@@ -69,7 +69,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 
         /* Get derivatives */
         /* if(n_real_x > 0) { */
-        flag = problem->rhs_func(problem, tcur, y, ydot);
+        flag = problem->ode_callbacks.rhs_func(problem, tcur, y, ydot);
         if (flag != 0){
             jmi_log_comment(problem->log, logError, "Could not retrieve time derivatives");
             return -1;
@@ -95,7 +95,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         
         /* Check if an event indicator has triggered */
         if(n_sw > 0){
-            flag = problem->root_func(problem, tcur, y, event_indicators);
+            flag = problem->ode_callbacks.root_func(problem, tcur, y, event_indicators);
             
             if (flag != 0){
                 jmi_log_comment(problem->log, logError, "Could not retrieve event indicators");
@@ -109,10 +109,10 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
                 break;
             }
         }
-        memcpy(event_indicators_previous, event_indicators, (problem->n_sw)*sizeof(jmi_real_t));
+        memcpy(event_indicators_previous, event_indicators, (n_sw)*sizeof(jmi_real_t));
         
         /* After each step call completed integrator step */
-        flag = problem->complete_step_func(problem, &step_event);
+        flag = problem->ode_callbacks.complete_step_func(problem, &step_event);
         if (flag != 0) {
             jmi_log_node(problem->log, logError, "Error", "Failed to complete an integrator step. "
                      "Returned with <error_flag: %d>", flag);
@@ -128,7 +128,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     } /* while */
     
     /* Final call to the RHS */
-    flag = problem->rhs_func(problem, tcur, y, ydot);
+    flag = problem->ode_callbacks.rhs_func(problem, tcur, y, ydot);
     if (flag != 0){
         jmi_log_comment(problem->log, logError, "Could not retrieve time derivatives");
         return -1;

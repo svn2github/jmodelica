@@ -17,7 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
 #include "jmi_cs.h"
 
 static int is_disc_input_with_diff_value(jmi_t*                     jmi,
@@ -142,6 +143,17 @@ void jmi_free_cs_data(jmi_cs_data_t* cs_data) {
     }
     
     free(cs_data);
+}
+
+void jmi_reset_cs_data(jmi_cs_data_t* cs_data) {
+    size_t i;
+    
+    cs_data->triggered_external_event = FALSE;
+    
+    memset(cs_data->real_inputs, 0, cs_data->n_real_inputs* sizeof(jmi_cs_real_input_t));
+    for (i = 0; i < cs_data->n_real_inputs; i++) {
+        jmi_cs_init_real_input_struct(&(cs_data->real_inputs[i]));
+    }
 }
 
 jmi_cs_data_t* jmi_new_cs_data(void* fmix_me, size_t n_real_inputs) {

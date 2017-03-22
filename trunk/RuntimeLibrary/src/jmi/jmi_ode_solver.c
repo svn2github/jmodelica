@@ -35,6 +35,9 @@ int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
     solver->step_size = step_size;
     solver->rel_tol = rel_tol;
     solver->experimental_mode = experimental_mode;
+    solver->states_derivative = calloc(problem->sizes.states, sizeof(jmi_real_t));
+    solver->event_indicators_previous = calloc(problem->sizes.root_fnc, sizeof(jmi_real_t));
+    solver->event_indicators = calloc(problem->sizes.root_fnc, sizeof(jmi_real_t));
     problem->ode_solver = solver;
 
     switch(method) {
@@ -67,6 +70,9 @@ int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
 void jmi_delete_ode_solver(jmi_ode_problem_t* problem){
     if(problem->ode_solver){
         (problem->ode_solver)->delete_solver(problem->ode_solver);
+        free(problem->ode_solver->states_derivative);
+        free(problem->ode_solver->event_indicators_previous);
+        free(problem->ode_solver->event_indicators);
         free(problem->ode_solver);
     }
 }

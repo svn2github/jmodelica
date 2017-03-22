@@ -37,14 +37,14 @@ int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
     ydot = NV_DATA_S(yydot); /*ydot is now a vector of realtype*/
 
-    flag = problem->rhs_func(problem, t, y, ydot);
+    flag = problem->ode_callbacks.rhs_func(problem, t, y, ydot);
     if(flag != 0) {
         jmi_log_node(problem->log, logWarning, "Warning", "Evaluating the derivatives failed (recoverable error). "
                      "Returned with <warningFlag: %d>", flag);
         return 1; /* Recoverable failure */
     }
     
-    if (problem->n_real_x == 0){
+    if (problem->sizes.states == 0){
         ydot[0] = 0.0;
     }
 
@@ -59,7 +59,7 @@ int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
 
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 
-    flag = problem->root_func(problem, t, y, gout);    
+    flag = problem->ode_callbacks.root_func(problem, t, y, gout);
     if(flag != 0) {
         jmi_log_node(problem->log, logError, "Error", "Evaluating the event indicators failed. "
                      "Returned with <error_flag: %d>", flag);
@@ -96,7 +96,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
             y = problem->states;
         }
         */
-		memcpy (NV_DATA_S(integrator->y_work), problem->states, problem->n_real_x*sizeof(jmi_real_t));
+		memcpy (NV_DATA_S(integrator->y_work), problem->states, problem->sizes.states*sizeof(jmi_real_t));
         time = problem->time;
         flag = CVodeReInit(integrator->cvode_mem, time, integrator->y_work);
         if (flag<0){
@@ -128,7 +128,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         /* Set time */
         problem->time = tret;
         /* Set states */
-        memcpy (problem->states, NV_DATA_S(integrator->y_work), problem->n_real_x*sizeof(jmi_real_t));
+        memcpy (problem->states, NV_DATA_S(integrator->y_work), problem->sizes.states*sizeof(jmi_real_t));
         
         /* Log information */
         if (problem->jmi_callbacks->log_options.log_level >= 4) {
@@ -149,7 +149,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         }
         
         /* After each step call completed integrator step */
-        retval = problem->complete_step_func(problem, &step_event);
+        retval = problem->ode_callbacks.complete_step_func(problem, &step_event);
         if (retval != 0) {
             jmi_log_node(problem->log, logError, "Error", "Failed to complete an integrator step. "
                      "Returned with <error_flag: %d>", retval);
@@ -191,16 +191,16 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
     /* integrator->rtol = 1e-4; */
     integrator->rtol = solver->rel_tol;
     
-    if (problem->n_real_x > 0) {
-        integrator->atol = N_VNew_Serial(problem->n_real_x);
+    if (problem->sizes.states > 0) {
+        integrator->atol = N_VNew_Serial(problem->sizes.states);
     } else {
         integrator->atol = N_VNew_Serial(1);
     }
     atol_nv = NV_DATA_S(integrator->atol);
     
-    if (problem->n_real_x > 0) {
-        for (i = 0; i < problem->n_real_x; i++) {
-            atol_nv[i] = 0.01*integrator->rtol*problem->nominal[i];
+    if (problem->sizes.states > 0) {
+        for (i = 0; i < problem->sizes.states; i++) {
+            atol_nv[i] = 0.01*integrator->rtol*problem->nominals[i];
         }
     }else{
         atol_nv[0] = 0.01*integrator->rtol*1.0;
@@ -213,10 +213,10 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
     }
 
     /* Get the default values for the time and states */
-    if (problem->n_real_x > 0) {
-        integrator->y_work = N_VNew_Serial(problem->n_real_x);
+    if (problem->sizes.states > 0) {
+        integrator->y_work = N_VNew_Serial(problem->sizes.states);
         y = NV_DATA_S(integrator->y_work);
-		memcpy (y, problem->states, problem->n_real_x*sizeof(jmi_real_t));
+		memcpy (y, problem->states, problem->sizes.states*sizeof(jmi_real_t));
     }else{
         integrator->y_work = N_VNew_Serial(1);
         y = NV_DATA_S(integrator->y_work);
@@ -235,8 +235,8 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
         return -1;
     }
 
-    if (problem->n_real_x > 0) {
-        flag = CVDense(cvode_mem, problem->n_real_x);
+    if (problem->sizes.states > 0) {
+        flag = CVDense(cvode_mem, problem->sizes.states);
     }else{
         flag = CVDense(cvode_mem, 1);
     }
@@ -251,8 +251,8 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
         return -1;
     }
     
-    if (problem->n_sw > 0){
-        flag = CVodeRootInit(cvode_mem, problem->n_sw, cv_root);
+    if (problem->sizes.root_fnc > 0){
+        flag = CVodeRootInit(cvode_mem, problem->sizes.root_fnc, cv_root);
         if(flag!=0){
             jmi_log_node(problem->log, logError, "Error", "Failed to specify the event indicator function. Returned with <error_flag: %d>", flag);
             return -1;

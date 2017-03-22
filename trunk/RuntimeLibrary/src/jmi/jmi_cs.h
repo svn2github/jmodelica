@@ -71,6 +71,17 @@ int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
  */
 void jmi_free_cs_data(jmi_cs_data_t* cs_data);
 
+
+/**
+ * \brief Resets the jmi_cs_data_t instance. The struct will be in the state
+ * it was after jmi_new_cs_data. NOTE that this does not mean that the struct
+ * that fmix_me points to is reset. So jmi_cs_data_t don't own it but only holds
+ * a reference to and use it.
+ *
+ * @param cs_data A jmi_cs_data_t struct.
+  */
+void jmi_reset_cs_data(jmi_cs_data_t* cs_data);
+
 /**
  * \brief Allocates all data for the jmi_cs_data_t struct.
  * 

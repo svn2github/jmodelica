@@ -134,7 +134,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         }
         
         /* Set states to the model */
-        flag = fmi1_me_set_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->n_real_x);
+        flag = fmi1_me_set_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
         if (flag != fmiOK) {
             jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
             jmi_log_unwind(ode_problem->log, top_node);
@@ -158,11 +158,11 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         /* Event handled, initialize again */
         fmi1_cs->initialize_solver = (int)JMI_TRUE;
         
-        flag = fmi1_me_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->n_real_x);
+        flag = fmi1_me_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
         if (flag != fmiOK) {
             return fmiError;
         }
-        flag = fmi1_me_get_nominal_continuous_states(cs_data->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
+        flag = fmi1_me_get_nominal_continuous_states(cs_data->fmix_me, ode_problem->nominals, ode_problem->sizes.states);
         if (flag != fmiOK) {
             jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
             jmi_log_unwind(ode_problem->log, top_node);
@@ -265,7 +265,8 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
                                    fmiBoolean loggingOn) {
     fmi1_cs_t *component;
     fmi1_me_t * fmi1_me;
-    jmi_ode_problem_t* ode_problem = 0;
+    jmi_ode_callbacks_t ode_callbacks;
+    jmi_ode_sizes_t ode_sizes;
     jmi_t* jmi;
     char* tmpname;
     char* tmpguid;
@@ -309,17 +310,21 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     }
     jmi = &(fmi1_me->jmi);
     /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
+    ode_callbacks = jmi_ode_problem_default_callbacks();
+    ode_callbacks.rhs_func = fmi1_cs_rhs_fcn;
+    ode_callbacks.root_func = fmi1_cs_root_fcn;
+    ode_callbacks.complete_step_func = fmi1_cs_completed_integrator_step;
+    ode_sizes.states = jmi->n_real_x;
+    ode_sizes.root_fnc = jmi->n_relations;
     component->cs_data = jmi_new_cs_data(fmi1_me, jmi->n_real_u);
-    jmi_new_ode_problem(&ode_problem, &(fmi1_me->jmi.jmi_callbacks),
-                        component->cs_data,
-                        jmi->n_real_x,
-                        jmi->n_relations,
-                        jmi->log);
+    component->ode_problem = jmi_new_ode_problem(&(fmi1_me->jmi.jmi_callbacks),
+                                                 component->cs_data,
+                                                 ode_callbacks,
+                                                 ode_sizes,
+                                                 jmi->log);
     /* In case fmi1_me_instantiate_model was not called, log struct have to
      * be created as:
      * ode_problem -> log = jmi_log_init(jmi_callbacks); */
-    
-    component -> ode_problem = ode_problem;
     
     return (fmiComponent)component;
 }
@@ -368,14 +373,10 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
         return fmiError; 
     }
     
-    /*Get the states, event indicators and the nominals for the ODE problem. Initialization. */
-    fmi1_me_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->n_real_x);
-    fmi1_me_get_event_indicators(cs_data->fmix_me, ode_problem->event_indicators, ode_problem->n_sw);
-    fmi1_me_get_event_indicators(cs_data->fmix_me, ode_problem->event_indicators_previous, ode_problem->n_sw);
-    fmi1_me_get_nominal_continuous_states(cs_data->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
-    /*The rest of the initialization for the ODE problem. */
-    jmi_init_ode_problem(ode_problem, tStart, fmi1_cs_rhs_fcn,
-                         fmi1_cs_root_fcn, fmi1_cs_completed_integrator_step);
+    /*Get the start time, states and the nominals for the ODE problem. Initialization. */
+    fmi1_me_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
+    fmi1_me_get_nominal_continuous_states(cs_data->fmix_me, ode_problem->nominals, ode_problem->sizes.states);
+    ode_problem->time = tStart;
     
     /* These options for the solver need to be found in a better way. */
     ode_method            = fmi1_me->jmi.options.cs_solver;
@@ -417,22 +418,17 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     }
     
     fmi1_me_free_model_instance(cs_data->fmix_me);
-    jmi_free_cs_data(cs_data);
-    
-    
     fmi1_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name,
                                         fmi1_cs->GUID, fmi1_cs->me_callback_functions,
                                         fmi1_cs->logging_on);
-    
     if (fmi1_me == NULL){ return fmiError; }
-    fmi1_cs->cs_data = jmi_new_cs_data(fmi1_me, fmi1_me->jmi.n_real_u);
-    jmi_new_ode_problem(&fmi1_cs->ode_problem, &(fmi1_me->jmi.jmi_callbacks),
-                        fmi1_cs->cs_data,
-                        fmi1_me->jmi.n_real_x,
-                        fmi1_me->jmi.n_relations,
-                        fmi1_me->jmi.log);
     
+    jmi_reset_cs_data(fmi1_cs->cs_data);
+    jmi_reset_ode_problem(fmi1_cs->ode_problem);
+    /* Due to no fmi1_me_t reset, pointers may have changed: */
+    fmi1_cs->cs_data->fmix_me = fmi1_me;
     ode_problem->log = fmi1_me->jmi.log;
+    ode_problem->jmi_callbacks = &(fmi1_me->jmi.jmi_callbacks);
     
     return fmiOK;
 }
@@ -574,7 +570,7 @@ int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y,
     jmi_cs_data_t* cs_data = (jmi_cs_data_t*)ode_problem->problem_data;
     
     /* Set the states */
-    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, (fmiReal*)y, ode_problem->n_real_x);
+    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, (fmiReal*)y, ode_problem->sizes.states);
     if (retval != fmiOK) {
         return -1;
     }
@@ -593,8 +589,8 @@ int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y,
     }
     
     /* Evaluate the derivatives */
-    if (ode_problem->n_real_x > 0) {
-        retval = fmi1_me_get_derivatives(cs_data->fmix_me, (fmiReal*)rhs , ode_problem->n_real_x);
+    if (ode_problem->sizes.states > 0) {
+        retval = fmi1_me_get_derivatives(cs_data->fmix_me, (fmiReal*)rhs , ode_problem->sizes.states);
         if (retval != fmiOK) {
             return -1;
         }
@@ -609,7 +605,7 @@ int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
     fmiStatus retval;
     jmi_cs_data_t* cs_data = (jmi_cs_data_t*)ode_problem->problem_data;
     
-    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, y, ode_problem->n_real_x);
+    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, y, ode_problem->sizes.states);
     if (retval != fmiOK) {
         return -1;
     }
@@ -627,7 +623,7 @@ int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
         return -1;
     }
     
-    retval = fmi1_me_get_event_indicators(cs_data->fmix_me, root , ode_problem->n_sw);
+    retval = fmi1_me_get_event_indicators(cs_data->fmix_me, root , ode_problem->sizes.root_fnc);
     if (retval != fmiOK) {
         return -1;
     }
