@@ -494,11 +494,14 @@ aspect ExpressionSimplification {
         when (getLeftNoTransform().isLiteralZero())     to FExp getRight().makeNegated();
         when (getRightNoTransform() instanceof FNegExp) to FExp convertToAddition();
         when (getRightNoTransform().isLiteralZero())    to FExp getLeft();
+        when (getLeftNoTransform().equalsSymbolic(getRightNoTransform())) to FExp getRight().size().createZeroFExp();
     }
 
     rewrite FDotAddExp {
         when (getLeftNoTransform().isLiteralZero())  to FExp getRight();
         when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
+        when (getLeftNoTransform().equalsNegatedSymbolic(getRightNoTransform())) 
+            to FExp getRight().size().createZeroFExp();
     }
 
     rewrite FNegExp {
@@ -525,8 +528,19 @@ aspect ExpressionSimplification {
     rewrite FSmoothExp {
         when (!getFExpNoTransform().needsSmooth()) to FExp getFExpNoTransform();
     }
-
-
+    
+    syn boolean FExp.equalsNegatedSymbolic(FExp other) {
+        if (other instanceof FNegExp) {
+            FNegExp o = (FNegExp) other;
+            return this.equalsSymbolic(o.getFExpNoTransform());
+        } else if (this instanceof FNegExp) {
+            FNegExp t = (FNegExp) this;
+            return other.equalsSymbolic(t.getFExpNoTransform());
+        } else {
+            return false;
+        }
+    }
+    
     syn boolean FExp.equalsSymbolic(FExp other) {
         return super.equals(other);
     }
