@@ -724,7 +724,7 @@ end Differentiation.Expressions.Homotopy;
             Real x1[2],x2[2];
         equation
             der(x1) .+ der(x2) = {1,1};
-            x1 .+ x2 = {0,0};
+            x1 .+ (-x2) = {0,0};
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -738,8 +738,8 @@ initial equation
  x1[1] = 0.0;
  x1[2] = 0.0;
 equation
- der(x1[1]) .+ (- der(x1[1])) = 1;
- der(x1[2]) .+ (- der(x1[2])) = 1;
+ der(x1[1]) .+ der(x1[1]) = 1;
+ der(x1[2]) .+ der(x1[2]) = 1;
 end Differentiation.Expressions.DotAdd;
 ")})));
         end DotAdd;

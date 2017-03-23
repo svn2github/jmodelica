@@ -468,4 +468,58 @@ end SymbolicTests.SimplifyNegations13;
 ")})));
 end SimplifyNegations13;
 
+model SimplifyCancellations1
+    Real x, y;
+equation
+    (-x) + x = y;
+    y = x + 1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyCancellations1",
+            description="Simplifying cancellations of two equal expressions",
+            flatModel="
+fclass SymbolicTests.SimplifyCancellations1
+ constant Real x = -1.0;
+ constant Real y = 0;
+end SymbolicTests.SimplifyCancellations1;
+")})));
+end SimplifyCancellations1;
+
+model SimplifyCancellations2
+    Real x, y;
+equation
+    x + (-x) = y;
+    y = x + 1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyCancellations2",
+            description="Simplifying cancellations of two equal expressions",
+            flatModel="
+fclass SymbolicTests.SimplifyCancellations2
+ constant Real x = -1.0;
+ constant Real y = 0;
+end SymbolicTests.SimplifyCancellations2;
+")})));
+end SimplifyCancellations2;
+
+model SimplifyCancellations3
+    Real x, y;
+equation
+    x - x = y;
+    y = x + 1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyCancellations3",
+            description="Simplifying cancellations of two equal expressions",
+            flatModel="
+fclass SymbolicTests.SimplifyCancellations3
+ constant Real x = -1.0;
+ constant Real y = 0;
+end SymbolicTests.SimplifyCancellations3;
+")})));
+end SimplifyCancellations3;
+
 end SymbolicTests;

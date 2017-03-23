@@ -917,7 +917,7 @@ equation
  x.a[1] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[1] + y[1]) - y[1];
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
- x.b = 3 + (temp_2 - temp_2);
+ x.b = 3;
  temp_2 = if y[4] < pre(temp_2) or y[4] >= pre(temp_2) + 1 or initial() then integer(y[4]) else pre(temp_2);
 end FunctionInlining.RecordInline7;
 ")})));

@@ -43,14 +43,15 @@ package OptimicaTransformCanonicalTests
 	x1 = 1;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="LinearityTest1",
-			methodName="variableDiagnostics",
-			description="Test linearity of variables.",
-			methodResult="  
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest1",
+            description="Test linearity of variables.",
+            methodName="variableDiagnostics",
+            methodResult="
 Independent constants: 
  x1: number of uses: 0, isLinear: true
+ x5: number of uses: 0, isLinear: true
 
 Dependent constants: 
 
@@ -61,7 +62,9 @@ Independent parameters:
  p2: number of uses: 1, isLinear: false
 
 Dependent parameters: 
+ x4: number of uses: 2, isLinear: true
  x2: number of uses: 2, isLinear: true
+ x3: number of uses: 2, isLinear: true
 
 Differentiated variables: 
  cost: number of uses: 0, isLinear: true
@@ -71,16 +74,12 @@ Derivative variables:
 
 Discrete variables: 
 
-Algebraic real variables:
- x3: number of uses: 2, isLinear: false, alias: no
- x4: number of uses: 2, isLinear: true, alias: no
- x5: number of uses: 2, isLinear: false, alias: no
- x6: number of uses: 3, isLinear: true, alias: no
+Algebraic real variables: 
+ x6: number of uses: 1, isLinear: true, alias: no
  x7: number of uses: 2, isLinear: false, alias: no
  x8: number of uses: 1, isLinear: false, alias: no
 
 Input variables: 
-
 ")})));
   end LinearityTest1;
 

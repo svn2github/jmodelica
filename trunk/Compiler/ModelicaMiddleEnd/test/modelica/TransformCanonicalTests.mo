@@ -419,14 +419,15 @@ Input variables:
   	x7 = x3*x5;
   
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="LinearityTest1",
-			methodName="variableDiagnostics",
-			description="Test linearity of variables.",
-			methodResult="  
-
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest1",
+            description="Test linearity of variables.",
+            methodName="variableDiagnostics",
+            methodResult="
 Independent constants: 
+ x5: number of uses: 0, isLinear: true
+ x6: number of uses: 0, isLinear: true
 
 Dependent constants: 
 
@@ -434,24 +435,21 @@ Independent parameters:
  p1: number of uses: 3, isLinear: true, evaluated binding exp: 1
 
 Dependent parameters: 
+ x4: number of uses: 2, isLinear: true
+ x3: number of uses: 2, isLinear: true
+ x2: number of uses: 2, isLinear: true
+ x1: number of uses: 1, isLinear: true
 
 Differentiated variables: 
 
 Derivative variables: 
 
-Discrete variables:
+Discrete variables: 
 
 Algebraic real variables: 
- x1: number of uses: 2, isLinear: true, alias: no
- x2: number of uses: 2, isLinear: true, alias: no
- x3: number of uses: 3, isLinear: false, alias: no
- x4: number of uses: 2, isLinear: true, alias: no
- x5: number of uses: 3, isLinear: false, alias: no
- x6: number of uses: 3, isLinear: true, alias: no
- x7: number of uses: 2, isLinear: false, alias: no
 
 Input variables: 
-  ")})));
+")})));
   end LinearityTest1;
 
   model AliasTest1
@@ -5570,7 +5568,7 @@ z := (x + (- y)) / (-1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (-1.0 + 1.0 + -1.0)
+der(x) := x
 -------------------------------
 ")})));
   end SolveEqTest8;
