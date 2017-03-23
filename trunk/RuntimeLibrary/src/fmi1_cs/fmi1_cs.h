@@ -315,60 +315,6 @@ fmiStatus fmi1_cs_get_string(fmiComponent c, const fmiValueReference vr[], size_
  */
 fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 
-/**
- * \brief Calls the underlying ME completed integrator step
- * 
- * @param ode_problem A ODE probelm struct
- * @param step_event (Output) If an event occured.
- * @return Error code.
- */
-int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event);
-
-/**
- * \brief Sets the current internal time.
- * 
- * @param c The FMU struct
- * @param time Sets the internal time.
- * @return Error code.
- */
-fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time);
-
-/**
- * \brief Sets the real inputs.
- * 
- * @param cs_data The CS data struct
- * @param time The time for which the input is set.
- * @return Error code.
- */
-fmiStatus fmi1_cs_set_real_inputs(jmi_cs_data_t* cs_data, fmiReal time);
-
-
-/**
- * \brief Evaluation of the root-function of the ODE.
- *
- * @param ode_problem A jmi_ode_problem_t struct.
- * @param t The ODE time.
- * @param x A pointer to the states of the ODE.
- * @param root A pointer to an evaluation of the event indicator of the ODE.
- * @return Error code.
-  */
-int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
-
-/**
- * \brief Evaluation of the right-hand-side of the ODE.
- *
- * @param ode_problem A jmi_ode_problem_t struct.
- * @param t The ODE time.
- * @param x A pointer to the states of the ODE.
- * @param rhs A pointer to the state derivatives of the ODE.
- * @return Error code.
-  */
-int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);
-
-/* Note in fmiCSFunctions.h
-fmiStatus fmi_save_state(fmiComponent c, size_t index);
-fmiStatus fmi_restore_state(fmiComponent c, size_t index);
-*/
 /* @} */
 
 #endif

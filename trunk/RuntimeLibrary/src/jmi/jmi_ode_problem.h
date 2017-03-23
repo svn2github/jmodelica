@@ -28,48 +28,50 @@
 #include "jmi_log.h"
 #include "jmi_ode_solver.h"
 
+typedef struct {
+    size_t states;
+    size_t root_fnc;
+} jmi_ode_sizes_t;
 
 /**
  * \brief An ode right-hand-side signature.
  *
- * @param ode_problem A jmi_ode_problem_t struct.
  * @param t The ODE time.
  * @param y A pointer to the states of the ODE.
- * @param rhs A pointer to the state derivatives of the ODE.
+ * @param rhs A pointer to an evaluation of state derivatives of the ODE.
+ * @param sizes A jmi_ode_sizes_t struct with ODE state and root sizes.
+ * @param problem_data Opac callback data depending on implementation.
  * @return Error code.
   */
-typedef int (*rhs_func_t)(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t* y, jmi_real_t* rhs);
+typedef int (*rhs_func_t)(jmi_real_t t, jmi_real_t* y, jmi_real_t* rhs, jmi_ode_sizes_t sizes, void* problem_data);
 
 /**
  * \brief An ode root-function signature.
  *
- * @param ode_problem A jmi_ode_problem_t struct.
  * @param t The ODE time.
  * @param y A pointer to the states of the ODE.
  * @param root A pointer to an evaluation of the event indicator of the ODE.
+ * @param sizes A jmi_ode_sizes_t struct with ODE state and root sizes.
+ * @param problem_data Opac callback data depending on implementation.
  * @return Error code.
   */
-typedef int (*root_func_t)(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *root);
+typedef int (*root_func_t)(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data);
 
 /**
  * \brief An ode complete-step-function signature.
  *
- * @param ode_problem A jmi_ode_problem_t struct.
  * @param step_event An indicator of whether a step event has occured or not.
+ * @param terminate An indicator of wheter the simulation should be terminated.
+ * @param problem_data Opac callback data depending on implementation.
  * @return Error code.
   */
-typedef int (*complete_step_func_t)(jmi_ode_problem_t* ode_problem, char* step_event);
+typedef int (*complete_step_func_t)(char* step_event, char* termiante, void* problem_data);
 
 typedef struct {
     rhs_func_t            rhs_func;             /**< \brief A callback function for the rhs of the ODE problem. */
     root_func_t           root_func;            /**< \brief A callback function for the root of the ODE problem. */
     complete_step_func_t  complete_step_func;   /**< \brief A callback function for completing the step. */
 } jmi_ode_callbacks_t;
-
-typedef struct {
-    size_t states;
-    size_t root_fnc;
-} jmi_ode_sizes_t;
 
 struct jmi_ode_problem_t {
     jmi_callbacks_t*      jmi_callbacks;        /**< \brief A pointer to the jmi_callbacks_t struct */

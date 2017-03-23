@@ -32,19 +32,19 @@ int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
     realtype *y, *ydot;
     int flag;
     jmi_ode_solver_t* solver = (jmi_ode_solver_t*)problem_data;
-    jmi_ode_problem_t* problem = solver -> ode_problem;
+    jmi_ode_problem_t* p = solver -> ode_problem;
 
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
     ydot = NV_DATA_S(yydot); /*ydot is now a vector of realtype*/
 
-    flag = problem->ode_callbacks.rhs_func(problem, t, y, ydot);
+    flag = p->ode_callbacks.rhs_func(t, y, ydot, p->sizes, p->problem_data);
     if(flag != 0) {
-        jmi_log_node(problem->log, logWarning, "Warning", "Evaluating the derivatives failed (recoverable error). "
+        jmi_log_node(p->log, logWarning, "Warning", "Evaluating the derivatives failed (recoverable error). "
                      "Returned with <warningFlag: %d>", flag);
         return 1; /* Recoverable failure */
     }
     
-    if (problem->sizes.states == 0){
+    if (p->sizes.states == 0){
         ydot[0] = 0.0;
     }
 
@@ -55,13 +55,13 @@ int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
     realtype *y;
     int flag;
     jmi_ode_solver_t* solver = (jmi_ode_solver_t*)problem_data;
-    jmi_ode_problem_t* problem = solver -> ode_problem;
+    jmi_ode_problem_t* p = solver -> ode_problem;
 
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 
-    flag = problem->ode_callbacks.root_func(problem, t, y, gout);
+    flag = p->ode_callbacks.root_func(t, y, gout, p->sizes, p->problem_data);
     if(flag != 0) {
-        jmi_log_node(problem->log, logError, "Error", "Evaluating the event indicators failed. "
+        jmi_log_node(p->log, logError, "Error", "Evaluating the event indicators failed. "
                      "Returned with <error_flag: %d>", flag);
         return -1; /* Failure */
     }
@@ -87,6 +87,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
     realtype tret/*,*y*/;
     realtype time;
     char step_event = 0; /* boolean step_event = FALSE */
+    char terminate = 0;
     
     if (initialize == TRUE){
         /* statements unused*/
@@ -149,7 +150,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         }
         
         /* After each step call completed integrator step */
-        retval = problem->ode_callbacks.complete_step_func(problem, &step_event);
+        retval = problem->ode_callbacks.complete_step_func(&step_event, &terminate, problem->problem_data);
         if (retval != 0) {
             jmi_log_node(problem->log, logError, "Error", "Failed to complete an integrator step. "
                      "Returned with <error_flag: %d>", retval);

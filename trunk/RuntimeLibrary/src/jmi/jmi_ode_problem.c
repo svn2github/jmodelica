@@ -22,13 +22,37 @@
 #include "jmi_ode_solver.h"
 #include "jmi_ode_problem.h"
 
+static int default_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data) {
+    /* Default implementation, assumes there are no states */
+    if (sizes.states == 0) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+static int default_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data) {
+    /* Default implementation, assumes there are no root function */
+    if (sizes.root_fnc == 0) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+static int default_completed_integrator_step(char* step_event, char* terminate, void* problem_data) {
+    /* Default implementation, assumes noting is done at completed step */
+    *step_event = 0;
+    *terminate = 0;
+    return 0;
+}
+
 jmi_ode_callbacks_t jmi_ode_problem_default_callbacks() {
     jmi_ode_callbacks_t cb;
     
-    /* TODO: Add default callbacks */
-    cb.rhs_func = NULL;
-    cb.root_func = NULL;
-    cb.complete_step_func = NULL;
+    cb.rhs_func = default_rhs_fcn;
+    cb.root_func = default_root_fcn;
+    cb.complete_step_func = default_completed_integrator_step;
     return cb;
 }
 

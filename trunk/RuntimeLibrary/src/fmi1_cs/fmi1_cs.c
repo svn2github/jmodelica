@@ -25,6 +25,11 @@
 #include "jmi_ode_solver.h"
 #include "jmi_log.h"
 
+/* Forward declarations: */
+int fmi1_cs_completed_integrator_step(char* step_event, char* terminate, void* problem_data);
+int fmi1_cs_root_fcn(jmi_real_t t, jmi_real_t *x, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data);
+int fmi1_cs_rhs_fcn(jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data);
+
 const char* fmi1_cs_get_types_platform() {
     return fmiPlatform;
 }
@@ -554,72 +559,6 @@ fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiSt
     return fmiDiscard;
 }
 
-int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
-    fmiStatus retval;
-    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)ode_problem->problem_data;
-    
-    /* Set the states */
-    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, (fmiReal*)y, ode_problem->sizes.states);
-    if (retval != fmiOK) {
-        return -1;
-    }
-    
-    /* Set the time */
-    retval = fmi1_me_set_time(cs_data->fmix_me, t);
-    if (retval != fmiOK) {
-        return -1;
-    }
-	ode_problem->time = t;
-    
-    /* Set the real inputs */
-    retval = fmi1_cs_set_real_inputs(cs_data, t);
-    if (retval != fmiOK) {
-        return -1;
-    }
-    
-    /* Evaluate the derivatives */
-    if (ode_problem->sizes.states > 0) {
-        retval = fmi1_me_get_derivatives(cs_data->fmix_me, (fmiReal*)rhs , ode_problem->sizes.states);
-        if (retval != fmiOK) {
-            return -1;
-        }
-    }else{
-        rhs[0] = 0.0;
-    }
-    
-    return 0;
-}
-
-int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
-    fmiStatus retval;
-    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)ode_problem->problem_data;
-    
-    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, y, ode_problem->sizes.states);
-    if (retval != fmiOK) {
-        return -1;
-    }
-    
-    /* Set the time */
-    retval = fmi1_me_set_time(cs_data->fmix_me, t);
-    if (retval != fmiOK) {
-        return -1;
-    }
-    ode_problem->time = t;
-    
-    /* Set the real inputs */
-    retval = fmi1_cs_set_real_inputs(cs_data, t);
-    if (retval != fmiOK) {
-        return -1;
-    }
-    
-    retval = fmi1_me_get_event_indicators(cs_data->fmix_me, root , ode_problem->sizes.root_fnc);
-    if (retval != fmiOK) {
-        return -1;
-    }
-    
-    return 0;
-}
-
 fmiStatus fmi1_cs_set_real_inputs(jmi_cs_data_t* cs_data, fmiReal time) {
     jmi_cs_real_input_t* real_inputs;
     fmiStatus retval;
@@ -660,11 +599,61 @@ fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time){
     return fmiOK;
 }
 
-int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event){
-    int retval;
-    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)ode_problem->problem_data;
+int fmi1_cs_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data){
+    fmiStatus retval;
+    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem_data;
+    
+    /* Set the states */
+    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, y, sizes.states);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    /* Set the time */
+    retval = fmi1_me_set_time(cs_data->fmix_me, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    /* Set the real inputs */
+    retval = fmi1_cs_set_real_inputs(cs_data, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    /* Evaluate the derivatives */
+    if (sizes.states > 0) {
+        retval = fmi1_me_get_derivatives(cs_data->fmix_me, rhs, sizes.states);
+        if (retval != fmiOK) {
+            return -1;
+        }
+    }
+    
+    return 0;
+}
 
-    retval = fmi1_me_completed_integrator_step(cs_data->fmix_me, step_event);
+int fmi1_cs_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data){
+    fmiStatus retval;
+    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem_data;
+    
+    retval = fmi1_me_set_continuous_states(cs_data->fmix_me, y, sizes.states);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    /* Set the time */
+    retval = fmi1_me_set_time(cs_data->fmix_me, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    /* Set the real inputs */
+    retval = fmi1_cs_set_real_inputs(cs_data, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    retval = fmi1_me_get_event_indicators(cs_data->fmix_me, root, sizes.root_fnc);
     if (retval != fmiOK) {
         return -1;
     }
@@ -672,3 +661,15 @@ int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step
     return 0;
 }
 
+int fmi1_cs_completed_integrator_step(char* step_event, char* terminate, void* problem_data) {
+    int retval;
+    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem_data;
+
+    *terminate = 0;
+    retval = fmi1_me_completed_integrator_step(cs_data->fmix_me, step_event);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    return 0;
+}
