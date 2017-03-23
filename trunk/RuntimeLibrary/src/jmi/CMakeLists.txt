@@ -62,6 +62,7 @@ set(JMIODESolverSourcesPartial
     jmi_ode_cvode.h
     jmi_ode_euler.h
     jmi_ode_solver.h
+    jmi_ode_solver_impl.h
     jmi_ode_problem.h
     
     jmi_ode_cvode.c

@@ -154,7 +154,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
             time_event = time_final;
         }
         
-        retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
+        retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_event, initialize);
         initialize = FALSE; /* The ODE problem has been initialized. */
         
         /* Set time to the model */
@@ -267,11 +267,9 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
 
 /* Helper method for fmi2_free_instance. */
 void fmi2_cs_free_instance(fmi2Component c) {
-    if (((fmi2_cs_t *)c)->ode_problem->ode_solver) {
-        jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
-    }
-    jmi_free_ode_problem(((fmi2_cs_t*)c) -> ode_problem);
-    jmi_free_cs_data(((fmi2_cs_t*)c) -> cs_data);
+    jmi_free_ode_solver(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+    jmi_free_ode_problem(((fmi2_cs_t*)c)->ode_problem);
+    jmi_free_cs_data(((fmi2_cs_t*)c)->cs_data);
     fmi2_me_free_instance(c);
 }
 

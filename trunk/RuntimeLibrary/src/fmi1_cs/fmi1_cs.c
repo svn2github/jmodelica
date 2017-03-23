@@ -114,7 +114,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         inner_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "InternalSolver", 
             "Invoking the internal solver at <t:%E> with end <t:%E>.", ode_problem->time, time_event);
 
-        retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, fmi1_cs->initialize_solver);
+        retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_event, fmi1_cs->initialize_solver);
         if (retval<JMI_ODE_OK){
             jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
             jmi_log_unwind(ode_problem->log, top_node);
@@ -199,38 +199,32 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
 }
 
 void fmi1_cs_free_slave_instance(fmiComponent c) {
-    fmi1_cs_t* fmi1_cs;
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     fmiCallbackFreeMemory fmi_free;
     
-    if (c == NULL) {
+    if (fmi1_cs == NULL) {
 		return;
     }
     
-    fmi1_cs = (fmi1_cs_t*)c;
-    
-    if (fmi1_cs->ode_problem->ode_solver){
-        jmi_delete_ode_solver(fmi1_cs->ode_problem);
-    }
-    
+    jmi_free_ode_solver(fmi1_cs->ode_problem->ode_solver);
     fmi1_me_free_model_instance(fmi1_cs->cs_data->fmix_me);
     
-    if (fmi1_cs) {
-        /* Free the ODE problem.
-         * In case log was created as:
-         * ode_problem -> log = jmi_log_init( jmi_callbacks); 
-         * it have to be freed by:
-         * free(fmi1_cs -> ode_problem -> log);*/
-        fmi1_cs -> ode_problem -> log = NULL;
-        jmi_free_ode_problem((void*)fmi1_cs -> ode_problem);
-        jmi_free_cs_data(fmi1_cs->cs_data);
-        
-        /* Free the fmi1_cs struct. */
-        fmi_free = fmi1_cs -> callback_functions.freeMemory;
-        fmi_free((void*)fmi1_cs -> instance_name);
-        fmi_free((void*)fmi1_cs -> encoded_instance_name);
-        fmi_free((void*)fmi1_cs -> GUID);
-        fmi_free(fmi1_cs);
-    }
+    /* Free the ODE problem.
+     * In case log was created as:
+     * ode_problem -> log = jmi_log_init( jmi_callbacks); 
+     * it have to be freed by:
+     * free(fmi1_cs -> ode_problem -> log);*/
+    fmi1_cs -> ode_problem -> log = NULL;
+    
+    jmi_free_ode_problem((void*)fmi1_cs -> ode_problem);
+    jmi_free_cs_data(fmi1_cs->cs_data);
+    
+    /* Free the fmi1_cs struct. */
+    fmi_free = fmi1_cs -> callback_functions.freeMemory;
+    fmi_free((void*)fmi1_cs -> instance_name);
+    fmi_free((void*)fmi1_cs -> encoded_instance_name);
+    fmi_free((void*)fmi1_cs -> GUID);
+    fmi_free(fmi1_cs);
 }
 
 void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...){
@@ -346,12 +340,9 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                                     fmiBoolean StopTimeDefined, fmiReal tStop){
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
+    jmi_ode_solver_options_t options;
     jmi_cs_data_t* cs_data;
     fmi1_me_t* fmi1_me;
-    jmi_ode_method_t ode_method;
-    jmi_real_t ode_step_size;
-    jmi_real_t ode_rel_tol;
-    int        ode_experimental_mode;
     fmiBoolean toleranceControlled = fmiTrue;
     fmiReal relativeTolerance = 1e-6;
     fmiStatus retval;
@@ -379,14 +370,15 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     ode_problem->time = tStart;
     
     /* These options for the solver need to be found in a better way. */
-    ode_method            = fmi1_me->jmi.options.cs_solver;
-    ode_step_size         = fmi1_me->jmi.options.cs_step_size;
-    ode_rel_tol           = fmi1_me->jmi.options.cs_rel_tol;
-    ode_experimental_mode = fmi1_me->jmi.options.cs_experimental_mode;
+    options = jmi_ode_solver_default_options();
+    options.method                  = fmi1_me->jmi.options.cs_solver;
+    options.euler_options.step_size = fmi1_me->jmi.options.cs_step_size;
+    options.cvode_options.rel_tol   = fmi1_me->jmi.options.cs_rel_tol;
+    options.experimental_mode       = fmi1_me->jmi.options.cs_experimental_mode;
     
     /* Create solver */
-    retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol, ode_experimental_mode);
-    if (retval != fmiOK){ return fmiError; }
+    ode_problem->ode_solver = jmi_new_ode_solver(ode_problem, options);
+    if (ode_problem->ode_solver == NULL){ return fmiError; }
     
     return fmiOK;
 }
@@ -413,10 +405,7 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     retval = fmi1_cs_terminate_slave(c);
     if (retval != fmiOK){ return fmiError; }
     
-    if (ode_problem->ode_solver){
-        jmi_delete_ode_solver(ode_problem);
-    }
-    
+    jmi_free_ode_solver(ode_problem->ode_solver);
     fmi1_me_free_model_instance(cs_data->fmix_me);
     fmi1_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name,
                                         fmi1_cs->GUID, fmi1_cs->me_callback_functions,

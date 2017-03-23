@@ -240,12 +240,9 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
 fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     fmi2Integer retval;
     jmi_ode_problem_t* ode_problem;
+    jmi_ode_solver_options_t options;
     jmi_t* jmi;
     jmi_cs_data_t* cs_data;
-    jmi_ode_method_t ode_method;
-    jmi_real_t ode_step_size;
-    jmi_real_t ode_rel_tol;
-    int        ode_experimental_mode;
 
 	if (c == NULL) {
 		return fmi2Fatal;
@@ -273,14 +270,15 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
         
         
         /* These options for the solver need to be found in a better way. */
-        ode_method            = jmi->options.cs_solver;
-        ode_step_size         = jmi->options.cs_step_size;
-        ode_rel_tol           = jmi->options.cs_rel_tol;
-        ode_experimental_mode = jmi->options.cs_experimental_mode;
+        options = jmi_ode_solver_default_options();
+        options.method                  = jmi->options.cs_solver;
+        options.euler_options.step_size = jmi->options.cs_step_size;
+        options.cvode_options.rel_tol   = jmi->options.cs_rel_tol;
+        options.experimental_mode       = jmi->options.cs_experimental_mode;
         
         /* Create solver */
-        retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol, ode_experimental_mode);
-        if (retval != fmi2OK) { 
+        ode_problem->ode_solver = jmi_new_ode_solver(ode_problem, options);
+        if (ode_problem->ode_solver == NULL) { 
             return fmi2Error;
         }
     }
@@ -335,8 +333,8 @@ fmi2Status fmi2_reset(fmi2Component c) {
     jmi = &fmi2_me->jmi;
     
     /* Clear the ode_solver in case of CoSimulation */
-    if (fmi2_me->fmu_type == fmi2CoSimulation && ((fmi2_cs_t *)c)->ode_problem->ode_solver) {
-        jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
+    if (fmi2_me->fmu_type == fmi2CoSimulation) {
+        jmi_free_ode_solver(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
     
     /* Save some information from the jmi struct */

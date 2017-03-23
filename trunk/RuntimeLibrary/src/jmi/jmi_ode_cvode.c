@@ -23,7 +23,7 @@
 #include <nvector/nvector_serial.h>  /* serial N_Vector types, fct. and macros */
 #include <sundials/sundials_types.h> /* definition of realtype */
 #include <sundials/sundials_math.h>  /* contains the macros ABS, SQR, and EXP*/
-#include "jmi_ode_solver.h"
+#include "jmi_ode_solver_impl.h"
 #include "jmi_ode_problem.h"
 #include "jmi_ode_cvode.h"
 #include "jmi_log.h"

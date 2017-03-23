@@ -17,7 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi_ode_solver.h"
+#include "jmi_ode_solver_impl.h"
+#include "jmi_ode_problem.h"
 #include "jmi_ode_euler.h"
 #include "jmi_log.h"
 

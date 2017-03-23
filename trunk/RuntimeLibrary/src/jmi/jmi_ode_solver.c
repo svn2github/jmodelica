@@ -17,32 +17,48 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi_ode_solver.h"
+#include "jmi_ode_solver_impl.h"
 #include "jmi_ode_problem.h"
-#include "jmi_ode_cvode.h"
 #include "jmi_ode_euler.h"
-#include "jmi_log.h"
+#include "jmi_ode_cvode.h"
 
+jmi_ode_solver_options_t jmi_ode_solver_default_options(void) {
+    jmi_ode_solver_options_t options;
+    
+    options.experimental_mode = jmi_cs_experimental_none;
+    options.method = JMI_ODE_CVODE;
+    options.cvode_options.rel_tol = 1e-6;
+    options.euler_options.step_size = 0.001;
+    
+    return options;
+}
 
-int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
-                       jmi_real_t step_size, jmi_real_t rel_tol, int experimental_mode){
+jmi_ode_solver_t* jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_solver_options_t solver_options) {
     int flag = 0;
-    jmi_ode_solver_t* solver = (jmi_ode_solver_t*)calloc(1,sizeof(jmi_ode_solver_t));
+    jmi_ode_solver_t* solver;
+    
+    solver = (jmi_ode_solver_t*)calloc(1, sizeof(jmi_ode_solver_t));
+    if(solver == NULL) return NULL;
 
-    if(!solver) return -1;
-
-    solver->ode_problem = problem;
-    solver->step_size = step_size;
-    solver->rel_tol = rel_tol;
-    solver->experimental_mode = experimental_mode;
     solver->states_derivative = calloc(problem->sizes.states, sizeof(jmi_real_t));
     solver->event_indicators_previous = calloc(problem->sizes.root_fnc, sizeof(jmi_real_t));
     solver->event_indicators = calloc(problem->sizes.root_fnc, sizeof(jmi_real_t));
-    problem->ode_solver = solver;
+    if (solver->states_derivative           == NULL ||
+        solver->event_indicators            == NULL ||
+        solver->event_indicators_previous   == NULL)
+    {
+        jmi_free_ode_solver(solver);
+        return NULL;
+    }
 
-    switch(method) {
+    solver->ode_problem = problem;
+    solver->experimental_mode = solver_options.experimental_mode;
+    solver->step_size =solver_options.euler_options.step_size;
+    solver->rel_tol = solver_options.cvode_options.rel_tol;
+    
+    switch(solver_options.method) {
     case JMI_ODE_CVODE: {
-        jmi_ode_cvode_t* integrator;    
+        jmi_ode_cvode_t* integrator;
         flag = jmi_ode_cvode_new(&integrator, solver);
         solver->integrator = integrator;
         solver->solve = jmi_ode_cvode_solve;
@@ -59,20 +75,27 @@ int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
         break;
 
     default:
-        free(problem->ode_solver);
-        problem->ode_solver = NULL;
-        return -1;
+        flag = -1;
     }
 
-    return flag;
+    if (flag == -1) {
+        jmi_free_ode_solver(solver);
+        return NULL;
+    } else {
+        return solver;
+    }
 }
 
-void jmi_delete_ode_solver(jmi_ode_problem_t* problem){
-    if(problem->ode_solver){
-        (problem->ode_solver)->delete_solver(problem->ode_solver);
-        free(problem->ode_solver->states_derivative);
-        free(problem->ode_solver->event_indicators_previous);
-        free(problem->ode_solver->event_indicators);
-        free(problem->ode_solver);
+void jmi_free_ode_solver(jmi_ode_solver_t* solver){
+    if(solver){
+        if (solver->states_derivative)          free(solver->states_derivative);
+        if (solver->event_indicators_previous)  free(solver->event_indicators_previous);
+        if (solver->event_indicators)           free(solver->event_indicators);
+        if (solver->delete_solver)              solver->delete_solver(solver);
+        free(solver);
     }
+}
+
+jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time, int initialize) {
+    return solver->solve(solver, final_time, initialize);
 }

@@ -19,6 +19,7 @@
 
 
 #include <string.h>
+#include "jmi_ode_solver.h"
 #include "jmi_ode_problem.h"
 
 jmi_ode_callbacks_t jmi_ode_problem_default_callbacks() {
