@@ -2076,7 +2076,7 @@ model EvaluateAnnotation9
         o.p := i.p + 42;
     end F;
     record R
-        parameter Real p = -40;
+        parameter Real p = -41;
     end R;
     parameter R r1 annotation(Evaluate=true);
     parameter R r2 = F(r1);
@@ -2089,16 +2089,16 @@ model EvaluateAnnotation9
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation9
- eval parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-40) /* EvaluationTests.EvaluateAnnotation9.R(-40) */;
- structural parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(2.0) /* EvaluationTests.EvaluateAnnotation9.R(2.0) */;
- Real x = (2.0 - 1) * time;
+ eval parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
+ structural parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
+ Real x = (1.0 - 1) * time;
 
 public
  function EvaluationTests.EvaluateAnnotation9.F
   input EvaluationTests.EvaluateAnnotation9.R i;
   output EvaluationTests.EvaluateAnnotation9.R o;
  algorithm
-  o.p := -40;
+  o.p := -41;
   o.p := i.p + 42;
   return;
  end EvaluationTests.EvaluateAnnotation9.F;
