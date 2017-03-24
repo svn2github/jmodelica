@@ -3764,17 +3764,17 @@ aspect LinearFVariables {
     
     eq FAbstractEquation.getChild().isLinear() = true;
     
-    eq FMulExp.getLeft().isLinear() =
+    eq FDotMulExp.getLeft().isLinear() =
         (getRight().isConstantExp() || getRight().isLinearParameterExp())?
                 isLinear() : false;
-    eq FMulExp.getRight().isLinear() =
+    eq FDotMulExp.getRight().isLinear() =
         (getLeft().isConstantExp() || getLeft().isLinearParameterExp())?
                 isLinear() : false;
-    eq FDivExp.getLeft().isLinear() =
+    eq FDotDivExp.getLeft().isLinear() =
         (getRight().isConstantExp() || getRight().isLinearParameterExp())?
-                isLinear() : false;         
-    eq FDivExp.getRight().isLinear() = false;       
-    eq FPowExp.getChild().isLinear() = false;
+                isLinear() : false;
+    eq FDotDivExp.getRight().isLinear() = false;
+    eq FDotPowExp.getChild().isLinear() = false;
     eq FFunctionCall.getChild().isLinear() = false;
     eq FMathematicalFunctionCall.getChild().isLinear() = false;
                 
