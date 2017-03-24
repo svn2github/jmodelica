@@ -58,7 +58,8 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     jmi_ode_problem_t* ode_problem;
     jmi_cs_data_t* cs_data;
     jmi_cs_real_input_t* real_inputs;
-    int flag, retval = JMI_ODE_EVENT;
+    int flag;
+    jmi_ode_status_t retval = JMI_ODE_STATE_EVENT;
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
     fmiReal time_event;
     fmiInteger i;
@@ -91,11 +92,11 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     for (i = 0; i < cs_data->n_real_inputs; i++) {
         if (real_inputs[i].active == fmiTrue) {
             real_inputs[i].tn = ode_problem->time;
-            retval = fmi1_me_get_real(cs_data ->fmix_me,
+            flag = fmi1_me_get_real(cs_data ->fmix_me,
                                       &(real_inputs[i].vr),
                                       1,
                                       &(real_inputs[i].value));
-            if (retval != fmiOK) {
+            if (flag != fmiOK) {
                 jmi_log_comment(ode_problem->log, logError,
                     "Failed to get the current value of real inputs.");
                 return fmiError;
@@ -105,28 +106,30 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     
     if (communicationStepSize == 0.0 || fmi1_cs->cs_data->triggered_external_event) {
         /* Event update: */
-        retval = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &(fmi1_cs->event_info));
-        if (retval != fmiOK) {
+        flag = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &(fmi1_cs->event_info));
+        if (flag != fmiOK) {
             jmi_log_comment(ode_problem->log, logError, "Failed to evaluate the derivatives with step-size zero.");
         }
         
         fmi1_cs->cs_data->triggered_external_event = FALSE;
     }
     
-    retval = JMI_ODE_EVENT;
-    while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final){
+    retval = JMI_ODE_STATE_EVENT;
+    while (retval == JMI_ODE_STATE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final){
         
         inner_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "InternalSolver", 
             "Invoking the internal solver at <t:%E> with end <t:%E>.", ode_problem->time, time_event);
 
         retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_event, fmi1_cs->initialize_solver);
-        if (retval<JMI_ODE_OK){
+        if (retval < JMI_ODE_OK) {
             jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
             jmi_log_unwind(ode_problem->log, top_node);
             return fmiError;
+        } else if (retval == JMI_ODE_TERMINATE) {
+            return fmiDiscard; /* ODE solver will log termination */
         }
         /* Solver initialized, set to False. */
-        fmi1_cs->initialize_solver = (int)JMI_FALSE;
+        fmi1_cs->initialize_solver = FALSE;
         
         jmi_log_leave(ode_problem->log, inner_node);
         
@@ -152,7 +155,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                 break;
             }
         }
-        retval = JMI_ODE_EVENT;
+        retval = JMI_ODE_STATE_EVENT;
         
         flag = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &(fmi1_cs->event_info));
         if (flag != fmiOK){

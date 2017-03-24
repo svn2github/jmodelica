@@ -31,11 +31,9 @@
 typedef enum {
     JMI_ODE_ERROR = -1,
     JMI_ODE_OK = 0,
-    JMI_ODE_EVENT = 1
-    /* TODO, extend ode statuses:
     JMI_ODE_STATE_EVENT = 1,
     JMI_ODE_TIME_EVENT = 2,
-    JMI_ODE_TERMINATE = 3*/
+    JMI_ODE_TERMINATE = 3
 } jmi_ode_status_t;
 
 /** \brief Integrator methods the solver can use */

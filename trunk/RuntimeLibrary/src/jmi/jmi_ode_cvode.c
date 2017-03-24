@@ -80,7 +80,7 @@ void cv_err(int error_code, const char *module,const char *function, char *msg, 
     }        
 }
 
-int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initialize){
+jmi_ode_status_t jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initialize) {
     int flag = 0,retval = 0;
     jmi_ode_cvode_t* integrator = (jmi_ode_cvode_t*)solver->integrator;
     jmi_ode_problem_t* problem = solver -> ode_problem;
@@ -159,14 +159,19 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         
         if (step_event == TRUE) {
             jmi_log_node(problem->log, logInfo, "StepEvent", "An event was detected at <t:%g>", tret);
-            return JMI_ODE_EVENT;
+            return JMI_ODE_STATE_EVENT;
         }
         
+        if (terminate == TRUE) {
+            jmi_log_node(problem->log, logInfo, "Terminate",
+                "Terminating simulation after a signal from the model at <t:%g>", tret);
+            return JMI_ODE_TERMINATE;
+        }
     }
     
-    if (flag == CV_ROOT_RETURN){
+    if (flag == CV_ROOT_RETURN) {
         jmi_log_node(problem->log, logInfo, "StateEvent", "An event was detected at <t:%g>", tret);
-        return JMI_ODE_EVENT;
+        return JMI_ODE_STATE_EVENT;
     }
     return JMI_ODE_OK;
 }

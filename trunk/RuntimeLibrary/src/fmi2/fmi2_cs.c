@@ -68,7 +68,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
     size_t i;
 
 	int initialize = FALSE;
-	int retval = JMI_ODE_EVENT;
+	jmi_ode_status_t retval = JMI_ODE_STATE_EVENT;
     fmi2Real time_final = currentCommunicationPoint + communicationStepSize;
 
     
@@ -105,7 +105,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         }
     }
     
-    while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final) {
+    while (retval == JMI_ODE_STATE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final) {
 
         while (fmi2_cs->event_info.newDiscreteStatesNeeded ||
                fmi2_cs->cs_data->triggered_external_event)
@@ -160,6 +160,12 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         
         retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_event, initialize);
         initialize = FALSE; /* The ODE problem has been initialized. */
+        if (retval == JMI_ODE_ERROR) {
+            jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
+            return fmi2Error;
+        } else if (retval == JMI_ODE_TERMINATE) {
+            return fmi2Discard; /* ODE, solver will log termination */
+        }
         
         /* Set time to the model */
         flag = fmi2_set_time(cs_data->fmix_me, ode_problem->time);
@@ -174,15 +180,14 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
             jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
             return fmi2Error;
         }
-
-        if (retval < JMI_ODE_OK) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
-            return fmi2Error;
-        } else if (retval == JMI_ODE_EVENT || 
-                  (retval == JMI_ODE_OK && time_event != time_final) ||
-                  (retval == JMI_ODE_OK && fmi2_cs->event_info.nextEventTimeDefined && fmi2_cs->event_info.nextEventTime == time_final)) {
+        
+        if (retval == JMI_ODE_STATE_EVENT || 
+            (retval == JMI_ODE_OK && time_event != time_final) ||
+            (retval == JMI_ODE_OK && fmi2_cs->event_info.nextEventTimeDefined &&
+             fmi2_cs->event_info.nextEventTime == time_final))
+        {
             fmi2_cs->event_info.newDiscreteStatesNeeded = fmi2True; /* Finished with an event -> new discrete states needed. */
-            retval = JMI_ODE_EVENT;
+            retval = JMI_ODE_STATE_EVENT;
         }
     }
     

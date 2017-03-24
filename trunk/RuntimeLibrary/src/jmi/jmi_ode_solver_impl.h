@@ -33,7 +33,7 @@
  * @param block A jmi_block_residual_t struct.
  * @return Error code.
  */
-typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t time_final, int initialize);
+typedef jmi_ode_status_t (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t time_final, int initialize);
 
 /**
  * \brief A ode solver destructor signature.
