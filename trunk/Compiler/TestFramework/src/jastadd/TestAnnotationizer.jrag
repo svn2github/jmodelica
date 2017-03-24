@@ -92,7 +92,7 @@ abstract public class TestAnnotationizerHelper {
             ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
             if (cd.isUnknown()) {
                 System.err.println("Class " + modelName + " not found");
-                System.exit(1);
+                return;
             }
             AnnotationNode tests = cd.annotation("__JModelica/UnitTesting/tests");
             AnnotationNode test = AnnotationNode.NO_ANNOTATION;
@@ -100,13 +100,13 @@ abstract public class TestAnnotationizerHelper {
                 if (test.exists()) {
                     System.err.println("Multiple test annotations found in class " + modelName + ".");
                     System.err.println("TestAnnotationizer is currently unable to regenerate models with multiple tests!");
-                    System.exit(1);
+                    return;
                 }
                 test = n;
             }
             if (!test.exists()) {
                 System.err.println("No test annotation found in class " + modelName);
-                System.exit(1);
+                return;
             }
             Class cl = getTestCase(test.name());
             Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
@@ -161,69 +161,63 @@ abstract public class TestAnnotationizerHelper {
         return libs.length > 0;
     }
 
-	/**
-	 * Get the test case generator class for the specified test case name (or prefix thereof).
-	 */
-	private static Class getTestCase(String testType) {
-		String ttl = testType.toLowerCase();
-		for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
-			if (cl.getSimpleName().toLowerCase().startsWith(ttl) && !Modifier.isAbstract(cl.getModifiers())) {
-				System.out.println("Creating " + cl.getSimpleName() + "...");
-				return cl;
-			}
-		}
-		
-		System.out.println("Test type " + testType + " not found.");
-		System.exit(1);
-		return null;
-	}
-	
-	/**
-	 * Print error message for exception and exit.
-	 */
-	private static void handleException(Exception e) {
-		System.out.println("Creating annotation failed:");
-		Throwable cause = (e instanceof InvocationTargetException) ? e.getCause() : e;
-		String message = cause.getMessage();
-		if (message == null || !(cause instanceof ModelicaException))
-			cause.printStackTrace(System.out);
-		else
-			System.out.println(message);
-		System.exit(1);
-	}
-	
-	/**
-	 * Prints a help message and exits.
-	 * 
-	 * Iterates over all available test case types and prints a usage message for each.
-	 * 
-	 * @param errorLevel  the exit status to pass to System.exit()
-	 */
-	public static void usageError(int errorLevel) throws Exception {
-		System.out.println("Usage: java TestAnnotationizer <.mo file path> [options...] [<description>]");
-		System.out.println("  Options:");
-		System.out.println("    -w           write result to file instead of stdout");
-		System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
-		System.out.println("    -r           regenerate an already present annotation");
-		System.out.println("    -a           regenerate annotations for all models in test file (implies -r)");
-		System.out.println("    -l=<libs>    comma-separated list of libraries needed by test (except for MSL)");
-		System.out.println("                 paths should be relative to test file");
-		System.out.println("    -t=<type>    set type of test, a unique prefix is enough, e.g. Err for ErrorTestCase");
-		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
-		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
-		System.out.println("    -d=<data>    set extra data to send to the specific generator, \\n is interpreted");
-		System.out.println("    -p=<opts>    comma-separated list of compiler options to override defaults for, ");
-		System.out.println("                 example: -p=eliminate_alias_variables=false,default_msl_version=\"2.2\"");
+    /**
+     * Get the test case generator class for the specified test case name (or prefix thereof).
+     */
+    private static Class getTestCase(String testType) {
+        String ttl = testType.toLowerCase();
+        for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
+            if (cl.getSimpleName().toLowerCase().startsWith(ttl) && !Modifier.isAbstract(cl.getModifiers())) {
+                System.out.println("Creating " + cl.getSimpleName() + "...");
+                return cl;
+            }
+        }
+        
+        throw new IllegalArgumentException("Test type " + testType + " not found.");
+    }
+
+    /**
+     * Print error message for exception.
+     */
+    private static void handleException(Exception e) {
+        System.out.println("Creating annotation failed:");
+        Throwable cause = (e instanceof InvocationTargetException) ? e.getCause() : e;
+        String message = cause.getMessage();
+        if (message == null || !(cause instanceof ModelicaException))
+            cause.printStackTrace(System.out);
+        else
+            System.out.println(message);
+    }
+
+    /**
+     * Prints a help message and exits.
+     * 
+     * Iterates over all available test case types and prints a usage message for each.
+     */
+    public static void usageError() throws Exception {
+        System.out.println("Usage: java TestAnnotationizer <.mo file path> [options...] [<description>]");
+        System.out.println("  Options:");
+        System.out.println("    -w           write result to file instead of stdout");
+        System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
+        System.out.println("    -r           regenerate an already present annotation");
+        System.out.println("    -a           regenerate annotations for all models in test file (implies -r)");
+        System.out.println("    -l=<libs>    comma-separated list of libraries needed by test (except for MSL)");
+        System.out.println("                 paths should be relative to test file");
+        System.out.println("    -t=<type>    set type of test, a unique prefix is enough, e.g. Err for ErrorTestCase");
+        System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
+        System.out.println("                 does not contain a dot, base name of .mo file is prepended");
+        System.out.println("    -d=<data>    set extra data to send to the specific generator, \\n is interpreted");
+        System.out.println("    -p=<opts>    comma-separated list of compiler options to override defaults for, ");
+        System.out.println("                 example: -p=eliminate_alias_variables=false,default_msl_version=\"2.2\"");
         System.out.println("    -k=<type>    set the check type to use when error checking");
         System.out.println("    -h           print this help");
-		System.out.println("  User will be prompted for type and/or class if not set with options.");
-		System.out.println("  Available test types:");
-		for (Class cl : TestAnnotationizerHelper.class.getClasses()) 
-			if (!Modifier.isAbstract(cl.getModifiers()))
-				cl.getMethod("usage", String.class, String.class).invoke(null, cl.getSimpleName(), null);
-		System.exit(errorLevel);
-	}
-	
+        System.out.println("  User will be prompted for type and/or class if not set with options.");
+        System.out.println("  Available test types:");
+        for (Class cl : TestAnnotationizerHelper.class.getClasses()) 
+            if (!Modifier.isAbstract(cl.getModifiers()))
+                cl.getMethod("usage", String.class, String.class).invoke(null, cl.getSimpleName(), null);
+    }
+
 	/**
 	 * Prints a usage message for this test case type.
 	 * 

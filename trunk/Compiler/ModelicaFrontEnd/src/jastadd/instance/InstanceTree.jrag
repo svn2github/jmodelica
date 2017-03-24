@@ -510,6 +510,12 @@ aspect Environments {
     eq InstNode.getChild().myEnvironment()                          = getMergedEnvironment().clone();
     eq InstRecordConstructor.getInstComponentDecl().myEnvironment() = getMergedEnvironment().clone();
     eq InstRecordConstructor.getInstExtends().myEnvironment()       = getMergedEnvironment().clone();
+    eq InstExpandableConnectorDecl.getInstComponentDecl(int i).myEnvironment()          = 
+        useTemplate(i) ? template(i).myEnvironment() : getMergedEnvironment().clone();
+    eq InstArrayExpandableConnector.getInstComponentDecl(int i).myEnvironment()         = 
+        useTemplate(i) ? template(i).myEnvironment() : getMergedEnvironment().clone();
+    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl(int i).myEnvironment() = 
+        useTemplate(i) ? template(i).myEnvironment() : getMergedEnvironment().clone();
 
     /** 
      * When a string argument representing a component name is given as argument to myEnvironment,
@@ -518,6 +524,12 @@ aspect Environments {
     eq InstNode.getChild().myEnvironment(String name) = myEnvironment_def(name); // This is just to get caching at the right place.
     eq InstRecordConstructor.getInstComponentDecl().myEnvironment(String name) = myEnvironment_def(name);
     eq InstRecordConstructor.getInstExtends().myEnvironment(String name)       = myEnvironment_def(name);
+    eq InstExpandableConnectorDecl.getInstComponentDecl(int i).myEnvironment(String name)          = 
+        useTemplate(i) ? template(i).myEnvironment(name) : myEnvironment_def(name);
+    eq InstArrayExpandableConnector.getInstComponentDecl(int i).myEnvironment(String name)         = 
+        useTemplate(i) ? template(i).myEnvironment(name) : myEnvironment_def(name);
+    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl(int i).myEnvironment(String name) = 
+        useTemplate(i) ? template(i).myEnvironment(name) : myEnvironment_def(name);
 
     syn lazy Environment InstNode.myEnvironment_def(String name) = 
         getMergedEnvironment().filter(name, retrieveReplacingComponent(name), retrieveReplacingClass(name));
@@ -694,7 +706,15 @@ aspect Environments {
     inh InstNode FAbstractEquation.myInstNode();
     eq Root.getChild().myInstNode()                       = null;
     eq InstNode.getChild().myInstNode()                   = this;
+    eq InstComponentDecl.getChild().myInstNode()          = 
+        isExpandableConnectorMember() ? myExpandableConnectorTemplate() : this;
     eq InstNode.getElementInstModification().myInstNode() = myInstNode();
+    eq InstExpandableConnectorDecl.getInstComponentDecl(int i).myInstNode()          = 
+        template(i).myInstNode();
+    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl(int i).myInstNode() = 
+        template(i).myInstNode();
+    eq InstArrayExpandableConnector.getInstComponentDecl(int i).myInstNode()         = 
+        template(i).myInstNode();
 
     //The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = getLookupNode();
@@ -872,10 +892,10 @@ aspect InstanceTreeConstruction {
         }
     }
 
-	public InstComponentDecl InstComponentDecl.createInstArrayComponentDecl(int i) {
-	    return new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
+    public InstComponentDecl InstComponentDecl.createInstArrayComponentDecl(int i) {
+        return new InstArrayComponentDecl(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
-	}
+    }
 
     syn lazy List InstNode.getInstClassDeclList() {
         List l = new List();
@@ -1132,15 +1152,28 @@ aspect InstanceTreeConstruction {
         return newInstComponentDecl(cd, cd.getClassName());
     }
 
-
-    public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className);
-
-    public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-        InstComponentDecl icd = emptyInstComponentDecl(cd, className.newInstAccess());
+    public InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+        InstComponentDecl icd = newInstComponentDeclGeneric(cd.name(), cd, className);
         if (cd.hasVarArraySubscripts()) 
             icd.setLocalFArraySubscripts(cd.getVarArraySubscripts().instantiate());
         if (cd.hasConditionalAttribute())
             icd.setConditionalAttribute(cd.getConditionalAttribute().getExp().instantiate());
+        return icd;
+    }
+
+    public InstComponentDecl InstClassDecl.newInstComponentDeclCopy(
+            String name, FArraySubscripts subscripts, ComponentDecl cd, Access className) {
+        InstComponentDecl icd = newInstComponentDeclGeneric(name, cd, className);
+        if (subscripts != null) {
+            icd.setLocalFArraySubscripts(subscripts);
+        }
+        return icd;
+    }
+
+    public abstract InstComponentDecl InstClassDecl.newInstComponentDeclGeneric(String name, ComponentDecl cd, Access className);
+
+    public InstComponentDecl InstBaseClassDecl.newInstComponentDeclGeneric(String name, ComponentDecl cd, Access className) {
+        InstComponentDecl icd = emptyInstComponentDecl(name, cd, className.newInstAccess());
         if (cd.hasModification())
             icd.setInstModification(cd.getModification().newInstModification());
         icd.setInstConstrainingComponentOpt(cd.newInstConstrainingComponentOpt(null));
@@ -1148,49 +1181,49 @@ aspect InstanceTreeConstruction {
         return icd;
     }
 
-    public InstComponentDecl InstSimpleShortClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-        return actualInstClass().newInstComponentDecl(cd, className);
+    public InstComponentDecl InstSimpleShortClassDecl.newInstComponentDeclGeneric(String name, ComponentDecl cd, Access className) {
+        return actualInstClass().newInstComponentDeclGeneric(name, cd, className);
     }
 
-    public InstComponentDecl InstLibNode.newInstComponentDecl(ComponentDecl cd, Access className) {
-        return actualInstClass().newInstComponentDecl(cd, className);
+    public InstComponentDecl InstLibNode.newInstComponentDeclGeneric(String name, ComponentDecl cd, Access className) {
+        return actualInstClass().newInstComponentDeclGeneric(name, cd, className);
     }
 
-    public InstComponentDecl BadInstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+    public InstComponentDecl BadInstClassDecl.newInstComponentDeclGeneric(String name, ComponentDecl cd, Access className) {
         throw new UnsupportedOperationException();
     }
 
-	public InstComponentDecl InstBaseClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
-		if (isRecord()) 
-			return new InstRecord(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-		else if (extendsEnum()) 
-			return new InstEnum(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-		else if (isExternalObject())
-			return new InstExternalObject(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-		else if (extendsPrimitive()) 
-			return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-		else if (isExpandableConnector())
-		    return new InstExpandableConnectorDecl(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+    public InstComponentDecl InstBaseClassDecl.emptyInstComponentDecl(String name, ComponentDecl cd, InstAccess className) {
+        if (isRecord()) 
+            return new InstRecord(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+        else if (extendsEnum()) 
+            return new InstEnum(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+        else if (isExternalObject())
+            return new InstExternalObject(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+        else if (extendsPrimitive()) 
+            return new InstPrimitive(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+        else if (isExpandableConnector())
+            return new InstExpandableConnectorDecl(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
         else if (isPartialFunction())
-            return new InstPartialFunction(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-		else
-			return new InstComposite(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-	}
-	
-	public InstComponentDecl InstPrimitiveClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
-		return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-	}
-	
-	public InstComponentDecl InstEnumClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
-		return new InstEnum(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
-	}
-	
-	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		if (cd.isEnumLiteral()) 
-			return new InstEnumLiteral(className.newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt());	
-		else 
-			return new InstBuiltIn(className.newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt());
-	}
+            return new InstPartialFunction(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+        else
+            return new InstComposite(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+    }
+
+    public InstComponentDecl InstPrimitiveClassDecl.emptyInstComponentDecl(String name, ComponentDecl cd, InstAccess className) {
+        return new InstPrimitive(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+    }
+
+    public InstComponentDecl InstEnumClassDecl.emptyInstComponentDecl(String name, ComponentDecl cd, InstAccess className) {
+        return new InstEnum(name, className, new Opt(), cd, new Opt(), new Opt(), new Opt());
+    }
+
+    public InstComponentDecl InstBuiltInClassDecl.newInstComponentDeclGeneric(String name, ComponentDecl cd, Access className) {
+        if (cd.isEnumLiteral()) 
+            return new InstEnumLiteral(name, className.newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt());   
+        else 
+            return new InstBuiltIn(name, className.newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt());
+    }
 
     public InstComponentDecl InstClassDecl.newInstConstrainingComponentDecl(ComponentDecl cd, Access className) {
         InstComponentDecl icd = newInstComponentDecl(cd, className);
@@ -1213,32 +1246,30 @@ aspect InstanceTreeConstruction {
         if (originalDecl.hasConditionalAttribute()) {
             cond_attr_opt.setChild(originalDecl.getConditionalAttribute().getExp().instantiate(), 0);
         }
-        ComponentDecl constrainingDecl = (cicr == null) ? originalDecl : cicr.getComponentRedeclare().getComponentDecl();
+        String name = replacingDecl.name();
+        InstAccess className = replacingDecl.newInstClassAccess();
         
+        InstComponentDecl icd;
         if (isOrExtendsPrimitive()) {
-            InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(), 
-                    fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
-            icd.setLocation(originalDecl);
-            return icd;
+            icd = new InstReplacingPrimitive(name, className, fas_opt, 
+                    replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
         } else if (isRecord()) {
-            InstReplacingRecord icd = new InstReplacingRecord(replacingDecl.newInstClassAccess(), 
-                    fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
-            icd.setLocation(originalDecl);
-            return icd;
+            icd = new InstReplacingRecord(name, className, fas_opt, 
+                    replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
         } else {
-            InstReplacingComposite icd;
-            if (isExpandableConnector())
-                icd = new InstReplacingExpandableConnectorDecl(replacingDecl.newInstClassAccess(), 
-                        fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            else
-                icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(), 
-                        fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
-            icd.setLocation(originalDecl);
-            return icd;
+            if (isExpandableConnector()) {
+                icd = new InstReplacingExpandableConnectorDecl(name, className, fas_opt, 
+                        replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+            } else {
+                icd = new InstReplacingComposite(name, className, fas_opt, 
+                        replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+            }
         }
+        
+        ComponentDecl constrainingDecl = (cicr == null) ? originalDecl : cicr.getComponentRedeclare().getComponentDecl();
+        icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
+        icd.setLocation(originalDecl);
+        return icd;
     }
 
     public InstComponentDecl InstLibNode.newInstReplacingComponent(
@@ -1641,7 +1672,25 @@ aspect ExpandableConnectorMembers {
     private List<InstComponentDecl> InstExpandableConnectorDecl.expandedMembers          = null;
     private List<InstComponentDecl> InstReplacingExpandableConnectorDecl.expandedMembers = null;
     private List<InstComponentDecl> InstArrayExpandableConnector.expandedMembers         = null;
-    
+
+    private InstComponentDecl[] InstExpandableConnectorDecl.templates          = null;
+    private InstComponentDecl[] InstReplacingExpandableConnectorDecl.templates = null;
+    private InstComponentDecl[] InstArrayExpandableConnector.templates         = null;
+
+    syn boolean InstExpandableConnectorDecl.useTemplate(int i)          = 
+        templates != null && getInstComponentDecl(i) != templates[i];
+    syn boolean InstReplacingExpandableConnectorDecl.useTemplate(int i) = 
+        templates != null && getInstComponentDecl(i) != templates[i];
+    syn boolean InstArrayExpandableConnector.useTemplate(int i)         = 
+        templates != null && getInstComponentDecl(i) != templates[i];
+
+    syn InstComponentDecl InstExpandableConnectorDecl.template(int i)          = 
+        templates[i].arrayTopInstComponentDecl();
+    syn InstComponentDecl InstReplacingExpandableConnectorDecl.template(int i) = 
+        templates[i].arrayTopInstComponentDecl();
+    syn InstComponentDecl InstArrayExpandableConnector.template(int i)         = 
+        templates[i].arrayTopInstComponentDecl();
+
     eq InstExpandableConnectorDecl.getInstComponentDeclList()          = 
         (expandedMembers != null) ? expandedMembers : super.getInstComponentDeclList();
     eq InstReplacingExpandableConnectorDecl.getInstComponentDeclList() = 
@@ -1657,51 +1706,37 @@ aspect ExpandableConnectorMembers {
         (expandedMembers != null) ? new List<InstExtends>() : super.getInstExtendsList();
     
     public InstComponentDecl InstExpandableConnectorDecl.createInstArrayComponentDecl(int i) {
-        return new InstArrayExpandableConnector(new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
     public InstComponentDecl InstReplacingExpandableConnectorDecl.createInstArrayComponentDecl(int i) {
-        return new InstArrayExpandableConnector(new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
     public InstComponentDecl InstArrayExpandableConnector.createInstArrayComponentDecl(int i) {
-        return new InstArrayExpandableConnector(new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
-    
-    public InstExpandableConnectorMember.InstExpandableConnectorMember(InstComponentDecl org, Opt<FArraySubscripts> subscripts, String name) {
-        this(null, subscripts, org.getComponentDecl(), new Opt(), new Opt(), new Opt(), org, name);
-    }
-    
-    syn boolean InstComponentDecl.isExpandableConnectorMember()    = false;
-    eq InstExpandableConnectorMember.isExpandableConnectorMember() = true;
-    
-    eq InstExpandableConnectorMember.getInstComponentDeclList()       = getCopyOf().getInstComponentDeclList().fullCopy();
-    eq InstExpandableConnectorMember.getInstClassDeclList()           = getCopyOf().getInstClassDeclList().fullCopy();
-    eq InstExpandableConnectorMember.getInstExtendsList()             = getCopyOf().getInstExtendsList().fullCopy();
-    eq InstExpandableConnectorMember.getInstImportList()              = getCopyOf().getInstImportList().fullCopy();
-    eq InstExpandableConnectorMember.getRedeclaredInstClassDeclList() = getCopyOf().getRedeclaredInstClassDeclList().fullCopy();
-    eq InstExpandableConnectorMember.getFAbstractEquationList()       = getCopyOf().getFAbstractEquationList().fullCopy();
-    
-    eq InstExpandableConnectorMember.name() = getName();
-    
-    eq InstExpandableConnectorMember.myInstClass()        = getCopyOf().myInstClass();
-    eq InstExpandableConnectorMember.defaultVariability() = getCopyOf().defaultVariability();
-    
-    eq InstExpandableConnectorMember.isAssignable() = getCopyOf().isAssignable();
-    
-    eq InstExpandableConnectorMember.myFSubscripts() {
-        // Only use local subscripts - they include entire size
-        java.util.List<FSubscript> l = new ArrayList<FSubscript>();
-        if (hasLocalFArraySubscripts())
-            getLocalFArraySubscripts().getFSubscripts().addAllTo(l);
-        return l;
-    }
-    
-    public void InstExpandableConnectorMember.flattenUsedFuncsAndEnums(FClass fc) {
-        getCopyOf().flattenUsedFuncsAndEnums(fc);
-    }
-    
+
+    inh boolean InstComponentDecl.isExpandableConnectorMember();
+    eq InstExpandableConnectorDecl.getInstComponentDecl().isExpandableConnectorMember()          = true;
+    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl().isExpandableConnectorMember() = true;
+    eq InstArrayExpandableConnector.getInstComponentDecl().isExpandableConnectorMember()         = true;
+    eq BaseNode.getChild().isExpandableConnectorMember()                                         = false;
+
+    inh boolean InstComponentDecl.inExpandableConnector();
+    eq InstExpandableConnectorDecl.getInstComponentDecl().inExpandableConnector()          = true;
+    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl().inExpandableConnector() = true;
+    eq InstArrayExpandableConnector.getInstComponentDecl().inExpandableConnector()         = true;
+    eq InstClassDecl.getChild().inExpandableConnector()                                    = false;
+    eq Root.getChild().inExpandableConnector()                                             = false;
+
+    inh InstComponentDecl InstComponentDecl.myExpandableConnectorTemplate();
+    eq InstExpandableConnectorDecl.getInstComponentDecl(int i).myExpandableConnectorTemplate()          = template(i);
+    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl(int i).myExpandableConnectorTemplate() = template(i);
+    eq InstArrayExpandableConnector.getInstComponentDecl(int i).myExpandableConnectorTemplate()         = template(i);
+    eq BaseNode.getChild().myExpandableConnectorTemplate() = null;
+
 }
 
 aspect InstaceConstrainingClauses {
@@ -1814,7 +1849,7 @@ aspect InstanceAST_API {
     eq InstBaseClassDecl.nameScope() = true;
 
     syn String InstNode.name()  = "";
-    eq InstComponentDecl.name() = getComponentDecl().name();
+    eq InstComponentDecl.name() = getName();
     eq InstClassDecl.name()     = getClassDecl().name();
     eq InstExtends.name()       = getClassName().name();
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
@@ -2491,6 +2526,12 @@ aspect InstArrays {
     eq InstComponentDecl.getChild().instComponentDecl()      = this;
     eq Root.getChild().instComponentDecl()                   = null;
 
+    /**
+     * If this is an array, get the top level component for the array.
+     */
+    syn InstComponentDecl InstComponentDecl.arrayTopInstComponentDecl() = this;
+    eq InstArrayComponentDecl.arrayTopInstComponentDecl()               = instComponentDecl();
+
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
 		getFArraySubscripts().getNumFSubscript()>0;
 	
@@ -2633,7 +2674,7 @@ aspect InstanceDumpTree {
 		System.out.println(indent + dump()
 		                      + ": " + 
 		                      myInstClass().name() + " "+
-		                      getComponentDecl().name());
+		                      name());
         getClassName().dumpTree(indent + "|");
 		System.out.println(toString(indent+"|"));
 
@@ -2651,7 +2692,7 @@ aspect InstanceDumpTree {
 		System.out.println(indent + dump()
 							  + ": " + 
 		                      myInstClass().name() + " "+
-		                      getComponentDecl().name());
+		                      name());
 	    getClassName().dumpTree(indent + "|");
 		System.out.println(toString(indent+"|"));
 
@@ -2866,7 +2907,7 @@ aspect InstancePrettyPrint {
 		String str = getClass().getName();
 		str = indent+str.substring(str.lastIndexOf('.')+1);
 		str+= ": " + getClassName().name() + " "+
-		                      getComponentDecl().name();
+		                      name();
 		return str;
 
 	}

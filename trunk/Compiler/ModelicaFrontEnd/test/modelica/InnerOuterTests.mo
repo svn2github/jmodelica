@@ -1298,9 +1298,9 @@ fclass InnerOuterTests.NoInner13
  Real a.b.c.y;
 equation
  a.b.c.x = a.c2.x;
- a.b.c.y - a.c2.y = 0;
- a.c1.y = 0;
- a.c2.y = 0;
+ a.b.c.y - a.c2.y = 0.0;
+ a.c1.y = 0.0;
+ a.c2.y = 0.0;
 end InnerOuterTests.NoInner13;
 ")})));
 end NoInner13;

@@ -95,8 +95,8 @@ aspect Flattening {
         buildConnectionSets(fc);
         breakOnErrors();
         beginStep("flattenComponents()");
-        flatten(fc, false, level);
-        getInstGeneratedInners().flatten(fc, false, level);
+        flatten(fc, FlattenBindingExp.ALL, level);
+        getInstGeneratedInners().flatten(fc, FlattenBindingExp.ALL, level);
         flattenUsedFuncsAndEnums(fc);
         flattenInstClassDeclExtra(fc);
         endStep("flattenComponents()");
@@ -1007,22 +1007,26 @@ aspect Flattening {
         return exp;
     }
 
-    // Generic method for flattening
-    public void ASTNode.flatten(FClass fc, boolean excludeBinding, int level) {
-        for (ASTNode n : this) {
-            n.flatten(fc, excludeBinding, level);
+    public enum FlattenBindingExp {
+        ALL, PARAMETER, NONE;
+        
+        public boolean shouldFlattenExp(InstAssignable var) {
+            return (this == ALL) || (this == PARAMETER && var.variability().parameterOrLess());
         }
     }
 
-    public void InstNode.flatten(FClass fc, boolean excludeBinding, int level) {
-        flatten(fc, getFQName(), excludeBinding, level);
+    // Generic method for flattening
+    public void ASTNode.flatten(FClass fc, FlattenBindingExp binding, int level) {
+        for (ASTNode n : this) {
+            n.flatten(fc, binding, level);
+        }
     }
 
-    public void InstNode.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
+    public void InstNode.flatten(FClass fc, FlattenBindingExp binding, int level) {
         HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
-        flattenEquations(name, fc);
-        getInstComponentDeclList().flatten(fc, excludeBinding, level + 1);
-        getInstExtendsList().flatten(fc, excludeBinding, level + 1);
+        flattenEquations(getFQName(), fc);
+        getInstComponentDeclList().flatten(fc, binding, level + 1);
+        getInstExtendsList().flatten(fc, binding, level + 1);
         contribute(fc);
         clearModificationLevel(oldLevels);
     }
@@ -1036,25 +1040,21 @@ aspect Flattening {
      * Check if this component is present in the model (i.e. not a disabled conditional 
      * and not a non-selected duplicate).
      */
-    syn boolean InstComponentDecl.isPresent()    = !isDisabled() && !isDuplicate();
-    eq InstArrayComponentDecl.isPresent()        = getIndex() > 0 && super.isPresent();
-    eq InstExpandableConnectorMember.isPresent() = getCopyOf().isPresent();
+    syn boolean InstComponentDecl.isPresent() = !isDisabled() && !isDuplicate();
+    eq InstArrayComponentDecl.isPresent()     = getIndex() > 0 && super.isPresent();
 
     /**
      * Check if this component should be considered during flattening.
      */
     syn boolean InstComponentDecl.useInFlattening()    = isPresent() && !(isOuter() && !isInner());
 
-    public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
+    public void InstComponentDecl.flatten(FClass fc, FlattenBindingExp binding, int level) {
         if (useInFlattening()) 
-            super.flatten(fc, name, excludeBinding, level);
+            super.flatten(fc, binding, level);
     }
 
-    public void InstExpandableConnectorMember.flatten(FClass fc, boolean excludeBinding, int level) {
-        if (getCopyOf().isAssignable())
-            getCopyOf().flatten(fc, getFQName(), true, level);
-        else
-            flatten(fc, getFQName(), true, level);
+    public void InstExpandableConnectorDecl.flatten(FClass fc, FlattenBindingExp binding, int level) {
+        super.flatten(fc, FlattenBindingExp.PARAMETER, level);
     }
 
     public void InstClassDecl.buildConnectionSets(FClass fc) {
@@ -1071,7 +1071,7 @@ aspect Flattening {
     public boolean FVariable.modifiableInRecord = true;
     public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         if (names.add(name())) {
-            FVariable fv = createFVariable(getFQName().copyLastSuffix(), true);
+            FVariable fv = createFVariable(getFQName().copyLastSuffix(), FlattenBindingExp.NONE);
             fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
@@ -1099,13 +1099,13 @@ aspect Flattening {
         return new FExpSubscript(exps[i].flatten(exps[i].sizeFlatteningPrefix()));
     }
 
-    public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
+    public void InstAssignable.flatten(FClass fc, FlattenBindingExp binding, int level) {
         if (useInFlattening()) {
             if (hasBindingFExp()) {
                 getBindingFExp().flattenAssertExternal(fc, myInstValueMod().myInstNode().retrieveFQName());
             }
             HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
-            fc.addFVariableNoTransform(createFVariable(name, excludeBinding));
+            fc.addFVariableNoTransform(createFVariable(getFQName(), binding));
             flattenMyType(fc);
             clearModificationLevel(oldLevels);
         }
@@ -1373,18 +1373,18 @@ aspect Flattening {
     }
     
     public void InstComponentDecl.addAttributesToFV(List<FAttribute> attr, Stack<Integer> indexStack,
-            boolean excludeBinding, boolean isBound) {
+            FlattenBindingExp binding, boolean isBound) {
         if (isArray()) {
             int i = 0;
             for (InstComponentDecl icd : allInstComponentDecls()) {
                 indexStack.push(i++);
-                icd.addAttributesToFV(attr, indexStack, excludeBinding, isBound);
+                icd.addAttributesToFV(attr, indexStack, binding, isBound);
                 indexStack.pop();
             }
         } else {
             for (InstComponentDecl icd : allInstComponentDecls()) {
                 if (icd.useInFlattening()) {
-                    icd.generateAdditionalAttributes(attr, indexStack, excludeBinding, isBound);
+                    icd.generateAdditionalAttributes(attr, indexStack, binding, isBound);
                 }
             }
         }
@@ -1392,7 +1392,7 @@ aspect Flattening {
     
     @Override
     public void InstAssignable.addAttributesToFV(List<FAttribute> attr, Stack<Integer> indexStack,
-            boolean excludeBinding, boolean isBound) {
+            FlattenBindingExp binding, boolean isBound) {
         if (!variability().knownParameterOrLess()) {
             AttributeExpRetriever mut = new AttributeExpRetriever() {
                 public FExp retrieve(InstValueModification im, boolean isEach) {
@@ -1405,22 +1405,23 @@ aspect Flattening {
             };
             addAttributes(attr, totalMergedEnvironment(), mut, false);
         }
-        super.addAttributesToFV(attr, indexStack, excludeBinding, isBound);
+        super.addAttributesToFV(attr, indexStack, binding, isBound);
     }
     
     public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, Stack<Integer> indexStack,
-            boolean excludeBinding, boolean isBound) {
+            FlattenBindingExp binding, boolean isBound) {
         
     }
     
     @Override
     public void InstAssignable.generateAdditionalAttributes(List<FAttribute> attr, Stack<Integer> indexStack,
-            boolean excludeBinding, boolean isBound) {
+            FlattenBindingExp binding, boolean isBound) {
         FAttribute a = findMatching(attr, name());
         boolean create = (a == null);
         boolean canBind = hasBindingFExp() || variability().knownParameterOrLess();
         List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
-        if (!excludeBinding && declaredSizeCalc().isUnknownNoEval()) {
+        boolean flattenBinding = binding.shouldFlattenExp(this);
+        if (flattenBinding && declaredSizeCalc().isUnknownNoEval()) {
             FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
             if (ia == null) {
                 ia = new FInternalAttribute(FAttribute.SIZE, new FArray(new List<FExp>()));
@@ -1428,9 +1429,9 @@ aspect Flattening {
             }
             ia.setValue(size().createFExp().addInDim(indexStack, 0, (FArray)ia.getValue()));
         }
-        if (!excludeBinding) {
+        if (flattenBinding) {
             HashMap<InstNode,Integer> m = setModificationLevel(FUNC_AND_REC_MOD_LEVEL+1);
-            addAttributesToFV(list, indexStack, excludeBinding, isBound || canBind);
+            addAttributesToFV(list, indexStack, binding, isBound || canBind);
             clearModificationLevel(m);
         }
         if (create && (list.getNumChild() > 0 || (!isBound && canBind))) {
@@ -1484,39 +1485,48 @@ aspect Flattening {
     }
 
     public FVariable InstAssignable.createFVariable() {
-        return createFVariable(getFQName(), false);
+        return createFVariable(getFQName(), FlattenBindingExp.ALL);
     }
 
-    public FVariable InstAssignable.createFVariable(FQName name, boolean excludeBinding) {
+    public FVariable InstAssignable.createFVariable(FQName name, FlattenBindingExp binding) {
         FVariable fv = createEmptyFVariable();
-        
-        fv.setFVisibilityType(isPublicVar() ? new FPublicVisibilityType() : new FProtectedVisibilityType());
-        
+        fv.setFVisibilityType(createFVisibilityType());
         fv.setFTypePrefixVariability(variability().fullCopy());
         
         // Only set input/output prefix for top level inputs and outputs
         if (isTopLevelInputOutput()) 
             fv.setFTypePrefixInputOutput(isInput() ? new FInput() : new FOutput());
-
+        
         if (myInstClass().extendsPrimitive())
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
-
-        addAttributesToFV(fv.getFAttributes(), new Stack<Integer>(), excludeBinding,
-                excludeBinding || hasBindingFExp() || variability().knownParameterOrLess());
-        if (!excludeBinding) {
+        
+        boolean flattenBinding = binding.shouldFlattenExp(this);
+        addAttributesToFV(fv.getFAttributes(), new Stack<Integer>(), binding,
+                !flattenBinding || hasBindingFExp() || variability().knownParameterOrLess());
+        if (flattenBinding) {
             FExp e = flattenBindingFExp();
             if (e != null)
                 fv.setBindingExp(e);
         }
-
+        
         if (getComponentDecl().getComment().hasStringComment())
             fv.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
-
+        
         fv.setFQName(name);
-
+        
         contribute(fv);
-
+        
         return fv;
+    }
+
+    public FVisibilityType InstAssignable.createFVisibilityType() {
+        if (inExpandableConnector()) {
+            return new FExpandableVisibilityType();
+        } else if (isPublicVar()) {
+            return new FPublicVisibilityType();
+        } else {
+            return new FProtectedVisibilityType();
+        }
     }
 
     /**
@@ -3409,9 +3419,9 @@ aspect InstantiatedExpressions {
     }
 
     public InstForIndex ForIndex.instantiate() {
-        InstForIndexPrimitive ip = new InstForIndexPrimitive(new InstParseAccess("Integer"),
-                new Opt<FArraySubscripts>(), getForIndexDecl(), new Opt<InstModification>(),
-                new Opt<InstConstrainingComponent>(), new Opt<FExp>());
+        InstForIndexPrimitive ip = new InstForIndexPrimitive(getForIndexDecl().name(), 
+                new InstParseAccess("Integer"), new Opt<FArraySubscripts>(), getForIndexDecl(), 
+                new Opt<InstModification>(), new Opt<InstConstrainingComponent>(), new Opt<FExp>());
         InstForIndex res;
         if (hasExp()) {
             res = new InstForIndexWithExp(ip, getExp().instantiate());

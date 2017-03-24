@@ -96,7 +96,8 @@ InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> <
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess 
+abstract InstComponentDecl : InstBaseNode ::= <Name:String>
+                                              ClassName:InstAccess 
                                               [LocalFArraySubscripts:FArraySubscripts] 
                                               <ComponentDecl:ComponentDecl> 
                                               [InstModification] 
@@ -118,7 +119,6 @@ UnknownInstComponentDecl      : InstComponentDecl;
 InstArrayComponentDecl        : InstComponentDecl ::= <Index:int>;
 InstExpandableConnectorDecl   : InstComposite;
 InstArrayExpandableConnector  : InstArrayComponentDecl;
-InstExpandableConnectorMember : InstComponentDecl ::= <CopyOf:InstComponentDecl> <Name:String>;
 
 InstReplacingComposite   : InstComposite ::= <OriginalDecl:ComponentDecl> 
                                              /OriginalInstComponent:InstComponentDecl/ 

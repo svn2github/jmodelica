@@ -158,7 +158,6 @@ aspect ConnectorTypes {
      */
     syn boolean InstComponentDecl.connectableTo(InstComponentDecl other)    = 
         other.connectableTypes(this) && typePrefixesMatch(other);
-    eq InstExpandableConnectorMember.connectableTo(InstComponentDecl other) = getCopyOf().connectableTo(other);
     
     /**
      * Check if two components are of sizes that can be connected.
@@ -191,7 +190,6 @@ aspect ConnectorTypes {
     }
     eq InstPrimitive.connectableTypes(InstComponentDecl other)                 = 
         other.isPrimitive() && type().scalarType().equivalentTo(other.type().scalarType());
-    eq InstExpandableConnectorMember.connectableTypes(InstComponentDecl other) = getCopyOf().connectableTypes(other);
     
     // TODO: Should other prefixes be checked?
     // TODO: Special handling for expandable connector members?

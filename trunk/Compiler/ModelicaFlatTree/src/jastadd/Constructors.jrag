@@ -135,14 +135,14 @@ aspect Constructors {
     public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
         this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
-    
+
     /**
      * Constructs a for clause equation that is not initial.
      */
     public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
         this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
-    
+
     /**
      * Constructs a for clause equation.
      */
@@ -151,30 +151,30 @@ aspect Constructors {
     }
 
     /**
-     * Constructor with only nessecary args. 
+     * Constructor with only necessary args. 
      */
     public InstCreateComponentDecl.InstCreateComponentDecl(ComponentDecl cd, InstLookupRedirectNode ln) {
-        this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), ln);
+        this(cd.name(), cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), ln);
     }
-    
+
     /**
-     * Constructor with only nessecary args. 
+     * Constructor with only necessary args. 
      */
     public InstCreateForIndexPrimitive.InstCreateForIndexPrimitive(ComponentDecl cd) {
         // This maneuver is pretty ugly, but we need to find an InstClassDecl
         // in the instance tree from the source tree...
-        this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), 
-                ((SourceRoot) cd.root()).getProgram().getInstProgramRoot());
+        this(cd.name(), cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), 
+                new Opt(), ((SourceRoot) cd.root()).getProgram().getInstProgramRoot());
     }
 
     /**
-     * Constructor with only nessecary args. 
+     * Constructor with only necessary args. 
      */
     public InstCreateReplacingComponentDecl.InstCreateReplacingComponentDecl(
             ComponentDecl cd, InstLookupRedirectNode ln, ComponentDecl ocd, 
             InstComponentRedeclare icr, InstComponentRedeclare cicr) {
-        this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), 
-                ln, ocd, icr, cicr);
+        this(cd.name(), cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), 
+                new Opt(), new Opt(), ln, ocd, icr, cicr);
     }
 
     /**
@@ -183,14 +183,14 @@ aspect Constructors {
     public FAlgorithm.FAlgorithm(List<FStatement> stmts) {
         this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), stmts);
     }
-    
+
     /**
      * Constructs an algorithm block.
      */
     public FAlgorithm.FAlgorithm(FEquationType type, List<FStatement> stmts) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), stmts);
     }
-    
+
     /**
      * Constructs a derivative algorithm block that is not initial.
      */
