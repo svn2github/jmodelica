@@ -2554,7 +2554,7 @@ aspect ExpandableConnectors {
                     
                     // Collect instances of this member from declarations
                     ArrayList<InstComponentDecl> declared = new ArrayList<InstComponentDecl>();
-                    Map<InstComponentDecl,InstComponentDecl> declaredMap = new HashMap<InstComponentDecl,InstComponentDecl>();
+                    Map<InstComponentDecl,InstComponentDecl> declaredMap = new HashMap<>();
                     for (InstComponentDecl conn : connectors) {
                         InstLookupResult<InstComponentDecl> res = conn.memberInstComponent(name);
                         if (res.successful()) {
