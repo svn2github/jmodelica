@@ -28,7 +28,7 @@
 
     <dirname property="base.dir" file="${ant.file.base}"/>
 
-    <property name="java_version" value="1.7"/>
+    <property name="java_version" value="1.6"/>
     <property name="java_compiler" value="javac${java_version}"/>
 
     <property name="target" value="${user.dir}"/>
