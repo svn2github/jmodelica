@@ -1327,7 +1327,8 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component or its class is declared input.
      */
-    syn boolean InstComponentDecl.isDeclaredInput() = isComponentDeclaredInput() || myInstClass().isInput();
+    syn boolean InstComponentDecl.isDeclaredInput() = 
+        (isComponentDeclaredInput() || myInstClass().isInput()) && !inExpandableConnector();
 
     /**
      * Check if this component is declared input.
@@ -1354,7 +1355,8 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an output component.
      */
-    syn boolean InstComponentDecl.isOutput() = isDeclaredOutput() || inheritsOutput();
+    syn boolean InstComponentDecl.isOutput() = 
+        (isDeclaredOutput() || inheritsOutput()) && !inExpandableConnector();
     
     /**
      * Check if this component inherits output from the surrounding component.

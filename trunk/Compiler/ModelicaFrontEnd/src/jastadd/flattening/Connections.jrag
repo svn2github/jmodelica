@@ -2430,6 +2430,20 @@ aspect ExpandableConnectors {
                 parent.expandConnector(memberList, templates);
             }
             
+            public String toString() {
+                StringBuilder buf = new StringBuilder("Connectors:");
+                for (InstComponentDecl c : connectors) {
+                    buf.append("\n  ");
+                    buf.append(c.qualifiedName());
+                }
+                buf.append("\nMembers:");
+                for (ConnectorMember m : members.values()) {
+                    buf.append("\n  ");
+                    buf.append(m.name);
+                }
+                return buf.toString();
+            }
+            
             private class ConnectorMember implements Comparable<ConnectorMember> {
                 
                 public final String name;

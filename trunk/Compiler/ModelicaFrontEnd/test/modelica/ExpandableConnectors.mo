@@ -2895,4 +2895,51 @@ end ExpandableConnectors.ConnectorArray7;
 ")})));
 end ConnectorArray7;
 
+
+model ExpandableWithInputOutput1
+    connector CI = input Real;
+    connector CO = output Real;
+    connector C = Real;
+
+    expandable connector EC
+    end EC;
+    
+    EC ec;
+    CI ci1;
+    CO co1;
+    input C ci2;
+    output C co2;
+equation
+    connect(ci1, ec.ci1);
+    connect(ci2, ec.ci2);
+    connect(co1, ec.co1);
+    connect(co2, ec.co2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExpandableWithInputOutput1",
+            description="Created variables in expandable connectors shouldn't be considered top-level input/outputs",
+            flatModel="
+fclass ExpandableConnectors.ExpandableWithInputOutput1
+ ExpandableConnectors.ExpandableWithInputOutput1.CI ec.ci1;
+ Real ec.ci2;
+ ExpandableConnectors.ExpandableWithInputOutput1.CO ec.co1;
+ Real ec.co2;
+ input ExpandableConnectors.ExpandableWithInputOutput1.CI ci1;
+ output ExpandableConnectors.ExpandableWithInputOutput1.CO co1;
+ input Real ci2;
+ output Real co2;
+equation
+ ci1 = ec.ci1;
+ ci2 = ec.ci2;
+ co1 = ec.co1;
+ co2 = ec.co2;
+
+public
+ type ExpandableConnectors.ExpandableWithInputOutput1.CI = Real;
+ type ExpandableConnectors.ExpandableWithInputOutput1.CO = Real;
+end ExpandableConnectors.ExpandableWithInputOutput1;
+")})));
+end ExpandableWithInputOutput1;
+
 end ExpandableConnectors;
