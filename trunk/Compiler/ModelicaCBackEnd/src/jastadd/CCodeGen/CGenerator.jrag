@@ -685,7 +685,7 @@ public class CGenerator extends GenericGenerator {
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
                     block.genBlockAddCall_C(p, genPrinter, indent, false,
                             true, block.isLinear() && options.getBooleanOption("generate_sparse_block_jacobian"),
-                            fclass.myOptions().getStringOption("nonlinear_solver"), -1);
+                            fclass.myOptions().getStringOption("init_nonlinear_solver"), -1);
             }
         }
     }

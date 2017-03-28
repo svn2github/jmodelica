@@ -12189,6 +12189,64 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end BlockTest22;
 
+model BlockTest23
+    function f
+        input Real x;
+        output Real y = x;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    parameter Real p = 3;
+    Real y(start=p);
+ equation
+    (y) = f(time + y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest23",
+            description="Test choice of nonlinear solver",
+            init_nonlinear_solver="minpack",
+            template="
+$C_dae_add_blocks_residual_functions$
+$C_dae_init_add_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_PARAMETER_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_PARAMETER_VARIABILITY, JMI_MINPACK_SOLVER, 0, \"1\", -1);
+")})));
+end BlockTest23;
+
+model BlockTest24
+    function f
+        input Real x;
+        output Real y = x;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    parameter Real p = 3;
+    Real y(start=p);
+ equation
+    (y) = f(time + y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest24",
+            description="Test choice of nonlinear solver",
+            nonlinear_solver="minpack",
+            template="
+$C_dae_add_blocks_residual_functions$
+$C_dae_init_add_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_PARAMETER_VARIABILITY, JMI_MINPACK_SOLVER, 0, \"1\", -1);
+
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_PARAMETER_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+")})));
+end BlockTest24;
+
 model NestedUnsolvedScalarInSolvedBlock
     Real a;
     Real b;

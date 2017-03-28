@@ -676,6 +676,13 @@ abstract public class OptionRegistry {
              NonlinearSolver.KINSOL,
              "Decides which nonlinear equation solver to use. Alternatives are 'kinsol or 'minpack'.",
              NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
+        INIT_NLE_SOLVER
+            ("init_nonlinear_solver",
+             OptionType.compiler,
+             Category.user,
+             NonlinearSolver.KINSOL,
+             "Decides which nonlinear equation solver to use in the initial system. Alternatives are 'kinsol or 'minpack'.",
+             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
         GENERATE_EVENT_SWITCHES
             ("generate_event_switches",
              OptionType.compiler,
