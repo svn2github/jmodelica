@@ -1555,7 +1555,7 @@ fclass CheckTests.NegativeFill2
  Real y[2];
 equation
  if 2 > 1 then
-  y[1:2] = cat(1, {time, time}, fill(0.0, 0));
+  y[1:2] = cat(1, {time, time}, fill(0.0, 2 - 2));
  elseif 2 == 1 then
   y[1:2] = {time};
  end if;
