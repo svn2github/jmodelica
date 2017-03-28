@@ -1,0 +1,1 @@
+MX((vertcat(A[1], A[2], B[1], B[2])-vertcat(function("AtomicModelVector3.f").call([A[1], A[2], 1, 2]){0}, function("AtomicModelVector3.f").call([A[1], A[2], 1, 2]){1}, function("AtomicModelVector3.f").call([A[1], A[2], 1, 2]){2}, function("AtomicModelVector3.f").call([A[1], A[2], 1, 2]){3})))

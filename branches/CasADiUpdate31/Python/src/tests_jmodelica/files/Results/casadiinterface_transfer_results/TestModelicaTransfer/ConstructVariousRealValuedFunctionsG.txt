@@ -1,0 +1,7 @@
+ModelFunction : function("AtomicModelAtomicRealFunctions.functionCallEquationInFunction")
+ Input: 1-by-1 (dense)
+ Output: 1-by-1 (dense)
+@0 = input[0]
+{@1, NULL} = function("AtomicModelAtomicRealFunctions.monoInPolyOut").call([@0])
+output[0] = @1
+

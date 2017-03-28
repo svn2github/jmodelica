@@ -1,0 +1,6 @@
+ModelFunction : function("AtomicModelAtomicBooleanFunctions.monoInMonoOut")
+ Input: 1-by-1 (dense)
+ Output: 1-by-1 (dense)
+@0 = input[0]
+output[0] = @0
+

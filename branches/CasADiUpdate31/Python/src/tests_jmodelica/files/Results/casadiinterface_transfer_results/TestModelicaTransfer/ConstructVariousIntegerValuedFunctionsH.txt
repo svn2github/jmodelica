@@ -1,0 +1,12 @@
+ModelFunction : function("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal")
+ Input: 1-by-1 (dense)
+ Output: 1-by-1 (dense)
+@0 = 3
+@1 = input[0]
+@0 = (@0*@1)
+@0 = (@1*@0)
+@2 = 1
+@2 = (@2+@0)
+@1 = (@1+@2)
+output[0] = @1
+

@@ -1,0 +1,7 @@
+ModelFunction : function("AtomicModelAtomicIntegerFunctions.functionCallInFunction")
+ Input: 1-by-1 (dense)
+ Output: 1-by-1 (dense)
+@0 = input[0]
+@1 = function("AtomicModelAtomicIntegerFunctions.monoInMonoOut").call([@0])
+output[0] = @1
+

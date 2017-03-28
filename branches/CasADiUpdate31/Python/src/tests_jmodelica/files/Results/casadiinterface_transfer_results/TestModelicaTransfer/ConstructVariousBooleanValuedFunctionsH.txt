@@ -1,0 +1,11 @@
+ModelFunction : function("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal")
+ Input: 1-by-1 (dense)
+ Output: 1-by-1 (dense)
+@0 = input[0]
+@0 = (@0&&@0)
+@1 = 0
+@1 = (@1||@0)
+@0 = 0
+@0 = (@0||@1)
+output[0] = @0
+

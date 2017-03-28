@@ -1,0 +1,1 @@
+MX(vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(function("atomicModelFunctionCallEquationIgnoredOuts.f").call([1, x3]){0}, function("atomicModelFunctionCallEquationIgnoredOuts.f").call([1, x3]){2}))))

@@ -1,0 +1,12 @@
+ModelFunction : function("AtomicModelAtomicIntegerFunctions.polyInPolyOut")
+ Inputs (2):
+  0. 1-by-1 (dense)
+  1. 1-by-1 (dense)
+ Outputs (2):
+  0. 1-by-1 (dense)
+  1. 1-by-1 (dense)
+@0 = input[0]
+output[0] = @0
+@0 = input[1]
+output[1] = @0
+
