@@ -1,1 +1,1 @@
-MX(vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function("AtomicModelVector2.f").call([A[1], A[2]]){0}, function("AtomicModelVector2.f").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2])))
+@1=AtomicModelVector2_f(A[1], A[2]), vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(@1{0}, @1{1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2]))

@@ -1,10 +1,10 @@
-ModelFunction : function("atomicModelSimpleArrayIndexing.f")
- Inputs (0):
- Outputs (4):
-  0. 1-by-1 (dense)
-  1. 1-by-1 (dense)
-  2. 1-by-1 (dense)
-  3. 1-by-1 (dense)
+ModelFunction : atomicModelSimpleArrayIndexing_f
+ Number of inputs: 0
+ Number of outputs: 4
+  Output 0 ("o0"): 1-by-1 (dense)
+  Output 1 ("o1"): 1-by-1 (dense)
+  Output 2 ("o2"): 1-by-1 (dense)
+  Output 3 ("o3"): 1-by-1 (dense)
 @0 = 1
 output[0] = @0
 @0 = 2

@@ -1,1 +1,1 @@
-MX((vertcat(x1, x2)-vertcat(function("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2").call([x1]){2}, function("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2").call([x1]){5})))
+@1=atomicModelFunctionCallStatementIgnoredArrayRecordOuts_f2(x1), (vertcat(x1, x2)-vertcat(@1{2}, @1{5}))
