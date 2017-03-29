@@ -1,0 +1,7 @@
+array([parameter Real p3[1](bindingExpression = (p1[1]*p2[1])) = (p1[1]*p2[1]);,
+       parameter Real p3[2](bindingExpression = (p1[2]*p2[2])) = (p1[2]*p2[2]);,
+       parameter Real p3[3](bindingExpression = (p1[3]*p2[3])) = (p1[3]*p2[3]);,
+       parameter Real p4(bindingExpression = (p1[1]*p2[1])) = (p1[1]*p2[1]);,
+       parameter Real p5[1](bindingExpression = (p1[1]*p2[1])) = (p1[1]*p2[1]);,
+       parameter Real p5[2](bindingExpression = (p1[2]*p2[1])) = (p1[2]*p2[1]);,
+       parameter Real p5[3](bindingExpression = (p1[3]*p2[1])) = (p1[3]*p2[1]);], dtype=object)

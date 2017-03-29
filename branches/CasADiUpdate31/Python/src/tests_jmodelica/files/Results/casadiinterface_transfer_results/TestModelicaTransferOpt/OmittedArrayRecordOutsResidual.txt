@@ -1,1 +1,0 @@
-@1=atomicModelFunctionCallStatementIgnoredArrayRecordOuts_f2(x1), (vertcat(x1, x2)-vertcat(@1{2}, @1{5}))

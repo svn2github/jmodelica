@@ -1,1 +1,0 @@
-@1=atomicModelFunctionCallEquationIgnoredOuts_f(1, x3), vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(@1{0}, @1{2})))

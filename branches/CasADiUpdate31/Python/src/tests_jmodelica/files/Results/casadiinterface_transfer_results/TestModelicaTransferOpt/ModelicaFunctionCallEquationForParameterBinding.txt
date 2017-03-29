@@ -1,2 +1,0 @@
-parameter Real p2[1](bindingExpression = atomicModelPolyOutFunctionCallForDependentParameter_f(p1){0}, evaluatedBindingExpression = 2) = atomicModelPolyOutFunctionCallForDependentParameter_f(p1){0}/* 2 */;
-parameter Real p2[2](bindingExpression = atomicModelPolyOutFunctionCallForDependentParameter_f(p1){1}, evaluatedBindingExpression = 4) = atomicModelPolyOutFunctionCallForDependentParameter_f(p1){1}/* 4 */;

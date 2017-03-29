@@ -1,1 +1,0 @@
-(der(a)+AtomicModelRecordInOutFunctionCallStatement_f1(a){0})

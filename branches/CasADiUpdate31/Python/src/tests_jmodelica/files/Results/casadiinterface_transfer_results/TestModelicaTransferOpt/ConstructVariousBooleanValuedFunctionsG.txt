@@ -1,9 +1,0 @@
-ModelFunction : AtomicModelAtomicBooleanFunctions_functionCallEquationInFunction
- Number of inputs: 1
-  Input 0 ("i0"): 1-by-1 (dense)
- Number of outputs: 1
-  Output 0 ("o0"): 1-by-1 (dense)
-@0 = input[0][0]
-{@1, NULL} = AtomicModelAtomicBooleanFunctions_monoInPolyOut(@0)
-output[0] = @1
-

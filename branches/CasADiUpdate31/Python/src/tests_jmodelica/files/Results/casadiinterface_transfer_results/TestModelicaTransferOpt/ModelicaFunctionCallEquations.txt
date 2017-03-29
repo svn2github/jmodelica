@@ -1,1 +1,0 @@
-MX(@1=AtomicModelFunctionCallEquation_f(der(x1)), vertcat((der(x1)-x1), (vertcat(x2, x3)-vertcat(@1{0}, @1{1}))))
