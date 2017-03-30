@@ -1178,13 +1178,6 @@ aspect InheritedFactoryMethods {
     public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
     public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
     public FDecouple          FDecouple.createEmptyNode()          { return new FDecouple();          }
-
-    
- /*   public FBinExp FExp.createNode2(FExp left, FExp right, BaseNode source) {
-    	FExp node = createNode(left, right);
-    	node.setLocationNoTree(source);
-    	return node;
-    }*/
     
     
 	/**

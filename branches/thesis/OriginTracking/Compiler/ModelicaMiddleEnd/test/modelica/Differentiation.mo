@@ -1544,7 +1544,7 @@ package DiscreteTime
             errorMessage="
 1 errors found:
 
-Error in flattened model, DIFFERENTIATED_DISCRETE_VARIALBE:
+Error at line 1532, column 40, in file \'ModelicaMiddleEnd\\test\\modelica\\Differentiation.mo\', DIFFERENTIATED_DISCRETE_VARIALBE:
   Unable to differentiate the variable x1 which is declared or infered to be discrete
 ")})));
     end DifferentiatedDiscreteVariable;

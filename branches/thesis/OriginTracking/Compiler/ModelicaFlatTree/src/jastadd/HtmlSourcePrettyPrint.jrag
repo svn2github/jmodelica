@@ -31,50 +31,68 @@ aspect HtmlSourcePrettyPrint {
 	 		public int getLineDepth(){ return htmlLineDepth; }
 	 		public int getContainedLDepth(){ return htmlContainedLDepth; }
 	}
+	
 	public void ASTNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		prettyPrint(p, str, indent);
 	}
+	
+	/*public int ASTNode.printfname(){
+		int n = 0;
+		if(this instanceof BaseNode){
+			if(((BaseNode)this).fName != null){
+				n = 1;
+			}
+		}
+		for(int i = 0; i < getNumChild(); i++ ){
+			n += getChild(i).printfname();
+		}
+		return n;
+	}
+	
+	public int ASTNode.printbasenodes(){
+		int n = 0;
+		if(this instanceof BaseNode){
+			n = 1;
+		}
+		for(int i = 0; i < getNumChild(); i++ ){
+			n += getChild(i).printbasenodes();
+		}
+		return n;
+	}
+	
+	public int ASTNode.printmult(){
+		int n = 0;
+		if(this instanceof BaseNode){
+			if(((BaseNode)this).fName != null && !(((BaseNode)this).fName instanceof String)){
+				n = 1;
+			}
+		}
+		for(int i = 0; i < getNumChild(); i++ ){
+			n += getChild(i).printmult();
+		}
+		return n;
+	}*/
+	
 	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
-		
+		//System.out.println("fname: " + printfname());
+		//System.out.println("multnodes: " + printmult());
+		//System.out.println("Total basenodes: " + printbasenodes() + "\n");
 		HtmlSourcePrettyPrinter p = new HtmlSourcePrettyPrinter();
 		str.println("<html>\n<head>\n");
-		//str.println("<link rel=\"stylesheet\" href=\"" + css.getName() + "\">\n");
 		str.println(p.htmlStyle());
 		str.println(p.htmlScriptHeader());
 		str.println("</head>\n<body>\n");
 		str.println("<div class=\"font\">\n");
-		str.println("<button class=\"button\" type=\"button\" onclick=\"classIdSwitch()\">Full underlining</button><br>\n");
+		str.println("<button class=\"button\" type=\"button\" onclick=\"classIdSwitch()\">Debug</button><br>\n");
 		
 		htmlSourcePrettyPrint(p, str, indent);
 		str.println("</div>\n</body>\n</html>");
-		/*try{
-			if(css != null){
-				CodeStream cssStr = new CodeStream(css);
-				cssStr.println(p.htmlStyle());
-				cssStr.close();
-			}
-	 	} catch (IOException e) {
-	 		//Do nothing
-	 	}*/
 	}
 	
 	public static String HtmlSourcePrettyPrinter.htmlStyle(){
 		StringBuilder sb = new StringBuilder();
-		/*
-		 * span.constantUse {
-		 * 	color:#999900;
-		 * }
-		 */
 		sb.append("<style>\n");
 		sb.append("span {\n");
-		/*sb.append("\tline-height: 20px;\n");
-		sb.append("\tbackground: linear-gradient(0deg, blue 1px, white 1px, transparent 1px);\n");
-		sb.append("\tbackground-position: 0 100%;\n}\n");
-		for(Integer i = 1; i < 12; i++){
-			sb.append(".s" + i + " {\n");
-			sb.append("\tline-height: " + (i * 4 + 20) + "px;\n");
-			sb.append("\tpadding-bottom: " + (i * 4) + "px;\n}\n");
-		}*/
 		sb.append("\tdisplay:inline-block\n}\n");
 		sb.append("span.newLevel,\n");
 		sb.append("span.forceLevel {\n");
@@ -120,48 +138,6 @@ aspect HtmlSourcePrettyPrint {
 		
 		return sb.toString();
 	}
-	
-	
-	/*public static String HtmlSourcePrettyPrinter.htmlScriptHeader(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("<script>\n");
-		sb.append("function classIdSwitch(){\n");
-		sb.append("\tvar allSpans = document.getElementsByTagName(\"span\");\n");
-		sb.append("\tfor(i = 1; i < allSpans.length; i++){\n");
-		sb.append("\t\tvar temp = allSpans[i].className;\n");
-		sb.append("\t\tallSpans[i].className = allSpans[i].id;\n");
-		sb.append("\t\tallSpans[i].id = temp;\n\t}\n}\n");
-		sb.append("</script>");
-		
-		return sb.toString();
-	}*/
-	
-	/*public String HtmlSourcePrettyPrinter.htmlStyle(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("s" + 0 + " {\n\t    background-color:rgba(255,0,0,0.5);\n}\n");
-		sb.append("s" + 1 + " {\n\t    background-color:rgba(0,255,0,0.5);\n}\n");
-		sb.append("s" + 2 + " {\n\t    background-color:rgba(0,0,255,0.5);\n}\n");
-		
-		return sb.toString();
-	}*/
-	
-	
-/*	public static String HtmlSourcePrettyPrinter.htmlStyle(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("<style>\n");
-		for(Integer i = 0; i < 2; i++){
-			sb.append("s" + i + " {\n");
-			sb.append("\t    background-color:rgba(100,0," + (i*100) + ",0.5);\n}\n");
-			sb.append("s" + (i + 1) + " {\n");
-			sb.append("\t    background-color:rgba(" + (i*100) + ",100,0,0.5);\n}\n");
-			sb.append("s" + (i + 2) +" {\n");
-			sb.append("\t    background-color:rgba(" + (i*100) + "100,0,100,0.5);\n}\n");
-		}
-		sb.append("</style>\n");
-		return sb.toString();
-		
-	}*/
-	
 	
 	/**
 	 * Copied from FClass.prettyPrint and modified
@@ -211,7 +187,6 @@ aspect HtmlSourcePrettyPrint {
                         wroteEquation = true;
                     }
                     p.print(e, str, nextInd);
-                   // str.print(";\n");
                 }
             }
         }
@@ -257,13 +232,8 @@ aspect HtmlSourcePrettyPrint {
 			String dir = System.getProperty("user.dir");
 			Boolean containedByParent = locationContainedBy();
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			
-			//String spanClass = "";
-			
+
 			str.print("<span ");
-			/*if(file != null){
-				str.print("id=\"" + spanClass + "s" + hp.incLineDepth() + "\" ");
-			}*/
 			str.print("class=\"");
 			if(htmlSourceNodeClass() != null){
 				str.print(htmlSourceNodeClass());
@@ -275,60 +245,25 @@ aspect HtmlSourcePrettyPrint {
 						str.print(" ");
 					}
 					str.print("newLevel");
-				}	
-				/*	spanClass += "s" + (hp.getContainedLDepth()-1);
-				}else{
-					spanClass += "s" + hp.incContainedLDepth();
-				}*/
+				}
 				str.print("\" title=\"");
 				for(int i = 0; i < file.length; i++){
 					String fileName = cropAbsolutePath(file[i].getFile());
-					//&#10;
 					if(i > 0)
-						str.print("&#10;");								// works, but produces linebreaks in the html code
-					//string format
+						str.print("&#10;");									// makes linebreaks to show multiple sources
+					
 					str.format("%s %d:%d %d:%d", fileName, file[i].getStartLine(), file[i].getStartColumn(),  file[i].getEndLine(), file[i].getEndColumn());
-					//str.print(fileName + " " + file[i].getStartRow() + ":" + file[i].getStartColumn() 
-					//	+ " " + file[i].getEndRow() + ":" + file[i].getEndColumn());
 				}
-			}/*else{
-				str.print(spanClass);
-			}*/
+			}
 			
 			str.print("\">");
 			prettyPrint(p, str, indent);
-			/*if(file != null){
-				hp.decLineDepth();
-				if(!containedByParent){
-					hp.decContainedLDepth();
-				}
-			}*/
 			
 			str.print("</span>");
 		}else{
 			prettyPrint(p, str, indent);
 		}
 	}
-	/*public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
-
-		String s = this.getClass().toString();
-		String file = fName;
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter && !locationContainedBy(parent)){
-			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			
-			if(prev != null)
-				str.print("</s" + hp.fileColour.get(cropAbsolutePath(prev.fName)) + ">");
-			
-			hp.printHTMLColour(this, str);
-			prettyPrint(p, str, indent);
-			str.print("</s" + hp.fileColour.get(cropAbsolutePath(fName)) + ">");
-			
-			if(prev != null)
-				hp.printHTMLColour(prev, str); 
-		}else{
-			prettyPrint(p, str, indent);
-		}
-	}*/
 	
 	public static String ASTNode.cropAbsolutePath(String path){
 		String p = path;
@@ -340,16 +275,6 @@ aspect HtmlSourcePrettyPrint {
 		}catch(IndexOutOfBoundsException e){}
 		return p;
 	}
-	
-	/*public void HtmlSourcePrettyPrinter.printHTMLColour(BaseNode node, CodeStream str){
-		String file = ASTNode.cropAbsolutePath(node.fName);
-		
-		if(!fileColour.containsKey(file)){
-			fileColour.put(file, nextColour);
-			nextColour++;
-		}
-		str.print("<s" + fileColour.get(file) + " title=\"" + file +  "\">"); 
-	}*/
 	
 	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
 		super.htmlSourcePrettyPrint(p, str, indent);
@@ -386,54 +311,6 @@ aspect HtmlSourcePrettyPrint {
     	str.print(indent + "<b>end</b> " + name() + ";<br><br>\n\n");
     }
 	
-	/*public void FEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
-			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
-			super.htmlSourcePrettyPrint(p, str, indent);
-			hp.htmlLineDepth--;
-			str.print("</span>");
-		}else{
-			super.htmlSourcePrettyPrint(p, str, indent);
-		}
-		prettyPrint(p, str, indent);
-	}*/
-	
-	/*public void FExp.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
-			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
-			super.htmlSourcePrettyPrint(p, str, indent);
-			hp.htmlLineDepth--;
-			str.print("</span>");
-		}else{
-			super.htmlSourcePrettyPrint(p, str, indent);
-		}
-	}
-	
-	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
-			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
-			super.htmlSourcePrettyPrint(p, str, indent);
-			hp.htmlLineDepth--;
-			str.print("</span>");
-		}else{
-			super.htmlSourcePrettyPrint(p, str, indent);
-		}
-	}
-	
-	public void FAbstractVariable.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
-			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
-			super.htmlSourcePrettyPrint(p, str, indent);
-			hp.htmlLineDepth--;
-			str.print("</span>");
-		}else{
-			super.htmlSourcePrettyPrint(p, str, indent);
-		}
-	}*/
 	
 	public String ASTNode.htmlSourcePrettyPrint(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

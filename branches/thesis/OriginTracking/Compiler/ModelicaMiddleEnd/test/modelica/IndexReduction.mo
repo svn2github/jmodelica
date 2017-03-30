@@ -1490,14 +1490,14 @@ equation
             errorMessage="
 3 errors found:
 
-Warning in flattened model:
+Warning at line 1471, column 13, in file \'ModelicaMiddleEnd\\test\\modelica\\IndexReduction.mo\':
+  a_v has stateSelect=always, but could not be selected as state
+
+Warning at line 1474, column 13, in file \'ModelicaMiddleEnd\\test\\modelica\\IndexReduction.mo\':
   Iteration variable \"b_v\" is missing start value!
 
-Warning in flattened model:
+Warning at line 1475, column 13, in file \'ModelicaMiddleEnd\\test\\modelica\\IndexReduction.mo\':
   Iteration variable \"v1\" is missing start value!
-
-Warning in flattened model:
-  a_v has stateSelect=always, but could not be selected as state
 ")})));
 end IndexReduction57;
 

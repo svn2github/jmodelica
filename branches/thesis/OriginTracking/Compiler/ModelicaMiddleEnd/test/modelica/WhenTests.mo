@@ -117,7 +117,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error in flattened model:
+Error at line 102, column 16, in file \'ModelicaMiddleEnd\\test\\modelica\\WhenTests.mo\':
   The variable x is assigned in reinit() clauses in more than one when clause:
     reinit(x, 1);
     reinit(x, 2);
@@ -273,7 +273,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error in flattened model:
+Error at line 258, column 17, in file \'ModelicaMiddleEnd\\test\\modelica\\WhenTests.mo\':
   The variable x[2] is assigned in reinit() clauses in more than one when clause:
     reinit(x[2], 1);
     reinit(x[2], 1);

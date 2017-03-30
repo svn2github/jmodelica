@@ -16,7 +16,6 @@
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Scanner;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
@@ -1074,30 +1073,13 @@ aspect FlatAPI {
        return res;
     }
     
-    
-    coll ArrayList<BaseNode> FClass.baseNodes() 			//Used for sourceDiagnostic. Memory inefficient?
-    	[new ArrayList<BaseNode>()] with add root FClass;
-    FVariable contributes
-    	this when fName != null
-    to FClass.baseNodes() for myFClass();
     		
-    FExp contributes
-        this when fName != null
-    to FClass.baseNodes() for myFClass();
-    		
-	FEquation contributes
-    	this when fName != null
-    to FClass.baseNodes() for myFClass();
-		
-		
-		
     syn lazy int FClass.numScalarEquationsAtInitialization() {
         int res = 0;
         for (FAbstractEquation e : equations())
             res += e.numScalarEquations();
         return res;
     }
-
     syn int FClass.numEquations() = equations().size();
     syn lazy ArrayList<FAbstractEquation> FClass.equations() {
         ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
@@ -3669,20 +3651,7 @@ aspect FlatDiagnostics {
             }
         }
         return sb.toString();
-    }
-    
-    
-    public String FClass.sourceDiagnostics(){		//v2
-    	StringBuilder sb = new StringBuilder();
-    	String fName;
-    	String dir = System.getProperty("user.dir");
-    	
-    	sb.append(htmlSourcePrettyPrint(""));
-    		
-    	return sb.toString();
-    	
-    }
-    
+    }    
     
     public Set<FVariable> FVariable.directDependencies() {
         Set<FVariable> res = new LinkedHashSet<FVariable>();

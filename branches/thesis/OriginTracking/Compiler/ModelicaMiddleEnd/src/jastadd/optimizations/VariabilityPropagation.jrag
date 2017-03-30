@@ -317,7 +317,6 @@ aspect VariabilityPropagation {
 		}
 
 		if (solutionVariability.knownParameterOrLess()) {
-			//spara solution
 			FExp newSolution;
 			try {
 				newSolution = solution.ceval().buildLiteral();
@@ -327,7 +326,6 @@ aspect VariabilityPropagation {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
 			}
-			//collect för solution här?
 		}
 		
         if (!solutionVariability.knownParameterOrLess()) {
