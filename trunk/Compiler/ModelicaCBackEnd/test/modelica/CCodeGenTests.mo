@@ -22360,4 +22360,27 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 end AliasNegParam1;
 
 
+model LinearityCheckPow1
+Real a,b;
+equation
+a^2 + a  = 2; 
+b.^2 + b = 2; 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="LinearityCheckPow1",
+            description="",
+            template="
+$C_dae_init_add_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
+")})));
+end LinearityCheckPow1;
+
 end CCodeGenTests;
