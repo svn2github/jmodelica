@@ -18,6 +18,21 @@ package DependencyTests
 
 package Direct
 
+model Test
+    input Real x;
+    output Real y = x;
+    input Real a;
+    output Real b = a + y;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="Test",
+            description="Testing direct dependencies. Basic.",
+            methodName="testMethod",
+            arguments={"aa", 1, 2.0, false},
+            methodResult="aa12.0false")})));
+  end Test;
+
 model Basic1
     input Real x;
     output Real y = x;

@@ -83,6 +83,15 @@ public abstract class ConstValue {
     }
 
     /**
+     * Convert to Object, default implementation.
+     * 
+     * @return Value as an Object.
+     */
+    public Object objectValue() { 
+        throw new ConstantEvaluationException(this, "get value of "); 
+    }
+
+    /**
      * Calculate the min value of this constant value.
      * Works for integer, real and array CValues.
      * 

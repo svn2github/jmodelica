@@ -22,6 +22,9 @@ import java.util.Arrays;
 
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.test.GenericTestCase;
+
+import com.sun.org.apache.bcel.internal.classfile.Field;
+
 import org.jmodelica.util.test.Assert;
 
 aspect TestCases {
@@ -53,6 +56,21 @@ abstract public class TestCase implements GenericTestCase {
     protected OptionRegistry options = createOptionRegistry();
     private Exception exception = null;
     private ArrayList<String> regexp = new ArrayList<String>();
+    
+    /**
+     * If cls represents a Java "wrapper" class, return the equivalent primitive 
+     * type. If not, return cls.
+     */
+    public static Class unwrapClass(Class cls) {
+        try {
+            for (Field f : cls.getDeclaredFields()) {
+                if (f.isStatic() && f.getType().equals(Class.class) && f.getName().equals("TYPE")) {
+                    return (Class) f.get(null);
+                }
+            }
+        } catch (Exception e) {}
+        return cls;
+    }
 
 	/**
 	 * Create the OptionRegistry to be used during compilation.
@@ -67,6 +85,13 @@ abstract public class TestCase implements GenericTestCase {
 		or.setBooleanOption("generate_runtime_option_parameters", false);
 		return or;
 	}
+    
+    public String filterTestResult(String str, Map<Pattern, String> resultFilters) {
+        for (Pattern p : resultFilters.keySet()) {
+            str = p.matcher(str).replaceAll(resultFilters.get(p));
+        }
+        return str;
+    }
 	
 	/**
 	 * Set a string option to be used during compilation.
@@ -78,13 +103,6 @@ abstract public class TestCase implements GenericTestCase {
 			exception = e;
 		}
 	}
-    
-    public String filterTestResult(String str, Map<Pattern, String> resultFilters) {
-        for (Pattern p : resultFilters.keySet()) {
-            str = p.matcher(str).replaceAll(resultFilters.get(p));
-        }
-        return str;
-    }
     
 	/**
 	 * Set a boolean option to be used during compilation.
@@ -118,6 +136,34 @@ abstract public class TestCase implements GenericTestCase {
 			exception = e;
 		}
 	}
+    
+    /**
+     * Set a string option to be used during compilation.
+     */
+    public void setOption(String key, String value) {
+        setStringOption(key, value);
+    }
+    
+    /**
+     * Set a boolean option to be used during compilation.
+     */
+    public void setOption(String key, boolean value) {
+        setBooleanOption(key, value);
+    }
+    
+    /**
+     * Set an integer option to be used during compilation.
+     */
+    public void setOption(String key, int value) {
+        setIntegerOption(key, value);
+    }
+    
+    /**
+     * Set a real option to be used during compilation.
+     */
+    public void setOption(String key, double value) {
+        setRealOption(key, value);
+    }
 	
 	/**
 	 * @return the name
