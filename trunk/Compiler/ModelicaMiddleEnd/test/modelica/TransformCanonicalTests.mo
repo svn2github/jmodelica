@@ -536,7 +536,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="LinearityTest4",
-            description="Linearity check for .*",
+            description="Linearity check for ./",
             methodName="variableDiagnostics",
             methodResult="
 Independent constants: 

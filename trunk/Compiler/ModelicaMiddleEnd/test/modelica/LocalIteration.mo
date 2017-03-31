@@ -244,14 +244,13 @@ Residual equations:
                     description="Test of enabled annotation set to a vectorized expression",
                     methodName="printDAEBLT",
                     methodResult="
---- Torn linear system (Block 1) of 1 iteration variables and 2 solved variables ---
-Coefficient variability: continuous-time
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
 Torn variables:
   (1.1) b[1]
   a[1]
 
 Iteration variables:
-  c[1]
+  c[1] ()
 
 Torn equations:
   --- Numerically solved equation (Block 1.1) ---
@@ -264,19 +263,13 @@ Residual equations:
   20 = c[1] .* a[1]
     Iteration variables: c[1]
 
-Jacobian:
-  |(- c[1]), 0.0, (- b[1])|
-  |-1.0, -1.0, 1.0|
-  |0.0, (- c[1]), (- a[1])|
-
---- Torn linear system (Block 2) of 2 iteration variables and 1 solved variables ---
-Coefficient variability: continuous-time
+--- Torn system (Block 2) of 2 iteration variables and 1 solved variables ---
 Torn variables:
   a[2]
 
 Iteration variables:
-  c[2]
-  b[2]
+  c[2] ()
+  b[2] ()
 
 Torn equations:
   a[2] := c[2] - b[2]
@@ -286,11 +279,6 @@ Residual equations:
     Iteration variables: c[2]
   1 = c[2] .* a[2]
     Iteration variables: b[2]
-
-Jacobian:
-  |-1.0, 1.0, -1.0|
-  |0.0, (- b[2]), (- c[2])|
-  |(- c[2]), (- a[2]), 0.0|
 -------------------------------
 ")})));
             end Vectorized;
