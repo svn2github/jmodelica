@@ -3039,7 +3039,9 @@ aspect BLTPrettyPrinting {
 
     @Override
     public void SolvedScalarEquationBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
-        str.format("%s%s := ", indent, fv.displayName());
+        str.print(indent);
+        p.print(solution().dynamicFExp(fv.createUseExp()), str, indent);
+        str.print(" := ");
         p.print(solution(), str, indent);
         equation().getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
         str.println();

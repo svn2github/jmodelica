@@ -134,7 +134,7 @@ aspect PrettyPrint {
 
 	// dump node names
 	public void ASTNode._dumpTree(Printer p, CodeStream str, String indent) {
- 		str.print(indent + getClass().getSimpleName() + "\n");
+ 		str.println(indent + getClass().getSimpleName());
  		for(int i = 0; i < getNumChild(); i++)
    			p.print(getChild(i),str,p.indent(indent)); // distpatch through Printer
 	}
@@ -235,7 +235,7 @@ aspect PrettyPrint {
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
 	public void List.prettyPrintWithIndent(Printer p, CodeStream str, String indent, String suffix) {
-		prettyPrintWithFix(p, str, indent, indent, suffix + "\n");
+		prettyPrintWithFix(p, str, indent, indent, suffix + str.getLineEnder());
 	}
 	
 	/**
@@ -243,7 +243,7 @@ aspect PrettyPrint {
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
 	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent, String suffix) {
-		prettyPrintWithFix(l, p, str, indent, indent, suffix + "\n");
+		prettyPrintWithFix(l, p, str, indent, indent, suffix + str.getLineEnder());
 	}
 	
 	/**
@@ -251,7 +251,7 @@ aspect PrettyPrint {
 	 * a line break after after each node.
 	 */
 	public void List.prettyPrintWithIndent(Printer p, CodeStream str, String indent) {
-		prettyPrintWithFix(p, str, indent, indent, "\n");
+		prettyPrintWithFix(p, str, indent, indent, str.getLineEnder());
 	}
 	
 	/**
@@ -259,7 +259,7 @@ aspect PrettyPrint {
 	 * a line break after after each node.
 	 */
 	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent) {
-		prettyPrintWithFix(l, p, str, indent, indent, "\n");
+		prettyPrintWithFix(l, p, str, indent, indent, str.getLineEnder());
 	}
 	
 	public void Program.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -275,11 +275,11 @@ aspect PrettyPrint {
  				str.print(" ");
  				p.print(getWithin().getPackageName(),str,indent);
  			}
- 			str.print(";\n");
+ 			str.println(";");
  		}
  		for (Element el : getElements()) {
 	 		p.print(el,str,indent);
- 			str.print(";\n");		
+ 			str.println(";");
 		}
 	}
 	
@@ -309,11 +309,11 @@ aspect PrettyPrint {
 	    str.print(" = ");
 	    str.print(getExtendsClauseShortClass().getSuper().name());
 	    if (getExtendsClauseShortClass().hasArraySubscripts())
-	    	p.print(getExtendsClauseShortClass().getArraySubscripts(),str,indent+"  ");
+	    	p.print(getExtendsClauseShortClass().getArraySubscripts(),str,p.indent(indent));
 	    if (getExtendsClauseShortClass().hasClassModification())
-	    	p.print(getExtendsClauseShortClass().getClassModification(),str,indent+"  ");
+	    	p.print(getExtendsClauseShortClass().getClassModification(),str,p.indent(indent));
 	    if (hasConstrainingClause())
-	    	p.print(getConstrainingClause(),str,indent+"  ");
+	    	p.print(getConstrainingClause(),str,p.indent(indent));
 	    
 	}
 	
@@ -336,59 +336,61 @@ aspect PrettyPrint {
 	    
  		
  		str.print(getRestriction().toString());
- 		str.print(" " + getName().getID() + "\n");
+ 		str.println(" " + getName().getID());
 
 		
  		// Print all local classes
  		int numPubClass = 0;
-// 		str.print(indent + "public\n");
+// 		str.println(indent + "public");
  		for (int i=0;i<getNumClassDecl();i++)
  			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
  			 	numPubClass++;
-	 			p.print(getClassDecl(i),str,indent+"  ");
-	 			str.print(";\n\n");
+	 			p.print(getClassDecl(i),str,p.indent(indent));
+	 			str.println(";");
+	 			str.println();
 			}
 			
 		if (getNumClassDecl()-numPubClass>0) {	
-	 		str.print(indent + "protected\n");
+	 		str.println(indent + "protected");
  			for (int i=0;i<getNumClassDecl();i++)
  				if (((BaseClassDecl)getClassDecl(i)).isProtected()) {
-		 			p.print(getClassDecl(i),str,indent+"  ");
-		 			str.print(";\n\n");
+		 			p.print(getClassDecl(i),str,p.indent(indent));
+		 			str.println(";");
+		 			str.println();
 		 		}
 		}
 			
 		// Print all extends clauses
  		for (int i=0;i<getNumSuper();i++) {
- 			p.print(getSuper(i),str,indent+"  ");
- 			str.print(";\n");
-		} 			
+ 			p.print(getSuper(i),str,p.indent(indent));
+ 			str.println(";");
+ 		}
 			
  		// Print all components
  		int numPubComp = 0;
-// 		str.print(indent + "public\n");
+// 		str.println(indent + "public");
  		for (int i=0;i<getNumComponentDecl();i++)
  			if (getComponentDecl(i).isPublic()) {
  			 	numPubComp++;
-	 			p.print(getComponentDecl(i),str,indent+"  ");
-	 			str.print(";\n");
+	 			p.print(getComponentDecl(i),str,p.indent(indent));
+	 			str.println(";");
 			}
 			
 		if (getNumComponentDecl()-numPubComp>0) {	
-	 		str.print(indent + "protected\n");
+	 		str.println(indent + "protected");
  			for (int i=0;i<getNumComponentDecl();i++)
  				if (getComponentDecl(i).isProtected()) {
-		 			p.print(getComponentDecl(i),str,indent+"  ");
-		 			str.print(";\n");
+		 			p.print(getComponentDecl(i),str,p.indent(indent));
+		 			str.println(";");
 			}
 		}	
 		
 		if (getNumEquation()>0) {
-			str.print(indent + "equation\n");
+			str.println(indent + "equation");
 			for (int i=0;i<getNumEquation();i++) {
 				str.print(p.indent(indent));
 				p.print(getEquation(i),str,indent);
-				str.print(";\n");
+				str.println(";");
 			}
 		}
 		
@@ -406,7 +408,7 @@ aspect PrettyPrint {
 		str.println("algorithm");
 		
 		for (Statement s : getStatements()) {
-			p.print(s, str, indent + "  ");
+			p.print(s, str, p.indent(indent));
 		}
 	}
 	
@@ -466,7 +468,7 @@ aspect PrettyPrint {
 			str.print(indent);
 			str.println("else");
 			for (Statement stmt : getStmts()) {
-				p.print(stmt, str, indent + "  ");
+				p.print(stmt, str, p.indent(indent));
 			}
 		}
 	}
@@ -482,7 +484,7 @@ aspect PrettyPrint {
 				str.print("elsewhen ");
 			}
 			first = false;
-			p.print(iwc, str, indent + "  ");
+			p.print(iwc, str, p.indent(indent));
 		}
 		str.print(indent);
 		str.println("end when;");
@@ -492,7 +494,7 @@ aspect PrettyPrint {
 		p.print(getTest(), str, indent);
 		str.println(" then");
 		for (Statement s : getStatements()) {
-			p.print(s, str, indent + "  ");
+			p.print(s, str, p.indent(indent));
 		}
 	}
 	
@@ -507,7 +509,7 @@ aspect PrettyPrint {
 			p.print(fi, str, indent);
 		}
 		str.println(" loop");
-		p.print(getForStmtList(), str, indent + "  ");
+		p.print(getForStmtList(), str, p.indent(indent));
 		str.print(indent);
 		str.println("end for;");
 	}
@@ -522,7 +524,7 @@ aspect PrettyPrint {
 		p.print(getTest(), str, indent);
 		str.println(" loop");
 		for (Statement s : getWhileStmts())
-			p.print(s, str, indent + "  ");
+			p.print(s, str, p.indent(indent));
 		str.print(indent);
 		str.println("end while;");
 	}
@@ -537,7 +539,7 @@ aspect PrettyPrint {
 	
 	// For debugging
 	public void LibNode.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.format("%s%structured library '%s' at '%s'\n", indent, 
+		str.formatln("%s%structured library '%s' at '%s'", indent, 
 				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
@@ -970,7 +972,7 @@ aspect FlatPrettyPrint {
 
     public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
         String nextInd = p.indent(indent);
-        str.print(indent + "fclass " + name() + "\n");
+        str.formatln(indent + "fclass %s", name());
         ArrayList<FVariable> protectedVars = new ArrayList<FVariable>();
         for (FVariable fv : getFVariables()) {
             if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
@@ -979,25 +981,25 @@ aspect FlatPrettyPrint {
                   protectedVars.add(fv);
                 } else {
                     p.print(fv, str, nextInd);
-                    str.print(";\n");
+                    str.println(";");
                 }
             }
         }
         if (!protectedVars.isEmpty()) {
-            str.print(indent + "protected\n");
+            str.println(indent + "protected");
             for (FVariable fv : protectedVars) {
                 p.print(fv, str, nextInd);
-                str.print(";\n");
+                str.println(";");
             }
         }
 
         if (getNumFInitialEquation()>0)
-            str.print(indent + "initial equation \n");
-        getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+            str.println(indent + "initial equation");
+        getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
 
         if (getNumFParameterEquation()>0)
-            str.print(indent + "parameter equation\n");
-        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+            str.println(indent + "parameter equation");
+        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
     
         boolean wroteEquation = false;
         for (FAbstractEquation e : getFAbstractEquations()) {
@@ -1008,30 +1010,31 @@ aspect FlatPrettyPrint {
                 if (!e.isIgnored()) {
                     if (!wroteEquation) {
                         str.print(indent);
-                        str.print("equation\n");
+                        str.println("equation");
                         wroteEquation = true;
                     }
                     p.print(e, str, nextInd);
-                    str.print(";\n");
+                    str.println(";");
                 }
             }
         }
         
         if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
                 getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
-            str.print("\n" + indent + "public\n");
+            str.println();
+            str.formatln("%spublic", indent);
             p.print(getFFunctionDecls(), str, nextInd);
             p.print(getFRecordDecls(), str, nextInd);
             p.print(getFEnumDecls(), str, nextInd);
             p.print(getFDerivedTypes(), str, nextInd);
         }
         
-        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";" + str.getLineEnder());
 
         str.print(indent);
         str.print("end ");
         str.print(name());
-        str.print(";\n");
+        str.println(";");
     }
 
 	syn String FVariable.prettyPrintType() = 
@@ -1154,17 +1157,19 @@ aspect FlatPrettyPrint {
 	}
 
     public void FFunctionDecl.prettyPrint(Printer p, CodeStream str, String indent) {
-    	str.print(indent + "function " + name() + "\n");
+    	str.println(indent + "function " + name());
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
     	p.print(getFAlgorithm(), str, indent);
-        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
-    	str.print(indent + "end " + name() + ";\n\n");
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";" + str.getLineEnder());
+    	str.println(indent + "end " + name() + ";");
+    	str.println();
     }
 
     public void FRecordDecl.prettyPrint(Printer p, CodeStream str, String indent) {
-    	str.print(indent + "record " + name() + "\n");
-    	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
-    	str.print(indent + "end " + name() + ";\n\n");
+    	str.println(indent + "record " + name());
+    	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), "", ";" + str.getLineEnder());
+    	str.println(indent + "end " + name() + ";");
+    	str.println();
     }
 
     public void FEnumDecl.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1177,7 +1182,8 @@ aspect FlatPrettyPrint {
         	t.getFAttributes().prettyPrintWithSep(p, str, indent, ", ");
         	str.print(")");
     	}
-    	str.print(";\n\n");
+    	str.println(";");
+    	str.println();
     }
     
     public void FDerivedType.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1185,7 +1191,7 @@ aspect FlatPrettyPrint {
 	    	str.print(indent + "type " + getName() + " = ");
 	    	str.print(getBaseType());
 	    	getFAttributeList().prettyPrintFAttributeList(str, p);
-	    	str.print(";\n");
+	    	str.println(";");
     	}
     }
     
@@ -1238,7 +1244,7 @@ aspect FlatPrettyPrint {
     public void FQNamePart.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(getName());
 		if (hasFArraySubscripts())
-			p.print(getFArraySubscripts(),str,indent);				    	
+			p.print(getFArraySubscripts(),str,indent);
     }
     
     public void FQName.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1253,7 +1259,7 @@ aspect FlatPrettyPrint {
 			p.print(getFQNamePart(i), str, indent);
 			if (i < n - 1)
 				str.print(".");
-		}    	
+		}
     }
     
     public void FArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1303,12 +1309,12 @@ aspect FlatPrettyPrint {
 		if (isElse())
    			str.print("else");
    		prettyPrintHead(p, str, indent);
-   		getFAbstractEquations().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
+   		getFAbstractEquations().prettyPrintWithFix(p, str, p.indent(indent), "", ";" + str.getLineEnder());
    		prettyPrintTail(p, str, indent);
 	}
 
 	protected void FIfWhenElseEquation.prettyPrintHead(Printer p, CodeStream str, String indent) {
-   		str.print("\n");
+   		str.println();
 	}
 
 	protected void FIfWhenElseEquation.prettyPrintTail(Printer p, CodeStream str, String indent) {
@@ -1318,7 +1324,7 @@ aspect FlatPrettyPrint {
    		str.print(ifWhenType());
    		str.print(" ");
     	p.print(getTest(), str, indent);
-   		str.print(" then\n");
+   		str.println(" then");
 	}
 
 	protected void FIfWhenEquation.prettyPrintTail(Printer p, CodeStream str, String indent) {
@@ -1359,7 +1365,7 @@ aspect FlatPrettyPrint {
 	public void FAlgorithm.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		p.print(getType(),str,"");
-		str.print("algorithm\n");
+		str.println("algorithm");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 	}
 	
@@ -1399,7 +1405,7 @@ aspect FlatPrettyPrint {
 	protected void FIfStmt.prettyPrintElse(Printer p, CodeStream str, String indent) {
 		if (getNumElseStmt() > 0) {
 			str.print(indent);
-			str.print("else\n");
+			str.println("else");
 			getElseStmts().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 		}
 	}
@@ -1408,7 +1414,7 @@ aspect FlatPrettyPrint {
 		str.print(getKeyword());
 		str.print(" ");
 		p.print(getTest(), str, indent);
-		str.print(" then\n");
+		str.println(" then");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 	}
 	
@@ -1421,7 +1427,7 @@ aspect FlatPrettyPrint {
 	public void FForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("for ");
 		p.print(getIndex(), str, indent);
-		str.print(" loop\n");
+		str.println(" loop");
 		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 		str.print(indent);
 		str.print("end for");
@@ -1430,7 +1436,7 @@ aspect FlatPrettyPrint {
 	public void InstForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("for ");
 		getInstForIndexList().prettyPrintWithSep(p, str, indent, ", ");
-		str.print(" loop\n");
+		str.println(" loop");
 		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 		str.print(indent);
 		str.print("end for");
@@ -1439,7 +1445,7 @@ aspect FlatPrettyPrint {
 	public void FWhileStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("while ");
 		p.print(getTest(), str, indent);
-		str.print(" loop\n");
+		str.println(" loop");
 		getWhileStmts().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 		str.print(indent);
 		str.print("end while");
@@ -1942,8 +1948,8 @@ aspect FlatPrettyPrint {
 	public void FForClauseE.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");
-		str.print(" loop\n");
-		getFAbstractEquationList().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
+		str.println(" loop");
+		getFAbstractEquationList().prettyPrintWithFix(p, str, p.indent(indent), "", ";" + str.getLineEnder());
 		str.print(indent + "end for");
 	}
 
@@ -2160,22 +2166,22 @@ aspect PrettyPrint_MC {
     	p.print(getFEnumDecls(), str, indent);
     	p.print(getFDerivedTypes(), str, indent);
 	
-		str.print(indent + "model " + nameUnderscore() + "\n");
+		str.println(indent + "model " + nameUnderscore());
 		for (FVariable fv : getFVariables()) {
 	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable()) {
 	  			p.print(fv, str, nextInd);
-	  			str.print(";\n");  
+	  			str.println(";");
 	  		}
 		}
 
 		if (getNumFInitialEquation()>0)
-			str.print(indent + "initial equation \n");
-		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+			str.println(indent + "initial equation");
+		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
 
 	/*
 		if (getNumFParameterEquation()>0)
-			str.print(indent + "parameter equation\n");
-		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+			str.println(indent + "parameter equation");
+		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
 	*/
 	    boolean wroteEquation = false;
     	for (FAbstractEquation e : getFAbstractEquations()) {
@@ -2186,11 +2192,11 @@ aspect PrettyPrint_MC {
     			if (!e.isIgnored()) {
 	    			if (!wroteEquation) {
 	    				str.print(indent);
-	    				str.print("equation\n");
+	    				str.println("equation");
 	    				wroteEquation = true;
 	    			}
 	    			p.print(e, str, nextInd);
-		    		str.print(";\n");
+		    		str.println(";");
     			}
     		}
     	}
@@ -2198,7 +2204,7 @@ aspect PrettyPrint_MC {
   		str.print(indent);
   		str.print("end ");
   		str.print(nameUnderscore());
-  		str.print(";\n");
+  		str.println(";");
 	}
 
 
