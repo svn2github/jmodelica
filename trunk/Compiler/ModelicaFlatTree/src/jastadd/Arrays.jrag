@@ -474,12 +474,6 @@ aspect Arrays {
 	eq InstComponentDecl.ndims()      = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
 	eq InstArrayComponentDecl.ndims() = retrieveArrayCompNdims();
 
-    /**
-     * The number of array dimensions declared locally on this component, i.e. not from the type.
-     */
-    syn int InstComponentDecl.localNdims() = 
-        hasLocalFArraySubscripts() ? getLocalFArraySubscripts().ndims() : 0;
-
     inh int InstArrayComponentDecl.retrieveArrayCompNdims();
     eq InstNode.getChild().retrieveArrayCompNdims()              = ndims() - 1;
     eq InstRecordConstructor.getChild().retrieveArrayCompNdims() = 0;

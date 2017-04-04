@@ -3739,21 +3739,21 @@ model InheritFlowTest1
 equation
 	connect(b1, b2);
 
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="InheritFlowTest1",
-            description="Check that flow is propagated to child components",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritFlowTest1",
+			description="Check that flow is propagated to child components",
+			flatModel="
 fclass NameTests.InheritFlowTest1
  Real b1.ap.x;
  Real b1.af.x;
  Real b2.ap.x;
  Real b2.af.x;
 equation
- - b1.af.x - b2.af.x = 0.0;
+ - b1.af.x - b2.af.x = 0;
  b1.ap.x = b2.ap.x;
- b1.af.x = 0.0;
- b2.af.x = 0.0;
+ b1.af.x = 0;
+ b2.af.x = 0;
 end NameTests.InheritFlowTest1;
 ")})));
 end InheritFlowTest1;

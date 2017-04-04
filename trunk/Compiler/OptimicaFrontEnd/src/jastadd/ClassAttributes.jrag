@@ -71,7 +71,7 @@ aspect ClassAttributes {
     rewrite InstPrimitive {
         when (!(this instanceof InstClassAttribute) && isClassAttribute()) to InstClassAttribute 
         copyLocationTo(new InstClassAttribute(
-                name(), getClassName(), getLocalFArraySubscriptsOpt(), getComponentDecl(), 
+                getClassName(), getLocalFArraySubscriptsOpt(), getComponentDecl(), 
                 getInstModificationOpt(), getInstConstrainingComponentOpt(), getConditionalAttributeOpt()));
     }
 
