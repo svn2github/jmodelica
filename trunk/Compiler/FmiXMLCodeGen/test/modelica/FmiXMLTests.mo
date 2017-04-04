@@ -1408,6 +1408,109 @@ $modelVariables$
 ")})));
 end TempVars2;
 
+model TempVarState1
+        function f
+        input Real x[2];
+        input Real A[2,2];
+        output Real y[2];
+    algorithm
+        y := A*x;
+    annotation(derivative=f_der,LateInline=true);
+    end f;
+
+    function f_der
+        input Real x[2];
+        input Real A[2,2];
+        input Real der_x[2];
+        input Real der_A[2,2];
+        output Real der_y[2];
+    algorithm
+        der_y := A*der_x;
+    annotation(LateInline=true);
+    end f_der;
+
+    parameter Real A[2,2] = {{1,2},{3,4}};
+    Real x1[2](each stateSelect=StateSelect.never),x2[2](each stateSelect=StateSelect.never);
+equation
+    der(x1) + der(x2) = {2,3};
+    x1 + f(x2,A) = {0,0};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="TempVarState1",
+            description="Ensures that temporary variables are exposed in the xml when they are differentiated (or derivative)",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+$modelStructure$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"A[1,1]\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"A[1,2]\" valueReference=\"1\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"2.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"A[2,1]\" valueReference=\"2\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"A[2,2]\" valueReference=\"3\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"4.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_6\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(temp_6)\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"5\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_7\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(temp_7)\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"7\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x1[1]\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x1[1])\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x1[2]\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x1[2])\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x2[1]\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x2[1])\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x2[2]\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x2[2])\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+<ModelStructure>
+    <Derivatives>
+        <Unknown index=\"6\" dependencies=\"\" />
+        <Unknown index=\"8\" dependencies=\"\" />
+    </Derivatives>
+    <InitialUnknowns>
+        <Unknown index=\"5\" dependencies=\"\" />
+        <Unknown index=\"6\" dependencies=\"1 2 3 4\" />
+        <Unknown index=\"7\" dependencies=\"\" />
+        <Unknown index=\"8\" dependencies=\"1 2 3 4\" />
+    </InitialUnknowns>
+</ModelStructure>
+")})));
+end TempVarState1;
+
 model ConstantAliasBase
     constant Real a = 1;
     constant Real b = a;

@@ -30,8 +30,8 @@ aspect FmiXML {
      * Checks if a variable should be exposed in the XML
      */
     public boolean FVariable.generateXMLVariable() {
-        return !isPreVariable() && !isExternalObject() && (!isTemporary()
-                || isDifferentiatedVariable() || myOptions().getBooleanOption("expose_temp_vars_in_fmu"));
+        return !isPreVariable() && !isExternalObject() && (!isTemporary() || isDifferentiatedVariable()
+                || isDerivativeVariable() || myOptions().getBooleanOption("expose_temp_vars_in_fmu"));
     }
 
     public void FVariable.generateXMLVariable(CodeStream str, FmiXMLGenerator.Variable gv) {
