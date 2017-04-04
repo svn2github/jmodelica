@@ -109,8 +109,8 @@ int jmi_cs_set_real_input_derivatives(jmi_cs_data_t* cs_data, jmi_log_t* log,
         /* No available real inputs -> the user has set a variable which is
          * not a real input */
         if (found_real_input == FALSE) {
-            jmi_log_comment(log, logError,
-                "Failed to set the input derivative, inconsistent number of "
+            jmi_log_node(log, logError, "CoSimulationInputs",
+                    "Failed to set the input derivative, inconsistent number of "
                 "real inputs.");
             return -1;
         }
@@ -148,8 +148,6 @@ void jmi_free_cs_data(jmi_cs_data_t* cs_data) {
 void jmi_reset_cs_data(jmi_cs_data_t* cs_data) {
     size_t i;
     
-    cs_data->triggered_external_event = FALSE;
-    
     memset(cs_data->real_inputs, 0, cs_data->n_real_inputs* sizeof(jmi_cs_real_input_t));
     for (i = 0; i < cs_data->n_real_inputs; i++) {
         jmi_cs_init_real_input_struct(&(cs_data->real_inputs[i]));
@@ -162,7 +160,6 @@ jmi_cs_data_t* jmi_new_cs_data(void* fmix_me, size_t n_real_inputs) {
     
     if (cs_data == NULL) return NULL;
     cs_data->fmix_me = fmix_me;
-    cs_data->triggered_external_event = FALSE;
     cs_data->n_real_inputs = n_real_inputs;
     cs_data->real_inputs = (jmi_cs_real_input_t*)calloc(n_real_inputs, sizeof(jmi_cs_real_input_t));
     if (cs_data->real_inputs == NULL) {

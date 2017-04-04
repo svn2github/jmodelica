@@ -159,7 +159,7 @@ jmi_ode_status_t jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_fin
         
         if (step_event == TRUE) {
             jmi_log_node(problem->log, logInfo, "StepEvent", "An event was detected at <t:%g>", tret);
-            return JMI_ODE_STATE_EVENT;
+            return JMI_ODE_EVENT;
         }
         
         if (terminate == TRUE) {
@@ -171,7 +171,7 @@ jmi_ode_status_t jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_fin
     
     if (flag == CV_ROOT_RETURN) {
         jmi_log_node(problem->log, logInfo, "StateEvent", "An event was detected at <t:%g>", tret);
-        return JMI_ODE_STATE_EVENT;
+        return JMI_ODE_EVENT;
     }
     return JMI_ODE_OK;
 }
@@ -257,8 +257,8 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
         return -1;
     }
     
-    if (problem->sizes.root_fnc > 0){
-        flag = CVodeRootInit(cvode_mem, problem->sizes.root_fnc, cv_root);
+    if (problem->sizes.event_indicators > 0){
+        flag = CVodeRootInit(cvode_mem, problem->sizes.event_indicators, cv_root);
         if(flag!=0){
             jmi_log_node(problem->log, logError, "Error", "Failed to specify the event indicator function. Returned with <error_flag: %d>", flag);
             return -1;
