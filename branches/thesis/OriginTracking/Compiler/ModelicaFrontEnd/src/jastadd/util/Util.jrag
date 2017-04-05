@@ -697,19 +697,9 @@ aspect FileNames {
     	return retrieveFileName(); 
     }
     public String BaseNode.fileName() {
-    	//String fName = null;
     	if (fName == null){
     	    fName = retrieveFileName();
-    	    //this.fName = new SourceLocation[1];
-    	    //((SourceLocation[])this.fName)[0] = new SourceLocation(fName, start, end);
     	}
-    	/*
-    	else if(this.fName != null && !(this.fName instanceof String)){
-    		return ((SourceLocation[])this.fName)[0].getFile();
-    	}
-    	else if(this.fName instanceof String){
-    		fName = (String)this.fName;
-    	}*/
     	if(fName instanceof SourceLocation[]){
     		return ((SourceLocation[])this.fName)[0].getFile();
     	}
