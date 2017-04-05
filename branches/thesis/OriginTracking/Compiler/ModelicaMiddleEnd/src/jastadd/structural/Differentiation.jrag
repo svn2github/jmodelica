@@ -291,7 +291,7 @@ aspect Derivatives {
     }
 
     public FExp FExpExp.diff(String name) {
-        return dynamicFExp(new FMulExp(new FExpExp(getFExp().copySymbolic()),
+        return dynamicFExp(new FMulExp(createNode(getFExp().copySymbolic()),
             getFExp().diff(name)));
     }
 
@@ -457,7 +457,7 @@ aspect Derivatives {
 
     public FExp FDelayExp.diff(String name) {
         Opt max = hasMax() ? new Opt(getMax().copySymbolic()) : new Opt();
-        FExp res = new FDelayExp(getFExp().diff(name), getDelay().copySymbolic(), max);
+        FExp res = createNode(getFExp().diff(name), getDelay().copySymbolic(), max);
         if (getDelay().isContinuousExp()) {
             res = new FMulExp(getDelay().diff(name), res);
         }
@@ -547,6 +547,10 @@ aspect Derivatives {
         if (name.equals(TIME))
             val = 1;
         return dynamicFExp(new FRealLitExp(val));
+    }
+
+    public FExp FInStreamEpsExp.diff(String name) {
+        return dynamicFExp(new FRealLitExp(0));
     }
 
     private int FFunctionCall.order = 0;
@@ -727,10 +731,6 @@ aspect Derivatives {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FArgumentExp.diff(String name) {
-        return copiedFExp().diff(name);
-    }
-
     public FExp FIterExp.diff(String name) {
         return dynamicFExp(new FIterExp(getFExp().diff(name), getForIndexs().treeCopy()));
     }
@@ -770,12 +770,13 @@ aspect Derivatives {
      */
     protected FExp FExp.diffWrap(String name, FExp... exp) {
         FExp res = createEmptyNode();
+        int o = res.argsOffset();
         for (int i = 0; i < exp.length; i++) {
-            res.setChild(exp[i].diff(name), i);
+            res.setChild(exp[i].diff(name), i + o);
         }
         return dynamicFExp(res);
     }
-
+    
     /**
      * Build an FArray containing the differentiated elements of this array 
      * (by calling {@link FExp#diff(String)} on each one).

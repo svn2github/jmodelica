@@ -113,19 +113,34 @@ aspect InstFunctionBinding {
     /**
      * Get the expression to use for this argument.
      */
-    syn FExp InstDefaultArgument.getFExp() {
-        InstComponentDecl bi = getBoundInput();
-        if (bi != boundInput) {
-            InstValueModification mod = bi.myInstValueMod();
-            if (mod != null && !mod.isDefaultRecordMod()) {
-                return mod.getFExp();
-            }
-        }
-        return getDeclarationFExp();
+    syn lazy FExp InstDefaultArgument.getFExp() {
+        FExp exp = getOriginalFExp();
+        FAbstractFunctionCall call = myCall();
+        FExp.FunctionContextReplacer crp = new FExp.FunctionContextReplacer(call.inputArgMap());
+        return exp.copyReplaceAccess(crp);
     }
 
-    syn boolean InstModification.isDefaultRecordMod()     = false;
-    eq InstDefaultRecordModification.isDefaultRecordMod() = true;
+    inh FAbstractFunctionCall InstFunctionArgument.myCall();
+    eq FAbstractFunctionCall.getChild().myCall() = this;
+
+    syn Map<InstComponentDecl, InstFunctionArgument> FAbstractFunctionCall.inputArgMap() =
+            Collections.<InstComponentDecl, InstFunctionArgument>emptyMap();
+    eq InstFunctionCall.inputArgMap() {
+        Map<InstComponentDecl,InstFunctionArgument> res = new HashMap<InstComponentDecl, InstFunctionArgument>();
+        int i = 0;
+        for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
+            res.put(icd, icd.isInput() ? getArg(i++) : null);
+        }
+        return res;
+    }
+    eq InstRecordConstructor.inputArgMap() {
+        Map<InstComponentDecl,InstFunctionArgument> res = new HashMap<InstComponentDecl, InstFunctionArgument>();
+        int i = 0;
+        for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
+            res.put(icd, getArg(i++));
+        }
+        return res;
+    }
 
 	/**
 	 * Argument nodes representing arguments that are missing or given multiple times do 
@@ -157,19 +172,6 @@ aspect InstFunctionBinding {
 		unbindableArgs = list;
 	}
 	public void FUnsupportedBuiltIn.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
-	}
-	
-	private ArrayList<InstFunctionArgument> FBuiltInFunctionCall.originalArgs = 
-		new ArrayList<InstFunctionArgument>();
-	public void FBuiltInFunctionCall.addToOriginalArgs(InstFunctionArgument arg) { 
-		originalArgs.add(arg);
-	}
-
-	syn lazy List<InstFunctionArgument> FBuiltInFunctionCall.getOriginalArgList() {
-		List<InstFunctionArgument> res = new List<InstFunctionArgument>();
-		for (InstFunctionArgument arg : originalArgs)
-			res.add(arg);
-		return res;
 	}
 	
 	/**
@@ -250,7 +252,7 @@ aspect InstFunctionBinding {
                 FBuiltInFunctionCall res = creator.create(args);
                 if (res != null)
                     for (InstFunctionArgument arg : args)
-                        res.addToOriginalArgs(arg);
+                        res.addOriginalArg(arg);
                 return res;
             }
 
@@ -380,8 +382,10 @@ aspect InstFunctionBinding {
 				}
 				
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
-					for (int i = 0; i < numArgs; i++)
-						res.setChild(extractFExp(args[i]), i);
+                    int o = res.argsOffset();
+                    for (int i = 0; i < numArgs; i++) {
+                        res.setChild(extractFExp(args[i]), i + o);
+                    }
 				}
 				
 				public boolean isInfArgs() {
@@ -389,7 +393,7 @@ aspect InstFunctionBinding {
 				}
 				
 				protected static FExp extractFExp(InstFunctionArgument arg) {
-					return arg.getFExpNoTransform().fullCopy();
+                    return arg.getOriginalFExp().fullCopy();
 				}
 				
                 public boolean match(BIT t) {
@@ -408,9 +412,11 @@ aspect InstFunctionBinding {
 					List<FExp> exps = new List<FExp>();
 					for (int i = numArgs; i < args.length; i++)
 						exps.add(extractFExp(args[i]));
-					res.setChild(exps, 0);
-					for (int i = 0; i < numArgs; i++)
-						res.setChild(extractFExp(args[i]), i + 1);
+                    res.setChild(exps, 1);
+                    int o = res.argsOffset();
+                    for (int i = 0; i < numArgs; i++) {
+                        res.setChild(extractFExp(args[i]), i + o);
+                    }
 				}
 				
 				public boolean isInfArgs() {
@@ -435,11 +441,12 @@ aspect InstFunctionBinding {
                 
                 protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
                     super.setArguments(res, args);
+                    int o = res.argsOffset();
                     for (int i = numArgs; i < maxArgs; i++) {
                         if (generateMissing) {
-                            res.setChild(extractFExp(args[i]), i);
+                            res.setChild(extractFExp(args[i]), i + o);
                         } else {
-                            res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i);
+                            res.setChild(args[i].isGiven() ? new Opt(extractFExp(args[i])) : new Opt(), i + o);
                         }
                     }
                 }
@@ -479,7 +486,11 @@ aspect InstFunctionBinding {
 		}
 		
 	}
-
+    
+    syn int FExp.argsOffset()            = 0;
+    eq FBuiltInFunctionCall.argsOffset() = super.argsOffset() + 1;
+    eq FInfArgsFunctionCall.argsOffset() = super.argsOffset() + 1;
+    
 	/**
 	 * Change access to point to <code>this</code> class instead of <code>orig</code>.
 	 * 
@@ -563,7 +574,7 @@ aspect InstFunctionBinding {
             int i = 0;
             for (InstFunctionArgument arg : bound) {
                 if (arg.isOKArg()) {
-                    FType argType = arg.getFExpNoTransform().type();
+                    FType argType = arg.getOriginalFExp().type();
                     FType inType = modifiableInputs.get(i).type();
                     if (!inType.dimensionCompatible(argType, true))
                         score++;

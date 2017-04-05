@@ -17,17 +17,18 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi_ode_solver.h"
+#include "jmi_ode_solver_impl.h"
+#include "jmi_ode_problem.h"
 #include "jmi_ode_euler.h"
 #include "jmi_log.h"
 
-int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
+jmi_ode_status_t jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     int flag = 0;
     jmi_ode_euler_t* integrator = (jmi_ode_euler_t*)solver->integrator;
     jmi_ode_problem_t* problem = solver -> ode_problem;
-    int n_real_x = problem->n_real_x;
-    int n_sw = problem->n_sw;
+    jmi_ode_sizes_t sizes = problem->sizes;
     char step_event = 0; /* boolean step_event = FALSE */
+    char terminate = 0;
     
     jmi_real_t tcur, tnext;
     jmi_real_t hcur;
@@ -40,26 +41,26 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     
     hdef = integrator->step_size;
 
-    /* if(n_real_x) { */
     y = problem->states;
-    ydot = problem->states_derivative;
+    ydot = solver->states_derivative;
     
     
-    if(n_sw) {
-        event_indicators = problem->event_indicators;
-        event_indicators_previous = problem->event_indicators_previous;
+    if(sizes.event_indicators) {
+        event_indicators = solver->event_indicators;
+        event_indicators_previous = solver->event_indicators_previous;
     }
     
     tcur = problem->time;
     hcur = hdef;
     
     /* Get the first event indicators */
-    if(n_sw > 0){
-        flag = problem->root_func(problem, tcur, y, event_indicators_previous);
+    if(sizes.event_indicators > 0){
+        flag = problem->ode_callbacks.root_func(tcur, y, event_indicators_previous, sizes, problem->problem_data);
             
         if (flag != 0){
-            jmi_log_comment(problem->log, logError, "Could not retrieve event indicators");
-            return -1;
+            jmi_log_node(problem->log, logError, "EulerSolver",
+                    "Could not retrieve event indicators");
+            return JMI_ODE_ERROR;
         }
     }
 
@@ -68,11 +69,11 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         int zero_crossning_event = 0;
 
         /* Get derivatives */
-        /* if(n_real_x > 0) { */
-        flag = problem->rhs_func(problem, tcur, y, ydot);
+        flag = problem->ode_callbacks.rhs_func(tcur, y, ydot, sizes, problem->problem_data);
         if (flag != 0){
-            jmi_log_comment(problem->log, logError, "Could not retrieve time derivatives");
-            return -1;
+            jmi_log_node(problem->log, logError, "EulerSolver",
+                    "Could not retrieve time derivatives");
+            return JMI_ODE_ERROR;
         }
 
         /* Choose time step and advance tcur */
@@ -85,34 +86,36 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 
         hcur = tnext - tcur;
         tcur = tnext;
+        problem->time = tnext;
         
         /* *tout = tcur; */
         
         /* integrate */
-        for (k = 0; k < n_real_x; k++) {
+        for (k = 0; k < sizes.states; k++) {
             y[k] = y[k] + hcur*ydot[k]; 
         }
         
         /* Check if an event indicator has triggered */
-        if(n_sw > 0){
-            flag = problem->root_func(problem, tcur, y, event_indicators);
+        if(sizes.event_indicators > 0){
+            flag = problem->ode_callbacks.root_func(tcur, y, event_indicators, sizes, problem->problem_data);
             
             if (flag != 0){
-                jmi_log_comment(problem->log, logError, "Could not retrieve event indicators");
-                return -1;
+                jmi_log_node(problem->log, logError, "EulerSolver",
+                    "Could not retrieve event indicators");
+                return JMI_ODE_ERROR;
             }
         }
 
-        for (k = 0; k < n_sw; k++) {
+        for (k = 0; k < sizes.event_indicators; k++) {
             if (event_indicators[k]*event_indicators_previous[k] < 0) {
                 zero_crossning_event = 1;
                 break;
             }
         }
-        memcpy(event_indicators_previous, event_indicators, (problem->n_sw)*sizeof(jmi_real_t));
+        memcpy(event_indicators_previous, event_indicators, sizes.event_indicators * sizeof(jmi_real_t));
         
         /* After each step call completed integrator step */
-        flag = problem->complete_step_func(problem, &step_event);
+        flag = problem->ode_callbacks.complete_step_func(&step_event, &terminate, problem->problem_data);
         if (flag != 0) {
             jmi_log_node(problem->log, logError, "Error", "Failed to complete an integrator step. "
                      "Returned with <error_flag: %d>", flag);
@@ -124,14 +127,21 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
             jmi_log_node(problem->log, logInfo, "EulerEvent", "An event was detected at <t:%g>", tcur);
             return JMI_ODE_EVENT;
         }
+        
+        if (terminate == TRUE) {
+            jmi_log_node(problem->log, logInfo, "Terminate",
+                "Terminating simulation after a signal from the model at <t:%g>", tcur);
+            return JMI_ODE_TERMINATE;
+        }
 
     } /* while */
     
     /* Final call to the RHS */
-    flag = problem->rhs_func(problem, tcur, y, ydot);
+    flag = problem->ode_callbacks.rhs_func(tcur, y, ydot, sizes, problem->problem_data);
     if (flag != 0){
-        jmi_log_comment(problem->log, logError, "Could not retrieve time derivatives");
-        return -1;
+        jmi_log_node(problem->log, logError, "EulerSolver",
+            "Could not retrieve time derivatives");
+        return JMI_ODE_ERROR;
     }
     return JMI_ODE_OK;
 }
@@ -144,7 +154,8 @@ int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver
     
     integrator = (jmi_ode_euler_t*)calloc(1,sizeof(jmi_ode_euler_t));
     if(!integrator){
-        jmi_log_comment(problem->log, logError, "Failed to allocate the internal EULER struct.");
+        jmi_log_node(problem->log, logError, "EulerSolver",
+            "Failed to allocate the internal struct.");
         return -1;
     }
     /* DEFAULT VALUES NEEDS TO BE IMPROVED*/

@@ -123,7 +123,7 @@ int main() {
     cb.allocate_memory = calloc;
     cb.free_memory = free;
     cb.model_name = "test";
-    cb.instance_name = "test instance";  
+    cb.instance_name = "test_instance";  
     cb.model_data = &sw;      
 
     log = jmi_log_init(&cb);
@@ -144,5 +144,8 @@ int main() {
                          &sw);
     jmi_block_solver_solve(block_solver, 0, 1);
     jmi_delete_block_solver(&block_solver);
+	if (JMI_ABS(sw.x - 1.3333333333) > 1e-4) {
+        return -1; /* Something went wrong */
+    }
     return 0;
 }

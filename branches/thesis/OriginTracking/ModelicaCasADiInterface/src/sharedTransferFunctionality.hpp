@@ -125,7 +125,7 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
             ciBlock->addNotClassifiedEquation(new ModelicaCasADi::Equation(toMX(f.toMXForLhs()),toMX(f.toMXForRhs())));       
         }
         
-        //Adding variables to block
+        //Adding variables to both variable containers in block
         std::set<int> indexBlockVariables;
         std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >::iterator it;
         JIterator iterUnsolvedVars(unsolved_vars.iterator().this$);
@@ -134,10 +134,15 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
             it = indexToVariable.find(uv.findVariableIndex());
             if(it!=indexToVariable.end()) {
                 indexBlockVariables.insert(it->first);
-                //This will add a variable to both variable containers in block
+                
+                // Mark unsolved variables in non-scalar blocks as tearing variables
+                if (block_equations.size() > 1 && ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations()) { 
+                    it->second->setTearing(true);
+                }
+                
                 ciBlock->addVariable(it->second.getNode(), false);
             }
-        }  
+        }
         
         JIterator iterSolvedVars(block_variables.iterator().this$);
         std::set<int>::iterator tmp_it;
@@ -232,9 +237,9 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
         //Setting Jacobian always with casadi
         ciBlock->computeJacobianCasADi();
 
-        //Temporal check
+        //Mark tearing residuals and then move everything to Unsolvable
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())) {
-            std::cout<<"WARNING: THERE ARE SOLVED AND UNSOLVED VARIABLES IN A BLOCK. EVERYTHING MOVED TO UNSOLVED WITHIN THAT BLOCK. (DEACTIVATE TEARING)\n";
+            ciBlock->markTearingResiduals();
             ciBlock->moveAllEquationsToUnsolvable();
             ciBlock->setasSolvable(false);
         }

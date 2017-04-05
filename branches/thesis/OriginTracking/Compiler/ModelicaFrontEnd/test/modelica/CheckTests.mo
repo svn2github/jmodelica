@@ -393,6 +393,7 @@ public
   input Integer[:] x;
   output Integer[:] y;
  algorithm
+  assert(n == size(x, 1), \"Mismatching sizes in function 'CheckTests.ArraySize2.f', component 'x', dimension '1'\");
   init y as Integer[n];
   for k in 1:n loop
    y[1:k] := y[1:k] + fill(x[k], k);
@@ -1558,5 +1559,81 @@ equation
 end CheckTests.NegativeFill2;
 ")})));
 end NegativeFill2;
+
+model FunctionOutputSize1
+    function f
+        input Integer x;
+        output Integer[x] y1 = 1:x;
+        output Integer[x] y2 = 1:x;
+        algorithm
+    end f;
+    parameter Integer[:] x;
+    Real[1] y1;
+    Real[1] y2;
+equation
+    (y1,y2) = f(size(x,1));
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="InnerOuter1",
+            description="Check that error for function outputs does not trigger in inactive branch",
+            checkType=check,
+            errorMessage="
+1 warnings found:
+
+Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+
+")})));
+end FunctionOutputSize1;
+
+model UnknownSizeArrayIndexBounds1
+    parameter Real[:] x;
+    Real y = x[1];
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="UnknownSizeArrayIndexBounds1",
+            description="",
+            checkType=check,
+            errorMessage="
+1 warnings found:
+
+Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+
+")})));
+end UnknownSizeArrayIndexBounds1;
+
+model ExternalFunctionAnnotation1
+    function f
+        input Real x;
+        output Real y;
+        external "C" y = f(x);
+        annotation(Include="", IncludeDirectory="", Library="", LibraryDirectory="", LegalAnnotation="");
+    end f;
+    
+    Real y = f(time);
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ExternalFunctionAnnotation1",
+            description="",
+            checkType=check,
+            errorMessage="
+4 errors found:
+
+Error at line 9, column 19, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+Error at line 9, column 30, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+Error at line 9, column 51, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+Error at line 9, column 63, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+")})));
+end ExternalFunctionAnnotation1;
+
 
 end CheckTests;

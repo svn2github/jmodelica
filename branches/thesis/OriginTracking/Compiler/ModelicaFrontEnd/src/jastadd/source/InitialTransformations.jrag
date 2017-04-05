@@ -198,25 +198,36 @@
     	}
     	return l;
     }
-    
+
     // For preserved formatting.
     Composition FullClassDecl.originalComposition;
-    
+
     /**
      * Extract elements from Composition and add to a FullClassDecl.
      */
     public void Composition.extractElementsTo(FullClassDecl fcd) {
-    	fcd.originalComposition = this;
+        fcd.originalComposition = this;
 
-        for (Clause cl : getClauses()) 
-			cl.addToFullClassDecl(fcd);
-        
-        if (hasExternalClause()) 
-        	fcd.setExternalClause(getExternalClause());
+        for (Clause cl : getClauses()) {
+            cl.addToFullClassDecl(fcd);
+        }
+
+        if (hasExternalClause()) { 
+            fcd.setExternalClause(getExternalClause());
+        }
     }
-    
+
+    /**
+     * Adds a clause element to a full class declaration.
+     * <p>
+     * This translates parsed elements to source elements.
+     * 
+     * @param fcd
+     *          The {@link FullClassDecl} instance in which to put the source elements.
+     */
+
     public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
-    
+
     public void ComponentDecl.addToFullClassDecl(FullClassDecl fcd) {
         if (hasRedeclare()) {
             ComponentAccess ca = new ComponentAccess(getName().getID(), getVarArraySubscriptsOpt().fullCopy());
@@ -225,47 +236,70 @@
             fcd.addComponentDecl(this);
         }
     }
-    
+
     public void Algorithm.addToFullClassDecl(FullClassDecl fcd) {
-    	Algorithm algo = new Algorithm(getInitialOpt(), new List());
-    	for (Statement stmt : getStatements())
-    		stmt.addToFullClassDecl(fcd, algo);
-    	fcd.addAlgorithm(algo);
+        Algorithm algo = new Algorithm(getInitialOpt(), new List());
+        for (Statement stmt : getStatements())
+            stmt.addToFullClassDecl(fcd, algo);
+        fcd.addAlgorithm(algo);
     }
-    
+
     public void Statement.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
-    	algo.addStatement(this);
+        algo.addStatement(this);
     }
-    
+
     public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
-    	getAnnotation().setLocationNoTree(getAnnotation(), this);
-    	fcd.setAnnotation(getAnnotation());
+        getAnnotation().setLocationNoTree(getAnnotation(), this);
+        fcd.setAnnotation(getAnnotation());
     }
-    
+
     public void ExtendsClause.addToFullClassDecl(FullClassDecl fcd) {
-    	fcd.addSuper(this);
+        fcd.addSuper(this);
     }
-    
+
     public void ClassDecl.addToFullClassDecl(FullClassDecl fcd) {
         // TODO: add redeclared to ElementModifications instead of class list
-    	fcd.addClassDecl(this);
+        fcd.addClassDecl(this);
     }
-    
+
     public void ImportClause.addToFullClassDecl(FullClassDecl fcd) {
         fcd.addImport(this);
     }
-    
+
     public void EquationClause.addToFullClassDecl(FullClassDecl fcd) {
         for (AbstractEquation equ : getAbstractEquations()) 
-        	equ.addToFullClassDecl(fcd);
+            equ.addToFullClassDecl(fcd);
     }
-    
+
     public void AbstractEquation.addToFullClassDecl(FullClassDecl fcd) {
         fcd.addEquation(this);
     }
-    
+
+    public void PublicElementList.addToFullClassDecl(FullClassDecl fcd) {
+        for (Element elem : getElements()) {
+            elem.addToFullClassDecl(fcd);
+        }
+    }
+
+    public void ProtectedElementList.addToFullClassDecl(FullClassDecl fcd) {
+        for (Element elem : getElements()) {
+            elem.addToFullClassDecl(fcd);
+        }
+    }
+
+    public void ComponentClause.addToFullClassDecl(FullClassDecl fcd) {
+        java.util.List<SiblingComponentDecl> siblings = getNumName() > 1 ? new ArrayList<SiblingComponentDecl>() : null;
+
+        for (int i = 0; i < getNumName(); ++i) {
+            PN_ComponentDecl name = getName(i);
+            ComponentDecl decl = asComponentDecl(name, siblings);
+            decl.setLocationNoTree(i == 0 ? this : name);
+            decl.addToFullClassDecl(fcd);
+        }
+    }
+
     /**
-     * Rewrite the PN_ExtendsClause to a ExtendsClause including visibility info 
+     * Rewrite the {@link PN_ExtendsClause} to an {@link ExtendsClause}, including visibility info.
      */
     rewrite PN_ExtendsClause {
         to ExtendsClause {     
@@ -273,24 +307,23 @@
                                      getSuper(),
                                      getClassModificationOpt(),
                                      getAnnotationOpt());
-        
+
             e.setLocationNoTree(this);
             return e;
         }
     }
  
     /**
-     * Rewrite the PN_ComponentClause to a ComponentClause including
-     * visibility information. 
+     * Rewrite the {@link PN_ComponentClause} to a {@link ComponentClause} including visibility information. 
      */
     rewrite PN_ComponentClause {
         to ComponentClause {
             List l = new List();
-         
+
             for(int i=0;i<getNumName();i++) {
                 if (getName(i)!=null) l.add(getName(i));
             }
-         
+
             ComponentClause c = new ComponentClause(getRedeclareOpt(),
                                                     getFinalOpt(),
                                                     getInnerOpt(),
@@ -306,120 +339,89 @@
                                                     getConstrainingClauseOpt(),
                                                     getComment());
             c.setLocationNoTree(this);
-            //log.debug("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
+            // log.debug("PN_ComponentClause->ComponentClause.getStart() = " + c.getStart());
             return c;
         }
     }
-    
+
+    /**
+     * Rewrite a component clause to a source component declaration.
+     */
+    rewrite ComponentClause {
+             when (getNumName() == 1) 
+             to ComponentDecl {
+                     ComponentDecl cd = asComponentDecl(getName(0), null);
+                     cd.setLocationNoTree(this);
+                     return cd;
+             }
+     }
+
+    /**
+     * Rewrite a parsed component redeclaration to a source component redeclaration.
+     */
      rewrite PN_ComponentRedeclare {
         to ComponentRedeclare {
-           ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), (ComponentDecl)getBaseComponentDecl());
+           ComponentRedeclare c = new ComponentRedeclare(getEachOpt(), getFinalOpt(), getName(),
+                   (ComponentDecl) getBaseComponentDecl());
            c.setLocationNoTree(this);
            return c;
         }
     }   
-    
-   
-    /**
-     * Eliminate the PublicElementList nodes. Creation of a new list
-     * is essential to trigger re-writes in the children. 
-     */
-    rewrite PublicElementList in Composition.getClause() {
-        to List {
-            List l = new List();
-            List el = getElementList();
-            for(int i=0;i<el.getNumChild();i++) 
-                if (el.getChild(i)!=null) l.add(el.getChild(i));
-            return l.add(new PN_DummyClause());
-        }
-    }
-  
-    /**
-     * Eliminate the ProtectedElementList nodes Creation of a new list
-     * is essential to trigger re-writes in the children. 
-     */
-    rewrite ProtectedElementList in Composition.getClause() {
-        to List {
-            List l = new List();
-            List el = getElementList();
-                for(int i=0;i<el.getNumChild();i++) 
-                    if (el.getChild(i)!=null) l.add(el.getChild(i));
-            return l.add(new PN_DummyClause());
-        }
-    }
-  
-	/**
-	 * Transform ComponentClauses to ComponentDecls 
-	 */
-	rewrite ComponentClause in Composition.getClause() {
-		to List {
-			List l = new List();
-			java.util.List<SiblingComponentDecl> siblings = null;
-			if (getNumName() > 1)
-				siblings = new ArrayList();
-			for (PN_ComponentDecl name : getNames()) {
-				ComponentDecl c = asComponentDecl(name, siblings);
-				if (l.getNumChild() == 0)
-					c.setLocationNoTree(this);
-				else
-					c.setLocationNoTree(name);
-				l.add(c);
-			}
-			return l;
-		}
-	}
-	
-	rewrite ComponentClause {
-		when (getNumName()==1) 
-		to ComponentDecl {
-			ComponentDecl cd = asComponentDecl(getName(0), null);
-			cd.setLocationNoTree(this);
-			return cd;
-		}
-	}
-	
-	private ComponentDecl ComponentClause.asComponentDecl(PN_ComponentDecl name, java.util.List<SiblingComponentDecl> siblings) {
-		// Move all ArraySubscripts to the declaration
-		List as;
-		if (name.hasVarArraySubscripts())
-			as = name.getVarArraySubscripts().getSubscriptList();
-		else
-			as = new List();
 
-		if (hasTypeArraySubscripts())
-			for (int i=0;i<getTypeArraySubscripts().getNumSubscript();i++)
-				as.add(getTypeArraySubscripts().getSubscript(i));
-		ComponentDecl c;
-		if (siblings == null) {
-			c = new ComponentDecl();
-		} else {
-			SiblingComponentDecl sc = new SiblingComponentDecl();
-			sc.setSiblings(siblings);
-			siblings.add(sc);
-			c = sc;
-		}
-		c.setRedeclareOpt(getRedeclareOpt().fullCopy());
-		c.setFinalOpt(getFinalOpt().fullCopy());
-		c.setInnerOpt(getInnerOpt().fullCopy());
-		c.setOuterOpt(getOuterOpt().fullCopy());
-		c.setReplaceableOpt(getReplaceableOpt().fullCopy());
-		c.setTypePrefixFlowOpt(getTypePrefixFlowOpt().fullCopy());
-		c.setTypePrefixVariabilityOpt(getTypePrefixVariabilityOpt().fullCopy());
-		c.setTypePrefixInputOutputOpt(getTypePrefixInputOutputOpt().fullCopy());
-		c.setClassName(getClassName().fullCopy());
-		c.setVisibilityType(getVisibilityType().fullCopy());
-		c.setName(name.getName());
-		if (as.getNumChild() > 0)
-		    c.setVarArraySubscripts(new ArraySubscripts(as));
-		c.setModificationOpt(name.getModificationOpt());
-		c.setConditionalAttributeOpt(name.getConditionalAttributeOpt());
-		c.setComment(name.getComment());
-		c.setConstrainingClauseOpt( getConstrainingClauseOpt().fullCopy());
-		c.setCCComment(getComment());
-		c.setLocationNoTree(this, this, name);
-		return c;
-	}
+    /**
+     * Returns a component declaration instance corresponding to the parsed component clause.
+     * 
+     * @param name
+     *          The parsed declaration of the component.
+     * @param siblings
+     *          The component's sibling components.
+     */
+    public ComponentDecl ComponentClause.asComponentDecl(PN_ComponentDecl name,
+            java.util.List<SiblingComponentDecl> siblings) {
 
+        List<Subscript> as = name.hasVarArraySubscripts() ? name.getVarArraySubscripts().getSubscriptList() :
+                new List<Subscript>();
+
+        if (hasTypeArraySubscripts()) {
+            for (int i = 0; i < getTypeArraySubscripts().getNumSubscript(); i++) {
+                as.add(getTypeArraySubscripts().getSubscript(i));
+            }
+        }
+
+        ComponentDecl c = null;
+        if (siblings == null) {
+            c = new ComponentDecl();
+        } else {
+            SiblingComponentDecl sc = new SiblingComponentDecl();
+            sc.setSiblings(siblings);
+            siblings.add(sc);
+            c = sc;
+        }
+
+        if (as.getNumChild() > 0) {
+            c.setVarArraySubscripts(new ArraySubscripts(as));
+        }
+
+        c.setRedeclareOpt(getRedeclareOpt().fullCopy());
+        c.setFinalOpt(getFinalOpt().fullCopy());
+        c.setInnerOpt(getInnerOpt().fullCopy());
+        c.setOuterOpt(getOuterOpt().fullCopy());
+        c.setReplaceableOpt(getReplaceableOpt().fullCopy());
+        c.setTypePrefixFlowOpt(getTypePrefixFlowOpt().fullCopy());
+        c.setTypePrefixVariabilityOpt(getTypePrefixVariabilityOpt().fullCopy());
+        c.setTypePrefixInputOutputOpt(getTypePrefixInputOutputOpt().fullCopy());
+        c.setClassName(getClassName().fullCopy());
+        c.setVisibilityType(getVisibilityType().fullCopy());
+        c.setName(name.getName());
+        c.setModificationOpt(name.getModificationOpt());
+        c.setConditionalAttributeOpt(name.getConditionalAttributeOpt());
+        c.setComment(name.getComment());
+        c.setConstrainingClauseOpt( getConstrainingClauseOpt().fullCopy());
+        c.setCCComment(getComment());
+        c.setLocationNoTree(this, this, name);
+
+        return c;
+    }
 
     rewrite ComponentModification {
         when (getName().isQualified())

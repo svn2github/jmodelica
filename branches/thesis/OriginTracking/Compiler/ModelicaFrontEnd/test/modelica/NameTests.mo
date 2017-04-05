@@ -2061,6 +2061,15 @@ Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameT
 end ConstantLookup39;
 
 
+model ConstantLookup40
+    model A
+        constant Real x = 2;
+    end A;
+    
+    parameter Real y = A.x;
+end ConstantLookup40;
+
+
 class ExtendsTest1
   class C
     Real x;
@@ -3984,5 +3993,115 @@ protected
 end NameTests.ProtectedComponent1;
 ")})));
 end ProtectedComponent1;
+
+
+model ClassThroughComponent1
+    model A
+        package B
+            constant Real x = 1;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a;
+    parameter Real z = a.B.x * a.y;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassThroughComponent1",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 4008, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
+  Can not access non-function class through component access: 'a.B.x'
+")})));
+end ClassThroughComponent1;
+
+
+model ClassThroughComponent2
+    model A
+        package B
+            constant Real x = 1;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    model C
+        A a;
+    end C;
+    
+    C c;
+    parameter Real z = c.a.B.x * c.a.y;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassThroughComponent2",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 4037, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
+  Can not access non-function class through component access: 'c.a.B.x'
+")})));
+end ClassThroughComponent2;
+
+
+model ClassThroughComponent3
+    model A
+        package B
+            constant Real x = 1;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    model C
+        A a[2];
+    end C;
+    
+    C c;
+    parameter Real z = c.a[1].B.x * c.a[1].y;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassThroughComponent3",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 4066, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
+  Can not access non-function class through component access: 'c.a[1].B.x'
+")})));
+end ClassThroughComponent3;
+
+
+model ClassThroughComponent4
+    model A
+        package B
+            model C
+                parameter Real x = 1;
+            end C;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a;
+    a.C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassThroughComponent4",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 4093, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+  Cannot find class declaration for a
+")})));
+end ClassThroughComponent4;
 
 end NameTests;

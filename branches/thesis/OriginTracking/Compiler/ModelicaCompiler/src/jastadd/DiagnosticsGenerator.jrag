@@ -38,6 +38,7 @@ public class DiagnosticsGenerator {
     private TransformedModelFile transformedModelFile;
     private ProblemsFile problemsFile;
     private BLTFile bltFile;
+    private InitBLTFile initBLTFile;
     private BLTTableFile bltTableFile;
     private AliasFile aliasFile;
     private ConnectionsFile connectionsFile;
@@ -74,6 +75,7 @@ public class DiagnosticsGenerator {
         transformedModelFile = new TransformedModelFile();
         problemsFile = new ProblemsFile();
         bltFile = new BLTFile();
+        initBLTFile = new InitBLTFile();
         bltTableFile = new BLTTableFile();
         aliasFile = new AliasFile();
         connectionsFile = new ConnectionsFile();
@@ -84,6 +86,7 @@ public class DiagnosticsGenerator {
                 transformedModelFile,
                 problemsFile,
                 bltFile,
+                initBLTFile,
                 bltTableFile,
                 aliasFile,
                 connectionsFile,
@@ -92,6 +95,13 @@ public class DiagnosticsGenerator {
         
         for (DiagnosticsFile<?> file : files)
             file.clear();
+        for (String file : new String[]{"scripts.js","style.css","zepto.min.js"}) {
+            try {
+                ASTNode.exportResourceFromJAR("htmldiag/" + file, new File(diagnosticsDir, file));
+            } catch (IOException e) {
+                ASTNode.log.warning("Unable to export resource '" + file + "' from JAR! " + e.getMessage());
+            }
+        }
     }
 
     public abstract class DiagnosticsFile<T> {
@@ -102,61 +112,75 @@ public class DiagnosticsGenerator {
         protected boolean addTitle;
 
         protected DiagnosticsFile(String title, String suffix, boolean addTitle) {
-            this(title, String.format("%s.html", suffix));
+            this.title = title;
+            fileName = String.format("%s.html", suffix);
+            path = new File(diagnosticsDirString, fileName).getAbsoluteFile();
             this.addTitle = addTitle;
         }
 
-        protected DiagnosticsFile(String title, String fileName) {
-            this.title = title;
-            this.fileName = fileName;
-            path = new File(diagnosticsDirString, fileName).getAbsoluteFile();
-            addTitle = false;
-        }
-
-        public void write(T obj) {
+        public final void write(T obj) {
             CodeStream out = null;
             try {
                 out = new CodeStream(new PrintStream(path, "UTF-8"));
-                out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
-                out.println("<html>");
-                out.println("<head>");
-                writeHead(out);
-                out.println("</head>");
-                out.println("<body>");
-                if (addTitle) {
-                    if (title != null)
-                        out.format("<h2>%s: %s</h2>\n", title, modelName);
-                    else
-                        out.format("<h2>%s</h2>\n", modelName);
-                }
-                writeContents(obj, out);
-                out.println("</body>");
-                out.println("</html>");
+                doWrite(obj, out);
             } catch(FileNotFoundException e) {
             } catch(UnsupportedEncodingException e) {
             } finally {
                 if (out != null)
                     out.close();
             }
+       }
+
+       protected abstract void doWrite(T obj, CodeStream out);
+
+       public void clear() {
+           PrintStream out;
+           try {
+               out = new PrintStream(path, "UTF-8");
+               out.close();
+           } catch(FileNotFoundException e) {
+           } catch(UnsupportedEncodingException e) {
+           }
+       }
+
+       public void writeLink(CodeStream out) {
+           writeLink(out, "");
+       }
+
+       public void writeLink(CodeStream out, String suffix) {
+           out.println("<p>");
+           out.formatln("<a href=\"%s\">%s</a>%s", fileName, title, suffix);
+           out.println("</p>\n");
+       }
+    }
+
+    public abstract class OldDiagnosticsFile<T> extends DiagnosticsFile<T> {
+        protected OldDiagnosticsFile(String title, String suffix, boolean addTitle) {
+            super(title, suffix, addTitle);
+        }
+
+        @Override
+        protected void doWrite(T obj, CodeStream out) {
+            out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
+            out.println("<html>");
+            out.println("<head>");
+            writeHead(out);
+            out.println("</head>");
+            out.println("<body>");
+            if (addTitle) {
+                if (title != null)
+                    out.format("<h2>%s: %s</h2>\n", title, modelName);
+                else
+                    out.format("<h2>%s</h2>\n", modelName);
+            }
+            writeContents(obj, out);
+            out.println("</body>");
+            out.println("</html>");
         }
 
         protected void writeHead(CodeStream out) {
             out.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">");
             out.println("<title>Model diagnosis</title>\n");
-        }
-
-        public void clear() {
-            PrintStream out;
-            try {
-                out = new PrintStream(path, "UTF-8");
-                out.close();
-            } catch(FileNotFoundException e) {
-            } catch(UnsupportedEncodingException e) {
-            }
-        }
-
-        public void writeLink(CodeStream out) {
-            writeLink(out, "");
         }
 
         public void writeLink(CodeStream out, String suffix) {
@@ -166,14 +190,9 @@ public class DiagnosticsGenerator {
         }
 
         protected abstract void writeContents(T obj, CodeStream out);
-
     }
 
-    public abstract class FClassDiagnosticsFile extends DiagnosticsFile<FClass> {
-
-        protected FClassDiagnosticsFile(String title, String suffix) {
-            super(title, suffix);
-        }
+    public abstract class FClassDiagnosticsFile extends OldDiagnosticsFile<FClass> {
 
         protected FClassDiagnosticsFile(String title, String suffix, boolean addTitle) {
             super(title, suffix, addTitle);
@@ -210,18 +229,16 @@ public class DiagnosticsGenerator {
         transformedModelFile.write(fc);
     }
 
-    public class TransformedModelFile extends FClassDiagnosticsFile {
+    public class TransformedModelFile extends DiagnosticsFile<FClass> {
 
         public TransformedModelFile() {
             super("Transformed model", "transformed", true);
         }
 
         @Override
-        protected void writeContents(FClass fc, CodeStream out) {
+        protected void doWrite(FClass fc, CodeStream out) {
             // Dump model to file
-            out.print("<pre>\n");
-            fc.prettyPrint(out, "");
-            out.print("</pre>\n");
+            fc.htmlPrint(out, "Transformed model");
         }
     }
 
@@ -230,50 +247,72 @@ public class DiagnosticsGenerator {
      */
     public void writeBLTFile(FClass fc) {
         bltFile.write(fc);
+        initBLTFile.write(fc);
     }
 
-    public class BLTFile extends FClassDiagnosticsFile {
+    public class BLTFile extends DiagnosticsFile<FClass> {
 
         public BLTFile() {
-            super("BLT diagnostics", "blt", false);
+            super("BLT for DAE System", "blt", false);
         }
 
         @Override
-        protected void writeContents(FClass fc, CodeStream out) {
-            if (!fc.myOptions().getBooleanOption("equation_sorting"))
-                return;
-            out.print("<h2>BLT for initialization system </h2>\n");
-            for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
-                out.print("<pre>\n");
-                eb.prettyPrint(out);
-                out.print("</pre>\n");
+        protected void doWrite(FClass fc, CodeStream out) {
+            HTMLPrinter p = ASTNode.htmlPrinter;
+            p.startFile(out, title);
+            if (!fc.myOptions().getBooleanOption("equation_sorting")) {
+                out.print("This page is only produced if 'equation_sorting' is set to true!");
+            } else {
+                out.print("<h3> ODE blocks </h3>\n");
+                // Loop over all derivatives
+                for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
+                    p.addLocalObjects(eb.allVariables());
+                    eb.prettyPrintHTML(p, out, "");
+                    p.clearLocalObjects();
+                }
+                out.print("<h3> Real output blocks </h3>\n");
+                for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
+                    p.addLocalObjects(eb.allVariables());
+                    eb.prettyPrintHTML(p, out, "");
+                    p.clearLocalObjects();
+                }
+                out.print("<h3> Integer and boolean output blocks </h3>\n");
+                for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
+                    p.addLocalObjects(eb.allVariables());
+                    eb.prettyPrintHTML(p, out, "");
+                    p.clearLocalObjects();
+                }
+                out.print("<h3> Other output blocks </h3>\n");
+                for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
+                    p.addLocalObjects(eb.allVariables());
+                    eb.prettyPrintHTML(p, out, "");
+                    p.clearLocalObjects();
+                }
             }
-            out.print("<h2>BLT for DAE system </h2>\n");
-            out.print("<h3> ODE blocks </h3>\n");
-            // Loop over all derivatives
-            for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
-                out.print("<pre>\n");
-                eb.prettyPrint(out);
-                out.print("</pre>\n");
+            p.endFile(out);
+        }
+    }
+
+    public class InitBLTFile extends DiagnosticsFile<FClass> {
+        
+        public InitBLTFile() {
+            super("BLT for Initialization System", "initBlt", false);
+        }
+        
+        @Override
+        protected void doWrite(FClass fc, CodeStream out) {
+            HTMLPrinter p = ASTNode.htmlPrinter;
+            p.startFile(out, title);
+            if (!fc.myOptions().getBooleanOption("equation_sorting")) {
+                out.print("This page is only produced if 'equation_sorting' is set to true!");
+            } else {
+                for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
+                    p.addLocalObjects(eb.allVariables());
+                    eb.prettyPrintHTML(p, out, "");
+                    p.clearLocalObjects();
+                }
             }
-            out.print("<h3> Real output blocks </h3>\n");
-            for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
-                out.print("<pre>\n");
-                eb.prettyPrint(out);
-                out.print("</pre>\n");
-            }
-            out.print("<h3> Integer and boolean output blocks </h3>\n");
-            for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
-                out.print("<pre>\n");
-                eb.prettyPrint(out);
-                out.print("</pre>\n");
-            }
-            out.print("<h3> Other output blocks </h3>\n");
-            for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
-                out.print("<pre>\n");
-                eb.prettyPrint(out);
-                out.print("</pre>\n");
-            }
+            p.endFile(out);
         }
     }
 
@@ -353,7 +392,7 @@ public class DiagnosticsGenerator {
         problemsFile.write(newProblems);
     }
 
-    public class ProblemsFile extends DiagnosticsFile<Collection<Problem>> {
+    public class ProblemsFile extends OldDiagnosticsFile<Collection<Problem>> {
 
         private Collection<Problem> problems = new TreeSet<Problem>();
 
@@ -450,6 +489,7 @@ public class DiagnosticsGenerator {
                 transformedModelFile.writeLink(out);
                 aliasFile.writeLink(out, " (" + fc.aliasDiagnosticsShort() + ")");
                 bltFile.writeLink(out);
+                initBLTFile.writeLink(out);
                 bltTableFile.writeLink(out);
                 
                 if (fc.myOptions().getBooleanOption("equation_sorting")) {
@@ -748,7 +788,7 @@ public class DiagnosticsGenerator {
 public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
     Deque<FVariable> orderList = new ArrayDeque<FVariable>();
     for (AbstractEquationBlock aeb : this) {
-        orderList.addAll(aeb.allVariables());
+        orderList.addAll(aeb.diagnostics_generateBLTTable_variables());
     }
     FVariable[] order = orderList.toArray(new FVariable[orderList.size()]);
 
@@ -765,6 +805,19 @@ public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
     }
 
     out.println("</div>");
+}
+
+protected Collection<FVariable> AbstractEquationBlock.diagnostics_generateBLTTable_variables() {
+    return allVariables();
+}
+
+@Override
+protected Collection<FVariable> PrePropagationEquationBlock.diagnostics_generateBLTTable_variables() {
+    Collection<FVariable> variables = new ArrayList<FVariable>();
+    for (AbstractEquationBlock block : solvedBlocks()) {
+        variables.addAll(block.diagnostics_generateBLTTable_variables());
+    }
+    return variables;
 }
 
 protected abstract String AbstractEquationBlock.diagnostics_generateBLTTable_color();
@@ -784,6 +837,10 @@ protected String EquationBlock.diagnostics_generateBLTTable_color() {
     return "#CCCCF0";
 }
 
+protected String PrePropagationEquationBlock.diagnostics_generateBLTTable_color() {
+    return "#EEFF22";
+}
+
 protected String AbstractSubBLTBlock.diagnostics_generateBLTTable_color() {
     return "#FF00FF";
 }
@@ -793,19 +850,32 @@ protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Colle
 public static final int AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE = 15;
 
 public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
+    int start = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
     int numReal = realVariables().size();
     int numNonReal = nonRealVariables().size();
-    int start = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
-    int sizeReal = numReal * DIAGNOSTICS_CELL_SIZE + 1;
+    int sizeFrame;
     int sizeNonReal = (numReal + numNonReal) * DIAGNOSTICS_CELL_SIZE + 1;
-    if (numNonReal > 0)
-        out.formatln("    <div class=\"block\" style=\"background:#F0E7CC;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", start, start, sizeNonReal, sizeNonReal);
+    if (diagnostics_generateBLTTable_printDiscreteFrame()) {
+        sizeFrame = numReal * DIAGNOSTICS_CELL_SIZE + 1;
+        if (numNonReal > 0)
+            out.formatln("    <div class=\"block\" style=\"background:#F0E7CC;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", start, start, sizeNonReal, sizeNonReal);
+    } else {
+        sizeFrame = (numReal + numNonReal) * DIAGNOSTICS_CELL_SIZE + 1;
+    }
     if (numReal > 0)
-        out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, sizeReal, sizeReal);
+        out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, sizeFrame, sizeFrame);
     diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
 }
 
-public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+protected boolean AbstractEquationBlock.diagnostics_generateBLTTable_printDiscreteFrame() {
+    return true;
+}
+
+protected boolean PrePropagationEquationBlock.diagnostics_generateBLTTable_printDiscreteFrame() {
+    return false;
+}
+
+public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     for (FAbstractEquation equation : allEquations()) {
         if (varFilter == EMPTY_VAR_FILTER)
             size = equation.numScalarEquations();
@@ -819,7 +889,7 @@ public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] 
                         || equation.initialParameters().contains(var))
                         && (pos == null || pos == i);
                 if (contains)
-                    out.formatln("    <div class=\"incidence\" style=\"left:%dpx;top:%dpx;z-index:10000;\" title=\"%s&#13;&#13;%s\" onmouseover=\"hightlight(this);\" onmouseout=\"unhighlight(this);\" onclick=\"lockHighlight(this);\"><div>%s</div></div>", tm.getXPos() * DIAGNOSTICS_CELL_SIZE, tm.getYPos() * DIAGNOSTICS_CELL_SIZE, ASTNode.escapeHTML(var.name()), equationStr, diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var, inTearBlock)));
+                    out.formatln("    <div class=\"incidence\" style=\"left:%dpx;top:%dpx;z-index:10000;\" title=\"%s&#13;&#13;%s\" onmouseover=\"hightlight(this);\" onmouseout=\"unhighlight(this);\" onclick=\"lockHighlight(this);\"><div>%s</div></div>", tm.getXPos() * DIAGNOSTICS_CELL_SIZE, tm.getYPos() * DIAGNOSTICS_CELL_SIZE, ASTNode.escapeHTML(var.name()), equationStr, diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var, nested)));
                 tm.newCol();
             }
             tm.newRow();
@@ -839,14 +909,14 @@ private String AbstractEquationBlock.diagnostics_generateBLTTable_solvabilitySym
     throw new IllegalArgumentException("Unsupported solvability type " + s);
 }
 
-public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     int numSolved = realVariables().size() - localUnsolvedVariables().size();
     int solvedStart = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
     int solvedSize = numSolved * DIAGNOSTICS_CELL_SIZE + 1;
     int unsolvedStart = (tm.getYPos() + numSolved) * DIAGNOSTICS_CELL_SIZE;
     int unsolvedSize = localUnsolvedVariables().size() * DIAGNOSTICS_CELL_SIZE + 1;
     int numNonReal = localNonRealVariables().size();
-    if (inTearBlock)
+    if (nested)
         out.formatln("    <div class=\"block\" style=\"background:#F0C7C7;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize + unsolvedSize - 1, solvedSize + unsolvedSize - 1);
     out.formatln("    <div class=\"block\" style=\"background:#F0E4E4;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize, solvedSize);
     out.formatln("    <div class=\"block\" style=\"background:#F0C0C0;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", unsolvedStart, unsolvedStart, unsolvedSize, unsolvedSize);
@@ -859,7 +929,14 @@ public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] orde
     }
 }
 
-public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+public void PrePropagationEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
+    for (AbstractEquationBlock seb : solvedBlocks()) {
+        seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
+    }
+}
+
+
+public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     varFilter = new HashMap<FVariable, Integer>();
     int index = 0;
     for (FVariable var : equation().referencedFVariablesInLHS()) {
@@ -872,10 +949,10 @@ public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariabl
     for (FVariable var : equation().referencedFVariablesInRHS()) {
         varFilter.remove(var);
     }
-    super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+    super.diagnostics_generateBLTTable_rows(order, out, tm, nested, activeVars.size(), varFilter);
 }
 
-public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     varFilter = new HashMap<FVariable, Integer>();
     int index = 0;
     for (FVariable var : equation().referencedFVariablesInLHS()) {
@@ -888,10 +965,10 @@ public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, 
     for (FVariable var : equation().referencedFVariablesInRHS()) {
         varFilter.remove(var);
     }
-    super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+    super.diagnostics_generateBLTTable_rows(order, out, tm, nested, activeVars.size(), varFilter);
 }
 
-public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
+public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
 }
 
 protected static String ASTNode.escapeHTML(Object o) {
@@ -906,5 +983,139 @@ protected static String ASTNode.escapeHTML(String str) {
     str = str.replace(">", "&gt;");
     return str;
 }
+
+}
+
+aspect HTMLMarkupPrinter {
+    public class HTMLPrinter extends Printer {
+        
+        private Set<Object> localObjects = new HashSet<Object>();
+        
+        public HTMLPrinter() {
+            super("&nbsp;&nbsp;");
+        }
+
+        public void print(ASTNode node, CodeStream str, String indent) {
+            String wrapTag = node.htmlPrintWrapTag();
+            String wrapTagClass = node.htmlPrintWrapTagClass();
+            String[][] wrapTagAttributes = node.htmlPrintWrapTagAttributes();
+            if (isLocalObject(node.htmlPrintLocalObject())) {
+                if (wrapTagClass == null) {
+                    wrapTagClass = "localObject";
+                } else {
+                    wrapTagClass += " localObject";
+                }
+            }
+            if (wrapTag == null && (wrapTagClass != null || wrapTagAttributes != null)) {
+                wrapTag = "span";
+            }
+            if (wrapTag != null) {
+                str.format("<%s", wrapTag);
+                if (wrapTagClass != null) {
+                    str.format(" class=\"%s\"", wrapTagClass);
+                }
+                if (wrapTagAttributes != null) {
+                    for (String[] attr : wrapTagAttributes) {
+                        str.format(" %s=\"%s\"", attr[0], attr[1]);
+                    }
+                }
+                str.print(">");
+            }
+            node.htmlPrint(this, str, indent); 
+            if (wrapTag != null) {
+                str.format("</%s>", wrapTag);
+            }
+        }
+
+        public void startFile(CodeStream out, String title) {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<meta charset=\"utf-8\" />");
+            out.formatln("<title>%s</title>", title);
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />");
+            out.println("<script src=\"zepto.min.js\"></script>");
+            out.println("<script src=\"scripts.js\"></script>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<div class=\"wrapper\">");
+            if (title != null) {
+                out.formatln("<h2>%s</h2>", title);
+            }
+            out.setLineEnder("<br />\n");
+        }
+
+        public void endFile(CodeStream out) {
+            out.setLineEnder("\n");
+            out.println("</div>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+
+        public void addLocalObjects(Collection<? extends Object> objects) {
+            localObjects.addAll(objects);
+        }
+
+        public void clearLocalObjects() {
+            localObjects.clear();
+        }
+
+        public boolean isLocalObject(Object o) {
+            return localObjects.contains(o);
+        }
+
+    }
+
+    public static HTMLPrinter ASTNode.htmlPrinter = new HTMLPrinter();
+
+    public void ASTNode.htmlPrint(HTMLPrinter p, CodeStream str, String indent) {
+        prettyPrint(p, str, indent);
+    }
+
+    public void ASTNode.htmlPrint(CodeStream out, String title) {
+        HTMLPrinter p = htmlPrinter;
+        p.startFile(out, title);
+        p.print(this, out, "  ");
+        p.endFile(out);
+    }
+
+    syn String ASTNode.htmlPrintWrapTag() = null;
+    syn String ASTNode.htmlPrintWrapTagClass() = null;
+    syn String[][] ASTNode.htmlPrintWrapTagAttributes() = null;
+    syn Object ASTNode.htmlPrintLocalObject() = this;
+
+    eq FClass.htmlPrintWrapTag() = "div";
+    eq FClass.htmlPrintWrapTagClass() = "fclass";
+
+    eq FIdUseExp.htmlPrintWrapTagClass() {
+        FAbstractVariable fv = myFV();
+        if (fv != null && fv.isFVariable()) {
+            return "varRef " + fv.asFVariable().zVariability();
+        }
+        return null;
+    }
+    eq FIdUseExp.htmlPrintLocalObject() = myFV();
+    eq FIdUseExp.htmlPrintWrapTagAttributes() {
+        FAbstractVariable fv = myFV();
+        if (fv == null || !fv.isFVariable()) {
+            return null;
+        }
+        return new String[][] {new String[] {"data-varRef", fv.name()}};
+    }
+    
+    eq FLitExp.htmlPrintWrapTagClass() = "literal";
+    eq FTimeExp.htmlPrintWrapTagClass() = "timeRef";
+    eq FIfExp.htmlPrintWrapTagClass() = "collapsable";
+    
+    eq FVariable.htmlPrintWrapTagAttributes() {
+        return new String[][] {new String[] {"data-varDecl", name()}};
+    }
+    
+
+    public void AbstractEquationBlock.prettyPrintHTML(HTMLPrinter p, CodeStream str, String indent) {
+        str.print("<div class=\"bltBlock\">");
+        prettyPrint(p, str, indent);
+        str.print("</div>");
+    }
 
 }

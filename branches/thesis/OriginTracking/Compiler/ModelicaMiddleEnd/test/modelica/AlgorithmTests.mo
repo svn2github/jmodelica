@@ -420,9 +420,9 @@ algorithm
  y2[2,2] := temp_2[2,2];
 equation
  x[1,1] = time;
- x[1,2] = 2 .* time;
- x[2,1] = 3 .* time;
- x[2,2] = 4 .* time;
+ x[1,2] = 2 * x[1,1];
+ x[2,1] = 3 * x[1,1];
+ x[2,2] = 4 * x[1,1];
 
 public
  function AlgorithmTests.TempAssign1.f
@@ -481,10 +481,7 @@ model TempAssign2
             description="Scalarizing assignment temp generation",
             flatModel="
 fclass AlgorithmTests.TempAssign2
- Real x[1].a;
  Real x[1].b;
- Real x[2].a;
- Real x[2].b;
  Real y1[1].a;
  Real y1[1].b;
  Real y1[2].a;
@@ -498,12 +495,12 @@ fclass AlgorithmTests.TempAssign2
  Real temp_2[2].a;
  Real temp_2[2].b;
 equation
- ({AlgorithmTests.TempAssign2.R(y1[1].a, y1[1].b), AlgorithmTests.TempAssign2.R(y1[2].a, y1[2].b)}) = AlgorithmTests.TempAssign2.f({AlgorithmTests.TempAssign2.R(x[1].a, x[1].b), AlgorithmTests.TempAssign2.R(x[2].a, x[2].b)});
+ ({AlgorithmTests.TempAssign2.R(y1[1].a, y1[1].b), AlgorithmTests.TempAssign2.R(y1[2].a, y1[2].b)}) = AlgorithmTests.TempAssign2.f({AlgorithmTests.TempAssign2.R(x[1].b, x[1].b), AlgorithmTests.TempAssign2.R(x[1].b, x[1].b)});
 algorithm
- y2[1].a := x[1].a;
+ y2[1].a := x[1].b;
  y2[1].b := x[1].b;
- y2[2].a := x[2].a;
- y2[2].b := x[2].b;
+ y2[2].a := x[1].b;
+ y2[2].b := x[1].b;
  temp_2[1].a := y2[2].a;
  temp_2[1].b := y2[2].b;
  temp_2[2].a := y2[1].a;
@@ -513,10 +510,7 @@ algorithm
  y2[2].a := temp_2[2].a;
  y2[2].b := temp_2[2].b;
 equation
- x[1].a = time;
  x[1].b = time;
- x[2].a = time;
- x[2].b = time;
 
 public
  function AlgorithmTests.TempAssign2.f
@@ -585,10 +579,7 @@ model TempAssign3
             description="Scalarizing assignment temp generation",
             flatModel="
 fclass AlgorithmTests.TempAssign3
- Real x[1].a[1];
  Real x[1].a[2];
- Real x[2].a[1];
- Real x[2].a[2];
  Real y1[1].a[1];
  Real y1[1].a[2];
  Real y1[2].a[1];
@@ -602,12 +593,12 @@ fclass AlgorithmTests.TempAssign3
  Real temp_2[2].a[1];
  Real temp_2[2].a[2];
 equation
- ({AlgorithmTests.TempAssign3.R({y1[1].a[1], y1[1].a[2]}), AlgorithmTests.TempAssign3.R({y1[2].a[1], y1[2].a[2]})}) = AlgorithmTests.TempAssign3.f({AlgorithmTests.TempAssign3.R({x[1].a[1], x[1].a[2]}), AlgorithmTests.TempAssign3.R({x[2].a[1], x[2].a[2]})});
+ ({AlgorithmTests.TempAssign3.R({y1[1].a[1], y1[1].a[2]}), AlgorithmTests.TempAssign3.R({y1[2].a[1], y1[2].a[2]})}) = AlgorithmTests.TempAssign3.f({AlgorithmTests.TempAssign3.R({x[1].a[2], x[1].a[2]}), AlgorithmTests.TempAssign3.R({x[1].a[2], x[1].a[2]})});
 algorithm
- y2[1].a[1] := x[1].a[1];
+ y2[1].a[1] := x[1].a[2];
  y2[1].a[2] := x[1].a[2];
- y2[2].a[1] := x[2].a[1];
- y2[2].a[2] := x[2].a[2];
+ y2[2].a[1] := x[1].a[2];
+ y2[2].a[2] := x[1].a[2];
  temp_2[1].a[1] := y2[2].a[1];
  temp_2[1].a[2] := y2[2].a[2];
  temp_2[2].a[1] := y2[1].a[1];
@@ -617,10 +608,7 @@ algorithm
  y2[2].a[1] := temp_2[2].a[1];
  y2[2].a[2] := temp_2[2].a[2];
 equation
- x[1].a[1] = time;
  x[1].a[2] = time;
- x[2].a[1] = time;
- x[2].a[2] = time;
 
 public
  function AlgorithmTests.TempAssign3.f
@@ -636,6 +624,9 @@ public
    y[i1].a[2] := x[i1].a[2];
   end for;
   t := size(x, 1);
+  for i1 in 1:size(x, 1) loop
+   assert(2 == size(x[i1].a, 1), \"Mismatching sizes in function 'AlgorithmTests.TempAssign3.f', component 'x[i1].a', dimension '1'\");
+  end for;
   init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
   init temp_2 as Integer[max(t, 0)];
   for i1 in 1:max(t, 0) loop
@@ -881,5 +872,35 @@ algorithm
 end AlgorithmTests.UnusedBranch5;
 ")})));
 end UnusedBranch5;
+
+model VariableSubscriptAssign1
+    Real[2,2] y;
+algorithm
+    y[integer(time),:] := {time,time+1};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableSubscriptAssign1",
+            description="",
+            flatModel="
+fclass AlgorithmTests.VariableSubscriptAssign1
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ discrete Integer temp_1;
+ discrete Integer temp_2;
+initial equation 
+ pre(temp_1) = 0;
+ pre(temp_2) = 0;
+algorithm
+ temp_2 := if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then integer(time) else pre(temp_2);
+ ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_2,1] := time;
+ temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+ ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_1,2] := time + 1;
+end AlgorithmTests.VariableSubscriptAssign1;
+")})));
+end VariableSubscriptAssign1;
+
 
 end AlgorithmTests;

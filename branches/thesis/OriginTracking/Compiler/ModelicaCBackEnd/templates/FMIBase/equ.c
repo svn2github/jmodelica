@@ -35,7 +35,5 @@ int model_ode_derivatives(jmi_t* jmi) {
 }
 
 int model_ode_event_indicators(jmi_t* jmi, jmi_real_t** res) {
-    int ef = 0;
 $C_DAE_event_indicator_residuals$
-    return ef;
 }

@@ -50,8 +50,7 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/jm_tests.in $(top_srcdir)/Python/jm_ipython.sh.in \
-	$(top_srcdir)/Python/jm_python.sh.in \
+	$(srcdir)/jm_tests.in \
 	$(top_srcdir)/Python/src/required_defaults.py.in \
 	$(top_srcdir)/configure INSTALL config.guess config.sub \
 	depcomp install-sh ltmain.sh missing
@@ -66,8 +65,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = Python/jm_ipython.sh Python/jm_python.sh jm_tests \
-	Python/src/required_defaults.py
+CONFIG_CLEAN_FILES = jm_tests Python/src/required_defaults.py
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -287,7 +285,7 @@ ACLOCAL_AMFLAGS = -I m4
 # EXTRA_DIST =
 
 # SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
-SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python/src/tests_jmodelica/files/Modelica/Resources
+SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python
 assimulo_install_dir = $(abs_builddir)/Assimulo_install
 pymodelica_install_dir = $(abs_builddir)/pymodelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
@@ -389,10 +387,6 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-Python/jm_ipython.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_ipython.sh.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-Python/jm_python.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_python.sh.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 jm_tests: $(top_builddir)/config.status $(srcdir)/jm_tests.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Python/src/required_defaults.py: $(top_builddir)/config.status $(top_srcdir)/Python/src/required_defaults.py.in

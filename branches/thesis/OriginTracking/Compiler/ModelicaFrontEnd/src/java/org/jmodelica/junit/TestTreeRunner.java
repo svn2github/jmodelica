@@ -63,10 +63,15 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         caseDesc = new HashMap<String,Description>();
         runners = new HashMap<String,TestTreeRunner>();
         children = new ArrayList<GenericTestTreeNode>();
+        int i = 0;
         for (GenericTestTreeNode test : tree) {
+            i++;
             Description chDesc = null;
             GenericTestTreeNode subTest = null;
             String testName = test.getName();
+            if (testName == null) {
+                testName = String.format("[%d]", i);
+            }
             if (test instanceof TestTree) {
                 TestTree subTree = (TestTree) test;
                 if (subTree.numChildren() == 1) {

@@ -158,6 +158,8 @@ aspect FlatTypeCheck {
                     "The binding expression of the variable %s does not match the declared type of the variable");
     public static final SimpleProblemProducer ASTNode.ASSUMING_EACH =
             new SimpleWarningProducer("ASSUMING_EACH", ProblemKind.SEMANTIC, "Assuming 'each' for the modification '%s'");
+    public static final SimpleProblemProducer ASTNode.IGNORING_EACH =
+            new SimpleWarningProducer("IGNORING_EACH", ProblemKind.SEMANTIC, "Ignoring erroneous 'each' for the modification '%s'");
     public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_DECLARATION =
             new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_DECLARATION", ProblemKind.SEMANTIC,
                     "Array size mismatch in declaration of %s, size of declaration is %s and size of binding expression is %s");
@@ -198,10 +200,13 @@ aspect FlatTypeCheck {
             FType actualBT = bexp.type();
             if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
-                if (needsEach != null) {
-                    ASSUMING_EACH.invoke(needsEach, needsEach);
-                } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
                     BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
+                } else if (needsEach != null) {
+                    ASSUMING_EACH.invoke(needsEach, needsEach);
+                } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
+                    InstModification parIM = ivm.parentInstModification();
+                    IGNORING_EACH.invoke(parIM, parIM);
                 } else {
                     ErrorProducerUnlessDisabled reporter;
                     if (ivm.myInstNode() == this) {
@@ -235,6 +240,15 @@ aspect FlatTypeCheck {
         super.typeCheck(checkType);
     }
 
+    inh InstModification InstModification.parentInstModification();
+    eq InstComponentModification.getChild().parentInstModification()             = this;
+    eq InstNode.getElementInstModification(int i).parentInstModification()       = getElementInstModification(i);
+    eq InstComponentDecl.getInstModification().parentInstModification()          = getInstModification();
+    eq InstComponentDecl.getAnnotation().parentInstModification()                = getAnnotation();
+    eq InstClassDecl.getClassAnnotation().parentInstModification()               = getClassAnnotation();
+    eq InstConstraining.getInstClassModification().parentInstModification()      = getInstClassModification();
+    eq InstRecordConstructor.getInstModification(int i).parentInstModification() = getInstModification(i);
+
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
@@ -266,12 +280,15 @@ aspect FlatTypeCheck {
             FExp valMod = getInstModification().instValueMod();
             if (!type().isUnknown() && !valMod.type().isUnknown()) {
                 Size attrSize = expectedSize();
+                Size modSize = valMod.size();
                 if (!type().typeCompatible(valMod.type().scalarType())) {
                     TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION.invoke(this, name(), owner.kindDescription(), owner.name());
-                } else if (!attrSize.equivalent(valMod.size(), true)) {
-                    InstModification im = findModificationLackingEach(valMod.size());
+                } else if (!attrSize.equivalent(modSize, true)) {
+                    InstModification im = findModificationLackingEach(modSize);
                     if (im != null) {
                         ASSUMING_EACH.invoke(im, im);
+                    } else if (expectedSizeNoEach().equivalent(modSize, false)) {
+                        IGNORING_EACH.invoke(this, this);
                     } else {
                         ErrorProducerUnlessDisabled producer;
                         if (hasEach()) {
@@ -280,7 +297,7 @@ aspect FlatTypeCheck {
                             producer = ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION;
                         }
                         producer.invokeWithCondition(this, attrSize.ndims() != valMod.ndims(), name(),
-                                owner.kindDescription(), owner.name(), attrSize, name(), valMod.size());
+                                owner.kindDescription(), owner.name(), attrSize, name(), modSize);
                     }
                 } else {
                     if (name().equals("nominal")) {
@@ -411,28 +428,56 @@ aspect FlatTypeCheck {
                 if (exp.type().isUnknown())
                     return;
             typeError(checkType);
-        } else if (!inFunction()) {
+        } else {
             size().markAsStructuralParameter(checkType, this);
         }
-    }
-    
-    protected static boolean FExp.isUnknownFExp(ASTNode n) {
-        return n instanceof FExp && ((FExp) n).type().isUnknown();
     }
     
     public void Size.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {}
     
     public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {
-        for (int i = 0; i < ndims(); i++) {
-            FExp exp = exps[i];
-            if (exp != null) {
-                exp.markAsStructuralParameter(checkType);
-                if (!exp.variability().parameterOrLess()) {
-                    ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
+        if (src.errorCheckUnknownSize()) {
+            for (int i = 0; i < ndims(); i++) {
+                FExp exp = exps[i];
+                if (exp != null) {
+                    exp.markAsStructuralParameter(checkType);
+                    if (!exp.variability().parameterOrLess()) {
+                        ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
+                    }
                 }
             }
         }
     }
+    
+    syn boolean FExp.errorCheckUnknownSize() = !inFunction() && !allowUnknownSize();
+    
+    syn boolean BaseNode.allowUnknownSize()    = false;
+    eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
+    eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
+    
+    inh boolean BaseNode.inAllowUnknownSize();
+    eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
+    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().isExternalFunction();
+    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().isExternalFunction();
+    
+    interface CommonCallable { public boolean isExternalFunction(); }
+    syn boolean InstPartialFunction.isExternalFunction() = false;
+    syn boolean FFunctionVariable.isExternalFunction()   = false;
+    
+    syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
+    syn boolean FFunctionDecl.isExternalFunction() {
+        for (FStatement stmt : getFAlgorithm().getFStatements()) {
+            if (stmt.isExternalStatement()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    syn boolean FStatement.isExternalStatement() = false;
+    eq FExternalStmt.isExternalStatement()       = true;
     
     public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
             new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
@@ -685,8 +730,6 @@ aspect FlatTypeCheck {
             if ((inner == 0 || inner == Size.UNKNOWN) && type().matchOverloadedZero() == null) 
                 error("Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined");
         }
-        getLeft().size().forceVariability(checkType, fStructParameter());
-        getRight().size().forceVariability(checkType, fStructParameter());
         super.typeCheck(checkType);
     }
 
@@ -734,15 +777,79 @@ aspect FlatTypeCheck {
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
-  
-  
-  
-  public void InstForIndex.typeCheck(ErrorCheckType checkType) {
-	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
-		  error("The expression of for index " + name() + " must be a vector expression: " + 
-				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
-  }
-  
+
+
+
+    public void InstForIndexWithExp.typeCheck(ErrorCheckType checkType) {
+        if (!getFExp().type().isUnknown() && getFExp().ndims() != 1)
+            error("The expression of for index " + name() + " must be a vector expression: " + 
+                    getFExp() + " has " + getFExp().ndims() + " dimension(s)");
+    }
+
+    public void InstForIndexNoExp.typeCheck(ErrorCheckType checkType) {
+        hasFExp(); // Force eval of NTA, thus checking if a consistent range can be computed
+    }
+
+    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NON_INTEGER =
+            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NON_INTEGER", ProblemKind.COMPLIANCE, 
+                    "Non-integer for iteration range not supported");
+
+    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_INCONSISTENT =
+            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_INCONSISTENT", ProblemKind.SEMANTIC, 
+                    "For index with implicit iteration range used for inconsistent sizes, here used for size %s and earlier for size %s");
+
+    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NOT_USED =
+            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NOT_USED", ProblemKind.SEMANTIC, 
+                    "For index with implicit iteration range must be used as array index");
+
+    // TODO: handle other index types than integer (see #3597)
+    syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
+        Size size = null;
+        for (FExpSubscript use : mySubscriptUses()) {
+            Size useSize = use.mySize();
+            if (!use.myIndexType().isInteger()) {
+                IMPLICIT_FOR_RANGE_NON_INTEGER.invoke(use);
+            }
+            if (size == null) {
+                size = useSize;
+            } else if (!size.equivalent(useSize, true)) {
+                IMPLICIT_FOR_RANGE_INCONSISTENT.invoke(use, useSize, size);
+            }
+        }
+        if (size == null) {
+            IMPLICIT_FOR_RANGE_NOT_USED.invoke(this);
+            return new Opt();
+        } else {
+            return new Opt(size.createRangeExp(0));
+        }
+    }
+
+    syn lazy Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses() = mySubscriptUses(name());
+
+    inh Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses(String name);
+    eq InstForClauseE.getInstForIndex(int i).mySubscriptUses(String name) = collectSubscriptUses(name);
+    eq InstForStmt.getInstForIndex(int i).mySubscriptUses(String name)    = collectSubscriptUses(name);
+    eq FIterExp.getForIndex(int i).mySubscriptUses(String name)           = collectSubscriptUses(name);
+
+    public Collection<FExpSubscript> ASTNode.collectSubscriptUses(String name) {
+        Collection<FExpSubscript> nodes = new ArrayList<FExpSubscript>();
+        collectSubscriptUses(name, nodes);
+        return nodes;
+    }
+
+    public void ASTNode.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
+        for (ASTNode n : this) {
+            n.collectSubscriptUses(name, nodes);
+        }
+    }
+
+    public void FExpSubscript.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
+        if (getFExp().isIdentifier(name)) {
+            nodes.add(this);
+        }
+        super.collectSubscriptUses(name, nodes);
+    }
+
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
@@ -771,7 +878,7 @@ aspect FlatTypeCheck {
         } else if (!inFunction()) { 
               if (!getFExp().variability().fixedParameterOrLess()) {
                 warning("Variable array index in equation can result in slow simulation time");
-            } else if (!reportedOutOfBound && !inUnknownAccess()) {
+              } else if (!reportedOutOfBound && !inUnknownAccess() && !mySize().isUnknown()) {
                 // Check array bounds
                 // TODO: Perform bounds check in functions if index has parameter variability or lower?
                 try {
@@ -855,12 +962,6 @@ aspect FlatTypeCheck {
               return false;
       return true;
   }
-  
-  
-  public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
-	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
-  }
-  
 
   public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
       FType left = getLeft().type();
@@ -1106,21 +1207,19 @@ aspect FlatTypeCheck {
     public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
         if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall()) {
             error("Function " + getName().name() + "() has no outputs, but is used in expression");
-        } else if (!isFunctionCallClause() && !inFunction() && size().isUnknown()) {
+        } else if (!isFunctionCallClause() && size().isUnknown() && errorCheckUnknownSize()) {
             CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT.invoke(this, expOutput().name());
         }
         if (myCallOutputs().size() < myLefts().size()) {
             error("Too many components assigned from function call: " + getName().name() + 
                     "() has " + myCallOutputs().size() + " output(s)");
         }
-        if (!inFunction()) {
-            if (isFunctionCallClause()) {
-                for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
-                    sizeOfOutput(i).markAsStructuralParameter(checkType, this);
-                }
-            } else {
-                size().markAsStructuralParameter(checkType, this);
+        if (isFunctionCallClause()) {
+            for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
+                sizeOfOutput(i).markAsStructuralParameter(checkType, this);
             }
+        } else {
+            size().markAsStructuralParameter(checkType, this);
         }
     }
   
@@ -1135,7 +1234,7 @@ aspect FlatTypeCheck {
                 FType outType = type();
                 if (use.isForIndex()) {
                     error("Can not assign a value to a for loop index");
-                } else if (outType.size().isUnknown() && !inFunction()) {
+                } else if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
                     error(functionCallDecription() + ": could not evaluate array size of output " + 
                             myOutput().name());
                 } else if (!useType.typeCompatible(outType, true)) {
@@ -1169,7 +1268,7 @@ aspect FlatTypeCheck {
                         boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
                     else if (isDestructorArgument())
                         boundType = boundType.sizedType(type.size());
-                    typeOk = boundType.typeCompatible(type, true);
+                    typeOk = boundType.typeCompatible(type, true) || lockBranch(checkType);
                 }
             } else {
                 typeOk = argumentTypeValid(type);
@@ -1228,72 +1327,125 @@ aspect FlatTypeCheck {
     eq InstNamedArgument.argumentDesc()      = "named argument " + getName();
 
   public void InstAccess.typeCheck(ErrorCheckType checkType) {
-//	  if (getTopInstAccess() == this && !type().isUnknown()) {
-		  // TODO: if this is a slice, check that all branches are of equal size
-//	  }
+      if (myInstComponentDecl().size().isUndefined() && myInstComponentDecl().inFunction() && 
+              !myInstComponentDecl().isInput() && !checkType.allowIncompleteSizes()) {
+          compliance("Using variables with undefined size is not supported");
+      }
   }
   
-  public void InstDot.typeCheck(ErrorCheckType checkType) {
-	  // Check for accesses to non-constant component in class
-	  int n = getNumInstAccess();
-	  for (int i = 0; i < n - 1; i++)
-		  getInstAccess(i).checkAccessCompInClassLeft(getInstAccess(i + 1), checkType);
-	  super.typeCheck(checkType);
+  public boolean Size.isUndefined() {
+      for (int i = 0; i < ndims(); i++) {
+          if (size[i] == Size.UNKNOWN) {
+              return true;
+          }
+      }
+      return false;
   }
-  
-  public void InstAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {}
-  
-  public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
-	  right.checkAccessCompInClassRight(myInstClassDecl(), checkType);
+
+  public boolean MutableSize.isUndefined() {
+      for (int i = 0; i < ndims(); i++) {
+          if (size[i] == Size.UNKNOWN && (exps[i] == null || exps[i] instanceof FColonSizeExp)) {
+              return true;
+          }
+      }
+      return false;
   }
-  
-  public void InstComponentAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
-	  if (myInstComponentDecl().isPrimitive()) {
-		  InstAccess top = getTopInstAccess();
-		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
-	  }
-  }
-  
-  public void InstComponentArrayAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
-	  if (myInstComponentDecl().isPrimitive()) {
-		  InstAccess top = getTopInstAccess();
-		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
-	  }
-  }
-  
-  public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {}
-  
-  public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {
-	  String type = null;
-	  if (icd.extendsEnum()) {
-		  if (!myInstComponentDecl().isEnumLiteral())
-			  type = "attribute of primitive with dot notation";
-	  } else if (icd.isPackage()) {
-		  icd.checkRestriction(checkType);
-	  } else if (!icd.isOkPackage()) {
-		  type = "component in non-package class";
-	  }
-	  if (type != null) {
-		  InstAccess top = getTopInstAccess();
-		  top.error("Can not access " + type + ": " + top.name());
-	  }
-  }
-  
-  public void InstComponentArrayAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {
-	  String type = null;
-	  if (icd.extendsEnum()) {
-		  if (!myInstComponentDecl().isEnumLiteral())
-			  type = "attribute of primitive with dot notation";
-	  } else if (icd.isPackage()) {
-		  icd.checkRestriction(checkType);
-	  } else if (!icd.isOkPackage()) {
-		  type = "component in non-package class";
-	  }
-	  if (type != null) {
-		  InstAccess top = getTopInstAccess();
-		  top.error("Can not access " + type + ": " + top.name());
-	  }
-  }
+
+    public static final SimpleProblemProducer ASTNode.ACCESS_TO_CLASS_THROUGH_COMPONENT = 
+            new SimpleErrorProducer("ACCESS_TO_CLASS_THROUGH_COMPONENT", ProblemKind.SEMANTIC,
+                    "Can not access non-function class through component access: '%s'");
+    public static final SimpleProblemProducer ASTNode.ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS = 
+            new SimpleErrorProducer("ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS", ProblemKind.SEMANTIC,
+                    "Can not access function through component unless only the first part of the name is a component: '%s'");
+    public static final SimpleProblemProducer ASTNode.ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT = 
+            new SimpleErrorProducer("ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT", ProblemKind.SEMANTIC,
+                    "Can not access function through array component access: '%s'");
+
+    public void InstDot.typeCheck(ErrorCheckType checkType) {
+        // Check for accesses to component in class or class in component
+        int n = getNumInstAccess();
+        for (int i = 0; i < n - 1; i++)
+            getInstAccess(i).checkMixedAccessLeft(getInstAccess(i + 1), this, checkType, i, n);
+        super.typeCheck(checkType);
+    }
+
+    public void InstAccess.checkMixedAccessLeft(
+            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {}
+
+    public void InstClassAccess.checkMixedAccessLeft(
+            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        right.checkMixedAccessRight(myInstClassDecl(), top, checkType, i, n);
+    }
+
+    public void InstComponentAccess.checkMixedAccessLeft(
+            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        right.checkMixedAccessRight(myInstComponentDecl(), top, checkType, isArray(), i, n);
+    }
+
+    public void InstComponentArrayAccess.checkMixedAccessLeft(
+            InstAccess right, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        right.checkMixedAccessRight(myInstComponentDecl(), top, checkType, true, i, n);
+    }
+
+    public void InstAccess.checkMixedAccessRight(
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {}
+
+    public void InstComponentAccess.checkMixedAccessRight(
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, i, n);
+    }
+
+    public void InstComponentArrayAccess.checkMixedAccessRight(
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, i, n);
+    }
+
+    public void InstAccess.checkMixedAccessRightForComponent(
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        String type = null;
+        if (left.extendsEnum()) {
+            if (!myInstComponentDecl().isEnumLiteral())
+                type = "attribute of primitive with dot notation";
+        } else if (left.isPackage()) {
+            left.checkRestriction(checkType);
+        } else if (!left.isOkPackage()) {
+            type = "component in non-package class";
+        }
+        if (type != null) {
+            top.error("Can not access " + type + ": " + top.name());
+        }
+    }
+
+    public void InstAccess.checkMixedAccessRight(
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {}
+
+    public void InstClassAccess.checkMixedAccessRight(
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        if (!top.myInstClassDecl().isFunction()) {
+            ACCESS_TO_CLASS_THROUGH_COMPONENT.invoke(top, top);
+        } else if (i != 0) {
+            ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS.invoke(top, top);
+        } else if (array) {
+            ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT.invoke(top, top);
+         }
+    }
+
+    public void InstComponentAccess.checkMixedAccessRight(
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, array, i, n);
+    }
+
+    public void InstComponentArrayAccess.checkMixedAccessRight(
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, array, i, n);
+    }
+
+    public void InstAccess.checkMixedAccessRightForComponent(
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        if (left.isPrimitive()) {
+            top.error("Can not access attribute of primitive with dot notation: " + top.name());
+        }
+    }
 
     /**
      * Check if the type defined for this argument in the built-in function list 

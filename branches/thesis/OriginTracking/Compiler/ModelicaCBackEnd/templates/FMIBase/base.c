@@ -108,7 +108,7 @@ $C_ode_guards$
     return 0;
 }
 
-static int model_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
+static int model_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* nextTimeEvent) {
 $C_ode_time_events$
     return 0;
 }

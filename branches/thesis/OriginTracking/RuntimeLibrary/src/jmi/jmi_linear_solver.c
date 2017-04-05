@@ -22,17 +22,16 @@
 #include "jmi_linear_solver.h"
 #include "jmi_block_solver_impl.h"
 #include "jmi_log.h"
+#include <stdint.h>
+
 
 #define SMALL 1e-15
 #define THRESHOLD 1e-15
 
 int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver= (jmi_linear_solver_t*)calloc(1,sizeof(jmi_linear_solver_t));
-/*    jmi_t* jmi = block->jmi;
-    int i = 0;
-    int j = 0; */
+
     int n_x = block->n;
-    int info = 0;
     int i;
     
     if (!solver) return -1;
@@ -65,9 +64,12 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     for (i=0; i<n_x; i++) {
         solver->zero_vector[i] = 0.0;
     }
+    
+    solver->Jsp = NULL;
 
     *solver_ptr = solver;
-    return info==0? 0: -1;
+    
+    return 0;
 }
 
 static int jmi_linear_find_dependent_set(jmi_block_solver_t * block) {
@@ -91,7 +93,7 @@ static int jmi_linear_find_dependent_set(jmi_block_solver_t * block) {
               solver->dgesdd_work, &solver->dgesdd_lwork, solver->dgesdd_iwork, &info);
               
     if(info != 0) {
-        jmi_log_node(block->log, logError, "Error", "DGESDD failed to compute the SVD in <block: %d> with error code <error: %s>", block->label, info);
+        jmi_log_node(block->log, logError, "Error", "DGESDD failed to compute the SVD in <block: %s> with error code <error: %s>", block->label, info);
         return 0;
     }
     
@@ -173,7 +175,7 @@ static int jmi_linear_find_active_set(jmi_block_solver_t * block ) {
     if(block->check_discrete_variables_change && solver->update_active_set == 1) {
         
         for (i = 0; i < n_x-1; i++) {
-            set = solver->dependent_set[(n_x-1)*n_x+i];
+            set = (int)solver->dependent_set[(n_x-1)*n_x+i];
             nbr_active = 0;
             
             if (set > 0) {
@@ -267,20 +269,32 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     jmi_linear_solver_t* solver = block->solver;
     iwork = solver->iwork;
     
-    /* If there are no equations, evalute and return. */
+    /* If there are no equations, evaluate and return. */
     if (n_x == 0) { 
         info = block->F(block->problem_data,solver->zero_vector, solver->rhs, JMI_BLOCK_EVALUATE);
         return 0; 
     }
     
-    /* If needed, reevaluate jacobian. */
+    /* If needed, re-evaluate jacobian. */
     if (solver->cached_jacobian != 1) {
         int j = 0;
           /*
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        info = block->F(block->problem_data,NULL,block->J->data,JMI_BLOCK_EVALUATE_JACOBIAN);
+        if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) { 
+            if(block->init) {  
+                info = jmi_linear_solver_sparse_setup(block);  
+                if (info) { 
+                    jmi_log_node(block->log, logError, "JacobianSparseSetup", "Failed to setup the sparse Jacobian for <block: %s>",  
+                            block->label); 
+                    return -1; 
+                } 
+            } 
+            info = jmi_linear_solver_sparse_compute_jacobian(block); 
+        } else  { 
+            info = block->F(block->problem_data,NULL,block->J->data,JMI_BLOCK_EVALUATE_JACOBIAN); 
+        } 
         
         jmi_linear_solver_employ_variable_scaling(block, block->J->data);
         
@@ -296,6 +310,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             }
             return -1;
         }
+
         if((n_x>1)  && block->options->use_jacobian_equilibration_flag) {
             double rowcnd, colcnd, amax;
             dgeequ_(&n_x, &n_x, solver->factorization, &n_x, solver->rScale, solver->cScale, 
@@ -359,9 +374,16 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* Compute right hand side at initial x*/ 
     if (solver->singular_jacobian == 1) {
         /* In case of singular system, use the last point in the calculation of the b-vector */
+        if (jmi_block_solver_use_save_restore_state_behaviour(block)) {
+            for (i = 0; i < block->n; i++) { block->x[i] = block->last_accepted_x[i]; }
+        }
         info = block->F(block->problem_data,block->x, solver->rhs, JMI_BLOCK_EVALUATE);
     } else {
+        /* Ignore bounds when calculating RHS with zero vector*/
+        int current_enforce_bounds_flag = block->options->enforce_bounds_flag;;
+        block->options->enforce_bounds_flag = FALSE;
         info = block->F(block->problem_data,solver->zero_vector, solver->rhs, JMI_BLOCK_EVALUATE);
+        block->options->enforce_bounds_flag = current_enforce_bounds_flag;
     }
     if(info) {
         /* Close the LinearSolve log node and generate the Error/Warning node and return. */
@@ -425,7 +447,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         }
         
         if(info != 0) {
-            jmi_log_node(block->log, logError, "Error", "DGELSS failed to solve the linear system in <block: %d> with error code <error: %s>", block->label, info);
+            jmi_log_node(block->log, logError, "Error", "DGELSS failed to solve the linear system in <block: %s> with error code <error: %s>", block->label, info);
             return -1;
         }
         
@@ -444,7 +466,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     
     if(info) {
         /* can only be "bad param" -> internal error */
-        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d> with <error_code: %s>", block->label, info);
+        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %s> with <error_code: %s>", block->label, info);
         return -1;
     }
     
@@ -509,18 +531,443 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
 
     }
 
-    return info==0? 0: -1;
+    return info==0 ? 0: -1;
+}
+
+int jmi_linear_solver_csc_to_dense(const jmi_matrix_sparse_csc_t *A, double *x) {
+    int col, p;
+
+    for (col = 0 ; col < A->nbr_cols ; col++) {
+        for (p = A->col_ptrs[col] ; p < A->col_ptrs[col+1] ; p++) {
+            x[A->nbr_cols*col+A->row_ind[p]] = A->x[p];
+        }
+    }
+    return 0;
+}
+
+
+static int jmi_linear_solver_sparse_compute_sparsity_backsolve_dfs(const jmi_matrix_sparse_csc_t *L, jmi_int_t *nz_pattern, jmi_int_t col, jmi_int_t* work, jmi_int_t* nnz) {
+    jmi_int_t L_p;
+    nz_pattern[nnz[0]] = col;
+    work[col] = col;
+    nnz[0] = nnz[0] + 1;
+    
+    for (L_p = L->col_ptrs[col]; L_p < L->col_ptrs[col+1]; L_p++) {
+        if (work[L->row_ind[L_p]] == -1) {
+            jmi_linear_solver_sparse_compute_sparsity_backsolve_dfs(L, nz_pattern, L->row_ind[L_p], work, nnz);
+        }
+    }
+    return 0;
+}
+
+/* L X = B */
+static int jmi_linear_solver_sparse_compute_sparsity_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t col, jmi_int_t* work) {
+    jmi_int_t B_p;
+    jmi_int_t nnz = 0;
+    
+    memset(work, -1, sizeof(jmi_int_t)*B->nbr_rows);
+    
+    for (B_p = B->col_ptrs[col]; B_p < B->col_ptrs[col+1]; B_p++) {
+        if (work[B->row_ind[B_p]] == -1) {
+            jmi_linear_solver_sparse_compute_sparsity_backsolve_dfs(L, nz_pattern, B->row_ind[B_p], work, &nnz);
+        }
+    }
+    nz_pattern[L->nbr_cols] = nnz;
+    
+    return 0;
+}
+
+/* L (sparse, tringular) x (sparse) = B (sparse) */
+int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work) {
+    jmi_int_t i, B_p;
+
+    /* Copy the right-hand side into the work vector */
+    for (B_p = B->col_ptrs[col]; B_p < B->col_ptrs[col+1]; B_p++) {
+        work[B->row_ind[B_p]] = B->x[B_p];
+    }
+    
+    /* Perform the backsolve */
+    for (i = 0; i < nz_size; i++) {
+        jmi_int_t col_L = nz_pattern[i];
+        jmi_int_t L_p   = L->col_ptrs[col_L];
+        double val;
+        
+        /* if (work[col_L] == 0.0) { continue; } */
+        
+        work[col_L] /= L->x[L_p++];
+        val = work[col_L];
+
+        for (; L_p < L->col_ptrs[col_L+1]; L_p++) {
+            work[L->row_ind[L_p]] -= L->x[L_p]*val; 
+        }
+    }
+    
+    return 0;
+}
+
+/* C (dense) += A (sparse) */
+int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A, double *C) {
+    jmi_int_t col, p;
+
+    for (col = 0 ; col < A->nbr_cols ; col++) {
+        jmi_int_t col_ind = A->nbr_cols*col;
+        for (p = A->col_ptrs[col]; p < A->col_ptrs[col+1]; p++) {
+            C[col_ind+A->row_ind[p]] += A->x[p];
+        }
+    }
+    return 0;
+}
+
+/* C (dense) = -A (sparse)*B (sparse) */
+int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C) {
+    jmi_int_t B_col;
+
+    for (B_col = 0; B_col < B->nbr_cols; B_col++) {
+        jmi_linear_solver_sparse_multiply_column(A, B, B_col, C);
+    }
+    
+    return 0;
+}
+
+/* C (dense) = -A (sparse)*B(:,col) (sparse) */
+int jmi_linear_solver_sparse_multiply_column(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, jmi_int_t B_col, double *C) {
+    jmi_int_t B_p, p;
+    jmi_int_t col_ind = A->nbr_rows*B_col;
+
+    for (B_p = B->col_ptrs[B_col]; B_p < B->col_ptrs[B_col + 1]; B_p++) {
+        double val = B->x[B_p];
+        jmi_int_t col = B->row_ind[B_p];
+
+        for (p = A->col_ptrs[col]; p < A->col_ptrs[col + 1]; p++) {
+            C[col_ind + A->row_ind[p]] -= A->x[p] * val;
+        }
+    }
+    return 0;
+}
+
+int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
+    int info = 0;
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp = solver->Jsp;
+
+    if(!(block->Jacobian)) {
+        jmi_log_node(block->log, logError, "MissingJacobian", "The method to compute the Jacobian is missing in <block: %s>.", block->label);
+        return -1;
+    }
+
+    if (Jsp->L != NULL) {
+        info |= block->Jacobian(block->problem_data,NULL,&(Jsp->L->x),  JMI_BLOCK_JACOBIAN_EVALUATE_L);
+        info |= block->Jacobian(block->problem_data,NULL,&(Jsp->A12->x),JMI_BLOCK_JACOBIAN_EVALUATE_A12);
+        info |= block->Jacobian(block->problem_data,NULL,&(Jsp->A21->x),JMI_BLOCK_JACOBIAN_EVALUATE_A21);
+    }
+    info |= block->Jacobian(block->problem_data,NULL,&(Jsp->A22->x),JMI_BLOCK_JACOBIAN_EVALUATE_A22);
+    if (info) { 
+        jmi_log_node(block->log, logError, "Jacobian", "Failed to evaluate the sparse Jacobian in <block: %s>.", block->label);
+        return info; 
+    }
+
+    /* A22 - A21L^(-1)A12 */
+    /* M1 = L^(-1)A12 */
+    /* M2 = A21L^(-1)A12 */
+    /* M3 = A22 - A21L^(-1)A12 */
+    
+    /* Compute L^(-1) A12 */
+    if (Jsp->L != NULL ) {
+        jmi_int_t col;
+
+        memset(block->J->data, 0, sizeof(double)*block->n*block->n);
+        
+        {
+            jmi_int_t tid = 0;
+            double *work;
+            work = Jsp->work_x[tid];
+
+            for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+                jmi_int_t i;
+                jmi_int_t offset = Jsp->nz_offsets[col];
+
+                jmi_linear_solver_sparse_backsolve(Jsp->L, Jsp->A12, Jsp->nz_patterns[col], Jsp->nz_sizes[col], col, work);
+            
+                for (i = 0; i < Jsp->nz_sizes[col]; i++) {
+                    Jsp->M1->x[offset+i] = work[Jsp->nz_patterns[col][i]];
+                    work[Jsp->nz_patterns[col][i]] = 0.0; /* Reset work vector */
+                }
+
+                /* Compute A21L^(-1)A12 */
+                jmi_linear_solver_sparse_multiply_column(Jsp->A21, Jsp->M1, col, block->J->data);
+            }
+        }
+        
+        
+        /* Compute A22 - A21L^(-1)A12 */
+        jmi_linear_solver_sparse_add_inplace(Jsp->A22, block->J->data);
+    } else {
+        /* Convert back to dense */
+        jmi_linear_solver_csc_to_dense(Jsp->A22, block->J->data);
+    }
+
+    return info;
+}
+
+
+static int compare( const void* a, const void* b)
+{
+     jmi_int_t int_a = * ( (jmi_int_t*) a );
+     jmi_int_t int_b = * ( (jmi_int_t*) b );
+
+     if ( int_a == int_b ) return 0;
+     else if ( int_a < int_b ) return -1;
+     else return 1;
+}
+
+int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp;
+    jmi_int_t col, i, j, nzmax = 0;
+    int ret;
+    
+    solver->Jsp = (jmi_linear_solver_sparse_t*)calloc(1, sizeof(jmi_linear_solver_sparse_t));
+    solver->Jsp->L = NULL; solver->Jsp->A12 = NULL; solver->Jsp->A21 = NULL; solver->Jsp->A22 = NULL;
+    solver->Jsp->M1 = NULL;
+    solver->Jsp->work_x = NULL;
+    Jsp = solver->Jsp;
+    
+    ret = jmi_linear_solver_init_sparse_matrices(block);
+    if (ret) { return ret; }
+    
+    /* Check if torn */
+    if (Jsp->L != NULL) {
+        jmi_int_t *work_nz_pattern;
+        jmi_int_t *work;
+        jmi_int_t max_dim = Jsp->L->nbr_cols > Jsp->A22->nbr_cols ? Jsp->L->nbr_cols : Jsp->A22->nbr_cols;
+        jmi_int_t max_threads = 1;
+        
+        work_nz_pattern   = (jmi_int_t*)calloc(Jsp->L->nbr_cols+1, sizeof(jmi_int_t));
+        work              = (jmi_int_t*)calloc(Jsp->L->nbr_cols, sizeof(jmi_int_t));
+        
+        Jsp->nz_offsets   = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
+        Jsp->nz_sizes     = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
+        Jsp->nz_patterns  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
+
+        
+        /* Allocate work arrays for the different threads */
+        Jsp->max_threads = max_threads;
+        Jsp->work_x       = (double**)calloc(max_threads, sizeof(double*));
+        for (col = 0; col < max_threads; col++) {
+            Jsp->work_x[col] = (double*)calloc(max_dim, sizeof(double));
+        }
+
+        Jsp->nz_offsets[col] = 0;
+    
+        /* Compute the sparsity structure of L^(-1) A12 */
+        for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+            
+            jmi_linear_solver_sparse_compute_sparsity_backsolve(Jsp->L, Jsp->A12, work_nz_pattern, col, work);
+            qsort(  work_nz_pattern, work_nz_pattern[Jsp->L->nbr_cols], sizeof(jmi_int_t), compare );
+            
+            Jsp->nz_sizes[col]    = work_nz_pattern[Jsp->L->nbr_cols];
+            Jsp->nz_patterns[col] = (jmi_int_t*)calloc(Jsp->nz_sizes[col], sizeof(jmi_int_t));
+            for (i = 0; i <  Jsp->nz_sizes[col]; i++) { Jsp->nz_patterns[col][i] = work_nz_pattern[i]; }
+
+            if (col < Jsp->A12->nbr_cols - 1) {
+                Jsp->nz_offsets[col+1] = Jsp->nz_offsets[col] + Jsp->nz_sizes[col];
+            }
+            
+            nzmax += Jsp->nz_sizes[col];
+        }
+        free(work_nz_pattern);
+        free(work);
+    
+        Jsp->M1 = jmi_linear_solver_create_sparse_matrix(Jsp->L->nbr_rows, Jsp->A12->nbr_cols, nzmax);
+        j = 0;
+        for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+            Jsp->M1->col_ptrs[col] = j;
+            for (i = 0; i < Jsp->nz_sizes[col]; i++) {
+                Jsp->M1->row_ind[j] = Jsp->nz_patterns[col][i];
+                Jsp->M1->x[j] = 1.0;
+                j = j + 1;
+            }
+        }
+        Jsp->M1->col_ptrs[Jsp->A12->nbr_cols] = j;
+        
+        /* A22 - A21L^(-1)A12 */
+        /* M1 = L^(-1)A12 */        
+    } else if (Jsp->A22 == NULL) {
+         jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to retrieve the sparsity structure of the Jacobian in <block: %s>.", block->label);
+        return -1;
+    }
+    
+    if(block->callbacks->log_options.log_level >= 4) {
+        jmi_log_node_t node;
+        node = jmi_log_enter_fmt(block->log, logInfo, "LinearSparsity", "Sparsity information in <block:%s>", block->label);
+        
+        if (Jsp->L != NULL)
+            jmi_log_fmt(block->log, node, logInfo, "Torn matrix L <numberOfColumns: %d> <numberOfRows: %d> <nonZeroElements: %d>", Jsp->L->nbr_cols, Jsp->L->nbr_rows, Jsp->L->nnz);
+        if (Jsp->A12 != NULL)
+            jmi_log_fmt(block->log, node, logInfo, "Torn matrix A12 <numberOfColumns: %d> <numberOfRows: %d> <nonZeroElements: %d>", Jsp->A12->nbr_cols, Jsp->A12->nbr_rows, Jsp->A12->nnz);
+        if (Jsp->A21 != NULL)
+            jmi_log_fmt(block->log, node, logInfo, "Torn matrix A21 <numberOfColumns: %d> <numberOfRows: %d> <nonZeroElements: %d>", Jsp->A21->nbr_cols, Jsp->A21->nbr_rows, Jsp->A21->nnz);
+        if (Jsp->A22 != NULL)
+            jmi_log_fmt(block->log, node, logInfo, "Torn matrix A22 <numberOfColumns: %d> <numberOfRows: %d> <nonZeroElements: %d>", Jsp->A22->nbr_cols, Jsp->A22->nbr_rows, Jsp->A22->nnz);
+        if (Jsp->M1 != NULL)
+            jmi_log_fmt(block->log, node, logInfo, "Torn matrix L^(-1)A12 <numberOfColumns: %d> <numberOfRows: %d> <nonZeroElements: %d>", Jsp->M1->nbr_cols, Jsp->M1->nbr_rows, Jsp->M1->nnz);
+        
+        jmi_log_leave(block->log, node);
+    }
+
+    return 0;
+}
+
+void jmi_linear_solver_sparse_delete(jmi_block_solver_t* block) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp = solver->Jsp;
+    
+    if (Jsp != NULL) {
+        if (Jsp->nz_patterns != NULL) {
+            jmi_int_t col;
+            for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+                free(Jsp->nz_patterns[col]);
+            }
+            free(Jsp->nz_patterns);
+        }
+        if (Jsp->nz_sizes != NULL)  { free(Jsp->nz_sizes); }
+        if (Jsp->work_x != NULL)    { 
+            int i;
+            for (i = 0; i < Jsp->max_threads; i++) {
+                if (Jsp->work_x[i] != NULL) { free(Jsp->work_x[i]); }
+            }
+            free(Jsp->work_x); 
+        }
+
+        if (Jsp->L != NULL)   { jmi_linear_solver_delete_sparse_matrix(Jsp->L);   }
+        if (Jsp->A12 != NULL) { jmi_linear_solver_delete_sparse_matrix(Jsp->A12); }
+        if (Jsp->A21 != NULL) { jmi_linear_solver_delete_sparse_matrix(Jsp->A21); }
+        if (Jsp->A22 != NULL) { jmi_linear_solver_delete_sparse_matrix(Jsp->A22); }
+        if (Jsp->M1 != NULL)  { jmi_linear_solver_delete_sparse_matrix(Jsp->M1);  }
+        free(Jsp);
+    }
+}
+
+int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
+    int info = 0;
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp = solver->Jsp;
+    int dim[3];
+    int *p = &dim[0];
+
+    if (!(block->Jacobian_structure)) {
+        jmi_log_node(block->log, logError, "MissingJacobianSparsity", "The method to compute the Jacobian structure is missing in <block: %s>.", block->label);
+        return -1;
+    }
+
+    info = block->Jacobian_structure(block->problem_data,NULL, &p,  JMI_BLOCK_JACOBIAN_L_DIMENSIONS);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian dimensions (for L) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    
+    Jsp->L = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->L->col_ptrs),  JMI_BLOCK_JACOBIAN_L_COLPTR);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for L) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->L->row_ind),  JMI_BLOCK_JACOBIAN_L_ROWIND);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for L) in <block: %s> failed.", block->label);
+        return -1;
+    }
+
+    info = block->Jacobian_structure(block->problem_data,NULL, &p,  JMI_BLOCK_JACOBIAN_A12_DIMENSIONS);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian dimensions (for A12) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    
+    Jsp->A12 = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A12->col_ptrs),  JMI_BLOCK_JACOBIAN_A12_COLPTR);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for A12) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A12->row_ind),  JMI_BLOCK_JACOBIAN_A12_ROWIND);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for A12) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    
+    info = block->Jacobian_structure(block->problem_data,NULL, &p,  JMI_BLOCK_JACOBIAN_A21_DIMENSIONS);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian dimensions (for A21) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    
+    Jsp->A21 = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A21->col_ptrs),  JMI_BLOCK_JACOBIAN_A21_COLPTR);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for A21) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A21->row_ind),  JMI_BLOCK_JACOBIAN_A21_ROWIND);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for A21) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    
+    info = block->Jacobian_structure(block->problem_data,NULL, &p,  JMI_BLOCK_JACOBIAN_A22_DIMENSIONS);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian dimensions (for A22) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    
+    Jsp->A22 = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A22->col_ptrs),  JMI_BLOCK_JACOBIAN_A22_COLPTR);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for A22) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A22->row_ind),  JMI_BLOCK_JACOBIAN_A22_ROWIND);
+    if (info) {
+        jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for A22) in <block: %s> failed.", block->label);
+        return -1;
+    }
+    return info;
+}
+
+int jmi_linear_completed_integrator_step(jmi_block_solver_t* block) {
+    if (jmi_block_solver_use_save_restore_state_behaviour(block)) {
+        int flag;
+        
+        flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
+        if (flag) {
+            jmi_log_node(block->log, logError, "ReadLastIterationVariables",
+                         "Failed to read the iteration variables, <errorCode: %d> in <block: %s>", flag, block->label);
+            return flag;
+        }
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            jmi_log_node_t node;
+            node = jmi_log_enter_fmt(block->log, logInfo, "LinearSaveState", "Saving the Linear state in <block:%s>", block->label);
+            jmi_log_reals(block->log, node, logInfo, "ivs", block->last_accepted_x, block->n);
+            jmi_log_leave(block->log, node);
+        }
+    }
+    return 0;
 }
 
 void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver = block->solver;
+    
+    if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) {
+        jmi_linear_solver_sparse_delete(block);
+    }
+    
     free(solver->ipiv);
     free(solver->factorization);
     free(solver->singular_values);
     free(solver->singular_vectors);
     free(solver->jacobian_extension);
     free(solver->rhs);
-    /* free(solver->rhs_extension_index); */
     free(solver->jacobian_temp);
     free(solver->dependent_set);
     free(solver->rScale);

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.TreeSet;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 
 
 aspect FlatTypeAnalysis {
@@ -162,11 +163,12 @@ aspect FlatTypeAnalysis {
         return super.isReal(exclusive) && (!exclusive || (!hasElse() || getElse().isReal()));
     }
 
-    syn boolean FRelExp.isRealComparison()    = getRight().type().numericPromotion(getLeft().type()).isReal();
-    syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();
-    syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
-    syn boolean FRelExp.isStringComparison()  = getRight().type().numericPromotion(getLeft().type()).isString();
+    syn boolean FRelExp.isRealComparison()    = comparisonType().isReal();
+    syn boolean FRelExp.isIntegerComparison() = comparisonType().isInteger();
+    syn boolean FRelExp.isBooleanComparison() = comparisonType().isBoolean();
+    syn boolean FRelExp.isStringComparison()  = comparisonType().isString();
 
+    syn FType FRelExp.comparisonType() = getRight().type().numericPromotion(getLeft().type());
 
     syn FType FExp.type() = fUnknownType();
     
@@ -339,7 +341,7 @@ aspect FlatTypeAnalysis {
     eq FBooleanType.canBeRange()   = true;
     eq FEnumType.canBeRange()      = true;
 
-    eq FArgumentExp.type() = copiedFExp().type();
+    eq FDeferExp.type() = getFExp().type();
 
     eq FLinspace.type() {
         // TODO: check that endpoints are real
@@ -355,8 +357,13 @@ aspect FlatTypeAnalysis {
         if (shouldUseOverloadedOperator()) 
             return getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
         FType left = getLeft().type();
-        if (left.equivalentTo(getRight().type()) && left.isScalar())
-            return fBooleanScalarType();
+        if (left.equivalentTo(getRight().type()) && left.isScalar()) {
+            if (left.isRecord()) {
+                return left;
+            } else {
+                return fBooleanScalarType();
+            }
+        }
         else
             return fUnknownType();
     }
@@ -411,6 +418,7 @@ aspect FlatTypeAnalysis {
     eq FStringLitExp.type()   = fStringScalarType();
     eq FTimeExp.type()        = fRealScalarType();
     eq FAbstractDerExp.type() = fRealType(size());
+    eq FInStreamEpsExp.type() = fRealScalarType();
 
     eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
 
@@ -426,7 +434,7 @@ aspect FlatTypeAnalysis {
 
     eq FTerminate.type() = fNoType();
     eq FReinit.type() = fNoType();
-    eq FAssert.type() = fNoType();
+    eq FAssert.type() = getTest().type();
     eq FGetInstanceName.type() = fStringScalarType();
 
     eq FDelayExp.type() = getFExp().type();
@@ -619,7 +627,7 @@ aspect FlatTypeAnalysis {
         return new FFunctionType(size(), name(), inputs, outputs, myFClass());
     }
 
-    // TODO: expand to handle boolean end enum index
+    // TODO: expand to handle boolean and enum index (see #3597)
     syn lazy FType FSubscript.type();
     eq FColonSubscript.type()   = fIntegerArrayType(size());
     eq FIntegerSubscript.type() = fIntegerScalarType();
@@ -693,14 +701,72 @@ aspect TypePromotion {
     syn FType FType.typePromotion(FType type, boolean allowUnknown, String operator) {
         if ((isOperatorRecord() || type.isOperatorRecord()) && operator != null) {
             return matchOverloadedOperatorType(type, operator, false, allowUnknown);
-        } else if (isNumeric())
+        } else if (isNumeric()) {
             return numericPromotion(type, allowUnknown, operator);
-        else if (!equivalentTo(type, allowUnknown))
+        } else if (!equivalentTo(type, allowUnknown)) {
+            if (isRecord()) {
+                return mergeRecordType(type);
+            }
             return fUnknownType();
-        else
+        } else {
             return this;
+        }
     }
-
+    
+    syn FType FType.mergeRecordType(FType other) {
+        FType res = treeCopy();
+        res.setSize(getSize().mergeRecordType(other.getSize()));
+        return res;
+    }
+    eq FRecordType.mergeRecordType(FType other) {
+        if (ndims() != other.ndims() || !other.isRecord()) {
+            return fUnknownType();
+        }
+        FRecordType rec = (FRecordType) other;
+        if (getNumComponent() != rec.getNumComponent()) {
+            return fUnknownType();
+        }
+        List<FRecordComponentType> comps = new List<FRecordComponentType>();
+        Iterator<FRecordComponentType> i1 = componentTreeSet().iterator();
+        Iterator<FRecordComponentType> i2 = rec.componentTreeSet().iterator();
+        while (i1.hasNext()) {
+            FRecordComponentType frct1 = i1.next();
+            FRecordComponentType frct2 = i2.next();
+            if (!frct1.getName().equals(frct2.getName())) {
+                return fUnknownType();
+            }
+            FType comp = frct1.getFType().mergeRecordType(frct2.getFType());
+            if (comp.isUnknown()) {
+                return fUnknownType();
+            }
+            comps.add(new FRecordComponentType(frct1.getName(), comp));
+        }
+        return new FRecordType(getSize().mergeRecordType(other.getSize()), getName(), comps, getFClass());
+    }
+    
+    syn TreeSet<FRecordComponentType> FRecordType.componentTreeSet() {
+        TreeSet<FRecordComponentType> res = new TreeSet<FRecordComponentType>();
+        for (FRecordComponentType frct : getComponents()) {
+            res.add(frct);
+        }
+        return res;
+    }
+    
+    public Size Size.mergeRecordType(Size other) {
+        if (ndims() == 0) {
+            return this;
+        }
+        int[] merged = new int[ndims()];
+        for (int i = 0; i < ndims(); i++) {
+            int s = get(i);
+            if (s != other.get(i)) {
+                s = Size.UNKNOWN;
+            }
+            merged[i] = s;
+        }
+        return new Size(merged);
+    }
+    
     /**
      * Combine two types to the broadest common denominator.
      * 
@@ -821,13 +887,7 @@ aspect FTypeCompatibility {
             return true;
         if (getNumComponent() != rec.getNumComponent())
             return false;
-        TreeSet<FRecordComponentType> comps1 = new TreeSet<FRecordComponentType>();
-        TreeSet<FRecordComponentType> comps2 = new TreeSet<FRecordComponentType>();
-        for (FRecordComponentType t : getComponents())
-            comps1.add(t);
-        for (FRecordComponentType t : rec.getComponents())
-            comps2.add(t);
-        return typeMatches(comps1, comps2, compatible, true);
+        return typeMatches(componentTreeSet(), rec.componentTreeSet(), compatible, true);
     }
     eq FExternalObjectType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isExternalObject())
@@ -1142,10 +1202,20 @@ aspect BuiltInFlatTypes {
     public FExp FBooleanType.zeroLiteral() { return new FBooleanLitExpFalse(); }
     public FExp FEnumType.zeroLiteral()    { return new FEnumLitExp(this, 1); }
     public FExp FRecordType.zeroLiteral()  {
-        List<FExp> args = new List<FExp>();
-        for (FRecordComponentType t : getComponents())
-            args.add(t.getFType().zeroLiteral());
-        return new FRecordConstructor(new FIdUse(getName()), args); 
+        if (getFClass() != null) {
+            List<FExp> args = new List<FExp>();
+            for (FRecordComponentType t : getComponents()) {
+                args.add(t.getFType().zeroLiteral());
+            }
+            return new FRecordConstructor(new FIdUse(getName()), args);
+        } else {
+            List<InstFunctionArgument> args = new List<InstFunctionArgument>();
+            int i = 1;
+            for (FRecordComponentType t : getComponents()) {
+                args.add(new InstPositionalArgument(t.getFType().zeroLiteral(), i++));
+            }
+            return new InstRecordConstructor(new InstGlobalAccess(InstAccess.fromName(getName())), args);
+        }
     }
 
     /**

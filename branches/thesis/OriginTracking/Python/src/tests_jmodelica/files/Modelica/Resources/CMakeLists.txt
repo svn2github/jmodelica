@@ -22,51 +22,6 @@ cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
 project (TestLibraries)
 
-#Enable Fortran if not MSVC
-if(NOT MSVC)
-  enable_language(Fortran)
-else()
-  message(STATUS "No Fortran support")
-endif()
-
-#Inputs through flags
-add_definitions(-DTOP_SRC)
-if(NOT TOP_SRC)
-    set(TOP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../)
-    message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
-endif()
-
-# Get the JModelica install directory
-if(CMAKE_INSTALL_DIR)
-    set(JMODELICA_INSTALL_DIR ${CMAKE_INSTALL_DIR})
-else()
-    set(JMODELICA_INSTALL_DIR "${TOP_SRC}/../install")
-    message(STATUS "Install dir not defined, using ${JMODELICA_INSTALL_DIR}")
-endif()    
-message(STATUS JMODELICA_INSTALL_DIR=${JMODELICA_INSTALL_DIR})
-
-# Get platform information
-if(CMAKE_HOST_WIN32) #Set to true when the host system is Windows and on cygwin.
-    set(JM_PLATFORM win)
-elseif(CMAKE_HOST_APPLE) #Set to true when the host system is Apple OSX. 
-    set(JM_PLATFORM darwin)
-elseif(CMAKE_HOST_UNIX) #Set to true when the host system is UNIX or UNIX like (i.e. APPLE and CYGWIN). 
-    set(JM_PLATFORM linux)
-else(CMAKE_HOST_WIN32)
-    message(SEND_ERROR "Target platform is not supported by the tests")
-set(JM_PLATFORM not_supported)
-endif()
-if(" ${CMAKE_C_FLAGS} " MATCHES " -m64 ")
-    set(JM_PLATFORM "${JM_PLATFORM}64")
-elseif(" ${CMAKE_C_FLAGS} " MATCHES " -m32 ")
-    set(JM_PLATFORM "${JM_PLATFORM}32")
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(JM_PLATFORM "${JM_PLATFORM}32")
-else()
-    set(JM_PLATFORM "${JM_PLATFORM}64")
-endif()
-
-
 #Make the directory for header files to be installed in. 
 install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Include/)")
 
@@ -74,17 +29,83 @@ install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${JMODELICA_INSTALL_DIR}/Python/t
 set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Library/${JM_PLATFORM})
 install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 
-if(NOT(WIN32 OR CYGWIN OR APPLE))
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS}")
-    SET(WITH_PIC ON)
-elseif(MSVC)
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
-    add_definitions(/D _CRT_SECURE_NO_WARNINGS)
-endif()
-
 #Add test libraries
 include_directories(Include)
 include_directories(${TOP_SRC}/JMI/src)
-add_subdirectory(src)
 
+set(ADDNUMBERS_Sources
+    src/addNumbers.c
+    Include/addNumbers.h
+)
+
+set(ARRAYFUNCTIONS_Sources
+    src/arrayFunctions.c
+    Include/arrayFunctions.h
+)
+
+set(EXTERNALFUNCTIONSC_Sources
+    src/externalFunctionsC.c
+    Include/externalFunctionsC.h
+)
+
+set(EXTOBJECTS_Sources
+    src/extObjects.c
+    Include/extObjects.h
+)
+
+set(USEMODELICAERROR_Sources
+    src/useModelicaError.c
+    Include/useModelicaError.h
+)
+
+#Don't build Fortran lib if MSVC
+if(NOT MSVC)
+    set(EXTERNALFUNCTIONSFORTRAN_Sources
+        src/externalFunctionsFortran.f
+    )
+endif()
+
+#Build addNumbers library
+add_library(addNumbers STATIC ${ADDNUMBERS_Sources})
+if(NOT MSVC)
+    set_target_properties(addNumbers PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+endif()
+
+#Build arrayFunctions library
+add_library(arrayFunctions STATIC ${ARRAYFUNCTIONS_Sources})
+if(NOT MSVC)
+    set_target_properties(arrayFunctions PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+endif()
+
+#Build externalFunctionsC library
+add_library(externalFunctionsC STATIC ${EXTERNALFUNCTIONSC_Sources})
+if(NOT MSVC)
+    set_target_properties(externalFunctionsC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+endif()
+
+#Build extObjects library
+add_library(extObjects STATIC ${EXTOBJECTS_Sources})
+if(NOT MSVC)
+    set_target_properties(extObjects PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+endif()
+
+#Build useModelicaError library
+add_library(useModelicaError STATIC ${USEMODELICAERROR_Sources})
+if(NOT MSVC)
+    set_target_properties(useModelicaError PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
+endif()
+
+#Build externalFunctionsFortran library (if not MSVC)
+if(NOT MSVC)
+    add_library(externalFunctionsFortran STATIC ${EXTERNALFUNCTIONSFORTRAN_Sources})
+endif()
+
+#Install the libraries
+install(TARGETS addNumbers DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+install(TARGETS arrayFunctions DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+install(TARGETS externalFunctionsC DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+install(TARGETS extObjects DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+install(TARGETS useModelicaError DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+if(NOT MSVC)
+    install(TARGETS externalFunctionsFortran DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+endif()

@@ -258,7 +258,7 @@ package CEval
       function fRealArrayUnknown
         input  Real[:] x_in;
         output Real[size(x_in,1)] x_out;
-      external "C" fRealArray(x_in, x_out) annotation(
+      external "C" fRealArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fRealArrayUnknown;
@@ -288,7 +288,7 @@ package CEval
       function fIntegerArrayUnknown
         input  Integer[:] x_in;
         output Integer[size(x_in,1)] x_out;
-      external "C" fIntegerArray(x_in, x_out) annotation(
+      external "C" fIntegerArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fIntegerArrayUnknown;
@@ -318,7 +318,7 @@ package CEval
       function fBooleanArrayUnknown
         input  Boolean[:] x_in;
         output Boolean[size(x_in,1)] x_out;
-      external "C" fBooleanArray(x_in, x_out) annotation(
+      external "C" fBooleanArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fBooleanArrayUnknown;
@@ -356,7 +356,7 @@ package CEval
       function fStringArrayUnknown
         input  String[:] x_in;
         output String[size(x_in,1)] x_out;
-      external "C" fStringArray(x_in, x_out) annotation(
+      external "C" fStringArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fStringArrayUnknown;
@@ -364,7 +364,9 @@ package CEval
       function fStrlen
         input String s;
         output Integer n;
-      external "C" n = strlen(s);
+      external "C" n = fStrlen(s) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
       end fStrlen;
 
       constant Integer   len            = fStrlen("abcde");
@@ -395,7 +397,7 @@ package CEval
       function fEnumArrayUnknown
         input  E[:] x_in;
         output E[size(x_in,1)] x_out;
-      external "C" fEnumArray(x_in, x_out) annotation(
+      external "C" fEnumArray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fEnumArrayUnknown;
@@ -439,7 +441,7 @@ package CEval
       function frealarrayunknown
         input  Real[:] x_in;
         output Real[size(x_in,1)] x_out;
-      external "FORTRAN 77" frealarray(x_in, x_out) annotation(
+      external "FORTRAN 77" frealarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsFortran");
       end frealarrayunknown;
       
@@ -478,7 +480,7 @@ package CEval
       function fintegerarrayunknown
         input  Integer[:] x_in;
         output Integer[size(x_in,1)] x_out;
-      external "FORTRAN 77" fintegerarray(x_in, x_out) annotation(
+      external "FORTRAN 77" fintegerarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsFortran");
       end fintegerarrayunknown;
       
@@ -505,7 +507,7 @@ package CEval
       function fbooleanarrayunknown
         input  Boolean[:] x_in;
         output Boolean[size(x_in,1)] x_out;
-      external "FORTRAN 77" fbooleanarray(x_in, x_out) annotation(
+      external "FORTRAN 77" fbooleanarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsFortran");
       end fbooleanarrayunknown;
       
@@ -533,7 +535,7 @@ package CEval
       function fenumarrayunknown
         input  E[:] x_in;
         output E[size(x_in,1)] x_out;
-      external "FORTRAN 77" fenumarray(x_in, x_out) annotation(
+      external "FORTRAN 77" fenumarray(x_in, size(x_in,1), x_out, size(x_in,1)) annotation(
         Library="externalFunctionsFortran");
       end fenumarrayunknown;
       
@@ -611,7 +613,7 @@ package CEval
             input Boolean b;
             input String s;
             output Obj1 o1;
-            external "C" o1 = my_constructor1(x,y,b,s);
+            external "C" o1 = my_constructor1(x,y,b,s)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -629,7 +631,7 @@ package CEval
             input Boolean[:] b;
             input String[:] s;
             output Obj2 o2;
-            external "C" my_constructor2(x,y,o2,b,s);
+            external "C" my_constructor2(x,y,o2,b,s)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -644,7 +646,7 @@ package CEval
             input Os.Obj1 o1;
             input Obj2[:] o2;
             output Obj3 o3;
-            external "C" my_constructor3(o1,o2,o3);
+            external "C" my_constructor3(o1,o2,o3)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -918,5 +920,14 @@ model PrintsControlCharacters
     end f;
     constant Real c = f(2);
 end PrintsControlCharacters;
+
+model StructuralAsserts
+    function f
+        output Integer n;
+        external "C" n = get_time() annotation(Library="externalFunctionsC", Include="#include \"externalFunctionsC.h\"");
+    end f;
+    
+    parameter Integer n = f() annotation(Evaluate=true);
+end StructuralAsserts;
 
 end ExtFunctionTests;

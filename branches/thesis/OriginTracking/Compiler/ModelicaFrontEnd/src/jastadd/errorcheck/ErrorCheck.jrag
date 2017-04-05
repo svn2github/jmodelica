@@ -403,84 +403,115 @@ aspect ErrorCheck {
         }
     }
 
-  /**
-   * Lock the closest surrounding if-equation or if-expression that have only 
-   * parameter-expression tests and evaluates to another branch. Returns true 
-   * if any such if exists. 
-   * 
-   * Any parameters used in the test will be marked as structural.
-   * 
-   * NB: This has side-effects, dispite being an inherited attribute.
-   * 
-   * @param checkType  the type of error checks to use when marking structural parameters
-   */
-  // TODO: find way to move side-effects out from inh attr
-  inh boolean FExp.lockBranch(ErrorCheckType checkType);
-  inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
-  inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
-  inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
-  inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
-  eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
-  eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
-  eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);
-  eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
-  eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled() || lockBranch(checkType);
-  eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled() || lockBranch(checkType);
-  eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)            = isDisabled() || lockBranch(checkType);
-  eq InstClassDecl.getChild().lockBranch(ErrorCheckType checkType)                = false;
-  eq InstRoot.getChild().lockBranch(ErrorCheckType checkType)                     = false;
-  eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
-  
-  /**
-   * Lock this if-expression and return true if it only has only parameter-expression 
-   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
-   * delegates to {@link #lockBranch(ErrorCheckType)}.
-   * 
-   * Any parameters used in the test will be marked as structural.
-   * 
-   * @param checkType  the type of error checks to use when marking structural parameters
-   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
-   */
-  public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
-        if (getIfExp().lockable(then)) {
-		  getIfExp().markAsStructuralParameter(checkType);
-		  return true;
-	  } else {
-		  return lockBranch(checkType);
-	  }
-  }
-  
+    public interface LockBranch {
+        /**
+         * Lock the closest surrounding if-equation or if-expression that have only 
+         * parameter-expression tests and evaluates to another branch. Returns true 
+         * if any such if exists. 
+         * 
+         * Any parameters used in the test will be marked as structural.
+         * 
+         * NB: This has side-effects, despite being an inherited attribute.
+         * 
+         * @param checkType  the type of error checks to use when marking structural parameters
+         */
+        public boolean lockBranch(ErrorCheckType checkType);
+    }
+    FExp implements LockBranch;
+    FExpSubscript implements LockBranch;
+    FAbstractEquation implements LockBranch;
+    FStatement implements LockBranch;
+    FIfWhenClause implements LockBranch;
+    InstComponentDecl implements LockBranch;
+    InstFunctionArgument implements LockBranch;
+    FFunctionCallLeft implements LockBranch;
+    InstValueModification implements LockBranch;
+
+    // TODO: find way to move side-effects out from inh attr
+    inh boolean FExp.lockBranch(ErrorCheckType checkType);
+    inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+    inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+    inh boolean FStatement.lockBranch(ErrorCheckType checkType);
+    inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
+    inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
+    inh boolean InstFunctionArgument.lockBranch(ErrorCheckType checkType); 
+    inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
+    inh boolean InstValueModification.lockBranch(ErrorCheckType checkType);
+    eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                = lockMyBranch(this, checkType, getIfExp(), true);
+    eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                = lockMyBranch(this, checkType, getIfExp(), false);
+    eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType) = lockMyBranch(this, checkType, getTest(), true);
+    eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)              = lockMyBranch(this, checkType, getTest(), false);
+    eq FIfClause.getFStatement().lockBranch(ErrorCheckType checkType)          = lockMyBranch(this, checkType, getTest(), true);
+    eq FIfStmt.getFIfWhenClause(int i).lockBranch(ErrorCheckType checkType)    = lockMyBranch(checkType, i);
+    eq FIfStmt.getElseStmt().lockBranch(ErrorCheckType checkType)              = lockMyBranch(checkType, getNumFIfWhenClause());
+    eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)     = getConnector2().isDisabled() || lockBranch(checkType);
+    eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)     = getConnector1().isDisabled() || lockBranch(checkType);
+    eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)       = isDisabled() || lockBranch(checkType);
+    eq InstValueModification.getFExp().lockBranch(ErrorCheckType checkType)    = isSuperseded() || lockBranch(checkType);
+    eq InstClassDecl.getChild().lockBranch(ErrorCheckType checkType)           = false;
+    eq InstRoot.getChild().lockBranch(ErrorCheckType checkType)                = false;
+    eq FClass.getChild().lockBranch(ErrorCheckType checkType)                  = false;
+
+    /**
+     * Lock branch on src and return true if it only has parameter-expression 
+     * tests that evaluates to use the branch not indicated by <code>then</code>. 
+     * Otherwise delegates to {@link LockBranch#lockBranch(ErrorCheckType)}.
+     * 
+     * Any parameters used in the test will be marked as structural.
+     * 
+     * @param checkType  the type of error checks to use when marking structural parameters
+     * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
+     */
+    public static boolean ASTNode.lockMyBranch(LockBranch src, ErrorCheckType checkType, FExp exp, boolean then) {
+        if (exp.lockable(then)) {
+            exp.markAsStructuralParameter(checkType);
+            return true;
+        } else {
+            return src.lockBranch(checkType);
+        }
+    }
+
     syn boolean FExp.lockable(boolean then) {
         if (variability().fixedParameterOrLess()) {
             try {
                 return ceval().booleanValue() != then;
-            } catch (ConstantEvaluationException e) {
-                
-            }
+            } catch (ConstantEvaluationException e) {}
         }
         return false;
     }
-  
-  /**
-   * Lock this if-expression and return true if it only has only parameter-expression 
-   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
-   * delegates to {@link #lockBranch(ErrorCheckType)}.
-   * 
-   * Any parameters used in the test will be marked as structural.
-   * 
-   * @param checkType  the type of error checks to use when marking structural parameters
-   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
-   */
-  public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
-        if (getTest().lockable(then)) {
-		  getTest().markAsStructuralParameter(checkType);
-		  return true;
-	  } else {
-		  return lockBranch(checkType);
-	  }
-  }
 
-  
+    public boolean FIfStmt.lockMyBranch(ErrorCheckType checkType, int i) {
+        if (i == 0) {
+            return lockBranch(checkType);
+        } else {
+            FIfWhenClause next = getFIfWhenClause(i - 1);
+            return lockMyBranch(next, checkType, next.getTest(), false);
+        }
+    }
+
+    syn boolean InstValueModification.isSuperseded() {
+        InstComponentDecl cmp = myTargetComponent();
+        InstModification mod = cmp.isAttribute() ? 
+                parentTargetComponent().totalMergedEnvironment().find(cmp.name()) : 
+                cmp.myInstValueMod();
+        return mod != null && mod != this;
+    }
+
+    inh InstComponentDecl InstModification.myTargetComponent();
+    eq InstComponentModification.getChild().myTargetComponent() = getName().myInstComponentDecl();
+    eq InstComponentDecl.getChild().myTargetComponent()         = this;
+    eq InstNode.getChild().myTargetComponent()                  = unknownInstComponentDecl();
+    eq InstRecordConstructor.getChild().myTargetComponent()     = unknownInstComponentDecl();
+
+    inh InstComponentDecl InstModification.parentTargetComponent();
+    eq InstComponentModification.getChild().parentTargetComponent() = myTargetComponent();
+    eq InstNode.getChild().parentTargetComponent()                  = unknownInstComponentDecl();
+    eq InstRecordConstructor.getChild().parentTargetComponent()     = unknownInstComponentDecl();
+
+    syn boolean InstComponentDecl.isAttribute() = false;
+    eq InstBuiltIn.isAttribute()                = true;
+
+
     /**
      * Class used by the error check to delegate to different error checks.
      * This class is subtyped for each error check with different
@@ -558,7 +589,6 @@ aspect ErrorCheck {
         }
     }
     eq InstComponentDecl.getFAbstractEquation().errorEnclosingComponent() = this;
-    eq InstAssignable.getBindingFExp().errorEnclosingComponent() = myInstValueMod().errorEnclosingComponent();
     
     eq FlatRoot.getChild().errorEnclosingComponent() = null;
     eq InstRoot.getChild().errorEnclosingComponent() = null;
@@ -911,30 +941,26 @@ aspect InstanceErrorCheck {
             new SimpleWarningProducer("PARAMETER_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The parameter %s does not have a binding expression");
     public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
             new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
-
-    syn boolean InstModification.collectErrorsInBindingExp() = true;
-    eq InstDefaultRecordModification.collectErrorsInBindingExp() = false;
     
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
             super.collectErrors(checkType);
             errorChecked = true;
-
-            // Check binding expression
-            FExp bexp = myBindingInstExp();
-            if (bexp != null) {
-                String type = isParameter() ? "parameter" : "constant";
-                // TODO: Check structural parameters as well
-                if (myInstValueMod().collectErrorsInBindingExp()) {
-                    bexp.collectErrors(checkType);
-                }
+            
+            // Check modification
+            if (hasInstValueMod()) {
+                myInstValueMod().collectErrors(checkType);
+            }
+            
+            if (hasBindingFExp()) {
                 // Check if the binding expression of constants can be evaluated
-                if (isConstant() && !bexp.type().isUnknown()) 
+                FExp bexp = getBindingFExp();
+                if (isConstant() && !bexp.type().isUnknown()) {
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
-                else if (isParameter() && bexp.isCircular())
-                    bexp.error("Circularity in binding expression of parameter: %s = %s", 
-                            qualifiedName(), bexp);
+                } else if (isParameter() && bexp.isCircular()) {
+                    bexp.error("Circularity in binding expression of parameter: %s = %s", qualifiedName(), bexp);
+                }
             } else {
                 // Warn if constant or parameter does not have a binding expression (start is used)
                 if (variability().fixedParameterOrLess() && !isForIndex() && !isRecord() && 
@@ -1261,26 +1287,33 @@ aspect InstanceErrorCheck {
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         throw new UnsupportedOperationException();
     }
-    
+
+    @Override
     public void InstForIndex.collectErrorsForAllIndices(
+        List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+        InstComponentDecl var = getInstPrimitive();
+        CValue oldVal = var.evaluationValue;
+        boolean last = i == indices.getNumChild() - 1;
+        CommonForIndex next = last ? null : indices.getChild(i + 1);
+        CValueArray ivals = getFExp().ceval().array();
+        for (Index j : ivals.indices()) {
+            var.setLocalCachedEvaluationValue(ivals.getCell(j));
+            if (last) {
+                child.resetCollectErrors();
+                child.collectErrors(checkType);
+                child.flushAllRecursive();
+            } else {
+                next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
+            }
+        }
+        var.setLocalCachedEvaluationValue(oldVal);
+    }
+
+    @Override
+    public void InstForIndexNoExp.collectErrorsForAllIndices(
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         if (hasFExp()) {
-            InstComponentDecl var = getInstPrimitive();
-            CValue oldVal = var.evaluationValue;
-            boolean last = i == indices.getNumChild() - 1;
-            CommonForIndex next = last ? null : indices.getChild(i + 1);
-            CValueArray ivals = getFExp().ceval().array();
-            for (Index j : ivals.indices()) {
-                var.setLocalCachedEvaluationValue(ivals.getCell(j));
-                if (last) {
-                    child.resetCollectErrors();
-                    child.collectErrors(checkType);
-                    child.flushAllRecursive();
-                } else {
-                    next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
-                }
-            }
-            var.setLocalCachedEvaluationValue(oldVal);
+            super.collectErrorsForAllIndices(indices, i, child, checkType);
         }
     }
 

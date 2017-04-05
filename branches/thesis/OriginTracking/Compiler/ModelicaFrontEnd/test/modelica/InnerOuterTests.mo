@@ -91,6 +91,7 @@ model InnerOuterTest2
             name="InnerOuterTest2",
             description="Basic test of inner outer.",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             equation_sorting=true,
             flatModel="
 fclass InnerOuterTests.InnerOuterTest2
@@ -618,6 +619,7 @@ public
   input Real[:] x;
   output Real[:] y;
  algorithm
+  assert(2 == size(x, 1), \"Mismatching sizes in function 'InnerOuterTests.InnerOuterTest21.b.m.f', component 'x', dimension '1'\");
   init y as Real[2];
   y[1:2] := x[1:2];
   return;

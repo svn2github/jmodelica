@@ -81,4 +81,10 @@ package JacFuncTests
 	equation
     	(a,y) = F1(x,q,a);
     end sparseFunc3;
+    
+    model Quadratic
+        Real x(start=3);
+    equation
+        der(x) = x^2;
+    end Quadratic;
 end JacFuncTests;

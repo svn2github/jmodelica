@@ -1142,7 +1142,7 @@ model RecursiveStructure5
             description="Don't trigger recursiveness check on for expression in binding exp of Integer",
             flatModel="
 fclass TypeTests.RecursiveStructure5
- discrete Integer i = sum(i for i in 1:2);
+ discrete Integer i = sum({1, 2});
 end TypeTests.RecursiveStructure5;
 ")})));
 end RecursiveStructure5;
@@ -1157,7 +1157,7 @@ model RecursiveStructure6
             description="Don't trigger recursiveness check on for expression in modifier on Integer",
             flatModel="
 fclass TypeTests.RecursiveStructure6
- discrete Integer i(start = sum(i for i in 1:2)) = 1;
+ discrete Integer i(start = sum({1, 2})) = 1;
 end TypeTests.RecursiveStructure6;
 ")})));
 end RecursiveStructure6;
@@ -1899,6 +1899,8 @@ public
   input Real[:] y;
   output Real[:,:] z;
  algorithm
+  assert(3 == size(x, 1), \"Mismatching sizes in function 'TypeTests.Primitive4.f', component 'x', dimension '1'\");
+  assert(3 == size(y, 1), \"Mismatching sizes in function 'TypeTests.Primitive4.f', component 'y', dimension '1'\");
   init z as Real[3, 3];
   z[1:3,1:3] := {x[1:3], cross(x[1:3], y[1:3]), y[1:3]};
   return;
@@ -1963,9 +1965,9 @@ fclass TypeTests.AlgorithmType1
  Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0;
- pre(b) = false;
- pre(i) = 0;
  pre(r) = 0.0;
+ pre(i) = 0;
+ pre(b) = false;
 algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
@@ -2015,12 +2017,12 @@ initial equation
  pre(outerR[1].r) = 0.0;
  pre(outerR[2].r) = 0.0;
  pre(outerR[3].r) = 0.0;
- pre(outerInteger[1]) = 0;
- pre(outerInteger[2]) = 0;
- pre(outerInteger[3]) = 0;
  pre(i.innerR[1].r) = 0.0;
  pre(i.innerR[2].r) = 0.0;
  pre(i.innerR[3].r) = 0.0;
+ pre(outerInteger[1]) = 0;
+ pre(outerInteger[2]) = 0;
+ pre(outerInteger[3]) = 0;
  pre(i.innerInteger[1]) = 0;
  pre(i.innerInteger[2]) = 0;
  pre(i.innerInteger[3]) = 0;
@@ -2508,6 +2510,44 @@ Error at line 2467, column 17, in file '...':
 
 ")})));
 end Functional8;
+
+
+model FunctionArgument1
+    record R
+        Real[1]  r;
+    end R;
+
+        Real arr1[1] = { 0 };
+        Real arr2[2] = { 0, 0 };
+        R   rec1;
+        R   rec2;
+    algorithm
+        rec1 := if size(arr1, 1) == 1 then R(r = arr1) else R(r = arr2);
+        rec2 := if size(arr2, 1) == 1 then R(r = arr2) else R(r = arr1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionArgument1",
+            description="Verifies that for functional arguments within if-statements
+                    only the used branch is type-checked.",
+            flatModel="
+fclass TypeTests.FunctionArgument1
+ Real arr1[1] = {0};
+ Real arr2[2] = {0, 0};
+ TypeTests.FunctionArgument1.R rec1;
+ TypeTests.FunctionArgument1.R rec2;
+algorithm
+ rec1 := TypeTests.FunctionArgument1.R(arr1[1:1]);
+ rec2 := TypeTests.FunctionArgument1.R(arr1[1:1]);
+
+public
+ record TypeTests.FunctionArgument1.R
+  Real r[1];
+ end TypeTests.FunctionArgument1.R;
+
+end TypeTests.FunctionArgument1;
+")})));
+end FunctionArgument1;
 
 
 model Delay1

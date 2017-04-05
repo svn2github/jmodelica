@@ -164,6 +164,14 @@ class TestLocalDAECollocator(object):
         class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
         self.qt_par_est_degenerate_op = \
                 transfer_to_casadi_interface(class_path, qt_file_path, self.compiler_opts)
+                
+        stream_file_path = os.path.join(get_files_path(), 'Modelica', 'TestOptimizationProblems.mop')
+        class_path = "InStream"
+        stream_comp_opts = self.compiler_opts
+        stream_comp_opts['eliminate_alias_variables'] = False
+        stream_comp_opts['eliminate_linear_equations'] = False
+        stream_comp_opts['variability_propagation'] = False
+        self.stream_op = transfer_to_casadi_interface(class_path, stream_file_path, stream_comp_opts)
         
         self.algorithm = "LocalDAECollocationAlg"
         
@@ -1490,23 +1498,27 @@ class TestLocalDAECollocator(object):
         # Scaled, Radau
         opts = self.optimize_options(scaled_op, self.algorithm)
         opts['discr'] = "LGR"
+        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = scaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, input_name="Tc")
         
         # Scaled, Gauss
         opts['discr'] = "LG"
+        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = scaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
         
         # Unscaled, Radau
         opts['discr'] = "LGR"
+        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
         
         # Unscaled, Gauss
         opts['discr'] = "LG"
+        opts['IPOPT_options']['linear_solver'] = "mumps"
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
@@ -2230,6 +2242,30 @@ class TestLocalDAECollocator(object):
         # Test with WORHP
         opts['solver'] = 'WORHP'
         opts['WORHP_options']['NLPprint'] = -1
+        res = op.optimize(options=opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_instream(self):
+        """
+        Test inStream operator support.
+        """
+        op = self.stream_op
+        opts = self.optimize_options(op)
+        
+        # Set arbitrary non-zero guesses
+        guesses = N.linspace(0.5, 1.8, len(op.getAllVariables()))
+        for (var, ig) in itertools.izip(op.getAllVariables(), guesses):
+            var.setAttribute('initialGuess', ig)
+
+        # Reference values
+        cost_ref = 63.99032036914
+        u_norm_ref = 5.9669830727
+        
+        # Solve and verify result
+        opts['solver'] = 'IPOPT'
+        opts['n_e'] = 3
+        opts['named_vars'] = True
         res = op.optimize(options=opts)
         assert_results(res, cost_ref, u_norm_ref)
 

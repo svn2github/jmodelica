@@ -2351,10 +2351,10 @@ model ArrayModifications67
             name="ArrayModifications67",
             description="Test each on other levels of modification",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 2286, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
-  Array size mismatch in modification of y, expected size is (due to 'each') scalar and size of binding expression is [2]
+Warning at line 2347, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'y = {1,2}'
 ")})));
 end ArrayModifications67;
 
@@ -2465,7 +2465,7 @@ model ArrayModifications71
             flatModel="
 fclass ModificationTests.ArrayModifications71
  ModificationTests.ArrayModifications71.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications71.B b2[1](each x = 0);
+ ModificationTests.ArrayModifications71.B b2[1](x = {0});
 
 public
  record ModificationTests.ArrayModifications71.B
@@ -2496,7 +2496,7 @@ model ArrayModifications72
             flatModel="
 fclass ModificationTests.ArrayModifications72
  ModificationTests.ArrayModifications72.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications72.B b2[1](each x = 0);
+ ModificationTests.ArrayModifications72.B b2[1](x = {0});
 
 public
  record ModificationTests.ArrayModifications72.B
@@ -2624,6 +2624,217 @@ fclass ModificationTests.ArrayModifications77
 end ModificationTests.ArrayModifications77;
 ")})));
 end ArrayModifications77;
+
+
+model ArrayModifications78
+    model A
+        Real x = 1;
+        Real y = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](each a(x = 2, y = {3, 4}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications78",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2639, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'y = {3,4}'
+")})));
+end ArrayModifications78;
+
+
+model ArrayModifications79
+    Real a[3](each start={1,2,3}) = zeros(3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications79",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2655, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'each start = {1,2,3}'
+")})));
+end ArrayModifications79;
+
+
+model ArrayModifications80
+    model A
+        Real x = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](a(x = true));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications80",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2679, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end ArrayModifications80;
+
+
+model ArrayModifications81
+    model A
+        Real x = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](each a(x = {true, false}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications81",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2703, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end ArrayModifications81;
+
+
+model ArrayModifications82
+    model A
+        Real x = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](each a(x = {1, 2, 3}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications82",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2703, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
+  Array size mismatch in modification of x, expected size is (due to 'each') scalar and size of binding expression is [3]
+")})));
+end ArrayModifications82;
+
+
+model ArrayModifications83
+    model A
+        Real x = 1;
+    end A;
+    
+    A a[2](each x(start = {1, 2}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications83",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2747, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'start = {1,2}'
+")})));
+end ArrayModifications83;
+
+
+model ArrayModifications84
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](a(n={i + j for i in 1:2, j in 3:3:6}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications84",
+            description="Expression splitting for iteration expressions",
+            flatModel="
+fclass ModificationTests.ArrayModifications84
+ parameter Integer b[1].a[1].n = 1 + 3 /* 4 */;
+ parameter Integer b[1].a[2].n = 2 + 3 /* 5 */;
+ parameter Integer b[2].a[1].n = 1 + 6 /* 7 */;
+ parameter Integer b[2].a[2].n = 2 + 6 /* 8 */;
+end ModificationTests.ArrayModifications84;
+")})));
+end ArrayModifications84;
+
+
+model ArrayModifications85
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](each a(n=1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications85",
+            description="Split binding expressions on the correct level",
+            flatModel="
+fclass ModificationTests.ArrayModifications85
+ parameter Integer b[1].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[1].a[2].n = (1:2)[2] /* 2 */;
+ parameter Integer b[2].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[2].a[2].n = (1:2)[2] /* 2 */;
+end ModificationTests.ArrayModifications85;
+")})));
+end ArrayModifications85;
+
+
+model ArrayModifications86
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](a(n=1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications86",
+            description="Split binding expressions on the correct level",
+            flatModel="
+fclass ModificationTests.ArrayModifications86
+ parameter Integer b[1].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[1].a[2].n = (1:2)[2] /* 2 */;
+ parameter Integer b[2].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[2].a[2].n = (1:2)[2] /* 2 */;
+end ModificationTests.ArrayModifications86;
+")})));
+end ArrayModifications86;
 
 
 /* ========= Modifications on type declarations ========= */
@@ -2992,6 +3203,7 @@ model ModificationLevel4
         FClassMethodTestCase(
             name="ModificationLevel4",
             description="Test merging attribute level",
+            eliminate_linear_equations=false,
             methodName="attributeLevels",
             methodResult="
 Variables:
@@ -3014,6 +3226,7 @@ model ModificationLevel5
         FClassMethodTestCase(
             name="ModificationLevel5",
             description="Test merging attribute level of array",
+            eliminate_linear_equations=false,
             methodName="attributeLevels",
             methodResult="
 Variables:
@@ -3320,5 +3533,113 @@ end ModificationTests.ModificationFlattening1;
 ")})));
 end ModificationFlattening1;
 
+
+
+model SupersededModification1
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        parameter Real y = x[2];
+    end A;
+    
+    A a(n = 1, y = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification1",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification1
+ structural parameter Integer a.n = 1 /* 1 */;
+ structural parameter Real a.x[1] = {1} /* { 1 } */;
+ parameter Real a.y = 2 /* 2 */;
+end ModificationTests.SupersededModification1;
+")})));
+end SupersededModification1;
+
+
+model SupersededModification2
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        parameter Real y;
+    end A;
+    
+    model B
+        A a(y = a.x[2]);
+    end B;
+    
+    B b(a(n = 1, y = 2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification2",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification2
+ structural parameter Integer b.a.n = 1 /* 1 */;
+ structural parameter Real b.a.x[1] = {1} /* { 1 } */;
+ parameter Real b.a.y = 2 /* 2 */;
+end ModificationTests.SupersededModification2;
+")})));
+end SupersededModification2;
+
+
+model SupersededModification3
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        Real y(start = x[2]);
+    equation
+        der(y) = -time;
+    end A;
+    
+    A a(n = 1, y(start = 2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification3",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification3
+ structural parameter Integer a.n = 1 /* 1 */;
+ structural parameter Real a.x[1] = {1} /* { 1 } */;
+ Real a.y(start = 2);
+equation
+ der(a.y) = - time;
+end ModificationTests.SupersededModification3;
+")})));
+end SupersededModification3;
+
+
+model SupersededModification4
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        Real y;
+    end A;
+    
+    model B
+        A a(y(start = a.x[2]));
+    equation
+        der(a.y) = -time;
+    end B;
+    
+    B b(a(n = 1, y(start = 2)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification4",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification4
+ structural parameter Integer b.a.n = 1 /* 1 */;
+ structural parameter Real b.a.x[1] = {1} /* { 1 } */;
+ Real b.a.y(start = 2);
+equation
+ der(b.a.y) = - time;
+end ModificationTests.SupersededModification4;
+")})));
+end SupersededModification4;
 
 end ModificationTests;

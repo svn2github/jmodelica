@@ -454,6 +454,117 @@ Input variables:
   ")})));
   end LinearityTest1;
 
+
+model LinearityTest2
+    Real a, b;
+equation
+    a^2 + a = 2;
+    b.^2 + b = 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest2",
+            description="Linearity check for .^",
+            methodName="variableDiagnostics",
+            methodResult="
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ a: number of uses: 2, isLinear: false, alias: no
+ b: number of uses: 2, isLinear: false, alias: no
+
+Input variables: 
+")})));
+end LinearityTest2;
+
+
+model LinearityTest3
+    Real a, b;
+equation
+    a .* b = 2;
+    b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest3",
+            description="Linearity check for .*",
+            methodName="variableDiagnostics",
+            methodResult="
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ a: number of uses: 1, isLinear: false, alias: no
+ b: number of uses: 2, isLinear: false, alias: no
+
+Input variables: 
+")})));
+end LinearityTest3;
+
+
+model LinearityTest4
+    Real a, b, c;
+    parameter Real d = 3;
+equation
+    a ./ b = 2;
+    c ./ d + a = 2;
+    b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest4",
+            description="Linearity check for ./",
+            methodName="variableDiagnostics",
+            methodResult="
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+ d: number of uses: 1, isLinear: true, evaluated binding exp: 3
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ a: number of uses: 2, isLinear: false, alias: no
+ b: number of uses: 2, isLinear: false, alias: no
+ c: number of uses: 1, isLinear: true, alias: no
+
+Input variables: 
+")})));
+end LinearityTest4;
+
+
+
   model AliasTest1
     Real x1 = time;
     Real x2 = time;
@@ -465,12 +576,13 @@ Input variables:
     x5 = x6;  
    
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="AliasTest1",
-			methodName="aliasDiagnostics",
-			description="Test computation of alias sets.",
-			methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AliasTest1",
+            methodName="aliasDiagnostics",
+            description="Test computation of alias sets.",
+            eliminate_linear_equations=false,
+            methodResult="
 Alias sets:
 {x1,-x3,-x4}
 {x2,-x5,-x6}
@@ -1464,29 +1576,30 @@ end AliasPropMinMax2;
 
 
 model AliasPropNominal1
-	type A = Real(nominal = 2);
-	
-	model B
-		Real x(nominal = 3);
-	end B;
-	
-	Real x1 = time;
-	A x2 = x1;
-	
-	Real y1 = time + 1;
-	A y2 = y1;
-	B y3(x = y1);
+    type A = Real(nominal = 2);
+    
+    model B
+        Real x(nominal = 3);
+    end B;
+    
+    Real x1 = time;
+    A x2 = x1;
+    
+    Real y1 = time + 1;
+    A y2 = y1;
+    B y3(x = y1);
     
     Real z1 = time + 2;
     A z2 = z1;
     B z3(x = z1);
-	Real z4(nominal = 4) = z1;
+    Real z4(nominal = 4) = z1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="AliasPropNominal1",
-			description="Test propagation of nominal attribute in alias set",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasPropNominal1",
+            description="Test propagation of nominal attribute in alias set",
+            eliminate_linear_equations=false,
+            flatModel="
 fclass TransformCanonicalTests.AliasPropNominal1
  TransformCanonicalTests.AliasPropNominal1.A x2;
  TransformCanonicalTests.AliasPropNominal1.A y2(nominal = 3);
@@ -1522,11 +1635,12 @@ model AliasPropStart1
     B z3(x = z1);
     Real z4(start = 4) = z1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="AliasPropStart1",
-			description="Test propagation of start attribute in alias set",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasPropStart1",
+            description="Test propagation of start attribute in alias set",
+            eliminate_linear_equations=false,
+            flatModel="
 fclass TransformCanonicalTests.AliasPropStart1
  TransformCanonicalTests.AliasPropStart1.A x2;
  TransformCanonicalTests.AliasPropStart1.A y2(start = 3);
@@ -1665,28 +1779,29 @@ end AliasPropFixed1;
 
 
 model AliasStateSelect1
-	package A
+    package A
         constant StateSelect ss[5] = { StateSelect.always, StateSelect.prefer, StateSelect.default, StateSelect.avoid, StateSelect.never };
-		
-		model B
+        
+        model B
             constant StateSelect s1;
             constant StateSelect s2;
-		    Real x1(stateSelect = s1);
+            Real x1(stateSelect = s1);
             Real x2(stateSelect = s2);
-		equation
-			x1 = time;
-			x1 = x2;
+        equation
+            x1 = time;
+            x1 = x2;
         end B;
-	end A;
-	
-	A.B b[10](s1 = A.ss[{1, 1, 1, 1, 2, 2, 2, 3, 3, 4}], s2 = A.ss[{2, 3, 4, 5, 3, 4, 5, 4, 5, 5}]);
+    end A;
+    
+    A.B b[10](s1 = A.ss[{1, 1, 1, 1, 2, 2, 2, 3, 3, 4}], s2 = A.ss[{2, 3, 4, 5, 3, 4, 5, 4, 5, 5}]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="AliasStateSelect1",
-			description="Test propagation of stateSelect attribute in alias set",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasStateSelect1",
+            description="Test propagation of stateSelect attribute in alias set",
             eliminate_alias_constants=false,
-			flatModel="
+            eliminate_linear_equations=false,
+            flatModel="
 fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[1].s1 = StateSelect.always;
  constant StateSelect b[1].s2 = StateSelect.prefer;
@@ -2153,7 +2268,7 @@ end TransformCanonicalTests.InitialEqTest1;
     v1 + v2 + v3 + v4 + v5 = 1;
     v1 + v2 + v3 + v4 + v6 = 1;
     v1 + v2 + v3 + v4 = 1;
-    v1 + v2 + v3 + v4 = 1;
+    v1 + v2 + v3 + v5 = 1;
     v5 + v6 + v8 + v7 + v9 = 1;
     v5 + v6 + v8 = 0;
     v1 = 1;
@@ -2161,27 +2276,25 @@ end TransformCanonicalTests.InitialEqTest1;
     v9 + v10 = 1;
     v10 = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InitialEqTest2",
-			description="Test algorithm for adding additional initial equations.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEqTest2",
+            description="Test algorithm for adding additional initial equations.",
+            flatModel="
 fclass TransformCanonicalTests.InitialEqTest2
  constant Real v1 = 1;
  Real v3;
  Real v4;
- Real v5;
  Real v6;
  Real v7;
  Real v8;
  constant Real v9 = 0.0;
 equation
- 2.0 + v3 + v4 + v5 = 1;
  2.0 + v3 + v4 + v6 = 1;
- 2.0 + v3 + v4 = 1;
- 2.0 + v3 + v4 = 1;
- v5 + v6 + v8 + v7 = 1;
- v5 + v6 + v8 = 0;
+ 0 = v6;
+ 0 = v4;
+ v6 + v6 + v8 + v7 = 1;
+ v6 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
   end InitialEqTest2;
@@ -2660,9 +2773,9 @@ initial equation
  pre(m.b1) = false;
  pre(m.i1) = 4;
  m.t = 0;
- pre(m.ub1) = false;
- pre(m.ui1) = 0;
  pre(m.x2) = 2;
+ pre(m.ui1) = 0;
+ pre(m.ub1) = false;
  pre(temp_1) = false;
 equation
  der(m.t) = 1;
@@ -3108,24 +3221,24 @@ end TransformCanonicalTests.WhenEqu15;
 end WhenEqu15;
 
 model WhenEqu1
-	discrete Real x[3];
+    discrete Real x[3];
         Real z[3];
 equation
-	der(z) = z .* { 0.1, 0.2, 0.3 };
-	when { z[i] > 2 for i in 1:3 } then
-		x = 1:3;
-	elsewhen { z[i] < 0 for i in 1:3 } then
-		x = 4:6;
-	elsewhen sum(z) > 4.5 then
-		x = 7:9;
-	end when;
+    der(z) = z .* { 0.1, 0.2, 0.3 };
+    when { z[i] > 2 for i in 1:3 } then
+        x = 1:3;
+    elsewhen { z[i] < 0 for i in 1:3 } then
+        x = 4:6;
+    elsewhen sum(z) > 4.5 then
+        x = 7:9;
+    end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu1",
-			description="Basic test of when equations",
-			equation_sorting=true,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu1",
+            description="Basic test of when equations",
+            equation_sorting=true,
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu1
  discrete Real x[1];
  discrete Real x[2];
@@ -3169,7 +3282,6 @@ equation
  x[2] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 2 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 5 elseif temp_7 and not pre(temp_7) then 8 else pre(x[2]);
  x[3] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 3 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 6 elseif temp_7 and not pre(temp_7) then 9 else pre(x[3]);
 end TransformCanonicalTests.WhenEqu1;
-			
 ")})));
 end WhenEqu1;
 
@@ -3498,32 +3610,38 @@ equation
    y = pre(y) + 1;
  end when;
 
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu8",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu8",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu8
  discrete Real x;
  discrete Real y;
  Real dummy;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
  discrete Boolean temp_2;
+ discrete Integer _sampleItr_2;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / 0.6666666666666666);
+ pre(temp_2) = false;
+ _sampleItr_2 = if time < 0 then 0 else ceil(time / 0.3333333333333333);
  dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
- pre(temp_2) = false;
 equation
  der(dummy) = 0;
- temp_1 = sample(0, 0.3333333333333333);
- x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
- temp_2 = sample(0, 0.6666666666666666);
- y = if temp_2 and not pre(temp_2) then pre(y) + 1 else pre(y);
+ x = if temp_2 and not pre(temp_2) then pre(x) + 1 else pre(x);
+ y = if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y);
+ temp_1 = not initial() and time >= pre(_sampleItr_1) * 0.6666666666666666;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * (2 / 3), \"Too long time steps relative to sample interval.\");
+ temp_2 = not initial() and time >= pre(_sampleItr_2) * 0.3333333333333333;
+ _sampleItr_2 = if temp_2 and not pre(temp_2) then pre(_sampleItr_2) + 1 else pre(_sampleItr_2);
+ assert(time < (pre(_sampleItr_2) + 1) * (1 / 3), \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu8;
-			
 ")})));
 end WhenEqu8; 
 
@@ -3545,11 +3663,11 @@ equation
  end when;
  ref = if time <1 then 0 else 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu9",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu9",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu9
  Real x;
  Real ref;
@@ -3559,19 +3677,22 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real Ti = 0.1 /* 0.1 */;
  parameter Real h = 0.05 /* 0.05 */;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / h);
  x = 0.0;
  pre(I) = 0.0;
  pre(u) = 0.0;
- pre(temp_1) = false;
 equation
  der(x) = - x + u;
- temp_1 = sample(0, h);
  I = if temp_1 and not pre(temp_1) then pre(I) + h * (ref - x) else pre(I);
  u = if temp_1 and not pre(temp_1) then K * (ref - x) + 1 / Ti * I else pre(u);
  ref = if time < 1 then 0 else 1;
+ temp_1 = not initial() and time >= pre(_sampleItr_1) * h;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * h, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu9;
-			
 ")})));
 end WhenEqu9; 
 
@@ -3590,7 +3711,7 @@ model WhenEqu10
  parameter Real c_c = 1;
  parameter Real h = 0.1;
 initial equation
- x_c = pre(x_c); 	
+ x_c = pre(x_c);     
 equation
  der(x_p) = a_p*x_p + b_p*u_p;
  u_p = c_c*x_c;
@@ -3600,11 +3721,11 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu10",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu10",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu10
  discrete Boolean sampleTrigger;
  Real x_p(start = 1,fixed = true);
@@ -3618,24 +3739,27 @@ fclass TransformCanonicalTests.WhenEqu10
  parameter Real b_c = 1 /* 1 */;
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
+ discrete Integer _sampleItr_1;
 initial equation 
  x_c = pre(x_c);
- x_p = 1;
  pre(sampleTrigger) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / h);
+ x_p = 1;
  pre(u_c) = 0.0;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
- sampleTrigger = sample(0, h);
  u_c = if initial() or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if initial() or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
+ sampleTrigger = not initial() and time >= pre(_sampleItr_1) * h;
+ _sampleItr_1 = if sampleTrigger and not pre(sampleTrigger) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * h, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu10;
-			
 ")})));
 end WhenEqu10;
 
-model WhenEqu11	
-		
+model WhenEqu11    
+        
  discrete Boolean sampleTrigger;
  Real x_p(start=1);
  Real u_p;
@@ -3650,7 +3774,7 @@ model WhenEqu11
  parameter Real h = 0.1;
  discrete Boolean atInit = true and initial();
 initial equation
- x_c = pre(x_c); 	
+ x_c = pre(x_c);     
 equation
  der(x_p) = a_p*x_p + b_p*u_p;
  u_p = c_c*x_c;
@@ -3660,11 +3784,11 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu11",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu11",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu11
  discrete Boolean sampleTrigger;
  Real x_p(start = 1);
@@ -3679,63 +3803,70 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
  discrete Boolean atInit;
+ discrete Integer _sampleItr_1;
 initial equation 
  x_c = pre(x_c);
- x_p = 1;
  pre(sampleTrigger) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / h);
+ x_p = 1;
  pre(x_c) = 0.0;
  pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
- sampleTrigger = sample(0, h);
  u_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
  atInit = true and initial();
+ sampleTrigger = not initial() and time >= pre(_sampleItr_1) * h;
+ _sampleItr_1 = if sampleTrigger and not pre(sampleTrigger) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * h, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu11;
-			
 ")})));
 end WhenEqu11;
 
 model WhenEqu12
-	
-	function F
-		input Real x;
-		output Real y1;
-		output Real y2;
-	algorithm
-		y1 := 1;
-		y2 := 2;
-	end F;
-	Real x,y;
-	equation
-	when sample(0,1) then
-		(x,y) = F(time);
-	end when;
+    
+    function F
+        input Real x;
+        output Real y1;
+        output Real y2;
+    algorithm
+        y1 := 1;
+        y2 := 2;
+    end F;
+    Real x,y;
+    equation
+    when sample(0,1) then
+        (x,y) = F(time);
+    end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu12",
-			description="Basic test of when equations",
-			inline_functions="none",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu12",
+            description="Basic test of when equations",
+            inline_functions="none",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu12
  discrete Real x;
  discrete Real y;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
 equation
- temp_1 = sample(0, 1);
  if temp_1 and not pre(temp_1) then
   (x, y) = TransformCanonicalTests.WhenEqu12.F(time);
  else
   x = pre(x);
   y = pre(y);
  end if;
+ temp_1 = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 
 public
  function TransformCanonicalTests.WhenEqu12.F
@@ -3749,8 +3880,7 @@ public
  end TransformCanonicalTests.WhenEqu12.F;
 
 end TransformCanonicalTests.WhenEqu12;
-			
-")})));		
+")})));
 end WhenEqu12;
 
 model WhenEqu13
@@ -3777,31 +3907,32 @@ end when;
  der(v3) = if y>=0 then 0 else 1;
  der(v4) = if y>0 then 0 else 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu13",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu13",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu13
- Real v1(start = - 1);
- Real v2(start = - 1);
- Real v3(start = - 1);
- Real v4(start = - 1);
+ Real v1(start = -1);
+ Real v2(start = -1);
+ Real v3(start = -1);
+ Real v4(start = -1);
  discrete Real y(start = 1);
  discrete Integer i(start = 0);
  discrete Boolean up(start = true);
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
  v1 = 0;
  v2 = 1;
  v3 = 0;
  v4 = 1;
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0.1 then 0 else ceil(time - 0.1);
  pre(y) = 1;
  pre(i) = 0;
  pre(up) = true;
- pre(temp_1) = false;
 equation
- temp_1 = sample(0.1, 1);
  i = if temp_1 and not pre(temp_1) then if up then pre(i) + 1 else pre(i) - 1 else pre(i);
  up = if temp_1 and not pre(temp_1) then if pre(i) == 2 then false elseif pre(i) == -2 then true else pre(up) else pre(up);
  y = if temp_1 and not pre(temp_1) then i else pre(y);
@@ -3809,9 +3940,11 @@ equation
  der(v2) = if y < 0 then 0 else 1;
  der(v3) = if y >= 0 then 0 else 1;
  der(v4) = if y > 0 then 0 else 1;
+ temp_1 = not initial() and time >= 0.1 + pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < 0.1 + (pre(_sampleItr_1) + 1), \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu13;
-			
-")})));		
+")})));
 end WhenEqu13;
 model WhenEqu14
     Boolean a;
@@ -4493,11 +4626,11 @@ end TransformCanonicalTests.IfEqu15;
           z1 + z2 = x - y;
       end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu16",
-			description="Nestled if equations with mixed assignment equations and non-assignment equations",
-			flatModel="
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="IfEqu16",
+      description="Nested if equations with mixed assignment equations and non-assignment equations",
+      flatModel="
 fclass TransformCanonicalTests.IfEqu16
  Real x;
  Real y;
@@ -4580,31 +4713,34 @@ Compliance error in flattened model:
   model IfEqu19
     Real x;
   equation
-	when sample(1,0) then
-		if time>=3 then
-			x = pre(x) + 1;
+    when sample(1,0) then
+        if time>=3 then
+            x = pre(x) + 1;
         else
-	        x = pre(x) + 5;
-		end if;
-	end when;
-			
+            x = pre(x) + 5;
+        end if;
+    end when;
+            
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu19",
-			description="Check that if equations inside when equations are treated correctly.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu19",
+            description="Check that if equations inside when equations are treated correctly.",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu19
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = false;
+ _sampleItr_1 = if time < 1 then 0 else ceil((time - 1) / 0);
+ pre(x) = 0.0;
 equation
- temp_1 = sample(1, 0);
  x = if temp_1 and not pre(temp_1) then if time >= 3 then pre(x) + 1 else pre(x) + 5 else pre(x);
+ temp_1 = not initial() and time >= 1;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < 1, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.IfEqu19;
-			
 ")})));
   end IfEqu19;
 
@@ -5343,20 +5479,19 @@ end StateInitialPars8;
   model SolveEqTest1
     Real x, y, z;
   equation
-    x = 1;
+    x = time;
     y = x + 3;
-    z = x - y ;
+    z = x - y;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest1",
 			description="Test solution of equations",
-			equation_sorting=true,
-			variability_propagation=false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-x := 1
+x := time
 
 --- Solved equation ---
 y := x + 3
@@ -5370,7 +5505,7 @@ z := x + (- y)
   model SolveEqTest2
     Real x, y, z;
   equation
-    x = 1;
+    x = time;
     - y = x + 3;
     - z = x - y ;
 
@@ -5378,12 +5513,11 @@ z := x + (- y)
 		FClassMethodTestCase(
 			name="SolveEqTest2",
 			description="Test solution of equations",
-			equation_sorting=true,
-			variability_propagation=false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-x := 1
+x := time
 
 --- Solved equation ---
 y := - x - 3
@@ -5509,7 +5643,7 @@ x / z = x - y
 
     Real x, y, z;
   equation
-    x = 1;
+    x = time;
     - y = x + 3 - y + 4*y;
     - z = x - y -z - 5*z;
 
@@ -5517,12 +5651,11 @@ x / z = x - y
 		FClassMethodTestCase(
 			name="SolveEqTest7",
 			description="Test solution of equations",
-			equation_sorting=true,
-			variability_propagation=false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-x := 1
+x := time
 
 --- Solved equation ---
 y := (x + 3) / (-1.0 + 1.0 + -4)
@@ -5579,6 +5712,7 @@ end TransformCanonicalTests.SolveEqTest9;
         FClassMethodTestCase(
             name="SolveEqTest10",
             description="Test bug found in solution framework",
+            eliminate_linear_equations=false,
             equation_sorting=true,
             variability_propagation=false,
             methodName="printDAEBLT",
@@ -5788,6 +5922,7 @@ x1 - x2 = z*w;
 			description="Test of linear systems of equations",
 			equation_sorting=true,
             automatic_tearing = false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Unsolved linear system (Block 1) of 3 variables ---
@@ -5826,6 +5961,7 @@ x1 - x2 = z;
 			description="Test of linear systems of equations",
 			equation_sorting=true,
             automatic_tearing = false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Unsolved linear system (Block 1) of 3 variables ---
@@ -5859,14 +5995,15 @@ x2 = z + p;
 x1 + x2 = z;
 x1 - x2 = z*p;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="BlockTest6",
-			description="Test of linear systems of equations",
-			equation_sorting=true,
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="BlockTest6",
+            description="Test of linear systems of equations",
+            eliminate_linear_equations=false,
+            equation_sorting=true,
             automatic_tearing = false,
-			methodName="printDAEBLT",
-			methodResult="
+            methodName="printDAEBLT",
+            methodResult="
 --- Unsolved linear system (Block 1) of 3 variables ---
 Coefficient variability: parameter
 Unknown variables:
@@ -5898,14 +6035,14 @@ equation
     a = 1 - b;
     a = b * (if d then 1 else 2);
     d = b < 0;
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="BlockTest7",
-			description="Test of linear systems of equations with if expression",
-			equation_sorting=true,
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="BlockTest7",
+            description="Test of linear systems of equations with if expression",
+            equation_sorting=true,
             automatic_tearing = false,
-			methodName="printDAEBLT",
-			methodResult="
+            methodName="printDAEBLT",
+            methodResult="
 --- Unsolved mixed linear system (Block 1) of 3 variables ---
 Coefficient variability: discrete-time
 Unknown continuous variables:
@@ -6358,14 +6495,14 @@ equation
   x[15] = x[12] + x[3];
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="VarDependencyTest1",
-			methodName="dependencyDiagnostics",
-			equation_sorting=true,
-			eliminate_alias_variables=false,
-			description="Test computation of direct dependencies",
-			methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="VarDependencyTest1",
+            methodName="dependencyDiagnostics",
+            equation_sorting=true,
+            eliminate_alias_variables=false,
+            description="Test computation of direct dependencies",
+            methodResult="
 Variable dependencies:
 Derivative variables: 
 
@@ -6396,16 +6533,16 @@ Algebraic real variables:
  x[11]
     u[1]
  x[12]
-    u[1]
     u[2]
+    u[1]
  x[13]
     u[3]
  x[14]
     u[3]
     u[4]
  x[15]
-    u[1]
     u[2]
+    u[1]
     u[3]
 ")})));
 end VarDependencyTest1;
@@ -7448,11 +7585,11 @@ model IllegalWhen2_Err
 
 Error in flattened model:
   A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions. Equations in block:
+temp_3 = z >= 1
 y = if temp_3 and not pre(temp_3) then 3 else pre(y)
 x = y - 1
 temp_2 = x >= 0.5
 z = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) then 2 else pre(z)
-temp_3 = z >= 1
 ")})));
 end IllegalWhen2_Err;
   
@@ -7666,7 +7803,7 @@ pre(b) := false
 end LinearBlockTest2;
 
 model LinearBlockTest3
-    Real a,b,c,d,e;
+    Real a, b, c, d, e;
 equation
     a = time + d * 2;
     e = a * 2 - d;
@@ -7681,6 +7818,7 @@ algorithm
         FClassMethodTestCase(
             name="LinearBlockTest3",
             description="Test generation of linear blocks with non-scalar algorithm block in the solved part",
+            eliminate_linear_equations=false,
             methodName="printDAEBLT",
             methodResult="
 --- Torn mixed linear system (Block 1) of 1 iteration variables and 4 solved variables ---
@@ -7726,7 +7864,6 @@ Jacobian:
 ")})));
 end LinearBlockTest3;
 
-
 model Sample1
     Real x;
 equation
@@ -7742,12 +7879,16 @@ equation
 fclass TransformCanonicalTests.Sample1
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
+ pre(x) = 0.0;
 equation
- temp_1 = sample(0, 1);
  x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
+ temp_1 = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.Sample1;
 ")})));
 end Sample1;
@@ -7767,18 +7908,51 @@ equation
 fclass TransformCanonicalTests.Sample2
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
  discrete Boolean temp_2;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
+ pre(x) = 0.0;
  pre(temp_2) = false;
 equation
- temp_1 = temp_2 and time < 20;
- x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
- temp_2 = sample(0, 1);
+ temp_2 = temp_1 and time < 20;
+ x = if temp_2 and not pre(temp_2) then time * 6.28 else pre(x);
+ temp_1 = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.Sample2;
+
 ")})));
 end Sample2;
+
+model Sample3
+    parameter input Integer a;
+    parameter input Integer b;
+    Boolean s;
+  equation
+    s = sample(a, b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sample3",
+            description="Test so that a sample equation is correctly transformed to a when-equation.",
+            flatModel="
+fclass TransformCanonicalTests.Sample3
+ parameter input Integer a;
+ parameter input Integer b;
+ discrete Boolean s;
+ discrete Integer _sampleItr_1;
+initial equation 
+ pre(s) = false;
+ _sampleItr_1 = if time < a then 0 else ceil((time - a) / b);
+equation
+ s = not initial() and time >= a + pre(_sampleItr_1) * b;
+ _sampleItr_1 = if s and not pre(s) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < a + (pre(_sampleItr_1) + 1) * b, \"Too long time steps relative to sample interval.\");
+end TransformCanonicalTests.Sample3;
+")})));
+end Sample3;
 
 model InsertTempLHS1
     record R
@@ -8061,5 +8235,271 @@ equation
 end TransformCanonicalTests.ScalarizeIfInLoop4;
 ")})));
 end ScalarizeIfInLoop4;
+
+
+model ForOfUnknownSize1
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize1",
+            description="Scalarization of for loop over unknown size array: array variable",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize1
+ structural parameter Integer n = 4 /* 4 */;
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize1.f({y[1], y[2], y[3], y[4]});
+ y[1] = time;
+ y[2] = 2 * y[1];
+ y[3] = 3 * y[1];
+ y[4] = 4 * y[1];
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize1.f
+  input Real[:] y;
+  output Real x;
+ algorithm
+  x := 0;
+  for v in y loop
+   x := x + v;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize1.f;
+
+end TransformCanonicalTests.ForOfUnknownSize1;
+")})));
+end ForOfUnknownSize1;
+
+
+model ForOfUnknownSize2
+    function f
+        input Integer n;
+        output Real x;
+    algorithm
+        x := 0;
+        for i in 1:n loop
+            x := x + i;
+        end for;
+    end f;
+    
+    Integer n = integer(time);
+    Real x = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize2",
+            description="Scalarization of for loop over unknown size array: range exp",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize2
+ discrete Integer n;
+ Real x;
+initial equation 
+ pre(n) = 0;
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize2.f(n);
+ n = if time < pre(n) or time >= pre(n) + 1 or initial() then integer(time) else pre(n);
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize2.f
+  input Integer n;
+  output Real x;
+ algorithm
+  x := 0;
+  for i in 1:n loop
+   x := x + i;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize2.f;
+
+end TransformCanonicalTests.ForOfUnknownSize2;
+")})));
+end ForOfUnknownSize2;
+
+
+model ForOfUnknownSize3
+    function f
+        input Integer n;
+        output Real x;
+    algorithm
+        x := 0;
+        for i in (1:n).^2 loop
+            x := x + i;
+        end for;
+    end f;
+    
+    Integer n = integer(time);
+    Real x = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize3",
+            description="Scalarization of for loop over unknown size array: general array exp",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize3
+ discrete Integer n;
+ Real x;
+initial equation 
+ pre(n) = 0;
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize3.f(n);
+ n = if time < pre(n) or time >= pre(n) + 1 or initial() then integer(time) else pre(n);
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize3.f
+  input Integer n;
+  output Real x;
+  Real[:] temp_1;
+ algorithm
+  x := 0;
+  init temp_1 as Real[max(n, 0)];
+  for i1 in 1:max(n, 0) loop
+   temp_1[i1] := i1 .^ 2;
+  end for;
+  for i in temp_1 loop
+   x := x + i;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize3.f;
+
+end TransformCanonicalTests.ForOfUnknownSize3;
+")})));
+end ForOfUnknownSize3;
+
+
+model ForOfUnknownSize4
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y[2:end] loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize4",
+            description="Scalarization of for loop over unknown size array: slice",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize4
+ structural parameter Integer n = 4 /* 4 */;
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize4.f({y[1], y[2], y[3], y[4]});
+ y[1] = time;
+ y[2] = 2 * y[1];
+ y[3] = 3 * y[1];
+ y[4] = 4 * y[1];
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize4.f
+  input Real[:] y;
+  output Real x;
+  Real[:] temp_1;
+ algorithm
+  x := 0;
+  init temp_1 as Real[max(integer(size(y, 1) - 2) + 1, 0)];
+  for i1 in 1:max(integer(size(y, 1) - 2) + 1, 0) loop
+   temp_1[i1] := y[2 + (i1 - 1)];
+  end for;
+  for v in temp_1 loop
+   x := x + v;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize4.f;
+
+end TransformCanonicalTests.ForOfUnknownSize4;
+")})));
+end ForOfUnknownSize4;
+
+
+model ForOfUnknownSize5
+    function f
+        input Real[2,:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y[2,:] loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[2,n] = {1:n, 2:n+1} * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize5",
+            description="Scalarization of for loop over unknown size array: select one row from matrix",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize5
+ structural parameter Integer n = 4 /* 4 */;
+ Real x;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[1,4];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[2,4];
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize5.f({{y[1,1], y[1,2], y[1,3], y[1,4]}, {y[2,1], y[2,2], y[2,3], y[2,4]}});
+ y[1,1] = time;
+ y[1,2] = 2 * y[1,1];
+ y[1,3] = 3 * y[1,1];
+ y[1,4] = 4 * y[1,1];
+ y[2,1] = 2 * y[1,1];
+ y[2,2] = 3 * y[1,1];
+ y[2,3] = 4 * y[1,1];
+ y[2,4] = 5 * y[1,1];
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize5.f
+  input Real[:,:] y;
+  output Real x;
+  Real[:] temp_1;
+ algorithm
+  x := 0;
+  init temp_1 as Real[size(y, 2)];
+  for i1 in 1:size(y, 2) loop
+   temp_1[i1] := y[2,i1];
+  end for;
+  for v in temp_1 loop
+   x := x + v;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize5.f;
+
+end TransformCanonicalTests.ForOfUnknownSize5;
+")})));
+end ForOfUnknownSize5;
 
 end TransformCanonicalTests;

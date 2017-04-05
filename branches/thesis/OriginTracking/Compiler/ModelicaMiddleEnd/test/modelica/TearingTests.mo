@@ -587,15 +587,16 @@ equation
   x = 2*z + y;
   z = 2*x;
   
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="AlgorithmTearingTest2",
-			methodName="printDAEBLT",
-			equation_sorting=true,
-			automatic_tearing=true,
-			inline_functions="none",
-			description="Test of algorithm tearing",
-			methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AlgorithmTearingTest2",
+            methodName="printDAEBLT",
+            equation_sorting=true,
+            automatic_tearing=true,
+            eliminate_linear_equations=false,
+            inline_functions="none",
+            description="Test of algorithm tearing",
+            methodResult="
 --- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
 Torn variables:
   y
@@ -907,15 +908,15 @@ der(x1) := 1
 --- Solved equation ---
 der(x2) := time
 
---- Torn mixed linear system (Block 1) of 2 iteration variables and 3 solved variables ---
+--- Torn mixed linear system (Block 1) of 3 iteration variables and 2 solved variables ---
 Coefficient variability: discrete-time
 Torn variables:
   r5
-  r1
   r2
 
 Iteration variables:
   r3[1]
+  r1
   r4
 
 Solved discrete variables:
@@ -927,12 +928,13 @@ Solved discrete variables:
 
 Torn equations:
   r5 := if noEvent(r4 >= 0) then r4 else - r4
-  r1 := if b1 then ({r3[1]})[1] else 0.0
   r2 := if b1 then r1 else 42.0
 
 Continuous residual equations:
   r3[1] = if b3 then 3.14 else 6.28
     Iteration variables: r3[1]
+  r1 = if b1 then ({r3[1]})[1] else 0.0
+    Iteration variables: r1
   r4 = r3[1] + r2
     Iteration variables: r4
 
@@ -954,10 +956,10 @@ Meta equations:
 
 Jacobian:
   |1.0, 0.0, 0.0, 0.0, 0.0|
-  |0.0, 1.0, 0.0, - (if b1 then ({1.0})[1] else 0.0), 0.0|
-  |0.0, - (if b1 then 1.0 else 0.0), 1.0, 0.0, 0.0|
-  |0.0, 0.0, 0.0, 1.0, 0.0|
-  |0.0, 0.0, -1.0, -1.0, 1.0|
+  |0.0, 1.0, 0.0, - (if b1 then 1.0 else 0.0), 0.0|
+  |0.0, 0.0, 1.0, 0.0, 0.0|
+  |0.0, 0.0, - (if b1 then ({1.0})[1] else 0.0), 1.0, 0.0|
+  |0.0, -1.0, -1.0, 0.0, 1.0|
 -------------------------------
 ")})));
 end MetaEquation2;
@@ -1148,6 +1150,7 @@ model NoEventNonlinear2
         FClassMethodTestCase(
             name="NoEventNonlinear2",
             description="",
+            eliminate_linear_equations=false,
             methodName="printDAEBLT",
             methodResult="
 --- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---

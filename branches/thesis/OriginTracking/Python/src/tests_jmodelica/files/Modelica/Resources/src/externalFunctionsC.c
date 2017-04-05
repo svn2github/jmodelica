@@ -2,7 +2,7 @@
 
 #include <string.h>
 #include <ModelicaUtilities.h>
-
+#include <time.h>
 
 double fRealScalar(double in)
 {
@@ -90,4 +90,16 @@ void fEnumArray(int* in, size_t in_d1, int* out, size_t out_d1)
 void fRecord(fRec_t *r, fRec_t *y)
 {
     y->x = r->x;
+}
+
+int fStrlen(const char *str)
+{
+    return (int) strlen(str);
+}
+
+int get_time()
+{
+    time_t seconds;
+    seconds = time(NULL);
+    return seconds; 
 }

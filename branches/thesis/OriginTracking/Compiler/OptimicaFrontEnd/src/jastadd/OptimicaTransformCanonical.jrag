@@ -180,41 +180,13 @@ aspect OptimicaTransformCanonical {
 	
     public void FRelationConstraint.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {
         createArrayTemporaries(s);
-		//log.debug("FEquation.scalarize() " + ndims());
-		if (ndims()==0) {
-			/**
-			 * If the constraint is of dimension 0, i.e, already scalar,
-			 * the constraint is "scalarized" into a simple constraint where
-			 * e.g. built in functions are replaced by elementary operations.
-			 */
-            constr.add(createNode(getLeft().scalarize(s), getRight().scalarize(s)));
-		} else if (ndims() > 0) {
-			/**
-			 * If the expression is an array expression, then the FExp.getArray()
-			 * element is used to generate scalar constraints.
-			 */
-			// Iterate over array elements and create scalarized equation for each
-			for (Index i : indices()) {
-                constr.add(createNode(getLeft().getArray().get(i).scalarize(s), 
-                        getRight().getArray().get(i).scalarize(s)));
-			}
-		}
-	}
-	
-    public void FForClauseC.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {
-        createArrayTemporaries(s);
-		Indices indices = indices();
-		for (Index i : indices) {
-            indices.fillIndexMap(s.map(), i, getFForIndexs());
-			for (FConstraint c : getFConstraints()) 
-                c.scalarize(s, constr);
-		}
-        for (CommonForIndex fi : getFForIndexs())
-            fi.clearEvaluationValue();
+        for (Index i : indices()) {
+            constr.add(createNode(getLeft().cell(i).scalarize(s), getRight().cell(i).scalarize(s)));
+        }
 	}
 	
 	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 
-		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 
+        return new FTimedVariable(getName().scalarize(indexMap, null), getArg().scalarize(indexMap));  
 	}
 	
 	public FExp FStartTimeExp.scalarize(Map<String,FExp> indexMap) { return new FStartTimeExp(); } 

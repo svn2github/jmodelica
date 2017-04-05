@@ -302,23 +302,19 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest7
  Real a1[1].x;
- Real a1[1].y;
+ input Real a1[1].y;
  Real a1[2].x;
- Real a1[2].y;
+ input Real a1[2].y;
  Real a2[1].x;
- Real a2[1].y;
+ input Real a2[1].y;
  Real a2[2].x;
- Real a2[2].y;
+ input Real a2[2].y;
 equation
  a1[1:2].x = ones(2);
  a1[1].x = a2[1].x;
  - a1[1].y - a2[1].y = 0;
  a1[2].x = a2[2].x;
  - a1[2].y - a2[2].y = 0;
- a1[1].y = 0;
- a1[2].y = 0;
- a2[1].y = 0;
- a2[2].y = 0;
 end ConnectTests.ConnectTest7;
 ")})));
 end ConnectTest7;
@@ -343,22 +339,18 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest8
  Real a[1].x;
- Real a[1].y;
+ input Real a[1].y;
  Real a[2].x;
- Real a[2].y;
+ input Real a[2].y;
  Real a[3].x;
- Real a[3].y;
+ input Real a[3].y;
  Real a[4].x;
- Real a[4].y;
+ input Real a[4].y;
 equation
  a[1].x = a[2].x;
  a[2].x = a[3].x;
  a[3].x = a[4].x;
  - a[1].y - a[2].y - a[3].y - a[4].y = 0;
- a[1].y = 0;
- a[2].y = 0;
- a[3].y = 0;
- a[4].y = 0;
 end ConnectTests.ConnectTest8;
 ")})));
 end ConnectTest8;
@@ -381,14 +373,12 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest9
  Real a[1].x;
- Real a[1].y;
+ input Real a[1].y;
  Real a[2].x;
- Real a[2].y;
+ input Real a[2].y;
 equation
  a[1].x = a[2].x;
  - a[1].y - a[2].y = 0;
- a[1].y = 0;
- a[2].y = 0;
 end ConnectTests.ConnectTest9;
 ")})));
 end ConnectTest9;
@@ -452,22 +442,18 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest11
  Real c1.b1.x;
- Real c1.b1.y;
+ input Real c1.b1.y;
  Real c1.b2.x;
- Real c1.b2.y;
+ input Real c1.b2.y;
  Real c2.b1.x;
- Real c2.b1.y;
+ input Real c2.b1.y;
  Real c2.b2.x;
- Real c2.b2.y;
+ input Real c2.b2.y;
 equation
  c1.b1.x = c2.b1.x;
  - c1.b1.y - c2.b1.y = 0;
  c1.b2.x = c2.b2.x;
  - c1.b2.y - c2.b2.y = 0;
- c1.b1.y = 0;
- c1.b2.y = 0;
- c2.b1.y = 0;
- c2.b2.y = 0;
 end ConnectTests.ConnectTest11;
 ")})));
 end ConnectTest11;
@@ -498,53 +484,53 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest12
  Real b[1,1].a[1].x;
- Real b[1,1].a[1].y;
+ input Real b[1,1].a[1].y;
  Real b[1,1].a[2].x;
- Real b[1,1].a[2].y;
+ input Real b[1,1].a[2].y;
  Real b[1,2].a[1].x;
- Real b[1,2].a[1].y;
+ input Real b[1,2].a[1].y;
  Real b[1,2].a[2].x;
- Real b[1,2].a[2].y;
+ input Real b[1,2].a[2].y;
  Real b[1,3].a[1].x;
- Real b[1,3].a[1].y;
+ input Real b[1,3].a[1].y;
  Real b[1,3].a[2].x;
- Real b[1,3].a[2].y;
+ input Real b[1,3].a[2].y;
  Real b[1,4].a[1].x;
- Real b[1,4].a[1].y;
+ input Real b[1,4].a[1].y;
  Real b[1,4].a[2].x;
- Real b[1,4].a[2].y;
+ input Real b[1,4].a[2].y;
  Real b[2,1].a[1].x;
- Real b[2,1].a[1].y;
+ input Real b[2,1].a[1].y;
  Real b[2,1].a[2].x;
- Real b[2,1].a[2].y;
+ input Real b[2,1].a[2].y;
  Real b[2,2].a[1].x;
- Real b[2,2].a[1].y;
+ input Real b[2,2].a[1].y;
  Real b[2,2].a[2].x;
- Real b[2,2].a[2].y;
+ input Real b[2,2].a[2].y;
  Real b[2,3].a[1].x;
- Real b[2,3].a[1].y;
+ input Real b[2,3].a[1].y;
  Real b[2,3].a[2].x;
- Real b[2,3].a[2].y;
+ input Real b[2,3].a[2].y;
  Real b[2,4].a[1].x;
- Real b[2,4].a[1].y;
+ input Real b[2,4].a[1].y;
  Real b[2,4].a[2].x;
- Real b[2,4].a[2].y;
+ input Real b[2,4].a[2].y;
  Real b[3,1].a[1].x;
- Real b[3,1].a[1].y;
+ input Real b[3,1].a[1].y;
  Real b[3,1].a[2].x;
- Real b[3,1].a[2].y;
+ input Real b[3,1].a[2].y;
  Real b[3,2].a[1].x;
- Real b[3,2].a[1].y;
+ input Real b[3,2].a[1].y;
  Real b[3,2].a[2].x;
- Real b[3,2].a[2].y;
+ input Real b[3,2].a[2].y;
  Real b[3,3].a[1].x;
- Real b[3,3].a[1].y;
+ input Real b[3,3].a[1].y;
  Real b[3,3].a[2].x;
- Real b[3,3].a[2].y;
+ input Real b[3,3].a[2].y;
  Real b[3,4].a[1].x;
- Real b[3,4].a[1].y;
+ input Real b[3,4].a[1].y;
  Real b[3,4].a[2].x;
- Real b[3,4].a[2].y;
+ input Real b[3,4].a[2].y;
 equation
  b[1,1].a[1].x = b[1,1].a[2].x;
  b[1,1].a[2].x = b[1,2].a[1].x;
@@ -563,30 +549,6 @@ equation
  b[3,1].a[2].x = b[3,2].a[2].x;
  b[3,2].a[2].x = b[3,3].a[2].x;
  - b[1,1].a[1].y - b[1,1].a[2].y - b[1,2].a[1].y - b[1,2].a[2].y - b[1,3].a[1].y - b[1,3].a[2].y - b[1,4].a[1].y - b[2,1].a[1].y - b[2,1].a[2].y - b[2,2].a[1].y - b[2,2].a[2].y - b[2,3].a[1].y - b[2,3].a[2].y - b[2,4].a[1].y - b[3,1].a[2].y - b[3,2].a[2].y - b[3,3].a[2].y = 0;
- b[1,1].a[1].y = 0;
- b[1,1].a[2].y = 0;
- b[1,2].a[1].y = 0;
- b[1,2].a[2].y = 0;
- b[1,3].a[1].y = 0;
- b[1,3].a[2].y = 0;
- b[1,4].a[1].y = 0;
- b[1,4].a[2].y = 0;
- b[2,1].a[1].y = 0;
- b[2,1].a[2].y = 0;
- b[2,2].a[1].y = 0;
- b[2,2].a[2].y = 0;
- b[2,3].a[1].y = 0;
- b[2,3].a[2].y = 0;
- b[2,4].a[1].y = 0;
- b[2,4].a[2].y = 0;
- b[3,1].a[1].y = 0;
- b[3,1].a[2].y = 0;
- b[3,2].a[1].y = 0;
- b[3,2].a[2].y = 0;
- b[3,3].a[1].y = 0;
- b[3,3].a[2].y = 0;
- b[3,4].a[1].y = 0;
- b[3,4].a[2].y = 0;
 end ConnectTests.ConnectTest12;
 ")})));
 end ConnectTest12;
@@ -615,17 +577,17 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest13
  Real b[1].a[1].x;
- Real b[1].a[1].y;
+ input Real b[1].a[1].y;
  Real b[1].a[2].x;
- Real b[1].a[2].y;
+ input Real b[1].a[2].y;
  Real b[2].a[1].x;
- Real b[2].a[1].y;
+ input Real b[2].a[1].y;
  Real b[2].a[2].x;
- Real b[2].a[2].y;
+ input Real b[2].a[2].y;
  Real b[3].a[1].x;
- Real b[3].a[1].y;
+ input Real b[3].a[1].y;
  Real b[3].a[2].x;
- Real b[3].a[2].y;
+ input Real b[3].a[2].y;
 equation
  b[1].a[1].x = b[2].a[1].x;
  b[2].a[1].x = b[3].a[1].x;
@@ -633,12 +595,6 @@ equation
  b[1].a[2].x = b[2].a[2].x;
  b[2].a[2].x = b[3].a[2].x;
  - b[1].a[2].y - b[2].a[2].y - b[3].a[2].y = 0;
- b[1].a[1].y = 0;
- b[1].a[2].y = 0;
- b[2].a[1].y = 0;
- b[2].a[2].y = 0;
- b[3].a[1].y = 0;
- b[3].a[2].y = 0;
 end ConnectTests.ConnectTest13;
 ")})));
 end ConnectTest13;
@@ -666,37 +622,37 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest14
  Real b1[1,1].a[1].x;
- Real b1[1,1].a[1].y;
+ input Real b1[1,1].a[1].y;
  Real b1[1,1].a[2].x;
- Real b1[1,1].a[2].y;
+ input Real b1[1,1].a[2].y;
  Real b1[1,2].a[1].x;
- Real b1[1,2].a[1].y;
+ input Real b1[1,2].a[1].y;
  Real b1[1,2].a[2].x;
- Real b1[1,2].a[2].y;
+ input Real b1[1,2].a[2].y;
  Real b1[2,1].a[1].x;
- Real b1[2,1].a[1].y;
+ input Real b1[2,1].a[1].y;
  Real b1[2,1].a[2].x;
- Real b1[2,1].a[2].y;
+ input Real b1[2,1].a[2].y;
  Real b1[2,2].a[1].x;
- Real b1[2,2].a[1].y;
+ input Real b1[2,2].a[1].y;
  Real b1[2,2].a[2].x;
- Real b1[2,2].a[2].y;
+ input Real b1[2,2].a[2].y;
  Real b2[1,1].a[1].x;
- Real b2[1,1].a[1].y;
+ input Real b2[1,1].a[1].y;
  Real b2[1,1].a[2].x;
- Real b2[1,1].a[2].y;
+ input Real b2[1,1].a[2].y;
  Real b2[1,2].a[1].x;
- Real b2[1,2].a[1].y;
+ input Real b2[1,2].a[1].y;
  Real b2[1,2].a[2].x;
- Real b2[1,2].a[2].y;
+ input Real b2[1,2].a[2].y;
  Real b2[2,1].a[1].x;
- Real b2[2,1].a[1].y;
+ input Real b2[2,1].a[1].y;
  Real b2[2,1].a[2].x;
- Real b2[2,1].a[2].y;
+ input Real b2[2,1].a[2].y;
  Real b2[2,2].a[1].x;
- Real b2[2,2].a[1].y;
+ input Real b2[2,2].a[1].y;
  Real b2[2,2].a[2].x;
- Real b2[2,2].a[2].y;
+ input Real b2[2,2].a[2].y;
 equation
  b1[1,1].a[1].x = b2[1,1].a[1].x;
  - b1[1,1].a[1].y - b2[1,1].a[1].y = 0;
@@ -714,22 +670,6 @@ equation
  - b1[2,2].a[1].y - b2[2,2].a[1].y = 0;
  b1[2,2].a[2].x = b2[2,2].a[2].x;
  - b1[2,2].a[2].y - b2[2,2].a[2].y = 0;
- b1[1,1].a[1].y = 0;
- b1[1,1].a[2].y = 0;
- b1[1,2].a[1].y = 0;
- b1[1,2].a[2].y = 0;
- b1[2,1].a[1].y = 0;
- b1[2,1].a[2].y = 0;
- b1[2,2].a[1].y = 0;
- b1[2,2].a[2].y = 0;
- b2[1,1].a[1].y = 0;
- b2[1,1].a[2].y = 0;
- b2[1,2].a[1].y = 0;
- b2[1,2].a[2].y = 0;
- b2[2,1].a[1].y = 0;
- b2[2,1].a[2].y = 0;
- b2[2,2].a[1].y = 0;
- b2[2,2].a[2].y = 0;
 end ConnectTests.ConnectTest14;
 ")})));
 end ConnectTest14;
@@ -756,37 +696,37 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest15
  Real b[1,1,1].a[1].x;
- Real b[1,1,1].a[1].y;
+ input Real b[1,1,1].a[1].y;
  Real b[1,1,1].a[2].x;
- Real b[1,1,1].a[2].y;
+ input Real b[1,1,1].a[2].y;
  Real b[1,1,2].a[1].x;
- Real b[1,1,2].a[1].y;
+ input Real b[1,1,2].a[1].y;
  Real b[1,1,2].a[2].x;
- Real b[1,1,2].a[2].y;
+ input Real b[1,1,2].a[2].y;
  Real b[1,2,1].a[1].x;
- Real b[1,2,1].a[1].y;
+ input Real b[1,2,1].a[1].y;
  Real b[1,2,1].a[2].x;
- Real b[1,2,1].a[2].y;
+ input Real b[1,2,1].a[2].y;
  Real b[1,2,2].a[1].x;
- Real b[1,2,2].a[1].y;
+ input Real b[1,2,2].a[1].y;
  Real b[1,2,2].a[2].x;
- Real b[1,2,2].a[2].y;
+ input Real b[1,2,2].a[2].y;
  Real b[2,1,1].a[1].x;
- Real b[2,1,1].a[1].y;
+ input Real b[2,1,1].a[1].y;
  Real b[2,1,1].a[2].x;
- Real b[2,1,1].a[2].y;
+ input Real b[2,1,1].a[2].y;
  Real b[2,1,2].a[1].x;
- Real b[2,1,2].a[1].y;
+ input Real b[2,1,2].a[1].y;
  Real b[2,1,2].a[2].x;
- Real b[2,1,2].a[2].y;
+ input Real b[2,1,2].a[2].y;
  Real b[2,2,1].a[1].x;
- Real b[2,2,1].a[1].y;
+ input Real b[2,2,1].a[1].y;
  Real b[2,2,1].a[2].x;
- Real b[2,2,1].a[2].y;
+ input Real b[2,2,1].a[2].y;
  Real b[2,2,2].a[1].x;
- Real b[2,2,2].a[1].y;
+ input Real b[2,2,2].a[1].y;
  Real b[2,2,2].a[2].x;
- Real b[2,2,2].a[2].y;
+ input Real b[2,2,2].a[2].y;
 equation
  b[1,1,1].a[1].x = b[2,1,1].a[1].x;
  - b[1,1,1].a[1].y - b[2,1,1].a[1].y = 0;
@@ -804,22 +744,6 @@ equation
  - b[1,2,2].a[1].y - b[2,2,2].a[1].y = 0;
  b[1,2,2].a[2].x = b[2,2,2].a[2].x;
  - b[1,2,2].a[2].y - b[2,2,2].a[2].y = 0;
- b[1,1,1].a[1].y = 0;
- b[1,1,1].a[2].y = 0;
- b[1,1,2].a[1].y = 0;
- b[1,1,2].a[2].y = 0;
- b[1,2,1].a[1].y = 0;
- b[1,2,1].a[2].y = 0;
- b[1,2,2].a[1].y = 0;
- b[1,2,2].a[2].y = 0;
- b[2,1,1].a[1].y = 0;
- b[2,1,1].a[2].y = 0;
- b[2,1,2].a[1].y = 0;
- b[2,1,2].a[2].y = 0;
- b[2,2,1].a[1].y = 0;
- b[2,2,1].a[2].y = 0;
- b[2,2,2].a[1].y = 0;
- b[2,2,2].a[2].y = 0;
 end ConnectTests.ConnectTest15;
 ")})));
 end ConnectTest15;
@@ -1191,22 +1115,18 @@ equation
 			flatModel="
 fclass ConnectTests.ConnectTest26
  Real a1.b[1].x;
- Real a1.b[1].y;
+ input Real a1.b[1].y;
  Real a1.b[2].x;
- Real a1.b[2].y;
+ input Real a1.b[2].y;
  Real a2.b[1].x;
- Real a2.b[1].y;
+ input Real a2.b[1].y;
  Real a2.b[2].x;
- Real a2.b[2].y;
+ input Real a2.b[2].y;
 equation
  a1.b[1].x = a2.b[1].x;
  - a1.b[1].y - a2.b[1].y = 0;
  a1.b[2].x = a2.b[2].x;
  - a1.b[2].y - a2.b[2].y = 0;
- a1.b[1].y = 0;
- a1.b[2].y = 0;
- a2.b[1].y = 0;
- a2.b[2].y = 0;
 end ConnectTests.ConnectTest26;
 ")})));
 end ConnectTest26;
@@ -1644,7 +1564,7 @@ model ConnectOuterTest9
             flatModel="
 fclass ConnectTests.ConnectOuterTest9
  Real c1.x;
- Real c1.y;
+ input Real c1.y;
  Real b.c1.x;
  Real b.c1.y;
  Real b.c2.x;
@@ -1652,7 +1572,6 @@ fclass ConnectTests.ConnectOuterTest9
  Real b.d.c2.x;
  Real b.d.c2.y;
 equation
- c1.y = 0;
  b.c2.x = c1.x;
  - b.c2.y - c1.y = 0;
  b.c1.y = 0;
@@ -2712,17 +2631,22 @@ fclass ConnectTests.StreamTest6
  Real x[1];
  Real x[2];
  Real a[1].a;
- constant Real a[1].b = 0;
+ input Real a[1].b;
  Real a[1].c;
  Real a[2].a;
+ input Real a[2].b;
  Real a[2].c;
+ Real b[1].a.b;
+ Real b[2].a.b;
 equation
  a[1].a = time;
- a[2].a = 2 * time;
- a[1].c = a[1].a * 2;
- a[2].c = a[2].a * 2;
+ a[2].a = 2 * a[1].a;
+ a[1].c = -2 * (- time);
+ a[2].c = -2 * (-2 * a[1].a);
  x[1] = a[2].c * time;
  x[2] = a[2].c + time;
+ - a[1].b + b[1].a.b = 0;
+ - a[2].b + b[2].a.b = 0;
 end ConnectTests.StreamTest6;
 ")})));
 end StreamTest6;
@@ -2924,6 +2848,7 @@ equation
         TransformCanonicalTestCase(
             name="Cardinality7",
             description="cardinality(): array test as test of if expression",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ConnectTests.Cardinality7
  structural parameter Integer n = 2 /* 2 */;
@@ -3175,6 +3100,122 @@ equation
 end ConnectTests.ConditionalCompInConnector2;
 ")})));
 end ConditionalCompInConnector2;
+
+model TopLevelIO1
+    connector C
+        input Real x;
+    end C;
+    
+    C[2] c1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TopLevelIO1",
+            description="",
+            flatModel="
+fclass ConnectTests.TopLevelIO1
+ input Real c1[1].x;
+ input Real c1[2].x;
+end ConnectTests.TopLevelIO1;
+")})));
+end TopLevelIO1;
+
+model TopLevelIO2
+    connector C
+        input Real x;
+        flow Real f;
+    end C;
+    
+    model M
+        C c2;
+    end M;
+    
+    C c1;
+    M m;
+equation
+    connect(c1, m.c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TopLevelIO2",
+            description="",
+            flatModel="
+fclass ConnectTests.TopLevelIO2
+ input Real c1.x;
+ input Real c1.f;
+ Real m.c2.x;
+ Real m.c2.f;
+equation
+ - c1.f + m.c2.f = 0;
+ c1.x = m.c2.x;
+end ConnectTests.TopLevelIO2;
+")})));
+end TopLevelIO2;
+
+model TopLevelIO3
+    connector C
+        Real x;
+        flow Real f;
+    end C;
+    
+    input  C c1;
+    output C c2;
+equation
+    connect(c1, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TopLevelIO3",
+            description="",
+            flatModel="
+fclass ConnectTests.TopLevelIO3
+ input Real c1.x;
+ input Real c1.f;
+ output Real c2.x;
+ output Real c2.f;
+equation
+ - c1.f - c2.f = 0;
+ c1.x = c2.x;
+end ConnectTests.TopLevelIO3;
+")})));
+end TopLevelIO3;
+
+model TopLevelIO4
+    connector C
+        Real x;
+        flow Real f;
+    end C;
+    
+    input  C ci;
+    output C co;
+protected
+    input  C cpi;
+    output C cpo;
+equation
+    connect(ci, cpo);
+    connect(co, cpi);
+    connect(cpi, cpo);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TopLevelIO4",
+            description="",
+            flatModel="
+fclass ConnectTests.TopLevelIO4
+ input Real ci.x;
+ input Real ci.f;
+ output Real co.x;
+ output Real co.f;
+protected
+ Real cpi.x;
+ constant Real cpi.f = 0;
+equation
+ - ci.f - co.f = 0;
+ ci.x = co.x;
+ co.x = cpi.x;
+end ConnectTests.TopLevelIO4;
+")})));
+end TopLevelIO4;
 
 
 end ConnectTests;

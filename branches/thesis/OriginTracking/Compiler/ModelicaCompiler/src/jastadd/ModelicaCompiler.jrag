@@ -149,7 +149,7 @@ public class ModelicaCompiler {
     protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
     protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
     
-    protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
+    private static File jmodelicaHome = null;
     
     protected File tempDir = null;
     protected File outDir = null;
@@ -341,12 +341,23 @@ public class ModelicaCompiler {
         return delegator;
     }
     
-    public static String getJModelicaHome() {
+    public static File getJModelicaHome() {
+        if (jmodelicaHome == null) {
+            String env = System.getenv("JMODELICA_HOME");
+            if (env == null) { 
+                throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
+            }
+            jmodelicaHome = new File(env);
+        }
+        
+        if (!jmodelicaHome.exists()) {
+            throw new JModelicaHomeNotFoundException(String.format("JMODELICA_HOME does not exist: '%s'", jmodelicaHome));
+        }
         return jmodelicaHome;
     }
     
     public static void setJModelicaHome(String jmHome) {
-        jmodelicaHome = jmHome;
+        jmodelicaHome = new File(jmHome);
     }
     
     public static <T extends CompilationHooks> T addGlobalCompilationHooks(T hooks) {
@@ -807,10 +818,15 @@ public class ModelicaCompiler {
      */
     protected String compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        // Always set certain options when compiling
-        // First save these options in temp options registry to reset when compiling has finished
+        /*
+         * Always set certain options when compiling.
+         * First save these options in the temporary options' registry to reset when compiling has finished.
+         */
         OptionRegistry tempOptions = options.copy();
-        //Set options for the target.
+
+        /*
+         * Set options for the target.
+         */
         target.setDefaultOptions(options);
         
         boolean doTearDown = true;
@@ -819,7 +835,9 @@ public class ModelicaCompiler {
             return doCompileUnit(className, fileName, target, compileTo);
         } finally {
             tryTearDown(doTearDown);
-            // set back all options
+            /*
+             * Reset all options.
+             */
             options.copyAllOptions(tempOptions);
         }
     }
@@ -915,6 +933,10 @@ public class ModelicaCompiler {
             FileOutputStream dest = new FileOutputStream(unitFile);
             ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
             out.setMethod(ZipOutputStream.DEFLATED);
+            if(!options.getBooleanOption("copy_source_files_to_fmu")) {
+            	recursiveDelete(sourceDir);
+            	sourceDir = null;
+            }
             zipDir(outDir, out);
             out.close();
         } catch (CompilationAbortedException e) {
@@ -970,6 +992,7 @@ public class ModelicaCompiler {
     }
 
     private static final int ZIP_BUFFER_SIZE = 2048;
+    
 
     /**
      * Write all files in a directory and its subdirectories to a zip stream.
@@ -1546,7 +1569,7 @@ public class ModelicaCompiler {
             if (System.getenv("MODELICAPATH") != null) 
                 modelicapath = System.getenv("MODELICAPATH");
             else
-                modelicapath = String.format("%s%sThirdParty%sMSL", jmodelicaHome, File.separator, File.separator);
+                modelicapath = String.format("%s%sThirdParty%sMSL", ModelicaCompiler.getJModelicaHome(), File.separator, File.separator);
         }
         options.setStringOption("MODELICAPATH", modelicapath);
     }
@@ -1555,11 +1578,7 @@ public class ModelicaCompiler {
         return options;
     }
 
-    protected void setArguments(Arguments programarguments) 
-            throws JModelicaHomeNotFoundException {
-        // check that JMODELICA_HOME exists
-        if (jmodelicaHome == null) 
-            throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
+    protected void setArguments(Arguments programarguments) {
         
         int arg = 0;
         String modelicapath = null;
@@ -1880,84 +1899,151 @@ public class ModelicaCompiler {
         public boolean getCodeGenFlag() {
             return codeGen;
         }
-        
+
         /**
          * Sets the default options that should be used for this target object. 
-         * 
-         * Should be updated when new default options are added.
          */
         public void setDefaultOptions(OptionRegistry options) {
-        
-            switch (this) {
-                case FMUME10:
-                case FMUME20:
-                case CHECK:
-                    options.setBooleanOption("generate_ode", true);
-                    options.setBooleanOption("generate_dae", false);
-                    options.setBooleanOption("equation_sorting", true);
-                    options.setBooleanOption("generate_fmi_me_xml", true);
-                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    break;
-                case FMUCS10:
-                case FMUCS20:
-                    options.setBooleanOption("generate_ode", true);
-                    options.setBooleanOption("generate_dae", false);
-                    options.setBooleanOption("equation_sorting", true);
-                    options.setBooleanOption("generate_fmi_me_xml", false);
-                    options.setBooleanOption("generate_fmi_cs_xml", true);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    break;
-                case FMUMECS20:
-                    options.setBooleanOption("generate_ode", true);
-                    options.setBooleanOption("generate_dae", false);
-                    options.setBooleanOption("equation_sorting", true);
-                    options.setBooleanOption("generate_fmi_me_xml", true);
-                    options.setBooleanOption("generate_fmi_cs_xml", true);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    break;
-                case JMU:
-                    options.setBooleanOption("generate_ode", false);
-                    options.setBooleanOption("generate_dae", true);
-                    options.setBooleanOption("equation_sorting", false);
-                    options.setBooleanOption("generate_fmi_me_xml", false);
-                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                    options.setBooleanOption("generate_xml_equations", false);
-                    options.setBooleanOption("relational_time_events", false);
-                    options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
-                    break;
-                case FMUX:
-                    options.setBooleanOption("generate_ode", false);
-                    options.setBooleanOption("generate_dae", true);
-                    options.setBooleanOption("equation_sorting", false);
-                    options.setBooleanOption("generate_fmi_me_xml", false);
-                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                    options.setBooleanOption("generate_xml_equations", true);
-                    break;
-                case NOCODEGEN:
-                    options.setBooleanOption("generate_runtime_option_parameters", false);
-                    options.setBooleanOption("equation_sorting", false);
-                    options.setBooleanOption("automatic_tearing", false);
-                    break;
-                default:
-                    break;
-            }
-            
-            switch (this) {
-                case FMUME10:
-                case FMUCS10:
-                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
-                    break;
-                case FMUME20:
-                case FMUCS20:
-                case FMUMECS20:
-                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
-                    break;
-                default:
-                    break;
+            for (TargetOptionContributor contributor :
+                    TargetOptionContributor.TARGET_DEFAULT_OPTION_CONTRIBUTORS.values()) {
+
+                contributor.setOptions(this, options);
             }
         }
+
     }
+
+    public static TargetOptionContributor addTargetOptionContributor(TargetOptionContributor contributor) {
+        Map<String, TargetOptionContributor> contributors = TargetOptionContributor.TARGET_DEFAULT_OPTION_CONTRIBUTORS;
+        String identity = contributor.identity();
+
+        if (contributors.containsKey(identity)) {
+            return contributors.get(identity);
+        }
+
+        contributors.put(identity, contributor);
+        return contributor;
+    }
+
+    private static final TargetOptionContributor TARGET_DEFAULT_BASE_CONTRIBUTOR = addTargetOptionContributor(
+                    new ModelicaCompiler.TargetOptionContributor() {
+
+                        @Override
+                        public void setOptions(TargetObject object, OptionRegistry options) {
+                            switch (object) {
+                                case FMUME10:
+                                case FMUME20:
+                                case CHECK:
+                                    options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", true);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    break;
+                                case FMUCS10:
+                                case FMUCS20:
+                                    options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    break;
+                                case FMUMECS20:
+                                    options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", true);
+                                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    break;
+                                case JMU:
+                                    options.setBooleanOption("generate_ode", false);
+                                    options.setBooleanOption("generate_dae", true);
+                                    options.setBooleanOption("equation_sorting", false);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                    options.setBooleanOption("relational_time_events", false);
+                                    options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
+                                    break;
+                                case FMUX:
+                                    options.setBooleanOption("generate_ode", false);
+                                    options.setBooleanOption("generate_dae", true);
+                                    options.setBooleanOption("equation_sorting", false);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", true);
+                                    break;
+                                case NOCODEGEN:
+                                    options.setBooleanOption("generate_runtime_option_parameters", false);
+                                    options.setBooleanOption("equation_sorting", false);
+                                    options.setBooleanOption("automatic_tearing", false);
+                                    break;
+                                default:
+                                    break;
+                                }
+                        }
+
+                        @Override
+                        public String identity() {
+                            return "org.jmodelica.modelica.compiler.ModelicaCompiler.TARGET_DEFAULT_BASE_CONTRIBUTOR";
+                        }
+                    });
+
+    private static final TargetOptionContributor TARGET_FMI_VERSION_CONTRIBUTOR = addTargetOptionContributor(
+                    new ModelicaCompiler.TargetOptionContributor() {
+
+                        @Override
+                        public void setOptions(TargetObject object, OptionRegistry options) {
+                            switch (object) {
+                                case FMUME10:
+                                case FMUCS10:
+                                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
+                                    break;
+                                case FMUME20:
+                                case FMUCS20:
+                                case FMUMECS20:
+                                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        @Override
+                        public String identity() {
+                            return "org.jmodelica.modelica.compiler.ModelicaCompiler.TARGET_FMI_VERSION_CONTRIBUTOR";
+                        }
+                    });
+
+    /**
+     * Contributor class for additional default options dependent on compilation target.
+     */
+    public static abstract class TargetOptionContributor implements Comparable<TargetOptionContributor> {
+
+        private static final Map<String, TargetOptionContributor> TARGET_DEFAULT_OPTION_CONTRIBUTORS =
+            new HashMap<String, TargetOptionContributor>();
+
+        protected abstract String identity();
+        protected abstract void setOptions(TargetObject object, OptionRegistry options);
+
+        @Override
+        public int compareTo(TargetOptionContributor other) {
+            return identity().compareTo(other.identity());
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof TargetOptionContributor)) {
+                return false;
+            }
+            return compareTo((TargetOptionContributor) other) == 0;
+        }
+
+    }
+
 }
 
     /**
@@ -2090,6 +2176,9 @@ public class ModelicaCompiler {
         setUp(null);
     }
     protected void ModelicaCompiler.setUp(IErrorHandler eh) {
+        if (isSetUp) {
+            throw new InternalCompilerError("Compiler setup can only be performed once", null);
+        }
         if (eh == null) {
             eh = new DefaultErrorHandler(options.getBooleanOption("halt_on_warning"));
             if (options.getBooleanOption("compliance_as_warning")) {
@@ -2245,7 +2334,7 @@ public class Templates {
             return null;
         }
         
-        String home = ModelicaCompiler.getJModelicaHome();
+        File home = ModelicaCompiler.getJModelicaHome();
         if (debugSrcIsHome) {
             for (String dir : DEBUG_TEMPLATE_IN_SRC) {
                 File f = new File(new File(home, dir), fileName);
@@ -2532,7 +2621,7 @@ public interface CompilationHooks {
     public void fmuPacked(ModelicaCompiler instance, File path);
 }
 
-public class JModelicaHomeNotFoundException extends Exception {
+public class JModelicaHomeNotFoundException extends ModelicaException {
     public JModelicaHomeNotFoundException() {
     }
     public JModelicaHomeNotFoundException(String msg) {
@@ -2635,22 +2724,43 @@ public abstract class CCompilerDelegator {
     public void setModuleLibraryNames(java.util.List<String> names) {
         moduleLibNames = names;
     }
-    
-    public Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
-        Set<String> newPaths = new LinkedHashSet<String>();
+
+    /**
+     * "Expands" libraries, i.e., generates path strings for a directory and all the subdirectories within it where
+     * libraries should be searched for.
+     * <p>
+     * E.g. for the path set ["/dir"] and with the {@code subDir} argument equal to ["dir1", "dir2"],
+     * the following paths are generated:
+     * <ul>
+     * <li>"/dir/dir1/dir2"</li>
+     * <li>"/dir/dir1"</li>
+     * <li>"/dir"</li>
+     * </ul>
+     * 
+     * @param paths
+     *          The paths to the library directories which to expand.
+     * @param subDirs
+     *          The sub-directories of the paths in {@code paths} for which to generate library sub-directories.
+     * @return
+     *          a set of all sub-directories 
+     */
+    public Set<String> expandLibraries(Set<String> paths, String... subDirs) {
+        Set<String> libraries = new LinkedHashSet<String>();
+
         for (String path : paths) {
-            String platformed = path + "/" + platform;
-            
-            if (versionNumber != null) {
-                String compilered = platformed + "/" + compilerType + versionNumber;
-                newPaths.add(compilered);
-            }
-            
-            newPaths.add(platformed);
+            expandLibraries(libraries, subDirs, path, 0);
         }
-        return newPaths;
+        return libraries;
     }
-    
+
+    private void expandLibraries(Set<String> newPaths, String[] subDirs, String workingPath, int currentIndex) {
+        String newPath = workingPath + "/" + subDirs[currentIndex];
+        if (currentIndex < subDirs.length - 1) {
+            expandLibraries(newPaths, subDirs, newPath, currentIndex + 1);
+        }
+        newPaths.add(newPath);
+    }
+
     public static class Arguments {
         private String fileName;
         private OptionRegistry options;
@@ -2941,10 +3051,14 @@ public class GccCompilerDelegator extends CCompilerDelegator {
     }
     
     /**
-     * Get the path to the Makefile for the specified target platform.
+     * Get the path to the Makefile.
      */
-    protected File getMakefile(String jmodelicaHome, String platform) {
-        return new File(jmodelicaHome, "Makefiles/MakeFile");
+    protected File getMakefile() {
+        File res = new File(ModelicaCompiler.getJModelicaHome(), "Makefiles/MakeFile");
+        if (!res.exists()) {
+            throw new CcodeCompilationException("Makefile '" + res + "' does not exist.");
+        }
+        return res;
     }
     
     /**
@@ -2962,18 +3076,18 @@ public class GccCompilerDelegator extends CCompilerDelegator {
     /**
      * Add make variables to set that is valid for all target platforms.
      */
-    protected void addFixedMakeVars(Map<String,String> vars, String fileName, String jmodelicaHome, 
+    protected void addFixedMakeVars(Map<String,String> vars, String fileName,
             Set<String> ext_libs, Set<String> ext_incl_dirs) {
         String filesep = File.separator;
         vars.put("FILE_NAME", fileName);
-        vars.put("JMODELICA_HOME", jmodelicaHome);
+        vars.put("JMODELICA_HOME", ModelicaCompiler.getJModelicaHome().getPath());
         vars.put("CPPAD_HOME", getEnv().get("CPPAD_HOME"));
         vars.put("IPOPT_HOME", getEnv().get("IPOPT_HOME"));
         vars.put("SUNDIALS_HOME", getEnv().get("SUNDIALS_HOME"));
         vars.put("EXT_LIBS", varFromList(ext_libs) != null ?
                       (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);
         vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
-        vars.put("JMTABLES_HOME", jmodelicaHome + filesep + "ThirdParty" + filesep + "Tables");
+        vars.put("JMTABLES_HOME", ModelicaCompiler.getJModelicaHome().getPath() + filesep + "ThirdParty" + filesep + "Tables");
         vars.put("MODULE_HOME", getEnv().get("MODULE_HOME"));
     }
     
@@ -2996,7 +3110,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         StringOperation libOp = new ChainedOperations(
                 new PlatformDirOperation(platform),
                 new QuoteOperation("-L"));
-        Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, "gcc", compilerVersionNumber(), platform);
+        Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
     
@@ -3021,7 +3135,6 @@ public class GccCompilerDelegator extends CCompilerDelegator {
      * Compile DLL(s) from generated C code for a set of target platforms.
      */
     protected void compileCCode(Arguments args, File workDir, String[] platforms) {
-        String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
         String buildPlatform = ModelicaCompiler.getPlatform();
         String make = getMake(buildPlatform);
         
@@ -3035,7 +3148,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         }
         
         Map<String, String> vars = new LinkedHashMap<String, String>();
-        addFixedMakeVars(vars, args.getFileName(), jmodelicaHome, ext_libs, args.getExternalIncludeDirectories());
+        addFixedMakeVars(vars, args.getFileName(), ext_libs, args.getExternalIncludeDirectories());
         
         addBuildPlatformMakeVars(vars, buildPlatform);
         
@@ -3045,9 +3158,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             Map<String, String> pVars = new LinkedHashMap<String, String>(vars);
             addTargetPlatformMakeVars(pVars, args.getExternalLibraryDirectories(), platform);
             
-            File makefile = getMakefile(jmodelicaHome, platform);
-            if (!makefile.exists())
-                throw new CcodeCompilationException("Makefile '" + makefile + "' does not exist.");
+            File makefile = getMakefile();
             String makefileVar = "MAKEFILE=" + makefile.getPath();
             String[] mArgs = new String[] { make, "-f", makefile.getPath(), "-j", Integer.toString(args.getMaxProc()), 
                     args.getTarget().getMakeFileFlag(), makefileVar };

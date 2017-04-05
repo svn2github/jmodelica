@@ -383,13 +383,13 @@ x = pre(x) + 1.1;
 y = pre(y) + 1.1; 
 end when; 
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="HybridFMU1",
-			description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
-			generate_ode=true,
-			checkAll=true,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="HybridFMU1",
+            description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+            generate_ode=true,
+            checkAll=true,
+            flatModel="
 fclass ComplianceTests.HybridFMU1
  Real xx(start = 2);
  discrete Real x;
@@ -400,17 +400,19 @@ fclass ComplianceTests.HybridFMU1
  parameter Real p1 = 1.2 /* 1.2 */;
  parameter Real p2;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
  discrete Boolean temp_2;
  discrete Boolean temp_3;
  discrete Boolean temp_4;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
  xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
- pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
  pre(temp_4) = false;
@@ -418,15 +420,17 @@ parameter equation
  p2 = floor(p1);
 equation
  der(xx) = - x;
- temp_1 = y > 2 and pre(z);
- w = if temp_1 and not pre(temp_1) then false else pre(w);
- temp_2 = y > 2 and z;
- v = if temp_2 and not pre(temp_2) then false else pre(v);
- temp_3 = x > 2;
- z = if temp_3 and not pre(temp_3) then false else pre(z);
- temp_4 = sample(0, 1);
- x = if temp_4 and not pre(temp_4) then pre(x) + 1.1 else pre(x);
- y = if temp_4 and not pre(temp_4) then pre(y) + 1.1 else pre(y);
+ temp_2 = y > 2 and pre(z);
+ w = if temp_2 and not pre(temp_2) then false else pre(w);
+ temp_3 = y > 2 and z;
+ v = if temp_3 and not pre(temp_3) then false else pre(v);
+ temp_4 = x > 2;
+ z = if temp_4 and not pre(temp_4) then false else pre(z);
+ x = if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x);
+ y = if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y);
+ temp_1 = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 end ComplianceTests.HybridFMU1;
 ")})));
 end HybridFMU1;
@@ -490,30 +494,33 @@ equation
    y = pre(y) + 1;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="HybridFMU2",
-			description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
-			generate_ode=true,
-			checkAll=true,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="HybridFMU2",
+            description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+            generate_ode=true,
+            checkAll=true,
+            flatModel="
 fclass ComplianceTests.HybridFMU2
  discrete Real x;
  discrete Real y;
  Real dummy;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / 0.3333333333333333);
  dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
 equation
  der(dummy) = 0;
- temp_1 = sample(0, 0.3333333333333333);
  x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
  y = if initial() then pre(y) + 1 else pre(y);
+ temp_1 = not initial() and time >= pre(_sampleItr_1) * 0.3333333333333333;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * (1 / 3), \"Too long time steps relative to sample interval.\");
 end ComplianceTests.HybridFMU2;
-			
 ")})));
 end HybridFMU2;
 
@@ -565,50 +572,6 @@ package UnknownArraySizes
 /* Tests compliance errors for array exps 
    of unknown size in functions. #2155 #698 */
 
-model Error1
-	
-record R
-	Real[2] x;
-end R;
-  function f
-    input Real x[2,:];
-	input R[:] recsIn; 
-	Boolean b[size(x,2)];
-    Real c[2,size(x,2)*2];
-	Real known[2,4];
-    output Real y[size(x,2),2];
-	output R[size(recsIn,1)] recsOut;
-  algorithm
-    c := cat(2,x,x); // Concat unknown size.
-	recsOut := recsIn;
-	recsOut[1] := R(x[1,:]);
-	
-	for i in x[2,:] loop // In exp is unknown size array.
-		b[i] := x[i] > 4;
-	end for;
-	for i in 1:size(x,2) loop // Shouldn't trigger, range exp allowed
-		b[i] := x[i] > 4;
-	end for;
-	
-/*	when b then // Array guard, unknown size.
-		x := x;
-	end when;*/
-  end f;
-  
-  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R({1,1})});
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="UnknownArraySizes_Error1",
-            description="Test that compliance errors are given.",
-            errorMessage="
-1 errors found:
-
-Compliance error at line 577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX:
-  Unknown size array as a for index is not supported in functions
-")})));
-end Error1;
-
 model Error2
   function f
     input Real x[:,:];
@@ -649,23 +612,22 @@ Compliance error at line 619, column 7, in file 'Compiler/ModelicaFrontEnd/src/t
 end Error2;
 
 model ArrayIterTest
- Real x[1,1] = { i * j for i, j };
+    type E = enumeration(a, b, c);
+    Real x[E];
+    Real y[E] = { x[i] for i };
 
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
             name="UnknownArraySizes_ArrayIterTest",
-            description="Array constructor with iterators: without in",
+            description="Array constructor with iterators: without in for non-integer indexed array",
             errorMessage="
-3 errors found:
+2 errors found:
 
-Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
-  Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
+Error at line 610, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
+  Expected array index of type 'ComplianceTests.UnknownArraySizes.ArrayIterTest.E' found 'Integer'
 
-Compliance error at line 643, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
-  For index without in expression isn't supported
-
-Compliance error at line 643, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
-  For index without in expression isn't supported
+Compliance error at line 610, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', IMPLICIT_FOR_RANGE_NON_INTEGER:
+  Non-integer for iteration range not supported
 ")})));
 end ArrayIterTest;
 

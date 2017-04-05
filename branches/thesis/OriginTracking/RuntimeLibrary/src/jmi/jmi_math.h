@@ -30,6 +30,8 @@
 /* Define the machine epsilon */
 #define JMI_EPS 2.2204460492503131e-16
 #define JMI_ALMOST_EPS (JMI_EPS*100)
+#define JMI_INF   1e20                    /**< \brief A Very Large Number denoting infinity.*/
+#define JMI_PI    3.14159265358979323846  /**< \brief The constant pi. */
 
 /*#define ALMOST_ZERO(op) (jmi_abs(op)<=1e-6? JMI_TRUE: JMI_FALSE)*/
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))

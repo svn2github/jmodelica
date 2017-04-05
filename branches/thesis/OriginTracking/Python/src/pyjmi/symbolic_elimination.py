@@ -20,12 +20,14 @@ import numpy as np
 import copy
 import scipy
 import casadi
+import modelicacasadi_wrapper as ci
 import itertools
 from collections import OrderedDict
 from modelicacasadi_wrapper import Model
 from pyjmi.common.core import ModelBase
+from pyjmi.common.algorithm_drivers import OptionBase
 
-class EliminationOptions(dict):
+class EliminationOptions(OptionBase):
 
     """
     dict-like options class for the elimination.
@@ -43,28 +45,13 @@ class EliminationOptions(dict):
             Default: False
 
         tearing --
-            Whether to tear algebraic loops. Choice of variables and residuals is done with options tear_vars and
-            tear_res_indices.
+            Whether to tear algebraic loops.
 
-            Default: False
-
-        tear_vars --
-            List of names of manually selected tearing variables. Only applicable if tearing is True.
-
-            Default: []
-
-        tear_res_indices --
-            List of global equation indices of manually selected tearing residuals.
-
-            Default: []
-
-        inline --
-            Whether to inline function calls (such as creation of linear systems).
-
+            Type: bool
             Default: True
 
-        uneliminable --
-            Names of variables that should not be eliminated. Particularly useful for variables with bounds.
+        ineliminable --
+            List of names of variables that should not be eliminated. Particularly useful for variables with bounds.
 
             Default: []
 
@@ -76,7 +63,7 @@ class EliminationOptions(dict):
             Default: 'lmfi'
 
         dense_tol --
-            Tolerance for controlling density in causalized system. Possible values: [0, inf]
+            Tolerance for controlling density in causalized system. Possible values: [-inf, inf]
 
             Default: 15
 
@@ -98,6 +85,11 @@ class EliminationOptions(dict):
 
             Default: False
 
+        inline --
+            Whether to inline function calls (such as creation of linear systems).
+
+            Default: True
+
         linear_solver --
             Which linear solver to use.
             See http://casadi.sourceforge.net/api/html/d8/d6a/classcasadi_1_1LinearSolver.html for possibilities
@@ -115,26 +107,25 @@ class EliminationOptions(dict):
 
             Default: False
     """
-
-    def __init__(self):
-        self['plots'] = False
-        self['draw_blt'] = False
-        self['draw_blt_strings'] = False
-        self['solve_blocks'] = False
-        self['solve_torn_linear_blocks'] = False
-        self['tearing'] = False
-        self['tear_vars'] = []
-        self['tear_res'] = []
-        self['inline'] = True
-        self['closed_form'] = False
-        self['inline_solved'] = False
-        self['uneliminable'] = []
-        self['linear_solver'] = "symbolicqr"
-        self['dense_tol'] = 15
-        self['dense_measure'] = 'lmfi'
-
-        # Experimental options to be removed
-        self['analyze_var'] = None
+    
+    def __init__(self, *args, **kw):
+        _defaults = {
+                'plots': False,
+                'draw_blt': False,
+                'draw_blt_strings': False,
+                'solve_blocks': False,
+                'solve_torn_linear_blocks': False,
+                'tearing': True,
+                'inline': True,
+                'closed_form': False,
+                'inline_solved': False,
+                'ineliminable': [],
+                'linear_solver': "symbolicqr",
+                'dense_tol': 15,
+                'dense_measure': 'lmfi'}
+        
+        super(EliminationOptions, self).__init__(_defaults)
+        self._update_keep_dict_defaults(*args, **kw)
 
 def scale_axis(figure=plt, xfac=0.08, yfac=0.08):
     """
@@ -153,11 +144,12 @@ def scale_axis(figure=plt, xfac=0.08, yfac=0.08):
 
 class Equation(object):
 
-    def __init__(self, string, global_index, local_index, expression=None):
+    def __init__(self, string, global_index, local_index, tearing, expression=None):
         self.string = string
         self.global_index = global_index
         self.local_index = local_index
         self.expression = expression
+        self.tearing = tearing
         self.global_blt_index = None
         self.local_blt_index = None
         self.dig_vertex = None
@@ -183,13 +175,14 @@ class NonBool(object):
 
 class Variable(object):
 
-    def __init__(self, name, global_index, local_index, is_der, mvar=None, mx_var=None):
+    def __init__(self, name, global_index, local_index, is_der, tearing, mvar=None, mx_var=None):
         self.name = name
         self.global_index = global_index
         self.local_index = local_index
         self.is_der = is_der
         self.mvar = mvar
         self.mx_var = mx_var
+        self.tearing = tearing
         self.global_blt_index = None
         self.local_blt_index = None
         self.dig_vertex = None
@@ -235,11 +228,9 @@ def find_deps(expr, mx_vars, deps=None):
 
 class Component(object):
 
-    def __init__(self, vertices, causalization_options, tear_vars, tear_res, edges):
+    def __init__(self, vertices, causalization_options, edges):
         # Define data structures
         self.options = causalization_options
-        self.tear_vars = tear_vars
-        self.tear_res = tear_res
         self.vertices = vertices
         self.n = len(vertices) # Block size
         self.variables = variables = []
@@ -279,12 +270,12 @@ class Component(object):
             self.block_causal_vars = []
             self.block_causal_equations = []
             for var in self.variables:
-                if var.name in self.tear_vars:
+                if var.tearing:
                     self.block_tear_vars.append(var)
                 else:
                     self.block_causal_vars.append(var)
             for eq in self.equations:
-                if eq.global_index in self.tear_res:
+                if eq.tearing:
                     self.block_tear_res.append(eq)
                 else:
                     self.block_causal_equations.append(eq)
@@ -292,11 +283,8 @@ class Component(object):
                 self.debug_tearing()
                 raise RuntimeError("Number of tearing variables does not match number of residuals for block. " +
                                    "See above printouts for block variables and equations.")
-            if len(self.block_tear_vars) > 0:
-                if self.n == 1:
-                    raise RuntimeError("Tearing variable %s selected for scalar block." % var.name)
-                else:
-                    return True
+            if 0 < len(self.block_tear_vars) < self.n:
+                return True
             else:
                 return False
         else:
@@ -314,9 +302,9 @@ class Component(object):
         if not self.options['solve_blocks'] and self.n > 1:
             return False
 
-        # Blocks containing derivatives or uneliminable variables are not solvable
+        # Blocks containing derivatives or ineliminable variables are not solvable
         for var in self.variables:
-            if var.is_der or var.name in self.options['uneliminable']:
+            if var.is_der or var.name in self.options['ineliminable']:
                 return False
 
         return True
@@ -454,7 +442,7 @@ class Component(object):
 
         # Create new bipartite graph for block
         causal_edges = create_edges(causal_equations, causal_variables)
-        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, [], [], CausalizationOptions())
+        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, EliminationOptions())
 
         # Compute components and verify scalarity
         causal_graph.maximum_match()
@@ -547,7 +535,7 @@ class Component(object):
 
         # Create new bipartite graph for block
         causal_edges = create_edges(causal_equations, causal_variables)
-        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, [], [], EliminationOptions())
+        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, EliminationOptions())
 
         # Compute components and verify scalarity
         try:
@@ -558,29 +546,30 @@ class Component(object):
                                "See above printouts for block variables and equations.")
         causal_graph.scc(global_index)
         if causal_graph.n != len(causal_graph.components):
+            for component in causal_graph.components:
+                component.sparsity_preserving = True
             self.debug_tearing()
             if self.options['draw_blt']:
                 causal_graph.draw_blt("Failed torn block", True)
             raise RuntimeError("Causalized equations in torn block are not lower triangular. " +
                                "See above printouts for block variables and equations.")
         for co in causal_graph.components:
-            if not co.linear or not co.solvable:
+            if not co.linear or (not co.solvable and not co.variables[0].is_der):
+                for component in causal_graph.components:
+                    component.sparsity_preserving = True
                 self.debug_tearing()
                 if self.options['draw_blt']:
                     causal_graph.draw_blt("Failed torn block", True)
                 raise RuntimeError("Causalized equations in torn block are not solvable and linear. " +
                                    "See above printouts for block variables and equations.")
-        # TODO: Also check sparsity preservation of causalized equations!
 
         return causal_graph
 
 class BipartiteGraph(object):
 
-    def __init__(self, equations, variables, edges, tear_vars, tear_res, causalization_options):
+    def __init__(self, equations, variables, edges, causalization_options):
         self.equations = equations
         self.variables = variables
-        self.tear_vars = tear_vars
-        self.tear_res = tear_res
         self.options = causalization_options
         self.n = len(equations)
         if self.n != len(variables):
@@ -671,7 +660,13 @@ class BipartiteGraph(object):
         if self.components:
             plt.close(idx)
             fig = plt.figure(idx, frameon=False)
-            if not strings:
+            if strings:
+                plt.tick_params(
+                    axis='both',       # changes apply to both axes
+                    which='both',        # ticks along the top edge are off
+                    left='off',
+                    labelleft='off')
+            else:
                 fig.gca().set_frame_on(False)
                 plt.tick_params(
                     axis='both',       # changes apply to both axes
@@ -687,7 +682,7 @@ class BipartiteGraph(object):
             linear_clr = 'ForestGreen'
             dense_clr = 'Gold'
             nonlinear_clr = 'Red'
-            uneliminable_clr = 'DarkOrange'
+            ineliminable_clr = 'DarkOrange'
             derivative_clr = 'Blue'
             unknown_clr = 'Black'
             for component in self.components:
@@ -715,8 +710,10 @@ class BipartiteGraph(object):
                         if component.torn:
                             color = nonlinear_clr
                             for (j, causal_co) in enumerate(component.causal_graph.components):
-                                if causal_co.variables[0].name in self.options['uneliminable']:
-                                    causal_color = uneliminable_clr
+                                if causal_co.variables[0].name in self.options['ineliminable']:
+                                    causal_color = ineliminable_clr
+                                elif causal_co.variables[0].is_der:
+                                    causal_color = derivative_clr
                                 elif causal_co.sparsity_preserving:
                                     causal_color = linear_clr
                                 else:
@@ -734,8 +731,8 @@ class BipartiteGraph(object):
                                 RuntimeError("BUG?")
                         else:
                             color = nonlinear_clr
-                elif component.n == 1 and component.variables[0].name in self.options['uneliminable']:
-                    color = uneliminable_clr
+                elif component.n == 1 and component.variables[0].name in self.options['ineliminable']:
+                    color = ineliminable_clr
                 else:
                     color = derivative_clr
                 plt.plot([i, i_new], [-i, -i], color, lw=lw)
@@ -831,7 +828,6 @@ class BipartiteGraph(object):
         L_union = copy.copy(L[0])
         E = []
         i = 0
-        bp = (L[0][0].string == "der(pendulum.boxBody1.body.w_a[3])-der(pendulum.revolute1.phi,2)")
         while set(L[-1]) & set(unmatched_varis) == set():
             if i % 2 == 0:
                 E_i = [(edge.var, edge.eq) for edge in self.edges if ((edge.eq in L[i]) and (edge.var not in L_union) and ((edge.eq, edge.var) not in self.matches))]
@@ -856,8 +852,8 @@ class BipartiteGraph(object):
         L[i_star] = [vari for vari in L[i_star] if vari in unmatched_varis]
 
         # Add source and sink
-        source = Equation('source', -1, -1, False)
-        sink = Variable('sink', -1, -1, False)
+        source = Equation('source', -1, -1, False, False)
+        sink = Variable('sink', -1, -1, False, False)
 
         # Draw layers
         if options['plots']:
@@ -994,7 +990,7 @@ class BipartiteGraph(object):
             vertices = []
             while self.stack and self.stack[-1].number >= v.number:
                 vertices.append(self.stack.pop())
-            self.components.append(Component(vertices, self.options, self.tear_vars, self.tear_res, self.edges))
+            self.components.append(Component(vertices, self.options, self.edges))
 
 def create_edges(equations, variables):
         """
@@ -1031,33 +1027,42 @@ class BLTModel(object):
         """
         Creates a BLTModel from a Model.
         """
-        self.options = elimination_options
-        self.tear_vars = list(self.options['tear_vars'])
-        self.tear_res = list(self.options['tear_res'])
-        
-        # Check that uneliminables exist and replace with aliases
-        for (i, name) in enumerate(self.options['uneliminable']):
-            var = model.getVariable(name)
-            if var is None:
-                raise ValueError('Uneliminable variable %s does not exist.' % name)
-            self.options['uneliminable'][i] = var.getModelVariable().getName()
+        self.original_options = elimination_options
+        self.options = copy.deepcopy(self.original_options)
 
+        # Identify tearing variables
+        if self.options['tearing']:
+            self.tear_vars = [var.getName() for var in model.getVariables(model.REAL_ALGEBRAIC)
+                              if not var.isAlias() and var.getTearing()]
+        else:
+            self.tear_vars = []
+
+        # Check validity of options
         if self.options['closed_form'] and not self.options['inline']:
             raise ValueError("inline has to be true when closed_form is")
+
+        # Get to work
         self._model = model
+        self._process_ineliminables()
         self._create_bipgraph()
         self._setup_dependencies()
         self._compute_blt()
         self._create_residuals()
         self._print_statistics()
-        if self.options['closed_form']:
-            dh()
 
     def __getattr__(self, name):
         """
         Emulate Model by default (particularly useful for enums).
         """
         return self._model.__getattribute__(name)
+
+    def _process_ineliminables(self):
+        # Check that ineliminables exist and replace with aliases.
+        for (i, name) in enumerate(self.options['ineliminable']):
+            var = self._model.getVariable(name)
+            if var is None:
+                raise ValueError('Ineliminable variable %s does not exist.' % name)
+            self.options['ineliminable'][i] = var.getModelVariable().getName()
 
     def _create_bipgraph(self):
         # Initialize structures
@@ -1119,6 +1124,7 @@ class BLTModel(object):
         # Get optimization and model expressions
         named_initial = model.getInitialResidual()
         named_dae = model.getDaeResidual()
+        named_dae_equations = model.getDaeEquations()
 
         # Eliminate parameters
         [named_initial, named_dae] = casadi.substitute([named_initial, named_dae], par_vars, par_vals)
@@ -1130,26 +1136,30 @@ class BLTModel(object):
 
         # Create variables
         i = 0
-        #~ mvar_map = {}
-        #~ self._mx_var_map = mx_var_map = {}
         for vk in ["dx", "w"]:
             for (mvar, mx_var) in itertools.izip(mvar_vectors[vk], mx_var_struct[vk]):
-                variables.append(Variable(mvar.getName(), i, i, vk=="dx", mvar, mx_var))
-                #~ mvar_map[mvar] = variables[-1]
-                #~ mx_var_map[mx_var] = variables[-1]
+                if self.options['tearing'] and mvar.getTearing():
+                    tearing = True
+                else:
+                    tearing = False
+                variables.append(Variable(mvar.getName(), i, i, vk=="dx", tearing, mvar, mx_var))
                 i += 1
 
         # Create equations
         i = 0
-        for named_eq in named_dae:
-            equations.append(Equation(named_eq.__str__()[4:-2], i, i, named_eq))
+        for (named_res, named_eq) in itertools.izip(named_dae, named_dae_equations):
+            if self.options['tearing'] and named_eq.getTearing():
+                tearing = True
+            else:
+                tearing = False
+            equations.append(Equation(named_eq.__str__(), i, i, tearing, named_res))
             i += 1
 
         # Create edges
         self._edges = create_edges(equations, variables)
 
         # Create graph
-        self._graph = BipartiteGraph(equations, variables, self._edges, self.tear_vars, self.tear_res, self.options)
+        self._graph = BipartiteGraph(equations, variables, self._edges, self.options)
         if self.options['plots']:
             self._graph.draw(11)
 
@@ -1158,14 +1168,14 @@ class BLTModel(object):
         Setup structure for computing variable dependencies for preserving sparsity.
         """
         self._dependencies = dependencies = {}
-        for vk in ['x', 'u']:
+        for vk in ['x', 'u', 'p_opt']:
             for var in self._mx_var_struct[vk]:
                 dependencies[var.getName()] = [var.getName()]
 
-        for var_name in self.options['uneliminable']:
+        for var_name in self.options['ineliminable']:
             dependencies[var_name] = [var_name]
 
-        for var in self.options['tear_vars']:
+        for var in self.tear_vars:
             self._dependencies[var] = [var]
 
     def _compute_blt(self):
@@ -1209,25 +1219,13 @@ class BLTModel(object):
             self._sx_known_vars = sx_known_vars = sx_time + sx_x + sx_u
             self._sx_solved_vars = sx_solved_vars = []
 
-        #~ for comp in self._graph.components:
-            #~ if 'temp_3087' in [var.name for var in comp.variables]:
-            #~ if 'i3' in [var.name for var in comp.variables]:
-                #~ A = np.zeros([comp.n, comp.n])
-                #~ n0 = comp.equations[0].global_blt_index
-                #~ for edge in self._graph.edges:
-                    #~ i = edge.eq.global_blt_index - n0
-                    #~ j = edge.var.global_blt_index - n0
-                    #~ if (0 <= i < comp.n and 0 <= j < comp.n):
-                        #~ A[i, j] = 2 - edge.linear
-        #~ from tearing import tear
-        #~ tear(A)
-        #~ dh()
-
         # Create expression
         residuals = []
         self._solved_vars = solved_vars = []
         self._explicit_solved_vars = explicit_solved_vars = []
         self._explicit_unsolved_vars = explicit_unsolved_vars = []
+        if options['closed_form']:
+            self._explicit_unsolved_sx_vars = explicit_unsolved_sx_vars = []
         self._solved_expr = solved_expr = []
         self._explicit_solved_algebraics = explicit_solved_algebraics = []
         self._explicit_unsolved_algebraics = explicit_unsolved_algebraics = []
@@ -1248,28 +1246,13 @@ class BLTModel(object):
                     eq_sys = {}
                     if options['closed_form']:
                         if options['inline_solved']:
-                            inputs = co.n * [1.] + sx_known_vars + solved_expr
+                            inputs = co.n * [0.] + sx_known_vars + solved_expr
                         else:
-                            inputs = co.n * [1.] + sx_known_vars + sx_solved_vars
+                            inputs = co.n * [0.] + sx_known_vars + sx_solved_vars
                     else:
-                        inputs = co.n * [1.] + known_vars + solved_expr
+                        inputs = co.n * [0.] + known_vars + solved_expr
                     for alpha in ["A", "B", "C", "D", "a", "b"]:
                         eq_sys[alpha] = co.fcn[alpha].call(inputs, self.options['inline'])[0]
-
-                    # Analyze block matrix solution
-                    if options['analyze_var'] in [var.name for var in co.variables]:
-                        # Get nominal values
-                        known_mvars = [self.getVariable(var.getName()) for var in known_vars[1:]]
-                        solved_mvars = [self.getVariable(var.getName()) for var in solved_vars]
-                        attr = "initialGuess" # "nominal"
-                        nominal_known = [0.] + [self.get_attr(var, attr) for var in known_mvars]
-                        nominal_solved = [self.get_attr(var, attr) for var in solved_mvars]
-
-                        # Compute nominal components
-                        for alpha in ["A", "B", "C", "D", "a", "b"]:
-                            alpha_fcn = casadi.MXFunction(known_vars + solved_vars, [eq_sys[alpha]])
-                            alpha_fcn.init()
-                            eq_sys[alpha] = alpha_fcn.call(nominal_known + nominal_solved)[0].toArray()
 
                     # Extract equation system components
                     A = eq_sys["A"]
@@ -1294,15 +1277,6 @@ class BLTModel(object):
                                                 b - casadi.mul(CAinv, a), options['linear_solver'])
                     causal_sol = casadi.mul(Ainv, a - casadi.mul(B, torn_sol))
                     sol = casadi.vertcat([causal_sol, torn_sol])
-
-                    # Analyze block matrix solution
-                    if options['analyze_var'] in [var.name for var in co.variables]:
-                        A_big = casadi.vertcat([casadi.horzcat([A, B]), casadi.horzcat([C, D])]).toArray()
-                        b_big = casadi.vertcat([a, b]).toArray()
-                        res = casadi.mul(A_big, sol) - b_big
-                        sol = sol.toArray()
-                        res = res.toArray()
-                        dh()
 
                     # Store causal solution
                     for (i, var) in enumerate(co.causalized_vars + co.block_tear_vars):
@@ -1336,11 +1310,11 @@ class BLTModel(object):
                     # Block variables need a (any) real value in order to find b
                     if options['closed_form']:
                         if options['inline_solved']:
-                            b_input = co.n * [1.] + sx_known_vars + solved_expr
+                            b_input = co.n * [0.] + sx_known_vars + solved_expr
                         else:
-                            b_input = co.n * [1.] + sx_known_vars + sx_solved_vars
+                            b_input = co.n * [0.] + sx_known_vars + sx_solved_vars
                     else:
-                        b_input = co.n * [1.] + known_vars + solved_expr
+                        b_input = co.n * [0.] + known_vars + solved_expr
                     b = co.b_fcn.call(b_input, self.options['inline'])[0]
                         
                     # Solve
@@ -1350,34 +1324,9 @@ class BLTModel(object):
                     else:
                         sol = casadi.solve(A, b, options['linear_solver'])
 
-                    # Analyze block matrix solution
-                    if options['analyze_var'] in [var.name for var in co.variables]:
-                        # Get nominal values
-                        known_mvars = [self.getVariable(var.getName()) for var in known_vars[1:]]
-                        solved_mvars = [self.getVariable(var.getName()) for var in solved_vars]
-                        attr = "initialGuess" # "nominal"
-                        nominal_known = [0.] + [self.get_attr(var, attr) for var in known_mvars]
-                        nominal_solved = [self.get_attr(var, attr) for var in solved_mvars]
-
-                        # Compute nominal A and b
-                        A_fcn = casadi.MXFunction(known_vars + solved_vars, [A])
-                        A_fcn.init()
-                        b_fcn = casadi.MXFunction(known_vars + solved_vars, [b])
-                        b_fcn.init()
-                        A_nom = A_fcn.call(nominal_known + nominal_solved)[0].toArray()
-                        b_nom = b_fcn.call(nominal_known + nominal_solved)[0].toArray()
-
-                        if False:
-                            sol_nom = [1e-3, 2e4]
-                            b = casadi.mul(A_nom, casadi.vertcat(sol_nom))
-                        
-                        sol = casadi.solve(A_nom, b_nom, options['linear_solver']).toArray()
-                        res = (casadi.mul(A_nom, sol) - b_nom).toArray()
-                        dh()
-
                     # Create residuals
                     for (i, var) in enumerate(co.variables):
-                        if var.is_der or var.name in self.options['uneliminable']:
+                        if var.is_der or var.name in self.options['ineliminable']:
                             if options['closed_form']:
                                 residuals.append(var.sx_var - sol[i])
                             else:
@@ -1401,7 +1350,8 @@ class BLTModel(object):
                             raise NotImplementedError('Causalized equations must be lower triangular')
                         # Eliminate causal variable
                         if (self._sparsity_preserving(causal_co) and
-                            causal_co.variables[0].name not in self.options['uneliminable']):
+                            causal_co.variables[0].name not in self.options['ineliminable'] and
+                            not causal_co.variables[0].is_der):
                             causal_co.create_lin_eq(known_vars, solved_vars, tear_mx_vars)
                             
                             # Compute A
@@ -1419,14 +1369,16 @@ class BLTModel(object):
                             if options['closed_form']:
                                 if options['inline_solved']:
                                     something = [] # tear_sx_vars
-                                    b_input = causal_co.n * [1.] + sx_known_vars + solved_expr + something
-                                    dh() # TODO: something
+                                    # TODO: something
+                                    b_input = causal_co.n * [0.] + sx_known_vars + solved_expr + something
+                                    raise NotImplementedError('Closed form is not supported for tearing')
                                 else:
                                     something = [] # tear_sx_vars
-                                    b_input = causal_co.n * [1.] + sx_known_vars + sx_solved_vars + something
-                                    dh() # TODO: something
+                                    # TODO: something
+                                    b_input = causal_co.n * [0.] + sx_known_vars + sx_solved_vars + something
+                                    raise NotImplementedError('Closed form is not supported for tearing')
                             else:
-                                b_input = causal_co.n * [1.] + known_vars + solved_expr + tear_mx_vars
+                                b_input = causal_co.n * [0.] + known_vars + solved_expr + tear_mx_vars
                             b = causal_co.b_fcn.call(b_input, self.options['inline'])[0]
                                 
                             # Solve
@@ -1458,21 +1410,17 @@ class BLTModel(object):
                             explicit_unsolved_algebraics.extend([var.mvar for var in causal_co.variables
                                                                  if not var.is_der])
                             explicit_unsolved_vars.extend(causal_co.mx_vars)
+                            res = casadi.vertcat(causal_co.eq_expr)
+                            all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
+                            res_f = casadi.MXFunction(all_vars , [res])
+                            res_f.init()
                             if options['closed_form']:
-                                # Create SX residual
-                                res = casadi.vertcat(causal_co.eq_expr)
-                                all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
-                                res_f = casadi.MXFunction(all_vars , [res])
-                                res_f.init()
+                                explicit_unsolved_sx_vars.extend(causal_co.sx_vars)
                                 sx_res = casadi.SXFunction(res_f)
                                 sx_res.init()
                                 residuals.extend(sx_res.call(causal_co.sx_vars + sx_known_vars + solved_expr, True))
                                 solved_expr.extend(causal_co.sx_vars)
                             else:
-                                res = casadi.vertcat(causal_co.eq_expr)
-                                all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
-                                res_f = casadi.MXFunction(all_vars , [res])
-                                res_f.init()
                                 residuals.extend(res_f.call(causal_co.mx_vars + known_vars +
                                                             solved_expr + tear_mx_vars))
                                 solved_expr.extend(causal_co.mx_vars)
@@ -1483,6 +1431,7 @@ class BLTModel(object):
                     explicit_unsolved_vars.extend([var.mx_var for var in co.block_tear_vars])
                     if options['closed_form']:
                         # Create SX residual
+                        explicit_unsolved_sx_vars.extend([var.sx_var for var in co.block_tear_vars])
                         res = casadi.vertcat([eq.expression for eq in co.block_tear_res])
                         co.tear_mx_vars = tear_mx_vars = [var.mx_var for var in co.block_tear_vars]
                         all_vars = tear_mx_vars + known_vars + solved_vars
@@ -1492,7 +1441,7 @@ class BLTModel(object):
                         sx_res.init()
                         residuals.extend(sx_res.call(tear_mx_vars + known_vars + solved_expr, True))
 
-                        dh()
+                        raise NotImplementedError
                         #~ solved_expr.extend(co.sx_vars) # Need to figure out what do here
                     else:
                         res = casadi.vertcat([eq.expression for eq in co.block_tear_res])
@@ -1510,21 +1459,17 @@ class BLTModel(object):
                     n_unsolvable += co.n
                     explicit_unsolved_algebraics.extend([var.mvar for var in co.variables if not var.is_der])
                     explicit_unsolved_vars.extend(co.mx_vars)
+                    res = casadi.vertcat(co.eq_expr)
+                    all_vars = co.mx_vars + known_vars + solved_vars 
+                    res_f = casadi.MXFunction(all_vars , [res])
+                    res_f.init()
                     if options['closed_form']:
-                        # Create SX residual
-                        res = casadi.vertcat(co.eq_expr)
-                        all_vars = co.mx_vars + known_vars + solved_vars 
-                        res_f = casadi.MXFunction(all_vars , [res])
-                        res_f.init()
+                        explicit_unsolved_sx_vars.extend(co.sx_vars)
                         sx_res = casadi.SXFunction(res_f)
                         sx_res.init()
                         residuals.extend(sx_res.call(co.sx_vars + sx_known_vars + solved_expr, True))
                         solved_expr.extend(co.sx_vars)
                     else:
-                        res = casadi.vertcat(co.eq_expr)
-                        all_vars = co.mx_vars + known_vars + solved_vars 
-                        res_f = casadi.MXFunction(all_vars , [res])
-                        res_f.init()
                         residuals.extend(res_f.call(co.mx_vars + known_vars + solved_expr))
                         solved_expr.extend(co.mx_vars)
                     solved_vars.extend(co.mx_vars)
@@ -1540,7 +1485,7 @@ class BLTModel(object):
 
         # Draw BLT
         if options['plots'] or options['draw_blt']:
-            self._graph.draw_blt(strings=options['blt_strings'])
+            self._graph.draw_blt(strings=options['draw_blt_strings'])
 
     def _sparsity_preserving(self, co):
         """
@@ -1557,7 +1502,7 @@ class BLTModel(object):
         # Find untorn dependencies, excluding block variable
         deps = []
         for i in xrange(co.n):
-            for vk in ['dx', 'x', 'u', 'w']:
+            for vk in ['dx', 'x', 'u', 'w', 'p_opt']:
                 for dae_var in self._mx_var_struct[vk]:
                     if casadi.dependsOn(co.eq_expr[i], [dae_var]) and dae_var.getName() != var.name:
                         deps.append(dae_var)
@@ -1715,6 +1660,80 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
     Emulates CasADi Interface's OptimizationProblem class using BLT.
     """
 
+    def __init__(self, op, elimination_options=EliminationOptions()):
+        """
+        Creates a BLTModel from a Model.
+        """
+        self._op = op
+        super(BLTOptimizationProblem, self).__init__(op, elimination_options)
+        self._substitute_objective_and_constraint()
+
+    def _process_ineliminables(self):
+        # Mark variables with timed variables as ineliminable
+        for var in self._model.getTimedVariables():
+            self.options['ineliminable'] += [var.getBaseVariable().getName()]
+        self.options['ineliminable'] = list(set(self.options['ineliminable']))
+        super(BLTOptimizationProblem, self)._process_ineliminables()
+
+    def _substitute_objective_and_constraint(self):
+        """
+        Substitute eliminated variables in objectiveIntegrand and path constraints.
+        """
+        # Find solved variables and their solutions
+        solved_vars = []
+        solved_expr = []
+        for (i, var) in self._explicit_solved_algebraics:
+            if self.options['closed_form']:
+                solved_vars.append(var.sx_var)
+            else:
+                solved_vars.append(var.mx_var)
+            solved_expr.append(self._solved_expr[i])
+
+        # Copy original path constraints
+        path_constraints = [ci.Constraint(constraint) for constraint in self._op.getPathConstraints()]
+        n_path = len(path_constraints)
+        if n_path > 0:
+            [path_lhs, path_rhs] = \
+                    map(list, zip(*[(constraint.getLhs(), constraint.getRhs()) for constraint in path_constraints]))
+        else:
+            path_lhs = []
+            path_rhs = []
+
+        # Substitute
+        objective_integrand = [self._op.getObjectiveIntegrand()]
+        if self.options['closed_form']:
+            all_vars = self._explicit_unsolved_vars + self._known_vars + self._explicit_solved_vars
+            mx_f = casadi.MXFunction(all_vars, path_lhs + path_rhs + objective_integrand)
+            mx_f.init()
+            sx_f = casadi.SXFunction(mx_f)
+            sx_f.init()
+            new_expr = sx_f.call(self._explicit_unsolved_sx_vars + self._sx_known_vars + solved_expr,
+                                 self.options['inline'])
+        else:
+            new_expr = casadi.substitute(path_lhs + path_rhs + objective_integrand, solved_vars, solved_expr)
+
+        # Unpack new expressions
+        path_lhs = new_expr[:n_path]
+        path_rhs = new_expr[n_path:-1]
+        objective_integrand = new_expr[-1]
+
+        # Update objective and path constraints
+        if self.options['closed_form']:
+            self._path_constraints = np.array(path_lhs) - np.array(path_rhs)
+            self._objective_integrand = objective_integrand
+        else:
+            for (path, lhs, rhs) in itertools.izip(path_constraints, path_lhs, path_rhs):
+                path.setLhs(lhs)
+                path.setRhs(rhs)
+            self._path_constraints = np.array(path_constraints)
+            self._objective_integrand = objective_integrand
+
+    def getObjectiveIntegrand(self):
+        return self._objective_integrand
+
+    def getPathConstraints(self):
+        return self._path_constraints
+
     def _default_options(self, algorithm):
         """ 
         Help method. Gets the options class for the algorithm specified in 
@@ -1834,6 +1853,10 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
         # Return result
         res.solver = op_res.solver
         return res
+
+    # Make solve synonymous with optimize
+    solve_options = optimize_options
+    solve = optimize
 
     def prepare_optimization(self, algorithm='LocalDAECollocationPrepareAlg', options={}):
         """

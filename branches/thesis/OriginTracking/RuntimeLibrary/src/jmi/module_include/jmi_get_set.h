@@ -20,8 +20,8 @@
 #ifndef _JMI_GET_SET_H_
 #define _JMI_GET_SET_H_
 
-#include "../jmi.h"
-#include "../jmi_me.h"
+#include "jmi.h"
+#include "jmi_me.h"
 
 int jmi_get_set_module_init(jmi_t *jmi);
 

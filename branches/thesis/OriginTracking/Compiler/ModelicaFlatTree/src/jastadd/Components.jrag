@@ -21,12 +21,22 @@ aspect Components {
      * Similar to getArray() for arrays.
      */
     syn FExp FExp.component(String name) = dynamicFExp(extractRecordFExp(name));
-    eq FRecordConstructor.component(String name) = getRecord().myFRecordDecl().extractArg(this, name);
+    eq InstRecordConstructor.component(String name) {
+        int i = 0;
+        for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
+            if (icd.name().equals(name)) {
+                break;
+            }
+            i++;
+        }
+        return getArg(i).getFExp();
+    }
+    eq FRecordConstructor.component(String name)    = getRecord().myFRecordDecl().extractArg(this, name);
     eq FIfExp.component(String name) = dynamicFExp(new FIfExp(getIfExp().treeCopy(), getThenExp().component(name).unboundCopy(), getElseExp().component(name).unboundCopy()));
     eq FSubscriptedExp.component(String name) {
         if (indexVariability().indexParameterOrLess()) {
             try {
-                return select().component(name);
+                return dynamicFExp(select().extractRecordFExp(name));
             } catch (ConstantEvaluationException e) {
                 
             }
@@ -37,5 +47,18 @@ aspect Components {
             fas.addFSubscriptNoTransform(new FColonSubscript());
         }
         return dynamicFExp(new FSubscriptedExp(e.treeCopy(), fas));
+    }
+    
+    eq FAssert.component(String name) = dynamicFExp(new FAssert(
+            getTest().component(name).treeCopy(), getMsg().treeCopy(), getLevelOpt().treeCopy()));
+    
+    eq FBinExp.component(String name) = dynamicFExp(createNode(getLeft().component(name), getRight().component(name)));
+    
+    eq FFunctionCall.component(String name) {
+        FClass fc = myFClass();
+        if (!isComposite() || fc == null) {
+            return super.component(name);
+        }
+        return dynamicFExp(dynamicFExp(new FIdUseExp(tempVarName())).component(name));
     }
 }

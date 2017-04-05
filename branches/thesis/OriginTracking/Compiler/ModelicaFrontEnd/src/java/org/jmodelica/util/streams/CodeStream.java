@@ -20,10 +20,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Collection;
 
 public class CodeStream {
     
     private PrintStream out;
+    private String lineEnder = "\n";
     
     public CodeStream(PrintStream ps) {
         this.out = ps;
@@ -76,7 +78,7 @@ public class CodeStream {
     public void splitFile() {}
     
     public void println() {
-        print("\n");
+        print(lineEnder);
     }
     
     public void print(Object o) {
@@ -99,5 +101,24 @@ public class CodeStream {
     
     public void formatln(String format, Object... args) {
         println(String.format(format, args));
+    }
+
+    public void print(Collection<? extends Object> collection, String separator) {
+        boolean first = true;
+        for (Object o : collection) {
+            if (!first) {
+                print(separator);
+            }
+            first = false;
+            print(o);
+        }
+    }
+
+    public void setLineEnder(String lineEnder) {
+        this.lineEnder = lineEnder;
+    }
+
+    public String getLineEnder() {
+        return lineEnder;
     }
 }

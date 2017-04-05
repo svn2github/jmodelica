@@ -127,8 +127,8 @@ model DisplayUnit5
             generatedCode="
 <UnitDefinitions>
     <BaseUnit unit=\"N\">
-        <DisplayUnitDefinition displayUnit=\"kN\" gain=\"0.001\" />
         <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
+        <DisplayUnitDefinition displayUnit=\"kN\" gain=\"0.001\" />
     </BaseUnit>
     <BaseUnit unit=\"J\">
         <DisplayUnitDefinition displayUnit=\"kW.h\" gain=\"2.7777777777777776E-7\" />
@@ -156,8 +156,8 @@ model DisplayUnit6
 <UnitDefinitions>
     <Unit name=\"N\">
         <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
-        <DisplayUnit name=\"kN\" factor=\"0.001\" />
         <DisplayUnit name=\"mN\" factor=\"1000.0\" />
+        <DisplayUnit name=\"kN\" factor=\"0.001\" />
     </Unit>
     <Unit name=\"J\">
         <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" />
@@ -184,9 +184,6 @@ model DisplayUnit7
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
-    <BaseUnit unit=\"kN\">
-        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000000.0\" />
-    </BaseUnit>
     <BaseUnit unit=\"N\">
         <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
     </BaseUnit>
@@ -195,6 +192,9 @@ model DisplayUnit7
     </BaseUnit>
     <BaseUnit unit=\"W.h\">
         <DisplayUnitDefinition displayUnit=\"J\" gain=\"3600.0\" />
+    </BaseUnit>
+    <BaseUnit unit=\"kN\">
+        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000000.0\" />
     </BaseUnit>
 </UnitDefinitions>
 ")})));
@@ -216,10 +216,6 @@ model DisplayUnit8
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
-    <Unit name=\"kN\">
-        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" factor=\"1000.0\" />
-        <DisplayUnit name=\"mN\" factor=\"1000000.0\" />
-    </Unit>
     <Unit name=\"N\">
         <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
         <DisplayUnit name=\"mN\" factor=\"1000.0\" />
@@ -231,6 +227,10 @@ model DisplayUnit8
     <Unit name=\"W.h\">
         <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" factor=\"3600.0\" />
         <DisplayUnit name=\"J\" factor=\"3600.0\" />
+    </Unit>
+    <Unit name=\"kN\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" factor=\"1000.0\" />
+        <DisplayUnit name=\"mN\" factor=\"1000000.0\" />
     </Unit>
 </UnitDefinitions>
 ")})));
@@ -375,13 +375,13 @@ $modelVariables$",
     <ScalarVariable name=\"dependent3\" valueReference=\"5\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent4\" valueReference=\"9\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"dependent4\" valueReference=\"11\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent5\" valueReference=\"10\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"dependent5\" valueReference=\"9\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent6\" valueReference=\"11\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"dependent6\" valueReference=\"10\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"independent1\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
@@ -492,13 +492,13 @@ $modelVariables$",
     <ScalarVariable name=\"dependent3\" valueReference=\"5\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent4\" valueReference=\"9\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependent4\" valueReference=\"11\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent5\" valueReference=\"10\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependent5\" valueReference=\"9\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependent6\" valueReference=\"11\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependent6\" valueReference=\"10\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"independent1\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
@@ -986,19 +986,19 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"dependentParameter1\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter1\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter2\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter2\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter3\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter3\" valueReference=\"5\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter4\" valueReference=\"5\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter4\" valueReference=\"6\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"dependentParameter5\" valueReference=\"6\" description=\"parameter equation\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"dependentParameter5\" valueReference=\"2\" description=\"parameter equation\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"independentParameter1\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
@@ -1408,6 +1408,109 @@ $modelVariables$
 ")})));
 end TempVars2;
 
+model TempVarState1
+        function f
+        input Real x[2];
+        input Real A[2,2];
+        output Real y[2];
+    algorithm
+        y := A*x;
+    annotation(derivative=f_der,LateInline=true);
+    end f;
+
+    function f_der
+        input Real x[2];
+        input Real A[2,2];
+        input Real der_x[2];
+        input Real der_A[2,2];
+        output Real der_y[2];
+    algorithm
+        der_y := A*der_x;
+    annotation(LateInline=true);
+    end f_der;
+
+    parameter Real A[2,2] = {{1,2},{3,4}};
+    Real x1[2](each stateSelect=StateSelect.never),x2[2](each stateSelect=StateSelect.never);
+equation
+    der(x1) + der(x2) = {2,3};
+    x1 + f(x2,A) = {0,0};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="TempVarState1",
+            description="Ensures that temporary variables are exposed in the xml when they are differentiated (or derivative)",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+$modelStructure$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"A[1,1]\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"A[1,2]\" valueReference=\"1\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"2.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"A[2,1]\" valueReference=\"2\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"A[2,2]\" valueReference=\"3\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"4.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_6\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(temp_6)\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"5\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_7\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(temp_7)\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"7\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x1[1]\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x1[1])\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x1[2]\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x1[2])\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x2[1]\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x2[1])\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x2[2]\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x2[2])\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+<ModelStructure>
+    <Derivatives>
+        <Unknown index=\"6\" dependencies=\"\" />
+        <Unknown index=\"8\" dependencies=\"\" />
+    </Derivatives>
+    <InitialUnknowns>
+        <Unknown index=\"5\" dependencies=\"\" />
+        <Unknown index=\"6\" dependencies=\"1 2 3 4\" />
+        <Unknown index=\"7\" dependencies=\"\" />
+        <Unknown index=\"8\" dependencies=\"1 2 3 4\" />
+    </InitialUnknowns>
+</ModelStructure>
+")})));
+end TempVarState1;
+
 model ConstantAliasBase
     constant Real a = 1;
     constant Real b = a;
@@ -1566,7 +1669,7 @@ model StringStartValueIllegalChars2
   
   annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
-            name="StringStartValueIllegalChars1",
+            name="StringStartValueIllegalChars2",
             description="Test that no illegal XML characters are generated",
             fmi_version="2.0",
             template="$modelVariables$",
@@ -1578,4 +1681,22 @@ model StringStartValueIllegalChars2
 </ModelVariables>
 ")})));
 end StringStartValueIllegalChars2;
+
+model Quantity1
+    Real x(quantity="Time") = time;
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Quantity1",
+            description="Quantity attribute",
+            fmi_version="2.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real quantity=\"Time\" relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Quantity1;
+
 end FmiXMLTests;

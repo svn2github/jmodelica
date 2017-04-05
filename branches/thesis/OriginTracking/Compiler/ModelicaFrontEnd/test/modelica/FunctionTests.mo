@@ -263,13 +263,16 @@ model FunctionFlatten4
  Real x = TestFunctionWithConst(2);
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        TransformCanonicalTestCase(
             name="FunctionFlatten4",
             description="Flattening functions: function containing constants",
             variability_propagation=false,
+            inline_functions="none",
             flatModel="
 fclass FunctionTests.FunctionFlatten4
- Real x = FunctionTests.TestFunctionWithConst(2);
+ Real x;
+equation
+ x = FunctionTests.TestFunctionWithConst(2);
 
 public
  function FunctionTests.TestFunctionWithConst
@@ -1824,6 +1827,117 @@ end FunctionTests.FunctionBinding22;
 ")})));
 end FunctionBinding22;
 
+model FunctionBinding23
+    function f
+        input Real x;
+        input Real z;
+        output Real y = z;
+        algorithm
+    end f;
+    
+    function f2
+        extends f(z=x);
+    end f2;
+    
+    Real y = f2(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding23",
+            description="Test default argument using function call where arguments use another argument of the outer function",
+            flatModel="
+fclass FunctionTests.FunctionBinding23
+ Real y = FunctionTests.FunctionBinding23.f2(1, 1);
+
+public
+ function FunctionTests.FunctionBinding23.f2
+  input Real x;
+  input Real z;
+  output Real y;
+ algorithm
+  y := z;
+  return;
+ end FunctionTests.FunctionBinding23.f2;
+
+end FunctionTests.FunctionBinding23;
+")})));
+end FunctionBinding23;
+
+model FunctionBinding24
+    function f
+        input Real x;
+        input Real z;
+        output Real y = z;
+        algorithm
+    end f;
+    
+    function f2
+        extends f(z=t);
+    protected
+        Real t = x;
+    end f2;
+    
+    Real y = f2(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding24",
+            description="Test default arguments",
+            flatModel="
+fclass FunctionTests.FunctionBinding24
+ Real y = FunctionTests.FunctionBinding24.f2(time, time);
+
+public
+ function FunctionTests.FunctionBinding24.f2
+  input Real x;
+  input Real z;
+  output Real y;
+  Real t;
+ algorithm
+  y := z;
+  t := x;
+  return;
+ end FunctionTests.FunctionBinding24.f2;
+
+end FunctionTests.FunctionBinding24;
+")})));
+end FunctionBinding24;
+
+model FunctionBinding25
+    function f
+        input Real x;
+        input Real y = x;
+        output Real z = y;
+        algorithm
+    end f;
+    
+    parameter Integer n = 1;
+    parameter Real[n] x = 1:n;
+    parameter Real z = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding25",
+            description="Test default arguments: variability of call",
+            flatModel="
+fclass FunctionTests.FunctionBinding25
+ structural parameter Integer n = 1 /* 1 */;
+ structural parameter Real x[1] = {1} /* { 1 } */;
+ parameter Real z = FunctionTests.FunctionBinding25.f(1, 1) /* 1 */;
+
+public
+ function FunctionTests.FunctionBinding25.f
+  input Real x;
+  input Real y;
+  output Real z;
+ algorithm
+  z := y;
+  return;
+ end FunctionTests.FunctionBinding25.f;
+
+end FunctionTests.FunctionBinding25;
+")})));
+end FunctionBinding25;
 
 
 model BadFunctionCall1
@@ -2125,6 +2239,38 @@ public
 end FunctionTests.RecursionTest2;
 ")})));
 end RecursionTest2;
+
+model RecursionTest3
+ function f
+  input Real x[:];
+  output Real y[size(x,1)];
+  Integer n = size(x,1);
+ algorithm
+  if n == 1 then
+    y[1] := x[1];
+  elseif n > 1 then
+    y[1:integer(n/2)] := f(x[1:integer(n/2)]);
+    y[integer(1+n/2):n] := f(x[integer(1+n/2):n])-fill(0.0,integer(1+n/2)+1);
+  end if;
+ end f;
+ 
+  constant Real[:] y1 = f({1,2,3,4,5});
+  Real[:] y2 = f({1,2,3,4,5});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecursionTest3",
+            description="Type calculation of recursive function call during constant evaluation",
+            flatModel="
+fclass FunctionTests.RecursionTest3
+ constant Real y1[1] = 1;
+ constant Real y1[2] = 2;
+ constant Real y1[3] = 3;
+ constant Real y1[4] = 4;
+ constant Real y1[5] = 5;
+end FunctionTests.RecursionTest3;
+")})));
+end RecursionTest3;
 
 /* ====================== Function call type checks ====================== */
 
@@ -6149,8 +6295,8 @@ fclass FunctionTests.ArrayExpInFunc31
  discrete FunctionTests.ArrayExpInFunc31.E d;
 initial equation 
  pre(b) = 0;
- pre(c) = false;
  pre(d) = FunctionTests.ArrayExpInFunc31.E.A;
+ pre(c) = false;
 equation
  (a, b, c, d) = FunctionTests.ArrayExpInFunc31.f({1}, {1}, {true}, {FunctionTests.ArrayExpInFunc31.E.A});
 
@@ -6232,8 +6378,8 @@ fclass FunctionTests.ArrayExpInFunc32
  discrete FunctionTests.ArrayExpInFunc32.E d;
 initial equation 
  pre(b) = 0;
- pre(c) = false;
  pre(d) = FunctionTests.ArrayExpInFunc32.E.A;
+ pre(c) = false;
 equation
  (a, b, c, d) = FunctionTests.ArrayExpInFunc32.f({{1}}, {1}, {true}, {FunctionTests.ArrayExpInFunc32.E.A});
 
@@ -6952,6 +7098,62 @@ end FunctionTests.ArrayExpInFunc46;
 ")})));
 end ArrayExpInFunc46;
 
+model ArrayExpInFunc47
+    function f1
+        input Real[:,:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f1;
+    
+    function f2
+        input Real[2] x;
+        output Real y = f1({x,x});
+        algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    Real y = f2({time,time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc47",
+            description="",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc47
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc47.f2({time, time});
+
+public
+ function FunctionTests.ArrayExpInFunc47.f2
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := FunctionTests.ArrayExpInFunc47.f1({{x[1], x[2]}, {x[1], x[2]}});
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc47.f2;
+
+ function FunctionTests.ArrayExpInFunc47.f1
+  input Real[:,:] x;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:size(x, 2) loop
+    temp_1 := temp_1 + x[i1,i2];
+   end for;
+  end for;
+  y := temp_1;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc47.f1;
+
+end FunctionTests.ArrayExpInFunc47;
+")})));
+end ArrayExpInFunc47;
 
 
 model ArrayOutputScalarization1
@@ -8295,6 +8497,10 @@ public
   output Real dummy;
  algorithm
   init o as FunctionTests.ArrayOutputScalarization25.R[2];
+  for i1 in 1:2 loop
+   assert(2 == size(i[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.fwrap', component 'i[i1].x', dimension '1'\");
+   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.fwrap', component 'i[i1].y', dimension '1'\");
+  end for;
   (o) := FunctionTests.ArrayOutputScalarization25.f(i);
   dummy := 1;
   return;
@@ -8305,6 +8511,10 @@ public
   output FunctionTests.ArrayOutputScalarization25.R[:] o;
  algorithm
   init o as FunctionTests.ArrayOutputScalarization25.R[2];
+  for i1 in 1:2 loop
+   assert(2 == size(i[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].x', dimension '1'\");
+   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].y', dimension '1'\");
+  end for;
   o[1].x[1] := i[1].x[1];
   o[1].x[2] := i[1].x[2];
   o[1].y[1] := i[1].y[1];
@@ -8508,6 +8718,74 @@ public
 end FunctionTests.ArrayOutputScalarization28;
 ")})));
 end ArrayOutputScalarization28;
+
+
+model ArrayOutputScalarization29
+    function f
+        input Real x;
+        input Integer n;
+        input Real z[n];
+        output Real[n] y;
+    algorithm
+        assert(x > 2, "Too low!");
+        y := x * z;
+        annotation(Inline=false);
+    end f;
+    
+    record R
+        final parameter Real z1[n] = f(w1, n, z2);
+        final parameter Real z2[n] = f(1, n, {2, 3});
+        parameter Integer n;
+        parameter Real w1;
+        parameter Real w2;
+    end R;
+    
+    R r(final w1 = 1, final n = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayOutputScalarization29",
+            description="Do not replace final parameter function call that fails eval with zeroes",
+            flatModel="
+fclass FunctionTests.ArrayOutputScalarization29
+ parameter Real temp_2[1];
+ parameter Real temp_2[2];
+ structural parameter Real r.z2[1];
+ structural parameter Real r.z2[2];
+ structural parameter Integer r.n = 2 /* 2 */;
+ final parameter Real r.w1 = 1 /* 1 */;
+ parameter Real r.w2;
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ final parameter Real r.z1[1];
+ final parameter Real r.z1[2];
+parameter equation
+ ({temp_2[1], temp_2[2]}) = FunctionTests.ArrayOutputScalarization29.f(1, 2, {2, 3});
+ r.z2[1] = temp_2[1];
+ r.z2[2] = temp_2[2];
+ ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization29.f(1.0, 2, {r.z2[1], r.z2[2]});
+ r.z1[1] = temp_1[1];
+ r.z1[2] = temp_1[2];
+
+public
+ function FunctionTests.ArrayOutputScalarization29.f
+  input Real x;
+  input Integer n;
+  input Real[:] z;
+  output Real[:] y;
+ algorithm
+  init y as Real[n];
+  assert(x > 2, \"Too low!\");
+  for i1 in 1:size(z, 1) loop
+   y[i1] := x * z[i1];
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayOutputScalarization29.f;
+
+end FunctionTests.ArrayOutputScalarization29;
+")})));
+end ArrayOutputScalarization29;
 
 
 /* ======================= Unknown array sizes ======================*/
@@ -8812,6 +9090,7 @@ public
   Real[:,:] d;
   Real[:,:] e;
  algorithm
+  assert(size(a, 2) == size(b, 2), \"Mismatching sizes in function 'FunctionTests.UnknownArray9.f', component 'b', dimension '2'\");
   init c as Real[size(d, 1), size(d, 2)];
   init d as Real[size(a, 1) + size(b, 1), size(a, 2)];
   d := cat(1, a[:,:], b[:,:]);
@@ -10435,6 +10714,9 @@ public
  algorithm
   init o as FunctionTests.UnknownArray40.R[size(i, 1)];
   for i1 in 1:size(i, 1) loop
+   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray40.f', component 'i[i1].y', dimension '1'\");
+  end for;
+  for i1 in 1:size(i, 1) loop
    o[i1].y[1] := i[i1].y[1];
    o[i1].y[2] := i[i1].y[2];
   end for;
@@ -10687,6 +10969,9 @@ public
   input FunctionTests.UnknownArray44.R1[:] r1;
   output FunctionTests.UnknownArray44.R2 r2;
  algorithm
+  for i1 in 1:size(r1, 1) loop
+   assert(1 == size(r1[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray44.f', component 'r1[i1].x', dimension '1'\");
+  end for;
   assert(size(r1, 1) == 1, \"Mismatching sizes in FunctionTests.UnknownArray44.f\");
   r2.y[1].x[1] := r1[1].x[1];
   return;
@@ -10785,11 +11070,14 @@ public
   Real[:] temp_1;
  algorithm
   init y as Real[size(x, 1)];
-  init temp_1 as Real[size(x, 1)];
-  for i1 in 1:size(x, 1) loop
-   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1] .+ 1;
-  end for;
-  (y) := FunctionTests.UnknownArray46.f2(temp_1);
+  if size(x, 1) > 1 then
+  else
+   init temp_1 as Real[size(x, 1)];
+   for i1 in 1:size(x, 1) loop
+    temp_1[i1] := x[i1] .+ 1;
+   end for;
+  end if;
+  (y) := FunctionTests.UnknownArray46.f2(if size(x, 1) > 1 then x else temp_1);
   return;
  end FunctionTests.UnknownArray46.f1;
 
@@ -11059,6 +11347,138 @@ Compliance error at line 10925, column 5, in file '...', CANNOT_INFER_ARRAY_SIZE
 ")})));
 end UnknownArray52;
 
+model UnknownArray53
+    record R
+        Real[2] a;
+    end R;
+    function F
+        input Real[:] X;
+        output R r;
+    algorithm
+        r := R(cat(1, X, {1 - sum(X)}));
+    end F;
+    R r = F({(sin(time) + 1) / 2});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray53",
+            description="Bug in #5272",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray53
+ Real r.a[1];
+ Real r.a[2];
+equation
+ (FunctionTests.UnknownArray53.R({r.a[1], r.a[2]})) = FunctionTests.UnknownArray53.F({(sin(time) + 1) / 2});
+
+public
+ function FunctionTests.UnknownArray53.F
+  input Real[:] X;
+  output FunctionTests.UnknownArray53.R r;
+  Real[:] temp_1;
+  Real[:] temp_2;
+  Real temp_3;
+ algorithm
+  assert(size(X, 1) + 1 == 2, \"Mismatching sizes in FunctionTests.UnknownArray53.F\");
+  init temp_1 as Real[size(X, 1) + 1];
+  for i1 in 1:size(X, 1) loop
+   temp_1[i1] := X[i1];
+  end for;
+  init temp_2 as Real[1];
+  temp_3 := 0.0;
+  for i2 in 1:size(X, 1) loop
+   temp_3 := temp_3 + X[i2];
+  end for;
+  temp_2[1] := 1 - temp_3;
+  for i1 in 1:1 loop
+   temp_1[i1 + size(X, 1)] := temp_2[i1];
+  end for;
+  r.a[1] := temp_1[1];
+  r.a[2] := temp_1[2];
+  return;
+ end FunctionTests.UnknownArray53.F;
+
+ record FunctionTests.UnknownArray53.R
+  Real a[2];
+ end FunctionTests.UnknownArray53.R;
+
+end FunctionTests.UnknownArray53;
+")})));
+end UnknownArray53;
+
+model UnknownArray54
+    function f1
+        input Integer n;
+        Real[:] t = 1:n;
+        output Real y = f2({f2(t[1:1]) for i in 1:n});
+        algorithm
+    end f1;
+    
+    function f2
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+    end f2;
+    
+    Real y = f1(2);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray54",
+            description="Bug in #5291",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray54
+ constant Real y = 2.0;
+end FunctionTests.UnknownArray54;
+")})));
+end UnknownArray54;
+
+model UnknownArray55
+record R
+    Real x;
+end R;
+
+function f
+    input R[:] r;
+    output Real y = sum(r[:].x);
+algorithm
+end f;
+
+Real y = f({R(1),R(2)});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray55",
+            description="Bug in #5317",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.UnknownArray55
+ Real y;
+equation
+ y = FunctionTests.UnknownArray55.f({FunctionTests.UnknownArray55.R(1), FunctionTests.UnknownArray55.R(2)});
+
+public
+ function FunctionTests.UnknownArray55.f
+  input FunctionTests.UnknownArray55.R[:] r;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(r, 1) loop
+   temp_1 := temp_1 + r[i1].x;
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.UnknownArray55.f;
+
+ record FunctionTests.UnknownArray55.R
+  Real x;
+ end FunctionTests.UnknownArray55.R;
+
+end FunctionTests.UnknownArray55;
+")})));
+end UnknownArray55;
+
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
@@ -11195,6 +11615,7 @@ public
   output Real q;
   Real a;
  algorithm
+  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc2.f', component 'x', dimension '2'\");
   a := y + 2;
   external \"C\" f(x, size(x, 1), size(x, 2), y, z, q, a);
   return;
@@ -11232,6 +11653,7 @@ public
   output Real z;
   output Real q;
  algorithm
+  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc3.f', component 'x', dimension '2'\");
   external \"C\" foo(size(x, 1), 2, x, z, y, q);
   return;
  end FunctionTests.ExternalFunc3.f;
@@ -11268,6 +11690,7 @@ public
   output Real z;
   output Real q;
  algorithm
+  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc4.f', component 'x', dimension '2'\");
   external \"C\" q = foo(size(x, 1), 2, x, z, y);
   return;
  end FunctionTests.ExternalFunc4.f;
@@ -12915,7 +13338,7 @@ model ComponentFunc3
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="ComponentFunc3",
-            description="",
+            description="Calling a function through a component",
             flatModel="
 fclass FunctionTests.ComponentFunc3
  Real a.x = 1;
@@ -12934,6 +13357,176 @@ public
 end FunctionTests.ComponentFunc3;
 ")})));
 end ComponentFunc3;
+
+
+model ComponentFunc4
+    model A
+        function f = f2(a = c);
+        parameter Real c = 1;
+    end A;
+    
+    function f2
+        input Real a;
+        output Real b;
+    algorithm
+        b := a + 1;
+        b := b + a;
+    end f2;
+    
+    A a(c = 2);
+    Real y = a.f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ComponentFunc4",
+            description="Calling a function through a component",
+            flatModel="
+fclass FunctionTests.ComponentFunc4
+ parameter Real a.c = 2 /* 2 */;
+ Real y = FunctionTests.ComponentFunc4.a.f(a.c);
+
+public
+ function FunctionTests.ComponentFunc4.a.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a + 1;
+  b := b + a;
+  return;
+ end FunctionTests.ComponentFunc4.a.f;
+
+end FunctionTests.ComponentFunc4;
+")})));
+end ComponentFunc4;
+
+
+model ComponentFunc5
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b;
+    parameter Real z = b.a.f(b.a.y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc5",
+            description="Calling function through nested components",
+            errorMessage="
+1 errors found:
+
+Error at line 13196, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS:
+  Can not access function through component unless only the first part of the name is a component: 'b.a.f'
+")})));
+end ComponentFunc5;
+
+
+model ComponentFunc6
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a[2];
+    parameter Real z = a[1].f(a[1].y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc6",
+            description="Calling function through array component",
+            errorMessage="
+1 errors found:
+
+Error at line 13224, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+  Can not access function through array component access: 'a[1].f'
+")})));
+end ComponentFunc6;
+
+
+model ComponentFunc7
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a[2];
+    parameter Real z = a.f(a[1].y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc7",
+            description="Calling function through array component",
+            errorMessage="
+1 errors found:
+
+Error at line 13252, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+  Can not access function through array component access: 'a.f'
+")})));
+end ComponentFunc7;
+
+
+model ComponentFunc8
+    model A
+        package B
+            function f
+                input Real x;
+                output Real y;
+            algorithm
+                y := x * 2;
+            end f;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a;
+    parameter Real z = a.B.f(a.y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ComponentFunc8",
+            description="Calling function through component, then package",
+            flatModel="
+fclass FunctionTests.ComponentFunc8
+ parameter Real a.y = 2 /* 2 */;
+ parameter Real z = FunctionTests.ComponentFunc8.a.B.f(a.y);
+
+public
+ function FunctionTests.ComponentFunc8.a.B.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * 2;
+  return;
+ end FunctionTests.ComponentFunc8.a.B.f;
+
+end FunctionTests.ComponentFunc8;
+")})));
+end ComponentFunc8;
+
 
 model MinOnInput1
     function F
@@ -14608,6 +15201,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionLike_Special_SemiLinear4",
             description="Test of the semiLinear() operator. Zero flow transformation.",
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear4
  Real x;
@@ -14644,6 +15238,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionLike_Special_SemiLinear5",
             description="Test of the semiLinear() operator. Zero flow transformation.",
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear5
  Real x;
@@ -14682,6 +15277,7 @@ equation
         ErrorTestCase(
             name="FunctionLike_Special_SemiLinear6",
             description="Test of the semiLinear() operator. Zero flow transformation error",
+            eliminate_linear_equations=false,
             variability_propagation=false,
             errorMessage="
 1 errors found:
@@ -14707,6 +15303,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionLike_Special_SemiLinear7",
             description="Check that semiLinear() with event-generating argument does not expand with smooth(0, ...)",
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real x;
@@ -14719,6 +15316,29 @@ equation
 end FunctionTests.FunctionLike.Special.SemiLinear7;
 ")})));
 end SemiLinear7;
+
+model SemiLinear8
+    Real y,x;
+    parameter Real sa=1,s1=2,s2=3;
+equation
+    y = semiLinear(x, sa, s1+1); 
+    y = semiLinear(x, s1, s2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_SemiLinear8",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 15325, column 5, in file '...':
+  Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
+y = semiLinear(x, sa, s1 + 1)
+y = semiLinear(x, s1, s2)
+
+")})));
+end SemiLinear8;
+
 
 end Special;
 
@@ -14846,7 +15466,7 @@ fclass FunctionTests.FunctionLike.EventRel.Smooth2
  Real d;
 equation
  b = time;
- c = b * 2;
+ c = -2 * (- time);
  d = c + b;
  a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
 end FunctionTests.FunctionLike.EventRel.Smooth2;
@@ -14854,20 +15474,21 @@ end FunctionTests.FunctionLike.EventRel.Smooth2;
 end Smooth2;
 
 model Pre1
-	discrete Integer x;
-	Real y = pre(x);
-	discrete Integer x2[2] = {x, x};
-	Real y2[2] = pre(x2);
+    discrete Integer x;
+    Real y = pre(x);
+    discrete Integer x2[2] = {x, x};
+    Real y2[2] = pre(x2);
 equation
-	when time > 1 then
-		x = 1;
-	end when;
+    when time > 1 then
+        x = 1;
+    end when;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="FunctionLike_EventRel_Pre1",
             description="pre(): basic test",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Pre1
  discrete Integer x;
@@ -14919,6 +15540,7 @@ equation
             name="FunctionLike_EventRel_Edge1",
             description="edge(): basic test",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Edge1
  discrete Boolean x;
@@ -14975,10 +15597,8 @@ equation
             description="change(): basic test",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Change1
- Real x;
  discrete Boolean y;
  Real x2[1];
- Real x2[2];
  discrete Boolean y2[1];
  discrete Boolean y2[2];
  discrete Boolean temp_1;
@@ -14989,12 +15609,10 @@ initial equation
  pre(temp_1) = false;
 equation
  temp_1 = time > 1;
- y = if temp_1 and not pre(temp_1) then x <> pre(x) else pre(y);
+ y = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y);
  y2[1] = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y2[1]);
- y2[2] = if temp_1 and not pre(temp_1) then x2[2] <> pre(x2[2]) else pre(y2[2]);
- x = time;
+ y2[2] = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y2[2]);
  x2[1] = time;
- x2[2] = time;
 end FunctionTests.FunctionLike.EventRel.Change1;
 ")})));
 end Change1;
@@ -15022,13 +15640,51 @@ model SampleTest1
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.SampleTest1
  discrete Boolean x;
+ discrete Integer _sampleItr_1;
 initial equation 
  pre(x) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
 equation
- x = sample(0, 1);
+ x = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if x and not pre(x) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 end FunctionTests.FunctionLike.EventRel.SampleTest1;
 ")})));
 end SampleTest1;
+
+model SampleTest2
+   Real y;
+   parameter Boolean x(start=true);
+equation
+    when x and sample(0.01, 0.01) then
+        y = time;
+   end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_EventRel_SampleTest1",
+            description="sample(): basic test",
+            flatModel="
+fclass FunctionTests.FunctionLike.EventRel.SampleTest2
+ discrete Real y;
+ parameter Boolean x(start = true);
+ discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
+ discrete Boolean temp_2;
+initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0.01 then 0 else ceil((time - 0.01) / 0.01);
+ pre(y) = 0.0;
+ pre(temp_2) = false;
+equation
+ temp_2 = x and temp_1;
+ y = if temp_2 and not pre(temp_2) then time else pre(y);
+ temp_1 = not initial() and time >= 0.01 + pre(_sampleItr_1) * 0.01;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < 0.01 + (pre(_sampleItr_1) + 1) * 0.01, \"Too long time steps relative to sample interval.\");
+end FunctionTests.FunctionLike.EventRel.SampleTest2;
+")})));
+end SampleTest2;
 
 end EventRel;
 
@@ -15711,5 +16367,156 @@ public
 end FunctionTests.AnnotationFlattening1;
 ")})));
 end AnnotationFlattening1;
+
+model ConstantInFunction1
+    function f
+        constant input Real x = 0;
+        output Real y;
+        algorithm
+    end f;
+    
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantInFunction1",
+            description="Constant input",
+            errorMessage="
+1 errors found:
+
+Error at line 15794, column 14, in file '...', CONSTANT_INPUT:
+  Function input may not be constant
+
+")})));
+end ConstantInFunction1;
+
+model ConstantInFunction2
+    record R
+        constant Real x = 0;
+    end R;
+    
+    function f
+        input R r;
+        output Real y = r.x;
+        algorithm
+    end f;
+    
+    R r(x=2);
+    Real y = f(r);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantInFunction2",
+            description="",
+            flatModel="
+fclass FunctionTests.ConstantInFunction2
+ constant Real y = 2;
+end FunctionTests.ConstantInFunction2;
+")})));
+end ConstantInFunction2;
+
+
+model ConstantInFunction3
+    package P1
+        record R
+            constant Real x = 0;
+        end R;
+        function f
+            input R r;
+            output Real y = r.x;
+        algorithm
+        end f;
+        
+        constant R r;
+        
+        model M
+            Real y = f(r);
+        end M;
+    end P1;
+    
+    package P2
+        extends P1(r(x=2));
+    end P2;
+    
+    P2.M m;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantInFunction3",
+            description="",
+            flatModel="
+fclass FunctionTests.ConstantInFunction3
+ constant Real m.y = 2;
+end FunctionTests.ConstantInFunction3;
+
+")})));
+end ConstantInFunction3;
+
+model ConstantInFunction4
+    function f
+        input Real x;
+        output Real y = z;
+        constant Real z = x;
+        algorithm
+    end f;
+    
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantInFunction1",
+            description="Constant input",
+            errorMessage="
+1 errors found:
+
+Error at line 15890, column 27, in file '...':
+  Could not evaluate binding expression for constant 'z': 'x'
+
+")})));
+end ConstantInFunction4;
+
+model ConstantInFunction5
+    record R
+        constant Real x = 1;
+    end R;
+    
+    function f
+        function g
+            output Real y = r1.x;
+            algorithm
+        end g;
+        output Real y = g();
+        constant R r1;
+    algorithm
+    end f;
+    
+    Real y = f();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConstantInFunction5",
+            description="",
+            flatModel="
+fclass FunctionTests.ConstantInFunction5
+ Real y = FunctionTests.ConstantInFunction5.f();
+
+public
+ function FunctionTests.ConstantInFunction5.f
+  output Real y;
+ algorithm
+  y := FunctionTests.ConstantInFunction5.f.g();
+  return;
+ end FunctionTests.ConstantInFunction5.f;
+
+ function FunctionTests.ConstantInFunction5.f.g
+  output Real y;
+ algorithm
+  y := 1.0;
+  return;
+ end FunctionTests.ConstantInFunction5.f.g;
+
+end FunctionTests.ConstantInFunction5;
+")})));
+end ConstantInFunction5;
 
 end FunctionTests;

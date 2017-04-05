@@ -10,7 +10,7 @@ void* cpy(void* src, size_t len) {
     return res;
 }
 
-char*   cpystr(const char* src)         { return (char*)  cpy((void*)src, strlen(src)*sizeof(char)); }
+char*   cpystr(const char* src)         { return (char*)  cpy((void*)src, (strlen(src)+1)*sizeof(char)); }
 double* cpydbl(double* src, size_t len) { return (double*)cpy((void*)src, len*sizeof(double)); }
 int*    cpyint(int* src, size_t len)    { return (int*)   cpy((void*)src, len*sizeof(int)); }
 

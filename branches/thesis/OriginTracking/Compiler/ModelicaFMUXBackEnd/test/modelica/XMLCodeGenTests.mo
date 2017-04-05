@@ -783,158 +783,158 @@ equation
   y1 = x[15] + x[1] + z[1];
   y2 = x[4] + sum(z);
 
-	annotation(__JModelica(UnitTesting(tests={
-		XMLCodeGenTestCase(
-			name="DirectDependencyTest1",
-			description="",
-			equation_sorting=true,
-			eliminate_alias_variables=false,
-			generate_fmi_me_xml=false,
-			template="$XML_variables$",
-			generatedCode="
-		<ScalarVariable name=\"u[1]\" valueReference=\"6\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"u[2]\" valueReference=\"7\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\"/>
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"u[3]\" valueReference=\"8\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\"/>
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"u[4]\" valueReference=\"9\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\"/>
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[1]\" valueReference=\"10\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[2]\" valueReference=\"11\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[3]\" valueReference=\"12\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[4]\" valueReference=\"13\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[5]\" valueReference=\"14\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[6]\" valueReference=\"15\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[7]\" valueReference=\"16\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[8]\" valueReference=\"17\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[9]\" valueReference=\"18\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[10]\" valueReference=\"19\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[11]\" valueReference=\"20\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[12]\" valueReference=\"21\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[13]\" valueReference=\"22\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[14]\" valueReference=\"23\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[15]\" valueReference=\"24\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"y1\" valueReference=\"25\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<DirectDependency>
-				<Name>u[1]</Name>
-				<Name>u[2]</Name>
-				<Name>u[3]</Name>
-			</DirectDependency>
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"y2\" valueReference=\"26\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<DirectDependency>
-				<Name>u[4]</Name>
-			</DirectDependency>
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"z[1]\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>state</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"der(z[1])\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>derivative</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"z[2]\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>state</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"der(z[2])\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>derivative</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"z[3]\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>state</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"der(z[3])\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>derivative</VariableCategory>
-		</ScalarVariable>
+    annotation(__JModelica(UnitTesting(tests={
+        XMLCodeGenTestCase(
+            name="DirectDependencyTest1",
+            description="",
+            equation_sorting=true,
+            eliminate_alias_variables=false,
+            generate_fmi_me_xml=false,
+            template="$XML_variables$",
+            generatedCode="
+<ScalarVariable name=\"u[1]\" valueReference=\"6\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"u[2]\" valueReference=\"7\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"u[3]\" valueReference=\"8\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"u[4]\" valueReference=\"9\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[1]\" valueReference=\"10\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[2]\" valueReference=\"11\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[3]\" valueReference=\"12\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[4]\" valueReference=\"13\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[5]\" valueReference=\"14\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[6]\" valueReference=\"15\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[7]\" valueReference=\"16\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[8]\" valueReference=\"17\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[9]\" valueReference=\"18\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[10]\" valueReference=\"19\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[11]\" valueReference=\"20\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[12]\" valueReference=\"21\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[13]\" valueReference=\"22\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[14]\" valueReference=\"23\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"x[15]\" valueReference=\"24\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"y1\" valueReference=\"25\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <DirectDependency>
+        <Name>u[2]</Name>
+        <Name>u[1]</Name>
+        <Name>u[3]</Name>
+    </DirectDependency>
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"y2\" valueReference=\"26\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <DirectDependency>
+        <Name>u[4]</Name>
+    </DirectDependency>
+    <isLinear>true</isLinear>
+    <VariableCategory>algebraic</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"z[1]\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>state</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"der(z[1])\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>derivative</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"z[2]\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>state</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"der(z[2])\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>derivative</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"z[3]\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>state</VariableCategory>
+</ScalarVariable>
+<ScalarVariable name=\"der(z[3])\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+    <isLinear>true</isLinear>
+    <VariableCategory>derivative</VariableCategory>
+</ScalarVariable>
 ")})));
 end DirectDependencyTest1;
 
@@ -1230,5 +1230,96 @@ model SpecialCharacter1
 		</ScalarVariable>
 ")})));
 end SpecialCharacter1;
+
+model Comment1
+  Real x = time "A \comment \t\\without\\\ backslashes\\\\.";
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment1",
+            description="Verifies that backslashes do not exist in the description attribute of a model variable.",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A comment    without backslashes.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment1;
+
+model Comment2
+  Real x = time "A \&comment\" \'with \<escaped \>characters\\.";
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment2",
+            description="Verifies that XML special characters preceded by backslash(es) are generated correctly.",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment2;
+
+model Comment3
+    Real x = time "\"A comment.\\\"";
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment3",
+            description="Verifies that citation marks surrounding a comment are preserved.",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A comment.&quot;\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment3;
+
+model Comment4
+    Real x = time "\\\"A \&comment\" \'with \<escaped \>characters\\.\"";
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Comment4",
+            description="Extra comment generation check for FMI 2.0.",
+            fmi_version="2.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.&quot;\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
+</ModelVariables>
+")})));
+end Comment4;
+
+model CommentFlattening1
+    Real x = time "\&\<\>\'\" \\&\\<\\>\\' \\\&\\\<\\\>\\\'\\\"";
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CommentFlattening1",
+            description="Verifies that comment flattening removes backslashes from characters to be escaped for XML.",
+            flatModel="
+fclass XMLCodeGenTests.CommentFlattening1
+  Real x = time \"&<>'\" &<>' &<>'\"\";
+end XMLCodeGenTests.CommentFlattening1;
+")})));
+end CommentFlattening1;
+
+model CommentFlattening2
+    Real x = time "\'\"\b\f\n\t\r \\'\\b\\f\\n\\t\\r \\\'\\\"\\\b\\\f\\\n\\\t\\\r";
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="CommentFlattening2",
+            description="Verifies that comment flattening removes backslashes from general characters to be escaped.",
+            flatModel="
+fclass XMLCodeGenTests.CommentFlattening2
+ Real x = time \"'\"\b\f\n\t\r 'bfntr '\"\b\f\n\t\r\";
+end XMLCodeGenTests.CommentFlattening2;
+")})));
+end CommentFlattening2;
 
 end XMLCodeGenTests;

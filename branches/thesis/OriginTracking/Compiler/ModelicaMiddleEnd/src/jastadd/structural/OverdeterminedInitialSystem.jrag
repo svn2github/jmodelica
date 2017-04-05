@@ -105,7 +105,7 @@ aspect OverdeterminedInitialSystem {
             
             @Override
             public CValue ceval(CommonVariableDecl variable) {
-                ASTNode.log.verbose(variable.name());
+                ASTNode.log.verbose("    %s", variable.name());
                 CValue val = evaluationCache.get(variable);
                 if (val != null)
                     return val;
@@ -133,7 +133,7 @@ aspect OverdeterminedInitialSystem {
             
             @Override
             public CValue ceval(CommonVariableDecl variable, Index i) {
-                return CValue.UNKNOWN;
+                return ceval(variable).array().getCell(i);
             }
         }
     }
@@ -169,8 +169,12 @@ aspect OverdeterminedInitialSystem {
     syn boolean FAbstractEquation.OIS_consistencyCheck(VariableEvaluator evaluator) = false;
     eq FEquation.OIS_consistencyCheck(VariableEvaluator evaluator) {
         try {
-            CValue left = getLeft().ceval(evaluator);
+            log.verbose("  Right:");
             CValue right = getRight().ceval(evaluator);
+            log.verbose("    Calculated value: %s", right);
+            log.verbose("  Left:");
+            CValue left = getLeft().ceval(evaluator);
+            log.verbose("    Calculated value: %s", left);
             return left.isValid() && right.isValid() && type().equ(left, right).booleanValue();
         } catch (ConstantEvaluationException e) {
             return false;

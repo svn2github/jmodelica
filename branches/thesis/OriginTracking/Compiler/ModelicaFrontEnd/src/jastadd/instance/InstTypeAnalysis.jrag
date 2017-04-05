@@ -58,9 +58,17 @@ aspect InstTypeAnalysis {
             return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FIdUse("ExternalObject.constructor"), new FIdUse("ExternalObject.destructor"));
         return fUnknownType();
     }
-    eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
-    eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
-    eq InstExternalObject.primitiveScalarType() = myInstClass().enumType();
+
+    eq InstEnum.primitiveScalarType()              = myInstClass().enumType();
+    eq InstClassDecl.primitiveScalarType()         = isEnum() ? enumType() : super.primitiveScalarType();
+    eq InstExternalObject.primitiveScalarType()    = myInstClass().enumType();
+    eq InstForIndexPrimitive.primitiveScalarType() = myInstForIndexType();
+
+    inh FType InstForIndexPrimitive.myInstForIndexType();
+    eq InstForIndexWithExp.getInstPrimitive().myInstForIndexType() = getFExp().type().scalarType();
+    eq InstForIndexNoExp.getInstPrimitive().myInstForIndexType()   = hasFExp() ? 
+            getFExp().type().scalarType() : fUnknownType();
+    eq InstNode.getChild().myInstForIndexType()                  = fUnknownType();
 
     syn nta FType InstExternalObject.getType() {
         FIdUseInstAccess con = new FIdUseInstAccess(InstAccess.fromName(myConstructor().qualifiedName()));
@@ -228,19 +236,39 @@ aspect InstBindingType {
     /**
      * The size that a value FExp of this modification should have.
      */
-    syn Size InstModification.expectedSize() = expectedSizeFromParent();
-    eq InstNamedModification.expectedSize()  = getName().myInstComponentDecl().size().expand(getEach() ? Size.SCALAR : super.expectedSize());
-    eq InstElementRedeclare.expectedSize()   = getName().myInstComponentDecl().size();
+    syn Size InstModification.expectedSize() = expectedSize(true);
+
+    /**
+     * The size that a value FExp of this modification should have, if all 'each' are ignored.
+     */
+    syn Size InstModification.expectedSizeNoEach() = expectedSize(false);
+
+    /**
+     * The size that a value FExp of this modification should have.
+     * 
+     * @param useEach  if <code>false</code>, ignore any each
+     */
+    syn Size InstModification.expectedSize(boolean useEach) = expectedSizeFromParent(useEach);
+    eq InstNamedModification.expectedSize(boolean useEach)  = 
+        getName().myInstComponentDecl().size().expand(useEach && getEach() ? Size.SCALAR : super.expectedSize(useEach));
+    eq InstElementRedeclare.expectedSize(boolean useEach)   = getName().myInstComponentDecl().size();
 
     /**
      * The size that a value expression of the parent this modification should have.
      */
-    inh Size InstModification.expectedSizeFromParent();
-    eq InstModification.getChild().expectedSizeFromParent()      = expectedSize();
-    eq InstComponentDecl.getChild().expectedSizeFromParent()     = size();
-    eq InstClassDecl.getChild().expectedSizeFromParent()         = size();
-    eq InstConstrainingClass.getChild().expectedSizeFromParent() = getClassName().myInstClassDecl().size();
-    eq Root.getChild().expectedSizeFromParent() {
+    syn Size InstModification.expectedSizeFromParent() = expectedSizeFromParent(true);
+
+    /**
+     * The size that a value expression of the parent this modification should have.
+     * 
+     * @param useEach  if <code>false</code>, ignore any each
+     */
+    inh Size InstModification.expectedSizeFromParent(boolean useEach);
+    eq InstModification.getChild().expectedSizeFromParent(boolean useEach)      = expectedSize(useEach);
+    eq InstComponentDecl.getChild().expectedSizeFromParent(boolean useEach)     = size();
+    eq InstClassDecl.getChild().expectedSizeFromParent(boolean useEach)         = size();
+    eq InstConstrainingClass.getChild().expectedSizeFromParent(boolean useEach) = getClassName().myInstClassDecl().size();
+    eq Root.getChild().expectedSizeFromParent(boolean useEach) {
         throw new UnsupportedOperationException();
     }
 
@@ -295,7 +323,6 @@ aspect InstBindingType {
      */
     syn boolean InstModification.allModificationsMatchesSize(Size s)     = true;
     eq InstArrayModification.allModificationsMatchesSize(Size s)         = true;
-    eq InstRecordModification.allModificationsMatchesSize(Size s)        = true;
     eq InstElementRedeclare.allModificationsMatchesSize(Size s)          = true;
     eq InstValueModification.allModificationsMatchesSize(Size s)         = getFExp().size().equivalent(s, true);
     eq InstCompleteModification.allModificationsMatchesSize(Size s)      = 
@@ -357,6 +384,23 @@ aspect InstBindingType {
     eq FlatRoot.getChild().inArrayComponent()               = false;
     eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
     syn boolean InstNode.inArrayComponent()                 = false;
+
+}
+
+
+aspect NodeTypes {
+
+    /**
+     * Is this element a short class decl?
+     */
+    syn boolean Element.isShortClassDecl() = false;
+    eq ShortClassDecl.isShortClassDecl()   = true;
+
+    /**
+     * Is this element a full class decl?
+     */
+    syn boolean Element.isFullClassDecl() = false;
+    eq FullClassDecl.isFullClassDecl()    = true;
 
 }
 

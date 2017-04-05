@@ -246,15 +246,51 @@ aspect ContentCheck {
         }
     }
 
+    
+    public static final SimpleProblemProducer ASTNode.CONSTANT_INPUT =
+        new SimpleErrorProducer("CONSTANT_INPUT", ProblemKind.SEMANTIC, "Function input may not be constant");
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_FUNCTION_ANNOTATION =
+        new SimpleErrorProducer("EXTERNAL_FUNCTION_ANNOTATION", ProblemKind.SEMANTIC,
+            "External function annotations only allowed on external statement annotations. "
+            + "This annotation is attached to a class. There might be a semicolon you want to remove.");
+
     public void InstClassDecl.contentCheck(ErrorCheckType checkType) {
         if (isExternalObject()) {
             checkContentsOKInExternalObject();
             myConstructor().checkConstructor(this);
             myDestructor().checkDestructor(this);
         }
+        
+        if (isFunction()) {
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                if (icd.definedVariability().constantVariability()) {
+                    if (icd.isInput()) {
+                        ASTNode.CONSTANT_INPUT.invoke(icd);
+                    } else if (icd.hasBindingFExp()) {
+                        icd.getBindingFExp().checkConstantExpression(checkType, "constant", icd.qualifiedName());
+                    }
+                }
+            }
+            for (AnnotationNode an : annotation()) {
+                if (AnnotationNode.EXTERNAL_FUNCTION_ANNOTATIONS.contains(an.name())) {
+                    ASTNode.EXTERNAL_FUNCTION_ANNOTATION.invoke(an.ast());
+                }
+            }
+        }
+        
         checkQuotedIdentifier(getClassDecl(), getClassDecl().getName().getID());
     }
-
+    
+    private static Set<String> AnnotationNode.buildExternalFunctionAnnotations() {
+        Set<String> res = new LinkedHashSet<String>();
+        res.add("Include");
+        res.add("IncludeDirectory");
+        res.add("Library");
+        res.add("LibraryDirectory");
+        return res;
+    }
+    public static final Set<String> AnnotationNode.EXTERNAL_FUNCTION_ANNOTATIONS = buildExternalFunctionAnnotations();
+    
 	public void InstNode.checkContentsOKInExternalObject() {
 		for (InstExtends ie : getInstExtendss())
 			ie.checkContentsOKInExternalObject();
@@ -450,11 +486,13 @@ aspect ContentCheck {
 	
 	syn boolean FIfWhenEquation.elseIsBalancedAssignments() = 
 		assignedSet().equals(getElse().assignedSet()) && getElse().isBalancedAssignments();
-	
-	inh boolean FIfEquation.isTopWhenIfEquation();
-	eq ASTNode.getChild().isTopWhenIfEquation()        = true;
-	eq FIfWhenEquation.getElse().isTopWhenIfEquation() = false;
-	
+
+    inh boolean FIfEquation.isTopWhenIfEquation();
+    eq FClass.getChild().isTopWhenIfEquation()              = true;
+    eq InstClassDecl.getChild().isTopWhenIfEquation()       = true;
+    eq FIfWhenElseEquation.getChild().isTopWhenIfEquation() = true;
+    eq FIfWhenEquation.getElse().isTopWhenIfEquation()      = false;
+
     syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
     eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().variability().fixedParameterOrLess() 
             && (!hasElse() || getElse().hasOnlyFixedParamTests());

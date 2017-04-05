@@ -109,6 +109,7 @@ end FunctionInlining.BasicInline2;
             variability_propagation=false,
             inline_functions="all",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionInlining.BasicInline3
  Real x;
@@ -152,6 +153,7 @@ end FunctionInlining.BasicInline3;
         TransformCanonicalTestCase(
             name="BasicInline4",
             description="Test of alias elimination after inlining",
+            eliminate_linear_equations=false,
             variability_propagation=false,
             inline_functions="all",
             flatModel="
@@ -247,6 +249,7 @@ end FunctionInlining.BasicInline6;
             variability_propagation=false,
             inline_functions="all",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionInlining.BasicInline7
  Real x;
@@ -295,6 +298,7 @@ end FunctionInlining.BasicInline7;
         TransformCanonicalTestCase(
             name="BasicInline8",
             description="Inlining function with both function calls and arrays",
+            eliminate_linear_equations=false,
             variability_propagation=false,
             inline_functions="all",
             flatModel="
@@ -559,36 +563,46 @@ fclass FunctionInlining.BasicInline14
  Real a3.c[1].f;
  constant Real a3.c[1].s = 5;
  Real x1;
+ Real _stream_s_1;
+ Real _stream_alpha_1;
+ Real _stream_positiveMax_1;
+ Real _stream_positiveMax_2;
 equation
- x1 = (max(- a2.c[1].f, 1.0E-8) * 4.0 + max(- a3.c[1].f, 1.0E-8) * 5.0) / (max(- a2.c[1].f, 1.0E-8) + max(- a3.c[1].f, 1.0E-8));
+ x1 = (_stream_positiveMax_1 * 4.0 + _stream_positiveMax_2 * 5.0) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  a1.c[1].f + a2.c[1].f + a3.c[1].f = 0;
  a1.c[1].f = time;
  a2.c[1].f = time / 2;
+ _stream_s_1 = max(- a2.c[1].f, 0) + max(- a3.c[1].f, 0);
+ _stream_alpha_1 = smooth(1, if _stream_s_1 > _inStreamEpsilon then 1 elseif _stream_s_1 > 0 then _stream_s_1 / _inStreamEpsilon * (_stream_s_1 / _inStreamEpsilon * (3 - 2 * _stream_s_1)) else 0);
+ _stream_positiveMax_1 = _stream_alpha_1 * max(- a2.c[1].f, 0) + (1 - _stream_alpha_1) * _inStreamEpsilon;
+ _stream_positiveMax_2 = _stream_alpha_1 * max(- a3.c[1].f, 0) + (1 - _stream_alpha_1) * _inStreamEpsilon;
 end FunctionInlining.BasicInline14;
+
 ")})));
     end BasicInline14;
 
 
-	model MatrixInline1
-		function f
-			input Real[2,2] a;
+    model MatrixInline1
+        function f
+            input Real[2,2] a;
             input Real[2,2] b;
-			output Real[2,2] c;
-		algorithm
-			c := a + b;
-		end f;
-		
-		parameter Real[2,2] p = [1,2; 3,4];
+            output Real[2,2] c;
+        algorithm
+            c := a + b;
+        end f;
+        
+        parameter Real[2,2] p = [1,2; 3,4];
         Real[2,2] x = p .+ time;
         Real[2,2] y = p * time;
-		Real[2,2] z = f(x, y);
+        Real[2,2] z = f(x, y);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="MatrixInline1",
-			description="Inline function with matrix as input and output",
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MatrixInline1",
+            description="Inline function with matrix as input and output",
+            eliminate_linear_equations=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.MatrixInline1
  parameter Real p[1,1] = 1 /* 1 */;
  parameter Real p[1,2] = 2 /* 2 */;
@@ -786,16 +800,16 @@ end FunctionInlining.RecordInline4;
             d := R({1,2,3} * c, 2);
         end f;
         
-		Real y = 1;
+        Real y = time;
         R x = f(y);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RecordInline5",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordInline5",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.RecordInline5
  Real y;
  Real x.a[2];
@@ -804,9 +818,9 @@ fclass FunctionInlining.RecordInline5
 initial equation 
  pre(x.b) = 0;
 equation
- y = 1;
- x.a[2] = 2 * y;
- x.a[3] = 3 * y;
+ y = time;
+ x.a[2] = -2 * (- time);
+ x.a[3] = -3 * (- time);
  x.b = 2;
 end FunctionInlining.RecordInline5;
 ")})));
@@ -829,7 +843,7 @@ end FunctionInlining.RecordInline5;
             d := sum(e.a) + c * e.b;
         end f;
         
-        Real y = 1;
+        Real y = time;
         Real x = f(y);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -837,13 +851,14 @@ end FunctionInlining.RecordInline5;
 			name="RecordInline6",
 			description="",
 			variability_propagation=false,
+            eliminate_linear_equations=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline6
  Real y;
  Real x;
 equation
- y = 1;
+ y = time;
  x = y + 2 * y + 3 * y + y * 4;
 end FunctionInlining.RecordInline6;
 ")})));
@@ -864,22 +879,23 @@ end FunctionInlining.RecordInline6;
             R g;
             R h;
         algorithm
-			e := c;
-			g := R(e.a + c.a, e.b - c.b);
-			h := R(c.a * e.a * g.a, 3);
-			d := R(h.a - c.a, h.b + g.b);
+            e := c;
+            g := R(e.a + c.a, e.b - c.b);
+            h := R(c.a * e.a * g.a, 3);
+            d := R(h.a - c.a, h.b + g.b);
         end f;
         
         Real y[4] = {1,2,3,4};
         R x = f(R(y[1:3], integer(y[4])));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RecordInline7",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordInline7",
+            description="",
+            eliminate_linear_equations=false,
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.RecordInline7
  Real y[1];
  Real y[2];
@@ -904,7 +920,6 @@ equation
  x.b = 3 + (temp_2 - temp_2);
  temp_2 = if y[4] < pre(temp_2) or y[4] >= pre(temp_2) + 1 or initial() then integer(y[4]) else pre(temp_2);
 end FunctionInlining.RecordInline7;
-			
 ")})));
     end RecordInline7;
     
@@ -925,16 +940,17 @@ end FunctionInlining.RecordInline7;
             d.b := integer(5 - c);
         end f;
         
-        Real y = 1;
+        Real y = time;
         R x = f(y);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RecordInline8",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordInline8",
+            description="",
+            variability_propagation=false,
+            eliminate_linear_equations=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.RecordInline8
  Real y;
  Real x.a[1];
@@ -944,7 +960,7 @@ fclass FunctionInlining.RecordInline8
 initial equation 
  pre(x.b) = 0;
 equation
- y = 1;
+ y = time;
  x.a[1] = 2 / y;
  x.a[2] = 3 + y;
  x.a[3] = 4 * y;
@@ -1744,28 +1760,29 @@ end FunctionInlining.IfStatementInline6;
         Real v = 3;
         Real z = f(v);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ForStatementInline1",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForStatementInline1",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
+            flatModel="
 fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
- Real temp_1;
- Real temp_5;
- Real temp_7;
- Real temp_9;
+ Real temp_2;
+ Real temp_10;
+ Real temp_12;
+ Real temp_14;
 equation
  v = 3;
- z = 1 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
- temp_1 = v;
- temp_5 = 1 + (temp_1 - 1) / 3;
- temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
- temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
+ z = 1 + temp_10 * temp_10 + temp_12 * temp_12 + temp_14 * temp_14;
+ temp_2 = v;
+ temp_10 = 1 + (temp_2 - 1) / 3;
+ temp_12 = 1 + 2 * ((temp_2 - 1) / 3);
+ temp_14 = 1 + 3 * ((temp_2 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
 ")})));
     end ForStatementInline1;
@@ -2084,13 +2101,14 @@ end FunctionInlining.ForStatementInline9;
         (x[5], x[6]) = f(x[3], 3);
         (x[7], x[8]) = f(x[5], x[6]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="MultipleOutputsInline1",
-			description="Inlining function call using multiple outputs",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MultipleOutputsInline1",
+            description="Inlining function call using multiple outputs",
+            eliminate_linear_equations=false,
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.MultipleOutputsInline1
  Real x[1];
  Real x[2];
@@ -2134,13 +2152,14 @@ end FunctionInlining.MultipleOutputsInline1;
         (x[3], x[4])   = f(y[3], y[4]);
         (, x[5], x[6]) = f(y[5], y[6]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="MultipleOutputsInline2",
-			description="Inlining function call using multiple (but not all) outputs",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MultipleOutputsInline2",
+            description="Inlining function call using multiple (but not all) outputs",
+            eliminate_linear_equations=false,
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.MultipleOutputsInline2
  Real x[1];
  Real x[2];
@@ -2184,16 +2203,16 @@ end FunctionInlining.MultipleOutputsInline2;
             d := a - b;
             e := a * b;
         end f1;
-		
-		function f2
+        
+        function f2
             input Real y1;
             input Real y2;
             output Real x1;
-	        output Real x2;
+            output Real x2;
             output Real x3;
-	    algorithm
-	        (x1, x2, x3) := f1(y1, y2);
-		end f2;
+        algorithm
+            (x1, x2, x3) := f1(y1, y2);
+        end f2;
         
         Real x[6];
         Real y[6] = ones(6);
@@ -2202,13 +2221,14 @@ end FunctionInlining.MultipleOutputsInline2;
         (x[3], x[4])   = f2(y[3], y[4]);
         (, x[5], x[6]) = f2(y[5], y[6]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="MultipleOutputsInline3",
-			description="Inlining function call using multiple (but not all) outputs",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MultipleOutputsInline3",
+            description="Inlining function call using multiple (but not all) outputs",
+            eliminate_linear_equations=false,
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.MultipleOutputsInline3
  Real x[1];
  Real x[2];
@@ -2622,18 +2642,22 @@ fclass FunctionInlining.WhenEquationInline1
  discrete Real x;
  discrete Real y;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
 equation
- temp_1 = sample(0, 1);
  if temp_1 and not pre(temp_1) then
   (x, y) = FunctionInlining.WhenEquationInline1.F(time);
  else
   x = pre(x);
   y = pre(y);
  end if;
+ temp_1 = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 
 public
  function FunctionInlining.WhenEquationInline1.F
@@ -2647,7 +2671,6 @@ public
  end FunctionInlining.WhenEquationInline1.F;
 
 end FunctionInlining.WhenEquationInline1;
-			
 ")})));
 end WhenEquationInline1;
 	
@@ -4220,10 +4243,10 @@ annotation(__JModelica(UnitTesting(tests={
             flatModel="
 fclass FunctionInlining.ChainedCallInlining4
  Real y;
- Real temp_11;
+ Real temp_14;
 equation
- y = temp_11 + 4 + (temp_11 + 5);
- temp_11 = time;
+ y = temp_14 + 4 + (temp_14 + 5);
+ temp_14 = time;
 end FunctionInlining.ChainedCallInlining4;
 ")})));
 end ChainedCallInlining4;
@@ -4261,10 +4284,10 @@ annotation(__JModelica(UnitTesting(tests={
             flatModel="
 fclass FunctionInlining.ChainedCallInlining5
  Real y;
- Real temp_11;
+ Real temp_14;
 equation
- y = (temp_11 + 4) / (temp_11 + 5);
- temp_11 = time;
+ y = (temp_14 + 4) / (temp_14 + 5);
+ temp_14 = time;
 end FunctionInlining.ChainedCallInlining5;
 ")})));
 end ChainedCallInlining5;
@@ -4302,12 +4325,12 @@ model ChainedCallInlining6
             flatModel="
 fclass FunctionInlining.ChainedCallInlining6
  Real y;
- Real temp_11;
- Real temp_30;
+ Real temp_14;
+ Real temp_36;
 equation
- y = (temp_11 + 4) / (temp_11 + 5);
- temp_11 = (temp_30 + 4) / (temp_30 + 5);
- temp_30 = time;
+ y = (temp_14 + 4) / (temp_14 + 5);
+ temp_14 = (temp_36 + 4) / (temp_36 + 5);
+ temp_36 = time;
 end FunctionInlining.ChainedCallInlining6;
 ")})));
 end ChainedCallInlining6;
@@ -4352,12 +4375,12 @@ model ChainedCallInlining7
             flatModel="
 fclass FunctionInlining.ChainedCallInlining7
  Real y;
- Real temp_13;
- Real temp_32;
+ Real temp_16;
+ Real temp_38;
 equation
- y = (temp_13 + 4) / (temp_13 + 5);
- temp_13 = (temp_32 + 4) / (temp_32 + 5);
- temp_32 = time;
+ y = (temp_16 + 4) / (temp_16 + 5);
+ temp_16 = (temp_38 + 4) / (temp_38 + 5);
+ temp_38 = time;
 end FunctionInlining.ChainedCallInlining7;
 ")})));
 end ChainedCallInlining7;
@@ -4390,19 +4413,17 @@ model ChainedCallInlining8
             description="Test inlining chained function calls",
             flatModel="
 fclass FunctionInlining.ChainedCallInlining8
- Real y1[1];
  Real y1[2];
  Real y1[3];
  Real y2[1];
  Real y2[2];
  Real y2[3];
 equation
- y1[1] = time;
- y1[2] = time + 1;
- y1[3] = time + 2;
- y2[2] = y2[1] + 1;
- y2[3] = y2[1] + 2;
  y2[1] = time;
+ y1[2] = time + 1;
+ y1[3] = y1[2] + 1;
+ y2[2] = y2[1] + 1;
+ y2[3] = y2[2] + 1;
 end FunctionInlining.ChainedCallInlining8;
 ")})));
 end ChainedCallInlining8;
@@ -4580,6 +4601,69 @@ end FunctionInlining.ChainedCallInlining12;
 ")})));
 end ChainedCallInlining12;
 
+model ChainedCallInlining13
+    record R
+        Real[2] x;
+    end R;
+    
+    function f1
+        input Real[:] x;
+        output R r = if size(x,1) >= 2 then R(x[1:2]) else R(cat(1,x,{1}));
+    algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R r;
+        output Real y = sum(r.x);
+        algorithm
+        annotation(Inline=true);
+    end f2;
+    
+    parameter R r = f1({1,2});
+    parameter Real y = f2(f1({1}));
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining13",
+            description="Test bug in #5165",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining13
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
+ parameter Real y = 2 /* 2 */;
+end FunctionInlining.ChainedCallInlining13;
+")})));
+end ChainedCallInlining13;
+
+model ChainedCallInlining14
+    function f1
+        input Integer n;
+        output Real y = if n > 0 then f2(1:n) else n;
+        algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    Real y = f1(2);
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining14",
+            description="Test bug in #5292",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining14
+ constant Real y = 3.0;
+end FunctionInlining.ChainedCallInlining14;
+")})));
+end ChainedCallInlining14;
+
 
 model InputAsIndex1
     function f
@@ -4680,7 +4764,7 @@ initial equation
 equation
  y = ({r[1].x, r[2].x})[i];
  r[1].x = time;
- r[2].x = 2 * time;
+ r[2].x = 2 * r[1].x;
  i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
 end FunctionInlining.InputAsIndex3;
 ")})));
@@ -4775,8 +4859,8 @@ fclass FunctionInlining.SizeParam1
  Real y[2];
 equation
  x[1] = time;
- x[2] = 2 * time;
- x[3] = 3 * time;
+ x[2] = 2 * x[1];
+ x[3] = 3 * x[1];
  y[1] = 0.6666666666666666 * x[1] + -0.33329767031411434 * x[2] + -0.33340465555621845 * x[3];
  y[2] = 0.5773708577748173 * x[2] + -0.5773090854108254 * x[3];
 end FunctionInlining.SizeParam1;

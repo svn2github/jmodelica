@@ -24,7 +24,7 @@ from scipy.io.matlab.mio import loadmat
 
 from pymodelica.compiler import compile_jmu, compile_fmu
 from pyfmi.fmi_deprecated import FMUModel2
-from pyfmi.fmi import FMUModel, load_fmu, FMUException
+from pyfmi.fmi import FMUModel, load_fmu, FMUException, TimeLimitExceeded
 from pyfmi.common.io import ResultDymolaTextual
 from tests_jmodelica import testattr, get_files_path
 
@@ -75,6 +75,46 @@ class Test_When:
         assert res.final("nextTime") == 4.0
         assert res.final("nextTime2") == 3.0
         assert res.final("nextTime3") == 8.0
+        
+class Test_Sparse_Linear_Block:
+    @classmethod
+    def setUpClass(cls):
+
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", 
+                                version=1.0,
+                                compiler_options={"generate_sparse_block_jacobian": True})
+    
+        file_name = os.path.join(get_files_path(), 'Modelica', 'TearingTests.mo')
+
+        _in3_name = compile_fmu("TearingTests.TearingTest1", file_name, version=1.0)
+    
+    @testattr(stddist = True)
+    def test_cc(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        
+        res1 = model.simulate()
+        
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        model.set("_le_sparse_jacobian_threshold", 1)
+        
+        res2 = model.simulate()
+        
+        #Assert that sparse handling has no impact on the number of steps
+        assert res1.solver.statistics["nsteps"] == res2.solver.statistics["nsteps"]
+        nose.tools.assert_almost_equal(res1.final("J1.w"), res2.final("J1.w"), 3)
+        
+    @testattr(stddist = True)
+    def test_multiple_sparse_systems(self):
+        file_name = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+
+        fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0)
+        
+    @testattr(stddist = True)
+    def test_no_sparse_generation(self):
+        model = load_fmu("TearingTests_TearingTest1.fmu")
+        model.set("_le_sparse_jacobian_threshold", 1)
+
+        nose.tools.assert_raises(FMUException, model.simulate)
         
 class Test_Sensitivities_FMI2:
     @classmethod
@@ -140,8 +180,15 @@ class Test_Time_Events:
         compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True})
         
         compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.TestSampling", file_name)
+        compile_fmu("TimeEvents.TestSampling1", file_name)
         compile_fmu("TimeEvents.TestSampling2", file_name)
+        compile_fmu("TimeEvents.TestSampling3", file_name)
+        compile_fmu("TimeEvents.TestSampling4", file_name)
+        compile_fmu("TimeEvents.TestSampling5", file_name)
+        compile_fmu("TimeEvents.TestSampling6", file_name)
+        compile_fmu("TimeEvents.TestSampling7", file_name)
+        compile_fmu("TimeEvents.TestSampling8", file_name)
+        compile_fmu("TimeEvents.TestSampling9", file_name)
         compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name)
     
     @testattr(stddist = True)
@@ -256,21 +303,88 @@ class Test_Time_Events:
         
         assert res.solver.statistics["ntimeevents"] == 2
         assert res.solver.statistics["nstateevents"] == 2
-        
-    @testattr(stddist = True)
-    def test_time_event_sampling(self):
-        model = load_fmu("TimeEvents_TestSampling.fmu")
+
+    """                 """
+    """ Sampling tests. """
+    """                 """
+
+    """ Basic test using only interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling1(self):
+        model = load_fmu("TimeEvents_TestSampling1.fmu")
         model.initialize()
-        res = model.simulate(0, 1e4, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e5
-        
-    @testattr(stddist = True)
+        res = model.simulate(0, 1e3, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Only small interval. """
+
+    @testattr(sample = True)
     def test_time_event_sampling2(self):
         model = load_fmu("TimeEvents_TestSampling2.fmu")
         model.initialize()
         res = model.simulate(0,1e-6, options={"initialize":False});
         assert res.solver.statistics["ntimeevents"] == 1e4
-        
+
+    """ Only big interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling3(self):
+        model = load_fmu("TimeEvents_TestSampling3.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Basic test using offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling4(self):
+        model = load_fmu("TimeEvents_TestSampling4.fmu")
+        model.initialize()
+        res = model.simulate(0,2e-6, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == (1e4)+1
+
+    """ Big interval, small offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling5(self):
+        model = load_fmu("TimeEvents_TestSampling5.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Big interval and offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling6(self):
+        model = load_fmu("TimeEvents_TestSampling6.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    @testattr(sample = True)
+    def test_time_event_sampling7(self):
+        model = load_fmu("TimeEvents_TestSampling7.fmu")
+        model.initialize()
+        res = model.simulate(0,1e5, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Test 8 verifies that sampling raises an exception when a too small step is required. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling8(self):
+        model = load_fmu("TimeEvents_TestSampling8.fmu")
+        nose.tools.assert_raises(model.initialize)
+
+    """ Same interval and offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling9(self):
+        model = load_fmu("TimeEvents_TestSampling9.fmu")
+        model.initialize()
+        res = model.simulate(0,1, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 10
+
     @testattr(stddist = True)
     def test_time_event_state_event_after_time_event(self):
         model = load_fmu("TimeEvents_StateEventAfterTimeEvent.fmu")
@@ -709,6 +823,7 @@ class Test_Singular_Systems:
         compile_fmu("Singular.NoMinimumNormSolution", file_name)
         compile_fmu("Singular.ZeroColumnJacobian", file_name)
         compile_fmu("Singular.ZeroColumnJacobian2", file_name)
+        compile_fmu("Singular.LinearEvent3", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -726,6 +841,22 @@ class Test_Singular_Systems:
         res = model.simulate(final_time=4)
         nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
         nose.tools.assert_almost_equal(res.final('w') ,2.000000000)
+        
+    @testattr(stddist = True)
+    def test_linear_event_3(self):
+        model = load_fmu("Singular_LinearEvent3.fmu", log_level=3)
+        model.set("_log_level", 3)
+        
+        opts = model.simulate_options()
+        opts["ncp"] = 7
+        opts["CVode_options"]["maxh"] = 0.49
+        
+        res = model.simulate(final_time=1, options=opts)
+        x = res["x"]
+        for i in range(4):
+            nose.tools.assert_almost_equal(x[i] ,0.000000000)
+        for i in range(4,8):
+            nose.tools.assert_almost_equal(x[i] ,0.0100000)
     
     @testattr(stddist = True)
     def test_linear_inf_1(self):
@@ -924,9 +1055,27 @@ class Test_FMI_ODE_CS:
         file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
         file_name_time_event = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
 
-        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs")
-        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs")
-       
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs", version=1.0)
+        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs", version=1.0)
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version=1.0)
+    
+    @testattr(stddist = True)
+    def test_time_out(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        
+        res = model.simulate() #Verify that it works to simulate
+        model.reset()
+        
+        opts = model.simulate_options()
+        opts["time_limit"] = 0.001
+        
+        nose.tools.assert_raises(TimeLimitExceeded, model.simulate, options=opts)
+        model.reset()
+        
+        opts["time_limit"] = 10
+        res = model.simulate() #Verify that it works with a high time out
+        
+    
     @testattr(stddist = True)
     def test_time_event_at_do_step_end(self):
         model = load_fmu("TimeEvents_Advanced5.fmu")
@@ -965,6 +1114,72 @@ class Test_FMI_ODE_CS:
             assert res["der(x)"][i] == 0.0
             
 
+class Test_FMI_ODE_2:
+    """
+    This class tests pyfmi.simulation.assimulo.FMIODE and together
+    with Assimulo. Requires that Assimulo is installed.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
+        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
+        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+
+        _ex1_name = compile_fmu("NoState.Example1", file_name, version=2.0)
+        _ex2_name = compile_fmu("NoState.Example2", file_name, version=2.0)
+        #_in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
+        #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
+        #_cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
+        #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+    
+    @testattr(stddist = True)
+    def test_no_state1(self):
+        """
+        Tests simulation when there is no state in the model (Example1).
+        """
+        model = load_fmu("NoState_Example1.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        nose.tools.assert_almost_equal(res.initial('x') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-2.000000000)
+        nose.tools.assert_almost_equal(res.initial('y') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('y'),-1.000000000)
+        nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('z'),4.000000000)
+        
+    @testattr(stddist = True)
+    def test_no_state2(self):
+        """
+        Tests simulation when there is no state in the model (Example2).
+        """
+        model = load_fmu("NoState_Example2.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        nose.tools.assert_almost_equal(res.initial('x') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-1.000000000)
+        
+    @testattr(stddist = True)
+    def test_no_state1_radau(self):
+        """
+        Tests simulation when there is no state in the model (Example1).
+        """
+        model = load_fmu("NoState_Example1.fmu")
+        
+        res = model.simulate(final_time=10, options={"solver": "Radau5ODE"})
+        
+        nose.tools.assert_almost_equal(res.initial('x') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-2.000000000)
+        nose.tools.assert_almost_equal(res.initial('y') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('y'),-1.000000000)
+        nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('z'),4.000000000)
+
 class Test_FMI_ODE:
     """
     This class tests pyfmi.simulation.assimulo.FMIODE and together
@@ -980,12 +1195,12 @@ class Test_FMI_ODE:
         file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
         file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
 
-        _ex1_name = compile_fmu("NoState.Example1", file_name)
-        _ex2_name = compile_fmu("NoState.Example2", file_name)
-        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
-        _in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
-        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
-        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+        _ex1_name = compile_fmu("NoState.Example1", file_name, version=1.0)
+        _ex2_name = compile_fmu("NoState.Example2", file_name, version=1.0)
+        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in, version=1.0)
+        _in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in, version=1.0)
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=1.0)
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=1.0)
         
     def setUp(self):
         """
@@ -1008,6 +1223,17 @@ class Test_FMI_ODE:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+            
+    @testattr(stddist = True)
+    def test_maxord_is_set(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["CVode_options"]["maxord"] = 1
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert res.solver.maxord == 1
     
     @testattr(stddist = True)
     def test_cc_with_cvode(self):

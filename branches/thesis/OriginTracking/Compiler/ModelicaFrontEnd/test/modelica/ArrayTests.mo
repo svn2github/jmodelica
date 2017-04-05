@@ -441,6 +441,38 @@ Error at line 430, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/A
 ")})));
 end ArrayTest15_Err;
 
+model ArrayTest16_Err
+  function f
+  input Integer n;
+  input Integer v[:];
+  Integer x[n];
+  Integer y[:];
+  Integer z[2];
+  output Integer o;
+algorithm
+  o := v[1] + x[1] + y[1] + z[1];
+  x := fill(-1, 2);
+  y := ones(o);
+  z := zeros(2);
+end f;
+
+Integer x = f(2, {2, 2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="General_ArrayTest16_Err",
+            description="Test type checking of arrays for unknown-size, non-input arrays in functions",
+            errorMessage="
+2 errors found:
+
+Compliance error at line 453, column 22, in file '...':
+  Using variables with undefined size is not supported
+
+Compliance error at line 455, column 3, in file '...':
+  Using variables with undefined size is not supported
+")})));
+end ArrayTest16_Err;
+
 model ArrayTest17
   model N
     model M
@@ -1122,6 +1154,7 @@ model ArrayTest43
             name="General_ArrayTest43",
             description="Splitting expression with access in array subscripts in part of dotted access",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.General.ArrayTest43
  structural parameter Integer n = 3 /* 3 */;
@@ -1171,9 +1204,9 @@ fclass ArrayTests.General.ArrayTest44
  Real b.x[2,2];
 equation
  b.x[1,1] = 1.0 + time;
- b.x[2,1] = 1.0 + 2 * time;
- b.x[1,2] = 2.0 + time;
- b.x[2,2] = 2.0 + 2 * time;
+ b.x[2,1] = 2 * b.x[1,1] + -1;
+ b.x[1,2] = b.x[1,1] + 1;
+ b.x[2,2] = 2 * b.x[1,1];
 end ArrayTests.General.ArrayTest44;
 ")})));
 end ArrayTest44;
@@ -1281,6 +1314,58 @@ public
 end ArrayTests.General.ArrayTest47;
 ")})));
 end ArrayTest47;
+
+model ArrayTest48
+    constant Integer n = 2;
+    function f
+        output Real[n] y = 1:n;
+        algorithm
+    end f;
+    constant Real[n] y1 = f();
+    constant Real[n] y2 = f();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="General_ArrayTest48",
+            description="",
+            flatModel="
+fclass ArrayTests.General.ArrayTest48
+ constant Integer n = 2;
+ constant Real y1[2] = {1, 2};
+ constant Real y2[2] = {1, 2};
+
+public
+ function ArrayTests.General.ArrayTest48.f
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y := 1:2;
+  return;
+ end ArrayTests.General.ArrayTest48.f;
+
+end ArrayTests.General.ArrayTest48;
+")})));
+end ArrayTest48;
+
+model ArrayTest49
+    record R
+        Real[:] x;
+    end R;
+    
+    R[:] r(x(start={1})) = {R({time})};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest49",
+            description="",
+            flatModel="
+fclass ArrayTests.General.ArrayTest49
+ Real r[1].x[1](start = 1);
+equation
+ r[1].x[1] = time;
+end ArrayTests.General.ArrayTest49;
+")})));
+end ArrayTest49;
 
 end General;
 
@@ -1711,6 +1796,40 @@ end ArrayTests.Subscripts.SubscriptExpression10;
 ")})));
 end SubscriptExpression10;
 
+model SubscriptExpression11
+    parameter Integer n1 = 2;
+    parameter Integer n2[n1] = {2,3};
+    Real x[sum(n2)];
+equation
+    for i in 1:n1 loop
+        for j in 1:n2[i] loop
+            x[sum(n2[k] for k in 1:(i - 1)) + j] = sin(time) * i * j;
+        end for;
+    end for;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_SubscriptExpression10",
+            description="Scalarization of subscript expression #5216",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Subscripts.SubscriptExpression11
+ structural parameter Integer n1 = 2 /* 2 */;
+ structural parameter Integer n2[2] = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+equation
+ x[1] = sin(time);
+ x[2] = sin(time) * 2;
+ x[3] = sin(time) * 2;
+ x[4] = sin(time) * 2 * 2;
+ x[5] = sin(time) * 2 * 3;
+end ArrayTests.Subscripts.SubscriptExpression11;
+")})));
+end SubscriptExpression11;
 
 
 model NumSubscripts1
@@ -1894,6 +2013,7 @@ model EndSubscript1
         TransformCanonicalTestCase(
             name="Subscripts_EndSubscript1",
             description="Using end in access to member of last record in array of records",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Subscripts.EndSubscript1
  Real a[1].x;
@@ -1934,6 +2054,7 @@ public
   input ArrayTests.Subscripts.EndSubscript2.R r;
   output Real x;
  algorithm
+  assert(r.n == size(r.x, 1), \"Mismatching sizes in function 'ArrayTests.Subscripts.EndSubscript2.f', component 'r.x', dimension '1'\");
   x := r.x[r.n];
   return;
  end ArrayTests.Subscripts.EndSubscript2.f;
@@ -5737,7 +5858,7 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  structural parameter Real D[2,2] = 4 /* 4 */;
 equation
  y[1] = u[1] + 2.0 * u[2];
- y[2] = 2.0 * u[1] + 4.0 * u[2];
+ y[2] = 2 * y[1];
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;
@@ -5762,6 +5883,22 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray6
 end ArrayTests.Constructors.EmptyArray.EmptyArray6;
 ")})));
 end EmptyArray6;
+
+model EmptyArray7
+    constant Real x[:] = {1};
+    Real[:] y = x[1:0];
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Constructors_EmptyArray_EmptyArray7",
+            description="Empty arrays, composite array",
+            flatModel="
+fclass ArrayTests.Constructors.EmptyArray.EmptyArray7
+ constant Real x[1] = {1};
+ Real y[0] = fill(0.0, 0);
+end ArrayTests.Constructors.EmptyArray.EmptyArray7;
+")})));
+end EmptyArray7;
 
 end EmptyArray;
 
@@ -5890,6 +6027,7 @@ model ArrayIterTest6
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest6",
             description="Iteration expressions as members of array constructor",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest6
  Real x[1,1];
@@ -5929,6 +6067,7 @@ model ArrayIterTest7
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest7",
             description="Iteration expressions with generated temporaries",
+            eliminate_linear_equations=false,
             inline_functions="none",
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest7
@@ -5990,6 +6129,7 @@ model ArrayIterTest8
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest8",
             description="Iteration expressions with generated temporaries",
+            eliminate_linear_equations=false,
             inline_functions="none",
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest8
@@ -6057,6 +6197,7 @@ model ArrayIterTest9
             name="Constructors_Iterators_ArrayIterTest9",
             description="Iteration expressions with generated temporaries",
             inline_functions="none",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest9
  Real z[1];
@@ -6157,6 +6298,7 @@ model ArrayIterTest12
             name="Constructors_Iterators_ArrayIterTest12",
             description="Nested iteration expressions",
             inline_functions="none",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest12
  Real r.t[1];
@@ -6221,6 +6363,7 @@ model ArrayIterTest14
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest14",
             description="Varying size in iteration expression",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest14
  Real L[1];
@@ -6262,6 +6405,7 @@ model ArrayIterTest15
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest15",
             description="Varying size in iteration expression",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest15
  structural parameter Integer n = 3 /* 3 */;
@@ -6337,6 +6481,28 @@ public
 end ArrayTests.Constructors.Iterators.ArrayIterTest17; 
 ")}))); 
 end ArrayIterTest17;
+
+model ArrayIterTest18
+    parameter Integer n = 10;
+    Real a[n] = ones(n);
+    Real x;
+equation
+    x = sum(if a[i] > 0 then 2 else 0 for i in 1:n - 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Constructors_Iterators_ArrayIterTest18",
+            description="",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest18
+ structural parameter Integer n = 10 /* 10 */;
+ Real a[10] = ones(10);
+ Real x;
+equation
+ x = sum({if a[1] > 0 then 2 else 0, if a[2] > 0 then 2 else 0, if a[3] > 0 then 2 else 0, if a[4] > 0 then 2 else 0, if a[5] > 0 then 2 else 0, if a[6] > 0 then 2 else 0, if a[7] > 0 then 2 else 0, if a[8] > 0 then 2 else 0});
+end ArrayTests.Constructors.Iterators.ArrayIterTest18;
+")})));
+end ArrayIterTest18;
     
 model ArrayIterTestUnknown1
     function f
@@ -6656,6 +6822,598 @@ public
 end ArrayTests.For.ForAlgorithm1;
 ")})));
 end ForAlgorithm1;
+
+
+model ForNoRange1
+    parameter Integer n = 3;
+    Real x[n];
+equation
+    for i loop
+        x[i] = i * time;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange1",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange1
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[3];
+equation
+ x[1] = time;
+ x[2] = 2 * time;
+ x[3] = 3 * time;
+end ArrayTests.For.ForNoRange1;
+")})));
+end ForNoRange1;
+
+
+model ForNoRange2
+    parameter Integer m = 2;
+    parameter Integer n = 3;
+    Real x[m, n];
+equation
+    for i, j loop
+        x[i, j] = (i + j) * time;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange2",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange2
+ structural parameter Integer m = 2 /* 2 */;
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[2,3];
+equation
+ x[1,1] = (1 + 1) * time;
+ x[1,2] = (1 + 2) * time;
+ x[1,3] = (1 + 3) * time;
+ x[2,1] = (2 + 1) * time;
+ x[2,2] = (2 + 2) * time;
+ x[2,3] = (2 + 3) * time;
+end ArrayTests.For.ForNoRange2;
+")})));
+end ForNoRange2;
+
+
+model ForNoRange3
+    parameter Integer n = 3;
+    Real x[:] = (1:n) * time;
+    Real y[n];
+equation
+    for i loop
+        x[i] = y[i] + i;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange3",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange3
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[3] = (1:3) * time;
+ Real y[3];
+equation
+ x[1] = y[1] + 1;
+ x[2] = y[2] + 2;
+ x[3] = y[3] + 3;
+end ArrayTests.For.ForNoRange3;
+")})));
+end ForNoRange3;
+
+
+model ForNoRange4
+    parameter Integer m = 2;
+    parameter Integer n = 3;
+    Real x[:] = (1:m) * time;
+    Real y[n];
+equation
+    for i loop
+        x[i] = y[i] + i;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange4",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 6766, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
+  For index with implicit iteration range used for inconsistent sizes, here used for size [3] and earlier for size [2]
+")})));
+end ForNoRange4;
+
+
+model ForNoRange5
+    parameter Integer n = 3;
+    Real x[n];
+equation
+    for i loop
+        x[end - i] = time + i;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange5",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 6786, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_NOT_USED:
+  For index with implicit iteration range must be used as array index
+")})));
+end ForNoRange5;
+
+
+model ForNoRange6
+    parameter Integer m = 2;
+    parameter Integer n = 3;
+    Real x[m, n];
+algorithm
+    for i, j loop
+        x[i, j] := (i + j) * time;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange6",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange6
+ structural parameter Integer m = 2 /* 2 */;
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[2,3];
+algorithm
+ x[1,1] := (1 + 1) * time;
+ x[1,2] := (1 + 2) * time;
+ x[1,3] := (1 + 3) * time;
+ x[2,1] := (2 + 1) * time;
+ x[2,2] := (2 + 2) * time;
+ x[2,3] := (2 + 3) * time;
+end ArrayTests.For.ForNoRange6;
+")})));
+end ForNoRange6;
+
+
+model ForNoRange7
+    parameter Integer n = 3;
+    Real x[:] = (1:n) * time;
+    Real y[n];
+algorithm
+    for i loop
+        x[i] := y[i] + i;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange7",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange7
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[3] = (1:3) * time;
+ Real y[3];
+algorithm
+ x[1] := y[1] + 1;
+ x[2] := y[2] + 2;
+ x[3] := y[3] + 3;
+end ArrayTests.For.ForNoRange7;
+")})));
+end ForNoRange7;
+
+
+model ForNoRange8
+    parameter Integer m = 2;
+    parameter Integer n = 3;
+    Real x[:] = (1:m) * time;
+    Real y[n];
+algorithm
+    for i loop
+        x[i] := y[i] + i;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange8",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 6867, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
+  For index with implicit iteration range used for inconsistent sizes, here used for size [3] and earlier for size [2]
+")})));
+end ForNoRange8;
+
+
+model ForNoRange9
+    parameter Integer n = 3;
+    Real x[n];
+algorithm
+    for i loop
+        x[end - i] := time + i;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange9",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 6887, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_NOT_USED:
+  For index with implicit iteration range must be used as array index
+")})));
+end ForNoRange9;
+
+
+model ForNoRange10
+    parameter Integer m = 2;
+    parameter Integer n = 3;
+    Real x[m, n];
+    Real y[m, n] = fill(time, m, n);
+equation
+    x = { (i + j) * y[i, j] for j, i };
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange10",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange10
+ structural parameter Integer m = 2 /* 2 */;
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[2,3];
+ Real y[2,3] = fill(time, 2, 3);
+equation
+ x[1:2,1:3] = {{(1 + 1) * y[1,1], (1 + 2) * y[1,2], (1 + 3) * y[1,3]}, {(2 + 1) * y[2,1], (2 + 2) * y[2,2], (2 + 3) * y[2,3]}};
+end ArrayTests.For.ForNoRange10;
+")})));
+end ForNoRange10;
+
+
+model ForNoRange11
+    parameter Integer n = 3;
+    Real x[:] = (1:n) * time;
+    Real y[n] = { x[i] + i for i };
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange11",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange11
+ structural parameter Integer n = 3 /* 3 */;
+ Real x[3] = (1:3) * time;
+ Real y[3] = {x[1] + 1, x[2] + 2, x[3] + 3};
+end ArrayTests.For.ForNoRange11;
+")})));
+end ForNoRange11;
+
+
+model ForNoRange12
+    parameter Integer m = 2;
+    parameter Integer n = 3;
+    Real x[:] = (1:m) * time;
+    Real y[:] = (1:n) * time;
+    Real y[:] = { x[i] + y[i] for i };
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange12",
+            description="",
+            errorMessage="
+2 errors found:
+
+Error at line 6952, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
+  Duplicate component in same class: Real y[:] = {x[i]+y[i]i}
+
+Error at line 6953, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
+  For index with implicit iteration range used for inconsistent sizes, here used for size [3] and earlier for size [2]
+")})));
+end ForNoRange12;
+
+
+model ForNoRange13
+    Real x[:] = { i * i for i };
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange13",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 6972, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_NOT_USED:
+  For index with implicit iteration range must be used as array index
+")})));
+end ForNoRange13;
+
+
+model ForNoRange14
+    function f
+        input Real y[2, 3];
+        output Real x[3, 2];
+    algorithm
+        for i, j loop
+            x[i, j] := (i + j) * y[j, i];
+        end for;
+    end f;
+
+    Real x[3, 2] = f(fill(time, 2, 3));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange14",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange14
+ Real x[3,2] = ArrayTests.For.ForNoRange14.f(fill(time, 2, 3));
+
+public
+ function ArrayTests.For.ForNoRange14.f
+  input Real[:,:] y;
+  output Real[:,:] x;
+ algorithm
+  assert(2 == size(y, 1), \"Mismatching sizes in function 'ArrayTests.For.ForNoRange14.f', component 'y', dimension '1'\");
+  assert(3 == size(y, 2), \"Mismatching sizes in function 'ArrayTests.For.ForNoRange14.f', component 'y', dimension '2'\");
+  init x as Real[3, 2];
+  for i in 1:3 loop
+   for j in 1:2 loop
+    x[i,j] := (i + j) * y[j,i];
+   end for;
+  end for;
+  return;
+ end ArrayTests.For.ForNoRange14.f;
+
+end ArrayTests.For.ForNoRange14;
+")})));
+end ForNoRange14;
+
+
+model ForNoRange15
+    function f
+        input Real y[2];
+        output Real x[3];
+    algorithm
+        for i loop
+            x[i] := y[i] + i;
+        end for;
+    end f;
+
+    Real x[3] = f((1:2) * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange15",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 7032, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
+  For index with implicit iteration range used for inconsistent sizes, here used for size [2] and earlier for size [3]
+")})));
+end ForNoRange15;
+
+
+model ForNoRange16
+    function f
+        input Real y[2];
+        output Real x[2];
+    algorithm
+        for i loop
+            x[end - i] := i;
+        end for;
+    end f;
+
+    Real x[2] = f((1:2) * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForNoRange16",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 7056, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_NOT_USED:
+  For index with implicit iteration range must be used as array index
+")})));
+end ForNoRange16;
+
+
+model ForNoRange17
+    Real x[4];
+    parameter Integer i[:] = {2, 4, 1};
+equation
+    for j loop
+        x[i[j]] = j * time;
+    end for;
+    x[3] = x[1] + x[2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange17",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange17
+ Real x[4];
+ parameter Integer i[3] = {2, 4, 1} /* { 2, 4, 1 } */;
+equation
+ (x[1:4])[i[1]] = time;
+ (x[1:4])[i[2]] = 2 * time;
+ (x[1:4])[i[3]] = 3 * time;
+ x[3] = x[1] + x[2];
+end ArrayTests.For.ForNoRange17;
+")})));
+end ForNoRange17;
+
+
+model ForNoRange18
+    function f
+        input Real y[:, :];
+        output Real x[size(y,2), size(y,1)];
+    algorithm
+        for i, j loop
+            x[i, j] := (i + j) * y[j, i];
+        end for;
+    end f;
+
+    Real x[3, 2] = f(fill(time, 2, 3));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange18",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange18
+ Real x[3,2] = ArrayTests.For.ForNoRange18.f(fill(time, 2, 3));
+
+public
+ function ArrayTests.For.ForNoRange18.f
+  input Real[:,:] y;
+  output Real[:,:] x;
+ algorithm
+  init x as Real[size(y, 2), size(y, 1)];
+  assert(size(y, 2) == size(y, 2), \"For index with implicit iteration range used for inconsistent sizes, i used for different sizes in y[j,i] and x[i,j]\");
+  assert(size(y, 1) == size(y, 1), \"For index with implicit iteration range used for inconsistent sizes, j used for different sizes in y[j,i] and x[i,j]\");
+  for i in 1:size(y, 2) loop
+   for j in 1:size(y, 1) loop
+    x[i,j] := (i + j) * y[j,i];
+   end for;
+  end for;
+  return;
+ end ArrayTests.For.ForNoRange18.f;
+
+end ArrayTests.For.ForNoRange18;
+")})));
+end ForNoRange18;
+
+
+model ForNoRange19
+    function f
+        input Real y[:];
+        input Real z[:];
+        output Real x[size(y,1)];
+    algorithm
+        x := { y[i] + z[i] + 1 for i };
+    end f;
+
+    Real x[2] = f((1:2) * time, (3:4) * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange19",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange19
+ Real x[2] = ArrayTests.For.ForNoRange19.f((1:2) * time, (3:4) * time);
+
+public
+ function ArrayTests.For.ForNoRange19.f
+  input Real[:] y;
+  input Real[:] z;
+  output Real[:] x;
+ algorithm
+  init x as Real[size(y, 1)];
+  assert(size(z, 1) == size(y, 1), \"For index with implicit iteration range used for inconsistent sizes, i used for different sizes in z[i] and y[i]\");
+  x[:] := {y[i] + z[i] + 1 for i in 1:size(y, 1)};
+  return;
+ end ArrayTests.For.ForNoRange19.f;
+
+end ArrayTests.For.ForNoRange19;
+")})));
+end ForNoRange19;
+
+
+model ForNoRange20
+    function f
+        input Real y[:];
+        input Real z[:];
+        output Real x[size(y,1)];
+    algorithm
+        for i loop
+            x[i] := y[i] + z[i] + i;
+        end for;
+    end f;
+
+    Real x[2] = f((1:2) * time, (3:5) * time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange20",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange20
+ Real x[2] = ArrayTests.For.ForNoRange20.f((1:2) * time, (3:5) * time);
+
+public
+ function ArrayTests.For.ForNoRange20.f
+  input Real[:] y;
+  input Real[:] z;
+  output Real[:] x;
+ algorithm
+  init x as Real[size(y, 1)];
+  assert(size(y, 1) == size(y, 1), \"For index with implicit iteration range used for inconsistent sizes, i used for different sizes in y[i] and x[i]\");
+  assert(size(z, 1) == size(y, 1), \"For index with implicit iteration range used for inconsistent sizes, i used for different sizes in z[i] and x[i]\");
+  for i in 1:size(y, 1) loop
+   x[i] := y[i] + z[i] + i;
+  end for;
+  return;
+ end ArrayTests.For.ForNoRange20.f;
+
+end ArrayTests.For.ForNoRange20;
+")})));
+end ForNoRange20;
+
+
+model ForNoRange21
+    function f
+        input Real y[:];
+        input Real z[:];
+        input Real w[2];
+        output Real x[2];
+    algorithm
+        for i loop
+            x[i] := y[i] + z[i] + w[i] + i;
+        end for;
+    end f;
+
+    Real y[2] = (1:2) * time;
+    Real x[2] = f(y, y, y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_ForNoRange21",
+            description="",
+            flatModel="
+fclass ArrayTests.For.ForNoRange21
+ Real y[2] = (1:2) * time;
+ Real x[2] = ArrayTests.For.ForNoRange21.f(y[1:2], y[1:2], y[1:2]);
+
+public
+ function ArrayTests.For.ForNoRange21.f
+  input Real[:] y;
+  input Real[:] z;
+  input Real[:] w;
+  output Real[:] x;
+ algorithm
+  assert(2 == size(w, 1), \"Mismatching sizes in function 'ArrayTests.For.ForNoRange21.f', component 'w', dimension '1'\");
+  init x as Real[2];
+  assert(size(y, 1) == 2, \"For index with implicit iteration range used for inconsistent sizes, i used for different sizes in y[i] and x[i]\");
+  assert(size(z, 1) == 2, \"For index with implicit iteration range used for inconsistent sizes, i used for different sizes in z[i] and x[i]\");
+  for i in 1:2 loop
+   x[i] := y[i] + z[i] + w[i] + i;
+  end for;
+  return;
+ end ArrayTests.For.ForNoRange21.f;
+
+end ArrayTests.For.ForNoRange21;
+")})));
+end ForNoRange21;
 
 end For;
 
@@ -7006,8 +7764,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({1.0, 3.0})[i];
- x[2] = ({2.0, 4.0})[i];
+ x[1] = ({{1.0, 2.0}, {3.0, 4.0}})[i,1];
+ x[2] = ({{1.0, 2.0}, {3.0, 4.0}})[i,2];
 end ArrayTests.VariableIndex.TwoDim4;
 ")})));
 end TwoDim4;
@@ -7034,8 +7792,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({1.0, 2.0})[i];
- x[2] = ({3.0, 4.0})[i];
+ x[1] = ({{1.0, 2.0}, {3.0, 4.0}})[1,i];
+ x[2] = ({{1.0, 2.0}, {3.0, 4.0}})[2,i];
 end ArrayTests.VariableIndex.TwoDim5;
 ")})));
 end TwoDim5;
@@ -7066,8 +7824,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({3.0, 4.0})[i];
- x[2] = ({5.0, 6.0})[i];
+ x[1] = ({{3.0, 4.0}, {5.0, 6.0}})[1,i];
+ x[2] = ({{3.0, 4.0}, {5.0, 6.0}})[2,i];
 end ArrayTests.VariableIndex.TwoDim6;
 ")})));
 end TwoDim6;
@@ -7098,8 +7856,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x[1] = ({2.0, 6.0})[i];
- x[2] = ({3.0, 7.0})[i];
+ x[1] = ({{2.0, 3.0}, {6.0, 7.0}})[i,1];
+ x[2] = ({{2.0, 3.0}, {6.0, 7.0}})[i,2];
 end ArrayTests.VariableIndex.TwoDim7;
 ")})));
 end TwoDim7;
@@ -7248,6 +8006,7 @@ model RecordArrayEquation1
         TransformCanonicalTestCase(
             name="VariableIndex_RecordArrayEquation1",
             description="Test of variable array index access",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.RecordArrayEquation1
  Real x[1].y;
@@ -7298,6 +8057,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_RecordArrayEquation2",
             description="Test of variable array index access",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.RecordArrayEquation2
  Real x[1,1].x;
@@ -7340,6 +8100,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_ExpEquationCombination",
             description="Test of variable array index access",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.ExpEquationCombination
  Real x[1,1,1,1];
@@ -7602,12 +8363,12 @@ equation
  x[2,3,4,3] = time;
  x[2,3,4,4] = time;
  x[2,3,4,5] = time;
- y[1,1] = ({{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}})[i,k];
- y[1,2] = ({{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}})[j,k];
- y[1,3] = ({{x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}})[i,k];
- y[2,1] = ({{x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}})[j,k];
- y[2,2] = ({{x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}})[i,k];
- y[2,3] = ({{x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}})[j,k];
+ y[1,1] = ({{{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}}, {{x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}}, {{x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}}})[i,1,k];
+ y[1,2] = ({{{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}}, {{x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}}, {{x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}}})[i,2,k];
+ y[1,3] = ({{{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}}, {{x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}}, {{x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}}})[i,3,k];
+ y[2,1] = ({{{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}}, {{x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}}, {{x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}}})[j,1,k];
+ y[2,2] = ({{{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}}, {{x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}}, {{x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}}})[j,2,k];
+ y[2,3] = ({{{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}}, {{x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}}, {{x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}}})[j,3,k];
 end ArrayTests.VariableIndex.ExpEquationCombination;
 ")})));
 end ExpEquationCombination;
@@ -7627,6 +8388,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_Slice1",
             description="Using variable index in slice",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice1
  Real y;
@@ -7651,6 +8413,7 @@ model Slice2
         TransformCanonicalTestCase(
             name="VariableIndex_Slice2",
             description="Using variable index in slice with matrix result",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice2
  Real x[1,1,1];
@@ -7677,12 +8440,12 @@ equation
  x[2,1,2] = 6 * time;
  x[2,2,1] = 7 * time;
  x[2,2,2] = 8 * time;
- y[1,1] = ({x[1,2,1], x[2,2,1]})[i];
- y[1,2] = ({x[1,2,2], x[2,2,2]})[i];
- y[1,3] = ({x[1,2,2], x[2,2,2]})[i];
- y[2,1] = ({x[1,1,1], x[2,1,1]})[i];
- y[2,2] = ({x[1,1,2], x[2,1,2]})[i];
- y[2,3] = ({x[1,1,2], x[2,1,2]})[i];
+ y[1,1] = ({{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}})[i,1,1];
+ y[1,2] = ({{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}})[i,1,2];
+ y[1,3] = ({{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}})[i,1,3];
+ y[2,1] = ({{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}})[i,2,1];
+ y[2,2] = ({{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}})[i,2,2];
+ y[2,3] = ({{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}})[i,2,3];
 end ArrayTests.VariableIndex.Slice2;
 ")})));
 end Slice2;
@@ -7701,6 +8464,7 @@ model Slice3
         TransformCanonicalTestCase(
             name="VariableIndex_Slice3",
             description="Using variable index in slice with no index on record",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice3
  Real r[1].x[1];
@@ -7715,8 +8479,8 @@ equation
  r[1].x[2] = 2 * time;
  r[2].x[1] = 3 * time;
  r[2].x[2] = 4 * time;
- x[1] = ({r[1].x[1], r[1].x[2]})[i];
- x[2] = ({r[2].x[1], r[2].x[2]})[i];
+ x[1] = ({{r[1].x[1], r[1].x[2]}, {r[2].x[1], r[2].x[2]}})[1,i];
+ x[2] = ({{r[1].x[1], r[1].x[2]}, {r[2].x[1], r[2].x[2]}})[2,i];
 end ArrayTests.VariableIndex.Slice3;
 ")})));
 end Slice3;
@@ -7737,6 +8501,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_Slice4",
             description="Using variable index in slice over models",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice4
  Real y;
@@ -7772,6 +8537,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_Slice5",
             description="Using variable index in slice over models, complex example",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice5
  Real y[1];
@@ -7795,8 +8561,8 @@ fclass ArrayTests.VariableIndex.Slice5
  discrete input Integer i;
  discrete input Integer j;
 equation
- y[1] = ({{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}})[i,j];
- y[2] = ({{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}})[i,j];
+ y[1] = ({{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}})[1,i,j];
+ y[2] = ({{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}})[2,i,j];
  b[1,1].a[1,1].z = time;
  b[1,1].a[1,2].z = time;
  b[1,1].a[2,1].z = time;
@@ -8173,7 +8939,7 @@ model ArraySize5
             description="",
             flatModel="
 fclass ArrayTests.Other.ArraySize5
- Real y[2] = ArrayTests.Other.ArraySize5.f(2, 1:3, 1:3);
+ Real y[2] = ArrayTests.Other.ArraySize5.f(2, 1:3, (1:3)[1:2]);
 
 public
  function ArrayTests.Other.ArraySize5.f
@@ -8335,6 +9101,81 @@ fclass ArrayTests.Other.ArraySizeInIf3
 end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
+
+model ArraySizeInIf4
+    Real[0] x = 1:0;
+    Real y;
+algorithm
+    if size(x,1) > 0 then
+        y := x[1];
+    else
+        y := x[1];
+    end if;
+            
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf4",
+            description="Test that array size errors lock if branches if possible",
+            errorMessage="
+1 errors found:
+
+Error at line 8346, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+")})));
+end ArraySizeInIf4;
+
+model ArraySizeInIf5
+    Real[0] x = 1:0;
+    Real y;
+algorithm
+    if size(x,1) < 0 then
+        y := x[1];
+    elseif size(x,1) > 0 then
+        y := x[1];
+    elseif size(x,1) > 0 then
+        y := x[1];
+    else
+        y := x[1];
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf5",
+            description="Test that array size errors lock if branches if possible",
+            errorMessage="
+1 errors found:
+
+Error at line 8373, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+")})));
+end ArraySizeInIf5;
+
+model ArraySizeInIf6
+    Real[0] x = 1:0;
+    Real y;
+algorithm
+    if sum(x) > 0 then
+        y := x[1];
+    elseif size(x,1) < 0 then
+        y := x[1];
+    else
+        y := x[1];
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf6",
+            description="Test that array size errors lock if branches if possible",
+            errorMessage="
+2 errors found:
+
+Error at line 8406, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+
+Error at line 8410, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+")})));
+end ArraySizeInIf6;
 
 model ArraySizeInComp1
     record R

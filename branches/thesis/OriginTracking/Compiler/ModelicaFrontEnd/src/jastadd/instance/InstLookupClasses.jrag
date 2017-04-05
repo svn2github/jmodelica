@@ -47,8 +47,6 @@ aspect InstLookupClasses {
     eq InstComponentDecl.getInstExtends().lookupInstClass(String name)           = superLookupInstClassInComponent(name);
     eq InstArrayComponentDecl.getInstExtends().lookupInstClass(String name)      = instComponentDecl().superLookupInstClassInComponent(name);
 
-    eq InstAssignable.getBindingFExp().lookupInstClass(String name)              = myInstValueMod().lookupInstClass(name);
-
     eq InstArrayComponentDecl.getChild().lookupInstClass(String name)            = lookupInstClass(name);
     eq InstExternalObject.getDestructorCall().lookupInstClass(String name)       = lookupInstClass(name);
 
@@ -105,9 +103,7 @@ aspect InstLookupClasses {
     eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
     eq InstGeneratedInner.getChild().lookupInstClass(String name) = getCopiedOuter().lookupInstClass(name);
-
-    eq InstDefaultRecordModification.getChild().lookupInstClass(String name)     = 
-        (sourceInstMod() != null) ? sourceInstMod().lookupInstClass(name) : lookupInstClass(name);
+    
     eq InstRecordConstructor.getInstComponentDecl().lookupInstClass(String name) = 
         myInstClassDecl().genericLookupInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupInstClass(String name) = 
@@ -120,10 +116,16 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstExtendsShortClass.lookupInstClassInChain(String name);
     inh InstLookupResult<InstClassDecl> InstReplacingExtendsShortClass.lookupInstClassInChain(String name);
-    // Default to using normal lookup
-    // TODO: don't use JastAdd internal stuff (child)
-    eq InstNode.getChild().lookupInstClassInChain(String name)                             = 
-        ((InstNode) child).lookupInstClass(name);
+
+    eq InstNode.getInstClassDecl(int index).lookupInstClassInChain(String name)             =
+            getInstClassDecl(index).lookupInstClass(name);
+    eq InstNode.getInstExtends(int index).lookupInstClassInChain(String name)               =
+            getInstExtends(index).lookupInstClass(name);
+    eq InstNode.getRedeclaredInstClassDecl(int index).lookupInstClassInChain(String name)   =
+            getRedeclaredInstClassDecl(index).lookupInstClass(name);
+    eq InstNode.getInstComponentDecl(int index).lookupInstClassInChain(String name)         =
+            getInstComponentDecl(index).lookupInstClass(name);
+
     eq InstRecordConstructor.getInstComponentDecl().lookupInstClassInChain(String name)    = 
         myInstClassDecl().genericLookupInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupInstClassInChain(String name) = 
@@ -155,6 +157,7 @@ aspect InstLookupClasses {
     eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
     eq InstExtends.getInstClassDecl().lookupRedeclareExtendsInstClass(String name)         = lookupTopRedeclareExtendsInstClass(name);
     eq InstExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)           = myInstClass().lookupRedeclareExtendsInstClass(name);
+    eq InstRecordConstructor.getInstExtends().lookupRedeclareExtendsInstClass(String name) = myInstClassDecl().genericLookupInstClass(name);
     eq InstNode.getRedeclaredInstClassDecl().lookupRedeclareExtendsInstClass(String name)  = lookupNextRedeclareExtendsInstClass(name);
     eq InstInlineExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)     = 
         myInstClass().lookupRedeclareExtendsInstClass(name);
@@ -322,10 +325,12 @@ aspect InstLookupClasses {
 
     syn InstLookupResult<InstClassDecl> InstAccess.qualifiedLookupInstClassUnconstrained(String name) = 
         InstLookupResult.notFound();
-    eq InstClassAccess.qualifiedLookupInstClassUnconstrained(String name)                                 = 
+    eq InstClassAccess.qualifiedLookupInstClassUnconstrained(String name)                             = 
         myInstClassDecl().memberInstClass(name);
-    eq InstComponentAccess.qualifiedLookupInstClassUnconstrained(String name)                             = 
-        lookupArrayElement(myInstComponentDecl()).memberInstClass(name);
+    eq InstComponentAccess.qualifiedLookupInstClassUnconstrained(String name)                         = 
+        myInstComponentDecl().memberInstClass(name);
+    eq InstComponentArrayAccess.qualifiedLookupInstClassUnconstrained(String name)                    = 
+       lookupArrayElement(myInstComponentDecl()).memberInstClass(name);
 
 
     eq InstClassAccess.lookupConstrainingInstNode() = 
@@ -550,7 +555,7 @@ aspect InstLookupClasses {
         if (equalsLowerCase(name(), str)) {
             resolveLib();
         }
-        return name().matches(str);
+        return name().equals(str);
     }
 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
@@ -573,8 +578,9 @@ aspect InstLookupClasses {
     
     syn InstLookupResult<InstClassDecl> InstAccess.myInstLookupClass() = lookupInstClass(name());
 
-    syn InstClassDecl InstFunctionCall.myInstClassDecl()      = getName().myInstClassDecl(); 
-    syn InstClassDecl InstRecordConstructor.myInstClassDecl() = getRecord().myInstClassDecl(); 
+    syn InstClassDecl FAbstractFunctionCall.myInstClassDecl() = null;
+    eq InstFunctionCall.myInstClassDecl()                     = getName().myInstClassDecl(); 
+    eq InstRecordConstructor.myInstClassDecl()                = getRecord().myInstClassDecl(); 
 
     syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
     eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();

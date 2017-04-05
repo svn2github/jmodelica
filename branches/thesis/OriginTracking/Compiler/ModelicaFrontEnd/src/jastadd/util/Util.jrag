@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -157,12 +158,17 @@ aspect Parsers {
     public static SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName) 
             throws CompilerException, beaver.Parser.Exception, IOException {
         try {
-            return parseModelicaString(uif, str, fileName);
+            return parseStringNoCatch(uif, str, fileName);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
             throw ce;
         }
+    }
+
+    public static SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, String fileName) 
+            throws CompilerException, beaver.Parser.Exception, IOException {
+        return parseModelicaString(uif, str, fileName);
     }
 
     public static Exp ParserHandler.parseExpString(String str)
@@ -255,7 +261,17 @@ aspect Logging {
 }
 
 aspect NodeMethods {
-	  
+
+    /**
+     * Implementing {@link ASTNode#iterator()} is required as of JastAdd 2.2.0.
+     */
+    public class ASTNode<T extends ASTNode> implements Iterable<T> {
+        @Override
+        public Iterator<T> iterator() {
+            return astChildIterator();
+        }
+    }
+
     public class ASTNode {
         /**
          * Copies the member variables defining the location within 
@@ -504,10 +520,9 @@ aspect NodeMethods {
     public String InstComponentDecl.getNodeName() {
         return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
     }
-    
-    
-   	public class List {
-   		
+
+    public class List {
+
 	    /**
 	     * Creates a new ArrayList containing all the elements in this list, in the same order.
 	     */
@@ -653,6 +668,52 @@ aspect NodeMethods {
             
         }
         
+    }
+
+}
+
+/**
+ * Utility methods.
+ */
+aspect Utility {
+
+    /**
+     * Utility methods available from every class.
+     */
+    public class ASTNode {
+        /**
+         * Returns the intersection of two sets.
+         * 
+         * @param a
+         *          A set.
+         * @param b
+         *          A set.
+         * @return
+         *          A set containing elements that exist in both {@code a} and {@code b}.
+         */
+        public static <T> Set<T> intersection(Set<T> a, Set<T> b) {
+            // TODO: use runtime type of a instead - problematic if it is something like HashMap.KeySet.
+            Set<T> res = new HashSet<T>();
+            res.addAll(a);
+            res.retainAll(b);
+            return res;
+        }
+
+        /**
+         * Short-hand method for sorting a collection.
+         * 
+         * @param elems
+         *          The elements to sort.
+         * @param cmp
+         *          The {@link Comparator} to use when calculating the ordering of {@code elems}.
+         */
+        public static <T> ArrayList<T> toSortedList(Collection<T> elems, Comparator<? super T> cmp) {
+            ArrayList<T> res = new ArrayList<T>(elems.size());
+            res.addAll(elems);
+            Collections.sort(res, cmp);
+            return res;
+        }
+
     }
 
 }
@@ -866,7 +927,6 @@ aspect Names {
     eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
 
     eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
-    eq InstAssignable.getBindingFExp().calcInstanceName()         = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
     eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFQName());
     eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FQNameEmpty());
     eq InstProgramRoot.getChild().calcInstanceName() {
@@ -958,6 +1018,16 @@ aspect Names {
         } else {
             return canonicalPath(new File(str));
         }
+    }
+
+    /**
+     * Resolves <code>str</code> to an absolute file path.
+     * 
+     * Supports file URI and modelica URI only.
+     * Returns null for unsupported schemes and malformed URIs.
+     */
+    public String ASTNode.resolveURI(String str) {
+        return resolveURI(str, false);
     }
 
     /**
@@ -1407,7 +1477,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an input component.
      */
-    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput() || (isDeclaredFlow() && !isOutput());
     
     /**
      * Check if this component inherits input from the surrounding component.
@@ -1489,21 +1559,14 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is or is part of a component that is declared input or output on the top level.
      */
-    syn boolean InstComponentDecl.isTopLevelInputOutput() {
-        if (isTopLevel())
-            return isDeclaredInput() || isDeclaredOutput();
-        InstComponentDecl source = inheritsInputOutputFrom();
-        return source != null && source.isTopLevel();
-    }
-    
-    /**
-     * Check if this component is declared at the top level, i.e. not part of any other component.
-     */
+    syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
+    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && 
+            (isInput() || isOutput()) && !isProtected() && isPublicVar();
+
     inh boolean InstComponentDecl.isTopLevel();
-    eq InstComponentDecl.getChild().isTopLevel() = false;
+    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
     eq InstClassDecl.getChild().isTopLevel()     = true;
-    eq InstRoot.getChild().isTopLevel()          = true;
-    eq Root.getChild().isTopLevel()              = true;
+    eq Root.getChild().isTopLevel()              = false;
 
     /**
      * Check if this equation is declared initial.
@@ -1675,6 +1738,7 @@ aspect MultiDeclMethods {
         public ArrayList<InstComponentDecl> myCallInputs();
         public ArrayList<InstComponentDecl> myInputs();
         public ArrayList<InstComponentDecl> myOutputs();
+        public ArrayList<InstComponentDecl> myNonInputs();
         
         public void flattenFunction(FClass fc);
     }
@@ -2203,4 +2267,10 @@ aspect UtilInterface {
         }
     }
     
+}
+
+aspect FileIO {
+    public static void ASTNode.exportResourceFromJAR(String resource, File destination) throws IOException {
+        Files.copy(ASTNode.class.getClassLoader().getResourceAsStream(resource), destination.toPath());
+    }
 }

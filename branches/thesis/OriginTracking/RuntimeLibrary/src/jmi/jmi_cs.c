@@ -17,7 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
 #include "jmi_cs.h"
 
 static int is_disc_input_with_diff_value(jmi_t*                     jmi,
@@ -60,17 +61,18 @@ int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
     return 0; /* No changed detected */
 }
 
-int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
+int jmi_cs_set_real_input_derivatives(jmi_cs_data_t* cs_data, jmi_log_t* log, 
         const jmi_value_reference vr[], size_t nvr, const int order[],
         const jmi_real_t value[]) {
     
-    jmi_cs_real_input_t* real_inputs;
+    jmi_cs_real_input_t* real_inputs = cs_data->real_inputs;
+    size_t n_real_inputs = cs_data->n_real_inputs;
     size_t i, j;
     jmi_boolean found_real_input = FALSE;
     
     for (i = 0; i < nvr; i++) {
         if (order[i] < 1 || order[i] > JMI_CS_MAX_INPUT_DERIVATIVES) {
-            jmi_log_node(ode_problem->log, logError, "SetInputDerivativeFailed",
+            jmi_log_node(log, logError, "SetInputDerivativeFailed",
                 "Failed to set the input derivative, un-supported order: "
                 "<order:%d>", order[i]);
             return -1;
@@ -78,8 +80,7 @@ int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem,
         found_real_input = FALSE;
         
         /* Check if there exists an active input with the value reference vr[i] */
-        real_inputs = ode_problem -> real_inputs;
-        for (j = 0; j < ode_problem -> n_real_u; j++) {
+        for (j = 0; j < n_real_inputs; j++) {
             if (real_inputs[j].vr == vr[i] && real_inputs[j].active == TRUE) {
                 real_inputs[j].input_derivatives[order[i]-1] = value[i];
                 found_real_input = TRUE;
@@ -93,7 +94,7 @@ int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem,
         }
         
         /* No active real input found, activate an available */
-        for (j = 0; j < ode_problem -> n_real_u; j++) {
+        for (j = 0; j < n_real_inputs; j++) {
             if (real_inputs[j].active == FALSE) {
                 jmi_cs_init_real_input_struct(&(real_inputs[j]));
                 real_inputs[j].active = TRUE;
@@ -108,8 +109,8 @@ int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem,
         /* No available real inputs -> the user has set a variable which is
          * not a real input */
         if (found_real_input == FALSE) {
-            jmi_log_comment(ode_problem->log, logError,
-                "Failed to set the input derivative, inconsistent number of "
+            jmi_log_node(log, logError, "CoSimulationInputs",
+                    "Failed to set the input derivative, inconsistent number of "
                 "real inputs.");
             return -1;
         }
@@ -133,3 +134,44 @@ int jmi_cs_init_real_input_struct(jmi_cs_real_input_t* real_input) {
     
     return 0;
 }
+
+void jmi_free_cs_data(jmi_cs_data_t* cs_data) {
+    if (cs_data == NULL) return;
+    
+    if (cs_data->real_inputs != NULL) {
+        free(cs_data->real_inputs);
+    }
+    
+    free(cs_data);
+}
+
+void jmi_reset_cs_data(jmi_cs_data_t* cs_data) {
+    size_t i;
+    
+    memset(cs_data->real_inputs, 0, cs_data->n_real_inputs* sizeof(jmi_cs_real_input_t));
+    for (i = 0; i < cs_data->n_real_inputs; i++) {
+        jmi_cs_init_real_input_struct(&(cs_data->real_inputs[i]));
+    }
+}
+
+jmi_cs_data_t* jmi_new_cs_data(void* fmix_me, size_t n_real_inputs) {
+    jmi_cs_data_t* cs_data = calloc(1, sizeof(jmi_cs_data_t));
+    size_t i;
+    
+    if (cs_data == NULL) return NULL;
+    cs_data->fmix_me = fmix_me;
+    cs_data->n_real_inputs = n_real_inputs;
+    cs_data->real_inputs = (jmi_cs_real_input_t*)calloc(n_real_inputs, sizeof(jmi_cs_real_input_t));
+    if (cs_data->real_inputs == NULL) {
+        free(cs_data);
+        return NULL;
+    }
+
+    /* Initialize real inputs */
+    for (i = 0; i < n_real_inputs; i++) {
+        jmi_cs_init_real_input_struct(&(cs_data->real_inputs[i]));
+    }
+    
+    return cs_data;
+}
+
