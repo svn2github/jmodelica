@@ -186,6 +186,7 @@ if (${BUILD_JMI_LIB})
             include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
         endif()
     endif()
+    include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 
     #Install the libraries
     install(TARGETS jmi
