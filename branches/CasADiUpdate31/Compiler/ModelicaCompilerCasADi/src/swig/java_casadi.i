@@ -123,7 +123,7 @@ namespace casadi {
         MX copysign(const MX& y) { return copysign(*$self, y); }
         MX constpow(const MX& y) { return constpow(*$self, y); }
         MX if_else(const MX& if_true,
-                   const MX& if_false, bool short_circuit=true) {
+                   const MX& if_false, bool short_circuit=false) {
           return if_else(*$self, if_true, if_false, short_circuit);
         }
     }
