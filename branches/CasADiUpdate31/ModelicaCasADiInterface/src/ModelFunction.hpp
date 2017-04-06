@@ -47,6 +47,8 @@ class ModelFunction : public RefCountedNode {
         casadi::Function getFunc() const;
         /** Returns the name of the Function */
         std::string getName() const;
+        /** Returns the name of the Function (alias of getName) */
+        inline std::string name() const {return getName();}
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 

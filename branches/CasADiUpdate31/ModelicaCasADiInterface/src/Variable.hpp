@@ -146,6 +146,11 @@ class Variable : public OwnedNode {
         std::string getName() const;
 
         /**
+         * @return The string name of this Variable (alias of getName)
+         */
+        inline std::string name() const { return getName();}
+
+        /**
          * @return A MX
          */
         const casadi::MX getVar() const;

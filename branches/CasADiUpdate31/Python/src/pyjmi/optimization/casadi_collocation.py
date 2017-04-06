@@ -1109,7 +1109,7 @@ class LocalDAECollocator(CasadiCollocator):
                             "Measured variable %s not " % name +
                             "found in model.")
                     if var.isAlias():
-                        new_name = var.getModelVariable().getName()
+                        new_name = var.getModelVariable().name()
                     else:
                         new_name = name
                     new_variable_lists[i][new_name] = variable_lists[i][name]
@@ -1122,7 +1122,7 @@ class LocalDAECollocator(CasadiCollocator):
             len(self.external_data.eliminated) == 0):
             elim_input_indices = []
         else:
-            input_names = [u.getName() for u in mvar_vectors['u']]
+            input_names = [u.name() for u in mvar_vectors['u']]
             elim_names = self.external_data.eliminated.keys()
             elim_vars = [op.getModelVariable(elim_name)
                          for elim_name in elim_names]
@@ -1133,9 +1133,9 @@ class LocalDAECollocator(CasadiCollocator):
                         "not a model variable.")
                 if elim_var.getCausality() != elim_var.INPUT:
                     raise CasadiCollocatorException(
-                        "Eliminated input %s is " % elim_var.getName() +
+                        "Eliminated input %s is " % elim_var.name() +
                         "not a model input.")
-            elim_var_names = [elim_var.getName() for elim_var in elim_vars]
+            elim_var_names = [elim_var.name() for elim_var in elim_vars]
             elim_input_indices = [input_names.index(u) for u in elim_var_names]
         unelim_input_indices = [i for i in range(n_var['u']) if
                                 i not in elim_input_indices]
@@ -1241,7 +1241,7 @@ class LocalDAECollocator(CasadiCollocator):
         for vt in ["x", "unelim_u", "w", "p_fixed", "p_opt", "elim_u", "dx"]:
             i = 0
             for var in mvar_vectors[vt]:
-                name = var.getName()
+                name = var.name()
                 name_map[name] = (i, vt)
                 svector_vars.append(mvar_struct[vt][i])
                 i = i + 1
@@ -1249,7 +1249,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Add names to the eliminated variables
         i = 0
         for var in op.getEliminatedVariables():
-            name = var.getName()
+            name = var.name()
             name_map[name] = (i, "elim_var")
             i = i + 1
 
@@ -1264,7 +1264,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Create BlockingFactors from self.blocking_factors
         if isinstance(self.blocking_factors, Iterable):
             factors = dict(zip(
-                    [var.getName() for var in mvar_vectors['unelim_u']],
+                    [var.name() for var in mvar_vectors['unelim_u']],
                     n_var['unelim_u'] * [self.blocking_factors]))
             self.blocking_factors = BlockingFactors(factors)
 
@@ -1343,11 +1343,11 @@ class LocalDAECollocator(CasadiCollocator):
         if self.named_vars:
             if k == -1:
                 if i == -1:
-                    named_var = casadi.SX.sym(var.getName())
+                    named_var = casadi.SX.sym(var.name())
                 else:
-                    named_var = casadi.SX.sym(var.getName()+'_%d' % i)
+                    named_var = casadi.SX.sym(var.name()+'_%d' % i)
             else:
-                named_var = casadi.SX.sym(var.getName()+'_%d_%d' % (i, k))
+                named_var = casadi.SX.sym(var.name()+'_%d_%d' % (i, k))
 
             if kind == 'xx':
                 self.named_xx.append(named_var)
@@ -1589,7 +1589,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             u_cont_vars = [
                 var for var in mvar_vectors['unelim_u']
-                if var.getName() not in
+                if var.name() not in
                 self.blocking_factors.factors.keys()]
 
             var_indices['u_cont'] = dict()
@@ -1634,7 +1634,7 @@ class LocalDAECollocator(CasadiCollocator):
                     i_bf = 0
                     indices = []
                     for var in self.mvar_vectors['unelim_u']:
-                        if var.getName() in self.blocking_factors.factors:
+                        if var.name() in self.blocking_factors.factors:
                             indices.append(var_indices['u_bf'][i][k][i_bf])
                             i_bf += 1
                         else:
@@ -1661,7 +1661,7 @@ class LocalDAECollocator(CasadiCollocator):
             bf_indices = []
             cont_indices = []
             for var in mvar_vectors['unelim_u']:
-                name = var.getName()
+                name = var.name()
                 (idx, _) = self.name_map[name]
                 if name in self.blocking_factors.factors:
                     bf_indices.append(idx)
@@ -1687,7 +1687,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Insert initial controls into variable map
             var_map['unelim_u'][1][0] = xx[var_indices['unelim_u'][1][0]]
             for var in mvar_vectors['unelim_u']:
-                if var.getName() not in self.blocking_factors.factors:
+                if var.name() not in self.blocking_factors.factors:
                     self.add_named_xx(var, i=1, k=0)
 
         # Creates check_point map entry for initial points
@@ -1718,7 +1718,7 @@ class LocalDAECollocator(CasadiCollocator):
                 var_map[varType][1][0]['all']=split_init[zt]
                 tmp_split=casadi.vertsplit(var_map[varType][1][0]['all'])
                 for var in mvar_vectors[varType]:
-                    name = var.getName()
+                    name = var.name()
                     (var_index, _) = self.name_map[name]
                     var_map[varType][1][0][var_index] = \
                               tmp_split[var_index]
@@ -1743,7 +1743,7 @@ class LocalDAECollocator(CasadiCollocator):
                     tmp_split=casadi.vertsplit(
                         var_map[varType][ii][kk]['all'])
                     for var in mvar_vectors[varType]:
-                        name = var.getName()
+                        name = var.name()
                         (var_index, _) = self.name_map[name]
                         var_map[varType][ii][kk][var_index] = \
                                   tmp_split[var_index]
@@ -1763,7 +1763,7 @@ class LocalDAECollocator(CasadiCollocator):
         if n_popt!=0:
             tmp_split=casadi.vertsplit(var_map['p_opt']['all'])
             for par in mvar_vectors['p_opt']:
-                name = par.getName()
+                name = par.name()
                 (var_index, _) = self.name_map[name]
                 var_map['p_opt'][var_index] = tmp_split[var_index]
 
@@ -1822,10 +1822,10 @@ class LocalDAECollocator(CasadiCollocator):
 
         # todo: save!
         if self.blocking_factors is None:
-            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']]
+            inp_list = [inp.name() for inp in self.mvar_vectors['unelim_u']]
         else:
-            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']
-                   if not self.blocking_factors.factors.has_key(inp.getName())]
+            inp_list = [inp.name() for inp in self.mvar_vectors['unelim_u']
+                   if not self.blocking_factors.factors.has_key(inp.name())]
 
         n_c_e += len(inp_list) # u_1_0
 
@@ -1866,7 +1866,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Bounds on du
         if self.blocking_factors is not None:
             for var in self.mvar_vectors['unelim_u']:
-                name = var.getName()
+                name = var.name()
                 if ((name in self.blocking_factors.factors) and
                     (name in self.blocking_factors.du_bounds)):
                     n_c_i += 2*(len(self.blocking_factors.factors[name])-1)
@@ -1971,7 +1971,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.n_var['p_fixed'] != 0:
             tmp_split=casadi.vertsplit(self.var_map['p_fixed']['all'])
             for par in self.mvar_vectors['p_fixed']:
-                name = par.getName()
+                name = par.name()
                 (var_index, _) = self.name_map[name]
                 self.var_map['p_fixed'][var_index] = tmp_split[var_index]
 
@@ -1995,7 +1995,7 @@ class LocalDAECollocator(CasadiCollocator):
             if self.named_vars:
                 for vt in ['x', 'dx', 'unelim_u', 'w']:
                     for var in self.mvar_vectors[vt]:
-                        name = var.getName()
+                        name = var.name()
                         if self._var_sf_mode[name] != "time-variant":
                             d = casadi.SX.sym("%s_d_sf"%(name))
                             e = casadi.SX.sym("%s_e_sf"%(name))
@@ -2009,7 +2009,7 @@ class LocalDAECollocator(CasadiCollocator):
                                     self.named_pp.append(d)
                                     self.named_pp.append(e)
                 for var in self.mvar_vectors["p_opt"]:
-                    name = var.getName()
+                    name = var.name()
                     d = casadi.SX.sym("%s_d_sf"%(name))
                     e = casadi.SX.sym("%s_e_sf"%(name))
                     self.named_pp.append(d)
@@ -2276,7 +2276,7 @@ class LocalDAECollocator(CasadiCollocator):
                 else:
                     cp = self.op.evaluateExpression(tp)
                 (i, k) = self._collocation_constraint_points[cp]
-                name = tv.getBaseVariable().getName()
+                name = tv.getBaseVariable().name()
                 (index, vt) = self.name_map[name]
                 if vt == "elim_u":
                     raise CasadiCollocatorException(
@@ -2397,7 +2397,7 @@ class LocalDAECollocator(CasadiCollocator):
                 nom_traj[vt] = {}
                 for var in mvar_vectors[vt]:
                     data_matrix = N.empty([n, len(mvar_vectors[vt])])
-                    name = var.getName()
+                    name = var.name()
                     (var_index, _) = name_map[name]
                     try:
                         data = self.nominal_traj.get_variable_data(name)
@@ -2448,7 +2448,7 @@ class LocalDAECollocator(CasadiCollocator):
                         var_sf_map[vt][i][k] = {}
 
                 for var in self.mvar_vectors[vt]:
-                    name = var.getName()
+                    name = var.name()
                     (var_index, _) = self.name_map[name]
                     var_sf_nbr_vars += 1
 
@@ -2477,7 +2477,7 @@ class LocalDAECollocator(CasadiCollocator):
             var_sf_map["p_opt"] = {}
             var_sf["n_variant_p_opt"] = 0
             for var in self.mvar_vectors['p_opt']:
-                name = var.getName()
+                name = var.name()
                 (var_index, _) = self.name_map[name]
 
                 var_sf_map['p_opt'][name] = (2*var_sf_count, 2*var_sf_count+1)
@@ -2532,7 +2532,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Evaluate trajectories to generate scaling factors
             for vt in ['x', 'dx', 'unelim_u', 'w']:
                 for var in self.mvar_vectors[vt]:
-                    name = var.getName()
+                    name = var.name()
                     (var_index, _) = self.name_map[name]
                     try:
                         mode = self.nominal_traj_mode[name]
@@ -2663,7 +2663,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Do not scaled eliminated inputs
             for var in self.mvar_vectors['elim_u']:
-                name = var.getName()
+                name = var.name()
                 (idx, vt) = self.name_map[name]
                 is_variant[name] = False
                 d = 1.
@@ -2675,7 +2675,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Handle free parameters
             for var in self.mvar_vectors['p_opt']:
-                name = var.getName()
+                name = var.name()
                 (var_index, _) = self.name_map[name]
                 is_variant[name] = False
                 if name == "startTime":
@@ -2895,7 +2895,7 @@ class LocalDAECollocator(CasadiCollocator):
 
                 for var in self.mvar_vectors['x']:
                     # State
-                    x_name = var.getName()
+                    x_name = var.name()
                     (ind, _) = self.name_map[x_name]
 
                     x_i_d[ind] = x_i_sf_d[:, var_x_idx]
@@ -2904,7 +2904,7 @@ class LocalDAECollocator(CasadiCollocator):
 
 
                     # State derivative
-                    dx_name = var.getMyDerivativeVariable().getName()
+                    dx_name = var.getMyDerivativeVariable().name()
                     (ind, _) = self.name_map[dx_name]
 
                     dx_i_k_d[ind] = dx_i_k_sf_d[var_dx_idx]
@@ -2941,7 +2941,7 @@ class LocalDAECollocator(CasadiCollocator):
                     sz_d[vk] = self.n_var[vk]*[1]
                     sz_e[vk] = self.n_var[vk]*[0.]
                     for var in self.mvar_vectors[vk]:
-                        name = var.getName()
+                        name = var.name()
                         (var_index, _) = self.name_map[name]
                         if vk == "elim_u": #Eliminated u's do not have scaling parameters in the NLP
                             d, e = self._get_affine_scaling(name, -1, -1)
@@ -2956,7 +2956,7 @@ class LocalDAECollocator(CasadiCollocator):
             timed_var_d = []
             timed_var_e = []
             for tv in self.op.getTimedVariables():
-                base_name = tv.getBaseVariable().getName()
+                base_name = tv.getBaseVariable().name()
 
                 if self._using_variant_variable_scaling(base_name):
                     raise NotImplementedError("Currently not supported.")
@@ -3378,9 +3378,9 @@ class LocalDAECollocator(CasadiCollocator):
                 if sdx_sf_d_i.shape[0] > 0:
                     var_inputs += [sdx_sf_d_i] + [sdx_sf_e_i]
 
-                coll_eq_l1_fcn = casadi.Function('coll_l1_eq_fcn', 
+                coll_eq_l1_fcn = casadi.Function('coll_l1_eq_fcn',
                                         var_inputs, [output_coll_element])
-                self.coll_eq_l1_fcn = coll_eq_l1_fcn 
+                self.coll_eq_l1_fcn = coll_eq_l1_fcn
 
                 if not self.lterm.is_constant() or float(self.lterm) != 0.:
                     # Define Lagrange term level1
@@ -3486,8 +3486,8 @@ class LocalDAECollocator(CasadiCollocator):
                     coll_sf[i]['dx_e'][k] = []
 
             for var in self.mvar_vectors['x']:
-                x_name = var.getName()
-                dx_name = var.getMyDerivativeVariable().getName()
+                x_name = var.name()
+                dx_name = var.getMyDerivativeVariable().name()
 
                 # States
 
@@ -3545,8 +3545,8 @@ class LocalDAECollocator(CasadiCollocator):
                     coll_l1_sf[i]['x_d'] = []
                     coll_l1_sf[i]['x_e'] = []
                     for var in self.mvar_vectors['x']:
-                        x_name = var.getName()
-                        dx_name = var.getMyDerivativeVariable().getName()
+                        x_name = var.name()
+                        dx_name = var.getMyDerivativeVariable().name()
 
                         d, e = self._get_affine_scaling_symbols(x_name, i, 0)
                         coll_l1_sf[i]['x_d'].append(d)
@@ -3557,8 +3557,8 @@ class LocalDAECollocator(CasadiCollocator):
                     coll_l1_sf[i]['x_d'] = []
                     coll_l1_sf[i]['x_e'] = []
                     for var in self.mvar_vectors['x']:
-                        x_name = var.getName()
-                        dx_name = var.getMyDerivativeVariable().getName()
+                        x_name = var.name()
+                        dx_name = var.getMyDerivativeVariable().name()
 
                         d, e = self._get_affine_scaling_symbols(x_name, i-1, k)
                         coll_l1_sf[i]['x_d'].append(d)
@@ -3570,8 +3570,8 @@ class LocalDAECollocator(CasadiCollocator):
             #level 1 scaling factor lists for Collocation equation
             for k in xrange(1, self.n_cp + 1):
                 for var in self.mvar_vectors['x']:
-                    x_name = var.getName()
-                    dx_name = var.getMyDerivativeVariable().getName()
+                    x_name = var.name()
+                    dx_name = var.getMyDerivativeVariable().name()
 
                     for i in xrange(1, self.n_e + 1):
                         d, e = self._get_affine_scaling_symbols(x_name, i, k)
@@ -3635,10 +3635,10 @@ class LocalDAECollocator(CasadiCollocator):
         self.add_c_eq('dae', dae_t0_constr, i, k)
 
         if self.blocking_factors is None:
-            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']]
+            inp_list = [inp.name() for inp in self.mvar_vectors['unelim_u']]
         else:
-            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']
-                   if not self.blocking_factors.factors.has_key(inp.getName())]
+            inp_list = [inp.name() for inp in self.mvar_vectors['unelim_u']
+                   if not self.blocking_factors.factors.has_key(inp.name())]
 
         for name in inp_list:
             # Evaluate u_1_0 based on polynomial u_1
@@ -3668,11 +3668,11 @@ class LocalDAECollocator(CasadiCollocator):
                         dx_i_np1.append(0.0)
 
                         # State
-                        x_name = var.getName()
+                        x_name = var.name()
                         (ind_x, _) = self.name_map[x_name]
 
                         # State derivative
-                        dx_name = var.getMyDerivativeVariable().getName()
+                        dx_name = var.getMyDerivativeVariable().name()
                         (ind_dx, _) = self.name_map[dx_name]
 
                         for k in xrange(1, self.n_cp + 1):
@@ -4179,7 +4179,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         for vk in ["x", "dx", "unelim_u", "w", "p_opt"]: #Dont check eliminated u!
             for var in self.mvar_vectors[vk]:
-                name = var.getName()
+                name = var.name()
                 d, e, = self._get_affine_scaling_symbols(name, i, k)
                 all_sf.append(d)
                 all_sf.append(e)
@@ -4197,7 +4197,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             for vt in ['x', 'dx', 'unelim_u', 'w']:
                 for var in self.mvar_vectors[vt]:
-                    name = var.getName()
+                    name = var.name()
                     if self._var_sf_mode[name] != "time-variant":
                         d, e = self._get_affine_scaling(name, -1, -1)
                         par_vals[ind]   = d
@@ -4212,7 +4212,7 @@ class LocalDAECollocator(CasadiCollocator):
                                 ind = ind + 2
 
             for var in self.mvar_vectors["p_opt"]:
-                name = var.getName()
+                name = var.name()
                 d, e = self._get_affine_scaling(name, -1, -1)
 
                 par_vals[ind]   = d
@@ -4386,7 +4386,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.blocking_factors is not None:
             bf_pen = 0.
             for var in self.mvar_vectors['unelim_u']:
-                name = var.getName()
+                name = var.name()
                 if name in self.blocking_factors.factors:
 
                     # Find scale factors
@@ -4440,7 +4440,7 @@ class LocalDAECollocator(CasadiCollocator):
             for vt in ["dx", "x", "w", "unelim_u"]:
                 for var in self.mvar_vectors[vt]:
                     data_matrix = N.empty([n, len(self.mvar_vectors[vt])])
-                    name = var.getName()
+                    name = var.name()
                     try:
                         data = self.init_traj.get_variable_data(name)
                     except VariableNotFoundError:
@@ -4502,7 +4502,7 @@ class LocalDAECollocator(CasadiCollocator):
         p_min = copy.deepcopy(p_max)
         p_init = copy.deepcopy(p_max)
         for var in mvar_vectors["p_opt"]:
-            name = var.getName()
+            name = var.name()
             (var_index, _) = name_map[name]
 
             (sf, _ ) = self._get_affine_scaling(name, -1, -1)
@@ -4513,7 +4513,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Handle initial guess
             var_init = op.get_attr(var, "initialGuess")
             if self.init_traj is not None:
-                name = var.getName()
+                name = var.name()
                 if name == "startTime":
                     var_init = self._denorm_t0_init
                 elif name == "finalTime":
@@ -4538,7 +4538,7 @@ class LocalDAECollocator(CasadiCollocator):
             for vt in ["dx", "x", "w", "unelim_u"]:
                 traj[vt] = {}
                 for var in mvar_vectors[vt]:
-                    name = var.getName()
+                    name = var.name()
                     (var_index, _) = name_map[name]
                     if name == "startTime":
                         abscissae = N.array([0])
@@ -4572,7 +4572,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Set bounds and initial guesses
         for vt in ['dx', 'x', 'w', 'unelim_u']:
             for var in mvar_vectors[vt]:
-                name = var.getName()
+                name = var.name()
                 v_min = op.get_attr(var, "min")
                 v_max = op.get_attr(var, "max")
                 (var_idx, _) = name_map[name]
@@ -4827,7 +4827,7 @@ class LocalDAECollocator(CasadiCollocator):
             #Get scaling factors
             p_opt_sf = N.empty(n_var['p_opt'])
             for var in mvar_vectors['p_opt']:
-                name = var.getName()
+                name = var.name()
                 (ind, _) = name_map[name]
                 (d, _) = self._get_affine_scaling(name, -1, -1)
                 p_opt_sf[ind] = d
@@ -4846,7 +4846,7 @@ class LocalDAECollocator(CasadiCollocator):
                 for k in time_points[i]:
                     for var_type in var_types:
                         for var in mvar_vectors[var_type]:
-                            name = var.getName()
+                            name = var.name()
                             if (var_type != "unelim_u" or
                                 self.blocking_factors is None or
                                 name not in self.blocking_factors.factors):
@@ -4869,7 +4869,7 @@ class LocalDAECollocator(CasadiCollocator):
             var_type = "unelim_u"
             k = 1
             for var in mvar_vectors[var_type]:
-                name = var.getName()
+                name = var.name()
                 if name in self.blocking_factors.factors:
                     (ind, _) = name_map[name]
                     # Rescale once per factor
@@ -5079,13 +5079,13 @@ class LocalDAECollocator(CasadiCollocator):
             t0_var = op.getVariable('startTime')
             tf_var = op.getVariable('finalTime')
             if op.get_attr(t0_var, "free"):
-                name = t0_var.getName()
+                name = t0_var.name()
                 (ind, _) = name_map[name]
                 t0 = var_opt['p_opt'][ind]
             else:
                 t0 = op.get_attr(t0_var, "_value")
             if op.get_attr(tf_var, "free"):
-                name = tf_var.getName()
+                name = tf_var.name()
                 (ind, _) = name_map[name]
                 tf = var_opt['p_opt'][ind]
             else:
@@ -5201,10 +5201,10 @@ class LocalDAECollocator(CasadiCollocator):
             # Map variable to aliases
             alias_map = {}
             for var in variable_list:
-                alias_map[var.getName()] = []
+                alias_map[var.name()] = []
             for alias_var in op.getAliases():
                 alias = alias_var.getModelVariable()
-                alias_map[alias.getName()].append(alias_var)
+                alias_map[alias.name()].append(alias_var)
 
             # Set up sections
             # Put exactly one entry per variable in name_section etc
@@ -5220,7 +5220,7 @@ class LocalDAECollocator(CasadiCollocator):
             max_desc_length = len('Time in [s]')
             for var in variable_list:
                 # Name
-                name = var.getName()
+                name = var.name()
                 name_section.append('%s\n' % name)
                 if len(name) > max_name_length:
                     max_name_length = len(name)
@@ -5243,9 +5243,9 @@ class LocalDAECollocator(CasadiCollocator):
                                              (n_variant, name))
 
                 # Handle alias variables
-                for alias_var in alias_map[var.getName()]:
+                for alias_var in alias_map[var.name()]:
                     # Name
-                    name = alias_var.getName()
+                    name = alias_var.name()
                     name_section.append('%s\n' % name)
                     if len(name) > max_name_length:
                         max_name_length = len(name)
@@ -5271,7 +5271,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Collect parameter data (data_1)
             data_1 = []
             for par in mvar_vectors['p_opt']:
-                name = par.getName()
+                name = par.name()
                 (ind, _) = name_map[name]
                 data_1.append(" %.14E" % p_opt[ind])
 
@@ -5368,7 +5368,7 @@ class LocalDAECollocator(CasadiCollocator):
         xi = self._u_opt[1:self.n_e*self.n_cp+1]
         self._xi = xi.reshape(self.n_e, self.n_cp, self.n_var['u'])
         self._ti = N.cumsum([self.t0] + self._hi[1:])
-        input_names = tuple([u.getName() for u in self.mvar_vectors['u']])
+        input_names = tuple([u.name() for u in self.mvar_vectors['u']])
         return (input_names, self._create_input_interpolator(self._xi, self._ti, self._hi))
 
     def get_named_var_expr(self, expr):
@@ -6239,7 +6239,7 @@ class OptimizationSolver(object):
         self.collocator._recalculate_model_parameters()
 
         if self.solver_options_changed:
-            self.collocator.initialize()            
+            self.collocator.initialize()
             self.solver_options_changed = False
 
         if self.collocator.warm_start:
