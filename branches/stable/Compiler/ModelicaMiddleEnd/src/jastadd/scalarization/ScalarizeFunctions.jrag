@@ -377,7 +377,7 @@ aspect FunctionScalarization {
         names.addLayer(ndims());
         names.fillLayer(this);
 
-        List<FStatement> firstLoop = names.createForLoops(result, this, 1);
+        List<FStatement> firstLoop = new List<FStatement>();
         FIdUseExp funcLeft = tempExp(names.createFArraySubscripts(1));
 
         for (int i = 0; i < getNumArg(); ++i) {
@@ -404,7 +404,9 @@ aspect FunctionScalarization {
 
                     FAssignableExp left = names.createUseWithSubscripts(tempName, 1, dimDiff + 1);
                     FExp right = arg.tempExp(names.createFArraySubscripts(0, dimDiff + 1));
-                    names.createForLoops(firstLoop, arg, 1, dimDiff + 1).add(new FAssignStmt(left, right));
+                    List<FStatement> inner = new List<FStatement>();
+                    inner.add(new FAssignStmt(left, right));
+                    names.createForLoops(firstLoop, inner, arg, 1, dimDiff + 1);
                     names.removeLayer();
                 } else {
                     newArgs.add(arg.scalarize(s));
@@ -417,7 +419,7 @@ aspect FunctionScalarization {
         FFunctionCall funcRight = new FFunctionCall(getName().fullCopy(), newArgs, getFType().scalarType());
         firstLoop.add(new FAssignStmt(funcLeft, funcRight));
 
-        outer.addAll(result);
+        names.createForLoops(outer, firstLoop, this, 0, 1);
         names.removeLayer();
     }
     
@@ -426,7 +428,7 @@ aspect FunctionScalarization {
         boolean iter = isIterArray();
         names.addLayer(ndims()- (iter ? 0 : 1));
         names.fillLayer(this);
-        
+
         for (int i = 0; i < getNumFExp(); i++) {
             List<FStatement> inner = new List<FStatement>();
             List<FStatement> outer = s.getClauses();
@@ -438,22 +440,19 @@ aspect FunctionScalarization {
                 right.createArrayTemporaries(s.block(inner));
                 right.addArrayUsesToIndexMap(s);
                 names.removeLayer();
-                outer = names.createForLoops(outer, right);
-                outer.addAll(inner);
                 right = ((FIterExp) right).getFExp();
             } else {
-                right.createArrayTemporaries(s);
-                right.addArrayUsesToIndexMap(s);
-                outer = names.createForLoops(outer, right);
                 List<FSubscript> subs = new List<FSubscript>();
                 subs.add(new FIntegerSubscript(i+1));
                 subs.addAll(names.createFArraySubscripts().getFSubscriptListNoTransform());
                 left = tempExp(new FArraySubscripts(subs));
+                right.createArrayTemporaries(s);
+                right.addArrayUsesToIndexMap(s);
             }
-            
-            type().scalarizeAssignment_sub((Scalarizer.Algorithm)s.block(outer), left, right);
+            type().scalarizeAssignment_sub((Scalarizer.Algorithm)s.block(inner), left, right);
+            s.createForLoops(inner, getFExp(i));
         }
-        
+
         names.removeLayer();
     }
     
@@ -471,10 +470,6 @@ aspect FunctionScalarization {
         if (names.size() > 1)
             names.promote(0);
         String i = names.create(this);
-        
-        // Create inner loop
-        FForStmt fs = new FForStmt(new FForIndex(i, getRight().size().createFExp(0)), new List());
-        List<FStatement> inner = fs.getForStmts();
         
         // Scalarize left operand
         exp.createArrayTemporaries(s);
@@ -496,13 +491,19 @@ aspect FunctionScalarization {
         // Add statement updating temp var to loop
         FExp mul = new FMulExp(left, right);
         FExp add = new FAddExp(sum.fullCopy(), mul);
+        List<FStatement> inner = new List<FStatement>();
         inner.add(new FAssignStmt(sum.fullCopy(), add));
         
+        // Create inner loop
+        FForStmt fs = new FForStmt(new FForIndex(i, getRight().size().createFExp(0)), inner);
+        
         // Create outer loops
-        List<FStatement> outer = s.createForLoops(this);
+        List<FStatement> outer = new List<FStatement>();
         outer.add(new FAssignStmt(sum, type().scalarType().zeroLiteral()));
         outer.add(fs);
         outer.add(new FAssignStmt(names.createUseWithSubscripts(tempVarName()), sum.fullCopy()));
+        
+        s.createForLoops(outer, this);
         
         names.removeLayer();
     }
@@ -526,8 +527,7 @@ aspect FunctionScalarization {
             ind = new FAddExp(ind, offset.fullCopy());
             fas.setFSubscript(new FExpSubscript(ind), catDim);
             
-            FIdUseExp left = tempExp(fas);
-            s.createForLoops(exp).add(new FAssignStmt(left, exp.scalarize(s)));
+            s.createForLoops(tempExp(fas), exp.scalarize(s), exp);
             names.removeLayer();
             
             offset = new FAddExp(offset, exp.size().has(catDim) ? exp.size().createFExp(catDim) : new FIntegerLitExp(1));
@@ -542,14 +542,12 @@ aspect FunctionScalarization {
         getFExp().createArrayTemporaries(s);
         getFExp().addArrayUsesToIndexMap(s);
         
-        FArraySubscripts fas = names.createFArraySubscripts(ndims());
-        FIdUseExp left = tempExp(fas);
         FIfExp right = new FIfExp(
                 new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
                 scalarizeDiagonalElement(s.map()),
                 new FIntegerLitExp(0)
         );
-        s.createForLoops(this).add(new FAssignStmt(left, right));
+        s.createForLoops(tempExp(names.createFArraySubscripts(ndims())), right, this);
         names.removeLayer();
     }
     
@@ -580,9 +578,10 @@ aspect FunctionScalarization {
         
         FArraySubscripts fas = new FArraySubscripts();
         fas.addFSubscript(new FExpSubscript(ind));
-        FIdUseExp left = tempExp(fas);
+
         FExp right = getFExp().scalarize(s);
-        s.createForLoops(getFExp()).add(new FAssignStmt(left, right));
+
+        s.createForLoops(tempExp(fas), right, getFExp());
         names.removeLayer();
     }
     
@@ -593,82 +592,56 @@ aspect FunctionScalarization {
         
         getFExp().createArrayTemporaries(s);
         getFExp().addArrayUsesToIndexMap(s);
-        
-        FIdUseExp left = tempExp(names.createFArraySubscripts(2));
-        FExp right = getFExp().scalarize(s);
-        s.createForLoops(getFExp()).add(new FAssignStmt(left, right));
+
+        s.createForLoops(tempExp(names.createFArraySubscripts(2)), getFExp().scalarize(s), getFExp());
         names.removeLayer();
     }
 
     public void FReductionExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        ForNames names = s.getNames();
-        // Set up names and create for loop(s)
-        FExp exp = getFExp();
-        names.addLayer(exp.ndims());
-        names.fillLayer(this);
-        
-        FIdUseExp reducer;
-        if (type().isArray())
-            reducer = tempExp(names.createFArraySubscripts(ndims()));
-        else
-            reducer = tempExp();
-        
-        FStatement initStmt = new FAssignStmt(reducer, scalarReduceStartValue().buildLiteral());
-        
-        List clauses = unknownReductionSub(s, exp, initStmt);
-        
-        // Add statement updating temp var to loop
-        FBinExp scalarizedExp = scalarReduceExp();
-        scalarizedExp.setLeft(reducer.fullCopy());
-        scalarizedExp.setRight(exp.scalarize(s));
-        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
-        
-        names.removeLayer();
+        unknownReductionSub(s, getFExp());
     }
 
     public void FMinMaxExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        // Set up names and create for loop(s)
-        ForNames names = s.getNames();
-        FExp exp = getX();
-        names.addLayer(exp.ndims());
-        names.fillLayer(this);
-        
-        FIdUseExp reducer = tempExp();
-        
-        FStatement initStmt = new FAssignStmt(reducer, scalarReduceStartValue().buildLiteral());
-        
-        List clauses = unknownReductionSub(s, exp, initStmt);
-        
-        // Add statement updating temp var to loop
-        FExp scalarizedExp = scalarReduceExp(reducer, exp.scalarize(s));
-        clauses.add(new FAssignStmt(reducer.fullCopy(), scalarizedExp));
-        
-        names.removeLayer();
+        unknownReductionSub(s, getX());
     }
     
-    syn FExp FMinMaxExp.scalarReduceExp(FExp reducer, FExp scalar);
-    eq FMaxExp.scalarReduceExp(FExp reducer, FExp scalar) = new FIfExp(new FGtExp(reducer.unboundCopy(), scalar.unboundCopy()), reducer.unboundCopy(), scalar.unboundCopy());
-    eq FMinExp.scalarReduceExp(FExp reducer, FExp scalar) = new FIfExp(new FLtExp(reducer.unboundCopy(), scalar.unboundCopy()), reducer.unboundCopy(), scalar.unboundCopy());
+    syn FAssignableExp FBuiltInFunctionCall.reducerTempExp(Scalarizer s) = type().isArray() ? 
+            tempExp(s.getNames().createFArraySubscripts(ndims())) : tempExp();
     
-    protected List FExp.unknownReductionSub(Scalarizer s, FExp exp, FStatement initStmt) {
+    syn FExp FBuiltInFunctionCall.scalarReduceExp(FExp reducer,  FExp scalar) = null;
+    eq FSumExp.scalarReduceExp(FExp reducer,     FExp scalar) = new FAddExp(reducer, scalar);
+    eq FProductExp.scalarReduceExp(FExp reducer, FExp scalar) = new FMulExp(reducer, scalar);
+    eq FMaxExp.scalarReduceExp(FExp reducer, FExp scalar) =
+            new FIfExp(new FGtExp(reducer, scalar.treeCopy()), reducer.treeCopy(), scalar.treeCopy());
+    eq FMinExp.scalarReduceExp(FExp reducer, FExp scalar) =
+            new FIfExp(new FLtExp(reducer, scalar.treeCopy()), reducer.treeCopy(), scalar.treeCopy());
+    
+    protected void FBuiltInFunctionCall.unknownReductionSub(Scalarizer s, FExp exp) {
         ForNames names = s.getNames();
-        List clauses = s.getClauses();
+        List<FStatement> clauses = s.getClauses();
+
+        names.addLayer(exp.ndims());
+        names.fillLayer(this);
+
         List<FStatement> inner = new List<FStatement>();
+        List<FStatement> mid   = new List<FStatement>();
         boolean iter = exp.editNamesIter(s);
-        exp.createArrayTemporaries(s.block(inner));
+        if (iter) {
+            exp.createArrayTemporaries(s.block(inner));
+        } else {
+            exp.createArrayTemporaries(s.block(mid));
+        }
         exp.addArrayUsesToIndexMap(s);
         if (iter) {
             names.removeLayer();
-            clauses = names.createForLoops(clauses, exp, 0, ndims());
-            clauses.add(initStmt);
-            clauses = names.createForLoops(clauses, exp, ndims(), exp.ndims());
-            clauses.addAll(inner);
-        } else {
-            clauses.addAll(inner);
-            clauses.add(initStmt);
-            clauses = names.createForLoops(clauses, exp);
         }
-        return clauses;
+
+        mid.add(new FAssignStmt(reducerTempExp(s), scalarReduceStartValue().buildLiteral()));
+        inner.add(new FAssignStmt(reducerTempExp(s), scalarReduceExp(reducerTempExp(s), exp.scalarize(s))));
+
+        names.createForLoops(mid, inner, exp, ndims(), exp.ndims());
+        names.createForLoops(clauses, mid, exp, 0, ndims());
+        names.removeLayer();
     }
     
     /**
@@ -953,15 +926,15 @@ aspect FunctionScalarizationHelpers {
          * @param sizes  array of expressions describing the size of each dimension
          * @return  the list of statements of the innermost loop
          */
-        public List<FStatement> createForLoops(List<FStatement> stmts, FExp[] sizes, int startDim) {
-            List<FStatement> cur = stmts;
-            for (int i = 0; i < sizes.length; i++) {
-                FForIndex ffi = new FForIndex(topLayer()[startDim + i], sizes[i]);
-                FForStmt fs = new FForStmt(ffi, new List());
-                cur.add(fs);
-                cur = fs.getForStmts();
+        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp[] sizes, int startDim) {
+            if (startDim < sizes.length) {
+                List<FStatement> mid = new List<FStatement>();
+                createForLoops(mid, inner, sizes, startDim + 1);
+                FForIndex ffi = new FForIndex(topLayer()[startDim], sizes[startDim]);
+                outer.add(new FForStmt(ffi, mid));
+            } else {
+                outer.addAll(inner);
             }
-            return cur;
         }
         
         /**
@@ -973,29 +946,15 @@ aspect FunctionScalarizationHelpers {
          * @param var    name of the variable to loop over
          * @return  the list of statements of the innermost loop
          */
-        public List<FStatement> createForLoops(List<FStatement> stmts, FQName var) {
+        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FQName var) {
             int n = topLayer().length;
             FExp[] sizes = new FExp[n];
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++) {
                 sizes[i] = new FSizeExp(var, i);
-            return createForLoops(stmts, sizes, 0);
+            }
+            createForLoops(outer, inner, sizes, 0);
         }
-        
-        /**
-         * Creates nestled (maximum d) for loops  over an expression, 
-         * using the top layer of names.
-         *  
-         * Adds the outermost for loop to a list of statements.
-         * 
-         * @param stmts  list to add the created for statements to
-         * @param exp    expression to loop over
-         * @param d      dimensions to loop over
-         * @return  the list of statements of the innermost loop
-         */
-        public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp, int d) {
-            return createForLoops(stmts, exp, 0, d);
-        }
-        
+
         /**
          * Creates nestled (from d1 to d2) for loops over an expression, 
          * using the top layer of names.
@@ -1008,11 +967,12 @@ aspect FunctionScalarizationHelpers {
          * @param d2     dimensions to end in
          * @return  the list of statements of the innermost loop
          */
-        public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp, int d1, int d2) {
-            FExp[] sizes = new FExp[d2 - d1];
-            for (int i = d1; i < d2; i++)
-                sizes[i-d1] = exp.size().createFExp(i);
-            return createForLoops(stmts, sizes, d1);
+        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp exp, int d1, int d2) {
+            FExp[] sizes = new FExp[d2];
+            for (int i = d1; i < d2; i++) {
+                sizes[i] = exp.size().createFExp(i);
+            }
+            createForLoops(outer, inner, sizes, d1);
         }
         
         /**
@@ -1024,15 +984,10 @@ aspect FunctionScalarizationHelpers {
          * @param exp    expression to loop over
          * @return  the list of statements of the innermost loop
          */
-        public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp) {
-            return createForLoops(stmts, exp, exp.ndims());
+        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp exp) {
+            createForLoops(outer, inner, exp, 0, exp.ndims());
         }
-        
-        public void createForLoops(List clauses, List inner, FExp exp) {
-            List<FStatement> fsl = createForLoops(clauses, exp);
-            fsl.addAll(inner);
-        }
-        
+
         /**
          * Creates a new FArraySubscripts with uses of the <code>d1</code> to <code>d2</code> names
          * in the top layer as subscripts. When out of names, adds 1s.

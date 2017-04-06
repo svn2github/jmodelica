@@ -63,8 +63,14 @@ aspect Scalarization {
             return forNames;
         }
         
-        public List createForLoops(FExp exp) {
-            return forNames.createForLoops(clauses, exp);
+        public void createForLoops(List<FStatement> inner, FExp exp) {
+            forNames.createForLoops(clauses, inner, exp);
+        }
+        
+        public void createForLoops(FAssignableExp left, FExp right, FExp exp) {
+            List<FStatement> l = new List<FStatement>();
+            l.add(new FAssignStmt(left, right));
+            createForLoops(l, exp);
         }
         
         public abstract void createScalarizedFunctionCallClause(FExp left, FFunctionCall right);
@@ -1211,9 +1217,11 @@ aspect Scalarization {
 	
     @Override
     public void FIfWhenElseEquation.scalarize(Scalarizer.Equation s) {
+        List<FAbstractEquation> l = new List<FAbstractEquation>();
+        scalarizeList(s.block(l), getFAbstractEquations());
         FIfWhenElseEquation res = createEmptyNode();
         res.setType((FEquationType) getType().fullCopy());
-        scalarizeList(s.block(res.getFAbstractEquations()), getFAbstractEquations());
+        res.setFAbstractEquationList(l);
         scalarizeTestAndElse(s, res);
         s.add(res);
     }

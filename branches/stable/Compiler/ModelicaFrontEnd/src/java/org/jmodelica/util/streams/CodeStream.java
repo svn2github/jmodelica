@@ -25,6 +25,7 @@ import java.util.Collection;
 public class CodeStream {
     
     private PrintStream out;
+    private String lineEnder = "\n";
     
     public CodeStream(PrintStream ps) {
         this.out = ps;
@@ -77,7 +78,7 @@ public class CodeStream {
     public void splitFile() {}
     
     public void println() {
-        print("\n");
+        print(lineEnder);
     }
     
     public void print(Object o) {
@@ -111,5 +112,13 @@ public class CodeStream {
             first = false;
             print(o);
         }
+    }
+
+    public void setLineEnder(String lineEnder) {
+        this.lineEnder = lineEnder;
+    }
+
+    public String getLineEnder() {
+        return lineEnder;
     }
 }

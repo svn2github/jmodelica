@@ -3764,17 +3764,17 @@ aspect LinearFVariables {
     
     eq FAbstractEquation.getChild().isLinear() = true;
     
-    eq FMulExp.getLeft().isLinear() =
+    eq FDotMulExp.getLeft().isLinear() =
         (getRight().isConstantExp() || getRight().isLinearParameterExp())?
                 isLinear() : false;
-    eq FMulExp.getRight().isLinear() =
+    eq FDotMulExp.getRight().isLinear() =
         (getLeft().isConstantExp() || getLeft().isLinearParameterExp())?
                 isLinear() : false;
-    eq FDivExp.getLeft().isLinear() =
+    eq FDotDivExp.getLeft().isLinear() =
         (getRight().isConstantExp() || getRight().isLinearParameterExp())?
-                isLinear() : false;         
-    eq FDivExp.getRight().isLinear() = false;       
-    eq FPowExp.getChild().isLinear() = false;
+                isLinear() : false;
+    eq FDotDivExp.getRight().isLinear() = false;
+    eq FDotPowExp.getChild().isLinear() = false;
     eq FFunctionCall.getChild().isLinear() = false;
     eq FMathematicalFunctionCall.getChild().isLinear() = false;
                 
@@ -3817,11 +3817,11 @@ aspect LinearFVariables {
     eq FAbstractEquation.getChild().isLinear(Set<FVariable> vars) = true;
     eq FStatement.getChild().isLinear(Set<FVariable> vars)        = false;
     
-    eq FMulExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
-    eq FMulExp.getRight().isLinear(Set<FVariable> vars) = getLeft().isIndependent(vars) && isLinear(vars);
-    eq FDivExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
-    eq FDivExp.getRight().isLinear(Set<FVariable> vars) = false;
-    eq FPowExp.getChild().isLinear(Set<FVariable> vars) = false;
+    eq FDotMulExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
+    eq FDotMulExp.getRight().isLinear(Set<FVariable> vars) = getLeft().isIndependent(vars) && isLinear(vars);
+    eq FDotDivExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
+    eq FDotDivExp.getRight().isLinear(Set<FVariable> vars) = false;
+    eq FDotPowExp.getChild().isLinear(Set<FVariable> vars) = false;
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FAbstractFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;

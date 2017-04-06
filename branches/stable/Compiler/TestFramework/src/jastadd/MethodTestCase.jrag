@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 public abstract class MethodTestCase extends TestCase {
     private String output = null;
     private String methodName = null;
+    private Object[] arguments = new Object[0];
 
     /**
      * Invoke a method with no arguments on the specified object and compare 
@@ -28,9 +29,13 @@ public abstract class MethodTestCase extends TestCase {
      */
     protected void testMethod(Object o) {
         try {
-            Method method = o.getClass().getMethod(getMethodName());
+            Class[] types = new Class[arguments.length];
+            for (int i = 0; i < arguments.length; i++) {
+                types[i] = unwrapClass(arguments[i].getClass());
+            }
+            Method method = o.getClass().getMethod(getMethodName(), types);
 
-            String test = method.invoke(o).toString();
+            String test = method.invoke(o, arguments).toString();
             String correct = filter(getOutput());
 
             if (!checkEquals(correct, test)) {
@@ -83,6 +88,20 @@ public abstract class MethodTestCase extends TestCase {
      */
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    /**
+     * @return the methodName
+     */
+    public Object[] getArguments() {
+        return arguments;
+    }
+
+    /**
+     * @param methodName the methodName to set
+     */
+    public void setArguments(Object[] arguments) {
+        this.arguments = arguments;
     }
 
 }

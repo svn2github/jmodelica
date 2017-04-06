@@ -25,13 +25,14 @@
 #ifndef _JMI_ODE_EULER_H
 #define _JMI_ODE_EULER_H
 
+#include <string.h>
 #include "jmi_ode_solver.h"
 
 typedef struct jmi_ode_euler_t jmi_ode_euler_t;
 
 int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver);
 
-int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double time_final, int initialize);
+jmi_ode_status_t jmi_ode_euler_solve(jmi_ode_solver_t* solver, double time_final, int initialize);
 
 void jmi_ode_euler_delete(jmi_ode_solver_t* solver);
 

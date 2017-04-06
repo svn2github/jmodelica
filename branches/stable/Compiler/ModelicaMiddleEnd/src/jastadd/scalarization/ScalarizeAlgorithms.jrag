@@ -82,9 +82,11 @@ aspect AlgorithmScalarization {
             cl.getTest().createArrayTemporaries(s);
         }
         FIfWhenStmt stmt = createEmptyNode();
+        List<FIfWhenClause> clauses = new List<FIfWhenClause>();
         for (FIfWhenClause cl : getFIfWhenClauses()) {
-            cl.scalarize(s, stmt.getFIfWhenClauses());
+            cl.scalarize(s, clauses);
         }
+        stmt.setFIfWhenClauseList(clauses);
         scalarizeElse(s, stmt);
         s.add(stmt);
     }
@@ -98,7 +100,9 @@ aspect AlgorithmScalarization {
     
     public void FIfStmt.scalarizeElse(Scalarizer.Algorithm s, FIfWhenStmt stmt) {
         FIfStmt ifstmt = (FIfStmt) stmt;
-        FStatement.scalarizeStmtList(s.block(ifstmt.getElseStmtList()), getElseStmts());
+        List<FStatement> l = new List<FStatement>();
+        FStatement.scalarizeStmtList(s.block(l), getElseStmts());
+        ifstmt.setElseStmtList(l);
     }
     
     /**
@@ -107,8 +111,8 @@ aspect AlgorithmScalarization {
     public void FIfWhenClause.scalarize(Scalarizer.Algorithm s, List<FIfWhenClause> clauses) {
         FExp test = getTest().scalarize(s);
         List<FStatement> stmts = new List<FStatement>();
-        clauses.add(createNode(test, stmts));
         FStatement.scalarizeStmtList(s.block(stmts), getFStatements());
+        clauses.add(createNode(test, stmts));
     }
     
     @Override
@@ -118,8 +122,10 @@ aspect AlgorithmScalarization {
         }
         getIndex().createArrayTemporaries(s);
         FForStmt stmt = new FForStmt();
+        List<FStatement> l = new List<FStatement>();
         stmt.setIndex(getIndex().scalarize(s.map()));
-        FStatement.scalarizeStmtList(s.block(stmt.getForStmtList()), getForStmts());
+        FStatement.scalarizeStmtList(s.block(l), getForStmts());
+        stmt.setForStmtList(l);
         s.add(stmt);
     }
     
@@ -127,12 +133,14 @@ aspect AlgorithmScalarization {
     public void FWhileStmt.scalarize(Scalarizer.Algorithm s) {
         getTest().createArrayTemporaries(s);
         FWhileStmt stmt = new FWhileStmt();
+        List<FStatement> l = new List<FStatement>();
         stmt.setTest(getTest().scalarize(s));
-        Scalarizer.Algorithm sb = s.block(stmt.getWhileStmtList());
+        Scalarizer.Algorithm sb = s.block(l);
         FStatement.scalarizeStmtList(sb, getWhileStmts());
         sb.setWriteBack(true);
         getTest().createArrayTemporaries(sb);
         sb.setWriteBack(false);
+        stmt.setWhileStmtList(l);
         s.add(stmt);
     }
     
@@ -176,19 +184,23 @@ aspect AssignmentScalarization {
         
         left.createArrayTemporaries(s);
         right.createArrayTemporaries(s);
-        
-        ForNames names = s.getNames();
+
         if (size().isUnknown()) {
+            ForNames names = s.getNames();
             names.addLayer(ndims());
             names.fillLayer(expInAst);
+
             left.addArrayUsesToIndexMap(s);
             right.addArrayUsesToIndexMap(s);
-            List<FStatement> stmts = s.createForLoops(expInAst);
-            s = s.block(stmts);
+
+            List<FStatement> stmts = new List<FStatement>();
+            scalarizeAssignment_sub(s.block(stmts), left, right);
+            s.createForLoops(stmts, expInAst);
+
             names.removeLayer();
+        } else {
+            scalarizeAssignment_sub(s, left, right);
         }
-        
-        scalarizeAssignment_sub(s, left, right);
     }
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {

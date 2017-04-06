@@ -61,10 +61,6 @@
 #define JMI_REL_LT 4
 #define JMI_REL_LEQ 8
 
-#define JMI_ODE_OK 0
-#define JMI_ODE_EVENT 1
-#define JMI_ODE_ERROR -1
-
 #define JMI_EQUAL                           1
 #define JMI_SWITCHES_AND_NON_REALS_CHANGED -1
 #define JMI_NON_REALS_CHANGED              -2

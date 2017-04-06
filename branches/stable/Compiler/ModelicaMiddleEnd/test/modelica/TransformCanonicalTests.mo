@@ -454,6 +454,117 @@ Input variables:
   ")})));
   end LinearityTest1;
 
+
+model LinearityTest2
+    Real a, b;
+equation
+    a^2 + a = 2;
+    b.^2 + b = 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest2",
+            description="Linearity check for .^",
+            methodName="variableDiagnostics",
+            methodResult="
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ a: number of uses: 2, isLinear: false, alias: no
+ b: number of uses: 2, isLinear: false, alias: no
+
+Input variables: 
+")})));
+end LinearityTest2;
+
+
+model LinearityTest3
+    Real a, b;
+equation
+    a .* b = 2;
+    b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest3",
+            description="Linearity check for .*",
+            methodName="variableDiagnostics",
+            methodResult="
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ a: number of uses: 1, isLinear: false, alias: no
+ b: number of uses: 2, isLinear: false, alias: no
+
+Input variables: 
+")})));
+end LinearityTest3;
+
+
+model LinearityTest4
+    Real a, b, c;
+    parameter Real d = 3;
+equation
+    a ./ b = 2;
+    c ./ d + a = 2;
+    b = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearityTest4",
+            description="Linearity check for ./",
+            methodName="variableDiagnostics",
+            methodResult="
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+ d: number of uses: 1, isLinear: true, evaluated binding exp: 3
+
+Dependent parameters: 
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ a: number of uses: 2, isLinear: false, alias: no
+ b: number of uses: 2, isLinear: false, alias: no
+ c: number of uses: 1, isLinear: true, alias: no
+
+Input variables: 
+")})));
+end LinearityTest4;
+
+
+
   model AliasTest1
     Real x1 = time;
     Real x2 = time;
@@ -7752,7 +7863,6 @@ Jacobian:
 -------------------------------
 ")})));
 end LinearBlockTest3;
-
 
 model Sample1
     Real x;

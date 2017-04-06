@@ -278,6 +278,16 @@ aspect ConstantEvaluation {
         }
 
         /**
+         * Convert to Object, boxes value as an Integer.
+         * 
+         * @return Value as an Integer.
+         */
+        @Override
+        public Integer objectValue() { 
+            return value;
+        }
+
+        /**
 	     * Convert to double.
 	     * 
 	     *  @return Value converted to double.
@@ -385,6 +395,16 @@ aspect ConstantEvaluation {
         	return value; 
         }
 
+        /**
+         * Convert to Object, boxes value as a Double.
+         * 
+         * @return Value as an Double.
+         */
+        @Override
+        public Double objectValue() { 
+            return value;
+        }
+
         @Override
         public double minValue() {
             return value;
@@ -479,6 +499,16 @@ aspect ConstantEvaluation {
         public boolean booleanValue() { 
         	return value; 
         }
+
+        /**
+         * Convert to Object, boxes value as an Boolean.
+         * 
+         * @return Value as an Boolean.
+         */
+        @Override
+        public Boolean objectValue() { 
+            return value;
+        }
         
         /**
          * Convert to int.
@@ -542,6 +572,16 @@ aspect ConstantEvaluation {
 	     * @return Value converted to string.
 	     */        
         public String stringValue() { return value; }
+
+        /**
+         * Convert to Object, just returns the value.
+         * 
+         * @return Value as an String.
+         */
+        @Override
+        public String objectValue() { 
+            return value;
+        }
 	    
 	    /**
 	     * Convert to CValueString.
@@ -816,6 +856,33 @@ aspect ConstantEvaluation {
             for (int i = 0; i < values.length; i++)
                 vector[i] = values[i].stringValue();
             return vector;
+        }
+
+        /**
+         * Convert to Object, Returns an Object array.
+         * 
+         * @return Value as Object[].
+         */
+        @Override
+        public Object[] objectValue() { 
+            return objectValue(0, 0);
+        }
+        
+        private Object[] objectValue(int dim, int pos) {
+            int n = size().get(dim);
+            dim++;
+            Object[] res = new Object[n];
+            if (dim == ndims()) {
+                for (int i = 0; i < n; i++) {
+                    res[i] = values[pos + i].objectValue();
+                }
+            } else {
+                int m = size().numElements(dim);
+                for (int i = 0; i < n; i++) {
+                    res[i] = objectValue(dim, pos + m * i);
+                }
+            }
+            return res;
         }
 
         @Override
@@ -2012,13 +2079,11 @@ aspect ConstantEvaluation {
     eq FSumExp.reduceStartValue()     = type().createCValue(0);
     eq FProductExp.reduceStartValue() = type().createCValue(1);
 
-    syn CValue FReductionExp.scalarReduceStartValue();
+    syn CValue FBuiltInFunctionCall.scalarReduceStartValue() = CValue.UNKNOWN;
     eq FSumExp.scalarReduceStartValue()     = type().createCValueScalar(0);
     eq FProductExp.scalarReduceStartValue() = type().createCValueScalar(1);
-
-    syn CValue FMinMaxExp.scalarReduceStartValue();
-    eq FMaxExp.scalarReduceStartValue() = type().limitCValueScalar(false);
-    eq FMinExp.scalarReduceStartValue() = type().limitCValueScalar(true);
+    eq FMaxExp.scalarReduceStartValue()     = type().limitCValueScalar(false);
+    eq FMinExp.scalarReduceStartValue()     = type().limitCValueScalar(true);
 
     syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
     eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);

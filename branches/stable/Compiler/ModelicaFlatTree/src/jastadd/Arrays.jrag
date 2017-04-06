@@ -2463,19 +2463,29 @@ aspect ArrayHelpers {
 		public boolean has(int i) {
 			return i >= 0 && i < size.length;
 		}
-		
-		/**
-		 * Returns the number of elements spanned by this Size.
-		 * 
-		 * Only valid if all dimensions are known or currently evaluable.
-		 */
-		public int numElements() {
-			int res = 1;
-			for (int i = 0; i < size.length && res > 0; i++)
-				res *= get(i);
-			return res < 0 ? 0 : res;
-		}
-		
+
+        /**
+         * Returns the number of elements spanned by this Size.
+         * 
+         * Only valid if all dimensions are known or currently evaluable.
+         */
+        public int numElements() {
+            return numElements(0);
+        }
+
+        /**
+         * Returns the number of elements spanned by all but the <code>n</code> outermost 
+         * dimensions of this Size.
+         * 
+         * Only valid if all used dimensions are known or currently evaluable.
+         */
+        public int numElements(int n) {
+            int res = 1;
+            for (int i = n; i < size.length && res > 0; i++)
+                res *= get(i);
+            return res < 0 ? 0 : res;
+        }
+
         /**
          * True if any dimension is verified to be zero
          */

@@ -1066,7 +1066,11 @@ aspect FlatNames {
      * Create an access expression to this variable.
      */
     public FIdUseExp FVariable.createUseExp() {
-         return getFQName().createUseFQName().createFIdUseExp();
+        if (isPreVariable()) {
+            return createFPreExp();
+        } else {
+            return getFQName().createUseFQName().createFIdUseExp();
+        }
     }
 
     public FIdUseExp FDerivativeVariable.createUseExp() {
