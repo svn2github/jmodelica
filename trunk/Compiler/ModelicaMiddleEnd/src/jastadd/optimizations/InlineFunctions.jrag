@@ -444,21 +444,21 @@ aspect FunctionInlining {
         public void inline() {
             List<FAbstractEquation> oldInitialEqns = initialEqns;
             initialEqns = new List<FAbstractEquation>();
-            fc.setFInitialEquationList(initialEqns);
             setContextVariability(ASTNode.fInitialParameter());
             inlineFCList(oldInitialEqns, initialEqns);
+            fc.setFInitialEquationList(initialEqns);
             
             List<FAbstractEquation> oldNormalEqns = normalEqns;
             normalEqns = new List<FAbstractEquation>();
-            fc.setFAbstractEquationList(normalEqns);
             setContextVariability(ASTNode.fContinuous());
             inlineFCList(oldNormalEqns, normalEqns);
+            fc.setFAbstractEquationList(normalEqns);
             
             List<FAbstractEquation> oldParamEqns = paramEqns;
             paramEqns = new List<FAbstractEquation>();
-            fc.setFParameterEquationList(paramEqns);
-            setContextVariability(ASTNode.fParameter());
+            setContextVariability(ASTNode.fFixedParameter());
             inlineFCList(oldParamEqns, paramEqns);
+            fc.setFParameterEquationList(paramEqns);
         }
         
         private List<FAbstractEquation> currentOldList = null;

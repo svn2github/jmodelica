@@ -769,11 +769,11 @@ aspect InstanceTreeConstruction {
         }
     }
 
-    syn nta Opt InstNode.getDynamicFExpOpt()     = new DynamicOpt();
-    syn nta Opt InstExternal.getDynamicFExpOpt() = new DynamicOpt();
-    syn nta Opt FExp.getDynamicFExpOpt()         = new DynamicOpt();
-	syn lazy Opt FAbstractEquation.getDynamicFAbstractEquationOpt() = new DynamicOpt();	
-	syn nta Opt FVariable.getDynamicFVariableOpt() = new DynamicOpt();
+    syn nta Opt InstNode.getDynamicFExpOpt()                       = new DynamicOpt();
+    syn nta Opt InstExternal.getDynamicFExpOpt()                   = new DynamicOpt();
+    syn nta Opt FExp.getDynamicFExpOpt()                           = new DynamicOpt();
+	syn nta Opt FAbstractEquation.getDynamicFAbstractEquationOpt() = new DynamicOpt();	
+	syn nta Opt FVariable.getDynamicFVariableOpt()                 = new DynamicOpt();
 	
 	/**
 	 * Dynamically places an FExp in the tree under this InstNode.

@@ -2158,9 +2158,9 @@ aspect JastAddHacks{
         }
     }
 
-    syn lazy Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
-    syn lazy Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
-    syn lazy Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
+    syn nta Opt FClass.getFDynamicResolverOpt()                   = new DynamicOpt();
+    syn nta Opt FIndexReductionResolver.getFVariableOpt()         = new DynamicOpt();
+    syn nta Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
 
     /**
      * Dynamic resolver used during index reduction to handle differentiated

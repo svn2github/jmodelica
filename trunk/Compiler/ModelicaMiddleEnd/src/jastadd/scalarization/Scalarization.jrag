@@ -447,9 +447,12 @@ aspect Scalarization {
         }
 
 		// Iterate over all attributes and scalarize.
+        List<FAttribute> attrs = new List<FAttribute>();
+        attrs.addAll(fv.getFAttributes());
         for (FAttribute a : getFAttributes()) {
-            a.scalarize(fv.getFAttributes(), i, Collections.<String,FExp>emptyMap());
+            a.scalarize(attrs, i, Collections.<String,FExp>emptyMap());
         }
+        fv.setFAttributeList(attrs);
 		fv.setDerivedType(getDerivedType());
 		fv.addArrayAttributesFromType(i, myFDerivedType());
 
@@ -498,9 +501,14 @@ aspect Scalarization {
 	 * to the given index. 
 	 */
 	protected void FVariable.addArrayAttributesFromType(Index i, FDerivedType t) {
-		if (t != null && i != Index.NULL)
-			for (FAttribute a : t.getFAttributes())
-				a.addArrayAttributesTo(i, getFAttributes());
+        if (t != null && i != Index.NULL) {
+            for (FAttribute a : t.getFAttributes()) {
+                List<FAttribute> attrs = new List<FAttribute>();
+                attrs.addAll(getFAttributes());
+                a.addArrayAttributesTo(i, attrs);
+                setFAttributeList(attrs);
+            }
+        }
 	}
 	
 	/**
@@ -800,8 +808,11 @@ aspect Scalarization {
      */
     public FAttribute FAttribute.scalarizeInternal(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
         FAttribute attr = createEmptyNode();
-        for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
-            a.scalarize(attr.getFAttributes(), i, indexMap);            // TODO: really send i here?
+        List<FAttribute> l = new List<FAttribute>();
+        for (FAttribute a : getFAttributes()) {
+            a.scalarize(l, i, indexMap);
+        }
+        attr.setFAttributeList(l);
         attr.setType(getType().fullCopy());
         attr.setName(getName().fullCopy());
         attr.setAttributeSet(getAttributeSet());
