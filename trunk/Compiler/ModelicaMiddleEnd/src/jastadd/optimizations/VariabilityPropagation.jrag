@@ -316,8 +316,11 @@ aspect VariabilityPropagation {
 		}
 
 		if (solutionVariability.knownParameterOrLess()) {
+			FExp newSolution;
 			try {
-				solution = solution.ceval().buildLiteral();
+				newSolution = solution.ceval().buildLiteral();
+				solution.collectLocations(newSolution);
+				solution = newSolution;
 			} catch (ConstantEvaluationException e) {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
@@ -325,7 +328,7 @@ aspect VariabilityPropagation {
 		}
 		
         if (!solutionVariability.knownParameterOrLess()) {
-            propagator.addEquation(solutionVariability, new FEquation(fVariable.createUseExp(), solution));
+            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
         }
         
         this.taggedByVProp = true;
@@ -563,7 +566,7 @@ aspect VariabilityPropagation {
                         topFactorExp.taggedByVProp = true;
                     }
                 }
-                
+            	
                 propagator.addWorkEq(equation);
                 if (equation.inInitialEquationSection() && equation.variables().size() == 0
                         && equation.initialParameters().size() == 0) {

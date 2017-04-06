@@ -811,7 +811,7 @@ aspect Flattening {
     
     public void InstAssignable.addBindingAssignments(List<FStatement> l) {
         if (hasBindingFExp()) {
-            FStatement stmt = new FAssignStmt(new FIdUseExp(expandedFQNameCalc()), getBindingFExp().flatten(new FQNameEmpty()));
+            FStatement stmt = new FAssignStmt(setLocationOf(new FIdUseExp(expandedFQNameCalc())), getBindingFExp().flatten(new FQNameEmpty()));
             stmt.shouldBeSorted = true;
             l.add(stmt);
         } else {
@@ -1513,6 +1513,7 @@ aspect Flattening {
             fv.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
 
         fv.setFQName(name);
+        fv.setLocation(this);
 
         contribute(fv);
 
@@ -2122,7 +2123,7 @@ aspect FlatExpressions {
     }
     
     public FExp FIdUseExp.flatten(FQName prefix) {
-        return getFIdUse().flatten(prefix, this);
+        return setLocationOf(getFIdUse().flatten(prefix, this));
     }
     
     public FExp FIdUse.flatten(FQName prefix, FIdUseExp use) {
@@ -2766,7 +2767,8 @@ aspect FlatExpressions {
     }
     
      public FDerExp FIdUseExp.flattenDer(FQName prefix, int order) {
-         return new FDerExp(getFIdUse().flatten(prefix), order);
+		//TODO: cast needed
+    	 return (FDerExp)parent.setLocationOf(new FDerExp(getFIdUse().flatten(prefix), order));
      }
 
     public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {
@@ -2788,7 +2790,8 @@ aspect FlatExpressions {
         return res;
     }
     
-    public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
+    public FTimeExp FTimeExp.flatten(FQName prefix) { return setLocationOf(new FTimeExp()); }
+    
     public FExp FEndExp.flatten(FQName prefix)  {
         if (expandSize()) {
             return mySize().flattenFExp(0);
@@ -2870,7 +2873,7 @@ aspect FlatExpressions {
     }
 
     public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
-        return new FFunctionCall(name, args, type);
+        return setLocationOf(new FFunctionCall(name, args, type));
     }
     
     public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
@@ -3050,7 +3053,7 @@ aspect InstantiatedExpressions {
     
     public  FFunctionCallLeft FunctionCallLeft.instantiate() {
         Opt id = hasAccess() ? 
-                new Opt(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess()))) : 
+                new Opt(setLocationOf(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess())))) : 
                 new Opt();
         return new FFunctionCallLeft(id);
     }
@@ -3114,6 +3117,7 @@ aspect InstantiatedExpressions {
     
     protected FAssignStmt AssignStmt.instantiateStatement() {
         FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
+        left.setLocation(this);
         return new FAssignStmt(left, getRight().instantiate());
     }
     

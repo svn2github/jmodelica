@@ -29,6 +29,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
@@ -1636,13 +1637,14 @@ aspect FlatAPI {
                 res += fv.getBindingExp().type().numScalarElements();
        return res;
     }
+    
+    		
     syn lazy int FClass.numScalarEquationsAtInitialization() {
         int res = 0;
         for (FAbstractEquation e : equations())
             res += e.numScalarEquations();
         return res;
     }
-
     syn int FClass.numEquations() = equations().size();
     syn lazy ArrayList<FAbstractEquation> FClass.equations() {
         ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
@@ -4210,7 +4212,7 @@ aspect FlatDiagnostics {
             }
         }
         return sb.toString();
-    }
+    }    
     
     public Set<FVariable> FVariable.directDependencies() {
         Set<FVariable> res = new LinkedHashSet<FVariable>();

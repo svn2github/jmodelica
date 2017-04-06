@@ -145,7 +145,8 @@ aspect Scalarization {
             }
             
             public void add(FExp left, FExp right) {
-                add(new FEquation(left, right));
+				// TODO: Not 100% correct, should be equation.setLocationOf(...)
+                add(left.setLocationOf(new FEquation(left, right)));
             }
             
             public void createScalarizedFunctionCallClause(FExp left, FFunctionCall right) {
@@ -441,7 +442,7 @@ aspect Scalarization {
             if (keepBExp(variability(), getBindingExp())) {
                 fv.setBindingExp(bexp);
             } else {
-                s.add(new FIdUseExp(scalarizeVariableUse(i)), bexp);
+                s.add(setLocationOf(new FIdUseExp(scalarizeVariableUse(i))), bexp);
             }
         }
 
@@ -452,6 +453,8 @@ aspect Scalarization {
 		fv.setDerivedType(getDerivedType());
 		fv.addArrayAttributesFromType(i, myFDerivedType());
 
+		fv.setLocation(this);
+		
         s.add(fv);
         return fv;
 	}
@@ -981,7 +984,7 @@ aspect Scalarization {
         if (left.inferType().isRecord()) {
             left.inferType().scalarRecordClauses(s, new FQNameEmpty(), left, right);
         } else {
-            s.add(new FEquation(attrs, left.scalarize(s), right.scalarize(s)));
+            s.add(this.setLocationOf(new FEquation(attrs, left.scalarize(s), right.scalarize(s))));
         }
 	}
 	
@@ -1078,6 +1081,7 @@ aspect Scalarization {
       fqn.scalarized = false;
       FExp res = createNode(new FIdUse(fqn));
       res = dynamicFExp(res).scalarize(indexMap);
+      res.setLocation(this);
       return res;
     }
     
@@ -1562,7 +1566,7 @@ aspect Scalarization {
         if (indexMap.containsKey(name())) {
             return indexMap.get(name()).fullCopy();
         }
-        return new FIdUseExp(getFIdUse().scalarize(indexMap, indexNames));
+        return setLocationOf(new FIdUseExp(getFIdUse().scalarize(indexMap, indexNames)));
     }
     
     @Override
@@ -1909,7 +1913,7 @@ aspect Scalarization {
     }
     
     protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
-        return new FFunctionCall(name, args, type); 
+        return setLocationOf(new FFunctionCall(name, args, type)); 
     }
     
     protected FFunctionCall FPartialFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
