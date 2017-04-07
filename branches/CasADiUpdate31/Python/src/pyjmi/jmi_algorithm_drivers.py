@@ -1296,7 +1296,6 @@ class LocalDAECollocationAlg(AlgorithmBase):
         if not casadi_present:
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
-        
         self.nlp = LocalDAECollocator(self.op, self.options)
             
         # set solver options
@@ -2017,11 +2016,8 @@ class StaticOptimizationAlg(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = StaticOptimizer(self.op, self.options)
-        
-        # set solver options
-        self._set_solver_options()
-        self.nlp.inititialize()
+        self.nlp = StaticOptimizer(self.op, self.options, 
+                                   self.solver_options)
 
         # record the initialization time including initialization within the algorithm object
         self.nlp.times['init'] = time.clock() - t0_init
@@ -2041,13 +2037,6 @@ class StaticOptimizationAlg(AlgorithmBase):
         else:
             raise ValueError('Unknown nonlinear programming solver %s.' %
                              self.solver)
-        
-    def _set_solver_options(self):
-        """ 
-        Helper function that sets options for the solver.
-        """
-        for (k, v) in self.solver_options.iteritems():
-            self.nlp.set_solver_option(k, v)
             
     def solve(self):
         """ 

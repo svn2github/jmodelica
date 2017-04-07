@@ -151,7 +151,7 @@ class StaticOptimizer(object):
 
     """Solves a static optimization problem."""
 
-    def __init__(self, op, options):
+    def __init__(self, op, options, solver_opts = {}):
         # Get the options
         self.__dict__.update(options)
         self.options = options # save the options for the result object
@@ -173,6 +173,7 @@ class StaticOptimizer(object):
             self.t0 = op.get_attr(t0, "_value")
 
         # Get to work
+        self.solver_opts = solver_opts
         self._create_nlp()
         self.times['init'] = time.clock() - t0_init 
         
@@ -370,15 +371,15 @@ class StaticOptimizer(object):
                 path_i.append(-pc.getResidual())
             else:
                 raise StaticOptimizerException("Unknown path constraint type %d." % pc_type)
-        path_e = casadi.vertcat(path_e)
-        path_i = casadi.vertcat(path_i)
+        path_e = casadi.vertcat(*path_e)
+        path_i = casadi.vertcat(*path_i)
         objective = op.getObjectiveIntegrand()
 
         # Check invalid constructs
         if len(op.getPointConstraints()) > 0:
             if self.verbosity >= 1:
                 print("Warning: Point constraints are ignored in static optimization.")
-        if not op.getObjective().isZero():
+        if not op.getObjective().is_zero():
             raise StaticOptimizerException('Optimica objective is not supported. Use objectiveIntegrand instead.')
 
         # Append name of variables into a list
@@ -465,7 +466,7 @@ class StaticOptimizer(object):
             var_index = 0
             for var in mvar_vectors[vk]:
                 name = var.getName()
-                var_map[vk].append(xx[global_index])
+                var_map[vk] = casadi.vertcat(var_map[vk], xx[global_index])
                 if self.named_vars:
                     named_var = casadi.SX.sym(var.getName())
                     self.named_xx.append(named_var)
@@ -483,7 +484,8 @@ class StaticOptimizer(object):
                 var_indices[vk][i] = []
                 for var in mvar_vectors[vk]:
                     name = var.getName()
-                    var_map[vk][i].append(xx[global_index])
+                    var_map[vk][i] = casadi.vertcat(var_map[vk][i], 
+                                                    xx[global_index])
                     var_indices[vk][i].append(global_index)
                     if self.named_vars:
                         if self.n_instances == 1:
@@ -501,7 +503,7 @@ class StaticOptimizer(object):
         p_fixed_index = 0
         for var in mvar_vectors[vk]:
             name = var.getName()
-            var_map[vk].append(pp[p_fixed_index])
+            var_map[vk] = casadi.vertcat(var_map[vk], pp[p_fixed_index])
             if self.named_vars:
                 named_var = casadi.SX.sym(var.getName())
                 self.named_pp.append(named_var)
@@ -614,11 +616,15 @@ class StaticOptimizer(object):
                 sym_input.append(self.mvar_struct[vk])
         
         # Create functions
-        dae_fcn = self._FXFunction(sym_input, [self.dae])
-        initial_fcn = self._FXFunction(sym_input, [self.initial])
-        path_e_fcn = self._FXFunction(sym_input, [self.path_e])
-        path_i_fcn = self._FXFunction(sym_input, [self.path_i])
-        objective_fcn = self._FXFunction(sym_input, [self.objective])
+        dae_fcn = self._Function('dae_fcn', sym_input, [self.dae])
+        initial_fcn = self._Function('init_fcn', sym_input, 
+                                     [self.initial])
+        path_e_fcn = self._Function('path_e_fcn', sym_input, 
+                                    [self.path_e])
+        path_i_fcn = self._Function('path_i_fcn', sym_input, 
+                                    [self.path_i])
+        objective_fcn = self._Function('obj_fcn', sym_input, 
+                                       [self.objective])
 
         # Create constraints and cost
         self.c_e = c_e = casadi.MX()
@@ -626,10 +632,10 @@ class StaticOptimizer(object):
         cost = casadi.MX(0)
         for i in xrange(self.n_instances):
             z = self._get_z(i)
-            c_e.append(dae_fcn.call(z)[0])
-            c_e.append(initial_fcn.call(z)[0])
-            c_e.append(path_e_fcn.call(z)[0])
-            c_i.append(path_i_fcn.call(z)[0])
+            c_e = casadi.vertcat(c_e, dae_fcn.call(z)[0])
+            c_e = casadi.vertcat(c_e, initial_fcn.call(z)[0])
+            c_e = casadi.vertcat(c_e, path_e_fcn.call(z)[0])
+            c_i = casadi.vertcat(c_i, path_i_fcn.call(z)[0])
             cost += objective_fcn.call(z)[0]
 
         # Add quadratic cost for external data
@@ -749,28 +755,32 @@ class StaticOptimizer(object):
             self.xx_min /= self.xx_sf
             self.xx_max /= self.xx_sf
 
-    def _FXFunction(self, *args):
-        f = casadi.MXFunction(*args)
+    def _Function(self, *args):
+        f = casadi.Function(*args)
         if self.expand_to_sx != 'no':
-            f.init()
-            f = casadi.SXFunction(f)
+            f = casadi.Function(f)
         return f
 
     def _create_solver_object(self):
         # Concatenate constraints
-        constraints = casadi.vertcat([self.c_e, self.c_i])
+        constraints = casadi.vertcat(self.c_e, self.c_i)
+        
+        # Set options
+        self.solver_opts["expand"] = self.expand_to_sx == "NLP"
 
         # Create solver object
         self.constraints = constraints
-        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp),
-                                casadi.nlpOut(f=self.cost, g=constraints))
+        nlp = dict(x=self.xx, p=self.pp, f=self.cost, g=constraints)
         if self.solver == "IPOPT":
-            self.solver_object = casadi.NlpSolver("ipopt",nlp)
+            plugin = 'ipopt'
         elif self.solver == "WORHP":
-            self.solver_object = casadi.NlpSolver("worhp",nlp)
+            plugin = 'worhp'
         else:
             raise CasadiCollocatorException(
                     "Unknown nonlinear programming solver %s." % self.solver)
+                    
+        self.solver_object = casadi.nlpsol("solver", plugin, nlp, 
+                                           self.solver_opts)
 
     def _recalculate_model_parameters(self):
         """
@@ -781,35 +791,22 @@ class StaticOptimizer(object):
         self.par_vals = N.array(par_vals).reshape(-1)
 
     def _init_and_set_solver_inputs(self):
-        self.solver_object.init()
-
-        # Expand to SX
-        self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
-
+        
+        self.inputs = {}
+        
         # Primal initial guess and parameter values
-        self.solver_object.setInput(self.xx_init, 'x0')
-        self.solver_object.setInput(self.par_vals, 'p')
+        self.inputs['x0'] = self.xx_init
+        self.inputs['p'] = self.par_vals
 
         # Bounds on x
-        self.solver_object.setInput(self.xx_min, 'lbx')
-        self.solver_object.setInput(self.xx_max, 'ubx')
+        self.inputs['lbx'] = self.xx_min
+        self.inputs['ubx'] = self.xx_max
 
         # Bounds on the constraints
         lbg = self.c_e.numel()*[0.] + self.c_i.numel()*[-N.inf]
         ubg = (self.c_e.numel() + self.c_i.numel())*[0.]
-        self.solver_object.setInput(lbg, 'lbg')
-        self.solver_object.setInput(ubg, 'ubg')
-
-    def set_solver_option(self, k, v):
-        """
-        Sets nonlinear programming solver options.
-
-            Parameters::
-
-                k - Name of the option
-                v - Value of the option (int, double, string)
-        """
-        self.solver_object.setOption(k, v)
+        self.inputs['lbg'] = lbg
+        self.inputs['ubg'] = ubg
 
     def get_solver_statistics(self):
         """ 
@@ -829,15 +826,15 @@ class StaticOptimizer(object):
             total_exec_time -- 
                 Nonlinear programming solver execution time.
         """
-        stats = self.solver_object.getStats()
+        stats = self.solver_object.stats()
         nbr_iter = stats['iter_count']
-        objective = float(self.solver_object.getOutput('f'))
-        total_exec_time = stats['t_mainloop.proc']
+        objective = float(self.solver_res['f'])
+        total_exec_time = stats['t_proc_mainloop']
         
         # 'Maximum_CPU_Time_Exceeded' and 'Feasible_Point_for_Square_Problem_Found' fail
         # to fill in stats['return_status'].
-        if (self.solver_object.hasSetOption('max_cpu_time') and
-            total_exec_time >= self.solver_object.getOption('max_cpu_time')):
+        if 'max_cpu_time' in self.solver_opts and \
+            total_exec_time >= self.solver_opts['max_cpu_time']:
             return_status = 'Maximum_CPU_Time_Exceeded'
         else:
             try:
@@ -850,12 +847,12 @@ class StaticOptimizer(object):
         # Solve the problem
         self._recalculate_model_parameters()
         self._init_and_set_solver_inputs()
-        t0 = time.clock()
-        self.solver_object.evaluate()
-        sol_time = time.clock() - t0
 
         # Get the result
-        primal_opt = N.array(self.solver_object.getOutput('x')).reshape(-1)
+        t0 = time.clock()
+        self.solver_res = self.solver_object.call(self.inputs)
+        primal_opt = N.array(self.solver_res['x']).reshape(-1)
+        sol_time = time.clock() - t0
         if self.variable_scaling and not self.write_scaled_result:
             primal_opt = self.xx_sf * primal_opt
         self.primal_opt = primal_opt.reshape(-1)
@@ -1112,7 +1109,7 @@ class StaticOptimizer(object):
         Only works if named_vars == True.
         """
         if self.named_vars:
-            f = casadi.MXFunction([self.xx, self.pp], [expr])
+            f = casadi.Function([self.xx, self.pp], [expr])
             f.init()
             return f.call([self.named_xx, self.named_pp],True)[0]
         else:
@@ -1152,6 +1149,7 @@ class StaticOptimizationAlgResult(JMResultBaseJMI):
             # Save values from the solver since they might change in the solver.
             # Assumes that solver.primal_opt and solver.dual_opt will not be mutated, which seems to be the case.
             self.primal_opt = solver.primal_opt
+            self.solver_res = solver.solver_res
             self.solver_statistics = solver.get_solver_statistics()
 
         if times is not None and self.options['verbosity'] >= 1:

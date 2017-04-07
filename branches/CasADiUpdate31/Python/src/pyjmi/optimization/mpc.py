@@ -336,8 +336,8 @@ class MPC(object):
             nominal = var.getNominal()
 
             # Check if nominal value is symbolic and find the value
-            if nominal.isSymbolic():
-                nominal = self.op.get(nominal.getName())
+            if nominal.is_symbolic():
+                nominal = self.op.get(nominal.name())
             else:
                 nominal = float(nominal)
 
@@ -385,7 +385,6 @@ class MPC(object):
         self.collocator = self.alg.nlp
         self.p_fixed = None
         self._get_states_and_initial_condition_parameters()
-        self.collocator.solver_object.init()
 
     def _set_blocking_options(self):
         """
@@ -400,7 +399,7 @@ class MPC(object):
             factors = {}
             print("Default blocking factors have been applied to all inputs.")
             for inp in self.original_model_inputs:  
-                factors[inp.getName()] = bl_list
+                factors[inp.name()] = bl_list
             bf = BlockingFactors(factors = factors)
             self.options['blocking_factors'] = bf
 
@@ -481,29 +480,31 @@ class MPC(object):
             'NLPprint' = 0
         """  
         
+        
+        
         if self.options['solver'] == 'IPOPT':
             if self.options['IPOPT_options'].get('warm_start_init_point')\
                                                                     is None:
-                self.collocator.solver_object.\
-                                    setOption('warm_start_init_point', 'yes')
+                self.collocator.solver_opts['warm_start_init_point'] = 'yes'
             if self.options['IPOPT_options'].get('mu_init') is None:
-                self.collocator.solver_object.setOption('mu_init', 1e-3)
+                self.collocator.solver_opts['mu_init'] = 1e-3
             if self.options['IPOPT_options'].get('print_level') is None:
-                self.collocator.solver_object.setOption('print_level', 0)
+                self.collocator.solver_opts['print_level'] = 0
                                                     
             for key in self.warm_start_options.keys():
-                self.collocator.solver_object.setOption(key,\
-                                                self.warm_start_options[key])
+                self.collocator.solver_opts[key] = self.warm_start_options[key]
 
-            self.collocator.solver_object.setOption('expand', False)
+            self.collocator.solver_opts['expand'] = False
              
         elif self.options['solver'] == 'WORHP':
-            self.collocator.solver_object.setOption('NLPprint', 0)
-            self.collocator.solver_object.setOption('InitialLMest', False)
+            self.collocator.solver_opts['NLPprint'] = 0
+            self.collocator.solver_opts['InitialLMest'] = False
             
             for key in self.warm_start_options.keys():
-                self.collocator.solver_object.setOption(key,\
-                                                self.warm_start_options[key])
+                value = self.warm_start_options[key]
+                self.collocator.set_solver_option(key, value)
+                                       
+        self.collocator.initialize()
 
     def _append_to_result_file(self, sim_res):
         """
@@ -524,7 +525,7 @@ class MPC(object):
                 for i in range(n_var_type):
                     try:
                         res_var = sim_res[self.collocator.mvar_vectors[n][i].\
-                                          getName()]
+                                          name()]
                     except VariableNotFoundError:
                         res_var = N.array([0]*n_values)
                     self.res[n].append(res_var[k])
@@ -532,7 +533,7 @@ class MPC(object):
         elims = N.zeros(len(self.eliminated_variables))
         for k in range(n_values):
             for i,var in enumerate (self.eliminated_variables):
-                elims[i] = sim_res[var.getName()][k]
+                elims[i] = sim_res[var.name()][k]
 			
             self.res['elim_vars'].append(elims)
        
@@ -567,11 +568,11 @@ class MPC(object):
         self._opt_input = {}
 
         for i, inp in enumerate(self.original_model_inputs):
-            names.append(inp.getName())
+            names.append(inp.name())
             
             inputs.append(self.result[3][(self._nbr_values_sample-1)*\
                                             self.consec_fails+1][i])
-            self._opt_input[inp.getName()] = self.result[3]\
+            self._opt_input[inp.name()] = self.result[3]\
                                             [(self._nbr_values_sample-1)*\
                                             self.consec_fails+1][i]
 
@@ -656,9 +657,9 @@ class MPC(object):
             is_x = 0
 
         # Shift inputs without blocking factors
-        u_cont_names = [ var.getName() for var in 
+        u_cont_names = [ var.name() for var in 
                         self.collocator.mvar_vectors['unelim_u'] 
-                        if var.getName() not in 
+                        if var.name() not in 
                         self.options['blocking_factors'].factors.keys()]
                     
         n_cont_u = len(u_cont_names) 
@@ -837,7 +838,6 @@ class MPC(object):
         if self._sample_nbr == 2:            
             self.collocator.warm_start = True
             self._set_warm_start_options()
-            self.collocator.solver_object.init()
             self.collocator._init_and_set_solver_inputs()
                     
 
@@ -847,7 +847,7 @@ class MPC(object):
         self.post_time = time.clock()
 
         # Check return status and if optimization was successful
-        self.status = self.collocator.solver_object.getStat('return_status')
+        self.status = self.collocator.solver_object.stats()['return_status']
         if self.status in self.successful_optimization:
             self.found_solution = True
         else:

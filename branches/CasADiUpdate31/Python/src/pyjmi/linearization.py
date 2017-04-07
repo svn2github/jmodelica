@@ -766,25 +766,18 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
                             svector_vars)    
     
     # Defines the DAEResidual Function
-    Fdae = casadi.MXFunction([mvar_struct["time"], mvar_struct["dx"],
+    Fdae = casadi.Function('Fdae', [mvar_struct["time"], mvar_struct["dx"],
                            mvar_struct["x"], mvar_struct["w"],
                            mvar_struct["u"], mvar_struct["p_opt"]],
                           DAE)
     
-    Fdae.init()
     # Define derivatives
     dF_dt = Fdae.jacobian(0,0)
-    dF_dt.init()
     dF_dxdot = Fdae.jacobian(1,0)
-    dF_dxdot.init()
     dF_dx = Fdae.jacobian(2,0)
-    dF_dx.init()
     dF_dw = Fdae.jacobian(3,0)
-    dF_dw.init()
     dF_du = Fdae.jacobian(4,0)
-    dF_du.init()
-    dF_dp = Fdae.jacobian(5,0)
-    dF_dp.init()    
+    dF_dp = Fdae.jacobian(5,0)   
     
     # Compute reference point for the linearization [t0, dotx0, x0, w0, u0, p0]
     RefPoint=dict()
@@ -825,31 +818,45 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
     
     # Set inputs
     var_kinds = ["time"] + var_kinds
+
+    #~ for i,varType in enumerate(var_kinds):    
+        #~ dF_dt.setInput(RefPoint[varType],i)
+        #~ dF_dxdot.setInput(RefPoint[varType],i)
+        #~ dF_dx.setInput(RefPoint[varType],i)
+        #~ dF_dw.setInput(RefPoint[varType],i)
+        #~ dF_du.setInput(RefPoint[varType],i)
+        #~ dF_dp.setInput(RefPoint[varType],i)
+        #~ Fdae.setInput(RefPoint[varType],i)
+    
+    #~ # Evaluate derivatives
+    #~ dF_dt.evaluate()
+    #~ dF_dxdot.evaluate()
+    #~ dF_dx.evaluate()
+    #~ dF_dw.evaluate()
+    #~ dF_du.evaluate()
+    #~ dF_dp.evaluate()
+    #~ Fdae.evaluate()
+    
+    #~ # Store result in Matrices
+    #~ D = -dF_dt.getOutput()[0]
+    #~ E = dF_dxdot.getOutput()
+    #~ A = -dF_dx.getOutput()
+    #~ B = -dF_du.getOutput()
+    #~ C = -dF_dw.getOutput()
+    #~ h = Fdae.getOutput()
+    #~ G = -dF_dp.getOutput() 
+    
+    input_list = []
     for i,varType in enumerate(var_kinds):
-        dF_dt.setInput(RefPoint[varType],i)
-        dF_dxdot.setInput(RefPoint[varType],i)
-        dF_dx.setInput(RefPoint[varType],i)
-        dF_dw.setInput(RefPoint[varType],i)
-        dF_du.setInput(RefPoint[varType],i)
-        dF_dp.setInput(RefPoint[varType],i)
-        Fdae.setInput(RefPoint[varType],i)
+        input_list.append(RefPoint[varType])
     
-    # Evaluate derivatives
-    dF_dt.evaluate()
-    dF_dxdot.evaluate()
-    dF_dx.evaluate()
-    dF_dw.evaluate()
-    dF_du.evaluate()
-    dF_dp.evaluate()
-    Fdae.evaluate()
+    D = -dF_dt.call(input_list)[0]
     
-    # Store result in Matrices
-    D = -dF_dt.getOutput()
-    E = dF_dxdot.getOutput()
-    A = -dF_dx.getOutput()
-    B = -dF_du.getOutput()
-    C = -dF_dw.getOutput()
-    h = Fdae.getOutput()
-    G = -dF_dp.getOutput()   
+    E = dF_dxdot.call(input_list)[0]
+    A = -dF_dx.call(input_list)[0]
+    B = -dF_du.call(input_list)[0]
+    C = -dF_dw.call(input_list)[0]
+    h = Fdae.call(input_list)[0]
+    G = -dF_dp.call(input_list)[0]  
     
     return E, A , B ,C ,D , G, h, RefPoint

@@ -305,12 +305,14 @@ class Component(object):
         all unknowns.
         """
         # Compute sparsity of Jacobian
-        mx_vars = [casadi.vertcat(self.mx_vars)]
-        res_f = casadi.MXFunction(mx_vars, [casadi.vertcat(self.eq_expr)])
-        res_f.setOption("name", "block_residual_for_solvability")
-        res_f.init()
-        jac_f = casadi.MXFunction(mx_vars, [casadi.transpose(res_f.jac())])
-        jac_f.init()
+        mx_vars = [casadi.vertcat(*self.mx_vars)]
+        res_f = casadi.Function(
+            'block_residual_for_solvability', 
+            mx_vars, 
+            [casadi.vertcat(*self.eq_expr)]
+        )
+        jac_f = casadi.Function('jac_f', mx_vars, 
+                                [casadi.transpose(res_f.jac())])
         sp = jac_f.jacSparsity()
         is_linear = sp.nnz() == 0
 
@@ -982,11 +984,10 @@ def create_edges(equations, variables):
         """
         Create edges between Equations and Variables.
         """
-        eqs = casadi.vertcat([eq.expression for eq in equations])
-        vrs = casadi.vertcat([var.mx_var for var in variables])
-        fcn = casadi.MXFunction([vrs], [eqs])
-        fcn.init()
-        [col_ptrs, row_inds] = fcn.jacSparsity().getCCS()
+        eqs = casadi.vertcat(*[eq.expression for eq in equations])
+        vrs = casadi.vertcat(*[var.mx_var for var in variables])
+        fcn = casadi.Function('f', [vrs], [eqs])
+        [col_ptrs, row_inds] = fcn.sparsity_jac().get_ccs()
         
         old_col_ptr = col_ptrs[0]
         col = 0
@@ -1022,7 +1023,7 @@ class BLTModel(object):
 
         # Identify tearing variables
         if self.options['tearing']:
-            self.tear_vars = [var.getName() for var in model.getVariables(model.REAL_ALGEBRAIC)
+            self.tear_vars = [var.name() for var in model.getVariables(model.REAL_ALGEBRAIC)
                               if not var.isAlias() and var.getTearing()]
         else:
             self.tear_vars = []
@@ -1052,7 +1053,7 @@ class BLTModel(object):
             var = self._model.getVariable(name)
             if var is None:
                 raise ValueError('Ineliminable variable %s does not exist.' % name)
-            self.options['ineliminable'][i] = var.getModelVariable().getName()
+            self.options['ineliminable'][i] = var.getModelVariable().name()
 
     def _create_bipgraph(self):
         # Initialize structures
@@ -1132,8 +1133,12 @@ class BLTModel(object):
                     tearing = True
                 else:
                     tearing = False
-                variables.append(Variable(mvar.getName(), i, i, vk=="dx", tearing, mvar, mx_var))
+                variables.append(Variable(mvar.name(), i, i, vk=="dx", tearing, mvar, mx_var))
                 i += 1
+                
+        # Split the MX column vector into a list of its rows
+        # This enables the following zipping
+        named_dae = casadi.vertsplit(named_dae, range(named_dae.shape[0]+1))
 
         # Create equations
         i = 0
@@ -1160,7 +1165,7 @@ class BLTModel(object):
         self._dependencies = dependencies = {}
         for vk in ['x', 'u']:
             for var in self._mx_var_struct[vk]:
-                dependencies[var.getName()] = [var.getName()]
+                dependencies[var.name()] = [var.name()]
 
         for var_name in self.options['ineliminable']:
             dependencies[var_name] = [var_name]
@@ -1496,12 +1501,12 @@ class BLTModel(object):
         fcn = casadi.MXFunction([dae_vars], [eq_expr])
         fcn.init()
         [_, dep_indices] = fcn.jacSparsity().getTriplet()
-        deps = [dae_var for dae_var in dae_vars[dep_indices] if dae_var.getName() != var.name]
+        deps = [dae_var for dae_var in dae_vars[dep_indices] if dae_var.name() != var.name]
 
         # Find torn dependencies
         torn_dep_names = []
         for dep in deps:
-            torn_dep_names += self._dependencies[dep.getName()]
+            torn_dep_names += self._dependencies[dep.name()]
         torn_dep_names = list(set(torn_dep_names))
 
         # Compute density measure
@@ -1526,7 +1531,7 @@ class BLTModel(object):
                     for dep in deps:
                         # If dependency causes fill-in
                         if not casadi.dependsOn(self._graph.equations[inc].expression, dep):
-                            inc_torn_dep_names += self._dependencies[dep.getName()]
+                            inc_torn_dep_names += self._dependencies[dep.name()]
                     n_dependencies = len(set(inc_torn_dep_names))
                     measure += n_dependencies - 1
         else:
@@ -1584,7 +1589,7 @@ class BLTModel(object):
         """
         Returns list of names of explicitly solved BLT variables.
         """
-        return [var.getName() for var in self._explicit_solved_vars]
+        return [var.name() for var in self._explicit_solved_vars]
 
     def get_attr(self, var, attr):
         """
@@ -1616,17 +1621,17 @@ class BLTModel(object):
                 if val is None:
                     if var.getVariability() != var.PARAMETER:
                         raise ValueError("%s is not a parameter." %
-                                         var.getName())
+                                         var.name())
                     else:
                         raise RuntimeError("BUG: Unable to evaluate " +
-                                           "value of %s." % var.getName())
+                                           "value of %s." % var.name())
             return float(val)
         elif attr == "comment":
             var_desc = var.getAttribute("comment")
             if var_desc is None:
                 return ""
             else:
-                return var_desc.getName()
+                return var_desc.name()
         elif attr == "nominal":
             if var.isDerivative():
                 var = var.getMyDifferentiatedVariable()
@@ -1641,7 +1646,7 @@ class BLTModel(object):
                     return self.get_attr(var, "start")
                 else:
                     raise ValueError("Variable %s does not have attribute %s."
-                                     % (var.getName(), attr))
+                                     % (var.name(), attr))
             return self.evaluateExpression(val_expr)
 
 class BLTOptimizationProblem(BLTModel, ModelBase):
@@ -1661,7 +1666,7 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
     def _process_ineliminables(self):
         # Mark variables with timed variables as ineliminable
         for var in self._model.getTimedVariables():
-            self.options['ineliminable'] += [var.getBaseVariable().getName()]
+            self.options['ineliminable'] += [var.getBaseVariable().name()]
         self.options['ineliminable'] = list(set(self.options['ineliminable']))
         super(BLTOptimizationProblem, self)._process_ineliminables()
 
@@ -1829,14 +1834,14 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
             # Compute solved algebraics
             for k in xrange(len(res['time'])):
                 for (i, var) in enumerate(self._known_vars + self._explicit_unsolved_vars):
-                    alg_sol_f.setInput(res[var.getName()][k], i)
+                    alg_sol_f.setInput(res[var.name()][k], i)
                 alg_sol_f.evaluate()
                 for (i, sol_alg) in enumerate(self._explicit_solved_algebraics):
                     res[sol_alg[1].name].append(alg_sol_f.getOutput(i).toArray().reshape(-1))
 
         # Add results for all alias variables (only needed for solved algebraics) and convert to array
         for var in self._model.getAllVariables():
-            res[var.getName()] = np.array(res[var.getModelVariable().getName()])
+            res[var.name()] = np.array(res[var.getModelVariable().name()])
 
         # Return result
         res.solver = op_res.solver

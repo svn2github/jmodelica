@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from pyjmi import transfer_optimization_problem
 from pyjmi.optimization.mpc import MPC
 from pyjmi.optimization.casadi_collocation import BlockingFactors
-from casadi import ExternalFunction, NlpSolver
+from casadi import external, nlpsol
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
 
@@ -524,7 +524,7 @@ class RealTimeMPCBase(RealTimeBase):
                 self.results[self.outputs[i]].append(x_k['_start_' + self.outputs[i]])
             for i in range(n_inputs):
                 self.results[self.inputs[i]].append(u_k[1](0)[i])
-            self.stats.append(self.solver.collocator.solver_object.getStats())
+            self.stats.append(self.solver.collocator.solver_object.stats())
             
         self.ptime = time.clock()-time1
         self.rtime = time.time()-time2

@@ -202,23 +202,18 @@ class EKFArrivalCost(object):
         # Substitute non-free parameters in expressions for their values
         DAE = casadi.substitute(self._dae, par_vars, par_vals)
         # Defines the DAEResidual Function
-        self.Fdae = casadi.MXFunction([self._mvar_struct["time"], 
+        self.Fdae = casadi.Function('Fdae', [self._mvar_struct["time"], 
                                        self._mvar_struct["dx"],
                                        self._mvar_struct["x"], 
                                        self._mvar_struct["c"],
                                        self._mvar_struct["u"]], 
                                        DAE)
 
-        self.Fdae.init()
         # Define derivatives
         self.dF_dxdot = self.Fdae.jacobian(1,0)
-        self.dF_dxdot.init()
         self.dF_dx = self.Fdae.jacobian(2,0)
-        self.dF_dx.init()
         self.dF_dc = self.Fdae.jacobian(3,0)
-        self.dF_dc.init()
         self.dF_du = self.Fdae.jacobian(4,0)
-        self.dF_du.init()
     
     def recalculate_jacobian_functions(self):
         """
@@ -249,22 +244,17 @@ class EKFArrivalCost(object):
         # Substitute non-free parameters in expressions for their values
         DAE = casadi.substitute(self._dae, par_vars, par_vals)
         # Defines the DAEResidual Function
-        self.Fdae = casadi.MXFunction([self._mvar_struct["time"], 
+        self.Fdae = casadi.Function('Fdae', [self._mvar_struct["time"], 
                                        self._mvar_struct["dx"],
                                        self._mvar_struct["x"], 
                                        self._mvar_struct["c"],
                                        self._mvar_struct["u"]], 
                                        DAE)
-        self.Fdae.init()
         # Define derivatives
         self.dF_dxdot = self.Fdae.jacobian(1,0)
-        self.dF_dxdot.init()
         self.dF_dx = self.Fdae.jacobian(2,0)
-        self.dF_dx.init()
         self.dF_dc = self.Fdae.jacobian(3,0)
-        self.dF_dc.init()
         self.dF_du = self.Fdae.jacobian(4,0)
-        self.dF_du.init()
     
     def update_process_noise_covariance_matrix(self, process_noise_cov):
         """
@@ -396,23 +386,16 @@ class EKFArrivalCost(object):
 
         # Set inputs
         var_kinds = ["time"] + var_kinds
+        input_list = []
         for i,varType in enumerate(var_kinds):
-            self.dF_dxdot.setInput(RefPoint[varType],i)
-            self.dF_dx.setInput(RefPoint[varType],i)
-            self.dF_dc.setInput(RefPoint[varType],i)
-            self.dF_du.setInput(RefPoint[varType],i)
-
-        # Evaluate derivatives
-        self.dF_dxdot.evaluate()
-        self.dF_dx.evaluate()
-        self.dF_dc.evaluate()
-        self.dF_du.evaluate()
+            input_list.append(RefPoint[varType])
+            
 
         # Store result in Matrices
-        E = self.dF_dxdot.getOutput()
-        A = -self.dF_dx.getOutput()
-        B = -self.dF_du.getOutput()
-        C = -self.dF_dc.getOutput()
+        E = self.dF_dxdot.call(input_list)[0]
+        A = -self.dF_dx.call(input_list)[0]
+        B = -self.dF_du.call(input_list)[0]
+        C = -self.dF_dc.call(input_list)[0]
         
         return E, A, B, C
     

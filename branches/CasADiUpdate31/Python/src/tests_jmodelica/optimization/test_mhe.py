@@ -543,22 +543,22 @@ class TestMHE:
         (E, A, B, C) = \
                 MHE_object.EKF_object._evaluate_jacobian_functions(z0, t)
         
-        assert(N.abs(A.toArray() - N.array([[-0.0166822, -1.1904],
+        assert(N.abs(N.array(A) - N.array([[-0.0166822, -1.1904],
                                             [0.00348651, 0.214034]])) \
                                             <= small).all() == True
 
-        assert(N.abs(B.toArray() - N.array([[0.], [0.034986]])) \
+        assert(N.abs(N.array(B) - N.array([[0.], [0.034986]])) \
                                             <= small).all() == True
-        assert(N.abs(C.toArray() - N.array([[]])) <= small).all() == True
+        assert(N.abs(N.array(C) - N.array([[]])) <= small).all() == True
 
-        assert(N.abs(E.toArray() - N.array([[1., 0.], 
+        assert(N.abs(N.array(E) - N.array([[1., 0.], 
                                             [0., 1.]])) \
                                             <= small).all() == True
 
         
         (A, B, C, G) = MHE_object.EKF_object._calculate_A_B_C_and_G(A, B, C, E)
         
-        assert(N.abs(A.toArray() - N.array([[-0.0166822, -1.1904],
+        assert(N.abs(N.array(A) - N.array([[-0.0166822, -1.1904],
                                             [0.00348651, 0.214034]])) \
                                             <= small).all() == True
                                   
@@ -601,18 +601,18 @@ class TestMHE:
         small = 1e-4
         E, A, B, C = \
                 MHE_object.EKF_object._evaluate_jacobian_functions(z0, t)
-        assert(N.abs(A.toArray() - N.array([[0., -1.],
+        assert(N.abs(N.array(A) - N.array([[0., -1.],
                                             [1., 0.]])) \
                                             <= small).all() == True
-        assert(N.abs(B.toArray() - N.array([[1.], [0.]])) \
+        assert(N.abs(N.array(B) - N.array([[1.], [0.]])) \
                                             <= small).all() == True
-        assert(N.abs(C.toArray() - N.array([[]])) <= small).all() == True
-        assert(N.abs(E.toArray() - N.array([[1., 0.], 
+        assert(N.abs(N.array(C) - N.array([[]])) <= small).all() == True
+        assert(N.abs(N.array(E) - N.array([[1., 0.], 
                                             [0., 1.]])) \
                                             <= small).all() == True
         
         A, B, C, G = MHE_object.EKF_object._calculate_A_B_C_and_G(A, B, C, E)
-        assert(N.abs(A.toArray() - N.array([[0., -1.],
+        assert(N.abs(N.array(A) - N.array([[0., -1.],
                                             [1., 0.]])) \
                                             <= small).all() == True                      
         assert(N.abs(B - N.array([[1.],[0.]])) \
@@ -652,25 +652,25 @@ class TestMHE:
         small = 1e-4
         E, A, B, C = \
                 MHE_object.EKF_object._evaluate_jacobian_functions(z0, t)        
-        assert(N.abs(A.toArray() - N.array([[-192., 0., 0.],
+        assert(N.abs(N.array(A) - N.array([[-192., 0., 0.],
                                             [0., 0., -3.],
                                             [0., 0., 0.],
                                             [2., 0., 0.],
                                             [0., 1., 0.]])) \
                                             <= small).all() == True
-        assert(N.abs(B.toArray() - N.array([[ 0.,  1.,  0.,  0.],
+        assert(N.abs(N.array(B) - N.array([[ 0.,  1.,  0.,  0.],
                                             [ 1.,  0.,  0.,  1.],
                                             [ 0.,  0.,  0.,  0.],
                                             [ 0.,  0.,  0.,  0.],
                                             [ 0.,  0., -1.,  0.]])) \
                                             <= small).all() == True
-        assert(N.abs(C.toArray() - N.array([[ 0.,  0.],
+        assert(N.abs(N.array(C) - N.array([[ 0.,  0.],
                                             [ 0.,  0.],
                                             [ 0., -1.],
                                             [-1.,  0.],
                                             [ 0., -1.]])) \
                                             <= small).all() == True
-        assert(N.abs(E.toArray() - N.array([[ 1.,  0.,  0.],
+        assert(N.abs(N.array(E) - N.array([[ 1.,  0.,  0.],
                                             [ 0.,  0.,  1.],
                                             [ 0.,  1.,  0.],
                                             [ 0.,  0.,  0.],
@@ -678,7 +678,7 @@ class TestMHE:
                                             <= small).all() == True
         
         A, B, C, G = MHE_object.EKF_object._calculate_A_B_C_and_G(A, B, C, E)
-        assert(N.abs(A.toArray() - N.array([[-192.,    0.,    0.],
+        assert(N.abs(N.array(A) - N.array([[-192.,    0.,    0.],
                                              [   0.,    0.,   -3.],
                                              [   0.,    0.,    0.]])) \
                                              <= small).all() == True                      
