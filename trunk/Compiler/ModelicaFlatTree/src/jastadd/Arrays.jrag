@@ -2176,32 +2176,47 @@ aspect Arrays {
 		return res;
 	}
 
-	eq FRangeExp.getArray() {
-		//log.debug("FRangeExp.getArray(): size = " + size().get(0));
-		Array array = new Array(indices());
-		if (type().isReal()) {
-			double i1 = getFExp(0).ceval().realValue();
-			double i2 = 1.0;
-			if (hasStep()) 
-				i2 = getFExp(1).ceval().realValue();
-			for (Index i : array.indices()) { 
-				array.set(i, new FRealLitExp(i1));
-				i1 += i2;
-			}
-		} else {
-			int i1 = getFExp(0).ceval().intValue();
-			int i2 = 1;
-			if (hasStep()) 
-				i2 = getFExp(1).ceval().intValue();
-			for (Index i : array.indices()) { 
-				array.set(i, type().createLiteral(i1));
-				i1 += i2;
-			}
-		}
-		
-		return array;
-	}
-	
+     eq FRangeExp.getArray() {
+        try {
+            return evaluatedArray();
+        } catch (ConstantEvaluationException e) {
+            
+        }
+
+        Array array = new Array(indices());
+        for (Index i : array.indices()) {
+            FExp offset = new FMulExp(
+                    new FIntegerLitExp(i.first()-1),
+                    hasStep() ? getFExp(1).treeCopy() : type().createLiteral(1));
+            array.set(i, new FAddExp(getFExp(0).treeCopy(), offset));
+        }
+        return array;
+    }
+
+    syn Array FRangeExp.evaluatedArray() {
+        Array array = new Array(indices());
+        if (type().isReal()) {
+            double i1 = getFExp(0).ceval().realValue();
+            double i2 = 1.0;
+            if (hasStep()) 
+                i2 = getFExp(1).ceval().realValue();
+            for (Index i : array.indices()) { 
+                array.set(i, new FRealLitExp(i1));
+                i1 += i2;
+            }
+        } else {
+            int i1 = getFExp(0).ceval().intValue();
+            int i2 = 1;
+            if (hasStep()) 
+                i2 = getFExp(1).ceval().intValue();
+            for (Index i : array.indices()) { 
+                array.set(i, type().createLiteral(i1));
+                i1 += i2;
+            }
+        }
+        return array;
+    }
+
 	eq FLinspace.getArray() {
 		int n = size().get(0);
 		FExp len = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());

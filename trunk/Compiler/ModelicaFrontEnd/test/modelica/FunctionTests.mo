@@ -7155,6 +7155,43 @@ end FunctionTests.ArrayExpInFunc47;
 ")})));
 end ArrayExpInFunc47;
 
+model ArrayExpInFunc48
+    function f
+        input Integer x;
+        output Integer[:] y = x:x;
+        algorithm
+        annotation(Inline=false);
+    end f;
+    Integer[:] y = f(2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc48",
+            description="",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc48
+ discrete Integer y[1];
+initial equation
+ pre(y[1]) = 0;
+equation
+ ({y[1]}) = FunctionTests.ArrayExpInFunc48.f(2);
+
+public
+ function FunctionTests.ArrayExpInFunc48.f
+  input Integer x;
+  output Integer[:] y;
+ algorithm
+  init y as Integer[1];
+  y[1] := x;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc48.f;
+
+end FunctionTests.ArrayExpInFunc48;
+")})));
+end ArrayExpInFunc48;
+
 
 model ArrayOutputScalarization1
  function f
