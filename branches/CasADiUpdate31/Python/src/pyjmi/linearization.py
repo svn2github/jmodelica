@@ -818,33 +818,6 @@ def linearize_dae_with_simresult(optProblem, t0, sim_result):
     
     # Set inputs
     var_kinds = ["time"] + var_kinds
-
-    #~ for i,varType in enumerate(var_kinds):    
-        #~ dF_dt.setInput(RefPoint[varType],i)
-        #~ dF_dxdot.setInput(RefPoint[varType],i)
-        #~ dF_dx.setInput(RefPoint[varType],i)
-        #~ dF_dw.setInput(RefPoint[varType],i)
-        #~ dF_du.setInput(RefPoint[varType],i)
-        #~ dF_dp.setInput(RefPoint[varType],i)
-        #~ Fdae.setInput(RefPoint[varType],i)
-    
-    #~ # Evaluate derivatives
-    #~ dF_dt.evaluate()
-    #~ dF_dxdot.evaluate()
-    #~ dF_dx.evaluate()
-    #~ dF_dw.evaluate()
-    #~ dF_du.evaluate()
-    #~ dF_dp.evaluate()
-    #~ Fdae.evaluate()
-    
-    #~ # Store result in Matrices
-    #~ D = -dF_dt.getOutput()[0]
-    #~ E = dF_dxdot.getOutput()
-    #~ A = -dF_dx.getOutput()
-    #~ B = -dF_du.getOutput()
-    #~ C = -dF_dw.getOutput()
-    #~ h = Fdae.getOutput()
-    #~ G = -dF_dp.getOutput() 
     
     input_list = []
     for i,varType in enumerate(var_kinds):
