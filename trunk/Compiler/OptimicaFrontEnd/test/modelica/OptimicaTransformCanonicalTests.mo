@@ -37,7 +37,7 @@ package OptimicaTransformCanonicalTests
   	x2 = x3^2;
   	x3 = x4/p1;
   	x4 = p1/x5;
-  	x5 = x6-x6;
+  	x5 = x6-2*x6;
   	x6 = sin(x7);
 	x7 = x8*p2;
 	x1 = 1;
