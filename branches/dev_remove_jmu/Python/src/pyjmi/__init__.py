@@ -16,10 +16,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 The JModelica.org Python package for working with simulation and optimization of
-JMUs <http:/www.jmodelica.org/>
+FMUs <http:/www.jmodelica.org/>
 """
 
-__all__ = ['common', 'initialization', 'optimization', 'simulation', 'examples', 'casadi_interface', 'linearization', 'jmi', 'jmi_algorithm_drivers', 'symbolic_elimination', 'logger_util', 'log', 'ukf']
+__all__ = ['common', 'initialization', 'optimization', 'examples', 'casadi_interface', 'linearization', 'symbolic_elimination', 'logger_util', 'log', 'ukf']
 
 __version__=''
 
@@ -66,8 +66,6 @@ try:
 except:
     ipopt_present = False
     
-#Import the model class allowing for users to type: from pyjmi import JMUModel
-from jmi import JMUModel
 #Import the model class allowing for users to type: from pyjmi import CasadiModel
 try:
     import casadi
