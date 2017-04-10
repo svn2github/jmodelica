@@ -19,7 +19,6 @@
 AC_PREREQ(2.61)
 AC_INIT([jmodelica.org], 0.0.0, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -416,12 +415,6 @@ AS_IF([test "x$with_ipopt" != xno],
       [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"])  
 AC_SUBST(jmilib)
 
-#jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
-AS_IF([test "x$with_ipopt" != xno],
-      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad"], 
-      [jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad"])  
-AC_SUBST(jmi_cppadlib)
-
 AC_PATH_PROG([ANT], [ant], [])
 AC_SUBST(ANT_OPTS)
 ANT_OPTS="ANT_OPTS=-Xmx2g"
@@ -499,8 +492,6 @@ AC_CONFIG_FILES([
  ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile
  external/FMILibrary/Makefile
- JMI/src/Makefile
- JMI/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
  Python/Makefile

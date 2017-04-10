@@ -188,7 +188,6 @@ includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 ipoptlib = @ipoptlib@
-jmi_cppadlib = @jmi_cppadlib@
 jmilib = @jmilib@
 libdir = @libdir@
 libexecdir = @libexecdir@
@@ -223,9 +222,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Python/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu Python/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign Python/Makefile
+	  $(AUTOMAKE) --gnu Python/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

@@ -575,7 +575,6 @@ PACKAGE_STRING='jmodelica.org 0.0.0'
 PACKAGE_BUGREPORT='BUG-REPORT-ADDRESS'
 PACKAGE_URL=''
 
-ac_unique_file="JMI/src/jmi.h"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -634,7 +633,6 @@ HAVE_ANT_FALSE
 HAVE_ANT_TRUE
 ANT_OPTS
 ANT
-jmi_cppadlib
 jmilib
 ipoptlib
 WITH_CPPAD
@@ -3032,7 +3030,6 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 AMTAR=${AMTAR-"${am_missing_run}tar"}
 
 am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
-
 
 
 
@@ -19427,14 +19424,6 @@ else
 fi
 
 
-#jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad";
-if test "x$with_ipopt" != xno; then :
-  jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad"
-else
-  jmi_cppadlib="-L\$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad"
-fi
-
-
 # Extract the first word of "ant", so it can be a program name with args.
 set dummy ant; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -19855,7 +19844,7 @@ REQUIRE_OPTIMICA_COMPILER=True
 
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
 
 
 cat >confcache <<\_ACEOF
@@ -21108,8 +21097,6 @@ do
     "ThirdParty/Minpack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minpack/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
     "external/FMILibrary/Makefile") CONFIG_FILES="$CONFIG_FILES external/FMILibrary/Makefile" ;;
-    "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;
-    "JMI/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/Makefile" ;;
     "Python/jm_ipython.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_ipython.sh" ;;
     "Python/jm_python.sh") CONFIG_FILES="$CONFIG_FILES Python/jm_python.sh" ;;
     "Python/Makefile") CONFIG_FILES="$CONFIG_FILES Python/Makefile" ;;
