@@ -21,8 +21,7 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-from pymodelica import compile_jmu, compile_fmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
 from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
@@ -126,106 +125,7 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.show()
         
-    # Compile and load opt model
-    jmu_name = compile_jmu("Crystallizer.OptCrystallizer",
-                           os.path.join(curr_dir, "files", "Crystallizer.mop"),
-                           compiler_options={"enable_variable_scaling":True})
-    crys_opt = JMUModel(jmu_name)
-
-    # Set optimization options
-    opt_opts = crys_opt.optimize_options()
-
-    n_e = 20
-    opt_opts['n_e'] = n_e 
-    opt_opts['init_traj'] = res.result_data
-    opt_opts['blocking_factors'] = N.ones(n_e,dtype=int)
-    opt_opts['IPOPT_options']['max_iter'] = 1000
-    opt_opts['IPOPT_options']['tol'] = 1e-3
-    opt_opts['IPOPT_options']['dual_inf_tol'] = 1e-3
     
-    # Run optimization
-    res_opt = crys_opt.optimize(options=opt_opts)
-    
-    # Get result data
-    time = res_opt['time']
-    Ls = res_opt['c.Ls']
-    Nc = res_opt['c.Nc']
-    L = res_opt['c.L']
-    Ac = res_opt['c.Ac']
-    Vc = res_opt['c.Vc']
-    Mc = res_opt['c.Mc']
-    Cc = res_opt['c.Cc']
-    Tc = res_opt['c.Tc']
-    
-    Teq = res_opt['c.Teq']
-    deltaT = res_opt['c.deltaT']
-    Cbar = res_opt['c.Cbar']
-    
-    Tj = res_opt['c.Tj']
-    
-    assert N.abs(res_opt.final('c.Tj') - 10.0) < 1e-3
-
-    if with_plots:
-        plt.figure(1)
-        plt.subplot(2,1,1)
-        plt.hold(True)
-        plt.plot(time,Ls)
-        plt.subplot(2,1,2)
-        plt.hold(True)
-        plt.plot(time,Tj,'x-')
-        
-        plt.figure(2)
-        plt.subplot(4,1,1)
-        plt.hold(True)
-        plt.plot(time,Nc)
-        plt.title('Nc')
-        plt.subplot(4,1,2)
-        plt.hold(True)
-        plt.plot(time,L)
-        plt.title('L')
-        plt.subplot(4,1,3)
-        plt.hold(True)
-        plt.plot(time,Ac)
-        plt.title('Ac')
-        plt.subplot(4,1,4)
-        plt.hold(True)
-        plt.plot(time,Vc)
-        plt.title('Vc')
-        
-        plt.figure(3)
-        plt.subplot(4,1,1)
-        plt.hold(True)
-        plt.plot(time,Mc)
-        plt.title('Mc')
-        plt.subplot(4,1,2)
-        plt.hold(True)
-        plt.plot(time,Cc)
-        plt.title('Cc')
-        plt.subplot(4,1,3)
-        plt.hold(True)
-        plt.plot(time,Tc)
-        plt.title('Tc')
-        plt.subplot(4,1,4)
-        plt.hold(True)
-        plt.plot(time,Teq)
-        plt.title('Teq')
-        plt.show()
-        
-        plt.figure(4)
-        plt.subplot(4,1,1)
-        plt.hold(True)
-        plt.plot(time,deltaT)
-        plt.title('deltaT')
-        plt.subplot(4,1,2)
-        plt.hold(True)
-        plt.plot(time,Cbar)
-        plt.title('Cbar')
-        plt.subplot(4,1,3)
-        plt.hold(True)
-        plt.plot(time,Teq-Tc)
-        plt.title('Teq-Tc')
-        
-        plt.show()
             
 if __name__ == "__main__":
     run_demo()

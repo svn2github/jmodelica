@@ -33,7 +33,7 @@ def run_demo(with_plots=True):
     model_name = 'SecondOrder'
     mofile = curr_dir+'/files/SecondOrder.mo'
 
-    # Compile the Modelica model to JMU
+    # Compile the Modelica model to FMU
     fmu_name = compile_fmu(model_name,mofile)
 
     # Load the dynamic library and XML data
