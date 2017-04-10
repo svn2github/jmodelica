@@ -130,12 +130,6 @@ $C_ode_guards_init$
     return 0;
 }
 
-static int model_ode_initialize_dir_der(jmi_t* jmi) {
-    int ef = 0;
-    /* This function is not needed - no derivatives of the initialization system is exposed.*/
-    return ef;
-}
-
 static int model_dae_F(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_equation_residuals$
     return 0;
@@ -154,11 +148,6 @@ $C_DAE_initial_equation_residuals$
 static int model_init_F1(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_guess_equation_residuals$
     return 0;
-}
-
-static int model_init_Fp(jmi_t* jmi, jmi_real_t** res) {
-    /* C_DAE_initial_dependent_parameter_residuals */
-    return -1;
 }
 
 static int model_init_delay(jmi_t* jmi) {

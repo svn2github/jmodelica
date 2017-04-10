@@ -119,14 +119,14 @@ aspect OptimicaCompilationHelpers {
     //Overshadowing the use of templates in case of optimization.
     refine CompilationHelpers private String Templates.getCTemplateName(FClass fc) {
         if (fc != null && fc instanceof FOptClass)
-            return (type == ModelicaCompiler.TargetType.JMU) ? "jmi_optimica_template.c" : null;
+            return null;
         else
             return template(C);
     }
     
     //Overshadowing the use of XMLgenerator in case of optimization.
     refine CompilationHelpers public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
-        if (fc instanceof FOptClass && (this == JMI || this == FMIX))
+        if (fc instanceof FOptClass && (this == FMIX))
             return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
         else
             return refined(fc);

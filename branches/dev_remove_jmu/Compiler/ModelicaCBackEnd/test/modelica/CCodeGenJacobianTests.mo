@@ -313,7 +313,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 1)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 9;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -324,7 +324,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_3_2;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
-        JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1)
+        JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1)
             jmi_real_t* Q1 = calloc(2, sizeof(jmi_real_t));
             jmi_real_t* Q2 = calloc(2, sizeof(jmi_real_t));
             jmi_real_t* Q3 = residual;
@@ -334,7 +334,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             double beta = 1;
             int n1 = 2;
             int n2 = 1;
-            JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1, 4)
+            JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1, 4)
             memcpy(&jmi_array_ref_1(tmp_2, 1), &_p1_1_6, 4 * sizeof(jmi_real_t));
             Q1[0] = - func_CCodeGenJacobianTests_SparseBlockJacobian_Simple2_F_exp0(tmp_2);
             for (i = 0; i < 2; i += 2) {
@@ -351,7 +351,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_3_2 = x[0];
         }
-        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 1, 4)
+        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 1, 4)
         memcpy(&jmi_array_ref_1(tmp_1, 1), &_p1_1_6, 4 * sizeof(jmi_real_t));
         _x_1_0 = _b_2_4 - func_CCodeGenJacobianTests_SparseBlockJacobian_Simple2_F_exp0(tmp_1) * _x_3_2;
         _x_2_1 = _b_1_3 - 2 * _x_1_0;
@@ -421,8 +421,8 @@ void L_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[2] = -1.0;
 }
 void A12_0_eval(jmi_t *jmi, jmi_real_t **jac) {
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1, 4)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1, 4)
     memcpy(&jmi_array_ref_1(tmp_2, 1), &_p1_1_6, 4 * sizeof(jmi_real_t));
     (*jac)[0] = - func_CCodeGenJacobianTests_SparseBlockJacobian_Simple2_F_exp0(tmp_2);
 }

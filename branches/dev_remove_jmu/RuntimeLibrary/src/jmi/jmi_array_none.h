@@ -96,15 +96,6 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
         JMI_DYNAMIC_ADD_POINTER(name->var)\
     }
 
-#define JMI_ARRAY_DECL_STATREAL(type, arr, name, ne, nd) \
-    JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd)
-#define JMI_ARRAY_DECL_DYNAREAL(type, arr, name, ne, nd) \
-    JMI_ARRAY_DECL_DYNA(type, arr, name, ne, nd)
-#define JMI_ARRAY_INIT_STATREAL(type, arr, name, ne, nd) \
-    JMI_ARRAY_INIT_STAT(type, arr, name, ne, nd)
-#define JMI_ARRAY_INIT_DYNAREAL(type, arr, name, ne, nd) \
-    JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd)
-
 #define JMI_ARRAY_INIT_1(dyn, type, arr, name, ne, nd, d1) \
     JMI_ARRAY_INIT(dyn, type, arr, name, ne, nd) \
     name->size[0] = (int) (d1);

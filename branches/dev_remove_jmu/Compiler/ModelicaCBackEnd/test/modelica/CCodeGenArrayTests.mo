@@ -42,8 +42,8 @@ model UnknownSizeInEquation1
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
-    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
+    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
     func_CCodeGenArrayTests_UnknownSizeInEquation1_f_def1(_time, tmp_1);
     _y_0 = func_CCodeGenArrayTests_UnknownSizeInEquation1_mysum_exp0(tmp_1);
     JMI_DYNAMIC_FREE()
@@ -78,16 +78,16 @@ model UnknownSizeInEquation2
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
-    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_2, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_2, -1, 1)
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(2)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (_sw(0)) {
-        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
+        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
         func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time, tmp_1);
     } else {
-        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_2, floor(_time + AD_WRAP_LITERAL(1)), 1, floor(_time + AD_WRAP_LITERAL(1)))
+        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_2, floor(_time + AD_WRAP_LITERAL(1)), 1, floor(_time + AD_WRAP_LITERAL(1)))
         func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time + AD_WRAP_LITERAL(1), tmp_2);
     }
     _y_0 = func_CCodeGenArrayTests_UnknownSizeInEquation2_mysum_exp0(COND_EXP_EQ(_sw(0), JMI_TRUE, tmp_1, tmp_2));
@@ -128,9 +128,9 @@ model UnknownSizeInEquation3
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
     _m_t_0 = _time;
-    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_m_t_0), 1, floor(_m_t_0))
+    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_m_t_0), 1, floor(_m_t_0))
     func_CCodeGenArrayTests_UnknownSizeInEquation3_m_f_def1(_m_t_0, tmp_1);
     _m_y_1 = func_CCodeGenArrayTests_UnknownSizeInEquation3_m_mysum_exp0(tmp_1);
     JMI_DYNAMIC_FREE()
@@ -166,8 +166,8 @@ model UnknownSizeInEquation4
 int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
-    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_p_0), 1, floor(_p_0))
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
+    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_p_0), 1, floor(_p_0))
     func_CCodeGenArrayTests_UnknownSizeInEquation4_f_def1(_p_0, tmp_1);
     _y_1 = (func_CCodeGenArrayTests_UnknownSizeInEquation4_mysum_exp0(tmp_1));
     JMI_DYNAMIC_FREE()
@@ -205,8 +205,8 @@ void func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(jmi_ad_var_t x_v, jmi_ad_
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     JMI_RECORD_STATIC(R_0_r, r_v)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     r_v->x = tmp_1;
     y_v = x_v;
     r_v->n = 3;

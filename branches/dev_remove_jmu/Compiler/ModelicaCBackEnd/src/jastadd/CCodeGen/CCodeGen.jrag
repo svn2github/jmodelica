@@ -1072,8 +1072,7 @@ aspect CCodeGen {
         
         
         protected String dynStr(FType type) {
-            // Note: The "REAL" part here is only relevant in JMU/cppad
-            return (dynamic() ? "DYNA" : "STAT") + (type.isReal() ? "REAL" : "");
+            return (dynamic() ? "DYNA" : "STAT");
         }
         
         public void print(FType type) {
@@ -1513,8 +1512,7 @@ aspect CCodeGen {
             if (size().isUnknown() || external) {
                 printDecl_C(p, str, indent, name, src, external);
             } else {
-                String type = "STAT" + (isReal() ? "REAL" : "");
-                str.format("%sJMI_ARR(%s, %s, %s, %s, ", indent, type,
+                str.format("%sJMI_ARR(STAT, %s, %s, %s, ", indent,
                         nameScalar_C(external), nameArray_C(external), name);
                 size().printNumElements_C(p, str, indent, src);
                 str.print(", ");
