@@ -311,19 +311,18 @@ class Component(object):
             mx_vars, 
             [casadi.vertcat(*self.eq_expr)]
         )
-        jac_f = casadi.Function('jac_f', mx_vars, 
-                                [casadi.transpose(res_f.jac())])
-        sp = jac_f.jacSparsity()
+        jac_f = res_f.jacobian()
+        sp = jac_f.sparsity_jac()
         is_linear = sp.nnz() == 0
 
         # Identify nonlinear edges
-        [rows, cols] = map(np.array, sp.getTriplet())
+        [rows, cols] = map(np.array, sp.get_triplet())
         rows = rows / self.n
         for (row, col) in itertools.izip(rows, cols):
             found_edges = 0
             for edge in edges:
-                if (casadi.isEqual(self.eq_expr[row], edge.eq.expression) and
-                    casadi.isEqual(self.mx_vars[col], edge.var.mx_var)):
+                if (casadi.is_equal(self.eq_expr[row], edge.eq.expression) and
+                    casadi.is_equal(self.mx_vars[col], edge.var.mx_var)):
                     edge.linear = False
                     found_edges += 1
             if found_edges != 1:
@@ -357,34 +356,29 @@ class Component(object):
         """
         if not self.solvable:
             raise RuntimeError("Can only create linear equation system for solvable blocks.")
-        res = casadi.vertcat(self.eq_expr)
+        res = casadi.vertcat(*self.eq_expr)
         all_vars = self.mx_vars + known_vars + solved_vars
-        res_f = casadi.MXFunction(all_vars , [res])
-        res_f.setOption("name", "block_residual_for_creating_linear_eq")
-        res_f.init()
+        res_f = casadi.Function(
+            'block_residual_for_creating_linear_eq', 
+            all_vars , 
+            [res]
+        )
 
         # Create coefficient function
         A = []
         for i in xrange(self.n):
+            # Block jacobian
             jac_f = res_f.jacobian(i)
-            jac_f.setOption("name", "block_jacobian")
-            jac_f.init()
             A.append(jac_f.call(all_vars, self.options['inline'])[0])
-        self.A_fcn = casadi.MXFunction(all_vars, [casadi.horzcat(A)])
-        self.A_fcn.setOption("name", "A")
-        self.A_fcn.init()
+        self.A_fcn = casadi.Function('A', all_vars, [casadi.horzcat(*A)])
         if self.options['closed_form']:
-            self.A_fcn = casadi.SXFunction(self.A_fcn)
-            self.A_fcn.init()
+            self.A_fcn = casadi.Function('A', self.A_fcn)
 
         # Create right-hand side function
-        rhs = casadi.mul(self.A_fcn.call(all_vars, self.options['inline'])[0], casadi.vertcat(self.mx_vars)) - res
-        self.b_fcn = casadi.MXFunction(all_vars + tear_vars, [rhs])
-        self.b_fcn.setOption("name", "b")
-        self.b_fcn.init()
+        rhs = casadi.mtimes(self.A_fcn.call(all_vars, self.options['inline'])[0], casadi.vertcat(*self.mx_vars)) - res
+        self.b_fcn = casadi.Function('b', all_vars + tear_vars, [rhs])
         if self.options['closed_form']:
-            self.b_fcn = casadi.SXFunction(self.b_fcn)
-            self.b_fcn.init()
+            self.b_fcn = casadi.Function('b', self.b_fcn)
 
         # TODO: Remove this
         self.A_sym = A
@@ -404,7 +398,7 @@ class Component(object):
         """
         if not self.solvable or not self.linear or not self.torn:
             raise RuntimeError("Can only create torn linear equation system for solvable, linear, torn blocks.")
-        res = casadi.vertcat(self.eq_expr)
+        res = casadi.vertcat(*self.eq_expr)
         all_vars = self.mx_vars + known_vars + solved_vars
 
         # Sort causal and tearing equations
@@ -447,8 +441,8 @@ class Component(object):
                                "Additional tearing variables needed.")
 
         # Compose component equations and variables
-        causal_eq_expr = casadi.vertcat([comp.eq_expr[0] for comp in causal_graph.components])
-        tearing_eq_expr = casadi.vertcat([tearing_eq.expression for tearing_eq in tearing_equations])
+        causal_eq_expr = casadi.vertcat(*[comp.eq_expr[0] for comp in causal_graph.components])
+        tearing_eq_expr = casadi.vertcat(*[tearing_eq.expression for tearing_eq in tearing_equations])
         self.causalized_vars = causalized_vars = [comp.variables[0] for comp in causal_graph.components]
         causal_mx_vars = [comp.mx_vars[0] for comp in causal_graph.components]
         tearing_mx_vars = [var.mx_var for var in tearing_variables]
@@ -459,20 +453,17 @@ class Component(object):
         eq_sys["B"] = casadi.horzcat([casadi.jacobian(causal_eq_expr, var) for var in tearing_mx_vars])
         eq_sys["C"] = casadi.horzcat([casadi.jacobian(tearing_eq_expr, var) for var in causal_mx_vars])
         eq_sys["D"] = casadi.horzcat([casadi.jacobian(tearing_eq_expr, var) for var in tearing_mx_vars])
-        eq_sys["a"] = (casadi.mul(eq_sys["A"], casadi.vertcat(causal_mx_vars)) +
-                       casadi.mul(eq_sys["B"], casadi.vertcat(tearing_mx_vars)) - causal_eq_expr)
-        eq_sys["b"] = (casadi.mul(eq_sys["C"], casadi.vertcat(causal_mx_vars)) +
-                       casadi.mul(eq_sys["D"], casadi.vertcat(tearing_mx_vars)) - tearing_eq_expr)
+        eq_sys["a"] = (casadi.mtimes(eq_sys["A"], casadi.vertcat(*causal_mx_vars)) +
+                       casadi.mtimes(eq_sys["B"], casadi.vertcat(*tearing_mx_vars)) - causal_eq_expr)
+        eq_sys["b"] = (casadi.mtimes(eq_sys["C"], casadi.vertcat(*causal_mx_vars)) +
+                       casadi.mtimes(eq_sys["D"], casadi.vertcat(*tearing_mx_vars)) - tearing_eq_expr)
 
         # Create functions for evaluating equation system components
         self.fcn = {}
         for alpha in ["A", "B", "C", "D", "a", "b"]:
-            fcn = casadi.MXFunction(all_vars, [eq_sys[alpha]])
-            fcn.setOption("name", alpha)
-            fcn.init()
+            fcn = casadi.Function(alpha, all_vars, [eq_sys[alpha]])
             if self.options['closed_form']:
-                fcn = casadi.SXFunction(fcn)
-                fcn.init()
+                fcn = casadi.Function(alpha, fcn)
             self.fcn[alpha] = fcn
 
     def tear_nonlin_eq(self, known_vars, solved_vars, matches, global_index):
@@ -497,7 +488,7 @@ class Component(object):
         """
         if not self.block_tear_vars:
             raise RuntimeError("Torn block has no tearing variables (bug?)")
-        res = casadi.vertcat(self.eq_expr)
+        res = casadi.vertcat(*self.eq_expr)
         all_vars = self.mx_vars + known_vars + solved_vars
 
         # Sort causal and tearing equations
@@ -1263,15 +1254,15 @@ class BLTModel(object):
                         Ainv = casadi.solve(A, I) # TODO: Is it better to solve twice instead?
                     else:
                         Ainv = casadi.solve(A, I, options['linear_solver']) # TODO: Is it better to solve twice instead?
-                    CAinv = casadi.mul(C, Ainv)
+                    CAinv = casadi.mtimes(C, Ainv)
                     if options['closed_form']:
-                        torn_sol = casadi.solve(D - casadi.mul(CAinv, B),
-                                                b - casadi.mul(CAinv, a))
+                        torn_sol = casadi.solve(D - casadi.mtimes(CAinv, B),
+                                                b - casadi.mtimes(CAinv, a))
                     else:
-                        torn_sol = casadi.solve(D - casadi.mul(CAinv, B),
-                                                b - casadi.mul(CAinv, a), options['linear_solver'])
-                    causal_sol = casadi.mul(Ainv, a - casadi.mul(B, torn_sol))
-                    sol = casadi.vertcat([causal_sol, torn_sol])
+                        torn_sol = casadi.solve(D - casadi.mtimes(CAinv, B),
+                                                b - casadi.mtimes(CAinv, a), options['linear_solver'])
+                    causal_sol = casadi.mtimes(Ainv, a - casadi.mtimes(B, torn_sol))
+                    sol = casadi.vertcat(*[causal_sol, torn_sol])
 
                     # Store causal solution
                     for (i, var) in enumerate(co.causalized_vars + co.block_tear_vars):
@@ -1314,7 +1305,7 @@ class BLTModel(object):
                         
                     # Solve
                     if options['closed_form']:
-                        sol = casadi.mul(casadi.inv(A), b)
+                        sol = casadi.mtimes(casadi.inv(A), b)
                         sol = casadi.simplify(sol)
                     else:
                         sol = casadi.solve(A, b, options['linear_solver'])
@@ -1378,7 +1369,7 @@ class BLTModel(object):
                                 
                             # Solve
                             if options['closed_form']:
-                                sol = casadi.mul(casadi.inv(A), b)
+                                sol = casadi.mtimes(casadi.inv(A), b)
                                 casadi.simplify(sol)
                             else:
                                 sol = casadi.solve(A, b, options['linear_solver'])
@@ -1405,10 +1396,9 @@ class BLTModel(object):
                             explicit_unsolved_algebraics.extend([var.mvar for var in causal_co.variables
                                                                  if not var.is_der])
                             explicit_unsolved_vars.extend(causal_co.mx_vars)
-                            res = casadi.vertcat(causal_co.eq_expr)
+                            res = casadi.vertcat(*causal_co.eq_expr)
                             all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
-                            res_f = casadi.MXFunction(all_vars , [res])
-                            res_f.init()
+                            res_f = casadi.Function('res_f', all_vars , [res])
                             if options['closed_form']:
                                 explicit_unsolved_sx_vars.extend(causal_co.sx_vars)
                                 sx_res = casadi.SXFunction(res_f)
@@ -1430,20 +1420,17 @@ class BLTModel(object):
                         res = casadi.vertcat([eq.expression for eq in co.block_tear_res])
                         co.tear_mx_vars = tear_mx_vars = [var.mx_var for var in co.block_tear_vars]
                         all_vars = tear_mx_vars + known_vars + solved_vars
-                        res_f = casadi.MXFunction(all_vars , [res])
-                        res_f.init()
-                        sx_res = casadi.SXFunction(res_f)
-                        sx_res.init()
+                        res_f = casadi.Function('res_f', all_vars , [res])
+                        sx_res = casadi.Function(res_f)
                         residuals.extend(sx_res.call(tear_mx_vars + known_vars + solved_expr, True))
 
                         raise NotImplementedError
                         #~ solved_expr.extend(co.sx_vars) # Need to figure out what do here
                     else:
-                        res = casadi.vertcat([eq.expression for eq in co.block_tear_res])
+                        res = casadi.vertcat(*[eq.expression for eq in co.block_tear_res])
                         co.tear_mx_vars = tear_mx_vars = [var.mx_var for var in co.block_tear_vars]
                         all_vars = tear_mx_vars + known_vars + solved_vars
-                        res_f = casadi.MXFunction(all_vars , [res])
-                        res_f.init()
+                        res_f = casadi.Function('res_f', all_vars , [res])
                         residuals.extend(res_f.call(tear_mx_vars + known_vars + solved_expr))
                         solved_expr.extend(tear_mx_vars)
                     solved_vars.extend(tear_mx_vars)
@@ -1454,14 +1441,12 @@ class BLTModel(object):
                     n_unsolvable += co.n
                     explicit_unsolved_algebraics.extend([var.mvar for var in co.variables if not var.is_der])
                     explicit_unsolved_vars.extend(co.mx_vars)
-                    res = casadi.vertcat(co.eq_expr)
+                    res = casadi.vertcat(*co.eq_expr)
                     all_vars = co.mx_vars + known_vars + solved_vars 
-                    res_f = casadi.MXFunction(all_vars , [res])
-                    res_f.init()
+                    res_f = casadi.Function('res_f', all_vars , [res])
                     if options['closed_form']:
                         explicit_unsolved_sx_vars.extend(co.sx_vars)
-                        sx_res = casadi.SXFunction(res_f)
-                        sx_res.init()
+                        sx_res = casadi.Function('sx_res', res_f)
                         residuals.extend(sx_res.call(co.sx_vars + sx_known_vars + solved_expr, True))
                         solved_expr.extend(co.sx_vars)
                     else:
@@ -1471,7 +1456,7 @@ class BLTModel(object):
             global_index += co.n
 
         # Save results
-        self._dae_residual = casadi.vertcat(residuals)
+        self._dae_residual = casadi.vertcat(*residuals)
         self._explicit_unsolved_algebraics = [var for var in self._model.getVariables(self.REAL_ALGEBRAIC) if
                                               var in explicit_unsolved_algebraics] # Preserve order
         self._solved_algebraics_mvar = [var[1].mvar for var in explicit_solved_algebraics]
@@ -1497,11 +1482,15 @@ class BLTModel(object):
         # Find untorn dependencies, excluding block variable
         deps = []
         eq_expr = co.eq_expr[0]
-        dae_vars = casadi.vertcat(reduce(list.__add__, [self._mx_var_struct[vk] for vk in ['dx', 'x', 'u', 'w']]))
-        fcn = casadi.MXFunction([dae_vars], [eq_expr])
-        fcn.init()
-        [_, dep_indices] = fcn.jacSparsity().getTriplet()
-        deps = [dae_var for dae_var in dae_vars[dep_indices] if dae_var.name() != var.name]
+        dae_var_list = reduce(
+            list.__add__, 
+            [self._mx_var_struct[vk] for vk in ['dx', 'x', 'u', 'w']]
+        )
+        dae_vars = casadi.vertcat(*dae_var_list)
+        fcn = casadi.Function('fcn', [dae_vars], [eq_expr])
+        [_, dep_indices] = fcn.sparsity_jac().get_triplet()
+        deps = [dae_var_list[i] for i in dep_indices if 
+                dae_var_list[i].name() != var.name]
 
         # Find torn dependencies
         torn_dep_names = []
@@ -1530,7 +1519,9 @@ class BLTModel(object):
                     inc_torn_dep_names = []
                     for dep in deps:
                         # If dependency causes fill-in
-                        if not casadi.dependsOn(self._graph.equations[inc].expression, dep):
+                        if not casadi.depends_on(
+                            self._graph.equations[inc].expression, 
+                            dep):
                             inc_torn_dep_names += self._dependencies[dep.name()]
                     n_dependencies = len(set(inc_torn_dep_names))
                     measure += n_dependencies - 1
@@ -1698,10 +1689,8 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
         objective_integrand = [self._op.getObjectiveIntegrand()]
         if self.options['closed_form']:
             all_vars = self._explicit_unsolved_vars + self._known_vars + self._explicit_solved_vars
-            mx_f = casadi.MXFunction(all_vars, path_lhs + path_rhs + objective_integrand)
-            mx_f.init()
-            sx_f = casadi.SXFunction(mx_f)
-            sx_f.init()
+            mx_f = casadi.Function('mx_f', all_vars, path_lhs + path_rhs + objective_integrand)
+            sx_f = casadi.Function('mx_f', mx_f)
             new_expr = sx_f.call(self._explicit_unsolved_sx_vars + self._sx_known_vars + solved_expr,
                                  self.options['inline'])
         else:
@@ -1825,19 +1814,22 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
             for (i, sol_alg) in self._explicit_solved_algebraics:
                 res[sol_alg.name] = []
                 explicit_solved_expr.append(self._solved_expr[i])
-            alg_sol_f = casadi.MXFunction(self._known_vars + self._explicit_unsolved_vars, explicit_solved_expr)
-            alg_sol_f.init()
+            alg_sol_f = casadi.Function('alg_sol_f', self._known_vars + self._explicit_unsolved_vars, explicit_solved_expr)
             if op_res.solver.expand_to_sx != "no":
-                alg_sol_f = casadi.SXFunction(alg_sol_f)
-                alg_sol_f.init()
+                alg_sol_f = alg_sol_f.expand()
 
             # Compute solved algebraics
             for k in xrange(len(res['time'])):
-                for (i, var) in enumerate(self._known_vars + self._explicit_unsolved_vars):
-                    alg_sol_f.setInput(res[var.name()][k], i)
-                alg_sol_f.evaluate()
-                for (i, sol_alg) in enumerate(self._explicit_solved_algebraics):
-                    res[sol_alg[1].name].append(alg_sol_f.getOutput(i).toArray().reshape(-1))
+                input_list = []
+                for (i, var) in enumerate(self._known_vars 
+                    + self._explicit_unsolved_vars):
+                        
+                    input_list.append(res[var.name()][k])
+                for (i, sol_alg) in enumerate(
+                    self._explicit_solved_algebraics):
+                        
+                    res[sol_alg[1].name].append(np.array(
+                        alg_sol_f.call(input_list)[i]).reshape(-1))
 
         # Add results for all alias variables (only needed for solved algebraics) and convert to array
         for var in self._model.getAllVariables():

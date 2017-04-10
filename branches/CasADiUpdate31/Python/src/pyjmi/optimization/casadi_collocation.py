@@ -19,6 +19,7 @@
 Module containing the classes for CasADi-based collocation.
 """
 
+import ipdb
 import struct
 import logging
 import codecs
@@ -166,6 +167,37 @@ class CasadiCollocator(object):
         Get the equality constraint h(x) = 0.0
         """
         return casadi.SX()
+        
+    def _get_actual_key(self, k):
+        """
+        Check if the option is a solver specific option and in
+        that case if a solver prefix needs to be added to it.
+        """
+        
+        # This list should be automatically generated, but while waiting
+        # for a Casadi function to do this, work with a manual list
+        option_list = ["expand", "print_time"]
+        
+        if k not in option_list:
+            prefix = self._plugin()
+            if prefix not in k:
+            
+                return '{}.{}'.format(prefix, k)
+                
+        return k
+        
+    def get_solver_option(self, k):
+        """
+        Get a nonlinear programming solver option
+        
+            Parameters::
+                k -- Name of the option
+        """
+        
+        k = self._get_actual_key(k)
+        
+        return self.solver_opts[k]
+        
 
     def set_solver_option(self, k, v):
         """
@@ -177,15 +209,7 @@ class CasadiCollocator(object):
                 v - Value of the option (int, double, string)
         """
         
-        # This list should be automatically generated, but while waiting
-        # for a Casadi function to do this, work with a manual list
-        option_list = ["print_level", "extend", "print_time"]
-        
-        if k not in option_list:
-            prefix = self._plugin()
-            if prefix not in k:
-            
-                k = '{}.{}'.format(prefix, k)
+        k = self._get_actual_key(k)
             
         self.solver_opts[k] = v
 
@@ -2218,11 +2242,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Map time points to constraint points
             cnstr_points_f = self._Function('cnstr_points_f',
                 [t0_var, tf_var], [mx_vertcat(cnstr_points_expr)])
-            cnstr_points_f.setInput(0., 0)
-            cnstr_points_f.setInput(1., 1)
-            raise Exception('deprecated syntax')
-            cnstr_points_f.evaluate()
-            constraint_points = cnstr_points_f.getOutput().toArray().reshape(-1)
+            constraint_points = N.array(cnstr_points_f(1., 1)[0]).reshape(-1)
             constraint_points = sorted(set(constraint_points))
         else:
             constraint_points = sorted(set([self.op.evaluateExpression(expr)
@@ -4137,8 +4157,8 @@ class LocalDAECollocator(CasadiCollocator):
         [zero] = casadi.substitute([expr], [t0, tf], [0., 0.])
         if zero != 0.:
             return False
-        f = self._Function('f', [t0, tf], [expr])
-        if not f.grad(0).is_constant() or not f.grad(1).is_constant():
+        if not casadi.gradient(expr, t0).is_constant() or \
+           not casadi.gradient(expr, tf).is_constant():
             return False
         return True
 
@@ -4148,14 +4168,8 @@ class LocalDAECollocator(CasadiCollocator):
         """
         t0_var = self.op.getVariable('startTime').getVar()
         tf_var = self.op.getVariable('finalTime').getVar()
-        cp_f = self._Function([t0_var, tf_var], [tp])
-        raise DeprecationWarning('Function::init() is deprecated')
-        cp_f.init()
-        cp_f.setInput(0., 0)
-        cp_f.setInput(1., 1)
-        raise Exception('deprecated syntax')
-        cp_f.evaluate()
-        return float(cp_f.getOutput())
+        cp_f = self._Function('cp_f', [t0_var, tf_var], [tp])
+        return float(cp_f(1., 1)[0])
 
     def _get_affine_scaling_symbols(self, name, i, k):
 
@@ -5394,9 +5408,7 @@ class LocalDAECollocator(CasadiCollocator):
         Only works if named_vars == True.
         """
         if self.named_vars:
-            f = casadi.Function([self.xx, self.pp], [expr])
-            raise DeprecationWarning('Function::init() is deprecated')
-            f.init()
+            f = casadi.Function('f', [self.xx, self.pp], [expr])
             return f.call([self.named_xx, self.named_pp],True)[0]
         else:
             raise CasadiCollocatorException(

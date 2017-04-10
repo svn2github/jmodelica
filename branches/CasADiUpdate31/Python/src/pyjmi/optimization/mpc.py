@@ -485,23 +485,22 @@ class MPC(object):
         if self.options['solver'] == 'IPOPT':
             if self.options['IPOPT_options'].get('warm_start_init_point')\
                                                                     is None:
-                self.collocator.solver_opts['warm_start_init_point'] = 'yes'
+                self.collocator.set_solver_option('warm_start_init_point','yes')
             if self.options['IPOPT_options'].get('mu_init') is None:
-                self.collocator.solver_opts['mu_init'] = 1e-3
+                self.collocator.set_solver_option('mu_init', 1e-3)
             if self.options['IPOPT_options'].get('print_level') is None:
-                self.collocator.solver_opts['print_level'] = 0
+                self.collocator.set_solver_option('print_level', 0)
                                                     
-            for key in self.warm_start_options.keys():
-                self.collocator.solver_opts[key] = self.warm_start_options[key]
+            for key, value in self.warm_start_options.iteritems():
+                self.collocator.set_solver_option(key, value)
 
-            self.collocator.solver_opts['expand'] = False
+            self.collocator.set_solver_option('expand', False)
              
         elif self.options['solver'] == 'WORHP':
-            self.collocator.solver_opts['NLPprint'] = 0
-            self.collocator.solver_opts['InitialLMest'] = False
+            self.collocator.set_solver_option('NLPprint', 0)
+            self.collocator.set_solver_option('InitialLMest', False)
             
-            for key in self.warm_start_options.keys():
-                value = self.warm_start_options[key]
+            for key, value in self.warm_start_options.iteritems():
                 self.collocator.set_solver_option(key, value)
                                        
         self.collocator.initialize()

@@ -270,8 +270,10 @@ class TestMPCClass(object):
         # succeeds
         MPC_object.update_state({'_start_c': self.c_0_A, '_start_T': 355})
         MPC_object.sample()
-        N.testing.assert_('Solve_Succeeded', MPC_object.collocator.
-                                        solver_object.getStat('return_status'))
+        N.testing.assert_(
+            'Solve_Succeeded', 
+            MPC_object.collocator.solver_object.stats()['return_status']
+        )
 
     #~ @testattr(casadi = True)
     #~ def test_shift_xx(self):
@@ -357,7 +359,10 @@ class TestMPCClass(object):
 
         # Assert that problem was infeasible and that the returned input is
         # the next input from the last succesful optimization
-        N.testing.assert_('Infeasible_Problem_Detected', MPC_object.collocator.solver_object.getStat('return_status'))
+        N.testing.assert_(
+            'Infeasible_Problem_Detected', 
+            MPC_object.collocator.solver_object.stats()['return_status']
+        )
  
         N.testing.assert_almost_equal(u_k2[1](0)[0], result1['Tc'][4],decimal=10)
         
@@ -371,8 +376,10 @@ class TestMPCClass(object):
         # input is the next (third) input from the last succesful optimization
         MPC_object.update_state({'_start_c': 900, '_start_T': 400})
         u_k3 = MPC_object.sample()
-        N.testing.assert_('Infeasible_Problem_Detected', MPC_object.collocator.
-                                        solver_object.getStat('return_status'))
+        N.testing.assert_(
+            'Infeasible_Problem_Detected', 
+            MPC_object.collocator.solver_object.stats()['return_status']
+        )
  
         N.testing.assert_almost_equal(u_k3[1](0)[0], result1['Tc'][7],decimal=10)
 
@@ -646,9 +653,9 @@ class TestMPCClass(object):
 
         N.testing.assert_(MPC_object.collocator.warm_start)
         wsip =\
-         MPC_object.collocator.solver_object.getOption('warm_start_init_point')
-        mu_init = MPC_object.collocator.solver_object.getOption('mu_init')
-        prl = MPC_object.collocator.solver_object.getOption('print_level')
+        MPC_object.collocator.get_solver_option('warm_start_init_point')
+        mu_init = MPC_object.collocator.get_solver_option('mu_init')
+        prl = MPC_object.collocator.get_solver_option('print_level')
 
         N.testing.assert_(wsip == 'yes')
         N.testing.assert_equal(mu_init, 1e-3)

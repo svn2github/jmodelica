@@ -758,7 +758,7 @@ class StaticOptimizer(object):
     def _Function(self, *args):
         f = casadi.Function(*args)
         if self.expand_to_sx != 'no':
-            f = casadi.Function(f)
+            f = f.expand()
         return f
 
     def _create_solver_object(self):
