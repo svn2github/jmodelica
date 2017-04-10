@@ -22,7 +22,7 @@ import numpy as N
 import pylab as P
 from scipy.io.matlab.mio import loadmat
 
-from pymodelica.compiler import compile_jmu, compile_fmu
+from pymodelica.compiler import compile_fmu
 from pyfmi.fmi_deprecated import FMUModel2
 from pyfmi.fmi import FMUModel, load_fmu, FMUException, TimeLimitExceeded
 from pyfmi.common.io import ResultDymolaTextual

@@ -26,7 +26,7 @@ VERSION = "trunk"
 LICENSE = "GPL"
 URL = "http://www.jmodelica.org"
 DOWNLOAD_URL = "http://www.jmodelica.org/page/12"
-DESCRIPTION = "A package for compiling Modelica / Optimica models into JMUs or FMUs."
+DESCRIPTION = "A package for compiling Modelica / Optimica models into FMUs."
 PLATFORMS = ["Linux", "Windows", "MacOS X"]
 CLASSIFIERS = [ 'Programming Language :: Python',
                 'Operating System :: MacOS :: MacOS X',

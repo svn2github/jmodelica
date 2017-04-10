@@ -108,25 +108,6 @@ class TestRLCCS(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['capacitor.v'])
-
-class TestWriteScaledResult(SimulationTest):
-
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-                'ScaledResult.mop', 'ScaledResult.Scaled1', format='jmu',
-                    options={"enable_variable_scaling":True})
-
-    @testattr(stddist = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=10.0, 
-            time_step = 0.1, abs_tol=1.0e-8, write_scaled_result=True)
-        self.run()
-        self.load_expected_data('ScaledResult_Scaled1_result.txt')
-
-    @testattr(stddist = True)
-    def test_trajectories(self):
-        self.assert_all_trajectories(['x', 'y', 'u', 'der(x)'])
     
 class TestFunction1(SimulationTest):
 
@@ -315,31 +296,6 @@ class TestStreams2(SimulationTest):
                                       'multiPortVolume.flowPort[1].h_outflow'
                                       ], same_span=True, rel_tol=1e-2, abs_tol=1e-2)
                                       
-class TestEnumerations(SimulationTest):
-    
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base(
-            'Enumerations.mo', 'Enumerations.Enumeration1', format='jmu')
-
-    @testattr(stddist = True)
-    def setUp(self):
-        self.setup_base()
-        
-    def check_init(self, val):
-        self.model.initialize();
-        assert self.model.get('x') == val
-
-    @testattr(stddist = True)
-    def test_enumerations_1(self):
-        self.check_init(7)
-        
-        
-    @testattr(stddist = True)
-    def test_enumerations_2(self):
-        self.model.set('y',2)
-        self.check_init(9)
-
 class TestHybrid1(SimulationTest):
     
     @classmethod
