@@ -63,8 +63,6 @@ N.int = N.int32
 
 """Use symbolic evaluation of derivatives (if available)."""
 JMI_DER_SYMBOLIC = 1
-"""Use automatic differentiation (CppAD) to evaluate derivatives."""
-JMI_DER_CPPAD = 2
 """Use automatic differentiation (CAD) to evaluate derivatives."""
 JMI_DER_CAD = 4
 """Use finite differentiation (FD) to evaluate derivatives."""

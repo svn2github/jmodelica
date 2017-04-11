@@ -79,11 +79,6 @@
               </listitem>
 
               <listitem>
-                <para><link
-                xlink:href="http://www.coin-or.org/CppAD/">CppAD</link></para>
-              </listitem>
-
-              <listitem>
                 <para><link xlink:href="http://expat.sourceforge.net/">eXpat
                 2.1.0</link></para>
               </listitem>

@@ -352,41 +352,6 @@ case $build in
     ;;  
 esac
 
-
-# Detect CppAD
-AC_ARG_WITH([cppad],
-   [AS_HELP_STRING([--with-cppad],
-     [CppAD installation directory @<:@default=no@:>@])],
-   [cppad=$withval],
-   [with_cppad=no])
-
-AS_IF([test "x$with_cppad" = xno],
-      [cppad="ThirdParty/CppAD/cppad-20100325/"])
-
-AS_IF([test "x$with_cppad" = xno],
-      [AC_CHECK_FILE($srcdir/$cppad/cppad/cppad.hpp,
-                     [],
-                     [AC_MSG_FAILURE([CppAD sources not found - distribution corrupt?])])],
-      [AC_CHECK_FILE($cppad/cppad/cppad.hpp,
-                     [],
-                     [AC_MSG_FAILURE([--with-cppad option was specified but does not seem to point at a valid CppAD installation])])])
-
-AS_IF([test "x$with_cppad" = xno],
-      [with_cppad=automatic])
-
-AM_CONDITIONAL([COMPILE_WITH_CPPAD],[test "x$with_cppad" != xno])
-
-# Set output variables to be exported to the Makefiles
-AC_SUBST(CPPAD_HOME)
-AC_SUBST(WITH_CPPAD)
-AS_IF([test "x$with_cppad" = xautomatic],
-      [CPPAD_HOME=`cd $srcdir; pwd`/$cppad],
-      [CPPAD_HOME=$cppad])
-
-AS_IF([test "x$with_cppad" != xno],
-      [WITH_CPPAD="true"],
-      [WITH_CPPAD="false"]) 
-
 AC_SUBST(ipoptlib)
 case $build in
   *-cygwin*)
@@ -464,7 +429,6 @@ AC_C_CONST
 
 REQUIRE_IPOPT_HOME=True
 REQUIRE_SUNDIALS_HOME=True
-REQUIRE_CPPAD_HOME=True
 REQUIRE_COMPILER_JARS=True
 REQUIRE_BEAVER_PATH=True
 REQUIRE_MODELICAPATH=True
@@ -475,7 +439,6 @@ REQUIRE_OPTIMICA_COMPILER=True
 
 AC_SUBST(REQUIRE_IPOPT_HOME)
 AC_SUBST(REQUIRE_SUNDIALS_HOME)
-AC_SUBST(REQUIRE_CPPAD_HOME)
 AC_SUBST(REQUIRE_COMPILER_JARS)
 AC_SUBST(REQUIRE_BEAVER_PATH)
 AC_SUBST(REQUIRE_MODELICAPATH)

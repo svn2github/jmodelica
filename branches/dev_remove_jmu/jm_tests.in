@@ -46,7 +46,6 @@ fi
 # Configure Bash
 set -o pipefail
 
-CPPAD_HOME="${JMODELICA_HOME}/ThirdParty/CppAD/"
 PYTHONPATH="$(merge_path "${PYTHONPATH}" "${JMODELICA_HOME}/Python/")"
 
 # Find operating system
@@ -386,7 +385,7 @@ for a in ${tests}; do
     test[${i}]=0
     (( ${a}=i++ ))
 done
-export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
+export JAVA_HOME JMODELICA_HOME IPOPT_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
 read_args $*

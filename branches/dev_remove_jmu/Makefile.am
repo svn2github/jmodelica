@@ -353,13 +353,6 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
-	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
-	cp $(CPPAD_HOME)/cppad/*.h $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad
-	cp $(CPPAD_HOME)/cppad/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local	
-	cp $(CPPAD_HOME)/cppad/local/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local
 	if [ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ]; then \
 	  echo "Installing in dist directory, don't copy MSL"; \
 	else \

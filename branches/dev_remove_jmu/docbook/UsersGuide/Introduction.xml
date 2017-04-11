@@ -127,21 +127,17 @@
 
       <listitem>
         <para>The JModelica.org runtime library is written in C and contains
-        supporting functions needed to compile the generated model C code.
-        Also, the runtime library contains an integration with CppAD, a tool
-        for computation of high accuracy derivatives by means of automatic
-        differentiation to provide derivatives for optimization algorithm. The
+        supporting functions needed to compile the generated model C code. The
         runtime system also contains the functions provided in the FMI
         API.</para>
       </listitem>
 
       <listitem>
-        <para>Currently, JModelica.org features four different algorithms for
-        solving dynamic optimization problems. There are three different
+        <para>Currently, JModelica.org features three different algorithms for
+        solving dynamic optimization problems. There are two different
         algorithms based on direct collocation, which rely on the solver IPOPT
-        for obtaining a solution to the resulting NLP. The default algorithm
-        is encoded in C and relies on CppAD for computing the NLP derivatives.
-        The other two algorithms are developed in Python and rely on CasADi
+        for obtaining a solution to the resulting NLP.
+        The two algorithms are developed in Python and rely on CasADi
         for computing derivatives. There is also a derivative free
         optimization algorithm for model calibration based on measurement data
         that is applicable to FMUs.</para>

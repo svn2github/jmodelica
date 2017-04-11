@@ -23,7 +23,6 @@ import numpy as N
 import numpy.ctypeslib as Nct
 
 from pyjmi.jmi import JMIException, IpoptException, _translate_value_ref, _returns_ndarray
-from pyjmi.jmi import JMI_DER_CPPAD
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 
 int = N.int32

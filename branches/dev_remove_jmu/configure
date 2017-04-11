@@ -623,7 +623,6 @@ REQUIRE_JPYPE_JVM
 REQUIRE_MODELICAPATH
 REQUIRE_BEAVER_PATH
 REQUIRE_COMPILER_JARS
-REQUIRE_CPPAD_HOME
 REQUIRE_SUNDIALS_HOME
 REQUIRE_IPOPT_HOME
 CMAKE_PYTHON_INCLUDE
@@ -635,10 +634,6 @@ ANT_OPTS
 ANT
 jmilib
 ipoptlib
-WITH_CPPAD
-CPPAD_HOME
-COMPILE_WITH_CPPAD_FALSE
-COMPILE_WITH_CPPAD_TRUE
 _JAVA_HOME_
 MINGW_HOME
 NUMPY_NO_MSVCR_FALSE
@@ -807,7 +802,6 @@ with_sundials
 with_superlu
 with_eclipse
 with_mingw
-with_cppad
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1468,7 +1462,6 @@ Optional Packages:
   --with-superlu          SuperLU installation directory [default=check]
   --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
-  --with-cppad            CppAD installation directory [default=no]
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -19296,105 +19289,6 @@ case $build in
 esac
 
 
-# Detect CppAD
-
-# Check whether --with-cppad was given.
-if test "${with_cppad+set}" = set; then :
-  withval=$with_cppad; cppad=$withval
-else
-  with_cppad=no
-fi
-
-
-if test "x$with_cppad" = xno; then :
-  cppad="ThirdParty/CppAD/cppad-20100325/"
-fi
-
-if test "x$with_cppad" = xno; then :
-  as_ac_File=`$as_echo "ac_cv_file_$srcdir/$cppad/cppad/cppad.hpp" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $srcdir/$cppad/cppad/cppad.hpp" >&5
-$as_echo_n "checking for $srcdir/$cppad/cppad/cppad.hpp... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$srcdir/$cppad/cppad/cppad.hpp"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "CppAD sources not found - distribution corrupt?
-See \`config.log' for more details" "$LINENO" 5 ; }
-fi
-
-else
-  as_ac_File=`$as_echo "ac_cv_file_$cppad/cppad/cppad.hpp" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $cppad/cppad/cppad.hpp" >&5
-$as_echo_n "checking for $cppad/cppad/cppad.hpp... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$cppad/cppad/cppad.hpp"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-cppad option was specified but does not seem to point at a valid CppAD installation
-See \`config.log' for more details" "$LINENO" 5 ; }
-fi
-
-fi
-
-if test "x$with_cppad" = xno; then :
-  with_cppad=automatic
-fi
-
- if test "x$with_cppad" != xno; then
-  COMPILE_WITH_CPPAD_TRUE=
-  COMPILE_WITH_CPPAD_FALSE='#'
-else
-  COMPILE_WITH_CPPAD_TRUE='#'
-  COMPILE_WITH_CPPAD_FALSE=
-fi
-
-
-# Set output variables to be exported to the Makefiles
-
-
-if test "x$with_cppad" = xautomatic; then :
-  CPPAD_HOME=`cd $srcdir; pwd`/$cppad
-else
-  CPPAD_HOME=$cppad
-fi
-
-if test "x$with_cppad" != xno; then :
-  WITH_CPPAD="true"
-else
-  WITH_CPPAD="false"
-fi
-
-
 case $build in
   *-cygwin*)
     ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
@@ -19824,7 +19718,6 @@ fi
 
 REQUIRE_IPOPT_HOME=True
 REQUIRE_SUNDIALS_HOME=True
-REQUIRE_CPPAD_HOME=True
 REQUIRE_COMPILER_JARS=True
 REQUIRE_BEAVER_PATH=True
 REQUIRE_MODELICAPATH=True
@@ -19832,7 +19725,6 @@ REQUIRE_JPYPE_JVM=True
 REQUIRE_JVM_ARGS=False
 REQUIRE_MINGW_HOME=True
 REQUIRE_OPTIMICA_COMPILER=True
-
 
 
 
@@ -20006,10 +19898,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NUMPY_NO_MSVCR_TRUE}" && test -z "${NUMPY_NO_MSVCR_FALSE}"; then
   as_fn_error $? "conditional \"NUMPY_NO_MSVCR\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${COMPILE_WITH_CPPAD_TRUE}" && test -z "${COMPILE_WITH_CPPAD_FALSE}"; then
-  as_fn_error $? "conditional \"COMPILE_WITH_CPPAD\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_ANT_TRUE}" && test -z "${HAVE_ANT_FALSE}"; then

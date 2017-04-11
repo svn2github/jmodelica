@@ -27,7 +27,7 @@ import numpy.ctypeslib as Nct
 
 import pyjmi
 from pyjmi.jmi import JMIException, IpoptException, _returns_ndarray, _translate_value_ref
-from pyjmi.jmi import JMI_SCALING_VARIABLES, JMI_DER_CPPAD
+from pyjmi.jmi import JMI_SCALING_VARIABLES
 from pyjmi.jmi_io import export_result_dymola as jmi_io_export_result_dymola
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
 
