@@ -491,13 +491,11 @@ aspect ExpressionSimplification {
         when (getLeftNoTransform().isLiteralZero())     to FExp getRight().makeNegated();
         when (getRightNoTransform() instanceof FNegExp) to FExp convertToAddition();
         when (getRightNoTransform().isLiteralZero())    to FExp getLeft();
-        when (getLeftNoTransform().equalsSymbolic(getRightNoTransform())) to FExp type().sizedZeroLiteral();
     }
 
     rewrite FDotAddExp {
         when (getLeftNoTransform().isLiteralZero())  to FExp getRight();
         when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
-        when (getLeftNoTransform().equalsNegatedSymbolic(getRightNoTransform())) to FExp type().sizedZeroLiteral();
     }
 
     rewrite FNegExp {
@@ -569,8 +567,4 @@ aspect ExpressionSimplification {
         return false;
     }
 
-    syn boolean FExp.equalsNegatedSymbolic(FExp other) =
-            (other instanceof FNegExp) && other.equalsNegatedSymbolic(this);
-    eq FNegExp.equalsNegatedSymbolic(FExp other) = getFExpNoTransform().equalsSymbolic(other);
-
-}
+ }

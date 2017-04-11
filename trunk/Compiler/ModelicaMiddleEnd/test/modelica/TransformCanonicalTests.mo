@@ -414,7 +414,7 @@ Input variables:
   	x2 = x3^2;
   	x3 = x4/p1;
   	x4 = p1/x5;
-  	x5 = x6-2*x6;
+  	x5 = x6-x6;
   	x6 = sin(x7);
   	x7 = x3*x5;
   
@@ -5670,7 +5670,7 @@ z := (x + (- y)) / (-1.0 + 1.0 + 5)
   model SolveEqTest8
     Real x;
   equation
-   -der(x) + x = -2*der(x) - (-(-(-der(x))));
+   -der(x) + x = -der(x) - (-(-(-der(x))));
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -5681,7 +5681,7 @@ z := (x + (- y)) / (-1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (-1.0 + 2 + -1.0)
+der(x) := (- x) / (-1.0 + 1.0 + -1.0)
 -------------------------------
 ")})));
   end SolveEqTest8;

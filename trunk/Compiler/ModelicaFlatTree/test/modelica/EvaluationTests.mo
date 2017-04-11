@@ -2081,7 +2081,7 @@ model EvaluateAnnotation9
     parameter R r1 annotation(Evaluate=true);
     parameter R r2 = F(r1);
     
-    Real x = (r2.p - 2) * time;
+    Real x = (r2.p - 1) * time;
     
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -2091,7 +2091,7 @@ model EvaluateAnnotation9
 fclass EvaluationTests.EvaluateAnnotation9
  eval parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
  structural parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
- Real x = (1.0 - 2) * time;
+ Real x = (1.0 - 1) * time;
 
 public
  function EvaluationTests.EvaluateAnnotation9.F
