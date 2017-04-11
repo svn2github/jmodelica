@@ -280,10 +280,10 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
 #define _JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24) (_JMI_ARR_I_23(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23)*(arr)->size[23]+i24-1)
 #define _JMI_ARR_I_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25) (_JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24)*(arr)->size[24]+i25-1)
 
-void jmi_transpose_matrix(jmi_array_t* arr, jmi_ad_var_t* src, jmi_ad_var_t* dest);
-void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_ad_var_t* src, jmi_int_t* dest);
-void jmi_transpose_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_ad_var_t* dest);
-void jmi_copy_matrix_to_int(jmi_array_t* arr, jmi_ad_var_t* src, jmi_int_t* dest);
-void jmi_copy_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_ad_var_t* dest);
+void jmi_transpose_matrix(jmi_array_t* arr, jmi_real_t* src, jmi_real_t* dest);
+void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);
+void jmi_transpose_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_real_t* dest);
+void jmi_copy_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);
+void jmi_copy_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_real_t* dest);
 
 #endif /* _JMI_ARRAY_NONE_H */

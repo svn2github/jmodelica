@@ -49,116 +49,116 @@ int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of
 /**
  * Function to wrap division and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
+jmi_real_t jmi_divide_function(const char* name, jmi_real_t num, jmi_real_t den, const char* msg);
 
 /**
  * Function to wrap division and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
+jmi_real_t jmi_divide_equation(jmi_t *jmi, jmi_real_t num, jmi_real_t den, const char* msg);
 
 /**
  * Function to wrap atan2 and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_atan2_function(const char* name, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+jmi_real_t jmi_atan2_function(const char* name, jmi_real_t x, jmi_real_t y, const char* msg);
 
 /**
  * Function to wrap atan2 and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_atan2_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+jmi_real_t jmi_atan2_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char* msg);
 
 /**
  * Function to wrap the C pow function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_pow_function(const char* name, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+jmi_real_t jmi_pow_function(const char* name, jmi_real_t x, jmi_real_t y, const char* msg);
 
 /**
  * Function to wrap the C pow function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_pow_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char* msg);
 
 /**
  * Function to wrap the C exp function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_exp_function(const char* name, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_exp_function(const char* name, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C exp function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_exp_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_exp_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C log function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_log_function(const char* name, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_log_function(const char* name, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C log function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_log_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_log_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C log10 function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_log10_function(const char* name, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_log10_function(const char* name, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C log10 function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_log10_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_log10_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C sinh function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_sinh_function(const char* name, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_sinh_function(const char* name, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C sinh function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_sinh_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_sinh_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C cosh function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_cosh_function(const char* name, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_cosh_function(const char* name, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C cosh function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_cosh_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_cosh_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C tan function and report errors to the log, for use in functions.
  */
-jmi_ad_var_t jmi_tan_function(const char* name, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_tan_function(const char* name, jmi_real_t x, const char* msg);
 
 /**
  * Function to wrap the C tan function and report errors to the log, for use in equations.
  */
-jmi_ad_var_t jmi_tan_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
+jmi_real_t jmi_tan_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to get the absolute value.
  * Is a separate function to avoid evaluating expressions several times.
  */
-jmi_ad_var_t jmi_abs(jmi_ad_var_t v);
+jmi_real_t jmi_abs(jmi_real_t v);
 
 /**
  * Function to get the absolute value.
  * Is a separate function to avoid evaluating expressions several times.
  */
-jmi_ad_var_t jmi_sign(jmi_ad_var_t v);
+jmi_real_t jmi_sign(jmi_real_t v);
 
 /**
  * Function to get the smaller of two values.
  * Is a separate function to avoid evaluating expressions twice.
  */
-jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y);
+jmi_real_t jmi_min(jmi_real_t x, jmi_real_t y);
 
 /**
  * Function to get the larger of two values.
  * Is a separate function to avoid evaluating expressions twice.
  */
-jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
+jmi_real_t jmi_max(jmi_real_t x, jmi_real_t y);
 
 /**
  * The round function for double numbers. 
@@ -177,6 +177,6 @@ jmi_real_t jmi_dremainder(jmi_t* jmi, jmi_real_t x, jmi_real_t y);
  * handling of an event. During continuous integration, false is returned.
  *
  */
-jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h);
+jmi_real_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h);
 
 #endif /* _JMI_MATH_H */

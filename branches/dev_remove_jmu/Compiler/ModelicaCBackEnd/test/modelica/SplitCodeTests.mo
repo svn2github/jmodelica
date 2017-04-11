@@ -340,8 +340,8 @@ model SplitCodeTest4
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = _time;
     jmi_array_ref_1(tmp_1, 2) = _time;
     _y1_0 = func_SplitCodeTests_SplitCodeTest4_f_exp0(tmp_1);
@@ -352,8 +352,8 @@ int model_ode_derivatives_0(jmi_t* jmi) {
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = _time;
     jmi_array_ref_1(tmp_2, 2) = _time;
     _y2_1 = func_SplitCodeTests_SplitCodeTest4_f_exp0(tmp_2);

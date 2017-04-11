@@ -178,9 +178,6 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 /* Number of empty bytes at end of string */
 #define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
 
-/* Temporary remains of CppAD*/            
-typedef jmi_real_t jmi_ad_var_t; 
-
 typedef int BOOL;
 
 #define TRUE  1

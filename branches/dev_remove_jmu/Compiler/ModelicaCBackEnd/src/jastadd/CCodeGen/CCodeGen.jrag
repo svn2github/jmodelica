@@ -855,7 +855,7 @@ aspect CCodeGen {
     syn String FType.nameScalar_C(boolean external) = external ? nameScalarExt_C() : nameScalar_C();
     syn String FType.nameArray_C(boolean external)  = external ? nameArrayExt_C() : nameArray_C();
     
-    syn String FType.nameScalar_C()       = "jmi_ad_var_t";
+    syn String FType.nameScalar_C()       = "jmi_real_t";
     eq FRecordType.nameScalar_C()         = (getFClass() != null ? myFRecordDecl().name_C() : 
         ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC;
     eq FStringType.nameScalar_C()         = "jmi_string_t";
@@ -1701,7 +1701,7 @@ aspect CCodeGen {
     public void FForIndex.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         super.genVarDecls_C(p, str, indent);
         String name = getFVariable().name_C();
-        str.format("%sjmi_ad_var_t %s;\n", indent, name);
+        str.format("%sjmi_real_t %s;\n", indent, name);
         getFExp().genForIndexExtraVarDecls_C(p, str, indent, name);
     }
 
@@ -1710,7 +1710,7 @@ aspect CCodeGen {
 
     @Override
     public void FRangeExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%sjmi_ad_var_t %se;\n", indent, name);
+        str.format("%sjmi_real_t %se;\n", indent, name);
     }
 
     @Override

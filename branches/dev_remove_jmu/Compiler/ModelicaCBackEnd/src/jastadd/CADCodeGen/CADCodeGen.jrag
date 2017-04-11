@@ -1504,7 +1504,7 @@ aspect CADCodeGen {
     public void FLitExp.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {}
 
 	/**
-	 * Declares a regular and a derivate variable for this expression. jmi_ad_var_t
+	 * Declares a regular and a derivate variable for this expression. jmi_real_t
 	 * is a type that describes floating point numbers. Calls the overridden
 	 * method in order to continue iteration over that  ASTNode:s
 	 * @param p  use CADPrettyPrinter for p.print to call prettyPrint_CAD
@@ -1516,12 +1516,12 @@ aspect CADCodeGen {
 		if (hasADStatement_CAD()) {
 			if (!inlineVar_CAD()) {
 				str.print(indent);
-				str.print("jmi_ad_var_t ");
+				str.print("jmi_real_t ");
 				str.println(varName_CAD() + ";");
 			}
 			if (shouldBeDifferentiated() && !inlineDer_CAD()) {
 				str.print(indent);
-				str.print("jmi_ad_var_t ");
+				str.print("jmi_real_t ");
 				str.println(derName_CAD() + ";");
 			}
 		}
@@ -1530,7 +1530,7 @@ aspect CADCodeGen {
 	}
 
     /**
-     * Declares a regular and a derivate variable for this expression. jmi_ad_var_t
+     * Declares a regular and a derivate variable for this expression. jmi_real_t
      * is a type that describes floating point numbers. Calls the overridden
      * method in order to continue iteration over that  ASTNode:s
      * 
@@ -1591,11 +1591,11 @@ aspect CADCodeGen {
     public void FFunctionCall.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
         if (functionCallIsExp()) {
             str.print(indent);
-            str.print("jmi_ad_var_t ");
+            str.print("jmi_real_t ");
             str.println(varName_CAD() + ";");
             if (shouldBeDifferentiated()) {
                 str.print(indent);
-                str.print("jmi_ad_var_t ");
+                str.print("jmi_real_t ");
                 str.println(derName_CAD() + ";");
             }
         }
@@ -1669,7 +1669,7 @@ aspect CADCodeGen {
     public void FForIndex.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
         super.genVarDecls_CAD(p, str, indent);
         String name = getFVariable().name_C();
-        str.format("%sjmi_ad_var_t %s;\n", indent, name);
+        str.format("%sjmi_real_t %s;\n", indent, name);
         getFExp().genForIndexExtraVarDecls_C(p, str, indent, name);
     }
     

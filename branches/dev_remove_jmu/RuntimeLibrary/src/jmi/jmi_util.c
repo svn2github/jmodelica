@@ -30,7 +30,7 @@
 #include <assert.h>
 #include "jmi_math.h"
 
-void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_t time) {
+void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_real_t time) {
     if (JMI_TRUE == LOG_EXP_OR(
                         LOG_EXP_OR(
                             LOG_EXP_NOT(AD_WRAP_LITERAL(event->defined)), 

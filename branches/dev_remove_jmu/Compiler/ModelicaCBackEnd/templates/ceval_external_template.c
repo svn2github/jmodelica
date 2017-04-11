@@ -28,7 +28,7 @@ $ECE_external_includes$
 #define JMCEVAL_DEBUG 0
 #define JMCEVAL_DBGP(x) if (JMCEVAL_DEBUG) { printf(x); fflush(stdout);}
 
-/* Format specifier when printing jmi_ad_var_t */
+/* Format specifier when printing jmi_real_t */
 #define JMCEVAL_realFormat "%.16f"
 
 /* Used record definitions */
@@ -40,7 +40,7 @@ $ECE_record_definitions$
 
 /* Parse/print basic types */
 double JMCEVAL_parseReal() {
-    /* Char buffer when reading jmi_ad_var_t. This is necessary
+    /* Char buffer when reading jmi_real_t. This is necessary
        since "%lf" is not allowed in c89. */
     char buff[32];
     JMCEVAL_DBGP("Parse number: "); 
