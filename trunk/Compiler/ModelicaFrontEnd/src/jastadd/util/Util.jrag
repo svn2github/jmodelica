@@ -518,7 +518,7 @@ aspect NodeMethods {
     }
     
     public String InstComponentDecl.getNodeName() {
-        return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
+        return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + name() + "'";
     }
 
     public class List {
@@ -1395,12 +1395,19 @@ aspect Visibility {
     syn boolean FVisibilityType.isTemporary() = false;
     eq FTemporaryVisibilityType.isTemporary() = true;
 
+    syn boolean FVisibilityType.isFromExpandableConnector()  = false;
+    eq FExpandableVisibilityType.isFromExpandableConnector() = true;
+
     syn boolean FVariable.isPublic()    = getFVisibilityType().isPublic();
     syn boolean FVariable.isProtected() = getFVisibilityType().isProtected();
 
     syn boolean FAbstractVariable.isTemporary() = false;
     eq FVariable.isTemporary()                  = getFVisibilityType().isTemporary();
-    
+
+    syn boolean FAbstractVariable.isFromExpandableConnector() = false;
+    eq FVariable.isFromExpandableConnector()                  = 
+        getFVisibilityType().isFromExpandableConnector();
+
 }
 
 
@@ -1490,7 +1497,8 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component or its class is declared input.
      */
-    syn boolean InstComponentDecl.isDeclaredInput() = isComponentDeclaredInput() || myInstClass().isInput();
+    syn boolean InstComponentDecl.isDeclaredInput() = 
+        (isComponentDeclaredInput() || myInstClass().isInput()) && !inExpandableConnector();
 
     /**
      * Check if this component is declared input.
@@ -1517,7 +1525,8 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an output component.
      */
-    syn boolean InstComponentDecl.isOutput() = isDeclaredOutput() || inheritsOutput();
+    syn boolean InstComponentDecl.isOutput() = 
+        (isDeclaredOutput() || inheritsOutput()) && !inExpandableConnector();
     
     /**
      * Check if this component inherits output from the surrounding component.

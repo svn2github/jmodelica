@@ -329,6 +329,13 @@ FProtectedVisibilityType : FVisibilityType;
 FTemporaryVisibilityType : FPublicVisibilityType;
 
 /**
+ * Visibility for variables in expandable connectors. 
+ *
+ * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
+ */
+FExpandableVisibilityType : FPublicVisibilityType;
+
+/**
  * Visibility for runtime option parameters. 
  */
 FRuntimeOptionVisibilityType : FPublicVisibilityType;

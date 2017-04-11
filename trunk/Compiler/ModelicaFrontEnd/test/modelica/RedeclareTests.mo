@@ -6987,7 +6987,7 @@ fclass RedeclareTests.RedeclarePrefix10
  input Real c1.x;
  input Real c2.x;
 equation
- - c1.x - c2.x = 0;
+ - c1.x - c2.x = 0.0;
 end RedeclareTests.RedeclarePrefix10;
 ")})));
 end RedeclarePrefix10;

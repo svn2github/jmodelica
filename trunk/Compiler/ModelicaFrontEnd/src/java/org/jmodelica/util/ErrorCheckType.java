@@ -16,8 +16,14 @@
 package org.jmodelica.util;
 
 public enum ErrorCheckType {
-    COMPILE, 
-    CHECK;
+    /** Used when compiling a model. */
+    COMPILE,
+    /** Used when doing an error check on a model that does not have to be a 
+     *  simulation model. */
+    CHECK,
+    /** Used to invoke the parts of the error check that has side effects 
+     *  (e.g. for structural parameters) on generated components. */
+    GENERATED;
     
     public boolean allowBadGeneratedInner() {
         return this == CHECK;
@@ -39,4 +45,11 @@ public enum ErrorCheckType {
         return this == CHECK;
     }
 
+    public boolean checkForRecursiveStructure() {
+        return this != GENERATED;
+    }
+
+    public boolean checkTypes() {
+        return this != GENERATED;
+    }
 }

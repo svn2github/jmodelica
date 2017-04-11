@@ -565,19 +565,19 @@ aspect ErrorCheck {
         for (ErrorChecker checker : ERROR_CHECKERS)
             checker.check(this, checkType);
     }
-  
-  public void ASTNode.collectErrors(ErrorCheckType checkType) {
-	  for(int i = 0; i < getNumChild(); i++) {
-		  getChild(i).collectErrors(checkType);
-	  }
+
+    public void ASTNode.collectErrors(ErrorCheckType checkType) {
+        for (ASTNode n : this) {
+            n.collectErrors(checkType);
+        }
         allChecks(checkType);
-  }
+    }
 
 
-	public void ASTNode.errorCheck(ErrorCheckType checkType) {
-		collectErrors(checkType);
-		breakOnErrors();
-	}
+    public void ASTNode.errorCheck(ErrorCheckType checkType) {
+        collectErrors(checkType);
+        breakOnErrors();
+    }
 
     inh InstComponentDecl ASTNode.errorEnclosingComponent();
     eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
@@ -848,7 +848,7 @@ aspect InstanceErrorCheck {
     public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
             errorChecked = true;
-            if (isRecursed()) {
+            if (checkType.checkForRecursiveStructure() && isRecursed()) {
                 error("Recursive class structure");
             } else if (isOuter()) {
                 myInnerInstComponentDecl().collectErrors(checkType);
@@ -1021,7 +1021,7 @@ aspect InstanceErrorCheck {
 	
 	public void InstExtends.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
-	    	if (isRecursed()) {
+	    	if (checkType.checkForRecursiveStructure() && isRecursed()) {
 	    		error("Recursive class structure");
 	    		errorChecked = true;
 	    	} else {
