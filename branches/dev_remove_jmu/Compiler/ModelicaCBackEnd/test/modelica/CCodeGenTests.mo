@@ -13687,10 +13687,10 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     __eventIndicator_1_3 = _y_1 - _x_0 * 3;
     __eventIndicator_2_4 = _y_1 - 1 - _x_0;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _y_1 - (_x_0 * 3), _sw(0), JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _y_1 - 1 - (_x_0), _sw(1), JMI_REL_LT);
+        _sw(1) = jmi_turn_switch(jmi, __eventIndicator_2_4, _sw(1), JMI_REL_LT);
     }
     _b_2 = LOG_EXP_OR(_sw(0), _sw(1));
     pre_b_2 = _b_2;
@@ -13700,8 +13700,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = _y_1 - (_x_0 * 3);
-    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, _y_1 - 1 - (_x_0), AD_WRAP_LITERAL(1));
+    (*res)[0] = __eventIndicator_1_3;
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, __eventIndicator_2_4, AD_WRAP_LITERAL(1));
     JMI_DYNAMIC_FREE()
     return ef;
 ")})));
@@ -14435,14 +14435,14 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     _a_0 = _time;
     __eventIndicator_1_1 = _a_0 - 1;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _a_0 - (1), _sw(0), JMI_REL_LT);
+        _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_1, _sw(0), JMI_REL_LT);
     }
     if (_sw(0)) {
         _a_0 = _a_0 + 1;
     }
     __eventIndicator_2_2 = _a_0 - 1;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _a_0 - (1), _sw(1), JMI_REL_LT);
+        _sw(1) = jmi_turn_switch(jmi, __eventIndicator_2_2, _sw(1), JMI_REL_LT);
     }
     if (_sw(1)) {
         _a_0 = _a_0 + 1;

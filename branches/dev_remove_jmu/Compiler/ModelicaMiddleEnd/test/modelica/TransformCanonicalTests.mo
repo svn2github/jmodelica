@@ -1563,14 +1563,14 @@ equation
             errorMessage="
 3 errors found:
 
-Error in flattened model:
-  Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
-
-Error in flattened model:
+Error at line 1435, column 41, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable x2 is part of alias set that results in min/max combination with no possible values, min = 2.6, max = 2.5
 
-Error in flattened model:
+Error at line 1436, column 39, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable y1 is part of alias set that results in min/max combination with no possible values, min = 3, max = 2
+
+Error at line 1439, column 40, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+  Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
 ")})));
 end AliasPropMinMax2;
 
@@ -1882,9 +1882,9 @@ equation
             description="Test warnings for state select.",
             automatic_tearing=false,
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Warning in flattened model:
+Warning at line 1755, column 56, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   a_s2 has stateSelect=always, but could not be selected as state
 ")})));
 end AliasStateSelect2;

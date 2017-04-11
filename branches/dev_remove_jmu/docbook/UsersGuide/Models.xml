@@ -930,9 +930,10 @@ Number of unsolved equation blocks in DAE system after tearing: 1: {1}
       <literal>Problems</literal>, <literal>Flattened model</literal>,
       <literal>Connection sets</literal>, <literal>Transformed
       model</literal>, <literal>Alias sets</literal>, <literal>BLT diagnostics
-      table</literal> and <literal>BLT diagnostics</literal> are links to sub
-      pages containing additional information. For example, the BLT
-      diagnostics page contains information about individual systems of
+      table</literal>, <literal>BLT for DAE System</literal> and <literal>BLT
+      for Initialization System</literal> are links to sub
+      pages containing additional information. For example, the BLT for DAE
+      System page contains information about individual systems of
       equations:</para>
 
       <programlisting>...

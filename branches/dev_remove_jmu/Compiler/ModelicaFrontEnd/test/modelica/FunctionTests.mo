@@ -15282,7 +15282,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error in flattened model:
+Error at line 14679, column 3, in file 'ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
 y = semiLinear(x, sa, s[1])
 y = semiLinear(x, s[1], s[2])
@@ -15331,7 +15331,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error in flattened model:
+Error at line 15325, column 5, in file '...':
   Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
 y = semiLinear(x, sa, s1 + 1)
 y = semiLinear(x, s1, s2)

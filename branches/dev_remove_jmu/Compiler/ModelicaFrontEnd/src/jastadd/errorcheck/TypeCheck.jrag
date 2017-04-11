@@ -1232,19 +1232,19 @@ aspect FlatTypeCheck {
                 FIdUse use = getFExp().asFIdUse();
                 FType useType = use.type();
                 FType outType = type();
-                if (use.isForIndex()) {
-                    error("Can not assign a value to a for loop index");
-                } else if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
-                    error(functionCallDecription() + ": could not evaluate array size of output " + 
-                            myOutput().name());
-                } else if (!useType.typeCompatible(outType, true)) {
-                    if (useType.typeCompatibleExceptLengths(outType)) {
-                        if (!lockBranch(checkType))
-                            errorUnlessDisabled("%s: component %s is of size %s and output %s is of size %s - they are not compatible", 
-                                    functionCallDecription(), use.name(), useType.size(), myOutput().name(), outType.size());
-                    } else {
-                        error("%s: component %s is of type %s and output %s is of type %s - they are not compatible", 
-                                functionCallDecription(), use.name(), useType, myOutput().name(), outType);
+                if (!use.isForIndex()) {
+                    if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
+                        error(functionCallDecription() + ": could not evaluate array size of output " + 
+                                myOutput().name());
+                    } else if (!useType.typeCompatible(outType, true)) {
+                        if (useType.typeCompatibleExceptLengths(outType)) {
+                            if (!lockBranch(checkType))
+                                errorUnlessDisabled("%s: component %s is of size %s and output %s is of size %s - they are not compatible", 
+                                        functionCallDecription(), use.name(), useType.size(), myOutput().name(), outType.size());
+                        } else {
+                            error("%s: component %s is of type %s and output %s is of type %s - they are not compatible", 
+                                    functionCallDecription(), use.name(), useType, myOutput().name(), outType);
+                        }
                     }
                 }
             }

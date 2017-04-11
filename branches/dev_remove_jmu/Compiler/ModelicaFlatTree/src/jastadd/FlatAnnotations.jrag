@@ -16,10 +16,10 @@
 
 aspect FlatAnnotations {
     
-    public FlatAnnotation FFunctionDecl.flatAnnotation(String ... path) {     return FlatAnnotation.createFor(getFAttributes(), path); }
-    public FlatAnnotation FVariable.flatAnnotation(String ... path) {         return FlatAnnotation.createFor(getFAttributes(), path); }
-    public FlatAnnotation FAbstractEquation.flatAnnotation(String ... path) { return FlatAnnotation.createFor(getFAttributes(), path); }
-    public FlatAnnotation FClass.flatAnnotation(String ... path) {            return FlatAnnotation.createFor(getFAttributes(), path); }
+    public FlatAnnotation FFunctionDecl.flatAnnotation(String ... path) {     return FlatAnnotation.createFor(this, path); }
+    public FlatAnnotation FVariable.flatAnnotation(String ... path) {         return FlatAnnotation.createFor(this, path); }
+    public FlatAnnotation FAbstractEquation.flatAnnotation(String ... path) { return FlatAnnotation.createFor(this, path); }
+    public FlatAnnotation FClass.flatAnnotation(String ... path) {            return FlatAnnotation.createFor(this, path); }
 
     /*******************
      *    Java Stuff    
@@ -83,7 +83,7 @@ aspect FlatAnnotations {
 
     @Override
     public FlatAnnotationProvider FAttribute.addAnnotationSubNode(String name) {
-        return addAnnotationSubNode(getFAttributes(), name);
+        return addAnnotationSubNode(this, name);
     }
 
 
@@ -111,9 +111,9 @@ aspect FlatAnnotations {
     public class FlatAnnotation {
         private static class ListAnnotationProvider implements FlatAnnotationProvider {
 
-            private final List<FAttribute> attributes;
+            private final FAttributeListAnnotationNode.FAttributeList attributes;
 
-            public ListAnnotationProvider(List<FAttribute> attributes) {
+            public ListAnnotationProvider(FAttributeListAnnotationNode.FAttributeList attributes) {
                 this.attributes = attributes;
             }
 
@@ -124,7 +124,7 @@ aspect FlatAnnotations {
 
             @Override
             public Iterable<SubNodePair<FlatAnnotationProvider>> annotationSubNodes() {
-                return FAttribute.annotationSubNodes(attributes);
+                return FAttribute.annotationSubNodes(attributes.getFAttributeList());
             }
 
             @Override
@@ -149,13 +149,13 @@ aspect FlatAnnotations {
 
             @Override
             public String resolveURI(String str) {
-                return attributes.resolveURI(str);
+                return attributes.getFAttributeList().resolveURI(str);
             }
 
         }
 
-        public static FlatAnnotation createFor(List<FAttribute> attributes, String[] path) {
-            return createFor(new ListAnnotationProvider(attributes), path);
+        public static FlatAnnotation createFor(FAttributeListAnnotationNode.FAttributeList attrs, String[] path) {
+            return createFor(new ListAnnotationProvider(attrs), path);
         }
     }
 
@@ -169,9 +169,9 @@ aspect FlatAnnotations {
             };
         }
 
-        public static FlatAnnotationProvider addAnnotationSubNode(List<FAttribute> list, String name) {
+        public static FlatAnnotationProvider addAnnotationSubNode(FAttributeListAnnotationNode.FAttributeList list, String name) {
             FAttribute attr = new FAnnotationAttribute(name);
-            list.add(attr);
+            list.addFAttribute(attr);
             return attr;
         }
     }

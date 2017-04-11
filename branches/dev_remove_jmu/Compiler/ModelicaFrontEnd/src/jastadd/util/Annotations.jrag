@@ -45,18 +45,18 @@ aspect AnnotationAPI {
      * Here the annotation given by the path <code>"A/B/C"</code> has the value <code>"foo"</code>.
      */
     syn AnnotationNode ASTNode.annotation(String path) = annotation().forPath(path);
+    
+    syn AnnotationNode ASTNode.annotationOfChild(Opt n) = 
+            (n.getNumChild() > 0) ? n.getChild(0).annotation() : createNullAnnotationNode();
 
-    eq Opt.annotation()  = (getNumChild() > 0) ? getChild(0).annotation() : getParent().createNullAnnotationNode();
-    eq List.annotation() = (getNumChild() > 0) ? getChild(0).annotation() : getParent().createNullAnnotationNode();
-
-    eq Comment.annotation()         = getAnnotationOpt().annotation();
+    eq Comment.annotation()         = annotationOfChild(getAnnotationOpt());
     eq ParseAnnotation.annotation() = getClassModification().annotationNode();
     eq Modification.annotation()    = annotationNode();
 
-    eq ExternalClause.annotation() = getAnnotationOpt().annotation();
+    eq ExternalClause.annotation() = annotationOfChild(getAnnotationOpt());
     eq InstExternal.annotation()   = getExternalClause().annotation();
 
-    eq FullClassDecl.annotation()            = getAnnotationOpt().annotation();
+    eq FullClassDecl.annotation()            = annotationOfChild(getAnnotationOpt());
     eq InstClassDecl.annotation()            = getClassDecl().annotation();
     eq ShortClassDecl.annotation()           = getExtendsClauseShortClass().annotation();
     eq LibNode.annotation()                  = myClass().annotation();
@@ -69,10 +69,16 @@ aspect AnnotationAPI {
     eq ComponentDecl.annotation()     = getComment().annotation();
     eq InstComponentDecl.annotation() = getComponentDecl().annotation();
 
-    eq FFunctionDecl.annotation()     = new FAttributeListAnnotationNode(getFAttributes());
-    eq FVariable.annotation()         = new FAttributeListAnnotationNode(getFAttributes());
-    eq FAbstractEquation.annotation() = new FAttributeListAnnotationNode(getFAttributes());
-    eq FClass.annotation()            = new FAttributeListAnnotationNode(getFAttributes());
+    public class FFunctionDecl     implements FAttributeListAnnotationNode.FAttributeList {}
+    public class FVariable         implements FAttributeListAnnotationNode.FAttributeList {}
+    public class FAbstractEquation implements FAttributeListAnnotationNode.FAttributeList {}
+    public class FClass            implements FAttributeListAnnotationNode.FAttributeList {}
+    public class FAttribute        implements FAttributeListAnnotationNode.FAttributeList {}
+    
+    eq FFunctionDecl.annotation()     = new FAttributeListAnnotationNode(this);
+    eq FVariable.annotation()         = new FAttributeListAnnotationNode(this);
+    eq FAbstractEquation.annotation() = new FAttributeListAnnotationNode(this);
+    eq FClass.annotation()            = new FAttributeListAnnotationNode(this);
 
     syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
 
@@ -81,8 +87,8 @@ aspect AnnotationAPI {
      */
 
     syn AnnotationNode Element.modificationAnnotation() = AnnotationNode.NO_ANNOTATION;
-    eq ComponentDecl.modificationAnnotation() = getModificationOpt().annotation();
-    eq ExtendsClause.modificationAnnotation() = getClassModificationOpt().annotation();
+    eq ComponentDecl.modificationAnnotation() = annotationOfChild(getModificationOpt());
+    eq ExtendsClause.modificationAnnotation() = annotationOfChild(getClassModificationOpt());
 
     syn AnnotationNode ASTNode.createNullAnnotationNode() = AnnotationNode.NO_ANNOTATION;
     eq Comment.createNullAnnotationNode()                 = new CommentAnnotationNode(this);
@@ -1262,25 +1268,31 @@ aspect AnnotationAPI {
 
     public class FAttributeListAnnotationNode extends AnnotationNode {
         
-        private final List<FAttribute> attrs;
+        public interface FAttributeList {
+            public void addFAttribute(FAttribute attribute);
+            public List<FAttribute> getFAttributeList();
+            public int getNumFAttribute();
+        }
         
-        public FAttributeListAnnotationNode(List<FAttribute> attrs) {
+        private final FAttributeList attrs;
+        
+        public FAttributeListAnnotationNode(FAttributeList attrs) {
             this.attrs = attrs;
         }
         
         @Override
         protected ASTNode ast() {
-            return attrs;
+            return attrs.getFAttributeList();
         }
 
         @Override
         public Iterator<AnnotationNode> attributeIterator() {
-            return attrs.getNumChild() > 0 ? new AnnotationIterator(attrs) : super.attributeIterator();
+            return attrs.getNumFAttribute() > 0 ? new AnnotationIterator(attrs.getFAttributeList()) : super.attributeIterator();
         }
 
         @Override
         protected AnnotationNode lookup(String path) {
-            for (FAttribute attr : attrs)
+            for (FAttribute attr : attrs.getFAttributeList())
                 if (attr.matches(path)) 
                     return attr.annotationNode();
             return null;
@@ -1289,7 +1301,7 @@ aspect AnnotationAPI {
         @Override
         public AnnotationNode addNode(String path) {
             FAttribute attr = new FAnnotationAttribute(path);
-            attrs.add(attr);
+            attrs.addFAttribute(attr);
             return new FAttributeAnnotationNode(attr);
         }
     }

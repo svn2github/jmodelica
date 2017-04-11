@@ -145,7 +145,8 @@ aspect Scalarization {
             }
             
             public void add(FExp left, FExp right) {
-                add(new FEquation(left, right));
+				// TODO: Not 100% correct, should be equation.setLocationOf(...)
+                add(left.setLocationOf(new FEquation(left, right)));
             }
             
             public void createScalarizedFunctionCallClause(FExp left, FFunctionCall right) {
@@ -441,17 +442,22 @@ aspect Scalarization {
             if (keepBExp(variability(), getBindingExp())) {
                 fv.setBindingExp(bexp);
             } else {
-                s.add(new FIdUseExp(scalarizeVariableUse(i)), bexp);
+                s.add(setLocationOf(new FIdUseExp(scalarizeVariableUse(i))), bexp);
             }
         }
 
 		// Iterate over all attributes and scalarize.
+        List<FAttribute> attrs = new List<FAttribute>();
+        attrs.addAll(fv.getFAttributes());
         for (FAttribute a : getFAttributes()) {
-            a.scalarize(fv.getFAttributes(), i, Collections.<String,FExp>emptyMap());
+            a.scalarize(attrs, i, Collections.<String,FExp>emptyMap());
         }
+        fv.setFAttributeList(attrs);
 		fv.setDerivedType(getDerivedType());
 		fv.addArrayAttributesFromType(i, myFDerivedType());
 
+		fv.setLocation(this);
+		
         s.add(fv);
         return fv;
 	}
@@ -495,9 +501,14 @@ aspect Scalarization {
 	 * to the given index. 
 	 */
 	protected void FVariable.addArrayAttributesFromType(Index i, FDerivedType t) {
-		if (t != null && i != Index.NULL)
-			for (FAttribute a : t.getFAttributes())
-				a.addArrayAttributesTo(i, getFAttributes());
+        if (t != null && i != Index.NULL) {
+            for (FAttribute a : t.getFAttributes()) {
+                List<FAttribute> attrs = new List<FAttribute>();
+                attrs.addAll(getFAttributes());
+                a.addArrayAttributesTo(i, attrs);
+                setFAttributeList(attrs);
+            }
+        }
 	}
 	
 	/**
@@ -797,8 +808,11 @@ aspect Scalarization {
      */
     public FAttribute FAttribute.scalarizeInternal(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
         FAttribute attr = createEmptyNode();
-        for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
-            a.scalarize(attr.getFAttributes(), i, indexMap);            // TODO: really send i here?
+        List<FAttribute> l = new List<FAttribute>();
+        for (FAttribute a : getFAttributes()) {
+            a.scalarize(l, i, indexMap);
+        }
+        attr.setFAttributeList(l);
         attr.setType(getType().fullCopy());
         attr.setName(getName().fullCopy());
         attr.setAttributeSet(getAttributeSet());
@@ -981,7 +995,7 @@ aspect Scalarization {
         if (left.inferType().isRecord()) {
             left.inferType().scalarRecordClauses(s, new FQNameEmpty(), left, right);
         } else {
-            s.add(new FEquation(attrs, left.scalarize(s), right.scalarize(s)));
+            s.add(this.setLocationOf(new FEquation(attrs, left.scalarize(s), right.scalarize(s))));
         }
 	}
 	
@@ -1078,6 +1092,7 @@ aspect Scalarization {
       fqn.scalarized = false;
       FExp res = createNode(new FIdUse(fqn));
       res = dynamicFExp(res).scalarize(indexMap);
+      res.setLocation(this);
       return res;
     }
     
@@ -1562,7 +1577,7 @@ aspect Scalarization {
         if (indexMap.containsKey(name())) {
             return indexMap.get(name()).fullCopy();
         }
-        return new FIdUseExp(getFIdUse().scalarize(indexMap, indexNames));
+        return setLocationOf(new FIdUseExp(getFIdUse().scalarize(indexMap, indexNames)));
     }
     
     @Override
@@ -1909,7 +1924,7 @@ aspect Scalarization {
     }
     
     protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
-        return new FFunctionCall(name, args, type); 
+        return setLocationOf(new FFunctionCall(name, args, type)); 
     }
     
     protected FFunctionCall FPartialFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {

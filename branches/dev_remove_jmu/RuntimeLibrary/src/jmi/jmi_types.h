@@ -63,6 +63,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define JMI_ABS(X)   ((X) < (0) ? (-1*(X)) : (X))
+#define JMI_SIGN(X)  ((X) >= (0) ? 1 : (-1))
 
 #define JMI_DEF(TYPE, NAME) \
     JMI_DEF_##TYPE(NAME)

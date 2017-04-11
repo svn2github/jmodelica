@@ -998,7 +998,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             
 			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
-			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
+			generateAttribute("completedIntegratorStepNotNeeded",    false,                   genPrinter);
 			generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
 			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);

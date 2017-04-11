@@ -1177,7 +1177,8 @@ aspect InheritedFactoryMethods {
     public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
     public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
     public FDecouple          FDecouple.createEmptyNode()          { return new FDecouple();          }
-
+    
+    
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
@@ -1185,6 +1186,7 @@ aspect InheritedFactoryMethods {
 		FBinExp node = createEmptyNode();
 		node.setLeft(left);
 		node.setRight(right);
+		node.setLocationNoTree(this);
 		return node;
 	}
 	
@@ -1194,6 +1196,7 @@ aspect InheritedFactoryMethods {
 	public FUnaryExp FUnaryExp.createNode(FExp exp) {
 		FUnaryExp node = createEmptyNode();
 		node.setFExp(exp);
+		node.setLocationNoTree(this);
 		return node;
 	}
 	
@@ -1203,6 +1206,7 @@ aspect InheritedFactoryMethods {
 	public FIdUseExp FIdUseExp.createNode(FIdUse use) {
 		FIdUseExp node = createEmptyNode();
 		node.setFIdUse(use);
+		node.setLocationNoTree(this);
 		return node;
 	}
 
@@ -1213,6 +1217,7 @@ aspect InheritedFactoryMethods {
         FAbstractDerExp node = createEmptyNode();
         node.setFIdUse(use);
         node.setOrder(order());
+        node.setLocationNoTree(this);
         return node;
     }
 
@@ -1257,6 +1262,7 @@ aspect InheritedFactoryMethods {
 	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
 		FMathematicalFunctionCall node = createEmptyNode();
 		node.setFExp(exp);
+		node.setLocation(this);
 		return node;
 	}
 	
@@ -1509,4 +1515,11 @@ aspect InheritedFactoryMethods {
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+
 }

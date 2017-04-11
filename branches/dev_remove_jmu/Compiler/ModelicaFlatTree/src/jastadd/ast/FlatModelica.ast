@@ -41,7 +41,6 @@ FClass : BaseNode ::= FQName
                       /UnknownFVariable/
                       FResidualPair*
                       FAttribute*
-                      /[FDynamicResolver]/
                       DynamicStateManager;
 
 /**
@@ -559,7 +558,6 @@ FInitialEquation : FEquationType;
  */
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FAbstractEquation*/
-                                          /[DynamicFAbstractEquation:FAbstractEquation]/
                                           FAttribute*
                                           [FStringComment];
 
@@ -953,7 +951,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= /[Indicator:FIdUseExp]/;
+abstract FRelExp : FBoolBinExp ::= [Indicator:FIdUseExp];
 
 /**
  * Less than expression.
@@ -1773,7 +1771,7 @@ abstract FDynamicResolver : BaseNode;
  * Dynamic resolver used during index reduction. Variables and equations are
  * temporarily inserted into this node.
  */
-FIndexReductionResolver : FDynamicResolver ::= <FClass:FClass> /[FVariable]/ /[FAbstractEquation]/;
+FIndexReductionResolver : FDynamicResolver ::= <FClass:FClass>;
 
 /**
  * Manager that handles dynamic states
