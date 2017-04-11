@@ -627,8 +627,8 @@ class StaticOptimizer(object):
                                        [self.objective])
 
         # Create constraints and cost
-        self.c_e = c_e = casadi.MX()
-        self.c_i = c_i = casadi.MX()
+        c_e = casadi.MX()
+        c_i = casadi.MX()
         cost = casadi.MX(0)
         for i in xrange(self.n_instances):
             z = self._get_z(i)
@@ -637,6 +637,8 @@ class StaticOptimizer(object):
             c_e = casadi.vertcat(c_e, path_e_fcn.call(z)[0])
             c_i = casadi.vertcat(c_i, path_i_fcn.call(z)[0])
             cost += objective_fcn.call(z)[0]
+        self.c_e = c_e
+        self.c_i = c_i
 
         # Add quadratic cost for external data
         if (self.external_data is not None and len(self.external_data.quad_pen) > 0):

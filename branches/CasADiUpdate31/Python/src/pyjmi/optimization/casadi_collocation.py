@@ -3646,8 +3646,8 @@ class LocalDAECollocator(CasadiCollocator):
             x_list.append(x_i)
 
         # Create constraint storage
-        self.c_e = c_e = casadi.MX()
-        self.c_i = c_i = casadi.MX()
+        self.c_e = casadi.MX()
+        self.c_i = casadi.MX()
         # Create storage to track connection between nlp constraints and equations
         # NB: internal format of c_dests is subject to change!
         self.c_dests = {} # map from equation types to nlp constraints
@@ -3829,7 +3829,7 @@ class LocalDAECollocator(CasadiCollocator):
 
                         # Add constraint
                         input_constr = constr_var - constr_val
-                        c_e = casadi.vertcat(c_e, input_constr)
+                        self.c_e = casadi.vertcat(self.c_e, input_constr)
 
         # Equality constraints for delayed feedback
         if self.delayed_feedback is not None:
@@ -3854,7 +3854,7 @@ class LocalDAECollocator(CasadiCollocator):
 
                         # Add constraint
                         input_constr = u_var - u_value
-                        c_e = casadi.vertcat(c_e, input_constr)
+                        self.c_e = casadi.vertcat(self.c_e, input_constr)
 
         # Calculate cost
         self.cost_mayer = 0
