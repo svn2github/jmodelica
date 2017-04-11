@@ -449,10 +449,10 @@ class Component(object):
 
         # Compose component block matrices and right-hand sides
         eq_sys = {}
-        eq_sys["A"] = casadi.horzcat([casadi.jacobian(causal_eq_expr, var) for var in causal_mx_vars])
-        eq_sys["B"] = casadi.horzcat([casadi.jacobian(causal_eq_expr, var) for var in tearing_mx_vars])
-        eq_sys["C"] = casadi.horzcat([casadi.jacobian(tearing_eq_expr, var) for var in causal_mx_vars])
-        eq_sys["D"] = casadi.horzcat([casadi.jacobian(tearing_eq_expr, var) for var in tearing_mx_vars])
+        eq_sys["A"] = casadi.horzcat(*[casadi.jacobian(causal_eq_expr, var) for var in causal_mx_vars])
+        eq_sys["B"] = casadi.horzcat(*[casadi.jacobian(causal_eq_expr, var) for var in tearing_mx_vars])
+        eq_sys["C"] = casadi.horzcat(*[casadi.jacobian(tearing_eq_expr, var) for var in causal_mx_vars])
+        eq_sys["D"] = casadi.horzcat(*[casadi.jacobian(tearing_eq_expr, var) for var in tearing_mx_vars])
         eq_sys["a"] = (casadi.mtimes(eq_sys["A"], casadi.vertcat(*causal_mx_vars)) +
                        casadi.mtimes(eq_sys["B"], casadi.vertcat(*tearing_mx_vars)) - causal_eq_expr)
         eq_sys["b"] = (casadi.mtimes(eq_sys["C"], casadi.vertcat(*causal_mx_vars)) +

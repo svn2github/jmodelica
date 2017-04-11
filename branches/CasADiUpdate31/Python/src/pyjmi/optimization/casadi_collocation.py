@@ -19,7 +19,6 @@
 Module containing the classes for CasADi-based collocation.
 """
 
-import ipdb
 import struct
 import logging
 import codecs
@@ -4756,12 +4755,15 @@ class LocalDAECollocator(CasadiCollocator):
         self.nlp = dict(x=self.xx, p=self.pp, f=self.cost, g=constraints)
         self.solver_opts = {}
         self.solver_arg = {}
+        
+        # Create corresponding NLP function
+        self.nlp_fcn = casadi.Function('nlp', 
+                                       [self.xx, self.pp],
+                                       [self.cost, constraints])
 
         # Expand to SX
         self.solver_opts['expand'] = self.expand_to_sx == "NLP"
         if self.equation_scaling:
-            self.nlp_fcn = casadi.Function('nlp', [self.xx, self.pp],
-                                    [self.cost, constraints])
             self.residual_jac_fcn = self.nlp_fcn.jacobian(0,1)
             
 
@@ -5897,7 +5899,7 @@ def _to_external_function(fcn, name, use_existing=False):
         exit_code = system('gcc ' + bitness_flag + ' -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
         if exit_code != 0:
             return fcn # fall back to uncompiled version
-    fcn_e = casadi.ExternalFunction(name)
+    fcn_e = casadi.external(name)
     return fcn_e
 
 def enable_codegen(coll, name=None):
@@ -5906,7 +5908,7 @@ def enable_codegen(coll, name=None):
     code for the NLP, gradient of f, Jacobian of g, and Hessian of the
     Lagrangian of g Function objects, and then replaces the solver
     object in the solver's collocator with a new one that makes use of
-    the compiled functions as ExternalFunction objects.
+    the compiled functions as "external" objects.
 
     Parameters::
 
@@ -5916,7 +5918,7 @@ def enable_codegen(coll, name=None):
         name --
             A string that if it is not None, tries to load existing files
             nlp_[name].so, grad_f_[name].so, jac_g_[name].so and
-            hess_lag_[name].so as ExternalFunction objects to be used
+            hess_lag_[name].so as external function objects to be used
             by the solver rather than generating new code. If any of the
             files don't exist, new files are generated with the above
             names.
@@ -5930,53 +5932,40 @@ def enable_codegen(coll, name=None):
 
     old_solver = coll.solver_object
 
-    nlp = coll.nlp_fcn
-    grad_f = old_solver.get_function('nlp_grad_f'), 
+    nlp_fcn = coll.nlp_fcn
+    grad_f = old_solver.get_function('nlp_grad_f') 
     jac_g = old_solver.get_function('nlp_jac_g')
-    hess_lag = old_solver.function('nlp_hess_l')
+    hess_lag = old_solver.get_function('nlp_hess_l')
 
     existing = False
     if name == None:
         enable_codegen.times += 1
         name = str(enable_codegen.times)
     else:
-        if (path.isfile('__func_nlp_'+name+ext) and
-            path.isfile('__func_grad_f_'+name+ext) and
-            path.isfile('__func_jac_g_'+name+ext) and
-            path.isfile('__func_hess_lag_'+name+ext)):
+        if (path.isfile('func_nlp_'+name+ext) and
+            path.isfile('func_grad_f_'+name+ext) and
+            path.isfile('func_jac_g_'+name+ext) and
+            path.isfile('func_hess_lag_'+name+ext)):
             existing = True
 
-    nlp = _to_external_function(nlp, '__func_nlp_' + name, existing)
-    grad_f = _to_external_function(grad_f, '__func_grad_f_' + name, existing)
-    jac_g = _to_external_function(jac_g, '__func_jac_g_' + name, existing)
-    hess_lag = _to_external_function(hess_lag, '__func_hess_lag_' + name, existing)
+    nlp_fcn = _to_external_function(nlp_fcn, 'func_nlp_' + name, existing)
+    grad_f = _to_external_function(grad_f, 'func_grad_f_' + name, existing)
+    jac_g = _to_external_function(jac_g, 'func_jac_g_' + name, existing)
+    hess_lag = _to_external_function(hess_lag, 'func_hess_lag_' + name, existing)
 
-    solver_cg = casadi.NlpSolver('ipopt', nlp)
+    coll.set_solver_option('expand', False)
+    coll.set_solver_option('grad_f', grad_f)
+    coll.set_solver_option('jac_g', jac_g)
+    coll.set_solver_option('hess_lag', hess_lag)
+    
+    [self.xx, self.pp] = nlp_fcn.mx_in()
+    [self.cost, constraints] = nlp_fcn.mx_out()
+    self.nlp = dict(x=self.xx, p=self.pp, f=self.cost, g=constraints)
 
-    old_solver_options = old_solver.dictionary()
-    old_solver_options['expand'] = False
-    solver_cg.setOption(old_solver_options)
-
-    solver_cg.setOption('grad_f', grad_f)
-    solver_cg.setOption('jac_g', jac_g)
-    solver_cg.setOption('hess_lag', hess_lag)
-
-    raise DeprecationWarning('Function::init() is deprecated')
-    solver_cg.init()
-
-    lbx = old_solver.getInput('lbx')
-    ubx = old_solver.getInput('ubx')
-    lbg = old_solver.getInput('lbg')
-    ubg = old_solver.getInput('ubg')
-    x0 = old_solver.getInput('x0')
-    p = old_solver.getInput('p')
-
-    solver_cg.setInput(lbx, 'lbx')
-    solver_cg.setInput(ubx, 'ubx')
-    solver_cg.setInput(lbg, 'lbg')
-    solver_cg.setInput(ubg, 'ubg')
-    solver_cg.setInput(x0, 'x0')
-    solver_cg.setInput(p, 'p')
+    solver_cg = casadi.nlpsol('solver_cg', 
+                              'ipopt', 
+                              nlp, 
+                              coll.solver_opts)
 
     coll.solver_object = solver_cg
 

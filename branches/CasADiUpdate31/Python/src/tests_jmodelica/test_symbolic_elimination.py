@@ -30,7 +30,7 @@ import casadi
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
     """Helper function for asserting optimization results."""
-    cost = float(res.solver.solver_object.getOutput('f'))
+    cost = float(res.solver.solver_res['f'])
     u = res[input_name]
     u_norm = N.linalg.norm(u) / N.sqrt(len(u))
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
