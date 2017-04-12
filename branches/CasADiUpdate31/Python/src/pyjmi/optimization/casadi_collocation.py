@@ -5566,11 +5566,13 @@ class LocalDAECollocator(CasadiCollocator):
         elif point == "opt":
             x_value = self.primal_opt
         elif point == "sym":
-            return J_fcn.call([self.xx, self.pp],True)[0]
+            #return J_fcn.call([self.xx, self.pp],True)[0]
+            return J_fcn(x=self.xx, p=self.pp)['jac_g_x']
+            #return J_fcn(x=self.xx, p=self.pp)['g']
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        result = J_fcn(p=self.get_par_vals(scaled_residuals=scaled_residuals),
-                       x=x_value)['jac_g_x']
+        result = J_fcn(p=self.get_par_vals(scaled_residuals=scaled_residuals),x=x_value)['jac_g_x']
+        #result = J_fcn(p=self.get_par_vals(scaled_residuals=scaled_residuals),x=x_value)['g']
         if dense: result = N.array(result)
         else: result = csc_matrix(result)
         return result
@@ -5616,8 +5618,7 @@ class LocalDAECollocator(CasadiCollocator):
         elif point == "init":
             x = self.xx_init
             sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
-            dual = N.zeros(self.c_e.numel() +
-                           self.c_i.numel())
+            dual = N.zeros(self.c_e.numel() + self.c_i.numel())
         elif point == "opt":
             x = self.primal_opt
             sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
@@ -5634,9 +5635,7 @@ class LocalDAECollocator(CasadiCollocator):
             raise ValueError("Unkonwn point value: " + repr(point))
         
         der_p = self.get_par_vals(scaled_residuals=scaled_residuals)
-        # When updating to CAsadi 3.1,
-        # Somewhat unsure if the following is correct
-        return N.array(H_fcn(x, der_p, sigma, dual)[0])
+        return N.array(H_fcn.call([x, der_p, sigma, dual])[0])
 
     def get_KKT(self, point="fcn", scaled_residuals=False):
         """
@@ -5690,8 +5689,7 @@ class LocalDAECollocator(CasadiCollocator):
                 return KKT_fcn
         elif point == "init":
             x = self.xx_init
-            dual = N.zeros(self.c_e.numel() +
-                           self.c_i.numel())
+            dual = N.zeros(self.c_e.numel() + self.c_i.numel())
         elif point == "opt":
             x = self.primal_opt
             dual = self.get_opt_constraint_duals(scaled=scaled_residuals)
