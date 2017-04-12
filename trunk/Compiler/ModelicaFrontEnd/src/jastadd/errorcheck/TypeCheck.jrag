@@ -194,7 +194,7 @@ aspect FlatTypeCheck {
                 CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
             }
         }
-        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && checkType.checkTypes()) {
+        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
             InstValueModification ivm = myInstValueMod();
             FType expectedBT = bindingType();
             FType actualBT = bexp.type();
@@ -346,7 +346,7 @@ aspect FlatTypeCheck {
                     "The 'each' keyword should not be applied to a modification of a scalar component: %s");
 
     public void InstArgument.typeCheck(ErrorCheckType checkType) {
-        if (checkType.checkTypes() && getEach() && expectedSizeFromParent() == Size.SCALAR) 
+        if (getEach() && expectedSizeFromParent() == Size.SCALAR) 
             EACH_APPLIED_ON_SCALAR.invoke(this, this);
     }
 
@@ -1582,24 +1582,22 @@ aspect FlatTypeCheck {
 
     protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
         enabledExp.collectErrors(checkType);
-        if (checkType.checkTypes()) {
-            if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
-                enabledExp.error("The type of the enabled expression is not boolean");
-            } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
-                if (enabledExp.ndims() == 0) {
-                    enabledExp.warning("Assuming 'each' for enabled expression");
-                } else {
-                    enabledExp.errorUnlessDisabledAnd(parentType.ndims() == enabledExp.ndims(), 
-                            "Array size mismatch for the enabled attribute, " + 
-                            "size of component declaration is %s and size of expression is %s", 
-                            parentType.size(), enabledExp.size());
-                }
-            } else if (eachSet) { 
-                if (parentType.ndims() == 0) {
-                    enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
-                } else if (enabledExp.ndims() > 0) {
-                    enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
-                }
+        if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
+            enabledExp.error("The type of the enabled expression is not boolean");
+        } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
+            if (enabledExp.ndims() == 0) {
+                enabledExp.warning("Assuming 'each' for enabled expression");
+            } else {
+                enabledExp.errorUnlessDisabledAnd(parentType.ndims() == enabledExp.ndims(), 
+                        "Array size mismatch for the enabled attribute, " + 
+                        "size of component declaration is %s and size of expression is %s", 
+                        parentType.size(), enabledExp.size());
+            }
+        } else if (eachSet) { 
+            if (parentType.ndims() == 0) {
+                enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
+            } else if (enabledExp.ndims() > 0) {
+                enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
             }
         }
     }

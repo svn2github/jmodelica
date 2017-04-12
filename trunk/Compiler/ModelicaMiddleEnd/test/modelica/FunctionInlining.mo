@@ -569,7 +569,7 @@ fclass FunctionInlining.BasicInline14
  Real _stream_positiveMax_2;
 equation
  x1 = (_stream_positiveMax_1 * 4.0 + _stream_positiveMax_2 * 5.0) / (_stream_positiveMax_1 + _stream_positiveMax_2);
- a1.c[1].f + a2.c[1].f + a3.c[1].f = 0.0;
+ a1.c[1].f + a2.c[1].f + a3.c[1].f = 0;
  a1.c[1].f = time;
  a2.c[1].f = time / 2;
  _stream_s_1 = max(- a2.c[1].f, 0) + max(- a3.c[1].f, 0);
@@ -577,6 +577,7 @@ equation
  _stream_positiveMax_1 = _stream_alpha_1 * max(- a2.c[1].f, 0) + (1 - _stream_alpha_1) * _inStreamEpsilon;
  _stream_positiveMax_2 = _stream_alpha_1 * max(- a3.c[1].f, 0) + (1 - _stream_alpha_1) * _inStreamEpsilon;
 end FunctionInlining.BasicInline14;
+
 ")})));
     end BasicInline14;
 

@@ -328,13 +328,6 @@ aspect InstLookupComponents {
     eq InstComponentDecl.getFArraySubscripts().lookupInstComponent(String name)          = lookupInstComponent(name);
     eq InstComponentDecl.getLocalFArraySubscripts().lookupInstComponent(String name)     = lookupInstComponent(name);
 
-    eq InstExpandableConnectorDecl.getInstComponentDecl(int i).lookupInstComponent(String name)          = 
-        useTemplate(i) ? template(i).lookupInstComponent(name) : genericLookupInstComponent(name);
-    eq InstArrayExpandableConnector.getInstComponentDecl(int i).lookupInstComponent(String name)         = 
-        useTemplate(i) ? template(i).lookupInstComponent(name) : genericLookupInstComponent(name);
-    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl(int i).lookupInstComponent(String name) = 
-        useTemplate(i) ? template(i).lookupInstComponent(name) : genericLookupInstComponent(name);
-
     eq InstReplacingRecord.getOriginalInstComponent().lookupInstComponent(String name)    = lookupInstComponent(name);
     eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
     eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
@@ -730,14 +723,6 @@ aspect InstLookupComponents {
     eq InstGlobalAccess.myInstLookup() = getInstAccess().myInstLookup();
     syn lazy InstLookupResult<InstComponentDecl> InstComponentAccess.myInstLookup()      = myInstLookupComponent();
     syn lazy InstLookupResult<InstComponentDecl> InstComponentArrayAccess.myInstLookup() = myInstLookupComponent();
-
-    syn InstComponentDecl InstAccess.myInstComponentElement() = unknownInstComponentDecl();
-    eq InstDot.myInstComponentElement()                       = getLastInstAccess().myInstComponentElement();
-    eq InstGlobalAccess.myInstComponentElement()              = getInstAccess().myInstComponentElement();
-    eq InstComponentAccess.myInstComponentElement()           = 
-        lookupArrayElement(myInstLookup()).target(INST_UNKNOWN_COMPONENT, this);
-    eq InstComponentArrayAccess.myInstComponentElement()      = 
-        lookupArrayElement(myInstLookup()).target(INST_UNKNOWN_COMPONENT, this);
 }
 
 aspect LookupInstComponentsInModifications {

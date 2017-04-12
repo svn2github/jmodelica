@@ -50,13 +50,6 @@ aspect InstLookupClasses {
     eq InstArrayComponentDecl.getChild().lookupInstClass(String name)            = lookupInstClass(name);
     eq InstExternalObject.getDestructorCall().lookupInstClass(String name)       = lookupInstClass(name);
 
-    eq InstExpandableConnectorDecl.getInstComponentDecl(int i).lookupInstClass(String name)          = 
-        useTemplate(i) ? template(i).lookupInstClass(name) : genericLookupInstClass(name);
-    eq InstArrayExpandableConnector.getInstComponentDecl(int i).lookupInstClass(String name)         = 
-        useTemplate(i) ? template(i).lookupInstClass(name) : genericLookupInstClass(name);
-    eq InstReplacingExpandableConnectorDecl.getInstComponentDecl(int i).lookupInstClass(String name) = 
-        useTemplate(i) ? template(i).lookupInstClass(name) : genericLookupInstClass(name);
-
     eq InstExtends.getInstClassDecl().lookupInstClass(String name)               = genericLookupInstClassInExtends(name);
     eq InstExtends.getInstComponentDecl().lookupInstClass(String name)           = genericLookupInstClassInExtends(name);
     eq InstExtends.getInstExtends().lookupInstClass(String name)                 = superLookupInstClassInExtends(name);
