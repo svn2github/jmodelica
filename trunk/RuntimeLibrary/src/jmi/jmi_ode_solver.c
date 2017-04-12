@@ -149,18 +149,20 @@ jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final
         s = solver->solve(solver, integrate_stop_time, solver->initialize_solver);
         solver->initialize_solver = FALSE;
         
+        if (s == JMI_ODE_OK || s == JMI_ODE_EVENT) {
+            /* Ensure that states and time is up to date in the model: */
+            if (p->ode_callbacks.rhs_func(p->time, p->states,
+                                          solver->states_derivative,
+                                          p->sizes, p->problem_data) == -1) {
+                return JMI_ODE_ERROR;
+            }
+        }
+        
         if (s == JMI_ODE_EVENT || jmi_ode_at_time_event(s, integrate_stop_time, final_time)) {
             s = p->ode_callbacks.event_update_func(p);
             solver->initialize_solver = TRUE;
             if (p->event_info.nominals_updated) {
                 jmi_log_node(p->log, logError, "Error", "Changed nominals is currently unsupported.");
-                return JMI_ODE_ERROR;
-            }
-        } else if (s == JMI_ODE_OK) {
-            /* Ensure that states and time is up to date in the model: */
-            if (p->ode_callbacks.rhs_func(p->time, p->states,
-                                          solver->states_derivative,
-                                          p->sizes, p->problem_data) == -1) {
                 return JMI_ODE_ERROR;
             }
         }

@@ -320,20 +320,6 @@ jmi_ode_status_t fmi2_cs_event_update(jmi_ode_problem_t *problem) {
     fmi2Boolean tmpNominalsOfContinuousStatesChanged = fmi2False;
     fmi2Boolean tmpValuesOfContinuousStatesChanged = fmi2False;
 
-    /* Set time to the model */
-    flag = fmi2_set_time(cs_data->fmix_me, problem->time);
-    if (flag != fmi2OK) {
-        jmi_log_node(problem->log, logError, "Error", "Failed to set the time.");
-        return JMI_ODE_ERROR;
-    }
-    
-    /* Set states to the model */
-    flag = fmi2_set_continuous_states(cs_data->fmix_me, problem->states, problem->sizes.states);
-    if (flag != fmi2OK) {
-        jmi_log_node(problem->log, logError, "Error", "Failed to set the continuous states.");
-        return JMI_ODE_ERROR;
-    }
-
     event_info.newDiscreteStatesNeeded = fmi2True;
     while (event_info.newDiscreteStatesNeeded) {
         flag = fmi2_new_discrete_state(cs_data->fmix_me, &event_info);

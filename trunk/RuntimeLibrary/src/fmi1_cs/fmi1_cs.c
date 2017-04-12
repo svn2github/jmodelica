@@ -603,20 +603,6 @@ jmi_ode_status_t fmi1_cs_event_update(jmi_ode_problem_t* problem) {
     jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem->problem_data;
     fmiEventInfo event_info;
     fmiStatus flag;
-
-    /* Set time to the model */
-    flag = fmi1_me_set_time(cs_data->fmix_me, problem->time);
-    if (flag != fmiOK) {
-        jmi_log_node(problem->log, logError, "Error", "Failed to set the time.");
-        return JMI_ODE_ERROR;
-    }
-    
-    /* Set states to the model */
-    flag = fmi1_me_set_continuous_states(cs_data->fmix_me, problem->states, problem->sizes.states);
-    if (flag != fmiOK) {
-        jmi_log_node(problem->log, logError, "Error", "Failed to set the continuous states.");
-        return JMI_ODE_ERROR;
-    }
         
     flag = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &event_info);
     if (flag != fmiOK) {
