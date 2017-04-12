@@ -1291,7 +1291,7 @@ aspect Slices {
         java.util.List<FArraySubscripts> l = allFArraySubscripts();
         int last = l.size() - 1;
         for (int i = 0; i < last; i++) {
-            if (l.get(i).ndims() > 0) {
+            if (l.get(i).accessNdims() > 0) {
                 return true;
             }
         }

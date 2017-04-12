@@ -1106,7 +1106,7 @@ aspect Scalarization {
     }
     
     public FExp FSubscriptedExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-        if (indexVariability().indexParameterOrLess()) {
+        if (indexVariability().indexParameterOrLess() && !getFExp().size().isUnknown()) {
             try {
                 return select().scalarRecordFExp(indexMap, suffix);
             } catch (ConstantEvaluationException e) {
@@ -1708,7 +1708,7 @@ aspect Scalarization {
 	
 	public FExp FSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (getFExp().isSlice() || !getFExp().size().isUnknown(dimension())) {
-            return getFExp().size().createFExp(dimension());
+            return getFExp().size().scalarize(indexMap, dimension());
         } else {
             return new FSizeExp(getFExp().scalarize(indexMap), new Opt<FExp>(getDim().scalarize(indexMap)));
         }
@@ -1723,7 +1723,7 @@ aspect Scalarization {
 	}
 
     public FExp FSubscriptedExp.scalarizeExp(Map<String,FExp> indexMap) {
-        if (indexVariability().indexParameterOrLess()) {
+        if (indexVariability().indexParameterOrLess() && !getFExp().size().isUnknown()) {
             try {
                 return select().scalarize(indexMap);
             } catch (ConstantEvaluationException e) {
@@ -1732,7 +1732,7 @@ aspect Scalarization {
         }
         FArraySubscripts fas = getFArraySubscripts().scalarize(indexMap);
         if (inFunction()) {
-            return new FIdUseExp(tempVarName(), fas);
+            return new FIdUseExp(getFExp().tempVarName(), fas);
         } else {
             FSubscriptedExp res = createEmptyNode();
             res.setFExp(getFExp().scalarize(indexMap));
@@ -1921,6 +1921,19 @@ aspect Scalarization {
             }
         }
         return res;
+    }
+    
+    public FExp Size.scalarize(Map<String,FExp> indexMap, int i) {
+        return createFExp(i);
+    }
+    
+    @Override
+    public FExp MutableSize.scalarize(Map<String,FExp> indexMap, int i) {
+        if (exps[i] != null) {
+            return exps[i].scalarize(indexMap);
+        } else {
+            return super.scalarize(indexMap, i);
+        }
     }
     
     protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {

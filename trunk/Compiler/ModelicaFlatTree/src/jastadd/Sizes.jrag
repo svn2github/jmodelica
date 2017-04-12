@@ -251,6 +251,8 @@ aspect AccessSizes {
         fas.addFSubscript(new FIntegerSubscript(1));
         return new FSubscriptedExp(treeCopy(), fas);
     }
+    
+    eq FRangeExp.createFirstIndexExp() = getFExp(0).treeCopy();
 }
 
 aspect FunctionCallSizes {

@@ -7155,6 +7155,324 @@ end FunctionTests.ArrayExpInFunc47;
 ")})));
 end ArrayExpInFunc47;
 
+model ArrayExpInFunc48
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            for j in 1:size(r[i].x, 1) loop
+                y := y + r[i].x[j];
+            end for;
+        end for;
+        annotation(Inline=false);
+    end f;
+    
+    Real y = f({R({time})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc48",
+            description="Scalarizing size expression",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc48
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc48.f({FunctionTests.ArrayExpInFunc48.R({time})});
+
+public
+ function FunctionTests.ArrayExpInFunc48.f
+  input FunctionTests.ArrayExpInFunc48.R[:] r;
+  output Real y;
+ algorithm
+  for i in 1:size(r, 1) loop
+   for j in 1:size(r[i].x, 1) loop
+    y := y + r[i].x[j];
+   end for;
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc48.f;
+
+ record FunctionTests.ArrayExpInFunc48.R
+  Real x[:];
+ end FunctionTests.ArrayExpInFunc48.R;
+
+end FunctionTests.ArrayExpInFunc48;
+")})));
+end ArrayExpInFunc48;
+
+model ArrayExpInFunc49
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:div(size(r,1),2) loop
+            for j in 1:size(r[i:2*i].x, 2) loop
+                y := y + r[i].x[j];
+            end for;
+        end for;
+        annotation(Inline=false);
+    end f;
+    
+    Real y = f({R({time})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc49",
+            description="Scalarizing size expression",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc49
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc49.f({FunctionTests.ArrayExpInFunc49.R({time})});
+
+public
+ function FunctionTests.ArrayExpInFunc49.f
+  input FunctionTests.ArrayExpInFunc49.R[:] r;
+  output Real y;
+ algorithm
+  for i in 1:div(size(r, 1), 2) loop
+   for j in 1:size(r[i].x, 1) loop
+    y := y + r[i].x[j];
+   end for;
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc49.f;
+
+ record FunctionTests.ArrayExpInFunc49.R
+  Real x[:];
+ end FunctionTests.ArrayExpInFunc49.R;
+
+end FunctionTests.ArrayExpInFunc49;
+")})));
+end ArrayExpInFunc49;
+
+model ArrayExpInFunc50
+    record R
+        Real[:] x;
+    end R;
+    
+    function g
+        input Integer x;
+        output Integer[:] y = x:2*x;
+        algorithm
+    end g;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:div(size(r,1),2) loop
+            for j in 1:size(r[g(i)].x, 2) loop
+                y := y + r[i].x[j];
+            end for;
+        end for;
+        annotation(Inline=false);
+    end f;
+    
+    Real y = f({R({time})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc50",
+            description="Scalarizing temporary in size expression",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc50
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc50.f({FunctionTests.ArrayExpInFunc50.R({time})});
+
+public
+ function FunctionTests.ArrayExpInFunc50.f
+  input FunctionTests.ArrayExpInFunc50.R[:] r;
+  output Real y;
+  Integer[:] temp_1;
+ algorithm
+  for i in 1:div(size(r, 1), 2) loop
+   init temp_1 as Integer[max(integer(2 * i - i) + 1, 0)];
+   (temp_1) := FunctionTests.ArrayExpInFunc50.g(i);
+   for j in 1:size(r[temp_1[1]].x, 1) loop
+    y := y + r[i].x[j];
+   end for;
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc50.f;
+
+ function FunctionTests.ArrayExpInFunc50.g
+  input Integer x;
+  output Integer[:] y;
+ algorithm
+  init y as Integer[max(integer(2 * x - x) + 1, 0)];
+  for i1 in 1:max(integer(2 * x - x) + 1, 0) loop
+   y[i1] := x + (i1 - 1);
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc50.g;
+
+ record FunctionTests.ArrayExpInFunc50.R
+  Real x[:];
+ end FunctionTests.ArrayExpInFunc50.R;
+
+end FunctionTests.ArrayExpInFunc50;
+")})));
+end ArrayExpInFunc50;
+
+model ArrayExpInFunc51
+    record R
+        Real[:] x;
+    end R;
+    
+    function g
+        input Integer x;
+        output Integer[:] y = x:2*x;
+        algorithm
+    end g;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:div(size(r,1),2) loop
+            for j in size(r[g(i)].x) loop
+                y := y + r[i].x[j];
+            end for;
+        end for;
+        annotation(Inline=false);
+    end f;
+    
+    Real y = f({R({time})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc51",
+            description="Scalarizing temporary in size expression",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc51
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc51.f({FunctionTests.ArrayExpInFunc51.R({time})});
+
+public
+ function FunctionTests.ArrayExpInFunc51.f
+  input FunctionTests.ArrayExpInFunc51.R[:] r;
+  output Real y;
+  Integer[:] temp_1;
+  Integer[:] temp_2;
+ algorithm
+  for i in 1:div(size(r, 1), 2) loop
+   init temp_1 as Integer[2];
+   temp_1[1] := max(integer(2 * i - i) + 1, 0);
+   init temp_2 as Integer[max(integer(2 * i - i) + 1, 0)];
+   (temp_2) := FunctionTests.ArrayExpInFunc51.g(i);
+   temp_1[2] := size(r[temp_2[1]].x, 1);
+   for j in temp_1 loop
+    y := y + r[i].x[j];
+   end for;
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc51.f;
+
+ function FunctionTests.ArrayExpInFunc51.g
+  input Integer x;
+  output Integer[:] y;
+ algorithm
+  init y as Integer[max(integer(2 * x - x) + 1, 0)];
+  for i1 in 1:max(integer(2 * x - x) + 1, 0) loop
+   y[i1] := x + (i1 - 1);
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc51.g;
+
+ record FunctionTests.ArrayExpInFunc51.R
+  Real x[:];
+ end FunctionTests.ArrayExpInFunc51.R;
+
+end FunctionTests.ArrayExpInFunc51;
+")})));
+end ArrayExpInFunc51;
+
+model ArrayExpInFunc52
+    // This test gives wrong result a getArray call is not 
+    // cached due boundariescrossed changing during computation.
+    // Looks like the expressions in the type on flat function call
+    // are not final. 
+
+    record R
+        Integer[:] x;
+    end R;
+    
+    function g
+        input Integer[:] x;
+        output Integer[:] y = x;
+        algorithm
+    end g;
+    
+    function f
+        input R[:] r;
+        output Integer[:] y = size(r[g(r[1].x)].x);
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real[:] y = f({R({1})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc52",
+            description="Scalarizing temporary in size expression",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc52
+ constant Real y[1] = 1;
+ parameter Real y[2];
+parameter equation
+ ({, y[2]}) = FunctionTests.ArrayExpInFunc52.f({FunctionTests.ArrayExpInFunc52.R({1})});
+
+public
+ function FunctionTests.ArrayExpInFunc52.f
+  input FunctionTests.ArrayExpInFunc52.R[:] r;
+  output Integer[:] y;
+  Integer[:] temp_1;
+ algorithm
+  init y as Integer[2];
+  init temp_1 as Integer[size(r[1].x, 1)];
+  (temp_1) := FunctionTests.ArrayExpInFunc52.g(r[1].x);
+  y[1] := size(r[1].x, 1);
+  y[2] := size(r[temp_2[1]].x, 1);
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc52.f;
+
+ function FunctionTests.ArrayExpInFunc52.g
+  input Integer[:] x;
+  output Integer[:] y;
+ algorithm
+  init y as Integer[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc52.g;
+
+ record FunctionTests.ArrayExpInFunc52.R
+  discrete Integer x[:];
+ end FunctionTests.ArrayExpInFunc52.R;
+
+end FunctionTests.ArrayExpInFunc52;
+")})));
+end ArrayExpInFunc52;
+
 
 model ArrayOutputScalarization1
  function f
