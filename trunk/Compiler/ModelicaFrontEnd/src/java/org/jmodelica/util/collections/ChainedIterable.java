@@ -19,7 +19,10 @@ package org.jmodelica.util.collections;
 import java.util.Iterator;
 
 public class ChainedIterable<T> implements Iterable<T> {
+
     private Iterable<? extends T>[] its;
+
+    @SafeVarargs // This is safe, we never edit the array!
     public ChainedIterable(Iterable<? extends T> ... its) {
         this.its = its;
     }
@@ -29,6 +32,6 @@ public class ChainedIterable<T> implements Iterable<T> {
         Iterator<? extends T>[] iterators = new Iterator[its.length];
         for (int i = 0; i < its.length; i++)
             iterators[i] = its[i].iterator();
-        return new ChainedIterator(iterators);
+        return new ChainedIterator<T>(iterators);
     }
 }
