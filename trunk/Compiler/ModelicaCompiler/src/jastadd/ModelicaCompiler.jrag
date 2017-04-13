@@ -729,7 +729,7 @@ public class ModelicaCompiler {
     /**
      * Creates a target object.
      * 
-     * @param target The type of target: me, cs, jmu, ect. Use nocodegen for a NOCODEGEN target.
+     * @param target The type of target: me, cs, ect. Use nocodegen for a NOCODEGEN target.
      * @param version The version in case of a fmu. Use null for a NOCODEGEN.
      */
     public TargetObject createTargetObject(String target, String version) {
@@ -770,26 +770,10 @@ public class ModelicaCompiler {
     }
 
     /**
-     * Compiles a model and creates a JMU, convenience method for compileUnit.
+     * Compiles a FMU or FMUX. Is a wrapper.
      * 
      * Compiles a model (parsing, instantiating, flattening, code generation and 
-     * binary file compilation) and packs the result in a JMU.
-     * 
-     * @param className Name of model class in the model file to compile.
-     * @param fileName Array of model file or library paths.
-     * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
-     * @return the path to the compiled JMU, if successful 
-     */
-    public String compileJMU(String className, String fileName[], String compileTo) 
-            throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        return compileUnit(className, fileName, "jmu", null, compileTo);
-    }
-
-    /**
-     * Compiles a JMU, FMU or FMUX. Is a wrapper.
-     * 
-     * Compiles a model (parsing, instantiating, flattening, code generation and 
-     * binary file compilation) and packs the result in a FMU/JMU/FMUX.
+     * binary file compilation) and packs the result in a FMU/FMUX.
      * 
      * @param className Name of model class in the model file to compile.
      * @param fileName Array of model file or library paths.
@@ -808,7 +792,7 @@ public class ModelicaCompiler {
     }
 
     /**
-     * Compiles a JMU, FMU or FMUX.
+     * Compiles a FMU or FMUX.
      * 
      * @param className Name of model class in the model file to compile.
      * @param fileName Array of model file or library paths.
@@ -908,7 +892,7 @@ public class ModelicaCompiler {
     }
 
     /**
-     * Packs either a JMU or FMU (helper function for compileUnit).
+     * Packs a FMU (helper function for compileUnit).
      * 
      * @param className  Name of model class that was compiled (will determine file names).
      * @param path       Location on file system where the packed file should be saved (created if does not exist).
@@ -1647,10 +1631,7 @@ public class ModelicaCompiler {
         // Compile model
         try {
             String targetType = programarguments.get("target");
-            if (targetType == null) {
-                //If no target was set, assume jmu.
-                targetType = "jmu";
-            } else if (targetType.equals("fmume")) {
+            if (targetType == null || targetType.equals("fmume")) {
                 targetType = "me";
             } else if (targetType.equals("fmucs")) {
                 targetType = "cs";
@@ -1753,7 +1734,7 @@ public class ModelicaCompiler {
     }
     
     public enum TargetType {
-        FMUME10, FMUME20, FMUCS10, FMUCS20, FMUMECS20, JMU, FMUX, CEVAL, NULL
+        FMUME10, FMUME20, FMUCS10, FMUCS20, FMUMECS20, FMUX, CEVAL, NULL
     }
     
     /**
@@ -1768,7 +1749,6 @@ public class ModelicaCompiler {
         FMUCS10   (TargetType.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1),
         FMUCS20   (TargetType.FMUCS20,   "fmucs20",   "fmu",  XMLGeneratorHolder.FMI2),
         FMUMECS20 (TargetType.FMUMECS20, "fmumecs20", "fmu",  XMLGeneratorHolder.FMI2), 
-        JMU       (TargetType.JMU,       "jmu",       "jmu",  XMLGeneratorHolder.JMI),
         FMUX      (TargetType.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
         CHECK     (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
         PARSE     (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
@@ -1845,8 +1825,6 @@ public class ModelicaCompiler {
                 } else {
                     throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 2.0.");
                 }
-            } else if (targetType.equals("jmu")) {
-                return JMU;
             } else if (targetType.equals("fmux")) {
                 return FMUX;
             } else if (targetType.equals("ceval")){
@@ -1856,7 +1834,7 @@ public class ModelicaCompiler {
             } else if (targetType.equals("check")) {
                 return CHECK;
             } else {
-                throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU, jmu to compile an JMU or fmux to compile an FMUX."); 
+                throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU or fmux to compile an FMUX."); 
             }
         }
         
@@ -1957,16 +1935,6 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_fmi_me_xml", true);
                                     options.setBooleanOption("generate_fmi_cs_xml", true);
                                     options.setBooleanOption("generate_xml_equations", false);
-                                    break;
-                                case JMU:
-                                    options.setBooleanOption("generate_ode", false);
-                                    options.setBooleanOption("generate_dae", true);
-                                    options.setBooleanOption("equation_sorting", false);
-                                    options.setBooleanOption("generate_fmi_me_xml", false);
-                                    options.setBooleanOption("generate_fmi_cs_xml", false);
-                                    options.setBooleanOption("generate_xml_equations", false);
-                                    options.setBooleanOption("relational_time_events", false);
-                                    options.setStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME);
                                     break;
                                 case FMUX:
                                     options.setBooleanOption("generate_ode", false);
@@ -2281,7 +2249,6 @@ public class Templates {
     protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
         "Compiler/ModelicaCBackEnd/templates",
         "Compiler/ModelicaFMUXBackEnd/templates",
-        "Compiler/OptimicaCBackEnd/templates",
         "Compiler/OptimicaFMUXBackEnd/templates",
     };
 
@@ -2301,9 +2268,6 @@ public class Templates {
         case FMUMECS20:
             templates = new String[] { null, "fmi2_master_modelica_template.c" };
             fmuTemplate = true;
-            break;
-        case JMU:
-            templates = new String[] { "jmodelica_model_description.tpl", "jmi_modelica_template.c" };
             break;
         case FMUX:
             templates = new String[] { "jmodelica_model_description.tpl" };
@@ -3081,8 +3045,6 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         String filesep = File.separator;
         vars.put("FILE_NAME", fileName);
         vars.put("JMODELICA_HOME", ModelicaCompiler.getJModelicaHome().getPath());
-        vars.put("CPPAD_HOME", getEnv().get("CPPAD_HOME"));
-        vars.put("IPOPT_HOME", getEnv().get("IPOPT_HOME"));
         vars.put("SUNDIALS_HOME", getEnv().get("SUNDIALS_HOME"));
         vars.put("EXT_LIBS", varFromList(ext_libs) != null ?
                       (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);

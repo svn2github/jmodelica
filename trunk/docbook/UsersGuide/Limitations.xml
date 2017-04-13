@@ -162,30 +162,5 @@
         </itemizedlist></para>
     </listitem>
 
-    <listitem>
-      <para>The following limitations apply to JMUs compiled with
-      JModelica.org (note that JMUs are deprecated in JModelica.org
-      1.15):</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>The ODE interface requires the Modelica model to be written on
-          explicit ODE form in order to work.</para>
-        </listitem>
-
-        <listitem>
-          <para>Second order derivatives (Hessians) are not provided.</para>
-        </listitem>
-
-        <listitem>
-          <para>The interface for interacting with JMUs does not comply with
-          FMI specification.</para>
-        </listitem>
-
-        <listitem>
-          <para>Discrete variables are not supported in JMUs.</para>
-        </listitem>
-      </itemizedlist>
-    </listitem>
   </itemizedlist>
 </chapter>

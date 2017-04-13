@@ -30,7 +30,6 @@ import nose.tools
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler_wrappers import ModelicaCompiler
 from pymodelica.compiler_wrappers import OptimicaCompiler
-from pymodelica import compile_jmu
 from pymodelica import compile_fmu
 import pymodelica as pym
 
@@ -52,31 +51,6 @@ class Test_Compiler:
         cls.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack.mop')
         cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
-            
-    @testattr(stddist = True)
-    def test_compile_JMU(self):
-        """
-        Test that it is possible to compile a JMU from a .mo file with 
-        ModelicaCompiler.
-        """
-        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'jmu', None,  '.')
-        
-        fname = Test_Compiler.cpath_mc.replace('.','_',1)
-        assert os.access(fname+'.jmu',os.F_OK) == True, fname+'.jmu'+" was not created."
-        os.remove(fname+'.jmu')
-
-    @testattr(stddist = True)
-    def test_optimica_compile_JMU(self):
-        """
-        Test that it is possible to compile a JMU from a .mop file with 
-        OptimicaCompiler. 
-        """     
-        Test_Compiler.oc.compile_Unit(Test_Compiler.cpath_oc, [Test_Compiler.fpath_oc], 'jmu', None, '.')
-        
-        fname = Test_Compiler.cpath_oc.replace('.','_',1)
-        assert os.access(fname+'.jmu',os.F_OK) == True, \
-               fname+'.jmu'+" was not created."
-        os.remove(fname+'.jmu')
     
     @testattr(stddist = True)
     def test_compile_FMUME10(self):
@@ -156,32 +130,18 @@ class Test_Compiler:
         fclass = Test_Compiler.oc.flatten_model(icd, target)
         Test_Compiler.oc.generate_code(fclass, target)
 
-    @testattr(stddist = True)
-    def test_compiler_error(self):
-        """ Test that a CompilerError is raised if compilation errors are found in the model."""
-        path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
-        cl = 'CorruptCodeGenTests.CorruptTest1'
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.mc.compile_Unit, cl, [path], 'jmu', None, '.')
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_Unit, cl, [path], 'jmu', None, '.')
-
     '''
     @testattr(stddist = True)
     def test_class_not_found_error(self):
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
         errorcl = 'NonExisting.Class'
-        nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, Test_Compiler.mc.compile_JMU, errorcl, [self.fpath_mc], '.')
-        nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, Test_Compiler.oc.compile_JMU, errorcl, [self.fpath_oc], '.')
         nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, pym.compile_fmu, errorcl, self.fpath_mc, separate_process=True)
-        nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, pym.compile_jmu, errorcl, self.fpath_oc, separate_process=True)
 
     @testattr(stddist = True)
     def test_IO_error(self):
         """ Test that an IOError is raised if the model file is not found. """
         errorpath = os.path.join(get_files_path(), 'Modelica','NonExistingModel.mo')
-        nose.tools.assert_raises(IOError, Test_Compiler.mc.compile_JMU, Test_Compiler.cpath_mc, [errorpath], '.')
-        nose.tools.assert_raises(IOError, Test_Compiler.oc.compile_JMU, Test_Compiler.cpath_oc, [errorpath], '.')
         nose.tools.assert_raises(IOError, pym.compile_fmu, Test_Compiler.cpath_mc, errorpath, separate_process=True)
-        nose.tools.assert_raises(IOError, pym.compile_jmu, Test_Compiler.cpath_oc, errorpath, separate_process=True)
     '''
     @testattr(stddist = True)
     def test_setget_modelicapath(self):
@@ -197,13 +157,6 @@ class Test_Compiler:
         lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
         opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
         Test_Compiler.oc.parse_model([lib, opt])
-
-    @testattr(stddist = True)
-    def test_compile_multiple(self):
-        """ Test that it is possible to compile two model files. """
-        lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
-        opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
-        Test_Compiler.oc.compile_Unit('CSTR2_Opt', [lib,opt], 'jmu', None, '.')
 
     @testattr(stddist = True)
     def test_setget_boolean_option(self):
@@ -287,19 +240,6 @@ class Test_Compiler:
         option = 'nonexist_real'
         #try to get an unknown option
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_string_option, option)
-            
-    @testattr(stddist = True)
-    def test_compile_no_mofile(self):
-        """ 
-        Test that compiling without mo-file (load class from libraries in 
-        MODELICAPATH) works.
-        """
-        cpath = "Modelica.Electrical.Analog.Examples.CauerLowPassAnalog"
-        Test_Compiler.mc.compile_Unit(cpath, [], 'jmu', None, '.')        
-        fname = cpath.replace('.','_')
-        assert os.access(fname+'.jmu',os.F_OK) == True, \
-               fname+'.jmu'+" was not created."
-        os.remove(fname+'.jmu')
 
     @testattr(stddist = True)
     def TO_ADDtest_MODELICAPATH(self):
@@ -386,31 +326,6 @@ class Test_Compiler_functions:
         assert os.access(fmuname, os.F_OK) == True, \
                fmuname+" was not created."
         os.remove(fmuname)
-    
-    @testattr(stddist = True)
-    def test_compile_jmu(self):
-        """
-        Test that it is possible to compile a JMU from a .mop file with 
-        pymodelica.compile_jmu.
-        """
-        jmuname = compile_jmu(Test_Compiler_functions.cpath_oc, Test_Compiler_functions.fpath_oc, 
-            separate_process=False)
-
-        assert os.access(jmuname, os.F_OK) == True, \
-               jmuname+" was not created."
-        os.remove(jmuname)
-    
-    @testattr(stddist = True)
-    def test_compile_jmu_separate_process(self):
-        """
-        Test that it is possible to compile a JMU from a .mop file with 
-        pymodelica.compile_jmu using separate process.
-        """
-        jmuname = compile_jmu(Test_Compiler_functions.cpath_oc, Test_Compiler_functions.fpath_oc)
-
-        assert os.access(jmuname, os.F_OK) == True, \
-               jmuname+" was not created."
-        os.remove(jmuname)
 
     @testattr(stddist = True)
     def test_compiler_error(self):
@@ -418,7 +333,6 @@ class Test_Compiler_functions:
         path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
         cl = 'CorruptCodeGenTests.CorruptTest1'
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path)
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path)
     
     @testattr(stddist = True)
     def test_compiler_modification_error(self):

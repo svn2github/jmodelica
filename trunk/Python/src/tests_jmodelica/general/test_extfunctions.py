@@ -73,8 +73,8 @@ class TestUtilities:
         """
         fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
         cpath = "ExtFunctionTests.ExtFunctionTest3"
-        jmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
-        model = load_fmu(jmu_name)
+        fmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(fmu_name)
         #model.simulate()
 
 class TestExternalShared:

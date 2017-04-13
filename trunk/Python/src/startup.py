@@ -29,7 +29,6 @@ Required keys:
   'JMODELICA_HOME' : Path to JModelica.org installation directory
   'IPOPT_HOME' : Path to Ipopt installation directory
   'SUNDIALS_HOME' : Path to Sundials installation directory
-  'CPPAD_HOME' : Path to Cpp_AD installation directory
   'MINGW_HOME' : Path to mingw installation directory (only win32)
   'COMPILER_JARS' : Paths to compiler jar files (path-separated depending on operating system)
   'BEAVER_LIB' : Path to Beaver lib directory
@@ -79,7 +78,6 @@ _no_inst_msg = ' installation could not be found, some modules and examples will
 # Format of _expected_env item: (name, should_split, default, error_msg_if_not_set)  
 _expected_env = [('IPOPT_HOME',    False, '', 'An IPOPT' + _no_inst_msg),
                  ('SUNDIALS_HOME', False, '', 'A SUNDIALS' + _no_inst_msg),
-                 ('CPPAD_HOME',    False, os.path.join(_jm_home,'ThirdParty','CppAD')),
                  ('COMPILER_JARS', True,  COMPILER_JARS),
                  ('BEAVER_PATH',   False, os.path.join(_jm_home,'ThirdParty','Beaver','lib')),
                  ('MODELICAPATH',  True,  os.path.join(_jm_home,'ThirdParty','MSL')),

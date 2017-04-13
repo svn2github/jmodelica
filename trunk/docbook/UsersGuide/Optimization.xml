@@ -152,7 +152,7 @@ plt.show()
     <para>The first step when solving an optimization problem is to formulate
     a model and an optimization specification and then compile the model as
     described in the following sections in this chapter. There are currently
-    three different optimization algorithms available in JModelica.org, which
+    two different optimization algorithms available in JModelica.org, which
     are suitable for different classes of optimization problems.</para>
 
     <itemizedlist>
@@ -162,9 +162,7 @@ plt.show()
         algorithm for solving optimal control and parameter estimation
         problems. It is implemented in Python, uses CasADi for computing
         function derivatives and the nonlinear programming solvers IPOPT or
-        WORHP for solving the resulting NLP. In terms of functionality, this
-        algorithm is very similar to the deprecated JMU-based algorithm, but
-        offers significant performance improvements in several regards. Use
+        WORHP for solving the resulting NLP. Use
         this method if your model is a DAE and does not contain
         discontinuities.</para>
       </listitem>
@@ -181,13 +179,6 @@ plt.show()
         as FMUs also by other tools than JModelica.org.</para>
       </listitem>
 
-      <listitem>
-        <para><emphasis role="bold">Dynamic optimization of DAEs using direct
-        collocation with JMUs (Deprecated in JModelica.org 1.15)</emphasis>.
-        This algorithm is implemented in C, uses CppAD for computing function
-        derivatives and IPOPT for solving the resulting nonlinear program
-        (NLP).</para>
-      </listitem>
     </itemizedlist>
 
     <para>To illustrate how to solve optimization problems the Van der Pol

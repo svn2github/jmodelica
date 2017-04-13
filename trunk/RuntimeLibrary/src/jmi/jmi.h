@@ -501,7 +501,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
 int jmi_destruct_external_objs(jmi_t* jmi);
 
 /**
- * \brief Get the name of the model that produced this FMU/JMU.
+ * \brief Get the name of the model that produced this FMU.
  */
 const char *jmi_get_model_identifier();
 

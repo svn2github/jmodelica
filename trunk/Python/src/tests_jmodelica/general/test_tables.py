@@ -37,7 +37,7 @@ class TestCombiTable1DArray(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'TablesTests.mo', 'TablesTest.Table1DfromArray', format='fmu')
+                'TablesTests.mo', 'TablesTest.Table1DfromArray')
 
     @testattr(stddist = True)
     def setUp(self):
@@ -56,7 +56,7 @@ class TestCombiTable2DArray(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'TablesTests.mo', 'TablesTest.Table2DfromArray', format='fmu')
+                'TablesTests.mo', 'TablesTest.Table2DfromArray')
 
     @testattr(stddist = True)
     def setUp(self):
@@ -77,7 +77,7 @@ class TestCombiTable1DFile(SimulationTest):
         cls.curr_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(path_to_mofiles)
         SimulationTest.setup_class_base(
-                'TablesTests.mo', 'TablesTest.Table1DfromFile', format='fmu')
+                'TablesTests.mo', 'TablesTest.Table1DfromFile')
     @classmethod
     def tearDownClass(cls):
         os.chdir(TestCombiTable1DFile.curr_dir)
@@ -101,7 +101,7 @@ class TestCombiTable2DFile(SimulationTest):
         cls.curr_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(path_to_mofiles)
         SimulationTest.setup_class_base(
-                'TablesTests.mo', 'TablesTest.Table2DfromFile', format='fmu')
+                'TablesTests.mo', 'TablesTest.Table2DfromFile')
                 
     @classmethod
     def tearDownClass(cls):

@@ -524,7 +524,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDSDerExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sjmi_ad_var_t %s;", indent, tempName_C());
+        str.formatln("%sjmi_real_t %s;", indent, tempName_C());
     }
 
     @Override
@@ -656,7 +656,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FReinit.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sstatic jmi_ad_var_t %s;", indent, tempName_C());
+        str.formatln("%sstatic jmi_real_t %s;", indent, tempName_C());
     }
 
     /**

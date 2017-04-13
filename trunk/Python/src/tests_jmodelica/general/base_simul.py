@@ -22,8 +22,7 @@ This file holds base classes for simulation and optimization tests.
 
 import os
 
-from pymodelica.compiler import compile_jmu, compile_fmu
-from pyjmi.jmi import JMUModel
+from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import load_fmu, FMUModelCS1, FMUModelME1
 from pyjmi.common.io import ResultDymolaTextual
 from tests_jmodelica import get_files_path
@@ -39,24 +38,18 @@ class _BaseSimOptTest:
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu',target="me"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, target="me"):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
-          format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
         global _model_name
         cls.mo_path = os.path.join(get_files_path(), 'Modelica', mo_file)
 
-        if format=='jmu':
-            _model_name = compile_jmu(class_name, cls.mo_path, compiler_options=options)
-        elif format=='fmu':
-            _model_name = compile_fmu(class_name, cls.mo_path, compiler_options=options,target=target)
-        else:
-            raise Exception("Format must be either 'jmu' or 'fmu'.")
+        _model_name = compile_fmu(class_name, cls.mo_path, compiler_options=options,target=target)
 
 
     def setup_base(self, rel_tol, abs_tol):
@@ -72,11 +65,7 @@ class _BaseSimOptTest:
         self.abs_tol = abs_tol
         self.model_name = _model_name
         parts = _model_name.split('.')
-        self.format = parts[len(parts)-1]
-        if self.format=='jmu':
-            self.model = JMUModel(self.model_name)
-        else:
-            self.model = load_fmu(self.model_name)
+        self.model = load_fmu(self.model_name)
 
     def run(self,cvode_options=None):
         """
@@ -84,7 +73,7 @@ class _BaseSimOptTest:
         Call this from setUp() or within a test depending if all tests should run simulation.
         """
         self._run_and_write_data(cvode_options)
-        self.data = ResultDymolaTextual(self.model_name[:-len('.jmu')] + '_result.txt')
+        self.data = ResultDymolaTextual(self.model_name[:-len('.fmu')] + '_result.txt')
 
 
     def load_expected_data(self, name):
@@ -255,16 +244,15 @@ class SimulationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'fmu',target="me"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, target="me"):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
-          format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, format,target)
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, target)
 
     def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
         start_time=0.0, final_time=10.0, time_step=0.01, input=(),
@@ -290,28 +278,20 @@ class SimulationTest(_BaseSimOptTest):
         Run optimization and write result to file.
         """
         
-        if self.format=='jmu':
+        if not cvode_options:
+            cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol}
+        
+        if isinstance(self.model, FMUModelME1):
             self.model.simulate(start_time=self.start_time,
                                 final_time=self.final_time,
-                                input = self.input,
+                                input=self.input,
                                 options={'ncp':self.ncp,
-                                         'write_scaled_result':self.write_scaled_result,
-                                        'IDA_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
-        elif self.format=='fmu':
-            if not cvode_options:
-                cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol}
-            
-            if isinstance(self.model, FMUModelME1):
-                self.model.simulate(start_time=self.start_time,
-                                    final_time=self.final_time,
-                                    input=self.input,
-                                    options={'ncp':self.ncp,
-                                             'CVode_options':cvode_options})
-            else:
-                self.model.simulate(start_time=self.start_time,
-                                    final_time=self.final_time,
-                                    input=self.input,
-                                    options={'ncp':self.ncp})
+                                         'CVode_options':cvode_options})
+        else:
+            self.model.simulate(start_time=self.start_time,
+                                final_time=self.final_time,
+                                input=self.input,
+                                options={'ncp':self.ncp})
 
 class OptimizationTest(_BaseSimOptTest):
     """
@@ -319,16 +299,15 @@ class OptimizationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu'):
+    def setup_class_base(cls, mo_file, class_name, options = {}):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
-          format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, options,format)
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options)
 
     def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, opt_options = {}):
         """ 

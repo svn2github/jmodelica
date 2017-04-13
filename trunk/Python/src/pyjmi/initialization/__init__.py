@@ -18,4 +18,4 @@
 """ 
 The JModelica Python Initialization toolkit. 
 """
-__all__=['ipopt','assimulo_interface']
+__all__=['ipopt']

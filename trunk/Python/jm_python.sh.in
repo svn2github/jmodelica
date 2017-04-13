@@ -5,7 +5,6 @@ if test "${JAVA_HOME}" = ""; then
 fi
 JMODELICA_HOME=@prefix@ \
 IPOPT_HOME=@IPOPT_HOME@ \
-CPPAD_HOME=@prefix@/ThirdParty/CppAD/ \
 SUNDIALS_HOME=@prefix@/ThirdParty/Sundials \
 PYTHONPATH=:@prefix@/Python/:@CASADI_HOME@:$PYTHONPATH \
 LD_LIBRARY_PATH=:@IPOPT_HOME@/lib/:@prefix@/ThirdParty/Sundials/lib:@prefix@/ThirdParty/CasADi/lib:$LD_LIBRARY_PATH \

@@ -98,7 +98,7 @@
 typedef struct _jmi_time_event_t {
     int defined;
     int phase;
-    jmi_ad_var_t time;
+    jmi_real_t time;
 } jmi_time_event_t;
 
 /**

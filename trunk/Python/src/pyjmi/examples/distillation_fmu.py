@@ -45,7 +45,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    # Compile the stationary initialization model into a JMU
+    # Compile the stationary initialization model into a FMU
     fmu_name = compile_fmu('DISTLib.Examples.Simulation', 
         os.path.join(curr_dir, 'files', 'DISTLib.mo'))
 
