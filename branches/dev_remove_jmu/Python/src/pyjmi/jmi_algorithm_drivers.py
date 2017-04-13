@@ -43,15 +43,9 @@ except:
     assimulo_present = False
 
 if assimulo_present:
-    from pyjmi.simulation.assimulo_interface import JMIDAE
-    from pyjmi.simulation.assimulo_interface import JMIDAESens
-    from pyjmi.simulation.assimulo_interface import write_data
     import assimulo.solvers as solvers
     from assimulo.implicit_ode import Implicit_ODE
     from assimulo.kinsol import KINSOL
-    from pyjmi.initialization.assimulo_interface import JMUAlgebraic
-    from pyjmi.initialization.assimulo_interface import JMUAlgebraic_Exception
-    from pyjmi.initialization.assimulo_interface import write_resdata
 
 try:
     import pyjmi
