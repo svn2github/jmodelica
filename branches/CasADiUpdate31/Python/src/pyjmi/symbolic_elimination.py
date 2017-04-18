@@ -312,12 +312,12 @@ class Component(object):
             [casadi.vertcat(*self.eq_expr)]
         )
         jac_f = res_f.jacobian()
-        sp = jac_f.sparsity_jac().transpose()[0]
+        sp = jac_f.sparsity_jac()
         is_linear = sp.nnz() == 0
         
         # Identify nonlinear edges
         [rows, cols] = map(np.array, sp.get_triplet())
-        rows = rows / self.n
+        rows = rows % self.n
         for (row, col) in itertools.izip(rows, cols):
             found_edges = 0
             for edge in edges:
