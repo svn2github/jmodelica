@@ -788,7 +788,7 @@
                                     <isset property="@{module}.@{scanner}.package" />
                                     <then>
                                         <var name="scanners.package" value="${@{module}.@{scanner}.package}" />
-                                        <propertyregex property="scanners.package_dir" input="${scanners.package}" defaultValue="${scanners.package}" regexp="\." replace="/" global="true" />
+                                        <propertyregex property="scanners.package_dir" input="${scanners.package}" defaultValue="${scanners.package}" regexp="\." replace="/" global="true" override="true" />
                                         <var name="scanners.output" value="${java_output}/${scanners.package_dir}" />
                                         <mkdir dir="${scanners.output}" />
                                     </then>

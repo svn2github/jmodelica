@@ -26,6 +26,7 @@
 int fmi2_cs_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data);
 int fmi2_cs_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data);
 int fmi2_cs_completed_integrator_step(char* step_event, char* terminate, void* problem_data);
+jmi_ode_status_t fmi2_cs_event_update(jmi_ode_problem_t *problem);
 
 fmi2Status fmi2_set_real_input_derivatives(fmi2Component c, 
                                            const fmi2ValueReference vr[],
@@ -64,11 +65,8 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
     jmi_cs_data_t* cs_data;
     jmi_cs_real_input_t* real_inputs;
     int flag;
-	fmi2Real time_event;
     size_t i;
-
-	int initialize = FALSE;
-	jmi_ode_status_t retval = JMI_ODE_STATE_EVENT;
+    jmi_ode_status_t retval;
     fmi2Real time_final = currentCommunicationPoint + communicationStepSize;
 
     
@@ -77,12 +75,15 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
     }
 
 	if (((fmi2_me_t*)c)->fmu_mode != slaveInitialized) {
-		jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only do a step if the model is an initialized slave.");
+		jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+            "Can only do a step if the model is an initialized slave.");
         return fmi2Error;
 	}
 
     if (((fmi2_me_t*)c)->stopTime < time_final-JMI_ALMOST_EPS*time_final) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot take a step past the <stop_time: %g>. Asked <final_time: %g>.", ((fmi2_me_t*)c)->stopTime);
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "DoStep",
+            "Cannot take a step past the <stop_time: %g>. Asked <final_time: %g>.",
+            ((fmi2_me_t*)c)->stopTime, time_final);
         return fmi2Error;
     }
 
@@ -98,97 +99,20 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
             flag = fmi2_get_real(cs_data->fmix_me, &(real_inputs[i].vr),
                                  1, &(real_inputs[i].value));
             if (flag != fmi2OK) {
-                jmi_log_comment(ode_problem->log, logError,
+                jmi_log_node(ode_problem->log, logError, "CoSimulationInputs",
                     "Failed to get the current value of real inputs.");
                 return fmi2Error;
             }
         }
     }
-    
-    while (retval == JMI_ODE_STATE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final) {
 
-        while (fmi2_cs->event_info.newDiscreteStatesNeeded ||
-               fmi2_cs->cs_data->triggered_external_event)
-        {
-            flag = fmi2_new_discrete_state(cs_data->fmix_me, &(fmi2_cs->event_info));
-            initialize = TRUE; /* Event detected, need to initialize the ODE problem. */
-
-            if (flag != fmi2OK) {
-                jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
-                return fmi2Error;
-            }
-            
-            fmi2_cs->cs_data->triggered_external_event = FALSE;
-        }
-        
-        /* Check if the simulation should be terminated. */
-        if (fmi2_cs->event_info.terminateSimulation) {
-            jmi_log_node(ode_problem->log, logInfo, "Terminate", "Terminating simulation after a signal from the model at <t:%E>.", ode_problem->time);
-            return fmi2Discard;
-        }
-        
-        /* We need the values of the continuous states to initialize, no need to check 'valuesOfContinuousStatesChanged'. */
-        if (initialize) {
-            flag = fmi2_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
-            
-            if (flag != fmi2OK) {
-                jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the continuous states.");
-                return fmi2Error;
-            }
-        }
-        
-        /* Check if the nominal values have changed. */
-        if (fmi2_cs->event_info.nominalsOfContinuousStatesChanged) {
-            flag = fmi2_get_nominals_of_continuous_states(cs_data->fmix_me, ode_problem->nominals, ode_problem->sizes.states);
-            if (flag != fmi2OK) {
-                jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
-                return fmi2Error;
-            }
-            fmi2_cs->event_info.nominalsOfContinuousStatesChanged = fmi2False;
-        }
-        
-        /* Check if there are upcoming time events. */
-        if (fmi2_cs->event_info.nextEventTimeDefined) {
-            if(fmi2_cs->event_info.nextEventTime < time_final) {
-                time_event = fmi2_cs->event_info.nextEventTime;
-            } else {
-                time_event = time_final;
-            }
-        } else {
-            time_event = time_final;
-        }
-        
-        retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_event, initialize);
-        initialize = FALSE; /* The ODE problem has been initialized. */
-        if (retval == JMI_ODE_ERROR) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
-            return fmi2Error;
-        } else if (retval == JMI_ODE_TERMINATE) {
-            return fmi2Discard; /* ODE, solver will log termination */
-        }
-        
-        /* Set time to the model */
-        flag = fmi2_set_time(cs_data->fmix_me, ode_problem->time);
-        if (flag != fmi2OK) {
-            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the time.");
-            return fmi2Error;
-        }
-        
-        /* Set states to the model */
-        flag = fmi2_set_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
-        if (flag != fmi2OK) {
-            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
-            return fmi2Error;
-        }
-        
-        if (retval == JMI_ODE_STATE_EVENT || 
-            (retval == JMI_ODE_OK && time_event != time_final) ||
-            (retval == JMI_ODE_OK && fmi2_cs->event_info.nextEventTimeDefined &&
-             fmi2_cs->event_info.nextEventTime == time_final))
-        {
-            fmi2_cs->event_info.newDiscreteStatesNeeded = fmi2True; /* Finished with an event -> new discrete states needed. */
-            retval = JMI_ODE_STATE_EVENT;
-        }
+    retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_final);
+    if (retval == JMI_ODE_ERROR) {
+        jmi_log_node(ode_problem->log, logError, "DoStep",
+                    "Failed to perform a step.");
+        return fmi2Error;
+    } else if (retval == JMI_ODE_TERMINATE) {
+        return fmi2Discard; /* ODE, solver will log termination */
     }
     
     /* De-activate real inputs as they are no longer valid */
@@ -265,8 +189,9 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
     ode_callbacks.rhs_func = fmi2_cs_rhs_fcn;
     ode_callbacks.root_func = fmi2_cs_root_fcn;
     ode_callbacks.complete_step_func = fmi2_cs_completed_integrator_step;
+    ode_callbacks.event_update_func = fmi2_cs_event_update;
     ode_sizes.states = jmi->n_real_x;
-    ode_sizes.root_fnc = jmi->n_relations;
+    ode_sizes.event_indicators = jmi->n_relations;
     fmi2_cs->cs_data = jmi_new_cs_data(c, jmi->n_real_u);
     fmi2_cs -> ode_problem = jmi_new_ode_problem(&jmi->jmi_callbacks,
         fmi2_cs->cs_data, ode_callbacks, ode_sizes, jmi->log);
@@ -363,7 +288,7 @@ int fmi2_cs_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_size
         return -1;
     }
     
-    retval = fmi2_get_event_indicators(cs_data->fmix_me, root, sizes.root_fnc);
+    retval = fmi2_get_event_indicators(cs_data->fmix_me, root, sizes.event_indicators);
     if (retval != fmi2OK) {
         return -1;
     }
@@ -386,4 +311,52 @@ int fmi2_cs_completed_integrator_step(char* step_event, char* terminate, void* p
     }
     
     return 0;
+}
+
+jmi_ode_status_t fmi2_cs_event_update(jmi_ode_problem_t *problem) {
+    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem->problem_data;
+    fmi2EventInfo event_info;
+    fmi2Status flag;
+    fmi2Boolean tmpNominalsOfContinuousStatesChanged = fmi2False;
+    fmi2Boolean tmpValuesOfContinuousStatesChanged = fmi2False;
+
+    event_info.newDiscreteStatesNeeded = fmi2True;
+    while (event_info.newDiscreteStatesNeeded) {
+        flag = fmi2_new_discrete_state(cs_data->fmix_me, &event_info);
+        if (flag != fmi2OK) {
+            jmi_log_node(problem->log, logError, "Error", "Failed to handle the event.");
+            return JMI_ODE_ERROR;
+        }
+        
+        if (event_info.nominalsOfContinuousStatesChanged) {
+            tmpNominalsOfContinuousStatesChanged = fmi2True;
+        }
+        if (event_info.valuesOfContinuousStatesChanged) {
+            tmpValuesOfContinuousStatesChanged = fmi2True;
+        }
+        if (event_info.terminateSimulation) {
+            return JMI_ODE_TERMINATE;
+        }
+    }
+    event_info.nominalsOfContinuousStatesChanged = tmpNominalsOfContinuousStatesChanged;
+    event_info.valuesOfContinuousStatesChanged = tmpValuesOfContinuousStatesChanged;
+
+    flag = fmi2_get_continuous_states(cs_data->fmix_me, problem->states, problem->sizes.states);
+    if (flag != fmi2OK) {
+        jmi_log_node(problem->log, logError, "Error", "Failed to get the continuous states.");
+        return JMI_ODE_ERROR;
+    }
+        
+    /* Nominals cannot change for current implementation */
+    problem->event_info.nominals_updated = FALSE;
+    /* Check if there are upcoming time events */
+    if (event_info.nextEventTimeDefined) {
+        problem->event_info.exists_time_event = 1;
+        problem->event_info.next_time_event = event_info.nextEventTime;
+    } else {
+        problem->event_info.exists_time_event = 0;
+        problem->event_info.next_time_event = JMI_INF;
+    }
+
+    return JMI_ODE_OK;
 }

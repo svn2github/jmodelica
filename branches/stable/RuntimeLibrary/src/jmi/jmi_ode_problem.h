@@ -30,7 +30,7 @@
 
 typedef struct {
     size_t states;
-    size_t root_fnc;
+    size_t event_indicators;
 } jmi_ode_sizes_t;
 
 /**
@@ -43,7 +43,7 @@ typedef struct {
  * @param problem_data Opac callback data depending on implementation.
  * @return Error code.
   */
-typedef int (*rhs_func_t)(jmi_real_t t, jmi_real_t* y, jmi_real_t* rhs, jmi_ode_sizes_t sizes, void* problem_data);
+typedef int (*jmi_rhs_func_t)(jmi_real_t t, jmi_real_t* y, jmi_real_t* rhs, jmi_ode_sizes_t sizes, void* problem_data);
 
 /**
  * \brief An ode root-function signature.
@@ -55,7 +55,7 @@ typedef int (*rhs_func_t)(jmi_real_t t, jmi_real_t* y, jmi_real_t* rhs, jmi_ode_
  * @param problem_data Opac callback data depending on implementation.
  * @return Error code.
   */
-typedef int (*root_func_t)(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data);
+typedef int (*jmi_root_func_t)(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data);
 
 /**
  * \brief An ode complete-step-function signature.
@@ -65,13 +65,28 @@ typedef int (*root_func_t)(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_od
  * @param problem_data Opac callback data depending on implementation.
  * @return Error code.
   */
-typedef int (*complete_step_func_t)(char* step_event, char* termiante, void* problem_data);
+typedef int (*jmi_complete_step_func_t)(char* step_event, char* termiante, void* problem_data);
+
+/**
+ * \brief An ode event update function called after state, time or step-event is detected
+ *
+ * @param ode_problem The jmi_ode_problem_t struct.
+ * @return Error code, should not return JMI_ODE_EVENT.
+  */
+typedef jmi_ode_status_t (*jmi_event_update_func_t)(jmi_ode_problem_t* ode_problem);
 
 typedef struct {
-    rhs_func_t            rhs_func;             /**< \brief A callback function for the rhs of the ODE problem. */
-    root_func_t           root_func;            /**< \brief A callback function for the root of the ODE problem. */
-    complete_step_func_t  complete_step_func;   /**< \brief A callback function for completing the step. */
+    jmi_rhs_func_t            rhs_func;             /**< \brief A callback function for the rhs of the ODE problem. */
+    jmi_root_func_t           root_func;            /**< \brief A callback function for the root of the ODE problem. */
+    jmi_complete_step_func_t  complete_step_func;   /**< \brief A callback function for completing the step. */
+    jmi_event_update_func_t   event_update_func;    /**< \brief A callback function for updating at events. */
 } jmi_ode_callbacks_t;
+
+typedef struct {
+    int nominals_updated;
+    int exists_time_event;
+    jmi_real_t next_time_event;
+} jmi_ode_event_info_t;
 
 struct jmi_ode_problem_t {
     jmi_callbacks_t*      jmi_callbacks;        /**< \brief A pointer to the jmi_callbacks_t struct */
@@ -81,6 +96,7 @@ struct jmi_ode_problem_t {
     
     jmi_ode_callbacks_t   ode_callbacks;        /**< \brief Struct with all ODE callback functions. */
     
+    jmi_ode_event_info_t  event_info;
     jmi_ode_sizes_t       sizes;                /**< \brief The dimensions of the ODE problem. */
     jmi_real_t            time;                 /**< \brief The time, independent variable of the ODE. */
     jmi_real_t*           states;               /**< \brief The states of the ODE. */

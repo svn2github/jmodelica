@@ -39,7 +39,6 @@ typedef struct {
     jmi_cs_real_input_t* real_inputs;   /**< \brief List of real inputs with derivative information */
     size_t n_real_inputs;               /**< \brief Number of real inputs in real_inputs list */
     
-    int triggered_external_event;       /**< \brief Flag indicating if any discrete inputs have been changed */
     void* fmix_me;                      /**< \brief The underlying Model Exchange/ODE implementation */
 } jmi_cs_data_t;
 

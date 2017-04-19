@@ -24,7 +24,8 @@ public class ChainedIterator<E> implements Iterator<E> {
 	private Iterator<? extends E>[] its;
 	private int i;
 	
-	public ChainedIterator(Iterator<? extends E>... its) {
+    @SafeVarargs // This is safe, we never edit the array!
+    public ChainedIterator(Iterator<? extends E>... its) {
 		this.its = its;
 	}
 

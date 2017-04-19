@@ -31,9 +31,6 @@
 #   JMODELICA_HOME        (mandatory) The directory where JModelica has been built,
 #                         or equivalently, the directory of a binary JModelica
 #                         distribution.
-#   CPPAD_HOME            (mandatory) The directory of CppAD.
-#   IPOPT_HOME            (mandatory if BUILD_WITH_ALGORITHMS=true) An IPOPT build
-#                         directory.
 #   SUNDIALS_HOME         (mandatory) The directory of Sundials.
 #   EXT_LIB_DIRS          List of external library directories.
 #   EXT_LIBS              List of external libraries.
@@ -42,8 +39,6 @@
 #                         Format is (with e1.c and e2.c) "e1:O2:pedantic e2:O1"
 #
 # The following targets are supported:
-#    jmu          Build a shared object file including the low level JMI interface 
-#                 (contained in jmi.a), JMI algorithms and the Ipopt algorithm.
 #    fmume10      Build a shared object file containing the generated code and the
 #                 Model Exchange for API FMI 1.0.
 #    fmucs10      Build a shared object file containing the generated code and the
@@ -56,11 +51,9 @@
 #                 Model Exchange API and co-simulation API for FMI 2.0.
 #
 # Example:
-#  make -f Makefile.windows ipopt
+#  make -f Makefile.windows win32
 #       FILE_NAME=CCodeGenTests.CCodeGenTest2 \
 #       JMODELICA_HOME=/c/jmodelica_install \
-#       CPPAD_HOME=/c/CppAD-20090303.0/ \
-#       IPOPT_HOME=/c/Ipopt-3.5.5/build \
 #
 #
 #
@@ -83,12 +76,6 @@ PLATFORM_64 = -m64
 # JModelica home
 JMODELICA_HOME = 
 
-# CPPAD home
-CPPAD_HOME = 
-
-# IPOPT home
-IPOPT_HOME = 
-
 # SUNDIALS home
 SUNDIALS_HOME = 
 
@@ -110,9 +97,6 @@ EXTERNAL_LIBS = $(EXT_LIBS:%=-l%) -llapack -lblas -l:libgfortran.a
 
 # Additional include directories
 EXT_INC_DIRS =
-
-# Build with algorithms (requires IPOPT)
-BUILD_WITH_ALGORITHMS = false
 
 # Directory to place binary in
 BINARY_BASE_DIR = binaries
@@ -139,9 +123,6 @@ AR = ar
 # Command to remove temporary files
 RM = del
 
-# Compile with or without CppAD
-JMI_AD=JMI_AD_CPPAD
-
 # Flags for which FMU type, me, cs or me+cs.
 FMU_TYPES =
 
@@ -149,10 +130,10 @@ FMU_TYPES =
 EXT_OPTION = 
 
 # C++ Compiler options
-CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -DJMI_AD=${JMI_AD} ${FMU_TYPES}
+CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g ${FMU_TYPES}
 
 # C Compiler options
-CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -msse2 -mfpmath=sse
+CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic ${FMU_TYPES} -msse2 -mfpmath=sse
 
 SHARED_LDFLAGS = $(PLATFORM_FLAG) -shared
 
@@ -160,7 +141,6 @@ SHARED_LDFLAGS = $(PLATFORM_FLAG) -shared
 JMI_INC_DIR = ${JMODELICA_HOME}/include
 RUNTIMELIBRARY_INC_DIR = ${JMODELICA_HOME}/include/RuntimeLibrary
 STANDARD_HEADER_INC_DIR = ${JMODELICA_HOME}/ThirdParty/FMI/2.0
-CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
 # Directories with libraries
@@ -173,11 +153,6 @@ SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 SUNDIALS_LIB_DIR64 = $(SUNDIALS_HOME)/lib64
 
 # Flags needed for specific libs
-ifdef IPOPT_HOME
-LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
-else
-LIB_FLAGS_IPOPT = 
-endif
 LIB_MINPACK  = "-L$(MINPACK_LIB_DIR)" -l:libcminpack.a
 LIB_SUNDIALS = "-L$(SUNDIALS_LIB_DIR)" -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a
 STATIC_PTHREADS_CONT = $(shell dir "$(STATIC_PTHREADS_HOME)")
@@ -193,22 +168,19 @@ LIBS_FMU_ALL = $(LIBS_FMU_STD) $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_PTHREADS)
 LIBS_FMUME10 = -lfmi1_me           $(LIBS_FMU_ALL)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIBS_FMU_ALL)
 LIBS_FMU20   = -lfmi2              $(LIBS_FMU_ALL)
-LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) "-L$(SUNDIALS_LIB_DIR)" -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
-LIBS_JMU = $(LIBS_IPOPT) -lpthread
 LIBS_CEVAL = $(LIBS_FMU_STD)
 
 # Include paths for compilation
-INCL_CPPAD = "-I$(JMI_INC_DIR)" "-I$(CPPAD_INC_DIR)" "-I$(SUNDIALS_INC_DIR)"
-INCL_NOCPPAD = "-I$(RUNTIMELIBRARY_INC_DIR)" "-I${STANDARD_HEADER_INC_DIR}" $(EXT_INC_DIRS) "-I$(SUNDIALS_INC_DIR)"
+INCL = "-I$(RUNTIMELIBRARY_INC_DIR)" "-I${STANDARD_HEADER_INC_DIR}" $(EXT_INC_DIRS) "-I$(SUNDIALS_INC_DIR)"
 
 # set variable to correct makefile (for recursive call in fmume/fmucs)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
 
 ceval:
 ifeq ($(PLATFORM),win32)
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 ceval_
+	"$(MAKE)" -f "$(MAKEFILE)" EXT_OPTION=-mincoming-stack-boundary=2 ceval_
 else
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" ceval_
+	"$(MAKE)" -f "$(MAKEFILE)" PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" ceval_
 endif
 
 ceval_: $(OBJS)
@@ -218,9 +190,9 @@ ceval_: $(OBJS)
 
 fmume10:
 ifeq ($(PLATFORM),win32)
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 fmume10_
+	"$(MAKE)" -f "$(MAKEFILE)" EXT_OPTION=-mincoming-stack-boundary=2 fmume10_
 else
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" fmume10_
+	"$(MAKE)" -f "$(MAKEFILE)" PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" fmume10_
 endif
 
 fmume10_: $(OBJS)
@@ -230,9 +202,9 @@ fmume10_: $(OBJS)
 
 fmucs10:
 ifeq ($(PLATFORM),win32)
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 fmucs10_
+	"$(MAKE)" -f "$(MAKEFILE)" EXT_OPTION=-mincoming-stack-boundary=2 fmucs10_
 else
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" fmucs10_
+	"$(MAKE)" -f "$(MAKEFILE)" PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" fmucs10_
 endif
 
 fmucs10_: $(OBJS)
@@ -242,9 +214,9 @@ fmucs10_: $(OBJS)
 
 fmume20:
 ifeq ($(PLATFORM),win32)
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUME20 fmume20_
+	"$(MAKE)" -f "$(MAKEFILE)" EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUME20 fmume20_
 else
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE "PLATFORM_FLAG=$(PLATFORM_64)" "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" FMU_TYPES+=-DFMUME20 fmume20_
+	"$(MAKE)" -f "$(MAKEFILE)" "PLATFORM_FLAG=$(PLATFORM_64)" "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" FMU_TYPES+=-DFMUME20 fmume20_
 endif
 
 fmume20_: $(OBJS)
@@ -254,9 +226,9 @@ fmume20_: $(OBJS)
 
 fmucs20:
 ifeq ($(PLATFORM),win32)
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUCS20 fmucs20_
+	"$(MAKE)" -f "$(MAKEFILE)" EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUCS20 fmucs20_
 else
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE "PLATFORM_FLAG=$(PLATFORM_64)" "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" FMU_TYPES+=-DFMUCS20 fmucs20_
+	"$(MAKE)" -f "$(MAKEFILE)" "PLATFORM_FLAG=$(PLATFORM_64)" "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" FMU_TYPES+=-DFMUCS20 fmucs20_
 endif
 
 fmucs20_: $(OBJS)
@@ -266,9 +238,9 @@ fmucs20_: $(OBJS)
 
 fmumecs20:
 ifeq ($(PLATFORM),win32)
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+	"$(MAKE)" -f "$(MAKEFILE)" EXT_OPTION=-mincoming-stack-boundary=2 FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
 else
-	"$(MAKE)" -f "$(MAKEFILE)" JMI_AD=JMI_AD_NONE PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+	"$(MAKE)" -f "$(MAKEFILE)" PLATFORM_FLAG=$(PLATFORM_64) "RUNTIMELIBRARY_LIB_DIR=$(RUNTIMELIBRARY_LIB_DIR64)" "MINPACK_LIB_DIR=$(MINPACK_LIB_DIR64)" "SUNDIALS_LIB_DIR=$(SUNDIALS_LIB_DIR64)" FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
 endif
 
 fmumecs20_: $(OBJS)
@@ -276,37 +248,15 @@ fmumecs20_: $(OBJS)
 	"$(CXX)" $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
 	$(RM) $(OBJS)
 
-jmu: $(OBJS)
-# This is to ensure that the contents of libjmi_algorithm_cppad and
-# libjmi_solver_cppade is included in the resulting shared object file.
-ifeq "$(wildcard .jmi_objs )" ""
-	mkdir .jmi_objs
-endif
-	mkdir $(BINARY_MKDIR)
-	cd .jmi_objs && $(AR) -x "$(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a"  && $(AR) -x "$(JMODELICA_HOME)/lib/libjmi_solver_cppad.a"  
-	"$(CXX)" $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o "-L$(JMI_LIB_DIR)" $(LIBS_JMU)
-	$(RM) .jmi_objs\*.o
-	rmdir .jmi_objs
-	$(RM) $(OBJS)
 
 all: $(SHARED)
 
 .SUFFIXES: .cpp .c .o .obj
 
 # Compile
-%.o: sources/%.cpp
-ifeq ($(JMI_AD),JMI_AD_CPPAD)
-	"$(CXX)" $(CXXFLAGS) $(INCL_CPPAD) -c -o "$@" $<
-else
-	"$(CXX)" $(CXXFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
-endif
-
 %.o: sources/%.c
-ifeq ($(JMI_AD),JMI_AD_CPPAD)
-	"$(CXX)" $(CXXFLAGS) $(INCL_CPPAD) -c -o "$@" $<
-else
-	"$(CC)" $(CFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
-endif
+	"$(CC)" $(CFLAGS) $(INCL) -c -o "$@" $<
+
 
 # Create a rule which uses the first item in arg as src name and
 # following items as additional CFLAGS. Argument "file:-O2:-d"

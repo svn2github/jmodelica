@@ -63,6 +63,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define JMI_ABS(X)   ((X) < (0) ? (-1*(X)) : (X))
+#define JMI_SIGN(X)  ((X) >= (0) ? 1 : (-1))
 
 #define JMI_DEF(TYPE, NAME) \
     JMI_DEF_##TYPE(NAME)
@@ -176,9 +177,6 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
     
 /* Number of empty bytes at end of string */
 #define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
-
-/* Temporary remains of CppAD*/            
-typedef jmi_real_t jmi_ad_var_t; 
 
 typedef int BOOL;
 

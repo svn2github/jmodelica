@@ -82,4 +82,7 @@ aspect OptimicaVariability {
         }
         return res;
     }
+    
+    eq FTimed.genJMIVariabilityConstant_C()        = null;
+    eq FOptParameter.genJMIVariabilityConstant_C() = null;
 }

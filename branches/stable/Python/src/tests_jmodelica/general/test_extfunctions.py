@@ -73,8 +73,8 @@ class TestUtilities:
         """
         fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
         cpath = "ExtFunctionTests.ExtFunctionTest3"
-        jmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
-        model = load_fmu(jmu_name)
+        fmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(fmu_name)
         #model.simulate()
 
 class TestExternalShared:
@@ -514,7 +514,7 @@ class TestFortranBasic:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalReal(self):
         '''
         Constant evaluation of basic external fortran function with Reals.
@@ -527,7 +527,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
         
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalMatrixReal(self):
         '''
         Constant evaluation of basic external fortran function with Reals.
@@ -539,7 +539,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('y1[1,1]'), 1)
         nose.tools.assert_equals(res.final('y2[1,1]'), 9)
         
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalInteger(self):
         '''
         Constant evaluation of basic external fortran function with Integers.
@@ -552,7 +552,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), 4)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
     
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalBoolean(self):
         '''
         Constant evaluation of basic external fortran function with Booleans.
@@ -565,7 +565,7 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArray[2]'), True)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
     
-    @testattr(disabled = True)
+    @testattr(stddist = True)
     def testCEvalEnum(self):
         '''
         Constant evaluation of basic external fortran function with Enums.

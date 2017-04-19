@@ -31,7 +31,7 @@ install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 
 #Add test libraries
 include_directories(Include)
-include_directories(${TOP_SRC}/JMI/src)
+include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 
 set(ADDNUMBERS_Sources
     src/addNumbers.c

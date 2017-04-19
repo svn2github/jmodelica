@@ -471,8 +471,7 @@ mc.generate_code(flat_rep, target)
     CasADi-based optimization are transferred directly into the
     <literal>OptimizationProblem</literal> class from the
     <literal>pyjmi</literal> module . This will be demonstrated in <xref
-    linkend="models_sec_loading_an_fmu"/>, <xref
-    linkend="models_sec_loading_a_jmu"/> and <xref
+    linkend="models_sec_loading_an_fmu"/> and <xref
     linkend="models_sec_transferring_an_optproblem"/>.</para>
 
     <para>The model classes contain many methods with which models can be
@@ -931,9 +930,10 @@ Number of unsolved equation blocks in DAE system after tearing: 1: {1}
       <literal>Problems</literal>, <literal>Flattened model</literal>,
       <literal>Connection sets</literal>, <literal>Transformed
       model</literal>, <literal>Alias sets</literal>, <literal>BLT diagnostics
-      table</literal> and <literal>BLT diagnostics</literal> are links to sub
-      pages containing additional information. For example, the BLT
-      diagnostics page contains information about individual systems of
+      table</literal>, <literal>BLT for DAE System</literal> and <literal>BLT
+      for Initialization System</literal> are links to sub
+      pages containing additional information. For example, the BLT for DAE
+      System page contains information about individual systems of
       equations:</para>
 
       <programlisting>...

@@ -42,6 +42,7 @@ aspect FlatEquations {
     public void FEquation.flattenEqn(List<FAbstractEquation> l, FQName prefix, FClass fc) {
         FEquation flattened = new FEquation(getLeft().flatten(prefix), getRight().flatten(prefix));
         flattenAttrs(flattened, prefix);
+        flattened.setLocation(this);
         l.add(flattened);
     }
     
@@ -65,9 +66,11 @@ aspect FlatEquations {
     }
     
     public void FIfWhenElseEquation.flattenEqn(List<FAbstractEquation> l, FQName prefix, FClass fc) {
+        List<FAbstractEquation> toList = new List<FAbstractEquation>();
+        FAbstractEquation.flattenEqnList(toList, prefix, fc, getFAbstractEquations());
         FIfWhenElseEquation res = createEmptyNode();
         res.setType((FEquationType) getType().fullCopy());
-        FAbstractEquation.flattenEqnList(res.getFAbstractEquationListNoTransform(), prefix, fc, getFAbstractEquations());
+        res.setFAbstractEquationList(toList);
         flattenIfWhenTo(res, prefix, fc);
         if (!res.isEmpty()) {
             l.add(res);

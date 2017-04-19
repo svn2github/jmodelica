@@ -31,9 +31,8 @@
 typedef enum {
     JMI_ODE_ERROR = -1,
     JMI_ODE_OK = 0,
-    JMI_ODE_STATE_EVENT = 1,
-    JMI_ODE_TIME_EVENT = 2,
-    JMI_ODE_TERMINATE = 3
+    JMI_ODE_EVENT = 1,
+    JMI_ODE_TERMINATE = 2
 } jmi_ode_status_t;
 
 /** \brief Integrator methods the solver can use */
@@ -83,14 +82,27 @@ jmi_ode_solver_t* jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_solver_
 void jmi_free_ode_solver(jmi_ode_solver_t* solver);
 
 /**
+ * \brief Indicate that the ode solver need to event update the ode problem.
+ *
+ * @param solver A jmi_ode_solver_t struct.
+  */
+void jmi_ode_solver_external_event(jmi_ode_solver_t* solver);
+
+/**
+ * \brief Indicate that the ode solver need to (re)initialize.
+ *
+ * @param solver A jmi_ode_solver_t struct.
+  */
+void jmi_ode_solver_need_to_initialize(jmi_ode_solver_t* solver);
+
+/**
  * \brief Solves the ODE problem given when creating the solver instance.
  *
  * @param solver A jmi_ode_solver_t struct.
  * @param final_time The final time the integrator will integrate to.
- * @param initialize Indicates if the integrator will need to (re)initialize
- * @return Error code.
+ * @return Error code, will not be JMI_ODE_EVENT.
   */
-jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time, int initialize);
+jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time);
 
 /**
  * \brief Returns a jmi_ode_solver_options_t struct with default values.

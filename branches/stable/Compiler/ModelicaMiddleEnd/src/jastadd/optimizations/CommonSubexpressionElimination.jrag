@@ -80,7 +80,9 @@ aspect CommonSubexpressionElimination {
                         if (res.getNumChild() != 1 || fc.isComposite()) {
                             add(new FFunctionCallEquation(res, fcCopy));
                         } else {
-                            add(new FEquation(res.getChild(0).getFExp(), fcCopy));
+                        	fae = get(0).setLocationOf(new FEquation(res.getChild(0).getFExp(), fcCopy));
+                        	fae.addLocation(get(1));
+                            add(fae);
                         }
                         return true;
                     }

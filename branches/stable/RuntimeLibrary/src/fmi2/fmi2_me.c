@@ -219,7 +219,8 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
     fmi2_me = (fmi2_me_t*)c;
 
     if (fmi2_me->fmu_mode != instantiatedMode) {
-        jmi_log_comment(fmi2_me->jmi.log, logError, "Can only set up an experiment right after the model is instantiated or has been reset.");
+        jmi_log_node(fmi2_me->jmi.log, logError, "FMIState",
+            "Can only set up an experiment right after the model is instantiated or has been reset.");
         return fmi2Error;
     }
     
@@ -249,7 +250,8 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     }
     
     if (((fmi2_me_t *)c)->fmu_mode != instantiatedMode) {
-        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter initialization mode after instantiating the model.");
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+            "Can only enter initialization mode after instantiating the model.");
         return fmi2Error;
     }
     jmi = &((fmi2_me_t*)c)->jmi;
@@ -292,14 +294,16 @@ fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != initializationMode) {
-        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only exit initialization mode when being in initialization mode.");
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+            "Can only exit initialization mode when being in initialization mode.");
         return fmi2Error;
     }
     if (((fmi2_me_t *)c)->fmu_type == fmi2ModelExchange) {
         ((fmi2_me_t *)c)->fmu_mode = eventMode;
     } else if (((fmi2_me_t *)c)->fmu_type == fmi2CoSimulation) {
         ((fmi2_me_t *)c)->fmu_mode = slaveInitialized;
-		((fmi2_cs_t *)c)->event_info.newDiscreteStatesNeeded = fmi2True; /* To start event iteration after initialization. */
+        /* Start event iteration after initialization: */
+        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
     return fmi2OK;
 }
@@ -476,9 +480,9 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t *)c)->cs_data->triggered_external_event =
-            jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
-                                               (void*)fmi2_me->work_real_array);
+        if (jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array)) {
+            jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+        }
     }
     
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);
@@ -509,9 +513,9 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t *)c)->cs_data->triggered_external_event =
-            jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
-                                               (void*)fmi2_me->work_int_array);
+        if (jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array)) {
+            jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+        }
     }
     
     retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_int_array);
@@ -539,9 +543,9 @@ fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        ((fmi2_cs_t *)c)->cs_data->triggered_external_event =
-            jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
-                                               (void*)jmi_boolean_values);
+        if (jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array)) {
+            jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+        }
     }
     retval = jmi_set_boolean(&fmi2_me->jmi, vr, nvr, jmi_boolean_values);
     free(jmi_boolean_values);
@@ -623,7 +627,8 @@ fmi2Status fmi2_enter_event_mode(fmi2Component c) {
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != continuousTimeMode) {
-        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter event mode from continuous time mode.");
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+            "Can only enter event mode from continuous time mode.");
         return fmi2Error;
     }
     
@@ -667,7 +672,8 @@ fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != eventMode) {
-        jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter continuous time mode from event mode.");
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+            "Can only enter continuous time mode from event mode.");
         return fmi2Error;
     }
     

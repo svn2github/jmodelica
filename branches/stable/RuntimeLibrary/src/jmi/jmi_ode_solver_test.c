@@ -91,7 +91,7 @@ static void test_ode_solver_basic() {
     /* Setup ode problem */
     ode_callbacks.rhs_func = simple_rhs;
     sizes.states = 1;
-    sizes.root_fnc = 0;
+    sizes.event_indicators = 0;
     ode_problem = jmi_new_ode_problem(cb, NULL, ode_callbacks, sizes, log);
     /* Setup initial conditons and nominals */
     ode_problem->time = 0.0;         /* t_0 := 0.0 */
@@ -100,7 +100,7 @@ static void test_ode_solver_basic() {
     
     /* Setup solver and solve ode */
     ode_solver = jmi_new_ode_solver(ode_problem, ode_options);
-    ret = jmi_ode_solver_solve(ode_solver, 1.0, 1);
+    ret = jmi_ode_solver_solve(ode_solver, 1.0);
     assert_true(ret == JMI_ODE_OK, "solver expected to return ok");
     /* Should be true: x = e^-5 */
     assert_true(ABS_MACRO(ode_problem->states[0] - 0.006737946999085) < 1e-4,

@@ -29,6 +29,7 @@
 int fmi1_cs_completed_integrator_step(char* step_event, char* terminate, void* problem_data);
 int fmi1_cs_root_fcn(jmi_real_t t, jmi_real_t *x, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data);
 int fmi1_cs_rhs_fcn(jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data);
+jmi_ode_status_t fmi1_cs_event_update(jmi_ode_problem_t* problem);
 
 const char* fmi1_cs_get_types_platform() {
     return fmiPlatform;
@@ -59,11 +60,10 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     jmi_cs_data_t* cs_data;
     jmi_cs_real_input_t* real_inputs;
     int flag;
-    jmi_ode_status_t retval = JMI_ODE_STATE_EVENT;
+    jmi_ode_status_t retval;
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
-    fmiReal time_event;
-    fmiInteger i;
-    jmi_log_node_t top_node, inner_node;
+    size_t i;
+    jmi_log_node_t top_node;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -72,17 +72,6 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     fmi1_cs = (fmi1_cs_t*)c;
     ode_problem = fmi1_cs->ode_problem;
     cs_data = fmi1_cs->cs_data;
-
-    /* Check if there are upcoming time events. */
-    if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
-        if(fmi1_cs->event_info.nextEventTime < time_final){
-            time_event = fmi1_cs->event_info.nextEventTime;
-        }else{
-            time_event = time_final;
-        }
-    }else{
-        time_event = time_final;
-    }
     
     top_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "DoStep", 
             "Starting a do step at internal <t:%E> with end <t:%E>", ode_problem->time, time_final);
@@ -97,103 +86,25 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                                       1,
                                       &(real_inputs[i].value));
             if (flag != fmiOK) {
-                jmi_log_comment(ode_problem->log, logError,
+                jmi_log_node(ode_problem->log, logError, "CoSimulationInputs",
                     "Failed to get the current value of real inputs.");
                 return fmiError;
             }
         }
     }
     
-    if (communicationStepSize == 0.0 || fmi1_cs->cs_data->triggered_external_event) {
-        /* Event update: */
-        flag = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &(fmi1_cs->event_info));
-        if (flag != fmiOK) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to evaluate the derivatives with step-size zero.");
-        }
-        
-        fmi1_cs->cs_data->triggered_external_event = FALSE;
+    if (communicationStepSize == 0.0) {
+        jmi_ode_solver_external_event(ode_problem->ode_solver);
     }
     
-    retval = JMI_ODE_STATE_EVENT;
-    while (retval == JMI_ODE_STATE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final){
-        
-        inner_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "InternalSolver", 
-            "Invoking the internal solver at <t:%E> with end <t:%E>.", ode_problem->time, time_event);
+    retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_final);
 
-        retval = jmi_ode_solver_solve(ode_problem->ode_solver, time_event, fmi1_cs->initialize_solver);
-        if (retval < JMI_ODE_OK) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
-            jmi_log_unwind(ode_problem->log, top_node);
-            return fmiError;
-        } else if (retval == JMI_ODE_TERMINATE) {
-            return fmiDiscard; /* ODE solver will log termination */
-        }
-        /* Solver initialized, set to False. */
-        fmi1_cs->initialize_solver = FALSE;
-        
-        jmi_log_leave(ode_problem->log, inner_node);
-        
-        /* Set time to the model */
-        flag = fmi1_me_set_time(cs_data->fmix_me, ode_problem->time);
-        if (flag != fmiOK) {
-            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the time.");
-            jmi_log_unwind(ode_problem->log, top_node);
-            return fmiError;
-        }
-        
-        /* Set states to the model */
-        flag = fmi1_me_set_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
-        if (flag != fmiOK) {
-            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
-            jmi_log_unwind(ode_problem->log, top_node);
-            return fmiError;
-        }
-    
-        if (retval==JMI_ODE_OK && time_event == time_final) {
-            if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue && fmi1_cs->event_info.nextEventTime == time_event) {
-            } else {
-                break;
-            }
-        }
-        retval = JMI_ODE_STATE_EVENT;
-        
-        flag = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &(fmi1_cs->event_info));
-        if (flag != fmiOK){
-            jmi_log_node(ode_problem->log, logError, "Error", "Failed to handle the event at <t:%E>.", ode_problem->time);
-            jmi_log_unwind(ode_problem->log, top_node);
-            return fmiError;
-        }
-        /* Event handled, initialize again */
-        fmi1_cs->initialize_solver = (int)JMI_TRUE;
-        
-        flag = fmi1_me_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
-        if (flag != fmiOK) {
-            return fmiError;
-        }
-        flag = fmi1_me_get_nominal_continuous_states(cs_data->fmix_me, ode_problem->nominals, ode_problem->sizes.states);
-        if (flag != fmiOK) {
-            jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
-            jmi_log_unwind(ode_problem->log, top_node);
-            return fmiError;
-        }
-        
-        /* Check if the simulation should be terminated. */
-        if (fmi1_cs->event_info.terminateSimulation == fmiTrue) {
-            jmi_log_node(ode_problem->log, logInfo, "Terminate", "Terminating simulation after a signal from the model at <t:%E>.", ode_problem->time);
-            jmi_log_unwind(ode_problem->log, top_node);
-            return fmiDiscard;
-        }
-        
-        /* Check if there are upcoming time events. */
-        if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
-            if(fmi1_cs->event_info.nextEventTime < time_final){
-                time_event = fmi1_cs->event_info.nextEventTime;
-            }else{
-                time_event = time_final;
-            }
-        } else{
-            time_event = time_final;
-        }
+    if (retval == JMI_ODE_ERROR) {
+        jmi_log_node(ode_problem->log, logError, "DoStep",
+                    "Failed to perform a step.");
+        return fmiError;
+    } else if (retval == JMI_ODE_TERMINATE) {
+        return fmiDiscard; /* ODE solver will log termination */
     }
     
     /* De-activate real inputs as they are no longer valid */
@@ -316,8 +227,9 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     ode_callbacks.rhs_func = fmi1_cs_rhs_fcn;
     ode_callbacks.root_func = fmi1_cs_root_fcn;
     ode_callbacks.complete_step_func = fmi1_cs_completed_integrator_step;
+    ode_callbacks.event_update_func = fmi1_cs_event_update;
     ode_sizes.states = jmi->n_real_x;
-    ode_sizes.root_fnc = jmi->n_relations;
+    ode_sizes.event_indicators = jmi->n_relations;
     component->cs_data = jmi_new_cs_data(fmi1_me, jmi->n_real_u);
     component->ode_problem = jmi_new_ode_problem(&(fmi1_me->jmi.jmi_callbacks),
                                                  component->cs_data,
@@ -354,6 +266,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     fmiBoolean toleranceControlled = fmiTrue;
     fmiReal relativeTolerance = 1e-6;
     fmiStatus retval;
+    fmiEventInfo event_info;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -367,10 +280,16 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     
     /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
                                         
-    retval = fmi1_me_initialize(cs_data->fmix_me, toleranceControlled, relativeTolerance, &(fmi1_cs->event_info));
+    retval = fmi1_me_initialize(cs_data->fmix_me, toleranceControlled, relativeTolerance, &event_info);
     if (retval != fmiOK) { 
         return fmiError; 
     }
+    /* TODO: handle terminate at initialization from event_info? */
+    if (event_info.nextEventTime) {
+        ode_problem->event_info.exists_time_event = TRUE;
+        ode_problem->event_info.next_time_event = event_info.nextEventTime;
+    }
+
     
     /*Get the start time, states and the nominals for the ODE problem. Initialization. */
     fmi1_me_get_continuous_states(cs_data->fmix_me, ode_problem->states, ode_problem->sizes.states);
@@ -439,8 +358,9 @@ fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
-    fmi1_cs->cs_data->triggered_external_event = 
-        jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value);
+    if (jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value)) {
+        jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
+    }
         
     return fmi1_me_set_real(fmi1_cs->cs_data->fmix_me, vr, nvr, value);
 }
@@ -454,8 +374,9 @@ fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], siz
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
-    fmi1_cs->cs_data->triggered_external_event = 
-        jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value);
+    if (jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value)) {
+        jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
+    }
     return fmi1_me_set_integer(fmi1_cs->cs_data->fmix_me, vr, nvr, value);
 }
 
@@ -468,8 +389,9 @@ fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
-    fmi1_cs->cs_data->triggered_external_event = 
-        jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value);
+    if (jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value)) {
+        jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
+    }
     return fmi1_me_set_boolean(fmi1_cs->cs_data->fmix_me, vr, nvr, value);
 }
 
@@ -656,7 +578,7 @@ int fmi1_cs_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_size
         return -1;
     }
     
-    retval = fmi1_me_get_event_indicators(cs_data->fmix_me, root, sizes.root_fnc);
+    retval = fmi1_me_get_event_indicators(cs_data->fmix_me, root, sizes.event_indicators);
     if (retval != fmiOK) {
         return -1;
     }
@@ -675,4 +597,39 @@ int fmi1_cs_completed_integrator_step(char* step_event, char* terminate, void* p
     }
     
     return 0;
+}
+
+jmi_ode_status_t fmi1_cs_event_update(jmi_ode_problem_t* problem) {
+    jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem->problem_data;
+    fmiEventInfo event_info;
+    fmiStatus flag;
+        
+    flag = fmi1_me_event_update(cs_data->fmix_me, fmiFalse, &event_info);
+    if (flag != fmiOK) {
+        jmi_log_node(problem->log, logError, "Error", "Failed to handle the event at <t:%E>.", problem->time);
+        return JMI_ODE_ERROR;
+    }
+
+    if (event_info.terminateSimulation) {
+        return JMI_ODE_TERMINATE;
+    }
+
+    flag = fmi1_me_get_continuous_states(cs_data->fmix_me, problem->states, problem->sizes.states);
+    if (flag != fmiOK) {
+        jmi_log_node(problem->log, logError, "Error", "Failed to get the continuous states.");
+        return JMI_ODE_ERROR;
+    }
+
+    /* Nominals cannot change for current implementation */
+    problem->event_info.nominals_updated = FALSE;
+    /* Check if there are upcoming time events */
+    if (event_info.upcomingTimeEvent) {
+        problem->event_info.exists_time_event = TRUE;
+        problem->event_info.next_time_event = event_info.nextEventTime;
+    } else {
+        problem->event_info.exists_time_event = FALSE;
+        problem->event_info.next_time_event = JMI_INF;
+    }
+
+    return JMI_ODE_OK;
 }

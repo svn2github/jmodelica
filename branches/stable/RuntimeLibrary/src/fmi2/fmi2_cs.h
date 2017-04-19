@@ -37,7 +37,6 @@ struct fmi2_cs_t {
     fmi2_me_t          fmi2_me;                     /**< \brief Must be the first one in this struct so that a fmi2_cs_t pointer can be used in place of a fmi2_me_t pointer. */
     jmi_ode_problem_t* ode_problem;                 /**< \brief A jmi ode problem pointer. */
     jmi_cs_data_t*     cs_data;                     /**< \brief A jmi CS data pointer. */
-    fmi2EventInfo      event_info;                  /**< \brief The event information struct. */
 };
 
 /**

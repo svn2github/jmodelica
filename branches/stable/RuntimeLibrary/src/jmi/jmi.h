@@ -39,9 +39,6 @@
  */
 /* @{ */
 
-#define JMI_INF   1e20                    /**< \brief A Very Large Number denoting infinity.*/
-#define JMI_PI    3.14159265358979323846  /**< \brief The constant pi. */
-
 #define JMI_OK     0                 /**< \brief Everything is OK. */
 #define JMI_ERROR -1                 /**< \brief An ERROR occurred. */
 
@@ -504,7 +501,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks);
 int jmi_destruct_external_objs(jmi_t* jmi);
 
 /**
- * \brief Get the name of the model that produced this FMU/JMU.
+ * \brief Get the name of the model that produced this FMU.
  */
 const char *jmi_get_model_identifier();
 

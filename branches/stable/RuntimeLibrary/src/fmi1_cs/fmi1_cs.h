@@ -48,7 +48,6 @@ struct fmi1_cs_t {
     fmiString GUID;                      /**< \brief The GUID identifier. */
     fmiCallbackFunctions callback_functions;    /**< \brief The callback functions provided by the user. */
     fmiCallbackFunctions me_callback_functions; /**< \brief The modified callbacks provided to the fmi1_me instance. */
-    fmiEventInfo event_info;
     fmiBoolean logging_on;                      /** < \brief The logging on / off attribute. */
     int initialize_solver;               /** < \brief Flag indicating if the solver shall be initialized. */
 };

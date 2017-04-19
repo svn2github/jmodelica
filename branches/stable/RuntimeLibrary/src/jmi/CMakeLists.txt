@@ -32,8 +32,12 @@ set(JMICommonSources
     jmi_types.h
     jmi_types.c
     
+    # Math
+    jmi_linear_algebra.h
+    jmi_linear_algebra.c
+    
     # Logging sources
-	jmi_callbacks.h
+    jmi_callbacks.h
     jmi_log.h
     jmi_log_impl.h
     jmi_log.c
@@ -42,7 +46,7 @@ set(JMICommonSources
 set(JMIBlockSourcesPartial
     jmi_block_solver.h
     jmi_block_solver_impl.h
-	jmi_block_log.h
+    jmi_block_log.h
     jmi_kinsol_solver.h
     jmi_brent_solver.h
     jmi_minpack_solver.h
@@ -50,7 +54,7 @@ set(JMIBlockSourcesPartial
     jmi_simple_newton.h
 
     jmi_block_solver.c
-	jmi_block_log.c
+    jmi_block_log.c
     jmi_kinsol_solver.c
     jmi_brent_solver.c
     jmi_minpack_solver.c
@@ -186,6 +190,7 @@ if (${BUILD_JMI_LIB})
             include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
         endif()
     endif()
+    include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 
     #Install the libraries
     install(TARGETS jmi

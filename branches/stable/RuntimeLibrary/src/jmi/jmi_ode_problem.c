@@ -21,6 +21,7 @@
 #include <string.h>
 #include "jmi_ode_solver.h"
 #include "jmi_ode_problem.h"
+#include "jmi_math.h"
 
 static int default_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data) {
     /* Default implementation, assumes there are no states */
@@ -33,7 +34,7 @@ static int default_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode
 
 static int default_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data) {
     /* Default implementation, assumes there are no root function */
-    if (sizes.root_fnc == 0) {
+    if (sizes.event_indicators == 0) {
         return 0;
     } else {
         return -1;
@@ -47,12 +48,18 @@ static int default_completed_integrator_step(char* step_event, char* terminate, 
     return 0;
 }
 
+static jmi_ode_status_t default_event_update(jmi_ode_problem_t* problem) {
+    /* Default implementation does nothing */
+    return JMI_ODE_OK;
+}
+
 jmi_ode_callbacks_t jmi_ode_problem_default_callbacks() {
     jmi_ode_callbacks_t cb;
     
     cb.rhs_func = default_rhs_fcn;
     cb.root_func = default_root_fcn;
     cb.complete_step_func = default_completed_integrator_step;
+    cb.event_update_func = default_event_update;
     return cb;
 }
 
@@ -67,6 +74,9 @@ jmi_ode_problem_t* jmi_new_ode_problem(jmi_callbacks_t*     cb,
     if (problem == NULL) return NULL;
     
     problem->jmi_callbacks  = cb;
+    problem->event_info.nominals_updated = FALSE;
+    problem->event_info.exists_time_event = FALSE;
+    problem->event_info.next_time_event = JMI_INF;
     problem->problem_data   = problem_data;
     problem->ode_callbacks  = ode_callbacks;
     problem->sizes          = sizes;
@@ -90,6 +100,8 @@ void jmi_free_ode_problem(jmi_ode_problem_t* problem) {
 }
 
 void jmi_reset_ode_problem(jmi_ode_problem_t* problem) {
+    problem->event_info.exists_time_event = FALSE;
+    problem->event_info.next_time_event = JMI_INF;
     memset(problem->states, 0, problem->sizes.states * sizeof(jmi_real_t));
     memset(problem->nominals, 0, problem->sizes.states * sizeof(jmi_real_t));
 }

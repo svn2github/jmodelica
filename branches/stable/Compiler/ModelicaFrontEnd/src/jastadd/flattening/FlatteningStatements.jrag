@@ -24,22 +24,26 @@ aspect FlatStatements {
             FClass fc, FQName prefix) {
         boolean hasBroken = false;
         boolean res = false;
+        List<FStatement> prevList = null;
         for (FStatement stmt : fromList) {
             if (hasBroken) {
-                toList = FStatement.breakBlock(toList, new FIdUseExp(stmt.breakCondName()));
+                prevList = toList;
+                toList = new List<FStatement>();
             }
             res = (hasBroken = stmt.flatten(toList, fc, prefix)) || res;
+            if (prevList != null) {
+                prevList.add(FStatement.breakBlock(toList, new FIdUseExp(stmt.breakCondName())));
+                toList = prevList;
+                prevList = null;
+            }
         }
         return res;
     }
     
-    public static List<FStatement> FStatement.breakBlock(List<FStatement> stmts, FExp breakCond) {
-        FIfStmt ifStmt = new FIfStmt();
-        FIfClause clause = new FIfClause();
-        clause.setTest(breakCond.fullCopy());
-        ifStmt.addFIfWhenClause(clause);
-        stmts.add(ifStmt);
-        return clause.getFStatements();
+    public static FIfStmt FStatement.breakBlock(List<FStatement> stmts, FExp breakCond) {
+        List<FIfWhenClause> clauses = new List<FIfWhenClause>();
+        clauses.add(new FIfClause(breakCond.fullCopy(), stmts));
+        return new FIfStmt(clauses, new List<FStatement>());
     }
     
     syn boolean ASTNode.containsBreakStmt() {
@@ -190,11 +194,14 @@ aspect FlatStatements {
                 List<FStatement> inner = sl;
                 for (Index i : ind) {
                     if (hasBreak) {
-                        inner = FStatement.breakBlock(sl, tempVar.createUseExp());
+                        inner = new List<FStatement>();
                     }
                     ind.translate(i).setValues(forIndices);
                     getForStmts().flushAllRecursive();
                     FStatement.flattenFStatementList(getForStmts(), inner, fc, prefix);
+                    if (hasBreak) {
+                        sl.add(FStatement.breakBlock(inner, tempVar.createUseExp()));
+                    }
                 }
                 for (InstForIndex ifi : getInstForIndexs()) {
                     ifi.clearEvaluationValue();

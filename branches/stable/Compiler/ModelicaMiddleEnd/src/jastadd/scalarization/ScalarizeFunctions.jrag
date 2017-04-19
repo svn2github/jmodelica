@@ -276,9 +276,40 @@ aspect FunctionScalarization {
     }
     
     public void FSizeExp.createArrayTemporaries(Scalarizer s) {
+        boolean b = !extractTemp();
+        if (b)
+            s.getNames().addLayer(0);
+        super.createArrayTemporaries(s);
+        if (b)
+            s.getNames().removeLayer();
+    }
+    
+    public void FSizeExp.createArrayTemporariesInChildren(Scalarizer s) {
+        if (!isArray() && (getFExp().isSlice() || !getFExp().size().isUnknown(dimension()))) {
+            getFExp().size().createArrayTemporaries(s, dimension());
+        } else {
+            if (isArray()) {
+                getArray().createArrayTemporaries(s);
+            } else {
+                super.createArrayTemporariesInChildren(s);
+            }
+        }
+    }
+    
+    public void Size.createArrayTemporaries(Scalarizer s, int i) {
         
     }
     
+    @Override
+    public void MutableSize.createArrayTemporaries(Scalarizer s, int i) {
+        if (exps[i] != null) {
+            exps[i].createArrayTemporaries(s);
+        } else {
+            super.createArrayTemporaries(s, i);
+        }
+    }
+    
+
     /**
      * Create clauses for and replace this known size expression with a temp variable.
      * Used in both functions and equations.

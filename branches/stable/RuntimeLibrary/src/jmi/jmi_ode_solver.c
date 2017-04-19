@@ -21,6 +21,7 @@
 #include "jmi_ode_problem.h"
 #include "jmi_ode_euler.h"
 #include "jmi_ode_cvode.h"
+#include "jmi_math.h"
 
 jmi_ode_solver_options_t jmi_ode_solver_default_options(void) {
     jmi_ode_solver_options_t options;
@@ -41,8 +42,8 @@ jmi_ode_solver_t* jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_solver_
     if(solver == NULL) return NULL;
 
     solver->states_derivative = calloc(problem->sizes.states, sizeof(jmi_real_t));
-    solver->event_indicators_previous = calloc(problem->sizes.root_fnc, sizeof(jmi_real_t));
-    solver->event_indicators = calloc(problem->sizes.root_fnc, sizeof(jmi_real_t));
+    solver->event_indicators_previous = calloc(problem->sizes.event_indicators, sizeof(jmi_real_t));
+    solver->event_indicators = calloc(problem->sizes.event_indicators, sizeof(jmi_real_t));
     if (solver->states_derivative           == NULL ||
         solver->event_indicators            == NULL ||
         solver->event_indicators_previous   == NULL)
@@ -52,6 +53,8 @@ jmi_ode_solver_t* jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_solver_
     }
 
     solver->ode_problem = problem;
+    solver->initialize_solver = TRUE;
+    solver->need_event_update = FALSE;
     solver->experimental_mode = solver_options.experimental_mode;
     solver->step_size =solver_options.euler_options.step_size;
     solver->rel_tol = solver_options.cvode_options.rel_tol;
@@ -96,6 +99,74 @@ void jmi_free_ode_solver(jmi_ode_solver_t* solver){
     }
 }
 
-jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time, int initialize) {
-    return solver->solve(solver, final_time, initialize);
+void jmi_ode_solver_external_event(jmi_ode_solver_t* solver) {
+    solver->initialize_solver = TRUE;
+    solver->need_event_update = TRUE;
+}
+
+void jmi_ode_solver_need_to_initialize(jmi_ode_solver_t* solver) {
+    solver->initialize_solver = TRUE;
+}
+
+static jmi_real_t jmi_ode_final_integration_time(jmi_ode_problem_t *p, jmi_real_t final_time) {
+    if (p->event_info.exists_time_event &&
+        p->event_info.next_time_event < final_time)
+    {
+        return p->event_info.next_time_event;
+    }
+    
+    return final_time;
+}
+
+static int jmi_ode_not_finished(jmi_real_t time, jmi_real_t final_time) {
+    return time + JMI_ALMOST_EPS*final_time < final_time;
+}
+
+/* At a time event if simulation ended successfully but integration stop time is not final time */
+static int jmi_ode_at_time_event(jmi_ode_status_t s, jmi_real_t integrate_stop_time, jmi_real_t final_time) {
+    return (s == JMI_ODE_OK && integrate_stop_time != final_time);
+}
+
+jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time) {
+    jmi_ode_problem_t *p = solver->ode_problem;
+    jmi_ode_status_t s = JMI_ODE_OK;
+    jmi_real_t integrate_stop_time;
+    
+    if (solver->need_event_update) {
+        s = p->ode_callbacks.event_update_func(p);
+        solver->need_event_update = FALSE;
+        if (p->event_info.nominals_updated) {
+            jmi_log_node(p->log, logError, "Error", "Changed nominals is currently unsupported.");
+            return JMI_ODE_ERROR;
+        }
+    }
+
+    /* while at event or ok but not finnished */
+    while (s == JMI_ODE_EVENT ||
+        (s == JMI_ODE_OK && jmi_ode_not_finished(p->time, final_time)))
+    {
+        integrate_stop_time = jmi_ode_final_integration_time(p, final_time);
+        s = solver->solve(solver, integrate_stop_time, solver->initialize_solver);
+        solver->initialize_solver = FALSE;
+        
+        if (s == JMI_ODE_OK || s == JMI_ODE_EVENT) {
+            /* Ensure that states and time is up to date in the model: */
+            if (p->ode_callbacks.rhs_func(p->time, p->states,
+                                          solver->states_derivative,
+                                          p->sizes, p->problem_data) == -1) {
+                return JMI_ODE_ERROR;
+            }
+        }
+        
+        if (s == JMI_ODE_EVENT || jmi_ode_at_time_event(s, integrate_stop_time, final_time)) {
+            s = p->ode_callbacks.event_update_func(p);
+            solver->initialize_solver = TRUE;
+            if (p->event_info.nominals_updated) {
+                jmi_log_node(p->log, logError, "Error", "Changed nominals is currently unsupported.");
+                return JMI_ODE_ERROR;
+            }
+        }
+    }
+    
+    return s;
 }

@@ -27,7 +27,6 @@ import pyfmi as fmi
 import pyfmi.fmi_algorithm_drivers as ad
 
 from pymodelica import compile_fmu
-from pyfmi.fmi_deprecated import FMUModel2
 from pyfmi import load_fmu
 from tests_jmodelica import testattr, get_files_path
 from pyfmi.common.core import get_platform_dir

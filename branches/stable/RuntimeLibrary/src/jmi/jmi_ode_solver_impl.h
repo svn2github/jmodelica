@@ -52,6 +52,9 @@ struct jmi_ode_solver_t {
     jmi_cs_experimental_mode_t experimental_mode;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
+
+    int initialize_solver;                             /**< \brief The solver need to restart. */
+    int need_event_update;                             /**< \brief The solver need event update the problem */
     
     jmi_real_t*           event_indicators;            /**< \brief The evaluated event indicators at the current time. */
     jmi_real_t*           event_indicators_previous;   /**< \brief The evaluated event indicators at the previous time. */

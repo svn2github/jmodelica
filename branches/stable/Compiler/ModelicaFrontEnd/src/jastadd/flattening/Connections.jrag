@@ -48,7 +48,7 @@ aspect Connections {
         List<FAbstractEquation> equationList = getFAbstractEquations();
         int numBefore = equationList.getNumChild();
         for (ConnectionSet set : l) 
-            set.generateEquations(equationList);
+            set.generateEquations(this);
         int count = 0;
         for (FAbstractEquation eqn : equationList) {
             if (count >= numBefore) {
@@ -490,7 +490,7 @@ aspect Connections {
 		 * 
 		 * @param eqns  equation list to add equations to
 		 */
-		public abstract void generateEquations(List<FAbstractEquation> eqns);
+		public abstract void generateEquations(FClass fc);
 		
 		/**
 		 * Return all ConnectionSetEntrys corresponding to flow variables based
@@ -546,7 +546,7 @@ aspect Connections {
 			return cses;
 		}
 
-        public void generateEquations(List<FAbstractEquation> eqns) {
+        public void generateEquations(FClass fc) {
             InstComponentDecl icd = first().getVar();
             if (size() == 1 && icd.isTopLevelInputOutput()) {
                 return;
@@ -557,7 +557,7 @@ aspect Connections {
             // Only possible types here are operator record scalar, Integer and Real (the two latter either array or scalar)
             FType t = icd.type();
             FExp zero = t.isNumeric() ? t.size().createZeroFExp() : t.flattenZeroLiteral();
-            eqns.add(new FEquation(e, zero));
+            fc.addFAbstractEquationNoTransform(new FEquation(e, zero));
         }
 
 	}
@@ -574,7 +574,7 @@ aspect Connections {
             return "stream";
         }
 
-        public void generateEquations(List<FAbstractEquation> eqns) {
+        public void generateEquations(FClass fc) {
             for (ConnectionSetEntry e : this) {
                 nominal = Math.min(e.flowNominal(), nominal);
             }
@@ -582,7 +582,7 @@ aspect Connections {
                 if (e.isOutside()) {
                     FExp left = e.createFIdUseExp();
                     FExp right = expandInStreamExp(e, null, new FIntegerLitExp(0));
-                    eqns.add(new FEquation(left, right));
+                    fc.addFAbstractEquationNoTransform(new FEquation(left, right));
                 }
             }
         }
@@ -662,20 +662,21 @@ aspect Connections {
 			return "potential";
 		}
 
-		public void generateEquations(List<FAbstractEquation> eqns) {
+        public void generateEquations(FClass fc) {
 		    if (size() == 1) {
 		        /* This case is for cells in arrays in expandable connectors that are not present.
 		         * Since we can't have arrays that are non-continous, we generate the missing ones and set them to zero.
 		         */
 		        FExp e = first().createFIdUseExp();
 		        FExp zero = new FIntegerLitExp(0);
-		        eqns.add(new FEquation(e, zero));   
+                fc.addFAbstractEquationNoTransform(new FEquation(e, zero));   
 		    } else {
     			FExp e1 = null;
     			for (ConnectionSetEntry cse : this) {
     				FExp e2 = cse.createFIdUseExp();
-    				if (e1 != null)
-    					eqns.add(new FEquation(e1, e2));
+                    if (e1 != null) {
+                        fc.addFAbstractEquationNoTransform(new FEquation(e1, e2));
+                    }
     				e1 = e2;
     			}
 		    }
