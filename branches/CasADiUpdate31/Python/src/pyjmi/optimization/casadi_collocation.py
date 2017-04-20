@@ -175,7 +175,7 @@ class CasadiCollocator(object):
         
         # This list should be automatically generated, but while waiting
         # for a Casadi function to do this, work with a manual list
-        option_list = ["expand", "print_time"]
+        option_list = ["expand", "print_time", "grad_f", "hess_lag", "jac_g"]
         
         if k not in option_list:
             prefix = self._plugin()
@@ -5524,7 +5524,7 @@ class LocalDAECollocator(CasadiCollocator):
         elif point == "sym":
             return nlp_fcn.call([self.xx, self.pp],True)
         else:
-            raise ValueError("Unkonwn point value: " + repr(point))
+            raise ValueError("Unknown point value: " + repr(point))
         p_value = self.get_par_vals(scaled_residuals=scaled_residuals)
         fcns = nlp_fcn(x_value,p_value)
         return (float(fcns[0]), N.array(fcns[1]).ravel())
@@ -5570,7 +5570,7 @@ class LocalDAECollocator(CasadiCollocator):
             return J_fcn(x=self.xx, p=self.pp)['jac_g_x']
             #return J_fcn(x=self.xx, p=self.pp)['g']
         else:
-            raise ValueError("Unkonwn point value: " + repr(point))
+            raise ValueError("Unknown point value: " + repr(point))
         result = J_fcn(p=self.get_par_vals(scaled_residuals=scaled_residuals),x=x_value)['jac_g_x']
         #result = J_fcn(p=self.get_par_vals(scaled_residuals=scaled_residuals),x=x_value)['g']
         if dense: result = N.array(result)
@@ -5632,7 +5632,7 @@ class LocalDAECollocator(CasadiCollocator):
             return [H_fcn.call([self.xx, self.pp, sigma, dual],True)[0], sigma,
                     dual]
         else:
-            raise ValueError("Unkonwn point value: " + repr(point))
+            raise ValueError("Unknown point value: " + repr(point))
         
         der_p = self.get_par_vals(scaled_residuals=scaled_residuals)
         return N.array(H_fcn.call([x, der_p, sigma, dual])[0])
@@ -5685,7 +5685,7 @@ class LocalDAECollocator(CasadiCollocator):
             if point == "sym":
                 return KKT
             else:
-                KKT_fcn = casadi.Function([x, [], sigma, dual], [KKT])
+                KKT_fcn = casadi.Function("KKT_fcn", [x, [], sigma, dual], [KKT])
                 return KKT_fcn
         elif point == "init":
             x = self.xx_init
@@ -5694,8 +5694,8 @@ class LocalDAECollocator(CasadiCollocator):
             x = self.primal_opt
             dual = self.get_opt_constraint_duals(scaled=scaled_residuals)
         else:
-            raise ValueError("Unkonwn point value: " + repr(point))
-        sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
+            raise ValueError("Uknown point value: " + repr(point))
+        
         J = self.get_J(point, scaled_residuals=scaled_residuals)
         H = self.get_H(point, scaled_residuals=scaled_residuals)
         zeros = N.zeros([len(dual), len(dual)])
@@ -5897,7 +5897,7 @@ def _to_external_function(fcn, name, use_existing=False):
         exit_code = system('gcc ' + bitness_flag + ' -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
         if exit_code != 0:
             return fcn # fall back to uncompiled version
-    fcn_e = casadi.external(name)
+    fcn_e = casadi.external(fcn.name(), name+ext)
     return fcn_e
 
 def enable_codegen(coll, name=None):
@@ -5930,9 +5930,11 @@ def enable_codegen(coll, name=None):
 
     old_solver = coll.solver_object
 
-    nlp_fcn = coll.nlp_fcn
-    grad_f = old_solver.get_function('nlp_grad_f') 
-    jac_g = old_solver.get_function('nlp_jac_g')
+    nlp_fcn  = coll.nlp_fcn
+    nlp_f    = old_solver.get_function('nlp_f')
+    nlp_g    = old_solver.get_function('nlp_g')
+    grad_f   = old_solver.get_function('nlp_grad_f') 
+    jac_g    = old_solver.get_function('nlp_jac_g')
     hess_lag = old_solver.get_function('nlp_hess_l')
 
     existing = False
@@ -5945,27 +5947,29 @@ def enable_codegen(coll, name=None):
             path.isfile('func_jac_g_'+name+ext) and
             path.isfile('func_hess_lag_'+name+ext)):
             existing = True
-
+    
+    nlp_f = _to_external_function(nlp_f, 'func_nlp_f_' + name, existing)
+    nlp_g = _to_external_function(nlp_g, 'func_nlp_g_' + name, existing)
     nlp_fcn = _to_external_function(nlp_fcn, 'func_nlp_' + name, existing)
     grad_f = _to_external_function(grad_f, 'func_grad_f_' + name, existing)
     jac_g = _to_external_function(jac_g, 'func_jac_g_' + name, existing)
     hess_lag = _to_external_function(hess_lag, 'func_hess_lag_' + name, existing)
 
-    coll.set_solver_option('expand', False)
-    coll.set_solver_option('grad_f', grad_f)
-    coll.set_solver_option('jac_g', jac_g)
+    coll.set_solver_option('expand'  , False)
+    coll.set_solver_option('grad_f'  , grad_f)
+    coll.set_solver_option('jac_g'   , jac_g)
     coll.set_solver_option('hess_lag', hess_lag)
     
-    [self.xx, self.pp] = nlp_fcn.mx_in()
-    [self.cost, constraints] = nlp_fcn.mx_out()
-    self.nlp = dict(x=self.xx, p=self.pp, f=self.cost, g=constraints)
+    [coll.xx, coll.pp] = nlp_fcn.mx_in()
+    [coll.cost, coll.constraints] = nlp_fcn.mx_out()
+    #[coll.xx, coll.pp] = nlp_f.mx_in()
+    #coll.cost=nlp_f.mx_out()[0]; coll.constraints=nlp_g.mx_out()[0]
+    
+    coll.nlp_fcn = nlp_fcn #casadi.Function('nlp', [coll.xx, coll.pp], [coll.cost, constraints])
+    coll.nlp = dict(x=coll.xx, p=coll.pp, f=coll.cost, g=coll.constraints)
+    
+    coll.initialize()
 
-    solver_cg = casadi.nlpsol('solver_cg', 
-                              'ipopt', 
-                              nlp, 
-                              coll.solver_opts)
-
-    coll.solver_object = solver_cg
 
 enable_codegen.times = 0
 

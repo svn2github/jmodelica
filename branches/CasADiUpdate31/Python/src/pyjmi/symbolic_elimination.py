@@ -372,13 +372,13 @@ class Component(object):
             A.append(jac_f.call(all_vars, self.options['inline'])[0])
         self.A_fcn = casadi.Function('A', all_vars, [casadi.horzcat(*A)])
         if self.options['closed_form']:
-            self.A_fcn = casadi.Function('A', self.A_fcn)
+            self.A_fcn = casadi.Function(self.A_fcn)
 
         # Create right-hand side function
         rhs = casadi.mtimes(self.A_fcn.call(all_vars, self.options['inline'])[0], casadi.vertcat(*self.mx_vars)) - res
         self.b_fcn = casadi.Function('b', all_vars + tear_vars, [rhs])
         if self.options['closed_form']:
-            self.b_fcn = casadi.Function('b', self.b_fcn)
+            self.b_fcn = casadi.Function(self.b_fcn)
 
         # TODO: Remove this
         self.A_sym = A
@@ -463,7 +463,7 @@ class Component(object):
         for alpha in ["A", "B", "C", "D", "a", "b"]:
             fcn = casadi.Function(alpha, all_vars, [eq_sys[alpha]])
             if self.options['closed_form']:
-                fcn = casadi.Function(alpha, fcn)
+                fcn = casadi.Function(fcn)
             self.fcn[alpha] = fcn
 
     def tear_nonlin_eq(self, known_vars, solved_vars, matches, global_index):
@@ -1401,8 +1401,7 @@ class BLTModel(object):
                             res_f = casadi.Function('res_f', all_vars , [res])
                             if options['closed_form']:
                                 explicit_unsolved_sx_vars.extend(causal_co.sx_vars)
-                                sx_res = casadi.SXFunction(res_f)
-                                sx_res.init()
+                                sx_res = casadi.Function(res_f)
                                 residuals.extend(sx_res.call(causal_co.sx_vars + sx_known_vars + solved_expr, True))
                                 solved_expr.extend(causal_co.sx_vars)
                             else:
@@ -1446,7 +1445,7 @@ class BLTModel(object):
                     res_f = casadi.Function('res_f', all_vars , [res])
                     if options['closed_form']:
                         explicit_unsolved_sx_vars.extend(co.sx_vars)
-                        sx_res = casadi.Function('sx_res', res_f)
+                        sx_res = casadi.Function(res_f)
                         residuals.extend(sx_res.call(co.sx_vars + sx_known_vars + solved_expr, True))
                         solved_expr.extend(co.sx_vars)
                     else:
@@ -1454,7 +1453,7 @@ class BLTModel(object):
                         solved_expr.extend(co.mx_vars)
                     solved_vars.extend(co.mx_vars)
             global_index += co.n
-
+        
         # Save results
         self._dae_residual = casadi.vertcat(*residuals)
         self._explicit_unsolved_algebraics = [var for var in self._model.getVariables(self.REAL_ALGEBRAIC) if
@@ -1689,8 +1688,8 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
         objective_integrand = [self._op.getObjectiveIntegrand()]
         if self.options['closed_form']:
             all_vars = self._explicit_unsolved_vars + self._known_vars + self._explicit_solved_vars
-            mx_f = casadi.Function('mx_f', all_vars, path_lhs + path_rhs + objective_integrand)
-            sx_f = casadi.Function('mx_f', mx_f)
+            mx_f = casadi.Function("mx_fcn", all_vars, path_lhs + path_rhs + objective_integrand)
+            sx_f = casadi.Function(mx_f)
             new_expr = sx_f.call(self._explicit_unsolved_sx_vars + self._sx_known_vars + solved_expr,
                                  self.options['inline'])
         else:
