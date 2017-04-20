@@ -1,0 +1,13 @@
+Index: src/kinsol/kinsol.c
+===================================================================
+--- src/kinsol/kinsol.c	(revision 9817)
++++ src/kinsol/kinsol.c	(working copy)
+@@ -145,7 +145,7 @@
+  * MAX_RECVR   max. no. of attempts to correct a recoverable func error
+  */
+ 
+-#define MAX_RECVR      5
++#define MAX_RECVR      20
+ 
+ /*
+  * Keys for KINPrintInfo
