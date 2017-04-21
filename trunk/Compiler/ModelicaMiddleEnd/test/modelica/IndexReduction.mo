@@ -162,7 +162,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle spring.phi_rel0 = 0 \"Unstretched spring angle\" /* 0 */;
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.Torque spring.tau \"Torque between flanges (= flange_b.tau)\";
- constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0 \"Cut torque in the flange\";
+ constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0.0 \"Cut torque in the flange\";
  parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
@@ -236,8 +236,8 @@ equation
  damper.w_rel = der(damper.phi_rel);
  damper.a_rel = der(damper.w_rel);
  torque.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
- - damper.tau + inertia2.flange_b.tau + (- spring.tau) = 0;
- damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0;
+ - damper.tau + inertia2.flange_b.tau + (- spring.tau) = 0.0;
+ damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0.0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  - der(damper.phi_rel) = inertia2._der_phi;
  inertia2._der_w = inertia2._der_der_phi;

@@ -46,16 +46,16 @@ end LinearResistance;
      Reservoir r;
      Real h = inStream(r.fluidPort.h_outflow);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest1",
-			description="Test of inside and outside stream connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest1",
+            description="Test of inside and outside stream connectors.",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass StreamTests.StreamTest1
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
- constant Real r.fluidPort.m_flow = 0;
+ constant Real r.fluidPort.m_flow = 0.0;
  parameter Real r.fluidPort.p;
  parameter Real r.fluidPort.h_outflow;
  parameter Real h;
@@ -80,7 +80,7 @@ model StreamTest2
 fclass StreamTests.StreamTest2
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
- constant Real r.fluidPort.m_flow = 0;
+ constant Real r.fluidPort.m_flow = 0.0;
  parameter Real r.fluidPort.p;
  parameter Real r.fluidPort.h_outflow;
  parameter Real h;
@@ -100,12 +100,12 @@ end StreamTest2;
      connect(r1.fluidPort,res.port_a);
      connect(r2.fluidPort,res.port_b);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest3",
-			description="Test of inside and outside stream connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest3",
+            description="Test of inside and outside stream connectors.",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass StreamTests.StreamTest3
  parameter Real r1.p0 = 1 /* 1 */;
  parameter Real r1.h0 = 1 /* 1 */;
@@ -144,21 +144,21 @@ end StreamTests.StreamTest3;
      Reservoir r[2];
      Real h[2] = inStream(r.fluidPort.h_outflow);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest4",
-			description="Using inStream() on array.",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest4",
+            description="Using inStream() on array.",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass StreamTests.StreamTest4
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
- constant Real r[1].fluidPort.m_flow = 0;
+ constant Real r[1].fluidPort.m_flow = 0.0;
  parameter Real r[1].fluidPort.p;
  parameter Real r[1].fluidPort.h_outflow;
  parameter Real r[2].p0 = 1 /* 1 */;
  parameter Real r[2].h0 = 1 /* 1 */;
- constant Real r[2].fluidPort.m_flow = 0;
+ constant Real r[2].fluidPort.m_flow = 0.0;
  parameter Real r[2].fluidPort.p;
  parameter Real r[2].fluidPort.h_outflow;
  parameter Real h[1];
@@ -188,12 +188,12 @@ model StreamTest5
 fclass StreamTests.StreamTest5
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
- constant Real r[1].fluidPort.m_flow = 0;
+ constant Real r[1].fluidPort.m_flow = 0.0;
  parameter Real r[1].fluidPort.p;
  parameter Real r[1].fluidPort.h_outflow;
  parameter Real r[2].p0 = 1 /* 1 */;
  parameter Real r[2].h0 = 1 /* 1 */;
- constant Real r[2].fluidPort.m_flow = 0;
+ constant Real r[2].fluidPort.m_flow = 0.0;
  parameter Real r[2].fluidPort.p;
  parameter Real r[2].fluidPort.h_outflow;
  parameter Real h[1];
@@ -278,7 +278,7 @@ equation
  h = g.b;
  g.b = time;
  g.c = 2 / g.b;
- f.e.a - g.a = 0;
+ f.e.a - g.a = 0.0;
  g.b = f.e.b;
  f.e.c = g.c;
 end StreamTests.StreamTest7;
@@ -361,15 +361,15 @@ equation
  l[3].port_a.m_flow + l[3].port_b.m_flow = 0;
  l[3].port_a.h_outflow = l[3].port_b.h_outflow;
  l[3].port_b.h_outflow = r[3].fluidPort.h_outflow;
- l[1].port_a.m_flow + r[1].fluidPort.m_flow = 0;
+ l[1].port_a.m_flow + r[1].fluidPort.m_flow = 0.0;
  l[1].port_a.p = r[1].fluidPort.p;
- l[2].port_a.m_flow + r[2].fluidPort.m_flow = 0;
+ l[2].port_a.m_flow + r[2].fluidPort.m_flow = 0.0;
  l[2].port_a.p = r[2].fluidPort.p;
- l[3].port_a.m_flow + r[3].fluidPort.m_flow = 0;
+ l[3].port_a.m_flow + r[3].fluidPort.m_flow = 0.0;
  l[3].port_a.p = r[3].fluidPort.p;
- l[1].port_b.m_flow = 0;
- l[2].port_b.m_flow = 0;
- l[3].port_b.m_flow = 0;
+ l[1].port_b.m_flow = 0.0;
+ l[2].port_b.m_flow = 0.0;
+ l[3].port_b.m_flow = 0.0;
  h[1] = if r[1].fluidPort.m_flow > 0.0 then l[1].port_a.h_outflow else r[1].fluidPort.h_outflow;
  h[2] = if r[2].fluidPort.m_flow > 0.0 then l[2].port_a.h_outflow else r[2].fluidPort.h_outflow;
  h[3] = l[3].port_a.h_outflow;
@@ -456,15 +456,15 @@ equation
  l[3].port_a.m_flow + l[3].port_b.m_flow = 0;
  l[3].port_a.h_outflow = l[3].port_b.h_outflow;
  l[3].port_b.h_outflow = r[3].fluidPort.h_outflow;
- l[1].port_a.m_flow + r[1].fluidPort.m_flow = 0;
+ l[1].port_a.m_flow + r[1].fluidPort.m_flow = 0.0;
  l[1].port_a.p = r[1].fluidPort.p;
- l[2].port_a.m_flow + r[2].fluidPort.m_flow = 0;
+ l[2].port_a.m_flow + r[2].fluidPort.m_flow = 0.0;
  l[2].port_a.p = r[2].fluidPort.p;
- l[3].port_a.m_flow + r[3].fluidPort.m_flow = 0;
+ l[3].port_a.m_flow + r[3].fluidPort.m_flow = 0.0;
  l[3].port_a.p = r[3].fluidPort.p;
- l[1].port_b.m_flow = 0;
- l[2].port_b.m_flow = 0;
- l[3].port_b.m_flow = 0;
+ l[1].port_b.m_flow = 0.0;
+ l[2].port_b.m_flow = 0.0;
+ l[3].port_b.m_flow = 0.0;
  h[1] = r[1].fluidPort.h_outflow;
  h[2] = r[2].fluidPort.h_outflow;
  h[3] = if r[3].fluidPort.m_flow > 0.0 then l[3].port_a.h_outflow else r[3].fluidPort.h_outflow;
@@ -505,7 +505,7 @@ fclass StreamTests.StreamN1M0
  Real a.c.s;
  Real x;
 equation
- a.c.f = 0;
+ a.c.f = 0.0;
  a.c.p = 2;
  a.c.s = 1;
  x = a.c.s;
@@ -544,7 +544,7 @@ fclass StreamTests.StreamN2M0
  Real x1;
  Real x2;
 equation
- a1.c.f + a2.c.f = 0;
+ a1.c.f + a2.c.f = 0.0;
  a1.c.p = a2.c.p;
  a1.c.p = 2;
  a1.c.s = 1;
@@ -587,7 +587,7 @@ fclass StreamTests.StreamN1M1
  Real x1;
  Real x2;
 equation
- a.c.f - c.f = 0;
+ a.c.f - c.f = 0.0;
  a.c.p = c.p;
  c.s = a.c.s;
  a.c.p = 2;
@@ -644,11 +644,11 @@ fclass StreamTests.StreamN0M2
  Real b.c4.f;
  Real b.c4.s;
 equation
- a.c1.f + b.c3.f = 0;
+ a.c1.f + b.c3.f = 0.0;
  a.c1.p = b.c3.p;
- a.c2.f + b.c4.f = 0;
+ a.c2.f + b.c4.f = 0.0;
  a.c2.p = b.c4.p;
- - a.c1.f - a.c2.f = 0;
+ - a.c1.f - a.c2.f = 0.0;
  a.c1.p = a.c2.p;
  a.c1.s = b.c4.s;
  a.c2.s = b.c3.s;
@@ -712,7 +712,7 @@ fclass StreamTests.StreamN3M0
  Real _stream_positiveMax_5;
  Real _stream_positiveMax_6;
 equation
- a1.c.f + a2.c.f + a3.c.f = 0;
+ a1.c.f + a2.c.f + a3.c.f = 0.0;
  a1.c.p = a2.c.p;
  a2.c.p = a3.c.p;
  a1.c.p = 4;
@@ -790,7 +790,7 @@ fclass StreamTests.StreamN2M1
  Real _stream_positiveMax_5;
  Real _stream_positiveMax_6;
 equation
- a1.c.f + a2.c.f - c.f = 0;
+ a1.c.f + a2.c.f - c.f = 0.0;
  a1.c.p = a2.c.p;
  a2.c.p = c.p;
  c.s = (_stream_positiveMax_1 * a1.c.s + _stream_positiveMax_2 * a2.c.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
@@ -867,7 +867,7 @@ fclass StreamTests.StreamN1M2
  Real _stream_positiveMax_5;
  Real _stream_positiveMax_6;
 equation
- a.c.f - c1.f - c2.f = 0;
+ a.c.f - c1.f - c2.f = 0.0;
  a.c.p = c1.p;
  c1.p = c2.p;
  c1.s = (_stream_positiveMax_1 * a.c.s + _stream_positiveMax_2 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
@@ -963,13 +963,13 @@ fclass StreamTests.StreamN0M3
  Real _stream_positiveMax_5;
  Real _stream_positiveMax_6;
 equation
- a.c1.f + b.c4.f = 0;
+ a.c1.f + b.c4.f = 0.0;
  a.c1.p = b.c4.p;
- a.c2.f + b.c5.f = 0;
+ a.c2.f + b.c5.f = 0.0;
  a.c2.p = b.c5.p;
- a.c3.f + b.c6.f = 0;
+ a.c3.f + b.c6.f = 0.0;
  a.c3.p = b.c6.p;
- - a.c1.f - a.c2.f - a.c3.f = 0;
+ - a.c1.f - a.c2.f - a.c3.f = 0.0;
  a.c1.p = a.c2.p;
  a.c2.p = a.c3.p;
  a.c1.s = (_stream_positiveMax_1 * b.c5.s + _stream_positiveMax_2 * b.c6.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
@@ -1065,7 +1065,7 @@ fclass StreamTests.StreamN2M2
  Real _stream_positiveMax_11;
  Real _stream_positiveMax_12;
 equation
- a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.f + a2.c.f - c1.f - c2.f = 0.0;
  a1.c.p = a2.c.p;
  a2.c.p = c1.p;
  c1.p = c2.p;
@@ -1152,7 +1152,7 @@ fclass StreamTests.StreamMinMax3
  Real _stream_positiveMax_3;
  Real _stream_positiveMax_4;
 equation
- a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.f + a2.c.f - c1.f - c2.f = 0.0;
  a1.c.p = a2.c.p;
  a2.c.p = c1.p;
  c1.p = c2.p;
@@ -1217,7 +1217,7 @@ fclass StreamTests.StreamMinMax4
  Real x1;
  Real x2;
 equation
- a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.f + a2.c.f - c1.f - c2.f = 0.0;
  a1.c.p = a2.c.p;
  a2.c.p = c1.p;
  c1.p = c2.p;
@@ -1274,12 +1274,12 @@ fclass StreamTests.StreamMinMax5
  Real x1;
  Real x2;
 equation
- a1.c.f + a2.c.f - c1.f - c2.f = 0;
+ a1.c.f + a2.c.f - c1.f - c2.f = 0.0;
  a1.c.p = a2.c.p;
  a2.c.p = c1.p;
  c1.p = c2.p;
  c1.s = c2.s;
- c2.s = 0;
+ c2.s = 0.0;
  a1.c.p = 4;
  a1.c.f = time + 1;
  a1.c.s = 1;
@@ -1360,13 +1360,13 @@ fclass StreamTests.StreamNominal1
  Real _stream_positiveMax_5;
  Real _stream_positiveMax_6;
 equation
- a.c1.f + b.c4.f = 0;
+ a.c1.f + b.c4.f = 0.0;
  a.c1.p = b.c4.p;
- a.c2.f + b.c5.f = 0;
+ a.c2.f + b.c5.f = 0.0;
  a.c2.p = b.c5.p;
- a.c3.f + b.c6.f = 0;
+ a.c3.f + b.c6.f = 0.0;
  a.c3.p = b.c6.p;
- - a.c1.f - a.c2.f - a.c3.f = 0;
+ - a.c1.f - a.c2.f - a.c3.f = 0.0;
  a.c1.p = a.c2.p;
  a.c2.p = a.c3.p;
  a.c1.s = (_stream_positiveMax_1 * b.c5.s + _stream_positiveMax_2 * b.c6.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
@@ -1467,13 +1467,13 @@ fclass StreamTests.StreamNominal2
  Real _stream_positiveMax_5;
  Real _stream_positiveMax_6;
 equation
- a.c1.f + b.c4.f = 0;
+ a.c1.f + b.c4.f = 0.0;
  a.c1.p = b.c4.p;
- a.c2.f + b.c5.f = 0;
+ a.c2.f + b.c5.f = 0.0;
  a.c2.p = b.c5.p;
- a.c3.f + b.c6.f = 0;
+ a.c3.f + b.c6.f = 0.0;
  a.c3.p = b.c6.p;
- - a.c1.f - a.c2.f - a.c3.f = 0;
+ - a.c1.f - a.c2.f - a.c3.f = 0.0;
  a.c1.p = a.c2.p;
  a.c2.p = a.c3.p;
  a.c1.s = (_stream_positiveMax_1 * b.c5.s + _stream_positiveMax_2 * b.c6.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
@@ -1568,13 +1568,13 @@ fclass StreamTests.StreamAttributesOnType
  Real _stream_positiveMax_1;
  Real _stream_positiveMax_2;
 equation
- a.c1.f + b.c4.f = 0;
+ a.c1.f + b.c4.f = 0.0;
  a.c1.p = b.c4.p;
- a.c2.f + b.c5.f = 0;
+ a.c2.f + b.c5.f = 0.0;
  a.c2.p = b.c5.p;
- a.c3.f + b.c6.f = 0;
+ a.c3.f + b.c6.f = 0.0;
  a.c3.p = b.c6.p;
- - a.c1.f - a.c2.f - a.c3.f = 0;
+ - a.c1.f - a.c2.f - a.c3.f = 0.0;
  a.c1.p = a.c2.p;
  a.c2.p = a.c3.p;
  a.c1.s = b.c5.s;
@@ -1668,13 +1668,13 @@ fclass StreamTests.InStreamDer1
  Real _stream_positiveMax_1;
  Real _stream_positiveMax_2;
 equation
- a.c1.f + b.c4.f = 0;
+ a.c1.f + b.c4.f = 0.0;
  a.c1.p = b.c4.p;
- a.c2.f + b.c5.f = 0;
+ a.c2.f + b.c5.f = 0.0;
  a.c2.p = b.c5.p;
- a.c3.f + b.c6.f = 0;
+ a.c3.f + b.c6.f = 0.0;
  a.c3.p = b.c6.p;
- - a.c1.f - a.c2.f - a.c3.f = 0;
+ - a.c1.f - a.c2.f - a.c3.f = 0.0;
  a.c1.p = a.c2.p;
  a.c2.p = a.c3.p;
  a.c1.s = b.c5.s;
@@ -1773,7 +1773,7 @@ fclass StreamTests.InStreamDer2
  Real _der_stream_s_5;
  Real _der_stream_alpha_5;
 equation
- a.c1.f + a.c2.f + a.c3.f = 0;
+ a.c1.f + a.c2.f + a.c3.f = 0.0;
  a.c1.f = time;
  a.c3.f = 2 * time;
  a.x1 = (_stream_positiveMax_1 * 5.0 + _stream_positiveMax_2 * 6.0) / (_stream_positiveMax_1 + _stream_positiveMax_2);
@@ -1801,7 +1801,7 @@ equation
  _stream_alpha_5 = smooth(1, if _stream_s_5 > _inStreamEpsilon then 1 elseif _stream_s_5 > 0 then _stream_s_5 / _inStreamEpsilon * (_stream_s_5 / _inStreamEpsilon * (3 - 2 * _stream_s_5)) else 0);
  _stream_positiveMax_9 = _stream_alpha_5 * max(- a.c2.f, 0) + (1 - _stream_alpha_5) * _inStreamEpsilon;
  _stream_positiveMax_10 = _stream_alpha_5 * max(- a.c3.f, 0) + (1 - _stream_alpha_5) * _inStreamEpsilon;
- a.c1._der_f + a.c2._der_f + a.c3._der_f = 0;
+ a.c1._der_f + a.c2._der_f + a.c3._der_f = 0.0;
  a.c1._der_f = 1.0;
  a.c3._der_f = 2;
  _der_stream_s_4 = noEvent(if - a.c2.f > 0 then - a.c2._der_f else 0) + noEvent(if - a.c3.f > 0 then - a.c3._der_f else 0);
@@ -1859,7 +1859,7 @@ equation
  x1 = (_stream_positiveMax_1 * a2.c.s + _stream_positiveMax_2 * a3.c.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  x2 = a3.c.s;
  x3 = a2.c.s;
- a2.c.f + a3.c.f = 0;
+ a2.c.f + a3.c.f = 0.0;
  a1.c.s = 2 * time;
  a2.c.f = time;
  a2.c.s = 3 * time;
@@ -1929,7 +1929,7 @@ fclass StreamTests.StreamWithConst2
  Real _stream_positiveMax_8;
  Real _stream_positiveMax_9;
 equation
- 1.0 + a2.c.f - c1.f - c2.f = 0;
+ 1.0 + a2.c.f - c1.f - c2.f = 0.0;
  c1.s = (_stream_positiveMax_1 * 2.0 + _stream_positiveMax_2 * c2.s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  c2.s = (_stream_positiveMax_3 * 2.0 + _stream_positiveMax_4 * c1.s) / (_stream_positiveMax_3 + _stream_positiveMax_4);
  x1 = (_stream_positiveMax_5 * 2.0 + _stream_positiveMax_6 * c1.s + _stream_positiveMax_7 * c2.s) / (_stream_positiveMax_5 + _stream_positiveMax_6 + _stream_positiveMax_7);
@@ -2046,10 +2046,10 @@ fclass StreamTests.StreamWithConst3
  Real _stream_positiveMax_20;
  Real _stream_positiveMax_21;
 equation
- 1.0 + a2[1].c.f - c1[1].f - c2[1].f = 0;
+ 1.0 + a2[1].c.f - c1[1].f - c2[1].f = 0.0;
  c1[1].s = (_stream_positiveMax_1 * 5.0 + _stream_positiveMax_2 * c2[1].s) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  c2[1].s = (_stream_positiveMax_3 * 5.0 + _stream_positiveMax_4 * c1[1].s) / (_stream_positiveMax_3 + _stream_positiveMax_4);
- a1[2].c.f + a2[2].c.f - c1[2].f - c2[2].f = 0;
+ a1[2].c.f + a2[2].c.f - c1[2].f - c2[2].f = 0.0;
  a1[2].c.p = a2[2].c.p;
  a2[2].c.p = c1[2].p;
  c1[2].p = c2[2].p;
@@ -2147,7 +2147,7 @@ equation
  x1 = (_stream_positiveMax_1 * 3.0 + _stream_positiveMax_2 * 4.0) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  x2 = 4.0;
  x3 = 3.0;
- a2.c.f + a3.c.f = 0;
+ a2.c.f + a3.c.f = 0.0;
  a1.c.s = 2 * time;
  a2.c.f = time;
  _stream_s_1 = max(- a2.c.f, 0) + max(- a3.c.f, 0);
@@ -2247,9 +2247,9 @@ fclass StreamTests.StreamWithArrays1
  constant Real a.c1.p = 1.0;
  constant Real a.c1.f = -0.0;
  constant Real a.c2.p = 1.0;
- constant Real a.c2.f = 0;
+ constant Real a.c2.f = 0.0;
  constant Real a.c3.p = 1.0;
- constant Real a.c3.f = 0;
+ constant Real a.c3.f = 0.0;
  constant Real b.c.p = 1;
  constant Real b.c.f = 0.0;
 end StreamTests.StreamWithArrays1;
@@ -2296,11 +2296,11 @@ fclass StreamTests.StreamWithArrays2
  Real a.c1.s[1];
  Real a.c1.s[2];
  constant Real a.c2.p = 1.0;
- constant Real a.c2.f = 0;
+ constant Real a.c2.f = 0.0;
  Real a.c2.s[1];
  Real a.c2.s[2];
  constant Real a.c3.p = 1.0;
- constant Real a.c3.f = 0;
+ constant Real a.c3.f = 0.0;
  Real a.c3.s[1];
  Real a.c3.s[2];
  constant Real a.x1[1] = 1.0;
@@ -2368,19 +2368,19 @@ fclass StreamTests.StreamWithArrays3
  Real a[1].c1[2].s[1];
  Real a[1].c1[2].s[2];
  constant Real a[1].c2[1].p = 1.0;
- constant Real a[1].c2[1].f = 0;
+ constant Real a[1].c2[1].f = 0.0;
  Real a[1].c2[1].s[1];
  Real a[1].c2[1].s[2];
  constant Real a[1].c2[2].p = 2.0;
- constant Real a[1].c2[2].f = 0;
+ constant Real a[1].c2[2].f = 0.0;
  Real a[1].c2[2].s[1];
  Real a[1].c2[2].s[2];
  constant Real a[1].c3[1].p = 1.0;
- constant Real a[1].c3[1].f = 0;
+ constant Real a[1].c3[1].f = 0.0;
  Real a[1].c3[1].s[1];
  Real a[1].c3[1].s[2];
  constant Real a[1].c3[2].p = 2.0;
- constant Real a[1].c3[2].f = 0;
+ constant Real a[1].c3[2].f = 0.0;
  Real a[1].c3[2].s[1];
  Real a[1].c3[2].s[2];
  constant Real a[2].c1[1].p = 1.0;
@@ -2392,19 +2392,19 @@ fclass StreamTests.StreamWithArrays3
  Real a[2].c1[2].s[1];
  Real a[2].c1[2].s[2];
  constant Real a[2].c2[1].p = 1.0;
- constant Real a[2].c2[1].f = 0;
+ constant Real a[2].c2[1].f = 0.0;
  Real a[2].c2[1].s[1];
  Real a[2].c2[1].s[2];
  constant Real a[2].c2[2].p = 2.0;
- constant Real a[2].c2[2].f = 0;
+ constant Real a[2].c2[2].f = 0.0;
  Real a[2].c2[2].s[1];
  Real a[2].c2[2].s[2];
  constant Real a[2].c3[1].p = 1.0;
- constant Real a[2].c3[1].f = 0;
+ constant Real a[2].c3[1].f = 0.0;
  Real a[2].c3[1].s[1];
  Real a[2].c3[1].s[2];
  constant Real a[2].c3[2].p = 2.0;
- constant Real a[2].c3[2].f = 0;
+ constant Real a[2].c3[2].f = 0.0;
  Real a[2].c3[2].s[1];
  Real a[2].c3[2].s[2];
  constant Real b[1].c[1].p = 1;
@@ -2515,7 +2515,7 @@ equation
  a1.c.f = der(y1);
  a2.c.f = der(y2);
  a3.c.f = der(y3);
- der(y1) + der(y2) + der(y3) = 0;
+ der(y1) + der(y2) + der(y3) = 0.0;
  der(y1) = time * time;
  a1.c.s = 2 * time;
  der(y2) = 2 * time * time;
@@ -2565,7 +2565,7 @@ fclass StreamTests.StreamSemiLinear1
  Real a.c2.s;
  Real x;
 equation
- a.c1.f + a.c2.f = 0;
+ a.c1.f + a.c2.f = 0.0;
  a.c1.f = 2 - time;
  a.c1.s = time;
  a.c2.s = 2 * time;
