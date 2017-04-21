@@ -345,7 +345,7 @@ endif
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
-	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
 if JM_WIN64
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
 	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
