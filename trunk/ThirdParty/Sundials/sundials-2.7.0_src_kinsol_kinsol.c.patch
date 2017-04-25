@@ -11,3 +11,13 @@ Index: src/kinsol/kinsol.c
  
  /*
   * Keys for KINPrintInfo
+@@ -1647,8 +1647,7 @@
+           rldiff = rldiff - rlinc;
+         }
+ 
+-      } while ((*f1normp > alpha_cond) ||
+-	       ((*f1normp < beta_cond) && (rldiff >= rlmin)));
++      } while (((*f1normp > alpha_cond) || (*f1normp < beta_cond)) && (rldiff >= rlmin));
+ 
+       if ( (*f1normp < beta_cond) || ((rldiff < rlmin) && (*f1normp > alpha_cond)) ) {
+ 
