@@ -37,7 +37,7 @@ aspect SrcAnnotations {
         return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
     }
     public SrcAnnotation InstComponentDecl.srcAnnotation(String ... path) {
-        return getComponentDecl().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
+        return SrcAnnotation.createFor(srcAnnotationProvider(), new SrcAnnotation.InstEvaluator(this), path);
     }
 
     public SrcAnnotation ExtendsClause.srcAnnotation(String ... path) {
@@ -68,7 +68,7 @@ aspect SrcAnnotations {
         return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ComponentDecl.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
-        return getComment().srcAnnotation(evaluator, path);
+        return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ExtendsClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
         return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
@@ -253,6 +253,14 @@ aspect SrcAnnotations {
     eq ShortClassDecl.srcAnnotationProvider() =
             SrcAnnotation.createProviderFor(getExtendsClauseShortClass().getComment().getAnnotationOpt());
     eq LibNode.srcAnnotationProvider() = resolveLib().srcAnnotationProvider();
+
+    /*******************
+     * Component Decls  
+     ******************/
+    syn SrcAnnotationProvider ComponentDecl.srcAnnotationProvider() =
+            SrcAnnotation.createProviderFor(getComment().getAnnotationOpt());
+    syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getComponentDecl().srcAnnotationProvider();
+    eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
 
     /*******************
      *  Annotation Opt  
