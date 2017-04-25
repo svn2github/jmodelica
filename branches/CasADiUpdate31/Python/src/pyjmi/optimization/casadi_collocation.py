@@ -5891,14 +5891,15 @@ def _to_external_function(fcn, name, use_existing=False):
 
     if not use_existing:
         print 'Generating code for', name
-        fcn.generate(name)
-        _add_help_fcns(name + '.c')
+        #old_solver.generate_dependencies("nlp.c");
+        fcn.generate_dependencies(name+".c")
+        #_add_help_fcns(name + '.c')
         bitness_flag = '-m32' if struct.calcsize('P') == 4 else '-m64'
         exit_code = system('gcc ' + bitness_flag + ' -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
         if exit_code != 0:
             return fcn # fall back to uncompiled version
-    fcn_e = casadi.external(fcn.name(), name+ext)
-    return fcn_e
+    #fcn_e = casadi.external(fcn.name(), name+ext)
+    return name+ext
 
 def enable_codegen(coll, name=None):
     """
@@ -5929,47 +5930,19 @@ def enable_codegen(coll, name=None):
     ext = '.so' # CasADi 2.4 seems to expect .so even on Windows
 
     old_solver = coll.solver_object
-
-    nlp_fcn  = coll.nlp_fcn
-    nlp_f    = old_solver.get_function('nlp_f')
-    nlp_g    = old_solver.get_function('nlp_g')
-    grad_f   = old_solver.get_function('nlp_grad_f') 
-    jac_g    = old_solver.get_function('nlp_jac_g')
-    hess_lag = old_solver.get_function('nlp_hess_l')
-
+    
     existing = False
     if name == None:
         enable_codegen.times += 1
         name = str(enable_codegen.times)
     else:
-        if (path.isfile('func_nlp_'+name+ext) and
-            path.isfile('func_grad_f_'+name+ext) and
-            path.isfile('func_jac_g_'+name+ext) and
-            path.isfile('func_hess_lag_'+name+ext)):
+        if path.isfile('func_nlp_'+name+ext):
             existing = True
-    
-    nlp_f = _to_external_function(nlp_f, 'func_nlp_f_' + name, existing)
-    nlp_g = _to_external_function(nlp_g, 'func_nlp_g_' + name, existing)
-    nlp_fcn = _to_external_function(nlp_fcn, 'func_nlp_' + name, existing)
-    grad_f = _to_external_function(grad_f, 'func_grad_f_' + name, existing)
-    jac_g = _to_external_function(jac_g, 'func_jac_g_' + name, existing)
-    hess_lag = _to_external_function(hess_lag, 'func_hess_lag_' + name, existing)
 
-    coll.set_solver_option('expand'  , False)
-    coll.set_solver_option('grad_f'  , grad_f)
-    coll.set_solver_option('jac_g'   , jac_g)
-    coll.set_solver_option('hess_lag', hess_lag)
-    
-    [coll.xx, coll.pp] = nlp_fcn.mx_in()
-    [coll.cost, coll.constraints] = nlp_fcn.mx_out()
-    #[coll.xx, coll.pp] = nlp_f.mx_in()
-    #coll.cost=nlp_f.mx_out()[0]; coll.constraints=nlp_g.mx_out()[0]
-    
-    coll.nlp_fcn = nlp_fcn #casadi.Function('nlp', [coll.xx, coll.pp], [coll.cost, constraints])
-    coll.nlp = dict(x=coll.xx, p=coll.pp, f=coll.cost, g=coll.constraints)
-    
-    coll.initialize()
+    nlp = _to_external_function(old_solver, 'func_nlp_' + name, existing)
 
+    if isinstance(nlp, str): #If not a string, then use the old object.
+        coll.solver_object = casadi.nlpsol('solver', coll._plugin(), os.path.join(os.path.abspath("."),nlp))
 
 enable_codegen.times = 0
 

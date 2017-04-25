@@ -35,7 +35,7 @@ def result_distance(res1, res2, names):
 @testattr(casadi = True)
 def test_code_gen():
     var_names = ('x1', 'x2', 'u')
-    func_names = ['nlp_test', 'grad_f_test', 'jac_g_test', 'hess_lag_test']
+    func_names = ['nlp_test']
     exts = ['.c']
     # if os.name == 'nt':
     #     exts.append('.dll')
