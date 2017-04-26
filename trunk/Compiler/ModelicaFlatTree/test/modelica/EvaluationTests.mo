@@ -4758,4 +4758,21 @@ end EvaluationTests.ConstantInFunction2;
 ")})));
 end ConstantInFunction2;
 
+model ZeroSizeRecordArray1
+    record R
+        Real x = 1;
+    end R;
+    
+    constant R[0] r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ZeroSizeRecordArray1",
+            description="",
+            flatModel="
+fclass EvaluationTests.ZeroSizeRecordArray1
+end EvaluationTests.ZeroSizeRecordArray1;
+")})));
+end ZeroSizeRecordArray1;
+
 end EvaluationTests;
