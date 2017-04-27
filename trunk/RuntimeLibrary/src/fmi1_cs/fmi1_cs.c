@@ -358,7 +358,9 @@ fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
-    if (jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value)) {
+    if (fmi1_cs->ode_problem->ode_solver != NULL &&
+        jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value))
+    {
         jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
     }
         
@@ -374,7 +376,9 @@ fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], siz
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
-    if (jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value)) {
+    if (fmi1_cs->ode_problem->ode_solver != NULL &&
+        jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value))
+    {
         jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
     }
     return fmi1_me_set_integer(fmi1_cs->cs_data->fmix_me, vr, nvr, value);
@@ -389,7 +393,9 @@ fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
     }
     
     jmi = &((fmi1_me_t*)fmi1_cs->cs_data->fmix_me)->jmi;
-    if (jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value)) {
+    if (fmi1_cs->ode_problem->ode_solver != NULL && 
+        jmi_cs_check_discrete_input_change(jmi, vr, nvr, (void*)value))
+    {
         jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
     }
     return fmi1_me_set_boolean(fmi1_cs->cs_data->fmix_me, vr, nvr, value);

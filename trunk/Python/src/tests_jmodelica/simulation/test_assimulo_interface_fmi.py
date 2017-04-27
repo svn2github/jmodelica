@@ -1008,6 +1008,22 @@ class Test_FMI_ODE_CS_2:
         nose.tools.assert_almost_equal(res.final("T"), 11.22494, 2)
         
     @testattr(stddist = True)
+    def test_changing_discrete_inputs_many_times(self):
+        model = load_fmu("Inputs_PlantDiscreteInputs.fmu")
+        opts = model.simulate_options()
+        
+        def step(time):
+            """
+            A step function that goes from 1 to 0 at time=0.28
+            and from 0 to 1 at time=0.55
+            """
+            return time < 0.28 or time > 0.55
+        
+        input = ('onSwitch', step)
+        res = model.simulate(final_time=0.8, options=opts, input=input)
+        nose.tools.assert_almost_equal(res.final("T"), 20.67587, 2)
+        
+    @testattr(stddist = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()
