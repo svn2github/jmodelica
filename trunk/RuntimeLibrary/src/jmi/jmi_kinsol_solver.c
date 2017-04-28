@@ -1306,7 +1306,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
 }
 
 /* Limit the maximum step to be within bounds. Do projection if needed. */
-static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vector b) {
+static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *sJpnorm, realtype *sFdotJp) {
     jmi_block_solver_t *block = (jmi_block_solver_t *)kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;  
     realtype xnorm;        /* step norm */
@@ -1598,9 +1598,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     }
     if(max_step_ratio < 1.0) {
         /* reduce the norms of Jp. This is only approximate since active bounds are not accounted for.*/
-        kin_mem->kin_sFdotJp *= max_step_ratio;
-        kin_mem->kin_sJpnorm *= max_step_ratio;
-        solver->sJpnorm = kin_mem->kin_sJpnorm;
+        *sFdotJp *= max_step_ratio;
+        *sJpnorm *= max_step_ratio;
+        solver->sJpnorm = *sJpnorm;
     }
     /* The maximum newton step leads to the bound  
     -> store the "x" and set maximum step to be L2 norm of x */
@@ -2298,7 +2298,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             topnode = jmi_log_enter_(block->log,logInfo,"StepDirection");
             jmi_log_reals(block->log, topnode, logInfo, "unbounded_step", xd, block->n);
         }
-        jmi_kinsol_limit_step(kin_mem, x, b);
+        jmi_kinsol_limit_step(kin_mem, x, b, sJpnorm, sFdotJp);
         t = jmi_block_solver_start_clock(block);
         if(solver->last_num_active_bounds > 0 && (block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode)) {
             realtype sfJp, fnorm, g_scale;
@@ -2329,10 +2329,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
                     jmi_log_node(block->log, logInfo, "GradientScaling", "Used gradient scaling is <gs: %g> in <block: %s>", g_scale, block->label);
                 }
                 N_VScale(g_scale, solver->gradient, x);
-             /*   sfJp *= g_scale;
-                jmi_kinsol_calc_Mv(solver->J, FALSE, solver->gradient, b);
-                sJpnorm = N_VWL2Norm(b,solver->kin_f_scale); */
-                jmi_kinsol_limit_step(kin_mem, x, b);
+                jmi_kinsol_limit_step(kin_mem, x, b, sJpnorm, sFdotJp);
 
                 sfJp = jmi_kinsol_calc_v1twwv2(x, solver->gradient, 0); 
 
@@ -2344,8 +2341,6 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             /* recalculate sJpnorm  */ 
             jmi_kinsol_calc_Mv(block->J, FALSE, x, b);
             *sJpnorm = N_VWL2Norm(b,block->f_scale);
-            /* update sJpnorm and sfdotJp for Kinsol */ 
-            /* kin_mem->kin_sJpnorm = sJpnorm; */
             *sFdotJp = -sfJp; /* Due to opposite sign of solver->gradient minus is present here. */
             solver->sJpnorm = *sJpnorm;
 
