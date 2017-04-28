@@ -790,137 +790,154 @@ print '  Scaled residual norm:',             solves[0].block_solves[0].iteration
       <programlisting>Modelica.Mechanics.Rotational.Examples.First
 
 Problems:
-0 errors, 0 compliance errors, 1 warnings
+0 errors, 0 compliance errors, 0 warnings
 
 Model before transformation
 
-Number of independent constants:              1
-  Number of Real independent constants:       1
-  Number of Integer independent constants:    0
-  Number of Enum independent constants:       0
-  Number of Boolean independent constants:    0
-  Number of String independent constants:     0
-Number of dependent constants:                0
-  Number of Real dependent constants:         0
-  Number of Integer dependent constants:      0
-  Number of Enum dependent constants:         0
-  Number of Boolean dependent constants:      0
-  Number of String dependent constants:       0
-Number of independent parameters:             20
-  Number of Real independent parameters:      14
-  Number of Integer independent parameters:   0
-  Number of Enum independent parameters:      4
-  Number of Boolean independent parameters:   2
-  Number of String independent parameters:    0
-Number of dependent parameters:               6
-  Number of Real dependent parameters:        6
-  Number of Integer dependent parameters:     0
-  Number of Enum dependent parameters:        0
-  Number of Boolean dependent parameters:     0
-  Number of String dependent parameters:      0
-Number of variables :                         53
-  Number of Real variables:                   53
-  Number of Integer variables:                0
-  Number of Enum variables:                   0
-  Number of Boolean variables:                0
-  Number of String variables:                 0
-Number of Real differentiated variables:      8
-Number of Real derivative variables:          0
-Number of Real algebraic variables:           45
-Number of inputs:                             0
-  Number of Real inputs:                      0
-  Number of Integer inputs:                   0
-  Number of Enum inputs:                      0
-  Number of Boolean inputs:                   0
-  Number of String inputs:                    0
-Number of discrete variables :                0
-  Number of Real discrete variables:          0
-  Number of Integer discrete variables:       0
-  Number of Enum discrete variables:          0
-  Number of Boolean discrete variables:       0
-  Number of String discrete variables:        0
-Number of equations:                          51
-Number of variables with binding expression:  4
-  Number of Real variables with binding exp:  4
-  Number of Integer variables binding exp:    0
-  Number of Enum variables binding exp:       0
-  Number of Boolean variables binding exp:    0
-  Number of String variables binding exp:     0
-Total number of equations:                    55
-Number of initial equations:                  0
-Number of relational exps in equations:       1
-Number of relational exps in init equations:  0
+Number of independent constants:                   0(    0 scalars)
+  Number of Real independent constants:            0(    0 scalars)
+  Number of Real independent constants:            0(    0 scalars)
+  Number of Integer independent constants:         0(    0 scalars)
+  Number of Enum independent constants:            0(    0 scalars)
+  Number of Boolean independent constants:         0(    0 scalars)
+  Number of String independent constants:          0(    0 scalars)
+Number of dependent constants:                     0(    0 scalars)
+  Number of Real dependent constants:              0(    0 scalars)
+  Number of Integer dependent constants:           0(    0 scalars)
+  Number of Enum dependent constants:              0(    0 scalars)
+  Number of Boolean dependent constants:           0(    0 scalars)
+  Number of String dependent constants:            0(    0 scalars)
+Number of independent parameters:                 21(   21 scalars)
+  Number of Real independent parameters:          14(   14 scalars)
+  Number of Integer independent parameters:        0(    0 scalars)
+  Number of Enum independent parameters:           4(    4 scalars)
+  Number of Boolean independent parameters:        3(    3 scalars)
+  Number of String independent parameters:         0(    0 scalars)
+Number of dependent parameters:                    6(    6 scalars)
+  Number of Real dependent parameters:             6(    6 scalars)
+  Number of Integer dependent parameters:          0(    0 scalars)
+  Number of Enum dependent parameters:             0(    0 scalars)
+  Number of Boolean dependent parameters:          0(    0 scalars)
+  Number of String dependent parameters:           0(    0 scalars)
+Number of initial parameters:                      0(    0 scalars)
+  Number of Real dependent parameters:             0(    0 scalars)
+  Number of Integer dependent parameters:          0(    0 scalars)
+  Number of Enum dependent parameters:             0(    0 scalars)
+  Number of Boolean dependent parameters:          0(    0 scalars)
+  Number of String dependent parameters:           0(    0 scalars)
+Number of variables:                              54(   54 scalars)
+  Number of Real variables:                       54(   54 scalars)
+  Number of Integer variables:                     0(    0 scalars)
+  Number of Enum variables:                        0(    0 scalars)
+  Number of Boolean variables:                     0(    0 scalars)
+  Number of String variables:                      0(    0 scalars)
+Number of Real differentiated variables:           8(    8 scalars)
+Number of Real derivative variables:               0(    0 scalars)
+Number of Real continous algebraic variables:     46(   46 scalars)
+Number of inputs:                                  0(    0 scalars)
+  Number of Real inputs:                           0(    0 scalars)
+  Number of Integer inputs:                        0(    0 scalars)
+  Number of Enum inputs:                           0(    0 scalars)
+  Number of Boolean inputs:                        0(    0 scalars)
+  Number of String inputs:                         0(    0 scalars)
+Number of discrete variables:                      0(    0 scalars)
+  Number of Real discrete variables:               0(    0 scalars)
+  Number of Integer discrete variables:            0(    0 scalars)
+  Number of Enum discrete variables:               0(    0 scalars)
+  Number of Boolean discrete variables:            0(    0 scalars)
+  Number of String discrete variables:             0(    0 scalars)
+Number of equations:                              52(   52 scalars)
+Number of variables with binding expression:       4(    4 scalars)
+  Number of Real variables with binding exp:       4(    4 scalars)
+  Number of Integer variables binding exp:         0(    0 scalars)
+  Number of Enum variables binding exp:            0(    0 scalars)
+  Number of Boolean variables binding exp:         0(    0 scalars)
+  Number of String variables binding exp:          0(    0 scalars)
+Total number of equations:                        56(   56 scalars)
+Number of initial equations:                       0(    0 scalars)
+Number of event indicators in equations:           0
+Number of event indicators in init equations:      0
 Flattened model
 
 Connection sets
 
 Model after transformation
 
-Number of independent constants:              1
-  Number of Real independent constants:       1
-  Number of Integer independent constants:    0
-  Number of Enum independent constants:       0
-  Number of Boolean independent constants:    0
-  Number of String independent constants:     0
-Number of dependent constants:                0
-  Number of Real dependent constants:         0
-  Number of Integer dependent constants:      0
-  Number of Enum dependent constants:         0
-  Number of Boolean dependent constants:      0
-  Number of String dependent constants:       0
-Number of independent parameters:             34
-  Number of Real independent parameters:      19
-  Number of Integer independent parameters:   2
-  Number of Enum independent parameters:      4
-  Number of Boolean independent parameters:   9
-  Number of String independent parameters:    0
-Number of dependent parameters:               6
-  Number of Real dependent parameters:        6
-  Number of Integer dependent parameters:     0
-  Number of Enum dependent parameters:        0
-  Number of Boolean dependent parameters:     0
-  Number of String dependent parameters:      0
-Number of variables :                         28
-  Number of Real variables:                   28
-  Number of Integer variables:                0
-  Number of Enum variables:                   0
-  Number of Boolean variables:                0
-  Number of String variables:                 0
-Number of Real differentiated variables:      4
-Number of Real derivative variables:          4
-Number of Real algebraic variables:           20
-Number of inputs:                             0
-  Number of Real inputs:                      0
-  Number of Integer inputs:                   0
-  Number of Enum inputs:                      0
-  Number of Boolean inputs:                   0
-  Number of String inputs:                    0
-Number of discrete variables :                0
-  Number of Real discrete variables:          0
-  Number of Integer discrete variables:       0
-  Number of Enum discrete variables:          0
-  Number of Boolean discrete variables:       0
-  Number of String discrete variables:        0
-Number of equations:                          24
-Number of variables with binding expression:  0
-  Number of Real variables with binding exp:  0
-  Number of Integer variables binding exp:    0
-  Number of Enum variables binding exp:       0
-  Number of Boolean variables binding exp:    0
-  Number of String variables binding exp:     0
-Total number of equations:                    24
-Number of initial equations:                  4
-Number of relational exps in equations:       1
-Number of relational exps in init equations:  0
+Number of independent constants:                   1(    1 scalars)
+  Number of Real independent constants:            1(    1 scalars)
+  Number of Real independent constants:            1(    1 scalars)
+  Number of Integer independent constants:         0(    0 scalars)
+  Number of Enum independent constants:            0(    0 scalars)
+  Number of Boolean independent constants:         0(    0 scalars)
+  Number of String independent constants:          0(    0 scalars)
+Number of dependent constants:                     0(    0 scalars)
+  Number of Real dependent constants:              0(    0 scalars)
+  Number of Integer dependent constants:           0(    0 scalars)
+  Number of Enum dependent constants:              0(    0 scalars)
+  Number of Boolean dependent constants:           0(    0 scalars)
+  Number of String dependent constants:            0(    0 scalars)
+Number of independent parameters:                 60(   60 scalars)
+  Number of Real independent parameters:          28(   28 scalars)
+  Number of Integer independent parameters:       13(   13 scalars)
+  Number of Enum independent parameters:           4(    4 scalars)
+  Number of Boolean independent parameters:       15(   15 scalars)
+  Number of String independent parameters:         0(    0 scalars)
+Number of dependent parameters:                   12(   12 scalars)
+  Number of Real dependent parameters:            12(   12 scalars)
+  Number of Integer dependent parameters:          0(    0 scalars)
+  Number of Enum dependent parameters:             0(    0 scalars)
+  Number of Boolean dependent parameters:          0(    0 scalars)
+  Number of String dependent parameters:           0(    0 scalars)
+Number of initial parameters:                      0(    0 scalars)
+  Number of Real dependent parameters:             0(    0 scalars)
+  Number of Integer dependent parameters:          0(    0 scalars)
+  Number of Enum dependent parameters:             0(    0 scalars)
+  Number of Boolean dependent parameters:          0(    0 scalars)
+  Number of String dependent parameters:           0(    0 scalars)
+Number of variables:                              36(   36 scalars)
+  Number of Real variables:                       36(   36 scalars)
+  Number of Integer variables:                     0(    0 scalars)
+  Number of Enum variables:                        0(    0 scalars)
+  Number of Boolean variables:                     0(    0 scalars)
+  Number of String variables:                      0(    0 scalars)
+Number of Real differentiated variables:           4(    4 scalars)
+Number of Real derivative variables:               4(    4 scalars)
+Number of Real continous algebraic variables:     28(   28 scalars)
+Number of inputs:                                  0(    0 scalars)
+  Number of Real inputs:                           0(    0 scalars)
+  Number of Integer inputs:                        0(    0 scalars)
+  Number of Enum inputs:                           0(    0 scalars)
+  Number of Boolean inputs:                        0(    0 scalars)
+  Number of String inputs:                         0(    0 scalars)
+Number of discrete variables:                      0(    0 scalars)
+  Number of Real discrete variables:               0(    0 scalars)
+  Number of Integer discrete variables:            0(    0 scalars)
+  Number of Enum discrete variables:               0(    0 scalars)
+  Number of Boolean discrete variables:            0(    0 scalars)
+  Number of String discrete variables:             0(    0 scalars)
+Number of equations:                              32(   32 scalars)
+Number of variables with binding expression:       0(    0 scalars)
+  Number of Real variables with binding exp:       0(    0 scalars)
+  Number of Integer variables binding exp:         0(    0 scalars)
+  Number of Enum variables binding exp:            0(    0 scalars)
+  Number of Boolean variables binding exp:         0(    0 scalars)
+  Number of String variables binding exp:          0(    0 scalars)
+Total number of equations:                        32(   32 scalars)
+Number of initial equations:                       4(    4 scalars)
+Number of event indicators in equations:           0
+Number of event indicators in init equations:      0
 Transformed model
 
-Alias sets (13 sets, 40 eliminated variables)
+Alias sets (10 sets, 25 eliminated variables)
 
-BLT diagnostics
+BLT for DAE System
+
+BLT for Initialization System
+
 BLT diagnostics table
 
-Number of unsolved equation blocks in DAE initialization system: 1: {4}
-Number of unsolved equation blocks in DAE system: 1: {4}
+Number of unsolved equation blocks in DAE initialization system: 1: {8}
+Number of unsolved equation blocks in DAE system: 1: {8}
 
 Number of unsolved equation blocks in DAE initialization system after tearing: 1: {1}
 Number of unsolved equation blocks in DAE system after tearing: 1: {1}

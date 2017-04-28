@@ -594,10 +594,6 @@ make casadi_interface
 from pyjmi.examples import VDP_sim
 VDP_sim.run_demo()
 
-# Import and run the CSTR example and plot results
-from pyjmi.examples import cstr
-cstr.run_demo()
-
 # Import and run the CSTR example using CasADi and plot results
 from pyjmi.examples import cstr_casadi
 cstr_casadi.run_demo()
