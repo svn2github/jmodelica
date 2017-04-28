@@ -84,7 +84,7 @@ jmi_real_t jmi_divide_equation(jmi_t *jmi, jmi_real_t num, jmi_real_t den, const
 
 jmi_real_t static jmi_atan2(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
     jmi_real_t to_return = atan2(x, y);
-	if (x == 0 && y == 0) {
+    if (x == 0 && y == 0) {
         char val[64];
         sprintf(val, "%.14E, %.14E", x, y);
         
@@ -259,12 +259,11 @@ jmi_real_t jmi_tan_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
 }
 
 jmi_real_t jmi_abs(jmi_real_t v) {
-    return COND_EXP_GE(v, AD_WRAP_LITERAL(0), v, -v);
+    return COND_EXP_GE(v, 1.0, v, -v);
 }
 
 jmi_real_t jmi_sign(jmi_real_t v) {
-    return COND_EXP_GT(v, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(1), 
-        COND_EXP_LT(v, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(-1), AD_WRAP_LITERAL(0)));
+    return COND_EXP_GT(v, 0.0, 1.0, COND_EXP_LT(v, 0.0, -1.0, 0.0));
 }
 
 jmi_real_t jmi_min(jmi_real_t x, jmi_real_t y) {
@@ -276,24 +275,22 @@ jmi_real_t jmi_max(jmi_real_t x, jmi_real_t y) {
 }
 
 jmi_real_t jmi_dround(jmi_real_t x) {
-        return (x >= 0)? floor(x + 0.5) : floor(x - 0.5);
+    return (x >= 0)? floor(x + 0.5) : floor(x - 0.5);
 }
 
 jmi_real_t jmi_dremainder(jmi_t* jmi, jmi_real_t x, jmi_real_t y) {
-        jmi_real_t res = fmod(x,y);
-        jmi_real_t scaling = jmi_max(1.0, jmi_max(x,y));
-        return ((jmi_abs(res-y)/scaling)<jmi->time_events_epsilon)? (res-y)/scaling : res/scaling;
+    jmi_real_t res = fmod(x,y);
+    jmi_real_t scaling = jmi_max(1.0, jmi_max(x,y));
+    return ((jmi_abs(res-y)/scaling)<jmi->time_events_epsilon)? (res-y)/scaling : res/scaling;
 }
 
 jmi_real_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
     jmi_real_t t = jmi_get_t(jmi)[0];
     jmi_real_t remainder;
     if (!jmi->atEvent || SURELY_LT_ZERO(t-offset) || jmi->atInitial) {
-      /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
         return JMI_FALSE;
     }
     remainder = jmi_dremainder(jmi, (t-offset),h);
-	/*jmi_log_node(jmi->log, logWarning, "jmi_sample2", "<offset: %g> <h: %g> <fmod: %g> <time_passed: %g> <remainder: %g>",offset,h,fmod((t-offset),h),(t-offset), jmi_dremainder((t-offset),h));*/
     if (jmi_abs(remainder) < jmi->time_events_epsilon)
         return TRUE;
     else
