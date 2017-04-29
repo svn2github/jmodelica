@@ -259,7 +259,7 @@ jmi_real_t jmi_tan_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
 }
 
 jmi_real_t jmi_abs(jmi_real_t v) {
-    return COND_EXP_GE(v, 1.0, v, -v);
+    return COND_EXP_GE(v, 0.0, v, -v);
 }
 
 jmi_real_t jmi_sign(jmi_real_t v) {
