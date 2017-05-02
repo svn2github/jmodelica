@@ -44,7 +44,8 @@
                 an overflow pipe if the level of the upper tank exceeds 6 meters instead of 10 meters.
             </listitem>
             <listitem> The state selection in <emphasis>Modelica.Magnetic.FluxTubes.Examples.Hysteresis.HysteresisModelComparison</emphasis>
-                is patched to improve the numerical robustness. 
+                is patched to improve the numerical robustness, see <link xlink:href="https://github.com/modelica/Modelica/issues/2248">issue 2248</link>
+                on the GitHub repository for Modelica Association.
             </listitem>
             <listitem> In <emphasis>Modelica.Fluid.Examples.TraceSubstances.RoomCO2WithControls</emphasis> the
                 experiment tolerance is tightened to 1e-007 instead of 1e-006 to avoid chattering.
