@@ -118,6 +118,17 @@ public class FClassMethodTestCase extends MethodTestCase {
     }
 }
 
+public class SourceMethodTestCase extends MethodTestCase {
+    /**
+     * Perform tests on source tree.
+     *
+     * @return  <code>true</code> if test case should stop after this method
+     */
+    protected boolean testSource(SourceRoot sr) {
+        testMethod(sr);
+        return true;
+    }
+}
 public class InstClassMethodTestCase extends MethodTestCase {
     /**
      * Perform tests on instantiated class.
