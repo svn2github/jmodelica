@@ -18,7 +18,7 @@
 """
 The pyjmi example package.
 """
-__all__ = ['ast_example', 'blood_glucose',
+__all__ = ['blood_glucose',
            'cart_pendulum',
            'ccpp', 'ccpp_elimination', 'ccpp_sym_elim', 'crane',
            'crystallizer', 
