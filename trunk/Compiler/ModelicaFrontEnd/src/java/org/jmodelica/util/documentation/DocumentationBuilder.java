@@ -2,8 +2,10 @@ package org.jmodelica.util.documentation;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +26,7 @@ import org.jmodelica.util.xml.StringUtil;
 import org.jmodelica.util.xml.XMLPrinter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -106,6 +109,7 @@ public final class DocumentationBuilder {
     private List<String> chapterOrder;
     private List<File> images;
     private List<File> moduleSources;
+    private Map<String, String> replacements;
 
     /**
      * Sets up a {@code DocumentationBuilder}.
@@ -121,18 +125,23 @@ public final class DocumentationBuilder {
      *            A listing of chapter names specifying the order in which to
      *            write chapters.
      * @param images
-     *            A list of chapters to exclude from the documentation.
+     *            A list of images to copy to the destination.
+     * @param replacements
+     *            A map of string-string key-value pairs; all keys are replaced
+     *            by their corresponding values in the text.
      * @param verbose
      *            Flag specifying whether or not the builder should print
      *            messages.
      */
     public DocumentationBuilder(File source, File destination, List<File> moduleSources, List<String> chapterOrder,
-            List<File> images, boolean verbose) {
+            List<File> images, Map<String, String> replacements, boolean verbose) {
+
         this.source = source;
         this.destination = destination;
         this.moduleSources = moduleSources;
         this.chapterOrder = chapterOrder;
         this.images = images;
+        this.replacements = replacements;
         DocumentationBuilder.verbose = verbose;
     }
 
@@ -186,7 +195,7 @@ public final class DocumentationBuilder {
         for (String name : chapterOrder) {
             ChapterElement chapter = root.getChapter(name);
             chapter.include(file);
-            chapter.writeFile(destination, CHARACTER_SET);
+            chapter.writeFile(destination, replacements, CHARACTER_SET);
             log("\tWrote chapter %s.\n", name);
         }
         file.write(CHARACTER_SET);
@@ -247,7 +256,8 @@ public final class DocumentationBuilder {
         }
 
         try {
-            Document document = BUILDER.parse(file);
+            Document document = BUILDER.parse(
+                    new InputSource(new InputStreamReader(new FileInputStream(file.getAbsolutePath()), CHARACTER_SET)));
             Element element = document.getDocumentElement();
             element.normalize();
 
@@ -384,7 +394,7 @@ public final class DocumentationBuilder {
         List<String> orderList = getOrderList(order);
 
         new DocumentationBuilder(docSource, docDest, moduleFiles(properties, options.moduleDirs, images, docDest),
-                orderList, images, options.verbose).writeDocumentation();
+                orderList, images, options.replacements, options.verbose).writeDocumentation();
     }
 
     /**
@@ -452,6 +462,7 @@ public final class DocumentationBuilder {
         private boolean verbose;
         private List<String> modules;
         private List<File> moduleDirs;
+        private Map<String, String> replacements;
         private File destination;
         private File order;
         private File properties;
@@ -468,6 +479,7 @@ public final class DocumentationBuilder {
 
             this.modules = new ArrayList<String>();
             this.moduleDirs = new ArrayList<File>();
+            this.replacements = new HashMap<String, String>();
 
             char opt = '\0';
             for (int i = 0; i < args.length; i++) {
@@ -526,6 +538,14 @@ public final class DocumentationBuilder {
                 break;
             case 'p':
                 this.properties = new File(firstArg);
+                break;
+            case 'r':
+                for (int i = 0; i < args.size(); i += 2) {
+                    if (i + 1 >= args.size()) {
+                        throw new IllegalArgumentException("Odd number of replacement parameters; pairs required.");
+                    }
+                    this.replacements.put(args.get(i), args.get(i + 1));
+                }
                 break;
             case 's':
                 this.source = new File(firstArg);

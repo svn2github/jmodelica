@@ -57,11 +57,12 @@ public class TextElement extends DocumentElement {
         try {
             Transformer t = TransformerFactory.newInstance().newTransformer();
             t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            t.setOutputProperty(OutputKeys.VERSION, "1.0");
             t.transform(new DOMSource(node), new StreamResult(sw));
         } catch (TransformerException te) {
-            System.out.println("nodeToString Transformer Exception in node " + node);
+            throw new DocumentationBuilderException("nodeToString Transformer Exception in node " + node);
         }
-        return sw.toString();
+        return new String(sw.getBuffer());
     }
 
     @Override

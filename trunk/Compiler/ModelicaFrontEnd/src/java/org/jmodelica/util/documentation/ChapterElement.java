@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -23,7 +24,8 @@ public class ChapterElement extends DocumentElement {
     /**
      * Regular expression describing which characters to escape in file names.
      */
-    private static final String ESCAPE_REGEX = "[^0-9a-zA-ZÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¥ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“]";
+    private static final String ESCAPE_REGEX =
+            "[^0-9a-zA-ZåäöÅÄÖ]";
 
     /**
      * String to replace characters escaped with {@link #ESCAPE_REGEX}.
@@ -179,17 +181,25 @@ public class ChapterElement extends DocumentElement {
      * 
      * @param destination
      *            The directory to write the file to.
+     * @param replacements
+     *            A map of string-string key-value pairs; in text, all
+     *            occurrences of a key will be replaced by the corresponding
+     *            value.
      * @param characterSet
      *            The character set to use when writing the file.
      * @throws IOException
      *             if there was any error writing to the file.
      */
-    public void writeFile(File destination, String characterSet) throws IOException {
+    public void writeFile(File destination, Map<String, String> replacements, String characterSet) throws IOException {
         File dest =
                 new File(destination.getAbsolutePath() + (destination.isDirectory() ? File.separator + fileName : ""));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), characterSet));
 
-        writer.write(text(""));
+        String text = text("");
+        for (String key : replacements.keySet()) {
+            text = text.replaceAll(key, replacements.get(key));
+        }
+        writer.write(text);
         writer.close();
     }
 
