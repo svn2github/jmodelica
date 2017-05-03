@@ -19,18 +19,12 @@
 """
 
 from tests_jmodelica import testattr
-from pyjmi.examples import (ast_example,
-                            blood_glucose,
+from pyjmi.examples import (blood_glucose,
                             crystallizer,
                             parameter_estimation_1,
                             qt_par_est,
                             bounds_kinsol,
                             furuta_dfo_using_algorithm_drivers)
-
-@testattr(stddist = True)
-def test_ast_example():
-    """ Test the ast_example example."""
-    ast_example.run_demo(False)
 
 @testattr(stddist = True)
 def test_blood_glucose():
