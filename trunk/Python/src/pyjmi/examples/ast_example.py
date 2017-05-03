@@ -22,14 +22,6 @@ import os.path
 import numpy as N
 import ctypes as ct
 import matplotlib.pyplot as plt
-# Import JPype
-import jpype
-
-# Import the JModelica.org Python packages
-from pymodelica.compiler_wrappers import ModelicaCompiler
-
-# Create a reference to the java package 'org'
-org = jpype.JPackage('org')
 
 def run_demo(with_plots=True):
     """
@@ -59,6 +51,14 @@ def run_demo(with_plots=True):
     3. Flatten the CauerLowPassAnalog model instance and print some statistics 
        of the flattened Model.
     """
+    # Import JPype
+    import jpype
+
+    # Import the JModelica.org Python packages
+    from pymodelica.compiler_wrappers import ModelicaCompiler
+
+    # Create a reference to the java package 'org'
+    org = jpype.JPackage('org')
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
