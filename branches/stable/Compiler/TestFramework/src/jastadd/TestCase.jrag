@@ -452,6 +452,8 @@ abstract public class TestCase implements GenericTestCase {
         } else {
             sr = ParserHandler.parseFile(uif, getSourceFileName());
         }
+
+        if (testSource(sr)) return;
         
         // Instantiate and check for errors
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
@@ -535,6 +537,15 @@ abstract public class TestCase implements GenericTestCase {
 	protected boolean testTransformed(FClass fc) {
 		return false;
 	}
+
+    /**
+    * Perform tests on source tree.
+    *
+    * @return  <code>true</code> if test case should stop after this method
+    */
+    protected boolean testSource(SourceRoot sr) {
+        return false;
+    }
 
 	/**
 	 * Perform tests on the set of semantic problems found after transform canonical step.

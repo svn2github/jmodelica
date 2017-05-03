@@ -479,10 +479,11 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
         }
     }
     
-    if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        if (jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array)) {
-            jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
-        }
+    if (fmi2_me->fmu_type == fmi2CoSimulation &&
+        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
+        jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array))
+    {
+        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
     
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);
@@ -512,10 +513,11 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
         }
     }
     
-    if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        if (jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array)) {
-            jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
-        }
+    if (fmi2_me->fmu_type == fmi2CoSimulation &&
+        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
+        jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_int_array))
+    {
+        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
     
     retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_int_array);
@@ -537,16 +539,18 @@ fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
 		return fmi2Fatal;
     }
     
-    jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));
+    jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(jmi_boolean));
     for (i = 0; i < nvr; i++) {
         jmi_boolean_values[i] = value[i];
     }
     
-    if (fmi2_me->fmu_type == fmi2CoSimulation) {
-        if (jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)fmi2_me->work_real_array)) {
-            jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
-        }
+    if (fmi2_me->fmu_type == fmi2CoSimulation  &&
+        ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
+        jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr, (void*)jmi_boolean_values))
+    {
+        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     }
+    
     retval = jmi_set_boolean(&fmi2_me->jmi, vr, nvr, jmi_boolean_values);
     free(jmi_boolean_values);
     

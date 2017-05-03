@@ -35,19 +35,6 @@ from pyjmi.common.core import TrajectoryLinearInterpolation
 from pyjmi.common.core import TrajectoryUserFunction
 
 try:
-    import assimulo
-    assimulo_present = True
-except:
-    logging.warning(
-        'Could not load Assimulo module. Check pyjmi.check_packages()')
-    assimulo_present = False
-
-if assimulo_present:
-    import assimulo.solvers as solvers
-    from assimulo.implicit_ode import Implicit_ODE
-    from assimulo.kinsol import KINSOL
-
-try:
     import pyjmi
     ipopt_present = pyjmi.environ['IPOPT_HOME']
 except:
