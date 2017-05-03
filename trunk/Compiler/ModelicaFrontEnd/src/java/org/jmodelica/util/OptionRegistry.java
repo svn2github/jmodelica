@@ -1887,9 +1887,19 @@ abstract public class OptionRegistry {
          */
         public void exportDocBook(DocBookPrinter out) {
             out.enter("row");
-            out.oneLine("entry", out.lit(StringUtil.wrapUnderscoreName(key, 26)));
-            out.oneLine("entry", String.format("%s / %s", out.lit(getType()), out.lit(getValueForDoc())));
-            out.oneLine("entry", out.prepare(description));
+            
+            out.enter("entry");
+            out.printLiteral(StringUtil.wrapUnderscoreName(key, 26));
+            out.exit();
+            
+            out.enter("entry");
+            out.printLiteral(getType());
+            out.text("/", 80);
+            out.printLiteral(getValueForDoc());
+            out.exit();
+            
+            out.printWrappedPreFormatedText("entry", description);
+            
             out.exit();
         }
 
