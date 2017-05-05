@@ -407,9 +407,7 @@ compile_fmu('myPackage.myModel', 'myModelFile.mo', jvm_args='-Xmx1g')</programli
 
       <para>Compiling with <literal>compile_fmu</literal> bundles quite a few
       steps required for the compilation from model file to FMU. Some of these
-      steps will be briefly described in this section with code examples. For
-      a more detailed review of the compile procedure, see <xref
-      linkend="intro_sec_architecture"/> in <xref linkend="ch_intro"/>.</para>
+      steps will be briefly described in this section with code examples.</para>
 
       <section>
         <title>Creating a compiler</title>
@@ -950,34 +948,9 @@ Number of unsolved equation blocks in DAE system after tearing: 1: {1}
       table</literal>, <literal>BLT for DAE System</literal> and <literal>BLT
       for Initialization System</literal> are links to sub
       pages containing additional information. For example, the BLT for DAE
-      System page contains information about individual systems of
-      equations:</para>
+      System page contains information about in which order the model equations
+      are evaluated and which blocks are present after compilation.</para>
 
-      <programlisting>...
-
---- Block 7 ---
-Solved block of 1 variables:
-Computed variable:
-  inertia2.flange_b.tau
-Solution:
-   - (  - ( damper.flange_b.tau ) ) - (  - ( spring.flange_b.tau ) ) + 0
-
---- Block 8 (Unsolvable block 0) ---
-Non-solved linear block of 4 variables:
-Coefficient variability: Parameter
-Unknown variables:
-  inertia2.a
-  idealGear.flange_b.tau
-  idealGear.flange_a.tau
-  inertia1.a
-Equations:
-  inertia1.a = ( idealGear.ratio ) * ( inertia2.a )
-  ( inertia2.J ) * ( inertia2.a ) =  - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau
-  0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau
-  ( inertia1.J ) * ( inertia1.a ) =  - ( torque.flange.tau ) - ( idealGear.flange_a.tau )
-
-...
-</programlisting>
 
       <para>Additionally there is a table view of the <literal>BLT</literal>.
       It can be found on the <literal>BLT diagnostics table</literal> page. It

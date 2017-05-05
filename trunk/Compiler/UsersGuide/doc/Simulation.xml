@@ -15,8 +15,7 @@
     <title>Introduction</title>
 
     <para>JModelica.org supports simulation of models described in the
-    Modelica language and models following the FMI standard, see <xref
-    linkend="intr_sec_tech"/> in <xref linkend="ch_intro"/>. The simulation
+    Modelica language and models following the FMI standard. The simulation
     environment uses <link
     xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link> as standard
     which is a standalone Python package for solving ordinary differential and
