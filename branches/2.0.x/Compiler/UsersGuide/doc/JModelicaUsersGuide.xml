@@ -11,12 +11,12 @@
   <info>
     <title><productname>JModelica.org</productname> User Guide</title>
 
-    <subtitle>Version <productnumber>1.17</productnumber></subtitle>
+    <subtitle>Version <productnumber>2.0</productnumber></subtitle>
 
-    <pubdate>2015-12-08</pubdate>
+    <pubdate>2017-xx-xx</pubdate>
 
     <copyright>
-      <year>2014</year>
+      <year>2017</year>
 
       <holder>Modelon AB</holder>
     </copyright>
@@ -30,29 +30,7 @@
     Computer Algebra and processed by JEuclid.</para>
   </acknowledgements>
 
-  <xi:include href="Introduction.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Installation.xml" xpointer="element(/1)"/>
-
-  <xi:include href="GettingStarted.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Models.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Simulation.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Optimization.xml" xpointer="element(/1)"/>
-
-  <xi:include href="GraphicalUserInterface.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Optimica.xml" xpointer="element(/1)"/>
-
-  <xi:include href="AdvancedTopics.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Limitations.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Options.xml" xpointer="element(/1)"/>
-
-  <xi:include href="ReleaseNotes.xml" xpointer="element(/1)"/>
+  <!-- ===INCLUDE=== -->
 
   <bibliography>
     <title>Bibliography</title>

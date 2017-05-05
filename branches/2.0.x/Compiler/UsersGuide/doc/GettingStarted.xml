@@ -115,50 +115,6 @@ RLC.run_demo()</programlisting></para>
   </section>
 
   <section>
-    <title>Checking your installation</title>
-
-    <para>The JModelica.org Python packages require some third-party Python
-    packages in order to run. Use the function
-    <literal>&lt;package&gt;.check_packages()</literal>, where
-    <literal>&lt;package&gt;</literal> is either
-    <literal>pymodelica</literal>, <literal>pyfmi</literal> or
-    <literal>pyjmi</literal>, to list which Python packages that are found on
-    your computer. Missing or having the wrong version of a package can be a
-    source of errors. Therefore it can be useful to run
-    <literal>&lt;package&gt;.check_packages()</literal> after installation or
-    when trouble-shooting.<programlisting language="python">import pyjmi
-pyjmi.check_packages()
-
-Performing pymodelica/pyjmi package check
-=========================================
-
-Platform...................... win32
-
-Python version:............... 2.7.3
-
-pymodelica/pyjmi version:..... 1.12
-
-
-Dependencies:
-
-Package                        Version
--------                        -------
-assimulo...................... --
-casadi........................ 1.7.0
-Cython........................ 0.18
-jpype......................... --
-lxml.......................... 3.1.0
-matplotlib.................... 1.2.0
-nose.......................... 1.2.1
-numpy......................... 1.6.2
-scipy......................... 0.11.0
-wxPython...................... 2.8.12.1
-pyreadline.................... 1.7.1
-setuptools.................... 0.6
-</programlisting></para>
-  </section>
-
-  <section>
     <title>Redefining the JModelica.org environment</title>
 
     <para>When importing <literal>pyjmi</literal> or

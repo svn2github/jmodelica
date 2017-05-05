@@ -750,14 +750,14 @@ abstract public class OptionRegistry {
             Category.uncommon,
             1000,
             "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
-            + " This option controls how many scalar elements can be evaluated by a function. Value < 1 indicates no split."),
+            + " This option controls how many scalar elements can be evaluated by a function. Value less than 1 indicates no split."),
         CC_SPLIT_FUNCTION_LIMIT
             ("cc_split_function_limit",
             OptionType.compiler,
             Category.uncommon,
             20,
             "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
-            + " This option controls how many functions can be generated in a file. Value < 1 indicates no split."),
+            + " This option controls how many functions can be generated in a file. Value less than 1 indicates no split."),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,

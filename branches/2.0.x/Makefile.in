@@ -1015,7 +1015,7 @@ install-python-packages: build-python-packages
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
-all-local: build-python-packages build-compiler prepare-doc-src
+all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
 	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
@@ -1026,12 +1026,6 @@ build-compiler:
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 @HAVE_ANT_TRUE@	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
-
-prepare-doc-src: build-compiler
-	mkdir -p "$(DOC_BUILD_DIR)"
-	cp -rT "$(DOC_SRC_DIR)" "$(DOC_BUILD_DIR)"
-	rm "$(DOC_BUILD_DIR)/Options.xml" "$(DOC_BUILD_DIR)/JModelicaUsersGuide.pdf"
-	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -t "$(DOC_SRC_DIR)/Options.xml" -d "$(DOC_BUILD_DIR)/Options.xml"
 
 install-exec-local: install-python-packages
 @HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
