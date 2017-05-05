@@ -27,7 +27,7 @@
   containing the C-functions which can be provided in source and/or binary
   form. FMI standard also supports providing documentation and resources
   together with the FMU. For more information regarding the FMI standard,
-  please visit http://www.functional-mockup-interface.org/.</para>
+  see <citation>FMI2017</citation>.</para>
 
   <section>
     <title>Overview of JModelica.org FMI Python package</title>
