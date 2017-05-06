@@ -178,7 +178,8 @@ public final class DocumentationBuilder {
         }
         checkChapters(root, chapterOrder);
 
-        ModifiableFile file = new ModifiableFile(source, new File(destination + File.separator + source.getName()));
+        ModifiableFile file =
+                new ModifiableFile(source, new File(destination + File.separator + source.getName()), CHARACTER_SET);
         if (file.advanceTo(INCLUDE_TAG) == -1) {
             throw new DocumentationBuilderException(
                     "Missing \"" + INCLUDE_TAG + "\" in documentation root " + file.source() + ".");

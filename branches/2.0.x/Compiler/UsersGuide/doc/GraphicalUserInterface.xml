@@ -30,7 +30,9 @@ plot_gui.startGUI()
 </programlisting>
 
     <para>Note that the GUI requires the Python package <link
-    xlink:href="http://www.wxpython.org/">wxPython</link>.</para>
+    xlink:href="http://www.wxpython.org/">wxPython</link> which
+    is installed by default in the Python version that comes with
+    JModelica.org.</para>
 
     <figure xml:id="fig_gui_overview">
       <title>Overview of JModelica.org Plot GUI</title>

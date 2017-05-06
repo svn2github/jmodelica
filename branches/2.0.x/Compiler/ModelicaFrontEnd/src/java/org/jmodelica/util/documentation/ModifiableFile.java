@@ -3,9 +3,10 @@ package org.jmodelica.util.documentation;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class ModifiableFile {
      *             if there was any error reading the file.
      */
     public ModifiableFile(File file) throws IOException {
-        this(file, file);
+        this(file, file, "UTF-8");
     }
 
     /**
@@ -45,10 +46,12 @@ public class ModifiableFile {
      *            The source file which contents to modify.
      * @param destination
      *            The destination file to which to write the modified content.
+     * @param characterSet
+     *            The character set to use for the read file.
      * @throws IOException
      *             if there was any error reading the file.
      */
-    public ModifiableFile(File source, File destination) throws IOException {
+    public ModifiableFile(File source, File destination, String characterSet) throws IOException {
         checkFiles(false, source);
         checkFiles(true, destination.getParentFile());
 
@@ -235,7 +238,7 @@ public class ModifiableFile {
      *             if there was any error reading the source file.
      */
     public void restore() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(source));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "UTF-8"));
         String line = "";
         while ((line = reader.readLine()) != null) {
             lines.add(line);

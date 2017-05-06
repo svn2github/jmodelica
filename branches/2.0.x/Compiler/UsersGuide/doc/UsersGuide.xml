@@ -39,7 +39,7 @@
       <abbrev>Jak2007</abbrev>
 
       <author>
-        <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+        <personname><firstname>Johan</firstname><surname>&#197;kesson</surname></personname>
       </author>
 
       <title>Tools and Languages for Optimization of Large-Scale
@@ -62,15 +62,15 @@
       <biblioset role="article">
         <authorgroup>
           <author>
-            <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+            <personname><firstname>Johan</firstname><surname>&#197;kesson</surname></personname>
           </author>
 
           <author>
-            <personname><firstname>Görel</firstname><surname>Hedin</surname></personname>
+            <personname><firstname>G&#246;rel</firstname><surname>Hedin</surname></personname>
           </author>
 
           <author>
-            <personname><firstname>Torbjörn</firstname><surname>Ekman</surname></personname>
+            <personname><firstname>Torbj&#246;rn</firstname><surname>Ekman</surname></personname>
           </author>
         </authorgroup>
 
@@ -95,7 +95,7 @@
       <biblioset role="article">
         <authorgroup>
           <author>
-            <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+            <personname><firstname>Johan</firstname><surname>&#197;kesson</surname></personname>
           </author>
         </authorgroup>
 
@@ -120,15 +120,15 @@
       <biblioset role="article">
         <authorgroup>
           <author>
-            <personname><firstname>Johan</firstname><surname>Åkesson</surname></personname>
+            <personname><firstname>Johan</firstname><surname>&#197;kesson</surname></personname>
           </author>
 
           <author>
-            <personname><firstname>Karl-Erik</firstname><surname>Årzén</surname></personname>
+            <personname><firstname>Karl-Erik</firstname><surname>&#197;rz&#233;n</surname></personname>
           </author>
 
           <author>
-            <personname><firstname>Magnus</firstname><surname>Gäfvert</surname></personname>
+            <personname><firstname>Magnus</firstname><surname>G&#228;fvert</surname></personname>
           </author>
 
           <author>
@@ -141,7 +141,7 @@
         </authorgroup>
 
         <title>Modeling and Optimization with Optimica and
-        JModelica.org—Languages and Tools for Solving Large-Scale Dynamic
+        JModelica.org - Languages and Tools for Solving Large-Scale Dynamic
         Optimization Problem</title>
       </biblioset>
 
@@ -190,7 +190,7 @@
           </author>
 
           <author>
-            <personname>Johan Åkesson</personname>
+            <personname>Johan &#197;kesson</personname>
           </author>
         </authorgroup>
 
@@ -230,6 +230,12 @@
       <biblioset relation="journal">
         <pubdate>2016</pubdate>
       </biblioset>
+    </biblioentry>
+    <biblioentry>
+    
+     <abbrev>FMI2017</abbrev>
+    <title>Functional Mock-up Interface standard</title>
+    <publisher>http://www.fmi-standard.org</publisher>
     </biblioentry>
   </bibliography>
 </book>
