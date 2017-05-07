@@ -8,7 +8,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>External functions</title>
+  <title>Integrating external functions in Modelica</title>
 
   <section xml:id="external_function_introduction">
     <title>Introduction</title>
@@ -61,8 +61,8 @@
     same compiler could be incompatible.
     
     <programlisting>
-      &lt;base&gt;/win32/gcc472/
-      &lt;base&gt;/win64/gcc472/
+&lt;base&gt;/win32/gcc472/
+&lt;base&gt;/win64/gcc472/
     </programlisting>
   </section>
 
@@ -79,7 +79,7 @@
     </para>
 
     <programlisting>
-      sources/Test_Test1_funcs.c:4:1: error: expected identifier or '(' before '/' token
+sources/Test_Test1_funcs.c:4:1: error: expected identifier or '(' before '/' token
     </programlisting>
   </section>
 

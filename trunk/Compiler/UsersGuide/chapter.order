@@ -10,5 +10,5 @@ FMI Interface
 High-level functions: initialize, simulate and optimize
 Limitations
 Compiler options
-ExternalFunctions
+Integrating external functions in Modelica
 Release notes

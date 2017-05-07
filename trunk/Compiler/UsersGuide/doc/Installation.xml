@@ -13,7 +13,7 @@
   <section xml:id="inst_sec_supported_platforms">
     <title>Supported platforms</title>
 
-    <para>JModelica.org is supported on Linux and Windows (Vista, 7) with
+    <para>JModelica.org is supported on Linux and Windows (Vista, 7, 10) with
     32-bit or 64-bit architectures.</para>
   </section>
 
@@ -201,26 +201,6 @@
           <para>Run the file by double-clicking and selecting "Run" if
           prompted with a security warning. This will launch an installer
           which should be self-explanatory.</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>In the <emphasis>Choose Components</emphasis> window,
-              select which of the bundled Python packages that should be
-              installed. Make sure that any package not already installed on
-              your computer is checked.<figure>
-                  <title>Selecting Python packages in the <emphasis>Choose
-                  components</emphasis> window.</title>
-
-                  <mediaobject>
-                    <imageobject>
-                      <imagedata align="center"
-                                 fileref="images/Setup_components.png"
-                                 scalefit="1" width="50%"/>
-                    </imageobject>
-                  </mediaobject>
-                </figure></para>
-            </listitem>
-          </itemizedlist>
         </step>
       </procedure>
     </section>
@@ -228,32 +208,37 @@
     <section>
       <title>Verifying the installation</title>
 
-      <para>Test the installation by starting a IPython or pylab shell from
-      the JModelica.org start menu and run a few examples. Starting the Python
-      session from the Windows start menu will set all the environment
-      variables required to run the JModelica.org Python
-      interface.<programlisting language="python"># Import and run the VDP_sim example and plot results
-from pyjmi.examples import VDP_sim
-VDP_sim.run_demo()
+        <para>
+            Test the installation by starting a IPython or pylab shell from
+            the JModelica.org start menu and run a few examples. Starting the Python
+            session from the Windows start menu will set all the environment
+            variables required to run the JModelica.org Python
+            interface.
+        </para>
 
-# Import and run the CSTR example and plot results
-from pyjmi.examples import cstr
-cstr.run_demo()
+        <programlisting language="python">
+# Import and run the fmi_bouncing_ball example and plot results
+from pyfmi.examples import fmi_bouncing_ball
+fmi_bouncing_ball.run_demo()
 
 # Import and run the CSTR example using CasADi and plot results
 from pyjmi.examples import cstr_casadi
-cstr_casadi.run_demo()</programlisting></para>
+cstr_casadi.run_demo()
+        </programlisting>
+
     </section>
 
     <section>
       <title>Compilation from sources</title>
 
-      <para>For compiling JModelica.org from sources on Windows there is a
-      <link xlink:href="http://www.jmodelica.org/sdk">Software Development
-      Kit</link> (SDK) available for download. The SDK is a bundle of tools
-      used to build JModelica.org from source code on Windows, please see the
-      SDK User's guide, which can be reached from the download site, for more
-      information.</para>
+        <para>
+            For compiling JModelica.org from sources on Windows there is a
+            <link xlink:href="http://www.jmodelica.org/sdk">Software Development
+            Kit</link> (SDK) available for download. The SDK is a bundle of tools
+            used to build JModelica.org from source code on Windows, please see the
+            SDK User's guide, which can be reached from the download site, for more
+            information.
+        </para>
     </section>
   </section>
 
@@ -590,14 +575,15 @@ make casadi_interface
       <literal>/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt;/bin/jm_ipython</literal>
       and run a few examples:</para>
 
-      <programlisting language="python"># Import and run the VDP_sim example and plot results
-from pyjmi.examples import VDP_sim
-VDP_sim.run_demo()
+        <programlisting language="python">
+# Import and run the fmi_bouncing_ball example and plot results
+from pyfmi.examples import fmi_bouncing_ball
+fmi_bouncing_ball.run_demo()
 
 # Import and run the CSTR example using CasADi and plot results
 from pyjmi.examples import cstr_casadi
 cstr_casadi.run_demo()
-</programlisting>
+        </programlisting>
     </section>
   </section>
 </chapter>
