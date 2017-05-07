@@ -2751,10 +2751,21 @@ public abstract class CCompilerDelegator {
             this.target = target;
             
             this.externalLibraries = externalLibraries;
-            this.externalLibraryDirectories = externalLibraryDirectories;
-            this.externalIncludeDirectories = externalIncludeDirectories;
+            this.externalLibraryDirectories = sanitizeDirectories(externalLibraryDirectories);
+            this.externalIncludeDirectories = sanitizeDirectories(externalIncludeDirectories);
         }
-        
+
+        /**
+         * Make sure the paths are on a form acceptable to the c-compiler.
+         */
+        private Set<String> sanitizeDirectories(Set<String> dirs) {
+            Set<String> res = new LinkedHashSet<String>();
+            for (String dir : dirs) {
+                res.add(new File(dir).getAbsolutePath());
+            }
+            return res;
+        }
+
         public OptionRegistry getOptions() {
             return options;
         }

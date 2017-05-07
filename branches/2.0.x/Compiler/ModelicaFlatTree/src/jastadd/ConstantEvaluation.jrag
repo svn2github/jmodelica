@@ -2468,7 +2468,9 @@ aspect ConstantEvaluation {
                 return CValue.UNKNOWN;
             }
             CValueArray val = new CValueArray(size());
-            cevalNoBExpArray(evaluator, this, val, ndims());
+            if (size().numElements() > 0) {
+                cevalNoBExpArray(evaluator, this, val, ndims());
+            }
             return i == Index.NULL ? val : val.getCell(i);
         } else {
             return cevalNoBExpCell(evaluator, allInstComponentDecls());
