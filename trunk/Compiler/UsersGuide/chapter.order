@@ -10,4 +10,5 @@ FMI Interface
 High-level functions: initialize, simulate and optimize
 Limitations
 Compiler options
+ExternalFunctions
 Release notes
