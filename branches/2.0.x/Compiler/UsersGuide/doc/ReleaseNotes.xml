@@ -17,8 +17,9 @@
       <title>Highlights</title>
 
       <para>For this release, all focus has been on Modelica/MSL compliance.
-      All example models in the bundled MSL version simulate
-      correctly with this release.</para>
+      All example models in the bundled MSL version, see  <xref linkend="MSL20"/>, simulate
+      correctly with this release. There is also support for IBPSA,
+      see <xref linkend="IBPSA20"/></para>.
     </section>
 
     <section>
@@ -26,7 +27,7 @@
 
       <section>
         <title>Compliance</title>
-        <section>
+        <section xml:id="MSL20">
         <title>Modelica Standard Library (MSL)</title>
         <para>For this release, the Modelica Standard Library (MSL) version
         3.2.2 build 3 with the following patches applied is used:
@@ -68,15 +69,25 @@
         xlink:href="http://jmodelica.org:8080">Jenkins</link>, using trunk
         version of JModelica.org.</para>
         </section>  
-
+      <section xml:id="IBPSA20"><title>IBPSA</title>
+      <para>With JModelica.org 2.0 there is support for IBPSA, a Modelica library for 
+      building and disctrict energy systems. More information can be found on the
+      <link xlink:href="https://github.com/ibpsa/modelica-ibpsa">
+      Modelica IBPSA library GitHub website</link>.
+      
+      </para>
+      </section>
       </section>
     </section>
     <section><title>Simulation</title>
     <para>For JModelica.org 2.0 improvements have been made for numerical
     robustness during initialization and simulation, 
     especially with regards to event handling.</para>
-    <para></para>
     </section>
+    <section><title>HTML Diagnostics</title>
+    <para>Improved HTML diagnostics with formatting and interactive functions.</para>
+    </section>
+    
   </section>
 
   <section>

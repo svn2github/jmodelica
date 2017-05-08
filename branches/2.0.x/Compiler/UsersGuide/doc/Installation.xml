@@ -34,7 +34,7 @@
     <section xml:id="inst_sec_win_deps">
       <title>Dependencies</title>
 
-      <para>As of JModelica.org version 2.0, all dependencies are bundled in
+      <para>As of JModelica.org version 1.9, all dependencies are bundled in
       the installer. They are listed below, each with version number (where
       applicable) and link to corresponding web site.<itemizedlist>
           <listitem>
