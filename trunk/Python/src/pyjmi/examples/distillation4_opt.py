@@ -209,10 +209,10 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
                            ss_res.initial('absolute_zero'))
             plt.plot(temperature, 43 - i, 'ko')
         plt.title('Steady state temperatures')
-            if latex_plots:
-                label = '$T$ [$^\circ$C]'
-            else:
-                label = 'T'
+        if latex_plots:
+            label = '$T$ [$^\circ$C]'
+        else:
+            label = 'T'
         plt.xlabel(label)
         plt.ylabel('Tray index [1]')
 
