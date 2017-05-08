@@ -1065,8 +1065,12 @@ P.show()</programlisting>
       <title>Simulation using the native FMI interface</title>
 
       <para>This example shows how to use the native JModelica.org FMI
-      interface for simulation of an FMU (FMI 1.0 for Model Exchange). The FMU
-      that is to be simulated is the bouncing ball example from Qtronics FMU
+      interface for simulation of an FMU of version 1.0 for Model Exchange. 
+      For the procedure with version 2.0, refer to 
+      <link xlink:href="https://svn.modelica.org/fmi/branches/public/specifications/v2.0/FMI_for_ModelExchange_and_CoSimulation_v2.0.pdf">
+      Functional Mock-up Interface for Model Exchange and Co-Simulation version 2.0</link>.</para>
+      
+      <para>The FMU that is to be simulated is the bouncing ball example from Qtronics FMU
       SDK (http://www.qtronic.de/en/fmusdk.html). This example is written
       similar to the example in the documentation of the 'Functional Mock-up
       Interface for Model Exchange' version 1.0

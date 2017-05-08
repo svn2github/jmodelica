@@ -10,10 +10,8 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Limitations</title>
 
-  <section>
   <para>This page lists the current limitations of the JModelica.org platform.
   </para>
-  </section>
 
     <para>The Modelica compliance of the front-end is limited; the following
     features are currently not supported:</para>

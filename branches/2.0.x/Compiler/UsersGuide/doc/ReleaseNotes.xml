@@ -8,7 +8,7 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
-  <title>Release notes</title>
+  <title>Release Notes</title>
   
   <section>
     <title>Release notes for JModelica.org version 2.0</title>
@@ -17,7 +17,7 @@
       <title>Highlights</title>
 
       <para>For this release, all focus has been on Modelica/MSL compliance.
-      All example models in the bundled MSL version both check and simulate
+      All example models in the bundled MSL version simulate
       correctly with this release.</para>
     </section>
 
@@ -67,8 +67,15 @@
         can be found on the JModelica.org public <link
         xlink:href="http://jmodelica.org:8080">Jenkins</link>, using trunk
         version of JModelica.org.</para>
-        </section>       
+        </section>  
+
       </section>
+    </section>
+    <section><title>Simulation</title>
+    <para>For JModelica.org 2.0 improvements have been made for numerical
+    robustness during initialization and simulation, 
+    especially with regards to event handling.</para>
+    <para></para>
     </section>
   </section>
 
