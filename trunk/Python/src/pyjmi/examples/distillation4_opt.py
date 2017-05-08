@@ -24,7 +24,7 @@ from pymodelica import compile_fmu
 from pyfmi import load_fmu
 from pyjmi import get_files_path, transfer_optimization_problem
 
-def run_demo(with_plots=True, use_ma57=False):
+def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
     """
     This example is based on a binary distillation column. The model has 42
     states, 1083 algebraic variables and 2 control variables. The task is to
@@ -99,7 +99,7 @@ def run_demo(with_plots=True, use_ma57=False):
         # Plotting options
         plt.rcParams.update(
             {'font.serif': ['Times New Roman'],
-             'text.usetex': True,
+             'text.usetex': latex_plots,
              'font.family': 'serif',
              'axes.labelsize': 20,
              'legend.fontsize': 16,
@@ -142,7 +142,11 @@ def run_demo(with_plots=True, use_ma57=False):
             ax.plot(t[[0, -1]], 2 * [T_28_ref + abs_zero], 'g--')
             ax.hold(False)
             ax.grid()
-            ax.set_ylabel('$T_{28}$ [$^\circ$C]', labelpad=pad)
+            if latex_plots:
+                label = '$T_{28}$ [$^\circ$C]'
+            else:
+                label = 'T28'
+            ax.set_ylabel(label, labelpad=pad)
             plt.setp(ax.get_xticklabels(), visible=False)
             scale_axis(ax)
 
@@ -151,7 +155,11 @@ def run_demo(with_plots=True, use_ma57=False):
             bx.plot(t[[0, -1]], 2 * [T_14_ref + abs_zero], 'g--')
             bx.hold(False)
             bx.grid()
-            bx.set_ylabel('$T_{14}$ [$^\circ$C]', labelpad=pad)
+            if latex_plots:
+                label = '$T_{14}$ [$^\circ$C]'
+            else:
+                label = 'T14'
+            ax.set_ylabel(label, labelpad=pad)
             plt.setp(bx.get_xticklabels(), visible=False)
             scale_axis(bx)
 
@@ -160,8 +168,14 @@ def run_demo(with_plots=True, use_ma57=False):
             cx.plot(t[[0, -1]], 2 * [Q_ref * Q_fac], 'g--')
             cx.hold(False)
             cx.grid()
-            cx.set_ylabel('$Q$ [kW]', labelpad=pad)
-            cx.set_xlabel('$t$ [s]')
+            if latex_plots:
+                ylabel = '$Q$ [kW]'
+                xlabel = '$t$ [s]'
+            else:
+                ylabel = 'Q'
+                xlabel = 't'
+            cx.set_ylabel(ylabel, labelpad=pad)
+            cx.set_xlabel(xlabel)
             scale_axis(cx)
 
             dx.plot(t, L_vol * L_fac, lw=width)
@@ -169,8 +183,14 @@ def run_demo(with_plots=True, use_ma57=False):
             dx.plot(t[[0, -1]], 2 * [L_vol_ref * L_fac], 'g--')
             dx.hold(False)
             dx.grid()
-            dx.set_ylabel('$L_{\Large \mbox{vol}}$ [l/h]', labelpad=pad)
-            dx.set_xlabel('$t$ [s]')
+            if latex_plots:
+                ylabel = '$L_{\Large \mbox{vol}}$ [l/h]'
+                xlabel = '$t$ [s]'
+            else:
+                ylabel = 'L'
+                xlabel = 't'
+            dx.set_ylabel(ylabel, labelpad=pad)
+            dx.set_xlabel(xlabel)
             scale_axis(dx)
 
             fig.suptitle(title)
@@ -189,7 +209,11 @@ def run_demo(with_plots=True, use_ma57=False):
                            ss_res.initial('absolute_zero'))
             plt.plot(temperature, 43 - i, 'ko')
         plt.title('Steady state temperatures')
-        plt.xlabel('$T$ [$^\circ$C]')
+            if latex_plots:
+                label = '$T$ [$^\circ$C]'
+            else:
+                label = 'T'
+        plt.xlabel(label)
         plt.ylabel('Tray index [1]')
 
     ### 2. Simulate the short reflux breakdown
