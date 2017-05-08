@@ -23,11 +23,6 @@
       </listitem>
 
       <listitem>
-        <para>Partial support for external functions; records are not
-        supported as arguments or return values.</para>
-      </listitem>
-
-      <listitem>
           <para>Support for partial function calls is limited.
           </para>
       </listitem>
@@ -136,11 +131,6 @@
                   setting the <code>stateSelect</code> attribute manually.</para>
       </listitem>
 
-      <listitem>
-        <para>Partial support for external functions; records are not
-        supported as arguments or return values.</para>
-      </listitem>
-
     </itemizedlist>
 
     <para>In the Optimica front-end the following constructs are not
@@ -181,10 +171,8 @@
 
     <itemizedlist>
       <listitem>
-        <para>Functions for setting and getting string variables do not
-        work.</para>
+        <para>Setting string parameters and inputs is not supported.</para>
       </listitem>
-
 
       <listitem>
         <para>The dependenciesKind attribute in the XML file for FMU 2.0 is
