@@ -9,16 +9,20 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release notes</title>
-  
+
   <section>
     <title>Release notes for JModelica.org version 2.0</title>
 
     <section>
       <title>Highlights</title>
 
-      <para>For this release, all focus has been on Modelica/MSL compliance.
-      All example models in the bundled MSL version both check and simulate
-      correctly with this release.</para>
+      <para>For this release, focus has been on Modelica/MSL compliance. All
+      example models in the bundled MSL version both check and simulate
+      correctly with this release, with marginal additions, see below.</para>
+
+      <para>A novel co-simulation master is available in PyFMI. It implements
+      a number of master algorithms, see <citation>And2016</citation> for
+      details.</para>
     </section>
 
     <section>
@@ -26,49 +30,101 @@
 
       <section>
         <title>Compliance</title>
+
         <section>
-        <title>Modelica Standard Library (MSL)</title>
-        <para>For this release, the Modelica Standard Library (MSL) version
-        3.2.2 build 3 with the following patches applied is used:
-        <itemizedlist>
-            <listitem>To the model <emphasis>Modelica.Blocks.Examples.NoiseExamples.ActuatorWithNoise</emphasis> 
-                defined in Modelica/Blocks/package.mo a StateSelect.always is added for
-                Controller.y1. With this patch dynamic state selection is avoided. See also
-                the reported <link xlink:href="https://github.com/modelica/Modelica/issues/2189">issue 2189</link>
-                 on the GitHub repository for Modelica Association.
-            </listitem>
-            <listitem> The model <emphasis>Modelica.Fluid.Examples.Tanks.TanksWithOverflow</emphasis> does not
-                initialize with the original parametrization in MSL 3.2.2 build 3 due to variable bounds not being 
-                respected, see <link xlink:href="https://github.com/modelica/Modelica/issues/2060">issue 2060</link>
-                on the GitHub repository for Modelica Association. In the patch additional fluid flows through 
-                an overflow pipe if the level of the upper tank exceeds 6 meters instead of 10 meters.
-            </listitem>
-            <listitem> The state selection in <emphasis>Modelica.Magnetic.FluxTubes.Examples.Hysteresis.HysteresisModelComparison</emphasis>
-                is patched to improve the numerical robustness, see <link xlink:href="https://github.com/modelica/Modelica/issues/2248">issue 2248</link>
-                on the GitHub repository for Modelica Association.
-            </listitem>
-            <listitem> In <emphasis>Modelica.Fluid.Examples.TraceSubstances.RoomCO2WithControls</emphasis> the
-                experiment tolerance is tightened to 1e-007 instead of 1e-006 to avoid chattering.
-            </listitem>
-            <listitem> In <emphasis>Modelica.Fluid.Examples.InverseParameterization</emphasis> pump.m_flow_start
-                is set to 0.5 instead of 0.0. With this change the correct branch is chosen in the actualStream operator,
-                see <link xlink:href="https://github.com/modelica/Modelica/issues/2063">issue 2063</link> on the GitHub
-                repository for Modelica Association.
-            </listitem>            
-        </itemizedlist>
-        With the patches listed above applied, all example models in version 3.2.2 build 3 of MSL simulate
-        correctly with JModelica.org 2.0. The results can be seen in the
-        compliance reports for simulation and check on the JModelica.org <link
-        xlink:href="http://jmodelica.org/binary">download site</link>. 
-        </para>
-        
-        <para>The trunk version of MSL has some additional example models
-        compared to version 3.2.2. build 3. Compliance reports for trunk MSL
-        can be found on the JModelica.org public <link
-        xlink:href="http://jmodelica.org:8080">Jenkins</link>, using trunk
-        version of JModelica.org.</para>
-        </section>       
+          <title>Modelica Standard Library (MSL)</title>
+
+          <para>For this release, the Modelica Standard Library (MSL) version
+          3.2.2 build 3 with the following patches applied is used:
+          <itemizedlist>
+              <listitem>
+                To the model 
+
+                <emphasis>Modelica.Blocks.Examples.NoiseExamples.ActuatorWithNoise</emphasis>
+
+                 defined in Modelica/Blocks/package.mo a StateSelect.always is added for Controller.y1. With this patch dynamic state selection is avoided. See also the reported 
+
+                <link
+                xlink:href="https://github.com/modelica/Modelica/issues/2189">issue
+                2189</link>
+
+                 on the GitHub repository for Modelica Association. 
+              </listitem>
+
+              <listitem>
+                 The model 
+
+                <emphasis>Modelica.Fluid.Examples.Tanks.TanksWithOverflow</emphasis>
+
+                 does not initialize with the original parametrization in MSL 3.2.2 build 3 due to variable bounds not being respected, see 
+
+                <link
+                xlink:href="https://github.com/modelica/Modelica/issues/2060">issue
+                2060</link>
+
+                 on the GitHub repository for Modelica Association. In the patch additional fluid flows through an overflow pipe if the level of the upper tank exceeds 6 meters instead of 10 meters. 
+              </listitem>
+
+              <listitem>
+                 The state selection in 
+
+                <emphasis>Modelica.Magnetic.FluxTubes.Examples.Hysteresis.HysteresisModelComparison</emphasis>
+
+                 is patched to improve the numerical robustness, see 
+
+                <link
+                xlink:href="https://github.com/modelica/Modelica/issues/2248">issue
+                2248</link>
+
+                 on the GitHub repository for Modelica Association. 
+              </listitem>
+
+              <listitem>
+                 In 
+
+                <emphasis>Modelica.Fluid.Examples.TraceSubstances.RoomCO2WithControls</emphasis>
+
+                 the experiment tolerance is tightened to 1e-007 instead of 1e-006 to avoid chattering. 
+              </listitem>
+
+              <listitem>
+                 In 
+
+                <emphasis>Modelica.Fluid.Examples.InverseParameterization</emphasis>
+
+                 pump.m_flow_start is set to 0.5 instead of 0.0. With this change the correct branch is chosen in the actualStream operator, see 
+
+                <link
+                xlink:href="https://github.com/modelica/Modelica/issues/2063">issue
+                2063</link>
+
+                 on the GitHub repository for Modelica Association. 
+              </listitem>
+            </itemizedlist>With the patches listed above applied, all example
+          models in version 3.2.2 build 3 of MSL simulate correctly with
+          JModelica.org 2.0. The results can be seen in the compliance reports
+          for simulation and check on the JModelica.org <link
+          xlink:href="http://jmodelica.org/binary">download
+          site</link>.</para>
+
+          <para>The trunk version of MSL has some additional example models
+          compared to version 3.2.2. build 3. Compliance reports for trunk MSL
+          can be found on the JModelica.org public <link
+          xlink:href="http://jmodelica.org:8080">Jenkins</link>, using trunk
+          version of JModelica.org.</para>
+        </section>
       </section>
+    </section>
+
+    <section>
+      <title>A novel co-simulation algorithm</title>
+
+      <para>A novel co-simulation master algorithm is now available in the
+      Python package PyFMI. The master algorithm supports FMUs 2.0 for
+      co-simulation. Features of the master algorithm include a parallel
+      Jacobi approach as well as a step-size controlled algorithm based on
+      Richardson extrapolation. The theory and implementation of the software
+      is described in <citation>And2016</citation>. </para>
     </section>
   </section>
 
