@@ -94,7 +94,19 @@
         <para>The following annotations are not supported:
         <informaltable border="1" frame="void" width="100%">
             <tr>
-              <td><code>uses()</code></td>
+              <td><code>version</code></td>
+              <td><code>arrayLayout</code></td>
+              <td><code>obsolete</code></td>
+            </tr>
+            <tr>
+              <td><code>uses</code></td>
+              <td><code>HideResult</code></td>
+              <td><code>unassignedMessage</code></td>
+            </tr>
+            <tr>
+              <td><code>inverse</code></td>
+              <td><code>absoluteValue</code></td>
+              <td></td>
             </tr>
           </informaltable></para>
       </listitem>
@@ -105,8 +117,8 @@
         <para>The following annotations are limited:</para>
         <itemizedlist>
            <listitem>
-             <para>The <code>zeroDerivative()</code> annotation is treated the same as
-                   the <code>noDerivative()</code> annotation.</para>
+             <para>The <code>zeroDerivative</code> annotation is treated the same as
+                   the <code>noDerivative</code> annotation.</para>
            </listitem>
         </itemizedlist>
       </listitem>
@@ -121,11 +133,6 @@
            </para>
        </listitem>
 
-    </itemizedlist>
-
-    <para>The middle-end has some limitations:</para>
-
-    <itemizedlist>
       <listitem>
             <para>Index reduction fails in some complex cases. It is possible to work around this by
                   setting the <code>stateSelect</code> attribute manually.</para>

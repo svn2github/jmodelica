@@ -34,7 +34,8 @@
     functionality in the most basic way. The model which is to be simulated is
     the Van der Pol problem described in the code below. The model is also
     available from the examples in JModelica.org in the file
-    <filename>VDP.mop</filename>.</para>
+    <filename>VDP.mop</filename> (located in 
+    <filename>install/Python/pyjmi/examples/files</filename>).</para>
 
     <programlisting language="modelica" xml:id="sim_list_vdp">model VDP
     // State start values
@@ -81,15 +82,15 @@ vdp = load_fmu(fmu_name)
     a binary, which is then loaded when the <literal>vdp</literal> object is
     created. This object represents the compiled model, an FMU, and is used to
     invoke the simulation algorithm (for more information about model
-    creations and options, see <xref linkend="ch_models"/>):</para>
+    compilation and options, see <xref linkend="ch_models"/>):</para>
 
     <programlisting language="python">res = vdp.simulate(final_time=10)
 </programlisting>
 
     <para>In this case we use the default simulation algorithm together with
     default options, except for the final time which we set to 10. The result
-    object can now be used to access in a dictionary-like way the simulation
-    result:</para>
+    object can now be used to access the simulation result in a dictionary-like 
+    way:</para>
 
     <programlisting language="python">x1 = res['x1']
 x2 = res['x2']
@@ -142,8 +143,8 @@ plt.show()
 
     <para><literal>FMUModelME* / FMUModelCS*</literal> also supports compiled
     models from other simulation/modelling tools that follow the FMI standard
-    (extension .fmu) (either Model exchange FMUs or Co-Simulation FMUs). The
-    support is both for FMI version 1.0 and FMI version 2.0. For more
+    (extension .fmu) (either Model exchange FMUs or Co-Simulation FMUs). Both
+    FMI version 1.0 and FMI version 2.0 are supported. For more
     information about compiling a model in JModelica.org see <xref
     linkend="ch_models"/>.</para>
 
@@ -199,19 +200,21 @@ plt.show()
       <section>
         <title>Input</title>
 
-        <para>The input defines the input trajectories to the model and should
-        be a 2-tuple consisting of the name(s) of the input variables and the
-        second argument should be either a data matrix or a function. If the
-        argument is a data matrix it should contain a time vector as the first
-        column and the second column should correspond to the first name in
-        the first argument and so forth. If instead the second argument is a
-        function it should be defined to take the time as input and return the
-        number of inputs in the order defined by the first argument.</para>
+        <para>The input argument defines the input trajectories to the model 
+        and should be a 2-tuple consisting of the names of the input variables 
+        and their trajectories. The names can be either a list of strings, or 
+        a single string for setting only a single input trajectory. The 
+        trajectories can be given as either a data matrix or a function. 
+        If a data matrix is used, it should contain a time vector as the first 
+        column, and then one column for each input, in the order of the list of 
+        names. If instead the second argument is a function it should be defined 
+        to take the time as input and return an array with the values of the inputs, 
+        in the order of the list of names.</para>
 
         <para>For example, consider that we have a model with an input
-        variable <literal>u1 </literal>and that the model should be driven by
-        a sinus wave as input. Also we are interested in the interval 0 to
-        10.</para>
+        variable <literal>u1</literal> and that the model should be driven by
+        a sine wave as input. We are interested in the interval 0 to 10.
+        We will look at both using a data matrix and at using a function.</para>
 
         <programlisting language="python">import numpy as N
 t = N.linspace(0.,10.,100)            # Create one hundred evenly spaced points
@@ -266,7 +269,7 @@ input_object = (['u1','u2'],input_function)
         <title>Options for FMUModelME1 and FMUModelME2</title>
 
         <para>The options attribute are where options to the specified
-        algorithm are stored and are preferably used together with:</para>
+        algorithm are stored, and are preferably used together with:</para>
 
         <programlisting language="python">opts = FMUModelME*.simulate_options()
 </programlisting>
@@ -294,6 +297,10 @@ input_object = (['u1','u2'],input_function)
           <title>General options for AssimuloFMIAlg.</title>
 
           <tgroup cols="3">
+            <colspec align="left" colname="col-opt" colwidth="1*" />
+            <colspec align="left" colname="col-def" colwidth="1*" />
+            <colspec align="left" colname="col-descr" colwidth="2*" />
+
             <thead>
               <row>
                 <entry align="center">Option</entry>
@@ -308,12 +315,12 @@ input_object = (['u1','u2'],input_function)
               <row>
                 <entry>solver</entry>
 
-                <entry>'CVode'</entry>
+                <entry>"CVode"</entry>
 
                 <entry>Specifies the simulation method that is to be used.
                 Currently supported solvers are, CVode, Radau5ODE,
                 RungeKutta34, Dopri5, RodasODE, LSODAR, ExplicitEuler.
-                Although the recommended solver is "CVode".</entry>
+                The recommended solver is "CVode".</entry>
               </row>
 
               <row>
@@ -494,7 +501,7 @@ opts['ncp'] = 1000        # Changing the number of communication points.
         <title>Options for FMUModelCS1 and FMUModelCS2</title>
 
         <para>The options attribute are where options to the specified
-        algorithm are stored and are preferably used together with:</para>
+        algorithm are stored, and are preferably used together with:</para>
 
         <programlisting>opts = FMUModelCS*.simulate_options()</programlisting>
 
@@ -704,7 +711,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
 
     <para>The Python commands in these examples may be copied and pasted
     directly into a Python shell, in some cases with minor modifications.
-    Alternatively, they may be copied into a text file, which also is the
+    Alternatively, they may be copied into a file, which also is the
     recommended way.</para>
 
     <section>
