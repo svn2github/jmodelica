@@ -247,7 +247,7 @@ cstr_casadi.run_demo()
 
     <para>This section describes a procedure for compiling JModelica.org from
     sources on Linux. The instructions have been verified to work on Ubuntu
-    Linux release 12.04, 64bit.</para>
+    Linux release 16.04, 64bit.</para>
 
     <section xml:id="inst_sec_sdk_prereq">
       <title>Prerequisites</title>
@@ -314,7 +314,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>g++</literal></entry>
 
-                <entry><literal>4.6.3</literal></entry>
+                <entry><literal>5.4.0</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -322,7 +322,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>subversion</literal></entry>
 
-                <entry><literal>1.6.17</literal></entry>
+                <entry><literal>1.9.3</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -330,7 +330,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>gfortran</literal></entry>
 
-                <entry><literal>4.6.3</literal></entry>
+                <entry><literal>5.4.0</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -338,7 +338,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>ipython</literal></entry>
 
-                <entry><literal>0.12.1</literal></entry>
+                <entry><literal>5.3.0</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -354,7 +354,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>swig</literal></entry>
 
-                <entry><literal>2.0.4</literal></entry>
+                <entry><literal>3.0.8</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -370,7 +370,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>python-dev</literal></entry>
 
-                <entry><literal>2.7.3</literal></entry>
+                <entry><literal>2.7.11</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -434,7 +434,7 @@ sudo pip install jcc
               <row>
                 <entry>zlib1g-dev</entry>
 
-                <entry>1:1.2.3.4</entry>
+                <entry>1:1.2.8</entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -442,7 +442,7 @@ sudo pip install jcc
               <row>
                 <entry>libboost-dev</entry>
 
-                <entry>1.48.0.2</entry>
+                <entry>1.58.0</entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -464,8 +464,7 @@ sudo pip install jcc
 
         <para>While Ipopt is available as a pre-compiled package for Ubuntu,
         it is recommended to build Ipopt from sources. The Ipopt packages
-        provided for Ubuntu have had flaws (including the version provided for
-        Ubuntu 12.04) that prevented usage with JModelica.org. Also, compiling
+        provided for Ubuntu have had flaws that prevented usage with JModelica.org. Also, compiling
         Ipopt from sources is required when using the linear solvers MA27 or
         MA57 from the HSL library, since these are not available as open
         source software.</para>
