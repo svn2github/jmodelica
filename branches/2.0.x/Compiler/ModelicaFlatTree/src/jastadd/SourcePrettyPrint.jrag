@@ -8,27 +8,23 @@ import beaver.Symbol;
 
 aspect SourcePrettyPrint {
 
-	public class SourcePrettyPrinter extends PrettyPrinter {
-			public SourcePrettyPrinter() {
-				super();
-			}
-			
-	 		public void print(ASTNode node, CodeStream str, String indent) { 
-	 			node.sourcePrettyPrint(this, str, indent); 
-	 		
-	 		}
-	}
-	public void ASTNode.sourcePrettyPrint(Printer p, CodeStream str, String indent) {
-		//System.out.println("ASTNode");
-		prettyPrint(p, str, indent);
-	}
-	public void ASTNode.sourcePrettyPrint(CodeStream str, String indent) {
-		sourcePrettyPrint(new SourcePrettyPrinter(), str, indent);
-		
-	}
-	
+    public class SourcePrettyPrinter extends PrettyPrinter {
+        public SourcePrettyPrinter() {
+            super();
+        }
 
+        public void print(ASTNode node, CodeStream str, String indent) {
+            node.sourcePrettyPrint(this, str, indent); 
+        }
+    }
 
+    public void ASTNode.sourcePrettyPrint(Printer p, CodeStream str, String indent) {
+        prettyPrint(p, str, indent);
+    }
+
+    public void ASTNode.sourcePrettyPrint(CodeStream str, String indent) {
+        sourcePrettyPrint(new SourcePrettyPrinter(), str, indent);
+    }
 
 	public void BaseNode.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		if(this.fName == null)
@@ -117,7 +113,7 @@ aspect SourcePrettyPrint {
 		prettyPrint(p, str, indent);
 	}
 	
-	public void FRecordConstructor.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// onödig? behövs till annat?
+	public void FRecordConstructor.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// onï¿½dig? behï¿½vs till annat?
 		log.debug("FRecordConstructor----Source position: " + this.start + " " + this.end);
 		log.debug("FRecordConstructor----Source file: " + this.fName);
 

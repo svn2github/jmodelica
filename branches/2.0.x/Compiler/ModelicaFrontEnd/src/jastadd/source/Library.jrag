@@ -72,7 +72,7 @@ aspect Library {
             baseDir = new File(dirName);
         }
         try {
-            log.info("Reading file: " + fileName);
+            logReadFile(fileName);
             SourceRoot sr = ParserHandler.parseFile(root().getUtilInterface(), fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
             ClassDecl cd = extractClassDecl(entity, name);
@@ -116,6 +116,10 @@ aspect Library {
             log.debug(e);
             return createErrorStoredDefinition();
         } 
+    }
+
+    private void LibNode.logReadFile(String fileName) {
+        log.info("Reading file: " + fileName);
     }
 
     private ClassDecl LibNode.extractClassDecl(StoredDefinition entity, String name) {

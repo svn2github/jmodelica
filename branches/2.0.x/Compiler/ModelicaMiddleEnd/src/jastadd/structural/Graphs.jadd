@@ -50,12 +50,17 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     private boolean initialSystem = false;
     private Enumerator enumerator = new Enumerator(1);
 
-    public AbstractBiPGraph() {
+    public AbstractBiPGraph(OptionRegistry options) {
+        setup(options);
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars) {
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>>
+            AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars, OptionRegistry options) {
+
+        this(options);
         for (E_OTHER oldE : eqs)
-            addEquation(oldE.getEquation(), oldE.groupNumber(), oldE.variability(), oldE.type(), oldE.isMeta(), oldE.getName());
+            addEquation(oldE.getEquation(), oldE.groupNumber(), oldE.variability(), oldE.type(),
+                    oldE.isMeta(), oldE.getName());
         for (V_OTHER oldV : vars)
             addVariable(oldV.getName(), oldV.getVariable());
         for (E_OTHER oldE : eqs) {
@@ -68,8 +73,10 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial) {
-        this(block, collectMatchingVariables(block));
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>>
+            AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial, OptionRegistry options) {
+
+        this(block, collectMatchingVariables(block), options);
         initialSystem = isInitial;
         for (E_OTHER e : block) {
             if (!e.isMeta()) {
@@ -337,31 +344,31 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         private Set<V> vars = null;
         protected final FAbstractEquation equation;
         protected final VariableResolver<E, V> resolver;
-        
+
         public IncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver) {
             equation = e;
             this.resolver = resolver;
         }
-        
+
         protected Set<V> vars() {
             if (vars == null) {
                 vars = resolver.lookupVars(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
             }
             return vars;
         }
-        
+
         public FTypePrefixVariability variability(int i) {
             return equation.variability();
         }
-        
+
         public FType type(int i) {
             return equation.type();
         }
-        
+
         public void addEdges(E eqn, boolean log) {
             for (V var : vars()) {
                 if (log) {
-                    ASTNode.log.verbose("*** %s", var);
+                    logIndexVerbose("*** %s", var);
                 }
                 addEdge(eqn, var);
             }
@@ -1550,16 +1557,20 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> e
 
 public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
 
-    public BiPGraph() {
-        super();
+    public BiPGraph(OptionRegistry options) {
+        super(options);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial) {
-        super(block, isInitial);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block,
+            boolean isInitial, OptionRegistry options) {
+
+        super(block, isInitial, options);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars) {
-        super(eqns, vars);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns,
+            Collection<V> vars, OptionRegistry options) {
+
+        super(eqns, vars, options);
     }
 
     @Override
@@ -1597,12 +1608,16 @@ public class Var extends AbstractVar<Eq, Var> {
 
 public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCCBlock<SolvingEq, SolvingVar>> {
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars) {
-        super(eqns, vars);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns,
+            Collection<V> vars, OptionRegistry options) {
+
+        super(eqns, vars, options);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial) {
-        super(block, isInitial);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block,
+            boolean isInitial, OptionRegistry options) {
+
+        super(block, isInitial, options);
     }
 
     @Override
@@ -2093,6 +2108,8 @@ public class AbstractBiPGraph {
         public Set<V> lookupVars(Iterable<FIdUseExp> set);
     }
 }
+
+private void AbstractBiPGraph.setup(OptionRegistry options) {}
 
 public VariableResolver<E, V> AbstractBiPGraph.defaultVariableResolver() {
     return new VariableResolver<E,V>() {

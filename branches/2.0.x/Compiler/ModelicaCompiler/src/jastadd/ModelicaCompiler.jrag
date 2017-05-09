@@ -1212,16 +1212,6 @@ public class ModelicaCompiler {
         return icd;
     }
 
-    protected void handleCompilerWarnings(Collection<Problem> warnings) throws CompilerException {
-        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
-            getDiagnosticsGenerator().writeProblems(warnings);
-        
-        if (!warnings.isEmpty()) {
-            log.logProblems(warnings);
-            this.warnings.addAll(warnings);
-        }
-    }
-    
     /**
      * Retrieves a list of warnings and clear the internal list.
     */
@@ -2013,6 +2003,16 @@ public class ModelicaCompiler {
     }
 
 }
+
+    protected void ModelicaCompiler.handleCompilerWarnings(Collection<Problem> warnings) throws CompilerException {
+        if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+            getDiagnosticsGenerator().writeProblems(warnings);
+        
+        if (!warnings.isEmpty()) {
+            log.logProblems(warnings);
+            this.warnings.addAll(warnings);
+        }
+    }
 
     /**
      * Compiles a Modelica model. A model file name and class must be provided.
