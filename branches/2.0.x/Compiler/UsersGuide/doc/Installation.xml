@@ -13,7 +13,7 @@
   <section xml:id="inst_sec_supported_platforms">
     <title>Supported platforms</title>
 
-    <para>JModelica.org is supported on Linux and Windows (Vista, 7, 10) with
+    <para>JModelica.org is supported on Linux and Windows (7, 10) with
     32-bit or 64-bit architectures.</para>
   </section>
 
@@ -266,7 +266,7 @@ sudo apt-get -y install ipython
 sudo apt-get -y install cmake
 sudo apt-get -y install swig
 sudo apt-get -y install ant
-sudo apt-get -y install openjdk-6-jdk
+sudo apt-get -y install openjdk-8-jdk
 sudo apt-get -y install python-dev
 sudo apt-get -y install python-numpy
 sudo apt-get -y install python-scipy
@@ -279,16 +279,9 @@ sudo apt-get -y install zlib1g-dev
 sudo apt-get -y install libboost-dev
 </programlisting>
 
-        <para>On Ubuntu 12.04, the bundled jcc version is too old. A new
-        enough version can be installed using pip:</para>
-
-        <programlisting>sudo apt-get -y install python-pip
-sudo pip install jcc
-</programlisting>
-
         <para>The following versions of each package have been tested and
-        verified to work. Please note that in some cases, a minimum version is
-        required.</para>
+        verified to work. Please note that in some cases, the listed version is
+        the minimum required.</para>
 
         <table xml:id="inst_tab_versions_ubuntu">
           <title>Package versions for Ubuntu</title>
@@ -432,25 +425,25 @@ sudo pip install jcc
               </row>
 
               <row>
-                <entry>zlib1g-dev</entry>
+                <entry><literal>zlib1g-dev</literal></entry>
 
-                <entry>1:1.2.8</entry>
-
-                <entry>Tested version</entry>
-              </row>
-
-              <row>
-                <entry>libboost-dev</entry>
-
-                <entry>1.58.0</entry>
+                <entry><literal>1:1.2.8</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
 
               <row>
-                <entry>jcc</entry>
+                <entry><literal>libboost-dev</literal></entry>
 
-                <entry>2.16</entry>
+                <entry><literal>1.58.0</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>jcc</literal></entry>
+
+                <entry><literal>2.16</literal></entry>
 
                 <entry>Minimum version</entry>
               </row>
@@ -488,7 +481,7 @@ cd ../Metis
 cd ../../
 </programlisting>
 
-        <para>If you have access to the HSL codes MA57 or MA27, copy their
+        <para>If you have access to the HSL solvers MA57 or MA27, copy their
         sources into the directory <literal>ThirdParty/HSL</literal>. In the
         next step, configure and compile Ipopt:</para>
 
