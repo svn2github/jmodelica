@@ -45,6 +45,13 @@ aspect Library {
      */
     syn boolean LibNode.fromModelicaPath() = getReason() == LoadReason.MODELICAPATH;
 
+    inh LibNode.LoadReason SourceBaseNode.loadReason();
+    eq LibNode.getChild().loadReason() = getReason();
+    // Assume command line if not in a LibNode.
+    eq SourceRoot.getChild().loadReason() = LibNode.LoadReason.COMMANDLINE;
+    // Override the inherited method and use direct!
+    syn LibNode.LoadReason LibNode.loadReason() = getReason();
+    
     public static final String LibNode.PACKAGE_FILE = "package.mo";
     public static final String LibNode.PACKAGE_ORDER_FILE = "package.order";
 
