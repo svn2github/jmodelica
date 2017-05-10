@@ -9,17 +9,21 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
-  
+
   <section>
     <title>Release notes for JModelica.org version 2.0</title>
 
     <section>
       <title>Highlights</title>
 
-      <para>For this release, all focus has been on Modelica/MSL compliance.
-      All example models in the bundled MSL version, see  <xref linkend="MSL20"/>, simulate
-      correctly with this release. There is also support for IBPSA,
-      see <xref linkend="IBPSA20"/>.</para>
+      <para>For this release, focus has been on Modelica/MSL compliance. All
+      example models in the bundled MSL version simulate correctly with this
+      release, with marginal additions, see <xref linkend="MSL20"/>. There
+      is also support for IBPSA, see <xref linkend="IBPSA20"/></para>
+
+      <para>A novel co-simulation master is available in PyFMI. It implements
+      a number of master algorithms, see <citation>And2016</citation> for
+      details.</para>
     </section>
 
     <section>
@@ -78,6 +82,17 @@
       </para>
       </section>
       </section>
+    </section>
+
+    <section>
+      <title>A novel co-simulation algorithm</title>
+
+      <para>A novel co-simulation master algorithm is now available in the
+      Python package PyFMI. The master algorithm supports FMUs 2.0 for
+      co-simulation. Features of the master algorithm include a parallel
+      Jacobi approach as well as a step-size controlled algorithm based on
+      Richardson extrapolation. The theory and implementation of the software
+      is described in <citation>And2016</citation>. </para>
     </section>
     <section><title>Simulation</title>
     <para>For JModelica.org 2.0 improvements have been made for numerical
