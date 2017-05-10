@@ -80,7 +80,7 @@
     numerous model libraries for Modelica, both free and commercial, including
     the freely available Modelica Standard Library (MSL).</para>
 
-    <para>A unique feature of JModelica.org is the support for the extension
+    <para>A unique feature of JModelica.org is the support for the language extension
     Optimica. Optimica enables users to conveniently formulate optimization
     problems based on Modelica models using simple but powerful constructs for
     encoding of optimization interval, cost function and constraints.</para>
@@ -123,7 +123,7 @@
     difference between them is that in a Co-Simulation FMU, the integrator for
     solving the system is contained in the model while in an Model Exchange
     FMU, an external integrator is needed to solve the system. The
-    JModelica.org compiler supports export of FMUs and FMUs can be imported
+    JModelica.org compiler supports export of FMUs. FMUs can be imported
     into Python using the Python packages included in the platform.</para>
   </section>
 </chapter>

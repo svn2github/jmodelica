@@ -4030,7 +4030,7 @@ aspect FlatDiagnostics {
     }
 
     public String FClass.aliasDiagnosticsShort() {
-        StringBuilder str = new StringBuilder();
+        StringBuilder str = new StringBuilder(" (");
         if (getAliasManager()!=null) {
             int n_elim = 0;
             Set<AliasManager.AliasSet> aliasSets = getAliasManager().getAliasSets();
@@ -4044,7 +4044,7 @@ aspect FlatDiagnostics {
         } else {
             str.append("Alias sets not computed");
         }
-        return str.toString();  
+        return str.append(")").toString();  
         
     }
 

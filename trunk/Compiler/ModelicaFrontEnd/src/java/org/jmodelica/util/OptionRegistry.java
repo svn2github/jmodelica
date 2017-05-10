@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -2350,7 +2351,7 @@ abstract public class OptionRegistry {
          * Retrieves the documentation string for this option's current value.
          */
         public String getValueForDoc() {
-            return String.format("'%s'", value);
+            return (getValue() == null) ? "null" : String.format("'%s'", getValue());
         }
 
         @Override
@@ -2508,6 +2509,14 @@ abstract public class OptionRegistry {
         public String getValueString() {
             return Double.toString(getValue());
         }
+
+        @Override
+        public String getValueForDoc() {
+            String raw = getValueString();
+            String round = String.format((Locale) null, "%.2E", getValue());
+            return (round.length() < raw.length()) ? round : raw;
+        }
+
 
         @Override
         protected void copyTo(OptionRegistry reg, String key) {

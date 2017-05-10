@@ -124,7 +124,7 @@ function python_tests() {
         for TEST in ${TESTS}; do
           echo ""
           echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
-          nosetests ${TAGS} -v ${TEST}
+          nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v ${TEST}
         done
       fi 2>&1 | log
       ;;
@@ -135,7 +135,7 @@ function python_tests() {
         for TEST in ${TESTS}; do
           echo "" | log > /dev/null
           echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log > /dev/null
-          nosetests ${TAGS} -v ${TEST} 2>&1 \
+          nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v ${TEST} 2>&1 \
           | log \
 	      | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p' || echo NOSETESTS_NOT_OK
         done | filter_python_separate
@@ -154,7 +154,7 @@ function python_tests() {
         for TEST in ${TESTS}; do
           echo "" | log
           echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log
-          nosetests ${TAGS} -v ${TEST} 2>&1 \
+          nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v ${TEST} 2>&1 \
           | log \
           | egrep -v '^Exception .* ignored$' \
           | egrep -A500 "${PATTERN}" \
@@ -239,6 +239,9 @@ function junit_test() {
       | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
       ;;
   esac
+  if [ -n "${XML_RES_PATH:-}" ]; then
+    cp "doc/junit-reports/TESTS-TestSuites.xml" "${XML_RES_PATH}"
+  fi
 }
 
 function ant_test() {
@@ -270,10 +273,17 @@ function switch_test_flags() {
   done
 }
 
+function compute_nose_extra_args() { # Argument is test name
+    if [ -n "${XML_RES_PATH:-}" ]; then
+        RES_FILE_NAME=`echo $1 | sed -e 's!^.*jmodelica.!!g' -e 's!/!_!g'`
+        echo --with-xunit --xunit-file=${XML_RES_PATH}/${RES_FILE_NAME}.xml
+    fi
+}
+
 function read_args() {
   TESTS=
   ARG_TYPE=flag
-  for a in ${DEFAULT_ARGS} $*; do
+  for a in ${DEFAULT_ARGS} "$@"; do
     if [[ "$(echo $a | head -c1)" == "-" ]]; then
       ARG_TYPE=flag
     fi
@@ -297,6 +307,10 @@ function read_args() {
           echo "Cannot find test file ${a}"
           exit
         fi
+        ;;
+      xmlResPath)
+        XML_RES_PATH=${a}
+        ARG_TYPE=flag
         ;;
     esac
     if [[ ${FLAG} == 1 ]]; then
@@ -336,8 +350,11 @@ function read_args() {
           g)
             ARG_TYPE=tag
             ;;
+          x)
+            ARG_TYPE=xmlResPath
+            ;;
           h)
-            echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...]"
+            echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...] [-x path]"
             echo "The -ajmop options each control a set of tests, and select all tests in set "
             echo "for running, or, if all in set are already selected, deselects them. "
             echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
@@ -363,6 +380,9 @@ function read_args() {
             echo "  -f  When running python tests, only run tests from the listed files. "
             echo "      Paths relative to the tests directory are accepted, as well as "
             echo "      absolute or relative to current directory"
+            echo "  -x  Path to folder where jUnit like xml files are written. The xml files"
+            echo "      contains the results of the tests. Currently doesn't handle spaces"
+			echo "      in the supplied path!"
             echo "  -h  Print this help and exit"
             exit
             ;;
@@ -388,7 +408,7 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
-read_args $*
+read_args "$@"
 
 if [ "${LOG}" == 1 ]; then
   echo "Log of jm_tests $(date):" > "${LOGFILE}"

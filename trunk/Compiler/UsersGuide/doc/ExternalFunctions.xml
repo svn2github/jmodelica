@@ -8,7 +8,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Integrating external functions in Modelica</title>
+  <title>Using External Functions in Modelica</title>
 
   <section xml:id="external_function_introduction">
     <title>Introduction</title>

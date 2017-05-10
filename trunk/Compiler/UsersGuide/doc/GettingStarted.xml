@@ -38,7 +38,7 @@
 
         <listitem>
           <para><emphasis role="bold">PyJMI</emphasis> Work with models that
-          are represented in symbolic form based no the automatic
+          are represented in symbolic form based on the automatic
           differentiation tool CasADi. This package is mainly used for solving
           optimization problems. See <xref linkend="ch_optimization"/> for
           more information.</para>
@@ -123,7 +123,7 @@ RLC.run_demo()</programlisting></para>
     JModelica.org for the current Python session. For example, the environment
     variable <literal>JMODELICA_HOME</literal> points at the JModelica.org
     installation directory and <literal>IPOPT_HOME</literal> points at the
-    Ipopt installation directory. One or more of these environment variables
+    Ipopt installation directory. These environment variables
     set in <filename>startup.py</filename> can be overridden by a user defined
     script: <filename>user_startup.py</filename>.</para>
 

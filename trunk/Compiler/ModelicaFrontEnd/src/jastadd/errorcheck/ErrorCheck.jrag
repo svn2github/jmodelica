@@ -227,23 +227,23 @@ aspect ErrorCheck {
 	public void ComplianceWarnErrorHandler.breakOnErrors() throws CompilerException {
 	    delegate.breakOnErrors();
 	}
-	
-	public void DefaultErrorHandler.breakOnErrors() throws CompilerException {
-		if (!errors.isEmpty() || (haltOnWarning && !warnings.isEmpty())) {
-		    java.util.Collections.sort(errors);
-		    java.util.Collections.sort(warnings);
-		    
-		    ArrayList<Problem> problems = new ArrayList<Problem>();
-		    problems.addAll(warnings);
-		    problems.addAll(errors);
-		    
-		    errors.clear();
-		    warnings.clear();
-		    
-		    throw new CompilerException(problems);
-		}
-	}
-	
+
+    public void DefaultErrorHandler.breakOnErrors() throws CompilerException {
+        if (!errors.isEmpty() || (haltOnWarning && !warnings.isEmpty())) {
+            java.util.Collections.sort(errors);
+            java.util.Collections.sort(warnings);
+            
+            ArrayList<Problem> problems = new ArrayList<Problem>();
+            problems.addAll(warnings);
+            problems.addAll(errors);
+            
+            errors.clear();
+            warnings.clear();
+            
+            throw new CompilerException(problems);
+        }
+    }
+
     public ArrayList<Problem> ASTNode.collectWarnings() {
         return root().getErrorHandler().collectWarnings();
     }
