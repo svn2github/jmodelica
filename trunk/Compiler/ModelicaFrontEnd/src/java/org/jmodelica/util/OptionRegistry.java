@@ -965,7 +965,7 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.uncommon,
              10,
-             "Factor limiting the step-size taken by the nonlinear solver.",
+             "Factor limiting the step-size taken by the nonlinear block solver.",
              0, 1e10),
         NLE_SOLVER_REGULARIZATION_TOLERANCE
             ("nle_solver_regularization_tolerance",
