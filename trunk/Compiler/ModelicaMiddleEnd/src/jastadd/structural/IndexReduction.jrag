@@ -64,32 +64,31 @@ aspect IndexReduction {
     private boolean FClass.shouldReduceIndex(BiPGraph g) {
         return !g.isComplete() && continuousEquations().size() > 0 && derivativeVariables().size() > 0;
     }
-
+    
     /**
      * Perform index reduction on model.
      * 
      * @return  the new graph
      */
     private void FClass.reduceIndex() {
-        logIndexVerbose("Flat tree before index reduction");
-        logIndexVerbose(this);
-        logIndexVerbose("Index reduction starts...");
+        log.verbose("Flat tree before index reduction");
+        log.verbose(this);
+        log.verbose("Index reduction starts...");
         IndexReductionResult result;
-
         while (true) {
-            IndexReductionBiPGraph g = new IndexReductionBiPGraph(myOptions());
+            IndexReductionBiPGraph g = new IndexReductionBiPGraph();
             // Only do index reduction based on real variables and equations
             g.addVariables(this, VAR_TYPES_REAL);
             g.addEquations(continuousNonMetaEquations(), VAR_TYPES_REAL);
-            logIndexVerbose(g);
+            log.verbose(g);
             g.maximumMatching(true);
-            logIndexVerbose("DAE system real variables only");
-            logIndexVerbose(g.printMatchingObj());
-
+            log.verbose("DAE system real variables only");
+            log.verbose(g.printMatchingObj());
+            
             try {
                 boolean printPantelidesSteps = g.getEquations().size() <= myOptions().getIntegerOption("diagnostics_limit");
                 if (!printPantelidesSteps) {
-                    logIndexVerbose("The BiPGraph will not be printed during pantelides, the model is too big. "
+                    log.verbose("The BiPGraph will not be printed during pantelides, the model is too big. "
                             + "Limit, compiler option 'diagnostics_limit', is set to %d and model size is %d. ",
                             myOptions().getIntegerOption("diagnostics_limit"), g.getEquations().size());
                 }
@@ -99,18 +98,18 @@ aspect IndexReduction {
                         printPantelidesSteps);
                 break;
             } catch (EquationDifferentiationException e) {
-                logIndexVerbose("Unable to differentiate equation:\n%s", e.equation);
+                ASTNode.log.verbose("Unable to differentiate equation:\n%s", e.equation);
                 if (ssPreferVars == null || ssPreferVars.isEmpty())
                     throw e;
                 Set<FVariable> removableVars = g.removablePreferDerivatives(ssPreferVars);
                 if (removableVars.isEmpty())
                     throw e;
-                logIndexVerbose("Retrying index reduction without the following state select prefer derivatives:");
+                log.verbose("Retrying index reduction without the following state select prefer derivatives:");
                 for (FVariable var : removableVars) {
-                    logIndexVerbose("  %s", var.name());
+                    log.verbose("  %s", var.name());
                     ssPreferVars.remove(var.getMeIntegrated());
                 }
-                logIndexVerbose("");
+                log.verbose("");
                 
                 // Remove SS=prefer derivatives
                 List<FVariable> vars = new List<FVariable>();
@@ -122,7 +121,7 @@ aspect IndexReduction {
                 root().flushAllRecursive();
             }
         }
-
+        
         // Add the new equations
         // Replace selected dummy derivatives with algebraics
         // Enable rewrite of identifiers? (not necessary?)
@@ -132,11 +131,11 @@ aspect IndexReduction {
             else
                 addFEquation(fe);
         }
-
+        
         getAliasManager().stopCollectingDerivativeBindings();
-
+        
         Collection<FVariable> l = new ArrayList<FVariable>();
-
+        
         for (FVariable fv : getFVariables()) {
             if (fv.isDerivativeVariable()) {
                 if (result.getDummyDerivatives().contains(fv)) {
@@ -165,7 +164,7 @@ aspect IndexReduction {
 
         applyDynamicStateResult(result);
         
-        logIndexVerbose(this);
+        log.verbose(this);
         
         enableFHDerRewrite();
 
@@ -179,8 +178,8 @@ aspect IndexReduction {
 
         root().flushAllRecursive();
 
-        logIndexVerbose(this);
-        logIndexVerbose(aliasManager);
+        log.verbose(this);
+        log.verbose(aliasManager);
 
         // Produce errors and warnings:
         Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
@@ -205,28 +204,20 @@ aspect IndexReduction {
             else
                 fv.warning(fv.name() + " has stateSelect=always, but could not be selected as state");
 
-        logIndexInfo(stateDiagnosticsObj());
+        log.info(stateDiagnosticsObj());
         
         DAEBiPGraph = computeMatchedDAEBiPGraph();
-        logIndexVerbose("BiPGraph after index reduction");
-        logIndexVerbose(DAEBiPGraph);
-        logIndexVerbose("BiPGraph matching after index reduction");
-        logIndexVerbose(DAEBiPGraph.printMatchingObj());
+        log.verbose("BiPGraph after index reduction");
+        log.verbose(DAEBiPGraph);
+        log.verbose("BiPGraph matching after index reduction");
+        log.verbose(DAEBiPGraph.printMatchingObj());
 
         if (!DAEBiPGraph.isComplete()) {
             // If we get here, index reduction failed
             throw new IndexReductionException();
         }
     }
-
-    private void FClass.logIndexInfo(Object... objects) {
-        ASTNode.log.info(objects);
-    }
-
-    private void FClass.logIndexVerbose(Object... objects) {
-        ASTNode.log.verbose(objects);
-    }
-
+    
     public Object FClass.stateDiagnosticsObj() {
         return new Object() {
             public String toString() {
@@ -295,10 +286,6 @@ aspect IndexReduction {
     }
     
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
-    
-        public IndexReductionBiPGraph(OptionRegistry options) {
-            super(options);
-        }
 
         @Override
         protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
@@ -737,7 +724,7 @@ aspect IndexReduction {
         if (baseEqn.getMeDifferentiated() != null)
             return;
         
-        logIndexVerbose("Differentiating %s", baseEqn);
+        ASTNode.log.verbose("Differentiating %s", baseEqn);
         
         // Go through all group members and collect all unique AST equations.
         // There might be several equations the second time an inlined
@@ -770,18 +757,18 @@ aspect IndexReduction {
         }
         Collection<FAbstractEquation> extraEquations = new ArrayList<FAbstractEquation>();
         for (FAbstractEquation fEqn : baseEqn.getExtraEquations()) {
-            logIndexVerbose("  Extra equation: %s", fEqn);
+            ASTNode.log.verbose("  Extra equation: %s", fEqn);
             extraEquations.add(fEqn);
             if (baseEqn.diffExtraEqn(fEqn)) {
                 FAbstractEquation diffedFEqn = differentiateEquation(fEqn, inliner);
-                logIndexVerbose("    Diffed into: %s", diffedFEqn);
+                ASTNode.log.verbose("    Diffed into: %s", diffedFEqn);
                 if (diffedFEqn.isContinuous()) {
                     diffedFEqns.add(diffedFEqn);
                 } else {
-                    logIndexVerbose("    Diffed not added!");
+                    ASTNode.log.verbose("    Diffed not added!");
                 }
             } else {
-                logIndexVerbose("    Not diffed!");
+                ASTNode.log.verbose("    Not diffed!");
             }
         }
         
@@ -811,15 +798,15 @@ aspect IndexReduction {
         
         if (inlineStack.size() > 0) {
             
-            logIndexDebug("Differentiated equation has inlinable functions");
+            ASTNode.log.debug("Differentiated equation has inlinable functions");
             while (!inlineStack.isEmpty()) {
                 inliner.reset();
                 FAbstractEquation fEqn = inlineStack.pop();
-                logIndexDebug("  Performing function inlining on %s", fEqn);
+                ASTNode.log.debug("  Performing function inlining on %s", fEqn);
                 Collection<FAbstractEquation> inlinedFEqns = fEqn.inlineFunctions(inliner);
                 
                 for (FAbstractEquation spawnedFExp : inliner.getNewEquations()) {
-                    logIndexDebug("Additional equation introduced, %s", spawnedFExp);
+                    ASTNode.log.debug("Additional equation introduced, %s", spawnedFExp);
                     if (spawnedFExp.hasInlinableFunctions(inliner))
                         inlineStack.add(spawnedFExp);
                     else
@@ -833,17 +820,17 @@ aspect IndexReduction {
                 
                 if (inlinedFEqns == null) {
                     if (originalDiffedFEqns.contains(fEqn)) {
-                        logIndexDebug("Inlining done, original equation has been split into multiple equations");
+                        ASTNode.log.debug("Inlining done, original equation has been split into multiple equations");
                         originalDiffedFEqns.remove(fEqn); // Remove the original equation if it has been split
                         originalDiffedFEqns.addAll(inliner.getLastSplitFFCE());
                         newExtraEquations.removeAll(inliner.getLastSplitFFCE());
                     } else {
-                        logIndexDebug("Inlining done, equation has been split into multiple equations");
+                        ASTNode.log.debug("Inlining done, equation has been split into multiple equations");
                     }
                     
                 } else {
                     for (FAbstractEquation inlinedFEqn : inlinedFEqns) {
-                        logIndexDebug("Equation inlined, got %s", inlinedFEqn);
+                        ASTNode.log.debug("Equation inlined, got %s", inlinedFEqn);
                         if (inlinedFEqn.hasInlinableFunctions(inliner)) {
                             inlineStack.add(inlinedFEqn);
                         } else if (!originalDiffedFEqns.contains(inlinedFEqn)) {
@@ -887,7 +874,7 @@ aspect IndexReduction {
             // Build new differentiated BiP equations for each scalar.
             for (int i = 0; i < newEqn.numScalarEquations(); i++) {
                 IndexReductionEq original = eqnIt.next();
-                logIndexVerbose("About to add equation: %s", newEqn);
+                ASTNode.log.verbose("About to add equation: %s", newEqn);
                 // Add the differentiated equation
                 IndexReductionEq diffedEqn = addEquation(newEqn, i, diffedOriginalEqs, incMap.variability(i), incMap.type(i), original.getName() + "_d");
                 
@@ -901,12 +888,12 @@ aspect IndexReduction {
                 original.setMeDifferentiated(diffedEqn);
                 diffedEqn.setMeIntegrated(original);
                 
-                logIndexVerbose("Added equation: %s, %s", diffedEqn, diffedEqn.printEquation());
+                ASTNode.log.verbose("Added equation: %s, %s", diffedEqn, diffedEqn.printEquation());
                 
                 if (original.getMatching() != null && !match(diffedEqn, original.getMatching().getMeDifferentiated()))
                     eqToMatchStack.add(diffedEqn);
             }
-            logIndexVerbose("Equation added");
+            ASTNode.log.verbose("Equation added");
         }
         
     }
@@ -993,20 +980,20 @@ aspect IndexReduction {
             boolean pathFound = augmentPath(eqToMatch);
             Collection<IndexReductionEq> visitedEquations = getVisitedEquations();
             Collection<IndexReductionVar> visitedVariables = getVisitedVariables();
-            logIndexVerbose("*************");
-            logIndexVerbose("Looking for augmented path starting in equation: %s", eqToMatch);
+            ASTNode.log.verbose("*************");
+            ASTNode.log.verbose("Looking for augmented path starting in equation: %s", eqToMatch);
             if (pathFound)
-                logIndexVerbose("Path found!");
+                ASTNode.log.verbose("Path found!");
             else
-                logIndexVerbose("Path not found!");
+                ASTNode.log.verbose("Path not found!");
             
-            logIndexVerbose("Visisted equations:");
+            ASTNode.log.verbose("Visisted equations:");
             for (IndexReductionEq ee : visitedEquations)
-                logIndexVerbose("  %s", ee.printEquation());
+                ASTNode.log.verbose("  %s", ee.printEquation());
             
-            logIndexVerbose("Visisted variables:");
+            ASTNode.log.verbose("Visisted variables:");
             for (IndexReductionVar vv : visitedVariables)
-                logIndexVerbose("  %s", vv);
+                ASTNode.log.verbose("  %s", vv);
             
             if (!pathFound) { // Step 3b-5
                 Collection<IndexReductionVar> varsToRemove = new ArrayList<IndexReductionVar>();
@@ -1033,14 +1020,14 @@ aspect IndexReduction {
                 // Push the matched equation to the stack of equations to be matched
                 eqToMatchStack.push(eqToMatch);
                 if (printPantelidesSteps) {
-                    logIndexVerbose("Graph after addition of equations and variables:");
-                    logIndexVerbose(this);
+                    ASTNode.log.verbose("Graph after addition of equations and variables:");
+                    ASTNode.log.verbose(this);
                 }
             }
             if (printPantelidesSteps) {
-                logIndexVerbose("Matching:");
-                logIndexVerbose(printMatchingObj());
-                logIndexVerbose("*************");
+                ASTNode.log.verbose("Matching:");
+                ASTNode.log.verbose(printMatchingObj());
+                ASTNode.log.verbose("*************");
             }
         }
         fclass.addFDerivativeVariables(newDiffedVars);
@@ -1055,16 +1042,16 @@ aspect IndexReduction {
         for (IndexReductionEq e : eqToRemove)
             removeEquation(e);
         
-        logIndexVerbose("Index reduction done!");
-        logIndexVerbose(this);
-        logIndexVerbose("Matching:");
-        logIndexVerbose(printMatchingObj());
+        ASTNode.log.verbose("Index reduction done!");
+        ASTNode.log.verbose(this);
+        ASTNode.log.verbose("Matching:");
+        ASTNode.log.verbose(printMatchingObj());
         
         if (getUnmatchedEquations().size() > 0 || getUnmatchedVariables().size() > 0)
             throw new IndexReductionException("There were unmatched equations and/or variables left after index reduction.");
         
         if (result.getEquations().isEmpty()) {
-            logIndexVerbose("Index reduction did not change the system. Munkres is skipped.");
+            ASTNode.log.verbose("Index reduction did not change the system. Munkres is skipped.");
             return result;
         }
         // Selection of dummy derivatives
@@ -1093,8 +1080,8 @@ aspect IndexReduction {
         // contains differentiated equations or variables.
         for (IndexReductionSCCBlock block : components) {
             if (block.containsDifferentatedComponents()) {
-                logIndexVerbose(" ********* Found block containing diffed equations ***********");
-                logIndexVerbose(block);
+                ASTNode.log.verbose(" ********* Found block containing diffed equations ***********");
+                ASTNode.log.verbose(block);
                 for (IndexReductionEq eqn : block.getMembers())
                     for (IndexReductionVar var : eqn.getVariables())
                         if (var.numDifferentiations() > 0)
@@ -1122,14 +1109,14 @@ aspect IndexReduction {
         
         // Iterate
         while (remainingDifferentiatedEquations) {
-            logIndexVerbose("----------------");
+            ASTNode.log.verbose("----------------");
             // Step 3: Remove equations that aren't differentiated.
             for (IndexReductionEq eqn : new ArrayList<IndexReductionEq>(getEquations()))
                 if (eqn.getMeIntegrated() == null)
                     removeEquation(eqn);
             
             // Step 4: Select independent columns.
-            logIndexVerbose(this);
+            ASTNode.log.verbose(this);
             
             // Compute weights for variables based on state select, linearity
             // and other attributes.
@@ -1142,7 +1129,7 @@ aspect IndexReduction {
                     linearity += calculateLinearityWeight(var.getMeIntegrated(), coefficientsMatrix);
                 boolean fixed = fv.getTopIntegrated().isFixed();
                 IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), linearity);
-                logIndexVerbose("Weight: %s %s", var, weight);
+                ASTNode.log.verbose("Weight: %s %s", var, weight);
                 weights.put(var, weight);
             }
             
@@ -1159,29 +1146,29 @@ aspect IndexReduction {
             } finally {
                 ASTNode.endStep("Munkres");
             }
-            logIndexVerbose(printMatchingObj());
+            ASTNode.log.verbose(printMatchingObj());
             Set<IndexReductionVar> dsVars = Collections.emptySet();
             if (computeDynamicStates)
                 dsVars = computeDynamicStateSets(coefficientsMatrix, result);
-            logIndexVerbose(printMatchingObj());
+            ASTNode.log.verbose(printMatchingObj());
             
             // Step 5: prepare for next iteration
             // Mark all variables for removal. Add the integrated variable for
             // each matched variable to the graph and add the matched variable
             // to zHat.
             Collection<IndexReductionVar> varsToRemove = new ArrayList<IndexReductionVar>();
-            logIndexVerbose(" Dummy derivatives selected in iteration: ");
+            ASTNode.log.verbose(" Dummy derivatives selected in iteration: ");
             for (IndexReductionVar var : new ArrayList<IndexReductionVar>(getVariables())) {
                 varsToRemove.add(var);
                 if (var.getMatching() != null) {
                     if (!dsVars.contains(var)) {
-                        logIndexVerbose("   %s", var);
+                        ASTNode.log.verbose("   %s", var);
                         zHat.add(var.getVariable());
                     }
                     insert(getOrCreateIntegrated(var));
                 }
             }
-            logIndexVerbose("");
+            ASTNode.log.verbose("");
             
             // Add the "integrated" equation for all equations in the graph and
             // remove the differentiated equation.
@@ -1206,12 +1193,12 @@ aspect IndexReduction {
                     remainingDifferentiatedEquations = true;
         }
         
-        logIndexVerbose(" Dummy derivatives: ");
+        ASTNode.log.verbose(" Dummy derivatives: ");
         for (FVariable var : zHat) {
             result.addDummyDerivative(var);
-            logIndexVerbose("   %s", var);
+            ASTNode.log.verbose("   %s", var);
         }
-        logIndexVerbose("");
+        ASTNode.log.verbose("");
         
         return result;
     }
@@ -1238,15 +1225,7 @@ aspect IndexReduction {
             }
         }
     }
-
-    protected void AbstractBiPGraph.logIndexDebug(Object... objects) {
-        ASTNode.log.debug(objects);
-    }
-
-    protected void AbstractBiPGraph.logIndexVerbose(Object... objects) {
-        ASTNode.log.verbose(objects);
-    }
-
+    
     public int IndexReductionBiPGraph.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix) {
         int weight = 0;
         for (IndexReductionEq eqn : getEquations())
@@ -1471,16 +1450,16 @@ aspect IndexReduction {
         }
 
         IndexReductionCost opt_cost = IndexReductionCost.zeroCost();
-        logIndexVerbose("Munkres result:");
+        ASTNode.log.verbose("Munkres result:");
         for (int i = 0; i < result.length; i++) {
             opt_cost.add(cost[result[i][0]][result[i][1]]);
             IndexReductionEq eqn = eqs.get(result[i][0]);
             IndexReductionVar var = vars.get(result[i][1]);
             if (!match(eqn, var))
                 throw new IndexReductionException("Munkres matched to unmatchable incidence, unable to match " + eqn + " with " + var);
-            logIndexVerbose("%s: %s %s", eqn, var, cost[result[i][0]][result[i][1]]);
+            ASTNode.log.verbose("%s: %s %s", eqn, var, cost[result[i][0]][result[i][1]]);
         }
-        logIndexVerbose("Optimal cost: %s", opt_cost);
+        ASTNode.log.verbose("Optimal cost: %s", opt_cost);
     }
 
     public class IndexReductionResult {

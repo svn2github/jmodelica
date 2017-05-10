@@ -58,28 +58,28 @@ aspect OverdeterminedInitialSystem {
          * returned if all unmatched equations are found to be redundent.
          */
         public OISResult overdeterminedInitialSystem() {
-            logIndexVerbose("Analysing initial system for redundant equations to remove.");
+            ASTNode.log.verbose("Analysing initial system for redundant equations to remove.");
             OISVariableEvaluator evaluator = new OISVariableEvaluator();
             boolean allIsGood = true;
             for (E eqn : unmatchedEquationsIterable()) {
-                logIndexVerbose("Checking unmatched equation %s", eqn);
+                ASTNode.log.verbose("Checking unmatched equation %s", eqn);
                 FAbstractEquation equation = eqn.getEquation();
                 if (!equation.isInitial()) {
-                    logIndexVerbose("  Not an initial equation");
+                    ASTNode.log.verbose("  Not an initial equation");
                     allIsGood = false;
                 } else if (equation.OIS_consistencyCheck(evaluator)) {
-                    logIndexVerbose("  Consistent");
+                    ASTNode.log.verbose("  Consistent");
                 } else {
                     allIsGood = false;
-                    logIndexVerbose("  Unable to verify or different values were calculated");
+                    ASTNode.log.verbose("  Unable to verify or different values were calculated");
                 }
             }
             if (!allIsGood) {
-                logIndexVerbose("Unable to verify all unmatched initial equations");
+                ASTNode.log.verbose("Unable to verify all unmatched initial equations");
                 return null;
             }
             Collection<E> results = new ArrayList<E>();
-            logIndexVerbose("All seems to be ok!");
+            ASTNode.log.verbose("All seems to be ok!");
             return new OISResult(getUnmatchedEquations(), evaluator.visitedParameters);
         }
         
@@ -105,7 +105,7 @@ aspect OverdeterminedInitialSystem {
             
             @Override
             public CValue ceval(CommonVariableDecl variable) {
-                logIndexVerbose("    %s", variable.name());
+                ASTNode.log.verbose("    %s", variable.name());
                 CValue val = evaluationCache.get(variable);
                 if (val != null)
                     return val;

@@ -23,7 +23,7 @@ import org.jmodelica.util.exceptions.BLTException;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.collections.ChainedIterable;
 
-aspect BLT {
+aspect BLT{
 
     public class EquationBlockFactory {
  
@@ -108,7 +108,7 @@ aspect BLT {
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            BiPGraph g = new BiPGraph(component.getMembers(), isInitial, options);
+            BiPGraph g = new BiPGraph(component.getMembers(), isInitial);
             Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(options, false);
             
             errorCheckWhenEquations(subBlocks);
@@ -173,7 +173,7 @@ aspect BLT {
                 if (seb != null && !mixed) {
                     block = seb;
                 } else {
-                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial, options);
+                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
                     Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, options);
                     eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
@@ -267,9 +267,7 @@ aspect BLT {
             public abstract boolean duringTearing();
             public abstract String symbol();
         }
-
         public static final BlockProducer DEFAULT_BLOCK_PRODUCER = new DefaultBlockProducer();
-
         private final static class DefaultBlockProducer extends BlockProducer {
             @Override
             public boolean useTearing() {
@@ -286,16 +284,23 @@ aspect BLT {
                 return "D";
             }
         }
-
+        
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT>
+        T computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
+                boolean handleHomotopy, boolean mergePre, Collection<? extends SCCBlock<E, V>> components) {
+            blt = computeInnerBLT(options, producer, blt, inInitial, handleHomotopy, mergePre, components);
+            blt.setLabels();
+            return blt;
+        }
+    
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT>
         T computeInnerBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
                 boolean handleHomotopy, boolean mergePre, Collection<? extends SCCBlock<E, V>> components) {
-
             Set<SCCBlock<E,V>> homotopyComponents = Collections.emptySet();
             if (inInitial && handleHomotopy) {
-                logBLTVerbose(options, "Initial system contains homotopy, computing homotopy block components...");
+                ASTNode.log.verbose("Initial system contains homotopy, computing homotopy block components...");
                 homotopyComponents = computeHomotopyComponents(components);
-                logBLTVerbose(options, "... block components computed: %s", homotopyComponents);
+                ASTNode.log.verbose("... block components computed: %s", homotopyComponents);
             }
             if (!inInitial && mergePre) {
                 blt = computeBLTWithPreMerge(options, producer, blt, components);
@@ -315,6 +320,8 @@ aspect BLT {
             return blt;
         }
 
+        
+        
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
         Set<SCCBlock<E, V>> computeHomotopyComponents(Collection<? extends SCCBlock<E, V>> components) {
             Set<E> eqsInHomotopyComponent = new HashSet<E>();
@@ -341,26 +348,8 @@ aspect BLT {
         }
         
         
-    }
-
-    public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT> T 
-            EquationBlockFactory.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer,
-            T blt, boolean inInitial, boolean handleHomotopy,
-            boolean mergePre, Collection<? extends SCCBlock<E, V>> components) {
-
-        blt = computeInnerBLT(options, producer, blt, inInitial, handleHomotopy, mergePre, components);
-        blt.setLabels();
-        return blt;
-    }
-
-    private static void EquationBlockFactory.logBLTDebug(OptionRegistry options, Object... objects) {
-        ASTNode.log.debug(objects);
-    }
-
-    private static void EquationBlockFactory.logBLTVerbose(OptionRegistry options, Object... objects) {
-        ASTNode.log.verbose(objects);
-    }
-
+	}
+	
 	/**
 	 * Create a simple equation block from a single equation. 
 	 */
@@ -483,15 +472,15 @@ aspect BLT {
         
         BLT homotopyBLT = computeBLT(options, producer, new BLT(), true, false, false, components);
         HomotopySubBlock homotopySubBlock = new HomotopySubBlock(producer, mergedComponent.computeBlockDependency(), homotopyBLT);
-        logBLTDebug(options, options, "Homotopy sub block:");
-        logBLTDebug(options, homotopySubBlock);
+        ASTNode.log.debug("Homotopy sub block:");
+        ASTNode.log.debug(homotopySubBlock);
         
-        BiPGraph graph = new BiPGraph(mergedComponent.getMembers(), true, options);
+        BiPGraph graph = new BiPGraph(mergedComponent.getMembers(), true);
         graph.setAsHomotopySimplified();
         graph.maximumMatching(true);
         BLT simplifiedBLT = graph.computeBLT(options, producer, new BLT(), false);
-        logBLTDebug(options, "Simplified BLT:");
-        logBLTDebug(options, simplifiedBLT);
+        ASTNode.log.debug("Simplified BLT:");
+        ASTNode.log.debug(simplifiedBLT);
         
         return new HomotopyBlock(producer, mergedComponent.computeBlockDependency(), homotopySubBlock, simplifiedBLT);
     }
@@ -526,17 +515,22 @@ aspect BLT {
         }
         
     }
-
+    
+    
+    
     private boolean AbstractBiPGraph.insideHomotopySimplified = false;
-
+    
     public void AbstractBiPGraph.setAsHomotopySimplified() {
         insideHomotopySimplified = true;
         removeHomotopyActualIncidences();
     }
-
+    
     public boolean AbstractBiPGraph.insideHomotopySimplified() {
         return insideHomotopySimplified;
     }
+    
+    
+    
 
     public class BLT extends ArrayList<AbstractEquationBlock> {
         
@@ -3323,19 +3317,19 @@ aspect AutomaticTearing {
             @Override
             public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> TornEquationBlock tear(SCCBlock<E, V> block, BlockProducer producer, OptionRegistry options, boolean isInitial) {
                 TornEquationBlock teb = new TornEquationBlock(producer, block.computeBlockDependency());
-                tear(options, block, teb, isInitial);
+                tear(block, teb, isInitial);
                 return teb;
             }
             
-            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(OptionRegistry options, SCCBlock<E, V> block, TornEquationBlock eb, boolean isInitial) {
-                SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial, options);
+            private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb, boolean isInitial) {
+                SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial);
                 if (isInitial)
                     g.setAsInitialSystem();
                 
-                logBLTVerbose(options, "Starting automatic tearing");
-                logBLTVerbose(options, g);
-                logBLTVerbose(options, "Initial matching");
-                logBLTVerbose(options, g.printMatchingObj());
+                ASTNode.log.verbose("Starting automatic tearing");
+                ASTNode.log.verbose(g);
+                ASTNode.log.verbose("Initial matching");
+                ASTNode.log.verbose(g.printMatchingObj());
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
                 g.greedyMatching();
@@ -3351,8 +3345,8 @@ aspect AutomaticTearing {
                     SUME.add(eqn);
                 }
 
-                logBLTVerbose(options, "Matching after initial manipulation");
-                logBLTVerbose(options, g.printMatchingObj());
+                ASTNode.log.verbose("Matching after initial manipulation");
+                ASTNode.log.verbose(g.printMatchingObj());
                 // Now we have a Maximum Solvable Matching
 
                 if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
@@ -3361,7 +3355,7 @@ aspect AutomaticTearing {
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
-                        tearInner(options, g, eb);
+                        tearInner(g, eb);
                     }
                 } else {
                     // Else: Start out by trying to insert residuals that contain
@@ -3406,7 +3400,7 @@ aspect AutomaticTearing {
                             }
                         } else {
                             // Build Inner Graph and add info about iteration variables
-                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner.getMembers(), isInitial, options);
+                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner.getMembers(), isInitial);
                             // Build block-graph and look for interchangeable variables in SUMV
                             java.util.List<SolvingEq> eqs = new ArrayList<SolvingEq>();
                             boolean graphHasTear = false;
@@ -3462,17 +3456,15 @@ aspect AutomaticTearing {
                                         if (tearBlock != null && tearBlock.isSolvable()) {
                                             eb.addSolvedBlock(tearBlock);
                                         } else {
-                                            tearInner(options, new SolvingBiPGraph(bInnerInner.getMembers(), isInitial,
-                                                    options), eb);
+                                            tearInner(new SolvingBiPGraph(bInnerInner.getMembers(), isInitial), eb);
                                         }
                                     }
                                 } else {
-                                    tearInner(options,
-                                            new SolvingBiPGraph(bInner.getMembers(), isInitial, options), eb);
+                                    tearInner(new SolvingBiPGraph(bInner.getMembers(), isInitial), eb);
                                 }
                             } else {
                                 // Reuse the already constructed graph
-                                tearInner(options, gInner, eb);
+                                tearInner(gInner, eb);
                             }
                         }
                     }
@@ -3482,13 +3474,13 @@ aspect AutomaticTearing {
                         tearings.add(v);
                     }
                     for (int i = 0; i < tearings.size(); i++) {
-                        logBLTVerbose(options, "Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
+                        ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
                         eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i), AUTOMATIC_TEARING_BLOCK_PRODUCER));
                     }
                 }
             }
             
-            private static void tearInner(OptionRegistry options, SolvingBiPGraph g, TornEquationBlock eb){
+            private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
                 SolvingVar bestIter = null;
                 for (SolvingEq e : g.getEquations()) {
                     if (e.isMeta()) {
@@ -3501,7 +3493,7 @@ aspect AutomaticTearing {
                 SolvingEq res = bestIter.getMatching();
                 bestIter.isIter(true);
                 res.isRes(true);
-                logBLTVerbose(options, "Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
+                ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
                 Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan(false);
                 for (SCCBlock<SolvingEq, SolvingVar> block : blt) {
@@ -3509,7 +3501,7 @@ aspect AutomaticTearing {
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
-                        tearInner(options, new SolvingBiPGraph(block.getMembers(), g.isInitialSystem(), options), eb);
+                        tearInner(new SolvingBiPGraph(block.getMembers(), g.isInitialSystem()), eb);
                     }
                 }
             }

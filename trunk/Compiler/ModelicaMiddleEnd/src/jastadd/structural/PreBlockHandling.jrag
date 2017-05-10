@@ -48,7 +48,7 @@ aspect PreBlockHandling {
                         }
                         aggr.addPredecessors(subBlock.getPredecessors());
                     }
-                    BiPGraph g = new BiPGraph(aggr.getMembers(), false, options);
+                    BiPGraph g = new BiPGraph(aggr.getMembers(), false);
                     Collection<SCCBlock<Eq, Var>> sortedBlocks = g.tarjan(options, false);
                     blt.add(new PrePropagationEquationBlock(producer, aggr.computeBlockDependency(), computeInnerBLT(options, producer, new BLT(), false, false, false, sortedBlocks)));
                 }

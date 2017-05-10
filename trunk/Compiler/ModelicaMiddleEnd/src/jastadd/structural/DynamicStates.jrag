@@ -292,8 +292,8 @@ aspect DynamicStateSelect{
         
         Map<IndexReductionVar, IndexReductionEq> tempAssignmentMap = computeTempAssignmentMap();
         
-        logIndexVerbose(printCoefficientsObj(coefficientsMatrix, false));
-        logIndexVerbose(printCoefficientsObj(coefficientsMatrix, true));
+        ASTNode.log.verbose(printCoefficientsObj(coefficientsMatrix, false));
+        ASTNode.log.verbose(printCoefficientsObj(coefficientsMatrix, true));
         Set<DSSet> dsSets = new LinkedHashSet<DSSet>();
         Map<IndexReductionEq, DSSet> dsLookup = new HashMap<IndexReductionEq, DSSet>();
         Queue<IndexReductionEq> worklist = new ArrayDeque<IndexReductionEq>();
@@ -309,14 +309,14 @@ aspect DynamicStateSelect{
         }
         while (!worklist.isEmpty()) {
             IndexReductionEq eqn = worklist.poll();
-            logIndexDebug("Looking for DS in %s", eqn);
+            ASTNode.log.debug("Looking for DS in %s", eqn);
             Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
             if (coefficients == null)
                 continue;
             if (!dynamicSetCandidate(eqn, eqn.getMatching(), coefficients))
                 continue;
             lightReset();
-            logIndexDebug("  SAP1");
+            ASTNode.log.debug("  SAP1");
             if (sap1.augmentingPath(eqn)) {
                 continue;
             }
@@ -324,18 +324,18 @@ aspect DynamicStateSelect{
             if (set == null)
                 set = new DSSet();
             Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
-            logIndexDebug("    Path not found, set %d", set.id);
+            ASTNode.log.debug("    Path not found, set %d", set.id);
             for (IndexReductionVar var : eqn.getVariablesSortedSAP2(tempAssignmentMap)) {
                 if (!dynamicSetCandidate(eqn, var, coefficients))
                     continue;
-                logIndexDebug("  Checking ncc variable %s", var);
+                ASTNode.log.debug("  Checking ncc variable %s", var);
                 if (var.getMatching() == eqn) {
                     set.vars.add(var);
-                    logIndexDebug("    adding %s to set %d", var, set.id);
+                    ASTNode.log.debug("    adding %s to set %d", var, set.id);
                 } else if (var.getMatching() == null) {
                     set.vars.add(var);
                     var.setMatching(eqn);
-                    logIndexDebug("    adding %s to set %d", var, set.id);
+                    ASTNode.log.debug("    adding %s to set %d", var, set.id);
                 } else {
                     IndexReductionEq tmpAssignEqn = tempAssignmentMap.get(var);
                     if (tmpAssignEqn != null) {
@@ -353,17 +353,17 @@ aspect DynamicStateSelect{
                     noVisit.addAll(set.vars);
                     noVisit.add(eqn.getMatching());
                     noVisit.add(var);
-                    logIndexDebug("    SAP2 %s", var.getMatching());
+                    ASTNode.log.debug("    SAP2 %s", var.getMatching());
                     Collection<IndexReductionEq> res = sap2.augmentingPath(var.getMatching(), noVisit);
                     if (res == sap2.trueValue()) {
-                        logIndexDebug("      Path found");
+                        ASTNode.log.debug("      Path found");
                         set.vars.add(var);
                         var.setMatching(eqn);
-                        logIndexDebug("      adding %s to set %d", var, set.id);
+                        ASTNode.log.debug("      adding %s to set %d", var, set.id);
                     } else {
-                        logIndexDebug("      Path not found");
+                        ASTNode.log.debug("      Path not found");
                         for (IndexReductionEq resEqn : res)
-                            logIndexDebug("      Adding %s to set.eqns", resEqn);
+                            ASTNode.log.debug("      Adding %s to set.eqns", resEqn);
                         otherEqns.addAll(res);
                     }
                 }
@@ -372,11 +372,11 @@ aspect DynamicStateSelect{
                 for (IndexReductionEq otherEqn : otherEqns) {
                     DSSet otherSet = dsLookup.remove(otherEqn);
                     if (otherSet != null) {
-                        logIndexDebug("  Merging with set %d from %s", otherSet.id, otherEqn);
+                        ASTNode.log.debug("  Merging with set %d from %s", otherSet.id, otherEqn);
                         dsSets.remove(otherSet);
                         for (IndexReductionVar memberVar : otherSet.vars) {
                             set.vars.add(memberVar);
-                            logIndexDebug("    adding %s to set %d", memberVar, set.id);
+                            ASTNode.log.debug("    adding %s to set %d", memberVar, set.id);
                         }
                         for (IndexReductionEq memberEq : otherSet.eqns) {
                             set.eqns.add(memberEq);
@@ -391,9 +391,9 @@ aspect DynamicStateSelect{
                 set.eqns.add(eqn);
                 dsLookup.put(eqn, set);
                 dsSets.add(set);
-                logIndexDebug("  Set added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
+                ASTNode.log.debug("  Set added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
             } else {
-                logIndexDebug("  Set not added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
+                ASTNode.log.debug("  Set not added, %d eqns and %d vars", set.eqns.size(), set.vars.size());
             }
         }
         
@@ -427,14 +427,14 @@ aspect DynamicStateSelect{
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
             if (set.eqns.size() > 8 || set.vars.size() > 8) {
-                logIndexVerbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
-                logIndexVerbose(set);
+                ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
+                ASTNode.log.verbose(set);
                 skipDynamicStates = true;
             }
         }
         
         if (skipDynamicStates) {
-            logIndexVerbose("Resetting matchings");
+            ASTNode.log.verbose("Resetting matchings");
             for (Map.Entry<IndexReductionVar, IndexReductionEq> entry : initialMatching.entrySet()) {
                 IndexReductionVar var = entry.getKey();
                 IndexReductionEq eqn = entry.getValue();
@@ -449,7 +449,7 @@ aspect DynamicStateSelect{
         Set<IndexReductionVar> vars = new HashSet<IndexReductionVar>();
         for (DSSet set : dsSets) {
             if (set.eqns.size() == set.vars.size()) {
-                logIndexDebug("Set %d not added, %d eqns and %d vars", set.id, set.eqns.size(), set.vars.size());
+                ASTNode.log.debug("Set %d not added, %d eqns and %d vars", set.id, set.eqns.size(), set.vars.size());
                 continue;
             } else if (set.eqns.size() > set.vars.size()) {
                 throw new UnsupportedOperationException("Something went wrong during dynamic state selection, dynamic state set " + set.id + " contains " + set.eqns.size() + " equations but only " + set.vars.size() + "variables! Please report this error!");
@@ -470,7 +470,7 @@ aspect DynamicStateSelect{
                 }
                 i++;
             }
-            logIndexVerbose(set);
+            ASTNode.log.verbose(set);
             result.addDSSet(set);
             vars.addAll(set.vars);
         }
@@ -651,7 +651,7 @@ aspect DynamicStateSelect{
             protected void match(IndexReductionEq eqn, IndexReductionVar var) {
                 IndexReductionVar previous = eqn.getMatching();
                 super.match(eqn, var);
-                logIndexDebug("      Rematch %s to %s (previous %s)", eqn, var, previous);
+                ASTNode.log.debug("      Rematch %s to %s (previous %s)", eqn, var, previous);
             }
         }
 
@@ -698,13 +698,13 @@ aspect DynamicStateSelect{
             protected void match(IndexReductionEq eqn, IndexReductionVar var) {
                 IndexReductionVar previous = eqn.getMatching();
                 super.match(eqn, var);
-                logIndexDebug("      Rematch %s to %s (previous %s)", eqn, var, previous);
+                ASTNode.log.debug("      Rematch %s to %s (previous %s)", eqn, var, previous);
                 Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
                 if (coefficients == null)
                     return;
                 Coefficient coff = coefficients.get(var);
                 if (coff != null && coff.state == COEFFICIENT_STATE.CONTINUOUS) {
-                    logIndexDebug("      Adding %s to worklist", eqn);
+                    ASTNode.log.debug("      Adding %s to worklist", eqn);
                     worklist.add(eqn);
                 }
             }
@@ -810,8 +810,8 @@ aspect DynamicStateSelect{
                 for (int j = 0; j < combination.length; j++) {
                     sb.append(combination[j].name() + " ");
                 }
-                logBLTDebug(options, "Generating BLT for: %s", sb);
-                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars, options);
+                ASTNode.log.debug("Generating BLT for: %s", sb);
+                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars);
                 for (FVariable var : combination)
                     graph.addVariable(var);
                 for (Eq eqn : graph.getEquations()) {
@@ -820,7 +820,7 @@ aspect DynamicStateSelect{
                         if (vars.contains(var))
                             graph.addEdge(eqn, graph.getVariable(var.name()));
                 }
-                logBLTDebug(options, graph);
+                ASTNode.log.debug(graph);
                 graph.maximumMatching(true);
                 Set<FVariable> algebraics = new LinkedHashSet<FVariable>(Arrays.asList(combination));
                 Collection<FVariable> states = new ArrayList<FVariable>();
@@ -831,10 +831,10 @@ aspect DynamicStateSelect{
                 if (graph.isComplete()) {
                     blt = graph.computeBLT(options, producer, blt, false);
                 } else {
-                    logBLTVerbose(options, "  This combination does not have a valid solution!");
-                    logBLTDebug(options,graph.printMatchingObj());
+                    ASTNode.log.verbose("  This combination does not have a valid solution!");
+                    ASTNode.log.debug(graph.printMatchingObj());
                 }
-                logBLTDebug(options,blt);
+                ASTNode.log.debug(blt);
                 blts[i] = blt;
             }
             return new DynamicStateBlock(producer, component.computeBlockDependency(), blts, setVarMap.keySet());
