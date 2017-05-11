@@ -25,7 +25,7 @@ public class ChapterElement extends DocumentElement {
      * Regular expression describing which characters to escape in file names.
      */
     private static final String ESCAPE_REGEX =
-            "[^0-9a-zA-ZåäöÅÄÖ]";
+            "[^0-9a-zA-Z]";
 
     /**
      * String to replace characters escaped with {@link #ESCAPE_REGEX}.
