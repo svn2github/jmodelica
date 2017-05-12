@@ -19393,8 +19393,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_REL_GT);
     }
-    _der_x_2 = (COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.2), AD_WRAP_LITERAL(0)));
-    _y_1 = _der_x_2;
+    _y_1 = (COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.2), AD_WRAP_LITERAL(0)));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -19408,8 +19407,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_REL_GT);
     }
-    _der_x_2 = (COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.2), AD_WRAP_LITERAL(0)));
-    _y_1 = _der_x_2;
+    _y_1 = (COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.2), AD_WRAP_LITERAL(0)));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -22112,7 +22110,7 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         ds_var_value_refs[0] = 5; /* a2 */
         ds_var_value_refs[1] = 4; /* a1 */
         ds_state_value_refs[0] = 2; /* _ds.1.s1 */
-        ds_algebraic_value_refs[0] = 18; /* _ds.1.a1 */
+        ds_algebraic_value_refs[0] = 17; /* _ds.1.a1 */
         jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -22125,7 +22123,7 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
         ds_var_value_refs[0] = 6; /* a3 */
         ds_var_value_refs[1] = 7; /* a4 */
         ds_state_value_refs[0] = 3; /* _ds.2.s1 */
-        ds_algebraic_value_refs[0] = 19; /* _ds.2.a1 */
+        ds_algebraic_value_refs[0] = 18; /* _ds.2.a1 */
         jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_1);
         free(ds_var_value_refs);
         free(ds_state_value_refs);
@@ -22147,49 +22145,47 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         jmi_dynamic_state_update_states(jmi, 1);
     }
     if (jmi_dynamic_state_check_is_state(jmi, 0, 4) && jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
-        _a1_0 = __ds_1_s1_15;
-        _a4_3 = __ds_2_s1_17;
+        _a1_0 = __ds_1_s1_14;
+        _a4_3 = __ds_2_s1_16;
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-        __ds_1_a1_14 = _a2_1;
-        __ds_2_a1_16 = _a3_2;
+        __ds_1_a1_13 = _a2_1;
+        __ds_2_a1_15 = _a3_2;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 4) && jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
-        _a1_0 = __ds_1_s1_15;
-        _a3_2 = __ds_2_s1_17;
+        _a1_0 = __ds_1_s1_14;
+        _a3_2 = __ds_2_s1_16;
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
-        __ds_1_a1_14 = _a2_1;
-        __ds_2_a1_16 = _a4_3;
+        __ds_1_a1_13 = _a2_1;
+        __ds_2_a1_15 = _a4_3;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 5) && jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
-        _a2_1 = __ds_1_s1_15;
-        _a4_3 = __ds_2_s1_17;
+        _a2_1 = __ds_1_s1_14;
+        _a4_3 = __ds_2_s1_16;
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[2]);
-        __ds_1_a1_14 = _a1_0;
-        __ds_2_a1_16 = _a3_2;
+        __ds_1_a1_13 = _a1_0;
+        __ds_2_a1_15 = _a3_2;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 5) && jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
-        _a2_1 = __ds_1_s1_15;
-        _a3_2 = __ds_2_s1_17;
+        _a2_1 = __ds_1_s1_14;
+        _a3_2 = __ds_2_s1_16;
         ef |= jmi_solve_block_residual(jmi->dae_block_residuals[3]);
-        __ds_1_a1_14 = _a1_0;
-        __ds_2_a1_16 = _a4_3;
+        __ds_1_a1_13 = _a1_0;
+        __ds_2_a1_15 = _a4_3;
     }
-    _der_a7_12 = 1.0;
-    _der_a5_9 = - _der_a7_12;
+    _der_a5_9 = -1.0;
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
     if (jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
-        tmp_1 = _der_a1_20;
+        tmp_1 = _der_a1_19;
     } else if (jmi_dynamic_state_check_is_state(jmi, 0, 5)) {
-        tmp_1 = _der_a2_22;
+        tmp_1 = _der_a2_21;
     }
-    _der__ds_1_s1_18 = tmp_1;
+    _der__ds_1_s1_17 = tmp_1;
     if (jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
-        tmp_2 = _der_a4_21;
+        tmp_2 = _der_a4_20;
     } else if (jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
-        tmp_2 = _der_a3_23;
+        tmp_2 = _der_a3_22;
     }
-    _der__ds_2_s1_19 = tmp_2;
+    _der__ds_2_s1_18 = tmp_2;
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
         end TwoDSSetSameBlock;
     end DynamicStates;

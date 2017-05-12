@@ -3176,20 +3176,16 @@ fclass FunctionInlining.TrivialInline11
  Real a3;
  Real a4;
  Real _der_a1;
- Real _der_a2;
  Real _der_a4;
- Real _der_der_a1;
  Real _der_der_a4;
 equation
  _der_a1 = a2;
- _der_a2 = a3;
  a4 = time;
  a4 = FunctionInlining.TrivialInline11.G(a1);
  _der_a4 = 1.0;
  _der_a4 = FunctionInlining.TrivialInline11.G(_der_a1);
- _der_der_a1 = _der_a2;
  _der_der_a4 = 0.0;
- _der_der_a4 = FunctionInlining.TrivialInline11.G(_der_der_a1);
+ _der_der_a4 = FunctionInlining.TrivialInline11.G(a3);
 
 public
  function FunctionInlining.TrivialInline11.G

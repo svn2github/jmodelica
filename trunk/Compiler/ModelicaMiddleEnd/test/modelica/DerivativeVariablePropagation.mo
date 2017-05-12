@@ -30,11 +30,9 @@ package DerivativeVariablePropagation
 fclass DerivativeVariablePropagation.RewriteTest1
  Real a;
  Real b;
- Real _der_b;
 equation
- a = - _der_b;
  b = time;
- _der_b = 1.0;
+ - a = 1.0;
 end DerivativeVariablePropagation.RewriteTest1;
 ")})));
     end RewriteTest1;
