@@ -410,7 +410,7 @@
                     <then>
                         <propertyregex property="compile-patcher.javafile" input="${@{module}.patch}" defaultValue="${@{module}.patch}" regexp="\." replace="/" override="true" global="true" />
                         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" 
-                                fork="true" debug="false" destdir="${class_output}" includeantruntime="false">
+                                fork="true" encoding="UTF8" debug="false" destdir="${class_output}" includeantruntime="false">
                             <src path="${@{module}.java_path}" />
                             <include name="${compile-patcher.javafile}.java" />
                         </javac>
@@ -434,6 +434,7 @@
                                 source="${java_version}" 
                                 target="${java_version}" 
                                 fork="true" 
+                                encoding="UTF8" 
                                 debug="false" 
                                 destdir="${class_output}" 
                                 includeantruntime="false"
@@ -457,6 +458,7 @@
             source="${java_version}" 
             target="${java_version}" 
             fork="true" 
+            encoding="UTF8" 
             debug="false" 
             destdir="${class_output}" 
             includeantruntime="false"
@@ -917,7 +919,7 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     <!-- Build a jar file from generated tests. -->
     <target name="build-test" depends="build">
         <mkdir dir="${test_class_output}" />
-        <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" fork="true" debug="false" 
+        <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" fork="true" encoding="UTF8" debug="false" 
                 destdir="${test_class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
                 srcdir="${test_package_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
