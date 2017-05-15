@@ -127,8 +127,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_3_2 = x[0];
         }
-        _x_2_1 = (- _b_3_5 + _x_3_2) / -2;
-        _x_1_0 = (- _b_1_3 + _x_2_1) / -2;
+        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2),-2,\"(- b[3] + x[3]) / -2\");
+        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1),-2,\"(- b[1] + x[2]) / -2\");
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _x_1_0 + 2 * _x_3_2 - (_b_2_4);
         }

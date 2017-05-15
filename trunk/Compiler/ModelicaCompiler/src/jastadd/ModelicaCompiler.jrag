@@ -3083,7 +3083,9 @@ public class GccCompilerDelegator extends CCompilerDelegator {
      */
     protected void addTargetPlatformMakeVars(Map<String,String> vars, Set<String> ext_lib_dirs, String platform) {
         vars.put("PLATFORM", platform);
-        StringOperation libOp = new QuoteOperation("-L");
+        StringOperation libOp = new ChainedOperations(
+                new PlatformDirOperation(platform),
+                new QuoteOperation("-L"));
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }

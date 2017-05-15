@@ -485,13 +485,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDotDivExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (getRight().isLiteralExp() && !getRight().isLiteralZero()) {
-            p.print(getLeft(), str, indent);
-            str.print(op_C());
-            p.print(getRight(), str, indent);
-        } else {
-            prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
-        }
+        prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
     }
 
     /*=========================================================================

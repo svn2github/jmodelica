@@ -622,7 +622,7 @@ package FSubscriptedExp
     /********* Other variables *********/
     v_0 = floor(_time);
     v_4 = floor(_time);
-    v_3 = v_4 / AD_WRAP_LITERAL(2);
+    v_3 = jmi_divide_equation(jmi, v_4,AD_WRAP_LITERAL(2),\"integer(time) / 2\");
     v_2 = floor(v_3);
     v_1 = v_2 * AD_WRAP_LITERAL(2);
     _i_0 = (v_0 - v_1);
@@ -907,7 +907,7 @@ equation
     jmi_real_t v_10;
     jmi_real_t d_10;
     if (_sw(0)) {
-        v_3 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+        v_3 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
         if (COND_EXP_LE(_time, v_3, JMI_TRUE, JMI_FALSE)) {
             v_4 = sin(_time);
             d_4 = (*dz)[jmi->offs_t] * cos(_time);
@@ -918,7 +918,7 @@ equation
                 v_5 = AD_WRAP_LITERAL(1);
                 d_5 = AD_WRAP_LITERAL(0);
             } else {
-                v_8 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+                v_8 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
                 v_7 = _time - v_8;
                 d_7 = (*dz)[jmi->offs_t] - AD_WRAP_LITERAL(0);
                 v_6 = sin(v_7);
@@ -984,7 +984,7 @@ equation
             v_2 = AD_WRAP_LITERAL(1);
             d_2 = AD_WRAP_LITERAL(0);
         } else {
-            v_5 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+            v_5 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
             v_4 = _time - v_5;
             d_4 = (*dz)[jmi->offs_t] - AD_WRAP_LITERAL(0);
             v_3 = sin(v_4);
@@ -1041,7 +1041,7 @@ equation
     jmi_real_t d_11;
     v_1 = _sw(0);
     if (LOG_EXP_OR(v_1, _b_2)) {
-        v_4 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+        v_4 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
         if (COND_EXP_LE(_time, v_4, JMI_TRUE, JMI_FALSE)) {
             v_5 = sin(_time);
             d_5 = (*dz)[jmi->offs_t] * cos(_time);
@@ -1052,7 +1052,7 @@ equation
                 v_6 = AD_WRAP_LITERAL(1);
                 d_6 = AD_WRAP_LITERAL(0);
             } else {
-                v_9 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+                v_9 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
                 v_8 = _time - v_9;
                 d_8 = (*dz)[jmi->offs_t] - AD_WRAP_LITERAL(0);
                 v_7 = sin(v_8);
@@ -2150,10 +2150,10 @@ void func_CADCodeGenTests_CADFunction10_F1_der_AD0(jmi_real_t x_var_v, jmi_real_
     jmi_array_ref_1(m_der_a, 8) = AD_WRAP_LITERAL(0);
     y_var_v = 0;
     y_der_v = AD_WRAP_LITERAL(0);
-    v_0 = 8 / 2;
+    v_0 = jmi_divide_function(\"CADCodeGenTests.CADFunction10.F1\", 8,2,\"8 / 2\");
     i_0ie = v_0 + 1 / 2.0;
     for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
-        v_1 = 8 / 2;
+        v_1 = jmi_divide_function(\"CADCodeGenTests.CADFunction10.F1\", 8,2,\"8 / 2\");
         j_1ie = v_1 + 1 / 2.0;
         for (j_1i = 1; j_1i < j_1ie; j_1i += 1) {
             if (COND_EXP_GT(jmi_array_val_1(m_var_a, floor(i_0i + j_1i * AD_WRAP_LITERAL(2))), x_var_v, JMI_TRUE, JMI_FALSE)) {
@@ -4098,7 +4098,7 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     d_47 = d_48 + d_56;
     v_29 = (v_30 + v_47);
     d_29 = d_30 + d_47;
-    _w_ode_1_1_1 = v_29 / 20;
+    _w_ode_1_1_1 = jmi_divide_equation(jmi, v_29,20,\"(- 1.3 * w_ode_1_2 + (- sin(w_ode_1_2)) + (- -2.01 * x_1) + (- sin(x_1) + (- -1.18 * x_1) + (- 1.45 * x_1)) + (- 1.09 * ur_2 + (- sin(ur_2)) + (- -1.24 * ur_2) + (- 2.16 * ur_3 + (- sin(ur_3))))) / 20\");
     (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = (d_29 * 20 - v_29 * AD_WRAP_LITERAL(0)) / (20 * 20);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         v_64 = _w_ode_1_2_2 * 20;
@@ -5698,7 +5698,7 @@ equation
         d_2 = (*dz)[jmi->offs_t] * _time + _time * (*dz)[jmi->offs_t];
         v_1 = v_2 * _time;
         d_1 = d_2 * _time + v_2 * (*dz)[jmi->offs_t];
-        v_0 = v_1 / AD_WRAP_LITERAL(2);
+        v_0 = jmi_divide_equation(jmi, v_1,AD_WRAP_LITERAL(2),\"time * time * time / 2\");
         d_0 = (d_1 * AD_WRAP_LITERAL(2) - v_1 * AD_WRAP_LITERAL(0)) / (AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
         func_CADCodeGenTests_dummyFunc_der_AD0(v_0, d_0, &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
         (*res)[0] = tmp_var_0 - (_x_0);
