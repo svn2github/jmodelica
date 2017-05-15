@@ -571,7 +571,7 @@ aspect AliasVariables {
 				if (isNegated())
 					buf.append('-');
 				FVariable fv = getFVariable();
-				buf.append(fv.displayName());
+				buf.append(fv.name());
 				if (withStart && fv.startAttributeSet()) {
 					buf.append("(start=");
 					CValue start;
@@ -959,10 +959,6 @@ aspect AliasVariables {
         // Distance to user
         score *= 1000;
         score += 999 - Math.min(getFQName().numDots(), 999);
-        
-        // Number of differentiation steps in dummy derivative
-        score *= 10;
-        score += 9 - Math.min(order(), 9);
         
         return score;
 	}

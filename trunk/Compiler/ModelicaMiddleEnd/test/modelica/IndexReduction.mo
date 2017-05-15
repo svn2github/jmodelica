@@ -48,6 +48,7 @@ fclass IndexReduction.IndexReduction1a_PlanarPendulum
  Real lambda \"Lagrange multiplier\";
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -59,8 +60,9 @@ equation
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.IndexReduction1a_PlanarPendulum;
 
 ")})));
@@ -97,6 +99,7 @@ fclass IndexReduction.IndexReduction1b_PlanarPendulum
  Real lambda \"Lagrange multiplier\";
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -108,8 +111,9 @@ equation
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.IndexReduction1b_PlanarPendulum;
 
 ")})));
@@ -182,8 +186,14 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
  parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
  Real inertia1._der_phi;
+ Real inertia1._der_w;
  Real inertia2._der_phi;
+ Real inertia2._der_w;
+ Real inertia2._der_der_phi;
+ Real damper._der_der_phi_rel;
  Real idealGear._der_phi_a;
+ Real inertia1._der_der_phi;
+ Real idealGear._der_der_phi_a;
 protected
  parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
@@ -207,13 +217,15 @@ parameter equation
  idealGear.phi_support = torque.phi_support;
 equation
  inertia1.w = inertia1._der_phi;
- inertia1.J * inertia1.a = torque.tau + (- idealGear.flange_a.tau);
+ inertia1.a = inertia1._der_w;
+ inertia1.J * inertia1._der_w = torque.tau + (- idealGear.flange_a.tau);
  idealGear.phi_a = inertia1.phi - torque.phi_support;
  - damper.phi_rel = inertia2.phi - torque.phi_support;
  idealGear.phi_a = idealGear.ratio * (- damper.phi_rel);
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
- inertia2.J * inertia2.a = - idealGear.flange_b.tau + inertia2.flange_b.tau;
+ inertia2.a = inertia2._der_w;
+ inertia2.J * inertia2._der_w = - idealGear.flange_b.tau + inertia2.flange_b.tau;
  spring.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
  spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = der(inertia3.phi);
@@ -228,10 +240,14 @@ equation
  damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0.0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  - der(damper.phi_rel) = inertia2._der_phi;
- der(damper.w_rel) = - inertia2.a;
+ inertia2._der_w = inertia2._der_der_phi;
+ der(damper.w_rel) = damper._der_der_phi_rel;
+ - damper._der_der_phi_rel = inertia2._der_der_phi;
  idealGear._der_phi_a = inertia1._der_phi;
  idealGear._der_phi_a = idealGear.ratio * (- der(damper.phi_rel));
- inertia1.a = idealGear.ratio * inertia2.a;
+ inertia1._der_w = inertia1._der_der_phi;
+ idealGear._der_der_phi_a = inertia1._der_der_phi;
+ idealGear._der_der_phi_a = idealGear.ratio * (- damper._der_der_phi_rel);
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -473,8 +489,8 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real _der_x1[2];
  Real temp_6;
  Real temp_7;
- Real temp_10;
- Real temp_11;
+ Real _der_temp_6;
+ Real _der_temp_7;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
@@ -484,9 +500,9 @@ equation
  ({temp_6, temp_7}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
  - x1[1] = temp_6;
  - x1[2] = temp_7;
- ({temp_10, temp_11}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
- - _der_x1[1] = temp_10;
- - _der_x1[2] = temp_11;
+ ({_der_temp_6, _der_temp_7}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - _der_x1[1] = _der_temp_6;
+ - _der_x1[2] = _der_temp_7;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f
@@ -572,7 +588,7 @@ fclass IndexReduction.IndexReduction28_Record
  Real temp_6;
  Real temp_7;
  Real _der_temp_6;
- Real temp_9;
+ Real _der_temp_7;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
@@ -582,9 +598,9 @@ equation
  (IndexReduction.IndexReduction28_Record.R({temp_6, temp_7})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
  - x1.a[1] = temp_6;
  - x1.a[2] = temp_7;
- (IndexReduction.IndexReduction28_Record.R({_der_temp_6, temp_9})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
+ (IndexReduction.IndexReduction28_Record.R({_der_temp_6, _der_temp_7})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
  - der(x1.a[1]) = _der_temp_6;
- - x1._der_a[2] = temp_9;
+ - x1._der_a[2] = _der_temp_7;
 
 public
  function IndexReduction.IndexReduction28_Record.f
@@ -653,6 +669,7 @@ fclass IndexReduction.IndexReduction30_PlanarPendulum_StatePrefer
  Real _der_y;
  Real _der_vy;
  Real _der_der_x;
+ Real _der_der_y;
 initial equation 
  x = 0.0;
  vx = 0.0;
@@ -664,7 +681,8 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * _der_y = 0.0;
  _der_der_x = der(vx);
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_vy + 2 * _der_y * _der_y) = 0.0;
+ _der_der_y = _der_vy;
+ 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -706,6 +724,7 @@ fclass IndexReduction.IndexReduction31_PlanarPendulum_StateAlways
  Real _der_y;
  Real _der_vy;
  Real _der_der_x;
+ Real _der_der_y;
 initial equation 
  x = 0.0;
  vx = 0.0;
@@ -717,7 +736,8 @@ equation
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * _der_y = 0.0;
  _der_der_x = der(vx);
- 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_vy + 2 * _der_y * _der_y) = 0.0;
+ _der_der_y = _der_vy;
+ 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -757,6 +777,7 @@ fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferAlways
  Real lambda \"Lagrange multiplier\";
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -768,8 +789,9 @@ equation
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -809,6 +831,7 @@ fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever
  Real lambda \"Lagrange multiplier\";
  Real _der_y;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  x = 0.0;
@@ -820,8 +843,9 @@ equation
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * _der_y = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ 2 * x * _der_der_x + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -860,6 +884,7 @@ fclass IndexReduction.IndexReduction32_PlanarPendulum_StateAvoidNever
  Real lambda \"Lagrange multiplier\";
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -871,8 +896,9 @@ equation
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -909,6 +935,8 @@ fclass IndexReduction.IndexReduction50
  Real c1_a;
  Real c2_w(stateSelect = c2_ss);
  Real c2_a;
+ Real _der_c2_w;
+ Real _der_der_c1_phi;
 initial equation 
  c1_phi = 0.0;
  c1_w = 0.0;
@@ -916,8 +944,10 @@ equation
  c1_w = der(c1_phi);
  c1_a = der(c1_w);
  c2_w = der(c1_phi);
- c2_a * p = 0;
- der(c1_w) = c2_a;
+ c2_a = _der_c2_w;
+ _der_c2_w * p = 0;
+ der(c1_w) = _der_der_c1_phi;
+ _der_c2_w = _der_der_c1_phi;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -959,6 +989,8 @@ fclass IndexReduction.IndexReduction51
  Real c2_a;
  Real x(start = 2);
  constant Real y = 0;
+ Real _der_c2_w;
+ Real _der_der_x;
 initial equation 
  x = 2;
  c1_w = 0.0;
@@ -966,8 +998,10 @@ equation
  c1_w = der(x);
  c1_a = der(c1_w);
  c2_w = der(x);
- c2_a * p = 0;
- der(c1_w) = c2_a;
+ c2_a = _der_c2_w;
+ _der_c2_w * p = 0;
+ der(c1_w) = _der_der_x;
+ _der_c2_w = _der_der_x;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1027,6 +1061,7 @@ fclass IndexReduction.IndexReduction52
  Real temp_4;
  Real _der_temp_1;
  Real _der_temp_4;
+ Real _der_der_temp_1;
  Real _der_der_temp_4;
 initial equation 
  dy = 0.0;
@@ -1049,8 +1084,9 @@ equation
  cos(_der_x) * _der_der_x = _der_dx;
  - sin(_der_y) * _der_der_y = der(dy);
  a * _der_der_b + _der_a * der(b) + (_der_a * der(b) + _der_der_a * b) = 0;
- _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4);
- _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_x * temp_4) + _der_der_y;
+ _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4);
+ _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4) + _der_der_y;
+ _der_der_temp_1 = _der_der_x;
  _der_der_temp_4 = 0.0;
 end IndexReduction.IndexReduction52;
 ")})));
@@ -1266,19 +1302,25 @@ fclass IndexReduction.IndexReduction55
  Real b_v;
  Real v1;
  Real _der_a_s;
+ Real _der_a_v;
  Real _der_b_v;
  Real _der_v1;
+ Real _der_der_a_s;
+ Real _der_der_b_v;
  Real _der_der_v1;
 equation
  b_v = a_s - 3.14;
  a_v = _der_a_s;
+ a_a = _der_a_v;
  v1 = 42 * (b_v - 3.14);
  21 = v1 * b_v;
  _der_b_v = _der_a_s;
  _der_v1 = 42 * _der_b_v;
  0 = v1 * _der_b_v + _der_v1 * b_v;
- _der_der_v1 = 42 * a_a;
- 0 = v1 * a_a + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
+ _der_a_v = _der_der_a_s;
+ _der_der_b_v = _der_der_a_s;
+ _der_der_v1 = 42 * _der_der_b_v;
+ 0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1314,19 +1356,25 @@ fclass IndexReduction.IndexReduction56
  Real b_v;
  Real v1;
  Real _der_a_s;
+ Real _der_a_v;
  Real _der_b_v;
  Real _der_v1;
+ Real _der_der_a_s;
+ Real _der_der_b_v;
  Real _der_der_v1;
 equation
  b_v = a_s - 3.14;
  a_v = _der_a_s;
+ a_a = _der_a_v;
  v1 = 42 * (b_v - 3.14);
  21 = v1 * b_v;
  _der_b_v = _der_a_s;
  _der_v1 = 42 * _der_b_v;
  0 = v1 * _der_b_v + _der_v1 * b_v;
- _der_der_v1 = 42 * a_a;
- 0 = v1 * a_a + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
+ _der_a_v = _der_der_a_s;
+ _der_der_b_v = _der_der_a_s;
+ _der_der_v1 = 42 * _der_der_b_v;
+ 0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1384,6 +1432,8 @@ fclass IndexReduction.TemporaryVarStates1
  Real temp_7;
  Real temp_8;
  Real temp_9;
+ Real temp_22;
+ Real temp_23;
 initial equation 
  temp_6 = 0.0;
  temp_7 = 0.0;
@@ -1394,12 +1444,14 @@ equation
  temp_7 = A[2,1] * temp_8 + A[2,2] * temp_9;
  - x1[1] = temp_6;
  - x1[2] = temp_7;
- der(temp_6) = A[1,1] * _der_x2[1] + A[1,2] * _der_x2[2];
- der(temp_7) = A[2,1] * _der_x2[1] + A[2,2] * _der_x2[2];
+ der(temp_6) = A[1,1] * temp_22 + A[1,2] * temp_23;
+ der(temp_7) = A[2,1] * temp_22 + A[2,2] * temp_23;
  - _der_x1[1] = der(temp_6);
  - _der_x1[2] = der(temp_7);
  temp_8 = x2[1];
  temp_9 = x2[2];
+ temp_22 = _der_x2[1];
+ temp_23 = _der_x2[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1549,6 +1601,7 @@ fclass IndexReduction.AlgorithmVariability1
  discrete Integer i;
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -1568,8 +1621,9 @@ algorithm
  end if;
 equation
  2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
 
@@ -1679,14 +1733,16 @@ fclass IndexReduction.AlgorithmVariability4
  parameter Integer p = 1 /* 1 */;
  parameter Integer it[1] = 1 /* 1 */;
  parameter Real rt[1] = 2.0 /* 2.0 */;
+ Real _der_x;
 initial equation 
  pre(b) = false;
 equation
  x = time;
+ y = _der_x;
 algorithm
- b := y > 0;
+ b := _der_x > 0;
 equation
- y = 1.0;
+ _der_x = 1.0;
 end IndexReduction.AlgorithmVariability4;
 ")})));
   end AlgorithmVariability4;
@@ -1728,13 +1784,15 @@ fclass IndexReduction.Variability1
  Real a;
  Real _der_x;
  Real _der_y;
+ Real temp_3;
  Real temp_4;
 initial equation 
  a = 0.0;
 equation
  (x, p) = IndexReduction.Variability1.F1(y + a);
  _der_x = _der_y * 2;
- (_der_x, temp_4) = IndexReduction.Variability1.F1((y + a) * (_der_y + der(a)));
+ (temp_3, temp_4) = IndexReduction.Variability1.F1((y + a) * (_der_y + der(a)));
+ _der_x = temp_3;
  0.0 = temp_4;
 
 public
@@ -1789,12 +1847,14 @@ fclass IndexReduction.FunctionAttributeScalarization1
  Real x;
  Real der_y;
  Real y;
+ Real _der_y;
  Real _der_x;
 equation
  x * y = time;
  y + 42 = IndexReduction.FunctionAttributeScalarization1.F1(x, {x, - x});
- x * der_y + _der_x * y = 1.0;
- der_y = IndexReduction.FunctionAttributeScalarization1.F1_der(x, {x, - x}, _der_x);
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.FunctionAttributeScalarization1.F1_der(x, {x, - x}, _der_x);
 
 public
  function IndexReduction.FunctionAttributeScalarization1.F1
@@ -1863,12 +1923,14 @@ fclass IndexReduction.FunctionAttributeScalarization2
  Real x;
  Real der_y;
  Real y;
+ Real _der_y;
  Real _der_x;
 equation
  x * y = time;
  y + 42 = IndexReduction.FunctionAttributeScalarization2.F1(x, {x, - x});
- x * der_y + _der_x * y = 1.0;
- der_y = IndexReduction.FunctionAttributeScalarization2.F1_der(x, {x, - x}, _der_x);
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.FunctionAttributeScalarization2.F1_der(x, {x, - x}, _der_x);
 
 public
  function IndexReduction.FunctionAttributeScalarization2.F1
@@ -1946,13 +2008,16 @@ fclass IndexReduction.NonDiffArgs.Test1
  Real der_y;
  Real y;
  Real r;
+ Real _der_y;
  Real _der_x;
 equation
  x * y = time;
  r = IndexReduction.NonDiffArgs.Test1.F2(x);
  y + 42 = IndexReduction.NonDiffArgs.Test1.F1(x, r);
- x * der_y + _der_x * y = 1.0;
- der_y = IndexReduction.NonDiffArgs.Test1.F1_der(x, r, _der_x);
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.NonDiffArgs.Test1.F1_der(x, r, _der_x);
+
 public
  function IndexReduction.NonDiffArgs.Test1.F2
   input Real x;
@@ -2040,13 +2105,15 @@ fclass IndexReduction.NonDiffArgs.Test2
  Real der_y;
  Real y;
  Real r.a;
+ Real _der_y;
  Real _der_x;
 equation
  x * y = time;
  (IndexReduction.NonDiffArgs.Test2.R(r.a)) = IndexReduction.NonDiffArgs.Test2.F2(x);
  y + 42 = IndexReduction.NonDiffArgs.Test2.F1(x, IndexReduction.NonDiffArgs.Test2.R(r.a));
- x * der_y + _der_x * y = 1.0;
- der_y = IndexReduction.NonDiffArgs.Test2.F1_der(x, IndexReduction.NonDiffArgs.Test2.R(r.a), _der_x);
+ der_y = _der_y;
+ x * _der_y + _der_x * y = 1.0;
+ _der_y = IndexReduction.NonDiffArgs.Test2.F1_der(x, IndexReduction.NonDiffArgs.Test2.R(r.a), _der_x);
 
 public
  function IndexReduction.NonDiffArgs.Test2.F2
@@ -2240,7 +2307,12 @@ fclass IndexReduction.NonDiffArgs.Test4
  Real v3_1;
  Real a1;
  Real a3;
+ Real a3_1;
  Real _der_p1;
+ Real _der_v3;
+ Real _der_v3_1;
+ Real _der_der_p3;
+ Real _der_der_p1;
 initial equation 
  v1 = 0.0;
  p3 = 0.0;
@@ -2248,11 +2320,16 @@ equation
  _der_p1 = v1;
  der(v1) = a1;
  der(p3) = v3;
+ _der_v3 = a3;
  der(p3) = v3_1;
+ _der_v3_1 = a3_1;
  p1 = p3;
  der(v1) * _der_p1 = 1;
+ _der_der_p3 = _der_v3;
+ _der_der_p3 = _der_v3_1;
  _der_p1 = der(p3);
- a3 = der(v1);
+ _der_der_p1 = der(v1);
+ _der_der_p1 = _der_v3;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2313,7 +2390,11 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test1
  Real w;
  Real T;
  Real _der_s1;
+ Real _der_v1;
  Real _der_s2;
+ Real _der_v2;
+ Real _der_der_s1;
+ Real _der_der_s2;
  Real _der_w;
  Real temp_4;
  Real temp_7;
@@ -2321,7 +2402,9 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test1
  Real temp_17;
 equation
  v1 = _der_s1;
+ a1 = _der_v1;
  v2 = _der_s2;
+ a2 = _der_v2;
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(sin(time), w, T);
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(cos(time), w, T);
  w = _der_s2 + sin(time);
@@ -2329,12 +2412,14 @@ equation
  temp_7 = w;
  temp_4 = cos(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * temp_7, temp_7, T);
- _der_w = a2 + cos(time);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ _der_v1 = _der_der_s1;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
  temp_17 = w;
  temp_14 = - sin(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * temp_17, temp_17, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * temp_17) * temp_17, temp_17, T);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * temp_17) * temp_17, temp_17, T);
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1
@@ -2408,17 +2493,26 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test2
  Real w;
  Real T;
  Real _der_s1;
+ Real _der_v1;
  Real _der_s2;
+ Real _der_v2;
  Real _der_s3;
+ Real _der_v3;
+ Real _der_der_s1;
+ Real _der_der_s2;
  Real _der_w;
+ Real _der_der_s3;
  Real temp_4;
  Real temp_7;
  Real temp_14;
  Real temp_17;
 equation
  v1 = _der_s1;
+ a1 = _der_v1;
  v2 = _der_s2;
+ a2 = _der_v2;
  v3 = _der_s3;
+ a3 = _der_v3;
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(sin(time), w, T);
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(cos(time), sin(time), T);
  s1 + s2 + s3 = 0;
@@ -2427,14 +2521,17 @@ equation
  temp_7 = w;
  temp_4 = cos(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * temp_7, temp_7, T);
- _der_w = a2 + cos(time);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ _der_v1 = _der_der_s1;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
  temp_17 = sin(time);
  temp_14 = - sin(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_17, temp_17, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_17) * temp_17, temp_17, T);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_17) * temp_17, temp_17, T);
  _der_s1 + _der_s2 + _der_s3 = 0;
- a1 + a2 + a3 = 0;
+ _der_v3 = _der_der_s3;
+ _der_der_s1 + _der_der_s2 + _der_der_s3 = 0;
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1
@@ -2514,10 +2611,18 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test3
  Real w;
  Real T;
  Real _der_s1a;
+ Real _der_v1a;
  Real _der_s1b;
+ Real _der_v1b;
  Real _der_s2;
+ Real _der_v2;
  Real _der_s3;
+ Real _der_v3;
+ Real _der_der_s1a;
+ Real _der_der_s1b;
+ Real _der_der_s2;
  Real _der_w;
+ Real _der_der_s3;
  Real temp_4;
  Real temp_7;
  Real temp_14;
@@ -2526,9 +2631,13 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test3
  Real temp_27;
 equation
  v1a = _der_s1a;
+ a1a = _der_v1a;
  v1b = _der_s1b;
+ a1b = _der_v1b;
  v2 = _der_s2;
+ a2 = _der_v2;
  v3 = _der_s3;
+ a3 = _der_v3;
  s1a + s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(sin(time), w, T);
  s1a - s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(sin(time), cos(time), T);
  s1a + s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(cos(time), sin(time), T);
@@ -2538,18 +2647,22 @@ equation
  temp_7 = w;
  temp_4 = cos(time);
  _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * temp_7, temp_7, T);
- _der_w = a2 + cos(time);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ _der_v1a = _der_der_s1a;
+ _der_v1b = _der_der_s1b;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1a + _der_der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
  temp_17 = cos(time);
  temp_14 = cos(time);
  _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_17, temp_17, T);
- a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_17) * temp_17, temp_17, T);
+ _der_der_s1a - _der_der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_17) * temp_17, temp_17, T);
  temp_27 = sin(time);
  temp_24 = - sin(time);
  _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_27, temp_27, T);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_27) * temp_27, temp_27, T);
+ _der_der_s1a + _der_der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_27) * temp_27, temp_27, T);
  _der_s1a + _der_s1b + _der_s2 + _der_s3 = 0;
-a1a + a1b +a2 +a3 = 0;
+ _der_v3 = _der_der_s3;
+ _der_der_s1a + _der_der_s1b + _der_der_s2 + _der_der_s3 = 0;
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1
@@ -2709,13 +2822,15 @@ fclass IndexReduction.FunctionCallEquation1
  Real x[2];
  Real y;
  Real z;
+ Real _der_y;
  Real _der_x[1];
  Real _der_x[2];
 equation
  ({x[1], x[2]}) = IndexReduction.FunctionCallEquation1.f(time);
  y = x[1] + x[2];
+ z = _der_y;
  ({_der_x[1], _der_x[2]}) = IndexReduction.FunctionCallEquation1._der_f(time, 1.0);
- z = _der_x[1] + _der_x[2];
+ _der_y = _der_x[1] + _der_x[2];
 
 public
  function IndexReduction.FunctionCallEquation1.f
@@ -2774,9 +2889,13 @@ fclass IndexReduction.FunctionCallEquation2
  Real b;
  Real c;
  Real d;
+ Real _der_c;
+ Real _der_a;
 equation
+ _der_c = d;
  (a, c) = IndexReduction.FunctionCallEquation2.f(time);
- (b, d) = IndexReduction.FunctionCallEquation2._der_f(time, 1.0);
+ _der_a = b;
+ (_der_a, _der_c) = IndexReduction.FunctionCallEquation2._der_f(time, 1.0);
 
 public
  function IndexReduction.FunctionCallEquation2.f
@@ -2835,11 +2954,13 @@ fclass IndexReduction.FunctionCallEquation3
  Real b;
  Real c;
  Real d;
+ Real _der_a;
  Real _der_c;
 equation
  c = d + 1;
  (a, c) = IndexReduction.FunctionCallEquation3.f(time);
- (b, _der_c) = IndexReduction.FunctionCallEquation3._der_f(time, 1.0);
+ _der_a = b;
+ (_der_a, _der_c) = IndexReduction.FunctionCallEquation3._der_f(time, 1.0);
 
 public
  function IndexReduction.FunctionCallEquation3.f
@@ -3414,7 +3535,9 @@ fclass IndexReduction.DoubleDifferentiationWithSS1
  Real _der_x2;
  Real _der_vx;
  Real _der_x;
+ Real _der_der_x2;
  Real _der_der_y;
+ Real _der_der_x;
 initial equation 
  y = 0.0;
  vy = 0.0;
@@ -3427,8 +3550,10 @@ equation
  x = x2 + 1;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
  _der_x = _der_x2;
+ _der_der_x2 = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ _der_der_x = _der_der_x2;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -3559,9 +3684,11 @@ fclass IndexReduction.PartiallyPropagatedComposite1
  Real y[2];
  constant Real x1[1] = 0.0;
  Real x1[2];
+ Real _der_y[2];
 equation
  ({, y[2]}) = IndexReduction.PartiallyPropagatedComposite1.f(2, time);
- ({, x1[2]}) = IndexReduction.PartiallyPropagatedComposite1._der_f(2, time, 0, 1.0);
+ x1[2] = _der_y[2];
+ ({, _der_y[2]}) = IndexReduction.PartiallyPropagatedComposite1._der_f(2, time, 0, 1.0);
 
 public
  function IndexReduction.PartiallyPropagatedComposite1.f
@@ -3670,6 +3797,7 @@ fclass IndexReduction.FunctionInlining.Test1
  Real a;
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -3681,8 +3809,9 @@ equation
  der(vy) = a * y;
  x ^ 2 + y ^ 2 = IndexReduction.FunctionInlining.Test1.F(time);
  2 * x * _der_x + 2 * y * der(y) = 1.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  function IndexReduction.FunctionInlining.Test1.F
@@ -3750,7 +3879,9 @@ fclass IndexReduction.FunctionInlining.Test2
  Real _der_x[2];
  Real _der_vx[1];
  Real _der_vx[2];
+ Real _der_der_x[1];
  Real _der_der_y[1];
+ Real _der_der_x[2];
  Real _der_der_y[2];
  Real temp_1[1];
  Real temp_1[2];
@@ -3772,11 +3903,13 @@ equation
  x[1] .^ 2 .+ y[1] .^ 2 = temp_1[1];
  x[2] .^ 2 .+ y[2] .^ 2 = temp_1[2];
  2 .* x[1] .* _der_x[1] .+ 2 .* y[1] .* der(y[1]) = 1.0;
+ _der_der_x[1] = _der_vx[1];
  _der_der_y[1] = der(vy[1]);
- 2 .* x[1] .* _der_vx[1] .+ 2 .* _der_x[1] .* _der_x[1] .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* der(y[1]) .* der(y[1])) = 0.0;
+ 2 .* x[1] .* _der_der_x[1] .+ 2 .* _der_x[1] .* _der_x[1] .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* der(y[1]) .* der(y[1])) = 0.0;
  2 .* x[2] .* _der_x[2] .+ 2 .* y[2] .* der(y[2]) = -1.0;
+ _der_der_x[2] = _der_vx[2];
  _der_der_y[2] = der(vy[2]);
- 2 .* x[2] .* _der_vx[2] .+ 2 .* _der_x[2] .* _der_x[2] .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* der(y[2]) .* der(y[2])) = 0.0;
+ 2 .* x[2] .* _der_der_x[2] .+ 2 .* _der_x[2] .* _der_x[2] .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* der(y[2]) .* der(y[2])) = 0.0;
 
 public
  function IndexReduction.FunctionInlining.Test2.F
@@ -3842,6 +3975,7 @@ fclass IndexReduction.FunctionInlining.Test3
  Real _der_x;
  Real _der_vx;
  Real _der_b;
+ Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
 initial equation 
@@ -3856,8 +3990,9 @@ equation
  b = time;
  2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test3.F(_der_b);
  _der_b = 1.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = IndexReduction.FunctionInlining.Test3.F(_der_der_b);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = IndexReduction.FunctionInlining.Test3.F(_der_der_b);
  _der_der_b = 0.0;
 
 public
@@ -3930,8 +4065,10 @@ fclass IndexReduction.FunctionInlining.Test4
  Real _der_vx[1];
  Real _der_vx[2];
  Real _der_b;
+ Real _der_der_x[1];
  Real _der_der_y[1];
  Real _der_der_b;
+ Real _der_der_x[2];
  Real _der_der_y[2];
  Real temp_1[1];
  Real temp_1[2];
@@ -3960,13 +4097,15 @@ equation
  ({temp_4, temp_5}) = IndexReduction.FunctionInlining.Test4.F(_der_b);
  2 .* x[1] .* _der_x[1] .+ 2 .* y[1] .* der(y[1]) = temp_4;
  _der_b = 1.0;
+ _der_der_x[1] = _der_vx[1];
  _der_der_y[1] = der(vy[1]);
  ({temp_8, temp_9}) = IndexReduction.FunctionInlining.Test4.F(_der_der_b);
- 2 .* x[1] .* _der_vx[1] .+ 2 .* _der_x[1] .* _der_x[1] .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* der(y[1]) .* der(y[1])) = temp_8;
+ 2 .* x[1] .* _der_der_x[1] .+ 2 .* _der_x[1] .* _der_x[1] .+ (2 .* y[1] .* _der_der_y[1] .+ 2 .* der(y[1]) .* der(y[1])) = temp_8;
  _der_der_b = 0.0;
  2 .* x[2] .* _der_x[2] .+ 2 .* y[2] .* der(y[2]) = temp_5;
+ _der_der_x[2] = _der_vx[2];
  _der_der_y[2] = der(vy[2]);
- 2 .* x[2] .* _der_vx[2] .+ 2 .* _der_x[2] .* _der_x[2] .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* der(y[2]) .* der(y[2])) = temp_9;
+ 2 .* x[2] .* _der_der_x[2] .+ 2 .* _der_x[2] .* _der_x[2] .+ (2 .* y[2] .* _der_der_y[2] .+ 2 .* der(y[2]) .* der(y[2])) = temp_9;
 
 public
  function IndexReduction.FunctionInlining.Test4.F
@@ -4105,6 +4244,7 @@ fclass IndexReduction.FunctionInlining.Test6
  Real _der_x;
  Real _der_vx;
  Real _der_b;
+ Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
 initial equation 
@@ -4119,8 +4259,9 @@ equation
  b = time;
  2 * x * _der_x + 2 * y * der(y) = IndexReduction.FunctionInlining.Test6.F(_der_b, 2.0);
  _der_b = 1.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = IndexReduction.FunctionInlining.Test6.F(_der_der_b, 2.0);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = IndexReduction.FunctionInlining.Test6.F(_der_der_b, 2.0);
  _der_der_b = 0.0;
 
 public
@@ -4204,6 +4345,7 @@ fclass IndexReduction.FunctionInlining.Test7
  Real _der_x;
  Real _der_vx;
  Real _der_b;
+ Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
 initial equation 
@@ -4218,9 +4360,10 @@ equation
  b = IndexReduction.FunctionInlining.Test7.F(x, y);
  2 * x * _der_x + 2 * y * der(y) = _der_b;
  _der_b = IndexReduction.FunctionInlining.Test7.F_der(x, y, _der_x, der(y));
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- 2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = _der_der_b;
- _der_der_b = noEvent(if x > y then _der_vx else _der_der_y);
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = _der_der_b;
+ _der_der_b = noEvent(if x > y then _der_der_x else _der_der_y);
 
 public
  function IndexReduction.FunctionInlining.Test7.F
@@ -4303,9 +4446,11 @@ fclass IndexReduction.FunctionInlining.Test8
  Real _der_x;
  Real _der_vx;
  Real _der_b;
+ Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
  Real temp_5;
+ Real temp_10;
 initial equation 
  y = 0.0;
  vy = 0.0;
@@ -4319,8 +4464,10 @@ equation
  (temp_5, ) = IndexReduction.FunctionInlining.Test8.F(_der_x, der(y));
  _der_b = temp_5;
  _der_b = 1.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- (_der_der_b, ) = IndexReduction.FunctionInlining.Test8.F(_der_vx, _der_der_y);
+ (temp_10, ) = IndexReduction.FunctionInlining.Test8.F(_der_der_x, _der_der_y);
+ _der_der_b = temp_10;
  _der_der_b = 0.0;
 
 public
@@ -4387,6 +4534,7 @@ fclass IndexReduction.FunctionInlining.Test9
  parameter Real p[1] = 1 /* 1 */;
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
  parameter Real temp_1;
  Real temp_2;
@@ -4405,8 +4553,9 @@ equation
  x + y = IndexReduction.FunctionInlining.Test9.F({p[1]}, time);
  temp_2 = time;
  _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({temp_1}, temp_1 + temp_2 * temp_1);
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- _der_vx + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, temp_1 * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
+ _der_der_x + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, temp_1 * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
 
 public
  function IndexReduction.FunctionInlining.Test9.F
@@ -4500,12 +4649,20 @@ fclass IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall
  Real b3;
  Real b4;
  Real _der_a1;
+ Real _der_a2;
  Real _der_b1;
+ Real _der_b2;
  Real _der_a4;
  Real _der_b4;
+ Real _der_der_a1;
+ Real _der_der_a4;
+ Real _der_der_b4;
+ Real _der_der_b1;
 equation
  _der_a1 = a2;
+ _der_a2 = a3;
  _der_b1 = b2;
+ _der_b2 = b3;
  a4 = time;
  b4 = 2 * a4;
  a4 = a1;
@@ -4514,8 +4671,12 @@ equation
  _der_b4 = 2 * _der_a4;
  _der_a4 = _der_a1;
  _der_b4 = _der_b1;
- a3 = 0.0;
- b3 = 2 * a3;
+ _der_der_a1 = _der_a2;
+ _der_der_a4 = 0.0;
+ _der_der_a4 = _der_der_a1;
+ _der_der_b4 = _der_der_b1;
+ _der_der_b1 = _der_b2;
+ _der_der_b4 = 2 * _der_der_a4;
 end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
 ")})));
         end InlinedFunctionCall;

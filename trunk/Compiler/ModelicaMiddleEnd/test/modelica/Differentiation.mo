@@ -920,9 +920,11 @@ end Differentiation.Expressions.DivFunc;
 fclass Differentiation.Expressions.FunctionCall1
  Real x;
  Real y;
+ Real _der_x;
 equation
  x = Differentiation.Expressions.FunctionCall1.f(time, 2);
- y = Differentiation.Expressions.FunctionCall1._der_f(time, 2, 1.0);
+ y = _der_x;
+ _der_x = Differentiation.Expressions.FunctionCall1._der_f(time, 2, 1.0);
 
 public
  function Differentiation.Expressions.FunctionCall1.f
@@ -1453,6 +1455,7 @@ fclass Differentiation.ComponentArray
  Real m[1].lambda \"Lagrange multiplier\";
  Real m[1]._der_x;
  Real m[1]._der_vx;
+ Real m[1]._der_der_x;
  Real m[1]._der_der_y;
 initial equation 
  m[1].y = 0.0;
@@ -1464,8 +1467,9 @@ equation
  der(m[1].vy) = m[1].lambda * m[1].y - m[1].g;
  m[1].x ^ 2 + m[1].y ^ 2 = m[1].L;
  2 * m[1].x * m[1]._der_x + 2 * m[1].y * der(m[1].y) = 0.0;
+ m[1]._der_der_x = m[1]._der_vx;
  m[1]._der_der_y = der(m[1].vy);
- 2 * m[1].x * m[1]._der_vx + 2 * m[1]._der_x * m[1]._der_x + (2 * m[1].y * m[1]._der_der_y + 2 * der(m[1].y) * der(m[1].y)) = 0.0;
+ 2 * m[1].x * m[1]._der_der_x + 2 * m[1]._der_x * m[1]._der_x + (2 * m[1].y * m[1]._der_der_y + 2 * der(m[1].y) * der(m[1].y)) = 0.0;
 end Differentiation.ComponentArray;
 ")})));
     end ComponentArray;
@@ -2052,6 +2056,7 @@ fclass Differentiation.DerivativeAnnotation.Order1
  Real dy;
  Real _der_x;
  Real _der_dx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -2062,8 +2067,9 @@ equation
  _der_dx + der(dy) = 0;
  x + Differentiation.DerivativeAnnotation.Order1.f(y) = 0;
  _der_x + Differentiation.DerivativeAnnotation.Order1.df(y, der(y)) = 0;
+ _der_der_x = _der_dx;
  _der_der_y = der(dy);
- _der_dx + Differentiation.DerivativeAnnotation.Order1.ddf(y, der(y), _der_der_y) = 0;
+ _der_der_x + Differentiation.DerivativeAnnotation.Order1.ddf(y, der(y), _der_der_y) = 0;
 
 public
  function Differentiation.DerivativeAnnotation.Order1.f
@@ -2161,6 +2167,7 @@ fclass Differentiation.DerivativeAnnotation.Order2
  Real dy;
  Real _der_x;
  Real _der_dx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -2171,8 +2178,9 @@ equation
  _der_dx + der(dy) = 0;
  x + Differentiation.DerivativeAnnotation.Order2.f(y, time) = 0;
  _der_x + Differentiation.DerivativeAnnotation.Order2.df(y, time, der(y), 1.0) = 0;
+ _der_der_x = _der_dx;
  _der_der_y = der(dy);
- _der_dx + Differentiation.DerivativeAnnotation.Order2.ddf(y, time, der(y), 1.0, _der_der_y, 0.0) = 0;
+ _der_der_x + Differentiation.DerivativeAnnotation.Order2.ddf(y, time, der(y), 1.0, _der_der_y, 0.0) = 0;
 
 public
  function Differentiation.DerivativeAnnotation.Order2.f
@@ -3160,6 +3168,7 @@ fclass Differentiation.AlgorithmDifferentiation.PlanarPendulum
  Real lambda \"Lagrange multiplier\";
  Real _der_x;
  Real _der_vx;
+ Real _der_der_x;
  Real _der_der_y;
 initial equation 
  y = 0.0;
@@ -3171,8 +3180,9 @@ equation
  der(vy) = lambda * y - g;
  Differentiation.AlgorithmDifferentiation.PlanarPendulum.square(x) + Differentiation.AlgorithmDifferentiation.PlanarPendulum.square(y) = L;
  Differentiation.AlgorithmDifferentiation.PlanarPendulum._der_square(x, _der_x) + Differentiation.AlgorithmDifferentiation.PlanarPendulum._der_square(y, der(y)) = 0.0;
+ _der_der_x = _der_vx;
  _der_der_y = der(vy);
- Differentiation.AlgorithmDifferentiation.PlanarPendulum._der_der_square(x, _der_x, _der_vx) + Differentiation.AlgorithmDifferentiation.PlanarPendulum._der_der_square(y, der(y), _der_der_y) = 0.0;
+ Differentiation.AlgorithmDifferentiation.PlanarPendulum._der_der_square(x, _der_x, _der_der_x) + Differentiation.AlgorithmDifferentiation.PlanarPendulum._der_der_square(y, der(y), _der_der_y) = 0.0;
 
 public
  function Differentiation.AlgorithmDifferentiation.PlanarPendulum.square
@@ -3235,9 +3245,11 @@ end Differentiation.AlgorithmDifferentiation.PlanarPendulum;
 fclass Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt
  Real a;
  Real b;
+ Real _der_a;
 equation
  a = Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt.F(time * 2);
- b = Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F(time * 2, 2);
+ b = _der_a;
+ _der_a = Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F(time * 2, 2);
 
 public
  function Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt.F
@@ -3298,9 +3310,11 @@ end Differentiation.AlgorithmDifferentiation.SelfReference_AssignStmt;
 fclass Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall
  Real a;
  Real b;
+ Real _der_a;
 equation
  a = Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall.F1(time * 2);
- b = Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1(time * 2, 2);
+ b = _der_a;
+ _der_a = Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1(time * 2, 2);
 
 public
  function Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall.F1
@@ -3531,13 +3545,19 @@ fclass Differentiation.MultipleDerivativeAnnotation1
  Real dx;
  Real dy;
  Real _der_x;
+ Real _der_y;
+ Real _der_dx;
+ Real _der_der_x;
 equation
  x = Differentiation.MultipleDerivativeAnnotation1.f(time);
  _der_x = y;
+ _der_y = z;
  dx = Differentiation.MultipleDerivativeAnnotation1.df(2.0 * time, 2.0);
+ _der_dx = dy;
  _der_x = Differentiation.MultipleDerivativeAnnotation1.df(time, 1.0);
- z = Differentiation.MultipleDerivativeAnnotation1.d2f(time, 1.0, 0.0);
- dy = Differentiation.MultipleDerivativeAnnotation1.ddf(2.0 * time, 2.0, 2.0, 0.0);
+ _der_der_x = _der_y;
+ _der_der_x = Differentiation.MultipleDerivativeAnnotation1.d2f(time, 1.0, 0.0);
+ _der_dx = Differentiation.MultipleDerivativeAnnotation1.ddf(2.0 * time, 2.0, 2.0, 0.0);
 
 public
  function Differentiation.MultipleDerivativeAnnotation1.f
@@ -3683,26 +3703,34 @@ fclass Differentiation.MultipleDerivativeAnnotation2
  Real y3;
  Real x4;
  Real y4;
+ Real _der_x1;
+ Real _der_x2;
+ Real _der_x3;
+ Real _der_x4;
  Real _der_t[1];
  Real _der_t[2];
  Real _der_t[3];
  Real _der_t[4];
 equation
  x1 = Differentiation.MultipleDerivativeAnnotation2.f(t[1], t[2], time);
+ _der_x1 = y1;
  x2 = Differentiation.MultipleDerivativeAnnotation2.f(t[3], 5, time);
+ _der_x2 = y2;
  x3 = Differentiation.MultipleDerivativeAnnotation2.f(6, t[4], time);
+ _der_x3 = y3;
  x4 = Differentiation.MultipleDerivativeAnnotation2.f(7, 8, time);
+ _der_x4 = y4;
  t[1] = time;
  t[2] = 2 * t[1];
  t[3] = 3 * t[1];
  t[4] = 4 * t[1];
- y4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
- y1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
+ _der_x4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
+ _der_x1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
  _der_t[1] = 1.0;
  _der_t[2] = 2 * _der_t[1];
- y2 = Differentiation.MultipleDerivativeAnnotation2.dfcy(t[3], 5, time, _der_t[3]);
+ _der_x2 = Differentiation.MultipleDerivativeAnnotation2.dfcy(t[3], 5, time, _der_t[3]);
  _der_t[3] = 3 * _der_t[1];
- y3 = Differentiation.MultipleDerivativeAnnotation2.dfcx(6, t[4], time, _der_t[4]);
+ _der_x3 = Differentiation.MultipleDerivativeAnnotation2.dfcx(6, t[4], time, _der_t[4]);
  _der_t[4] = 4 * _der_t[1];
 
 public

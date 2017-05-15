@@ -914,7 +914,10 @@ Coefficient variability: continuous-time
     -------------------------------
 
 --- Solved equation ---
-_der_a5 := -1.0
+_der_a7 := 1.0
+
+--- Solved equation ---
+_der_a5 := - _der_a7
 
 --- Torn linear system (Block 2) of 3 iteration variables and 4 solved variables ---
 Coefficient variability: continuous-time
@@ -930,17 +933,17 @@ Iteration variables:
   dynDer(a2)
 
 Torn equations:
-  _der_a9 := ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) - (_der_a5 + (- _der_a5))
+  _der_a9 := ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) - (_der_a5 + _der_a7)
   _der_a8 := _der_a6 - 1.0
   dynDer(a4) := - dynDer(a1) + (- _der_a5) + (- _der_a8) + (- _der_a9)
-  dynDer(a3) := - dynDer(a2) + _der_a5 + (- _der_a6)
+  dynDer(a3) := - dynDer(a2) + (- _der_a7) + (- _der_a6)
 
 Residual equations:
   ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = _der_a6 + _der_a8 + _der_a9
     Iteration variables: _der_a6
   ds(2, a3) * dynDer(a4) + dynDer(a3) * ds(2, a4) = _der_a6 + _der_a8 + _der_a9
     Iteration variables: dynDer(a1)
-  ds(2, a3) * dynDer(a4) + dynDer(a3) * ds(2, a4) = _der_a5 + (- _der_a5) + _der_a9
+  ds(2, a3) * dynDer(a4) + dynDer(a3) * ds(2, a4) = _der_a5 + _der_a7 + _der_a9
     Iteration variables: dynDer(a2)
 
 Jacobian:
@@ -1891,6 +1894,24 @@ der(sy) := sin(time)
 --- Solved equation ---
 der_sy := der(sy)
 
+--- Solved equation ---
+_der_der_sx := - sin(time)
+
+--- Solved equation ---
+_der_der_sx := _der_der_sx
+
+--- Solved equation ---
+der2_sx := _der_der_sx
+
+--- Solved equation ---
+_der_der_sy := cos(time)
+
+--- Solved equation ---
+_der_der_sy := _der_der_sy
+
+--- Solved equation ---
+der2_sy := _der_der_sy
+
 --- Solved function call equation ---
 ({r[1], r[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1(sx, sy)
   Assigned variables: r[1]
@@ -1913,16 +1934,28 @@ _der_r[2] := der_r_check[2]
 --- Solved equation ---
 der_r[2] := _der_r[2]
 
---- Solved equation ---
-der2_sx := - sin(time)
-
---- Solved equation ---
-der2_sy := cos(time)
-
 --- Solved function call equation ---
-({der_der_r[1], der_der_r[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der_der(sx, sy, der(sx), der(sy), der2_sx, der2_sy)
-  Assigned variables: der_der_r[1]
-                      der_der_r[2]
+({der_der_r_check[1], der_der_r_check[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der_der(sx, sy, der(sx), der(sy), _der_der_sx, _der_der_sy)
+  Assigned variables: der_der_r_check[2]
+                      der_der_r_check[1]
+
+--- Solved equation ---
+_der_der_r[1] := der_der_r_check[1]
+
+--- Solved equation ---
+_der_der_r[1] := _der_der_r[1]
+
+--- Solved equation ---
+der_der_r[1] := _der_der_r[1]
+
+--- Solved equation ---
+_der_der_r[2] := der_der_r_check[2]
+
+--- Solved equation ---
+_der_der_r[2] := _der_der_r[2]
+
+--- Solved equation ---
+der_der_r[2] := _der_der_r[2]
 -------------------------------
 ")})));
         end FunctionCallEquationJacobian;
@@ -2082,26 +2115,28 @@ vy := dynDer(y)
 --- Solved equation ---
 _der_der_b := 0.0
 
---- Torn system (Block 2) of 1 iteration variables and 5 solved variables ---
+--- Torn system (Block 2) of 1 iteration variables and 6 solved variables ---
 Torn variables:
-  _der_vy
-  dynDer(_der_y)
   _der_vx
+  _der_der_x
   _der_c
   dynDer(_der_t)
+  _der_vy
+  dynDer(_der_y)
 
 Iteration variables:
   a ()
 
 Torn equations:
+  _der_vx := a * x
+  _der_der_x := _der_vx
+  _der_c := - sin(_der_x) * _der_der_x
+  dynDer(_der_t) := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
   _der_vy := a * ds(2, y)
   dynDer(_der_y) := _der_vy
-  _der_vx := a * x
-  _der_c := - sin(_der_x) * _der_vx
-  dynDer(_der_t) := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
 
 Residual equations:
-  x * ds(2, y) * dynDer(_der_t) + (x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + ((x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + (x * dynDer(_der_y) + _der_x * dynDer(y) + (_der_x * dynDer(y) + _der_vx * ds(2, y))) * ds(2, t)) = 0
+  x * ds(2, y) * dynDer(_der_t) + (x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + ((x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + (x * dynDer(_der_y) + _der_x * dynDer(y) + (_der_x * dynDer(y) + _der_der_x * ds(2, y))) * ds(2, t)) = 0
     Iteration variables: a
 
 --- Solved equation ---

@@ -2556,10 +2556,6 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isDummyDerivativeVariable() = false;
     eq FDummyDerivativeVariable.isDummyDerivativeVariable() = true;
 
-    syn boolean FAbstractVariable.isNonDummyDerivativeVariable()  = false;
-    eq FAbstractDerivativeVariable.isNonDummyDerivativeVariable() = true;
-    eq FDummyDerivativeVariable.isNonDummyDerivativeVariable()    = false;
-
     syn boolean FAbstractVariable.isDynamicDerivativeVariable() = false;
     eq FDynamicDerivativeVariable.isDynamicDerivativeVariable() = true;
     
