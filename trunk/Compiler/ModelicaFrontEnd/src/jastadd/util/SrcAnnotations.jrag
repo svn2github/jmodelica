@@ -14,15 +14,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.jmodelica.util.annotations.GenericAnnotationNode;
-import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
 import org.jmodelica.util.annotations.AnnotationProvider;
 import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
+import org.jmodelica.util.annotations.GenericAnnotationNode;
+import org.jmodelica.util.annotations.IterableAnnotationProvider;
 import org.jmodelica.util.annotations.PossiblyAnnotation;
 import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.collections.TransformerIterable;
 import org.jmodelica.util.values.Evaluator;
-
 
 aspect SrcAnnotations {
 
@@ -92,7 +92,7 @@ aspect SrcAnnotations {
     /*******************
      *    Java Stuff    
      ******************/
-    
+
     public class SrcAnnotation extends GenericAnnotationNode<SrcAnnotation, SrcAnnotationProvider, Exp> {
         
         public static final SrcAnnotation AMBIGUOUS_ANNOTATION =  new SrcAnnotation(null, null, null,
@@ -164,14 +164,16 @@ aspect SrcAnnotations {
             }
         }
     }
-    
+
     public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, Exp> {}
-    
+    public interface SrcIterableAnnotationProvider extends
+            IterableAnnotationProvider<SrcAnnotationProvider, Exp>, SrcAnnotationProvider {}
+
     /*******************
      *  Modifications   
      ******************/
     Modification implements SrcAnnotationProvider;
-    
+
     syn String Modification.annotationName() = parentAnnotationName();
     eq NamedModification.annotationName() = getName().name();
 
@@ -184,7 +186,7 @@ aspect SrcAnnotations {
     eq CompleteModification.annotationValue() = hasValueModification() ? getValueModification().getExp() : null;
     eq ComponentModification.annotationValue() = hasModification() ? getModification().annotationValue() : null;
     eq ValueModification.annotationValue() = getExp();
-    
+
     syn Iterable<SubNodePair<SrcAnnotationProvider>> Modification.annotationSubNodes() = Collections.emptyList();
     eq CompleteModification.annotationSubNodes() = getClassModification().annotationSubNodes();
     eq ComponentModification.annotationSubNodes() = 
@@ -250,8 +252,15 @@ aspect SrcAnnotations {
      ******************/
     syn SrcAnnotationProvider ClassDecl.srcAnnotationProvider() = null;
     eq FullClassDecl.srcAnnotationProvider() = SrcAnnotation.createProviderFor(getAnnotationOpt());
-    eq ShortClassDecl.srcAnnotationProvider() =
-            SrcAnnotation.createProviderFor(getExtendsClauseShortClass().getComment().getAnnotationOpt());
+    eq ShortClassDecl.srcAnnotationProvider() {
+        Opt<Annotation> annotationOpt = getExtendsClauseShortClass().getComment().getAnnotationOpt();
+        Opt<Comment> commentOpt = getConstrainingClauseCommentOpt();
+
+        if (commentOpt.numChildren() > 0) {
+            return SrcAnnotation.createProviderFor(annotationOpt, commentOpt.getChild(0).getAnnotationOpt());
+        }
+        return SrcAnnotation.createProviderFor(annotationOpt);
+    }
     eq LibNode.srcAnnotationProvider() = resolveLib().srcAnnotationProvider();
 
     /*******************
@@ -325,6 +334,9 @@ aspect SrcAnnotations {
         public static SrcAnnotationProvider createProviderFor(Opt<Annotation> opt) {
             return new AnnotationOptAnnotationProvider(opt);
         }
+        public static SrcAnnotationProvider createProviderFor(Opt<Annotation>... opts) {
+            return new SrcAnnotationsIteratorProvider(opts);
+        }
     }
 
     /*******************
@@ -362,12 +374,12 @@ aspect SrcAnnotations {
     eq FunctionCall.namedAnnotationProviderName() = name();
 
     FunctionArguments implements SrcAnnotationProvider;
-    
+
     @Override
     public Exp FunctionArguments.annotationValue() {
         return null;
     }
-    
+
     @Override
     public Iterable<SubNodePair<SrcAnnotationProvider>> FunctionArguments.annotationSubNodes() {
         return new ChainedIterable(new TransformerIterable<Exp, SubNodePair<SrcAnnotationProvider>>(getExps()) {
@@ -407,34 +419,34 @@ aspect SrcAnnotations {
     public boolean FunctionArguments.isFinal() {
         return false;
     }
-    
+
     NamedArgument implements SrcAnnotationProvider;
-    
+
     @Override
     public Exp NamedArgument.annotationValue() {
         return getExp();
     }
-    
+
     @Override
     public Iterable<SubNodePair<SrcAnnotationProvider>> NamedArgument.annotationSubNodes() {
         return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
     }
-    
+
     @Override
     public void NamedArgument.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
         throw new FailedToSetAnnotationValueException();
     }
-    
+
     @Override
     public SrcAnnotationProvider NamedArgument.addAnnotationSubNode(String name) {
         return null;
     }
-    
+
     @Override
     public boolean NamedArgument.isEach() {
         return false;
     }
-    
+
     @Override
     public boolean NamedArgument.isFinal() {
         return false;
@@ -481,7 +493,7 @@ aspect SrcAnnotations {
      ******************/
     syn Iterable<SubNodePair<SrcAnnotationProvider>> Annotation.annotationSubNodes() = Collections.emptyList();
     eq ParseAnnotation.annotationSubNodes() = getClassModification().annotationSubNodes();
-    
+
     public SrcAnnotationProvider Annotation.addAnnotationSubNode(String name) {
         return null;
     }
@@ -535,7 +547,66 @@ aspect SrcAnnotations {
             return provider.resolveURI(str);
         }
     }
-    
+
+    public class SrcAnnotationsIteratorProvider implements SrcIterableAnnotationProvider {
+
+        private java.util.List<SrcAnnotationProvider> providers;
+
+        public SrcAnnotationsIteratorProvider(Opt<Annotation>[] opts) {
+            this.providers = new ArrayList<SrcAnnotationProvider>();
+            for (Opt<Annotation> opt : opts) {
+                this.providers.add(SrcAnnotation.createProviderFor(opt));
+            }
+        }
+
+        @Override
+        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
+            int length = providers.size();
+            Iterable[] iterables = new Iterable[length];
+            for (int i = 0; i < length; ++i) {
+                iterables[i] = providers.get(i).annotationSubNodes();
+            }
+            return new ChainedIterable<SubNodePair<SrcAnnotationProvider>>(iterables);
+        }
+
+        @Override
+        public Exp annotationValue() {
+            return null;
+        }
+
+        @Override
+        public void setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+            throw new FailedToSetAnnotationValueException();
+        }
+
+        @Override
+        public SrcAnnotationProvider addAnnotationSubNode(String name) throws AnnotationEditException {
+            throw new AnnotationEditException("Can not add annotation sub nodes to an iterable provider.");
+        }
+
+        @Override
+        public boolean isEach() {
+            return false;
+        }
+
+        @Override
+        public boolean isFinal() {
+            return false;
+        }
+
+        @Override
+        public String resolveURI(String str) {
+            return null;
+        }
+
+        @Override
+        public Iterator<SubNodePair<SrcAnnotationProvider>> iterator() {
+            return annotationSubNodes().iterator();
+        }
+
+    }
+
+
     public class ExpValueProvider implements SrcAnnotationProvider {
 
         private final Exp exp;

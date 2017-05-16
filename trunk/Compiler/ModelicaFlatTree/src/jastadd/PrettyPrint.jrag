@@ -2247,4 +2247,23 @@ aspect AnnotationPrettyPrinting {
     
     public static PrettyPrinter ASTNode.AnnotationPrettyPrinter = new AnnotationPrettyPrinter();
 
+    /**
+     * Returns a string listing the annotations in this class declaration and any child class declarations, recursively.
+     *
+     * @param prefix
+     *          The string to prefix the annotation string with.
+     */
+    syn String InstClassDecl.printClassAnnotations(String prefix) = "";
+
+    eq InstFullClassDecl.printClassAnnotations(String prefix) {
+        FullClassDecl myDecl = getFullClassDecl();
+        Opt<Annotation> myAnnotation = myDecl.getAnnotationOpt();
+        String myNode = (myAnnotation.numChildren() > 0 ? prefix + myAnnotation.getChild(0).toString() + "\n" : "");
+        StringBuilder string = new StringBuilder(myNode.contains("__JModelica") ? "" : myNode);
+        for (InstClassDecl decl : getInstClassDecls()) {
+            string.append(decl.printClassAnnotations(prefix + "    "));
+        }
+        return string.toString();
+    }
+    eq InstAbstractShortClassDecl.printClassAnnotations(String prefix) = getShortClassDecl().srcAnnotation().toString();
 }
