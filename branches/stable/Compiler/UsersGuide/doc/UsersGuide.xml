@@ -30,32 +30,31 @@
     Computer Algebra and processed by JEuclid.</para>
   </acknowledgements>
 
-  <xi:include href="Introduction.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Installation.xml" xpointer="element(/1)"/>
-
-  <xi:include href="GettingStarted.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Models.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Simulation.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Optimization.xml" xpointer="element(/1)"/>
-
-  <xi:include href="GraphicalUserInterface.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Optimica.xml" xpointer="element(/1)"/>
-
-  <xi:include href="AdvancedTopics.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Limitations.xml" xpointer="element(/1)"/>
-
-  <xi:include href="Options.xml" xpointer="element(/1)"/>
-
-  <xi:include href="ReleaseNotes.xml" xpointer="element(/1)"/>
+  <!-- ===INCLUDE=== -->
 
   <bibliography>
     <title>Bibliography</title>
+
+    <biblioentry role="phd thesis">
+      <abbrev>And2016</abbrev>
+
+      <author>
+        <personname><firstname>Christian Andersson</firstname></personname>
+      </author>
+
+      <title>Methods and Tools for Co-Simulation of Dynamic Systems with the
+      Functional Mock-up Interface</title>
+
+      <biblioid class="isrn">LUTFNA-1010-2016 </biblioid>
+
+      <publisher>
+        <publishername>Lund University</publishername>
+
+        <address>Sweden</address>
+      </publisher>
+
+      <pubdate>2016</pubdate>
+    </biblioentry>
 
     <biblioentry role="phd thesis">
       <abbrev>Jak2007</abbrev>
@@ -121,7 +120,7 @@
           </author>
         </authorgroup>
 
-        <title>Optimica—An Extension of Modelica Supporting Dynamic
+        <title>Optimica - An Extension of Modelica Supporting Dynamic
         Optimization</title>
       </biblioset>
 
@@ -162,9 +161,9 @@
           </author>
         </authorgroup>
 
-        <title>Modeling and Optimization with Optimica and
-        JModelica.org—Languages and Tools for Solving Large-Scale Dynamic
-        Optimization Problem</title>
+        <title>Modeling and Optimization with Optimica and JModelica.org -
+        Languages and Tools for Solving Large-Scale Dynamic Optimization
+        Problem</title>
       </biblioset>
 
       <biblioset relation="journal">
@@ -252,6 +251,16 @@
       <biblioset relation="journal">
         <pubdate>2016</pubdate>
       </biblioset>
+    </biblioentry>
+
+    <biblioentry>
+      <abbrev>FMI2017</abbrev>
+
+      <title>Functional Mock-up Interface standard</title>
+
+      <publisher>
+        http://www.fmi-standard.org
+      </publisher>
     </biblioentry>
   </bibliography>
 </book>

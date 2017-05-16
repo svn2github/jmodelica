@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -2280,6 +2281,6 @@ aspect UtilInterface {
 
 aspect FileIO {
     public static void ASTNode.exportResourceFromJAR(String resource, File destination) throws IOException {
-        Files.copy(ASTNode.class.getClassLoader().getResourceAsStream(resource), destination.toPath());
+        Files.copy(ASTNode.class.getClassLoader().getResourceAsStream(resource), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }

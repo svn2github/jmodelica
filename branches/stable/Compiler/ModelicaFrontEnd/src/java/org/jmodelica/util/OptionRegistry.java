@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -750,14 +751,14 @@ abstract public class OptionRegistry {
             Category.uncommon,
             1000,
             "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
-            + " This option controls how many scalar elements can be evaluated by a function. Value < 1 indicates no split."),
+            + " This option controls how many scalar elements can be evaluated by a function. Value less than 1 indicates no split."),
         CC_SPLIT_FUNCTION_LIMIT
             ("cc_split_function_limit",
             OptionType.compiler,
             Category.uncommon,
             20,
             "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
-            + " This option controls how many functions can be generated in a file. Value < 1 indicates no split."),
+            + " This option controls how many functions can be generated in a file. Value less than 1 indicates no split."),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,
@@ -964,7 +965,7 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.uncommon,
              10,
-             "Factor limiting the step-size taken by the nonlinear solver.",
+             "Factor limiting the step-size taken by the nonlinear block solver.",
              0, 1e10),
         NLE_SOLVER_REGULARIZATION_TOLERANCE
             ("nle_solver_regularization_tolerance",
@@ -1887,9 +1888,19 @@ abstract public class OptionRegistry {
          */
         public void exportDocBook(DocBookPrinter out) {
             out.enter("row");
-            out.oneLine("entry", out.lit(StringUtil.wrapUnderscoreName(key, 26)));
-            out.oneLine("entry", String.format("%s / %s", out.lit(getType()), out.lit(getValueForDoc())));
-            out.oneLine("entry", out.prepare(description));
+            
+            out.enter("entry");
+            out.printLiteral(StringUtil.wrapUnderscoreName(key, 26));
+            out.exit();
+            
+            out.enter("entry");
+            out.printLiteral(getType());
+            out.text("/", 80);
+            out.printLiteral(getValueForDoc());
+            out.exit();
+            
+            out.printWrappedPreFormatedText("entry", description);
+            
             out.exit();
         }
 
@@ -2340,7 +2351,7 @@ abstract public class OptionRegistry {
          * Retrieves the documentation string for this option's current value.
          */
         public String getValueForDoc() {
-            return String.format("'%s'", value);
+            return (getValue() == null) ? "null" : String.format("'%s'", getValue());
         }
 
         @Override
@@ -2498,6 +2509,14 @@ abstract public class OptionRegistry {
         public String getValueString() {
             return Double.toString(getValue());
         }
+
+        @Override
+        public String getValueForDoc() {
+            String raw = getValueString();
+            String round = String.format((Locale) null, "%.2E", getValue());
+            return (round.length() < raw.length()) ? round : raw;
+        }
+
 
         @Override
         protected void copyTo(OptionRegistry reg, String key) {

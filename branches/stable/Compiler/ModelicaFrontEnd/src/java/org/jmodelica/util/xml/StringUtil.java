@@ -7,7 +7,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 public abstract class StringUtil {
-    private static void doWrap(Writer out, String text, String prefix, String partSep, String suffix, char splitAt, int width) {
+    private static void doWrap(Writer out, String text, String prefix, String partSep, String suffix, char splitAt,
+            int width) {
         try {
             if (width == 0) {
                 width = Integer.MAX_VALUE;
@@ -34,8 +35,7 @@ public abstract class StringUtil {
             out.append(prefix);
             out.append(text.substring(start));
             out.append(suffix);
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {}
     }
 
     public static void wrapText(PrintStream out, String text, String indent, int width) {
@@ -50,8 +50,22 @@ public abstract class StringUtil {
 
     public static String wrapUnderscoreName(String text, int width) {
         StringWriter out = new StringWriter();
-        doWrap(out , text, "", " ", "", '_', width);
+        doWrap(out, text, "", " ", "", '_', width);
         return out.toString();
+    }
+
+    /**
+     * Trims a string and replaces all whitespace occurrences with singular
+     * spaces.
+     * 
+     * @param text
+     *            The text to "conform."
+     * @return
+     *         {@code text}, trimmed, with all remaining white spaces replaced
+     *         by singular spaces.
+     */
+    public static String conformWhiteSpace(String text) {
+        return text.trim().replaceAll("\\s+", " ");
     }
 
 }

@@ -18,7 +18,7 @@
 """
 The pyjmi example package.
 """
-__all__ = ['ast_example', 'blood_glucose',
+__all__ = ['blood_glucose',
            'cart_pendulum',
            'ccpp', 'ccpp_elimination', 'ccpp_sym_elim', 'crane',
            'crystallizer', 
@@ -40,5 +40,5 @@ __all__ = ['ast_example', 'blood_glucose',
            'vehicle_turn', 'vdp_casadi',
            'vdp_minimum_time_casadi',
            'vdp_pp', 'VDP_sim', 
-           'vdp_minimum_time_interpolation', 'bounds_kinsol',
+           'bounds_kinsol',
            'furuta_dfo_using_algorithm_drivers', 'greybox_identification']

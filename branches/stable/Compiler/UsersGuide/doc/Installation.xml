@@ -13,7 +13,7 @@
   <section xml:id="inst_sec_supported_platforms">
     <title>Supported platforms</title>
 
-    <para>JModelica.org is supported on Linux and Windows (Vista, 7) with
+    <para>JModelica.org is supported on Linux and Windows (7, 10) with
     32-bit or 64-bit architectures.</para>
   </section>
 
@@ -97,7 +97,7 @@
               <listitem>
                 <para><link
                 xlink:href="https://computation.llnl.gov/casc/sundials">SUNDIALS
-                2.4.0</link></para>
+                2.7.0</link></para>
               </listitem>
 
               <listitem>
@@ -118,7 +118,7 @@
             <itemizedlist>
               <listitem>
                 <para><link xlink:href="http://www.cython.org/">Cython
-                0.18</link></para>
+                0.23.4</link></para>
               </listitem>
 
               <listitem>
@@ -129,12 +129,12 @@
 
               <listitem>
                 <para><link xlink:href="http://ipython.org/">IPython
-                0.13.1</link></para>
+                4.1.1</link></para>
               </listitem>
 
               <listitem>
                 <para><link xlink:href="https://pypi.python.org/pypi/JCC/">JCC
-                1.18</link></para>
+                2.21</link></para>
               </listitem>
 
               <listitem>
@@ -144,39 +144,39 @@
 
               <listitem>
                 <para><link xlink:href="http://lxml.de/">lxml
-                3.1.0</link></para>
+                3.5.0</link></para>
               </listitem>
 
               <listitem>
                 <para><link xlink:href="http://matplotlib.org/">matplotlib
-                1.2.0</link></para>
+                1.5.1</link></para>
               </listitem>
 
               <listitem>
                 <para><link
                 xlink:href="https://nose.readthedocs.org/en/latest/">nose
-                1.2.1</link></para>
+                1.3.7</link></para>
               </listitem>
 
               <listitem>
                 <para><link xlink:href="http://www.numpy.org/">NumPy
-                1.6.2</link></para>
+                1.10.4</link></para>
               </listitem>
 
               <listitem>
                 <para><link
                 xlink:href="http://packages.python.org/pyreadline/">Pyreadline
-                1.7.1</link></para>
+                2.1</link></para>
               </listitem>
 
               <listitem>
                 <para><link xlink:href="http://www.scipy.org/">SciPy
-                0.11.0</link></para>
+                0.17.0</link></para>
               </listitem>
 
               <listitem>
                 <para><link xlink:href="http://www.wxpython.org">wxPython
-                2.8</link></para>
+                3.0.2.0</link></para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -201,26 +201,6 @@
           <para>Run the file by double-clicking and selecting "Run" if
           prompted with a security warning. This will launch an installer
           which should be self-explanatory.</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>In the <emphasis>Choose Components</emphasis> window,
-              select which of the bundled Python packages that should be
-              installed. Make sure that any package not already installed on
-              your computer is checked.<figure>
-                  <title>Selecting Python packages in the <emphasis>Choose
-                  components</emphasis> window.</title>
-
-                  <mediaobject>
-                    <imageobject>
-                      <imagedata align="center"
-                                 fileref="images/Setup_components.png"
-                                 scalefit="1" width="50%"/>
-                    </imageobject>
-                  </mediaobject>
-                </figure></para>
-            </listitem>
-          </itemizedlist>
         </step>
       </procedure>
     </section>
@@ -228,32 +208,37 @@
     <section>
       <title>Verifying the installation</title>
 
-      <para>Test the installation by starting a IPython or pylab shell from
-      the JModelica.org start menu and run a few examples. Starting the Python
-      session from the Windows start menu will set all the environment
-      variables required to run the JModelica.org Python
-      interface.<programlisting language="python"># Import and run the VDP_sim example and plot results
-from pyjmi.examples import VDP_sim
-VDP_sim.run_demo()
+        <para>
+            Test the installation by starting a IPython or pylab shell from
+            the JModelica.org start menu and run a few examples. Starting the Python
+            session from the Windows start menu will set all the environment
+            variables required to run the JModelica.org Python
+            interface.
+        </para>
 
-# Import and run the CSTR example and plot results
-from pyjmi.examples import cstr
-cstr.run_demo()
+        <programlisting language="python">
+# Import and run the fmi_bouncing_ball example and plot results
+from pyfmi.examples import fmi_bouncing_ball
+fmi_bouncing_ball.run_demo()
 
 # Import and run the CSTR example using CasADi and plot results
 from pyjmi.examples import cstr_casadi
-cstr_casadi.run_demo()</programlisting></para>
+cstr_casadi.run_demo()
+        </programlisting>
+
     </section>
 
     <section>
       <title>Compilation from sources</title>
 
-      <para>For compiling JModelica.org from sources on Windows there is a
-      <link xlink:href="http://www.jmodelica.org/sdk">Software Development
-      Kit</link> (SDK) available for download. The SDK is a bundle of tools
-      used to build JModelica.org from source code on Windows, please see the
-      SDK User's guide, which can be reached from the download site, for more
-      information.</para>
+        <para>
+            For compiling JModelica.org from sources on Windows there is a
+            <link xlink:href="http://www.jmodelica.org/sdk">Software Development
+            Kit</link> (SDK) available for download. The SDK is a bundle of tools
+            used to build JModelica.org from source code on Windows, please see the
+            SDK User's guide, which can be reached from the download site, for more
+            information.
+        </para>
     </section>
   </section>
 
@@ -262,7 +247,7 @@ cstr_casadi.run_demo()</programlisting></para>
 
     <para>This section describes a procedure for compiling JModelica.org from
     sources on Linux. The instructions have been verified to work on Ubuntu
-    Linux release 12.04, 64bit.</para>
+    Linux release 16.04, 64bit.</para>
 
     <section xml:id="inst_sec_sdk_prereq">
       <title>Prerequisites</title>
@@ -281,7 +266,7 @@ sudo apt-get -y install ipython
 sudo apt-get -y install cmake
 sudo apt-get -y install swig
 sudo apt-get -y install ant
-sudo apt-get -y install openjdk-6-jdk
+sudo apt-get -y install openjdk-8-jdk
 sudo apt-get -y install python-dev
 sudo apt-get -y install python-numpy
 sudo apt-get -y install python-scipy
@@ -294,16 +279,9 @@ sudo apt-get -y install zlib1g-dev
 sudo apt-get -y install libboost-dev
 </programlisting>
 
-        <para>On Ubuntu 12.04, the bundled jcc version is too old. A new
-        enough version can be installed using pip:</para>
-
-        <programlisting>sudo apt-get -y install python-pip
-sudo pip install jcc
-</programlisting>
-
         <para>The following versions of each package have been tested and
-        verified to work. Please note that in some cases, a minimum version is
-        required.</para>
+        verified to work. Please note that in some cases, the listed version is
+        the minimum required.</para>
 
         <table xml:id="inst_tab_versions_ubuntu">
           <title>Package versions for Ubuntu</title>
@@ -329,7 +307,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>g++</literal></entry>
 
-                <entry><literal>4.6.3</literal></entry>
+                <entry><literal>5.4.0</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -337,7 +315,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>subversion</literal></entry>
 
-                <entry><literal>1.6.17</literal></entry>
+                <entry><literal>1.9.3</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -345,7 +323,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>gfortran</literal></entry>
 
-                <entry><literal>4.6.3</literal></entry>
+                <entry><literal>5.4.0</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -353,7 +331,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>ipython</literal></entry>
 
-                <entry><literal>0.12.1</literal></entry>
+                <entry><literal>5.3.0</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -369,7 +347,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>swig</literal></entry>
 
-                <entry><literal>2.0.4</literal></entry>
+                <entry><literal>3.0.8</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -385,7 +363,7 @@ sudo pip install jcc
               <row>
                 <entry><literal>python-dev</literal></entry>
 
-                <entry><literal>2.7.3</literal></entry>
+                <entry><literal>2.7.11</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
@@ -447,25 +425,25 @@ sudo pip install jcc
               </row>
 
               <row>
-                <entry>zlib1g-dev</entry>
+                <entry><literal>zlib1g-dev</literal></entry>
 
-                <entry>1:1.2.3.4</entry>
-
-                <entry>Tested version</entry>
-              </row>
-
-              <row>
-                <entry>libboost-dev</entry>
-
-                <entry>1.48.0.2</entry>
+                <entry><literal>1:1.2.8</literal></entry>
 
                 <entry>Tested version</entry>
               </row>
 
               <row>
-                <entry>jcc</entry>
+                <entry><literal>libboost-dev</literal></entry>
 
-                <entry>2.16</entry>
+                <entry><literal>1.58.0</literal></entry>
+
+                <entry>Tested version</entry>
+              </row>
+
+              <row>
+                <entry><literal>jcc</literal></entry>
+
+                <entry><literal>2.16</literal></entry>
 
                 <entry>Minimum version</entry>
               </row>
@@ -479,8 +457,7 @@ sudo pip install jcc
 
         <para>While Ipopt is available as a pre-compiled package for Ubuntu,
         it is recommended to build Ipopt from sources. The Ipopt packages
-        provided for Ubuntu have had flaws (including the version provided for
-        Ubuntu 12.04) that prevented usage with JModelica.org. Also, compiling
+        provided for Ubuntu have had flaws that prevented usage with JModelica.org. Also, compiling
         Ipopt from sources is required when using the linear solvers MA27 or
         MA57 from the HSL library, since these are not available as open
         source software.</para>
@@ -504,7 +481,7 @@ cd ../Metis
 cd ../../
 </programlisting>
 
-        <para>If you have access to the HSL codes MA57 or MA27, copy their
+        <para>If you have access to the HSL solvers MA57 or MA27, copy their
         sources into the directory <literal>ThirdParty/HSL</literal>. In the
         next step, configure and compile Ipopt:</para>
 
@@ -590,14 +567,15 @@ make casadi_interface
       <literal>/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt;/bin/jm_ipython</literal>
       and run a few examples:</para>
 
-      <programlisting language="python"># Import and run the VDP_sim example and plot results
-from pyjmi.examples import VDP_sim
-VDP_sim.run_demo()
+        <programlisting language="python">
+# Import and run the fmi_bouncing_ball example and plot results
+from pyfmi.examples import fmi_bouncing_ball
+fmi_bouncing_ball.run_demo()
 
 # Import and run the CSTR example using CasADi and plot results
 from pyjmi.examples import cstr_casadi
 cstr_casadi.run_demo()
-</programlisting>
+        </programlisting>
     </section>
   </section>
 </chapter>

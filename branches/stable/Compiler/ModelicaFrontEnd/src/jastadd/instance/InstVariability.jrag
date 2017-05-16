@@ -44,10 +44,19 @@ aspect InstVariability {
     syn boolean InstComponentDecl.isDiscrete()   = variability().discreteVariability();
     syn boolean InstComponentDecl.isContinuous() = variability().continuousVariability();
     
-    // This attribute should only have one equation, sometimes we flush it manually.
+    /**
+     * Get variability without any variability propagation, structural considerations, etc.
+     * Does not combine component variabilities for records.
+     */
+    syn FTypePrefixVariability InstComponentDecl.originalVariability() = definedVariability().combineDown(defaultVariability());
+    
+    /**
+     * Calculate variability.
+     * This attribute should only have one equation, sometimes we flush it manually.
+     */
     syn lazy FTypePrefixVariability InstComponentDecl.variability() = calcVariability();
     
-    syn FTypePrefixVariability InstComponentDecl.calcVariability() = definedVariability().combineDown(defaultVariability());
+    syn FTypePrefixVariability InstComponentDecl.calcVariability() = originalVariability();
     
     eq InstEnumLiteral.calcVariability()                           = fConstant();
     eq UnknownInstComponentDecl.calcVariability()                  = fConstant();
