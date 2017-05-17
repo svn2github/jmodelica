@@ -870,7 +870,9 @@ public class ModelicaCompiler {
             
             // package unit
             ASTNode.beginStep("packUnit()");
-            unitFile = packUnit(className, compileTo, target, fc).getPath();
+            File unitPath = packUnit(className, compileTo, target, fc);
+            unitFile = unitPath.getPath();
+            log.logCompiledUnit(unitPath, fc.numberOfComponents());
             deleteOutDir();
             ASTNode.endStep("packUnit()");
         } finally {
@@ -2156,7 +2158,6 @@ public class ModelicaCompiler {
 
         File unitFile = makePackagingDirs(className, new File(path), target);
 
-        int BUFFER_SIZE = 2048;
         try {
             hookCheckAbort();
             FileOutputStream dest = new FileOutputStream(unitFile);
@@ -2178,7 +2179,6 @@ public class ModelicaCompiler {
             deleteOutDir();
         }
 
-        log.logCompiledUnit(unitFile);
         hookFmuPacked(unitFile.getAbsoluteFile());
         return unitFile;
     }

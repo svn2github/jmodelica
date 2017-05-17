@@ -1050,8 +1050,12 @@ aspect Flattening {
     syn boolean InstComponentDecl.useInFlattening()    = isPresent() && !(isOuter() && !isInner());
 
     public void InstComponentDecl.flatten(FClass fc, FlattenBindingExp binding, int level) {
-        if (useInFlattening()) 
+        if (useInFlattening()) {
             super.flatten(fc, binding, level);
+            if (!isPrimitive() && !hasFArraySubscripts() && !isConnector()) {
+                fc.countComponent();
+            }
+        }
     }
 
     public void InstExpandableConnectorDecl.flatten(FClass fc, FlattenBindingExp binding, int level) {
@@ -3589,5 +3593,17 @@ aspect AttributeContributer {
         }
     }
     
+}
+
+aspect ComponentCount {
+    private int FClass.numComponents = 0;
+
+    protected void FClass.countComponent() {
+        numComponents++;
+    }
+
+    public int FClass.numberOfComponents() {
+        return numComponents;
+    }
 }
 
