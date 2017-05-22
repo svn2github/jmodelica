@@ -3324,13 +3324,20 @@ aspect SemiLinear {
 	eq FSemiLinearExp.isSemiLinear() = true;
 
     syn FExp FSemiLinearExp.asIfExp() {
-        FExp exp = new FIfExp(new FGeqExp(getX().treeCopy(), new FIntegerLitExp(0)),
-            new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
-            new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
+        FExp exp = new FIfExp(getGuardExp().treeCopy(), 
+                createBranchExp(true), createBranchExp(false));
         if (isSmoothInSemiLinear()) {
             exp = new FNoEventExp(exp);
         }
         return exp;
+    }
+
+    syn lazy FExp FSemiLinearExp.getGuardExp() = 
+        new FGeqOrGtExp(getX().treeCopy(), new FIntegerLitExp(0));
+
+    public FExp FSemiLinearExp.createBranchExp(boolean positive) {
+        FExp slope = positive ? getPosSlope() : getNegSlope();
+        return new FMulExp(getX().treeCopy(), slope.treeCopy());
     }
 
     /**

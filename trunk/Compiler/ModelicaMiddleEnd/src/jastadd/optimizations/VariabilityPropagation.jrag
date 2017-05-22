@@ -695,8 +695,32 @@ aspect ConstantFolding {
                     return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
                 }
             } catch (ConstantEvaluationException e) {}
-                return this;
+            return this;
+        }
+    }
+
+    public void FSemiLinearExp.enableConstantFolding() {
+        super.enableConstantFolding();
+        if (!getX().isLiteralZero()) {
+            getGuardExp().enableConstantFolding();
+            if (!constantFoldingEnabled && getGuardExp().isConstantExp()) {
+                try {
+                    selectBranchValue = getGuardExp().ceval().booleanValue();
+                    selectBranch = true;
+                    is$Final = false;
+                } catch (ConstantEvaluationException e) {}
             }
+        }
+    }
+
+    private boolean FSemiLinearExp.selectBranch = false;
+    private boolean FSemiLinearExp.selectBranchValue = false;
+
+    rewrite FSemiLinearExp {
+        when (selectBranch) to FExp {
+            selectBranch = false;
+            return createBranchExp(selectBranchValue);
+        }
     }
 
 	public void FAbstractExp.enableConstantFolding() {
