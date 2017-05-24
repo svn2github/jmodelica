@@ -788,7 +788,6 @@ abstract public class OptionRegistry {
              RuntimeLogLevel.WARNING,
              "Log level for the runtime: 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 - verbose, 6 - debug.",
              RuntimeLogLevel.NONE, RuntimeLogLevel.MAXDEBUG),
-
         ENFORCE_BOUNDS
             ("enforce_bounds",
              OptionType.runtime, 
@@ -911,7 +910,7 @@ abstract public class OptionRegistry {
             ("block_solver_experimental_mode",
              OptionType.runtime, 
              Category.experimental,
-             128,
+             0,
              "Activates experimental features of equation block solvers",
              0, Integer.MAX_VALUE),
         NLE_SOLVER_DEFAULT_TOL

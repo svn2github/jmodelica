@@ -16119,7 +16119,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     __nle_solver_step_limit_factor_29 = (10.0);
     __nle_solver_tol_factor_30 = (1.0E-4);
     __time_events_default_tol_37 = (2.220446049250313E-14);
-    __block_solver_experimental_mode_3 = (128);
+    __block_solver_experimental_mode_3 = (0);
     __cs_experimental_mode_5 = (0);
     __cs_solver_7 = (0);
     __iteration_variable_scaling_12 = (1);
