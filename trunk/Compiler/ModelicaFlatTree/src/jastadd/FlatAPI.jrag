@@ -3147,10 +3147,9 @@ aspect Attributes {
     // min attribute
     syn boolean FVariable.minAttributeSet()           = attributeSet(FAttribute.MIN);
     syn FExp    FVariable.minAttributeExp()           = attributeExp(FAttribute.MIN);
-    syn CValue  FVariable.minAttributeCValue()        = CValue.UNKNOWN;
-    eq          FRealVariable.minAttributeCValue()    = attributeCValueReal(FAttribute.MIN, -1e20);
-    eq          FIntegerVariable.minAttributeCValue() = attributeCValueInteger(FAttribute.MIN, (int) -1e10);
-    eq          FEnumVariable.minAttributeCValue()    = attributeCValueEnum(FAttribute.MIN, type(), 1);
+    syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal(FAttribute.MIN, -1e20);
+    syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger(FAttribute.MIN, (int) -1e10);
+    syn CValue  FEnumVariable.minAttributeCValue()    = attributeCValueEnum(FAttribute.MIN, type(), 1);
     syn double  FRealVariable.minAttribute()          = minAttributeCValue().realValue();
     syn int     FIntegerVariable.minAttribute()       = minAttributeCValue().intValue();
     syn int     FEnumVariable.minAttribute()          = minAttributeCValue().intValue();
@@ -3158,10 +3157,9 @@ aspect Attributes {
     // max attribute
     syn boolean FVariable.maxAttributeSet()           = attributeSet(FAttribute.MAX);
     syn FExp    FVariable.maxAttributeExp()           = attributeExp(FAttribute.MAX);
-    syn CValue  FVariable.maxAttributeCValue()        = CValue.UNKNOWN;
-    eq          FRealVariable.maxAttributeCValue()    = attributeCValueReal(FAttribute.MAX, 1e20);
-    eq          FIntegerVariable.maxAttributeCValue() = attributeCValueInteger(FAttribute.MAX, (int) 1e10);
-    eq          FEnumVariable.maxAttributeCValue()    = attributeCValueEnum(FAttribute.MAX, type(), numEnumLiterals());
+    syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal(FAttribute.MAX, 1e20);
+    syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger(FAttribute.MAX, (int) 1e10);
+    syn CValue  FEnumVariable.maxAttributeCValue()    = attributeCValueEnum(FAttribute.MAX, type(), numEnumLiterals());
     syn double  FRealVariable.maxAttribute()          = maxAttributeCValue().realValue();
     syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
     syn int     FEnumVariable.maxAttribute()          = maxAttributeCValue().intValue();

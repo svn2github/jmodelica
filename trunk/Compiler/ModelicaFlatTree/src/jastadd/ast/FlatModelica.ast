@@ -981,16 +981,6 @@ FGtExp : FRelExp;
 FGeqExp : FRelExp;
 
 /**
- * Equivalent to FGeqExp, but can be treated as FGtExp if that allows more symbolic transformations.
- */
-FGeqOrGtExp : FGeqExp;
-
-/**
- * Equivalent to FGtExp, but can be treated as FGeqExp if that allows more symbolic transformations.
- */
-FGtOrGeqExp : FGtExp;
-
-/**
  * Base class for equality expressions (== and <>).
  */
 abstract FEqRelExp : FRelExp;
@@ -1727,7 +1717,7 @@ FHomotopyExp : FBuiltInFunctionCall ::= Actual:FExp Simplified:FExp;
 /**
  * SemiLinear built-in function.
  */
-FSemiLinearExp : FBuiltInFunctionCall ::= X:FExp PosSlope:FExp NegSlope:FExp /GuardExp:FExp/;
+FSemiLinearExp : FBuiltInFunctionCall ::= X:FExp PosSlope:FExp NegSlope:FExp;
 
 /**
  * Common base class for FInStream & FActualStream

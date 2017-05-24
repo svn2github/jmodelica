@@ -1041,17 +1041,15 @@ aspect InheritedFactoryMethods {
 	public FStringAddExp FStringAddExp.createEmptyNode() { return new FStringAddExp(); }
 	
 	// Logical operators
-    public FLtExp      FLtExp.createEmptyNode()      { return new FLtExp();  }
-    public FLeqExp     FLeqExp.createEmptyNode()     { return new FLeqExp(); }
-    public FGtExp      FGtExp.createEmptyNode()      { return new FGtExp();  }
-    public FGeqExp     FGeqExp.createEmptyNode()     { return new FGeqExp(); }
-    public FEqExp      FEqExp.createEmptyNode()      { return new FEqExp();  }
-    public FNeqExp     FNeqExp.createEmptyNode()     { return new FNeqExp(); }
-    public FNotExp     FNotExp.createEmptyNode()     { return new FNotExp(); }
-    public FOrExp      FOrExp.createEmptyNode()      { return new FOrExp();  }
-    public FAndExp     FAndExp.createEmptyNode()     { return new FAndExp(); }
-    public FGeqOrGtExp FGeqOrGtExp.createEmptyNode() { return new FGeqOrGtExp(); }
-    public FGtOrGeqExp FGtOrGeqExp.createEmptyNode() { return new FGtOrGeqExp(); }
+	public FLtExp  FLtExp.createEmptyNode()  { return new FLtExp();  }
+	public FLeqExp FLeqExp.createEmptyNode() { return new FLeqExp(); }
+	public FGtExp  FGtExp.createEmptyNode()  { return new FGtExp();  }
+	public FGeqExp FGeqExp.createEmptyNode() { return new FGeqExp(); }
+	public FEqExp  FEqExp.createEmptyNode()  { return new FEqExp();  }
+	public FNeqExp FNeqExp.createEmptyNode() { return new FNeqExp(); }
+	public FNotExp FNotExp.createEmptyNode() { return new FNotExp(); }
+	public FOrExp  FOrExp.createEmptyNode()  { return new FOrExp();  }
+	public FAndExp FAndExp.createEmptyNode() { return new FAndExp(); }
 	
 	// Literal expressions (all have different children, so mostly here for completeness)
 	public FRealLitExp         FRealLitExp.createEmptyNode()         { return new FRealLitExp();         }
@@ -1517,13 +1515,11 @@ aspect InheritedFactoryMethods {
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
-    public FLtExp.FLtExp(FExp e1, FExp e2)           { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FLeqExp.FLeqExp(FExp e1, FExp e2)         { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FGtExp.FGtExp(FExp e1, FExp e2)           { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FGeqExp.FGeqExp(FExp e1, FExp e2)         { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FEqExp.FEqExp(FExp e1, FExp e2)           { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FNeqExp.FNeqExp(FExp e1, FExp e2)         { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FGtOrGeqExp.FGtOrGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FGeqOrGtExp.FGeqOrGtExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
 
 }

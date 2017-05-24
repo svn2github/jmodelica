@@ -389,9 +389,7 @@ aspect Connections {
                 if (elseValid) 
                     res = elseExp = var.createUseExp();
                 if (thenValid && elseValid) {
-                    FExp gl = flowVar.createUseExp();
-                    FExp gr = new FRealLitExp(0.0);
-                    FExp guard = multFlow ? new FGtOrGeqExp(gl, gr) : new FGtExp(gl, gr);
+                    FExp guard = new FGtExp(flowVar.createUseExp(), new FRealLitExp(0.0));
                     res = new FIfExp(guard, thenExp, elseExp);
                     if (multFlow)
                         res = new FSmoothExp(0, res);

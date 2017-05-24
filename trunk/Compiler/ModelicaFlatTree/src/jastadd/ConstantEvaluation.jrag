@@ -138,20 +138,6 @@ aspect ConstantEvaluation {
             return new CValueString(stringValue());
         }
 
-        /**
-         * Is this a Boolean with the value true?
-         */
-        public boolean isBooleanTrue() {
-            return false;
-        }
-
-        /**
-         * Is this a Boolean with the value false?
-         */
-        public boolean isBooleanFalse() {
-            return false;
-        }
-
         public String stringExpValue() {
             return stringValue();
         }
@@ -512,20 +498,6 @@ aspect ConstantEvaluation {
 	     */
         public boolean booleanValue() { 
         	return value; 
-        }
-
-        /**
-         * Is this a Boolean with the value true?
-         */
-        public boolean isBooleanTrue() {
-            return value;
-        }
-
-        /**
-         * Is this a Boolean with the value false?
-         */
-        public boolean isBooleanFalse() {
-            return !value;
         }
 
         /**
@@ -1943,154 +1915,16 @@ aspect ConstantEvaluation {
     
     eq FAndExp.cevalEval(CValue left, CValue right) = type().and(left, right);
     eq FOrExp.cevalEval(CValue left, CValue right)  = type().or(left, right);
-
-    eq FRelExp.cevalCalc(VariableEvaluator evaluator) {
-        CValue v = CValue.UNKNOWN;
-        try {
-            v = super.cevalCalc(evaluator);
-        } catch (ConstantEvaluationException e) {}
-        if (v.isUnknown()) {
-            // TODO: Tie this into evaluators
-            v = cevalUsingMinMax();
-        }
-        return v;
-    }
     
     syn FType FRelExp.cevalType() = getLeft().type().typePromotion(getRight().type());
-
+    
     eq FEqExp.cevalEval(CValue left, CValue right)  = cevalType().equ(left, right);
     eq FNeqExp.cevalEval(CValue left, CValue right) = cevalType().neq(left, right);
     eq FGtExp.cevalEval(CValue left, CValue right)  = cevalType().gt(left, right);
     eq FGeqExp.cevalEval(CValue left, CValue right) = cevalType().geq(left, right);
     eq FLtExp.cevalEval(CValue left, CValue right)  = cevalType().lt(left, right);
     eq FLeqExp.cevalEval(CValue left, CValue right) = cevalType().leq(left, right);
-
-    // TODO: Tie this into evaluators
-    syn CValue FRelExp.cevalUsingMinMax() = CValue.UNKNOWN;
-    eq FGtExp.cevalUsingMinMax()  = calcCevalMinMax(false, true, true, false);
-    eq FGeqExp.cevalUsingMinMax() = calcCevalMinMax(false, true, true, false);
-    eq FLtExp.cevalUsingMinMax()  = calcCevalMinMax(true, false, false, true);
-    eq FLeqExp.cevalUsingMinMax() = calcCevalMinMax(true, false, false, true);
-    eq FNeqExp.cevalUsingMinMax() = 
-        calcCevalNeqMinMax().isBooleanTrue() ? CValueBoolean.TRUE : CValue.UNKNOWN;
-    eq FEqExp.cevalUsingMinMax()  = 
-        calcCevalNeqMinMax().isBooleanTrue() ? CValueBoolean.FALSE : CValue.UNKNOWN;
-
-    protected CValue FRelExp.calcCevalMinMax(boolean tlMax, boolean trMax, boolean flMax, boolean frMax) {
-        CValue val = calcCevalMinMax(true, tlMax, trMax);
-        if (!val.isUnknown()) {
-            return val;
-        }
-        return calcCevalMinMax(false, flMax, frMax);
-    }
-
-    private CValue FRelExp.calcCevalMinMax(boolean expected, boolean leftMax, boolean rightMax) {
-        CValue res = CValue.UNKNOWN;
-        if (getLeft().canCevalMinMax(leftMax) && getRight().canCevalMinMax(rightMax)) {
-            try {
-                CValue left = getLeft().cevalMinMax(leftMax);
-                CValue right = getRight().cevalMinMax(rightMax);
-                res = cevalEval(left, right);
-                if (!res.isUnknown()) {
-                    if (res.booleanValue() != expected && hasAltCevalEval()) {
-                        res = altCevalEval(left, right);
-                    }
-                    if (res.booleanValue() != expected) {
-                        res = CValue.UNKNOWN;
-                    }
-                }
-            } catch (ConstantEvaluationException e) {}
-        }
-        return res;
-    }
     
-    syn boolean FRelExp.hasAltCevalEval() = false;
-    eq FGeqOrGtExp.hasAltCevalEval()      = true;
-    eq FGtOrGeqExp.hasAltCevalEval()      = true;
-    
-    syn CValue FRelExp.altCevalEval(CValue left, CValue right) = CValue.UNKNOWN;
-    eq FGeqOrGtExp.altCevalEval(CValue left, CValue right)     = cevalType().gt(left, right);
-    eq FGtOrGeqExp.altCevalEval(CValue left, CValue right)     = cevalType().geq(left, right);
-    
-    protected CValue FEqRelExp.calcCevalNeqMinMax() {
-        FType ct = cevalType();
-        CValue lt = CValue.UNKNOWN;
-        CValue gt = CValue.UNKNOWN;
-        if (getLeft().canCevalMax() && getRight().canCevalMin()) {
-            try {
-                lt = ct.lt(getLeft().cevalMax(), getRight().cevalMin());
-            } catch (ConstantEvaluationException e) {}
-        }
-        if (getLeft().canCevalMin() && getRight().canCevalMax()) {
-            try {
-                gt = ct.gt(getLeft().cevalMin(), getRight().cevalMax());
-            } catch (ConstantEvaluationException e) {}
-        }
-        if (lt.isUnknown()) {
-            return gt;
-        } else if (gt.isUnknown()) {
-            return lt;
-        } else {
-            return type().or(lt, gt);
-        }
-    }
-
-    syn boolean FExp.canCevalMinMax(boolean max) = max ? canCevalMax() : canCevalMin();
-
-    syn boolean FExp.canCevalMin()   = false;
-    eq FIdUseExp.canCevalMin()       = getFIdUse().canCevalMin();
-    eq FAbstractDerExp.canCevalMin() = false;
-    eq FLitExp.canCevalMin()         = true;
-    eq FNegExp.canCevalMin()         = getFExp().canCevalMax();
-
-    syn boolean FIdUse.canCevalMin()  = myFV().canCevalMin();
-    eq FIdUseInstAccess.canCevalMin() = false;
-
-    syn boolean FAbstractVariable.canCevalMin() = false;
-    eq FVariable.canCevalMin()                  = minAttributeSet();
-    // TODO: when we add conditions for turning min/max into structural or not, consider variability
-
-    syn boolean FExp.canCevalMax()   = false;
-    eq FIdUseExp.canCevalMax()       = getFIdUse().canCevalMax();
-    eq FAbstractDerExp.canCevalMax() = false;
-    eq FLitExp.canCevalMax()         = true;
-    eq FNegExp.canCevalMax()         = getFExp().canCevalMin();
-
-    syn boolean FIdUse.canCevalMax()  = myFV().canCevalMax();
-    eq FIdUseInstAccess.canCevalMax() = false;
-
-    syn boolean FAbstractVariable.canCevalMax() = false;
-    eq FVariable.canCevalMax()                  = maxAttributeSet();
-    // TODO: when we add conditions for turning min/max into structural or not, consider variability
-
-    syn CValue FExp.cevalMinMax(boolean max) = max ? cevalMax() : cevalMin();
-
-    syn CValue FExp.cevalMin()    = CValue.UNKNOWN;
-    eq FIdUseExp.cevalMin()       = getFIdUse().cevalMin();
-    eq FAbstractDerExp.cevalMin() = CValue.UNKNOWN;
-    eq FLitExp.cevalMin()         = ceval();
-    eq FNegExp.cevalMin()         = cevalEval(getFExp().cevalMax());
-
-    syn CValue FIdUse.cevalMin()   = myFV().cevalMin();
-    eq FIdUseInstAccess.cevalMin() = CValue.UNKNOWN;
-
-    syn CValue FAbstractVariable.cevalMin() = CValue.UNKNOWN;
-    eq FVariable.cevalMin()                 = 
-        minAttributeSet() ? minAttributeCValue() : CValue.UNKNOWN;
-
-    syn CValue FExp.cevalMax()    = CValue.UNKNOWN;
-    eq FIdUseExp.cevalMax()       = getFIdUse().cevalMax();
-    eq FAbstractDerExp.cevalMax() = CValue.UNKNOWN;
-    eq FLitExp.cevalMax()         = ceval();
-    eq FNegExp.cevalMax()         = cevalEval(getFExp().cevalMin());
-
-    syn CValue FIdUse.cevalMax()   = myFV().cevalMax();
-    eq FIdUseInstAccess.cevalMax() = CValue.UNKNOWN;
-
-    syn CValue FAbstractVariable.cevalMax() = CValue.UNKNOWN;
-    eq FVariable.cevalMax()                 = 
-        maxAttributeSet() ? maxAttributeCValue() : CValue.UNKNOWN;
-
     eq FUnaryExp.cevalCalc(VariableEvaluator evaluator) = evaluator.evalUnOp(this, getFExp().ceval(evaluator));
     
     syn CValue FUnaryExp.cevalEval(CValue val) { throw new ConstantEvaluationException(null, "Unimplemented attribute"); }
@@ -2840,83 +2674,77 @@ aspect ConstantEvaluation {
     }
 
 
-    /**
-     * Constant evaluation of FVariable binding expressions.
-     * 
-     * If an expression is evaluated in an FClass, then identifiers are 
-     * referencing FVariables. The constant value of an FVariable is computed
-     * by evaluating the binding expression of the variable, if any. If the
-     * FVariable is not a constant or a parameter, or if it has no binding
-     * expressions, then a CValueUnknown object is returned.
-     * 
-     *  @return The constant value.
-     */
+	/**
+	 * Constant evaluation of FVariable binding expressions.
+	 * 
+	 * If an expression is evaluated in an FClass, then identifiers are 
+	 * referencing FVariables. The constant value of an FVariable is computed
+	 * by evaluating the binding expression of the variable, if any. If the
+	 * FVariable is not a constant or a parameter, or if it has no binding
+	 * expressions, then a CValueUnknown object is returned.
+	 * 
+	 *  @return The constant value.
+	 */
     syn CValue FAbstractVariable.ceval() = ceval(defaultVariableEvaluator());
-
-    syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator) = CValue.UNKNOWN;
-    eq FFunctionVariable.ceval(VariableEvaluator evaluator)         = evaluationValue(evaluator);
-    eq FVariable.ceval(VariableEvaluator evaluator)                 = ceval(evaluator, isParameter());
-    syn CValue FVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
-        CValue val;
-        if (isForIndex()) {
-            val = evaluationValue(evaluator);
-        } else if (hasParameterEquation()) {
-            val = parameterEquation().cevalParameter(evaluator, this);
-        } else if (hasBindingExp()) {
-            val = getBindingExp().ceval(evaluator);
-        } else if (variability().parameterOrLess()) {
-            val = defaultCValue(evaluator, inParameterRecord);
-        } else {
-            val = CValue.UNKNOWN;
-        }
+    
+	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator) = CValue.UNKNOWN;
+	eq FFunctionVariable.ceval(VariableEvaluator evaluator)         = evaluationValue(evaluator);
+	eq FVariable.ceval(VariableEvaluator evaluator)                 = ceval(evaluator, isParameter());
+	syn CValue FVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
+		CValue val;
+		if (isForIndex())
+			val = evaluationValue(evaluator);
+		else if (hasParameterEquation())
+			val = parameterEquation().cevalParameter(evaluator, this);
+		else if (hasBindingExp())
+			val = getBindingExp().ceval(evaluator);
+		else
+			val = defaultCValue(evaluator, inParameterRecord);
         if (isReal() && !val.isUnknown()) {
             val = val.convertReal();
         }
-        return val;
-    }
-
+		return val;
+	}
+    
     eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
         CValue val = super.ceval(evaluator, inParameterRecord);
         val.markExternalObject(name());
         return val;
     }
-
-
-    /**
-     * Constant evaluation of FVariable binding expressions.
-     * 
-     * If an expression is evaluated in an FClass, then identifiers are 
-     * referencing FVariables. The constant value of an FVariable is computed
-     * by evaluating the binding expression of the variable, if any. If the
-     * FVariable is not a constant or a parameter, or if it has no binding
-     * expressions, then a CValueUnknown object is returned.
-     * 
-     * This version only evaluates a specific cell in an array, and returns 
-     * the value for that specific cell.
-     * 
-     *  @return The constant value.
-     */
-    syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
-    eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
-    eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
+    
+	
+	/**
+	 * Constant evaluation of FVariable binding expressions.
+	 * 
+	 * If an expression is evaluated in an FClass, then identifiers are 
+	 * referencing FVariables. The constant value of an FVariable is computed
+	 * by evaluating the binding expression of the variable, if any. If the
+	 * FVariable is not a constant or a parameter, or if it has no binding
+	 * expressions, then a CValueUnknown object is returned.
+	 * 
+	 * This version only evaluates a specific cell in an array, and returns 
+	 * the value for that specific cell.
+	 * 
+	 *  @return The constant value.
+	 */
+	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
+	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
+	eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
         CValue val;
-        if (isForIndex()) {
+        if (isForIndex())
             val = evaluationValue(evaluator);
-        } else if (hasParameterEquation()) {
+        else if (hasParameterEquation())
             val = parameterEquation().cevalParameter(evaluator, this, i);
-        } else if (hasBindingExp()) {
+        else if (hasBindingExp())
             val = getBindingExp().ceval(evaluator, i);
-        } else if (variability().parameterOrLess()) {
+        else
             val = startAttributeCValue();
-        } else {
-            val = CValue.UNKNOWN;
-        }
         val = val.array().getCell(i);
         if (isReal())
             val = val.convertReal();
         return val;
     }
-
+    
     eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, Index i) {
         CValue val = super.ceval(evaluator, i);
         val.markExternalObject(name());
