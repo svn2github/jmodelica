@@ -316,91 +316,94 @@ aspect PrettyPrint {
 	    	p.print(getConstrainingClause(),str,p.indent(indent));
 	    
 	}
-	
-	public void FullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(indent);
-	    if (hasEncapsulated())
-	    	str.print("encapsulated ");
-	    if (hasPartial())
-	    	str.print("partial "); 		
- 	    if (hasRedeclare())
-	    	str.print("redeclare ");
-	    if (hasFinal())
-	    	str.print("final ");
-	    if (hasInner())
-	    	str.print("inner ");
-	    if (hasOuter())
-	    	str.print("outer ");
-	    if (hasReplaceable())
-	    	str.print("replaceable ");
-	    
- 		
- 		str.print(getRestriction().toString());
- 		str.println(" " + getName().getID());
 
-		
- 		// Print all local classes
- 		int numPubClass = 0;
-// 		str.println(indent + "public");
- 		for (int i=0;i<getNumClassDecl();i++)
- 			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
- 			 	numPubClass++;
-	 			p.print(getClassDecl(i),str,p.indent(indent));
-	 			str.println(";");
-	 			str.println();
-			}
-			
-		if (getNumClassDecl()-numPubClass>0) {	
-	 		str.println(indent + "protected");
- 			for (int i=0;i<getNumClassDecl();i++)
- 				if (((BaseClassDecl)getClassDecl(i)).isProtected()) {
-		 			p.print(getClassDecl(i),str,p.indent(indent));
-		 			str.println(";");
-		 			str.println();
-		 		}
-		}
-			
-		// Print all extends clauses
- 		for (int i=0;i<getNumSuper();i++) {
- 			p.print(getSuper(i),str,p.indent(indent));
- 			str.println(";");
- 		}
-			
- 		// Print all components
- 		int numPubComp = 0;
-// 		str.println(indent + "public");
- 		for (int i=0;i<getNumComponentDecl();i++)
- 			if (getComponentDecl(i).isPublic()) {
- 			 	numPubComp++;
-	 			p.print(getComponentDecl(i),str,p.indent(indent));
-	 			str.println(";");
-			}
-			
-		if (getNumComponentDecl()-numPubComp>0) {	
-	 		str.println(indent + "protected");
- 			for (int i=0;i<getNumComponentDecl();i++)
- 				if (getComponentDecl(i).isProtected()) {
-		 			p.print(getComponentDecl(i),str,p.indent(indent));
-		 			str.println(";");
-			}
-		}	
-		
-		if (getNumEquation()>0) {
-			str.println(indent + "equation");
-			for (int i=0;i<getNumEquation();i++) {
-				str.print(p.indent(indent));
-				p.print(getEquation(i),str,indent);
-				str.println(";");
-			}
-		}
-		
-		for (Algorithm a : getAlgorithms()) {
-			p.print(a, str, indent);
-		}
-		
-		str.print(indent + "end " + getName().getID());
-	} 
-	
+    public void FullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent);
+        if (hasEncapsulated())
+            str.print("encapsulated ");
+        if (hasPartial())
+            str.print("partial ");
+        if (hasRedeclare())
+            str.print("redeclare ");
+        if (hasFinal())
+            str.print("final ");
+        if (hasInner())
+            str.print("inner ");
+        if (hasOuter())
+            str.print("outer ");
+        if (hasReplaceable())
+            str.print("replaceable ");
+        
+        
+        str.print(getRestriction().toString());
+        str.println(" " + getName().getID());
+
+        
+        // Print all local classes
+        int numPubClass = 0;
+        for (ClassDecl cl : getClassDecls()) {
+            if (cl.isPublic()) {
+                numPubClass++;
+                if (!cl.isLibNode()) {
+                    p.print(cl, str, p.indent(indent));
+                    str.println(";\n");
+                }
+            }
+        }
+        
+        if (getNumClassDecl() > numPubClass) {
+            str.println(indent + "protected");
+            for (ClassDecl cl : getClassDecls()) {
+                if (cl.isProtected() && !cl.isLibNode()) {
+                    p.print(cl, str, p.indent(indent));
+                    str.println(";\n");
+                }
+            }
+            str.println(indent + "public");
+        }
+            
+        // Print all extends clauses
+        for (ExtendsClause sup : getSupers()) {
+            p.print(sup, str, p.indent(indent));
+            str.println(";");
+        }
+            
+        // Print all components
+        int numPubComp = 0;
+        for (ComponentDecl comp : getComponentDecls()) {
+            if (comp.isPublic()) {
+                numPubComp++;
+                p.print(comp, str, p.indent(indent));
+                str.println(";");
+            }
+        }
+        
+        if (getNumComponentDecl() > numPubComp) {
+            str.println(indent + "protected");
+            for (ComponentDecl comp : getComponentDecls()) {
+                if (comp.isProtected()) {
+                    p.print(comp, str, p.indent(indent));
+                    str.println(";");
+                }
+            }
+        }
+        
+        if (getNumEquation() > 0) {
+            str.println(indent + "equation");
+            for (AbstractEquation e : getEquations()) {
+                str.print(p.indent(indent));
+                p.print(e, str, indent);
+                str.println(";");
+            }
+        }
+        
+        for (Algorithm a : getAlgorithms()) {
+            p.print(a, str, indent);
+        }
+        
+        str.print(indent + "end " + getName().getID());
+    }
+
 	public void Algorithm.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		if (hasInitial())
