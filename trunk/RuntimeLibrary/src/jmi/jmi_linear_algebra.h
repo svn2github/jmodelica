@@ -81,9 +81,10 @@ jmi_real_t jmi_linear_algebra_ddot(jmi_real_t* x, jmi_real_t* y, jmi_int_t N);
  * @param jmi_real_t A real constant b.
  * @param jmi_real_t* A real pointer to the y vector.
  * @param jmi_int_t The number of elements.
+ * @param jmi_int_t Boolean flag indicating if matrix A should be transposed.
  * @return The dot product.
  */
-void jmi_linear_algebra_dgemv(jmi_real_t a, jmi_real_t* A, jmi_real_t* x, jmi_real_t b, jmi_real_t* y, jmi_int_t N);
+void jmi_linear_algebra_dgemv(jmi_real_t a, jmi_real_t* A, jmi_real_t* x, jmi_real_t b, jmi_real_t* y, jmi_int_t N, jmi_int_t trans);
 
 /**
  * \brief Computes the rank-1 operation, A := alpha*x*y**T + A

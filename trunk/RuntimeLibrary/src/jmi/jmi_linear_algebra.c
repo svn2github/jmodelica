@@ -84,11 +84,11 @@ jmi_real_t jmi_linear_algebra_ddot(jmi_real_t* x, jmi_real_t* y, jmi_int_t N) {
 }
 
 /* Computes  y = alpha*A*x + beta*y */
-void jmi_linear_algebra_dgemv(jmi_real_t a, jmi_real_t* A, jmi_real_t* x, jmi_real_t b, jmi_real_t* y, jmi_int_t N) {
-    char trans = 'N'; /* No transposition */
+void jmi_linear_algebra_dgemv(jmi_real_t a, jmi_real_t* A, jmi_real_t* x, jmi_real_t b, jmi_real_t* y, jmi_int_t N, jmi_int_t trans) {
+    char trans_char = trans? 'T':'N'; /* No transposition */
     int i = 1;
     
-    dgemv_(&trans, &N, &N, &a, A, &N, x, &i, &b, y, &i);
+    dgemv_(&trans_char, &N, &N, &a, A, &N, x, &i, &b, y, &i);
 }
 
 /* Computes A = alpha*x*y**T + A */

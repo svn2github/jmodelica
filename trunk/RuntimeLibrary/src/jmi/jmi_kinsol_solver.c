@@ -32,6 +32,7 @@
 #include "jmi_block_solver_impl.h"
 #include "jmi_block_solver.h"
 #include "jmi_block_log.h"
+#include "jmi_linear_algebra.h"
 
 #include "jmi_brent_search.h"
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
@@ -1819,8 +1820,7 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
     See algorithm A8.3.1 in "Numerical methods for Unconstrained Opt and NLE" */
     denom = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
     /* work_vector = Jac * step */
-    jmi_kinsol_calc_Mv(block->J, 0, kin_mem->kin_pp, solver->work_vector);
-
+    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(kin_mem->kin_pp), 0, N_VGetArrayPointer(solver->work_vector), N, FALSE);
     /* work_vector = (ResidualDelta  - Jac * step) unless below update tolerance */
     for(i = 0; i < N; i++) {
         double tempi = -(Ith(b,i) - Ith(solver->last_residual,i)) - Ith(solver->work_vector,i);
@@ -1866,8 +1866,7 @@ static int jmi_kin_make_sparse_Broyden_update(jmi_block_solver_t *block, N_Vecto
     int N = block->n;
 
     /* work_vector = Jac * step */
-    jmi_kinsol_calc_Mv(block->J, 0, kin_mem->kin_pp, solver->work_vector);
-
+    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(kin_mem->kin_pp), 0, N_VGetArrayPointer(solver->work_vector), N, FALSE);
     /* work_vector = (ResidualDelta  - Jac * step) unless below update tolerance */
     for(i = 0; i < N; i++) {
         double tempi = -(Ith(b,i) - Ith(solver->last_residual,i)) - Ith(solver->work_vector,i);
@@ -1922,12 +1921,11 @@ static int jmi_kin_make_modifiedBFGS_update(jmi_block_solver_t *block, N_Vector 
     N_VProd(solver->work_vector, block->f_scale, solver->work_vector);
     N_VProd(solver->work_vector, block->f_scale, solver->work_vector);
     /* work_vector2 = res_diff^T*f_scale^2*Jac */
-    jmi_kinsol_calc_Mv(block->J, TRUE, solver->work_vector, solver->work_vector2);
-
+    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(solver->work_vector), 0, N_VGetArrayPointer(solver->work_vector2), N, TRUE);
     /* denom1 = step^T.*kin_y_scale^2*step */
     denom1 = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
     /* work_vector = Jac * step */
-    jmi_kinsol_calc_Mv(block->J, 0, kin_mem->kin_pp, solver->work_vector);
+    jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(kin_mem->kin_pp), 0, N_VGetArrayPointer(solver->work_vector), N, FALSE);
     /* denom2 = res_diff^T.*kin_f_scale^2*Jac*step */
     denom2 = 0;
     for(i = 0; i < N; i++) {
@@ -2154,7 +2152,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             solver->gradient is the negative gradient.
          */
 
-        jmi_kinsol_calc_Mv(block->J, TRUE, x, solver->gradient);
+        jmi_linear_algebra_dgemv(1, block->J->data, N_VGetArrayPointer(x), 0, N_VGetArrayPointer(solver->gradient), N, TRUE);
     }
     if(solver->use_steepest_descent_flag) {
         /* Make step in steepest descent direction and not Newton*/
@@ -2339,7 +2337,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             }
             
             /* recalculate sJpnorm  */ 
-            jmi_kinsol_calc_Mv(block->J, FALSE, x, b);
+            jmi_linear_algebra_dgemv(1.0, block->J->data, N_VGetArrayPointer(x), 0, N_VGetArrayPointer(b), N, FALSE);
             *sJpnorm = N_VWL2Norm(b,block->f_scale);
             *sFdotJp = -sfJp; /* Due to opposite sign of solver->gradient minus is present here. */
             solver->sJpnorm = *sJpnorm;
