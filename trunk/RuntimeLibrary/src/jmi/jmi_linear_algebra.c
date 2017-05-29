@@ -124,7 +124,7 @@ jmi_int_t jmi_linear_algebra_idamax(jmi_real_t *x, jmi_int_t N) {
             j=i;
         }
     }
-    return i;
+    return j;
     /*return idamax_(&N, x, &i) - 1; */ /* Compensate for Fortran indexing */
 }
 
