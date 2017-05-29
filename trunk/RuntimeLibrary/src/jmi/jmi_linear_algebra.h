@@ -37,7 +37,7 @@ extern void dger_(int* M, int* N, double* ALPHA, double* X, int* INCX, double* Y
 extern void dgemv_(char* TRANS, int* M, int* N, double* ALPHA, double* A, int* LDA, double* X, int* INCX, double* BETA, double* Y, int* INCY);
 extern void daxpy_(int* N,double* DA,double* DX,int* INCX,double* DY, int* INCY);
 extern double ddot_(int* N, double* DX, int* INCX, double* Y, int* INCY);
-extern int idamax_(int *N, double* X, int *INC);
+/* extern int idamax_(int *N, double* X, int *INC); */
 extern double dnrm2_(int* N, double* X, int *INC);
 
 /**
