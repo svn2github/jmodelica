@@ -64,34 +64,6 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
 
 static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * block);
 
-/* Calculate matrix vector product vv = M*v or vv = M^T*v */
-static void jmi_kinsol_calc_Mv(DlsMat M, int transpose, N_Vector v, N_Vector vv) {
-    realtype*  vd = N_VGetArrayPointer(v);
-    realtype*  vvd = N_VGetArrayPointer(vv);
-    long int N = NV_LENGTH_S(v);
-    long int i,j;
-
-    if(transpose) {
-        for (i=0;i<N;i++) {
-            vvd[i] = 0;
-            for (j=0;j<N;j++){
-                vvd[i] += DENSE_ELEM(M, j, i) * vd[j];
-            }
-        }
-    } else {
-        for (i=0;i<N;i++) {
-            vvd[i] = 0;
-        }
-        for (i=0;i<N;i++) {
-            for (j=0;j<N;j++){
-                vvd[j] += DENSE_ELEM(M, j, i) * vd[i];
-                
-            }
-        }
-    }
-}
-
-
 /* Calculate Transpose(v1)*diag(w)*diag(w)*v2.
    w can be NULL in which case it is set to identity */
 static realtype jmi_kinsol_calc_v1twwv2(N_Vector v1, N_Vector v2, N_Vector w) {
