@@ -17625,6 +17625,59 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 ")})));
 end TestRelationalOp16;
+model TestRelationalOp17
+    Real x = sin(time);
+    Boolean b(start = true);
+initial equation
+    b = x > 0.5;
+equation
+    when (not pre(b)) and x > 0.5 then
+        b = true;
+    elsewhen pre(b) and x < -0.5 then
+        b = false;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp17",
+            description="Ensure that switches in DAE isn't eliminated for switch in initDAE'",
+            template="
+$C_ode_derivatives$
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x_0 = sin(_time);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _x_0 - (-0.5), _sw(1), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_0 - (0.5), _sw(0), JMI_REL_GT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = COND_EXP_EQ(LOG_EXP_NOT(pre_b_1), JMI_TRUE, _x_0 - (0.5), AD_WRAP_LITERAL(1));
+    (*res)[1] = COND_EXP_EQ(pre_b_1, JMI_TRUE, _x_0 - (-0.5), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    (*res)[0] = COND_EXP_EQ(LOG_EXP_NOT(pre_b_1), JMI_TRUE, _x_0 - (0.5), AD_WRAP_LITERAL(1));
+    (*res)[1] = COND_EXP_EQ(pre_b_1, JMI_TRUE, _x_0 - (-0.5), AD_WRAP_LITERAL(1));
+    (*res)[2] = _x_0 - (0.5);
+    JMI_DYNAMIC_FREE()
+    return ef;
+")})));
+end TestRelationalOp17;
 
 model StringOperations1
 	type E = enumeration(a, bb, ccc);
