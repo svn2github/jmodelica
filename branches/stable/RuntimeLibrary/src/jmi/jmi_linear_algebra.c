@@ -84,11 +84,11 @@ jmi_real_t jmi_linear_algebra_ddot(jmi_real_t* x, jmi_real_t* y, jmi_int_t N) {
 }
 
 /* Computes  y = alpha*A*x + beta*y */
-void jmi_linear_algebra_dgemv(jmi_real_t a, jmi_real_t* A, jmi_real_t* x, jmi_real_t b, jmi_real_t* y, jmi_int_t N) {
-    char trans = 'N'; /* No transposition */
+void jmi_linear_algebra_dgemv(jmi_real_t a, jmi_real_t* A, jmi_real_t* x, jmi_real_t b, jmi_real_t* y, jmi_int_t N, jmi_int_t trans) {
+    char trans_char = trans? 'T':'N'; /* No transposition */
     int i = 1;
     
-    dgemv_(&trans, &N, &N, &a, A, &N, x, &i, &b, y, &i);
+    dgemv_(&trans_char, &N, &N, &a, A, &N, x, &i, &b, y, &i);
 }
 
 /* Computes A = alpha*x*y**T + A */
@@ -116,9 +116,16 @@ void jmi_linear_algebra_daxpby(jmi_real_t a, jmi_real_t* x, jmi_real_t b, jmi_re
 
 /* Find the index of the max absolute value */
 jmi_int_t jmi_linear_algebra_idamax(jmi_real_t *x, jmi_int_t N) {
-    int i = 1;
-    
-    return idamax_(&N, x, &i) - 1; /* Compensate for Fortran indexing */
+    int i = 0;
+    int j=0;
+    jmi_real_t cmax = JMI_ABS(x[i]);
+    for(i=1; i<N; i++) {
+        if(JMI_ABS(x[i])>cmax) {
+            j=i;
+        }
+    }
+    return j;
+    /*return idamax_(&N, x, &i) - 1; */ /* Compensate for Fortran indexing */
 }
 
 /* Perform LU factorization using Lapack */

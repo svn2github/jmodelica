@@ -2575,25 +2575,29 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
     syn boolean FVariable.isAlgebraicContinousRealVariable()    = zCategory() == FClass.ZOrdinaryCategory.CONTINUOUS;
 
-    syn lazy String FClass.guid() {
-        try {
-            PipedInputStream in = new PipedInputStream();
-            PipedOutputStream out = new PipedOutputStream(in);
-            
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            new StreamGobbler(in).start();
-            prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
-            out.close();
-            
-            return new BigInteger(1,md5.digest()).toString(16);
-            
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+    private String FClass.guid = null;
+    public String FClass.guid() {
+        if (guid == null) {
+            try {
+                PipedInputStream in = new PipedInputStream();
+                PipedOutputStream out = new PipedOutputStream(in);
+
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
+                new StreamGobbler(in).start();
+                prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
+                out.close();
+
+                guid = new BigInteger(1,md5.digest()).toString(16);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return guid;
     }
-    
+
     private FAbstractEquation FAbstractEquation.meDifferentiated = null;
     private FAbstractEquation FAbstractEquation.meIntegrated = null;
     private FVariable FVariable.meDifferentiated = null;

@@ -340,15 +340,20 @@
     <propertyregex property="test_helper_packages" input="${test_helper_packages_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_dirs" input="${test_helper_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
-    <!-- calculate sets of jar files  -->
+    <!-- calculate sets of jar files, and set of java files to compile for them -->
     <var name="compiler_jars_temp" value="${beaver-rt_jar}" />
+    <var name="compile_java_patterns_temp" value="" />
     <for list="${jars}" param="jar">
         <sequential>
             <var name="compiler_jars_temp" value="${compiler_jars_temp}:${jar_output}/@{jar}.jar" />
+            <var name="compile_java_patterns_temp" value="${compile_java_patterns_temp}${@{jar}.jar.packages}," />
         </sequential>
     </for>
     <property name="compiler_jars" value="${compiler_jars_temp}" />
     <property name="test_jars" value="${compiler_jars}:${junit_jar}" />
+    <propertyregex property="compile_java_patterns_temp2" input="${compile_java_patterns_temp}" regexp="\." replace="/" defaultvalue="${compile_java_patterns_temp}" />
+    <propertyregex property="compile_java_patterns_temp3" input="${compile_java_patterns_temp2}" regexp="," replace="/**/*.java," defaultvalue="${compile_java_patterns_temp2}" />
+    <propertyregex property="compile_java_patterns" input="${compile_java_patterns_temp3}" regexp=",$" replace="" defaultvalue="" />
     
     
     <!-- Build compiler jars. -->
@@ -463,6 +468,7 @@
             destdir="${class_output}" 
             includeantruntime="false"
             srcdir="${java_output}:${java_dirs}" 
+            includes="${compile_java_patterns}" 
             excludes="${test_helper_java_patterns}" />
     </target>
     
@@ -921,7 +927,7 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
         <mkdir dir="${test_class_output}" />
         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" fork="true" encoding="UTF8" debug="false" 
                 destdir="${test_class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
-                srcdir="${test_package_output}:${test_helper_dirs}:${junit_dirs}"/>
+                srcdir="${junit_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
 
     <!-- Run all generated JUnit tests. -->
@@ -930,7 +936,7 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
         <junit printsummary="yes" fork="true" maxmemory="1G">
             <classpath path="${test_jars}:${test_class_output}:${junit_dirs}:${test_resource_dirs}:${resource_dirs}" />
             <formatter type="xml" />
-            <batchtest fork="yes" todir="${test_output}" >
+            <batchtest fork="yes" todir="${test_output}" skipNonTests="true">
                 <fileset dir="${test_class_output}" excludes="${test_helper_class_patterns}" />
             </batchtest>
         </junit>

@@ -166,8 +166,8 @@ public abstract class ModelicaLogger {
     /**
      * Log the compiled unit, it will be written on level info.
      */
-    public void logCompiledUnit(File unitFile) {
-        logCompiledUnit(new CompiledUnit(unitFile));
+    public void logCompiledUnit(File unitFile, int numberOfComponents) {
+        logCompiledUnit(new CompiledUnit(unitFile, numberOfComponents));
     }
 
     /**

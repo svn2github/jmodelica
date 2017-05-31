@@ -1994,6 +1994,15 @@ aspect FlatExpressions {
 
     public abstract FExp CommonForIndex.getFExp();
 
+    /**
+     * Check if this expression is in an FArray expression. Either directly or
+     * a thorugh a sequence of other expressions.
+     */
+    inh boolean FExp.inFArray();
+    eq FExp.getChild().inFArray()    = inFArray();
+    eq FArray.getChild().inFArray()   = true;
+    eq BaseNode.getChild().inFArray() = false;
+
 }
 
 

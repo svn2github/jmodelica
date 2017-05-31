@@ -71,6 +71,7 @@ import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.streams.*;
+import org.jmodelica.util.files.*;
 
 import org.xml.sax.SAXException;
 
@@ -315,23 +316,14 @@ public class ModelicaCompiler {
     }
 
     public void deleteOutDir() {
-        if (outDir != null)
-            recursiveDelete(outDir);
+        if (outDir != null) {
+            FileUtil.recursiveDelete(outDir);
+        }
         outDir = null;
         sourceDir = null;
         resourceDir = null;
     }
-    
-    protected void recursiveDelete(File dir) {
-        for (File f : dir.listFiles()) {
-            if (f.isDirectory())
-                recursiveDelete(f);
-            else
-                f.delete();
-        }
-        dir.delete();
-    }
-    
+
     public CCompilerDelegator getCCompiler() {
         String c_compiler = options.getStringOption(CCompilerDelegator.OPTION);
         if (delegator == null || !c_compiler.equals(delegator_name)) {
@@ -871,14 +863,16 @@ public class ModelicaCompiler {
                 CCompilerDelegator ccompiler = getCCompiler();
                 CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(cFileName, fc, target);
                 ccompiler.compileCCode(ccArgs, outDir);
-                ccompiler.copySharedLibs(outDir, ccArgs.getExternalLibraries(), ccArgs.getExternalLibraryDirectories());
+                ccompiler.copySharedLibs(outDir, ccArgs.getExternalLibraries());
                 ASTNode.endStep("compileCCode()");
             }
             hookCodeCompiled();
             
             // package unit
             ASTNode.beginStep("packUnit()");
-            unitFile = packUnit(className, compileTo, target).getPath();
+            File unitPath = packUnit(className, compileTo, target, fc);
+            unitFile = unitPath.getPath();
+            log.logCompiledUnit(unitPath, fc.numberOfComponents());
             deleteOutDir();
             ASTNode.endStep("packUnit()");
         } finally {
@@ -888,51 +882,6 @@ public class ModelicaCompiler {
                 ASTNode.getStepInfo().writeCSVFile(new File(FClass.removeModifiersFromClassName(className) + ".csv"));
         }
         
-        return unitFile;
-    }
-
-    /**
-     * Packs a FMU (helper function for compileUnit).
-     * 
-     * @param className  Name of model class that was compiled (will determine file names).
-     * @param path       Location on file system where the packed file should be saved (created if does not exist).
-     * @param target     Target object, contains information about the target, its unit suffix for example.
-     * @return the path to the packed unit 
-     */
-    protected File packUnit(String className, String path, TargetObject target) throws PackingFailedException {
-        File unitFile = new File(path);
-        if (unitFile.isDirectory()) { 
-            String mMangledName = FClass.convertClassNameToUnderscore(className);
-            unitFile = new File(unitFile, mMangledName + "." + target.getUnitSuffix());
-        } else {
-            File dirPath = unitFile.getParentFile();
-            if (dirPath != null && !dirPath.isDirectory())
-                unitFile.getParentFile().mkdirs();
-        }
-        
-        // Create the new archive
-        int BUFFER_SIZE = 2048;
-        try {
-            hookCheckAbort();
-            FileOutputStream dest = new FileOutputStream(unitFile);
-            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-            out.setMethod(ZipOutputStream.DEFLATED);
-            if(!options.getBooleanOption("copy_source_files_to_fmu")) {
-            	recursiveDelete(sourceDir);
-            	sourceDir = null;
-            }
-            zipDir(outDir, out);
-            out.close();
-        } catch (CompilationAbortedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new PackingFailedException(String.format("Could not write to '%s'", unitFile));
-        } finally {
-            // remove files
-            deleteOutDir();
-        }
-        log.logCompiledUnit(unitFile);
-        hookFmuPacked(unitFile.getAbsoluteFile());
         return unitFile;
     }
 
@@ -1394,27 +1343,6 @@ public class ModelicaCompiler {
     }
 
     /**
-     * Generate an output file.
-     * 
-     * @param fc    the FClass to generate code for
-     * @param tmpl  the path to the template
-     * @param gen   the code generator to use 
-     * @param dir   the directory to put the output file in
-     * @param name  the name of the output file
-     */
-    void generateFile(String tmpl, AbstractGenerator gen, File dir, String name, String header) 
-            throws FileNotFoundException {
-        if (tmpl != null || gen instanceof GenericXMLGenerator) {
-            hookCheckAbort();
-            hookCodeGeneratorCreated(gen);
-            File outFile = new File(dir, name);
-            boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
-            gen.generate(tmpl, new SplitFilesCodeStream(outFile, debugGen, header), header);
-            log.debug("Generated file '" + outFile + "'.");
-        }
-    }
-    
-    /**
      * 
      * Generates XML and c code for a flattened model represented as an instance
      * of FClass using template files. The XML variables, XML values and c files
@@ -1446,8 +1374,8 @@ public class ModelicaCompiler {
         
         Templates templates = target.getTemplates(getOptions());
     
-        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
+        templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
         
         hookCodeGenerated(outDir);
         log.debug("... code generated.");
@@ -2188,6 +2116,100 @@ public class ModelicaCompiler {
     protected void ModelicaCompiler.error(String message) {
         errorHandler.problem(new Problem("", message, ProblemSeverity.ERROR));
     }
+
+    /**
+     * Generate an output file.
+     * 
+     * @param fc    the FClass to generate code for
+     * @param tmpl  the path to the template
+     * @param gen   the code generator to use 
+     * @param dir   the directory to put the output file in
+     * @param name  the name of the output file
+     */
+    void ModelicaCompiler.generateFile(String tmpl, AbstractGenerator gen, File dir, String name, String header) 
+            throws FileNotFoundException {
+
+        if (tmpl != null || gen instanceof GenericXMLGenerator) {
+            hookCheckAbort();
+            hookCodeGeneratorCreated(gen);
+            File outFile = new File(dir, name);
+            boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
+            gen.generate(tmpl, new SplitFilesCodeStream(outFile, debugGen, header), header);
+            log.debug("Generated file '" + outFile + "'.");
+        }
+    }
+
+    /**
+     * Packs a FMU (helper function for {@link #compileUnit()}).
+     * 
+     * @param className
+     *          The qualified name of the class for which to create a source code FMU.
+     * @param destination
+     *          The path where to put the packaged FMU.
+     * @param target
+     *          A {@link TargetObject} containing information about the target.
+     * @param externalLibraries
+     *          External libraries used for the unit.
+     * @return
+     *          the path to the packaged unit.
+     */
+    protected File ModelicaCompiler.packUnit(String className, String path,
+            TargetObject target, FClass fClass) throws PackingFailedException {
+
+        File unitFile = makePackagingDirs(className, new File(path), target);
+
+        try {
+            hookCheckAbort();
+            FileOutputStream dest = new FileOutputStream(unitFile);
+            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+            out.setMethod(ZipOutputStream.DEFLATED);
+
+            if(!options.getBooleanOption("copy_source_files_to_fmu")) {
+                FileUtil.recursiveDelete(sourceDir);
+                sourceDir = null;
+            }
+
+            zipDir(outDir, out);
+            out.close();
+        } catch (CompilationAbortedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile));
+        } finally {
+            deleteOutDir();
+        }
+
+        hookFmuPacked(unitFile.getAbsoluteFile());
+        return unitFile;
+    }
+
+    /**
+     * Calculates the destination directory for a packaged unit. If the specified destination is a file its directory
+     * is chosen as destination. If the destination does not exist, it is created (using {@link File#mkdirs()}).
+     * 
+     * @param className
+     *          The qualified name of the class for to create a unit for.
+     * @param destination
+     *          The path where to put the packaged unit.
+     * @param target
+     *          A {@link TargetObject} containing information about the target.
+     * @return
+     *          the path to the destination directory of the packaged unit.
+     */ 
+    private File ModelicaCompiler.makePackagingDirs(String className, File destination, TargetObject target) {
+        File dest = new File(destination.getAbsolutePath());
+        if (dest.isDirectory()) { 
+            String mangledName = FClass.convertClassNameToUnderscore(className);
+            dest = new File(dest, mangledName + "." + target.getUnitSuffix());
+        } else {
+            File destDir = dest.getParentFile();
+            if (destDir != null && !destDir.isDirectory()) {
+                dest.getParentFile().mkdirs();
+            }
+        }
+        return dest;
+    }
+
 }
 
 
@@ -2452,12 +2474,12 @@ public class XMLGeneratorHolder {
     private XMLGeneratorHolder(GenericXMLGenerator.Creator xmlGen) {
         this.xmlGen = xmlGen;
     }
-    
+
     private XMLGeneratorHolder() {
         this.xmlGen = null;
     }
 }
-    
+
 public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
     if (xmlGen == null) {
         return null;
@@ -2682,9 +2704,10 @@ public abstract class CCompilerDelegator {
     
     private static Map<String, String> env = System.getenv();
     private String[] targetPlatforms = null;
-    
+
+    protected Set<String> sharedLibs = new HashSet<String>();
     protected java.util.List<String> moduleLibNames;
-    
+
     public void setModuleLibraryNames(java.util.List<String> names) {
         moduleLibNames = names;
     }
@@ -2838,12 +2861,11 @@ public abstract class CCompilerDelegator {
     /**
      * Copy shared libs to binaries[\<platform>] folder.
      */
-    public void copySharedLibs(File outDir, Set<String> ext_libs, 
-            Set<String> ext_lib_dirs) {
+    public void copySharedLibs(File outDir, Set<String> ext_libs) {
         for (String platform : getTargetPlatforms()) {
             StringOperation po = new PlatformDirOperation(platform);
             StringOperation sh = new SharedLibOperation(platform);
-            for (String dir : ext_lib_dirs) {
+            for (String dir : sharedLibs) {
                 String dirpath = po.op(dir);
                 for (String lib : ext_libs) {
                     String libname = sh.op(lib);
@@ -2861,6 +2883,7 @@ public abstract class CCompilerDelegator {
                 }
             }
         }
+        sharedLibs.clear();
     }
     
     public static Map<String, String> getEnv() {
@@ -3087,6 +3110,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
                 new PlatformDirOperation(platform),
                 new QuoteOperation("-L"));
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
+        sharedLibs.addAll(expandedLibDirs);
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
     

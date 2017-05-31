@@ -716,6 +716,10 @@ aspect Environments {
     eq InstArrayExpandableConnector.getInstComponentDecl(int i).myInstNode()         = 
         template(i).myInstNode();
 
+    inh InstNode InstNode.myParentInstNode();
+    eq Root.getChild().myParentInstNode()     = null;
+    eq InstNode.getChild().myParentInstNode() = this;
+
     //The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = getLookupNode();
 

@@ -793,6 +793,8 @@ aspect FileNames {
 
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName()         = fileName();
+    eq LibNode.getChild().retrieveFileName()          = fileName();
+    eq InstLibNode.getChild().retrieveFileName()      = getClassDecl().fileName();
     eq Program.getAnonymousClass().retrieveFileName() = ParserHandler.ANONYMOUS_CLASS_FILENAME;
     
     public void Root.setFileName(String fName)             { this.fName = fName; }
@@ -1718,6 +1720,9 @@ aspect ClassDeclMethods {
         }
         return false;
     }
+
+    syn boolean ClassDecl.isLibNode() = false;
+    eq LibNode.isLibNode()            = true;
 }
 
 

@@ -115,7 +115,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param fclass An FClass object used as a basis for the code generation.
      */
     public FmiXMLGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
-        super(expPrinter,escapeCharacter, fclass);
+        super(expPrinter, escapeCharacter, fclass);
     }
     
     /**
@@ -981,60 +981,94 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         }
 	}
 	
-	/**
-	 * Internal class used to generate a ModelExchange tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_modelExchange extends METag {
-		
-		
-		public XMLTag_modelExchange(AbstractGenerator myGenerator, FClass fclass) {
-			super("modelExchange", "ModelExchange", myGenerator, fclass);
-		}
-		
-		public void generateAttributes(CodeStream genPrinter) {
-            Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
-            
-			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
-			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
-			generateAttribute("completedIntegratorStepNotNeeded",    false,                   genPrinter);
-			generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
-			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
-			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
-			generateAttribute("canSerializeFMUstate",                false,                   genPrinter);
-			generateAttribute("providesDirectionalDerivative",       supportDirDer,           genPrinter);
-        }
-	}
 
-	/**
-	 * Internal class used to generate a CoSimulation tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_coSimulation extends CSTag {
-		
-		
-		public XMLTag_coSimulation(AbstractGenerator myGenerator, FClass fclass) {
-			super("coSimulation", "CoSimulation", myGenerator, fclass);
-		}
-		
-		public void generateAttributes(CodeStream genPrinter) {
+    /**
+     * Internal class used to generate a ModelExchange tag.
+     * 
+     * @see XMLTag
+     */
+    public class XMLTag_modelExchange extends METag {
+
+        public XMLTag_modelExchange(AbstractGenerator myGenerator, FClass fclass) {
+            super("modelExchange", "ModelExchange", myGenerator, fclass);
+        }
+
+        @Override
+        public String[] children() {
+            return modelExchangeChildren.toArray(new String[modelExchangeChildren.size()]);
+        }
+
+        @Override
+        public void generateAttributes(CodeStream genPrinter) {
             Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
             
-			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
-			generateAttribute("needsExecutionTool",                     false,                   genPrinter);
-			generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
-			generateAttribute("canInterpolateInputs",                   true,                    genPrinter);
-			generateAttribute("maxOutputDerivativeOrder",               0,                       genPrinter);
-			generateAttribute("canRunAsynchronuously",                  false,                   genPrinter);
-			generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
-			generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
-			generateAttribute("canSerializeFMUstate",                   false,                   genPrinter);
-			generateAttribute("providesDirectionalDerivative",          supportDirDer,           genPrinter);
+            generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
+            generateAttribute("needsExecutionTool",                  false,                   genPrinter);
+            generateAttribute("completedIntegratorStepNotNeeded",    false,                   genPrinter);
+            generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
+            generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
+            generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
+            generateAttribute("canSerializeFMUstate",                false,                   genPrinter);
+            generateAttribute("providesDirectionalDerivative",       supportDirDer,           genPrinter);
         }
-	}
-	
+    }
+
+    private static java.util.List<String> modelExchangeChildren = new ArrayList<String>();
+
+    /**
+     * Adds extra children to the {@code &lt;ModelExchange$gt;} tag.
+     *
+     * @param childName
+     *          The name of the child to add.
+     */
+    public static void addModelExchangeChild(String childName) {
+        modelExchangeChildren.add(childName);
+    }
+
+    /**
+     * Internal class used to generate a CoSimulation tag.
+     * 
+     * @see XMLTag
+     */
+    public class XMLTag_coSimulation extends CSTag {
+
+        public XMLTag_coSimulation(AbstractGenerator myGenerator, FClass fclass) {
+            super("coSimulation", "CoSimulation", myGenerator, fclass);
+        }
+
+        @Override
+        public String[] children() {
+            return coSimulationChildren.toArray(new String[coSimulationChildren.size()]);
+        }
+
+        public void generateAttributes(CodeStream genPrinter) {
+            Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
+            
+            generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
+            generateAttribute("needsExecutionTool",                     false,                   genPrinter);
+            generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
+            generateAttribute("canInterpolateInputs",                   true,                    genPrinter);
+            generateAttribute("maxOutputDerivativeOrder",               0,                       genPrinter);
+            generateAttribute("canRunAsynchronuously",                  false,                   genPrinter);
+            generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
+            generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
+            generateAttribute("canSerializeFMUstate",                   false,                   genPrinter);
+            generateAttribute("providesDirectionalDerivative",          supportDirDer,           genPrinter);
+        }
+    }
+
+    private static java.util.List<String> coSimulationChildren = new ArrayList<String>();
+
+    /**
+     * Adds extra children to the {@code &lt;CoSimulation$gt;} tag.
+     *
+     * @param childName
+     *          The name of the child to add.
+     */
+    public static void addCoSimulationChild(String childName) {
+        coSimulationChildren.add(childName);
+    }
+
 	/**
 	 * Internal class used to generate a UnitDefinitions tag.
 	 * 
