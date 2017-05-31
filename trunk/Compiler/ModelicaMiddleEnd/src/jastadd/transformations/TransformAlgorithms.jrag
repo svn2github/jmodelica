@@ -1,0 +1,204 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect TransformAlgorithms {
+
+    public class FClass {
+        public class transformAlgorithms extends Transformation {
+            public void perform() {
+                AlgorithmTransformer.visit(algorithms(), new IndicatorAlgoTransformer());
+                flushAllRecursive();
+            }
+        }
+    }
+
+    /**
+     * Visitor pattern for inserting new statements in an algorithm.
+     * <p>
+     * {@code transform(FAlgorithm)} is called for each start of an algorithm.
+     * {@code transform(FStatement)} is called for each statement.
+     */
+    public abstract class AlgorithmTransformer {
+        private ArrayList<ArrayList<FStatement>> blocks = new ArrayList<ArrayList<FStatement>>();
+
+        protected void add(FStatement stmt) {
+            blocks.get(blocks.size() - 1).add(stmt);
+        }
+
+        protected void addAll(Collection<? extends FStatement> stmts) {
+            for (FStatement stmt : stmts) {
+                add(stmt);
+            }
+        }
+
+        public static void visit(Collection<FAlgorithm> algs, AlgorithmTransformer tf) {
+            for (FAlgorithm alg : algs) {
+                tf.visit(alg);
+            }
+        }
+
+        public void visit(FAlgorithm alg) {
+            blocks.add(new ArrayList<FStatement>());
+            if (transform(alg)) {
+                for (FStatement stmt : alg.getFStatements()) {
+                    stmt.acceptTransform(this);
+                }
+            } else {
+                for (FStatement stmt : alg.getFStatements()) {
+                    add(stmt);
+                }
+            }
+            alg.setFStatementList(new List<FStatement>(blocks.remove(blocks.size()-1)));
+        }
+
+        public List<FStatement> visit(List<FStatement> stmts) {
+            blocks.add(new ArrayList<FStatement>());
+            for (FStatement stmt : stmts) {
+                stmt.acceptTransform(this);
+            }
+            return new List<FStatement>(blocks.remove(blocks.size() - 1));
+        }
+
+        public void visit(FStatement stmt) {
+            transform(stmt);
+        }
+
+        public void visit(FForStmt stmt) {
+            stmt.setForStmtList(visit(stmt.getForStmts()));
+            transform(stmt);
+        }
+
+        public void visit(FWhileStmt stmt) {
+            stmt.setWhileStmtList(visit(stmt.getWhileStmts()));
+            transform(stmt);
+        }
+
+        public void visit(FIfStmt stmt) {
+            for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
+                clause.setFStatementList(visit(clause.getFStatements()));
+            }
+            stmt.setElseStmtList(visit(stmt.getElseStmts()));
+            transform(stmt);
+        }
+
+        public void visit(FWhenStmt stmt) {
+            for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
+                clause.setFStatementList(visit(clause.getFStatements()));
+            }
+            transform(stmt);
+        }
+
+        /**
+         * Returns true if other statements should be visited
+         *
+         * @return
+         *          {@code true} if other statements should be visited,
+         *          {@code false} otherwise.
+         */
+        public boolean transform(FAlgorithm alg) { return true; }
+
+        public void transform(FStatement stmt) { add(stmt); }
+    }
+
+    public void FAlgorithm.acceptTransform(AlgorithmTransformer tf)     { tf.visit(this); }
+    public void FStatement.acceptTransform(AlgorithmTransformer tf)     { tf.visit(this); }
+    public void FAssignStmt.acceptTransform(AlgorithmTransformer tf)    { tf.visit(this); }
+    public void FIfStmt.acceptTransform(AlgorithmTransformer tf)        { tf.visit(this); }
+    public void FForStmt.acceptTransform(AlgorithmTransformer tf)       { tf.visit(this); }
+    public void FWhileStmt.acceptTransform(AlgorithmTransformer tf)     { tf.visit(this); }
+    public void FWhenStmt.acceptTransform(AlgorithmTransformer tf)      { tf.visit(this); }
+
+    /**
+     * Generates initial statements and indicator statements for relational expressions.
+     */
+    public class IndicatorAlgoTransformer extends AlgorithmTransformer {
+        public boolean transform(FAlgorithm alg) {
+
+            // Generate indicator NTA:s.
+            for (FRelExp exp : alg.relExpInEquation()) {
+                if (exp.dependsOn(alg.referencedFVariablesInLHS())) {
+                    exp.genIndicator();
+                }
+            }
+
+            // Add indicator initial statements
+            for (FRelExp exp : alg.relExpInEquation()) {
+                if (exp.hasIndicator() && exp.needsIndicatorInit()) {
+                    add(exp.indicatorInitStmt());
+                }
+            }
+            return true;
+        }
+
+        public void transform(FStatement stmt) {
+
+            // Add indicator statements.
+            for (FRelExp exp : stmt.relExpInStmt()) {
+                if (exp.hasIndicator()) {
+                    add(exp.indicatorStmt());
+                }
+            }
+            add(stmt);
+        }
+    }
+
+    syn boolean FExp.dependsOn(Collection<FVariable> fvs) {
+        for (FVariable fv : lookupFVariablesInSet(findFIdUseExpsInTree())) {
+            if (fvs.contains(fv)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inh boolean FRelExp.needsIndicatorInit();
+    eq Root.getChild().needsIndicatorInit()                = false;
+    eq FAlgorithm.getChild().needsIndicatorInit()          = false;
+    eq FForStmt.getForStmt().needsIndicatorInit()          = true;
+    eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
+    eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
+    eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
+
+    /**
+     * Creates an indicator for this FRelExp.
+     */
+    public void FRelExp.genIndicator() {
+        FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(),
+                new FQNameFull(calcIndicatorVarName()));
+
+        myFClass().addFVariable(v);
+        setIndicator(v.createUseExp());
+    }
+    
+    /**
+     * Creates an initial assign statement for the indicator.
+     */
+    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
+
+    /**
+     * Creates an assign statement for the indicator.
+     */
+    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().fullCopy(), indicatorExp());
+
+    syn FExp FRelExp.indicatorExp() {
+        FExp res = new FSubExp(getLeft(), getRight());
+        if (myOptions().getBooleanOption("event_indicator_scaling")) {
+            res = new FDivExp(res, nominal());
+        }
+        return res;
+    }
+
+}
