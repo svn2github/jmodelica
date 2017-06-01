@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.jmodelica.util.files.ModifiableFile;
 import org.jmodelica.util.xml.StringUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

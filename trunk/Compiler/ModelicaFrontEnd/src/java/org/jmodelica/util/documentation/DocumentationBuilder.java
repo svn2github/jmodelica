@@ -21,7 +21,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jmodelica.util.FileUtil;
+import org.jmodelica.util.files.FileUtil;
+import org.jmodelica.util.files.ModifiableFile;
 import org.jmodelica.util.xml.StringUtil;
 import org.jmodelica.util.xml.XMLPrinter;
 import org.w3c.dom.Document;
