@@ -144,13 +144,13 @@ public class FileUtil {
      *            The file to copy.
      * @param destination
      *            The location of the copied file.
-     * @param replaceExisting
+     * @param replace
      *            A flag specifying whether or not to replace the file if it
      *            already exists at {@code destination}.
      * @throws IOException
      *             if there was any error copying the file.
      */
-    public static void copy(File source, File destination, boolean replaceExisting) throws IOException {
+    public static void copy(File source, File destination, boolean replace) throws IOException {
         if (!source.exists()) {
             return;
         }
@@ -160,7 +160,7 @@ public class FileUtil {
             newFile = new File(newFile.getAbsolutePath(), source.getName());
         }
 
-        Files.copy(source.toPath(), newFile.toPath(), replaceExisting ? StandardCopyOption.REPLACE_EXISTING : null);
+        Files.copy(source.toPath(), newFile.toPath(), replace(replace));
     }
 
     /**
@@ -172,20 +172,22 @@ public class FileUtil {
      *            The source folder or file.
      * @param destination
      *            The destination folder.
+     * @param replace
+     *            A flag specifying whether or not to replace the file if it
+     *            already exists at {@code destination}.
      * @throws IOException
      *             if there was any error copying a file.
      */
-    public static void copyRecursive(File source, File destination) throws IOException {
+    public static void copyRecursive(File source, File destination, boolean replace) throws IOException {
         if (source.isDirectory()) {
-            File newDir = new File(destination.getAbsolutePath() + File.separator + source.getName());
+            File newDir = new File(destination.getAbsolutePath(), source.getName());
             newDir.mkdirs();
             for (File file : source.listFiles()) {
-                copyRecursive(file, newDir);
+                copyRecursive(file, newDir, replace);
             }
         } else if (source.isFile()) {
-            Files.copy(source.toPath(),
-                    new File(destination.getAbsolutePath() + File.separator + source.getName()).toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(source.toPath(), new File(destination.getAbsolutePath(), source.getName()).toPath(),
+                    replace(replace));
         }
     }
 
@@ -197,17 +199,15 @@ public class FileUtil {
      * @param destination
      *            The destination of the copied files (if the parameter is a
      *            file, files are copied to the same directory).
-     * @param replaceExisting
+     * @param replace
      *            A flag specifying whether or not to replace the file if it
      *            already exists at {@code destination}.
      * @throws IOException
      *             if there was any error copying the files.
      */
-    public static void copyAllTo(Collection<File> files, File destination, boolean replaceExisting) throws IOException {
-        File target = (destination.isDirectory() ? destination : destination.getParentFile());
-        StandardCopyOption replace = replaceExisting ? StandardCopyOption.REPLACE_EXISTING : null;
+    public static void copyRecursive(Collection<File> files, File destination, boolean replace) throws IOException {
         for (File file : files) {
-            Files.copy(file.toPath(), new File(target, file.getName()).toPath(), replace);
+            copyRecursive(file, destination, replace);
         }
     }
 
@@ -243,4 +243,17 @@ public class FileUtil {
         return Arrays.asList(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))).split("\n"));
     }
 
+    /**
+     * Quick method for specifying {@link StandardCopyOption#REPLACE_EXISTING}.
+     * 
+     * @param replace
+     *            Flag for whether or not to replace existing files when copying
+     *            or moving.
+     * @return
+     *         {@link StandardCopyOption#REPLACE_EXISTING} if replace is
+     *         {@code true}, {@code null} otherwise.
+     */
+    private static StandardCopyOption replace(boolean replace) {
+        return replace ? StandardCopyOption.REPLACE_EXISTING : null;
+    }
 }
