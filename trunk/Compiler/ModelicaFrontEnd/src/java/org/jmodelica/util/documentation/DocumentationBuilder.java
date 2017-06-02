@@ -209,7 +209,7 @@ public final class DocumentationBuilder {
         log("Copying images to %s.\n", imageDest);
         for (File image : images) {
             log("    Copied %s to %s.\n", image, imageDest);
-            FileUtil.copyRecursive(image, imageDest);
+            FileUtil.copyRecursive(image, imageDest, true);
         }
         log("Done building.\n");
     }
@@ -700,7 +700,7 @@ public final class DocumentationBuilder {
 
         for (File file : filesToCopy) {
             // log("    Copied %s to %s.", file, destination);
-            FileUtil.copyRecursive(file, destination);
+            FileUtil.copyRecursive(file, destination, true);
         }
         return includeFiles;
     }
