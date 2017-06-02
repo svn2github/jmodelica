@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.jmodelica.util.Enumerator;
 import org.jmodelica.util.collections.HashStack;
@@ -96,7 +97,7 @@ public abstract class Tarjan<N, C extends TarjanComponent<N>> {
      * @param members
      *      A collection where nodes forced into the same block are added
      */
-    protected void forceIntoSame(N n, Collection<N> members) {
+    protected void forceIntoSame(N n, Set<N> members) {
         // Do nothing by default
     }
 
@@ -129,7 +130,7 @@ public abstract class Tarjan<N, C extends TarjanComponent<N>> {
             Map<N, Collection<N>> predecessorCache) {
         int index = indexer.next();
         
-        Collection<N> sameBlock = new LinkedHashSet<N>();
+        Set<N> sameBlock = new LinkedHashSet<N>();
         sameBlock.add(initialNode);
         forceIntoSame(initialNode, sameBlock);
         
