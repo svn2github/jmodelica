@@ -152,6 +152,7 @@ if(WIN32)
     #Flag that is needed for compiling lib togheter with MINPACK, no dll is created.
     add_definitions(-DCMINPACK_NO_DLL)
 endif()
+add_definitions(-DJMI_INCLUDE_MINPACK)
 
 OPTION(BUILD_BLOCK_SOLVER_LIB "Build the block solver library" ON)
 if (${BUILD_BLOCK_SOLVER_LIB})
