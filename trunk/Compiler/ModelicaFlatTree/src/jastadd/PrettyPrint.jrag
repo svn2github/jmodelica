@@ -139,22 +139,33 @@ aspect PrettyPrint {
    			p.print(getChild(i),str,p.indent(indent)); // distpatch through Printer
 	}
 
-	public String ASTNode.prettyPrint(String indent) {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		CodeStream str = new NotNullCodeStream(os);
-		prettyPrint(str, indent);
-		return os.toString();
-	}
-	
-	// Override ASTNode.prettyPrint to get method on Python side (jpype bug)
-	public String BaseNode.prettyPrint(String indent) {
-		return super.prettyPrint(indent);
-	}
+    public String ASTNode.prettyPrint(String indent) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        CodeStream str = new NotNullCodeStream(os);
+        prettyPrint(str, indent);
+        return os.toString();
+    }
 
-	public void ASTNode.prettyPrint(CodeStream str,String indent) {
- 		prettyPrint(prettyPrinter,str,indent);
-	}
-	
+    public String ASTNode.prettyPrint(Printer printer) {
+        return prettyPrint(printer, "");
+    }
+
+    public String ASTNode.prettyPrint(Printer printer, String indent) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CodeStream str = new NotNullCodeStream(baos);
+        printer.print(this, str, indent);
+        return baos.toString();
+    }
+
+    // Override ASTNode.prettyPrint to get method on Python side (jpype bug)
+    public String BaseNode.prettyPrint(String indent) {
+        return super.prettyPrint(indent);
+    }
+
+    public void ASTNode.prettyPrint(CodeStream str, String indent) {
+         prettyPrint(prettyPrinter, str, indent);
+    }
+
     /**
      * Overrides default behaviour since we should use AnnotationPrettyPrinter
      * when printing annotation nodes.
