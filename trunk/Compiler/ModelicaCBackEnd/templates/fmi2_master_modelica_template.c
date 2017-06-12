@@ -19,8 +19,6 @@
 #include "stdlib.h"
 #include "math.h"
 #include "jmi.h"
-#include "jmi_block_residual.h"
-#include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 
@@ -29,15 +27,6 @@
 #include "fmi2Functions.h"
 #include "fmi2FunctionTypes.h"
 #include "fmi2TypesPlatform.h"
-
-/* FMI Funcitons. */
-$INCLUDE: fmi2_functions_common_template.c$
-#ifdef FMUME20
-$INCLUDE: fmi2_functions_me_template.c$
-#endif
-#ifdef FMUCS20
-$INCLUDE: fmi2_functions_cs_template.c$
-#endif
 
 /* Helper function for instantiating the FMU. */
 int can_instantiate(fmi2Type fmuType, fmi2String instanceName,
@@ -55,3 +44,12 @@ int can_instantiate(fmi2Type fmuType, fmi2String instanceName,
     }
     return 1;
 }
+
+/* FMI Funcitons. */
+$INCLUDE: fmi2_functions_common_template.c$
+#ifdef FMUME20
+$INCLUDE: fmi2_functions_me_template.c$
+#endif
+#ifdef FMUCS20
+$INCLUDE: fmi2_functions_cs_template.c$
+#endif
