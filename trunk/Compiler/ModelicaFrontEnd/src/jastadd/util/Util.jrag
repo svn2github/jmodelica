@@ -864,6 +864,7 @@ aspect Names {
     syn String Element.name() = null;
     eq ClassDecl.name()       = getNameNoTransform().getID();
     eq ComponentDecl.name()   = getNameNoTransform().getID();
+    eq ExtendsClause.name()   = getSuperNoTransform().name();
 
   syn String FunctionCall.name() = getNameNoTransform().name();
   
