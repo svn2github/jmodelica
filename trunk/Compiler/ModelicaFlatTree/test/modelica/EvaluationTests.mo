@@ -2471,8 +2471,6 @@ Error at line 2416, column 10, in file 'Compiler/ModelicaFlatTree/test/modelica/
 
 Error at line 2419, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for structural parameter 'n': 'f(a)'
-    in function 'EvaluationTests.EvalNoBinding5.f'
-    Failed to evaluate external function 'f', external function cache unavailable
 
 Error at line 2420, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate array size expression: n
