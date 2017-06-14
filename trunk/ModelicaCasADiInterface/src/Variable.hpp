@@ -250,7 +250,7 @@ inline void Variable::setAsEliminable() {eliminable=true;}
 inline void Variable::setAlias(Ref<Variable> modelVariable) { this->myModelVariable = modelVariable; }
 inline Ref<Variable> Variable::getModelVariable() { return isAlias() ? myModelVariable : this; }
 inline std::string Variable::getName() const { return var.getName(); }
-inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
+
 inline void Variable::setDeclaredType(Ref<VariableType> declaredType) { this->declaredType = declaredType; }
 inline Ref<VariableType> Variable::getDeclaredType() const { return declaredType; }
 inline const casadi::MX Variable::getVar() const { return var; }

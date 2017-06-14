@@ -40,5 +40,6 @@ void UserType::print(ostream& os) const {
     }
     os << ");";
 }
-
+const std::string UserType::getName() const { return name; }
+void UserType::setAttribute(AttributeKey key, AttributeValue val) { attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal(key), val)); }
 }; 

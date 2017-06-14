@@ -28,4 +28,7 @@ TimedVariable::TimedVariable(Model *owner, MX var, Ref<Variable> baseVariable, M
     this->baseVariable = baseVariable;
     this->timePoint = timePoint;
 }
+const Variable::Type TimedVariable::getType() const { return Variable::REAL; }
+const Ref<Variable> TimedVariable::getBaseVariable() { return this->baseVariable; }
+const casadi::MX TimedVariable::getTimePoint() { return this->timePoint; }
 }; // End namespace

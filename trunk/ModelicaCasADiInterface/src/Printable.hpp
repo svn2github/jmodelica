@@ -25,6 +25,7 @@ namespace ModelicaCasADi
 {
 class Printable {
     public:
+        virtual ~Printable() {}
         virtual void print(std::ostream& os) const;
         
         friend std::ostream& operator<<(std::ostream& os, const Printable& p);
@@ -34,17 +35,6 @@ class Printable {
 inline std::ostream &operator<<(std::ostream &os, const Printable &p) {
     p.print(os);
     return os;
-}
-
-inline std::string Printable::repr() {
-    std::stringstream s;
-    s << *this;
-    return s.str();    
-}
-
-inline void Printable::print(std::ostream& os) const {
-    // Test code to help debug python printing problems. Todo: remove
-    os << "<This is a Printable>";
 }
 
 inline std::string normalizeMXRespresentation(casadi::MX a){

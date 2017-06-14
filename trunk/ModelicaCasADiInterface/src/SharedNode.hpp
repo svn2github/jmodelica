@@ -34,6 +34,7 @@ namespace ModelicaCasADi
 {
 class SharedNode: public Printable {
     public:
+        virtual ~SharedNode() {}
 #ifdef MODELICACASADI_WITH_SWIG
         virtual void *_get_swig_p_type();
 #endif

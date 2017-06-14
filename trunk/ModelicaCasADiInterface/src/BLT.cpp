@@ -170,7 +170,7 @@ namespace ModelicaCasADi
     }
     
     void BLT::solveBlocksWithLinearSystems(){
-        bool first=0;         
+        /* bool first=0; */        
         for(std::vector< Ref<Block> >::iterator it=blt.begin();
         it!=blt.end() /*&& !first*/;++it) {
             if((*it)->getNumUnsolvedVariables()>1){
@@ -179,4 +179,15 @@ namespace ModelicaCasADi
             }
         }    
     }
+
+    bool BLT::hasBLT() const {return 1;}
+
+    void BLT::addDaeEquation(Ref<Equation> eq) {
+        Ref<Block> nBlock = new Block();
+        nBlock->addEquation(eq,false);
+        addBlock(nBlock);
+    }
+
+    void BLT::addBlock(Ref<Block> block){blt.push_back(block);}
+    Ref<Block> BLT::getBlock(int i) const {return blt[i];}
 }; //End namespace

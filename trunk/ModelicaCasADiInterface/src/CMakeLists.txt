@@ -43,10 +43,12 @@ set(MC_CPP
   DerivativeVariable.cpp
   TimedVariable.cpp
   Equation.cpp
+  RefCountedNode.cpp
   IntegerVariable.cpp
   Model.cpp
   ModelFunction.cpp
   OptimizationProblem.cpp
+  Printable.cpp
   RealVariable.cpp
   sharedTransferFunctionality.cpp
   transferModelica.cpp

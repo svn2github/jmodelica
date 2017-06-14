@@ -38,5 +38,6 @@ VariableType::AttributeValue* RealType::getAttribute(const AttributeKey key) {
     // If the attribute is in the map, return, otherwise return null. 
     return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : NULL;
 }
-
+const std::string RealType::getName() const { return "Real"; }
+bool RealType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }
 }; // End namespace

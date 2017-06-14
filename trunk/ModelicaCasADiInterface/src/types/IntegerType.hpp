@@ -41,7 +41,6 @@ class IntegerType : public PrimitiveType {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
-inline const std::string IntegerType::getName() const { return "Integer"; }
-inline bool IntegerType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }
+
 }; // End namespace
 #endif

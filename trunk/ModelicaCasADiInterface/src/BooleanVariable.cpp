@@ -24,4 +24,5 @@ BooleanVariable::BooleanVariable(Model *owner, casadi::MX var, Variable::Causali
 		throw std::runtime_error("A boolean variable can not have continuous variability");
 	}
 }
+const Variable::Type BooleanVariable::getType() const { return Variable::BOOLEAN; }
 }; // End namespace

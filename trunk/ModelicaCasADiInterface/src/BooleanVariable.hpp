@@ -44,6 +44,6 @@ class BooleanVariable : public Variable {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
-inline const Variable::Type BooleanVariable::getType() const { return Variable::BOOLEAN; }
+
 }; // End namespace
 #endif
