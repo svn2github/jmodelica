@@ -44,17 +44,7 @@ aspect ExternalConstantEvaluation {
         }
         return true;
     }
-
-    syn boolean FExternalStmt.hasUnknownArguments(Map<CommonVariableDecl, CValue> values) {
-        for (CommonVariableDecl cvd : varsToSerialize()) {
-            CValue val = values.containsKey(cvd) ? values.get(cvd) : cvd.ceval();
-            if (val.isPartlyUnknown()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    
     /**
      * Check if this external function should be cached as a live process.
      */
