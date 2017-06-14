@@ -937,7 +937,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
             break;
         default:
-            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
+            bsop->active_bounds_mode = jmi_project_newton_step_active_bounds_mode;
         }
     } 
         

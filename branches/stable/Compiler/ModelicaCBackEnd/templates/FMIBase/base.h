@@ -18,8 +18,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
-#include <jmi_block_residual.h>
-#include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 

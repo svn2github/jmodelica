@@ -2115,7 +2115,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             bd[i] *= solver->rScale[i];
         }
     }
-    if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
+    if(solver->use_steepest_descent_flag || block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode) {
         /* calculate steepest descent direction */
 
         /*  gradient = Transpose(J) W*W F, 
@@ -2255,7 +2255,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         realtype*  gd = N_VGetArrayPointer(solver->gradient);
         for(i = 0; i < block->n; i++) {
             xd[i] *= solver->cScale[i];
-            if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
+            if(solver->use_steepest_descent_flag || block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode) {
                 gd[i] *= solver->cScale[i];
             }
         }

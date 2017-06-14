@@ -1281,16 +1281,28 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
 
         @Override
-        protected void forceIntoSame(E e, Collection<E> members) {
+        protected void forceIntoSame(E e, Set<E> members) {
+            members.remove(e); // Added later
+            forceIntoSameInternal(e, members);
+        }
+
+        private void forceIntoSameInternal(E e, Set<E> members) {
+            if (members.contains(e)) {
+                return;
+            }
+            members.add(e);
             Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(e);
-            if (keepTogetherLists != null)
-                for (Collection<E> keepTogether : keepTogetherLists)
-                    for (E ee : keepTogether)
-                        if (ee != e && ee.tarjanVisit())
-                            members.add(ee);
-            
+            if (keepTogetherLists != null) {
+                for (Collection<E> keepTogether : keepTogetherLists) {
+                    for (E ee : keepTogether) {
+                        forceIntoSameInternal(ee, members);
+                    }
+                }
+            }
             for (SCCContributor contributor : contributors) {
-                members.addAll(contributor.sameBlockMembers(e, AbstractBiPGraph.this));
+                for (E member : contributor.sameBlockMembers(e, AbstractBiPGraph.this)) {
+                    forceIntoSameInternal(member, members);
+                }
             }
         }
 

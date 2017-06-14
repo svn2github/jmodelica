@@ -1297,11 +1297,11 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             categorieNames        = new String[] {"logLevel1", "logLevel2", "logLevel3",
                                                   "logLevel4", "logLevel5", "logLevel6"};
                                            
-            categorieDescriptions = new String[] { "logLevel1 - fatal errors", 
-                                                   "logLevel2 - errors",
-                                                   "logLevel3 - warnings",
+            categorieDescriptions = new String[] { "logLevel1 - fatal error", 
+                                                   "logLevel2 - error",
+                                                   "logLevel3 - warning",
                                                    "logLevel4 - info",
-                                                   "logLevel5 - verobse",
+                                                   "logLevel5 - verbose",
                                                    "logLevel6 - debug"};
 		}
         

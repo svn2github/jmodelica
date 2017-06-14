@@ -393,7 +393,7 @@ aspect PreBlockHandling {
             }
 
             @Override
-            protected void forceIntoSame(C n, Collection<C> members) {
+            protected void forceIntoSame(C n, Set<C> members) {
                 Collection<C> mergeList = blocksToMerge.get(n);
                 if (mergeList != null) {
                     members.addAll(mergeList);

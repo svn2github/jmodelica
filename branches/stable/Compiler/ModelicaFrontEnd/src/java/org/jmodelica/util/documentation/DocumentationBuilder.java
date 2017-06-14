@@ -21,7 +21,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jmodelica.util.FileUtil;
+import org.jmodelica.util.files.FileUtil;
+import org.jmodelica.util.files.ModifiableFile;
 import org.jmodelica.util.xml.StringUtil;
 import org.jmodelica.util.xml.XMLPrinter;
 import org.w3c.dom.Document;
@@ -208,7 +209,7 @@ public final class DocumentationBuilder {
         log("Copying images to %s.\n", imageDest);
         for (File image : images) {
             log("    Copied %s to %s.\n", image, imageDest);
-            FileUtil.copyRecursive(image, imageDest);
+            FileUtil.copyRecursive(image, imageDest, true);
         }
         log("Done building.\n");
     }
@@ -699,7 +700,7 @@ public final class DocumentationBuilder {
 
         for (File file : filesToCopy) {
             // log("    Copied %s to %s.", file, destination);
-            FileUtil.copyRecursive(file, destination);
+            FileUtil.copyRecursive(file, destination, true);
         }
         return includeFiles;
     }

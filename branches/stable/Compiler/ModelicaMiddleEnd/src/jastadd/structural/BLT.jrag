@@ -416,6 +416,10 @@ aspect BLT{
         ASTNode.beginStep("computeBLT()");
         try {
             Collection<C> components = tarjan(options, extraContributors, true);
+            ASTNode.log.debug("BLT Components:");
+            for (C component : components) {
+                ASTNode.log.debug(component);
+            }
             return EquationBlockFactory.computeBLT(options, producer, blt, isInitialSystem(), handleHomotopy, mergePre, components);
         } finally {
             ASTNode.endStep("computeBLT()");
