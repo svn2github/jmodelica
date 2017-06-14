@@ -1302,15 +1302,16 @@ aspect CCodeGenExpressions {
      */
     public void FDelayExp.genInit_C(CodePrinter p, CodeStream str, String indent) {
         FExp maxDelayExp = myMaxDelayExp();
+        boolean fixed = isTimeEventGenerating();
         p.printPreSteps(getFExp(), str, indent);
         p.printPreSteps(maxDelayExp, str, indent);
         
         str.format("%sjmi_delay_init(jmi, %d, ", indent, myDelayIndex());
-        str.print(!isTimeEventGenerating() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean fixed
+        str.print(boolValue_C(fixed)); // jmi_boolean fixed
         str.print(", "); 
-        str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
+        str.print(boolValue_C(!generatesEventInDAE())); // jmi_boolean no_event
         str.print(", "); 
-        p.print(maxDelayExp, str, indent); // jmi_real_t max_delay
+        p.print(fixed ? getDelay() : maxDelayExp, str, indent); // jmi_real_t max_delay
         str.print(", "); 
         p.print(getFExp(), str, indent); // jmi_real_t y0
         str.println(");");
@@ -1319,6 +1320,13 @@ aspect CCodeGenExpressions {
         p.printPostSteps(maxDelayExp, str, indent);
     }
     syn FExp FDelayExp.myMaxDelayExp() = hasMax() ? getMax() : getDelay();
+
+    /**
+     * 
+     */
+    public static String ASTNode.boolValue_C(boolean value) {
+        return value ? "JMI_TRUE" : "JMI_FALSE";
+    }
 
     /**
      * Generate temp declarations for the sampling of delay blocks.
@@ -1369,7 +1377,7 @@ aspect CCodeGenExpressions {
         getInitialValues().genTempArg(p.PreStep, str, indent);
         
         str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
-        str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
+        str.print(boolValue_C(!generatesEventInDAE())); // jmi_boolean no_event
         str.print(", "); 
         p.print(getX(), str, indent); // jmi_real_t x0,
         str.print(", "); 

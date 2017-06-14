@@ -21590,6 +21590,68 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end Delay5;
 
+model Delay6
+    Real x1;
+  equation
+    x1 = delay(time, 1, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Delay6",
+            description="",
+            template="
+N_delays = $n_delays$;
+$C_DAE_relations$
+
+$C_delay_init$
+$C_delay_sample$
+$C_ode_initialization$
+$C_ode_derivatives$
+
+$C_DAE_event_indicator_residuals$
+$C_DAE_initial_event_indicator_residuals$
+",
+            generatedCode="
+N_delays = 1;
+static const int N_relations = 0;
+static const int DAE_relations[] = { -1 };
+
+    jmi_delay_init(jmi, 0, JMI_TRUE, JMI_FALSE, AD_WRAP_LITERAL(1), _time);
+
+    jmi_delay_record_sample(jmi, 0, _time);
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x1_0 = _time;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x1_0 = jmi_delay_evaluate(jmi, 0, _time, AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+")})));
+end Delay6;
+
+
 model SpatialDist1
     Real x1,x2,x3,x4;
   equation

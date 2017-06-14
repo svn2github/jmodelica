@@ -15658,6 +15658,94 @@ y = semiLinear(x, s1, s2)
 end SemiLinear8;
 
 
+model Delay1
+    Real x = delay(time, y, z);
+    Real y = time;
+    Real z = time ^ 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_Delay1",
+            description="Delay, non-parameter max",
+            errorMessage="
+1 errors found:
+
+Error at line 15662, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NOT_PARAMETER:
+  Calling function delay(): third argument must be of parameter variability: z
+")})));
+end Delay1;
+
+
+model Delay2
+    Real x = delay(time, y);
+    Real y = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_Delay2",
+            description="Delay, non-parameter delay without max",
+            errorMessage="
+1 errors found:
+
+Error at line 15680, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NOT_PARAMETER:
+  Calling function delay(): second argument must be of parameter variability when third argument is not given: y
+")})));
+end Delay2;
+
+
+model Delay3
+    Real x = delay(time, y, z);
+    parameter Real y = 2;
+    parameter Real z = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_Delay3",
+            description="Delay, delay > max",
+            errorMessage="
+1 errors found:
+
+Error at line 15697, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_OVER_MAX:
+  Calling function delay(): second argument may not be larger than third argument: y = 2.0 > z = 1.0
+")})));
+end Delay3;
+
+
+model Delay4
+    Real x = delay(time, y);
+    parameter Real y = -1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_Delay4",
+            description="Delay, delay < 0",
+            errorMessage="
+1 errors found:
+
+Error at line 15715, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NEGATIVE:
+  Calling function delay(): second argument may not be negative: y = -1.0 < 0
+")})));
+end Delay4;
+
+
+model Delay5
+    Real x = delay(time, y, z);
+    Real y = time;
+    parameter Real z = -1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_Delay5",
+            description="Delay, max < 0",
+            errorMessage="
+1 errors found:
+
+Error at line 15732, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NEGATIVE:
+  Calling function delay(): third argument may not be negative: z = -1.0 < 0
+")})));
+end Delay5;
+
+
 end Special;
 
 package EventRel
