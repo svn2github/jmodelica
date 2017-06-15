@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect TransformAlgorithms {
+aspect GenerateEventIndicators {
 
     public class FClass {
 
@@ -25,7 +25,7 @@ aspect TransformAlgorithms {
          * <li>{@link EventIndicatorGenerator}; generates event indicators for equations.</li>
          * </ul>
          */ 
-        public class transformAlgorithms extends Transformation {
+        public class GenerateEventIndicators extends Transformation {
 
             @Override
             public void perform() {
