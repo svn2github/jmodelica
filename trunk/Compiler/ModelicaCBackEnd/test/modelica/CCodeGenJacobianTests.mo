@@ -551,51 +551,41 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 2;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
-        x[0] = 4;
-        x[1] = 3;
-        x[2] = 7;
-        x[3] = 8;
-        x[4] = 0;
+        x[0] = 5;
+        x[1] = 6;
+        x[2] = 0;
     } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
-        x[0] = 7;
-        x[1] = 8;
+        x[0] = 5;
+        x[1] = 6;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
-        x[0] = 536870923;
-        x[1] = 268435466;
-        x[2] = 268435465;
+        x[0] = 536870921;
+        x[1] = 268435464;
+        x[2] = 268435463;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
-        x[0] = 536870923;
-        x[1] = 268435466;
-        x[2] = 268435465;
-    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
-        x[0] = jmi->offs_sw + 0;
-        x[1] = jmi->offs_sw + 1;
-    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
-        x[0] = jmi->offs_sw + 0;
-        x[1] = jmi->offs_sw + 1;
+        x[0] = 536870921;
+        x[1] = 268435464;
+        x[2] = 268435463;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
         init_with_lbound(x[0], 0, \"Resetting initial value for variable x\");
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
-            jmi_real_t* Q1 = calloc(5, sizeof(jmi_real_t));
-            jmi_real_t* Q2 = calloc(5, sizeof(jmi_real_t));
+            jmi_real_t* Q1 = calloc(3, sizeof(jmi_real_t));
+            jmi_real_t* Q2 = calloc(3, sizeof(jmi_real_t));
             jmi_real_t* Q3 = residual;
             int i;
             char trans = 'N';
             double alpha = -1;
             double beta = 1;
-            int n1 = 5;
+            int n1 = 3;
             int n2 = 1;
-            for (i = 0; i < 5; i += 5) {
+            for (i = 0; i < 3; i += 3) {
                 Q1[i + 0] = (Q1[i + 0]) / (1.0);
                 Q1[i + 1] = (Q1[i + 1]) / (1.0);
                 Q1[i + 2] = (Q1[i + 2]) / (1.0);
-                Q1[i + 3] = (Q1[i + 3]) / (1.0);
-                Q1[i + 4] = (Q1[i + 4]) / (1.0);
             }
-            Q2[4] = 1.0;
+            Q2[2] = 1.0;
             memset(Q3, 0, 1 * sizeof(jmi_real_t));
             Q3[0] = -1.0;
             dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
@@ -606,8 +596,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             check_lbound(x[0], 0, \"Out of bounds for variable x\");
             _x_0 = x[0];
         }
-        __eventIndicator_2_8 = _time + (- pre__sampleItr_1_6) + -1;
-        __eventIndicator_1_7 = _time + (- pre__sampleItr_1_6);
         tmp_2 = _temp_1_4;
         tmp_3 = __sampleItr_1_6;
         tmp_4 = _y_1;
@@ -616,14 +604,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _y_1 = pre_y_1;
         _a_3 = pre_a_3;
         if (jmi->atInitial || jmi->atEvent) {
-            _sw(0) = jmi_turn_switch_time(jmi, __eventIndicator_1_7, _sw(0), JMI_REL_GEQ);
+            _sw(0) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6), _sw(0), JMI_REL_GEQ);
         }
         _temp_1_4 = LOG_EXP_AND(LOG_EXP_NOT(_atInitial), _sw(0));
         if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
             __sampleItr_1_6 = pre__sampleItr_1_6 + 1;
         }
         if (jmi->atInitial || jmi->atEvent) {
-            _sw(1) = jmi_turn_switch_time(jmi, __eventIndicator_2_8, _sw(1), JMI_REL_LT);
+            _sw(1) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
         }
         if (_sw(1) == JMI_FALSE) {
             jmi_assert_failed(\"Too long time steps relative to sample interval.\", JMI_ASSERT_ERROR);
@@ -659,9 +647,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             }
             _temp_2_5 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(2), _sw(3)), _atInitial), JMI_TRUE, floor(_time), pre_temp_2_5);
         }
-        _der_z_14 = _temp_2_5;
+        _der_z_12 = _temp_2_5;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_0 - (_der_z_14);
+            (*res)[0] = _x_0 - (_der_z_12);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -669,18 +657,18 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 void L_0_dim(jmi_int_t **jac) {
-    (*jac)[0] = 5;
-    (*jac)[1] = 5;
-    (*jac)[2] = 5;
+    (*jac)[0] = 3;
+    (*jac)[1] = 3;
+    (*jac)[2] = 3;
 }
 void A12_0_dim(jmi_int_t **jac) {
     (*jac)[0] = 0;
     (*jac)[1] = 1;
-    (*jac)[2] = 5;
+    (*jac)[2] = 3;
 }
 void A21_0_dim(jmi_int_t **jac) {
     (*jac)[0] = 1;
-    (*jac)[1] = 5;
+    (*jac)[1] = 3;
     (*jac)[2] = 1;
 }
 void A22_0_dim(jmi_int_t **jac) {
@@ -693,8 +681,6 @@ void L_0_col(jmi_int_t **jac) {
     (*jac)[1] = 1;
     (*jac)[2] = 2;
     (*jac)[3] = 3;
-    (*jac)[4] = 4;
-    (*jac)[5] = 5;
 }
 void A12_0_col(jmi_int_t **jac) {
     (*jac)[0] = 0;
@@ -704,9 +690,7 @@ void A21_0_col(jmi_int_t **jac) {
     (*jac)[0] = 0;
     (*jac)[1] = 0;
     (*jac)[2] = 0;
-    (*jac)[3] = 0;
-    (*jac)[4] = 0;
-    (*jac)[5] = 1;
+    (*jac)[3] = 1;
 }
 void A22_0_col(jmi_int_t **jac) {
     (*jac)[0] = 0;
@@ -716,8 +700,6 @@ void L_0_row(jmi_int_t **jac) {
     (*jac)[0] = 0;
     (*jac)[1] = 1;
     (*jac)[2] = 2;
-    (*jac)[3] = 3;
-    (*jac)[4] = 4;
 }
 void A12_0_row(jmi_int_t **jac) {
 }
@@ -731,8 +713,6 @@ void L_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = 1.0;
     (*jac)[1] = 1.0;
     (*jac)[2] = 1.0;
-    (*jac)[3] = 1.0;
-    (*jac)[4] = 1.0;
 }
 void A12_0_eval(jmi_t *jmi, jmi_real_t **jac) {
 }
@@ -817,6 +797,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
     free(jc);
     return ef;
 }
+
 ")})));
 end MultipleSolvedRealInAlgorithm;
 

@@ -423,10 +423,9 @@ fclass WhenTests.ParameterPre1
  discrete Real x(start = 0);
  discrete Real y(start = 0);
  parameter Real p = 1 /* 1 */;
- Real _eventIndicator_1;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
-initial equation
+initial equation 
  pre(x) = 0;
  pre(y) = 0;
  pre(temp_1) = false;
@@ -439,8 +438,6 @@ algorithm
  if temp_2 and not pre(temp_2) then
   y := p + 3.0;
  end if;
-equation
- _eventIndicator_1 = time - 0.25;
 end WhenTests.ParameterPre1;
 ")})));
 end ParameterPre1;

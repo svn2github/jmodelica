@@ -890,23 +890,14 @@ fclass AlgorithmTests.VariableSubscriptAssign1
  Real y[2,2];
  discrete Integer temp_1;
  discrete Integer temp_2;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
- Real _eventIndicator_3;
- Real _eventIndicator_4;
-initial equation
+initial equation 
  pre(temp_1) = 0;
  pre(temp_2) = 0;
 algorithm
- temp_2 := if time < pre(temp_2) or time >= (pre(temp_2) + 1) or initial() then integer(time) else pre(temp_2);
+ temp_2 := if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then integer(time) else pre(temp_2);
  ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_2,1] := time;
- temp_1 := if time < pre(temp_1) or time >= (pre(temp_1) + 1) or initial() then integer(time) else pre(temp_1);
+ temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
  ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_1,2] := time + 1;
-equation
- _eventIndicator_1 = time - pre(temp_2);
- _eventIndicator_2 = time - (pre(temp_2) + 1);
- _eventIndicator_3 = time - pre(temp_1);
- _eventIndicator_4 = time - (pre(temp_1) + 1);
 end AlgorithmTests.VariableSubscriptAssign1;
 ")})));
 end VariableSubscriptAssign1;

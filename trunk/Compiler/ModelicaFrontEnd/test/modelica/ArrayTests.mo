@@ -9378,14 +9378,14 @@ end IfExprTemp1;
 model IfExprTemp2
     function f
         input Real x;
-        output Real[:] y = {x, x+1};
+        output Real[:] y = {x,x+1};
     algorithm
     end f;
-
+    
     Real y;
 algorithm
-    y := if sum(f(time)) > 0 then sum(f(time)) else sum(f(time + 1));
-
+    y := if sum(f(time))>0 then sum(f(time)) else sum(f(time+1));
+    
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="IfExprTemp2",
