@@ -1204,8 +1204,8 @@ fclass ArrayTests.General.ArrayTest44
  Real b.x[2,2];
 equation
  b.x[1,1] = 1.0 + time;
- b.x[2,1] = 2 * b.x[1,1] + -1;
- b.x[1,2] = b.x[1,1] + 1;
+ b.x[2,1] = 2 * time + 1;
+ b.x[1,2] = time + 2;
  b.x[2,2] = 2 * b.x[1,1];
 end ArrayTests.General.ArrayTest44;
 ")})));

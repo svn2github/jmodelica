@@ -446,7 +446,7 @@ Algebraic real variables:
  x3: number of uses: 3, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
  x5: number of uses: 3, isLinear: false, alias: no
- x6: number of uses: 3, isLinear: true, alias: no
+ x6: number of uses: 1, isLinear: true, alias: no
  x7: number of uses: 2, isLinear: false, alias: no
 
 Input variables: 
@@ -6537,16 +6537,16 @@ Algebraic real variables:
  x[11]
     u[1]
  x[12]
-    u[2]
     u[1]
+    u[2]
  x[13]
     u[3]
  x[14]
     u[3]
     u[4]
  x[15]
-    u[2]
     u[1]
+    u[2]
     u[3]
 ")})));
 end VarDependencyTest1;
@@ -8048,10 +8048,10 @@ fclass TransformCanonicalTests.ForOfUnknownSize1
 equation
  x = TransformCanonicalTests.ForOfUnknownSize1.f({y[1], y[2], y[3], y[4]});
  y[1] = time;
- y[2] = 2 * y[1];
- y[3] = 3 * y[1];
- y[4] = 4 * y[1];
-
+ y[2] = 2 * time;
+ y[3] = 3 * time;
+ y[4] = 4 * time;
+ 
 public
  function TransformCanonicalTests.ForOfUnknownSize1.f
   input Real[:] y;
@@ -8194,10 +8194,10 @@ fclass TransformCanonicalTests.ForOfUnknownSize4
 equation
  x = TransformCanonicalTests.ForOfUnknownSize4.f({y[1], y[2], y[3], y[4]});
  y[1] = time;
- y[2] = 2 * y[1];
- y[3] = 3 * y[1];
- y[4] = 4 * y[1];
-
+ y[2] = 2 * time;
+ y[3] = 3 * time;
+ y[4] = 4 * time;
+ 
 public
  function TransformCanonicalTests.ForOfUnknownSize4.f
   input Real[:] y;
@@ -8254,14 +8254,14 @@ fclass TransformCanonicalTests.ForOfUnknownSize5
 equation
  x = TransformCanonicalTests.ForOfUnknownSize5.f({{y[1,1], y[1,2], y[1,3], y[1,4]}, {y[2,1], y[2,2], y[2,3], y[2,4]}});
  y[1,1] = time;
- y[1,2] = 2 * y[1,1];
- y[1,3] = 3 * y[1,1];
- y[1,4] = 4 * y[1,1];
- y[2,1] = 2 * y[1,1];
- y[2,2] = 3 * y[1,1];
- y[2,3] = 4 * y[1,1];
- y[2,4] = 5 * y[1,1];
-
+ y[1,2] = 2 * time;
+ y[1,3] = 3 * time;
+ y[1,4] = 4 * time;
+ y[2,1] = 2 * time;
+ y[2,2] = 3 * time;
+ y[2,3] = 4 * time;
+ y[2,4] = 5 * time;
+ 
 public
  function TransformCanonicalTests.ForOfUnknownSize5.f
   input Real[:,:] y;

@@ -144,6 +144,7 @@ aspect TransformCanonical {
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
+            transformations.add(new eliminateLinearEquations());
             transformations.add(new computeMatchingsAndBLT());
         }
 
@@ -253,6 +254,11 @@ aspect TransformCanonical {
                 setDAEInitBLT(BLT.EMPTY_BLT);
                 DAEBiPGraph = null;
                 root().flushAllRecursiveClearFinal();
+            }
+            
+            @Override
+            public String toString() {
+                return getClass().getSimpleName() + ", operating on:\n\n" + FClass.this;
             }
         }
 

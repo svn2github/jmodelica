@@ -7918,7 +7918,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _a_2 = _time;
-    _b_3 = 2 * _a_2;
+    _b_3 = 2 * _time;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
     }
@@ -7934,7 +7934,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     JMI_DEF(REA, tmp_1)
     JMI_DEF(REA, tmp_2)
     _a_2 = _time;
-    _b_3 = 2 * _a_2;
+    _b_3 = 2 * _time;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
     }
@@ -10555,8 +10555,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 3;
         x[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 20;
-        (*res)[1] = 25;
+        (*res)[0] = 14;
+        (*res)[1] = 30;
         (*res)[2] = 5;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_2_2;
@@ -10567,12 +10567,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         init_with_lbound(x[2], 1, \"Resetting initial value for variable x[1]\");
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 9 * sizeof(jmi_real_t));
-        residual[0] = 1.0;
+        residual[0] = -3;
+        residual[1] = -1.0;
         residual[2] = -1.0;
-        residual[3] = -4;
-        residual[4] = -5;
+        residual[4] = 6;
         residual[5] = 1.0;
-        residual[7] = -1.0;
+        residual[6] = -4;
         residual[8] = -1.0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
@@ -10584,14 +10584,15 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_1_1 = x[2];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = - _x_2_2 + (4 * _y_3 + -2) - (0);
-            (*res)[1] = 5 * _y_3 + -5 - (- _x_1_1);
+            (*res)[0] = 4 * _x_1_1 + 3 * _x_2_2 + -14 - (0);
+            (*res)[1] = _x_2_2 + -6 * _y_3 + 2 - (0);
             (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
         }
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end BlockTest5;
 
@@ -10650,8 +10651,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 5;
         x[2] = 3;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 20;
-        (*res)[1] = 25;
+        (*res)[0] = 14;
+        (*res)[1] = 30;
         (*res)[2] = 5;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_2_2;
@@ -10662,12 +10663,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         init_with_lbound(x[2], 6.0, \"Resetting initial value for variable x[1]\");
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 9 * sizeof(jmi_real_t));
-        residual[0] = 1.0;
+        residual[0] = -3;
+        residual[1] = -1.0;
         residual[2] = -1.0;
-        residual[3] = -4;
-        residual[4] = -5;
+        residual[4] = 6;
         residual[5] = 1.0;
-        residual[7] = -1.0;
+        residual[6] = -4;
         residual[8] = -1.0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
@@ -10679,14 +10680,15 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_1_1 = x[2];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = - _x_2_2 + (4 * _y_3 + -2) - (0);
-            (*res)[1] = 5 * _y_3 + -5 - (- _x_1_1);
+            (*res)[0] = 4 * _x_1_1 + 3 * _x_2_2 + -14 - (0);
+            (*res)[1] = _x_2_2 + -6 * _y_3 + 2 - (0);
             (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
         }
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end BlockTest6;
 
@@ -16409,9 +16411,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = 268435464;
         x[1] = 268435463;
         x[2] = 268435459;
-        x[3] = 268435460;
-        x[4] = 268435462;
-        x[5] = 268435461;
+        x[3] = 268435462;
+        x[4] = 268435461;
+        x[5] = 268435460;
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
         x[0] = 268435460;
         x[1] = 268435461;
@@ -16458,13 +16460,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _t_0 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(2), _sw(3)), _atInitial), JMI_TRUE, floor(_time), pre_t_0);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _x_3_3 = _t_0 + 3;
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _x_2_2 = _t_0 + 2;
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _x_1_1 = _t_0 + 1;
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _x_3_3 = _x_1_1 + 2;
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _x_2_2 = _x_1_1 + 1;
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = (&_x_1_1)[(int)((&_x_1_1)[(int)(_i_5 - 1)] - 1)] - (_y_4);
@@ -16537,9 +16539,9 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     pre_i_4 = _i_4;
     _is_1_5 = _i_4 + -1;
     pre_is_1_5 = _is_1_5;
-    _is_2_6 = _is_1_5 + -1;
+    _is_2_6 = _i_4 + -2;
     pre_is_2_6 = _is_2_6;
-    _is_3_7 = _is_1_5 + -2;
+    _is_3_7 = _i_4 + -3;
     pre_is_3_7 = _is_3_7;
     _x_2_3 = _time;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
@@ -18575,7 +18577,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (_sw(0) == JMI_FALSE) {
         jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
     }
-    _y_1 = _time + 2;
+    _y_1 = _x_0 + 1;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _y_1 - (AD_WRAP_LITERAL(4)), _sw(1), JMI_REL_LT);
     }
@@ -18603,7 +18605,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = _time + 1;
-    _y_1 = _time + 2;
+    _y_1 = _x_0 + 1;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(3)), _sw(0), JMI_REL_LT);
     }

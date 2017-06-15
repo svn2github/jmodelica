@@ -602,7 +602,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 514, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType2.B, and type of right-hand side is RecordTests.RecordType2.A
 ")})));
 end RecordType2;
@@ -632,7 +632,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 544, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType3.B, and type of right-hand side is RecordTests.RecordType3.A
 ")})));
 end RecordType3;
@@ -736,7 +736,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 648, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType5.D, and type of right-hand side is RecordTests.RecordType5.C
 ")})));
 end RecordType5;
@@ -809,7 +809,7 @@ model RecordType7
             errorMessage="
 1 errors found:
 
-Error at line 719, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordType7;
@@ -819,6 +819,7 @@ model RecordType8
         constant Real[:] x = {1,2};
     end R;
     Real[:] r = R.x;
+
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RecordType8",
@@ -836,6 +837,7 @@ model RecordType9
     end R;
     record R2 = R(x={3});
     R2 r2;
+
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RecordType9",
@@ -863,6 +865,7 @@ record R2 = R(x = {2, 3});
 R1 r1;
 R2 r2;
 R r[2] = { r1, r2 };
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordType10",
@@ -897,6 +900,7 @@ end R2;
 R1 r1;
 R2 r2;
 R r[2] = { r1, r2};
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordType11",
@@ -932,6 +936,7 @@ record R2
 end R2;
 
 R r[2] = { R1(1), R2(3)};
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordType12",
@@ -1040,7 +1045,7 @@ model RecordBinding3
             errorMessage="
 1 errors found:
 
-Error at line 819, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end RecordBinding3;
@@ -1063,7 +1068,7 @@ model RecordBinding4
             errorMessage="
 1 errors found:
 
-Error at line 842, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is scalar and size of binding expression is [2]
 ")})));
 end RecordBinding4;
@@ -1085,7 +1090,7 @@ model RecordBinding5
             errorMessage="
 1 errors found:
 
-Error at line 865, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
 end RecordBinding5;
@@ -1128,7 +1133,7 @@ model RecordBinding7
             errorMessage="
 1 errors found:
 
-Error at line 908, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: y
 ")})));
 end RecordBinding7;
@@ -1693,7 +1698,7 @@ fclass RecordTests.RecordBinding27
 equation
  r.t[1] = time;
  r.t[2] = time + 1;
- r.x[1,1] = -2 * (- time);
+ r.x[1,1] = 2 * r.t[1];
  r.x[2,1] = r.t[1] + r.t[2];
 end RecordTests.RecordBinding27;
 ")})));
@@ -1721,7 +1726,7 @@ model RecordBinding28
             errorMessage="
 1 errors found:
 
-Error at line 1488, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
 In component d:
   Can not infer array size of the variable a
 ")})));
@@ -1751,7 +1756,7 @@ model RecordBinding29
             errorMessage="
 1 errors found:
 
-Error at line 1527, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo',
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo',
 In component d:
   Circularity in binding expression of parameter: d.b.a = b.a
 ")})));
@@ -2002,7 +2007,7 @@ fclass RecordTests.UnmodifiableComponent5
  constant Real r[2].x = 2;
  Real w;
  discrete Integer i;
-initial equation 
+initial equation
  pre(i) = 0;
 equation
  w = RecordTests.UnmodifiableComponent5.f1(i);
@@ -2420,7 +2425,7 @@ model RecordConstructor4
             errorMessage="
 1 errors found:
 
-Error at line 2141, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: types of positional argument 3 and input c are not compatible
     type of '3' is Integer
     expected type is String
@@ -2445,10 +2450,10 @@ model RecordConstructor5
             errorMessage="
 2 errors found:
 
-Error at line 2252, column 8, in file '...':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, )).c'
 
-Error at line 2166, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: missing argument for required input c
 ")})));
 end RecordConstructor5;
@@ -2471,10 +2476,10 @@ model RecordConstructor6
             errorMessage="
 2 errors found:
 
-Error at line 2275, column 8, in file '...':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, \"foo\")).c'
 
-Error at line 2189, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: too many positional arguments
 ")})));
 end RecordConstructor6;
@@ -2556,7 +2561,7 @@ fclass RecordTests.RecordConstructor9
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordConstructor9;
 ")})));
 end RecordConstructor9;
@@ -2681,7 +2686,7 @@ model RecordConstructor13
             errorMessage="
 1 errors found:
 
-Error at line 2397, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of positional argument 2 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is Real[3]
@@ -3319,7 +3324,7 @@ model RecordConstructor30
             errorMessage="
 1 warnings found:
 
-Warning at line 3032, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
+Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
 In component c:
   Assuming 'each' for the modification 'd = {R()}'
 ")})));
@@ -3345,11 +3350,10 @@ M m(r={R(x={1},y=1:2),R(x={2,3})});
             errorMessage="
 1 errors found:
 
-Error at line 3061, column 16, in file '...':
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of named argument y and input y are not compatible
     type of '1:2' is Integer[2]
     expected type is Real[1]
-
 ")})));
 end RecordConstructor31;
 
@@ -3504,7 +3508,7 @@ fclass RecordTests.RecordConstructor36
  Real m[2].r1.x;
 equation
  m[1].r1.x = 1 + time;
- m[2].r1.x = m[1].r1.x + 1;
+ m[2].r1.x = time + 2;
 end RecordTests.RecordConstructor36;
 ")})));
 end RecordConstructor36;
@@ -4217,7 +4221,7 @@ equation
 fclass RecordTests.RecordScalarize19
  Real a1.x[1](stateSelect = StateSelect.default,start = 1);
  Real a1.x[2](stateSelect = StateSelect.default,start = 2);
-initial equation 
+initial equation
  a1.x[1] = 1;
  a1.x[2] = 2;
 equation
@@ -4250,7 +4254,7 @@ equation
 fclass RecordTests.RecordScalarize20
  Real a1.x[1](stateSelect = StateSelect.default,start = 1);
  Real a1.x[2](stateSelect = StateSelect.default,start = 2);
-initial equation 
+initial equation
  a1.x[1] = 1;
  a1.x[2] = 2;
 equation
@@ -4464,7 +4468,7 @@ model RecordScalarize25
 fclass RecordTests.RecordScalarize25
  Real b.x;
  discrete RecordTests.RecordScalarize25.A b.y;
-initial equation 
+initial equation
  pre(b.y) = RecordTests.RecordScalarize25.A.a1;
 equation
  b.x = time;
@@ -5134,7 +5138,7 @@ fclass RecordTests.RecordScalarize43
  Real x[1];
  Real x[2];
  discrete Integer temp_1;
-initial equation 
+initial equation
  pre(temp_1) = 0;
  pre(i) = 0;
 equation
@@ -5160,6 +5164,7 @@ equation
     for j in 1:size(m.r, 1) loop
         m.x[j] = m.r[j].x[m.i];
     end for;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize44",
@@ -5176,7 +5181,7 @@ fclass RecordTests.RecordScalarize44
  Real m.x[1];
  Real m.x[2];
  discrete Integer temp_1;
-initial equation 
+initial equation
  pre(temp_1) = 0;
  pre(m.i) = 0;
 equation
@@ -5202,6 +5207,7 @@ equation
     for j in 1:size(m.r,1) loop
         m.x[j] = m.r[j].x[end];
     end for;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize45",
@@ -5218,7 +5224,7 @@ fclass RecordTests.RecordScalarize45
  constant Real m.x[1] = 3.0;
  constant Real m.x[2] = 2.0;
  discrete Integer temp_1;
-initial equation 
+initial equation
  pre(temp_1) = 0;
  pre(m.i) = 0;
 equation
@@ -5243,6 +5249,7 @@ equation
     for i in 1:2 loop
         y[i] = f(r[i]);
     end for;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize46",
@@ -5275,6 +5282,7 @@ model RecordScalarize47
     R r1 = R(time);
     R r2 = R(2 * time);
     Real x = f(if p then r1 else r2);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize47",
@@ -5324,6 +5332,7 @@ model RecordScalarize48
     R[:] r2 ={R(x),R(x)};
     Real[:] x = {1,2,3};
     M[2] m(r1=if true then r1 else r2);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize48",
@@ -5443,6 +5452,7 @@ end R4;
 
 R4 r1 = R4({R3({R2(2, R1(2,fill(0,2))),R2(3, R1(3,fill(0,3)))})});
 R4 r2 = r1;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize50",
@@ -5492,6 +5502,7 @@ model RecordScalarize51
     end M;
     
     M m;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize51",
@@ -5518,6 +5529,7 @@ model RecordScalarize52
     end f;
     
     R r = if time > 1 then R(1:1) else f();
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize52",
@@ -5539,6 +5551,7 @@ model RecordScalarize53
     end R;
     R x[2] = {R(1),R(2)};
     R y = x[integer(time)];
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordScalarize53",
@@ -5549,7 +5562,7 @@ fclass RecordTests.RecordScalarize53
  constant Real x[2].x = 2;
  Real y.x;
  discrete Integer temp_1;
-initial equation 
+initial equation
  pre(temp_1) = 0;
 equation
  y.x = ({1.0, 2.0})[temp_1];
@@ -7051,7 +7064,7 @@ model RecordWithColonArray2
             errorMessage="
 1 errors found:
 
-Error at line 5961, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordWithColonArray2;
@@ -7215,7 +7228,7 @@ equation
 fclass RecordTests.RecordDer1
  Real a.x;
  Real a.y;
-initial equation 
+initial equation
  a.x = 1;
  a.y = 0;
 equation
@@ -7475,7 +7488,7 @@ model RecordParam8
             errorMessage="
 1 warnings found:
 
-Warning at line 6286, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter a.y does not have a binding expression
 ")})));
 end RecordParam8;
@@ -7497,7 +7510,7 @@ model RecordParam9
             errorMessage="
 1 warnings found:
 
-Warning at line 6311, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam9;
@@ -7525,7 +7538,7 @@ model RecordParam10
             errorMessage="
 1 warnings found:
 
-Warning at line 6339, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam10;
@@ -7675,7 +7688,7 @@ fclass RecordTests.RecordEval1
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval1;
 ")})));
 end RecordEval1;
@@ -7703,7 +7716,7 @@ fclass RecordTests.RecordEval2
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval2;
 ")})));
 end RecordEval2;
@@ -7733,7 +7746,7 @@ fclass RecordTests.RecordEval3
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval3;
 ")})));
 end RecordEval3;
@@ -7763,7 +7776,7 @@ fclass RecordTests.RecordEval4
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval4;
 ")})));
 end RecordEval4;
@@ -7805,7 +7818,7 @@ fclass RecordTests.RecordEval5
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval5;
 ")})));
 end RecordEval5;
@@ -7917,6 +7930,7 @@ model RecordEval8
     end R3;
     
     R3 r3;
+
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RecordEval8",

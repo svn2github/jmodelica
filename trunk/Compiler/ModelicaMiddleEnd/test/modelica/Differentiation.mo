@@ -32,7 +32,7 @@ fclass Differentiation.Expressions.Cos
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -57,7 +57,7 @@ fclass Differentiation.Expressions.Sin
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -82,7 +82,7 @@ fclass Differentiation.Expressions.Neg
  Real x1;
  Real x2(stateSelect = StateSelect.prefer);
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -113,7 +113,7 @@ fclass Differentiation.Expressions.Exp
  Real x2(stateSelect = StateSelect.prefer);
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -144,7 +144,7 @@ fclass Differentiation.Expressions.Tan
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -171,7 +171,7 @@ fclass Differentiation.Expressions.Asin
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -198,7 +198,7 @@ fclass Differentiation.Expressions.Acos
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -225,7 +225,7 @@ fclass Differentiation.Expressions.Atan
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -254,7 +254,7 @@ fclass Differentiation.Expressions.Atan2
  Real x3;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
  x3 = 0.0;
 equation
@@ -283,7 +283,7 @@ fclass Differentiation.Expressions.Sinh
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -310,7 +310,7 @@ fclass Differentiation.Expressions.Cosh
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -337,7 +337,7 @@ fclass Differentiation.Expressions.Tanh
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -364,7 +364,7 @@ fclass Differentiation.Expressions.Log
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -391,7 +391,7 @@ fclass Differentiation.Expressions.Log10
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -418,7 +418,7 @@ fclass Differentiation.Expressions.Sqrt
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -445,7 +445,7 @@ fclass Differentiation.Expressions.If
  Real x2(stateSelect = StateSelect.prefer);
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -476,7 +476,7 @@ fclass Differentiation.Expressions.Pow1
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -504,7 +504,7 @@ fclass Differentiation.Expressions.Pow2
  Real x3;
  Real _der_x1;
  Real _der_x2;
-initial equation 
+initial equation
  x3 = 0.0;
 equation
  _der_x1 + _der_x2 = 1;
@@ -537,7 +537,7 @@ fclass Differentiation.Expressions.Pow3
  Real _der_x1;
  Real _der_x2;
  Real _der_x4;
-initial equation 
+initial equation
  x3 = 0.0;
 equation
  _der_x1 + _der_x2 = 1;
@@ -569,7 +569,7 @@ fclass Differentiation.Expressions.Div1
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -598,7 +598,7 @@ fclass Differentiation.Expressions.Div2
  parameter Real p1 = 2 /* 2 */;
  parameter Real p2 = 5 /* 5 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -625,7 +625,7 @@ fclass Differentiation.Expressions.NoEvent
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -654,7 +654,7 @@ fclass Differentiation.Expressions.MinExp
  Real x3;
  Real _der_x2;
  Real _der_x3;
-initial equation 
+initial equation
  x1 = 0.0;
 equation
  der(x1) + _der_x2 + _der_x3 = 1;
@@ -685,7 +685,7 @@ fclass Differentiation.Expressions.MaxExp
  Real x3;
  Real _der_x2;
  Real _der_x3;
-initial equation 
+initial equation
  x1 = 0.0;
 equation
  der(x1) + _der_x2 + _der_x3 = 1;
@@ -712,7 +712,7 @@ end Differentiation.Expressions.MaxExp;
 fclass Differentiation.Expressions.Homotopy
  constant Real x1 = 0;
  Real x2;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  der(x2) = 1;
@@ -734,7 +734,7 @@ end Differentiation.Expressions.Homotopy;
 fclass Differentiation.Expressions.DotAdd
  Real x1[1];
  Real x1[2];
-initial equation 
+initial equation
  x1[1] = 0.0;
  x1[2] = 0.0;
 equation
@@ -758,7 +758,7 @@ end Differentiation.Expressions.DotAdd;
 fclass Differentiation.Expressions.DotSub
  Real x1[1];
  Real x1[2];
-initial equation 
+initial equation
  x1[1] = 0.0;
  x1[2] = 0.0;
 equation
@@ -787,7 +787,7 @@ fclass Differentiation.Expressions.DotMul
  Real x2[2];
  Real _der_x1[1];
  Real _der_x1[2];
-initial equation 
+initial equation
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
@@ -820,7 +820,7 @@ fclass Differentiation.Expressions.DotDiv
  Real x2[2];
  Real _der_x1[1];
  Real _der_x1[2];
-initial equation 
+initial equation
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
@@ -855,7 +855,7 @@ fclass Differentiation.Expressions.DotPow
  parameter Real p2[2] = 3 /* 3 */;
  Real _der_x2[1];
  Real _der_x2[2];
-initial equation 
+initial equation
  x1[1] = 0.0;
  x1[2] = 0.0;
 equation
@@ -886,7 +886,7 @@ fclass Differentiation.Expressions.DivFunc
  Real x2;
  discrete Real temp_1;
  Real _der_x1;
-initial equation 
+initial equation
  pre(temp_1) = 0.0;
  x2 = 0.0;
 equation
@@ -1109,7 +1109,7 @@ fclass Differentiation.Expressions.Ceil
  Real y;
  discrete Real temp_1;
  Real _der_x;
-initial equation 
+initial equation
  pre(temp_1) = 0.0;
  y = 0.0;
 equation
@@ -1138,7 +1138,7 @@ fclass Differentiation.Expressions.Floor
  Real y;
  discrete Real temp_1;
  Real _der_x;
-initial equation 
+initial equation
  pre(temp_1) = 0.0;
  y = 0.0;
 equation
@@ -1359,7 +1359,7 @@ fclass Differentiation.Expressions.ActualStream
  Real a2.c.s(start = 1);
  Real a2.x;
  Real a2.dx;
-initial equation 
+initial equation
  a1.c.s = -1;
  a2.c.s = 1;
 equation
@@ -1457,7 +1457,7 @@ fclass Differentiation.ComponentArray
  Real m[1]._der_vx;
  Real m[1]._der_der_x;
  Real m[1]._der_der_y;
-initial equation 
+initial equation
  m[1].y = 0.0;
  m[1].vy = 0.0;
 equation
@@ -1491,7 +1491,7 @@ fclass Differentiation.BooleanVariable
  Real y;
  constant Boolean b = false;
  Real _der_x;
-initial equation 
+initial equation
  y = 0.0;
 equation
  x = 2 + y;
@@ -1518,7 +1518,7 @@ fclass Differentiation.IntegerVariable
  Real y;
  constant Integer b = 2;
  Real _der_x;
-initial equation 
+initial equation
  y = 0.0;
 equation
  x = 1;
@@ -1537,14 +1537,14 @@ package DiscreteTime
             x1 = sin(x2) + time;
         end when;
     
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="DifferentiatedDiscreteVariable",
+            name="DiscreteTime_DifferentiatedDiscreteVariable",
             description="Test error given when differentiating a discrete real",
             errorMessage="
 1 errors found:
 
-Error at line 1532, column 40, in file 'ModelicaMiddleEnd/test/modelica/Differentiation.mo', DIFFERENTIATED_DISCRETE_VARIALBE:
+Error at line 0, column 0, in file 'Compiler/ModelicaMiddleEnd/test/modelica/Differentiation.mo', DIFFERENTIATED_DISCRETE_VARIALBE:
   Unable to differentiate the variable x1 which is declared or infered to be discrete
 ")})));
     end DifferentiatedDiscreteVariable;
@@ -1569,7 +1569,7 @@ Error at line 1532, column 40, in file 'ModelicaMiddleEnd/test/modelica/Differen
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="IntegerVariable1",
+            name="DiscreteTime_AutoDiffOfDiscrete1",
             description="Ensure that we allow the index reduction to differentiate discete variable references",
             flatModel="
 fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete1
@@ -1593,7 +1593,7 @@ fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete1
  Real dynDer(y);
  Real dynDer(_der_x);
  Real dynDer(_der_y);
-initial equation 
+initial equation
  _ds.1.s1 = 0.0;
  _ds.2.s1 = 0.0;
  y = 0.0;
@@ -1640,7 +1640,7 @@ end Differentiation.DiscreteTime.AutoDiffOfDiscrete1;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="IntegerVariable2",
+            name="DiscreteTime_AutoDiffOfDiscrete2",
             description="Ensure that we allow the index reduction to differentiate discete variable references",
             flatModel="
 fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete2
@@ -1664,7 +1664,7 @@ fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete2
  Real dynDer(y);
  Real dynDer(_der_x);
  Real dynDer(_der_y);
-initial equation 
+initial equation
  _ds.1.s1 = 0.0;
  _ds.2.s1 = 0.0;
  y = 0.0;
@@ -1751,7 +1751,7 @@ fclass Differentiation.DerivativeAnnotation.Test1
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -1824,7 +1824,7 @@ fclass Differentiation.DerivativeAnnotation.Test2
  Real x2[1];
  Real x2[2];
  Real _der_x1[1];
-initial equation 
+initial equation
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
@@ -1894,7 +1894,7 @@ fclass Differentiation.DerivativeAnnotation.Test3
  Real x2[1];
  Real x2[2];
  Real _der_x1[1];
-initial equation 
+initial equation
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
@@ -1967,7 +1967,7 @@ fclass Differentiation.DerivativeAnnotation.NoDerivative1
  Real x;
  Real y;
  Real _der_x;
-initial equation 
+initial equation
  y = 0.0;
 equation
  _der_x + der(y) = 0;
@@ -2058,7 +2058,7 @@ fclass Differentiation.DerivativeAnnotation.Order1
  Real _der_dx;
  Real _der_der_x;
  Real _der_der_y;
-initial equation 
+initial equation
  y = 0.0;
  dy = 0.0;
 equation
@@ -2169,7 +2169,7 @@ fclass Differentiation.DerivativeAnnotation.Order2
  Real _der_dx;
  Real _der_der_x;
  Real _der_der_y;
-initial equation 
+initial equation
  y = 0.0;
  dy = 0.0;
 equation
@@ -2291,7 +2291,7 @@ fclass Differentiation.AlgorithmDifferentiation.Simple
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -2351,7 +2351,7 @@ fclass Differentiation.AlgorithmDifferentiation.RecordInput
  Real x1;
  Real x2.x[1];
  Real _der_x1;
-initial equation 
+initial equation
  x2.x[1] = 0.0;
 equation
  _der_x1 + der(x2.x[1]) = 1;
@@ -2418,7 +2418,7 @@ fclass Differentiation.AlgorithmDifferentiation.RecordOutput
  Real r.x[1];
  Real _der_x1;
  Real _der_x2;
-initial equation 
+initial equation
  r.x[1] = 0.0;
 equation
  _der_x1 + _der_x2 = 1;
@@ -2488,7 +2488,7 @@ fclass Differentiation.AlgorithmDifferentiation.For
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -2575,7 +2575,7 @@ fclass Differentiation.AlgorithmDifferentiation.FunctionCall
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -2679,7 +2679,7 @@ fclass Differentiation.AlgorithmDifferentiation.If
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -2751,7 +2751,7 @@ fclass Differentiation.AlgorithmDifferentiation.InitArray
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -2886,7 +2886,7 @@ fclass Differentiation.AlgorithmDifferentiation.While
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -2975,7 +2975,7 @@ fclass Differentiation.AlgorithmDifferentiation.Recursive
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -3088,7 +3088,7 @@ fclass Differentiation.AlgorithmDifferentiation.DiscreteComponents
  Real x1;
  Real x2;
  Real _der_x1;
-initial equation 
+initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
@@ -3170,7 +3170,7 @@ fclass Differentiation.AlgorithmDifferentiation.PlanarPendulum
  Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
-initial equation 
+initial equation
  y = 0.0;
  vy = 0.0;
 equation
@@ -3400,7 +3400,7 @@ fclass Differentiation.TempDiff
  Real x;
  Real y;
  Real _der_x;
-initial equation 
+initial equation
  y = 0.0;
 equation
  x = Differentiation.TempDiff.f(y, {time});
@@ -3721,9 +3721,9 @@ equation
  x4 = Differentiation.MultipleDerivativeAnnotation2.f(7, 8, time);
  _der_x4 = y4;
  t[1] = time;
- t[2] = 2 * t[1];
- t[3] = 3 * t[1];
- t[4] = 4 * t[1];
+ t[2] = 2 * time;
+ t[3] = 3 * time;
+ t[4] = 4 * time;
  _der_x4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
  _der_x1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
  _der_t[1] = 1.0;

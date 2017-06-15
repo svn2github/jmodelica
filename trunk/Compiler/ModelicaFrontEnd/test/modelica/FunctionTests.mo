@@ -3322,7 +3322,7 @@ algorithm
  end if;
 equation
  _eventIndicator_1 = time - 1;
- _eventIndicator_2 = _eventIndicator_1 + -1;
+ _eventIndicator_2 = time + -2;
 end FunctionTests.AlgorithmFlatten10;
 ")})));
 end AlgorithmFlatten10;
@@ -15881,8 +15881,8 @@ fclass FunctionTests.FunctionLike.EventRel.Smooth2
  Real d;
 equation
  b = time;
- c = -2 * (- time);
- d = c + b;
+ c = 2 * b;
+ d = 3 * b;
  a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
 end FunctionTests.FunctionLike.EventRel.Smooth2;
 ")})));

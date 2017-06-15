@@ -4669,7 +4669,7 @@ equation
  _der_b1 = b2;
  _der_b2 = b3;
  a4 = time;
- b4 = 2 * a4;
+ b4 = 2 * time;
  a4 = a1;
  b4 = b1;
  _der_a4 = 1.0;
