@@ -1234,6 +1234,81 @@ end VariabilityPropagationTests.FunctionCallEquationPartial7;
 ")})));
 end FunctionCallEquationPartial7;
 
+model FunctionCallEquationPartial8
+    function f
+        input Real[:] x;
+        input Boolean b;
+        output Real[:] y = x;
+    algorithm
+        y := g(y);
+        y := u(y);
+        annotation(Inline=false);
+    end f;
+    
+    function g
+        input Real[:] x;
+        output Real[size(x,1)] y;
+    external;
+    end g;
+    
+    function u
+        input Real[:] x;
+        output Real[size(x,1)] y = x;
+    algorithm
+    end u;
+    Real[:] y = f({time,time},true);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial8",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial8
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = VariabilityPropagationTests.FunctionCallEquationPartial8.f({time, time}, true);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquationPartial8.f
+  input Real[:] x;
+  input Boolean b;
+  output Real[:] y;
+ algorithm
+  init y as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  (y) := VariabilityPropagationTests.FunctionCallEquationPartial8.g(y);
+  (y) := VariabilityPropagationTests.FunctionCallEquationPartial8.u(y);
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationTests.FunctionCallEquationPartial8.f;
+
+ function VariabilityPropagationTests.FunctionCallEquationPartial8.g
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[size(x, 1)];
+  external \"C\" g(x, size(x, 1), y, size(y, 1));
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial8.g;
+
+ function VariabilityPropagationTests.FunctionCallEquationPartial8.u
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial8.u;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial8;
+")})));
+end FunctionCallEquationPartial8;
+
     model PartiallyKnownComposite1
         function f
             input Real x1;
