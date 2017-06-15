@@ -890,17 +890,174 @@ fclass AlgorithmTests.VariableSubscriptAssign1
  Real y[2,2];
  discrete Integer temp_1;
  discrete Integer temp_2;
-initial equation 
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
+ Real _eventIndicator_3;
+ Real _eventIndicator_4;
+initial equation
  pre(temp_1) = 0;
  pre(temp_2) = 0;
 algorithm
- temp_2 := if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then integer(time) else pre(temp_2);
+ temp_2 := if time < pre(temp_2) or time >= (pre(temp_2) + 1) or initial() then integer(time) else pre(temp_2);
  ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_2,1] := time;
- temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+ temp_1 := if time < pre(temp_1) or time >= (pre(temp_1) + 1) or initial() then integer(time) else pre(temp_1);
  ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}})[temp_1,2] := time + 1;
+equation
+ _eventIndicator_1 = time - pre(temp_2);
+ _eventIndicator_2 = time - (pre(temp_2) + 1);
+ _eventIndicator_3 = time - pre(temp_1);
+ _eventIndicator_4 = time - (pre(temp_1) + 1);
 end AlgorithmTests.VariableSubscriptAssign1;
 ")})));
 end VariableSubscriptAssign1;
+
+
+package EventIndicator
+
+
+model Basic1
+    discrete Integer i(start=0, fixed=true);
+    discrete Real t;
+  equation
+    i = 1;
+  algorithm
+    when time > 1 + i then
+        t := time + 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Basic1",
+            description="Test that event indicators are generated as equations when not referenced in LHS,
+                option not set.",
+            event_output_vars=false,
+            flatModel="
+fclass AlgorithmTests.EventIndicator.Basic1
+ constant Integer i(start = 0,fixed = true) = 1;
+ discrete Real t;
+ Real _eventIndicator_1;
+ discrete Boolean temp_1;
+initial equation
+ pre(t) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 2;
+algorithm
+ if temp_1 and not pre(temp_1) then
+  t := time + 1;
+ end if;
+equation
+ _eventIndicator_1 = time - 2;
+end AlgorithmTests.EventIndicator.Basic1;
+")})));
+end Basic1;
+
+model Basic2
+    discrete Integer i(start=0, fixed=true);
+    discrete Real t;
+  equation
+    i = 1;
+  algorithm
+    when time > 1 + t then
+        t := time + 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Basic2",
+            description="Test that event indicators are generated as statements when referenced in LHS, option set.",
+            event_output_vars=false,
+            flatModel="
+fclass AlgorithmTests.EventIndicator.Basic2
+ constant Integer i(start = 0,fixed = true) = 1;
+ discrete Real t;
+ Real _eventIndicator_1;
+ discrete Boolean temp_1;
+initial equation
+ pre(t) = 0.0;
+ pre(temp_1) = false;
+algorithm
+ _eventIndicator_1 := time - (1 + t);
+ temp_1 := time > 1 + t;
+ if temp_1 and not pre(temp_1) then
+  t := time + 1;
+ end if;
+end AlgorithmTests.EventIndicator.Basic2;
+")})));
+end Basic2;
+
+model Basic3
+    discrete Integer i(start=0, fixed=true);
+    discrete Real t;
+  equation
+    i = 1;
+  algorithm
+    when time > 1 + i then
+        t := time + 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Basic3",
+            description="Test that event indicators are generated as equations when not referenced in LHS, option set.",
+            event_output_vars=true,
+            flatModel="
+fclass AlgorithmTests.EventIndicator.Basic3
+ constant Integer i(start = 0,fixed = true) = 1;
+ discrete Real t;
+ output Real _eventIndicator_1;
+ discrete Boolean temp_1;
+initial equation
+ pre(t) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 2;
+algorithm
+ if temp_1 and not pre(temp_1) then
+  t := time + 1;
+ end if;
+equation
+ _eventIndicator_1 = time - 2;
+end AlgorithmTests.EventIndicator.Basic3;
+")})));
+end Basic3;
+
+model Basic4
+    discrete Integer i(start=0, fixed=true);
+    discrete Real t;
+  equation
+    i = 1;
+  algorithm
+    when time > 1 + t then
+        t := time + 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Basic4",
+            description="Test that event indicators are generated as statements when referenced in LHS, option set.",
+            event_output_vars=true,
+            flatModel="
+fclass AlgorithmTests.EventIndicator.Basic4
+ constant Integer i(start = 0,fixed = true) = 1;
+ discrete Real t;
+ output Real _eventIndicator_1;
+ discrete Boolean temp_1;
+initial equation
+ pre(t) = 0.0;
+ pre(temp_1) = false;
+algorithm
+ _eventIndicator_1 := time - (1 + t);
+ temp_1 := time > 1 + t;
+ if temp_1 and not pre(temp_1) then
+  t := time + 1;
+ end if;
+end AlgorithmTests.EventIndicator.Basic4;
+")})));
+end Basic4;
+
+
+end EventIndicator;
 
 
 end AlgorithmTests;

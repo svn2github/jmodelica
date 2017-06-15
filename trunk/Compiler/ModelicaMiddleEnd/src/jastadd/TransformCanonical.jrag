@@ -2724,7 +2724,7 @@ aspect EventGeneratingExps {
                 }
 
                 // Algorithms
-                AlgorithmTransformer.visit(algs, new EventAlgoTransformer());
+                Transformer.visitAlgorithms(algs, new EventAlgorithmTransformer(myOptions()));
 
                 root().flushAllRecursive();
             }
@@ -2762,10 +2762,22 @@ aspect EventGeneratingExps {
     /**
      * Extracts event generating expressions into if-expressions
      */
-    public class EventAlgoTransformer extends AlgorithmTransformer {
+    public class EventAlgorithmTransformer extends AlgorithmTransformer {
+
+        /**
+         * Constructs an {@code EventAlgorithmTransformer} with a reference to an {@link OptionRegistry}.
+         *
+         * @param options
+         *          The option registry.
+         */
+        public EventAlgorithmTransformer(OptionRegistry options) {
+            super(options);
+        }
+    
         public void transform(FStatement stmt) {
             ArrayList<FExp> eventExps = stmt.eventGenExps();
             Collections.reverse(eventExps);
+
             for (FExp exp : eventExps) {
                 add(new FAssignStmt(exp.tempUseExp(), exp.eventTempExpCalc()));
                 exp.replaceMe(exp.eventTempExpUse());
