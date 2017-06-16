@@ -75,12 +75,11 @@ Algebraic real variables:
  x3: number of uses: 2, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
  x5: number of uses: 2, isLinear: false, alias: no
- x6: number of uses: 3, isLinear: true, alias: no
+ x6: number of uses: 1, isLinear: true, alias: no
  x7: number of uses: 2, isLinear: false, alias: no
  x8: number of uses: 1, isLinear: false, alias: no
 
 Input variables: 
-
 ")})));
   end LinearityTest1;
 
