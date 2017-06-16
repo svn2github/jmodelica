@@ -871,7 +871,7 @@ public class ModelicaCompiler {
                 CCompilerDelegator ccompiler = getCCompiler();
                 CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(cFileName, fc, target);
                 ccompiler.compileCCode(ccArgs, outDir);
-                ccompiler.copySharedLibs(outDir, ccArgs.getExternalLibraries(), ccArgs.getExternalLibraryDirectories());
+                ccompiler.copySharedLibs(outDir, ccArgs.getExternalLibraries());
                 ASTNode.endStep("compileCCode()");
             }
             hookCodeCompiled();
@@ -2682,9 +2682,10 @@ public abstract class CCompilerDelegator {
     
     private static Map<String, String> env = System.getenv();
     private String[] targetPlatforms = null;
-    
+
+    protected Set<String> sharedLibs = new HashSet<String>();
     protected java.util.List<String> moduleLibNames;
-    
+
     public void setModuleLibraryNames(java.util.List<String> names) {
         moduleLibNames = names;
     }
@@ -2838,12 +2839,11 @@ public abstract class CCompilerDelegator {
     /**
      * Copy shared libs to binaries[\<platform>] folder.
      */
-    public void copySharedLibs(File outDir, Set<String> ext_libs, 
-            Set<String> ext_lib_dirs) {
+    public void copySharedLibs(File outDir, Set<String> ext_libs) {
         for (String platform : getTargetPlatforms()) {
             StringOperation po = new PlatformDirOperation(platform);
             StringOperation sh = new SharedLibOperation(platform);
-            for (String dir : ext_lib_dirs) {
+            for (String dir : sharedLibs) {
                 String dirpath = po.op(dir);
                 for (String lib : ext_libs) {
                     String libname = sh.op(lib);
@@ -2861,6 +2861,7 @@ public abstract class CCompilerDelegator {
                 }
             }
         }
+        sharedLibs.clear();
     }
     
     public static Map<String, String> getEnv() {
@@ -3087,6 +3088,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
                 new PlatformDirOperation(platform),
                 new QuoteOperation("-L"));
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
+        sharedLibs.addAll(expandedLibDirs);
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
     
