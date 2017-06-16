@@ -3257,9 +3257,10 @@ fclass FunctionTests.AlgorithmFlatten9
  Real y2;
  discrete Real y3;
  Real x;
+ Real _eventIndicator_2;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
-initial equation 
+initial equation
  pre(y1) = 0.0;
  pre(y3) = 0.0;
  pre(temp_1) = false;
@@ -3278,19 +3279,21 @@ algorithm
  if temp_2 and not pre(temp_2) then
   y3 := 2 * x + y1 + y2;
  end if;
+equation
+ _eventIndicator_2 = x - 2;
 end FunctionTests.AlgorithmFlatten9;
 ")})));
 end AlgorithmFlatten9;
 
 model AlgorithmFlatten10
- Real y1,y2;
+  Real y1,y2;
 algorithm
-	when time > 1 then
-		y1 := 1;
-	elsewhen time > 2 then
-		y2 := 2;
-	end when;
-	
+  when time > 1 then
+    y1 := 1;
+  elsewhen time > 2 then
+    y2 := 2;
+  end when;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmFlatten10",
@@ -3301,7 +3304,7 @@ fclass FunctionTests.AlgorithmFlatten10
  discrete Real y2;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
-initial equation 
+initial equation
  pre(y1) = 0.0;
  pre(y2) = 0.0;
  pre(temp_1) = false;
@@ -15055,8 +15058,9 @@ y
 ")})));
 end Integer2;
 
-end EventGen;
 
+
+end EventGen;
 
 
 package Math

@@ -697,6 +697,18 @@ abstract public class OptionRegistry {
              Category.user,
              true,
              "If enabled, then relational operators are allowed to generate time events."),
+        EVENT_OUTPUT_VARS
+            ("event_output_vars",
+             OptionType.compiler,
+             Category.user,
+             false,
+             "If enabled, output variables are generated for each generated event."),
+        EQUATION_EVENT_INDICATORS
+            ("equation_event_indicators",
+             OptionType.compiler,
+             Category.internal,
+             true,
+             "If enabled, event indicators are generated from equations."),
         DISABLE_SMOOTH_EVENTS
             ("disable_smooth_events",
              OptionType.compiler,

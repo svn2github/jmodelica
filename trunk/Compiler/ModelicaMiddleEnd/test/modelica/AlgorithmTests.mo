@@ -890,7 +890,7 @@ fclass AlgorithmTests.VariableSubscriptAssign1
  Real y[2,2];
  discrete Integer temp_1;
  discrete Integer temp_2;
-initial equation 
+initial equation
  pre(temp_1) = 0;
  pre(temp_2) = 0;
 algorithm

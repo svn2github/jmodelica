@@ -17,38 +17,37 @@ package OptimicaTransformCanonicalTests
 
   optimization LinearityTest1 (objective = cost(finalTime)^2, startTime=0, finalTime=1)
 
-        Real cost;
-  
-  	Real x1;
-  	Real x2;
-  	Real x3;
-  	Real x4;
-  	Real x5;
-  	Real x6;
-  	Real x7;
-	Real x8;
-  	
-  	parameter Real p1 = 1;
-        parameter Real p2(free=true,initialGuess=3);
-  	  
+    Real cost;
+
+    Real x1;
+    Real x2;
+    Real x3;
+    Real x4;
+    Real x5;
+    Real x6;
+    Real x7;
+    Real x8;
+
+    parameter Real p1 = 1;
+    parameter Real p2(free=true,initialGuess=3);
+
   equation
-	der(cost) = 1;
-  	x1 = x1*p1 + x2;
-  	x2 = x3^2;
-  	x3 = x4/p1;
-  	x4 = p1/x5;
-  	x5 = x6-x6;
-  	x6 = sin(x7);
-	x7 = x8*p2;
-	x1 = 1;
+    der(cost) = 1;
+    x1 = x1 * p1 + x2;
+    x2 = x3 ^ 2;
+    x3 = x4 / p1;
+    x4 = p1 / x5;
+    x5 = x6 - x6;
+    x6 = sin(x7);
+    x7 = x8 * p2;
+    x1 = 1;
 
-
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="LinearityTest1",
-			methodName="variableDiagnostics",
-			description="Test linearity of variables.",
-			methodResult="  
+  annotation(__JModelica(UnitTesting(tests={
+    FClassMethodTestCase(
+      name="LinearityTest1",
+      methodName="variableDiagnostics",
+      description="Test linearity of variables.",
+      methodResult="  
 Independent constants: 
  x1: number of uses: 0, isLinear: true
 
