@@ -392,7 +392,7 @@ fclass LinearEquationElimination.CommonSubExpression2
  Real y;
 equation
  0 = y;
- y = x + 1;
+ x + 1 = 0;
 end LinearEquationElimination.CommonSubExpression2;
 ")})));
     end CommonSubExpression2;

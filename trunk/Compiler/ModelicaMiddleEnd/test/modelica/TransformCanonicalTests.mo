@@ -2294,8 +2294,8 @@ equation
  0 = v6;
  0 = v4;
  v6 + v6 + v8 + v7 = 1;
- v6 + v6 + v8 = 0;
-end TransformCanonicalTests.InitialEqTest2;
+ 0 = 2 * v6 + v8;
+ end TransformCanonicalTests.InitialEqTest2;
 ")})));
   end InitialEqTest2;
 

@@ -23,7 +23,7 @@ import java.util.Iterator;
 aspect eliminateLinearEquations {
 
     public class FClass {
-        private static final int ALIAS_SIZE = 1;
+        private static final int ALIAS_SIZE = 2;
 
         /**
          *  <h1>Eliminate Linear Equations</h1>
@@ -272,12 +272,12 @@ aspect eliminateLinearEquations {
                 }
                 destUnique.removeAll(mutual);
 
-                if (mutual.size() <= 0) {
+                if (mutual.isEmpty()) {
                     return false;
                 }
 
-                return !(sourceUnique.isEmpty() && destUnique.isEmpty() || sourceUnique.size() > ALIAS_SIZE ||
-                        destUnique.size() > ALIAS_SIZE);
+                return (!sourceUnique.isEmpty() || !destUnique.isEmpty()) && 
+                       sourceUnique.size() + destUnique.size() <= ALIAS_SIZE;
             }
 
             /* ========================= *
