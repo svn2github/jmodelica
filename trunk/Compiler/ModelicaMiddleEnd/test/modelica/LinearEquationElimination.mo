@@ -52,11 +52,11 @@ end LinearEquationElimination.Simple1;
         Real d;
     equation
         a = 2 * b + time;
-        c = 2 * a - b;
-        b = a + 2 * d;
+        c = 2 * a - 4 * b;
+        b = a + 2 * d + time;
         d = sin(time);
 
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Simple2",
             description="A simple test case that tests elimination.",
@@ -68,8 +68,8 @@ fclass LinearEquationElimination.Simple2
  Real d;
 equation
  a = 2 * b + time;
- 2 * c = 3 * a + time;
- -4 * d = a + time;
+ c = 2 * time;
+ -4 * d = a + 3 * time;
  d = sin(time);
 end LinearEquationElimination.Simple2;
 ")})));
@@ -162,23 +162,21 @@ end LinearEquationElimination.FunctionCall1;
         Real b;
         Real c;
     equation
-        a = b + 1;
+        a = b - 1;
         b = c + 1;
         c = sin(time);
 
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Constant1",
             description="Alias elimination through re-arrangement of variable ordering, solving for equations with
                     constant terms.",
             flatModel="
 fclass LinearEquationElimination.Constant1
- Real a;
  Real b;
  Real c;
 equation
- a = b + 1;
- c = b + -1;
+ c = b - 1;
  c = sin(time);
 end LinearEquationElimination.Constant1;
 ")})));
@@ -251,21 +249,19 @@ end LinearEquationElimination.Constant3;
         Real c;
     equation
         a = 2 * b;
-        a = 4 * c;
+        a = 2 * c;
         c = sin(time);
 
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Coefficient1",
-            description="Alias elimination through re-arrangement of variable ordering, with coefficients.",
+            description="",
             flatModel="
 fclass LinearEquationElimination.Coefficient1
  Real a;
- Real b;
  Real c;
 equation
- a = 2 * b;
- 4 * c = a;
+ a = 2 * c;
  c = sin(time);
 end LinearEquationElimination.Coefficient1;
 ")})));
@@ -344,7 +340,7 @@ fclass LinearEquationElimination.TimeExpression2
  Real c;
 equation
  a = time + 1;
- b = time + -1;
+ b = a + -2;
  c = sin(time);
 end LinearEquationElimination.TimeExpression2;
 ")})));

@@ -1698,7 +1698,7 @@ fclass RecordTests.RecordBinding27
 equation
  r.t[1] = time;
  r.t[2] = time + 1;
- r.x[1,1] = 2 * r.t[1];
+ r.x[1,1] = r.t[1] + r.t[1];
  r.x[2,1] = r.t[1] + r.t[2];
 end RecordTests.RecordBinding27;
 ")})));
@@ -2561,7 +2561,7 @@ fclass RecordTests.RecordConstructor9
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * time;
+ z[2] = 2 * z[1];
 end RecordTests.RecordConstructor9;
 ")})));
 end RecordConstructor9;
@@ -3508,7 +3508,7 @@ fclass RecordTests.RecordConstructor36
  Real m[2].r1.x;
 equation
  m[1].r1.x = 1 + time;
- m[2].r1.x = time + 2;
+ m[2].r1.x = m[1].r1.x + 1;
 end RecordTests.RecordConstructor36;
 ")})));
 end RecordConstructor36;
@@ -7688,7 +7688,7 @@ fclass RecordTests.RecordEval1
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * time;
+ z[2] = 2 * z[1];
 end RecordTests.RecordEval1;
 ")})));
 end RecordEval1;
@@ -7716,7 +7716,7 @@ fclass RecordTests.RecordEval2
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * time;
+ z[2] = 2 * z[1];
 end RecordTests.RecordEval2;
 ")})));
 end RecordEval2;
@@ -7746,7 +7746,7 @@ fclass RecordTests.RecordEval3
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * time;
+ z[2] = 2 * z[1];
 end RecordTests.RecordEval3;
 ")})));
 end RecordEval3;
@@ -7776,7 +7776,7 @@ fclass RecordTests.RecordEval4
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * time;
+ z[2] = 2 * z[1];
 end RecordTests.RecordEval4;
 ")})));
 end RecordEval4;
@@ -7818,7 +7818,7 @@ fclass RecordTests.RecordEval5
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * time;
+ z[2] = 2 * z[1];
 end RecordTests.RecordEval5;
 ")})));
 end RecordEval5;

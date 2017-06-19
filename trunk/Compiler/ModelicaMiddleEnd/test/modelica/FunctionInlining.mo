@@ -4423,7 +4423,7 @@ fclass FunctionInlining.ChainedCallInlining8
 equation
  y2[1] = time;
  y1[2] = time + 1;
- y1[3] = time + 2;
+ y1[3] = y1[2] + 1;
  y2[2] = y2[1] + 1;
  y2[3] = y2[1] + 2;
 end FunctionInlining.ChainedCallInlining8;
@@ -4766,7 +4766,7 @@ initial equation
 equation
  y = ({r[1].x, r[2].x})[i];
  r[1].x = time;
- r[2].x = 2 * time;
+ r[2].x = 2 * r[1].x;
  i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
 end FunctionInlining.InputAsIndex3;
 ")})));
@@ -4861,8 +4861,8 @@ fclass FunctionInlining.SizeParam1
  Real y[2];
 equation
  x[1] = time;
- x[2] = 2 * time;
- x[3] = 3 * time;
+ x[2] = 2 * x[1];
+ x[3] = 3 * x[1];
  y[1] = 0.6666666666666666 * x[1] + -0.33329767031411434 * x[2] + -0.33340465555621845 * x[3];
  y[2] = 0.5773708577748173 * x[2] + -0.5773090854108254 * x[3];
 end FunctionInlining.SizeParam1;

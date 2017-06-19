@@ -420,10 +420,10 @@ algorithm
  y2[2,2] := temp_2[2,2];
 equation
  x[1,1] = time;
- x[1,2] = 2 * time;
- x[2,1] = 3 * time;
- x[2,2] = 4 * time;
-
+ x[1,2] = 2 * x[1,1];
+ x[2,1] = 3 * x[1,1];
+ x[2,2] = 4 * x[1,1];
+ 
 public
  function AlgorithmTests.TempAssign1.f
   input Real[:,:] x;

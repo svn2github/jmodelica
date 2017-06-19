@@ -1952,8 +1952,8 @@ void func_CADCodeGenTests_CADFunction8_f1_der_AD1(jmi_array_t* x_var_a, jmi_arra
     (*dF)[1] = jmi_array_val_1(tmp_der_1, 2) - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
     (*res)[2] = _time - (_x_1_0);
     (*dF)[2] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
-    (*res)[3] = 2 * _time - (_x_2_1);
-    (*dF)[3] = AD_WRAP_LITERAL(0) * _time + 2 * (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    (*res)[3] = 2 * _x_1_0 - (_x_2_1);
+    (*dF)[3] = AD_WRAP_LITERAL(0) * _x_1_0 + 2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADFunction8;
 
@@ -2083,8 +2083,8 @@ void func_CADCodeGenTests_CADFunction9_f1_der_AD1(jmi_array_t* x_var_a, jmi_arra
     (*dF)[0] = d_1 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
     (*res)[1] = _time - (_x_1_0);
     (*dF)[1] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
-    (*res)[2] = 2 * _time - (_x_2_1);
-    (*dF)[2] = AD_WRAP_LITERAL(0) * _time + 2 * (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    (*res)[2] = 2 * _x_1_0 - (_x_2_1);
+    (*dF)[2] = AD_WRAP_LITERAL(0) * _x_1_0 + 2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADFunction9;
 
@@ -5407,8 +5407,8 @@ equation
     jmi_real_t v_2;
     (*res)[0] = _time - (_a_2);
     (*dF)[0] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
-    (*res)[1] = 2 * _time - (_b_3);
-    (*dF)[1] = AD_WRAP_LITERAL(0) * _time + 2 * (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    (*res)[1] = 2 * _a_2 - (_b_3);
+    (*dF)[1] = AD_WRAP_LITERAL(0) * _a_2 + 2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
     }

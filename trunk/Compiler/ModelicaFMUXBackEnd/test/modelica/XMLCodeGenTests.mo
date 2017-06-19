@@ -890,8 +890,8 @@ equation
 <ScalarVariable name=\"y1\" valueReference=\"25\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
 	<Real relativeQuantity=\"false\" />
 	<DirectDependency>
-		<Name>u[1]</Name>
 		<Name>u[2]</Name>
+		<Name>u[1]</Name>
 		<Name>u[3]</Name>
 	</DirectDependency>
 	<isLinear>true</isLinear>

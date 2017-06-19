@@ -15876,7 +15876,7 @@ fclass FunctionTests.FunctionLike.EventRel.Smooth2
  Real d;
 equation
  b = time;
- c = 2 * b;
+ c = b * 2;
  d = 3 * b;
  a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
 end FunctionTests.FunctionLike.EventRel.Smooth2;

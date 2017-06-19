@@ -3721,9 +3721,9 @@ equation
  x4 = Differentiation.MultipleDerivativeAnnotation2.f(7, 8, time);
  _der_x4 = y4;
  t[1] = time;
- t[2] = 2 * time;
- t[3] = 3 * time;
- t[4] = 4 * time;
+ t[2] = 2 * t[1];
+ t[3] = 3 * t[1];
+ t[4] = 4 * t[1];
  _der_x4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
  _der_x1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
  _der_t[1] = 1.0;
