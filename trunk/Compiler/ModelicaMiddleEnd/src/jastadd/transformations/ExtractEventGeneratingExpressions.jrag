@@ -102,11 +102,11 @@ aspect ExtractEventGeneratingExpressions {
             Collections.reverse(eventExps);
 
             for (FExp exp : eventExps) {
-                add(new FAssignStmt(exp.tempUseExp(), exp.eventTempExpCalc()));
+                addStatement(new FAssignStmt(exp.tempUseExp(), exp.eventTempExpCalc()));
                 exp.replaceMe(exp.eventTempExpUse());
-                addAll(exp.extractEventGenStatement());
+                addStatements(exp.extractEventGenStatement());
             }
-            add(stmt);
+            addStatement(stmt);
         }
     }
 

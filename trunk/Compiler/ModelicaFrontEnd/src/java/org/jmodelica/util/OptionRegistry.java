@@ -708,7 +708,9 @@ abstract public class OptionRegistry {
              OptionType.compiler,
              Category.internal,
              true,
-             "If enabled, event indicators are generated from equations."),
+             false,
+             "If enabled, event indicators are generated from equations."
+             + "This is disabled by default when running tests"),
         DISABLE_SMOOTH_EVENTS
             ("disable_smooth_events",
              OptionType.compiler,

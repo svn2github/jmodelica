@@ -1515,11 +1515,11 @@ aspect InheritedFactoryMethods {
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
-    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FIdUseExp>()); }
-    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FIdUseExp>()); }
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>()); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>()); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>()); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>()); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>()); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>()); }
 
 }
