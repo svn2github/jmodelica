@@ -49,7 +49,7 @@
     <property name="beaver-rt_jar" value="${beaver_dir}/lib/beaver-rt.jar"/>
     <property name="ant-contrib_dir" value="${base.dir}/../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 
-    <property name="timestamp_format" value="yyyyDDHHmmssSSS"/>
+    <property name="timestamp_format" value="yyyyDDDHHmmssSSS"/>
 
     <!-- for ant-contrib (foreach, etc) -->
     <taskdef resource="net/sf/antcontrib/antlib.xml">
@@ -537,10 +537,10 @@
                     <arg value="--visitCheck=false" />
                     <arg value="--lazyMaps" />
                     <arg value="--indent=4space" />
-                	<arg value="--inhEqCheck=false" />
+                    <arg value="--inhEqCheck=false" />
                     <arg line="${jastadd_files}" />
                 </java>
-            	<!-- delete stale java files created in earlier runs -->
+                <!-- delete stale java files created in earlier runs -->
                 <delete verbose="true">
                     <fileset dir="${ast_output}">
                         <date datetime="${ast_creation_time}" when="before" pattern="${timestamp_format}" />
