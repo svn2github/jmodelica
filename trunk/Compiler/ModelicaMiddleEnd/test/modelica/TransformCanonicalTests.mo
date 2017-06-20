@@ -7600,7 +7600,7 @@ algorithm
 Coefficient variability: constant
 Torn variables:
   a
-  _eventIndicator_1
+  e
   b
   c
 
@@ -7612,7 +7612,7 @@ Solved discrete variables:
 
 Torn equations:
   a := time + d * 2
-  _eventIndicator_1 := a * 2 + (- d)
+  e := a * 2 + (- d)
   algorithm
     if temp_1 and not pre(temp_1) then
       b := pre(d) + 1;
@@ -7627,7 +7627,7 @@ Continuous residual equations:
     Iteration variables: d
 
 Discrete equations:
-  temp_1 := _eventIndicator_1 > 0
+  temp_1 := e > 0
 
 Jacobian:
   |1.0, 0.0, 0.0, 0.0, -2|

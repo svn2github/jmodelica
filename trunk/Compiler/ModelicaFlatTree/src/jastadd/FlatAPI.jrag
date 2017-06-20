@@ -3463,7 +3463,17 @@ aspect FVariableUses {
     eq FFunctionCall.getArg().isFunctionCallArg() = true;
     eq FIfExp.getThenExp().isFunctionCallArg()    = isFunctionCallArg();
     eq FIfExp.getElseExp().isFunctionCallArg()    = isFunctionCallArg();
-    
+
+    syn boolean FExp.containsCommonFunctionCallExp() {
+        for (FExp exp : childFExps()) {
+            if (exp.containsCommonFunctionCallExp()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    eq CommonFunctionCall.containsCommonFunctionCallExp() = true;
+
     /**
      * Returnes the function input that this expressions corresponds to.
      * NOTICE, this method will throw exception if this exp does not reside in a function call.
