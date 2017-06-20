@@ -560,8 +560,8 @@ aspect GenerateEventIndicators {
         }
     }
 
-    syn boolean FRelExp.shouldGenerateIndicator() = !isTimeEventGenerating() && !inFunctionCall() &&
-            !containsCommonFunctionCallExp();
+    syn boolean FRelExp.shouldGenerateIndicator() = generatesEvent() && !isTimeEventGenerating() &&
+            !inFunctionCall() && !containsCommonFunctionCallExp();
 
     /**
      * Checks whether or not this relational expression requires an initialization statement.
@@ -623,7 +623,8 @@ aspect GenerateEventIndicators {
      * Generates an expression for the event indicator.
      */
     syn FExp FRelExp.indicatorExp() {
-        FExp res = new FSubExp(getLeft(), getRight());
+        FExp res = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
+
         if (myOptions().getBooleanOption("event_indicator_scaling")) {
             res = new FDivExp(res, nominal());
         }

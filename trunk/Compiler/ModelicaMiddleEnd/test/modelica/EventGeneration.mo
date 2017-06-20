@@ -42,8 +42,8 @@ initial equation
  pre(temp_2) = 0;
 equation
  1 + x = temp_2;
- temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  _eventIndicator_1 = time * 0.3 + 4.2 - pre(temp_1);
  _eventIndicator_2 = time * 0.3 + 4.2 - (pre(temp_1) + 1);
  _eventIndicator_3 = 3 + temp_1 * 4 - pre(temp_2);
@@ -75,10 +75,10 @@ initial equation
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
- temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
  _eventIndicator_3 := 3 + temp_1 * 4 - pre(temp_2);
  _eventIndicator_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
- temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 equation
  _eventIndicator_1 = time * 0.3 + 4.2 - pre(temp_1);
@@ -118,7 +118,7 @@ initial equation
  pre(temp_2) = 0.0;
 equation
  x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
- temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= (pre(temp_1) + 1) or initial() then integer(0.9 + time / 10) else pre(temp_1);
+ temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
  _eventIndicator_1 = 0.9 + time / 10 - pre(temp_1);
  _eventIndicator_2 = 0.9 + time / 10 - (pre(temp_1) + 1);
  temp_2 = temp_1 * 3.14;
@@ -157,8 +157,8 @@ initial equation
 equation
  temp_3 = temp_1 + noEvent(integer(time * 3)) > 1;
  x = if temp_3 and not pre(temp_3) then temp_2 else pre(x);
- temp_1 = if time * 3 < pre(temp_1) or time * 3 >= (pre(temp_1) + 1) or initial() then integer(time * 3) else pre(temp_1);
- temp_2 = if time * 0.3 + 4.2 < pre(temp_2) or time * 0.3 + 4.2 >= (pre(temp_2) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
+ temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
+ temp_2 = if time * 0.3 + 4.2 < pre(temp_2) or time * 0.3 + 4.2 >= pre(temp_2) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
  _eventIndicator_1 = time * 3 - pre(temp_1);
  _eventIndicator_2 = time * 3 - (pre(temp_1) + 1);
  _eventIndicator_3 = time * 0.3 + 4.2 - pre(temp_2);
@@ -195,7 +195,7 @@ initial equation
  pre(x) = 0.0;
  pre(temp_3) = false;
 algorithm
- temp_2 := if time * 3 < pre(temp_2) or time * 3 >= (pre(temp_2) + 1) or initial() then integer(time * 3) else pre(temp_2);
+ temp_2 := if time * 3 < pre(temp_2) or time * 3 >= pre(temp_2) + 1 or initial() then integer(time * 3) else pre(temp_2);
  temp_3 := temp_2 + noEvent(integer(time * 3)) > 1;
  if temp_3 and not pre(temp_3) then
   temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
