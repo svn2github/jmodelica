@@ -535,4 +535,79 @@ end EventGeneration.OutputVarsState4;
 end OutputVarsState4;
 
 
+model AliasIndicatorEquation
+  Real a;
+  Real b;
+
+equation
+  if a > 0 then
+    a = 1;
+  else
+    a = 2;
+  end if;
+
+  if a > 1 then
+    b = 1;
+  else
+    b = 2;
+  end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EventGeneration_AliasIndicatorEquation",
+            equation_event_indicators=true,
+            description="Checks that event indicator equations are not alias eliminated.",
+            flatModel="
+fclass EventGeneration.AliasIndicatorEquation
+ Real a;
+ Real b;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
+equation
+ a = if a > 0 then 1 else 2;
+ b = if a > 1 then 1 else 2;
+ _eventIndicator_1 = a;
+ _eventIndicator_2 = a - 1;
+end EventGeneration.AliasIndicatorEquation;
+")})));
+end AliasIndicatorEquation;
+
+model AliasIndicatorOutput
+  Real a;
+  Real b;
+
+equation
+  if a > 0 then
+    a = 1;
+  else
+    a = 2;
+  end if;
+
+  if a > 1 then
+    b = 1;
+  else
+    b = 2;
+  end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EventGeneration_AliasIndicatorOutput",
+            equation_event_indicators=true,
+            event_output_vars=true,
+            description="Checks that event indicator equations are not alias eliminated.",
+            flatModel="
+fclass EventGeneration.AliasIndicatorOutput
+ Real a;
+ Real b;
+ output Real _eventIndicator_1;
+ output Real _eventIndicator_2;
+equation
+ a = if a > 0 then 1 else 2;
+ b = if a > 1 then 1 else 2;
+ _eventIndicator_1 = a;
+ _eventIndicator_2 = a - 1;
+end EventGeneration.AliasIndicatorOutput;
+")})));
+end AliasIndicatorOutput;
+
 end EventGeneration;

@@ -574,6 +574,19 @@ aspect GenerateEventIndicators {
     eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
     eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
 
+    inh boolean FExp.isIndicator();
+    eq FClass.getChild().isIndicator() = false;
+    eq FRelExp.getIndicator().isIndicator() = true;
+
+    syn boolean FVariable.isIndicator() {
+        for (FIdUseExp use : uses()) {
+            if (use.isIndicator()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Creates an assign equation for the indicator.
      */

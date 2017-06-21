@@ -1375,7 +1375,7 @@ aspect TransformCanonical {
     // TODO: Use meDifferentiated instead of myDerivativeVariable()
     eq FVariable.canBeAlias() = !getFQName().myDerFV(order() + 1).isDummyDerivativeVariable() 
             && !isPreVariable() && !isNonDummyDerivativeVariable()
-            && !isInput() && !isOutput();
+            && !isInput() && !isOutput() && !isIndicator();
 
     syn int FExp.aliasSign() = 1;
     eq FNegExp.aliasSign()   = -getFExp().aliasSign();
