@@ -25,7 +25,6 @@ equation
   annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
       name="EventGeneration_Nested",
-      equation_event_indicators=true,
       description="Tests extraction of nested event generating expressions
       into when equations.",
       flatModel="
@@ -33,22 +32,15 @@ fclass EventGeneration.Nested
  Real x;
  discrete Real temp_1;
  discrete Integer temp_2;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
- Real _eventIndicator_3;
- Real _eventIndicator_4;
-initial equation
+initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 equation
  1 + x = temp_2;
  temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
  temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
- _eventIndicator_1 = time * 0.3 + 4.2 - pre(temp_1);
- _eventIndicator_2 = time * 0.3 + 4.2 - (pre(temp_1) + 1);
- _eventIndicator_3 = 3 + temp_1 * 4 - pre(temp_2);
- _eventIndicator_4 = _eventIndicator_3 + -1;
 end EventGeneration.Nested;
+      
 ")})));
 end Nested;
 
@@ -60,7 +52,6 @@ algorithm
   annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
       name="EventGeneration_InAlgorithm",
-      equation_event_indicators=true,
       description="Tests extraction of event generating expressions in algorithms.",
       flatModel="
 fclass EventGeneration.InAlgorithm
@@ -75,10 +66,10 @@ initial equation
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
- temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
  _eventIndicator_3 := 3 + temp_1 * 4 - pre(temp_2);
  _eventIndicator_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
- temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 equation
  _eventIndicator_1 = time * 0.3 + 4.2 - pre(temp_1);
@@ -104,25 +95,21 @@ equation
   annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
       name="EventGeneration_InFunctionCall",
-      equation_event_indicators=true,
       description="Tests event generating expressions in function calls.",
       flatModel="
 fclass EventGeneration.InFunctionCall
  Real x;
  discrete Integer temp_1;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
  discrete Real temp_2;
-initial equation
+initial equation 
  pre(temp_1) = 0;
  pre(temp_2) = 0.0;
 equation
  x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
  temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
- _eventIndicator_1 = 0.9 + time / 10 - pre(temp_1);
- _eventIndicator_2 = 0.9 + time / 10 - (pre(temp_1) + 1);
  temp_2 = temp_1 * 3.14;
 end EventGeneration.InFunctionCall;
+      
 ")})));
 end InFunctionCall;
 
@@ -134,22 +121,17 @@ equation
         x = floor(time * 0.3 + 4.2);
     end when;
 
-  annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-      name="EventGeneration_InWhenClauses1",
-      equation_event_indicators=true,
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneration_InWhenClauses1",
       description="Tests event generating expressions in a when equation.",
       flatModel="
 fclass EventGeneration.InWhenClauses1
  discrete Real x;
  discrete Integer temp_1;
  discrete Real temp_2;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
- Real _eventIndicator_3;
- Real _eventIndicator_4;
  discrete Boolean temp_3;
-initial equation
+initial equation 
  pre(temp_1) = 0;
  pre(temp_2) = 0.0;
  pre(x) = 0.0;
@@ -159,10 +141,6 @@ equation
  x = if temp_3 and not pre(temp_3) then temp_2 else pre(x);
  temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
  temp_2 = if time * 0.3 + 4.2 < pre(temp_2) or time * 0.3 + 4.2 >= pre(temp_2) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
- _eventIndicator_1 = time * 3 - pre(temp_1);
- _eventIndicator_2 = time * 3 - (pre(temp_1) + 1);
- _eventIndicator_3 = time * 0.3 + 4.2 - pre(temp_2);
- _eventIndicator_4 = time * 0.3 + 4.2 - (pre(temp_2) + 1);
 end EventGeneration.InWhenClauses1;
 ")})));
 end InWhenClauses1;
@@ -170,14 +148,13 @@ end InWhenClauses1;
 model InWhenClauses2
        Real x;
 algorithm
-    when integer(time * 3) + noEvent(integer(time * 3)) > 1 then
+    when integer(time*3) + noEvent(integer(time*3)) > 1 then
         x := floor(time * 0.3 + 4.2);
     end when;
 
-  annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-      name="EventGeneration_InWhenClauses2",
-      equation_event_indicators=true,
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneration_InWhenClauses2",
       description="Tests event generating expressions in a when statement.",
       flatModel="
 fclass EventGeneration.InWhenClauses2
@@ -195,7 +172,7 @@ initial equation
  pre(x) = 0.0;
  pre(temp_3) = false;
 algorithm
- temp_2 := if time * 3 < pre(temp_2) or time * 3 >= pre(temp_2) + 1 or initial() then integer(time * 3) else pre(temp_2);
+ temp_2 := if time * 3 < pre(temp_2) or time * 3 >= (pre(temp_2) + 1) or initial() then integer(time * 3) else pre(temp_2);
  temp_3 := temp_2 + noEvent(integer(time * 3)) > 1;
  if temp_3 and not pre(temp_3) then
   temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
@@ -219,10 +196,9 @@ equation
     x = integer(time);
   end when;
 
-  annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-      name="EventGeneration_InInitialAlgorithm",
-      equation_event_indicators=false,
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneration_InInitialAlgorithm",
       description="Tests event generating expressions in a when equation.",
       flatModel="
 fclass EventGeneration.InInitialAlgorithm
@@ -252,10 +228,9 @@ equation
     x = integer(time);
   end when;
 
-  annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-      name="EventGeneration_InInitialEquation",
-      equation_event_indicators=false,
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneration_InInitialEquation",
       description="Tests event generating expressions in a when equation.",
       flatModel="
 fclass EventGeneration.InInitialEquation
@@ -281,12 +256,11 @@ model OutputVarsTime1
         t := 1;
     end when;
 
-  annotation(__JModelica(UnitTesting(tests={
-      TransformCanonicalTestCase(
-          name="EventGeneration_OutputVarsTime1",
-          equation_event_indicators=true,
-          description="Time event generating expressions should not generate event indicator equations.",
-          flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EventGeneration_OutputVarsTime1",
+            description="Time event generating expressions should not generate event indicator equations.",
+            flatModel="
 fclass EventGeneration.OutputVarsTime1
  discrete Real t;
  discrete Boolean temp_1;
@@ -313,7 +287,6 @@ model OutputVarsTime2
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsTime2",
-            equation_event_indicators=true,
             description="Time event generating expressions should generate event indicator statements when they have
                 a variable referenced in the LHS.",
             flatModel="
@@ -344,10 +317,9 @@ model OutputVarsTime3
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsTime3",
-            equation_event_indicators=true,
-            event_output_vars=true,
             description="Time event generating expressions should not generate event indicator equations, even with
                 the option set to true.",
+            event_output_vars=true,
             flatModel="
 fclass EventGeneration.OutputVarsTime3
  discrete Real t;
@@ -375,10 +347,9 @@ model OutputVarsTime4
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsTime4",
-            equation_event_indicators=true,
-            event_output_vars=true,
             description="Time event generating expressions should generate event indicator statements when they have
                 a variable referenced in the LHS. The indicator should be an output when the option is set to true.",
+            event_output_vars=true,
             flatModel="
 fclass EventGeneration.OutputVarsTime4
  discrete Real t;
@@ -408,7 +379,6 @@ model OutputVarsState1
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsState1",
-            equation_event_indicators=true,
             description="State event generating expressions should generate indicator equations.",
             flatModel="
 fclass EventGeneration.OutputVarsState1
@@ -442,7 +412,6 @@ model OutputVarsState2
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsState2",
-            equation_event_indicators=true,
             description="State event generating expressions should generate indicator statements when they have a
                 variable referenced in the LHS.",
             flatModel="
@@ -475,10 +444,9 @@ model OutputVarsState3
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsState3",
-            equation_event_indicators=true,
-            event_output_vars=true,
             description="State event generating expressions should generate indicator equations when no variable is
                 referenced in the LHS. The variable should be an output when the option is set to true.",
+            event_output_vars=true,
             flatModel="
 fclass EventGeneration.OutputVarsState3
  discrete input Integer i;
@@ -511,10 +479,9 @@ model OutputVarsState4
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsState4",
-            equation_event_indicators=true,
-            event_output_vars=true,
             description="State event generating expressions should generate event indicator statements when they have
                 a variable referenced in the LHS. The indicator should be an output when the option is set to true.",
+            event_output_vars=true,
             flatModel="
 fclass EventGeneration.OutputVarsState4
  discrete input Integer i;
@@ -534,80 +501,5 @@ end EventGeneration.OutputVarsState4;
 ")})));
 end OutputVarsState4;
 
-
-model AliasIndicatorEquation
-  Real a;
-  Real b;
-
-equation
-  if a > 0 then
-    a = 1;
-  else
-    a = 2;
-  end if;
-
-  if a > 1 then
-    b = 1;
-  else
-    b = 2;
-  end if;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="EventGeneration_AliasIndicatorEquation",
-            equation_event_indicators=true,
-            description="Checks that event indicator equations are not alias eliminated.",
-            flatModel="
-fclass EventGeneration.AliasIndicatorEquation
- Real a;
- Real b;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
-equation
- a = if a > 0 then 1 else 2;
- b = if a > 1 then 1 else 2;
- _eventIndicator_1 = a;
- _eventIndicator_2 = a - 1;
-end EventGeneration.AliasIndicatorEquation;
-")})));
-end AliasIndicatorEquation;
-
-model AliasIndicatorOutput
-  Real a;
-  Real b;
-
-equation
-  if a > 0 then
-    a = 1;
-  else
-    a = 2;
-  end if;
-
-  if a > 1 then
-    b = 1;
-  else
-    b = 2;
-  end if;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="EventGeneration_AliasIndicatorOutput",
-            equation_event_indicators=true,
-            event_output_vars=true,
-            description="Checks that event indicator equations are not alias eliminated.",
-            flatModel="
-fclass EventGeneration.AliasIndicatorOutput
- Real a;
- Real b;
- output Real _eventIndicator_1;
- output Real _eventIndicator_2;
-equation
- a = if a > 0 then 1 else 2;
- b = if a > 1 then 1 else 2;
- _eventIndicator_1 = a;
- _eventIndicator_2 = a - 1;
-end EventGeneration.AliasIndicatorOutput;
-")})));
-end AliasIndicatorOutput;
 
 end EventGeneration;

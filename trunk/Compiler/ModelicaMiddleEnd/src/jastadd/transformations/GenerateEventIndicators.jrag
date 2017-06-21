@@ -22,24 +22,21 @@ aspect GenerateEventIndicators {
          * Transforms equations and algorithms. Currently the following transformations exist:
          * <ul>
          * <li>{@link AlgorithmIndicatorGenerator}; generates event indicators for algorithm statements.</li>
-         * <li>{@link EquationIndicatorGenerator}; generates event indicators for equations.</li>
+         * <li>{@link EventIndicatorGenerator}; generates event indicators for equations.</li>
          * </ul>
-         * <p>
-         * Options used by this transformation step:
-         * <ul>
-         * <li>{@link OptionRegistry.OptionSpecification#EVENT_OUTPUT_VARS event_output_vars}</li>
-         * <li>{@link OptionRegistry.OptionSpecification#EQUATION_EVENT_INDICATORS equation_event_indicators}</li>
-         * </ul>
-         * Note that the latter, which enables generation of indicator equations if no indicator statements are needed,
-         * is disabled by default when running tests.
-         */
+         */ 
         public class GenerateEventIndicators extends Transformation {
 
             @Override
             public void perform() {
                 OptionRegistry options = myOptions();
-                Transformer.visitAlgorithms(algorithms(), new AlgorithmIndicatorGenerator(FClass.this, options));
-                Transformer.visitEquations(FClass.this, new EquationIndicatorGenerator(options));
+
+                java.util.List<? extends FAlgorithm> algorithms = algorithms();
+                java.util.List<? extends FAbstractEquation> equations = equations();
+                equations.removeAll(algorithms);
+
+                Transformer.visitAlgorithms(algorithms, new AlgorithmIndicatorGenerator(FClass.this, options));
+                // EquationTransformer.visit(equations, new IndicatorTransformer(options));
                 flushAllRecursive();
             }
         }
@@ -48,7 +45,7 @@ aspect GenerateEventIndicators {
     /**
      * Visitor pattern for inserting new equtions or statements into a flat tree.
      */
-    public abstract class Transformer<T extends ASTNode<?>> {
+    public abstract class Transformer<T> {
         protected OptionRegistry options;
         protected boolean equationEventIndicators;
         protected boolean eventOutputVars;
@@ -68,13 +65,15 @@ aspect GenerateEventIndicators {
         /**
          * Starting point for the equation transformer.
          * 
-         * @param fClass
-         *          The flat tree to transform.
+         * @param equations
+         *          The equations to transform.
          * @param tf
-         *          The transformer to transform {@code fClass}.
+         *          The {@link Transformer} to transform {@code equations}.
          */
-        public static void visitEquations(FClass fClass, EquationTransformer tf) {
-            tf.visit(fClass);
+        public static void visitEquations(Collection<? extends FAbstractEquation> equations, Transformer tf) {
+            for (FAbstractEquation eqn : equations) {
+                tf.visit(eqn);
+            }
         }
 
         /**
@@ -83,7 +82,7 @@ aspect GenerateEventIndicators {
          * @param algorithms
          *          The algorithms to transform.
          * @param tf
-         *          The transformer to transform {@code algs}.
+         *          The {@link AlgorithmTransformer} to transform {@code algs}.
          */
         public static void visitAlgorithms(Collection<? extends FAlgorithm> algorithms, AlgorithmTransformer tf) {
             for (FAlgorithm alg : algorithms) {
@@ -102,185 +101,12 @@ aspect GenerateEventIndicators {
          * Transforms an equation or a statement, depending on {@code T}.
          */ 
         public abstract void transform(T item);
-
-        /**
-         * Visits a list of {@code T} elements.
-         * 
-         * @param ts
-         *          The elements to visit.
-         */ 
-        public List<T> visit(List<T> ts) {
-            for (T t : ts) {
-                visit(t);
-            }
-            return ts;
-        }
-    }
-
-    /**
-     * Transformer class for equations.
-     */ 
-    public abstract class EquationTransformer extends Transformer<FAbstractEquation> {
-
-        /**
-         * List of generated equations to be added to a flat tree.
-         */ 
-        protected java.util.List<FAbstractEquation> generatedEquations;
-
-        /*
-         * Queue for keeping track of transformed blocks.
-         * <p>
-         * The most recently inserted (index {@code blocks.size() - 1}) block belongs to the equation
-         * being transformed.
-         */
-        protected java.util.List<java.util.List<FAbstractEquation>> blocks;
-
-        /**
-         * Constructs an {@code EquationTransformer} with a reference to an {@link OptionRegistry}.
-         */
-        public EquationTransformer(OptionRegistry options) {
-            super(options);
-            this.blocks = new ArrayList<java.util.List<FAbstractEquation>>();
-            this.generatedEquations = new ArrayList<FAbstractEquation>();
-        }
-
-        /**
-         * Add generated equation to be added to the flat class.
-         *
-         * @param eqn
-         *          The equation to be added.
-         */
-        protected void addEquation(FAbstractEquation eqn) {
-            blocks.get(blocks.size() - 1).add(eqn);
-        }
-
-        /**
-         * Add generated equations to be added to the flat class.
-         * Convenience method for calling {@link #addEquation(FAbstractEquation)} on each element in {@code eqns}.
-         *
-         * @param eqns
-         *          The equations to be added.
-         */
-        protected void addEquations(Collection<? extends FAbstractEquation> eqns) {
-            for (FAbstractEquation eqn : eqns) {
-                addEquation(eqn);
-            }
-        }
-
-        protected void generateEquation(FAbstractEquation eqn) {
-            generatedEquations.add(eqn);
-        }
-
-        @Override
-        public void transform(FAbstractEquation eqn) {
-            addEquation(eqn);
-        }
-
-        /**
-         * Transforms a flat tree.
-         *
-         * @param fClass
-         *          The flat tree to transform.
-         * @return
-         *          {@code true} if {@code fClass} should be transformed, {@code false} otherwise.
-         */
-        public boolean transform(FClass fClass) {
-            return true;
-        }
-
-        /**
-         * Visits a flat tree.
-         * <p>
-         * TODO: Move to its own class "FClassTransformer?"
-         * 
-         * @param fClass
-         *          The flat tree to visit.
-         */ 
-        public void visit(FClass fClass) {
-            blocks.add(new ArrayList<FAbstractEquation>());
-            java.util.List<FAbstractEquation> eqns = fClass.getFAbstractEquationList().toArrayList();
-
-            if (transform(fClass)) {
-                for (FAbstractEquation eqn : eqns) {
-                    eqn.acceptTransform(this);
-                }
-            } else {
-                addEquations(eqns);
-            }
-            fClass.setFAbstractEquationList(new List<FAbstractEquation>(blocks.get(blocks.size() - 1)));
-            fClass.addFEquations(generatedEquations);
-            generatedEquations.clear();
-        }
-
-        /**
-         * Visits a for-equation.
-         * 
-         * @param eqn
-         *          The for-equation to visit.
-         */ 
-        public void visit(FForClauseE eqn) {
-            eqn.setFAbstractEquationList(visit(eqn.getFAbstractEquationList()));
-            transform(eqn);
-        }
-
-        /**
-         * Visits an {@code FIfWhenElseEquation} (if-, else-, or when-equation).
-         * 
-         * @param eqn
-         *          The equation to visit.
-         */ 
-        public void visit(FIfWhenElseEquation eqn) {
-            eqn.setFAbstractEquationList(visit(eqn.getFAbstractEquationList()));
-            transform(eqn);
-        }
-
-        /**
-         * Visits an {@code FIfWhenEquation} (if-, or when-equation).
-         * 
-         * @param eqn
-         *          The equation to visit.
-         */ 
-        public void visit(FIfWhenEquation eqn) {
-            eqn.setFAbstractEquationList(visit(eqn.getFAbstractEquationList()));
-            if (eqn.hasElse()) {
-                visit(eqn.getElse());
-            }
-            transform(eqn);
-        }
-
-        @Override
-        public List<FAbstractEquation> visit(List<FAbstractEquation> eqns) {
-            blocks.add(new ArrayList<FAbstractEquation>());
-            for (FAbstractEquation eqn : eqns) {
-                eqn.acceptTransform(this);
-            }
-            return new List<FAbstractEquation>(blocks.remove(blocks.size() - 1));
-        }
-
-        /**
-         * Transformation of algorithms is performed by an {@link AlgorithmTransformer}.
-         * This method ensures that algorithms are not transformed by this {@code EquationIndicatorGenerator}.
-         * 
-         * @param alg
-         *             The algorithm that should not be transformed.
-         */
-        public void visit(FAlgorithm alg) {
-            addEquation(alg);
-        }
     }
 
     /**
      * Transformer class for statements.
      */ 
     public abstract class StatementTransformer extends Transformer<FStatement> {
-
-        /*
-         * Queue for keeping track of transformed blocks.
-         * <p>
-         * The most recently inserted (index {@code blocks.size() - 1}) block belongs to the statement
-         * being transformed.
-         */
-        protected java.util.List<java.util.List<FStatement>> blocks = new ArrayList<java.util.List<FStatement>>();
 
         /**
          * Constructs an {@code StatementTransformer} with a reference to an {@link OptionRegistry}.
@@ -292,31 +118,13 @@ aspect GenerateEventIndicators {
             super(options);
         }
 
-        /**
-         * Adds a statement to the statement block currently being transformed.
-         *
-         * @param stmt
-         *          The statement to add.
-         */
-        protected void addStatement(FStatement stmt) {
-            blocks.get(blocks.size() - 1).add(stmt);
+        @Override
+        public void visit(FStatement stmt) {
+            transform(stmt);
         }
 
         /**
-         * Adds statements to the statement block currently being transformed.
-         * Convenience method for calling {@link #addStatement(FStatement)} on each element in {@code stmts}.
-         *
-         * @param stmts
-         *          The statements to add.
-         */
-        protected void addStatements(Collection<? extends FStatement> stmts) {
-            for (FStatement stmt : stmts) {
-                addStatement(stmt);
-            }
-        }
-
-        /**
-         * Visits a for-statement.
+         * Visits an {@code FForStmt}.
          * 
          * @param stmt
          *          The statement to visit.
@@ -327,7 +135,7 @@ aspect GenerateEventIndicators {
         }
 
         /**
-         * Visits a while-statement.
+         * Visits an {@code FWhileStmt}.
          * 
          * @param stmt
          *          The statement to visit.
@@ -338,7 +146,7 @@ aspect GenerateEventIndicators {
         }
 
         /**
-         * Visits an if-statement.
+         * Visits an {@code FIfStmt}.
          * 
          * @param stmt
          *          The statement to visit.
@@ -352,7 +160,7 @@ aspect GenerateEventIndicators {
         }
 
         /**
-         * Visits a when-statement.
+         * Visits an {@code FWhenStmt}.
          * 
          * @param stmt
          *          The statement to visit.
@@ -364,13 +172,17 @@ aspect GenerateEventIndicators {
             transform(stmt);
         }
 
-        @Override
+        /**
+         * Visits a list of {@code FStatement}s.
+         * 
+         * @param stmts
+         *          The statements to visit.
+         */ 
         public List<FStatement> visit(List<FStatement> stmts) {
-            blocks.add(new ArrayList<FStatement>());
             for (FStatement stmt : stmts) {
-                stmt.acceptTransform(this);
+                visit(stmt);
             }
-            return new List<FStatement>(blocks.remove(blocks.size() - 1));
+            return stmts;
         }
     }
 
@@ -378,10 +190,6 @@ aspect GenerateEventIndicators {
      * Transforms statements in algorithms.
      */ 
     public abstract class AlgorithmTransformer extends StatementTransformer {
-        /**
-         * List of generated equations to be added to a flat tree.
-         */ 
-        protected java.util.List<FAbstractEquation> generatedEquations;
 
         /**
          * Constructs an {@code AlgorithmTransformer} with a reference to an {@link OptionRegistry}.
@@ -391,27 +199,44 @@ aspect GenerateEventIndicators {
          */
         public AlgorithmTransformer(OptionRegistry options) {
             super(options);
-            this.generatedEquations = new ArrayList<FAbstractEquation>();
+        }
+
+        /*
+         * Queue for keeping track of transformed {@code FAlgorithm} blocks.
+         * <p>
+         * The most recently inserted (index {@code blocks.size() - 1}) block belongs to the {@link FAlgorithm}
+         * being transformed.
+         */
+        private java.util.List<ArrayList<FStatement>> blocks = new ArrayList<ArrayList<FStatement>>();
+
+        /**
+         * Adds a statement to the algorithm block currently being transformed.
+         *
+         * @param stmt
+         *          The statement to add.
+         */
+        protected void add(FStatement stmt) {
+            blocks.get(blocks.size() - 1).add(stmt);
         }
 
         /**
-         * Add generated equation to be added to the flat class.
+         * Adds statements to the algorithm block currently being transformed.
+         * Convenience method for calling {@link #add(FStatement)} on each element in {@code stmts}.
          *
-         * @param eqn
-         *          The equation to be added.
+         * @param stmts
+         *          The statements to add.
          */
-        protected void generateEquation(FAbstractEquation eqn) {
-            generatedEquations.add(eqn);
+        protected void addAll(Collection<? extends FStatement> stmts) {
+            for (FStatement stmt : stmts) {
+                add(stmt);
+            }
         }
 
         /**
          * Transforms an algorithm.
-         * <p>
          *
          * @param alg
          *          The algorithm to transform.
-         * @return
-         *          {@code true} if {@code alg} should be transformed, {@code false} otherwise.
          */
         public boolean transform(FAlgorithm alg) {
             return true;
@@ -419,42 +244,49 @@ aspect GenerateEventIndicators {
 
         @Override
         public void transform(FStatement stmt) {
-            addStatement(stmt);
+            add(stmt);
         }
 
         /**
-         * Visits an algorithm equation.
+         * Visits an {@code FAlgorithm}.
          * 
          * @param alg
          *          The algorithm to visit.
          */
         public void visit(FAlgorithm alg) {
             blocks.add(new ArrayList<FStatement>());
-            java.util.List<FStatement> stmts = alg.getFStatements().toArrayList();
 
             if (transform(alg)) {
-                for (FStatement stmt : stmts) {
+                for (FStatement stmt : alg.getFStatements()) {
                     stmt.acceptTransform(this);
                 }
             } else {
-                addStatements(stmts);
+                for (FStatement stmt : alg.getFStatements()) {
+                    add(stmt);
+                }
             }
             alg.setFStatementList(new List<FStatement>(blocks.remove(blocks.size() - 1)));
+        }
+
+        @Override
+        public List<FStatement> visit(List<FStatement> stmts) {
+            blocks.add(new ArrayList<FStatement>());
+            for (FStatement stmt : stmts) {
+                stmt.acceptTransform(this);
+            }
+            return new List<FStatement>(blocks.remove(blocks.size() - 1));
         }
 
     }
 
     /**
      * Generates initial statements and indicator statements for relational expressions.
-     * <p>
-     * If variables in a relational expression are referenced in the LHS of an algorithm statement, it needs an
-     * initialization statement. If not, the indicator can be added as an equation, unless the expression is
-     * time-event generating.
-     * <p>
+     *
      * TODO: Expression dependency is checked twice, possibly expensive. Cache result?
      */
     public class AlgorithmIndicatorGenerator extends AlgorithmTransformer {
-        protected FClass fClass;
+        private FClass fClass;
+        private java.util.List<FAbstractEquation> addedEquations;
 
         /**
          * Constructs an {@code AlgorithmIndicatorGenerator} with a reference to an {@link OptionRegistry}.
@@ -465,17 +297,29 @@ aspect GenerateEventIndicators {
          public AlgorithmIndicatorGenerator(FClass fClass, OptionRegistry options) {
             super(options);
             this.fClass = fClass;
+            this.addedEquations = new ArrayList<FAbstractEquation>();
          }
+
+        /**
+         * Add generated equation to be added to the flat class.
+         *
+         * @param eqn
+         *          The equation to be added.
+         */
+        public void addEquation(FAbstractEquation eqn) {
+            addedEquations.add(eqn);
+        }
 
         @Override
         public void visit(FAlgorithm alg) {
             super.visit(alg);
-            fClass.getFAbstractEquationList().addAll(generatedEquations);
-            generatedEquations.clear();
+            fClass.getFAbstractEquationList().addAll(addedEquations);
+            addedEquations.clear();
         }
 
         /**
-         * Add indicators for relational expressions in statements in an algorithm equation.
+         * Add indicator statement if the indicator could be changed by the algorithm (i.e. referenced in LHS),
+         * otherwise an equation for it should be added.
          *
          * @param alg
          *          The algorithm to transform.
@@ -489,9 +333,9 @@ aspect GenerateEventIndicators {
                     exp.genIndicator(eventOutputVars);
 
                     if (exp.needsIndicatorInit()) {
-                        addStatement(exp.indicatorInitStmt());
+                        add(exp.indicatorInitStmt());
                     }
-                } else if (exp.shouldGenerateIndicator() && equationEventIndicators) {
+                } else if (!exp.isTimeEventGenerating() && equationEventIndicators) {
                     exp.genIndicator(eventOutputVars);
                 }
             }
@@ -499,7 +343,8 @@ aspect GenerateEventIndicators {
         }
 
         /**
-         * Add indicators for relational expressions in a statement.
+         * Add indicator statement if the indicator could be changed by the algorithm (i.e. referenced in LHS),
+         * otherwise an equation for it should be added.
          *
          * @param stmt
          *          The statement to transform.
@@ -509,59 +354,15 @@ aspect GenerateEventIndicators {
 
             for (FRelExp exp : stmt.relExpInStmt()) {
                 if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
-                    addStatement(exp.indicatorStmt());
-                } else if (exp.shouldGenerateIndicator() && equationEventIndicators) {
-                    generateEquation(exp.indicatorEquation());
+                    add(exp.indicatorStmt());
+                } else if (exp.hasIndicator() && equationEventIndicators) {
+                    addEquation(exp.indicatorEquation());
                 }
             }
-            addStatement(stmt);
+            add(stmt);
         }
 
     }
-
-    /**
-     * Generates indicator equations for relational expressions.
-     * <p>
-     * If variables in a relational expression are referenced in the LHS of an algorithm statement, it needs an
-     * initialization statement. If not, the indicator can be added as an equation, unless the expression is
-     * time-event generating.
-     * <p>
-     * TODO: Expression dependency is checked twice, possibly expensive. Cache result?
-     */
-    public class EquationIndicatorGenerator extends EquationTransformer {
-
-        /**
-         * Constructs an {@code AlgorithmIndicatorGenerator} with a reference to an {@link OptionRegistry}.
-         *
-         * @param options
-         *          The option registry.
-         */
-         public EquationIndicatorGenerator(OptionRegistry options) {
-            super(options);
-         }
-
-        /**
-         * Generate event indicators for an equation's relational expressions.
-         * <p>
-         * Indicators should not be added if the expression is time-event generating.
-         *
-         * @param eqn
-         *          The equation for which to add event indicators.
-         */
-        @Override
-        public void transform(FAbstractEquation eqn) {
-            for (FRelExp exp : eqn.relExpInEquation()) {
-                if (exp.shouldGenerateIndicator() && equationEventIndicators) {
-                    exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation());
-                }
-            }
-            addEquation(eqn);
-        }
-    }
-
-    syn boolean FRelExp.shouldGenerateIndicator() = generatesEvent() && !isTimeEventGenerating() &&
-            !inFunctionCall() && !containsCommonFunctionCallExp();
 
     /**
      * Checks whether or not this relational expression requires an initialization statement.
@@ -574,19 +375,6 @@ aspect GenerateEventIndicators {
     eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
     eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
 
-    inh boolean FExp.isIndicator();
-    eq FClass.getChild().isIndicator() = false;
-    eq FRelExp.getIndicator().isIndicator() = true;
-
-    syn boolean FVariable.isIndicator() {
-        for (FIdUseExp use : uses()) {
-            if (use.isIndicator()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Creates an assign equation for the indicator.
      */
@@ -595,12 +383,12 @@ aspect GenerateEventIndicators {
     /**
      * Creates an assign statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), indicatorExp());
+    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().fullCopy(), indicatorExp());
 
     /**
      * Creates an initialization statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), new FIntegerLitExp(1));
+    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
 
     /**
      * Checks whether or not an expression depends on any variable in a collection of them.
@@ -636,8 +424,7 @@ aspect GenerateEventIndicators {
      * Generates an expression for the event indicator.
      */
     syn FExp FRelExp.indicatorExp() {
-        FExp res = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
-
+        FExp res = new FSubExp(getLeft(), getRight());
         if (myOptions().getBooleanOption("event_indicator_scaling")) {
             res = new FDivExp(res, nominal());
         }
@@ -654,19 +441,7 @@ aspect GenerateEventIndicators {
      * @param tf
      *          The transformer to transform {@code this} with.
      */ 
-    public void FAbstractEquation.acceptTransform(EquationTransformer tf)   { tf.visit(this); }
-
-    @Override
-    public void FAlgorithm.acceptTransform(EquationTransformer tf)          { tf.visit(this); }
-
-    @Override
-    public void FEquation.acceptTransform(EquationTransformer tf)           { tf.visit(this); }
-
-    @Override
-    public void FIfWhenElseEquation.acceptTransform(EquationTransformer tf) { tf.visit(this); }
-
-    @Override
-    public void FForClauseE.acceptTransform(EquationTransformer tf)         { tf.visit(this); }
+    // public void FAbstractEquation.acceptTransform(EquationTransformer tf)   { tf.visit(this); }
 
     /* ======================= *
      *  Transform statements.  *
