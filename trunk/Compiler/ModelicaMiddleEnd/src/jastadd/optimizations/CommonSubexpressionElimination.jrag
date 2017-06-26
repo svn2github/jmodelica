@@ -131,9 +131,10 @@ aspect CommonSubexpressionElimination {
                     final FTypePrefixVariability variability = call.variability().combine(
                             ASTNode.fFixedParameter()).combineDown(call.type().funcOutputVariability());
 
-                    FVariable var = call.tempVar(variability, call.type());
-                    if (!variables().contains(var)) {
-                        addFVariable(var);
+                    FAbstractVariable var = variablesMap().lookup(call.tempVarName());
+                    if (var == null) {
+                        var = call.tempVar(variability, call.type());
+                        addFVariable(var.asFVariable());
                         variablesMap().addVariable(var);
                     }
 
