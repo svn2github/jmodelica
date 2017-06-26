@@ -120,31 +120,34 @@ aspect CommonSubexpressionElimination {
                         addFAbstractEquationNoTransform(fae);
                     }
                 }
-                
+
                 public FExp getRepl() {
-                    if (repl == null) {
-                        FFunctionCall fc = get(0);
-                        final String name = fc.tempVarName();
-                        final FTypePrefixVariability v = fc.variability().combine(ASTNode.fFixedParameter());
-                        ExpFromTypeBuilder b = new ExpFromTypeBuilder() {
-                            public FExp build(String suffix, FType type) {
-                                String n = name + suffix;
-                                FVariable var = type.createTempFVariable(new FQNameString(n), v.combineDown(type.funcOutputVariability()));
-                                addFVariable(var);
-                                variablesMap().addVariable(var);
-                                return new FIdUseExp(name + suffix);
-                            }
-                        };
-                        repl = fc.type().buildFExp(b, "");
-                        merge(0, repl);
+                    if (repl != null) {
+                        return repl;
                     }
+
+                    FFunctionCall call = get(0);
+
+                    final FTypePrefixVariability variability = call.variability().combine(
+                            ASTNode.fFixedParameter()).combineDown(call.type().funcOutputVariability());
+
+                    FVariable var = call.tempVar(variability, call.type());
+                    if (!variables().contains(var)) {
+                        addFVariable(var);
+                        variablesMap().addVariable(var);
+                    }
+
+                    repl = var.createUseExp();
+                    merge(0, repl);
                     return repl;
                 }
-                
+
             }
+
         }
+
     }
-    
+
     /**
      * Add function calls in this sub tree to <code>m</code>
      */
