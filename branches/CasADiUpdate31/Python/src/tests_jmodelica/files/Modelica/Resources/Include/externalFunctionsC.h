@@ -8,6 +8,7 @@ int fIntegerScalar(int in);
 int fEnumScalar(int in);
 int fBooleanScalar(int in);
 const char* fStringScalar(const char* in);
+const char* fStringScalarLit(const char* in);
 void fRealArray(double* in, size_t in_d1, double* out, size_t out_d1);
 void fIntegerArray(int* in, size_t in_d1, int* out, size_t out_d1);
 void fEnumArray(int* in, size_t in_d1, int* out, size_t out_d1);
@@ -20,5 +21,7 @@ typedef struct fRec {
 } fRec_t;
 
 void fRecord(fRec_t *r, fRec_t *y);
+
+int get_time();
 
 #endif

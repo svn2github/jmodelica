@@ -67,22 +67,22 @@ def test_qt_par_casadi():
 @testattr(ma27 = True)
 def test_vehicle_turn():
     """Run the vehicle turn example."""
-    vehicle_turn.run_demo(False)
+    vehicle_turn.run_demo(False, use_ma57=False)
 
 @testattr(ma57 = True)
 def test_vehicle_turn():
     """Run the vehicle turn example."""
-    vehicle_turn.run_demo(False, use_ma57=True)
+    vehicle_turn.run_demo(False)
 
 @testattr(ma27 = True)
 def test_distillation4_opt():
     """Run the large distillation optimization example."""
-    distillation4_opt.run_demo(False)
+    distillation4_opt.run_demo(False, use_ma57=False)
 
 @testattr(ma57 = True)
 def test_distillation4_opt():
     """Run the large distillation optimization example."""
-    distillation4_opt.run_demo(False, use_ma57=True)
+    distillation4_opt.run_demo(False)
 
 @testattr(casadi = True)
 def test_cstr_mpc_casadi():
@@ -118,3 +118,4 @@ def test_fourbar1():
 def test_kinematic_robot_calibration():
     """Run the static robot calibration example."""
     kinematic_robot_calibration.run_demo(False)
+

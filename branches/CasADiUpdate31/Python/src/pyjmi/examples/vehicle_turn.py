@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as N
 import os
 
-def run_demo(with_plots=True, use_ma57=False):
+def run_demo(with_plots=True, use_ma57=True):
     """
     This example is based on a single-track model of a car with tire dynamics.
     The optimization problem is to minimize the duration of a 90-degree turn

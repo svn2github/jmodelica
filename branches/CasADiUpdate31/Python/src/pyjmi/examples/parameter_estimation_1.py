@@ -25,8 +25,7 @@ import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
 # Import the JModelica.org Python packages
-from pymodelica import compile_jmu, compile_fmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
 from pyfmi import load_fmu
 from pyjmi.optimization import ipopt
 
@@ -39,13 +38,11 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     model_path = curr_dir + "/files/ParameterEstimation_1.mop"
     
-    # Compile the model into an FMU and JMU
+    # Compile the model into an FMU
     fmu = compile_fmu("ParEst.SecondOrder", model_path)
-    jmu = compile_jmu("ParEst.ParEst", model_path)
     
     # Load the model
     sim_model = load_fmu(fmu)
-    opt_model = JMUModel(jmu)
     
     # Simulate model with nominal parameters
     sim_res = sim_model.simulate(final_time=10)
@@ -80,49 +77,6 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.ylabel('x2')
         plt.show()
-    
-    # Insert measurement data
-    for i in xrange(11):
-        opt_model.set('t[' + repr(i+1) + ']', t_meas[i])
-        opt_model.set('y[' + repr(i+1) + ']', y_meas[i])
-    
-    # Set optimization options
-    opts = opt_model.optimize_options()
-    opts['n_e'] = 16
-    
-    # Optimize
-    opt_res = opt_model.optimize(options=opts)
-
-    # Extract variable profiles
-    x1_opt = opt_res['sys.x1']
-    x2_opt = opt_res['sys.x2']
-    w_opt = opt_res.final('sys.w')
-    z_opt = opt_res.final('sys.z')
-    t_opt = opt_res['time']
-    
-    # Assert results
-    assert N.abs(opt_res.final('sys.x1') - 1.) < 1e-2
-    assert N.abs(w_opt - 1.05)  < 1e-2
-    assert N.abs(z_opt - 0.45)   < 1e-2
-    
-    # Plot optimization result
-    if with_plots:
-        plt.close(2)
-        plt.figure(2)
-        plt.subplot(2, 1, 1)
-        plt.plot(t_opt, x1_opt, 'g')
-        plt.plot(t_sim, x1_sim)
-        plt.plot(t_meas, y_meas, 'x')
-        plt.grid()
-        plt.subplot(2, 1, 2)
-        plt.plot(t_opt, x2_opt, 'g')
-        plt.grid()
-        plt.plot(t_sim, x2_sim)
-        plt.show()
-        
-        print("** Optimal parameter values: **")
-        print("w = %f" % w_opt)
-        print("z = %f" % z_opt)
 
 if __name__ == "__main__":
     run_demo()

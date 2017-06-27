@@ -30,7 +30,7 @@ set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/pyjmi/examples/file
 install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 
 include_directories(Include)
-include_directories(${TOP_SRC}/JMI/src)
+include_directories(${TOP_SRC}/RuntimeLibrary/src/jmi)
 
 set(ADDNUMBERS_Sources
     src/addNumbers.c

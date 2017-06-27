@@ -31,7 +31,7 @@ fpath = os.path.join(get_files_path(), 'Modelica', 'TestBrent.mo')
 
 def load_model(classname):
     options = {'block_solver_experimental_mode':4, 'use_Brent_in_1d':True,
-               'generate_only_initial_system': True}
+               'generate_only_initial_system': True, 'nle_solver_use_last_integrator_step': False}
     log_level = 2
     use_logging = False
     options['log_level'] = log_level
@@ -169,3 +169,20 @@ def test_arcsin():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
+@testattr(stddist = True)
+def test_bracketing_failure_Brent():
+    m = load_model('TestBrent.BrentWithBracketingFailure')
+    m.initialize(relativeTolerance=1e-6)
+    x = m.get('x')
+    y0 = m.get('y0')
+    z = m.get('z')
+    assert N.exp(x)-(1+abs(abs(z)-N.sqrt(y0))) < 1e-10
+    
+@testattr(stddist = True)
+def test_negative_nominal_Brent():
+    m = load_model('TestBrent.NegativeNominal')
+    m.initialize(relativeTolerance=1e-6)
+    x = m.get('x')
+    y = m.get('y')
+    assert N.abs(x + 11) < 1e-3
+    assert N.abs(y**2 - 6) < 1e-3

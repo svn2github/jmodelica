@@ -74,6 +74,13 @@ def sol_repeating_events(t, d=1):
     return x_expected
 
 
+class TestDelay:
+    @testattr(stddist = True)
+    def test_next_event(self):
+        # Test bug where delay in inactive if branch does not compute next time event correctly. #5692.
+        res = compile_and_simulate('TestNextEvent', 2)
+
+
 class TestFixedDelay:
     def zero_delay_ok(self):
         return True

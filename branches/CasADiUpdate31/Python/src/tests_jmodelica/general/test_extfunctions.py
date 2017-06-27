@@ -73,8 +73,8 @@ class TestUtilities:
         """
         fpath = path(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
         cpath = "ExtFunctionTests.ExtFunctionTest3"
-        jmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
-        model = load_fmu(jmu_name)
+        fmu_name = compile_fmu(cpath, fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(fmu_name)
         #model.simulate()
 
 class TestExternalShared:
@@ -343,8 +343,24 @@ class TestAssertEqu2(SimulationTest):
             assert False, 'Simulation not stopped by failed assertions'
         except FMUException, e:
             self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
+            
+class TestAssertEqu3(SimulationTest):
+    '''Test structural verification assert'''
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            "ExtFunctionTests.mo",
+            'ExtFunctionTests.StructuralAsserts')
+            
+    @testattr(stddist = True)
+    def test_simulate(self):
+        try:
+            self.setup_base()
+            self.run()
+            assert False, 'Simulation not stopped by failed assertions'
+        except FMUException, e:
+            pass
     
-     
 class TestAssertFunc(SimulationTest):
     
     @classmethod

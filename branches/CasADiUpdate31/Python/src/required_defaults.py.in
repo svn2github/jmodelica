@@ -34,7 +34,6 @@ def get_required_paths_dict():
     are required. These are the keys in the dictionary:
     'IPOPT_HOME'
     'SUNDIALS_HOME'
-    'CPPAD_HOME'
     'MINGW_HOME'
     'COMPILER_JARS'
     'BEAVER_LIB'
@@ -45,7 +44,6 @@ def get_required_paths_dict():
     """
     return {'IPOPT_HOME'    : @REQUIRE_IPOPT_HOME@,
             'SUNDIALS_HOME' : @REQUIRE_SUNDIALS_HOME@,
-            'CPPAD_HOME'    : @REQUIRE_CPPAD_HOME@,
             'COMPILER_JARS' : @REQUIRE_COMPILER_JARS@,
             'BEAVER_PATH'   : @REQUIRE_BEAVER_PATH@,
             'MODELICAPATH'  : @REQUIRE_MODELICAPATH@,

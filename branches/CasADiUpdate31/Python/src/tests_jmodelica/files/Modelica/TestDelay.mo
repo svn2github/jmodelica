@@ -142,3 +142,9 @@ model TestMultipleDelays
     TestZenoRepeat zeno(d = 5);
     TestZenoRepeatNoEvent zeno_ne(d = 5*phi);
 end TestMultipleDelays;
+
+model TestNextEvent
+    Boolean b = time > 2;
+    Real x = if time < 1 then 1 else time;
+    Real y = if b then delay(x,1) else time;
+end TestNextEvent;

@@ -47,7 +47,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
             
         file_name --
             If no file name is given, the name of the model (as defined by 
-            JMUModel.get_identifier()) concatenated with the string '_result' is used. 
+            FMUModel.get_identifier()) concatenated with the string '_result' is used. 
             A file suffix equal to the format argument is then appended to the 
             file name.
             Default: Empty string.
@@ -280,7 +280,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         Parameters::
         
             model   --
-                A JMUModel object.
+                A FMUModel object.
             format  --
                 A text string equal either to 'txt for textual format
                 or 'mat' for binary Matlab format.
@@ -309,7 +309,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         
             file_name --
                 If no file name is given, the name of the model (as 
-                defined by JMUModel.get_identifier()) concatenated with the 
+                defined by FMUModel.get_identifier()) concatenated with the 
                 string '_result' is used. A file suffix equal to the 
                 format argument is then appended to the file name.
                 Default: Empty string.

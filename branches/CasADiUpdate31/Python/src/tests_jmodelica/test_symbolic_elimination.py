@@ -26,6 +26,10 @@ from pyjmi import transfer_optimization_problem
 import numpy as N
 import os
 import casadi
+from pyfmi import load_fmu
+from pymodelica import compile_fmu
+from pyjmi.optimization.casadi_collocation import ExternalData
+from collections import OrderedDict
 
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
@@ -48,6 +52,10 @@ class TestSymbolicElimination(object):
         self.compiler_opts_automatic = {'equation_sorting': True, 'automatic_tearing': True}
         self.compiler_opts_manual = {}
         
+        class_path = "IllustExample"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.model_illust = load_fmu(compile_fmu(class_path, file_path))
+        
         class_path = "IllustExampleLagrange"
         file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
         self.op_illust_automatic = transfer_optimization_problem(class_path, file_path, self.compiler_opts_automatic)
@@ -66,6 +74,11 @@ class TestSymbolicElimination(object):
                 class_path, file_path, self.compiler_opts_automatic)
         self.op_illust_manual_constraint = transfer_optimization_problem(
                 class_path, file_path, self.compiler_opts_manual)
+        
+        class_path = "IllustExampleEst"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.op_illust_est_automatic = transfer_optimization_problem(class_path, file_path, self.compiler_opts_automatic)
+        self.op_illust_est_manual = transfer_optimization_problem(class_path, file_path, self.compiler_opts_manual)
         
         class_path = "LinearLoopLagrangeConstraint"
         file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
@@ -98,8 +111,8 @@ class TestSymbolicElimination(object):
                                 if not var.isAlias()])
         var_manual = sorted([var.getName() for var in blt_op_manual.getVariables(blt_op_manual.REAL_ALGEBRAIC)
                              if not var.isAlias()])
-        N.testing.assert_array_equal(var_automatic, ['y1', 'y3', 'y5'])
-        N.testing.assert_array_equal(var_manual, ['y1', 'y2', 'y3', 'y5'])
+        assert len(var_automatic) == 3
+        assert len(var_manual) == 4
 
         # Optimize and check result
         res_automatic = blt_op_automatic.optimize()
@@ -141,9 +154,9 @@ class TestSymbolicElimination(object):
                              if not var.isAlias()])
         var_hybrid = sorted([var.getName() for var in blt_op_hybrid.getVariables(blt_op_hybrid.REAL_ALGEBRAIC)
                              if not var.isAlias()])
-        N.testing.assert_array_equal(var_automatic, ['y1', 'y3', 'y5'])
-        N.testing.assert_array_equal(var_manual, ['y3', 'y5'])
-        N.testing.assert_array_equal(var_hybrid, ['y3', 'y5'])
+        assert len(var_automatic) == 3
+        assert len(var_manual) == 2
+        assert len(var_hybrid) == 2
 
         # Optimize and check result
         res_automatic = blt_op_automatic.optimize()
@@ -196,8 +209,8 @@ class TestSymbolicElimination(object):
                              if not var.isAlias()])
         var_hybrid = sorted([var.getName() for var in blt_op_hybrid.getVariables(blt_op_hybrid.REAL_ALGEBRAIC)
                              if not var.isAlias()])
-        N.testing.assert_array_equal(var_manual, ['y1', 'y3', 'y5'])
-        N.testing.assert_array_equal(var_hybrid, ['y1', 'y3', 'y5'])
+        assert len(var_manual) == 3
+        assert len(var_hybrid) == 3
 
         # Optimize and check result
         res_manual = blt_op_manual.optimize()
@@ -251,9 +264,9 @@ class TestSymbolicElimination(object):
                              if not var.isAlias()])
         var_mrkwtz2 = sorted([var.getName() for var in blt_op_mrkwtz2.getVariables(blt_op_mrkwtz.REAL_ALGEBRAIC)
                               if not var.isAlias()])
-        N.testing.assert_array_equal(var_lmfi, ['y1', 'y3', 'y5'])
-        N.testing.assert_array_equal(var_mrkwtz, ['y1', 'y3', 'y5'])
-        N.testing.assert_array_equal(var_mrkwtz2, ['y1', 'y2', 'y3', 'y5'])
+        assert len(var_lmfi) == 3
+        assert len(var_mrkwtz) == 3
+        assert len(var_mrkwtz2) == 4
 
         # Optimize and check result
         res_lmfi = blt_op_lmfi.optimize()
@@ -312,8 +325,8 @@ class TestSymbolicElimination(object):
                              if not var.isAlias()])
         var_elim = sorted([var.getName() for var in blt_op_elim.getVariables(blt_op_elim.REAL_ALGEBRAIC)
                            if not var.isAlias()])
-        N.testing.assert_array_equal(var_inelim, ['y1', 'y3', 'y5'])
-        N.testing.assert_array_equal(var_elim, ['y3', 'y5'])
+        assert len(var_inelim) == 3
+        assert len(var_elim) == 2
 
         # Optimize and check result
         res_inelim = blt_op_inelim.optimize()
@@ -331,6 +344,8 @@ class TestSymbolicElimination(object):
     def test_block_solve(self):
         """
         Test solution of linear blocks both symbolically with SX and numerically with MX.
+
+        Numerical part of the test has been disabled, see #5208.
         """
         cost_ref = 2.5843277
         u_norm_ref = 0.647282415
@@ -350,31 +365,33 @@ class TestSymbolicElimination(object):
         op = self.op_loop_manual
         blt_op_dae = BLTOptimizationProblem(op, dae_opts)
         blt_op_symbolic = BLTOptimizationProblem(op, symbolic_opts)
-        blt_op_numeric = BLTOptimizationProblem(op, numeric_opts)
+        #~ blt_op_numeric = BLTOptimizationProblem(op, numeric_opts)
 
         # Check remaining variables
         var_dae = sorted([var.getName() for var in blt_op_dae.getVariables(blt_op_dae.REAL_ALGEBRAIC)
                           if not var.isAlias()])
         var_symbolic = sorted([var.getName() for var in blt_op_symbolic.getVariables(blt_op_symbolic.REAL_ALGEBRAIC)
                                if not var.isAlias()])
-        var_numeric = sorted([var.getName() for var in blt_op_numeric.getVariables(blt_op_numeric.REAL_ALGEBRAIC)
-                              if not var.isAlias()])
-        N.testing.assert_array_equal(var_dae, ['y1', 'y2'])
-        N.testing.assert_array_equal(var_symbolic, [])
-        N.testing.assert_array_equal(var_numeric, [])
+        #~ var_numeric = sorted([var.getName() for var in blt_op_numeric.getVariables(blt_op_numeric.REAL_ALGEBRAIC)
+                              #~ if not var.isAlias()])
+        assert len(var_dae) == 2
+        assert len(var_symbolic) == 0
+        #~ assert len(var_numeric) == 0
 
         # Optimize and check result
         res_dae = blt_op_dae.optimize()
         res_symbolic = blt_op_symbolic.optimize()
-        res_numeric = blt_op_numeric.optimize(options=numeric_op_opts)
+        #~ res_numeric = blt_op_numeric.optimize(options=numeric_op_opts)
         assert_results(res_dae, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
-        assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        #~ assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
 
     @testattr(casadi = True)
     def test_linear_tearing(self):
         """
         Test solution of torn linear blocks both symbolically with SX and numerically with MX.
+
+        Numerical part of the test has been disabled, see #5208.
         """
         cost_ref = 2.5843277
         u_norm_ref = 0.647282415
@@ -396,26 +413,26 @@ class TestSymbolicElimination(object):
         op = self.op_loop_automatic
         blt_op_nonlinear = BLTOptimizationProblem(op, nonlinear_opts)
         blt_op_symbolic = BLTOptimizationProblem(op, symbolic_opts)
-        blt_op_numeric = BLTOptimizationProblem(op, numeric_opts)
+        #~ blt_op_numeric = BLTOptimizationProblem(op, numeric_opts)
 
         # Check remaining variables
         var_nonlinear = sorted([var.getName() for var in blt_op_nonlinear.getVariables(blt_op_nonlinear.REAL_ALGEBRAIC)
                                 if not var.isAlias()])
         var_symbolic = sorted([var.getName() for var in blt_op_symbolic.getVariables(blt_op_symbolic.REAL_ALGEBRAIC)
                                if not var.isAlias()])
-        var_numeric = sorted([var.getName() for var in blt_op_numeric.getVariables(blt_op_numeric.REAL_ALGEBRAIC)
-                              if not var.isAlias()])
-        N.testing.assert_array_equal(var_nonlinear, ['y1'])
-        N.testing.assert_array_equal(var_symbolic, [])
-        N.testing.assert_array_equal(var_numeric, [])
+        #~ var_numeric = sorted([var.getName() for var in blt_op_numeric.getVariables(blt_op_numeric.REAL_ALGEBRAIC)
+                              #~ if not var.isAlias()])
+        assert len(var_nonlinear) == 1
+        assert len(var_symbolic) == 0
+        #~ assert len(var_numeric) == 0
 
         # Optimize and check result
         res_nonlinear = blt_op_nonlinear.optimize()
         res_symbolic = blt_op_symbolic.optimize()
-        res_numeric = blt_op_numeric.optimize(options=numeric_op_opts)
+        #~ res_numeric = blt_op_numeric.optimize(options=numeric_op_opts)
         assert_results(res_nonlinear, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
-        assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        #~ assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
 
     @testattr(casadi = True)
     def test_derivative_elimination(self):
@@ -437,11 +454,70 @@ class TestSymbolicElimination(object):
                              if not var.isAlias()])
         var_automatic = sorted([var.getName() for var in blt_op_automatic.getVariables(blt_op_automatic.REAL_ALGEBRAIC)
                                 if not var.isAlias()])
-        N.testing.assert_array_equal(var_manual, ['y1', 'y2'])
-        N.testing.assert_array_equal(var_automatic, ['y2'])
+        assert len(var_manual) == 2
+        assert len(var_automatic) == 1
 
         # Optimize and check result
         res_manual = blt_op_manual.optimize()
         res_automatic = blt_op_automatic.optimize()
         assert_results(res_manual, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_automatic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+    @testattr(casadi = True)
+    def test_par_est(self):
+        """
+        Test parameter estimation.
+        """
+        cost_ref = 1.1109779e-2
+        u_norm_ref = 0.556018602
+
+        model = self.model_illust
+        op = self.op_illust_est_automatic
+
+        # Simulate with nominal parameters
+        n_meas = 16
+        sim_res = model.simulate(input=('u', lambda t: -0.2 + N.sin(t)), final_time=4.,
+                                 options={'ncp': n_meas, 'CVode_options': {'rtol': 1e-10}})
+
+        # Assemble external data by adding noise to simulation
+        Q = N.diag([1., 1.])
+        N.random.seed(1)
+        t_meas = sim_res['time']
+        sigma = 0.05
+        x1_meas = sim_res['x1'] + sigma*N.random.randn(n_meas+1)
+        x2_meas = sim_res['x2'] + sigma*N.random.randn(n_meas+1)
+        u_meas = sim_res['u']
+        data_x1 = N.vstack([t_meas, x1_meas])
+        data_x2 = N.vstack([t_meas, x2_meas])
+        data_u1 = N.vstack([t_meas, u_meas])
+        quad_pen = OrderedDict()
+        quad_pen['x1'] = data_x1
+        quad_pen['x2'] = data_x2
+        eliminated = OrderedDict()
+        eliminated['u'] = data_u1
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen, eliminated=eliminated)
+
+        # Eliminate
+        blt_op = BLTOptimizationProblem(op)
+
+        # Check remaining variables
+        alg_vars = sorted([var.getName() for var in blt_op.getVariables(blt_op.REAL_ALGEBRAIC) if not var.isAlias()])
+        assert len(alg_vars) == 3
+
+        # Set up options
+        dae_opts = op.optimize_options()
+        dae_opts['init_traj'] = sim_res
+        dae_opts['nominal_traj'] = sim_res
+        dae_opts['external_data'] = external_data
+        blt_opts = blt_op.optimize_options()
+        blt_opts['init_traj'] = sim_res
+        blt_opts['nominal_traj'] = sim_res
+        blt_opts['external_data'] = external_data
+
+        # Optimize and check result
+        res_dae = op.optimize(options=dae_opts)
+        res_blt = blt_op.optimize(options=blt_opts)
+        assert_results(res_dae, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_blt, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        N.testing.assert_allclose([res_dae['p1'][0], res_dae['p3'][0]], [2.022765, 0.992965], rtol=2e-3)
+        N.testing.assert_allclose([res_blt['p1'][0], res_blt['p3'][0]], [2.022765, 0.992965], rtol=2e-3)

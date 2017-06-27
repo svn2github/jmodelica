@@ -51,7 +51,7 @@ class EliminationOptions(OptionBase):
             Default: True
 
         ineliminable --
-            Names of variables that should not be eliminated. Particularly useful for variables with bounds.
+            List of names of variables that should not be eliminated. Particularly useful for variables with bounds.
 
             Default: []
 
@@ -63,7 +63,7 @@ class EliminationOptions(OptionBase):
             Default: 'lmfi'
 
         dense_tol --
-            Tolerance for controlling density in causalized system. Possible values: [0, inf]
+            Tolerance for controlling density in causalized system. Possible values: [-inf, inf]
 
             Default: 15
 
@@ -645,7 +645,13 @@ class BipartiteGraph(object):
         if self.components:
             plt.close(idx)
             fig = plt.figure(idx, frameon=False)
-            if not strings:
+            if strings:
+                plt.tick_params(
+                    axis='both',       # changes apply to both axes
+                    which='both',        # ticks along the top edge are off
+                    left='off',
+                    labelleft='off')
+            else:
                 fig.gca().set_frame_on(False)
                 plt.tick_params(
                     axis='both',       # changes apply to both axes
@@ -1154,7 +1160,7 @@ class BLTModel(object):
         Setup structure for computing variable dependencies for preserving sparsity.
         """
         self._dependencies = dependencies = {}
-        for vk in ['x', 'u']:
+        for vk in ['x', 'u', 'p_opt']:
             for var in self._mx_var_struct[vk]:
                 dependencies[var.name()] = [var.name()]
 
@@ -1483,7 +1489,7 @@ class BLTModel(object):
         eq_expr = co.eq_expr[0]
         dae_var_list = reduce(
             list.__add__, 
-            [self._mx_var_struct[vk] for vk in ['dx', 'x', 'u', 'w']]
+            [self._mx_var_struct[vk] for vk in ['dx', 'x', 'u', 'w', 'p_opt']]
         )
         dae_vars = casadi.vertcat(*dae_var_list)
         fcn = casadi.Function('fcn', [dae_vars], [eq_expr])
