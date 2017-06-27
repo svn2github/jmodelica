@@ -195,7 +195,7 @@ public class ModelicaCompiler {
                         }
                     } else {
                         try {
-                            PrintStream out = new PrintStream(new FileOutputStream(arg));
+                            PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(arg)));
                             if (tmpl != null) {
                                 String line = tmpl.readLine();
                                 while (line != null) {
@@ -2160,7 +2160,7 @@ public class ModelicaCompiler {
 
         try {
             hookCheckAbort();
-            FileOutputStream dest = new FileOutputStream(unitFile);
+            OutputStream dest = new BufferedOutputStream(new FileOutputStream(unitFile));
             ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
             out.setMethod(ZipOutputStream.DEFLATED);
 
@@ -3003,7 +3003,7 @@ public abstract class CCompilerDelegator {
         try {
             source = new FileInputStream(sourceFile).getChannel();
             destination = new FileOutputStream(destFile).getChannel();
-            long count =0;
+            long count = 0;
             long size = source.size();
             while( (count += destination.transferFrom(source, 0, size-count)) < size);
         }
