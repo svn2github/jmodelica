@@ -18,58 +18,91 @@
 */
 
 
+#include <string.h>
+#include "jmi_ode_solver.h"
 #include "jmi_ode_problem.h"
+#include "jmi_math.h"
 
-int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* fmix_me,
-                       int n_real_x, int n_sw, int n_real_u, jmi_log_t* log){
-    int i;
+static int default_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode_sizes_t sizes, void* problem_data) {
+    /* Default implementation, assumes there are no states */
+    if (sizes.states == 0) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+static int default_root_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *root, jmi_ode_sizes_t sizes, void* problem_data) {
+    /* Default implementation, assumes there are no root function */
+    if (sizes.event_indicators == 0) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+static int default_completed_integrator_step(char* step_event, char* terminate, void* problem_data) {
+    /* Default implementation, assumes noting is done at completed step */
+    *step_event = 0;
+    *terminate = 0;
+    return 0;
+}
+
+static jmi_ode_status_t default_event_update(jmi_ode_problem_t* problem) {
+    /* Default implementation does nothing */
+    return JMI_ODE_OK;
+}
+
+jmi_ode_callbacks_t jmi_ode_problem_default_callbacks() {
+    jmi_ode_callbacks_t cb;
+    
+    cb.rhs_func = default_rhs_fcn;
+    cb.root_func = default_root_fcn;
+    cb.complete_step_func = default_completed_integrator_step;
+    cb.event_update_func = default_event_update;
+    return cb;
+}
+
+jmi_ode_problem_t* jmi_new_ode_problem(jmi_callbacks_t*     cb,
+                                       void*                problem_data,
+                                       jmi_ode_callbacks_t  ode_callbacks,
+                                       jmi_ode_sizes_t      sizes,
+                                       jmi_log_t*           log) {
     jmi_ode_problem_t* problem;
     
-    *ode_problem = (jmi_ode_problem_t*)calloc(1,sizeof(jmi_ode_problem_t));
-    problem = *ode_problem;
-    problem -> jmi_callbacks = cb;
-    problem -> fmix_me  = fmix_me;     
-    problem -> n_real_x = n_real_x;
-    problem -> n_sw     = n_sw;
-    problem -> n_real_u = n_real_u;
-    problem -> states                    = (jmi_real_t*)calloc(n_real_x, sizeof(jmi_real_t));
-    problem -> states_derivative         = (jmi_real_t*)calloc(n_real_x, sizeof(jmi_real_t));
-    problem -> nominal                   = (jmi_real_t*)calloc(n_real_x, sizeof(jmi_real_t));
-    problem -> event_indicators          = (jmi_real_t*)calloc(n_sw, sizeof(jmi_real_t));
-    problem -> event_indicators_previous = (jmi_real_t*)calloc(n_sw, sizeof(jmi_real_t));
-    problem -> log = log;
+    problem = (jmi_ode_problem_t*)calloc(1,sizeof(jmi_ode_problem_t));
+    if (problem == NULL) return NULL;
     
-    problem -> real_inputs = (jmi_cs_real_input_t*)calloc(n_real_u, sizeof(jmi_cs_real_input_t));
-    /* Initialize real inputs */
-    for (i = 0; i < n_real_u; i++) {
-        jmi_cs_init_real_input_struct(&(problem -> real_inputs[i]));
+    problem->jmi_callbacks  = cb;
+    problem->event_info.nominals_updated = FALSE;
+    problem->event_info.exists_time_event = FALSE;
+    problem->event_info.next_time_event = JMI_INF;
+    problem->problem_data   = problem_data;
+    problem->ode_callbacks  = ode_callbacks;
+    problem->sizes          = sizes;
+    problem->states         = (jmi_real_t*)calloc(sizes.states, sizeof(jmi_real_t));
+    problem->nominals       = (jmi_real_t*)calloc(sizes.states, sizeof(jmi_real_t));
+    problem->log = log;
+    if (problem->states == NULL || problem->nominals == NULL) {
+        jmi_free_ode_problem(problem);
+        return NULL;
     }
     
-    return 0;
+    return problem;
 }
 
-int jmi_init_ode_problem(jmi_ode_problem_t* problem, jmi_real_t t_start,
-                         rhs_func_t rhs_func, root_func_t root_func, 
-                         complete_step_func_t complete_step_func) {
-    
-    problem -> time               = t_start;
-    problem -> rhs_func           = rhs_func;
-    problem -> root_func          = root_func;
-    problem -> complete_step_func = complete_step_func;
-    
-    return 0;
-}
-
-
-void jmi_free_ode_problem(jmi_ode_problem_t* problem){
+void jmi_free_ode_problem(jmi_ode_problem_t* problem) {
     if (problem) {
-        free(problem -> states);
-        free(problem -> states_derivative);
-        free(problem -> nominal);
-        free(problem -> event_indicators);
-        free(problem -> event_indicators_previous);
-        free(problem -> real_inputs);
+        if (problem->states)    free(problem->states);
+        if (problem->nominals)  free(problem->nominals);
         free(problem);
     }
 }
-    
+
+void jmi_reset_ode_problem(jmi_ode_problem_t* problem) {
+    problem->event_info.exists_time_event = FALSE;
+    problem->event_info.next_time_event = JMI_INF;
+    memset(problem->states, 0, problem->sizes.states * sizeof(jmi_real_t));
+    memset(problem->nominals, 0, problem->sizes.states * sizeof(jmi_real_t));
+}
+

@@ -776,6 +776,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
 int jmi_next_time_event(jmi_t* jmi) {
     int retval;
+    jmi->nextTimeEvent.defined = 0;
     
     retval = jmi_ode_next_time_event(jmi, &jmi->nextTimeEvent);
     if(retval != 0) {
@@ -784,11 +785,9 @@ int jmi_next_time_event(jmi_t* jmi) {
     
     /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
        if the next event is caused by a delay of the current one. */
-    {
-        jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
-        if (t_delay != JMI_INF) {
-            jmi_min_time_event(&jmi->nextTimeEvent, 1, 0, t_delay);
-        }
+    retval = jmi_delay_next_time_event(jmi, &jmi->nextTimeEvent);
+    if (retval != 0) {
+        return -1;
     }
     
     return 0;
@@ -938,7 +937,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
             break;
         default:
-            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
+            bsop->active_bounds_mode = jmi_project_newton_step_active_bounds_mode;
         }
     } 
         
@@ -1033,9 +1032,14 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_tol_factor");
     if(index)
         op->nle_solver_tol_factor = z[index]; 
+        
+    index = get_option_index("_le_sparse_jacobian_threshold");
+    if(index)
+        bsop->linear_sparse_jacobian_threshold = (int)z[index];
+        
     index = get_option_index("_events_default_tol");
     if(index)
-        op->events_default_tol = z[index];
+        op->events_default_tol = z[index]; 
     index = get_option_index("_time_events_default_tol");
     if(index)
         op->time_events_default_tol = z[index];

@@ -482,6 +482,8 @@ static void initialize(log_t *log) {
 }
 
 static void delete_log(log_t *log) {
+    if (log == NULL) return;
+
     leave_all(log);
     if (log->log_file) {
         fprintf(log->log_file, "</JMILog>\n");

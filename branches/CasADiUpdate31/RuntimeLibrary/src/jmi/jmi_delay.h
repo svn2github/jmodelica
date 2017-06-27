@@ -39,7 +39,8 @@
     
     Before using a delay block in simulation, it must be initialized with `jmi_delay_init`.
     This will specify the properties of the delay block and provide an initial value for its output,
-    to be used until the elapsed simulation time exceeds the delay time.
+    to be used until the elapsed simulation time exceeds the delay time. If `fixed` is true, then 
+    the fixed delay value must be passed as the max value.
 
     Delay blocks are evaluated using the `jmi_delay_evaluate`, which uses the current time and input
     value in cases when the delay time is small. `jmi_delay_evaluate` will step over events stored
@@ -106,8 +107,8 @@ int jmi_delay_record_sample(jmi_t *jmi, int index, jmi_real_t y_in);
            Use also for recording into spatialDistributions. */
 int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event);
 
-/** \brief Return the next time event caused by any delay block, or JMI_INF if there is no next time event */
-jmi_real_t jmi_delay_next_time_event(jmi_t *jmi);
+/** \brief Update nextTimeEvent with the next time event caused by any delay block. Return -1 on failure, 0 otherwise. */
+jmi_real_t jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent);
 
 /** \brief Compute the first (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);

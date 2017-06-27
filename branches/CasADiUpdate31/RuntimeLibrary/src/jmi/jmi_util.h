@@ -98,7 +98,7 @@
 typedef struct _jmi_time_event_t {
     int defined;
     int phase;
-    jmi_ad_var_t time;
+    jmi_real_t time;
 } jmi_time_event_t;
 
 /**
@@ -634,6 +634,13 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
 jmi_real_t jmi_turn_switch(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel);
 
 jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel);
+
+/**
+ * \brief Returns the epsilon used when computing inStream operator.
+ * 
+ * @param jmi The jmi struct
+ */
+jmi_real_t jmi_in_stream_eps(jmi_t* jmi);
 
 /**
  * \brief Check if file exists.

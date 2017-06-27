@@ -74,5 +74,7 @@ void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data);
 #define JMI_DYNAMIC_FREE() \
     if (dyn_mem.head) jmi_dyn_mem_free(&dyn_mem);
 
+/* Evaluate and assign expression only if computed flag is false. Sets computed flag to true. */
+#define JMI_CACHED(var, exp) ((!var##_computed && (var##_computed = 1)) ? (var = exp) : var)
 
 #endif /* _JMI_DYN_MEM_H */

@@ -30,8 +30,14 @@
 #include <assert.h>
 #include "jmi_math.h"
 
-void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_t time) {
-    if (JMI_TRUE == LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_NOT(AD_WRAP_LITERAL(event->defined)), SURELY_GT_ZERO(event->time - time)), LOG_EXP_AND(ALMOST_ZERO(event->time - time), SURELY_GT_ZERO(event->phase - phase)))) {
+void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_real_t time) {
+    if (JMI_TRUE == LOG_EXP_OR(
+                        LOG_EXP_OR(
+                            LOG_EXP_NOT(AD_WRAP_LITERAL(event->defined)), 
+                            SURELY_GT_ZERO(event->time - time)), 
+                        LOG_EXP_AND(
+                            ALMOST_ZERO(event->time - time), 
+                            SURELY_GT_ZERO(event->phase - phase)))) {
         event->defined = def;
         event->phase = phase;
         event->time = time;
@@ -249,7 +255,7 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
     int i, all_discrete_reals_equal = 1;
     
     for (i = 0; i < size; i++){
-        if (RAbs(dr_pre[i] - dr_post[i])/nominals[i] > JMI_ALMOST_EPS ){
+        if (JMI_ABS(dr_pre[i] - dr_post[i])/nominals[i] > JMI_ALMOST_EPS ){
             all_discrete_reals_equal = 0;
             break;
         }
@@ -310,7 +316,9 @@ jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, in
      * x <= 0
      * x <  0
      */
+    jmi_real_t t = jmi_get_t(jmi)[0];
     jmi_real_t eps = jmi->time_events_epsilon;
+    eps = eps*jmi_max(1.0, t);
     if (sw == 1.0) {
         if ((ev_ind <  -eps && rel == JMI_REL_GEQ)  ||
             (ev_ind <=  eps && rel == JMI_REL_GT)   ||
@@ -329,6 +337,10 @@ jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, in
         }
     }
     return sw;
+}
+
+jmi_real_t jmi_in_stream_eps(jmi_t* jmi) {
+    return 1e-8;
 }
 
 int jmi_file_exists(const char* file) {

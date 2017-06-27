@@ -40,7 +40,9 @@
 #include "jmi_kinsol_solver.h"
 #include "jmi_brent_solver.h"
 #include "jmi_linear_solver.h"
+#ifdef JMI_INCLUDE_MINPACK
 #include "jmi_minpack_solver.h"
+#endif
 #include "jmi_block_solver_impl.h"
 #include "jmi_math.h"
 
@@ -148,6 +150,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
         }
         break;
         
+#ifdef JMI_INCLUDE_MINPACK
         case JMI_MINPACK_SOLVER: {
             jmi_minpack_solver_t* solver;    
             jmi_minpack_solver_new(&solver, block_solver);
@@ -156,7 +159,9 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->delete_solver = jmi_minpack_solver_delete;
         }
         break;
-
+#else
+        assert(0);
+#endif
         case JMI_SIMPLE_NEWTON_SOLVER: {
             block_solver->solver = 0;
             block_solver->solve = jmi_simple_newton_solve;
@@ -170,6 +175,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->solver = solver;
             block_solver->solve = jmi_linear_solver_solve;
             block_solver->delete_solver = jmi_linear_solver_delete;
+            block_solver->completed_integrator_step = jmi_linear_completed_integrator_step;
         }
         break;
 
@@ -183,6 +189,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->F = solver_callbacks.F;
     block_solver->dF = solver_callbacks.dF;
     block_solver->Jacobian = solver_callbacks.Jacobian;
+    block_solver->Jacobian_structure = solver_callbacks.Jacobian_structure;
     block_solver->check_discrete_variables_change = solver_callbacks.check_discrete_variables_change;
     block_solver->update_discrete_variables = solver_callbacks.update_discrete_variables;
     block_solver->log_discrete_variables = solver_callbacks.log_discrete_variables;
@@ -722,6 +729,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
+    bsop->linear_sparse_jacobian_threshold = -1;
 
     bsop->active_bounds_threshold = 0; /** < \brief Threshold for when at active bound. */
 
@@ -828,8 +836,8 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
         for (i = 0; i < N; i++) {
             int j;
             /* column scaling is formed by max(abs(nominal), abs(actual_value)) */
-            realtype xscale = RAbs(block->nominal[i]);
-            realtype x = RAbs(block->x[i]);
+            realtype xscale = JMI_ABS(block->nominal[i]);
+            realtype x = JMI_ABS(block->x[i]);
             realtype* col_ptr;
             realtype* scaled_col_ptr;
             if(x < xscale) x = xscale;
@@ -843,7 +851,7 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
                 realtype fscale;
                 fscale = dres * x;
                 scaled_col_ptr[j] = fscale;
-                scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
+                scale_ptr[j] = JMI_MAX(scale_ptr[j], JMI_ABS(fscale));
             }
         }
     }
@@ -871,12 +879,11 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
                 scale_ptr[i] = block->residual_heuristic_nominal[i];
             } else if(scale_ptr[i] < 1/bsop->max_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
-                realtype **jac = block->J_scale->cols;
-                realtype maxInJac = RAbs(jac[0][i]); 
+                realtype maxInJac = JMI_ABS(DENSE_ELEM(block->J_scale, i, 0));
                 block->using_max_min_scaling_flag = 1; /* Using maximum scaling, singular Jacobian? */
                 for(j = 0; j < N; j++) {
-                    if(RAbs(maxInJac) < RAbs(jac[j][i])) {
-                        maxInJac = jac[j][i];
+                    if(JMI_ABS(maxInJac) < JMI_ABS(DENSE_ELEM(block->J_scale, i, j))) {
+                        maxInJac = DENSE_ELEM(block->J_scale, i, j);
                         maxInJacIndex = j;
                     }
                 }
@@ -888,12 +895,11 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
-                realtype **jac = block->J_scale->cols;
-                realtype maxInJac = RAbs(jac[0][i]);
+                realtype maxInJac = JMI_ABS(DENSE_ELEM(block->J_scale, i, 0));
                 /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
                 for(j = 0; j < N; j++) {
-                    if(RAbs(maxInJac) < RAbs(jac[j][i])) {
-                        maxInJac = jac[j][i];
+                    if(JMI_ABS(maxInJac) < JMI_ABS(DENSE_ELEM(block->J_scale, i, j))) {
+                        maxInJac = DENSE_ELEM(block->J_scale, i, j);
                         maxInJacIndex = j;
                     }
                 }

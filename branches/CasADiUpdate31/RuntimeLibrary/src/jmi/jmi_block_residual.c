@@ -35,10 +35,10 @@
 #define nbr_allocated_iterations 30
 
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_solver_jacobian_func_t jacobian_func, jmi_block_solver_jacobian_structure_func_t jacobian_struct, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_jacobian_func_t J, jmi_block_jacobian_structure_func_t J_structure, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, J, J_structure, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
     jmi->dae_block_residuals[index] = b;
 #ifdef JMI_PROFILE_RUNTIME
     if (b != 0) {
@@ -49,10 +49,10 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
     return flag;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_solver_jacobian_func_t jacobian_func, jmi_block_solver_jacobian_structure_func_t jacobian_struct, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_jacobian_func_t J, jmi_block_jacobian_structure_func_t J_structure, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, J, J_structure, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
 #ifdef JMI_PROFILE_RUNTIME
     if (b != 0) {
         b->parent_index = parent_index;
@@ -73,6 +73,34 @@ int jmi_block_residual(void* b, double* x, double* residual, int mode) {
     }
     else {
         ret = block->F(block->jmi, x, residual, mode);
+    }
+    jmi_finalize_try(jmi,depth);
+    return ret;     
+}
+
+int jmi_block_jacobian(void* b, double* x, double** jac, int mode) {
+    jmi_block_residual_t* block = (jmi_block_residual_t*)b;
+    jmi_t* jmi = block->jmi;
+    int ret;
+    int depth = jmi_prepare_try(jmi);
+    if(jmi_try(jmi, depth)) {
+        ret = -1;
+    } else {
+        ret = block->J(block->jmi, x, jac, mode);
+    }
+    jmi_finalize_try(jmi,depth);
+    return ret;     
+}
+
+int jmi_block_jacobian_structure(void* b, double* x, int** jac, int mode) {
+    jmi_block_residual_t* block = (jmi_block_residual_t*)b;
+    jmi_t* jmi = block->jmi;
+    int ret;
+    int depth = jmi_prepare_try(jmi);
+    if(jmi_try(jmi, depth)) {
+        ret = -1;
+    } else {
+        ret = block->J_structure(block->jmi, x, jac, mode);
     }
     jmi_finalize_try(jmi,depth);
     return ret;     
@@ -245,7 +273,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         }
 
         for (i=0;i<block->n_dr; i++) {
-            if (RAbs(pre_discrete_reals[i] - discrete_reals[i])/block->discrete_nominals[i] > JMI_ALMOST_EPS) {
+            if (JMI_ABS(pre_discrete_reals[i] - discrete_reals[i])/block->discrete_nominals[i] > JMI_ALMOST_EPS) {
                 jmi_log_node(jmi->log, logInfo, "Info", " <discrete_real: #r%d#> <from: %g> <to: %g>  ", block->dr_vref[i], pre_discrete_reals[i], discrete_reals[i]);
             }
         }
@@ -382,7 +410,7 @@ int jmi_block_set_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jm
     return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_jacobian_func_t J, jmi_block_jacobian_structure_func_t J_structure, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
     jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
     jmi_block_solver_callbacks_t solver_callbacks;
     int flag = 0;
@@ -394,6 +422,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->options = &(jmi->options.block_solver_options);
     b->F = F;
     b->dF = dF;
+    b->J = J;
+    b->J_structure = J_structure;
     b->n = n;
     b->n_sr = n_sr;
     b->n_dr = n_dr;
@@ -457,6 +487,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     solver_callbacks = jmi_block_solver_default_callbacks();
     solver_callbacks.F = jmi_block_residual;
     solver_callbacks.dF = dF ? jmi_block_dir_der : NULL;
+    solver_callbacks.Jacobian = J ? jmi_block_jacobian : NULL;
+    solver_callbacks.Jacobian_structure = J_structure ? jmi_block_jacobian_structure : NULL;
     solver_callbacks.check_discrete_variables_change = jmi_block_check_discrete_variables_change;
     solver_callbacks.update_discrete_variables = jmi_block_update_discrete_variables;
     solver_callbacks.log_discrete_variables = jmi_block_log_discrete_variables;

@@ -42,7 +42,7 @@
    @param f - output - residual value
    @param problem_data - solver object propagated as opaques data
 */
-int brentf(realtype y, realtype* f, void* problem_data) {
+int brentf(jmi_real_t y, jmi_real_t* f, void* problem_data) {
     jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
     int ret = 0;
     
@@ -73,13 +73,11 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     return ret;
 }
 
-int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
+int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
     jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
     int ret = 0;
-    realtype y0 = y;
-    realtype ftemp;
+    jmi_real_t y0 = y, ftemp, inc;
     int sign;
-    realtype inc;
 
     /* Check that arguments are valid */
     ret = jmi_check_and_log_illegal_iv_input(block, &y, 1);
@@ -105,8 +103,8 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
             return ret;
         }
     } else {
-        sign = (y >= 0) ? 1 : -1;
-        inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
+        sign = (y >= 0)  ? 1 : -1;
+        inc = JMI_MAX(JMI_ABS(y), block->nominal[0])*sign*1e-8;
         y += inc;
         /* make sure we're inside bounds*/
         if((y > block->max[0]) || (y < block->min[0])) {
@@ -139,7 +137,7 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
     
     /* Check that outputs are valid */    
     {
-        realtype v = *df;
+        jmi_real_t v = *df;
         if (v- v != 0) {
              jmi_log_t* log = block->log;
              jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in derivative from <block: %s>", block->label);
@@ -213,6 +211,32 @@ void jmi_brent_solver_print_solve_end(jmi_block_solver_t *block, const jmi_log_n
         else jmi_log_fmt_(log, *node, logInfo, "Brent solver finished with unrecognized <brent_exit_flag:%d>. ", flag);
         jmi_log_fmt_(log, *node, logInfo, "<solution:%g>", block->x[0]);
         jmi_log_leave(log, *node);
+    }
+}
+
+int jmi_brent_test_best_guess(jmi_block_solver_t *block, double xBest, double fBest) {
+    /* Calculate scaling */
+    int flag;
+    double dfBest = 0.0;
+    double scaled_max_norm = 0;
+
+    jmi_block_solver_options_t* bsop = block->options;
+    flag = brentdf(xBest, fBest, &dfBest, block);
+    DENSE_ELEM(block->J, 0, 0) = dfBest;
+    jmi_update_f_scale(block);
+        
+    flag = jmi_scaled_vector_norm(&fBest, N_VGetArrayPointer(block->f_scale), block->n, JMI_NORM_MAX, &scaled_max_norm);
+    
+    if(flag != -1 && JMI_ABS(scaled_max_norm) <= bsop->res_tol) {
+        if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL)
+            jmi_log_node(block->log, logInfo, "BrentSmallestResidualSuccess", 
+                    "The smallest scaled residual computed, <res_scaled: %f>, is small enough in <block: %s>", scaled_max_norm, block->label);
+        return JMI_BRENT_SUCCESS;
+    } else {
+        if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL)
+            jmi_log_node(block->log, logInfo, "BrentSmallestResidualFailure", 
+            "The smallest scaled residual computed is not good enough in <block: %s>. Scaled residual <res_scaled: %f>, <iv_lower_bound: %f>, <tolerance: %f> ", block->label, scaled_max_norm, xBest, bsop->res_tol);
+        return JMI_BRENT_FAILED;
     }
 }
 
@@ -330,6 +354,7 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
 static int jmi_brent_init(jmi_block_solver_t * block) {
    jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
    solver->originalStart = block->x[0];
+   jmi_setup_f_residual_scaling(block);
    return 0;
 }
 
@@ -390,6 +415,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     double xNewton = 0.0;
     double fNewton = 0.0;
     double dNewton = 0.0;
+    double xBest = 0.0;
+    double fBest = 0.0;
     jmi_log_node_t topnode;
     jmi_log_t *log = block->log;
 #ifdef JMI_PROFILE_RUNTIME
@@ -452,6 +479,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 #endif
                 return flag;
             }
+            if(block->nominal[0] < 0) /* According to spec negative nominal is fine but solver expects positive.*/
+                block->nominal[0] = -block->nominal[0];
         }
 
 
@@ -487,7 +516,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 
 
         if ((init > max) || (init < min)) {
-            realtype old_init = init;
+            jmi_real_t old_init = init;
             init = init > max ? max : min;
             block->x[0] = block->initial[0] = init;
             jmi_log_node(block->log, logWarning, "StartOutOfBounds",
@@ -569,6 +598,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             return JMI_BRENT_FIRST_SYSFUNC_ERR;
     }
     
+    /* Save the best guess for x and f to be used as a backup */
+    xBest = block->x[0];
+    fBest = f;
+
     /* Try to use Newton to find a good initial interval */
     if (block->options->use_newton_for_brent) {
         if ((f > DBL_MIN) || ((f < -DBL_MIN))) {
@@ -577,6 +610,12 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             flag = jmi_brent_newton(block, &xNewton, &fNewton, &dNewton);
             jmi_log_fmt(log, topnode, BRENT_EXTENDED_LOG_LEVEL, "<flag:%d>, <newton_x:%g>, <newton_f:%g>, <newton_step:%g>", flag, xNewton, fNewton, dNewton);
             
+            /* Update best values */
+            if (JMI_ABS(fNewton) < JMI_ABS(fBest)) {
+                xBest = xNewton;
+                fBest = fNewton;
+            }
+
             /* If Newton was successful, use the returned values, otherwise continue */
             if (!flag) {
                 block->x[0] = xNewton;
@@ -591,22 +630,26 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double x = block->x[0], tmp, f_tmp;
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
+        /* Introduce to avoid IllegalIterationVariableInput warnings */
+        double bracketMin = JMI_MAX(block->min[0], -block->nominal[0]*JMI_LIMIT_VALUE);
+        double bracketMax = JMI_MIN(block->max[0], block->nominal[0]*JMI_LIMIT_VALUE);
+
         double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
         double initialStepStaticSmall = initialStepStatic*BRENT_INITIAL_STEP_FACTOR;
         double initialStep = (initialStepNewton > initialStepStatic) ? (JMI_ABS(f) < UNIT_ROUNDOFF*BRENT_SMALL_RESIDUAL_FACTOR ? initialStepStaticSmall : initialStepStatic) : initialStepNewton;
         double lstep = initialStep, ustep = initialStep;
         while (1) {
-            if (lower > block->min[0] && /* lower is fine as long as we're inside the bounds */
+            if (lower > bracketMin && /* lower is fine as long as we're inside the bounds */
                 (
-                    ( upper >= block->max[0]) ||  /* prefer lower if upper is outside bounds */
+                    ( upper >= bracketMax) ||  /* prefer lower if upper is outside bounds */
                     ((f_lower < f_upper) && (f > 0)) || /* or lower is "closer" to sign change */
                     ((f_lower >= f_upper) && (f < 0))
                 )
                 ) {
                 /* widen the interval */
                 tmp = lower - lstep;  
-                if ((tmp < block->min[0]) || (tmp != tmp)) { /* make sure we're inside bounds and not NAN*/
-                    tmp = block->min[0];
+                if ((tmp < bracketMin) || (tmp != tmp)) { /* make sure we're inside bounds and not NAN*/
+                    tmp = bracketMin;
                     /* This update can increase roundoff that prevents lstep from decreasing.
                        Ok if we hit the bound anyway. */
                     lstep = lower - tmp;
@@ -630,9 +673,15 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                                      "Too small bracketing step - modifying <lower_bound: %g> "
                                      "on the iteration variable", lower);
                         block->min[0] = lower; /* we cannot step further without breaking the function -> update the bound */
+                        bracketMin = JMI_MAX(bracketMin, block->min[0]);
                     }
                 }
                 else if (flag == 0) {
+                    /* Update best values */ 
+                    if (JMI_ABS(f_lower) < JMI_ABS(fBest)) {
+                        xBest = lower;
+                        fBest = f_lower;
+                    }
                     /* increase the step */
                     lstep *= 2;
                     lower = tmp;
@@ -642,10 +691,10 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                                  "to <lstep: %g>", lstep);
                 }
             }
-            else if (upper < block->max[0]) { /* upper might work otherwise */
+            else if (upper < bracketMax) { /* upper might work otherwise */
                 tmp = upper + ustep;
-                if ((tmp > block->max[0]) || (tmp != tmp)) {
-                    tmp = block->max[0];
+                if ((tmp > bracketMax) || (tmp != tmp)) {
+                    tmp = bracketMax;
                     /* This update can increase roundoff that prevents lstep from decreasing.
                        Ok if we hit the bound anyway. */
                     ustep = tmp - upper;
@@ -670,9 +719,15 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                                      "Too small bracketing step - modifying <upper_bound: %g> "
                                      "on the iteration variable", upper);
                         block->max[0] = upper; /* we cannot step further without breaking the function -> update the bound */
+                        bracketMax = JMI_MIN(bracketMax, block->max[0]);
                     }
                 }
                 else if (flag == 0) {
+                    /* Update best values */ 
+                    if (JMI_ABS(f_upper) < JMI_ABS(fBest)) {
+                        xBest = upper;
+                        fBest = f_upper;
+                    }
                     /* increase the step */
                     ustep *= 2;
                     upper = tmp;
@@ -682,7 +737,16 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                                  "to <ustep: %g>", ustep);
                 }
             }
-            else {
+            else { /* Bracketing failed */
+                /* Check if fBest satisfies convergence criteria */
+                flag = jmi_brent_test_best_guess(block, xBest, fBest);
+                if (flag == JMI_BRENT_SUCCESS) {
+                    jmi_log_node(log, logInfo, "BrentBracketingResidualAccepted", "Could not bracket the root but accepting the smallest residual computed during bracketing in <block: %s>.", block->label);
+                    block->x[0] = xBest;
+                    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+                    jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
+                    return JMI_BRENT_SUCCESS;
+                }
                 jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
                 /* Write initial guess back to model. */ 
@@ -731,7 +795,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                  solver->y_neg_max, solver->y_pos_min, solver->f_neg_max, solver->f_pos_min);
 
     {            
-        realtype u, f;
+        jmi_real_t u, f;
         flag = jmi_brent_search(brentf, solver->y_neg_max,  solver->y_pos_min, 
                                 solver->f_neg_max, solver->f_pos_min, 0, &u, &f,block);
         block->x[0] = u;
@@ -762,21 +826,17 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     return JMI_BRENT_SUCCESS;
 }
 
-int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtype f_min, realtype f_max, realtype tolerance, realtype* u_out, realtype* f_out,void *data) {
-    realtype a=u_min; /* left point */
-    realtype fa = f_min;
-    realtype b=u_max; /* right point */
-    realtype fb = f_max;
-    realtype c = u_min; /* Intermediate point a <= c <= b */
-    realtype fc = f_min;
-    realtype e= u_max - u_min;
-    realtype d=e;
-    realtype m;
-    realtype s;
-    realtype p;
-    realtype q;
-    realtype r;
-    realtype tol; /* absolute tolerance for the current "b" */
+int jmi_brent_search(jmi_brent_func_t f, jmi_real_t u_min, jmi_real_t u_max, jmi_real_t f_min, jmi_real_t f_max, jmi_real_t tolerance, jmi_real_t* u_out, jmi_real_t* f_out,void *data) {
+    jmi_real_t a=u_min; /* left point */
+    jmi_real_t fa = f_min;
+    jmi_real_t b=u_max; /* right point */
+    jmi_real_t fb = f_max;
+    jmi_real_t c = u_min; /* Intermediate point a <= c <= b */
+    jmi_real_t fc = f_min;
+    jmi_real_t e= u_max - u_min;
+    jmi_real_t d=e;
+    jmi_real_t m,s,p,q,r;
+    jmi_real_t tol; /* absolute tolerance for the current "b" */
     int flag;
     jmi_block_solver_t* block = (jmi_block_solver_t*)data;
     jmi_log_t* log = block->log;
@@ -795,7 +855,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
     }
 #endif
     while(1) {
-        if (RAbs(fc) < RAbs(fb)) {
+        if (JMI_ABS(fc) < JMI_ABS(fb)) {
             a = b;
             b = c;
             c = a;
@@ -808,12 +868,12 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
                      "Root is bracketed between <iv_best: %g> and <iv_second: %g>, residuals <f_best: %g> and <f_second: %g>",
                      b, c, fb, fc);
 
-        tol = 2*UNIT_ROUNDOFF*RAbs(b) + tolerance;
+        tol = 2*UNIT_ROUNDOFF*JMI_ABS(b) + tolerance;
         m = (c - b)/2;
         
-        if ((RAbs(m) <= tol) || (fb == 0.0)) {
+        if ((JMI_ABS(m) <= tol) || (fb == 0.0)) {
             /* root found (interval is small enough) */
-            if (RAbs(fb) < RAbs(fc)) {
+            if (JMI_ABS(fb) < JMI_ABS(fc)) {
                 *u_out = b;
                 *f_out = fb;
             }
@@ -828,7 +888,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
         }
         /* Find the new point: */
         /* Determine if a bisection is needed */
-        if ((RAbs(e) < tol) || ( RAbs(fa) <= RAbs(fb))) {
+        if ((JMI_ABS(e) < tol) || ( JMI_ABS(fa) <= JMI_ABS(fb))) {
             e = m;
             d = e;
         }
@@ -853,7 +913,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
             s = e;
             e = d;
             
-            if ((2*p < 3*m*q - RAbs(tol*q)) && (p < RAbs(0.5*s*q)))
+            if ((2*p < 3*m*q - JMI_ABS(tol*q)) && (p < JMI_ABS(0.5*s*q)))
                 /* interpolation successful */
                 d = p/q;
             else {
@@ -867,10 +927,10 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
         /* Best guess value is saved into "a" */
         a = b;
         fa = fb;
-        b = b + ((RAbs(d) > tol) ? d : ((m > 0) ? tol: -tol));
+        b = b + ((JMI_ABS(d) > tol) ? d : ((m > 0) ? tol: -tol));
         flag = f(b, &fb, data);
         if (flag) {
-             if (RAbs(fa) < RAbs(fc)) {
+             if (JMI_ABS(fa) < JMI_ABS(fc)) {
                 *u_out = a;
                 *f_out = fa;
             }

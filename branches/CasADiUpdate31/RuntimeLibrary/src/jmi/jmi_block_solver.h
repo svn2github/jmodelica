@@ -26,13 +26,8 @@
 #define _JMI_BLOCK_SOLVER_H
 
 #include "jmi_log.h"
+#include "jmi_types.h"
 #include <time.h>
-#include <sundials/sundials_math.h>
-#include <sundials/sundials_direct.h>
-#include <nvector/nvector_serial.h>
-#include <kinsol/kinsol_direct.h>
-#include <kinsol/kinsol_impl.h>
-#include <sundials/sundials_dense.h>
 
 /** \brief Evaluation modes for the residual function.*/
 #define JMI_BLOCK_INITIALIZE                                    0
@@ -165,7 +160,6 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_Brent_with_newton = 16,
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_Broyden_with_zeros = 64,
-    jmi_block_solver_experimental_nom_in_active_bounds = 128,
     jmi_block_solver_experimental_Sparse_Broyden = 2048,
     jmi_block_solver_experimental_use_modifiedBFGS = 4096
 } jmi_block_solver_experimental_mode_t;
@@ -367,6 +361,7 @@ struct jmi_block_solver_options_t {
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
     double jacobian_finite_difference_delta; /**< \brief Option for which delta to use in finite differences Jacobian, default sqrt(eps). */
     int block_profiling; /**< \brief Option for enabling profiling of the blocks. */
+    int linear_sparse_jacobian_threshold; /**< \brief Option for specifying when sparse linear solver in linear blocks is used. */
     
     /* Options below are not supposed to change between invocations of the solver. */
     jmi_block_solver_kind_t solver;                          /**< \brief Kind of block solver to use */
@@ -442,8 +437,8 @@ void jmi_setup_f_residual_scaling(jmi_block_solver_t *block);
 int jmi_scaled_vector_norm(jmi_real_t *x, jmi_real_t *scale, jmi_int_t n, jmi_int_t NORM, jmi_real_t* out);
 
 /** \brief Check and log illegal iv inputs */
-int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);
+int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, jmi_real_t* ivs, int N);
 
 /** \brief Check and log illegal residual output(s) */
-int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double* f, double* ivs, double* heuristic_nominal,int N);
+int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, jmi_real_t* f, jmi_real_t* ivs, jmi_real_t* heuristic_nominal,int N);
 #endif /* _JMI_BLOCK_SOLVER_H */
