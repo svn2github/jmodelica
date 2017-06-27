@@ -22,11 +22,13 @@ import org.jmodelica.util.streams.NotNullCodeStream;
 
 aspect BasePrinter {
 
-	// superclass to all classes that perform the dispatch
+    /**
+     * Superclass to all classes that perform the dispatch.
+     */ 
     public class Printer {
-        
-        private static final Map<String,Map<String,String>> INDENT_MAPS = new HashMap<String,Map<String,String>>();
-        private final Map<String,String> INDENTS;
+
+        private static final Map<String, Map<String, String>> INDENT_MAPS = new HashMap<String, Map<String, String>>();
+        private final Map<String, String> INDENTS;
 		
 		protected String step;
 		
@@ -62,7 +64,7 @@ aspect BasePrinter {
 		}
   		
   		public String op(FBinExp e) { return e.op(); }
-  		
+
         /**
          * Method that returns the printer that should be used when
          * annotations are PrettyPrinted in the flat tree.
@@ -83,7 +85,14 @@ aspect BasePrinter {
 
 aspect PrettyPrint {
 
-	// select first variant
+    /**
+     * Static printer instance.
+     */
+    static PrettyPrinter ASTNode.prettyPrinter = new PrettyPrinter();
+
+    /**
+     * Select first variant.
+     */ 
     public class PrettyPrinter extends Printer {
 		public PrettyPrinter() {
 			super(" ");
@@ -93,8 +102,15 @@ aspect PrettyPrint {
  			node.prettyPrint(this, str, indent); 
  		}
 	}
-	
-	// select second variant
+
+    /**
+     * Static printer instance.
+     */
+    static DumpTreePrinter ASTNode.printer_dumpTree = new DumpTreePrinter();
+
+    /**
+     * Select second variant.
+     */
     public class DumpTreePrinter extends Printer {
 		public DumpTreePrinter() {
 			super(" ");
@@ -125,12 +141,10 @@ aspect PrettyPrint {
 			return n.prettyPrint(i);
 		}
 	}
-	
-	static PrettyPrinter ASTNode.prettyPrinter = new PrettyPrinter();
-	
-	public void ASTNode._dumpTree(CodeStream str, String indent) {
- 		_dumpTree(new DumpTreePrinter(),str,indent);
-	}
+
+    public void ASTNode._dumpTree(CodeStream str, String indent) {
+        _dumpTree(printer_dumpTree, str, indent);
+    }
 
 	// dump node names
 	public void ASTNode._dumpTree(Printer p, CodeStream str, String indent) {
@@ -2080,21 +2094,24 @@ aspect FlatPrettyPrint {
 }
 
 aspect PrettyPrint_MC {
-	
+
+    /**
+     * Static printer instance.
+     */
+    static MCPrettyPrinter ASTNode.printer_MC = new MCPrettyPrinter();
+
     public class MCPrettyPrinter extends Printer {
-		
-		public MCPrettyPrinter() {
-			super("    ");
-		}
-		
- 		public void print(ASTNode node, CodeStream str, String indent) { 
- 			node.prettyPrint(this, str, indent); 
- 		}
-  		
-	}
-	
-	static MCPrettyPrinter ASTNode.printer_MC = new MCPrettyPrinter();
-	
+
+        public MCPrettyPrinter() {
+            super("    ");
+        }
+
+        public void print(ASTNode node, CodeStream str, String indent) {
+            node.prettyPrint(this, str, indent); 
+        }
+
+    }
+
 	public String ASTNode.prettyPrint_MC(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		CodeStream str = new CodeStream(os);

@@ -18,7 +18,7 @@
 public class CCodeGenTestCase extends CodeGenTestCase {
 
     public AbstractGenerator createGenerator(FClass fc) {
-        return new CGenerator(new PrettyPrinter(), '$',fc);
+        return new CGenerator(ASTNode.prettyPrinter, '$',fc);
     }
 
 }

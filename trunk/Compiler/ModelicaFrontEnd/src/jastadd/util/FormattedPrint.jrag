@@ -24,6 +24,12 @@ import java.io.PrintStream;
 import beaver.Symbol;
 
 aspect FormattedPrint {
+
+    /**
+     * Static printer instance.
+     */
+    static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
+
 	/**
 	 * A pretty printer that prints the AST in code, with the old formatting.
 	 */
@@ -87,8 +93,6 @@ aspect FormattedPrint {
 	// This section of the aspect contains attributes and methods for adding formatting to the AST.
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static FormattedPrettyPrinter ASTNode.formattedPrettyPrinter = new FormattedPrettyPrinter();
 
 	private FormattingInfo StoredDefinition.formatting = new FormattingInfo();
 	protected FormattingItem SourceBaseNode.preFormatting = FormattingItem.NOT_FORMATTED;

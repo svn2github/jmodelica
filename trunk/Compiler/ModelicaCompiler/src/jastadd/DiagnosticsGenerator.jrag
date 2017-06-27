@@ -987,6 +987,12 @@ protected static String ASTNode.escapeHTML(String str) {
 }
 
 aspect HTMLMarkupPrinter {
+
+    /**
+     * Static printer instance.
+     */
+    public static HTMLPrinter ASTNode.htmlPrinter = new HTMLPrinter();
+
     public class HTMLPrinter extends Printer {
         
         private Set<Object> localObjects = new HashSet<Object>();
@@ -1065,8 +1071,6 @@ aspect HTMLMarkupPrinter {
         }
 
     }
-
-    public static HTMLPrinter ASTNode.htmlPrinter = new HTMLPrinter();
 
     public void ASTNode.htmlPrint(HTMLPrinter p, CodeStream str, String indent) {
         prettyPrint(p, str, indent);

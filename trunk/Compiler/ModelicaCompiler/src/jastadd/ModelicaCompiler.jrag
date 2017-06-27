@@ -1333,13 +1333,13 @@ public class ModelicaCompiler {
      * Override for subclasses needing another subclass of CGenerator.
      */
     protected CGenerator createCGenerator(FClass fc) {
-        return new CADGenerator(new PrettyPrinter(), '$', fc);
+        return new CADGenerator(ASTNode.prettyPrinter, '$', fc);
     }
-    
+
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
         CodeGenContext cgc = new CodeGenContext();
         Map<String,String> tempMap = new HashMap<String,String>();
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext, cgc, tempMap);
+        return new ExternCEvalGenerator(ASTNode.prettyPrinter, '$', null, ext, cgc, tempMap);
     }
 
     /**
@@ -2485,7 +2485,7 @@ public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
         return null;
     }
     
-    return (GenericXMLGenerator) xmlGen.create(new PrettyPrinter(), '$', fc);
+    return (GenericXMLGenerator) xmlGen.create(ASTNode.prettyPrinter, '$', fc);
 }
 
 public enum Module { GET_SET }

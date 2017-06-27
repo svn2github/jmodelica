@@ -744,17 +744,17 @@ abstract public class TestAnnotationizerHelper {
 			TestAnnotationizerHelper.usage(cl, "generic code template");
 		}
 
-		/**
-		 * Create the code generator to use.
-		 * 
-		 * Creates a GenericGenerator.
-		 */
-		@Override
-		public AbstractGenerator createGenerator(FClass fc) {
-			return new GenericGenerator(new PrettyPrinter(), '$', fc);
-		}
-		
-	}
+        /**
+         * Create the code generator to use.
+         * 
+         * Creates a GenericGenerator.
+         */
+        @Override
+        public AbstractGenerator createGenerator(FClass fc) {
+            return new GenericGenerator(ASTNode.prettyPrinter, '$', fc);
+        }
+        
+    }
 
 	/**
 	 * A flattening test.

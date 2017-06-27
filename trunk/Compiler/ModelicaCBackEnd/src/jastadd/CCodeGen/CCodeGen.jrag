@@ -31,6 +31,11 @@ import org.jmodelica.util.streams.CStringCodeStream;
 
 aspect CCodeGen {
 
+    /**
+     * Static printer instance.
+     */
+    static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
+
     public class CPrettyPrinter extends CodePrinter {
 
         public CPrettyPrinter() {
@@ -109,9 +114,7 @@ aspect CCodeGen {
             node.genResidual_C(this, str, indent, enumerator, visited, forIndices);
         }
     }
-	
-    static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
-	
+
 	public String ASTNode.prettyPrint_C(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		CodeStream str = new CodeStream(os);

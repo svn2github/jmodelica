@@ -66,6 +66,7 @@ public abstract class ExternalCEvalTag extends AbstractTag {
     
     public void generate_wrap(CodeStream str, FExternalStmt ext, CodeGenContext cgc,
             Map<String,String> tempMap) {
+
         CodePrinter p = ASTNode.printer_C;
         String indent = p.indent("");
         ext.setCodeGenContext(cgc);

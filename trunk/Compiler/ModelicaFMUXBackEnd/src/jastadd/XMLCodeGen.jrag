@@ -24,7 +24,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 aspect XMLCodeGen {
-	
+
+    /**
+     * Static printer instance.
+     */
+    public static XMLPrettyPrinter ASTNode.printer_XML = new XMLPrettyPrinter();
+
 	public class XMLPrettyPrinter extends Printer {
 		public XMLPrettyPrinter() {
 			super("\t");
@@ -42,10 +47,10 @@ aspect XMLCodeGen {
 		return os.toString();
 	}
 
-	public void ASTNode.prettyPrint_XML(CodeStream str, String indent) {
- 		prettyPrint_XML(new XMLPrettyPrinter(), str, indent);
-	}
-	
+    public void ASTNode.prettyPrint_XML(CodeStream str, String indent) {
+        prettyPrint_XML(printer_XML, str, indent);
+    }
+
 	public void ASTNode.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		prettyPrint(p, str, indent);
 	}
@@ -73,7 +78,7 @@ aspect XMLCodeGen {
 	public void ASTNode.tag_XML(CodeStream str, String format, String indent, String tag, Map<String, String> attr) {
 		str.format(format, indent, xmlNamespace(), addAttrs_XML(tag, attr));
 	}
-	
+
 	private static String ASTNode.addAttrs_XML(String tag, Map<String, String> attr) {
 		StringBuilder buf = new StringBuilder(tag);
 		for (String name : attr.keySet()) {
