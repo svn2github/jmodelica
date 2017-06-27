@@ -683,40 +683,93 @@ public class XMLGenerator extends GenericXMLGenerator {
     }
 }
 
+/**
+ * {@link Comparator} for comparison of two {@link FVariable}s.
+ */
 public class VariableNameComparator implements Comparator<FVariable> {
-	public int compare(FVariable variable1, FVariable variable2) {
-		String name1 = variable1.getFQNameNoTransform().name();
-		String name2 = variable2.getFQNameNoTransform().name();
-		String regex = "\\[|\\]";
-		String[] n1 = name1.split(regex);
-		String[] n2 = name2.split(regex);
-		
-		int nn = Math.min(n1.length, n2.length);
-		int res = 0;
-		
-		for (int i=0; i < nn && res == 0; i++) {
-			if (i%2 == 0) {			//even index -> name
-				res = n1[i].compareTo(n2[i]);
-			} else {				//odd index -> variable index
-				String[] i1 = n1[i].split(",");
-				String[] i2 = n2[i].split(",");
-				int ni = Math.min(i1.length, i2.length);
-				
-				for (int j = 0; j < ni && res == 0; j++) {
-					int ii1 = Integer.parseInt(i1[j]);
-					int ii2 = Integer.parseInt(i2[j]);
-					res = ii1 - ii2;
-				}
-				if (res == 0) {
-					res = i1.length - i2.length;
-				}
-			}
-		}
-		if (res == 0) {
-			res = n1.length - n2.length;
-		}
-		return res;
-	}
+
+    @Override
+    public int compare(FVariable variable1, FVariable variable2) {
+        char[] name1 = variable1.getFQNameNoTransform().name().toCharArray();
+        char[] name2 = variable2.getFQNameNoTransform().name().toCharArray();
+
+        int length1 = name1.length;
+        int length2 = name2.length;
+        int minLength = Math.min(length1, length2);
+
+        for (int i = 0; i < minLength; ++i) {
+            int cmp = 0;
+            char char1 = name1[i];
+
+            cmp = char1 - name2[i];
+            if (cmp != 0) {
+                return cmp;
+            }
+
+            if (!Character.isAlphabetic(char1)) {
+                if(char1 == '[') {
+                    ++i;
+                }
+
+                cmp = compareNumbers(name1, name2, i);
+                if (cmp != 0) {
+                    return cmp;
+                }
+            }
+        }
+
+        return length1 - length2;
+    }
+
+    /**
+     * Compares the numeric values of two numbers represented as character arrays.
+     *
+     * @param string1
+     *          A string with a number to compare.
+     * @param string2
+     *          The string with a number to compare {@code string1} to.
+     * @param pos
+     *          The starting position of the numbers. Assumed to be the same for both
+     *          {@code string1} and {@code string2}.
+     */
+    private int compareNumbers(char[] string1, char[] string2, int pos) {
+        int cmp = 0;
+
+        java.util.List<Character> number1 = getNumber(string1, pos);
+        java.util.List<Character> number2 = getNumber(string2, pos);
+
+        cmp = number1.size() - number2.size();
+        if (cmp != 0) {
+            return cmp;
+        }
+
+        for (int i = 0; i < number1.size(); ++i) {
+            cmp = number1.get(i) - number2.get(i);
+            if (cmp != 0) {
+                return cmp;
+            }
+        }
+        return cmp;
+    }
+
+    /**
+     * Retrieves a number from a character array as a list of characters.
+     *
+     * @param string
+     *          The character array from which to retrieve a number.
+     * @param pos
+     *          The starting position of the number to retrieve.
+     */
+    private java.util.List<Character> getNumber(char[] string, int pos) {
+        java.util.List<Character> number = new ArrayList<Character>();
+        char c = '0';
+
+        for (int i = pos; Character.isDigit(c) && i < string.length; ++i) {
+            c = string[i];
+            number.add(c);
+        }
+        return number;
+    }
 
 }
 
