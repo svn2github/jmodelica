@@ -2737,6 +2737,12 @@ aspect BlockDependencies {
 }
 
 aspect BLTPrettyPrinting {
+
+    /**
+     * Static printer instance.
+     */
+    public static BLTPrettyPrinter ASTNode.BLTPrettyPrinter = new BLTPrettyPrinter();
+
     public class BLTPrettyPrinter extends Printer {
         public BLTPrettyPrinter() {
             super("  ");
@@ -2747,8 +2753,6 @@ aspect BLTPrettyPrinting {
             node.prettyPrint(this, str, indent); 
         }
     }
-    
-    public static BLTPrettyPrinter ASTNode.BLTPrettyPrinter = new BLTPrettyPrinter();
 
     @Override
     public final String BLT.toString() {

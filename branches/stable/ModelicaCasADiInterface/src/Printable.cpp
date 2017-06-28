@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2013 Modelon AB
+Copyright (C) 2017 Modelon AB
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,14 +14,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Equation.hpp"
-using casadi::MX;
-namespace ModelicaCasADi 
+#include "Printable.hpp"
+
+namespace ModelicaCasADi
 {
-Equation::Equation(MX lhs, MX rhs) : lhs(lhs), rhs(rhs), tearing(false) {}
-void Equation::print(std::ostream& os) const { 
-    os << ModelicaCasADi::normalizeMXRespresentation(lhs);
-    os << " = ";
-    os << ModelicaCasADi::normalizeMXRespresentation(rhs); 
+void Printable::print(std::ostream& os) const {
+    // Test code to help debug python printing problems. Todo: remove
+    os << "<This is a Printable>";
 }
-}; // End namespace
+
+std::string Printable::repr() {
+    std::stringstream s;
+    s << *this;
+    return s.str();    
+}
+};

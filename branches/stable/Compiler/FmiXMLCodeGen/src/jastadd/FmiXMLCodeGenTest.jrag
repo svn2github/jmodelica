@@ -14,15 +14,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 public class FmiXMLCodeGenTestCase extends CodeGenTestCase {
 
     public AbstractGenerator createGenerator(FClass fc) {
         String ver = options.getStringOption("fmi_version");
-        if (ver == OptionRegistry.FMIVersion.FMI20)
-            return new Fmi2XMLGenerator(new PrettyPrinter(), '$', fc);
-        else
-            return new Fmi1XMLGenerator(new PrettyPrinter(), '$', fc);
+        if (ver == OptionRegistry.FMIVersion.FMI20) {
+            return new Fmi2XMLGenerator(ASTNode.prettyPrinter, '$', fc);
+        } else {
+            return new Fmi1XMLGenerator(ASTNode.prettyPrinter, '$', fc);
+        }
     }
 
 }
@@ -51,10 +51,11 @@ abstract public class TestAnnotationizerHelper {
         @Override
         public AbstractGenerator createGenerator(FClass fc) {
             String ver = optionRegistry().getStringOption("fmi_version");
-            if (ver == OptionRegistry.FMIVersion.FMI20)
-                return new Fmi2XMLGenerator(new PrettyPrinter(), '$', fc);
-            else
-                return new Fmi1XMLGenerator(new PrettyPrinter(), '$', fc);
+            if (ver == OptionRegistry.FMIVersion.FMI20) {
+                return new Fmi2XMLGenerator(ASTNode.prettyPrinter, '$', fc);
+            } else {
+                return new Fmi1XMLGenerator(ASTNode.prettyPrinter, '$', fc);
+            }
         }
 
     }

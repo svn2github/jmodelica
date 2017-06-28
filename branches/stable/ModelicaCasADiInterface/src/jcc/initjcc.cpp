@@ -111,7 +111,7 @@ jint initJVM(const char *classpath, const char *libpath)
     vm_args.ignoreUnrecognized = false;
   
     jint res = CreateJavaVM(&jvm, (void**)&vm_env, &vm_args);
-    delete options;
+    delete[] options;
 
     if (res < 0) {
         throw std::runtime_error("Failed to create Java VM");

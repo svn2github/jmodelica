@@ -52,11 +52,11 @@ end LinearEquationElimination.Simple1;
         Real d;
     equation
         a = 2 * b + time;
-        c = 2 * a - b;
-        b = a + 2 * d;
+        c = 2 * a - 4 * b;
+        b = a + 2 * d + time;
         d = sin(time);
 
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Simple2",
             description="A simple test case that tests elimination.",
@@ -68,8 +68,8 @@ fclass LinearEquationElimination.Simple2
  Real d;
 equation
  a = 2 * b + time;
- c = -2 * (- time) + 3 * b;
- -2 * d = time + b;
+ c = 2 * time;
+ -4 * d = a + 3 * time;
  d = sin(time);
 end LinearEquationElimination.Simple2;
 ")})));
@@ -162,23 +162,21 @@ end LinearEquationElimination.FunctionCall1;
         Real b;
         Real c;
     equation
-        a = b + 1;
+        a = b - 1;
         b = c + 1;
         c = sin(time);
 
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Constant1",
             description="Alias elimination through re-arrangement of variable ordering, solving for equations with
                     constant terms.",
             flatModel="
 fclass LinearEquationElimination.Constant1
- Real a;
  Real b;
  Real c;
 equation
- a = b + 1;
- - c = - a + 2;
+ c = b - 1;
  c = sin(time);
 end LinearEquationElimination.Constant1;
 ")})));
@@ -237,7 +235,7 @@ fclass LinearEquationElimination.Constant3
  Real x;
 equation
  x = a + b + c;
- -1 = - x;
+ 1 = x;
  b = sin(time);
  c = sin(time);
 end LinearEquationElimination.Constant3;
@@ -251,21 +249,19 @@ end LinearEquationElimination.Constant3;
         Real c;
     equation
         a = 2 * b;
-        a = 4 * c;
+        a = 2 * c;
         c = sin(time);
 
-        annotation(__JModelica(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Coefficient1",
-            description="Alias elimination through re-arrangement of variable ordering, with coefficients.",
+            description="",
             flatModel="
 fclass LinearEquationElimination.Coefficient1
  Real a;
- Real b;
  Real c;
 equation
- a = 2 * b;
- -4 * c = -2 * b;
+ a = 2 * c;
  c = sin(time);
 end LinearEquationElimination.Coefficient1;
 ")})));
@@ -293,7 +289,7 @@ fclass LinearEquationElimination.Coefficient2
  Real c;
 equation
  3 * a = 2 * b;
- -4 * c = 2 / 3 * (-2 * b);
+ 2 * c = a;
  c = sin(time);
 end LinearEquationElimination.Coefficient2;
 ")})));
@@ -317,7 +313,7 @@ fclass LinearEquationElimination.TimeExpression1
  Real b;
 equation
  a = time + 1;
- b = time + 2;
+ b = a + 1;
 end LinearEquationElimination.TimeExpression1;
 ")})));
     end TimeExpression1;
@@ -350,5 +346,85 @@ end LinearEquationElimination.TimeExpression2;
 ")})));
     end TimeExpression2;
 
+
+    model CommonSubExpression1
+        Real a = time;
+        Real b, c;
+    equation
+        a + b = c + a;
+        der(b) = a^2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="CommonSubExpression1",
+            description="Eliminating terms that are present on both sides of linear equation",
+            flatModel="
+fclass LinearEquationElimination.CommonSubExpression1
+ Real a;
+ Real b;
+initial equation
+ b = 0.0;
+equation
+ der(b) = a ^ 2;
+ a = time;
+end LinearEquationElimination.CommonSubExpression1;
+")})));
+    end CommonSubExpression1;
+
+
+    model CommonSubExpression2
+        Real x, y;
+    equation
+        x - x = y;
+        y = x + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="CommonSubExpression2",
+            description="Eliminating terms that cancel each other out in linear equation",
+            flatModel="
+fclass LinearEquationElimination.CommonSubExpression2
+ Real x;
+ Real y;
+equation
+ 0 = y;
+ x + 1 = 0;
+end LinearEquationElimination.CommonSubExpression2;
+")})));
+    end CommonSubExpression2;
+
+
+    model CommonSubExpression3
+        Real a = time;
+        Real b, c, d, e;
+    equation
+        -d + 3 * a + b - d = c + a - 2 * (d - a) - e;
+        der(b) = a^2;
+        der(d) = b + e;
+        e = a^3 + c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="CommonSubExpression3",
+            description="Eliminating terms that are present on both sides of linear equation",
+            flatModel="
+fclass LinearEquationElimination.CommonSubExpression3
+ Real a;
+ Real b;
+ Real c;
+ Real d;
+ Real e;
+initial equation
+ b = 0.0;
+ d = 0.0;
+equation
+ b + e = c;
+ der(b) = a ^ 2;
+ der(d) = b + e;
+ e = a ^ 3 + c;
+ a = time;
+end LinearEquationElimination.CommonSubExpression3;
+")})));
+    end CommonSubExpression3;
 
 end LinearEquationElimination;

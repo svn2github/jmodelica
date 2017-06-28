@@ -2519,7 +2519,7 @@ equation
  der(y1) = time * time;
  a1.c.s = 2 * time;
  der(y2) = 2 * time * time;
- a2.c.s = -3 / -2 * a1.c.s;
+ a2.c.s = 3 * time;
  a3.c.s = 2 * a1.c.s;
  _stream_s_1 = max(- der(y2), 0) + max(- der(y3), 0);
  _stream_alpha_1 = smooth(1, if _stream_s_1 > _inStreamEpsilon then 1 elseif _stream_s_1 > 0 then _stream_s_1 / _inStreamEpsilon * (_stream_s_1 / _inStreamEpsilon * (3 - 2 * _stream_s_1)) else 0);

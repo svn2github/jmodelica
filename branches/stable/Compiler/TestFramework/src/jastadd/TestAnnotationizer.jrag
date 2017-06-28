@@ -744,17 +744,17 @@ abstract public class TestAnnotationizerHelper {
 			TestAnnotationizerHelper.usage(cl, "generic code template");
 		}
 
-		/**
-		 * Create the code generator to use.
-		 * 
-		 * Creates a GenericGenerator.
-		 */
-		@Override
-		public AbstractGenerator createGenerator(FClass fc) {
-			return new GenericGenerator(new PrettyPrinter(), '$', fc);
-		}
-		
-	}
+        /**
+         * Create the code generator to use.
+         * 
+         * Creates a GenericGenerator.
+         */
+        @Override
+        public AbstractGenerator createGenerator(FClass fc) {
+            return new GenericGenerator(ASTNode.prettyPrinter, '$', fc);
+        }
+        
+    }
 
 	/**
 	 * A flattening test.
@@ -872,8 +872,17 @@ abstract public class TestAnnotationizerHelper {
                 compile();
                 throw new ModelicaException(noExceptionMessage());
             } catch (CompilerException e) {
-                message = prepare(e.getMessage(true));
+                message = prepareErrorMsg(e.getMessage(true));
             }
+        }
+
+        /**
+         * Remove location information from error message, since it is unreliable anyway, 
+         * in addition to escaping characters that aren't allowed in the annotation.
+         */
+        protected static String prepareErrorMsg(String str) {
+            str = str.replaceAll(" at line [0-9]+, column [0-9]+, in file ", " at line 0, column 0, in file ");
+            return prepare(str);
         }
 
 		/**

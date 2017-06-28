@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <map>
 
+#include "types/VariableType.hpp"
 #include "types/PrimitiveType.hpp"
 namespace ModelicaCasADi 
 {
@@ -42,7 +43,6 @@ class BooleanType : public PrimitiveType {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
-inline const std::string BooleanType::getName() const { return "Boolean"; }
-inline bool BooleanType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }
+
 }; // End namespace
 #endif

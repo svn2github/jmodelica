@@ -31,5 +31,6 @@ VariableType::AttributeValue* BooleanType::getAttribute(const AttributeKey key) 
     // If the attribute is in the map, return, otherwise return null. 
     return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : NULL;
 }
-
+const std::string BooleanType::getName() const { return "Boolean"; }
+bool BooleanType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }
 }; // End namespace

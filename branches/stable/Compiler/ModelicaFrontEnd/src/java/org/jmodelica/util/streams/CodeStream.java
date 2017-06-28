@@ -15,6 +15,7 @@
 */
 package org.jmodelica.util.streams;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,7 +46,8 @@ public class CodeStream {
     
     public static PrintStream createPrintStream(File file, boolean cloneToSysOut) {
         try {
-            return createPrintStream(new FileOutputStream(file), cloneToSysOut ? System.out : null);
+            return createPrintStream(new BufferedOutputStream(new FileOutputStream(file)),
+                    cloneToSysOut ? System.out : null);
         } catch (IOException e) {
             throw new RuntimeException("File I/O problem during code generation", e);
         }

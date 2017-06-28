@@ -39,7 +39,8 @@
     
     Before using a delay block in simulation, it must be initialized with `jmi_delay_init`.
     This will specify the properties of the delay block and provide an initial value for its output,
-    to be used until the elapsed simulation time exceeds the delay time.
+    to be used until the elapsed simulation time exceeds the delay time. If `fixed` is true, then 
+    the fixed delay value must be passed as the max value.
 
     Delay blocks are evaluated using the `jmi_delay_evaluate`, which uses the current time and input
     value in cases when the delay time is small. `jmi_delay_evaluate` will step over events stored

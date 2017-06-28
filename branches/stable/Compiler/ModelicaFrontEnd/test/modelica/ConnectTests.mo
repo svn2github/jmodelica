@@ -2630,17 +2630,15 @@ fclass ConnectTests.StreamTest6
  Real a[1].a;
  input Real a[1].b;
  Real a[1].c;
- Real a[2].a;
  input Real a[2].b;
  Real a[2].c;
  Real b[1].a.b;
  Real b[2].a.b;
 equation
  a[1].a = time;
- a[2].a = 2 * a[1].a;
- a[1].c = -2 * (- time);
- a[2].c = -2 * (-2 * a[1].a);
- x[1] = a[2].c * time;
+ a[1].c = 2 * a[1].a;
+ a[2].c = a[1].c * 2;
+  x[1] = a[2].c * time;
  x[2] = a[2].c + time;
  - a[1].b + b[1].a.b = 0.0;
  - a[2].b + b[2].a.b = 0.0;

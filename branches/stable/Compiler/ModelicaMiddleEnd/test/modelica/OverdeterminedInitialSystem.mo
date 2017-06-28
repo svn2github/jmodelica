@@ -241,8 +241,6 @@ fclass OverdeterminedInitialSystem.HighIndex1
  Real vy;
  Real _der_vx;
  Real _der_x;
- Real _der_der_x;
- Real _der_der_y;
 initial equation 
  vy = 1;
  y = 0.0;
@@ -252,9 +250,7 @@ equation
  vy = der(y);
  x + y = 2;
  _der_x + der(y) = 0;
- _der_vx = _der_der_x;
- der(vy) = _der_der_y;
- _der_der_x + _der_der_y = 0;
+ der(vy) = - _der_vx;
 end OverdeterminedInitialSystem.HighIndex1;
 ")})));
     end HighIndex1;

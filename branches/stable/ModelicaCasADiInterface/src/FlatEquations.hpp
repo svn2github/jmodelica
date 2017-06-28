@@ -81,8 +81,6 @@ namespace ModelicaCasADi
 
     };
 
-    inline void FlatEquations::addDaeEquation(Ref<Equation>eq) { daeEquations.push_back(eq); }
-    inline std::vector< Ref< Equation> > FlatEquations::getDaeEquations() const { return daeEquations; }
 
 }; // End namespace
 #endif

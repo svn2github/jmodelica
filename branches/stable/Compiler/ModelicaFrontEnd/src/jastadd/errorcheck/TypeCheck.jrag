@@ -1142,9 +1142,58 @@ aspect FlatTypeCheck {
             error("Calling function change(): argument must be a variable access");
     }
 
+    public static final SimpleProblemProducer ASTNode.DELAY_MAX_NOT_PARAMETER =
+            new SimpleErrorProducer("DELAY_MAX_NOT_PARAMETER", ProblemKind.SEMANTIC,
+                    "Calling function delay(): third argument must be of parameter variability: %s");
+    public static final SimpleProblemProducer ASTNode.DELAY_NOT_PARAMETER =
+            new SimpleErrorProducer("DELAY_NOT_PARAMETER", ProblemKind.SEMANTIC,
+                    "Calling function delay(): second argument must be of parameter variability when third argument is not given: %s");
+    public static final SimpleProblemProducer ASTNode.DELAY_OVER_MAX =
+            new SimpleErrorProducer("DELAY_OVER_MAX", ProblemKind.SEMANTIC,
+                    "Calling function delay(): second argument may not be larger than third argument: %s = %s > %s = %s");
+    public static final SimpleProblemProducer ASTNode.DELAY_NEGATIVE =
+            new SimpleErrorProducer("DELAY_NEGATIVE", ProblemKind.SEMANTIC,
+                    "Calling function delay(): second argument may not be negative: %s = %s < 0");
+    public static final SimpleProblemProducer ASTNode.DELAY_MAX_NEGATIVE =
+            new SimpleErrorProducer("DELAY_MAX_NEGATIVE", ProblemKind.SEMANTIC,
+                    "Calling function delay(): third argument may not be negative: %s = %s < 0");
+
     public void FDelayExp.typeCheck(ErrorCheckType checkType) {
-        if (!(hasMax() ? getMax() : getDelay()).variability().parameterOrLess())
-            error("Calling function delay(): last argument supplied must be of parameter variability");
+        boolean max = hasMax();
+        boolean maxParam = max ? getMax().variability().parameterOrLess() : false;
+        boolean delayParam = getDelay().variability().parameterOrLess();
+        if (max && !maxParam) {
+            DELAY_MAX_NOT_PARAMETER.invoke(this, getMax());
+        }
+        if (!max && !delayParam) {
+            DELAY_NOT_PARAMETER.invoke(this, getDelay());
+        }
+        
+        double maxVal = 0.0;
+        boolean maxEval = false;
+        if (max && maxParam) {
+            try {
+                maxVal = getMax().ceval().realValue();
+                maxEval = true;
+            } catch (ConstantEvaluationException e) {}
+        }
+        double delayVal = 0.0;
+        boolean delayEval = false;
+        if (delayParam) {
+            try {
+                delayVal = getDelay().ceval().realValue();
+                delayEval = true;
+            } catch (ConstantEvaluationException e) {}
+        }
+        if (maxEval && delayEval && delayVal > maxVal) {
+            DELAY_OVER_MAX.invoke(this, getDelay(), delayVal, getMax(), maxVal);
+        }
+        if (delayEval && delayVal < 0.0) {
+            DELAY_NEGATIVE.invoke(this, getDelay(), delayVal);
+        }
+        if (maxEval && maxVal < 0.0) {
+            DELAY_MAX_NEGATIVE.invoke(this, getMax(), maxVal);
+        }
     }
     
     public void FSpatialDistExp.typeCheck(ErrorCheckType checkType) {

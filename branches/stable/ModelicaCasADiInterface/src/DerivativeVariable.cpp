@@ -27,4 +27,6 @@ DerivativeVariable::DerivativeVariable(Model *owner, MX var, Ref<Variable> diffV
     }
     myDifferentiatedVariable = diffVar.getNode();
 }
+bool DerivativeVariable::isDerivative() const { return true; }
+const Ref<Variable> DerivativeVariable::getMyDifferentiatedVariable() const { return myDifferentiatedVariable; }
 }; // End namespace

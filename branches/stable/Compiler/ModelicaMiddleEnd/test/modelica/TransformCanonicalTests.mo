@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,7 +13,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 package TransformCanonicalTests
 
@@ -398,33 +397,32 @@ Input variables:
 
 
   model LinearityTest1
-  
-  	Real x1;
-  	Real x2;
-  	Real x3;
-  	Real x4;
-  	Real x5;
-  	Real x6;
-  	Real x7;
-  	
-  	parameter Real p1 = 1;
-  	  
-  equation
-  	x1 = x1*p1 + x2;
-  	x2 = x3^2;
-  	x3 = x4/p1;
-  	x4 = p1/x5;
-  	x5 = x6-x6;
-  	x6 = sin(x7);
-  	x7 = x3*x5;
-  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="LinearityTest1",
-			methodName="variableDiagnostics",
-			description="Test linearity of variables.",
-			methodResult="  
+    Real x1;
+    Real x2;
+    Real x3;
+    Real x4;
+    Real x5;
+    Real x6;
+    Real x7;
+
+    parameter Real p1 = 1;
+
+  equation
+    x1 = x1 * p1 + x2;
+    x2 = x3 ^ 2;
+    x3 = x4 / p1;
+    x4 = p1 / x5;
+    x5 = x6 - x6;
+    x6 = sin(x7);
+    x7 = x3 * x5;
+
+  annotation(__JModelica(UnitTesting(tests={
+    FClassMethodTestCase(
+      name="LinearityTest1",
+      methodName="variableDiagnostics",
+      description="Test linearity of variables.",
+      methodResult="
 
 Independent constants: 
 
@@ -447,7 +445,7 @@ Algebraic real variables:
  x3: number of uses: 3, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
  x5: number of uses: 3, isLinear: false, alias: no
- x6: number of uses: 3, isLinear: true, alias: no
+ x6: number of uses: 1, isLinear: true, alias: no
  x7: number of uses: 2, isLinear: false, alias: no
 
 Input variables: 
@@ -1396,48 +1394,29 @@ pre(x) := 2 * switchTime ^ 2 / (1.0 + 1.0)
 end AliasTest34;
 
     model AliasTest35
-        function F
-            input Real i1;
-            input Real i2;
-            output Real o1;
-            output Real o2;
-        algorithm
-            o1 := i1 * 2;
-            o2 := i2 * 2;
-            annotation(InlineAfterIndexReduction=true,derivative=F_der);
-        end F;
-    
-        function F_der
-            input Real i1;
-            input Real i2;
-            input Real i1_der;
-            input Real i2_der;
-            output Real o1_der;
-            output Real o2_der;
+        function f
+            input Real x;
+            input Real y;
+            output Real z;
+            output Real w;
         protected
             Real v1;
             Real v2;
         algorithm
-            v1 := 1 * i1_der;
-            v2 := 1 * i2_der;
-            (o1_der, o2_der) := F(v1, v2);
+            v1 := x;
+            v2 := y - 1;
+            z := x + (v2 * x * v1);
+            w := v1 * v2;
             annotation(Inline=true);
-        end F_der;
-    
-        Real x;
-        Real y;
-        Real vx;
-        Real vy;
-        Real vx2;
-        Real vy2;
-        Real a;
+        end f;
+        
+        Real x = time;
+        Real y = 1;
+        Real z;
+        Real w;
     equation
-        der(x) = vx;
-        der(y) = vy;
-        (vx, vy) = F(vx2, vy2);
-        der(vx2) = a*x;
-        der(vy2) = a*y;
-        x^2 + y^2 = 2;
+        (z, w) = f(x + 1, y);
+
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="AliasTest35",
@@ -1445,9 +1424,11 @@ end AliasTest34;
             description="Test so that alias sets with only temporaries in are removed",
             methodResult="
 Alias sets:
-0 variables can be eliminated
+{w, temp_4}
+1 variables can be eliminated
 ")})));
     end AliasTest35;
+
 
 model AliasFuncTest1
     function f
@@ -2294,8 +2275,8 @@ equation
  0 = v6;
  0 = v4;
  v6 + v6 + v8 + v7 = 1;
- v6 + v6 + v8 = 0;
-end TransformCanonicalTests.InitialEqTest2;
+ 0 = v7 + -1;
+ end TransformCanonicalTests.InitialEqTest2;
 ")})));
   end InitialEqTest2;
 
@@ -2940,7 +2921,7 @@ fclass TransformCanonicalTests.InitialEqTest20
  discrete Integer temp_1;
  Real _eventIndicator_1;
  discrete Boolean temp_2;
-initial equation 
+initial equation
  pre(temp_1) = 0;
  pre(i) = 0;
  pre(t) = 0.0;
@@ -6929,229 +6910,6 @@ Error at line 6275, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/Trans
 end TestExternalObj10;
 
 
-package EventGeneratingExps
-
-model Nested
-	Real x;
-equation
-	1 + x = integer(3 + floor((time * 0.3) + 4.2) * 4);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="EventGeneratingExps_Nested",
-			description="Tests extraction of nested event generating expressions
-			into when equations.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.Nested
- Real x;
- discrete Real temp_1;
- discrete Integer temp_2;
-initial equation 
- pre(temp_1) = 0.0;
- pre(temp_2) = 0;
-equation
- 1 + x = temp_2;
- temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
-end TransformCanonicalTests.EventGeneratingExps.Nested;
-			
-")})));
-end Nested;
-
-model InAlgorithm
-	Real x;
-algorithm
-	x := integer(3 + floor((time * 0.3) + 4.2) * 4);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="EventGeneratingExps_InAlgorithm",
-			description="Tests extraction of event generating expressions in algorithms.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
- Real x;
- discrete Real temp_1;
- discrete Integer temp_2;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
-initial equation 
- pre(temp_1) = 0.0;
- pre(temp_2) = 0;
-algorithm
- temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- _eventIndicator_1 := 3 + temp_1 * 4 - pre(temp_2);
- _eventIndicator_2 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
- temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
- x := temp_2;
-end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
-")})));
-end InAlgorithm;
-
-model InFunctionCall
-
-  function f
-    input Real x;
-    output Real y;
-  algorithm
-   y := mod(x,2);
-   return;
-  end f;
-	
-	Real x;
-equation
-	x = f(integer(0.9 + time/10) * 3.14);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="EventGeneratingExps_InFunctionCall",
-			description="Tests event generating expressions in function calls.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
- Real x;
- discrete Integer temp_1;
- discrete Real temp_2;
-initial equation 
- pre(temp_1) = 0;
- pre(temp_2) = 0.0;
-equation
- x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
- temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
- temp_2 = temp_1 * 3.14;
-end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
-			
-")})));
-end InFunctionCall;
-
-
-model InWhenClauses1
-       Real x;
-equation
-    when integer(time*3) + noEvent(integer(time*3)) > 1 then
-        x = floor(time * 0.3 + 4.2);
-    end when;
-
-       annotation(__JModelica(UnitTesting(tests={
-               TransformCanonicalTestCase(
-                       name="EventGeneratingExps_InWhenClauses1",
-			description="Tests event generating expressions in a when equation.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses1
- discrete Real x;
- discrete Integer temp_1;
- discrete Real temp_2;
- discrete Boolean temp_3;
-initial equation 
- pre(temp_1) = 0;
- pre(temp_2) = 0.0;
- pre(x) = 0.0;
- pre(temp_3) = false;
-equation
- temp_3 = temp_1 + noEvent(integer(time * 3)) > 1;
- x = if temp_3 and not pre(temp_3) then temp_2 else pre(x);
- temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
- temp_2 = if time * 0.3 + 4.2 < pre(temp_2) or time * 0.3 + 4.2 >= pre(temp_2) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
-end TransformCanonicalTests.EventGeneratingExps.InWhenClauses1;
-")})));
-end InWhenClauses1;
-
-model InWhenClauses2
-       Real x;
-algorithm
-    when integer(time*3) + noEvent(integer(time*3)) > 1 then
-        x := floor(time * 0.3 + 4.2);
-    end when;
-
-       annotation(__JModelica(UnitTesting(tests={
-               TransformCanonicalTestCase(
-                       name="EventGeneratingExps_InWhenClauses2",
-			description="Tests event generating expressions in a when statement.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses2
- discrete Real x;
- discrete Real temp_1;
- discrete Integer temp_2;
- discrete Boolean temp_3;
-initial equation 
- pre(temp_1) = 0.0;
- pre(temp_2) = 0;
- pre(x) = 0.0;
- pre(temp_3) = false;
-algorithm
- temp_2 := if time * 3 < pre(temp_2) or time * 3 >= pre(temp_2) + 1 or initial() then integer(time * 3) else pre(temp_2);
- temp_3 := temp_2 + noEvent(integer(time * 3)) > 1;
- if temp_3 and not pre(temp_3) then
-  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
-  x := temp_1;
- end if;
-end TransformCanonicalTests.EventGeneratingExps.InWhenClauses2;
-")})));
-end InWhenClauses2;
-
-model InInitialAlgorithm
-       Integer x;
-initial algorithm
-	x := integer(time);
-equation
-	when (time >= 1) then
-		x = integer(time);
-	end when;
-
-       annotation(__JModelica(UnitTesting(tests={
-               TransformCanonicalTestCase(
-                       name="EventGeneratingExps_InInitialAlgorithm",
-			description="Tests event generating expressions in a when equation.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm
- discrete Integer x;
- discrete Integer temp_1;
- discrete Boolean temp_2;
-initial equation 
- algorithm
-  x := integer(time);
-;
- pre(temp_1) = 0;
- pre(temp_2) = false;
-equation
- temp_2 = time >= 1;
- x = if temp_2 and not pre(temp_2) then temp_1 else pre(x);
- temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
-end TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm;
-")})));
-end InInitialAlgorithm;
-
-model InInitialEquation
-       Real x;
-initial equation
-	x = integer(time);
-equation
-	when (time >= 1) then
-		x = integer(time);
-	end when;
-
-       annotation(__JModelica(UnitTesting(tests={
-               TransformCanonicalTestCase(
-                       name="EventGeneratingExps_InInitialEquation",
-			description="Tests event generating expressions in a when equation.",
-			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InInitialEquation
- discrete Real x;
- discrete Integer temp_1;
- discrete Boolean temp_2;
-initial equation 
- x = integer(time);
- pre(temp_1) = 0;
- pre(temp_2) = false;
-equation
- temp_2 = time >= 1;
- x = if temp_2 and not pre(temp_2) then temp_1 else pre(x);
- temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
-end TransformCanonicalTests.EventGeneratingExps.InInitialEquation;
-")})));
-end InInitialEquation;
-
-end EventGeneratingExps;
-
-
 model GetInstanceName1
     model B
         model C
@@ -7825,7 +7583,7 @@ algorithm
 Coefficient variability: constant
 Torn variables:
   a
-  e
+  _eventIndicator_1
   b
   c
 
@@ -7837,7 +7595,7 @@ Solved discrete variables:
 
 Torn equations:
   a := time + d * 2
-  e := a * 2 + (- d)
+  _eventIndicator_1 := a * 2 + (- d)
   algorithm
     if temp_1 and not pre(temp_1) then
       b := pre(d) + 1;
@@ -7852,7 +7610,7 @@ Continuous residual equations:
     Iteration variables: d
 
 Discrete equations:
-  temp_1 := e > 0
+  temp_1 := _eventIndicator_1 > 0
 
 Jacobian:
   |1.0, 0.0, 0.0, 0.0, -2|
@@ -8270,7 +8028,7 @@ equation
  y[2] = 2 * y[1];
  y[3] = 3 * y[1];
  y[4] = 4 * y[1];
-
+ 
 public
  function TransformCanonicalTests.ForOfUnknownSize1.f
   input Real[:] y;
@@ -8416,7 +8174,7 @@ equation
  y[2] = 2 * y[1];
  y[3] = 3 * y[1];
  y[4] = 4 * y[1];
-
+ 
 public
  function TransformCanonicalTests.ForOfUnknownSize4.f
   input Real[:] y;
@@ -8476,11 +8234,11 @@ equation
  y[1,2] = 2 * y[1,1];
  y[1,3] = 3 * y[1,1];
  y[1,4] = 4 * y[1,1];
- y[2,1] = 2 * y[1,1];
- y[2,2] = 3 * y[1,1];
- y[2,3] = 4 * y[1,1];
+ y[2,1] = y[1,2];
+ y[2,2] = y[1,3];
+ y[2,3] = y[1,4];
  y[2,4] = 5 * y[1,1];
-
+ 
 public
  function TransformCanonicalTests.ForOfUnknownSize5.f
   input Real[:,:] y;

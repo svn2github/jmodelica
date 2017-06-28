@@ -25,4 +25,5 @@ IntegerVariable::IntegerVariable(Model *owner, MX var, Variable::Causality causa
 		throw std::runtime_error("An integer variable can not have continuous variability");
 	}
 }
+const Variable::Type IntegerVariable::getType() const { return Variable::INTEGER; }
 }; // End namespace

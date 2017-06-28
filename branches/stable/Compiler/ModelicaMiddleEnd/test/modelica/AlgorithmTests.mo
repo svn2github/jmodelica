@@ -423,7 +423,7 @@ equation
  x[1,2] = 2 * x[1,1];
  x[2,1] = 3 * x[1,1];
  x[2,2] = 4 * x[1,1];
-
+ 
 public
  function AlgorithmTests.TempAssign1.f
   input Real[:,:] x;
@@ -890,7 +890,7 @@ fclass AlgorithmTests.VariableSubscriptAssign1
  Real y[2,2];
  discrete Integer temp_1;
  discrete Integer temp_2;
-initial equation 
+initial equation
  pre(temp_1) = 0;
  pre(temp_2) = 0;
 algorithm

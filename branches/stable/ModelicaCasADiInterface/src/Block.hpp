@@ -228,9 +228,9 @@ namespace ModelicaCasADi
              * @return A boolean
              */
             bool isSolvable() const;
-            bool setasSimple(bool flag){simple_flag=flag;}
-            bool setasLinear(bool flag){linear_flag=flag;}
-            bool setasSolvable(bool flag){solve_flag=flag;}
+            void setasSimple(bool flag){simple_flag=flag;}
+            void setasLinear(bool flag){linear_flag=flag;}
+            void setasSolvable(bool flag){solve_flag=flag;}
 
             //Requires the jacobian to be computed in beforehand
             /**

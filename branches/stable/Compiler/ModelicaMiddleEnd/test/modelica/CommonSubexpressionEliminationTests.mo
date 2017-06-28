@@ -385,4 +385,94 @@ end CommonSubexpressionEliminationTests.ParameterFunctionCall2;
 ")})));
 end ParameterFunctionCall2;
 
+
+model InfiniteLoop
+  function func
+    input Boolean b1;
+    output Boolean b2;
+  algorithm
+    b2 := b1;
+    annotation(Inline = false);
+  end func;
+
+    Real x;
+    Real y;
+  initial equation
+    x = 1;
+    y = 1;
+  equation
+    when {func(initial())} then
+      x=2;
+    end when;
+    when {func(initial())} then
+      y=2;
+    end when;
+
+      annotation(__JModelica(UnitTesting(tests={
+          TimeTestCase(
+            name="CSE_TemporaryVariables",
+            description="Verifies that temporary variables used for function calls aren't created twice.
+                         This caused an inifinite loop. #5389.",
+            variability_propagation=false,
+            maxTime=1.0
+)})));
+end InfiniteLoop;
+
+
+model DuplicateTemporaries
+  function func
+    input Boolean b1;
+    output Boolean b2;
+  algorithm
+    b2 := b1;
+    annotation(Inline = false);
+  end func;
+
+    Real x;
+    Real y;
+  initial equation
+    x = 1;
+    y = 1;
+  equation
+    when {func(initial())} then
+      x=2;
+    end when;
+    when {func(initial())} then
+      y=2;
+    end when;
+
+      annotation(__JModelica(UnitTesting(tests={
+          TransformCanonicalTestCase(
+            name="CSE_DuplicateTemporaries",
+            description="Verifies that temporary variables used for function calls aren't created twice.
+                         This caused an inifinite loop. #5389.",
+            variability_propagation=false,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.DuplicateTemporaries
+ discrete Real x;
+ discrete Real y;
+ discrete Boolean temp_1;
+initial equation
+ x = 1;
+ y = 1;
+ pre(temp_1) = false;
+equation
+ x = if temp_1 and not pre(temp_1) then 2 else pre(x);
+ y = if temp_1 and not pre(temp_1) then 2 else pre(y);
+ temp_1 = CommonSubexpressionEliminationTests.DuplicateTemporaries.func(initial());
+
+public
+ function CommonSubexpressionEliminationTests.DuplicateTemporaries.func
+  input Boolean b1;
+  output Boolean b2;
+ algorithm
+  b2 := b1;
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.DuplicateTemporaries.func;
+
+end CommonSubexpressionEliminationTests.DuplicateTemporaries;
+")})));
+end DuplicateTemporaries;
+
 end CommonSubexpressionEliminationTests;

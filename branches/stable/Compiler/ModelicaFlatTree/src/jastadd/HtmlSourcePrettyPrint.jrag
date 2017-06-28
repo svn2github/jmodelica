@@ -5,6 +5,11 @@ import beaver.Symbol;
 
 aspect HtmlSourcePrettyPrint {
 
+    /**
+     * Static printer instance.
+     */
+    public static HtmlSourcePrettyPrinter ASTNode.printer_htmlSource = new HtmlSourcePrettyPrinter();
+
 	public class HtmlSourcePrettyPrinter extends PrettyPrinter {
 		
 			private int htmlLineDepth;
@@ -72,23 +77,23 @@ aspect HtmlSourcePrettyPrint {
 		}
 		return n;
 	}*/
-	
-	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
-		//System.out.println("fname: " + printfname());
-		//System.out.println("multnodes: " + printmult());
-		//System.out.println("Total basenodes: " + printbasenodes() + "\n");
-		HtmlSourcePrettyPrinter p = new HtmlSourcePrettyPrinter();
-		str.println("<html>\n<head>\n");
-		str.println(p.htmlStyle());
-		str.println(p.htmlScriptHeader());
-		str.println("</head>\n<body>\n");
-		str.println("<div class=\"font\">\n");
-		str.println("<button class=\"button\" type=\"button\" onclick=\"classIdSwitch()\">Debug</button><br>\n");
-		
-		htmlSourcePrettyPrint(p, str, indent);
-		str.println("</div>\n</body>\n</html>");
-	}
-	
+
+    public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
+        //System.out.println("fname: " + printfname());
+        //System.out.println("multnodes: " + printmult());
+        //System.out.println("Total basenodes: " + printbasenodes() + "\n");
+        HtmlSourcePrettyPrinter p = printer_htmlSource;
+        str.println("<html>\n<head>\n");
+        str.println(p.htmlStyle());
+        str.println(p.htmlScriptHeader());
+        str.println("</head>\n<body>\n");
+        str.println("<div class=\"font\">\n");
+        str.println("<button class=\"button\" type=\"button\" onclick=\"classIdSwitch()\">Debug</button><br>\n");
+
+        htmlSourcePrettyPrint(p, str, indent);
+        str.println("</div>\n</body>\n</html>");
+    }
+
 	public static String HtmlSourcePrettyPrinter.htmlStyle(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("<style>\n");

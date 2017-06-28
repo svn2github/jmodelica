@@ -132,14 +132,8 @@ namespace ModelicaCasADi
             std::vector< Ref<Block> > blt;
 
     };
-    inline bool BLT::hasBLT() const {return 1;}
-    inline void BLT::addDaeEquation(Ref<Equation>eq) {
-        Ref<Block> nBlock = new Block();
-        nBlock->addEquation(eq,false);
-        addBlock(nBlock);
-    }
+
     inline int BLT::getNumberOfBlocks() const {return blt.size();}
-    inline void BLT::addBlock(Ref<Block> block){blt.push_back(block);}
-    inline Ref<Block> BLT::getBlock(int i) const {return blt[i];}
+
 }; // End namespace
 #endif

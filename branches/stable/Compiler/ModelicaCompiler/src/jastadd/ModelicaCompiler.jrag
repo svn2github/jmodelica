@@ -195,7 +195,7 @@ public class ModelicaCompiler {
                         }
                     } else {
                         try {
-                            PrintStream out = new PrintStream(new FileOutputStream(arg));
+                            PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(arg)));
                             if (tmpl != null) {
                                 String line = tmpl.readLine();
                                 while (line != null) {
@@ -1333,13 +1333,13 @@ public class ModelicaCompiler {
      * Override for subclasses needing another subclass of CGenerator.
      */
     protected CGenerator createCGenerator(FClass fc) {
-        return new CADGenerator(new PrettyPrinter(), '$', fc);
+        return new CADGenerator(ASTNode.prettyPrinter, '$', fc);
     }
-    
+
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
         CodeGenContext cgc = new CodeGenContext();
         Map<String,String> tempMap = new HashMap<String,String>();
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext, cgc, tempMap);
+        return new ExternCEvalGenerator(ASTNode.prettyPrinter, '$', null, ext, cgc, tempMap);
     }
 
     /**
@@ -2160,7 +2160,7 @@ public class ModelicaCompiler {
 
         try {
             hookCheckAbort();
-            FileOutputStream dest = new FileOutputStream(unitFile);
+            OutputStream dest = new BufferedOutputStream(new FileOutputStream(unitFile));
             ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
             out.setMethod(ZipOutputStream.DEFLATED);
 
@@ -2485,7 +2485,7 @@ public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
         return null;
     }
     
-    return (GenericXMLGenerator) xmlGen.create(new PrettyPrinter(), '$', fc);
+    return (GenericXMLGenerator) xmlGen.create(ASTNode.prettyPrinter, '$', fc);
 }
 
 public enum Module { GET_SET }
@@ -3003,7 +3003,7 @@ public abstract class CCompilerDelegator {
         try {
             source = new FileInputStream(sourceFile).getChannel();
             destination = new FileOutputStream(destFile).getChannel();
-            long count =0;
+            long count = 0;
             long size = source.size();
             while( (count += destination.transferFrom(source, 0, size-count)) < size);
         }

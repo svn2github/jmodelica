@@ -251,8 +251,8 @@ int model_ode_derivatives_0(jmi_t* jmi) {
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_3_2 = _x_1_0 + 2;
-    _x_4_3 = _x_1_0 + 3;
+    _x_3_2 = _x_2_1 + 1;
+    _x_4_3 = _x_2_1 + 2;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -262,8 +262,8 @@ int model_ode_derivatives_1(jmi_t* jmi) {
 int model_ode_derivatives_2(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_5_4 = _x_1_0 + 4;
-    _x_6_5 = _x_1_0 + 5;
+    _x_5_4 = _x_2_1 + 3;
+    _x_6_5 = _x_2_1 + 4;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -271,8 +271,8 @@ int model_ode_derivatives_2(jmi_t* jmi) {
 int model_ode_derivatives_3(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_7_6 = _x_1_0 + 6;
-    _x_8_7 = _x_1_0 + 7;
+    _x_7_6 = _x_2_1 + 5;
+    _x_8_7 = _x_2_1 + 6;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -282,8 +282,8 @@ int model_ode_derivatives_3(jmi_t* jmi) {
 int model_ode_derivatives_4(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_9_8 = _x_1_0 + 8;
-    _x_10_9 = _x_1_0 + 9;
+    _x_9_8 = _x_2_1 + 7;
+    _x_10_9 = _x_2_1 + 8;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -291,7 +291,7 @@ int model_ode_derivatives_4(jmi_t* jmi) {
 int model_ode_derivatives_5(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_11_10 = _x_1_0 + 10;
+    _x_11_10 = _x_2_1 + 9;
     JMI_DYNAMIC_FREE()
     return ef;
 }

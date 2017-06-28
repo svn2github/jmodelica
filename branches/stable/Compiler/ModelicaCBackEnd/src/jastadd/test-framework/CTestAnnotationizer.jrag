@@ -58,7 +58,7 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		@Override
 		public AbstractGenerator createGenerator(FClass fc) {
-			return new CGenerator(new PrettyPrinter(), '$', fc);
+			return new CGenerator(ASTNode.prettyPrinter, '$', fc);
 		}
 		
 	}
@@ -100,7 +100,7 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		@Override
 		public AbstractGenerator createGenerator(FClass fc) {
-			return new CADGenerator(new PrettyPrinter(), '$', fc);
+			return new CADGenerator(ASTNode.prettyPrinter, '$', fc);
 		}
 		
 	}

@@ -91,7 +91,7 @@ namespace ModelicaCasADi
             /** Initialize the Model, before populating it.
              * @param string identifier, typically <packagename>_<classname>, default empty string */
             void initializeModel(std::string identifier = "");
-            ~Model() {
+            virtual ~Model() {
                 //std::cout<<"\nDELETE_MODEL\n";
                 // Delete all the Model's variables, since they are OwnedNodes with the Model as owner.
                 for (std::vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {

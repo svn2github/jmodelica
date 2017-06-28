@@ -44,6 +44,6 @@ class IntegerVariable : public Variable {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
-inline const Variable::Type IntegerVariable::getType() const { return Variable::INTEGER; }
+
 }; // End namespace
 #endif

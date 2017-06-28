@@ -33,6 +33,11 @@ import java.util.HashSet;
 
 aspect CADCodeGen {
 
+    /**
+     * Static printer instance.
+     */
+    static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
+
     public class CADPrettyPrinter extends CodePrinter {
 
         public CADPrettyPrinter() {
@@ -107,9 +112,7 @@ aspect CADCodeGen {
             node.genResidual_CAD(enumerator, indent, str, visited, forIndices);
         }
     }
-	
-	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
-	
+
 	public String ASTNode.prettyPrint_CAD(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		CodeStream str = new CodeStream(os);
