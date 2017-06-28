@@ -703,12 +703,6 @@ abstract public class OptionRegistry {
              Category.user,
              false,
              "If enabled, output variables are generated for each generated event."),
-        EQUATION_EVENT_INDICATORS
-            ("equation_event_indicators",
-             OptionType.compiler,
-             Category.internal,
-             true,
-             "If enabled, event indicators are generated from equations."),
         DISABLE_SMOOTH_EVENTS
             ("disable_smooth_events",
              OptionType.compiler,

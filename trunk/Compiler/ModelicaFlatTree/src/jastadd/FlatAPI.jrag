@@ -2678,13 +2678,28 @@ aspect ReferencedVariables {
             visitor.visit(n, set);
         }
     }
-    
+
     @Override
     public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         set.add(this);
         super.findFIdUseExpsInTree(set, visitor);
     }
-    
+
+    @Override
+    public void FRelExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        Opt<FExp> indicator = getIndicatorOpt();
+
+        if (indicator == null) {
+            super.findFIdUseExpsInTree(set, visitor);
+        } else {
+            for (ASTNode<?> n : this) {
+                if (indicator != n) {
+                    n.findFIdUseExpsInTree(set, visitor);
+                }
+            }
+        }
+    }
+
     @Override
     public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
     }
@@ -3467,7 +3482,17 @@ aspect FVariableUses {
     eq FFunctionCall.getArg().isFunctionCallArg() = true;
     eq FIfExp.getThenExp().isFunctionCallArg()    = isFunctionCallArg();
     eq FIfExp.getElseExp().isFunctionCallArg()    = isFunctionCallArg();
-    
+
+    syn boolean FExp.containsCommonFunctionCallExp() {
+        for (FExp exp : childFExps()) {
+            if (exp.containsCommonFunctionCallExp()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    eq CommonFunctionCall.containsCommonFunctionCallExp() = true;
+
     /**
      * Returnes the function input that this expressions corresponds to.
      * NOTICE, this method will throw exception if this exp does not reside in a function call.
