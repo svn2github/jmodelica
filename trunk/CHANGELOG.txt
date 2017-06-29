@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Compiler ; #5375
+Added compiler option "event_output_vars". When set, output variables are
+generated for each event indicator.
+
 ; Other ; Minor ; General ; #5393
 Added a changeLog to JModelica.org.
 
