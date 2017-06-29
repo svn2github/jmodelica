@@ -1,0 +1,6 @@
+================= Unreleased ==================
+; Other ; Minor ; General ; #5393
+Added a changeLog to JModelica.org.
+
+
+==================== JM 2.0 ===================
