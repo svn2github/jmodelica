@@ -359,6 +359,10 @@ aspect ConstantEvaluation {
             return value < 0;
         }
 
+        @Override
+        public boolean hasIntegerValue() {
+            return true;
+        }
     }
     
 	/**
@@ -468,6 +472,10 @@ aspect ConstantEvaluation {
             return !(Double.isInfinite(value) || Double.isNaN(value));
         }
 
+        @Override
+        public boolean hasIntegerValue() {
+            return true;
+        }
       }
     
 	/**
@@ -551,8 +559,12 @@ aspect ConstantEvaluation {
             return true;
         }
 
-      }
-      
+        @Override
+        public boolean hasIntegerValue() {
+            return true;
+        }
+    }
+
 	/**
 	 * Constant string value.
 	 */
@@ -1116,7 +1128,21 @@ aspect ConstantEvaluation {
 		public Iterator<CValue> iterator() {
 			return new ConstArrayIterator<CValue>(values);
 		}
-    	
+
+        /**
+         * Checks whether or not this array has unknown members.
+         * 
+         * @return
+         *          {@code false} of all array members are known, {@code true} otherwise.
+         */
+        public boolean hasUnknowns() {
+            for (CValue value : values) {
+                if (value.isUnknown()) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
     
     /**
@@ -1436,6 +1462,11 @@ aspect ConstantEvaluation {
 
         @Override
         public boolean isEnum() {
+            return true;
+        }
+
+        @Override
+        public boolean hasIntegerValue() {
             return true;
         }
 
@@ -3604,7 +3635,6 @@ aspect ConstantEvaluation {
         return map;
     }
 
-
     /**
      * Addition of constant values.
      * 
@@ -3612,14 +3642,28 @@ aspect ConstantEvaluation {
      * @param v2 Constant value of right operand.
      * @return Resulting constant value.
      */
-    syn CValue FType.add(CValue v1, CValue v2) = 
-        CValue.UNKNOWN;
-    eq FRealType.add(CValue v1, CValue v2) = 
-        new CValueReal(v1.realValue() + v2.realValue());
-    eq FIntegerType.add(CValue v1, CValue v2) = 
-        new CValueInteger(v1.intValue() + v2.intValue());
-    eq FStringType.add(CValue v1, CValue v2) = 
-        new CValueString(v1.stringValue() + v2.stringValue());
+    syn CValue FType.add(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    eq FRealType.add(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueReal(v1.realValue() + v2.realValue());
+    }
+
+    eq FIntegerType.add(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueInteger(v1.intValue() + v2.intValue());
+    }
+
+    eq FStringType.add(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueString(v1.stringValue() + v2.stringValue());
+    }
 
     /**
      * Subtraction of constant values.
@@ -3628,12 +3672,21 @@ aspect ConstantEvaluation {
      * @param v2 Constant value of right operand.
      * @return Resulting constant value.
      */
-    syn CValue FType.sub(CValue v1, CValue v2) = 
-        CValue.UNKNOWN;
-    eq FRealType.sub(CValue v1, CValue v2) = 
-        new CValueReal(v1.realValue() - v2.realValue());
-    eq FIntegerType.sub(CValue v1, CValue v2) = 
-        new CValueInteger(v1.intValue() - v2.intValue());
+    syn CValue FType.sub(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    eq FRealType.sub(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueReal(v1.realValue() - v2.realValue());
+    }
+
+    eq FIntegerType.sub(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueInteger(v1.intValue() - v2.intValue());
+    }
 
     /**
      * Multiplication of constant values.
@@ -3642,245 +3695,361 @@ aspect ConstantEvaluation {
      * @param v2 Constant value of right operand.
      * @return Resulting constant value.
      */
-    syn CValue FType.mul(CValue v1, CValue v2) = 
-        CValue.UNKNOWN;
+    syn CValue FType.mul(CValue v1, CValue v2) = CValue.UNKNOWN;
+
     eq FRealType.mul(CValue v1, CValue v2) {
-        return new CValueReal(v1.realValue()*v2.realValue());
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueReal(v1.realValue() * v2.realValue());
     }
+
     eq FIntegerType.mul(CValue v1, CValue v2) {
-        return new CValueInteger(v1.intValue()*v2.intValue());
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueInteger(v1.intValue() * v2.intValue());
     }
 
-  /**
-   * Division of constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.div(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FRealType.div(CValue v1, CValue v2) = 
-	  new CValueReal(v1.realValue()/v2.realValue());
-  eq FIntegerType.div(CValue v1, CValue v2) = 
-	  new CValueReal(v1.realValue()/v2.realValue());
+    /**
+     * Division of constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.div(CValue v1, CValue v2) = CValue.UNKNOWN;
 
-  /**
-   * Power expression for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.pow(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FRealType.pow(CValue v1, CValue v2) =
-	  new CValueReal(java.lang.StrictMath.pow(v1.realValue(),v2.realValue()));
+    eq FRealType.div(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueReal(v1.realValue() / v2.realValue());
+    }
 
-  /**
-   * Negation of a constant value.
-   * 
-   * @param v Constant value of operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.neg(CValue v) = 
-	  CValue.UNKNOWN;
-  eq FRealType.neg(CValue v) = new CValueReal(-v.realValue());
-  eq FIntegerType.neg(CValue v) = new CValueInteger(-v.intValue());
+    eq FIntegerType.div(CValue v1, CValue v2) {
+        if (!v1.isReal() || !v2.isReal()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueReal(v1.realValue() / v2.realValue());
+    }
 
-  /**
-   * Abs expression for constant values.
-   * 
-   * @param v Constant value of operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.abs(CValue v) = 
-	  CValue.UNKNOWN;
-  eq FRealType.abs(CValue v) = 
-	  new CValueReal(StrictMath.abs(v.realValue()));
-  eq FIntegerType.abs(CValue v) = 
-	  new CValueInteger(StrictMath.abs(v.intValue()));
-  
-  /**
-   * Sign expression for constant values.
-   * 
-   * @param v Constant value of operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.sign(CValue v) = 
-	  CValue.UNKNOWN;
-  eq FIntegerType.sign(CValue v) = 
-	  new CValueInteger((int) StrictMath.signum(v.realValue()));
-  
-  /**
-   * Ceil expression for constant values.
-   * 
-   * @param v Constant value of operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.ceil(CValue v) = 
-	  CValue.UNKNOWN;
-  eq FRealType.ceil(CValue v) = 
-	  new CValueReal(StrictMath.ceil(v.realValue()));
-  eq FIntegerType.ceil(CValue v) = 
-	  new CValueInteger((int) StrictMath.ceil(v.realValue()));
+    /**
+     * Power expression for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.pow(CValue v1, CValue v2) = CValue.UNKNOWN;
 
-  /**
-   * Truncation to zero for constant values.
-   * 
-   * @param v Constant value of operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.truncToZero(CValue v) = 
-	  CValue.UNKNOWN;
-  eq FRealType.truncToZero(CValue v) = 
-	  v.realValue() < 0 ? ceil(v) : v.convertInteger().convertReal();
-  eq FIntegerType.truncToZero(CValue v) = 
-	  v.realValue() < 0 ? ceil(v) : v.convertInteger();
+    eq FRealType.pow(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueReal(java.lang.StrictMath.pow(v1.realValue(), v2.realValue()));
+    }
 
-  /**
-   * And expression for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.and(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.and(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.booleanValue() && v2.booleanValue());
+    /**
+     * Negation of a constant value.
+     * 
+     * @param v Constant value of operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.neg(CValue v) = CValue.UNKNOWN;
+    eq FRealType.neg(CValue v) = v.isNumericScalar() ? new CValueReal(-v.realValue()) : CValue.UNKNOWN;
+    eq FIntegerType.neg(CValue v) = v.hasIntegerValue() ? new CValueInteger(-v.intValue()) : CValue.UNKNOWN;
 
-  /**
-   * Or expression for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.or(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.or(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.booleanValue() || v2.booleanValue());
+    /**
+     * Abs expression for constant values.
+     * 
+     * @param v Constant value of operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.abs(CValue v) = CValue.UNKNOWN;
+    eq FRealType.abs(CValue v) = v.isNumericScalar() ? new CValueReal(StrictMath.abs(v.realValue())) : CValue.UNKNOWN;
+    eq FIntegerType.abs(CValue v) =
+            v.hasIntegerValue() ? new CValueInteger(StrictMath.abs(v.intValue())) : CValue.UNKNOWN;
 
-  /**
-   * Not expression for constant values.
-   * 
-   * @param v Constant value of operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.not(CValue v) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.not(CValue v) = 
-	  new CValueBoolean(!v.booleanValue());
-    
+    /**
+     * Sign expression for constant values.
+     * 
+     * @param v Constant value of operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.sign(CValue v) = CValue.UNKNOWN;
+
+    eq FIntegerType.sign(CValue v) =
+            v.hasIntegerValue() ? new CValueInteger((int) StrictMath.signum(v.realValue())) : CValue.UNKNOWN;
+
+    /**
+     * Ceil expression for constant values.
+     * 
+     * @param v Constant value of operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.ceil(CValue v) = CValue.UNKNOWN;
+
+    eq FRealType.ceil(CValue v) = v.isNumericScalar() ? new CValueReal(StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
+
+    eq FIntegerType.ceil(CValue v) =
+            v.hasIntegerValue() ? new CValueInteger((int) StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
+
+    /**
+     * Truncation to zero for constant values.
+     * 
+     * @param v Constant value of operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.truncToZero(CValue v) = CValue.UNKNOWN;
+
+    eq FRealType.truncToZero(CValue v) {
+        if (!v.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return v.realValue() < 0 ? ceil(v) : v.convertInteger().convertReal();
+    }
+
+    eq FIntegerType.truncToZero(CValue v) {
+        if (!v.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return v.realValue() < 0 ? ceil(v) : v.convertInteger();
+    }
+
+    /**
+     * And expression for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.and(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    eq FBooleanType.and(CValue v1, CValue v2) {
+        if (!v1.isBoolean() || !v2.isBoolean()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.booleanValue() && v2.booleanValue());
+    }
+
+    /**
+     * Or expression for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.or(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    eq FBooleanType.or(CValue v1, CValue v2) {
+        if (!v1.isBoolean() || !v2.isBoolean()) {
+            return CValue.UNKNOWN;
+        } 
+        return new CValueBoolean(v1.booleanValue() || v2.booleanValue());
+    }
+
+    /**
+     * Not expression for constant values.
+     * 
+     * @param v Constant value of operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.not(CValue v) = CValue.UNKNOWN;
+    eq FBooleanType.not(CValue v) = v.isBoolean() ? new CValueBoolean(!v.booleanValue()) : CValue.UNKNOWN;
+
     /* Machine epsilon */
     public static double FRealType.MACHINE_EPSILON = 2.2204460492503131e-16;
-    
+
     /* Epsilon used for Real-type comparisons */
     public static double FRealType.ALMOST_EPSILON = MACHINE_EPSILON;
-    
+
     syn boolean FRealType.almostZero(double op)   = almostLtZero(op) && almostGtZero(op);
     syn boolean FRealType.almostLtZero(double op) = op <= ALMOST_EPSILON;
     syn boolean FRealType.almostGtZero(double op) = op >= -ALMOST_EPSILON;
     syn boolean FRealType.surelyLtZero(double op) = op < -ALMOST_EPSILON;
     syn boolean FRealType.surelyGtZero(double op) = op > ALMOST_EPSILON;
-    
-  /**
-   * Equals comparison for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.equ(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() == v2.intValue());
-  eq FRealType.equ(CValue v1, CValue v2) = 
-        new CValueBoolean(almostZero(v1.realValue() - v2.realValue()));
-  eq FStringType.equ(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
-  eq CValueUnknown.equ(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  
-  /**
-   * Not equal comparison for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.neq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() != v2.intValue());
-  eq FRealType.neq(CValue v1, CValue v2) = 
-        new CValueBoolean(v1.realValue() != v2.realValue());
-  eq FStringType.neq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
-  eq CValueUnknown.neq(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  
-  /**
-   * Greater or equal than comparison for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.geq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() >= v2.intValue());
-  eq FRealType.geq(CValue v1, CValue v2) = 
-        new CValueBoolean(almostGtZero(v1.realValue() - v2.realValue()));
-  eq FStringType.geq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
-  eq CValueUnknown.geq(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  
-  /**
-   * Greater than comparison for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.gt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() > v2.intValue());
-  eq FRealType.gt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() > v2.realValue());
-  eq FStringType.gt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
-  eq CValueUnknown.gt(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  
-  /**
-   * Less or equal than comparison for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.leq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() <= v2.intValue());
-  eq FRealType.leq(CValue v1, CValue v2) = 
-        new CValueBoolean(almostLtZero(v1.realValue() - v2.realValue()));
-  eq FStringType.leq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
-  eq CValueUnknown.leq(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  
-  /**
-   * Less than comparison for constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.lt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() < v2.intValue());
-  eq FRealType.lt(CValue v1, CValue v2) = 
-        new CValueBoolean(v1.realValue() < v2.realValue());
-  eq FStringType.lt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
-  eq CValueUnknown.lt(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-	  
+
+    /**
+     * Equals comparison for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.equ(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.intValue() == v2.intValue());
+    }
+
+    eq FRealType.equ(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(almostZero(v1.realValue() - v2.realValue()));
+    }
+
+    eq FStringType.equ(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
+    }
+
+    eq CValueUnknown.equ(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    /**
+     * Not equal comparison for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.neq(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.intValue() != v2.intValue());
+    }
+
+    eq FRealType.neq(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.realValue() != v2.realValue());
+    }
+
+    eq FStringType.neq(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
+    }
+
+    eq CValueUnknown.neq(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    /**
+     * Greater or equal than comparison for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.geq(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.intValue() >= v2.intValue());
+    }
+
+    eq FRealType.geq(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(almostGtZero(v1.realValue() - v2.realValue()));
+    }
+
+    eq FStringType.geq(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        } 
+        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
+    }
+
+    eq CValueUnknown.geq(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    /**
+     * Greater than comparison for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.gt(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.intValue() > v2.intValue());
+    }
+
+    eq FRealType.gt(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.realValue() > v2.realValue());
+    }
+
+    eq FStringType.gt(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
+    }
+
+    eq CValueUnknown.gt(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    /**
+     * Less or equal than comparison for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.leq(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.intValue() <= v2.intValue());
+    }
+
+    eq FRealType.leq(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        } 
+        return new CValueBoolean(almostLtZero(v1.realValue() - v2.realValue()));
+    }
+
+    eq FStringType.leq(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
+    }
+
+    eq CValueUnknown.leq(CValue v1, CValue v2) = CValue.UNKNOWN;
+
+    /**
+     * Less than comparison for constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.lt(CValue v1, CValue v2) {
+        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.intValue() < v2.intValue());
+    }
+
+    eq FRealType.lt(CValue v1, CValue v2) {
+        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.realValue() < v2.realValue());
+    }
+
+    eq FStringType.lt(CValue v1, CValue v2) {
+        if (!v1.isString() || !v2.isString()) {
+            return CValue.UNKNOWN;
+        }
+        return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
+    }
+
+    eq CValueUnknown.lt(CValue v1, CValue v2) = CValue.UNKNOWN;
+
 }
 
 aspect ArrayConstantEvaluation {

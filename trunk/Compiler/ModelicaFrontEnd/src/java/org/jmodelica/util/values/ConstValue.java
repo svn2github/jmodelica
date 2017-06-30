@@ -271,4 +271,23 @@ public abstract class ConstValue {
         return false;
     }
 
+    /**
+     * Checks if this is a numeric, scalar value.
+     * 
+     * @return
+     *          {@code true} if this value is numeric and scalar, {@code false} otherwise.
+     */
+    public boolean isNumericScalar() {
+        return isNumeric() && isScalar();
+    }
+    
+    /**
+     * Checks if this value can be used as an integer value.
+     * 
+     * @return
+     *          {@code true} if this value can be used as an integer, {@code false} otherwise.
+     */
+    public boolean hasIntegerValue() {
+        return false;
+    }
 }

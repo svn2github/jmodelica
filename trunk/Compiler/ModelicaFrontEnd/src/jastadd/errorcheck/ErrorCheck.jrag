@@ -1296,6 +1296,11 @@ aspect InstanceErrorCheck {
         boolean last = i == indices.getNumChild() - 1;
         CommonForIndex next = last ? null : indices.getChild(i + 1);
         CValueArray ivals = getFExp().ceval().array();
+
+        if (ivals.hasUnknowns()) {
+            return;
+        }
+
         for (Index j : ivals.indices()) {
             var.setLocalCachedEvaluationValue(ivals.getCell(j));
             if (last) {

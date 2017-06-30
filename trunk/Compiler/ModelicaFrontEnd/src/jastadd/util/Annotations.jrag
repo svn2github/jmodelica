@@ -402,11 +402,12 @@ aspect AnnotationAPI {
          * Returns the value for a node that represents a boolean value.
          */
         public final boolean bool() {
-            try {
-                return ceval().booleanValue();
-            } catch (ConstantEvaluationException e) {
-                return false;
+            CValue val = ceval();
+
+            if (val.isBoolean() && val.isScalar()) {
+                return val.booleanValue();
             }
+            return false;
         }
 
         /**
