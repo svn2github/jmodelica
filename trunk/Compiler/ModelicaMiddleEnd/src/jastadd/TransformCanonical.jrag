@@ -2090,7 +2090,7 @@ aspect TransformCanonical {
         String tempName = calcTempVarName();
         FTypePrefixVariability v;
         if (param) {
-            v = fParameter();
+            v = fFixedParameter();
         } else {
             v = type().funcOutputVariability();
         }

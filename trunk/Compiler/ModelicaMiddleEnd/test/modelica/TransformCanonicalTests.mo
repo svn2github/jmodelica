@@ -8260,4 +8260,107 @@ end TransformCanonicalTests.ForOfUnknownSize5;
 ")})));
 end ForOfUnknownSize5;
 
+
+model FunctionWithZeroSizeOutput1
+    function f
+        input Real[:] x;
+        input Integer n;
+        output Real[size(x,1)] y;
+        output Real[size(x,1) - n] z;
+    algorithm
+        y := x .+ 1;
+        y := y .* 2;
+    end f;
+    
+    Real x[2];
+    Real y[2];
+    Real z[0];
+equation
+    (y, z) = f(x, 2);
+    der(x) = {y[2], time};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionWithZeroSizeOutput1",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.FunctionWithZeroSizeOutput1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+initial equation
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ ({y[1], y[2]}, ) = TransformCanonicalTests.FunctionWithZeroSizeOutput1.f({x[1], x[2]}, 2);
+ der(x[1]) = y[2];
+ der(x[2]) = time;
+
+public
+ function TransformCanonicalTests.FunctionWithZeroSizeOutput1.f
+  input Real[:] x;
+  input Integer n;
+  output Real[:] y;
+  output Real[:] z;
+  Real[:] temp_1;
+ algorithm
+  init y as Real[size(x, 1)];
+  init z as Real[size(x, 1) - n];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1] .+ 1;
+  end for;
+  init temp_1 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_1[i1] := y[i1] .* 2;
+  end for;
+  for i1 in 1:size(x, 1) loop
+   y[i1] := temp_1[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.FunctionWithZeroSizeOutput1.f;
+
+end TransformCanonicalTests.FunctionWithZeroSizeOutput1;
+")})));
+end FunctionWithZeroSizeOutput1;
+
+
+model FunctionWithZeroSizeOutput2
+    function f
+        input Real[2] x;
+        output Real[2] y;
+        output Real[0] z;
+    algorithm
+        y := x .+ 1;
+        end f;
+    
+    Real x[2];
+    Real y[2];
+    Real z[0];
+equation
+    (y, z) = f(x);
+    der(x) = {y[2], time};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionWithZeroSizeOutput2",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.FunctionWithZeroSizeOutput2
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+initial equation
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ y[1] = x[1] .+ 1;
+ der(x[1]) = x[2] .+ 1;
+ der(x[1]) = y[2];
+ der(x[2]) = time;
+end TransformCanonicalTests.FunctionWithZeroSizeOutput2;
+")})));
+end FunctionWithZeroSizeOutput2;
+
 end TransformCanonicalTests;

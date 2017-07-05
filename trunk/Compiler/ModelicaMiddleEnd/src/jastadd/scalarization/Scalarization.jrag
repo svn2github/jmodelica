@@ -1335,12 +1335,16 @@ aspect Scalarization {
     eq Root.getChild().surroundingIfOrElse()                        = null;
     eq FIfWhenEquation.getFAbstractEquation().surroundingIfOrElse() = this;
     eq FIfWhenEquation.getElse().surroundingIfOrElse()              = this;
-	
-	
-	public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
-		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().scalarize(indexMap)) : new Opt());
-	}
-    
+
+
+    public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
+        FFunctionCallLeft res = new FFunctionCallLeft();
+        if (hasFExp() && !getFExp().size().isEmpty()) {
+            res.setFExp(getFExp().scalarize(indexMap));
+        }
+        return res;
+    }
+
 	/**
 	 * Create a record constructor (or FArray of record constructors),  
 	 *        with the arguments taken from a record variable with the given name.
