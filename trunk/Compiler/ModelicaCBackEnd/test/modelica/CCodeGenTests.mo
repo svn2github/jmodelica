@@ -816,6 +816,88 @@ initial equation
 ")})));
 end CCodeGenTest21;
 
+model CCodeGenTest22
+	Real t;
+equation
+	t = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest22",
+            description="",
+            fmume10=true,
+            template="$fmu_type_define$",
+            generatedCode="
+#define FMUME10 1
+")})));
+end CCodeGenTest22;
+
+model CCodeGenTest23
+	Real t;
+equation
+	t = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest23",
+            description="",
+            fmume20=true,
+            template="$fmu_type_define$",
+            generatedCode="
+#define FMUME20 1
+")})));
+end CCodeGenTest23;
+
+model CCodeGenTest24
+	Real t;
+equation
+	t = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest24",
+            description="",
+            fmucs10=true,
+            template="$fmu_type_define$",
+            generatedCode="
+#define FMUCS10 1
+")})));
+end CCodeGenTest24;
+
+model CCodeGenTest25
+	Real t;
+equation
+	t = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest25",
+            description="",
+            fmucs20=true,
+            template="$fmu_type_define$",
+            generatedCode="
+#define FMUCS20 1
+")})));
+end CCodeGenTest25;
+
+model CCodeGenTest26
+	Real t;
+equation
+	t = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest26",
+            description="",
+            fmucs20=true,
+            fmume20=true,
+            template="$fmu_type_define$",
+            generatedCode="
+#define FMUME20 1
+#define FMUCS20 1
+")})));
+end CCodeGenTest26;
+
 model CLogExp1
  Boolean x = true;
  Boolean y = false;

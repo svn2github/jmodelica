@@ -1022,6 +1022,34 @@ public class GenericGenerator extends AbstractGenerator {
             genPrinter.print(fclass.getDynamicStateManager().getNumSet());
         }
     }
+    
+   /**
+     * C: Define of FMU type, derived from compiler target
+     */
+    public class DAETag_fmu_type_define extends DAETag {
+        
+        public DAETag_fmu_type_define(AbstractGenerator myGenerator, FClass fclass) {
+            super("fmu_type_define", myGenerator, fclass);
+        }
+
+        public void generate(CodeStream genPrinter) {
+            
+            if (fclass.myOptions().getBooleanOption("fmume10")) {
+            	genPrinter.print("#define FMUME10 1\n");
+            }
+            if (fclass.myOptions().getBooleanOption("fmume20")) {
+                genPrinter.print("#define FMUME20 1\n");
+            }
+            if (fclass.myOptions().getBooleanOption("fmucs10")) {
+                genPrinter.print("#define FMUCS10 1\n");
+            }
+            if (fclass.myOptions().getBooleanOption("fmucs20")) {
+                genPrinter.print("#define FMUCS20 1\n");
+            }
+            genPrinter.print("");
+        }
+    }
+    
 	/**
 	 * Constructor.
 	 * 

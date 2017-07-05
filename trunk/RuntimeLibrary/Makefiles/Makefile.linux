@@ -95,12 +95,10 @@ CXX = g++
 # C Compiler command
 CC = gcc
 
-# Flags for which FMU type, me, cs or me+cs.
-FMU_TYPES =
 
 # C Compiler options
 CFLAGS = -g
-CFLAGS += -std=c89 -pedantic ${FMU_TYPES} -fPIC -msse2 -mfpmath=sse
+CFLAGS += -std=c89 -pedantic -fPIC -msse2 -mfpmath=sse
 
 SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined -pthread
 
@@ -163,7 +161,7 @@ fmucs10_: $(OBJS)
 	$(RM) $(OBJS)
 
 fmume20:
-	$(MAKE) -f $(MAKEFILE) FMU_TYPES+=-DFMUME20 fmume20_
+	$(MAKE) -f $(MAKEFILE) fmume20_
 
 fmume20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
@@ -171,7 +169,7 @@ fmume20_: $(OBJS)
 	$(RM) $(OBJS)
 	
 fmucs20:
-	$(MAKE) -f $(MAKEFILE) FMU_TYPES+=-DFMUCS20 fmucs20_
+	$(MAKE) -f $(MAKEFILE) fmucs20_
 	
 fmucs20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
@@ -179,7 +177,7 @@ fmucs20_: $(OBJS)
 	$(RM) $(OBJS)
 	
 fmumecs20:
-	$(MAKE) -f $(MAKEFILE) FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+	$(MAKE) -f $(MAKEFILE) fmucs20_
 	
 fmumecs20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)

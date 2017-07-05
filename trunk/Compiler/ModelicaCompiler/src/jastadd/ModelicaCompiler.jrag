@@ -1838,7 +1838,23 @@ public class ModelicaCompiler {
                         public void setOptions(TargetObject object, OptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
+                                	options.setBooleanOption("fmume10", true);
+                                	options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", true);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                	break;
                                 case FMUME20:
+                                	options.setBooleanOption("fmume20", true);
+                                	options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", true);
+                                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                	break;
                                 case CHECK:
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
@@ -1848,7 +1864,17 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                     break;
                                 case FMUCS10:
+                                	options.setBooleanOption("fmucs10", true);
+                                	options.setBooleanOption("generate_ode", true);
+                                    options.setBooleanOption("generate_dae", false);
+                                    options.setBooleanOption("equation_sorting", true);
+                                    options.setBooleanOption("generate_fmi_me_xml", false);
+                                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                                    options.setBooleanOption("generate_xml_equations", false);
+                                	break;
                                 case FMUCS20:
+                                	options.setBooleanOption("fmucs20", true);
+                                
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -1857,6 +1883,9 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                     break;
                                 case FMUMECS20:
+                                	options.setBooleanOption("fmume20", true);
+                                	options.setBooleanOption("fmucs20", true);
+                                	
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -3106,9 +3135,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
      */
     protected void addTargetPlatformMakeVars(Map<String,String> vars, Set<String> ext_lib_dirs, String platform) {
         vars.put("PLATFORM", platform);
-        StringOperation libOp = new ChainedOperations(
-                new PlatformDirOperation(platform),
-                new QuoteOperation("-L"));
+        StringOperation libOp = new QuoteOperation("-L");
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, platform, "gcc" + compilerVersionNumber());
         sharedLibs.addAll(expandedLibDirs);
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
