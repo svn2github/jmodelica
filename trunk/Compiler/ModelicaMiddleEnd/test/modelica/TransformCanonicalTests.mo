@@ -4367,84 +4367,100 @@ end IfEqu8;
 
 
 model IfEqu9
-	Real x[2];
-	Boolean y = true;
+    Real x[2];
+    Boolean y = time < 3;
 equation
-	if false then
-		x = 1:2;
-	elseif y then
-		x = 3:4;
-	elseif false then
-		x = 5:6;
-	else
-		x = 7:8;
-	end if;
+    if false then
+        x = 1:2;
+    elseif y then
+        x = 3:4;
+    elseif false then
+        x = 5:6;
+    else
+        x = 7:8;
+    end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu9",
-			description="If equations: branch elimination with one test non-parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu9",
+            description="If equations: branch elimination with one test non-parameter",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu9
- constant Real x[1] = 3;
- constant Real x[2] = 4;
- constant Boolean y = true;
+ Real x[1];
+ Real x[2];
+ discrete Boolean y;
+initial equation
+ pre(y) = false;
+equation
+ x[1] = if y then 3 else 7;
+ x[2] = if y then 4 else 8;
+ y = time < 3;
 end TransformCanonicalTests.IfEqu9;
 ")})));
 end IfEqu9;
 
 
 model IfEqu10
-	Real x[2];
-	Boolean y = true;
+    Real x[2];
+    Boolean y = time < 3;
 equation
-	if false then
-		x = 1:2;
-	elseif y then
-		x = 3:4;
-	elseif true then
-		x = 5:6;
-	else
-		x = 7:8;
-	end if;
+    if false then
+        x = 1:2;
+    elseif y then
+        x = 3:4;
+    elseif true then
+        x = 5:6;
+    else
+        x = 7:8;
+    end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu10",
-			description="If equations: branch elimination with one test non-parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu10",
+            description="If equations: branch elimination with one test non-parameter",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu10
- constant Real x[1] = 3;
- constant Real x[2] = 4;
- constant Boolean y = true;
+ Real x[1];
+ Real x[2];
+ discrete Boolean y;
+initial equation
+ pre(y) = false;
+equation
+ x[1] = if y then 3 else 5;
+ x[2] = if y then 4 else 6;
+ y = time < 3;
 end TransformCanonicalTests.IfEqu10;
 ")})));
 end IfEqu10;
 
 
 model IfEqu11
-	Real x[2];
-	Boolean y = true;
+    Real x[2];
+    Boolean y = time < 3;
 equation
-	if true then
-		x = 1:2;
-	elseif y then
-		x = 3:4;
-	elseif false then
-		x = 5:6;
-	else
-		x = 7:8;
-	end if;
+    if true then
+        x = 1:2;
+    elseif y then
+        x = 3:4;
+    elseif false then
+        x = 5:6;
+    else
+        x = 7:8;
+    end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu11",
-			description="If equations: branch elimination with one test non-parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu11",
+            description="If equations: branch elimination with one test non-parameter",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu11
  constant Real x[1] = 1;
  constant Real x[2] = 2;
- constant Boolean y = true;
+ discrete Boolean y;
+initial equation
+ pre(y) = false;
+equation
+ y = time < 3;
 end TransformCanonicalTests.IfEqu11;
 ")})));
 end IfEqu11;

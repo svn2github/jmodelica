@@ -138,6 +138,41 @@ aspect ConstantEvaluation {
             return new CValueString(stringValue());
         }
 
+        /**
+         * Is {@link #convertInteger()} expected to succeed?
+         */
+        public boolean hasConvertInteger() {
+            return hasIntValue();
+        }
+
+        /**
+         * Is {@link #convertReal()} expected to succeed?
+         */
+        public boolean hasConvertReal() {
+            return hasRealValue();
+        }
+
+        /**
+         * Is {@link #convertBoolean()} expected to succeed?
+         */
+        public boolean hasConvertBoolean() {
+            return hasBooleanValue();
+        }
+
+        /**
+         * Is {@link #convertString()} expected to succeed?
+         */
+        public boolean hasConvertString() {
+            return hasStringValue();
+        }
+
+        /**
+         * Is {@link #buildLiteral()} expected to succeed?
+         */
+        public boolean hasBuildLiteral() {
+            return false;
+        }
+
         public String stringExpValue() {
             return stringValue();
         }
@@ -251,11 +286,11 @@ aspect ConstantEvaluation {
         public CValue evaluatePartialFunction(CommonCallable partial, Map<CommonVariableDecl, CValue> values) {
             throw new ConstantEvaluationException(this, "use this as a partial function: ");
         }
-	}
-	
-	/**
-	 * Constant integer value.
-	 */
+    }
+    
+    /**
+     * Constant integer value.
+     */
     public class CValueInteger extends CValue {
         private int value;
         
@@ -269,10 +304,10 @@ aspect ConstantEvaluation {
         }
 
         /**
-	     * Convert to int.
-	     * 
-	     * @return Value converted to int.
-	     */
+         * Convert to int.
+         * 
+         * @return Value converted to int.
+         */
         public int intValue() {
         	return value;
         }
@@ -288,10 +323,10 @@ aspect ConstantEvaluation {
         }
 
         /**
-	     * Convert to double.
-	     * 
-	     *  @return Value converted to double.
-	     */
+         * Convert to double.
+         * 
+         *  @return Value converted to double.
+         */
         public double realValue() { 
         	return value; 
         }
@@ -340,6 +375,11 @@ aspect ConstantEvaluation {
         }
 
         @Override
+        public boolean hasBuildLiteral() {
+            return true;
+        }
+
+        @Override
         public boolean isInteger() {
             return true;
         }
@@ -360,7 +400,17 @@ aspect ConstantEvaluation {
         }
 
         @Override
-        public boolean hasIntegerValue() {
+        public boolean hasIntValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasRealValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasStringValue() {
             return true;
         }
     }
@@ -453,6 +503,11 @@ aspect ConstantEvaluation {
         }
 
         @Override
+        public boolean hasBuildLiteral() {
+            return true;
+        }
+
+        @Override
         public boolean isReal() {
             return true;
         }
@@ -473,10 +528,20 @@ aspect ConstantEvaluation {
         }
 
         @Override
-        public boolean hasIntegerValue() {
+        public boolean hasIntValue() {
             return true;
         }
-      }
+
+        @Override
+        public boolean hasRealValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasStringValue() {
+            return true;
+        }
+    }
     
 	/**
 	 * Constant boolean value.
@@ -555,12 +620,27 @@ aspect ConstantEvaluation {
         }
 
         @Override
+        public boolean hasBuildLiteral() {
+            return true;
+        }
+
+        @Override
         public boolean isBoolean() {
             return true;
         }
 
         @Override
-        public boolean hasIntegerValue() {
+        public boolean hasIntValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasBooleanValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasStringValue() {
             return true;
         }
     }
@@ -608,9 +688,14 @@ aspect ConstantEvaluation {
          * @return FStringLitExp AST node.
          */
         public FLitExp buildLiteral() { 
-        	return new FStringLitExp(value); 
+            return new FStringLitExp(value); 
         }
-	    
+
+        @Override
+        public boolean hasBuildLiteral() {
+            return true;
+        }
+
 	    public String toString() {
 	    	return '"' + value + '"';
 	    }
@@ -620,6 +705,10 @@ aspect ConstantEvaluation {
             return true;
         }
 
+        @Override
+        public boolean hasStringValue() {
+            return true;
+        }
       }
     
 	/**
@@ -1063,7 +1152,55 @@ aspect ConstantEvaluation {
 	    		res.values[i] = values[i].convertString();
 	    	return res;
 	    }
-		
+
+        /**
+         * Is {@link #convertInteger()} expected to succeed?
+         */
+        public boolean hasConvertInteger() {
+            for (CValue val : values) {
+                if (!val.hasConvertInteger()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Is {@link #convertReal()} expected to succeed?
+         */
+        public boolean hasConvertReal() {
+            for (CValue val : values) {
+                if (!val.hasConvertReal()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Is {@link #convertBoolean()} expected to succeed?
+         */
+        public boolean hasConvertBoolean() {
+            for (CValue val : values) {
+                if (!val.hasConvertBoolean()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Is {@link #convertString()} expected to succeed?
+         */
+        public boolean hasConvertString() {
+            for (CValue val : values) {
+                if (!val.hasConvertString()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
 		public String toString() {
 			// TODO: Should this be stringValue() instead?
 			if (values.length == 0)
@@ -1096,6 +1233,16 @@ aspect ConstantEvaluation {
          */
         public FExp buildLiteral() { 
             return buildLiteralRec(iterator(), 0, true);
+        }
+
+        @Override
+        public boolean hasBuildLiteral() {
+            for (CValue val : values) {
+                if (!val.hasBuildLiteral()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /**
@@ -1290,6 +1437,16 @@ aspect ConstantEvaluation {
             return res;
         }
 
+        @Override
+        public boolean hasBuildLiteral() {
+            for (CValue val : values) {
+                if (!val.hasBuildLiteral()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /**
          * Create a literal AST node from constant, for use in instance tree.
          * 
@@ -1466,7 +1623,17 @@ aspect ConstantEvaluation {
         }
 
         @Override
-        public boolean hasIntegerValue() {
+        public boolean hasIntValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasRealValue() {
+            return true;
+        }
+
+        @Override
+        public boolean hasStringValue() {
             return true;
         }
 
@@ -1479,6 +1646,11 @@ aspect ConstantEvaluation {
          */
         public FExp buildLiteral() {
             return type.createLiteral(index);
+        }
+
+        @Override
+        public boolean hasBuildLiteral() {
+            return true;
         }
 
         public CValue constrainWithin(CValue min, CValue max) {
@@ -2479,7 +2651,7 @@ aspect ConstantEvaluation {
         CValue val = startAttributeCValue(evaluator);
         if (i != Index.NULL) 
             val = val.array().getCell(i);
-        if (isInteger() || isReal() || isEnum()) {
+        if ((isInteger() || isReal() || isEnum()) && !val.isUnknown()) {
             try {
                 CValue min = minAttributeCValue(evaluator);
                 if (i != Index.NULL) 
@@ -3645,14 +3817,14 @@ aspect ConstantEvaluation {
     syn CValue FType.add(CValue v1, CValue v2) = CValue.UNKNOWN;
 
     eq FRealType.add(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueReal(v1.realValue() + v2.realValue());
     }
 
     eq FIntegerType.add(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueInteger(v1.intValue() + v2.intValue());
@@ -3675,14 +3847,14 @@ aspect ConstantEvaluation {
     syn CValue FType.sub(CValue v1, CValue v2) = CValue.UNKNOWN;
 
     eq FRealType.sub(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueReal(v1.realValue() - v2.realValue());
     }
 
     eq FIntegerType.sub(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueInteger(v1.intValue() - v2.intValue());
@@ -3698,14 +3870,14 @@ aspect ConstantEvaluation {
     syn CValue FType.mul(CValue v1, CValue v2) = CValue.UNKNOWN;
 
     eq FRealType.mul(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueReal(v1.realValue() * v2.realValue());
     }
 
     eq FIntegerType.mul(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueInteger(v1.intValue() * v2.intValue());
@@ -3721,7 +3893,7 @@ aspect ConstantEvaluation {
     syn CValue FType.div(CValue v1, CValue v2) = CValue.UNKNOWN;
 
     eq FRealType.div(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueReal(v1.realValue() / v2.realValue());
@@ -3744,7 +3916,7 @@ aspect ConstantEvaluation {
     syn CValue FType.pow(CValue v1, CValue v2) = CValue.UNKNOWN;
 
     eq FRealType.pow(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueReal(java.lang.StrictMath.pow(v1.realValue(), v2.realValue()));
@@ -3757,8 +3929,8 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.neg(CValue v) = CValue.UNKNOWN;
-    eq FRealType.neg(CValue v) = v.isNumericScalar() ? new CValueReal(-v.realValue()) : CValue.UNKNOWN;
-    eq FIntegerType.neg(CValue v) = v.hasIntegerValue() ? new CValueInteger(-v.intValue()) : CValue.UNKNOWN;
+    eq FRealType.neg(CValue v) = v.hasRealValue() ? new CValueReal(-v.realValue()) : CValue.UNKNOWN;
+    eq FIntegerType.neg(CValue v) = v.hasIntValue() ? new CValueInteger(-v.intValue()) : CValue.UNKNOWN;
 
     /**
      * Abs expression for constant values.
@@ -3767,9 +3939,9 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.abs(CValue v) = CValue.UNKNOWN;
-    eq FRealType.abs(CValue v) = v.isNumericScalar() ? new CValueReal(StrictMath.abs(v.realValue())) : CValue.UNKNOWN;
+    eq FRealType.abs(CValue v) = v.hasRealValue() ? new CValueReal(StrictMath.abs(v.realValue())) : CValue.UNKNOWN;
     eq FIntegerType.abs(CValue v) =
-            v.hasIntegerValue() ? new CValueInteger(StrictMath.abs(v.intValue())) : CValue.UNKNOWN;
+            v.hasIntValue() ? new CValueInteger(StrictMath.abs(v.intValue())) : CValue.UNKNOWN;
 
     /**
      * Sign expression for constant values.
@@ -3780,7 +3952,7 @@ aspect ConstantEvaluation {
     syn CValue FType.sign(CValue v) = CValue.UNKNOWN;
 
     eq FIntegerType.sign(CValue v) =
-            v.hasIntegerValue() ? new CValueInteger((int) StrictMath.signum(v.realValue())) : CValue.UNKNOWN;
+            v.hasIntValue() ? new CValueInteger((int) StrictMath.signum(v.realValue())) : CValue.UNKNOWN;
 
     /**
      * Ceil expression for constant values.
@@ -3790,10 +3962,10 @@ aspect ConstantEvaluation {
      */
     syn CValue FType.ceil(CValue v) = CValue.UNKNOWN;
 
-    eq FRealType.ceil(CValue v) = v.isNumericScalar() ? new CValueReal(StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
+    eq FRealType.ceil(CValue v) = v.hasRealValue() ? new CValueReal(StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
 
     eq FIntegerType.ceil(CValue v) =
-            v.hasIntegerValue() ? new CValueInteger((int) StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
+            v.hasIntValue() ? new CValueInteger((int) StrictMath.ceil(v.realValue())) : CValue.UNKNOWN;
 
     /**
      * Truncation to zero for constant values.
@@ -3804,14 +3976,14 @@ aspect ConstantEvaluation {
     syn CValue FType.truncToZero(CValue v) = CValue.UNKNOWN;
 
     eq FRealType.truncToZero(CValue v) {
-        if (!v.isNumericScalar()) {
+        if (!v.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return v.realValue() < 0 ? ceil(v) : v.convertInteger().convertReal();
     }
 
     eq FIntegerType.truncToZero(CValue v) {
-        if (!v.hasIntegerValue()) {
+        if (!v.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return v.realValue() < 0 ? ceil(v) : v.convertInteger();
@@ -3878,21 +4050,21 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.equ(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.intValue() == v2.intValue());
     }
 
     eq FRealType.equ(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(almostZero(v1.realValue() - v2.realValue()));
     }
 
     eq FStringType.equ(CValue v1, CValue v2) {
-        if (!v1.isString() || !v2.isString()) {
+        if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
@@ -3908,21 +4080,21 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.neq(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.intValue() != v2.intValue());
     }
 
     eq FRealType.neq(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.realValue() != v2.realValue());
     }
 
     eq FStringType.neq(CValue v1, CValue v2) {
-        if (!v1.isString() || !v2.isString()) {
+        if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
@@ -3938,21 +4110,21 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.geq(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.intValue() >= v2.intValue());
     }
 
     eq FRealType.geq(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(almostGtZero(v1.realValue() - v2.realValue()));
     }
 
     eq FStringType.geq(CValue v1, CValue v2) {
-        if (!v1.isString() || !v2.isString()) {
+        if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         } 
         return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
@@ -3968,21 +4140,21 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.gt(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.intValue() > v2.intValue());
     }
 
     eq FRealType.gt(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.realValue() > v2.realValue());
     }
 
     eq FStringType.gt(CValue v1, CValue v2) {
-        if (!v1.isString() || !v2.isString()) {
+        if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
@@ -3998,21 +4170,21 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.leq(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.intValue() <= v2.intValue());
     }
 
     eq FRealType.leq(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         } 
         return new CValueBoolean(almostLtZero(v1.realValue() - v2.realValue()));
     }
 
     eq FStringType.leq(CValue v1, CValue v2) {
-        if (!v1.isString() || !v2.isString()) {
+        if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
@@ -4028,21 +4200,21 @@ aspect ConstantEvaluation {
      * @return Resulting constant value.
      */
     syn CValue FType.lt(CValue v1, CValue v2) {
-        if (!v1.hasIntegerValue() || !v2.hasIntegerValue()) {
+        if (!v1.hasIntValue() || !v2.hasIntValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.intValue() < v2.intValue());
     }
 
     eq FRealType.lt(CValue v1, CValue v2) {
-        if (!v1.isNumericScalar() || !v2.isNumericScalar()) {
+        if (!v1.hasRealValue() || !v2.hasRealValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.realValue() < v2.realValue());
     }
 
     eq FStringType.lt(CValue v1, CValue v2) {
-        if (!v1.isString() || !v2.isString()) {
+        if (!v1.hasStringValue() || !v2.hasStringValue()) {
             return CValue.UNKNOWN;
         }
         return new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
@@ -4137,10 +4309,13 @@ aspect CircularExpressions {
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {
             try {
-                if (getIfExp().ceval().booleanValue())
-                    return getThenExp().isCircular();
-                else
-                    return getElseExp().isCircular();
+                CValue testVal = getIfExp().ceval();
+                if (testVal.hasBooleanValue()) {
+                    if (testVal.booleanValue())
+                        return getThenExp().isCircular();
+                    else
+                        return getElseExp().isCircular();
+                }
             } catch (ConstantEvaluationException e) {}
         }
         return super.isCircularCalc();

@@ -474,7 +474,8 @@ aspect ErrorCheck {
     syn boolean FExp.lockable(boolean then) {
         if (variability().fixedParameterOrLess()) {
             try {
-                return ceval().booleanValue() != then;
+                CValue val = ceval();
+                return val.hasBooleanValue() && val.booleanValue() != then;
             } catch (ConstantEvaluationException e) {}
         }
         return false;
@@ -1380,13 +1381,14 @@ aspect InstanceErrorCheck {
             for (FExp exp : getFExps()) {
                 if (exp.variability().knownParameterOrLess()) {
                     try {
-                        int d = exp.ceval().intValue();
-                        if (d < 0) {
-                            NEGATIVE_SIZE_FILL.invoke(exp);
+                        CValue val = exp.ceval();
+                            if (val.hasIntValue()) {
+                            int d = val.intValue();
+                            if (d < 0) {
+                                NEGATIVE_SIZE_FILL.invoke(exp);
+                            }
                         }
-                    } catch (ConstantEvaluationException e) {
-                        
-                    }
+                    } catch (ConstantEvaluationException e) {}
                 }
             }
         }
@@ -1642,15 +1644,23 @@ aspect AssertEval {
         boolean remove = false;
         if (getTest().isConstantExp()) {
             try {
-                boolean val = getTest().ceval().booleanValue();
-                if (error && !val) {
-                    String msg = "Assertion failed: " + getMsg().ceval().stringValue();
-                    if (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))
-                        error(msg);
-                    else
-                        warning(msg);
+                CValue cVal = getTest().ceval();
+                if (cVal.hasBooleanValue()) {
+                    boolean val = cVal.booleanValue();
+                    if (error && !val) {
+                        CValue cMsg = getMsg().ceval();
+                        CValue cLevel = hasLevel() ? getLevel().ceval() : null;
+                        if (cMsg.hasStringValue() && (cLevel == null || cLevel.hasStringValue())) {
+                            String msg = "Assertion failed: " + cMsg.stringValue();
+                            if (cLevel == null || cLevel.stringValue().equals(LEVEL_ERROR)) {
+                                error(msg);
+                            } else {
+                                warning(msg);
+                            }
+                        }
+                    }
+                    remove = val || error;
                 }
-                remove = val || error;
             } catch (ConstantEvaluationException e) {}
         }
         return remove;

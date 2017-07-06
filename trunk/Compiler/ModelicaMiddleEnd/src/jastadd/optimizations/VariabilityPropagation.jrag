@@ -282,50 +282,54 @@ aspect VariabilityPropagation {
 	public void FAbstractEquation.variabilityPropagation(FClass.VariabilityPropagator propagator) {
 		
 	}
-		
-	public void FEquation.variabilityPropagation(FClass.VariabilityPropagator propagator) {
-		
-		FVariable fVariable;
-		FExp solution;
-		FTypePrefixVariability solutionVariability;
 
-		fVariable = variables().iterator().next();
+    public void FEquation.variabilityPropagation(FClass.VariabilityPropagator propagator) {
+        
+        FVariable fVariable;
+        FExp solution;
+        FTypePrefixVariability solutionVariability;
 
-		if (!fVariable.canPropagate()) {
-			return;
-		}
+        fVariable = variables().iterator().next();
 
-		solution = solution(fVariable);
-		solution.resetOriginalReferences();
-		
-		if (!solution.isValidExp()) {
-			return;
-		}
-		
-		if (!canPropagate(fVariable, solution)) {
-			return;
-		}
-		
-		solutionVariability = solution.variability();
+        if (!fVariable.canPropagate()) {
+            return;
+        }
 
-		if (!solutionVariability.parameterOrLess()) {
-			// Sometimes combinations of parameters and constants yield 
-			// discrete variability. IfExpr, sample() etc.
-			return;
-		}
+        solution = solution(fVariable);
+        solution.resetOriginalReferences();
+        
+        if (!solution.isValidExp()) {
+            return;
+        }
+        
+        if (!canPropagate(fVariable, solution)) {
+            return;
+        }
+        
+        solutionVariability = solution.variability();
 
-		if (solutionVariability.knownParameterOrLess()) {
-			FExp newSolution;
-			try {
-				newSolution = solution.ceval().buildLiteral();
-				solution.collectLocations(newSolution);
-				solution = newSolution;
-			} catch (ConstantEvaluationException e) {
-				// If we can't evaluate right now, set it as parameter
-				solutionVariability = fParameter();
-			}
-		}
-		
+        if (!solutionVariability.parameterOrLess()) {
+            // Sometimes combinations of parameters and constants yield 
+            // discrete variability. IfExpr, sample() etc.
+            return;
+        }
+
+        if (solutionVariability.knownParameterOrLess()) {
+            FExp newSolution = null;
+            try {
+                CValue cval = solution.ceval();
+                if (cval.hasBuildLiteral()) {
+                    newSolution = cval.buildLiteral();
+                    solution.collectLocations(newSolution);
+                    solution = newSolution;
+                }
+            } catch (ConstantEvaluationException e) {}
+            if (newSolution == null) {
+                // If we can't evaluate right now, set it as parameter
+                solutionVariability = fParameter();
+            }
+        }
+
         if (!solutionVariability.knownParameterOrLess()) {
             propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
         }
@@ -488,7 +492,7 @@ aspect VariabilityPropagation {
         }
         
         FExp bexp = null;
-        if (!value.isUnknown()) {
+        if (value.hasBuildLiteral()) {
             try {
                 bexp = value.buildLiteral();
                 variability = fConstant();
@@ -692,11 +696,14 @@ aspect ConstantFolding {
 
             try {
                 if (getIfExp().isConstantExp()) {
-                    return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+                    CValue cval = getIfExp().ceval();
+                    if (cval.hasBooleanValue()) {
+                        return cval.booleanValue() ? getThenExp() : getElseExp();
+                    }
                 }
             } catch (ConstantEvaluationException e) {}
-                return this;
-            }
+            return this;
+        }
     }
 
 	public void FAbstractExp.enableConstantFolding() {
@@ -723,18 +730,18 @@ aspect ConstantFolding {
 		}
 	}
 
-	rewrite FAbstractExp {
+    rewrite FAbstractExp {
         when (constantFoldingEnabled && variability().knownParameterOrLess()) to FExp {
-			try {
-				CValue value = ceval();
-				if (!value.size().isEmpty()) 
-					return value.buildLiteral();
-			} catch (ConstantEvaluationException e) {
-			}
-			constantFoldingEnabled = false;
-			return this;
-		}
-	}
+            try {
+                CValue value = ceval();
+                if (value.hasBuildLiteral() && !value.size().isEmpty()) {
+                    return value.buildLiteral();
+                }
+            } catch (ConstantEvaluationException e) {}
+            constantFoldingEnabled = false;
+            return this;
+        }
+    }
 
 	rewrite FIdUseExp {
 		when (constantFoldingEnabled && type().isString()) to FExp {

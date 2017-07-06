@@ -345,12 +345,21 @@ aspect FlatTypeAnalysis {
 
     eq FLinspace.type() {
         // TODO: check that endpoints are real
-        try {
-            if ((getN().variability().parameterOrLess() && getN().ceval().intValue() >= 2) || inFunction())
-                return fRealArrayType(size());
-        } catch (ConstantEvaluationException e) {
+        if (hasValidN() || inFunction()) {
+            return fRealArrayType(size());
+        } else {
+            return fUnknownType();
         }
-        return fUnknownType();
+    }
+
+    syn boolean FLinspace.hasValidN() {
+        if (getN().variability().parameterOrLess()) {
+            try {
+                CValue val = getN().ceval();
+                return val.hasIntValue() && val.intValue() >= 2;
+            } catch (ConstantEvaluationException e) {}
+        }
+        return false;
     }
 
     eq FRelExp.type() {

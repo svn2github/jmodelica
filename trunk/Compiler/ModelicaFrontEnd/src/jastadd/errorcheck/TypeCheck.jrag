@@ -321,13 +321,14 @@ aspect FlatTypeCheck {
             if (val.isArray()) {
                 CValueArray arr = (CValueArray) val;
                 for (Index i : arr.indices()) {
-                    if (arr.getCell(i).realValue() == 0.0) {
+                    CValue cell = arr.getCell(i);
+                    if (cell.hasRealValue() && cell.realValue() == 0.0) {
                         NOMINAL_ELEMENT_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod, i);
                         break;
                     }
                 }
             } else {
-                if (val.realValue() == 0.0) {
+                if (val.hasRealValue() && val.realValue() == 0.0) {
                     NOMINAL_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod);
                 }
             }
@@ -850,23 +851,25 @@ aspect FlatTypeCheck {
         super.collectSubscriptUses(name, nodes);
     }
 
-  public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
-	  if (ndims() > 0) { 
-		  error("Array size must be scalar expression: " + getFExp());
-      } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
-          error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
-	  } else if (!inFunction()) { 
-		  if (!getFExp().variability().parameterOrLess()) {
-			  error("Array size must be constant or parameter: " + getFExp());
-		  } else if (!checkType.allowIncompleteSizes()) {
-			  try {
-				  getFExp().ceval().intValue();
-			  } catch (ConstantEvaluationException e) {
-				  error("Could not evaluate array size expression: " + getFExp());
-			  }
-		  }
-	  }
-  }
+    public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
+        if (ndims() > 0) { 
+            error("Array size must be scalar expression: " + getFExp());
+        } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
+            error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
+        } else if (!inFunction()) { 
+            if (!getFExp().variability().parameterOrLess()) {
+                error("Array size must be constant or parameter: " + getFExp());
+            } else if (!checkType.allowIncompleteSizes()) {
+                boolean ok = false;
+                try {
+                    ok = getFExp().ceval().hasIntValue();
+                } catch (ConstantEvaluationException e) {}
+                if (!ok) {
+                    error("Could not evaluate array size expression: " + getFExp());
+                }
+            }
+        }
+    }
 
     public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
         if (ndims() > 1) { 
@@ -884,12 +887,16 @@ aspect FlatTypeCheck {
                 try {
                     int max = mySize().get(0);
                     for (FExp e : getFExp().getArray().iterable()) {
-                        int i = e.ceval().intValue();
-                        if (i < 1 || i > max) {
-                            if (!lockBranch(checkType))
-                                errorUnlessDisabled("Array index out of bounds: " + i + ", index expression: " + getFExp());
-                            reportedOutOfBound = true;
-                            return;
+                        CValue cval = e.ceval();
+                        if (cval.hasIntValue()) {
+                            int i = cval.intValue();
+                            if (i < 1 || i > max) {
+                                if (!lockBranch(checkType))
+                                    errorUnlessDisabled("Array index out of bounds: " + i + 
+                                                        ", index expression: " + getFExp());
+                                reportedOutOfBound = true;
+                                return;
+                            }
                         }
                     }
                 } catch (ConstantEvaluationException e) {
@@ -1173,16 +1180,22 @@ aspect FlatTypeCheck {
         boolean maxEval = false;
         if (max && maxParam) {
             try {
-                maxVal = getMax().ceval().realValue();
-                maxEval = true;
+                CValue maxCVal = getMax().ceval();
+                if (maxCVal.hasRealValue()) {
+                    maxVal = maxCVal.realValue();
+                    maxEval = true;
+                }
             } catch (ConstantEvaluationException e) {}
         }
         double delayVal = 0.0;
         boolean delayEval = false;
         if (delayParam) {
             try {
-                delayVal = getDelay().ceval().realValue();
-                delayEval = true;
+                CValue delayCVal = getDelay().ceval();
+                if (delayCVal.hasRealValue()) {
+                    delayVal = delayCVal.realValue();
+                    delayEval = true;
+                }
             } catch (ConstantEvaluationException e) {}
         }
         if (maxEval && delayEval && delayVal > maxVal) {

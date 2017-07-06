@@ -802,11 +802,15 @@ aspect AliasVariables {
                     boolean selVal = false;
                     for (FAttribute attr : list) {
                         boolean val = false;
-                        boolean set = attr.hasValue();
-                        try {
-                            val = set && attr.getValue().ceval().booleanValue();
-                        } catch (ConstantEvaluationException e) {
-                            set = false;
+                        boolean set = false;
+                        if (attr.hasValue()) {
+                            try {
+                                CValue cval = attr.getValue().ceval();
+                                if (cval.hasBooleanValue()) {
+                                    val = cval.booleanValue();
+                                    set = true;
+                                }
+                            } catch (ConstantEvaluationException e) {}
                         }
                         res = isAnd ? (res && val) : (res || val);
                         if (val == res && (selIndex < 0 || selVal != res)) {
@@ -855,8 +859,12 @@ aspect AliasVariables {
                         boolean isMin = attr.name().equals(FAttribute.MIN);
                         double val = isMin ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
                         try {
-                            if (attr.hasValue())
-                                val = attr.getValue().ceval().realValue();
+                            if (attr.hasValue()) {
+                                CValue cval = attr.getValue().ceval();
+                                if (cval.hasRealValue()) {
+                                    val = cval.realValue();
+                                }
+                            }
                         } catch (ConstantEvaluationException e) {}
                         if (neg.get(i) != targetNeg) {
                             val = -val;

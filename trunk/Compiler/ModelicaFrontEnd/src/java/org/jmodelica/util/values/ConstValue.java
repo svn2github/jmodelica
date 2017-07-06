@@ -270,16 +270,6 @@ public abstract class ConstValue {
     public boolean isRecord() {
         return false;
     }
-
-    /**
-     * Checks if this is a numeric, scalar value.
-     * 
-     * @return
-     *          {@code true} if this value is numeric and scalar, {@code false} otherwise.
-     */
-    public boolean isNumericScalar() {
-        return isNumeric() && isScalar();
-    }
     
     /**
      * Checks if this value can be used as an integer value.
@@ -287,7 +277,37 @@ public abstract class ConstValue {
      * @return
      *          {@code true} if this value can be used as an integer, {@code false} otherwise.
      */
-    public boolean hasIntegerValue() {
+    public boolean hasIntValue() {
+        return false;
+    }
+    
+    /**
+     * Checks if this value can be used as a boolean value.
+     * 
+     * @return
+     *          {@code true} if this value can be used as a boolean, {@code false} otherwise.
+     */
+    public boolean hasBooleanValue() {
+        return false;
+    }
+    
+    /**
+     * Checks if this value can be used as a double value.
+     * 
+     * @return
+     *          {@code true} if this value can be used as a double, {@code false} otherwise.
+     */
+    public boolean hasRealValue() {
+        return false;
+    }
+    
+    /**
+     * Checks if this value can be used as a string value.
+     * 
+     * @return
+     *          {@code true} if this value can be used as a string, {@code false} otherwise.
+     */
+    public boolean hasStringValue() {
         return false;
     }
 }

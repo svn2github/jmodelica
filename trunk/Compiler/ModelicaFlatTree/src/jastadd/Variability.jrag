@@ -259,15 +259,16 @@ aspect Variability {
     public void FIfEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
         if (getTest().variability().knownParameterOrLess()) {
             try {
-                if (getTest().ceval().booleanValue()) {
-                    getFAbstractEquations().updateVariabilityForVariablesInWhen(inWhen);
-                } else if (hasElse()) {
-                    getElse().updateVariabilityForVariablesInWhen(inWhen);
+                CValue testVal = getTest().ceval();
+                if (testVal.hasBooleanValue()) {
+                    if (testVal.booleanValue()) {
+                        getFAbstractEquations().updateVariabilityForVariablesInWhen(inWhen);
+                    } else if (hasElse()) {
+                        getElse().updateVariabilityForVariablesInWhen(inWhen);
+                    }
+                    return;
                 }
-                return;
-            } catch (ConstantEvaluationException e) {
-                
-            }
+            } catch (ConstantEvaluationException e) {}
         }
         super.updateVariabilityForVariablesInWhen(inWhen);
     }
@@ -405,13 +406,14 @@ aspect Variability {
         if (hasDim()) {
             if (getDim().variability().knownParameterOrLess()) {
                 try {
-                    int dim = getDim().ceval().intValue() - 1;
-                    if (getFExp().size().has(dim)) {
-                        return getFExp().size().variability(dim);
+                    CValue dimVal = getDim().ceval();
+                    if (dimVal.hasIntValue()) {
+                        int dim = dimVal.intValue() - 1;
+                        if (getFExp().size().has(dim)) {
+                            return getFExp().size().variability(dim);
+                        }
                     }
-                } catch (ConstantEvaluationException e) {
-                    
-                }
+                } catch (ConstantEvaluationException e) {}
             }
             res = res.combine(getDim().variability());
         }

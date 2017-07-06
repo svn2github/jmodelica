@@ -1157,13 +1157,6 @@ aspect OptimicaSparsity {
 			}
 			i++;
 		}
-/*	
-		for (int j=0; j<numFreeParameters(); j++) {
-			for (int k=0; k<sp[j].size(); k++) {
-				System.out.println("p_opt:[" + sp[j].get(k).intValue() + "," + j + "]");
-			}
-		}
-	*/	
 		return sp;
 		
 	}

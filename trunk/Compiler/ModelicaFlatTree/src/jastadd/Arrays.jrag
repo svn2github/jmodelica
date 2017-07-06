@@ -2344,25 +2344,33 @@ aspect Arrays {
 	
 	eq FExpSubscript.myIndices()     = getFExp().myIndices();
 	eq FIntegerSubscript.myIndices() = new int[] { getValue() };
-	
-	syn int[] FExp.myIndices() {
-		try {
-			int n = 0;
-			if (ndims() == 0)
-				n = 1;
-			else if (ndims() == 1)
-				n = size().get(0);
-			if (n > 0) {
-				int[] indices = new int[n];
-				int j = 0;
-				for (CValue val : ceval())
-					indices[j++] = val.intValue();
-				return indices;
-			}
-		} catch (ConstantEvaluationException e) {
-		}
-		return new int[0];
-	}
+
+    syn int[] FExp.myIndices() {
+        try {
+            int n = 0;
+            if (ndims() == 0) {
+                n = 1;
+            } else if (ndims() == 1) {
+                n = size().get(0);
+            }
+            if (n > 0) {
+                CValue arrVal = ceval();
+                if (!arrVal.isUnknown()) {
+                    int[] indices = new int[n];
+                    int j = 0;
+                    for (CValue val : arrVal) {
+                        if (!val.hasIntValue()) {
+                            return new int[0];
+                        }
+                        indices[j++] = val.intValue();
+                    }
+                    return indices;
+                }
+            }
+        } catch (ConstantEvaluationException e) {
+        }
+        return new int[0];
+    }
 
     /**
      * Get the set of all values this for index spans.
@@ -3086,21 +3094,24 @@ aspect ArrayHelpers {
 		public void set(int i, int s) {
 			size[i] = s;
 		}
-		
-		/**
-		 * Sets length <code>d</code> to the value of <code>e</code>.
-		 */
-		public void set(int d, FExp e) {
-			int s = UNKNOWN;
-			if (okExp(e) && e.hasOnlyLiterals()) {
-				try {
-					s = e.ceval().intValue();
-				} catch (ConstantEvaluationException uoe) {
-				}
-			}
-			size[d] = s;
-			exps[d] = (s == UNKNOWN) ? e : null;
-		}
+
+        /**
+         * Sets length <code>d</code> to the value of <code>e</code>.
+         */
+        public void set(int d, FExp e) {
+            int s = UNKNOWN;
+            if (okExp(e) && e.hasOnlyLiterals()) {
+                try {
+                    CValue val = e.ceval();
+                    if (val.hasIntValue()) {
+                        s = val.intValue();
+                    }
+                } catch (ConstantEvaluationException cee) {
+                }
+            }
+            size[d] = s;
+            exps[d] = (s == UNKNOWN) ? e : null;
+        }
 
         /**
          * Sets length <code>d1</code> to the length of dimension <code>d2</code> 
@@ -3118,21 +3129,24 @@ aspect ArrayHelpers {
             }
         }
 
-		/**
-		 * Make sure dimension i of size is ready to use.
-		 */
-		private void evaluate(int i) {
-			if (i >= 0 && i < evaluated.length && !evaluated[i]) {
-				evaluated[i] = true;
-				if (exps[i] != null) {
-					try {
-						size[i] = exps[i].ceval().intValue();
-					} catch (ConstantEvaluationException e) {
-					}
-				}
-			}
-		}
-		
+        /**
+         * Make sure dimension i of size is ready to use.
+         */
+        private void evaluate(int i) {
+            if (i >= 0 && i < evaluated.length && !evaluated[i]) {
+                evaluated[i] = true;
+                if (exps[i] != null) {
+                    try {
+                        CValue val = exps[i].ceval();
+                        if (val.hasIntValue()) {
+                            size[i] = val.intValue();
+                        }
+                    } catch (ConstantEvaluationException e) {
+                    }
+                }
+            }
+        }
+
 		/**
 		 * Make sure size is ready to use.
 		 */
@@ -3150,21 +3164,27 @@ aspect ArrayHelpers {
             } else {
                 size[d] = size[d] + s;
             }
-		}
-		
-		/**
-		 * Adds the value of <code>e</code> to length <code>d</code>.
-		 */
-		public void add(int d, FExp e) {
-			try {
-				add(d, e.ceval().intValue());
-			} catch (ConstantEvaluationException uoe) {
-				FExp e2 = new FAddExp(createFExp(d), e.createSizeFExp());
-				exps[d] = e.dynamicFExp(e2);
-				size[d] = UNKNOWN;
-			}
-		}
-		
+        }
+
+        /**
+         * Adds the value of <code>e</code> to length <code>d</code>.
+         */
+        public void add(int d, FExp e) {
+            boolean ok = false;
+            try {
+                CValue val = e.ceval();
+                if (val.hasIntValue()) {
+                    add(d, val.intValue());
+                    ok = true;
+                }
+            } catch (ConstantEvaluationException cee) {}
+            if (!ok) {
+                FExp e2 = new FAddExp(createFExp(d), e.createSizeFExp());
+                exps[d] = e.dynamicFExp(e2);
+                size[d] = UNKNOWN;
+            }
+        }
+
 		/**
 		 * Adds the length of dimension <code>d2</code> of <code>s</code> 
 		 *        to length <code>d1</code> of this size.

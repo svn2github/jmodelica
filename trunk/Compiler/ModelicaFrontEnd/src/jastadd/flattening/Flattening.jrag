@@ -1127,12 +1127,13 @@ aspect Flattening {
             try {
                 String msg = runtimeErrorString("Structural parameter external function call '"
                         + name() + "' did not evaluate to same result as during compilation");
-                fc.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
-                    new FAssert(new FEqExp(ceval().buildLiteral(), flatten(prefix)),
-                            new FStringLitExp(msg), new Opt<FExp>())));
-            } catch (ConstantEvaluationException e) {
-                
-            }
+                CValue cval = ceval();
+                if (cval.hasBuildLiteral()) {
+                    fc.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
+                            new FAssert(new FEqExp(cval.buildLiteral(), flatten(prefix)),
+                                    new FStringLitExp(msg), new Opt<FExp>())));
+                }
+            } catch (ConstantEvaluationException e) {}
         }
     }
     
@@ -1593,11 +1594,12 @@ aspect Flattening {
     public FExp InstAssignable.flattenBindingFExp() {
         try {
             if (variability().knownParameterOrLess()) {
-                return ceval().buildLiteral();
+                CValue cval = ceval();
+                if (cval.hasBuildLiteral()) {
+                    return cval.buildLiteral();
+                }
             }
-        } catch (ConstantEvaluationException e) {
-            
-        }
+        } catch (ConstantEvaluationException e) {}
         if (hasInstValueMod()) {
             InstValueModification im = myInstValueMod();
             return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
@@ -2216,13 +2218,15 @@ aspect FlatExpressions {
                     } else {
                         // Inline value
                         CValue cval = iae.ceval();
-                        if (isReal())
+                        if (isReal() && cval.hasConvertReal()) {
                             cval = cval.convertReal();
-                        return cval.buildLiteral();
+                        }
+                        if (cval.hasBuildLiteral()) {
+                            return cval.buildLiteral();
+                        }
                     }
                 } catch (ConstantEvaluationException e) {
                     // In this case, simply don't inline value if we aren't in a function
-                    // TODO: Really? isn't this an error?
                 }
             }
             if (ia.inFunction() && flattenAsFunctionConstant())
@@ -2590,12 +2594,13 @@ aspect FlatExpressions {
     public FExp FIfExp.flatten(FQName prefix) {
         if (getIfExpNoTransform().variability().knownParameterOrLess()) {
             try {
-                return getIfExpNoTransform().ceval().booleanValue() ? 
-                        getThenExp().flatten(prefix) : 
-                        getElseExp().flatten(prefix);
-            } catch (ConstantEvaluationException e) {
-                
-            }
+                CValue cval = getIfExpNoTransform().ceval();
+                if (cval.hasBooleanValue()) {
+                    return cval.booleanValue() ? 
+                            getThenExp().flatten(prefix) : 
+                            getElseExp().flatten(prefix);
+                }
+            } catch (ConstantEvaluationException e) {}
         }
         return new FIfExp(getIfExp().flatten(prefix),
                           getThenExp().flatten(prefix),
@@ -2665,10 +2670,12 @@ aspect FlatExpressions {
     
     public FExp FLoadResource.flatten(FQName prefix)   {
         try {
-            return createNode(new FStringLitExp(ceval().stringValue()));
-        } catch (ConstantEvaluationException e) {
-            return createNode(getFExp().flatten(prefix));
-        }
+            CValue cval = ceval();
+            if (cval.hasStringValue()) {
+                return createNode(new FStringLitExp(cval.stringValue()));
+            }
+        } catch (ConstantEvaluationException e) {}
+        return createNode(getFExp().flatten(prefix));
     }
     
     // These operators save reference to source node in instance tree until end of flattening - used for error checking them

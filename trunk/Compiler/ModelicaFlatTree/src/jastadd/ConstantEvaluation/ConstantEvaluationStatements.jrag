@@ -166,7 +166,7 @@ aspect ConstantEvaluationStatements {
         InstAccess firstPart = getFirstInstAccess();
         InstComponentDecl comp = firstPart.myInstComponentDecl();
         if (comp instanceof InstAssignable) {
-            InstAssignable var = (InstAssignable) firstPart.myInstComponentDecl();
+            InstAssignable var = (InstAssignable) comp;
             CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
             evaluator.setEvaluationValue(var, val);
         }
