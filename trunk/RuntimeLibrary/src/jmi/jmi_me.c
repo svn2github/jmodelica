@@ -41,9 +41,9 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     retval = jmi_me_init_modules(jmi);
     if (retval != 0) {
-    	jmi_log_node(jmi_->log, logError, "ModuleInitializationFailure","Failed to initialize modules");
-    	jmi_delete(jmi_);
-    	return -1;
+        jmi_log_node(jmi_->log, logError, "ModuleInitializationFailure","Failed to initialize modules");
+        jmi_delete(jmi_);
+        return -1;
     }
 
 
@@ -54,12 +54,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
         return -1;
     }
     
-    /* Check resource location */
-    if (resource_location && !jmi_dir_exists(resource_location)) {
-        jmi_log_node(jmi->log, logError, "Error", "Resource location does not exist <Path:%s>", resource_location);
-        jmi_delete(jmi_);
-        return -1;
-    }
+    /* Postpone resource check until it is used. */
     jmi_->resource_location = resource_location;
     
     /* set start values*/
@@ -79,15 +74,15 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
 }
 
 int jmi_me_init_modules(jmi_t* jmi) {
-	int retval;
+    int retval;
 
-	retval = jmi_get_set_module_init(jmi);
-	if (retval != 0) {
-    	jmi_log_comment(jmi->log, logError, "jmi_get_set_module_init() failed");
-    	return -1;
-	}
+    retval = jmi_get_set_module_init(jmi);
+    if (retval != 0) {
+        jmi_log_comment(jmi->log, logError, "jmi_get_set_module_init() failed");
+        return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 void jmi_me_delete_modules(jmi_t* jmi) {
@@ -221,7 +216,7 @@ int jmi_cannot_set(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  const jmi_real_t value[]) {
 
-	if (jmi->user_terminate == 1) {
+    if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set Real variables when the model is terminated");
         return -1;

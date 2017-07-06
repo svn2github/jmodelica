@@ -64,15 +64,15 @@ int jmi_find_parent_dir(char* path, const char* dir) {
 }
 
 union jmi_func_cast {
-	void* x;
-	char* (*y)();
+    void* x;
+    char* (*y)();
 };
 
 void* jmi_func_to_voidp(char* (*y)()) {
-	union jmi_func_cast jfc;
-	assert(sizeof(jfc.x)==sizeof(jfc.y));
-	jfc.y = y;
-	return jfc.x;
+    union jmi_func_cast jfc;
+    assert(sizeof(jfc.x)==sizeof(jfc.y));
+    jfc.y = y;
+    return jfc.x;
 }
  
 char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size)) {
@@ -152,9 +152,8 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     cb->instance_name = instanceName;  /* set instance name to use under instantiation (to avoid initial malloc)*/
     
     resource_location = jmi_locate_resources(functions.allocateMemory);
-    if (!resource_location)
-        functions.logger(0, instanceName, fmiWarning, "Warning", "Could not find resource location.");
     
+    /* Resource location is error checked in jmi_me_init */
     retval = jmi_me_init(cb, &component->jmi, GUID, resource_location);
     
     if (retval != 0) {
@@ -192,7 +191,7 @@ void fmi1_me_free_model_instance(fmiComponent c) {
 fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
     fmi1_me_t* self = (fmi1_me_t*)c;
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     self->jmi.jmi_callbacks.log_options.logging_on_flag = loggingOn;
@@ -205,7 +204,7 @@ fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
     fmiInteger retval;
 
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 
     retval = jmi_set_time(&((fmi1_me_t*)c)->jmi, time);
@@ -220,7 +219,7 @@ fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_
     fmiInteger retval;
 
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_set_continuous_states(&((fmi1_me_t*)c)->jmi, x, nx);
@@ -237,7 +236,7 @@ fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEven
     fmiInteger retval;
     fmiReal triggered_event;
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_completed_integrator_step(jmi, &triggered_event);
@@ -260,7 +259,7 @@ fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_set_real(jmi, vr, nvr, value);
@@ -277,7 +276,7 @@ fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], siz
     fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 
     retval = jmi_set_integer(jmi, vr, nvr, value);
@@ -294,7 +293,7 @@ fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
    fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_set_boolean(jmi, vr, nvr, value);
@@ -311,7 +310,7 @@ fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_
    fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_set_string(jmi, vr, nvr, value);
@@ -329,7 +328,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
 #ifdef JMI_PROFILE_RUNTIME 
-	clock_t t;
+    clock_t t;
 #endif
     /* For debugging Jacobians */
 /*
@@ -339,18 +338,18 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
 */
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 #ifdef JMI_PROFILE_RUNTIME 
-	t = clock();
+    t = clock();
 #endif
     jmi_setup_experiment(jmi, toleranceControlled, relativeTolerance);
-	
+    
     retval = jmi_initialize(jmi);
     if (retval != 0) {
         return fmiError;
     }
-	
+    
     /* Initialization is now complete, but we also need to handle events
      * at the start of the integration.
      */
@@ -361,11 +360,11 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     }
 
 #ifdef JMI_PROFILE_RUNTIME 
-	{
-		char message[256];
-		sprintf(message, "Time spent during initialize %f", ((double)clock() - t) / CLOCKS_PER_SEC);
-		jmi_log_comment(jmi->log, logError, message);
-	}
+    {
+        char message[256];
+        sprintf(message, "Time spent during initialize %f", ((double)clock() - t) / CLOCKS_PER_SEC);
+        jmi_log_comment(jmi->log, logError, message);
+    }
 #endif
     return fmiOK;
 }
@@ -376,7 +375,7 @@ fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t
     jmi_t* jmi = &self->jmi;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_get_derivatives(jmi, derivatives, nx);
@@ -393,7 +392,7 @@ fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[]
     jmi_t* jmi = &self->jmi;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_get_event_indicators(jmi, eventIndicators, ni);
@@ -410,7 +409,7 @@ fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t 
     jmi_t* jmi = &self->jmi;
 
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 
     retval = jmi_get_real(jmi, vr, nvr, value);
@@ -425,7 +424,7 @@ fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size
     fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 
     retval = jmi_get_integer(&((fmi1_me_t *)c)->jmi, vr, nvr, value);
@@ -440,7 +439,7 @@ fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size
     fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 
     retval = jmi_get_boolean(&((fmi1_me_t *)c)->jmi, vr, nvr, value);
@@ -455,7 +454,7 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
     fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
 
     retval = jmi_get_string(&((fmi1_me_t *)c)->jmi, vr, nvr, value);
@@ -475,7 +474,7 @@ fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, f
     jmi_event_info_t* event_info;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
@@ -500,7 +499,7 @@ fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, f
 
 fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     memcpy (states, jmi_get_real_x(&((fmi1_me_t *)c)->jmi), nx*sizeof(fmiReal));
@@ -511,7 +510,7 @@ fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nomina
     fmiInteger retval;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
     
     retval = jmi_get_nominal_continuous_states(&((fmi1_me_t *)c)->jmi, x_nominal, nx);
@@ -527,7 +526,7 @@ fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference v
     fmiValueReference i;
     
     if (c == NULL) {
-		return fmiFatal;
+        return fmiFatal;
     }
         
     offset = ((fmi1_me_t *)c)->jmi.offs_real_x;

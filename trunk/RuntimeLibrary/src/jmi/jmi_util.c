@@ -364,11 +364,19 @@ int jmi_dir_exists(const char* dir) {
 void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
     size_t len;
     jmi_string_t loc = jmi->resource_location;
+
     if (!loc) {
         jmi_log_node(jmi->log, logError, "Error", "Resource location unavailable.");
         strcpy(res,file);
         return;
     }
+    if (!(jmi->resource_location_verified) && !jmi_dir_exists(loc)) {
+        jmi_log_node(jmi->log, logError, "Error", "Resource location does not exist <Path:%s>", loc);
+        strcpy(res,file);
+        return;
+    }
+    jmi->resource_location_verified = 1;
+    
     len = strlen(loc) + strlen(file);
     if (len >= JMI_PATH_MAX) {
         jmi_log_node(jmi->log, logError, "Error", "File path too long: <Path:%s, File:%s>", loc, file);

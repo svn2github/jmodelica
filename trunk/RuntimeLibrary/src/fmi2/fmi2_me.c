@@ -40,7 +40,7 @@ fmi2Status fmi2_set_debug_logging(fmi2Component    c,
     size_t i;
     int max_log_level, tmp_log_level;
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
     max_log_level = 0;
@@ -114,12 +114,12 @@ fmi2Component fmi2_instantiate(fmi2String instanceName,
         if (retval != fmi2OK) {
             functions->freeMemory(component);
             return NULL;
-		}
+        }
     } else {
-		/* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
+        /* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
         functions->logger(0, instanceName, fmi2Error, "ERROR", "Valid choises for fmuType are fmi2ModelExchange and fmi2CoSimulation");
         component = NULL;
-	}
+    }
     
     return component;
 }
@@ -212,8 +212,8 @@ fmi2Status fmi2_setup_experiment(fmi2Component c,
     fmi2Status retval;
     fmi2_me_t* fmi2_me; 
     
-	if (c == NULL) {
-		return fmi2Fatal;
+    if (c == NULL) {
+        return fmi2Fatal;
     }
 
     fmi2_me = (fmi2_me_t*)c;
@@ -245,8 +245,8 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     jmi_t* jmi;
     jmi_cs_data_t* cs_data;
 
-	if (c == NULL) {
-		return fmi2Fatal;
+    if (c == NULL) {
+        return fmi2Fatal;
     }
     
     if (((fmi2_me_t *)c)->fmu_mode != instantiatedMode) {
@@ -289,8 +289,8 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
 }
 
 fmi2Status fmi2_exit_initialization_mode(fmi2Component c) {
-	if (c == NULL) {
-		return fmi2Fatal;
+    if (c == NULL) {
+        return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != initializationMode) {
@@ -313,7 +313,7 @@ fmi2Status fmi2_terminate(fmi2Component c) {
     int retval;
 
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_update_and_terminate(&((fmi2_me_t*)c)->jmi);
@@ -328,9 +328,9 @@ fmi2Status fmi2_reset(fmi2Component c) {
     fmi2_me_t* fmi2_me;
     jmi_callbacks_t* cb;
     char*  tmp_resource_location;
-	
+    
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     fmi2_me = (fmi2_me_t*)c;
@@ -379,7 +379,7 @@ fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
     retval = jmi_get_real(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -403,7 +403,7 @@ fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
     retval = jmi_get_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -428,7 +428,7 @@ fmi2Status fmi2_get_boolean(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
     retval = jmi_get_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
@@ -449,7 +449,7 @@ fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
     retval = jmi_get_string(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -467,7 +467,7 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     for (i = 0; i < nvr; i++) {
@@ -501,7 +501,7 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
     size_t i;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     /* Negate the values before setting the "negate alias" variables. */
@@ -536,7 +536,7 @@ fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
     jmi_boolean* jmi_boolean_values;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(jmi_boolean));
@@ -566,7 +566,7 @@ fmi2Status fmi2_set_string(fmi2Component c, const fmi2ValueReference vr[],
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_set_string(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
@@ -613,7 +613,7 @@ fmi2Status fmi2_get_directional_derivative(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_get_directional_derivative(&((fmi2_me_t *)c)->jmi, vUnknown_ref,
@@ -626,8 +626,8 @@ fmi2Status fmi2_get_directional_derivative(fmi2Component c,
 }
 
 fmi2Status fmi2_enter_event_mode(fmi2Component c) {
-	if (c == NULL) {
-		return fmi2Fatal;
+    if (c == NULL) {
+        return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != continuousTimeMode) {
@@ -645,7 +645,7 @@ fmi2Status fmi2_new_discrete_state(fmi2Component  c, fmi2EventInfo* fmiEventInfo
     fmi2_me_t* fmi2_me = (fmi2_me_t *)c;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     fmi2_me->event_info->iteration_converged        = !fmiEventInfo->newDiscreteStatesNeeded;
@@ -671,8 +671,8 @@ fmi2Status fmi2_new_discrete_state(fmi2Component  c, fmi2EventInfo* fmiEventInfo
 }
 
 fmi2Status fmi2_enter_continuous_time_mode(fmi2Component c) {
-	if (c == NULL) {
-		return fmi2Fatal;
+    if (c == NULL) {
+        return fmi2Fatal;
     }
 
     if (((fmi2_me_t *)c)->fmu_mode != eventMode) {
@@ -695,7 +695,7 @@ fmi2Status fmi2_completed_integrator_step(fmi2Component c,
     fmi2Real triggered_event;
 
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     self = (fmi2_me_t*)c;
@@ -718,7 +718,7 @@ fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
     fmi2Integer retval;
 
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
     if (((fmi2_me_t*)c)->stopTime*(1+JMI_ALMOST_EPS) < time) {
@@ -739,7 +739,7 @@ fmi2Status fmi2_set_continuous_states(fmi2Component c, const fmi2Real x[],
     fmi2Integer retval;
 
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_set_continuous_states(&((fmi2_me_t*)c)->jmi, x, nx);
@@ -754,7 +754,7 @@ fmi2Status fmi2_get_derivatives(fmi2Component c, fmi2Real derivatives[], size_t 
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_get_derivatives(&((fmi2_me_t *)c)->jmi, derivatives, nx);
@@ -770,7 +770,7 @@ fmi2Status fmi2_get_event_indicators(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_get_event_indicators(&((fmi2_me_t *)c)->jmi, eventIndicators, ni);
@@ -783,7 +783,7 @@ fmi2Status fmi2_get_event_indicators(fmi2Component c,
 
 fmi2Status fmi2_get_continuous_states(fmi2Component c, fmi2Real x[], size_t nx) {
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     memcpy (x, jmi_get_real_x(&((fmi2_me_t *)c)->jmi), nx*sizeof(fmi2Real));
@@ -796,7 +796,7 @@ fmi2Status fmi2_get_nominals_of_continuous_states(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_get_nominal_continuous_states(&((fmi2_me_t *)c)->jmi, x_nominal, nx);
@@ -868,9 +868,9 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
     size_t inst_GUID_len;
     
     fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
-	jmi_callbacks_t* cb = &fmi2_me->jmi.jmi_callbacks;
+    jmi_callbacks_t* cb = &fmi2_me->jmi.jmi_callbacks;
 
-	inst_name_len = strlen(instanceName)+1;
+    inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
     
