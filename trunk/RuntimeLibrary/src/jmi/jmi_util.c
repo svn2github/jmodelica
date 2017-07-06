@@ -18,11 +18,8 @@
 */
 
 #include <stdarg.h>
-#ifdef _WIN32
-    #include <win32_dirent.h>
-#else
-    #include <dirent.h>
-#endif
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_global.h"
@@ -353,12 +350,12 @@ int jmi_file_exists(const char* file) {
 }
 
 int jmi_dir_exists(const char* dir) {
-    DIR* dh;
-    if(dir && (dh = opendir(dir)))
-        closedir(dh);
+    struct stat finfo;
+    
+    if(dir && stat(dir, &finfo) == 0 && finfo.st_mode & S_IFDIR)
+        return 1;
     else
         return 0;
-    return 1;
 }
 
 void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
