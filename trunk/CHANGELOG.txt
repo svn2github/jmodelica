@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Bugfix ; Minor ; Compiler ; #5394
+Fixed compiler crash when using function with several outputs where one is 
+a zero-size array.
+
 ; Change ; Minor ; Compiler ; #5398
 Removed the need to define fmu type in the make file
 
