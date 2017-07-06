@@ -1033,18 +1033,11 @@ public class GenericGenerator extends AbstractGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-            
-            if (fclass.myOptions().getBooleanOption("fmume10")) {
-            	genPrinter.print("#define FMUME10 1\n");
-            }
-            if (fclass.myOptions().getBooleanOption("fmume20")) {
-                genPrinter.print("#define FMUME20 1\n");
-            }
-            if (fclass.myOptions().getBooleanOption("fmucs10")) {
-                genPrinter.print("#define FMUCS10 1\n");
-            }
-            if (fclass.myOptions().getBooleanOption("fmucs20")) {
-                genPrinter.print("#define FMUCS20 1\n");
+            String[] fmuTypes = fclass.myOptions().getStringOption("fmu_type").split(";");
+            for (String fType : fmuTypes) {
+            	genPrinter.print("#define ");
+            	genPrinter.print(fType);
+            	genPrinter.print(" 1\n");
             }
             genPrinter.print("");
         }

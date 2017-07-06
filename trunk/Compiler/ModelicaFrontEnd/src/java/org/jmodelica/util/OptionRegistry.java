@@ -352,30 +352,12 @@ abstract public class OptionRegistry {
              Category.user,
              false,
              "If enabled, then flat model before and after transformations will be generated."),
-        FMUME10
-        	("fmume10",
+        FMU_TYPE
+        	("fmu_type",
         	 OptionType.compiler,
         	 Category.internal,
-        	 false,
-        	 "If enabled define FMUME10 will be added to generated code"),
-        FMUCS10
-         	("fmucs10",
-         	 OptionType.compiler,
-         	 Category.internal,
-         	 false,
-         	 "If enabled define FMUCS10 will be added to generated code"),
-        FMUME20
-         	("fmume20",
-         	 OptionType.compiler,
-         	 Category.internal,
-         	 false,
-         	 "If enabled define FMUME20 will be added to generated code"),
-         FMUCS20
-         	("fmucs20",
-         	 OptionType.compiler,
-         	 Category.internal,
-         	 false,
-         	 "If enabled define FMUCS20 will be added to generated code"),
+        	 "",
+        	 "Semicolon separated list of defines to set, e.g. FMUCS20."),
         EXTRA_LIB
             ("extra_lib_dirs", 
              OptionType.compiler, 

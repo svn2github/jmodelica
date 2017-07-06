@@ -857,16 +857,8 @@ public class ModelicaCompiler {
             
             // compile c code if Makefile flag is not null
             hookCheckAbort();
-            if (target.getMakeFileFlag() != null) {
-                ASTNode.beginStep("compileCCode()");
-                String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
-                CCompilerDelegator ccompiler = getCCompiler();
-                CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(cFileName, fc, target);
-                ccompiler.compileCCode(ccArgs, outDir);
-                ccompiler.copySharedLibs(outDir, ccArgs.getExternalLibraries());
-                ASTNode.endStep("compileCCode()");
-            }
-            hookCodeCompiled();
+            doCompileCCode(target, fc, className, flatName);
+
             
             // package unit
             ASTNode.beginStep("packUnit()");
@@ -1838,7 +1830,7 @@ public class ModelicaCompiler {
                         public void setOptions(TargetObject object, OptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
-                                	options.setBooleanOption("fmume10", true);
+                                	options.setStringOption("fmu_type", "FMUME10");
                                 	options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -1847,7 +1839,7 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                 	break;
                                 case FMUME20:
-                                	options.setBooleanOption("fmume20", true);
+                                	options.setStringOption("fmu_type", "FMUME20");
                                 	options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -1864,7 +1856,7 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                     break;
                                 case FMUCS10:
-                                	options.setBooleanOption("fmucs10", true);
+                                	options.setStringOption("fmu_type", "FMUCS10");
                                 	options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -1873,7 +1865,7 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                 	break;
                                 case FMUCS20:
-                                	options.setBooleanOption("fmucs20", true);
+                                	options.setStringOption("fmu_type", "FMUCS20");
                                 
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
@@ -1883,8 +1875,7 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                     break;
                                 case FMUMECS20:
-                                	options.setBooleanOption("fmume20", true);
-                                	options.setBooleanOption("fmucs20", true);
+                                	options.setStringOption("fmu_type", "FMUME20;FMUCS20");
                                 	
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
@@ -2211,6 +2202,19 @@ public class ModelicaCompiler {
         hookFmuPacked(unitFile.getAbsoluteFile());
         return unitFile;
     }
+    
+    private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc, String className, String flatName) {
+    	if (target.getMakeFileFlag() != null) {
+                ASTNode.beginStep("compileCCode()");
+                String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
+                CCompilerDelegator ccompiler = getCCompiler();
+                CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(cFileName, fc, target);
+                ccompiler.compileCCode(ccArgs, outDir);
+                ccompiler.copySharedLibs(outDir, ccArgs.getExternalLibraries());
+                ASTNode.endStep("compileCCode()");
+        }
+        hookCodeCompiled();
+     }
 
     /**
      * Calculates the destination directory for a packaged unit. If the specified destination is a file its directory

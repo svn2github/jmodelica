@@ -825,7 +825,7 @@ equation
         CCodeGenTestCase(
             name="CCodeGenTest22",
             description="",
-            fmume10=true,
+            fmu_type="FMUME10",
             template="$fmu_type_define$",
             generatedCode="
 #define FMUME10 1
@@ -841,7 +841,7 @@ equation
         CCodeGenTestCase(
             name="CCodeGenTest23",
             description="",
-            fmume20=true,
+            fmu_type="FMUME20",
             template="$fmu_type_define$",
             generatedCode="
 #define FMUME20 1
@@ -857,7 +857,7 @@ equation
         CCodeGenTestCase(
             name="CCodeGenTest24",
             description="",
-            fmucs10=true,
+            fmu_type="FMUCS10",
             template="$fmu_type_define$",
             generatedCode="
 #define FMUCS10 1
@@ -873,7 +873,7 @@ equation
         CCodeGenTestCase(
             name="CCodeGenTest25",
             description="",
-            fmucs20=true,
+            fmu_type="FMUCS20",
             template="$fmu_type_define$",
             generatedCode="
 #define FMUCS20 1
@@ -889,8 +889,7 @@ equation
         CCodeGenTestCase(
             name="CCodeGenTest26",
             description="",
-            fmucs20=true,
-            fmume20=true,
+            fmu_type="FMUME20;FMUCS20",
             template="$fmu_type_define$",
             generatedCode="
 #define FMUME20 1
