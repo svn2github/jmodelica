@@ -351,8 +351,11 @@ int jmi_file_exists(const char* file) {
 
 int jmi_dir_exists(const char* dir) {
     struct stat finfo;
-    
+#ifdef _WIN32
     if(dir && stat(dir, &finfo) == 0 && finfo.st_mode & S_IFDIR)
+#else
+    if(dir && stat(dir, &finfo) == 0 && S_ISDIR(finfo.st_mode))
+#endif
         return 1;
     else
         return 0;
