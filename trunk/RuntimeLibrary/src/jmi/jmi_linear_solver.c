@@ -282,7 +282,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) { 
+        if (block->Jacobian_structure) { 
             if(block->init) {  
                 info = jmi_linear_solver_sparse_setup(block);  
                 if (info) { 
@@ -958,7 +958,7 @@ int jmi_linear_completed_integrator_step(jmi_block_solver_t* block) {
 void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver = block->solver;
     
-    if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) {
+    if (block->Jacobian_structure) {
         jmi_linear_solver_sparse_delete(block);
     }
     

@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler, runtime ; #5402
+Generation of sparse Jacobian for linear systems is now controlled by a
+threshold and either the dense Jacobian is generated or the sparse, not both. 
+
 ; Bugfix ; Minor ; Compiler ; #5394
 Fixed compiler crash when using function with several outputs where one is 
 a zero-size array.

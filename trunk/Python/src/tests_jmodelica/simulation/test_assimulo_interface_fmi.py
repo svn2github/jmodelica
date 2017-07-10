@@ -80,12 +80,11 @@ class Test_Sparse_Linear_Block:
     def setUpClass(cls):
 
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", 
+                                version=1.0)
+        _cc_name_sparse = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", 
                                 version=1.0,
-                                compiler_options={"generate_sparse_block_jacobian": True})
-    
-        file_name = os.path.join(get_files_path(), 'Modelica', 'TearingTests.mo')
-
-        _in3_name = compile_fmu("TearingTests.TearingTest1", file_name, version=1.0)
+                                compiler_options={"generate_sparse_block_jacobian_threshold": 0},
+                                compile_to=_cc_name[:-4]+"_sparse"+_cc_name[-4:])
     
     @testattr(stddist = True)
     def test_cc(self):
@@ -93,8 +92,7 @@ class Test_Sparse_Linear_Block:
         
         res1 = model.simulate()
         
-        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
-        model.set("_le_sparse_jacobian_threshold", 1)
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_sparse.fmu")
         
         res2 = model.simulate()
         
@@ -106,14 +104,8 @@ class Test_Sparse_Linear_Block:
     def test_multiple_sparse_systems(self):
         file_name = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
 
-        fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0)
-        
-    @testattr(stddist = True)
-    def test_no_sparse_generation(self):
-        model = load_fmu("TearingTests_TearingTest1.fmu")
-        model.set("_le_sparse_jacobian_threshold", 1)
-
-        nose.tools.assert_raises(FMUException, model.simulate)
+        fmu_name = compile_fmu("LinearTest.TwoTornSystems1", file_name, version=1.0,
+                        compiler_options={"generate_sparse_block_jacobian_threshold": 0})
         
 class Test_Sensitivities_FMI2:
     @classmethod

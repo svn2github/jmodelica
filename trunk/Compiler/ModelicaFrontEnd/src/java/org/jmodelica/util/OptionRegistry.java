@@ -315,12 +315,14 @@ abstract public class OptionRegistry {
              Category.internal,
              false, 
              "If enabled, then code for solving DAEs are generated."),
-        GENERATE_SPARSE_BLOCK_JACOBIAN
-            ("generate_sparse_block_jacobian", 
-             OptionType.compiler, 
-             Category.experimental,
-             false, 
-             "If enabled, then a sparse Jacobian is additionally generated for linear blocks."),
+        GENERATE_SPARSE_BLOCK_JACOBIAN_THRESHOLD
+        	("generate_sparse_block_jacobian_threshold",
+        	 OptionType.compiler,
+        	 Category.experimental,
+        	 100,
+        	 "Threshold for when a sparse Jacobian should be generated. If the number of torn variables"
+        	 + "is less than the threshold a dense Jacobian is generated.",
+        	 0,Integer.MAX_VALUE),
         GEN_DAE_JAC
             ("generate_dae_jacobian", 
              OptionType.compiler, 
@@ -842,13 +844,6 @@ abstract public class OptionRegistry {
              "Exit criterion mode: " +
              "0 - step length and residual based, 1 - only step length based, 2 - only residual based, 3 - hybrid.",
              0, 3),
-        LE_SPARSE_JACOBIAN_THRESHOLD
-            ("le_sparse_jacobian_threshold",
-             OptionType.runtime, 
-             Category.experimental,
-             -1,
-             "Threshold for computing the Jacobian using sparse matrices (-1 indicates that Dense computation is used).",
-             -1, Integer.MAX_VALUE),
         NLE_JACOBIAN_UPDATE_MODE
             ("nle_jacobian_update_mode",
              OptionType.runtime, 
