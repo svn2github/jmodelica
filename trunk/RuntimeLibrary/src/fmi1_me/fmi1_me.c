@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <assert.h>
 
 #include "fmi1_me.h"
@@ -327,22 +326,11 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     fmiInteger retval;
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
-#ifdef JMI_PROFILE_RUNTIME 
-    clock_t t;
-#endif
-    /* For debugging Jacobians */
-/*
-    int n_states;
-    jmi_real_t* jac;
-    int j;
-*/
     
     if (c == NULL) {
         return fmiFatal;
     }
-#ifdef JMI_PROFILE_RUNTIME 
-    t = clock();
-#endif
+
     jmi_setup_experiment(jmi, toleranceControlled, relativeTolerance);
     
     retval = jmi_initialize(jmi);
@@ -359,13 +347,6 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         return fmiError;
     }
 
-#ifdef JMI_PROFILE_RUNTIME 
-    {
-        char message[256];
-        sprintf(message, "Time spent during initialize %f", ((double)clock() - t) / CLOCKS_PER_SEC);
-        jmi_log_comment(jmi->log, logError, message);
-    }
-#endif
     return fmiOK;
 }
 

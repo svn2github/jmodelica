@@ -18,6 +18,13 @@
 */
 
 #include <time.h>
+#ifndef CLOCKS_PER_SEC /* In C89 CLK_TCK is the correct name */
+#   ifdef CLK_TCK
+#       define CLOCKS_PER_SEC   CLK_TCK
+#   else
+#       define CLOCKS_PER_SEC   1000000l /* The results in this case will likely be bogus. */
+#   endif
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
