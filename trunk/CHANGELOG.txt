@@ -8,10 +8,6 @@ Reworked how we check if a directory exist.
 ; Change ; Minor ; Runtime ; #5399
 Delayed check of the resource location until it is asked for.
 
-; Change ; Minor ; Compiler, Runtime ; #5402
-Generation of sparse Jacobian for linear systems is now controlled by a
-threshold and either the dense Jacobian is generated or the sparse, not both. 
-
 ; Bugfix ; Minor ; Compiler ; #5394
 Fixed compiler crash when using function with several outputs where one is 
 a zero-size array.

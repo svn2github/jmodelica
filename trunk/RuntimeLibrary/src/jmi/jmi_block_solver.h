@@ -361,6 +361,7 @@ struct jmi_block_solver_options_t {
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
     double jacobian_finite_difference_delta; /**< \brief Option for which delta to use in finite differences Jacobian, default sqrt(eps). */
     int block_profiling; /**< \brief Option for enabling profiling of the blocks. */
+    int linear_sparse_jacobian_threshold; /**< \brief Option for specifying when sparse linear solver in linear blocks is used. */
     
     /* Options below are not supposed to change between invocations of the solver. */
     jmi_block_solver_kind_t solver;                          /**< \brief Kind of block solver to use */

@@ -2062,14 +2062,14 @@ aspect CCodeGen {
         str.print(indent + "} else ");
     }
 
-    public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
+    public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent) {
 
         if (!hasResidualFunction()) {
             return;
         }
 
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C()) {
-            subBlock.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+            subBlock.genBlockResidualFunction_C(p, str, outerIndent);
         }
 
         Map<FVariable,String> solverArrayMap = createSolverArrayMap(localUnsolvedVariables());
@@ -2143,16 +2143,12 @@ aspect CCodeGen {
         }
 
         // Generate code for Jacobian
-        if (isLinear() && generateSparseThreshold >= localSolvedRealVariables().size()) {
+        if (jacobian != null) {
             genOpenEvalMode_C(str, indent, "JMI_BLOCK_EVALUATE_JACOBIAN");
             // TODO: Merge the two functions?
             genBlockResidualFunction_jacobianDecls_C(p, str, p.indent(indent));
             genBlockResidualFunction_jacobian_C(p, str, p.indent(indent));
             genCloseEvalMode_C(str, indent);
-        } else if (isLinear()) {
-        	genOpenEvalMode_C(str, indent, "JMI_BLOCK_EVALUATE_JACOBIAN");
-        	str.print(nextIndent + "ef = -1;\n");
-        	genCloseEvalMode_C(str, indent);
         }
         
         str.print("if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
@@ -2173,24 +2169,24 @@ aspect CCodeGen {
     }
 
     @Override
-    public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
+    public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent) {
 
         for (T blt : subBLTs) {
             for (AbstractEquationBlock block : blt) {
-                block.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+                block.genBlockResidualFunction_C(p, str, outerIndent);
             }
         }
     }
 
     @Override
     public void HomotopyBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str,
-            String outerIndent, int generateSparseThreshold) {
+            String outerIndent) {
 
-        homotopySubBlock.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+        homotopySubBlock.genBlockResidualFunction_C(p, str, outerIndent);
         CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
 
         for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS]) {
-            block.genBlockResidualFunction_C(simplifiedPrinter, str, outerIndent, generateSparseThreshold);
+            block.genBlockResidualFunction_C(simplifiedPrinter, str, outerIndent);
         }
     }
     /*

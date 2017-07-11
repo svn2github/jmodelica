@@ -570,11 +570,12 @@ public class CGenerator extends GenericGenerator {
 
         public void generate(CodeStream genPrinter) {
             String indent = "";
-            int generateSparseThreshold = fclass.myOptions().getIntegerOption("generate_sparse_block_jacobian_threshold");
+            boolean generateSparse = fclass.myOptions().getBooleanOption("generate_sparse_block_jacobian");
+
             for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                 CodePrinter printer = block.blockPrinter();
-                block.genBlockResidualFunction_C(printer, genPrinter, indent, generateSparseThreshold);
-                if (block.isLinear() && generateSparseThreshold < block.localSolvedRealVariables().size()) {
+                block.genBlockResidualFunction_C(printer, genPrinter, indent);
+                if (block.isLinear() && generateSparse) {
                     block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, false);
                 }
             }
@@ -607,7 +608,7 @@ public class CGenerator extends GenericGenerator {
 
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
                     block.genBlockAddCall_C(p, genPrinter, indent, false,
-                            false, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
+                            false, block.isLinear() && options.getBooleanOption("generate_sparse_block_jacobian"),
                             options.getStringOption("nonlinear_solver"), -1);
             }
         }
@@ -649,13 +650,13 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodeStream genPrinter) {
             String indent = "";
             
-            int generateSparseThreshold = fclass.myOptions().getIntegerOption("generate_sparse_block_jacobian_threshold");
+            boolean generateSparse = fclass.myOptions().getBooleanOption("generate_sparse_block_jacobian");
 
             for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
                 CodePrinter printer = block.blockPrinter().initialSystemPrinter();
-                block.genBlockResidualFunction_C(printer, genPrinter, indent, generateSparseThreshold);
+                block.genBlockResidualFunction_C(printer, genPrinter, indent);
 
-                if (block.isLinear() && generateSparseThreshold < block.localSolvedRealVariables().size()) {
+                if (block.isLinear() && generateSparse) {
                     block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, true);
                 }
             } 
@@ -683,7 +684,7 @@ public class CGenerator extends GenericGenerator {
 
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
                     block.genBlockAddCall_C(p, genPrinter, indent, false,
-                            true, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
+                            true, block.isLinear() && options.getBooleanOption("generate_sparse_block_jacobian"),
                             fclass.myOptions().getStringOption("init_nonlinear_solver"), -1);
             }
         }
