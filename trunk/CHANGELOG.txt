@@ -1,5 +1,14 @@
 ================= Unreleased ==================
-; Change ; Minor ; Compiler, runtime ; #5402
+; Change ; Minor ; Runtime ; #5401
+Added defines to handle missing CLOCKS_PER_SEC
+
+; Change ; Minor ; Runtime ; #5400
+Reworked how we check if a directory exist.
+
+; Change ; Minor ; Runtime ; #5399
+Delayed check of the resource location until it is asked for.
+
+; Change ; Minor ; Compiler, Runtime ; #5402
 Generation of sparse Jacobian for linear systems is now controlled by a
 threshold and either the dense Jacobian is generated or the sparse, not both. 
 
@@ -15,7 +24,7 @@ Added compiler option "event_output_vars". When set, output variables are
 generated for each event indicator.
 
 ; Other ; Minor ; General ; #5393
-Added a changeLog to JModelica.org.
+Added a changelog to JModelica.org.
 
 
 ==================== JM 2.0 ===================
