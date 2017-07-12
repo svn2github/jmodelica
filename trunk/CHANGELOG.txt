@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler, Runtime ; #5402
+Generation of sparse Jacobian for linear systems is now controlled by a
+threshold and either the dense Jacobian is generated or the sparse, not both. 
+
 ; Change ; Minor ; Runtime ; #5401
 Added defines to handle missing CLOCKS_PER_SEC
 

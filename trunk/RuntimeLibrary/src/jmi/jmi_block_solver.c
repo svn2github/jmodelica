@@ -736,7 +736,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
-    bsop->linear_sparse_jacobian_threshold = -1;
 
     bsop->active_bounds_threshold = 0; /** < \brief Threshold for when at active bound. */
 
