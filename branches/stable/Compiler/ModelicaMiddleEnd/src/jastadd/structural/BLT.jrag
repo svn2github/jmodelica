@@ -259,7 +259,7 @@ aspect BLT{
             Collection<FVariable> depVars = new ArrayList<FVariable>();
             depVars.addAll(eqn.algebraicVariables());
             depVars.addAll(eqn.derivativeVariables());
-            return eqn.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new SimpleBlockDependency(depVars));
+            return eqn.createMetaEquationBlock(EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new SimpleBlockDependency(depVars));
         }
 
         public static abstract class BlockProducer {
@@ -371,8 +371,6 @@ aspect BLT{
 
     @Override
 	public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) { 
-		if (numScalarEquations() == 0)
-			return new MetaEquationBlock(producer, blockDependency, this);
 		for (Integer assignedIndex : assignedIndices)
 			if (assignedIndex == null)
 				throw new IllegalArgumentException("FAlgorithm, AssignedIndex must be set for this class type! equation: " + this);
@@ -385,8 +383,6 @@ aspect BLT{
 
     @Override
 	public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
-		if (numScalarEquations() == 0)
-			return new MetaEquationBlock(producer, blockDependency, this);
 		for (Integer assignedIndex : assignedIndices)
 			if (assignedIndex == null)
 				throw new IllegalArgumentException("FFunctionCallEquation, AssignedIndex must be set for this class type! equation: " + this);
@@ -396,11 +392,9 @@ aspect BLT{
 			return new UnsolvedFunctionCallEquationBlock(producer, blockDependency, this, fvs, assignedIndices);
 		}
 	}
-	
+
     @Override
     public SimpleEquationBlock FIfEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability, EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) { 
-        if (numScalarEquations() == 0)
-            return new MetaEquationBlock(producer, blockDependency, this);
         for (Integer assignedIndex : assignedIndices)
             if (assignedIndex == null)
                 throw new IllegalArgumentException("FIfEquation, AssignedIndex must be set for this class type! equation: " + this);
@@ -409,6 +403,28 @@ aspect BLT{
         } else {
             return new UnsolvedIfEquationBlock(producer, blockDependency, this, fvs, assignedIndices);
         }
+    }
+
+    /**
+     * Create a meta equation block from a single equation. 
+     */
+    public SimpleEquationBlock FAbstractEquation.createMetaEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
+        throw new UnsupportedOperationException("Unable to construct meta equation block from equation type " + getClass().getSimpleName());
+    }
+
+    @Override
+    public SimpleEquationBlock FAlgorithm.createMetaEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
+        return new MetaEquationBlock(producer, blockDependency, this);
+    }
+
+    @Override
+    public SimpleEquationBlock FFunctionCallEquation.createMetaEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
+        return new MetaEquationBlock(producer, blockDependency, this);
+    }
+
+    @Override
+    public SimpleEquationBlock FIfEquation.createMetaEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency) {
+        return new MetaEquationBlock(producer, blockDependency, this);
     }
 
     public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer,

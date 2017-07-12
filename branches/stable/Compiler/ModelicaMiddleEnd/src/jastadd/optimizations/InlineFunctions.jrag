@@ -285,13 +285,14 @@ aspect FunctionInlining {
             FVariable var = addVar(oldName, variability, type);
             if (variability.knownParameterOrLess()) {
                 try {
-                    value = value.ceval().buildLiteral();
-                    var.setBindingExp(value);
-                    replMap.put(oldName, value);
-                    return;
-                } catch (ConstantEvaluationException e) {
-                    
-                }
+                    CValue cval = value.ceval();
+                    if (cval.hasBuildLiteral()) {
+                        value = cval.buildLiteral();
+                        var.setBindingExp(value);
+                        replMap.put(oldName, value);
+                        return;
+                    }
+                } catch (ConstantEvaluationException e) {}
             }
             if (noEvent)
                 value = value.preventEvents();
@@ -314,8 +315,13 @@ aspect FunctionInlining {
                 try {
                     CValue[] values = call.evaluate(ASTNode.defaultVariableEvaluator());
                     exps = new FExp[values.length];
-                    for (int i = 0; i < values.length; i++)
-                        exps[i] = values[i].buildLiteral();
+                    for (int i = 0; exps != null && i < values.length; i++) {
+                        if (values[i].hasBuildLiteral()) {
+                            exps[i] = values[i].buildLiteral();
+                        } else {
+                            exps = null;
+                        }
+                    }
                 } catch (ConstantEvaluationException e) {
                     exps = null;
                 }
@@ -492,11 +498,12 @@ aspect FunctionInlining {
             FTypePrefixVariability v = fi.contextVariability(this);
             if (v.constantVariability()) {
                 try {
-                    dynamicFExp(ceval().buildLiteral()).addInliningVarsAndEqns(fi, oldName, noEvent);
-                    return;
-                } catch (ConstantEvaluationException e) {
-                    
-                }
+                    CValue cval = ceval();
+                    if (cval.hasBuildLiteral()) {
+                        dynamicFExp(cval.buildLiteral()).addInliningVarsAndEqns(fi, oldName, noEvent);
+                        return;
+                    }
+                } catch (ConstantEvaluationException e) {}
             }
             String tempName = fi.nextTempVarName();
             FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName);
@@ -944,11 +951,15 @@ aspect FunctionInlining {
      * Create a use exp for non-constant variables, and a literal for constant variables.
      */
     public FExp FVariable.createInlineUseFExp() {
-        try {
-            return isConstant() ? ceval().buildLiteral() : createUseExp();
-        } catch (ConstantEvaluationException e) {
-            return createUseExp();
+        if (isConstant()) {
+            try {
+                CValue cval = ceval();
+                if (cval.hasBuildLiteral()) {
+                    return cval.buildLiteral();
+                }
+            } catch (ConstantEvaluationException e) {}
         }
+        return createUseExp();
     }
 
     private static final String ASTNode.REPLACE_UNKNOWN_CHILD_MSG = 
@@ -1707,7 +1718,10 @@ aspect FunctionInlining {
         getFExp().replaceReferences(fi);
         if (isConstant()) {
             try {
-                replaceMe(getFExp().ceval().createFSubscript());
+                CValue cval = getFExp().ceval();
+                if (!cval.isUnknown()) {
+                    replaceMe(cval.createFSubscript());
+                }
             } catch (ConstantEvaluationException e) {}
         }
     }

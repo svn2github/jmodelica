@@ -1246,21 +1246,24 @@ aspect Scalarization {
         boolean lockedBranch = false;
         if (getTest().variability().indexParameterOrLess()) {
             try {
-                if (getTest().ceval().booleanValue()) {
-                    scalarizeList(s, getFAbstractEquations());
-                } else if (hasElse()) {
-                    scalarizeList(s, getElse().getFAbstractEquations());
+                CValue cval = getTest().ceval();
+                if (cval.hasBooleanValue()) {
+                    if (cval.booleanValue()) {
+                        scalarizeList(s, getFAbstractEquations());
+                    } else if (hasElse()) {
+                        scalarizeList(s, getElse().getFAbstractEquations());
+                    }
+                    lockedBranch = true;
                 }
-                lockedBranch = true;
             } catch (ConstantEvaluationException e) {}
         }
         if (!lockedBranch) {
             super.scalarize(s);
         }
     }
-	
+
     public void FIfWhenElseEquation.scalarizeTestAndElse(Scalarizer.Equation s, FIfWhenElseEquation res) {}
-	
+
     public void FIfWhenEquation.scalarizeTestAndElse(Scalarizer.Equation s, FIfWhenElseEquation res) {
 		FIfWhenEquation res2 = (FIfWhenEquation) res;
         res2.setTest(getTest().scalarize(s));
@@ -1335,12 +1338,16 @@ aspect Scalarization {
     eq Root.getChild().surroundingIfOrElse()                        = null;
     eq FIfWhenEquation.getFAbstractEquation().surroundingIfOrElse() = this;
     eq FIfWhenEquation.getElse().surroundingIfOrElse()              = this;
-	
-	
-	public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
-		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().scalarize(indexMap)) : new Opt());
-	}
-    
+
+
+    public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
+        FFunctionCallLeft res = new FFunctionCallLeft();
+        if (hasFExp() && !getFExp().size().isEmpty()) {
+            res.setFExp(getFExp().scalarize(indexMap));
+        }
+        return res;
+    }
+
 	/**
 	 * Create a record constructor (or FArray of record constructors),  
 	 *        with the arguments taken from a record variable with the given name.

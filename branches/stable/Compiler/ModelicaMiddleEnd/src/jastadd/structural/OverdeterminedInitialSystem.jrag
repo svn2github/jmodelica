@@ -175,7 +175,8 @@ aspect OverdeterminedInitialSystem {
             log.verbose("  Left:");
             CValue left = getLeft().ceval(evaluator);
             log.verbose("    Calculated value: %s", left);
-            return left.isValid() && right.isValid() && type().equ(left, right).booleanValue();
+            CValue equ = type().equ(left, right);
+            return equ.hasBooleanValue() && equ.booleanValue();
         } catch (ConstantEvaluationException e) {
             return false;
         }

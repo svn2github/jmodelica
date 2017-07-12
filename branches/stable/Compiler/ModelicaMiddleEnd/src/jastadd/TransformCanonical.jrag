@@ -2090,7 +2090,7 @@ aspect TransformCanonical {
         String tempName = calcTempVarName();
         FTypePrefixVariability v;
         if (param) {
-            v = fParameter();
+            v = fFixedParameter();
         } else {
             v = type().funcOutputVariability();
         }
@@ -2197,31 +2197,39 @@ aspect ParameterSorting {
             }
         }
     }
-	
-	/**
-	 * Sort dependent parameter equations.
-	 * 
-	 * This is a simple implementation of Kahn's topological sorting algorithm.
-	 * This implementation will most likely be replaced by other graph 
-	 * algorithms later on.
-	 */
-	public void FClass.sortDependentParameters() {
-		// Check that all independent parameters can be evaluated.
-		for (FVariable var : getFVariables()) {
-			FTypePrefixVariability variability = var.variability();
-			if (variability.parameterVariability()) {
-				if (var.hasBindingExp() && !var.getBindingExp().isLiteralExp() && !var.isExternalObject()) {
-					try {
-						var.setBindingExp(var.getBindingExp().ceval().buildLiteral());
-					} catch (ConstantEvaluationException e) {
-                        FAbstractEquation fae = new FEquation(var.createUseExp(), var.getBindingExp());
+
+    /**
+     * Sort dependent parameter equations.
+     * 
+     * This is a simple implementation of Kahn's topological sorting algorithm.
+     * This implementation will most likely be replaced by other graph 
+     * algorithms later on.
+     */
+    public void FClass.sortDependentParameters() {
+        // Check that all independent parameters can be evaluated.
+        for (FVariable var : getFVariables()) {
+            FTypePrefixVariability variability = var.variability();
+            if (variability.parameterVariability() && var.hasBindingExp()) {
+                FExp bExp = var.getBindingExp();
+                if (!bExp.isLiteralExp() && !var.isExternalObject()) {
+                    FExp literal = null;
+                    try {
+                        CValue cval = bExp.ceval();
+                        if (cval.hasBuildLiteral()) {
+                            literal = cval.buildLiteral();
+                        }
+                    } catch (ConstantEvaluationException e) {}
+                    if (literal != null) {
+                        var.setBindingExp(literal);
+                    } else {
+                        FAbstractEquation fae = new FEquation(var.createUseExp(), bExp);
                         addFParameterEquationNoTransform(fae);
                         var.removeBindingExp();
-                        parameterEquationsMap().put(var,fae);
-					}
-				}
-			}
-		}
+                        parameterEquationsMap().put(var, fae);
+                    }
+                }
+            }
+        }
 		// Get the list of parameter equations and set up preliminary data.
 		ArrayList<FAbstractEquation> eqns = getFParameterEquations().toArrayList();
 		

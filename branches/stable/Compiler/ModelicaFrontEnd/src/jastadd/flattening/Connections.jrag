@@ -1082,12 +1082,17 @@ aspect Connections {
                 InstComponentDecl flow = cd.myFlowVar();
                 flowExp = new FIdUseExp(flow.flattenedAccess());
                 try {
-                    nominal = Math.abs(flow.nominalAttributeCValue().realValue());
+                    CValue cval = flow.nominalAttributeCValue();
+                    if (cval.hasRealValue()) {
+                        nominal = Math.abs(cval.realValue());
+                    }
                 } catch (ConstantEvaluationException e) {}
                 try {
-                    contribute = isOutside() ? 
-                            (flow.maxAttributeCValue().realValue() > 0) : 
-                            (flow.minAttributeCValue().realValue() < 0);
+                    CValue cval = isOutside() ? flow.maxAttributeCValue() : flow.minAttributeCValue();
+                    if (cval.hasRealValue()) {
+                        double val = cval.realValue();
+                        contribute = isOutside() ? (val > 0) : (val < 0);
+                    }
                 } catch (ConstantEvaluationException e) {}
             }
 
@@ -1326,21 +1331,24 @@ aspect Connections {
         }
     }
 
-	public void FIfEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-		boolean all = true;
-		boolean test = false;
-		try {
-			test = getTest().ceval().booleanValue();
-			all = false;
-		} catch (ConstantEvaluationException e) {
-		}
-		getTest().buildConnectionSets(prefix, csm, connect);
-		for (FAbstractEquation equ : getFAbstractEquations())
-		    equ.buildConnectionSets(prefix, csm, (all || test) && connect);
-		if (hasElse())
-			getElse().buildConnectionSets(prefix, csm, (all || !test) && connect);
-	}
-	
+    public void FIfEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        boolean all = true;
+        boolean test = false;
+        try {
+            CValue cval = getTest().ceval();
+            if (cval.hasBooleanValue()) {
+                test = cval.booleanValue();
+                all = false;
+            }
+        } catch (ConstantEvaluationException e) {
+        }
+        getTest().buildConnectionSets(prefix, csm, connect);
+        for (FAbstractEquation equ : getFAbstractEquations())
+            equ.buildConnectionSets(prefix, csm, (all || test) && connect);
+        if (hasElse())
+            getElse().buildConnectionSets(prefix, csm, (all || !test) && connect);
+    }
+
 	public void InstForClauseE.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
 		Indices indices = Indices.create(getInstForIndexs());
 		for (Index i : indices) {

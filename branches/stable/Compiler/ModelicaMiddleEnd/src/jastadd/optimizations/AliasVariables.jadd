@@ -802,11 +802,15 @@ aspect AliasVariables {
                     boolean selVal = false;
                     for (FAttribute attr : list) {
                         boolean val = false;
-                        boolean set = attr.hasValue();
-                        try {
-                            val = set && attr.getValue().ceval().booleanValue();
-                        } catch (ConstantEvaluationException e) {
-                            set = false;
+                        boolean set = false;
+                        if (attr.hasValue()) {
+                            try {
+                                CValue cval = attr.getValue().ceval();
+                                if (cval.hasBooleanValue()) {
+                                    val = cval.booleanValue();
+                                    set = true;
+                                }
+                            } catch (ConstantEvaluationException e) {}
                         }
                         res = isAnd ? (res && val) : (res || val);
                         if (val == res && (selIndex < 0 || selVal != res)) {
@@ -855,8 +859,12 @@ aspect AliasVariables {
                         boolean isMin = attr.name().equals(FAttribute.MIN);
                         double val = isMin ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
                         try {
-                            if (attr.hasValue())
-                                val = attr.getValue().ceval().realValue();
+                            if (attr.hasValue()) {
+                                CValue cval = attr.getValue().ceval();
+                                if (cval.hasRealValue()) {
+                                    val = cval.realValue();
+                                }
+                            }
                         } catch (ConstantEvaluationException e) {}
                         if (neg.get(i) != targetNeg) {
                             val = -val;
@@ -897,28 +905,29 @@ aspect AliasVariables {
             }
         }
 
-	}
-	
-	/**
-	 * Get the heuristic score for keeping this variable in an alias set.
-	 * 
-	 * The variable with the highest score should be kept. Score is always > 0.
-	 */
-	syn long FVariable.aliasHeuristicScore() {
+    }
+
+    /**
+     * Get the heuristic score for keeping this variable in an alias set.
+     * 
+     * The variable with the highest score should be kept. Score is always > 0.
+     */
+    syn long FVariable.aliasHeuristicScore() {
         long score = 0;
-        
-        // Temporary variables added during transformations or in expandable connectors
+
+        // Temporary variables added during transformations or in expandable connectors.
         if (isFromExpandableConnector()) {
             score += 1;
         } else if (!isTemporary()) {
             score += 2;
         }
-        
+
         // Input
         score *= 10;
-        if (isInput())
+        if (isInput()) {
             score += 1;
-        
+        }
+
         // Parameter
         score *= 10;
         if (variability().parameterOrLess()) {
@@ -930,36 +939,40 @@ aspect AliasVariables {
                 score += 1;
             }
         }
-        
+
         // Stateselect level
         score *= 100;
         FAttribute stateSelectAttribute = findAttribute(FAttribute.STATE_SELECT);
         if (isReal() && stateSelectAttribute != null) {
-            if (!stateSelectAttribute.isInDerivedType())
+            if (!stateSelectAttribute.isInDerivedType()) {
                 score += stateSelectAttribute().ordinal() * 10;
-            else
+            } else {
                 score += stateSelectAttribute().ordinal();
+            }
         }
-        
+
         // Annotations
         score *= 10;
-        if (containsActiveAnnotations())
+        if (containsActiveAnnotations()) {
             score += 1;
-        
+        }
+
         // Fixed attribute == true
         score *= 10;
-        if (isFixed())
+        if (isFixed()) {
             score += 1;
-        
+        }
+
         // Start attribute set
         score *= 10;
-        if (startAttributeSet())
+        if (startAttributeSet()) {
             score += 1;
-        
+        }
+
         // Distance to user
         score *= 1000;
         score += 999 - Math.min(getFQName().numDots(), 999);
-        
+
         // Number of differentiation steps in dummy derivative
         score *= 10;
         score += 9 - Math.min(order(), 9);

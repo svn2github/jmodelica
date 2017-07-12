@@ -282,7 +282,12 @@ aspect AnnotationAPI {
          * Check if this node represents a string value.
          */
         public final boolean isStringValue() {
-            return ceval().isString() && ceval().isScalar();
+            try {
+                CValue val = ceval();
+                return val.isString() && val.isScalar();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**
@@ -300,17 +305,24 @@ aspect AnnotationAPI {
          */
         public final String[] stringVector() {
             try {
-                return ceval().stringVector();
-            } catch (ConstantEvaluationException e) {
-                return null;
-            }
+                CValue val = ceval();
+                if (val.isString() && val.isVector()) {
+                    return val.stringVector();
+                }
+            } catch (ConstantEvaluationException e) {}
+            return null;
         }
 
         /**
          * Check if this node represents a list of strings.
          */
         public final boolean isStringVector() {
-            return ceval().isString() && ceval().isVector();
+            try {
+                CValue val = ceval();
+                return val.isString() && val.isVector();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**
@@ -331,17 +343,24 @@ aspect AnnotationAPI {
          */
         public final int integer() {
             try {
-                return ceval().intValue();
-            } catch (ConstantEvaluationException e) {
-                return 0;
-            }
+                CValue val = ceval();
+                if (val.hasIntValue()) {
+                    return val.intValue();
+                }
+            } catch (ConstantEvaluationException e) {}
+            return 0;
         }
 
         /**
          * Check if this node represents an integer value.
          */
         public final boolean isIntegerValue() {
-            return ceval().isInteger() && ceval().isScalar();
+            try {
+                CValue val = ceval();
+                return val.isInteger() && val.isScalar();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**
@@ -349,17 +368,24 @@ aspect AnnotationAPI {
          */
         public final double real() {
             try {
-                return ceval().realValue();
-            } catch (ConstantEvaluationException e) {
-                return 0.0;
-            }
+                CValue val = ceval();
+                if (val.hasRealValue()) {
+                    return val.realValue();
+                }
+            } catch (ConstantEvaluationException e) {}
+            return 0.0;
         }
 
         /**
          * Check if this node represents a real value.
          */
         public final boolean isRealValue() {
-            return ceval().isReal() && ceval().isScalar();
+            try {
+                CValue val = ceval();
+                return val.isReal() && val.isScalar();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**
@@ -367,17 +393,24 @@ aspect AnnotationAPI {
          */
         public final double[] realVector() {
             try {
-                return ceval().realVector();
-            } catch (ConstantEvaluationException e) {
-                return null;
-            }
+                CValue val = ceval();
+                if (val.isReal() && val.isVector()) {
+                    return val.realVector();
+                }
+            } catch (ConstantEvaluationException e) {}
+            return null;
         }
 
         /**
          * Check if this node represents a vector of real values.
          */
         public final boolean isRealVectorValue() {
-            return ceval().isReal() && ceval().isVector();
+            try {
+                CValue val = ceval();
+                return val.isReal() && val.isVector();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**
@@ -385,17 +418,24 @@ aspect AnnotationAPI {
          */
         public final double[][] realMatrix() {
             try {
-                return ceval().realMatrix();
-            } catch (ConstantEvaluationException e) {
-                return null;
-            }
+                CValue val = ceval();
+                if (val.isReal() && val.isMatrix()) {
+                    return val.realMatrix();
+                }
+            } catch (ConstantEvaluationException e) {}
+            return null;
         }
 
         /**
          * Check if this node represents a matrix of real values.
          */
         public final boolean isRealMatrixValue() {
-            return ceval().isReal() && ceval().isMatrix();
+            try {
+                CValue val = ceval();
+                return val.isReal() && val.isMatrix();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**
@@ -403,17 +443,24 @@ aspect AnnotationAPI {
          */
         public final boolean bool() {
             try {
-                return ceval().booleanValue();
-            } catch (ConstantEvaluationException e) {
-                return false;
-            }
+                CValue val = ceval();
+                if (val.hasBooleanValue()) {
+                    return val.booleanValue();
+                }
+            } catch (ConstantEvaluationException e) {}
+            return false;
         }
 
         /**
          * Check if this node represents a boolean value.
          */
         public final boolean isBoolValue() {
-            return ceval().isBoolean() && ceval().isScalar();
+            try {
+                CValue val = ceval();
+                return val.isBoolean() && val.isScalar();
+            } catch (ConstantEvaluationException e) {
+                return false;
+            }
         }
 
         /**

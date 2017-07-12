@@ -352,6 +352,12 @@ abstract public class OptionRegistry {
              Category.user,
              false,
              "If enabled, then flat model before and after transformations will be generated."),
+        FMU_TYPE
+        	("fmu_type",
+        	 OptionType.compiler,
+        	 Category.internal,
+        	 "",
+        	 "Semicolon separated list of defines to set, e.g. FMUCS20."),
         EXTRA_LIB
             ("extra_lib_dirs", 
              OptionType.compiler, 
@@ -703,12 +709,6 @@ abstract public class OptionRegistry {
              Category.user,
              false,
              "If enabled, output variables are generated for each generated event."),
-        EQUATION_EVENT_INDICATORS
-            ("equation_event_indicators",
-             OptionType.compiler,
-             Category.internal,
-             true,
-             "If enabled, event indicators are generated from equations."),
         DISABLE_SMOOTH_EVENTS
             ("disable_smooth_events",
              OptionType.compiler,

@@ -1546,7 +1546,6 @@ fclass IndexReduction.AlgorithmVariability1
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  discrete Integer i;
- Real _eventIndicator_1;
  Real _der_x;
  Real _der_vx;
  Real _der_der_y;
@@ -1567,7 +1566,6 @@ algorithm
   i := -1;
  end if;
 equation
- _eventIndicator_1 = y - 3.12;
  2 * x * _der_x + 2 * y * der(y) = 0.0;
  _der_der_y = der(vy);
  2 * x * _der_vx + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
@@ -1676,19 +1674,19 @@ algorithm
             flatModel="
 fclass IndexReduction.AlgorithmVariability4
  Real x;
+ Real y;
  discrete Boolean b;
  parameter Integer p = 1 /* 1 */;
  parameter Integer it[1] = 1 /* 1 */;
  parameter Real rt[1] = 2.0 /* 2.0 */;
- Real _eventIndicator_1;
 initial equation
  pre(b) = false;
 equation
  x = time;
 algorithm
- b := _eventIndicator_1 > 0;
+ b := y > 0;
 equation
- _eventIndicator_1 = 1.0;
+ y = 1.0;
 end IndexReduction.AlgorithmVariability4;
 ")})));
   end AlgorithmVariability4;

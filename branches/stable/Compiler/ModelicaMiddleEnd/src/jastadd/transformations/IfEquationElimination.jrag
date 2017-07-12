@@ -63,27 +63,19 @@ aspect IfEquationElimination {
 
     }
 
-    syn List<FAbstractEquation> FIfWhenElseEquation.myIfEliminatedEquations() {
-        List<FAbstractEquation> equations = new List<FAbstractEquation>();
-        for (FAbstractEquation equation : getFAbstractEquations()) {
-            equation.eliminateIfEquations(equations);
-        }
-        return equations;
-    }
-
-    public void ASTNode.eliminateIfEquations(List<FAbstractEquation> equations) {}
-    public void FAbstractEquation.eliminateIfEquations(List<FAbstractEquation> equations) { equations.add(this); }
-    public FIfWhenElseEquation FIfWhenElseEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations,
-            boolean falseBranchesOnly) { return this; }
-
     /**
      * Eliminates unnecessary if equations.
      * 
      * @param equations
      *          The list in which to put equations that are extracted from live branches.
      */
+    public void ASTNode.eliminateIfEquations(List<FAbstractEquation> equations) {}
+    public void FAbstractEquation.eliminateIfEquations(List<FAbstractEquation> equations) { 
+        equations.add(this);
+    }
+
     public void FIfWhenEquation.eliminateIfEquations(List<FAbstractEquation> equations) {
-        FIfWhenElseEquation eqn = eliminateIfEquationsLocal(equations, false);
+        FIfWhenElseEquation eqn = eliminateIfEquationsLocal(equations);
         if (eqn != null) {
             equations.add(eqn);
         }
@@ -99,23 +91,52 @@ aspect IfEquationElimination {
      * evaluated to false, in which case they are disregarded. Remaining live branches are kept but their
      * block equations are not added yet, since <i>the first</i> {@code true} test's equations should be added,
      * and there are preceding branches that could not be evaluated.
-     * This is specified with the {@code falseBranchesOnly} flag.
+     * This is specified with {@code equations} being null.
      * 
      * @param equations
      *          The list in which to put equations that are extracted from live branches.
-     * @param falseBranchesOnly
-     *          A flag specifying whether or not to only eliminate dead branches and ignore live branches.
-     *          The flag is set to true as soon as a test could not be evaluated.
+     *          If null, only eliminate dead branches, and return new else branch of parent.
      * @return
      *          this branch if it could not be evaluated, {@code null} otherwise. If non-{@code null} this equation is
      *          added back to the {@code equations} list by {@link #eliminateIfEquations(List<FAbstractEquation>)}.
      */
-    public FIfWhenElseEquation FIfEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations,
-            boolean falseBranchesOnly) {
+    public FIfWhenElseEquation FIfWhenElseEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations) {
+        return this;
+    }
 
-        if (!getTest().isConstantExp()) {
+    public FIfWhenElseEquation FIfEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations) {
+        boolean evaluated = false;
+        boolean testValue = false;
+        if (getTest().variability().knownParameterOrLess()) {
+            try {
+                CValue cval = getTest().ceval();
+                if (cval.hasBooleanValue()) {
+                    testValue = cval.booleanValue();
+                    evaluated = true;
+                }
+            } catch (ConstantEvaluationException e) {}
+        }
+        
+        if (evaluated) {
+            if (testValue) {
+                if (equations == null) {
+                    List<FAbstractEquation> subEquations = new List<>();
+                    eliminateChildIfEquationsToList(subEquations);
+                    return new FElseEquation(getType(), subEquations);
+               } else {
+                    eliminateChildIfEquationsToList(equations);
+                    return null;
+                }
+            } else {
+                if (hasElse()) {
+                    return getElse().eliminateIfEquationsLocal(equations);
+                } else {
+                    return null;
+                }
+            }
+        } else {
             if (hasElse()) {
-                FIfWhenElseEquation elseEquation = getElse().eliminateIfEquationsLocal(equations, true);
+                FIfWhenElseEquation elseEquation = getElse().eliminateIfEquationsLocal(null);
                 if (elseEquation == null) {
                     setElseOpt(new Opt<FIfWhenElseEquation>());
                 } else {
@@ -124,45 +145,38 @@ aspect IfEquationElimination {
             }
             return this;
         }
-
-        try {
-            if (getTest().ceval().booleanValue() && !falseBranchesOnly) {
-                equations.addAll(myIfEliminatedEquations());
-                return null;
-            } else if (hasElse()) {
-                return getElse().eliminateIfEquationsLocal(equations, falseBranchesOnly);
-            }
-        } catch (ConstantEvaluationException e) {
-            /*
-             * Test failed to evaluate to boolean constant. In this case we do nothing.
-             */
-            return this;
-        }
-        return null;
     }
 
     /**
-     * Eliminates the else branch, if it was determined to be the live branch.
+     * Keeps the else branch, if it was determined to be the live branch.
      * <p>
      * If-equation-elimination only reaches this method in two cases: either all previous branches were determinedly
-     * false (meaning that {@code falseBranchesOnly} is still false) in which case the block equations are added
+     * false (meaning that {@code equations} is non-{@code null}) in which case the block equations are added
      * to {@code equations}. In the other case not all branches could be evaluated, and this branch needs to be kept.
      * 
      * @param equations
      *          The list in which to put equations that are extracted from true branches.
-     * @param falseBranchesOnly
-     *          A flag specifying whether or not to only eliminate dead branches and ignore
-     *          live branches. The flag is set to true as soon as a test could not be evaluated.
      */
-    public FIfWhenElseEquation FElseEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations,
-            boolean falseBranchesOnly) {
-
-        if (falseBranchesOnly) {
+    public FIfWhenElseEquation FElseEquation.eliminateIfEquationsLocal(List<FAbstractEquation> equations) {
+        if (equations == null) {
+            eliminateChildIfEquationsInPlace();
             return this;
+        } else {
+            eliminateChildIfEquationsToList(equations);
+            return null;
         }
+    }
 
-        equations.addAll(myIfEliminatedEquations());
-        return null;
+    public void FIfWhenElseEquation.eliminateChildIfEquationsToList(List<FAbstractEquation> equations) {
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            equation.eliminateIfEquations(equations);
+        }
+    }
+
+    public void FIfWhenElseEquation.eliminateChildIfEquationsInPlace() {
+        List<FAbstractEquation> equations = new List<>();
+        eliminateChildIfEquationsToList(equations);
+        setFAbstractEquationList(equations);
     }
 
     /**

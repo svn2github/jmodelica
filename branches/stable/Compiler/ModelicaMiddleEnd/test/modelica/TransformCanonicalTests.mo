@@ -4367,84 +4367,100 @@ end IfEqu8;
 
 
 model IfEqu9
-	Real x[2];
-	Boolean y = true;
+    Real x[2];
+    Boolean y = time < 3;
 equation
-	if false then
-		x = 1:2;
-	elseif y then
-		x = 3:4;
-	elseif false then
-		x = 5:6;
-	else
-		x = 7:8;
-	end if;
+    if false then
+        x = 1:2;
+    elseif y then
+        x = 3:4;
+    elseif false then
+        x = 5:6;
+    else
+        x = 7:8;
+    end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu9",
-			description="If equations: branch elimination with one test non-parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu9",
+            description="If equations: branch elimination with one test non-parameter",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu9
- constant Real x[1] = 3;
- constant Real x[2] = 4;
- constant Boolean y = true;
+ Real x[1];
+ Real x[2];
+ discrete Boolean y;
+initial equation
+ pre(y) = false;
+equation
+ x[1] = if y then 3 else 7;
+ x[2] = if y then 4 else 8;
+ y = time < 3;
 end TransformCanonicalTests.IfEqu9;
 ")})));
 end IfEqu9;
 
 
 model IfEqu10
-	Real x[2];
-	Boolean y = true;
+    Real x[2];
+    Boolean y = time < 3;
 equation
-	if false then
-		x = 1:2;
-	elseif y then
-		x = 3:4;
-	elseif true then
-		x = 5:6;
-	else
-		x = 7:8;
-	end if;
+    if false then
+        x = 1:2;
+    elseif y then
+        x = 3:4;
+    elseif true then
+        x = 5:6;
+    else
+        x = 7:8;
+    end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu10",
-			description="If equations: branch elimination with one test non-parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu10",
+            description="If equations: branch elimination with one test non-parameter",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu10
- constant Real x[1] = 3;
- constant Real x[2] = 4;
- constant Boolean y = true;
+ Real x[1];
+ Real x[2];
+ discrete Boolean y;
+initial equation
+ pre(y) = false;
+equation
+ x[1] = if y then 3 else 5;
+ x[2] = if y then 4 else 6;
+ y = time < 3;
 end TransformCanonicalTests.IfEqu10;
 ")})));
 end IfEqu10;
 
 
 model IfEqu11
-	Real x[2];
-	Boolean y = true;
+    Real x[2];
+    Boolean y = time < 3;
 equation
-	if true then
-		x = 1:2;
-	elseif y then
-		x = 3:4;
-	elseif false then
-		x = 5:6;
-	else
-		x = 7:8;
-	end if;
+    if true then
+        x = 1:2;
+    elseif y then
+        x = 3:4;
+    elseif false then
+        x = 5:6;
+    else
+        x = 7:8;
+    end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu11",
-			description="If equations: branch elimination with one test non-parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu11",
+            description="If equations: branch elimination with one test non-parameter",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu11
  constant Real x[1] = 1;
  constant Real x[2] = 2;
- constant Boolean y = true;
+ discrete Boolean y;
+initial equation
+ pre(y) = false;
+equation
+ y = time < 3;
 end TransformCanonicalTests.IfEqu11;
 ")})));
 end IfEqu11;
@@ -7583,7 +7599,7 @@ algorithm
 Coefficient variability: constant
 Torn variables:
   a
-  _eventIndicator_1
+  e
   b
   c
 
@@ -7595,7 +7611,7 @@ Solved discrete variables:
 
 Torn equations:
   a := time + d * 2
-  _eventIndicator_1 := a * 2 + (- d)
+  e := a * 2 + (- d)
   algorithm
     if temp_1 and not pre(temp_1) then
       b := pre(d) + 1;
@@ -7610,7 +7626,7 @@ Continuous residual equations:
     Iteration variables: d
 
 Discrete equations:
-  temp_1 := _eventIndicator_1 > 0
+  temp_1 := e > 0
 
 Jacobian:
   |1.0, 0.0, 0.0, 0.0, -2|
@@ -8259,5 +8275,108 @@ public
 end TransformCanonicalTests.ForOfUnknownSize5;
 ")})));
 end ForOfUnknownSize5;
+
+
+model FunctionWithZeroSizeOutput1
+    function f
+        input Real[:] x;
+        input Integer n;
+        output Real[size(x,1)] y;
+        output Real[size(x,1) - n] z;
+    algorithm
+        y := x .+ 1;
+        y := y .* 2;
+    end f;
+    
+    Real x[2];
+    Real y[2];
+    Real z[0];
+equation
+    (y, z) = f(x, 2);
+    der(x) = {y[2], time};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionWithZeroSizeOutput1",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.FunctionWithZeroSizeOutput1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+initial equation
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ ({y[1], y[2]}, ) = TransformCanonicalTests.FunctionWithZeroSizeOutput1.f({x[1], x[2]}, 2);
+ der(x[1]) = y[2];
+ der(x[2]) = time;
+
+public
+ function TransformCanonicalTests.FunctionWithZeroSizeOutput1.f
+  input Real[:] x;
+  input Integer n;
+  output Real[:] y;
+  output Real[:] z;
+  Real[:] temp_1;
+ algorithm
+  init y as Real[size(x, 1)];
+  init z as Real[size(x, 1) - n];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1] .+ 1;
+  end for;
+  init temp_1 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_1[i1] := y[i1] .* 2;
+  end for;
+  for i1 in 1:size(x, 1) loop
+   y[i1] := temp_1[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.FunctionWithZeroSizeOutput1.f;
+
+end TransformCanonicalTests.FunctionWithZeroSizeOutput1;
+")})));
+end FunctionWithZeroSizeOutput1;
+
+
+model FunctionWithZeroSizeOutput2
+    function f
+        input Real[2] x;
+        output Real[2] y;
+        output Real[0] z;
+    algorithm
+        y := x .+ 1;
+        end f;
+    
+    Real x[2];
+    Real y[2];
+    Real z[0];
+equation
+    (y, z) = f(x);
+    der(x) = {y[2], time};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionWithZeroSizeOutput2",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.FunctionWithZeroSizeOutput2
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+initial equation
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ y[1] = x[1] .+ 1;
+ der(x[1]) = x[2] .+ 1;
+ der(x[1]) = y[2];
+ der(x[2]) = time;
+end TransformCanonicalTests.FunctionWithZeroSizeOutput2;
+")})));
+end FunctionWithZeroSizeOutput2;
 
 end TransformCanonicalTests;

@@ -1,0 +1,26 @@
+================= Unreleased ==================
+; Change ; Minor ; Runtime ; #5401
+Added defines to handle missing CLOCKS_PER_SEC
+
+; Change ; Minor ; Runtime ; #5400
+Reworked how we check if a directory exist.
+
+; Change ; Minor ; Runtime ; #5399
+Delayed check of the resource location until it is asked for.
+
+; Bugfix ; Minor ; Compiler ; #5394
+Fixed compiler crash when using function with several outputs where one is 
+a zero-size array.
+
+; Change ; Minor ; Compiler ; #5398
+Removed the need to define fmu type in the make file
+
+; Feature ; Minor ; Compiler ; #5375
+Added compiler option "event_output_vars". When set, output variables are
+generated for each event indicator.
+
+; Other ; Minor ; General ; #5393
+Added a changelog to JModelica.org.
+
+
+==================== JM 2.0 ===================

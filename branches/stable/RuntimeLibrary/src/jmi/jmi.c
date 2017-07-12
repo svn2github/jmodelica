@@ -299,6 +299,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->model_terminate = 0;
     jmi_->user_terminate = 0;
     jmi_->reinit_triggered = 0;
+    jmi_->resource_location_verified = 0;
 
     jmi_->is_initialized = 0;
 

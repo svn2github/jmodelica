@@ -213,7 +213,6 @@ aspect NormalizeFinalTimeProblems {
 	boolean FDerExp.rewritten = false;
 	
 	rewrite FDerExp {when (rewriteStartAndFinalTime && !rewritten) to FExp {
-		    //System.out.println("hej");
 			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FIdUse("finalTime")),
 					new FIdUseExp(new FIdUse("startTime"))));
 			rewritten = true;

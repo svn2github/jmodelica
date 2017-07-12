@@ -456,6 +456,7 @@ struct jmi_t {
     jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
     
     jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. No trailing separator. May be null. */
+    jmi_int_t resource_location_verified;/**< \brief Flag indicating if the resource location has been checked to exist or not. */
 
     jmi_modules_t modules;               /**< \brief Interchangable modules struct */
     jmi_chattering_t* chattering;        /**< \brief Contains chattering information, used for logging */

@@ -32,7 +32,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.jmodelica.util.logging.StreamingLogger;
@@ -264,12 +263,14 @@ aspect FlatNames {
     public FSubscript FExpSubscript.createEvaluated() {
         try {
             CValue val = getFExp().ceval();
-            if (val.isArray())
+            if (val.isArray()) {
                 val = val.array().getCell(0);
-            return val.createFSubscript();
-        } catch (ConstantEvaluationException e) {
-            return fullCopy();
-        }
+            }
+            if (!val.isUnknown()) {
+                return val.createFSubscript();
+            }
+        } catch (ConstantEvaluationException e) {}
+        return fullCopy();
     }
     
     syn boolean FSubscript.isColon() = false;

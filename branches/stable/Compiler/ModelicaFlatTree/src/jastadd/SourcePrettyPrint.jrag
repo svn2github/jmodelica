@@ -2,10 +2,6 @@ import java.util.ArrayList;
 
 import beaver.Symbol;
 
-//fabstractequaton
-    //fabstractvariable
-    //fexp
-
 aspect SourcePrettyPrint {
 
     /**
@@ -32,12 +28,6 @@ aspect SourcePrettyPrint {
     }
 
 	public void BaseNode.sourcePrettyPrint(Printer p, CodeStream str, String indent){
-		if(this.fName == null)
-			log.debug(this.toString() + " " + this.getClass().toString() + "----Source file: " + this.fName);
-		
-		
-		//log.debug("Base----Source position: " + this.start + " " + this.end);
-		//log.debug("Base----Source file: " + this.fName);
 		prettyPrint(p, str, indent);
 	}
 	
@@ -53,43 +43,23 @@ aspect SourcePrettyPrint {
 		//if(this.fName != null)
 			//str.print("%Var location: " + this.fName);
 		
-		log.debug("FVar----Source position: " + this.start + " " + this.end);
-		log.debug("FVar----Source file: " + this.fName);
 		prettyPrint(p, str, indent);
 	}
 	
 	/*public void FSinExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		//str.print("Source file: " + this.start + " " + this.end);
-		log.debug("SinExp----Source position: " + this.start + " " + this.end);
-		log.debug("SinExp----Source file: " + this.fName);	
 		prettyPrint(p, str, indent);
 	}*/
 	
 	/*public void FExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
-		if(this.fName == null)
-			log.debug(this.toString() + " " + this.getClass().toString() + "----Source file: " + this.fName);
-		
-		log.debug("Exp----Source position: " + this.start + " " + this.end);
-		log.debug("Exp----Source file: " + this.fName);
-		//log.debug(this.getClass().getName());
-		
 		prettyPrint(p, str, indent);
 		
 	}
 	public void FAbstractVariable.sourcePrettyPrint(Printer p, CodeStream str, String indent){
-		if(this.fName == null)
-			log.debug(this.toString() + " " + this.getClass().toString() + "----Source file: " + this.fName);
-		log.debug("AbstractVariable----Source position: " + this.start + " " + this.end);
-		log.debug("AbstractVariable----Source file: " + this.fName);
 		prettyPrint(p, str, indent);
 	}
 	
 	public void FEquation.sourcePrettyPrint(Printer p, CodeStream str, String indent){
-		if(this.fName == null)
-			log.debug(this.toString() + " " + this.getClass().toString() + "----Source file: " + this.fName);
-		log.debug("FEquation----Source position: " + this.start + " " + this.end);
-		log.debug("FEquation----Source file: " + this.fName);
-
 		prettyPrint(p, str, indent);
 		
 	}
@@ -164,7 +134,6 @@ aspect SourceDiagnosticsPrinter{
  		}
 }
 public void ASTNode.sourceDiagnosticsPrint(Printer p, String indent) {
-	//System.out.println("ASTNode");
 	prettyPrint(p, new Codestream(), indent);
 }
 public void ASTNode.sourceDiagnosticsPrint(CodeStream str, String indent) {
@@ -186,7 +155,7 @@ aspect Temp_CValue{
 
         return ceval_value;
 	}
-		
+
 	public CValue FExp.ceval(VariableEvaluator evaluator, BaseNode sourceCollector) {
         ASTNode$State state = state();
         try {

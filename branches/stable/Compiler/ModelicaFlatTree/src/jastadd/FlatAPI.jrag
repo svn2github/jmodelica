@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.math.BigInteger;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -2678,13 +2676,28 @@ aspect ReferencedVariables {
             visitor.visit(n, set);
         }
     }
-    
+
     @Override
     public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         set.add(this);
         super.findFIdUseExpsInTree(set, visitor);
     }
-    
+
+    @Override
+    public void FRelExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        Opt<FExp> indicator = getIndicatorOpt();
+
+        if (indicator == null) {
+            super.findFIdUseExpsInTree(set, visitor);
+        } else {
+            for (ASTNode<?> n : this) {
+                if (indicator != n) {
+                    n.findFIdUseExpsInTree(set, visitor);
+                }
+            }
+        }
+    }
+
     @Override
     public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
     }
@@ -3336,10 +3349,11 @@ aspect Nominals {
         FExp nom = getLeft().dynamicFExp(FExp.nominalMax(getLeft(), getRight()));
         if (nom.variability().knownParameterOrLess()) {
             try {
-                nom = getLeft().dynamicFExp(nom.ceval().buildLiteral());
-            } catch (ConstantEvaluationException e) {
-                
-            }
+                CValue val = nom.ceval();
+                if (val.hasBuildLiteral()) {
+                    nom = getLeft().dynamicFExp(val.buildLiteral());
+                }
+            } catch (ConstantEvaluationException e) {}
         }
         return nom;
     }
@@ -3467,7 +3481,17 @@ aspect FVariableUses {
     eq FFunctionCall.getArg().isFunctionCallArg() = true;
     eq FIfExp.getThenExp().isFunctionCallArg()    = isFunctionCallArg();
     eq FIfExp.getElseExp().isFunctionCallArg()    = isFunctionCallArg();
-    
+
+    syn boolean FExp.containsCommonFunctionCallExp() {
+        for (FExp exp : childFExps()) {
+            if (exp.containsCommonFunctionCallExp()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    eq CommonFunctionCall.containsCommonFunctionCallExp() = true;
+
     /**
      * Returnes the function input that this expressions corresponds to.
      * NOTICE, this method will throw exception if this exp does not reside in a function call.

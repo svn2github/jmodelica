@@ -106,19 +106,19 @@ aspect FlatStatements {
             if (c.getTest().variability().indexParameterOrLess()) {
                 try {
                     CValue val = c.getTest().ceval();
-                    if (!val.booleanValue()) {
-                        continue;
-                    } else if (first) {
-                        return FStatement.flattenFStatementList(c.getFStatements(), sl, fc, prefix) || hasBroken;
-                    } else {
-                        List l = new List();
-                        hasBroken = FStatement.flattenFStatementList(c.getFStatements(), l, fc, prefix) || hasBroken;
-                        sl.add(new FIfStmt(cl, l));
-                        return hasBroken;
+                    if (val.hasBooleanValue()) { 
+                        if (!val.booleanValue()) {
+                            continue;
+                        } else if (first) {
+                            return FStatement.flattenFStatementList(c.getFStatements(), sl, fc, prefix) || hasBroken;
+                        } else {
+                            List l = new List();
+                            hasBroken = FStatement.flattenFStatementList(c.getFStatements(), l, fc, prefix) || hasBroken;
+                            sl.add(new FIfStmt(cl, l));
+                            return hasBroken;
+                        }
                     }
-                } catch (ConstantEvaluationException e) {
-                    
-                }
+                } catch (ConstantEvaluationException e) {}
             }
             first = false;
             hasBroken = c.flatten(cl, fc, prefix) || hasBroken;

@@ -35,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
 import org.jmodelica.util.logging.StreamingLogger;
@@ -1045,15 +1046,15 @@ aspect Names {
         try {
             URI uri = new URI(str);
             if (uri.getScheme() != null) {
-                if (uri.getScheme().equals("file")) {
+                if (uri.getScheme().equalsIgnoreCase("file")) {
                     return uri.getPath();
-                } else if (uri.getScheme().equals("modelica")) {
+                } else if (uri.getScheme().equalsIgnoreCase("modelica")) {
                     String pack = packagePath(uri.getAuthority());
                     if (pack != null) {
                         return canonicalPath(new File(pack + uri.getPath()));
                     }
                 } else if (error) {
-                    error("Unsupported URI scheme '%s'.", uri.getScheme());
+                    error("Unsupported URI scheme '%s'.", uri.getScheme().toLowerCase());
                 }
             }
         } catch (URISyntaxException e) {
@@ -1681,11 +1682,13 @@ aspect ComponentDeclMethods {
      * Check if this component is disabled by a conditional clause
      */
     syn boolean InstComponentDecl.isDisabled() {
-        try {
-            return hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
-        } catch (ConstantEvaluationException e) {
-            return false;
+        if (hasConditionalAttribute()) {
+            try {
+                CValue cval = getConditionalAttribute().ceval();
+                return cval.hasBooleanValue() && !cval.booleanValue();
+            } catch (ConstantEvaluationException e) {}
         }
+        return false;
     }
     
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();

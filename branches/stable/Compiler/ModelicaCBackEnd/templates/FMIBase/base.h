@@ -21,6 +21,8 @@
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 
+$fmu_type_define$
+
 extern void dgemm_(char* TRANSA, char* TRANSB, int* M, int* N, int* K, double* ALPHA, double* A, int* LDA, double* B, int* LDB, double* BETA, double* C, int* LDC);
 
 int model_ode_derivatives(jmi_t* jmi);
