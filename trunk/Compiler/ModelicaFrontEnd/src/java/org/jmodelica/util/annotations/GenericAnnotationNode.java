@@ -43,7 +43,7 @@ import org.jmodelica.util.values.Evaluable;
  * @param <V> The value that is returned by the nodes
  */
 public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N, V>,
-        N extends AnnotationProvider<N, V>, V extends Evaluable & PossiblyAnnotation<N>> {
+        N extends AnnotationProvider<N, V>, V extends Evaluable> {
 
     /**
      * Vendor name.
@@ -273,7 +273,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             if (!hasValue()) {
                 valueAnnotation_cache = createNode(null, null);
             } else {
-                N annotationNode = value().asAnnotationProvider();
+                N annotationNode = valueAsProvider(value());
                 if (annotationNode == null) {
                     valueAnnotation_cache = null;
                 } else {
@@ -283,6 +283,16 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         }
         return valueAnnotation_cache;
     }
+
+    /**
+     * If the provided value can be interpreted as an annotation node, then
+     * this method should return the provider that reflects the value as an
+     * annotation node.
+     * 
+     * @param value Value which can be an annotation node
+     * @return Provider which reflects the value as annotation node
+     */
+    protected abstract N valueAsProvider(V value);
 
     @Override
     public String toString() {
