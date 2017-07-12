@@ -39,11 +39,11 @@ aspect CCodeGen {
     public class CPrettyPrinter extends CodePrinter {
 
         public CPrettyPrinter() {
-            this(null);
+            this(null, false, Homotopy.HOMOTOPY, true);
         }
         
         public CPrettyPrinter(AbstractEquationBlock block) {
-            this(block, false, Homotopy.HOMOTOPY, true);
+            this(block, false, Homotopy.HOMOTOPY, false);
         }
 
         protected CPrettyPrinter(AbstractEquationBlock block, boolean inInitialSystem, Homotopy homotopyType,
@@ -2150,6 +2150,8 @@ aspect CCodeGen {
             genBlockResidualFunction_jacobian_C(p, str, p.indent(indent));
             genCloseEvalMode_C(str, indent);
         }
+        
+        p = p.evalPrinter();
         
         str.print("if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
         // Loop over all active variables and write the values in x to the z vector

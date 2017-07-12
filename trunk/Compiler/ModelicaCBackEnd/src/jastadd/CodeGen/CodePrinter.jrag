@@ -140,7 +140,14 @@ aspect CodePrinter {
             }
             return this;
         }
-        
+
+        public final CodePrinter evalPrinter() {
+            if (!writeSwitches) {
+                return createPrinter(block, inInitialSystem, homotopyType, true);
+            }
+            return this;
+        }
+
         public boolean inInitialSystem() {
             return inInitialSystem;
         }
