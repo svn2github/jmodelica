@@ -16,12 +16,6 @@
     see <http://www.gnu.org/licenses/> or
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #define _GNU_SOURCE
-  #include <dlfcn.h>
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -39,73 +33,6 @@ const char* fmi1_me_get_model_types_platform() {
 }
 const char* fmi1_me_get_version() {
     return fmiVersion;
-}
-
-/* Local helpers for fmi1_me_instantiate_model */
-int jmi_find_parent_dir(char* path, const char* dir) {
-    int found = 0;
-    int dir_level = 3;
-    int c_i = strlen(path) - 1;
-    
-    while(dir_level > 0 && !found) {
-        while(c_i > 0 && path[c_i] != '\\' && path[c_i] != '/')
-            c_i--;
-        if (c_i <= 0)
-            break;
-        if (strcmp(&path[c_i+1],dir) == 0)
-            found = 1;
-        path[c_i]= '\0';
-        c_i--;
-        dir_level--;
-    }
-    
-    return found;
-}
-
-union jmi_func_cast {
-    void* x;
-    char* (*y)();
-};
-
-void* jmi_func_to_voidp(char* (*y)()) {
-    union jmi_func_cast jfc;
-    assert(sizeof(jfc.x)==sizeof(jfc.y));
-    jfc.y = y;
-    return jfc.x;
-}
- 
-char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size)) {
-    int found;
-    char *resource_dir = "/resources";
-    char *binary_dir = "binaries";
-    char *res;
-    char path[JMI_PATH_MAX];
-    char *resolved = path;
-    
-#ifdef _WIN32
-    EXTERN_C IMAGE_DOS_HEADER __ImageBase;
-    GetModuleFileName((HINSTANCE)&__ImageBase, path, MAX_PATH);
-#else
-    Dl_info info;
-    dladdr(jmi_func_to_voidp(jmi_locate_resources), &info);
-    resolved = realpath(info.dli_fname, path);
-    if (!resolved)
-        return NULL;
-#endif
-    
-    found = jmi_find_parent_dir(resolved, binary_dir);
-    
-    if (!found)
-        return NULL;
-    
-    strcat(resolved, resource_dir);
-    
-    if (!jmi_dir_exists(resolved))
-        return NULL;
-    
-    res = allocateMemory(strlen(resolved)+1,sizeof(char));
-    strcpy(res, resolved);
-    return res;
 }
 
 /* Creation and destruction of model instances and setting debug status */

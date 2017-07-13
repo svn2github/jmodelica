@@ -29,6 +29,9 @@
 #include "jmi_log.h"
 #include "jmi.h"
 
+#if !defined(NO_FILE_SYSTEM) && (defined(RT) || defined(NRT))
+#define NO_FILE_SYSTEM
+#endif
 
 #ifdef _MSC_VER
 /* Use Microsoft stuff. */
@@ -67,6 +70,18 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 /* Macro for function that gets thread-specific storage value. */
 #define jmi_tls_get_value TlsGetValue
 
+#elif defined(NO_FILE_SYSTEM) /* ifdef _MSC_VER */
+    
+static void* jmi_tls_handle;
+
+void jmi_tls_set_value(void *handle, jmi_t* jmi) {
+    handle = (void*)jmi;
+}
+
+void* jmi_tls_get_value(void *handle) {
+    return handle;
+}
+    
 #else /* ifdef _MSC_VER */
 /* Assume pthreads is available. */
 
