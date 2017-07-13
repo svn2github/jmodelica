@@ -32,7 +32,7 @@
 #include "module_include/jmi_get_set.h"
 
 void jmi_z_init(jmi_z_t* z) {
-    size_t i;
+    int i;
     char *empty = "";
     size_t defaultLen = strlen(empty) + 1;
     z->strings.values = calloc(sizeof(char*), z->strings.offsets.n);
@@ -43,7 +43,7 @@ void jmi_z_init(jmi_z_t* z) {
 }
 
 void jmi_z_delete(jmi_z_t* z) {
-    size_t i;
+    int i;
     for (i = 0; i < z->strings.offsets.n; i++) {
         free(z->strings.values[i]);
     }
@@ -250,7 +250,7 @@ int jmi_init(jmi_t** jmi,
     }
     jmi_->n_dynamic_state_sets = n_dynamic_state_sets;
     jmi_->dynamic_state_sets = (jmi_dynamic_state_set_t*)calloc(n_dynamic_state_sets,sizeof(jmi_dynamic_state_set_t));
-    jmi_->updated_states = JMI_FALSE;
+    jmi_->updated_states = FALSE;
     
     jmi_->chattering = jmi_chattering_create(n_sw);
     

@@ -207,7 +207,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     jmi_log_t* log = jmi->log;
     int iter = block->event_iter;
     int ef;
-    jmi_int_t changed_pre_values = JMI_FALSE;
+    jmi_int_t changed_pre_values = FALSE;
 
     jmi_real_t *pre_switches, *pre_non_reals, *pre_discrete_reals;
     jmi_real_t* switches  = &block->sw_old[iter*block->n_sw];
@@ -335,7 +335,7 @@ int jmi_block_update_pre(jmi_block_residual_t* block) {
     int i = 0;
     jmi_real_t previous, current;
     jmi_value_reference type, ind;
-    jmi_int_t changed_pre_values = JMI_FALSE;
+    jmi_int_t changed_pre_values = FALSE;
     
     jmi_log_node_t node = jmi_log_enter_fmt(jmi->log, logInfo, 
                     "BlockUpdateOfPreVariables", 
@@ -347,7 +347,7 @@ int jmi_block_update_pre(jmi_block_residual_t* block) {
         current = (*(jmi->z))[ind];
         previous = (*(jmi->z))[ind - jmi->offs_real_d + jmi->offs_pre_real_d];
         if (current != previous) {
-            changed_pre_values = JMI_TRUE;
+            changed_pre_values = TRUE;
             (*(jmi->z))[ind - jmi->offs_real_d + jmi->offs_pre_real_d] = (*(jmi->z))[ind];
 
             jmi_log_node(jmi->log, logInfo, "Info", " <dr: #r%d#> <from: %E> <to: %E> ", block->dr_vref[i], previous, current);
@@ -362,7 +362,7 @@ int jmi_block_update_pre(jmi_block_residual_t* block) {
         previous = (*(jmi->z))[block->nr_pre_index[i]]; 
         
         if (current != previous) {
-            changed_pre_values = JMI_TRUE;
+            changed_pre_values = TRUE;
             (*(jmi->z))[block->nr_pre_index[i]] = (*(jmi->z))[block->nr_index[i]];
             
             if (type == JMI_INTEGER) {

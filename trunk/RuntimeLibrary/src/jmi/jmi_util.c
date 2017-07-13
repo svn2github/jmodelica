@@ -21,10 +21,7 @@
 #define NO_FILE_SYSTEM
 #endif
 
-#ifndef NO_FILE_SYSTEM
-    #include <sys/types.h>
-    #include <sys/stat.h>
-    
+#ifndef NO_FILE_SYSTEM    
     #ifdef _WIN32
       #include <windows.h>
       #define JMI_PATH_MAX MAX_PATH
@@ -39,6 +36,9 @@
         #define JMI_PATH_MAX PATH_MAX
       #endif
     #endif
+    
+    #include <sys/types.h>
+    #include <sys/stat.h>
 #endif
 
 #ifndef JMI_PATH_MAX

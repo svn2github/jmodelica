@@ -763,7 +763,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     
     if (jmi->updated_states == JMI_TRUE) {
         event_info->state_values_changed = TRUE;
-        jmi->updated_states = JMI_FALSE;
+        jmi->updated_states = FALSE;
     }
     
     return 0;
@@ -942,11 +942,11 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         
     index = get_option_index("_nle_solver_use_nominals_as_fallback");
     if(index)
-        bsop->use_nominals_as_fallback_in_init = z[index];
+        bsop->use_nominals_as_fallback_in_init = (int)z[index];
         
     index = get_option_index("_nle_solver_use_last_integrator_step");
     if(index)
-        bsop->start_from_last_integrator_step = z[index];
+        bsop->start_from_last_integrator_step = (int)z[index];
     
     index = get_option_index("_nle_solver_max_residual_scaling_factor");
     if(index)
@@ -1057,7 +1057,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->cs_step_size = z[index];
     index = get_option_index("_cs_experimental_mode");
     if(index)
-        op->cs_experimental_mode = z[index];
+        op->cs_experimental_mode = (int)z[index];
     index = get_option_index("_runtime_log_to_file");
     if(index)
         op->log_options->copy_log_to_file_flag = (int)z[index]; 
