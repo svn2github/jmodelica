@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5402
+Fixed c code generation bug when sparse Jacobians are generated with nonlinear
+blocks present in model.
+
 ; Fixed ; Minor ; Compiler ; #5404
 Fixed missing include of the block solver in the FMI templates.
 
