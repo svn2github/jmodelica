@@ -24,6 +24,36 @@
 #ifndef _JMI_UTIL_H
 #define _JMI_UTIL_H
 
+
+#if !defined(NO_FILE_SYSTEM) && (defined(RT) || defined(NRT))
+#define NO_FILE_SYSTEM
+#endif
+
+#ifndef NO_FILE_SYSTEM    
+    #ifdef _WIN32
+      #include <windows.h>
+      #define JMI_PATH_MAX MAX_PATH
+    #else
+      #define _GNU_SOURCE
+      #include <dlfcn.h>
+      #ifdef __APPLE__
+        #include <limits.h>
+        #define JMI_PATH_MAX PATH_MAX
+      #else
+        #include <linux/limits.h>
+        #define JMI_PATH_MAX PATH_MAX
+      #endif
+    #endif
+    
+    #include <sys/types.h>
+    #include <sys/stat.h>
+#endif
+
+#ifndef JMI_PATH_MAX
+#define JMI_PATH_MAX 256
+#endif
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

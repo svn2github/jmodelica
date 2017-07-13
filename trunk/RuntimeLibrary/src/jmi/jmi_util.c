@@ -16,35 +16,7 @@
     see <http://www.gnu.org/licenses/> or
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
-
-#if !defined(NO_FILE_SYSTEM) && (defined(RT) || defined(NRT))
-#define NO_FILE_SYSTEM
-#endif
-
-#ifndef NO_FILE_SYSTEM    
-    #ifdef _WIN32
-      #include <windows.h>
-      #define JMI_PATH_MAX MAX_PATH
-    #else
-      #define _GNU_SOURCE
-      #include <dlfcn.h>
-      #ifdef __APPLE__
-        #include <limits.h>
-        #define JMI_PATH_MAX PATH_MAX
-      #else
-        #include <linux/limits.h>
-        #define JMI_PATH_MAX PATH_MAX
-      #endif
-    #endif
-    
-    #include <sys/types.h>
-    #include <sys/stat.h>
-#endif
-
-#ifndef JMI_PATH_MAX
-#define JMI_PATH_MAX 256
-#endif
-
+#include "jmi_util.h"
 #include <stdarg.h>
 #include "jmi.h"
 #include "jmi_log.h"
