@@ -1,22 +1,25 @@
 ================= Unreleased ==================
-; Change ; Minor ; Compiler, Runtime ; #5402
+; Fixed ; Minor ; Compiler ; #5404
+Fixed missing include of the block solver in the FMI templates.
+
+; Changed ; Minor ; Compiler, Runtime ; #5402
 Generation of sparse Jacobian for linear systems is now controlled by a
 threshold and either the dense Jacobian is generated or the sparse, not both. 
 
-; Change ; Minor ; Runtime ; #5401
+; Changed ; Minor ; Runtime ; #5401
 Added defines to handle missing CLOCKS_PER_SEC
 
-; Change ; Minor ; Runtime ; #5400
+; Changed ; Minor ; Runtime ; #5400
 Reworked how we check if a directory exist.
 
-; Change ; Minor ; Runtime ; #5399
+; Changed ; Minor ; Runtime ; #5399
 Delayed check of the resource location until it is asked for.
 
-; Bugfix ; Minor ; Compiler ; #5394
+; Fixed ; Minor ; Compiler ; #5394
 Fixed compiler crash when using function with several outputs where one is 
 a zero-size array.
 
-; Change ; Minor ; Compiler ; #5398
+; Changed ; Minor ; Compiler ; #5398
 Removed the need to define fmu type in the make file
 
 ; Feature ; Minor ; Compiler ; #5375
