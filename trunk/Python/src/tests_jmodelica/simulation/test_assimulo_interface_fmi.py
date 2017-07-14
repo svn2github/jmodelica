@@ -152,7 +152,7 @@ class Test_Sensitivities_FMI2:
         assert res.solver.statistics["nsensfcnfcns"] == 0
         
 
-class Test_Time_Events:
+class Test_Time_Events_FMU10:
     @classmethod
     def setUpClass(cls):
         """
@@ -160,27 +160,27 @@ class Test_Time_Events:
         """
         file_name = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
 
-        compile_fmu("TimeEvents.Basic1", file_name, compiler_options={"relational_time_events":True}, compiler_log_level="debug:log.txt")
-        compile_fmu("TimeEvents.Basic2", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.Basic3", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.Basic4", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Basic1", file_name, compiler_options={"relational_time_events":True}, compiler_log_level="debug:log.txt", version="1.0")
+        compile_fmu("TimeEvents.Basic2", file_name, compiler_options={"relational_time_events":True}, version="1.0")
+        compile_fmu("TimeEvents.Basic3", file_name, compiler_options={"relational_time_events":True}, version="1.0")
+        compile_fmu("TimeEvents.Basic4", file_name, compiler_options={"relational_time_events":True}, version="1.0")
         
-        compile_fmu("TimeEvents.Advanced1", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.Advanced2", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.Advanced3", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.Advanced1", file_name, compiler_options={"relational_time_events":True}, version="1.0")
+        compile_fmu("TimeEvents.Advanced2", file_name, compiler_options={"relational_time_events":True}, version="1.0")
+        compile_fmu("TimeEvents.Advanced3", file_name, compiler_options={"relational_time_events":True}, version="1.0")
+        compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True}, version="1.0")
         
-        compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.TestSampling1", file_name)
-        compile_fmu("TimeEvents.TestSampling2", file_name)
-        compile_fmu("TimeEvents.TestSampling3", file_name)
-        compile_fmu("TimeEvents.TestSampling4", file_name)
-        compile_fmu("TimeEvents.TestSampling5", file_name)
-        compile_fmu("TimeEvents.TestSampling6", file_name)
-        compile_fmu("TimeEvents.TestSampling7", file_name)
-        compile_fmu("TimeEvents.TestSampling8", file_name)
-        compile_fmu("TimeEvents.TestSampling9", file_name)
-        compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name)
+        compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True}, version="1.0")
+        compile_fmu("TimeEvents.TestSampling1", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling2", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling3", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling4", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling5", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling6", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling7", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling8", file_name, version="1.0")
+        compile_fmu("TimeEvents.TestSampling9", file_name, version="1.0")
+        compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name, version="1.0")
     
     @testattr(stddist = True)
     def test_time_event_basic_1(self):
@@ -384,7 +384,260 @@ class Test_Time_Events:
         opts["CVode_options"]["rtol"] = 1e-4
         res = model.simulate(0,1, options=opts);
         nose.tools.assert_almost_equal(model.get("s"), 2.8)
-        assert res.solver.statistics["ntimeevents"] == 2        
+        assert res.solver.statistics["ntimeevents"] == 2      
+
+class Test_Time_Events_FMU20:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
+
+        compile_fmu("TimeEvents.Basic1", file_name, compiler_options={"relational_time_events":True}, compiler_log_level="debug:log.txt", version="2.0")
+        compile_fmu("TimeEvents.Basic2", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        compile_fmu("TimeEvents.Basic3", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        compile_fmu("TimeEvents.Basic4", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        
+        compile_fmu("TimeEvents.Advanced1", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        compile_fmu("TimeEvents.Advanced2", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        compile_fmu("TimeEvents.Advanced3", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        
+        compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True}, version="2.0")
+        compile_fmu("TimeEvents.TestSampling1", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling2", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling3", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling4", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling5", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling6", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling7", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling8", file_name, version="2.0")
+        compile_fmu("TimeEvents.TestSampling9", file_name, version="2.0")
+        compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name, version="2.0")
+    
+    @testattr(stddist = True)
+    def test_time_event_basic_1(self):
+        model = load_fmu("TimeEvents_Basic1.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_basic_2(self):
+        model = load_fmu("TimeEvents_Basic2.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 2
+        assert ev.nextEventTime == model.get("p")
+        
+    @testattr(stddist = True)
+    def test_time_event_basic_3(self):
+        model = load_fmu("TimeEvents_Basic3.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 1.5
+        
+    @testattr(stddist = True)
+    def test_time_event_basic_4(self):
+        model = load_fmu("TimeEvents_Basic4.fmu")
+        
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        assert ev.nextEventTimeDefined == False
+        assert model.get("x")== 2
+        
+        model.reset()
+        model.time = 1
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        
+        assert ev.nextEventTimeDefined == False
+        assert model.get("x") == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced1(self):
+        model = load_fmu("TimeEvents_Advanced1.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 2): ", model.get("i") 
+        assert model.get("i") == 2
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced2(self):
+        model = load_fmu("TimeEvents_Advanced2.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 2): ", model.get("i") 
+        assert model.get("i") == 2
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced3(self):
+        model = load_fmu("TimeEvents_Advanced3.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 2): ", model.get("i") 
+        print "j (should be 1): ", model.get("j") 
+        assert model.get("i") == 2
+        assert model.get("j") == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_advanced4(self):
+        model = load_fmu("TimeEvents_Advanced4.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        assert ev.nextEventTime == 0.5
+        
+        model.simulate(options={"initialize":False})
+        
+        print "i (should be 1): ", model.get("i") 
+        print "j (should be 1): ", model.get("j") 
+        assert model.get("i") == 1
+        assert model.get("j") == 1
+        
+    @testattr(stddist = True)
+    def test_time_event_mixed1(self):
+        model = load_fmu("TimeEvents_Mixed1.fmu")
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        ev = model.get_event_info()
+        print ev.nextEventTime
+        assert ev.nextEventTime == 1.5
+        
+        res = model.simulate(final_time=4, options={"initialize":False})
+        
+        print "x: ", res["x"]
+        print "dx: ", res["der(x)"]
+        
+        assert res.solver.statistics["ntimeevents"] == 2
+        assert res.solver.statistics["nstateevents"] == 2
+
+    """                 """
+    """ Sampling tests. """
+    """                 """
+
+    """ Basic test using only interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling1(self):
+        model = load_fmu("TimeEvents_TestSampling1.fmu")
+        model.initialize()
+        res = model.simulate(0, 1e3, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Only small interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling2(self):
+        model = load_fmu("TimeEvents_TestSampling2.fmu")
+        model.initialize()
+        res = model.simulate(0,1e-6, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Only big interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling3(self):
+        model = load_fmu("TimeEvents_TestSampling3.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Basic test using offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling4(self):
+        model = load_fmu("TimeEvents_TestSampling4.fmu")
+        model.initialize()
+        res = model.simulate(0,2e-6, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == (1e4)+1
+
+    """ Big interval, small offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling5(self):
+        model = load_fmu("TimeEvents_TestSampling5.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Big interval and offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling6(self):
+        model = load_fmu("TimeEvents_TestSampling6.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    @testattr(sample = True)
+    def test_time_event_sampling7(self):
+        model = load_fmu("TimeEvents_TestSampling7.fmu")
+        model.initialize()
+        res = model.simulate(0,1e5, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Test 8 verifies that sampling raises an exception when a too small step is required. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling8(self):
+        model = load_fmu("TimeEvents_TestSampling8.fmu")
+        nose.tools.assert_raises(model.initialize)
+
+    """ Same interval and offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling9(self):
+        model = load_fmu("TimeEvents_TestSampling9.fmu")
+        model.initialize()
+        res = model.simulate(0,1, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 10
+
+    @testattr(stddist = True)
+    def test_time_event_state_event_after_time_event(self):
+        model = load_fmu("TimeEvents_StateEventAfterTimeEvent.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["CVode_options"]["rtol"] = 1e-4
+        res = model.simulate(0,1, options=opts);
+        nose.tools.assert_almost_equal(model.get("s"), 2.8)
+        assert res.solver.statistics["ntimeevents"] == 2                
 
 class Test_DynamicStates:
     @classmethod
@@ -490,7 +743,7 @@ class Test_Events:
     @testattr(stddist = True)
     def test_enhanced_event_iteration_3(self):
         model = load_fmu("EventIter_EnhancedEventIteration3.fmu")
-        model.initialize(relativeTolerance=1e-1)
+        model.initialize(tolerance=1e-1)
         
         nose.tools.assert_almost_equal(model.get("x"), -1e-6)
     
@@ -1763,7 +2016,7 @@ class Test_FMI_ODE:
         
         fmu_name = compile_fmu('EventIter.EventStartIter', os.path.join(path_to_mos,'EventIter.mo'))
         
-        model = FMUModel(fmu_name)
+        model = load_fmu(fmu_name)
 
         sim_res = model.simulate(final_time=10)
 

@@ -172,7 +172,7 @@ def test_arcsin():
 @testattr(stddist = True)
 def test_bracketing_failure_Brent():
     m = load_model('TestBrent.BrentWithBracketingFailure')
-    m.initialize(relativeTolerance=1e-6)
+    m.initialize(tolerance=1e-6)
     x = m.get('x')
     y0 = m.get('y0')
     z = m.get('z')
@@ -181,7 +181,7 @@ def test_bracketing_failure_Brent():
 @testattr(stddist = True)
 def test_negative_nominal_Brent():
     m = load_model('TestBrent.NegativeNominal')
-    m.initialize(relativeTolerance=1e-6)
+    m.initialize(tolerance=1e-6)
     x = m.get('x')
     y = m.get('y')
     assert N.abs(x + 11) < 1e-3
