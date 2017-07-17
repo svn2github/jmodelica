@@ -23,7 +23,7 @@ This file holds base classes for simulation and optimization tests.
 import os
 
 from pymodelica.compiler import compile_fmu
-from pyfmi.fmi import load_fmu, FMUModelCS1, FMUModelME1
+from pyfmi.fmi import load_fmu, FMUModelCS1, FMUModelME1, FMUModelCS2, FMUModelME2
 from pyjmi.common.io import ResultDymolaTextual
 from tests_jmodelica import get_files_path
 
@@ -281,7 +281,7 @@ class SimulationTest(_BaseSimOptTest):
         if not cvode_options:
             cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol}
         
-        if isinstance(self.model, FMUModelME1):
+        if isinstance(self.model, FMUModelME1) or isinstance(self.model, FMUModelME2):
             self.model.simulate(start_time=self.start_time,
                                 final_time=self.final_time,
                                 input=self.input,
