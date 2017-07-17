@@ -202,6 +202,17 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
+     * Return the node that this annotation represents without creating if it
+     * doesn't exist. I.e.: simply return what we know without creating
+     * anything.
+     * 
+     * @return The underlying node if available
+     */
+    protected N peekNode() {
+        return node;
+    }
+
+    /**
      * Tries to resolve the provided string as and URI.
      * 
      * @param str String to resolve as URI
@@ -270,15 +281,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public T valueAsAnnotation() {
         if (!valueAnnotation_cacheComputed) {
             valueAnnotation_cacheComputed = true;
-            if (!hasValue()) {
-                valueAnnotation_cache = createNode(null, null);
+            N annotationNode = valueAsProvider();
+            if (hasValue() && annotationNode == null) {
+                valueAnnotation_cache = null;
             } else {
-                N annotationNode = valueAsProvider(value());
-                if (annotationNode == null) {
-                    valueAnnotation_cache = null;
-                } else {
-                    valueAnnotation_cache = createNode(null, annotationNode);
-                }
+                valueAnnotation_cache = createNode(null, annotationNode);
             }
         }
         return valueAnnotation_cache;
@@ -292,7 +299,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param value Value which can be an annotation node
      * @return Provider which reflects the value as annotation node
      */
-    protected abstract N valueAsProvider(V value);
+    protected abstract N valueAsProvider();
 
     @Override
     public String toString() {

@@ -138,8 +138,9 @@ aspect SrcAnnotations {
         }
 
         @Override
-        protected SrcAnnotationProvider valueAsProvider(Exp value) {
-            return value.asAnnotationProvider();
+        protected SrcAnnotationProvider valueAsProvider() {
+            Exp value = value();
+            return value == null ? null : value.asAnnotationProvider();
         }
 
         public static Evaluator defaultEvaluator() { return SrcAnnotation.defaultEvaluator; }

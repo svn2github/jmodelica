@@ -58,8 +58,9 @@ aspect FlatAnnotations {
         }
 
         @Override
-        protected FlatAnnotationProvider valueAsProvider(FExp value) {
-            return value.asAnnotationProvider();
+        protected FlatAnnotationProvider valueAsProvider() {
+            FExp value = value();
+            return value == null ? null : value.asAnnotationProvider();
         }
     }
 
