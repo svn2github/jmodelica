@@ -242,7 +242,7 @@ aspect SimpleClassLookup {
     eq ImportClauseQualified.matches(String str) = 
         getPackageName().getLastAccess().matches(str);
     eq LibNode.matches(String str) {
-        if (equalsLowerCase(name(), str)) {
+        if (name().equalsIgnoreCase(str)) {
             myClass();
         }
         return name().equals(str);
