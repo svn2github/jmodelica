@@ -64,7 +64,7 @@ public class ErrorTestCase extends TestCase {
         m.put(Pattern.compile("^\\s*[0-9]+.+:"), "");
         m.put(Pattern.compile("at line [0-9]+, column [0-9]+"), "at line 0, column 0");
         m.put(Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.)+'([:,])"), "in $1 '...'$3");
-        m.put(Pattern.compile("'C:\\\\([^\\\\]+\\\\)*([^']+)'"), "'$2'");
+        m.put(Pattern.compile("'[A-Z]:\\\\([^\\\\]+\\\\)*([^']+)'"), "'$2'");
         return m;
     }
     
