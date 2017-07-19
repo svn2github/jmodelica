@@ -44,6 +44,14 @@ aspect OptimicaParsers {
         return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.anonymous_short_class;
     }
 
+    refine Parsers public static short ParserHandler.elementGoal() {
+        return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.element;
+    }
+
+    refine Parsers public static short ParserHandler.abstractEquationGoal() {
+        return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.abstract_equation;
+    }
+
     public static beaver.Parser ParserHandler.createOptimicaParser(AbstractModelicaScanner scanner, String fileName) {
         org.jmodelica.optimica.parser.OptimicaParser parser = new org.jmodelica.optimica.parser.OptimicaParser();
         parser.setLineBreakMap(scanner.getLineBreakMap());
