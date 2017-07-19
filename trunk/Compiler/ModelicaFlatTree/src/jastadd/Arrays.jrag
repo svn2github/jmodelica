@@ -327,7 +327,7 @@ aspect Arrays {
 	syn int InstAccess.ndims()  = 0;
 	eq InstScalarAccess.ndims() = myInstComponentDecl().ndims();
 	eq InstArrayAccess.ndims()  = getFArraySubscripts().accessNdims();
-    eq InstDot.ndims() {
+    syn lazy int InstDot.ndims() {
         int n = 0;
         for (InstAccess ia : getInstAccesss()) {
             n = n + ia.ndims();
