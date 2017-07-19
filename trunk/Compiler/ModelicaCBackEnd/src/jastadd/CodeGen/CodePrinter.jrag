@@ -26,7 +26,7 @@ aspect CodePrinter {
         /**
          * Adds a CodeGeneratorProvider to the list of providers.
          */
-        private <T extends CodeGeneratorProvider> T addProvider(T provider) {
+        private static <T extends CodeGeneratorProvider> T addProvider(T provider) {
             if (providers == null)
                 providers = new PriorityQueue<CodeGeneratorProvider>();
             providers.add(provider);
