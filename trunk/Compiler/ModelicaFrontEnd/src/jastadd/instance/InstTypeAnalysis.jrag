@@ -685,6 +685,12 @@ aspect InstClassRestriction {
         throw new UnsupportedOperationException();
     }
 
+    public InstRestriction InstBuiltInClassDecl.getInstRestriction() {
+        return root().getInstBuiltInClassRestriction();
+    }
+    
+    syn nta InstRestriction Root.getInstBuiltInClassRestriction() = new InstMType();
+
 }
 
 

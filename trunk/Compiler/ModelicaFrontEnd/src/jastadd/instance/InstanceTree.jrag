@@ -1607,6 +1607,7 @@ aspect InstanceTreeConstruction {
         hasFArraySubscripts() || 
         hasInstClassModification() || 
         getClassDecl().hasTypePrefix() || 
+        !getInstRestriction().equals(myTargetInstClassDecl().getInstRestriction()) ||
         !filteredEnvironment().isEmpty();
     eq InstReplacingShortClassDecl.shouldBeExpanded() =
         super.shouldBeExpanded() || 
@@ -1624,6 +1625,8 @@ aspect InstanceTreeConstruction {
 
     syn InstClassDecl InstSimpleShortClassDecl.myTargetInstClassDecl() = getTarget().myInstClassDecl();
     syn InstClassDecl InstShortClassDecl.myTargetInstClassDecl()       = getInstExtends(0).myInstClass();
+
+    syn boolean InstRestriction.equals(Object o) = getClass().equals(o.getClass());
 
     syn lazy InstClassDecl InstLibNode.getActualInstClass() {
         LibNode ln = (LibNode) getClassDecl();
