@@ -1549,7 +1549,7 @@ aspect CCodeGen {
 			return getBindingExp().prettyPrint_C("");
 		} else {
 			FExp e = startAttributeExp();
-			return (e == null) ? "0.0" : e.prettyPrint("");
+			return (e == null) ? "0.0" : e.prettyPrint_C("");
 		}
 	}
     
