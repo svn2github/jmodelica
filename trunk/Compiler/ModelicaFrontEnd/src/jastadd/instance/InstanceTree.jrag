@@ -1607,7 +1607,6 @@ aspect InstanceTreeConstruction {
         hasFArraySubscripts() || 
         hasInstClassModification() || 
         getClassDecl().hasTypePrefix() || 
-        !getInstRestriction().equals(myTargetInstClassDecl().getInstRestriction()) ||
         !filteredEnvironment().isEmpty();
     eq InstReplacingShortClassDecl.shouldBeExpanded() =
         super.shouldBeExpanded() || 
