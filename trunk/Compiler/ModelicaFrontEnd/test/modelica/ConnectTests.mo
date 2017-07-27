@@ -310,7 +310,7 @@ fclass ConnectTests.ConnectTest7
  Real a2[2].x;
  input Real a2[2].y;
 equation
- a1[1:2].x = ones(2);
+ {a1[1].x, a1[2].x} = ones(2);
  a1[1].x = a2[1].x;
  - a1[1].y - a2[1].y = 0.0;
  a1[2].x = a2[2].x;

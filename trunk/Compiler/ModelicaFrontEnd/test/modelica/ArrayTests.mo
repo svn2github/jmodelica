@@ -1367,6 +1367,34 @@ end ArrayTests.General.ArrayTest49;
 ")})));
 end ArrayTest49;
 
+model ArrayTest50
+    model B
+        outer Real x;
+    end B;
+    
+    model A
+        inner Real x;
+        B b;
+    end A;
+    
+    A[2] a(x={time,time+1});
+    Real[:] y = a.b.x;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest50",
+            description="Flattening outer access in array",
+            flatModel="
+fclass ArrayTests.General.ArrayTest50
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = time;
+ y[2] = time + 1;
+end ArrayTests.General.ArrayTest50;
+")})));
+end ArrayTest50;
+
 end General;
 
 
@@ -5879,7 +5907,7 @@ model EmptyArray6
             description="Empty arrays, composite array",
             flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray6
- constant Real t = 0;
+ constant Real t = 0.0;
 end ArrayTests.Constructors.EmptyArray.EmptyArray6;
 ")})));
 end EmptyArray6;
@@ -7437,7 +7465,7 @@ model SliceTest1
 fclass ArrayTests.Slices.SliceTest1
  Real x[1].a[2] = {1, 2};
  Real x[2].a[2] = {3, 4};
- Real y[2,2] = x[1:2].a[1:2] .+ 1;
+ Real y[2,2] = {{x[1].a[1], x[1].a[2]}, {x[2].a[1], x[2].a[2]}} .+ 1;
 end ArrayTests.Slices.SliceTest1;
 ")})));
 end SliceTest1;
@@ -7627,7 +7655,7 @@ model EmptySlice1
             flatModel="
 fclass ArrayTests.Slices.EmptySlice1
  structural parameter Integer n = 0 /* 0 */;
- Real y[0] = a[1:0].x;
+ Real y[0] = fill(0.0, 0);
 end ArrayTests.Slices.EmptySlice1;
 ")})));
 end EmptySlice1;
@@ -8561,8 +8589,8 @@ fclass ArrayTests.VariableIndex.Slice5
  discrete input Integer i;
  discrete input Integer j;
 equation
- y[1] = ({{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}})[1,i,j];
- y[2] = ({{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}})[2,i,j];
+ y[1] = ({{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}})[i,j];
+ y[2] = ({{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}})[i,j];
  b[1,1].a[1,1].z = time;
  b[1,1].a[1,2].z = time;
  b[1,1].a[2,1].z = time;

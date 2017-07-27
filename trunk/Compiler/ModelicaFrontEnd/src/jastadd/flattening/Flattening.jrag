@@ -2145,31 +2145,45 @@ aspect FlatExpressions {
         return new FIgnoredBuiltIn();
     }
 
+    public FExp FIdUseExp.flatten(FQName prefix) {
+        if (!getFIdUse().isInstAccess()) {
+            return treeCopy();
+        }
+        
+        InstAccess ia = asInstAccess();
+        InstComponentDecl var = ia.myInstComponentDecl();
+        if (!inFunction()) {
+            if (ia.isNonAssignableArray()) {
+                return getArray().buildFlattened(prefix, this);
+            } else if (!ia.indexVariability().indexParameterOrLess()) {
+                FIdUseExp copy = (FIdUseExp) dynamicFExp(treeCopy());
+                List<FSubscript> sub = new List<FSubscript>();
+                copy.asInstAccess().extractNonParameterIndices(sub, ia.myInstComponentDecl().variability());
+                FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
+                return res.flatten(prefix);
+            }
+        }
+        return setLocationOf(var.flattenAccess(prefix, this));
+    }
+
+    syn boolean InstAccess.isNonAssignableArray() = !myInstComponentDecl().isAssignable() && isArray();
+    eq InstDot.isNonAssignableArray() {
+        for (InstAccess ia : getInstAccessList()) {
+            if (ia.isNonAssignableArray()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public FIdUse FIdUse.flatten(FQName prefix) {
         return (FIdUse)fullCopy();
     }
-    
-    public FExp FIdUseExp.flatten(FQName prefix) {
-        return setLocationOf(getFIdUse().flatten(prefix, this));
+
+    public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
+        return new FIdUse(getInstAccess().flatten(prefix));
     }
-    
-    public FExp FIdUse.flatten(FQName prefix, FIdUseExp use) {
-        return new FIdUseExp(flatten(prefix));
-    }
-    
-    public FExp FIdUseInstAccess.flatten(FQName prefix, FIdUseExp use) {
-        InstComponentDecl var = getInstAccess().myInstComponentDecl();
-        if (!inFunction() && !getInstAccess().indexVariability().indexParameterOrLess()) {
-            FIdUseExp copy = (FIdUseExp) use.dynamicFExp(use.fullCopy());
-            List<FSubscript> sub = new List<FSubscript>();
-            ((FIdUseInstAccess)copy.getFIdUse()).getInstAccess().extractNonParameterIndices(sub, getInstAccess().myInstComponentDecl().variability());
-            FExp res = use.dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
-            return res.flatten(prefix);
-        } else {
-            return var.flattenAccess(prefix, use);
-        }
-    }
-    
+
     @Override
     public FExp FDeferExp.flatten(FQName prefix) {
         return getFExp().flatten(getFExp().retrieveFQName());
@@ -2503,10 +2517,6 @@ aspect FlatExpressions {
     
     public FSubscript CValueInteger.createFSubscript() {
         return new FIntegerSubscript(intValue());
-    }
-
-    public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
-       return new FIdUse(getInstAccess().flatten(prefix));
     }
 
     public FExp FArray.flatten(FQName prefix) {
