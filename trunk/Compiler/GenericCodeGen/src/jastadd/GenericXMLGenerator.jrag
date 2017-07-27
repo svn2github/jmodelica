@@ -220,7 +220,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     }
     
     /**
-     * Generate and XML attribute representing a list, the entires will be
+     * Generate an XML attribute representing a list, the entires will be
      * space separated.
      * 
      * @param name     the name of the attribute
@@ -304,6 +304,32 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
             if (attributeTags == null) 
                 attributeTags = findTags(attributes());
             return attributeTags;
+        }
+        
+        /**
+         * Does this tag have any child tags that are active?
+         */
+        public boolean hasActiveChildren() {
+            return anyTagActive(childTags());
+        }
+        
+        /**
+         * Does this tag have any attribute tags that are active?
+         */
+        public boolean hasActiveAttributes() {
+            return anyTagActive(attributeTags());
+        }
+        
+        /**
+         * Checks if any of the given tags are active.
+         */
+        public boolean anyTagActive(AbstractTag[] tags) {
+            for (AbstractTag tag : tags) {
+                if (tag.isActive()) {
+                    return true;
+                }
+            }
+            return false;
         }
         
         /**

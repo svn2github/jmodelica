@@ -785,6 +785,12 @@ abstract public class OptionRegistry {
              Category.internal,
              "",
              "The MODELICAPATH to use during compilation."),
+        COMPILER_VERSION
+            ("compiler_version", 
+             OptionType.compiler,
+             Category.internal,
+             "compiler_version_file_not_read",
+             "The version string for the compiler. Uses default value during unit testing."),
 
         /* ================== *
          *  Runtime options.  *

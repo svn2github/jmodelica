@@ -186,32 +186,37 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 				generateAttribute("tolerance", Double.toString(e.tolerance), genPrinter);
 		}
 	}
-    
+
     private static Collection<String> vendorAnnotationChildren = new ArrayList<String>();
+
     /**
-     * Used for registering new sub nodes to this node. Returns the name
-     * for conveninence.
+     * Used for registering new vendor annotation tag. Returns the name
+     * for conveninence. Vendor annotation tags should inherit 
+     * FMIVendorAnnotation.
      */
-    public static String addVendorAnnotationChild(String childName) {
+    public static String addVendorAnnotation(String childName) {
         vendorAnnotationChildren.add(childName);
         return childName;
     }
-    
+
     /**
-	 * Internal class used to generate a VendorAnnotations tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_vendorAnnotations extends XMLTag {
+     * Internal class used to generate a VendorAnnotations tag.
+     * 
+     * @see XMLTag
+     */
+    public class XMLTag_vendorAnnotations extends XMLTag {
 
-		public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
-			super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
-		}
-
-        public String[] children() {
-            return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+        public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
+            super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
+        }
+        
+        public String[] children() { 
+            return new String[] { "vendorAnnotations_tool" };
         }
 
+        public boolean isActive() {
+            return hasActiveChildren();
+        }
     }
 	
     /**
@@ -233,70 +238,83 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
     }
 
-	public static final String vendorTooltagName = addVendorAnnotationChild("vendorTool");
-	/**
-	 * Internal class used to generate a Vendor Tool tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_vendorTool extends XMLTag_tool {
-	    
-		
-		public XMLTag_vendorTool(AbstractGenerator myGenerator, FClass fclass) {
-			super(vendorTooltagName, ASTNode.vendorName(), myGenerator, fclass);
-		}
-		
-		public String[] children() { return new String[] {"annotation"}; }
-	}
-	
-	/**
-	 * Internal class used to generate a Annotation tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_annotation extends XMLTag {
-		
-		private String name;
-		private String value;
-		
-		public XMLTag_annotation(AbstractGenerator myGenerator, FClass fclass) {
-			super("annotation", "Annotation", myGenerator, fclass);
-		}
-		
-		public void generate(CodeStream genPrinter) {
-			HashSet<String> extLibraries = fclass.externalLibraries();
-			HashSet<String> extIncludes  = fclass.externalIncludes();
-			HashSet<String> extLibDirs   = fclass.externalLibraryDirectories();
-			HashSet<String> extInclDirs  = fclass.externalIncludeDirectories();
-			
-			name = "Library";
-			for(String lib : extLibraries) {
-				value = lib;
-				super.generate(genPrinter);
-			}
-			name = "Include";
-			for(String inc : extIncludes) {
-				value = inc;
-				super.generate(genPrinter);
-			}
-			name = "LibraryDirectory";
-			for(String libdir : extLibDirs) {
-				value = libdir;
-				super.generate(genPrinter);
-			}
-			name = "IncludeDirectory";
-			for(String incdir : extInclDirs) {
-				value = incdir;
-				super.generate(genPrinter);
-			}
-		}
-		
-		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name",  name,  genPrinter);
-            generateAttribute("value", value, genPrinter);
-		}
-	}
+    /**
+     * Internal class used to generate a Tool tag in VendorAnnotations.
+     * 
+     * @see XMLTag
+     */
+    public class XMLTag_vendorAnnotations_tool extends XMLTag_tool {
+        
+        public XMLTag_vendorAnnotations_tool(AbstractGenerator myGenerator, FClass fclass) {
+            super("vendorAnnotations_tool", ASTNode.vendorName(), myGenerator, fclass);
+        }
+
+        public String[] children() {
+            if (fclass.myOptions().getStringOption("fmi_version") == OptionRegistry.FMIVersion.FMI10) {
+                return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+            } else {
+                return new String[] { "vendorAnnotations_annotations" };
+            }
+        }
+
+        public boolean isActive() {
+            return hasActiveChildren();
+        }
+    }
+
+    /**
+     * Internal class used to generate a Tool tag in VendorAnnotations.
+     * 
+     * @see XMLTag
+     */
+    public class XMLTag_vendorAnnotations_annotations extends XMLTag {
+        
+        public XMLTag_vendorAnnotations_annotations(AbstractGenerator myGenerator, FClass fclass) {
+            super("vendorAnnotations_annotations", "Annotations", myGenerator, fclass);
+        }
+
+        public String[] children() {
+            return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+        }
+
+        public boolean isActive() {
+            return hasActiveChildren();
+        }
+    }
+
+    /**
+     * Internal class used to describe a vendor annotation.
+     * 
+     * @see XMLTag
+     */
+    public abstract class FMIVendorAnnotation extends XMLTag {
+        
+        private String annotationName;
+        
+        public FMIVendorAnnotation(String tagName, String annotationName, AbstractGenerator myGenerator, FClass fclass) {
+            super(tagName, "Annotation", myGenerator, fclass);
+            this.annotationName = annotationName;
+        }
+        
+        public abstract Object annotationValue();
+        
+        public void generateAttributes(CodeStream genPrinter) {
+            generateAttribute("name",  annotationName,    genPrinter);
+            generateAttribute("value", annotationValue(), genPrinter);
+        }
+    }
+
+    private static final String COMPILER_VERSION_ANNOTATION = addVendorAnnotation("vendorAnnotation:compilerVersion");
     
+    public class CompilerVersionAnnotation extends FMIVendorAnnotation {
+        public CompilerVersionAnnotation(AbstractGenerator myGenerator, FClass fclass) {
+            super(COMPILER_VERSION_ANNOTATION, "CompilerVersion", myGenerator, fclass);
+        }
+        
+        public String annotationValue() {
+            return fclass.myOptions().getStringOption("compiler_version");
+        }
+    }
 
     /**
      * Abstract class for handling printing of variables. Things that are
