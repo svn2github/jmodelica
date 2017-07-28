@@ -1150,12 +1150,18 @@ aspect Connections {
             while (leftIter.hasNext()) {
                 Index leftI = leftInd.translate(leftIter.next());
                 Index rightI = rightInd.translate(rightIter.next());
-                FQName leftCellName = leftName.copyReplacingSubscripts(leftI);
-                FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
                 InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
                 InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
+                FQName leftCellName = leftCompCell.getFQName();
+                FQName rightCellName = rightCompCell.getFQName();
+                if (leftCompCell.isArray()) {
+                    leftCellName = leftCellName.copyAndAddFas(leftI.subIndex(leftI.ndims() - leftComp.ndims()).createFArraySubscripts());
+                }
+                if (rightCompCell.isArray()) {
+                    rightCellName = rightCellName.copyAndAddFas(rightI.subIndex(rightI.ndims() - rightComp.ndims()).createFArraySubscripts());
+                }
                 ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftCompCell, leftOutside, leftCellName);
-                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);  
+                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);
                 leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
             }
         } else {

@@ -95,19 +95,27 @@ aspect FlatNames {
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
     eq InstClassDecl.getFQName()         = new FQNameEmpty();
     eq InstComponentDecl.getFQName()     = appendMyName(retrieveFQName());
-    
-    syn FQName InstComponentDecl.appendMyName(FQName prefix) = 
-        (isAssignable() && isArrayDecl()) ? 
-                prefix.copyAndAppend(name(), size().flattenFArraySubscripts()) :
-                prefix.copyAndAppend(name());
-    eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
-        (getIndex() > 0) ? prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex())) : prefix;
-    eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
-    
+
+    syn FQName InstComponentDecl.appendMyName(FQName prefix) = prefix.copyAndAppend(name());
+    eq InstRecord.appendMyName(FQName prefix)                = super.appendMyName(prefix).asFQNameFull();
+    eq InstArrayComponentDecl.appendMyName(FQName prefix) {
+        if (isArray()) {
+            return prefix;
+        } else {
+            InstComponentDecl top = arrayTopInstComponentDecl();
+            if (top.size().isEmpty() || top.size().isUnknown()) {
+                return prefix;
+            } else if (top.isAssignable()) {
+                return prefix.copyAndAddFas(myIndex().createFArraySubscripts());
+            } else {
+                return new FQNameString(prefix.name() + myIndex());
+            }
+        }
+    }
+
     inh lazy FQName InstNode.retrieveFQName();
     inh FQName FExp.retrieveFQName();
-    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName().copyAndAddFas(null);
-    eq InstArrayComponentDecl.getChild().retrieveFQName()                        = getFQName();
+    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName();
     eq InstComponentDecl.getInstModification().retrieveFQName()                  = retrieveFQName();
     eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
@@ -425,7 +433,7 @@ aspect FlatNames {
         return str.toString();
     }
     
-    syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName());
+    syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();

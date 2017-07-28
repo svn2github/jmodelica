@@ -257,15 +257,6 @@ aspect Constructors {
     }
 
 	/**
-	 * Constructs an FQName by splitting the given name into name parts.
-	 * 
-	 * Does <em>not</em> parse array subscripts.
-	 */
-    public FQNameFull.FQNameFull(String name) {
-        this(name.split("\\."));
-    }
-    
-	/**
 	 * Constructs an FQName with the given name parts (without any subscripts).
 	 * 
 	 * Does <em>not</em> parse array subscripts.
