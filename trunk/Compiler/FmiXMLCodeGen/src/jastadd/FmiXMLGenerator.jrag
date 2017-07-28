@@ -187,7 +187,8 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 	}
 
-    private static Collection<String> vendorAnnotationChildren = new ArrayList<String>();
+    private static Collection<String> vendorAnnotationTools = new ArrayList<String>();
+    private static Collection<String> vendorAnnotations = new ArrayList<String>();
 
     /**
      * Used for registering new vendor annotation tag. Returns the name
@@ -195,7 +196,16 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * FMIVendorAnnotation.
      */
     public static String addVendorAnnotation(String childName) {
-        vendorAnnotationChildren.add(childName);
+        vendorAnnotations.add(childName);
+        return childName;
+    }
+
+    /**
+     * Used for registering new tool tag undet the vendor annotation tag. 
+     * Returns the name for conveninence.
+     */
+    public static String addVendorAnnotationTool(String childName) {
+        vendorAnnotationTools.add(childName);
         return childName;
     }
 
@@ -211,7 +221,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
         
         public String[] children() { 
-            return new String[] { "vendorAnnotations_tool" };
+            return vendorAnnotationTools.toArray(new String[vendorAnnotationTools.size()]);
         }
 
         public boolean isActive() {
@@ -238,6 +248,8 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
     }
 
+    private static final String VENDOR_ANNOTATIONS_TOOL_MAIN = addVendorAnnotationTool("vendorAnnotations_tool");
+
     /**
      * Internal class used to generate a Tool tag in VendorAnnotations.
      * 
@@ -246,12 +258,12 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     public class XMLTag_vendorAnnotations_tool extends XMLTag_tool {
         
         public XMLTag_vendorAnnotations_tool(AbstractGenerator myGenerator, FClass fclass) {
-            super("vendorAnnotations_tool", ASTNode.vendorName(), myGenerator, fclass);
+            super(VENDOR_ANNOTATIONS_TOOL_MAIN, ASTNode.vendorName(), myGenerator, fclass);
         }
 
         public String[] children() {
             if (fclass.myOptions().getStringOption("fmi_version") == OptionRegistry.FMIVersion.FMI10) {
-                return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+                return vendorAnnotations.toArray(new String[vendorAnnotations.size()]);
             } else {
                 return new String[] { "vendorAnnotations_annotations" };
             }
@@ -274,7 +286,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
 
         public String[] children() {
-            return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+            return vendorAnnotations.toArray(new String[vendorAnnotations.size()]);
         }
 
         public boolean isActive() {

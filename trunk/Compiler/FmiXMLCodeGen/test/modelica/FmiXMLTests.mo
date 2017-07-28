@@ -1706,12 +1706,13 @@ model VendorAnnotations1
     annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
             name="VendorAnnotations1",
-            description="",
+            description="VendorAnnotations for FMI 1.0",
             fmi_version="1.0",
             template="$vendorAnnotations$",
+            regexp="/Tool name=\"[^\"]+\"/Tool name=\"\"/",
             generatedCode="
 <VendorAnnotations>
-    <Tool name=\"JModelica.org\">
+    <Tool name=\"\">
         <Annotation name=\"CompilerVersion\" value=\"compiler_version_file_not_read\" />
     </Tool>
 </VendorAnnotations>
@@ -1725,12 +1726,13 @@ model VendorAnnotations2
     annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
             name="VendorAnnotations2",
-            description="",
+            description="VendorAnnotations for FMI 2.0",
             fmi_version="2.0",
             template="$vendorAnnotations$",
+            regexp="/Tool name=\"[^\"]+\"/Tool name=\"\"/",
             generatedCode="
 <VendorAnnotations>
-    <Tool name=\"JModelica.org\">
+    <Tool name=\"\">
         <Annotations>
             <Annotation name=\"CompilerVersion\" value=\"compiler_version_file_not_read\" />
         </Annotations>
