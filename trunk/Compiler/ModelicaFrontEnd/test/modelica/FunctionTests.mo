@@ -13081,10 +13081,10 @@ public
   init r as FunctionTests.InputAsArraySize16.R[2];
   r[1].n := b;
   r[1].x := (FunctionTests.InputAsArraySize16.f(b))[1,:];
-  r[1].y := r[1].x[1];
+  r[1].y := x[1];
   r[2].n := b;
   r[2].x := (FunctionTests.InputAsArraySize16.f(b))[2,:];
-  r[2].y := r[2].x[1];
+  r[2].y := x[1];
   init y as Real[2];
   y := r[1:2].y;
   return;
