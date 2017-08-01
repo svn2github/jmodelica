@@ -24,26 +24,31 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 public class CodeStream {
-    
-    private PrintStream out;
-    private String lineEnder = "\n";
-    
+
+    protected PrintStream out;
+    protected CodeStream parent;
+    protected String lineEnder = "\n";
+
     public CodeStream(PrintStream ps) {
         this.out = ps;
     }
-    
+
+    public CodeStream(CodeStream parent) {
+        this.parent = parent;
+    }
+
     public CodeStream(OutputStream os) {
         this(new PrintStream(os));
     }
-    
+
     public CodeStream(String file) throws IOException {
         this(new File(file));
     }
-    
+
     public CodeStream(File file) throws IOException {
         this(createPrintStream(file, false));
     }
-    
+
     public static PrintStream createPrintStream(File file, boolean cloneToSysOut) {
         try {
             return createPrintStream(new BufferedOutputStream(new FileOutputStream(file)),
@@ -52,11 +57,11 @@ public class CodeStream {
             throw new RuntimeException("File I/O problem during code generation", e);
         }
     }
-    
+
     public static PrintStream createPrintStream(OutputStream os, boolean cloneToSysOut) {
         return createPrintStream(os, cloneToSysOut ? System.out : null);
     }
-    
+
     public static PrintStream createPrintStream(OutputStream os, PrintStream clone) {
         if (clone != null) {
             os = new CloneOutputStream(os, clone).setClose(true, false);
@@ -67,42 +72,62 @@ public class CodeStream {
             throw new RuntimeException("File I/O problem during code generation", e);
         }
     }
-    
+
+    public void switchParent(CodeStream par) {
+        if (parent != null) {
+            parent.close();
+        }
+        parent = par;
+    }
+
     public void close() {
-        out.close();
-        out = null;
+        if (parent != null) {
+            parent.close();
+            parent = null;
+        } else {
+            out.close();
+            out = null;
+        }
     }
-    
+
     public void print(String s) {
-        out.print(s);
+        if (parent != null) {
+        } else {
+            out.print(s);
+        }
     }
-    
+
+    public void format(String format, Object... args) {
+        if (parent != null) {
+            parent.format(format, args);
+        } else {
+            out.format(format, args);
+        }
+    }
+
     public void splitFile() {}
-    
+
     public void println() {
         print(lineEnder);
     }
-    
+
     public void print(Object o) {
         print(o.toString());
     }
-    
+
     public void println(String s) {
         print(s);
         println();
     }
-    
+
     public void println(Object o) {
         print(o);
         println();
     }
-    
-    public void format(String format, Object... args) {
-        print(String.format(format, args));
-    }
-    
+
     public void formatln(String format, Object... args) {
-        println(String.format(format, args));
+        format(format, args);
+        println();
     }
 
     public void print(Collection<? extends Object> collection, String separator) {
@@ -123,4 +148,5 @@ public class CodeStream {
     public String getLineEnder() {
         return lineEnder;
     }
+
 }

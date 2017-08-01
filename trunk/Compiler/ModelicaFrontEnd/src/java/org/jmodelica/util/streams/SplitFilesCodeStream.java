@@ -24,38 +24,34 @@ public class SplitFilesCodeStream extends CodeStream {
     private boolean debugGen;
     private int i = 0;
     private String header;
-    private CodeStream str;
     
     public SplitFilesCodeStream(File file, boolean debugGen, String header) {
-        super((PrintStream)null);
+        super((CodeStream) null);
         this.file = file;
         this.debugGen = debugGen;
         this.header = header;
-        str = nextFileStream();
-    }
-    
-    public void print(String s) {
-        str.print(s);
-    }
-    
-    public void close() {
-        str.close();
-        str = null;
     }
     
     public void splitFile() {
-        close();
-        str = nextFileStream();
+        switchParent(nextFileStream());
         print(header);
     }
     
     private CodeStream nextFileStream() {
+        return createCodeStream(nextFile());
+    }
+
+    private File nextFile() {
         String path = file.getPath();
         if (i > 0) {
             path = path.replace(".c", "_" + i + ".c");
         }
         i++;
-        return new NotNullCodeStream(createPrintStream(new File(path), debugGen));
+        return new File(path);
+    }
+
+    private NotNullCodeStream createCodeStream(File nextFile) {
+        return new NotNullCodeStream(createPrintStream(nextFile, debugGen));
     }
 
 }
