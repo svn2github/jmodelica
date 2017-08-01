@@ -92,6 +92,7 @@ public class CodeStream {
 
     public void print(String s) {
         if (parent != null) {
+            parent.print(s);
         } else {
             out.print(s);
         }
