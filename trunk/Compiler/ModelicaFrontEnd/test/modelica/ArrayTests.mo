@@ -1395,6 +1395,28 @@ end ArrayTests.General.ArrayTest50;
 ")})));
 end ArrayTest50;
 
+model ArrayTest51
+    model M
+        Real x;
+    end M;
+    
+    M[1] m;
+equation
+    der(m.x) = {0};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="General_ArrayTest51",
+            description="Flattening outer access in array",
+            flatModel="
+fclass ArrayTests.General.ArrayTest51
+ Real m[1].x;
+equation
+ {der(m[1].x)} = {0};
+end ArrayTests.General.ArrayTest51;
+")})));
+end ArrayTest51;
+
 end General;
 
 
@@ -1837,7 +1859,7 @@ equation
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="Subscripts_SubscriptExpression10",
+            name="Subscripts_SubscriptExpression11",
             description="Scalarization of subscript expression #5216",
             inline_functions="none",
             flatModel="
