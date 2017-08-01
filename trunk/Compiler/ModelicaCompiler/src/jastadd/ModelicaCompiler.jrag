@@ -1520,6 +1520,8 @@ public class ModelicaCompiler {
         log.info("Current working directory:\n  " + currentWorkingDirecory());
         log.info("Compiler version: "             + COMPILER_VERSION);
         log.info("Java version: "                 + System.getProperty("java.version"));
+        log.info("OS name: "                      + System.getProperty("os.name"));
+        log.info("OS architecture: "              + System.getProperty("os.arch"));
         logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
     }
 

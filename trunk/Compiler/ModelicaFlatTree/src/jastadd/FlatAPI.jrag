@@ -4108,8 +4108,14 @@ aspect FlatDiagnostics {
             str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
                     + fv.isLinear());
             if (fv.hasBindingExp()) {
+                CValue val = CValue.UNKNOWN;
+                try {
+                    val = fv.getBindingExp().ceval();
+                } catch (ConstantEvaluationException e) {
+                    
+                }
                 str.append(", evaluated binding exp: ");
-                str.append(fv.getBindingExp().ceval());
+                str.append(val);
             }
             str.append("\n");
         }
