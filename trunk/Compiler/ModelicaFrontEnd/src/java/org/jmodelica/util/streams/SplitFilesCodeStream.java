@@ -38,20 +38,20 @@ public class SplitFilesCodeStream extends CodeStream {
         print(header);
     }
     
-    private CodeStream nextFileStream() {
+    protected CodeStream nextFileStream() {
         return createCodeStream(nextFile());
     }
 
-    private File nextFile() {
+    protected File nextFile() {
         String path = file.getPath();
         if (i > 0) {
-            path = path.replace(".c", "_" + i + ".c");
+            path = path.replaceAll(".[^.]+$", "_" + i + "$0");
         }
         i++;
         return new File(path);
     }
 
-    private NotNullCodeStream createCodeStream(File nextFile) {
+    protected NotNullCodeStream createCodeStream(File nextFile) {
         return new NotNullCodeStream(createPrintStream(nextFile, debugGen));
     }
 
