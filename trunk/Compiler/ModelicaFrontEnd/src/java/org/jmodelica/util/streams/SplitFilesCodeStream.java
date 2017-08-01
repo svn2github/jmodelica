@@ -30,6 +30,7 @@ public class SplitFilesCodeStream extends CodeStream {
         this.file = file;
         this.debugGen = debugGen;
         this.header = header;
+        switchParent(nextFileStream());
     }
     
     public void splitFile() {
