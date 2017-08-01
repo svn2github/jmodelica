@@ -584,14 +584,25 @@ aspect PredefinedTypes {
         return l;
     }
 
-    public ClassDecl SourceRoot.doLookupBuiltInFunction(String name) {
-        return unknownClassDecl();
+    /**
+     * Check if this class has a restriction.
+     */
+    syn boolean ClassDecl.hasRestriction() = false;
+    eq BaseClassDecl.hasRestriction()      = true;
+    eq BuiltInClassDecl.hasRestriction()   = true;
+
+    /**
+     * Get the restriction of this class.
+     */
+    public Restriction ClassDecl.getRestriction() {
+        throw new UnsupportedOperationException();
     }
 
-
-    inh ClassDecl Exp.lookupBuiltInFunction(String name);
-    eq SourceRoot.getProgram().lookupBuiltInFunction(String name) = doLookupBuiltInFunction(name);
-    eq Root.getChild().lookupBuiltInFunction(String name) = null;
+    public Restriction BuiltInClassDecl.getRestriction() {
+        return root().getBuiltInClassRestriction();
+    }
+    
+    syn nta Restriction Root.getBuiltInClassRestriction() = new MType();
 
 
     boolean PrimitiveClassDecl.rewritten = false;

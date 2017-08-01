@@ -677,6 +677,7 @@ aspect InstClassRestriction {
      */
     syn boolean InstClassDecl.hasInstRestriction() = false;
     eq InstBaseClassDecl.hasInstRestriction()      = true;
+    eq InstBuiltInClassDecl.hasInstRestriction()   = true;
 
     /**
      * Get the restriction of this class.
