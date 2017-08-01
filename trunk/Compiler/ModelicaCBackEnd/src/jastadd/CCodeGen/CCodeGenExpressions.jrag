@@ -105,15 +105,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        boolean wrap = inIfCondition();
-        if (wrap) {
-            str.print(FLitExp.macro_C);
-            str.print("(");
-        }
-        str.print(ceval().intValue());
-        if (wrap) {
-            str.print(")");
-        }
+        str.print(ceval().intValue() + ".0");
     }
 
     @Override
@@ -350,29 +342,13 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        boolean wrap = inIfCondition() || inFunctionArg();
-        if (wrap) {
-            str.print(FLitExp.macro_C);
-            str.print("(");
-        }
-        str.print(getValue());
-        if (wrap) 
-            str.print(")");
+        str.print(getValue() + ".0");
     }
 
     @Override
     public void FRealLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        boolean wrap = inIfCondition();
-        if (wrap) {
-            str.print(FLitExp.macro_C);
-            str.print("(");
-        }
         str.print(getValue());
-        if (wrap) 
-            str.print(")");
     }
-
-    public static final String FLitExp.macro_C = "AD_WRAP_LITERAL";
 
     /**
      * Helper, returns true if the expression is in an function argument
@@ -485,7 +461,13 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDotDivExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+        if (getRight().isLiteralExp() && !getRight().isLiteralZero()) {
+            p.print(getLeft(), str, indent);
+            str.print(op_C());
+            p.print(getRight(), str, indent);
+        } else {
+            prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+        }
     }
 
     /*=========================================================================

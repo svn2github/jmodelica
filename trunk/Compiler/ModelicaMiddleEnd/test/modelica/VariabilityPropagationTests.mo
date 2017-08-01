@@ -1643,7 +1643,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
     tmp_2->y1 = tmp_3;
     tmp_1->r2 = tmp_2;
-    func_VariabilityPropagationTests_PartiallyKnownComposite8_f_def0(AD_WRAP_LITERAL(1), _time, tmp_1);
+    func_VariabilityPropagationTests_PartiallyKnownComposite8_f_def0(1.0, _time, tmp_1);
     _r_y2_2 = (tmp_1->y2);
     JMI_DYNAMIC_FREE()
     return ef;
@@ -1779,7 +1779,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
     tmp_1->z = tmp_2;
-    func_VariabilityPropagationTests_PartiallyKnownComposite11_f_def0(_time, AD_WRAP_LITERAL(3), tmp_1);
+    func_VariabilityPropagationTests_PartiallyKnownComposite11_f_def0(_time, 3.0, tmp_1);
     _r_x_0 = (tmp_1->x);
     JMI_DYNAMIC_FREE()
     return ef;
