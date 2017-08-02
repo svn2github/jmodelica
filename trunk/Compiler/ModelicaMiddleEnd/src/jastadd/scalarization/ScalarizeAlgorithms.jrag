@@ -180,7 +180,7 @@ aspect AssignmentScalarization {
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
         
-        FExp expInAst = right.getParent() != null ? right : left;
+        FExp expInAst = right.type().isUnknown() ? left : right;
         
         left.createArrayTemporaries(s);
         right.createArrayTemporaries(s);

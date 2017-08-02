@@ -944,11 +944,10 @@ aspect TransformCanonical {
 					}
 					
 					// Rename input
-					FQName fqn = new FQNameString(name);
-					ffv.setFQName(fqn);
+                    ffv.setFQName(new FQNameString(name));
 					
 					// Create and add binding expression for output
-                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), fqn.createFIdUseExp()));
+                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), ffv.createUseExp()));
 				}
 			}
 			

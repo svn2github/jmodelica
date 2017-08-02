@@ -1296,7 +1296,7 @@ aspect Arrays {
     syn Array FExp.createTempArray() {
         Array res = new Array(indices());
         for (Index i : res.indices()) {
-            res.set(i, tempExp(i.createFArraySubscripts()));
+            res.set(i, tempExp(i));
         }
         return res;
     }
@@ -1901,41 +1901,9 @@ aspect Arrays {
             return super.getArray();
         }
         
-        FArraySubscripts fas = collectIterExpSubscripts();
-        Array arr = new Array(indices());
-        for (Index i : arr.indices()) {
-            FArraySubscripts fas2 = fas.fullCopy();
-            fas2.addFSubscripts(i);
-            arr.set(i, new FIdUseExp(tempVarName(), fas2));
-        }
-        return arr;
+        return createTempArray();
     }
 
-	/**
-	 * Collect an FArraySubscriptss for the indexes of surrounding iteration expressions, 
-	 * to use in getArray() for children.
-	 */
-	inh FArraySubscripts FExp.collectIterExpSubscripts();
-	eq FClass.getChild().collectIterExpSubscripts()   = new FArraySubscripts();
-	eq InstRoot.getChild().collectIterExpSubscripts() = new FArraySubscripts();
-	eq FIterExp.getFExp().collectIterExpSubscripts() {
-		FArraySubscripts res = collectIterExpSubscripts();
-		for (CommonForIndex i : getForIndexs())
-			res.addFSubscript(i.iterExpSubscript());
-		return res;
-	}
-	
-	/**
-	 * Creates an FSubscript to use when scalarizing iteration expressions.
-	 * 
-	 * Returns a use of {@link #uniqueIterExpName()} if there is no current evaluation value, 
-	 * or that value if there is one.
-	 */
-	syn FSubscript CommonForIndex.iterExpSubscript() = 
-		evaluationValue().isUnknown() ? 
-			new FExpSubscript(new FIdUseExp(uniqueIterExpName())) : 
-			new FIntegerSubscript(evaluationValue().intValue());
-	
 	/**
 	 * A name that is not a valid Modelica identifier, and is unique among the iteraton indices 
 	 * of nestled iteration expressions.

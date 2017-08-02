@@ -105,10 +105,8 @@ aspect FlatNames {
             InstComponentDecl top = arrayTopInstComponentDecl();
             if (top.size().isEmpty() || top.size().isUnknown()) {
                 return prefix;
-            } else if (top.isAssignable()) {
-                return prefix.copyAndAddFas(myIndex().createFArraySubscripts());
             } else {
-                return new FQNameString(prefix.name() + myIndex());
+                return prefix.copyAndAddFas(myIndex());
             }
         }
     }
@@ -295,19 +293,16 @@ aspect FlatNames {
     syn FQName FAbstractVariable.getFQName() = null;
 
     syn String FQName.name()                = "";
-    syn String FQName.resolvedName()        = "";
     syn String FQName.derName(int index)    = "";
     syn String FQName.dynDerName(int index) = "";
     syn String FQName.preName()             = "";
     
     eq FQNameString.name()                             = getName();
-    eq FQNameString.resolvedName()                     = getName();
     syn lazy String FQNameString.derName(int index)    = applyOpToName(getName(), DER, index);
     syn lazy String FQNameString.dynDerName(int index) = applyOpToName(getName(), DYN_DER, index);
     syn lazy String FQNameString.preName()             = applyOpToName(getName(), PRE, -1);
     
     syn lazy String FQNameFull.name()                = prefixName(0, 0, null, false, -1);
-    syn lazy String FQNameFull.resolvedName()        = prefixName(0, 0, null, true, -1);
     syn lazy String FQNameFull.derName(int index)    = prefixName(0, 0, DER, false, index);
     syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, 0, DYN_DER, false, index);
     syn lazy String FQNameFull.preName()             = prefixName(0, 0, PRE, false, -1);
@@ -813,7 +808,7 @@ aspect FlatNames {
         getFArraySubscripts().addFSubscript(s);
         return this;
     }
-    
+
     /**
      * Create a copy of the name, with an FArraySubscripts added to the last part.
      * 
@@ -821,23 +816,45 @@ aspect FlatNames {
      * to calling {@link #removeFArraySubscripts()}.
      */
     public abstract FQName FQName.copyAndAddFas(FArraySubscripts fas);
-    
-    public FQName FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
-        if (fas == null)
-            return fullCopy();
-        throw new UnsupportedOperationException();
+
+    public FQNameEmpty FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
+        throw new InternalCompilerError("Cannot add FArraySubscripts to FQNameEmpty");
     }
-    
+
     public FQName FQNameString.copyAndAddFas(FArraySubscripts fas) {
-        if (fas == null)
-            return fullCopy();
+        if (fas == null) {
+            return treeCopy();
+        }
         return new FQNameFull(getName()).addFArraySubscripts(fas);
     }
-    
-    public FQName FQNameFull.copyAndAddFas(FArraySubscripts fas) {
-        return fullCopy().addFArraySubscripts(fas);
+
+    public FQNameFull FQNameFull.copyAndAddFas(FArraySubscripts fas) {
+        return treeCopy().addFArraySubscripts(fas);
     }
-    
+
+
+    public FQName FQName.copyAndRemoveFas() {
+        return copyAndAddFas((FArraySubscripts) null);
+    }
+
+
+    /**
+     * Create a copy of the name with <code>i</code> added as subscripts.
+     */
+    public abstract FQName FQName.copyAndAddFas(Index i);
+
+    public FQNameEmpty FQNameEmpty.copyAndAddFas(Index i) {
+        throw new InternalCompilerError("Cannot add FArraySubscripts to FQNameEmpty");
+    }
+
+    public FQNameString FQNameString.copyAndAddFas(Index i) {
+        return new FQNameString(getName() + i);
+    }
+
+    public FQNameFull FQNameFull.copyAndAddFas(Index i) {
+        return copyAndAddFas(i.createFArraySubscripts());
+    }
+
     /**
      * Copies this and add <code>i</code> as subscripts if <code>i</code>
      * has dimensions. Otherwise returns this.
@@ -994,116 +1011,36 @@ aspect FlatNames {
     public FQName FQNamePartArray.createFQName() {
         return new FQNameFull(new List(fullCopy()));
     }
-    
-    /**
-     * Create a copy of this name without array subscripts.
-     */
-    public FQName FQName.copyWithoutSubscripts() {
-        return fullCopy();
-    }
-    
-    public FQName FQNameFull.copyWithoutSubscripts() {
-        FQNameFull res = new FQNameFull();
-        for (FQNamePart part : getFQNameParts())
-            res.addFQNamePart(part.getName());
-        return res;
-    }
-    
-    /**
-     * Create a copy of this name with all array subscripts replaced with indices 
-     * from <code>i</code>.
-     * 
-     * The number of dimensions of <code>i</code> must be the same as the number 
-     * of non-literal subscripts. The subscripts to be replaced can be spread out 
-     * over several name parts.
-     */
-    public FQName FQName.copyReplacingSubscripts(Index i) {
-        return fullCopy();
-    }
-    
-    public FQName FQNameFull.copyReplacingSubscripts(Index i) {
-        FQNameFull res = new FQNameFull();
-        int j = 0;
-        for (FQNamePart part : getFQNameParts()) 
-            j = part.appendWithReplacedSubscripts(res, i, j);
-        return res;
-    }
-    
-    /**
-     * Append this name part to <code>name</code>, but with 
-     * all array subscripts replaced with indices from <code>i</code>.
-     * 
-     * The first index in <code>i</code> to use should be given in <code>j</code>, and 
-     * the new value for <code>j</code> is returned.
-     */
-    public int FQNamePart.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
-        name.append(getName());
-        return j;
-    }
-    
-    public int FQNamePartArray.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
-        int k = j + getFArraySubscripts().getNumFSubscript();
-        name.append(getName());
-        name.addFArraySubscripts(i.partIndex(j, k).createFArraySubscripts());
-        return k;
-    }
-    
+
     /**
      * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
         public FExp createUseExp();
     }
-    
-    /**
-     * Create an access to this variable.
-     */
-    public FIdUse FAbstractVariable.createFIdUse() {
-         return null;
-    }
-    // TODO: Add implementation for enum
-   
-    public FIdUse FVariable.createFIdUse() {
-         return getFQName().createUseFQName().createFIdUse();
-    }  
-   
-    public FIdUse FFunctionVariable.createFIdUse() {
-         return getFQName().createUseFQName().createFIdUse();
-    }  
-   
+
     /**
      * Create an access expression to this variable.
      */
-    public FIdUseExp FVariable.createUseExp() {
-        if (isPreVariable()) {
-            return createFPreExp();
+    syn FIdUseExp FVariable.createUseExp() = 
+            isPreVariable() ? new FPreExp(createFIdUse()) : new FIdUseExp(createFIdUse());
+    eq FDerivativeVariable.createUseExp()          = new FDerExp(createFIdUse(), order());
+    eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createFIdUse(), (String)null, order());
+    eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createFIdUse(), (String)null, order());
+
+    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(new FIdUse(getFQName().treeCopy()));
+    syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
+    syn FExp UnknownFVariable.createUseExp()       = null;
+
+    /**
+     * Create an access to this variable.
+     */
+    syn FIdUse FVariable.createFIdUse() {
+        if (isArray()) {
+            return new FIdUse(getFQName().copyAndAddFas(size().createExpandedFArraySubscripts()));
         } else {
-            return getFQName().createUseFQName().createFIdUseExp();
+            return new FIdUse(getFQName().treeCopy());
         }
-    }
-
-    public FIdUseExp FDerivativeVariable.createUseExp() {
-         return getFQName().createUseFQName().createFDerExp(order());
-    }
-
-    public FIdUseExp FDummyDerivativeVariable.createUseExp() {
-         return getFQName().createUseFQName().createFDummyDerExp(order());
-    }
-
-    public FIdUseExp FDynamicDerivativeVariable.createUseExp() {
-        return getFQName().createUseFQName().createFDynamicDerExp(order());
-    }
-    
-    public FIdUseExp FFunctionVariable.createUseExp() {
-         return getFQName().createUseFQName().createFIdUseExp();
-    }
-    
-    public FExp FEnumLiteral.createUseExp() {
-         return new FEnumLitExp(myFEnumDecl().name(), name(), null);
-    }
-    
-    public FExp UnknownFVariable.createUseExp() {
-         return null;
     }
 
     /**
@@ -1116,44 +1053,10 @@ aspect FlatNames {
     syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
 
     /**
-     * Create an access expression with this access.
-     */
-    abstract public FExp CommonAccess.createFExp();
-
-    public FIdUseExp InstAccess.createFExp() {
-        return new FIdUseExp(new FIdUseInstAccess(this));
-    }
-
-    public FIdUseExp FIdUse.createFExp() {
-        return new FIdUseExp(this);
-    }
-
-    /**
      * Create a pre() expression for this variable.
      */
     public FPreExp FVariable.createFPreExp() {
         return new FPreExp(createFIdUse());
-    }
-
-    /**
-     * Create an FDerExp for this name with order order, using a copy if needed.
-     */
-    public FDerExp FQName.createFDerExp(int order) {
-        return new FDerExp(createFIdUse(), order); 
-    }
-
-    /**
-     * Create an FHDummyDerExp for this name with order order, using a copy if needed.
-     */
-    public FDummyDerExp FQName.createFDummyDerExp(int order) {
-        return new FDummyDerExp(createFIdUse(), (String)null, order); 
-    }
-
-    /**
-     * Create an FHDummyDerExp for this name with order order, using a copy if needed.
-     */
-    public FDynamicDerExp FQName.createFDynamicDerExp(int order) {
-        return new FDynamicDerExp(createFIdUse(), (String)null, order); 
     }
 
     /**
@@ -1162,19 +1065,7 @@ aspect FlatNames {
     public FIdUseExp FQName.createFIdUseExp() {
         return new FIdUseExp(createFIdUse()); 
     }
-    
-    /**
-     * Create a copy of this name that is suitable for an FIdUse.
-     * 
-     * It is assumed that this name is from a variable declaration.
-     */
-    public FQName FQName.createUseFQName() {
-        if (!isScalarized() && ndims() > 0)
-            return copyAndAddFas(size().createExpandedFArraySubscripts());
-        else
-            return fullCopy();
-    }
-    
+
     /**
      * Create an FIdUse for this name, using a copy if needed.
      */
@@ -1182,24 +1073,7 @@ aspect FlatNames {
         return new FIdUse((FQName) unboundCopy()); 
     }
     
-    /**
-     * Create an FIdUseExp using a copy of this name.
-     * 
-     * @param fas  array subscripts to use for the last name part.
-     */
-    public FIdUseExp FQName.createFIdUseExp(FArraySubscripts fas) {
-        return new FIdUseExp(createFIdUse(fas)); 
-    }
-    
-    /**
-     * Create an FIdUse using a copy of this name.
-     * 
-     * @param fas  array subscripts to use for the last name part.
-     */
-    public FIdUse FQName.createFIdUse(FArraySubscripts fas) {
-        return new FIdUse(copyAndAddFas(fas)); 
-    }
-    
+
     syn String FType.name();
     eq FRealType.name()             = "Real";
     eq FIntegerType.name()          = "Integer";

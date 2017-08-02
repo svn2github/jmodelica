@@ -239,7 +239,7 @@ aspect FlatStatements {
     
     public boolean FBreakStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix){
         if (!inFunction() && enclosingLoop() instanceof InstForStmt) {
-            sl.add(new FAssignStmt(prefix.copyAndAppend(breakCondName()).createFIdUseExp(), new FBooleanLitExpFalse()));
+            sl.add(new FAssignStmt(new FIdUseExp(new FIdUse(prefix.copyAndAppend(breakCondName()))), new FBooleanLitExpFalse()));
             return true;
         }
         sl.add(new FBreakStmt());
