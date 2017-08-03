@@ -71,9 +71,9 @@ aspect AlgorithmScalarization {
         getLefts().createArrayTemporaries(s);
         s.setWriteBack(false);
         for (FFunctionCallLeft left : getLefts()) {
-            stmt.addLeft(left.scalarize(s.map()));
+            stmt.addLeft(left.scalarize(s));
         }
-        stmt.setCall((FAbstractFunctionCall) getCall().scalarizeExp(s.map()));
+        stmt.setCall((FAbstractFunctionCall) getCall().scalarizeExp(s));
     }
     
     @Override
@@ -123,7 +123,7 @@ aspect AlgorithmScalarization {
         getIndex().createArrayTemporaries(s);
         FForStmt stmt = new FForStmt();
         List<FStatement> l = new List<FStatement>();
-        stmt.setIndex(getIndex().scalarize(s.map()));
+        stmt.setIndex(getIndex().scalarize(s));
         FStatement.scalarizeStmtList(s.block(l), getForStmts());
         stmt.setForStmtList(l);
         s.add(stmt);
@@ -166,7 +166,7 @@ aspect AlgorithmScalarization {
             res.size[i] = size[i];
             if (exps[i] != null) {
                 exps[i].createArrayTemporaries(s);
-                res.exps[i] = exps[i].scalarize(s.map());
+                res.exps[i] = exps[i].scalarize(s);
                 res.exps[i].parent = context;
             }
         }
@@ -217,7 +217,7 @@ aspect AssignmentScalarization {
     public void FType.scalarizeArrayAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
         Indices ind = size().isUnknown() ? right.indices() : indices();
         for (Index i : ind) {
-            scalarizeScalarAssignment(s, (FAssignableExp) left.extractArrayCell(s.map(), i), right.extractArrayCell(s.map(), i));
+            scalarizeScalarAssignment(s, (FAssignableExp) left.extractArrayCell(s, i), right.extractArrayCell(s, i));
         }
     }
     
@@ -225,8 +225,8 @@ aspect AssignmentScalarization {
      * Scalarize a scalar assignment
      */
     protected void FType.scalarizeScalarAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        left = (FAssignableExp) left.scalarize(s.map());
-        right = right.scalarize(s.map());
+        left = (FAssignableExp) left.scalarize(s);
+        right = right.scalarize(s);
         s.add(new FAssignStmt(left,right));
     }
     

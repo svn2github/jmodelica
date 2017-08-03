@@ -132,14 +132,12 @@ aspect FlatNameBinding {
 	syn boolean FIdUseExp.isForIndex()         = getFIdUse().isForIndex();
 	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
 	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();
-	syn boolean FAbstractVariable.isForIndex() = false;
-	inh boolean FVariable.isForIndex();
-	inh boolean InstComponentDecl.isForIndex();
-	eq FForIndex.getFVariable().isForIndex()        = true;
-	eq InstForIndex.getInstPrimitive().isForIndex() = true;
-	eq InstNode.getChild().isForIndex()             = false;
-	eq FClass.getChild().isForIndex()               = false;
-	
+    inh boolean FAbstractVariable.isForIndex();
+    inh boolean InstComponentDecl.isForIndex();
+    eq FForIndex.getFVariable().isForIndex()        = true;
+    eq InstForIndex.getInstPrimitive().isForIndex() = true;
+    eq ASTNode.getChild().isForIndex()              = false;
+
 }
 
 aspect ParameterEquations {

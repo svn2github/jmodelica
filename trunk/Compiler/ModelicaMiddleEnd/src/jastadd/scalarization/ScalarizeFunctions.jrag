@@ -21,7 +21,6 @@ aspect FunctionScalarization {
      *        assignments and scalarize all expressions.
      */
     public void FFunctionDecl.scalarize() {
-        Map<String,FExp> emptyIndexMap = Collections.emptyMap();
         List<FStatement> stmts = new List<FStatement>();
         List<FAttribute> attrs = new List<FAttribute>();
         try {
@@ -573,16 +572,16 @@ aspect FunctionScalarization {
         
         FIfExp right = new FIfExp(
                 new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
-                scalarizeDiagonalElement(s.map()),
+                scalarizeDiagonalElement(s),
                 new FIntegerLitExp(0)
         );
         s.createForLoops(tempExp(names.createFArraySubscripts(ndims())), right, this);
         names.removeLayer();
     }
     
-    syn FExp FAbstractDiagonal.scalarizeDiagonalElement(Map<String,FExp> indexMap);
-    eq FIdentity.scalarizeDiagonalElement(Map<String,FExp> indexMap) = new FIntegerLitExp(1);
-    eq FDiagonal.scalarizeDiagonalElement(Map<String,FExp> indexMap) = getFExp().scalarize(indexMap);
+    syn FExp FAbstractDiagonal.scalarizeDiagonalElement(Scalarizer s);
+    eq FIdentity.scalarizeDiagonalElement(Scalarizer s) = new FIntegerLitExp(1);
+    eq FDiagonal.scalarizeDiagonalElement(Scalarizer s) = getFExp().scalarize(s);
     
     public void FVectorExp.unknownFunctionArrayTemporaries(Scalarizer s) {
         ForNames names = s.getNames();
@@ -675,17 +674,15 @@ aspect FunctionScalarization {
     
     /**
      * Helper for unknown size expressions containing iteration expressions.
-     * Transfers some names  in <code>names</code> to <code>indexMap</code>
      */
     public boolean FExp.editNamesIter(Scalarizer s) {
         return false;
     }
     public boolean FIterExp.editNamesIter(Scalarizer s) {
         ForNames names = s.getNames();
-        Map<String,FExp> indexMap = s.map();
         int i = 0;
         for (; i < getNumForIndex(); i++) {
-            indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
+            getForIndex(i).setIndexName(names.get(i));
         }
         names.addLayer(getFExp().ndims());
         for (; i < getFExp().ndims() + getNumForIndex(); i++) {
@@ -693,6 +690,15 @@ aspect FunctionScalarization {
         }
         return true;
     }
+
+    private String FForIndex.indexName = null;
+    public void CommonForIndex.setIndexName(String indexName) {}
+    public void FForIndex.setIndexName(String indexName) { this.indexName = indexName; }
+
+    inh String FAbstractVariable.myForIndexName();
+    eq ASTNode.getChild().myForIndexName()       = null;
+    eq FForIndex.getFVariable().myForIndexName() = indexName;
+
     
     /**
      * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(FExp[] names)}.

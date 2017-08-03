@@ -377,6 +377,9 @@ aspect FunctionInlining {
             return result;
         }
 
+        public Scalarizer scalarizer() {
+            return null;
+        }
     }
 
     public class FunctionInliner extends AbstractFunctionInliner {
@@ -1342,16 +1345,15 @@ aspect FunctionInlining {
 
     public void FFunctionCallStmt.inline(AbstractFunctionInliner fi) {
         // Temporarily replace lefts with scalarized versions
-        Map<String,FExp> empty = Collections.emptyMap();
         List<FFunctionCallLeft> oldLefts = getLefts();
         List<FFunctionCallLeft> newLefts = new List<FFunctionCallLeft>();
         for (FFunctionCallLeft left : oldLefts)
-            newLefts.add(left.scalarize(empty));
+            newLefts.add(left.scalarize(fi.scalarizer()));
         setLeftList(newLefts);
         newLefts.clearScalarized();
         
         // Scalarize and replace references
-        FExp call = getCall().scalarizeExp(empty);
+        FExp call = getCall().scalarizeExp(fi.scalarizer());
         call = getCall().dynamicFExp(call);
         call.clearScalarized();
         call = call.replaceReferences(fi);
@@ -1579,7 +1581,7 @@ aspect FunctionInlining {
                 if (isArray() && !size().isUnknown()) { 
                     exp = getArray().buildWithReplacedReferences(fi, this);
                 } else if (type().isRecord()) {
-                    exp = dynamicFExp(type().createRecordConstructor(Collections.<String,FExp>emptyMap(), this));
+                    exp = dynamicFExp(type().createRecordConstructor(fi.scalarizer(), this));
                     exp = exp.replaceReferences(fi);
                 } else {
                     exp = type().zeroLiteral();

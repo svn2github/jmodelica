@@ -1631,19 +1631,8 @@ aspect FlatFunctionUtils {
      syn FVariable FExp.tempVar() = tempVar(variability(), type());
      syn FVariable FExp.tempVar(FTypePrefixVariability variability, FType type)
          = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
-     
-     /**
-      * Throw away calculated temp names.
-      */
-     public void ASTNode.flushTempVarNames() {
-         for (ASTNode n : this)
-             n.flushTempVarNames();
-     }
-     public void FExp.flushTempVarNames() {
-         myTempVarName = null;
-         super.flushTempVarNames();
-     }
-     
+
+
      private FlatVariableMap.NameIndexCache FClass.nameIndexCache = new FlatVariableMap.NameIndexCache();
      private FlatVariableMap.NameIndexCache FFunctionDecl.nameIndexCache = new FlatVariableMap.NameIndexCache();
      
@@ -1728,6 +1717,92 @@ aspect FlatFunctionUtils {
         return name;
     }
     private int FClass.nextTempFuncIndex = 1;
+
+
+    /**
+     * Creates new temporary variables with the given name.
+     * 
+     * @param vars         list of variable to add the new variable to
+     * @param name         the name of the new variable
+     * @param variability  the variability of the new variable
+     */
+    public void FType.createTempFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
+        if (isArray()) {
+            for (Index i : indices()) {
+                createTempCellFVariables(vars, name.copyAndAddFas(i), variability);
+            }
+        } else {
+            createTempCellFVariables(vars, name, variability);
+        }
+    }
+
+    public void FType.createTempCellFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
+        vars.add(createTempFVariable(name, variability));
+    }
+
+    public void FRecordType.createTempCellFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
+        for (FRecordComponentType comp : getComponents()) {
+            comp.getFType().createTempFVariables(vars, name.copyAndAppend(comp.getName()), variability);
+        }
+    }
+
+    /**
+     * Creates a new temporary variable with the given name and variability.
+     * 
+     * All optional children in the new variable are empty.
+     * 
+     * Default implementation returns <code>null</code>.
+     */
+    public FVariable FType.createTempFVariable(FQName name, FTypePrefixVariability variability) {
+        return createFVariable(new FTemporaryVisibilityType(), name, variability);
+    }
+    
+    /**
+     * Creates a new variable with the given visibility, name and visibility.
+     * 
+     * All optional children in the new variable are empty.
+     * 
+     * Default implementation returns <code>null</code>.
+     */
+    public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        throw new UnsupportedOperationException();
+    }
+        
+    public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FRealVariable(fvt, variability, name);
+    }   
+    
+    public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FIntegerVariable(fvt, variability.combineDown(fDiscrete()), name);
+    }   
+    
+    public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FBooleanVariable(fvt, variability.combineDown(fDiscrete()), name);
+    }   
+    
+    public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FStringVariable(fvt, variability.combineDown(fDiscrete()), name);
+    }   
+    
+    public FVariable FRecordType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FRecordVariable(fvt, variability, name, new FQNameString(getName()));
+    }   
+    
+    public FVariable FEnumType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FEnumVariable(fvt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
+    }   
+    
+    public FVariable FExternalObjectType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FExternalObjectVariable(fvt, variability.combineDown(fParameter()), name, getConstructor().fullCopy());
+    }
 }
 
 
