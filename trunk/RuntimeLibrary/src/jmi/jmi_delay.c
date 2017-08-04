@@ -158,7 +158,7 @@ int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event) {
     return 0;
 }
 
-jmi_real_t jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent) {
+int jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent) {
     int index;
     /* consider: More efficient strategy than linear iteration over all (fixed and variable time, event and noevent) delays? */
     for (index = 0; index < jmi->n_delays; index++) {

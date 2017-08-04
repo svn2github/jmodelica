@@ -108,7 +108,7 @@ int jmi_delay_record_sample(jmi_t *jmi, int index, jmi_real_t y_in);
 int jmi_delay_set_event_mode(jmi_t *jmi, jmi_boolean in_event);
 
 /** \brief Update nextTimeEvent with the next time event caused by any delay block. Return -1 on failure, 0 otherwise. */
-jmi_real_t jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent);
+int jmi_delay_next_time_event(jmi_t *jmi, jmi_time_event_t* nextTimeEvent);
 
 /** \brief Compute the first (of two) event indicators >= 0 for a variable delay block in *event_indicator. Return -1 on failure, 0 otherwise. */
 int jmi_delay_first_event_indicator(jmi_t *jmi, int index, jmi_real_t delay_time, jmi_real_t *event_indicator);

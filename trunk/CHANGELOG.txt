@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5421
+Improved performance in the sparse linear solver (about 30%).
+
 ; Fixed ; Minor ; Compiler ; #5408
 Removed erreneous xml tag where several annotations were listed under the
 annotation tag in VendorAnnotatios.

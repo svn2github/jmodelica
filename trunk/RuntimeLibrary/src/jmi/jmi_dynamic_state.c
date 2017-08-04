@@ -301,7 +301,7 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         } else {
             if (jmi->jmi_callbacks.log_options.log_level >= 5) { jmi_log_leave(jmi->log, node); }
             jmi_log_node(jmi->log, logError, "DynamicState", "Failed to perform a QR factorization of the coefficient matrix in <set:%I>", index_set);
-            return JMI_FALSE;
+            return FALSE;
         }
         
         /* Get the new rr value */
