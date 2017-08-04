@@ -1684,19 +1684,10 @@ aspect FlatPrettyPrint {
 		getElseExp().prettyPrintAsElseExp(p, str, indent);
 	}
 	
-	protected void FRealLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print(getValue());
-	}
+    protected void FLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print(toString());
+    }
 
-	protected void FIntegerLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print(getValue());
-	}
-
-	protected void FEnumLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print(getEnum());
-		str.print('.');
-		str.print(getValue());
-	}
 	
 	protected void FTimeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("time");
@@ -1704,18 +1695,6 @@ aspect FlatPrettyPrint {
 
 	protected void FEndExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("end");
-	}
-	
-	protected void FStringLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print("\"" + getString() + "\"");
-	}
-
-	protected void FBooleanLitExpTrue.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print("true");
-	}
-
-	protected void FBooleanLitExpFalse.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print("false");
 	}
 	
     protected void FInStreamEpsExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
