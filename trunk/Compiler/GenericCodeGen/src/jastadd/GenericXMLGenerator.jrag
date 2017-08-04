@@ -86,8 +86,8 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     protected void generateXMLDeclaration(CodeStream printer) {
         printer.print("<?xml");
-        printer.format(" %s=\"%s\"", "version", getXMLVersion());
-        printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
+        generateAttribute("version", getXMLVersion(), printer);
+        generateAttribute("encoding", getXMLEncoding(), printer);
         printer.print("?>\n");
     }
     
@@ -166,9 +166,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     protected void generateOneLineTag(String name, Object contents, CodeStream printer) {
         generateTagStart(name, printer);
-        printer.print(">");
-        printer.print(XMLUtil.escape(contents.toString()));
-        printer.format("</%s>\n", name);
+        printer.print(">", XMLUtil.escape(contents.toString()), "</", name, ">\n");
     }
     
     /**
@@ -191,7 +189,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     protected void generateClosing(String name, CodeStream printer) {
         indentation--;
         indent(printer);
-        printer.format("</%s>\n", name);
+        printer.print("</", name, ">\n");
     }
     
     /**
@@ -202,7 +200,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param printer  the print stream to use
      */
     protected void generateAttribute(String name, Object value, CodeStream printer) {
-        printer.format(" %s=\"%s\"", name, XMLUtil.escape(value.toString()));
+        printer.print(" ", name, "=\"", XMLUtil.escape(value.toString()), "\"");
     }
     
     /**
@@ -228,7 +226,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param printer  the print stream to use
      */
     protected void generateListAttribute(String name, Iterable<? extends Object> values, CodeStream printer) {
-        printer.format(" %s=\"", name);
+        printer.print(" ", name, "=\"");
         boolean first = true;
         for (Object value : values) {
             if (!first) {

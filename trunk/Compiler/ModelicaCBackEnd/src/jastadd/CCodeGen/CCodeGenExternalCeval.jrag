@@ -62,7 +62,7 @@ aspect CCodeGenExternalCeval {
             return tempMap.get(key);
         }
         protected void printArray(FType type) {
-            str.formatln("%sJMCEVAL_parseArrayDims(%d);", indent(), type.ndims());
+            str.print(indent(), "JMCEVAL_parseArrayDims(", type.ndims(), ");\n");
             super.printArray(type);
             if (type.isExternalObject()) {
                 
@@ -214,12 +214,11 @@ aspect CCodeGenExternalCeval {
      * <code>this</code> from stdin.
      */
     public void FType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
-        str.formatln("%sJMCEVAL_%s%s(%s, %s);",
-                indent,
-                parse ? "parse" : "print",
-                isArray() ? "Array" : "",
-                isEnum() ? "Enum" : name(),
-                name);
+        str.print(indent, "JMCEVAL_", 
+                parse ? "parse" : "print", 
+                isArray() ? "Array(" : "(", 
+                isEnum() ? "Enum" : name(), ", ",
+                name, ");\n");
     }
     
     public void FRecordType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {

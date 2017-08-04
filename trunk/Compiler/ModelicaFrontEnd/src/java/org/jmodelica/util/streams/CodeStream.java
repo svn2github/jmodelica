@@ -116,6 +116,12 @@ public class CodeStream {
         print(o.toString());
     }
 
+    public void print(Object... os) {
+        for (Object s : os) {
+            print(s);
+        }
+    }
+
     public void println(String s) {
         print(s);
         println();

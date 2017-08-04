@@ -76,24 +76,26 @@ public class CGenerator extends GenericGenerator {
             this.nullValue = nullValue;
         }
         
-        public void generate(CodeStream genPrinter) {
+        public void generate(CodeStream str) {
             Collection<T> elems = elements();
             int n = numElements(elems);
-            genPrinter.format("static const int N_%s = %d;\n", varName, n);
-            genPrinter.format("static const %s DAE_%s[] = { ", type, varName);
+            str.print("static const int N_", varName, " = ", n, ";\n");
+            
+            str.print("static const ", type, " DAE_", varName, "[] = { ");
+            
             if (n == 0) {
-                genPrinter.print(nullValue);
+                str.print(nullValue);
             } else {
                 boolean first = true;
                 for (T e : elems) {
                     if (first)
                         first = false;
                     else
-                        genPrinter.print(", ");
-                    generateFor(e, genPrinter);
+                        str.print(", ");
+                    generateFor(e, str);
                 }
             }
-            genPrinter.print(" };");
+            str.print(" };");
         }
         
         protected int numElements(Collection<T> elems) {
@@ -102,7 +104,7 @@ public class CGenerator extends GenericGenerator {
         
         protected abstract Collection<T> elements();
         
-        protected abstract void generateFor(T e, CodeStream genPrinter);
+        protected abstract void generateFor(T e, CodeStream str);
         
     }
 

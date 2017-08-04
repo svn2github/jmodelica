@@ -1212,8 +1212,11 @@ aspect CCodeGen {
         @Override
         protected void printArray(FType type) {
             if (print) {
-                str.format("%sJMI_ARR(%s, %s, %s, %s, ", indent(), dynStr(type),
-                        type.nameScalar_C(external), type.nameArray_C(external), name());
+                str.print(indent(), "JMI_ARR(",
+                        dynStr(type), ", ", 
+                        type.nameScalar_C(external), ", ",
+                        type.nameArray_C(external), ", ",
+                        name(), ", ");
                 printSizesAsArgs(type);
                 str.println(")");
             }
@@ -1263,8 +1266,11 @@ aspect CCodeGen {
 
         @Override
         protected void printArray(FType type) {
-            str.format("%sJMI_ARRAY_INIT_%d(%s, %s, %s, %s, ", indent(), type.ndims(), dynStr(type),
-                    type.nameScalar_C(external), type.nameArray_C(external), name());
+            str.print(indent(), "JMI_ARRAY_INIT_", type.ndims(), "(", 
+                    dynStr(type), ", ",
+                    type.nameScalar_C(external), ", ",
+                    type.nameArray_C(external), ", ",
+                    name(), ", ");
             printSizesAsArgs(type);
             str.println(")");
         }
@@ -2820,7 +2826,7 @@ aspect CCodeGen {
         FVariable fv = forVariables.iterator().next();
         FExp sol = solution(fv);
         p.printPreSteps(sol, str, indent);
-        str.format("%s%s = ", indent, fv.name_C());
+        str.print(indent, fv.name_C(), " = ");
         p.print(sol, str, indent);
         str.print(";\n");
         p.printPostSteps(sol, str, indent);
