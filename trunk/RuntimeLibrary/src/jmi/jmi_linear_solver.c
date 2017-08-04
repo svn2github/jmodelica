@@ -781,8 +781,8 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
         Jsp->nz_sizes     = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
         Jsp->nz_patterns  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
         Jsp->nz_pattern_sizes  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
-        Jsp->M1_patterns  = (jmi_int_t**)calloc(Jsp->A22->nbr_cols, sizeof(jmi_int_t*));
-        Jsp->M1_sizes     = (jmi_int_t*)calloc(Jsp->A22->nbr_cols, sizeof(jmi_int_t));
+        Jsp->M1_patterns  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
+        Jsp->M1_sizes     = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
         
         /* Allocate work arrays for the different threads */
         Jsp->max_threads = max_threads;
@@ -813,7 +813,6 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
             
             nzmax += Jsp->nz_sizes[col];
         }
-        free(work_nz_pattern);
         free(work);
     
         Jsp->M1 = jmi_linear_solver_create_sparse_matrix(Jsp->L->nbr_rows, Jsp->A12->nbr_cols, nzmax);
@@ -829,11 +828,13 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
         Jsp->M1->col_ptrs[Jsp->A12->nbr_cols] = j;
         
         /* Analyze and store the pattern for the computation A21 * M1 */
-        for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+        for (col = 0; col < Jsp->M1->nbr_cols; col++) {
             jmi_linear_solver_sparse_compute_multiply_patterns(Jsp->A21, Jsp->M1, col, work_nz_pattern, &(Jsp->M1_sizes[col]));
             Jsp->M1_patterns[col] = (jmi_int_t*)calloc(Jsp->M1_sizes[col], sizeof(jmi_int_t));
             for (i = 0; i < Jsp->M1_sizes[col]; i++) { Jsp->M1_patterns[col][i] = work_nz_pattern[i]; }
         }
+        
+        free(work_nz_pattern);
         
         /* A22 - A21L^(-1)A12 */
         /* M1 = L^(-1)A12 */        
@@ -890,6 +891,7 @@ void jmi_linear_solver_sparse_delete(jmi_block_solver_t* block) {
             free(Jsp->M1_patterns);
         }
         if (Jsp->nz_sizes != NULL) { free(Jsp->nz_sizes); }
+        if (Jsp->nz_offsets != NULL) { free(Jsp->nz_offsets); }
         if (Jsp->M1_sizes != NULL) { free(Jsp->M1_sizes); }
         if (Jsp->work_x != NULL)    { 
             int i;
