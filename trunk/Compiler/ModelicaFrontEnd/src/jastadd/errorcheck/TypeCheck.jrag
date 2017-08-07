@@ -411,8 +411,8 @@ aspect FlatTypeCheck {
         if (!expandableSame && !left.isUnknown() && !right.isUnknown())
             CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE.invoke(this);
         if (checkTypes) { 
-            InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
-            InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+            InstComponentDecl leftComp  = left.myInstComponentElement();
+            InstComponentDecl rightComp = right.myInstComponentElement();
             if (!leftComp.connectableTo(rightComp)) {
                 TYPE_MISMATCH_IN_CONNECT.invoke(this);
             } else if (!left.size().equivalent(right.size(), false)) {

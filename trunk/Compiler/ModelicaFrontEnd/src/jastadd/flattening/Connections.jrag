@@ -1118,8 +1118,8 @@ aspect Connections {
         
         boolean leftOutside  = isOutsideConnector();
         boolean rightOutside = right.isOutsideConnector();
-        InstComponentDecl leftComp  = lookupEvaluatingIndices();
-        InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+        InstComponentDecl leftComp  = myInstComponentElement();
+        InstComponentDecl rightComp = right.myInstComponentElement();
         
         boolean handleExpandable = !csm.isExpandableConnectorsDone();
         if (handleExpandable && (isExpandableConnectorPart() || right.isExpandableConnectorPart())) {
