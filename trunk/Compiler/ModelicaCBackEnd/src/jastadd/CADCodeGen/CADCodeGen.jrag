@@ -162,7 +162,7 @@ aspect CADCodeGen {
 	
 	syn String FIdUse.derName_CAD() = toString_der_CAD(printer_CAD);
 	
-	syn String FExp.zeroValue_CAD() = type().isString() ? "\"\"" : "0.0";
+	syn String FExp.zeroValue_CAD() = type().isString() ? "\"\"" : "AD_WRAP_LITERAL(0)";
 	
 	/**
 	 *Print CAD code for value for record use in statement in function. 

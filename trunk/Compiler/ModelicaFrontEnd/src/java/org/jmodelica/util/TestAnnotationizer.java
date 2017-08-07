@@ -35,7 +35,7 @@ import java.util.Iterator;
  * parsing the arguments and choosing between Modelica and Optimica versions 
  * of TestAnnotationizerHelper.
  * 
- * Usage: java TestAnnotationizer <.mo file path> [options...] [description]
+ * Usage: java TestAnnotationizer java TestAnnotationizer <.mo file path> [options...] [description]
  *   Options:
  *     -w           write result to file instead of stdout
  *     -m/-o        create annotation for Modelica/Optimica (default is infer from file path)

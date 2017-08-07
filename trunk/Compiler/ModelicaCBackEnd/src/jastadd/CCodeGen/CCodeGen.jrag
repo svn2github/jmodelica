@@ -1174,11 +1174,10 @@ aspect CCodeGen {
             printDimensions(type);
         }
         protected void printNumElements(FType type) {
-            if (external && dynamic()) {
+            if (external && dynamic())
                 type.size().printNumElements_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C("")));
-            } else {
+            else
                 type.size().printNumElements_C(p, str, indent(), src);
-            }
         }
         protected void printDimensions(FType type) {
             str.print(", ");
@@ -1315,7 +1314,9 @@ aspect CCodeGen {
         }
     }
 
-    public void FType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {}
+    public void FType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {
+        
+    }
 
     @Override
     public void FStringType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {
@@ -1335,9 +1336,9 @@ aspect CCodeGen {
 		return recordChildTempNameMap;
 	}
 
-    public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
-        str.print(numElements());
-    }
+	public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
+		str.print(numElements());
+	}
 
     @Override
     public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
@@ -1363,8 +1364,8 @@ aspect CCodeGen {
         } else {
             super.printNumElements_C(p, str, indent, src);
         }
-    }
-
+	}
+	
     public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         str.print(toUnclosedString());
     }
@@ -1744,7 +1745,7 @@ aspect CCodeGen {
 
     protected void FRangeExp.printForIndexStep_C(CodePrinter p, CodeStream str, String indent) {
         if (hasStep()) {
-            getFExp(1).printStepValue_C(p, str, indent);
+            p.print(getFExp(1), str, indent);
         } else {
             str.print("1");
         }
@@ -1769,8 +1770,7 @@ aspect CCodeGen {
     @Override
     public void FRangeExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%s = ", name);
-        getFExp(0).printInitialForIndexValue_C(p, str, indent);
-
+        p.print(getFExp(0), str, indent);
         if (hasStep() && !getFExp(1).variability().knownParameterOrLess()) {
             str.format("; %s * ", name);
             p.print(getFExp(1), str, indent);
@@ -1784,10 +1784,11 @@ aspect CCodeGen {
         printForIndexStep_C(p, str, indent);
     }
 
-    public void FExp.printForIndexNext_C(CodePrinter p, CodeStream str, String indent, String name) {}
-
     public void FForIndex.printForIndexNext_C(CodePrinter p, CodeStream str, String indent) {
         getFExp().printForIndexNext_C(p, str, indent, getFVariable().name_C());
+    }
+
+    public void FExp.printForIndexNext_C(CodePrinter p, CodeStream str, String indent, String name) {
     }
 
     @Override
@@ -1796,23 +1797,6 @@ aspect CCodeGen {
                 indent, name, getFIdUse().toString_C(p));
     }
 
-    public void FExp.printInitialForIndexValue_C(CodePrinter p, CodeStream str, String indent) {
-        p.print(this, str, indent);
-    }
-
-    @Override
-    public void FIntegerLitExp.printInitialForIndexValue_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(getValue());
-    }
-
-    public void FExp.printStepValue_C(CodePrinter p, CodeStream str, String indent) {
-        p.print(this, str, indent);
-    }
-
-    @Override
-    public void FIntegerLitExp.printStepValue_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrint_C(p, str, indent);
-    }
 
     @Override
 	public void FEnumDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -1915,7 +1899,7 @@ aspect CCodeGen {
         if (wb) {
             str.formatln("%s%s = %s;", indent, src, dst);
         } else {
-            str.formatln("%s%s = (%s) %s;", indent, dst, argType_C(false), src);
+            str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(false), src);
         }
     }
 
@@ -3319,7 +3303,7 @@ aspect CCodeGen {
         }
         
         if (guard && hb) {
-            sp.print(str, ", 1.0)");
+            sp.print(str, ", " + FLitExp.macro_C + "(1))");
         }
     }
     

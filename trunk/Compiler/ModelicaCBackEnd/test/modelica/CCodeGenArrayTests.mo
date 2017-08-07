@@ -81,19 +81,20 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, -1, 1)
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch_time(jmi, _time - (2.0), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(2)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (_sw(0)) {
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
         func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time, tmp_1);
     } else {
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, floor(_time + 1.0), 1, floor(_time + 1.0))
-        func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time + 1.0, tmp_2);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, floor(_time + AD_WRAP_LITERAL(1)), 1, floor(_time + AD_WRAP_LITERAL(1)))
+        func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time + AD_WRAP_LITERAL(1), tmp_2);
     }
     _y_0 = func_CCodeGenArrayTests_UnknownSizeInEquation2_mysum_exp0(COND_EXP_EQ(_sw(0), JMI_TRUE, tmp_1, tmp_2));
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end UnknownSizeInEquation2;
 
@@ -208,10 +209,10 @@ void func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(jmi_real_t x_v, jmi_real_
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
     r_v->x = tmp_1;
     y_v = x_v;
-    r_v->n = 3.0;
-    jmi_array_ref_1(r_v->x, 1) = 1.0;
-    jmi_array_ref_1(r_v->x, 2) = 2.0;
-    jmi_array_ref_1(r_v->x, 3) = 3.0;
+    r_v->n = 3;
+    jmi_array_ref_1(r_v->x, 1) = 1;
+    jmi_array_ref_1(r_v->x, 2) = 2;
+    jmi_array_ref_1(r_v->x, 3) = 3;
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -222,6 +223,7 @@ jmi_real_t func_CCodeGenArrayTests_PrimitiveInRecord1_f_exp0(jmi_real_t x_v) {
     func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(x_v, &y_v);
     return y_v;
 }
+
 ")})));
 end PrimitiveInRecord1;
 
