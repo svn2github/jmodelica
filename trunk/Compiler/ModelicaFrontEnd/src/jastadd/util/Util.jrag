@@ -1384,7 +1384,7 @@ aspect DebugHelpers {
     /**
      * Override simple expressions for performance reasons
      */
-    
+
     public String FRealLitExp.toString()         { return Double.toString(getValue()); }
     public String FIntegerLitExp.toString()      { return Integer.toString(getValue()); }
     public String FOverflowIntLitExp.toString()  { return getString(); }
@@ -1392,6 +1392,8 @@ aspect DebugHelpers {
     public String FBooleanLitExpFalse.toString() { return "false"; }
     public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }
     public String FEnumLitExp.toString()         { return getEnum() + "." + getValue(); }
+
+    public String FQNameString.toString()        { return getName(); }
 
 }
 
