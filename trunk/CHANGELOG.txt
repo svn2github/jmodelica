@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5416
+Fixed generation of VendorAnnotation tag in FMI XML file to correctly handle FMI 2.0.
+
 ; Changed ; Minor ; Compiler ; #5430
 Added option removers to the option registry. Also added a test case for options.
 
