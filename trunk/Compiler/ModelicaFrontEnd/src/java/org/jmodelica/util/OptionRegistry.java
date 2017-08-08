@@ -73,6 +73,30 @@ abstract public class OptionRegistry {
         public abstract Object identity();
     }
 
+    /**
+     * Extend this class and add an instance to the contributor list with 
+     * {@link OptionRegistry#addRemover(OptionRemover)} to remove an option 
+     * from the set of options. The preferred way to do this is by adding a static 
+     * field in ModelicaCompiler that gets its value from a call to addRemover().
+     */
+    public abstract static class OptionRemover {
+        /**
+         * A list of the options to remove in the option registry when this remover is added.
+         * 
+         * @return  a list of the names of the options to remove.
+         */
+        public abstract String[] options();
+
+        /**
+         * Returns an object that uniquely identifies this contributor, to protect 
+         * against the same contributor being added several times. One example is when 
+         * Modelica and Optimica versions of compiler are loaded in the same JVM.
+         * 
+         * Recommended is a string literal in the jrag file.
+         */
+        public abstract Object identity();
+    }
+
     public abstract static class Default<T> {
         public final Class<T> type;
         
@@ -176,14 +200,18 @@ abstract public class OptionRegistry {
     }
 
     private static java.util.List<OptionContributor> CONTRIBUTORS = new ArrayList<OptionContributor>();
+    private static java.util.List<OptionRemover> REMOVERS = new ArrayList<OptionRemover>();
 
-    private static java.util.Map<Object,OptionContributor> CONTRIBUTOR_IDENTITES = new LinkedHashMap<Object,OptionContributor>();
-
+    private static java.util.Map<Object, OptionContributor> CONTRIBUTOR_IDENTITES = new LinkedHashMap<Object,OptionContributor>();
+    private static java.util.Map<Object, OptionRemover> REMOVER_IDENTITIES = new LinkedHashMap<Object, OptionRemover>();
+    
     /**
      * Adds a new options contributor.
      * 
-     * @param oc  the contributor
-     * @return    the contributor, for convenience
+     * @param oc
+     *          The contributor
+     * @return
+     *          The contributor, for convenience.
      */
     public static OptionContributor addContributor(OptionContributor oc) {
         Object id = oc.identity();
@@ -197,6 +225,26 @@ abstract public class OptionRegistry {
         }
     }
 
+    /**
+     * Adds a new options remover.
+     * 
+     * @param or
+     *          The remover
+     * @return
+     *          The remover, for convenience.
+     */
+    public static OptionRemover addRemover(OptionRemover or) {
+        Object id = or.identity();
+        OptionRemover old = REMOVER_IDENTITIES.get(id);
+        if (old == null) {
+            REMOVER_IDENTITIES.put(id, or);
+            REMOVERS.add(or);
+            return or;
+        } else {
+            return old;
+        }
+    }
+    
     public interface Inlining {
         public static final String NONE    = "none";
         public static final String TRIVIAL = "trivial";
@@ -1182,6 +1230,14 @@ abstract public class OptionRegistry {
         }
         for (OptionContributor oc : CONTRIBUTORS) {
             oc.modifyOptions(this);
+        }
+        for (OptionRemover remover : REMOVERS) {
+            for (String option : remover.options()) {
+                if (!optionsMap.containsKey(option)) {
+                    throw new UnknownOptionException("Failure trying to remove non-existent option " + option + ".");
+                }
+                optionsMap.remove(option);
+            }
         }
     }
 

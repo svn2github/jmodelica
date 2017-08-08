@@ -13,7 +13,12 @@ import java.util.List;
 /**
  * Utility class for files.
  */
-public class FileUtil {
+public final class FileUtil {
+
+    /**
+     * Hidden default constructor to prevent instantiation.
+     */
+    private FileUtil() {}
 
     /**
      * Retrieves all the files from the specified sources.

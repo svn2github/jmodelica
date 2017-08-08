@@ -2165,16 +2165,11 @@ public class ModelicaCompiler {
     /**
      * Packs a FMU (helper function for {@link #compileUnit()}).
      * 
-     * @param className
-     *          The qualified name of the class for which to create a source code FMU.
-     * @param destination
-     *          The path where to put the packaged FMU.
-     * @param target
-     *          A {@link TargetObject} containing information about the target.
-     * @param externalLibraries
-     *          External libraries used for the unit.
-     * @return
-     *          the path to the packaged unit.
+     * @param className             the qualified name of the class for which to create an FMU.
+     * @param destination           the path where to put the packed FMU.
+     * @param target                a {@link TargetObject} containing information about the target.
+     * @param externalLibraries     external libraries used for the unit.
+     * @return                      the path to the packaged unit.
      */
     protected File ModelicaCompiler.packUnit(String className, String path,
             TargetObject target, FClass fClass) throws PackingFailedException {
@@ -2183,14 +2178,11 @@ public class ModelicaCompiler {
 
         try {
             hookCheckAbort();
+            copySourceFiles(fClass, sourceDir, outDir);
+
             OutputStream dest = new BufferedOutputStream(new FileOutputStream(unitFile));
             ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
             out.setMethod(ZipOutputStream.DEFLATED);
-
-            if(!options.getBooleanOption("copy_source_files_to_fmu")) {
-                FileUtil.recursiveDelete(sourceDir);
-                sourceDir = null;
-            }
 
             zipDir(outDir, out);
             out.close();
@@ -2205,9 +2197,24 @@ public class ModelicaCompiler {
         hookFmuPacked(unitFile.getAbsoluteFile());
         return unitFile;
     }
-    
+
+    /**
+     * Copies source files.
+     *
+     * @param fClass        the flat tree for which the source code was compiled.
+     * @param rootDir       the root directory that contains the sources.
+     * @param destination   the destination to which to copy the source files.
+     * @throws IOException  if there was any error copying or reading files.
+     */
+    private void ModelicaCompiler.copySourceFiles(FClass fClass, File rootDir, File destination) {
+        if(!options.getBooleanOption("copy_source_files_to_fmu")) {
+            FileUtil.recursiveDelete(sourceDir);
+            sourceDir = null;
+        }
+    }
+
     private void ModelicaCompiler.doCompileCCode(TargetObject target,  FClass fc, String className, String flatName) {
-    	if (target.getMakeFileFlag() != null) {
+        if (target.getMakeFileFlag() != null) {
                 ASTNode.beginStep("compileCCode()");
                 String cFileName = (flatName != null) ? flatName : FClass.convertClassNameToUnderscore(className);
                 CCompilerDelegator ccompiler = getCCompiler();

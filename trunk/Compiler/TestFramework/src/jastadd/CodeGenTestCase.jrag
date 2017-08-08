@@ -41,9 +41,7 @@ public abstract class CodeGenTestCase extends TestCase {
         generator.generate(createTemplateReader(), new UnitTestCodeStream(ps));
         String test = os.toString();
         String correct = filter(getGeneratedCode());
-        if (!checkEquals(correct, test)) {
-            assertEquals("Generated code does not match expected.", correct, test);
-        }
+        compareResult("Generated code does not match expected.", correct, test);
         return true;
     }
 

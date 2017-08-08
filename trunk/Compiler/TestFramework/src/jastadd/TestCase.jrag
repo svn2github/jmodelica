@@ -27,18 +27,22 @@ import java.lang.reflect.Field;
 
 import org.jmodelica.util.test.Assert;
 
+/**
+ * Main aspect for test cases used by the test framework.
+ */
 aspect TestCases {
 
 /**
- * base class for test cases.
+ * Base class for test cases.
  * 
- * Note that for each attribute (e.g. "attributeName") in the test case 
- * annotation, there must be a corresponding method (e.g. "setAttributeName()") 
- * in that subclass of TestCase. Any attribute in the test case annotation with 
- * a name containing an underscore ("_"), is instead interpreted as a compiler
- * option, and is set with setXXXOption().
- * 
- * @author jakesson
+ * Note that for each attribute (e.g. "attributeName") in the test case annotation, there must be a
+ * corresponding method (e.g. "setAttributeName()") in that subclass of TestCase. Any attribute in the test case
+ * annotation with a name containing an underscore ("_"), is instead interpreted as a compiler option, and is set
+ * with setXXXOption().
+ * <p>
+ * In order to create a new test case, override either {@code testXXX(subject)},
+ * e.g. {@code testSource(SourceRoot sr)} in the sub class created for the new test case. That overriding method must
+ * finally return {@code true}. In order to fail a test, call {@link #fail(String)} before this return.
  */
 abstract public class TestCase implements GenericTestCase {
 
@@ -164,7 +168,31 @@ abstract public class TestCase implements GenericTestCase {
     public void setOption(String key, double value) {
         setRealOption(key, value);
     }
-	
+
+    /**
+     * Gets an option's default value.
+     * 
+     * @param options   the {@link OptionRegistry} from which to get the option.
+     * @param key       the name of the option.
+     */
+    public Object getOptionDefault(OptionRegistry options, String key) {
+        if (!options.hasOption(key)) {
+            return null;
+        }
+
+        if (options.isBooleanOption(key)) {
+            return options.getBooleanOptionDefault(key);
+        } else if (options.isRealOption(key)) {
+            return options.getRealOptionDefault(key);
+        } else if (options.isIntegerOption(key)) {
+            return options.getIntegerOptionDefault(key);
+        } else if (options.isStringOption(key)) {
+            return options.getStringOptionDefault(key);
+        }
+
+        throw new IllegalArgumentException("Unexpected option value type for " + key + ".");
+    }
+
 	/**
 	 * @return the name
 	 */
@@ -453,9 +481,15 @@ abstract public class TestCase implements GenericTestCase {
             sr = ParserHandler.parseFile(uif, getSourceFileName());
         }
 
-        if (testSource(sr)) return;
-        
-        // Instantiate and check for errors
+        if (testOptions(options)) {
+            return;
+        }
+
+        if (testSource(sr)) {
+            return;
+        }
+
+        // Instantiate and check for errors.
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
         Collection<Problem> problems = null;
         try {
@@ -499,6 +533,66 @@ abstract public class TestCase implements GenericTestCase {
 		// Test transformed class
 	    testTransformed(fc);
 	}
+
+    /**
+     * Compares two objects by class and value.
+     * <p>
+     * The classes in question need to implement {@link Comparable}.
+     * 
+     * @param expected  an object.
+     * @param actual    an object to compare to {@code expected}.
+     * @return          {@code true} if both operands are of the same class, and their
+     *                  {@link Comparable#compareTo(Object)} returns 0 (value equality).
+     */
+    protected boolean classValueCompare(Object expected, Object actual) {
+        Class<?> expectedClass = expected.getClass();
+        if (expectedClass != actual.getClass()) {
+            return false;
+        }
+
+        return expected.toString().equals(actual.toString());
+    }
+    
+    /**
+     * Compares the actual result of a test to the expected, failing if the actual result differs from the expected.
+     * 
+     * @param message   the message to report if the comparison fails.
+     * @param expected  the expected result.
+     * @param actual    the actual result.
+     */
+    protected void compareResult(String message, String expected, String actual) {
+        if (!checkEquals(expected, actual)) {
+            assertEquals(message, expected, actual);
+        }
+    }
+
+    /**
+     * Gets the classes of an array of objects.
+     * 
+     * @param objects   an array of objects.
+     * @return          an array of the classes of {@code objects}.
+     */
+    protected static Class<?>[] unwrapClasses(Object[] objects) {
+        Class<?>[] types = new Class[objects.length];
+
+        for (int i = 0; i < objects.length; i++) {
+            types[i] = unwrapClass(objects[i].getClass());
+        }
+        return types;
+    }
+    
+    /* ============= *
+     *  Test types.  *
+     * ============= */
+
+    /**
+     * Performs tests on the options' registry.
+     * 
+     * @return  {@code true} if the test case should top after this method.
+     */
+    public boolean testOptions(OptionRegistry options) {
+        return false;
+    }
 
 	/**
 	 * Perform tests on the set of semantic problems found in the instance tree.
