@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; API ; #836
+Added isArray() method to instance components in the API.
+
 ; Fixed ; Minor ; Compiler ; #5416
 Fixed generation of VendorAnnotation tag in FMI XML file to correctly handle FMI 2.0.
 
