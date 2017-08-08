@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Other ; Minor ; Compiler ; #5417 #5420
+Improved compiler performance in general. In some cases up to -10% compilation time and -20% memory peak when compiling
+
 ; Fixed ; Minor ; Runtime ; #5421
 Improved performance in the sparse linear solver (about 30%).
 
