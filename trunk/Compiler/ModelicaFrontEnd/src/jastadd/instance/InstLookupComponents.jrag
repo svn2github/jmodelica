@@ -492,6 +492,25 @@ aspect InstLookupComponents {
         return array.create(icd);
     }
 
+    /**
+     * Lookup component, re-evaluating any array accesses except in last component.
+     */
+    public InstComponentDecl InstAccess.lookupEvaluatingIndices() {
+        InstAccess cur = getFirstInstAccess();
+        InstComponentDecl icd = cur.myInstComponentDecl();
+        
+        InstAccess next = cur.getNextInstAccess();
+        while (next != null && icd != null && !icd.isUnknown()) {
+            icd = cur.lookupArrayElement(icd);
+            icd = icd.memberInstComponent(next.name()).targetOrNull();
+            cur = next;
+            next = next.getNextInstAccess();
+        }
+        icd = cur.lookupArrayElement(icd);
+        
+        return (icd == null) ? unknownInstComponentDecl() : icd;
+    }
+
     inh InstLookupResult<InstComponentDecl> FIterExp.lookupInstComponent(String name);
     inh InstLookupResult<InstComponentDecl> InstForClauseE.lookupInstComponent(String name);
     inh InstLookupResult<InstComponentDecl> InstForStmt.lookupInstComponent(String name);
@@ -712,9 +731,6 @@ aspect InstLookupComponents {
     syn lazy InstLookupResult<InstComponentDecl> InstComponentAccess.myInstLookup()      = myInstLookupComponent();
     syn lazy InstLookupResult<InstComponentDecl> InstComponentArrayAccess.myInstLookup() = myInstLookupComponent();
 
-    /**
-     * Lookup component, also evaluating last array subscripts. Returns a scalar element if possible. 
-     */
     syn InstComponentDecl InstAccess.myInstComponentElement() = unknownInstComponentDecl();
     eq InstDot.myInstComponentElement()                       = getLastInstAccess().myInstComponentElement();
     eq InstGlobalAccess.myInstComponentElement()              = getInstAccess().myInstComponentElement();
