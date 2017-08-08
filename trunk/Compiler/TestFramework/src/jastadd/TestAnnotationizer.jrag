@@ -485,7 +485,7 @@ abstract public class TestAnnotationizerHelper {
         doPrintSpecificLine(out, indent, name, arrayString(value), last, false);
     }
 
-    private String arrayString(T[] array) {
+    private <T> String arrayString(T[] array) {
         String arrayString = Arrays.toString(array);
         return "{ " + arrayString.substring(1, arrayString.length() - 2) + " }";
     }
