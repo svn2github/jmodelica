@@ -16,10 +16,8 @@
     see <http://www.gnu.org/licenses/> or
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
-
+#include "jmi_util.h"
 #include <stdarg.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_global.h"
@@ -350,15 +348,19 @@ int jmi_file_exists(const char* file) {
 }
 
 int jmi_dir_exists(const char* dir) {
-    struct stat finfo;
-#ifdef _WIN32
-    if(dir && stat(dir, &finfo) == 0 && finfo.st_mode & S_IFDIR)
+#ifdef NO_FILE_SYSTEM
+    return 0;
 #else
-    if(dir && stat(dir, &finfo) == 0 && S_ISDIR(finfo.st_mode))
+        struct stat finfo;
+    #ifdef _WIN32
+        if(dir && stat(dir, &finfo) == 0 && finfo.st_mode & S_IFDIR)
+    #else
+        if(dir && stat(dir, &finfo) == 0 && S_ISDIR(finfo.st_mode))
+    #endif
+            return 1;
+        else
+            return 0;
 #endif
-        return 1;
-    else
-        return 0;
 }
 
 void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
@@ -386,4 +388,75 @@ void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file) {
     strcat(res, file);
     if (!jmi_file_exists(res))
         jmi_log_node(jmi->log, logError, "Error", "Could not locate resource <File:%s>", res);
+}
+
+/* Local helpers for fmi1_me_instantiate_model */
+int jmi_find_parent_dir(char* path, const char* dir) {
+    int found = 0;
+    int dir_level = 3;
+    int c_i = strlen(path) - 1;
+    
+    while(dir_level > 0 && !found) {
+        while(c_i > 0 && path[c_i] != '\\' && path[c_i] != '/')
+            c_i--;
+        if (c_i <= 0)
+            break;
+        if (strcmp(&path[c_i+1],dir) == 0)
+            found = 1;
+        path[c_i]= '\0';
+        c_i--;
+        dir_level--;
+    }
+    
+    return found;
+}
+
+union jmi_func_cast {
+    void* x;
+    char* (*y)();
+};
+
+void* jmi_func_to_voidp(char* (*y)()) {
+    union jmi_func_cast jfc;
+    assert(sizeof(jfc.x)==sizeof(jfc.y));
+    jfc.y = y;
+    return jfc.x;
+}
+ 
+char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size)) {
+#ifdef NO_FILE_SYSTEM
+    return NULL;
+#else
+    int found;
+    char *resource_dir = "/resources";
+    char *binary_dir = "binaries";
+    char *res;
+    char path[JMI_PATH_MAX];
+    char *resolved = path;
+    
+    #ifdef _WIN32
+        EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+        GetModuleFileName((HINSTANCE)&__ImageBase, path, MAX_PATH);
+    #else
+        Dl_info info;
+        dladdr(jmi_func_to_voidp(jmi_locate_resources), &info);
+        resolved = realpath(info.dli_fname, path);
+        if (!resolved)
+            return NULL;
+    #endif
+    
+    found = jmi_find_parent_dir(resolved, binary_dir);
+    
+    if (!found)
+        return NULL;
+    
+    strcat(resolved, resource_dir);
+    
+    if (!jmi_dir_exists(resolved))
+        return NULL;
+    
+    res = allocateMemory(strlen(resolved)+1,sizeof(char));
+    strcpy(res, resolved);
+    return res;
+#endif
 }

@@ -188,7 +188,7 @@ aspect FlatStatements {
                     tempVar = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(),
                             prefix.copyAndAppend(myTempVarName()));
                     fc.addFVariableNoTransform(tempVar);
-                    new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()).flatten(sl, fc, prefix);
+                    sl.add(new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()));
                 }
                 
                 List<FStatement> inner = sl;
@@ -239,8 +239,7 @@ aspect FlatStatements {
     
     public boolean FBreakStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix){
         if (!inFunction() && enclosingLoop() instanceof InstForStmt) {
-            new FAssignStmt(prefix.copyAndAppend(breakCondName()).createFIdUseExp(),
-                    new FBooleanLitExpFalse()).flatten(sl, fc, prefix);
+            sl.add(new FAssignStmt(new FIdUseExp(new FIdUse(prefix.copyAndAppend(breakCondName()))), new FBooleanLitExpFalse()));
             return true;
         }
         sl.add(new FBreakStmt());

@@ -22,14 +22,6 @@
  * This code can be compiled either with C or a C++ compiler.
  */
 
-#include <time.h>
-#ifndef CLOCKS_PER_SEC /* In C89 CLK_TCK is the correct name */
-#   ifdef CLK_TCK
-#       define CLOCKS_PER_SEC   CLK_TCK
-#   else
-#       define CLOCKS_PER_SEC   1000000l /* The results in this case will likely be bogus. */
-#   endif
-#endif
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -690,18 +682,22 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 /** \brief Start the clock for profiling. */
 clock_t jmi_block_solver_start_clock(jmi_block_solver_t * block_solver) {
     clock_t time = 0;
+#if !defined(NO_FILE_SYSTEM) && !defined(RT) /* SHOULD IN THE FUTURE BE CHANGED TO RT */
     if (block_solver->options->block_profiling) {
         time = clock();
     }
+#endif
     return time;
 }
 
 /** \brief Stop the clock for profiling. */
 double jmi_block_solver_elapsed_time(jmi_block_solver_t * block_solver, clock_t start_clock) {
     double elapsed_time = 0.0;
+#if !defined(NO_FILE_SYSTEM) && !defined(RT) /* SHOULD IN THE FUTURE BE CHANGED TO RT */
     if (block_solver->options->block_profiling) {
         elapsed_time = ((double)(clock()-start_clock))/(CLOCKS_PER_SEC);
     }
+#endif
     return elapsed_time;
 }
 
@@ -736,7 +732,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
-    bsop->linear_sparse_jacobian_threshold = -1;
 
     bsop->active_bounds_threshold = 0; /** < \brief Threshold for when at active bound. */
 

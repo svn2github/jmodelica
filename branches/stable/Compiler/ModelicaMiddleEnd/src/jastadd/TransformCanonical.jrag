@@ -944,11 +944,10 @@ aspect TransformCanonical {
 					}
 					
 					// Rename input
-					FQName fqn = new FQNameString(name);
-					ffv.setFQName(fqn);
+                    ffv.setFQName(new FQNameString(name));
 					
 					// Create and add binding expression for output
-                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), fqn.createFIdUseExp()));
+                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), ffv.createUseExp()));
 				}
 			}
 			
@@ -1441,7 +1440,7 @@ aspect TransformCanonical {
             Map<String, FVariable> firstOccurencesNonReal) {
         if (variability().knownParameterOrLess() && hasBindingExp()) {
             Map<String, FVariable> firstOccurences = isReal() ? firstOccurencesReal : firstOccurencesNonReal;
-            String s = getBindingExp().prettyPrint("");
+            String s = getBindingExp().toString();
             FVariable first = firstOccurences.get(s);
             if (first != null) {
                 aliasManager.addAliasVariables(new AliasPair(first, this, false));

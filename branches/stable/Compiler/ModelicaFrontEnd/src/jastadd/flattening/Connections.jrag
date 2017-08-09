@@ -80,7 +80,7 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
+        String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().name();
         ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
         return cs.expandInStreamExp(name);
     }
@@ -1008,19 +1008,8 @@ aspect Connections {
          * Assumes that the variable is an array and that <code>i</code> is suitable.
          */
         public ConnectionSetEntry specifyCell(Index i) {
-            return ConnectionSetEntry.create(cd.findCell(i, 0), outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
-        }
-
-        /**
-         * If this entry points to an outer component (or a member of one), redirect it to point to the 
-         * corresponding inner component. 
-         * 
-         * This should only be done once, or "inner outer" declarations will not be handled correctly.
-         */
-        public void redirectInner() {
-            if (cd.inOrIsInner()) {
-                fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
-            }
+            InstComponentDecl cell = cd.findCell(i, 0);
+            return ConnectionSetEntry.create(cell, outside, cell.getFQName(i));
         }
 
         public boolean equals(Object o) {
@@ -1080,7 +1069,7 @@ aspect Connections {
             public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
                 super(cd, outside, fqName);
                 InstComponentDecl flow = cd.myFlowVar();
-                flowExp = new FIdUseExp(flow.flattenedAccess());
+                flowExp = new FIdUseExp(flow.getFQName().treeCopy());
                 try {
                     CValue cval = flow.nominalAttributeCValue();
                     if (cval.hasRealValue()) {
@@ -1126,8 +1115,6 @@ aspect Connections {
      * @param source  the originating connect or branch statement
      */
     public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm, ConnectionEdge source) {
-        FQName leftName  = flattenAndResolveIndices(prefix);
-        FQName rightName = right.flattenAndResolveIndices(prefix);
         
         boolean leftOutside  = isOutsideConnector();
         boolean rightOutside = right.isOutsideConnector();
@@ -1150,20 +1137,41 @@ aspect Connections {
             while (leftIter.hasNext()) {
                 Index leftI = leftInd.translate(leftIter.next());
                 Index rightI = rightInd.translate(rightIter.next());
-                FQName leftCellName = leftName.copyReplacingSubscripts(leftI);
-                FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
                 InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
                 InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
+                FQName leftCellName  = leftCompCell.getFQName(leftI);
+                FQName rightCellName = rightCompCell.getFQName(rightI);
                 ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftCompCell, leftOutside, leftCellName);
-                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);  
+                ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightCompCell, rightOutside, rightCellName);
                 leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
             }
         } else {
+            FQName leftName  = leftComp.getFQName(index());
+            FQName rightName = rightComp.getFQName(right.index());
             ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, leftOutside, leftName);
-            ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, rightOutside, rightName);  
+            ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, rightOutside, rightName);
             leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
         }
     }
+
+    /**
+     * Helper method for constructing FQNames for connection sets
+     */
+    public FQName InstComponentDecl.getFQName(Index i) {
+        FQName res = getFQName();
+        if (isArray()) {
+            if (i.ndims() > 0) {
+                res = res.copyAndAddFas(i.subIndex(i.ndims() - ndims()).createFArraySubscripts());
+            } else {
+                res = res.copyAndAddFas(expandedSubscripts());
+            }
+        }
+        return res;
+    }
+    
+    syn Index InstAccess.index() = hasFArraySubscripts() ?
+            getFArraySubscripts().createIndex() :
+            Index.NULL;
 
     /**
      * Connect the variables referenced in a connect or branch statement in the connection set manager.
@@ -1194,8 +1202,8 @@ aspect Connections {
                     SortedSet<InstComponentDecl> rightTail = rightChildren.tailSet(leftComp);
                     if (rightTail.size() > 0) {
                         InstComponentDecl rightComp = rightTail.first();
-                        FQName leftName  = leftComp.flattenedAccess(left.getFQName());
-                        FQName rightName = rightComp.flattenedAccess(right.getFQName());
+                        FQName leftName  = leftComp.getFQName(Index.NULL);
+                        FQName rightName = rightComp.getFQName(Index.NULL);
                         ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, left.isOutside(), leftName);
                         ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, right.isOutside(), rightName);
                         leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
@@ -1215,8 +1223,6 @@ aspect Connections {
 
     public void InstComponentDecl.connectToAsPrimitive(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-        left.redirectInner();
-        right.redirectInner();
         if (left.equals(right)) {
             source.warning("Ignored connection from connector to itself");
         } else {
@@ -1326,8 +1332,7 @@ aspect Connections {
 
     public void InstComponentDecl.buildConnectionSetsAsPrimitive(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (useInFlattening() && (isFlow() || isStream())) {
-            FQName name = flattenedAccess(getFQNamePrefix());
-            csm.addInsideFlowVar(this, name);
+            csm.addInsideFlowVar(this, getFQName(Index.NULL));
         }
     }
 
@@ -3087,7 +3092,7 @@ aspect ExpandableConnectors {
             } else if (csm.isExpandableConnectorsDone()) {
                 for (InstComponentDecl icd : getInstComponentDecls()) {
                     if (icd.isArray()) {
-                        icd.addExpandableArrayMembersTopLevel(csm, getFQName());
+                        icd.addExpandableArrayMembersTopLevel(csm);
                     }
                 }
             } else {
@@ -3100,18 +3105,16 @@ aspect ExpandableConnectors {
     /**
      * Add all variables to connection set manager, to get "= 0" equations if they are not connected.
      */
-    public void InstComponentDecl.addExpandableArrayMembersTopLevel(ConnectionSetManager csm, FQName prefix) {
+    public void InstComponentDecl.addExpandableArrayMembersTopLevel(ConnectionSetManager csm) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
-            icd.addExpandableArrayMembers(csm, getFQName());
+            icd.addExpandableArrayMembers(csm);
         }
     }
     
-    public void InstPrimitive.addExpandableArrayMembersTopLevel(ConnectionSetManager csm, FQName prefix) {
+    public void InstPrimitive.addExpandableArrayMembersTopLevel(ConnectionSetManager csm) {
         if (!variability().parameterOrLess()) {
-            FQName name = prefix.copyAndAppend(name());
             for (Index i : indices()) {
-                FQName cellName = name.copyAndAddFas(i.createFArraySubscripts());
-                csm.addExpandableArrayMember(this, cellName);
+                csm.addExpandableArrayMember(this, getFQName(i));
             }
         }
     }
@@ -3119,15 +3122,15 @@ aspect ExpandableConnectors {
     /**
      * Add all variables to connection set manager, to get "= 0" equations if they are not connected.
      */
-    public void InstComponentDecl.addExpandableArrayMembers(ConnectionSetManager csm, FQName prefix) {
+    public void InstComponentDecl.addExpandableArrayMembers(ConnectionSetManager csm) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
-            icd.addExpandableArrayMembers(csm, getFQName());
+            icd.addExpandableArrayMembers(csm);
         }
     }
     
-    public void InstPrimitive.addExpandableArrayMembers(ConnectionSetManager csm, FQName prefix) {
+    public void InstPrimitive.addExpandableArrayMembers(ConnectionSetManager csm) {
         if (!variability().parameterOrLess()) {
-            csm.addExpandableArrayMember(this, flattenedAccess(prefix));
+            csm.addExpandableArrayMember(this, getFQName(Index.NULL));
         }
     }
     

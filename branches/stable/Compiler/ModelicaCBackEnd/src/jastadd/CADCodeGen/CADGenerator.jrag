@@ -184,10 +184,13 @@ public class CADGenerator extends CGenerator {
                 String indent = p.indent("");
                 OptionRegistry options = fclass.myOptions();
 
-                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
+                	boolean generateSparse = options.getIntegerOption("generate_sparse_block_jacobian_threshold") 
+                		< block.localSolvedRealVariables().size() && block.isLinear();
                     block.genBlockAddCall_C(p, genPrinter, indent, true,
-                            false, options.getBooleanOption("generate_sparse_block_jacobian"),
+                            false, generateSparse,
                             options.getStringOption("nonlinear_solver"), -1);
+                }
             }
         }
 	    }
@@ -207,10 +210,13 @@ public class CADGenerator extends CGenerator {
                 String indent = p.indent("");
                 OptionRegistry options = fclass.myOptions();
 
-                for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+                for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
+                	boolean generateSparse = options.getIntegerOption("generate_sparse_block_jacobian_threshold") 
+                		< block.localSolvedRealVariables().size() && block.isLinear();
                     block.genBlockAddCall_C(p, genPrinter, indent, true,
-                            true, options.getBooleanOption("generate_sparse_block_jacobian"),
+                            true, generateSparse,
                             options.getStringOption("nonlinear_solver"), -1);
+                }
             }
         }
     }

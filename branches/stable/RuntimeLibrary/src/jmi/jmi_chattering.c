@@ -41,7 +41,7 @@ static void jmi_chattering_log(jmi_t* jmi) {
 }
 
 static void jmi_chattering_save_switches(jmi_t* jmi) {
-    size_t i;
+    int i;
     
     for (i = 0; i < jmi->n_sw; i++) {
         jmi->chattering->pre_switches[i] = jmi_get_sw(jmi)[i];
@@ -49,7 +49,7 @@ static void jmi_chattering_save_switches(jmi_t* jmi) {
 }
 
 void jmi_chattering_completed_integrator_step(jmi_t* jmi) {
-    size_t i;
+    int i;
     jmi_chattering_t* chattering = jmi->chattering;
     
     if (!chattering->chattering_detection_mode) {
@@ -74,7 +74,7 @@ void jmi_chattering_completed_integrator_step(jmi_t* jmi) {
 }
 
 void jmi_chattering_check(jmi_t* jmi) {
-    size_t i;
+    int i;
     jmi_chattering_t* chattering = jmi->chattering;
     
     chattering->clear_counter = 0;

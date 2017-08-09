@@ -1625,6 +1625,8 @@ aspect InstanceTreeConstruction {
     syn InstClassDecl InstSimpleShortClassDecl.myTargetInstClassDecl() = getTarget().myInstClassDecl();
     syn InstClassDecl InstShortClassDecl.myTargetInstClassDecl()       = getInstExtends(0).myInstClass();
 
+    syn boolean InstRestriction.equals(Object o) = getClass().equals(o.getClass());
+
     syn lazy InstClassDecl InstLibNode.getActualInstClass() {
         LibNode ln = (LibNode) getClassDecl();
         ClassDecl cl = ln.myClass();
@@ -2357,10 +2359,6 @@ aspect InstanceAST_API {
 
 aspect SourceAST_API {
 
-    public static boolean ASTNode.equalsLowerCase(String name1, String name2) {
-        return name1.toLowerCase().equals(name2.toLowerCase());
-    }
-
     private static final byte LibNode.UPDATED_NAME_CASE_NOT_DONE  = 0;
     private static final byte LibNode.UPDATED_NAME_CASE_CHANGE    = 1;
     private static final byte LibNode.UPDATED_NAME_CASE_NO_CHANGE = 2;
@@ -2369,7 +2367,7 @@ aspect SourceAST_API {
     syn ClassDecl LibNode.myClass() {
         ClassDecl cl = (ClassDecl) getStoredDefinition().getElement(0);
         if (updatedNameCase == UPDATED_NAME_CASE_NOT_DONE) {
-            if (!cl.name().equals(name()) && equalsLowerCase(cl.name(), name())) {
+            if (!cl.name().equals(name()) && cl.name().equalsIgnoreCase(name())) {
                 setName(cl.getName().treeCopy());
                 updatedNameCase = UPDATED_NAME_CASE_CHANGE;
             } else {

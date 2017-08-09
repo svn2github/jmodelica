@@ -17,6 +17,8 @@
 %goal source_root;
 %goal anonymous_short_class;
 %goal exp;
+%goal element;
+%goal abstract_equation
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -53,7 +55,9 @@
             
             StringBuilder s = new StringBuilder();
             //s.append("Syntax error at line "+ Symbol.getLine(token.getStart()) + ", column " + Symbol.getColumn(token.getStart()) + "\n");
-            if (token.value != null) {
+            if (token.getId() == Terminals.EOF) {
+                s.append("  Unexpected end of file");
+            } else if (token.value != null) {
                 s.append("   Unexpected token: \"" + token.value + "\"");
             } else if (token.getId()<Terminals.NAMES.length)
                 s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);

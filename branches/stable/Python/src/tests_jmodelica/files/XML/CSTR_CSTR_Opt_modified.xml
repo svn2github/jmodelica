@@ -13,15 +13,7 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			<IntegerType max="100" quantity="5" min="5"/>
 		</Type>
 	</TypeDefinitions>	
-	<DefaultExperiment stopTime="20" tolerance="1E-6" startTime="0"/>
-	<VendorAnnotations>
-		<Tool name="JModelica">
-			<Annotation name="Library" value="addNumbers1"/>
-			<Annotation name="Include" value="#include &quot;addNumbers1.h&quot;"/>
-			<Annotation name="LibraryDirectory" value="/Library"/>
-			<Annotation name="IncludeDirectory" value="/Include"/>
-		</Tool>
-	</VendorAnnotations>		
+	<DefaultExperiment stopTime="20" tolerance="1E-6" startTime="0"/>		
 	<ModelVariables>
 		 <ScalarVariable name="u" valueReference="26" variability="continuous" causality="input" alias="noAlias">
 			 <Real relativeQuantity="false" start="350.0" free="false" initialGuess="350.0" nominal="3.14" />

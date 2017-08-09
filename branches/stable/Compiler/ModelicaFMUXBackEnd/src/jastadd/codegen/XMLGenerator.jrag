@@ -257,52 +257,6 @@ public class XMLGenerator extends GenericXMLGenerator {
         }
     }
 
-    /**
-     * Internal class used to generate the vendor annotations tag.
-     * 
-     * @see DAETag
-     */
-    public class DAETag_XML_vendorAnnotations extends DAETag {
-
-        public DAETag_XML_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
-            super("XML_vendorAnnotations", myGenerator, fclass);
-        }
-
-        @Override
-        public void generate(CodeStream genPrinter) {
-            generateOpenTag("VendorAnnotations", genPrinter);
-            generateTagStart("Tool", genPrinter);
-            generateAttribute("name", ASTNode.vendorName(), genPrinter);
-            generateOpenEnd(genPrinter);
-            
-            for(String lib : fclass.externalLibraries()) {
-                generateTagStart("Annotation", genPrinter);
-                generateAttribute("name", "Library", genPrinter);
-                generateAttribute("value", lib, genPrinter);
-                generateClosedEnd(genPrinter);
-            }
-            for(String inc : fclass.externalIncludes()) {
-                generateTagStart("Annotation", genPrinter);
-                generateAttribute("name", "Include", genPrinter);
-                generateAttribute("value", inc, genPrinter);
-                generateClosedEnd(genPrinter);
-            }
-            for(String libdir : fclass.externalLibraryDirectories()) {
-                generateTagStart("Annotation", genPrinter);
-                generateAttribute("name", "LibraryDirectory", genPrinter);
-                generateAttribute("value", libdir, genPrinter);
-                generateClosedEnd(genPrinter);
-            }
-            for(String incdir : fclass.externalIncludeDirectories()) {
-                generateTagStart("Annotation", genPrinter);
-                generateAttribute("name", "IncludeDirectory", genPrinter);
-                generateAttribute("value", incdir, genPrinter);
-                generateClosedEnd(genPrinter);
-            }
-            generateClosing("Tool", genPrinter);
-            generateClosing("VendorAnnotations", genPrinter);
-        }
-    }
 
     /**
      * Internal class used to generate the model variables tags.

@@ -152,7 +152,7 @@ int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set) {
     jmi_dynamic_state_copy_to_ds_values_single(jmi, index_set);
 
     /* Set that the states has been updated */
-    jmi->updated_states = JMI_TRUE;
+    jmi->updated_states = TRUE;
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5) {
         jmi_log_vrefs(jmi->log, node, logInfo, "new_states", 'r', set->state_value_references, set->n_states);
@@ -209,7 +209,7 @@ static int jmi_dynamic_state_sort(jmi_t* jmi, int* array, int n) {
 
 int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index_set];
-    jmi_int_t new_states = JMI_FALSE;
+    jmi_int_t new_states = FALSE;
     jmi_log_node_t node;
     
     /* Update the coefficients */
@@ -248,7 +248,7 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         }
         
         if (best_value != -1 && best_choice != set->algebraic_value_references[0]) {
-            new_states = JMI_TRUE;
+            new_states = TRUE;
             set->temp_algebraic[0] = best_choice;
         }
         
@@ -258,7 +258,7 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         }
     } else {
         int info = 0, i;
-        int best_choice_choosen = JMI_TRUE;
+        int best_choice_choosen = TRUE;
         jmi_real_t rr = 0.0, rr_new = 0.0;
         
         for (i = 0; i < set->n_algebraics; i++) { 
@@ -269,7 +269,7 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         if (info != 0) {
             if (jmi->jmi_callbacks.log_options.log_level >= 5) { jmi_log_leave(jmi->log, node); }
             jmi_log_node(jmi->log, logError, "DynamicState", "Failed to perform a QR factorization of the sub coefficient matrix in <set:%I>", index_set);
-            return JMI_FALSE;
+            return FALSE;
         }
         
         rr = JMI_ABS(set->sub_coefficent_matrix[set->n_algebraics*set->n_algebraics-1]);
@@ -301,7 +301,7 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         } else {
             if (jmi->jmi_callbacks.log_options.log_level >= 5) { jmi_log_leave(jmi->log, node); }
             jmi_log_node(jmi->log, logError, "DynamicState", "Failed to perform a QR factorization of the coefficient matrix in <set:%I>", index_set);
-            return JMI_FALSE;
+            return FALSE;
         }
         
         /* Get the new rr value */
@@ -314,7 +314,7 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
                 rr, rr_new, index_set);
                 jmi_log_leave(jmi->log, node);
             }
-            new_states = JMI_FALSE;
+            new_states = FALSE;
             return new_states;
         } else {
             if (jmi->jmi_callbacks.log_options.log_level >= 5) {
@@ -331,14 +331,14 @@ int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
         
         for (i = 0; i < set->n_algebraics; i++) {
             if (set->algebraic_value_references[i] != set->variables_value_references[set->dgeqp3_jpvt[i]-1]) {
-                best_choice_choosen = JMI_FALSE;
+                best_choice_choosen = FALSE;
             }
         }
         
         if (best_choice_choosen == JMI_FALSE) {
             jmi_log_node(jmi->log, logInfo, "Info", "Found new optimal choice of states in <set:%I>.", index_set);
             
-            new_states = JMI_TRUE;
+            new_states = TRUE;
             for (i = 0; i < set->n_algebraics; i++) {
                 set->temp_algebraic[i] = set->variables_value_references[set->dgeqp3_jpvt[i]-1];
             }
@@ -375,7 +375,7 @@ int jmi_dynamic_state_update(jmi_t* jmi) {
 
 int jmi_dynamic_state_verify_choice(jmi_t* jmi) {
     int i = 0;
-    jmi_int_t new_states = JMI_FALSE;
+    jmi_int_t new_states = FALSE;
     jmi_log_node_t node;
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5) {
@@ -401,7 +401,7 @@ int jmi_dynamic_state_verify_choice(jmi_t* jmi) {
 
 int jmi_dynamic_state_check_is_state(jmi_t* jmi, jmi_int_t index, ...) {
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index];
-    int ret = JMI_TRUE;
+    int ret = TRUE;
     int i = 0;
     jmi_log_node_t node;
     
@@ -421,7 +421,7 @@ int jmi_dynamic_state_check_is_state(jmi_t* jmi, jmi_int_t index, ...) {
         }
         
         if (set->state_value_references[i] != value_reference) {
-            ret = JMI_FALSE;
+            ret = FALSE;
             break;
         }
     }

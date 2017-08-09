@@ -106,88 +106,38 @@ aspect FlatNameBinding {
         }
     }
 
-    syn FAbstractVariable FQName.myFV() {
-        FAbstractVariable res = lookupFV(resolvedName());
-        if (!res.isUnknown()) {
-            return res;
-        }
-        FQNameFull full = asFQNameFull();
-        if (full.getParent() == null) {
-            full.setParent(this);
-        }
-        return full.myFV();
-    }
-
-    eq FQNameFull.myFV() {
-        FAbstractVariable res = lookupFV(resolvedName());
-        if (!res.isUnknown()) {
-            return res;
-        }
-        return getFQNamePart(getNumFQNamePart() - 1).myFV(false);
-    }
+    syn FAbstractVariable FQName.myFV() = lookupFV(name());
+    eq FQNameFull.myFV() = getFQNamePart(getNumFQNamePart() - 1).myFV();
 
     syn FAbstractVariable FQName.myOutermostFV() = myFV();
-    eq FQNameFull.myOutermostFV()                = getFQNamePart(getNumFQNamePart() - 1).myFV(true);
+    eq FQNameFull.myOutermostFV()                = getFQNamePart(0).myFV();
     
     inh FAbstractVariable FQNamePart.lookupFV(String name);
     
-    syn FAbstractVariable FQNamePart.myFV(boolean outerMost) {
-        FAbstractVariable res = myContextFV(outerMost);
-        if (res != null && !res.isUnknown()) {
-            if (outerMost) {
-                return res;
-            }
+    syn FAbstractVariable FQNamePart.myFV() {
+        FAbstractVariable res = myContextFV();
+        if (res == null) {
+            res = lookupFV(name());
+        } else if (!res.isUnknown()) {
             res = res.myFRecordDecl().lookupFV(name());
-        } else {
-            res = lookupFV(resolvedName());
         }
         return res;
-    }
-    
-    eq FQNamePartArray.myFV(boolean outerMost) {
-        FAbstractVariable res = myContextFV(outerMost);
-        if (res != null && !res.isUnknown()) {
-            if (outerMost) {
-                return res;
-            }
-            res = res.myFRecordDecl().lookupFV(name());
-        } else {
-            res = lookupFV(resolvedName());
-        }
-        return res;
-    }
-    
-    inh String FQNamePart.resolvedName();
-    eq FQNameFull.getFQNamePart(int k).resolvedName() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < k; i++) {
-            FQNamePart fqnp = getFQNamePart(i);
-            sb.append(fqnp.name());
-            if (fqnp.hasFArraySubscripts()) {
-                sb.append(fqnp.getFArraySubscripts().createEvaluated());
-            }
-            sb.append(".");
-        }
-        sb.append(getFQNamePart(k).name());
-        return sb.toString();
     }
 
-    inh FAbstractVariable FQNamePart.myContextFV(boolean outerMost);
-    eq FQNameFull.getFQNamePart(int i).myContextFV(boolean outerMost) = 
-            i == 0 ? null : getFQNamePart(i - 1).myFV(outerMost);
+    inh FAbstractVariable FQNamePart.myContextFV();
+    eq FQNameFull.getFQNamePart(int i).myContextFV() = 
+            i == 0 ? null : getFQNamePart(i - 1).myFV();
 	
 	syn boolean FIdUse.isForIndex()            = myFV().isForIndex();
 	syn boolean FIdUseExp.isForIndex()         = getFIdUse().isForIndex();
 	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
 	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();
-	syn boolean FAbstractVariable.isForIndex() = false;
-	inh boolean FVariable.isForIndex();
-	inh boolean InstComponentDecl.isForIndex();
-	eq FForIndex.getFVariable().isForIndex()        = true;
-	eq InstForIndex.getInstPrimitive().isForIndex() = true;
-	eq InstNode.getChild().isForIndex()             = false;
-	eq FClass.getChild().isForIndex()               = false;
-	
+    inh boolean FAbstractVariable.isForIndex();
+    inh boolean InstComponentDecl.isForIndex();
+    eq FForIndex.getFVariable().isForIndex()        = true;
+    eq InstForIndex.getInstPrimitive().isForIndex() = true;
+    eq ASTNode.getChild().isForIndex()              = false;
+
 }
 
 aspect ParameterEquations {

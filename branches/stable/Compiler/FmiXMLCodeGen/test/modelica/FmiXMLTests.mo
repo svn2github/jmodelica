@@ -1699,4 +1699,46 @@ model Quantity1
 ")})));
 end Quantity1;
 
+
+model VendorAnnotations1
+    Real x = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="VendorAnnotations1",
+            description="VendorAnnotations for FMI 1.0",
+            fmi_version="1.0",
+            template="$vendorAnnotations$",
+            regexp="/Tool name=\"[^\"]+\"/Tool name=\"\"/",
+            generatedCode="
+<VendorAnnotations>
+    <Tool name=\"\">
+        <Annotation name=\"CompilerVersion\" value=\"compiler_version_file_not_read\" />
+    </Tool>
+</VendorAnnotations>
+")})));
+end VendorAnnotations1;
+
+
+model VendorAnnotations2
+    Real x = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="VendorAnnotations2",
+            description="VendorAnnotations for FMI 2.0",
+            fmi_version="2.0",
+            template="$vendorAnnotations$",
+            regexp="/Tool name=\"[^\"]+\"/Tool name=\"\"/",
+            generatedCode="
+<VendorAnnotations>
+    <Tool name=\"\">
+        <Annotations>
+            <Annotation name=\"CompilerVersion\" value=\"compiler_version_file_not_read\" />
+        </Annotations>
+    </Tool>
+</VendorAnnotations>
+")})));
+end VendorAnnotations2;
+
 end FmiXMLTests;

@@ -152,6 +152,14 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.anonymous_short_class;
     }
 
+    public static short ParserHandler.elementGoal() {
+        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.element;
+    }
+
+    public static short ParserHandler.abstractEquationGoal() {
+        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.abstract_equation;
+    }
+
     public static SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseModelicaFile(uif, fileName);
@@ -224,6 +232,20 @@ aspect Parsers {
         cl.setRestriction(restriction);
         cl.setName(new IdDecl(targetName));
         return cl;
+    }
+
+    public static Element ParserHandler.parseElemet(String code, String parentSourceFile)
+            throws ParserException, beaver.Parser.Exception, IOException {
+        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
+        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
+        return (Element) parser.parse(scanner, elementGoal());
+    }
+
+    public static AbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile)
+            throws ParserException, beaver.Parser.Exception, IOException {
+        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
+        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
+        return (AbstractEquation) parser.parse(scanner, abstractEquationGoal());
     }
 
     public static Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
@@ -1358,7 +1380,21 @@ aspect DebugHelpers {
     public String ASTNode.toString() {
         return prettyPrint("");
     }
-    
+
+    /**
+     * Override simple expressions for performance reasons
+     */
+
+    public String FRealLitExp.toString()         { return Double.toString(getValue()); }
+    public String FIntegerLitExp.toString()      { return Integer.toString(getValue()); }
+    public String FOverflowIntLitExp.toString()  { return getString(); }
+    public String FBooleanLitExpTrue.toString()  { return "true"; }
+    public String FBooleanLitExpFalse.toString() { return "false"; }
+    public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }
+    public String FEnumLitExp.toString()         { return getEnum() + "." + getValue(); }
+
+    public String FQNameString.toString()        { return getName(); }
+
 }
 
 

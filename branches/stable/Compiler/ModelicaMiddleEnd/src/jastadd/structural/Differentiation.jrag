@@ -560,9 +560,7 @@ aspect Derivatives {
         // and the name is not 'time', then the derivative is zero.
         if (!name.equals(TIME)) {
             boolean isIndependent = true;
-            FQName fqn = new FQNameString(name);
-            FIdUseExp fid = (FIdUseExp) dynamicFExp(fqn.createFIdUseExp());
-            FAbstractVariable fv = fid.myFV();
+            FAbstractVariable fv = getName().getFQName().lookupFV(name);
             if (fv != null) {
                 HashSet<FVariable> s = new HashSet<FVariable>();
                 s.add((FVariable) fv);
@@ -836,7 +834,7 @@ aspect AlgorithmDifferentiation{
     
     public FFunctionDecl FFunctionDecl.createAndAddDerivativeFunction(AnnotationNode derNode) {
         FQName name = getFQName().createDerPrefixedName(1);
-        derNode.setValue(name.createFIdUseExp());
+        derNode.setValue(new FIdUseExp(name));
         derNode.forPath("order").setValue(new FIntegerLitExp(order() + 1));
         
         Collection<FFunctionVariable> inputs = new ArrayList<FFunctionVariable>();

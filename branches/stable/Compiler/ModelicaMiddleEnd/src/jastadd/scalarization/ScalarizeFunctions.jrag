@@ -21,7 +21,6 @@ aspect FunctionScalarization {
      *        assignments and scalarize all expressions.
      */
     public void FFunctionDecl.scalarize() {
-        Map<String,FExp> emptyIndexMap = Collections.emptyMap();
         List<FStatement> stmts = new List<FStatement>();
         List<FAttribute> attrs = new List<FAttribute>();
         try {
@@ -319,10 +318,8 @@ aspect FunctionScalarization {
         s.addTempVar(this);
         Array arr = getArray();
         for (Index i : indices()) {
-            FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
-            name.scalarized = true;
             arr.get(i).createArrayTemporaries(s);
-            s.add(new FIdUseExp(name), arr.get(i).scalarize(s));
+            s.add(tempExp(i), arr.get(i).scalarize(s));
         }
         useTempVar = true;
     }
@@ -431,9 +428,9 @@ aspect FunctionScalarization {
                     FType tempType = arg.type().arrayType(arg.size().contract(1));
                     s.block(firstLoop).addTempVar(tempType, tempName);
 
-                    newArgs.add(names.createUseWithSubscripts(tempName, 0, dimDiff - 1));
+                    newArgs.add(tempExp(tempName, names.createFArraySubscripts(0, dimDiff - 1)));
 
-                    FAssignableExp left = names.createUseWithSubscripts(tempName, 1, dimDiff + 1);
+                    FAssignableExp left = tempExp(tempName, names.createFArraySubscripts(1, dimDiff + 1));
                     FExp right = arg.tempExp(names.createFArraySubscripts(0, dimDiff + 1));
                     List<FStatement> inner = new List<FStatement>();
                     inner.add(new FAssignStmt(left, right));
@@ -466,7 +463,7 @@ aspect FunctionScalarization {
             FExp right = getFExp(i);
             FIdUseExp left;
             if (iter) {
-                left = names.createUseWithSubscripts(tempVarName());
+                left = tempExp(names.createFArraySubscripts());
                 getFExp(0).editNamesIter(s);
                 right.createArrayTemporaries(s.block(inner));
                 right.addArrayUsesToIndexMap(s);
@@ -532,7 +529,7 @@ aspect FunctionScalarization {
         List<FStatement> outer = new List<FStatement>();
         outer.add(new FAssignStmt(sum, type().scalarType().zeroLiteral()));
         outer.add(fs);
-        outer.add(new FAssignStmt(names.createUseWithSubscripts(tempVarName()), sum.fullCopy()));
+        outer.add(new FAssignStmt(tempExp(names.createFArraySubscripts()), sum.fullCopy()));
         
         s.createForLoops(outer, this);
         
@@ -575,16 +572,16 @@ aspect FunctionScalarization {
         
         FIfExp right = new FIfExp(
                 new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
-                scalarizeDiagonalElement(s.map()),
+                scalarizeDiagonalElement(s),
                 new FIntegerLitExp(0)
         );
         s.createForLoops(tempExp(names.createFArraySubscripts(ndims())), right, this);
         names.removeLayer();
     }
     
-    syn FExp FAbstractDiagonal.scalarizeDiagonalElement(Map<String,FExp> indexMap);
-    eq FIdentity.scalarizeDiagonalElement(Map<String,FExp> indexMap) = new FIntegerLitExp(1);
-    eq FDiagonal.scalarizeDiagonalElement(Map<String,FExp> indexMap) = getFExp().scalarize(indexMap);
+    syn FExp FAbstractDiagonal.scalarizeDiagonalElement(Scalarizer s);
+    eq FIdentity.scalarizeDiagonalElement(Scalarizer s) = new FIntegerLitExp(1);
+    eq FDiagonal.scalarizeDiagonalElement(Scalarizer s) = getFExp().scalarize(s);
     
     public void FVectorExp.unknownFunctionArrayTemporaries(Scalarizer s) {
         ForNames names = s.getNames();
@@ -677,17 +674,15 @@ aspect FunctionScalarization {
     
     /**
      * Helper for unknown size expressions containing iteration expressions.
-     * Transfers some names  in <code>names</code> to <code>indexMap</code>
      */
     public boolean FExp.editNamesIter(Scalarizer s) {
         return false;
     }
     public boolean FIterExp.editNamesIter(Scalarizer s) {
         ForNames names = s.getNames();
-        Map<String,FExp> indexMap = s.map();
         int i = 0;
         for (; i < getNumForIndex(); i++) {
-            indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
+            getForIndex(i).setIndexName(names.get(i));
         }
         names.addLayer(getFExp().ndims());
         for (; i < getFExp().ndims() + getNumForIndex(); i++) {
@@ -695,6 +690,15 @@ aspect FunctionScalarization {
         }
         return true;
     }
+
+    private String FForIndex.indexName = null;
+    public void CommonForIndex.setIndexName(String indexName) {}
+    public void FForIndex.setIndexName(String indexName) { this.indexName = indexName; }
+
+    inh String FAbstractVariable.myForIndexName();
+    eq ASTNode.getChild().myForIndexName()       = null;
+    eq FForIndex.getFVariable().myForIndexName() = indexName;
+
     
     /**
      * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(FExp[] names)}.
@@ -1029,7 +1033,7 @@ aspect FunctionScalarizationHelpers {
             FArraySubscripts fas = new FArraySubscripts();
             for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
-                    fas.addFSubscript(new FIdTempExp(new FIdUse(topLayer()[i])));
+                    fas.addFSubscript(new FIdTempExp(new FIdUse(new FQNameFull(topLayer()[i]))));
                 else
                     fas.addFSubscript(new FIntegerLitExp(1));
             }
@@ -1050,38 +1054,7 @@ aspect FunctionScalarizationHelpers {
         public FArraySubscripts createFArraySubscripts() {
             return createFArraySubscripts(topLayer().length);
         }
-        
-        /**
-         * Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
-         * 
-         * @param name  the name of the expression to have subscripts.
-         * @param d1    the first subscript integer to use.
-         * @param d2    the first subscript integer not to use after d1.
-         * @return  the expression using subscripts in top layer [d1, d2).
-         */
-        public FIdUseExp createUseWithSubscripts(String name, int d1, int d2) {
-            FQName fqn;
-            if (hasNames() && (d2 - d1) > 0)
-                fqn = new FQNameFull(name, createFArraySubscripts(d1, d2));
-            else
-                fqn = new FQNameFull(name);
-            return new FIdTempExp(new FIdUse(fqn));
-        }
-        
-        /**
-         * Creates a new FIdUseExp with the first </code>d</code> names in the top layer.
-         */
-        public FIdUseExp createUseWithSubscripts(String name, int d) {
-            return createUseWithSubscripts(name, 0, d < topLayer().length ? d : topLayer().length);
-        }
-        
-        /**
-         * Creates a new FIdUseExp with all of the names in the top layer.
-         */
-        public FIdUseExp createUseWithSubscripts(String name) {
-            return createUseWithSubscripts(name, topLayer().length);
-        }
-        
+
         public FExp[] createFExpArray() {
             if (!hasNames())
                 return new FExp[0];

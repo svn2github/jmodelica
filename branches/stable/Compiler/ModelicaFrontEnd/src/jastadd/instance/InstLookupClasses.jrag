@@ -559,7 +559,7 @@ aspect InstLookupClasses {
 
     eq InstClassDecl.matches(String str) = name().equals(str);
     eq InstLibNode.matches(String str) {
-        if (equalsLowerCase(name(), str)) {
+        if (name().equalsIgnoreCase(str)) {
             resolveLib();
         }
         return name().equals(str);

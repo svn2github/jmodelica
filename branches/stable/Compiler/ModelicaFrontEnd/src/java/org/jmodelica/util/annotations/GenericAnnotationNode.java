@@ -43,7 +43,7 @@ import org.jmodelica.util.values.Evaluable;
  * @param <V> The value that is returned by the nodes
  */
 public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N, V>,
-        N extends AnnotationProvider<N, V>, V extends Evaluable & PossiblyAnnotation<N>> {
+        N extends AnnotationProvider<N, V>, V extends Evaluable> {
 
     /**
      * Vendor name.
@@ -202,6 +202,17 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
+     * Return the node that this annotation represents without creating if it
+     * doesn't exist. I.e.: simply return what we know without creating
+     * anything.
+     * 
+     * @return The underlying node if available
+     */
+    protected N peekNode() {
+        return node;
+    }
+
+    /**
      * Tries to resolve the provided string as and URI.
      * 
      * @param str String to resolve as URI
@@ -270,19 +281,25 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public T valueAsAnnotation() {
         if (!valueAnnotation_cacheComputed) {
             valueAnnotation_cacheComputed = true;
-            if (!hasValue()) {
-                valueAnnotation_cache = createNode(null, null);
+            N annotationNode = valueAsProvider();
+            if (hasValue() && annotationNode == null) {
+                valueAnnotation_cache = null;
             } else {
-                N annotationNode = value().asAnnotationProvider();
-                if (annotationNode == null) {
-                    valueAnnotation_cache = null;
-                } else {
-                    valueAnnotation_cache = createNode(null, annotationNode);
-                }
+                valueAnnotation_cache = createNode(null, annotationNode);
             }
         }
         return valueAnnotation_cache;
     }
+
+    /**
+     * If the provided value can be interpreted as an annotation node, then
+     * this method should return the provider that reflects the value as an
+     * annotation node.
+     * 
+     * @param value Value which can be an annotation node
+     * @return Provider which reflects the value as annotation node
+     */
+    protected abstract N valueAsProvider();
 
     @Override
     public String toString() {

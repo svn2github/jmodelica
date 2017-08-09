@@ -1482,6 +1482,8 @@ public class ModelicaCompiler {
         return options;
     }
 
+    public static final String COMPILER_VERSION = Version.parseVersion();
+
     protected void setArguments(Arguments programarguments) {
         
         int arg = 0;
@@ -1516,8 +1518,10 @@ public class ModelicaCompiler {
         // Log compilation command
         log.info("Compiler arguments:\n  "        + programarguments.line());
         log.info("Current working directory:\n  " + currentWorkingDirecory());
-        log.info("Compiler version: "             + Version.parseVersion());
+        log.info("Compiler version: "             + COMPILER_VERSION);
         log.info("Java version: "                 + System.getProperty("java.version"));
+        log.info("OS name: "                      + System.getProperty("os.name"));
+        log.info("OS architecture: "              + System.getProperty("os.arch"));
         logEnvironment("MODELICAPATH", "JAVA_HOME", "JMODELICA_HOME");
     }
 
@@ -1830,23 +1834,23 @@ public class ModelicaCompiler {
                         public void setOptions(TargetObject object, OptionRegistry options) {
                             switch (object) {
                                 case FMUME10:
-                                	options.setStringOption("fmu_type", "FMUME10");
-                                	options.setBooleanOption("generate_ode", true);
+                                    options.setStringOption("fmu_type", "FMUME10");
+                                    options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
                                     options.setBooleanOption("generate_fmi_me_xml", true);
                                     options.setBooleanOption("generate_fmi_cs_xml", false);
                                     options.setBooleanOption("generate_xml_equations", false);
-                                	break;
+                                    break;
                                 case FMUME20:
-                                	options.setStringOption("fmu_type", "FMUME20");
-                                	options.setBooleanOption("generate_ode", true);
+                                    options.setStringOption("fmu_type", "FMUME20");
+                                    options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
                                     options.setBooleanOption("generate_fmi_me_xml", true);
                                     options.setBooleanOption("generate_fmi_cs_xml", false);
                                     options.setBooleanOption("generate_xml_equations", false);
-                                	break;
+                                    break;
                                 case CHECK:
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
@@ -1856,17 +1860,16 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                     break;
                                 case FMUCS10:
-                                	options.setStringOption("fmu_type", "FMUCS10");
-                                	options.setBooleanOption("generate_ode", true);
+                                    options.setStringOption("fmu_type", "FMUCS10");
+                                    options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
                                     options.setBooleanOption("generate_fmi_me_xml", false);
                                     options.setBooleanOption("generate_fmi_cs_xml", true);
                                     options.setBooleanOption("generate_xml_equations", false);
-                                	break;
+                                    break;
                                 case FMUCS20:
-                                	options.setStringOption("fmu_type", "FMUCS20");
-                                
+                                    options.setStringOption("fmu_type", "FMUCS20");
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -1875,8 +1878,7 @@ public class ModelicaCompiler {
                                     options.setBooleanOption("generate_xml_equations", false);
                                     break;
                                 case FMUMECS20:
-                                	options.setStringOption("fmu_type", "FMUME20;FMUCS20");
-                                	
+                                    options.setStringOption("fmu_type", "FMUME20;FMUCS20");
                                     options.setBooleanOption("generate_ode", true);
                                     options.setBooleanOption("generate_dae", false);
                                     options.setBooleanOption("equation_sorting", true);
@@ -1900,6 +1902,7 @@ public class ModelicaCompiler {
                                 default:
                                     break;
                                 }
+                            options.setStringOption("compiler_version", ModelicaCompiler.COMPILER_VERSION);
                         }
 
                         @Override

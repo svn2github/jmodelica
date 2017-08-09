@@ -24,7 +24,7 @@ import org.jmodelica.util.values.Evaluable;
  * @param <N> The base node type which we deal with
  * @param <V> The value that is returned by the nodes
  */
-public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extends Evaluable & PossiblyAnnotation<N>> {
+public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extends Evaluable> {
     public Iterable<SubNodePair<N>> annotationSubNodes();
     public V annotationValue();
     public void setAnnotationValue(V newValue) throws FailedToSetAnnotationValueException;

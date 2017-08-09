@@ -282,7 +282,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) { 
+        if (block->Jacobian_structure) { 
             if(block->init) {  
                 info = jmi_linear_solver_sparse_setup(block);  
                 if (info) { 
@@ -578,7 +578,7 @@ static int jmi_linear_solver_sparse_compute_sparsity_backsolve(const jmi_matrix_
 }
 
 /* L (sparse, tringular) x (sparse) = B (sparse) */
-int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work) {
+int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t* nz_pattern_sizes, jmi_int_t nz_size, jmi_int_t col, double *work) {
     jmi_int_t i, B_p;
 
     /* Copy the right-hand side into the work vector */
@@ -590,15 +590,23 @@ int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const j
     for (i = 0; i < nz_size; i++) {
         jmi_int_t col_L = nz_pattern[i];
         jmi_int_t L_p   = L->col_ptrs[col_L];
+        jmi_int_t odd_internal_loop = nz_pattern_sizes[i];
         double val;
         
-        /* if (work[col_L] == 0.0) { continue; } */
-        
-        work[col_L] /= L->x[L_p++];
+        /* This is a multiplication due to that diag(L) has been previously
+        been replaced by 1/diag(L) */
+        work[col_L] *= L->x[L_p++];
         val = work[col_L];
-
-        for (; L_p < L->col_ptrs[col_L+1]; L_p++) {
-            work[L->row_ind[L_p]] -= L->x[L_p]*val; 
+        
+        if (odd_internal_loop) { /* The number of internal loops are odd */
+            work[L->row_ind[L_p]] -= L->x[L_p]*val;
+            L_p = L_p + 1 ;
+        }
+        
+        /* Increment loop by 2 for performance */
+        for (; L_p < L->col_ptrs[col_L+1]; L_p += 2) {
+            work[L->row_ind[L_p]]   -= L->x[L_p]*val;
+            work[L->row_ind[L_p+1]] -= L->x[L_p+1]*val;
         }
     }
     
@@ -619,6 +627,7 @@ int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A, doubl
 }
 
 /* C (dense) = -A (sparse)*B (sparse) */
+/*
 int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C) {
     jmi_int_t B_col;
 
@@ -628,13 +637,15 @@ int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jm
     
     return 0;
 }
+*/
 
 /* C (dense) = -A (sparse)*B(:,col) (sparse) */
-int jmi_linear_solver_sparse_multiply_column(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, jmi_int_t B_col, double *C) {
-    jmi_int_t B_p, p;
+int jmi_linear_solver_sparse_multiply_column(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t B_col, double *C) {
+    jmi_int_t i, p;
     jmi_int_t col_ind = A->nbr_rows*B_col;
-
-    for (B_p = B->col_ptrs[B_col]; B_p < B->col_ptrs[B_col + 1]; B_p++) {
+    
+    for (i = 0; i < nz_size; i++) {
+        jmi_int_t B_p = nz_pattern[i];
         double val = B->x[B_p];
         jmi_int_t col = B->row_ind[B_p];
 
@@ -681,12 +692,15 @@ int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
             jmi_int_t tid = 0;
             double *work;
             work = Jsp->work_x[tid];
-
+            
+            /* Perform division once so that multiplication can be used in backsolve (for performance) */
+            for (col = 0; col < Jsp->L->nbr_cols; col++) { Jsp->L->x[Jsp->L->col_ptrs[col]] = 1.0/Jsp->L->x[Jsp->L->col_ptrs[col]]; }
+            
             for (col = 0; col < Jsp->A12->nbr_cols; col++) {
                 jmi_int_t i;
                 jmi_int_t offset = Jsp->nz_offsets[col];
 
-                jmi_linear_solver_sparse_backsolve(Jsp->L, Jsp->A12, Jsp->nz_patterns[col], Jsp->nz_sizes[col], col, work);
+                jmi_linear_solver_sparse_backsolve(Jsp->L, Jsp->A12, Jsp->nz_patterns[col], Jsp->nz_pattern_sizes[col], Jsp->nz_sizes[col], col, work);
             
                 for (i = 0; i < Jsp->nz_sizes[col]; i++) {
                     Jsp->M1->x[offset+i] = work[Jsp->nz_patterns[col][i]];
@@ -694,7 +708,7 @@ int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
                 }
 
                 /* Compute A21L^(-1)A12 */
-                jmi_linear_solver_sparse_multiply_column(Jsp->A21, Jsp->M1, col, block->J->data);
+                jmi_linear_solver_sparse_multiply_column(Jsp->A21, Jsp->M1, Jsp->M1_patterns[col], Jsp->M1_sizes[col], col, block->J->data);
             }
         }
         
@@ -718,6 +732,24 @@ static int compare( const void* a, const void* b)
      if ( int_a == int_b ) return 0;
      else if ( int_a < int_b ) return -1;
      else return 1;
+}
+
+/* C (dense) = -A (sparse)*B(:,col) (sparse) */
+static int jmi_linear_solver_sparse_compute_multiply_patterns(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, jmi_int_t B_col, jmi_int_t* nz_patterns, jmi_int_t* sizes) {
+    jmi_int_t B_p;
+    jmi_int_t i = 0;
+
+    for (B_p = B->col_ptrs[B_col]; B_p < B->col_ptrs[B_col + 1]; B_p++) {
+        jmi_int_t col = B->row_ind[B_p];
+        
+        if (A->col_ptrs[col] != A->col_ptrs[col + 1]) {
+            nz_patterns[i] = B_p;
+            i++;
+        }
+    }
+    sizes[0] = i;
+    
+    return 0;
 }
 
 int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
@@ -748,7 +780,9 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
         Jsp->nz_offsets   = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
         Jsp->nz_sizes     = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
         Jsp->nz_patterns  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
-
+        Jsp->nz_pattern_sizes  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
+        Jsp->M1_patterns  = (jmi_int_t**)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t*));
+        Jsp->M1_sizes     = (jmi_int_t*)calloc(Jsp->A12->nbr_cols, sizeof(jmi_int_t));
         
         /* Allocate work arrays for the different threads */
         Jsp->max_threads = max_threads;
@@ -767,7 +801,11 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
             
             Jsp->nz_sizes[col]    = work_nz_pattern[Jsp->L->nbr_cols];
             Jsp->nz_patterns[col] = (jmi_int_t*)calloc(Jsp->nz_sizes[col], sizeof(jmi_int_t));
-            for (i = 0; i <  Jsp->nz_sizes[col]; i++) { Jsp->nz_patterns[col][i] = work_nz_pattern[i]; }
+            Jsp->nz_pattern_sizes[col] = (jmi_int_t*)calloc(Jsp->nz_sizes[col], sizeof(jmi_int_t));
+            for (i = 0; i <  Jsp->nz_sizes[col]; i++) { 
+                Jsp->nz_patterns[col][i] = work_nz_pattern[i];
+                Jsp->nz_pattern_sizes[col][i] = (Jsp->L->col_ptrs[work_nz_pattern[i]+1] - Jsp->L->col_ptrs[work_nz_pattern[i]] - 1) % 2;
+            }
 
             if (col < Jsp->A12->nbr_cols - 1) {
                 Jsp->nz_offsets[col+1] = Jsp->nz_offsets[col] + Jsp->nz_sizes[col];
@@ -775,7 +813,6 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
             
             nzmax += Jsp->nz_sizes[col];
         }
-        free(work_nz_pattern);
         free(work);
     
         Jsp->M1 = jmi_linear_solver_create_sparse_matrix(Jsp->L->nbr_rows, Jsp->A12->nbr_cols, nzmax);
@@ -789,6 +826,15 @@ int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
             }
         }
         Jsp->M1->col_ptrs[Jsp->A12->nbr_cols] = j;
+        
+        /* Analyze and store the pattern for the computation A21 * M1 */
+        for (col = 0; col < Jsp->M1->nbr_cols; col++) {
+            jmi_linear_solver_sparse_compute_multiply_patterns(Jsp->A21, Jsp->M1, col, work_nz_pattern, &(Jsp->M1_sizes[col]));
+            Jsp->M1_patterns[col] = (jmi_int_t*)calloc(Jsp->M1_sizes[col], sizeof(jmi_int_t));
+            for (i = 0; i < Jsp->M1_sizes[col]; i++) { Jsp->M1_patterns[col][i] = work_nz_pattern[i]; }
+        }
+        
+        free(work_nz_pattern);
         
         /* A22 - A21L^(-1)A12 */
         /* M1 = L^(-1)A12 */        
@@ -830,7 +876,23 @@ void jmi_linear_solver_sparse_delete(jmi_block_solver_t* block) {
             }
             free(Jsp->nz_patterns);
         }
-        if (Jsp->nz_sizes != NULL)  { free(Jsp->nz_sizes); }
+        if (Jsp->nz_pattern_sizes != NULL) {
+            jmi_int_t col;
+            for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+                free(Jsp->nz_pattern_sizes[col]);
+            }
+            free(Jsp->nz_pattern_sizes);
+        }
+        if (Jsp->M1_patterns != NULL) {
+            jmi_int_t col;
+            for (col = 0; col < Jsp->A12->nbr_cols; col++) {
+                free(Jsp->M1_patterns[col]);
+            }
+            free(Jsp->M1_patterns);
+        }
+        if (Jsp->nz_sizes != NULL) { free(Jsp->nz_sizes); }
+        if (Jsp->nz_offsets != NULL) { free(Jsp->nz_offsets); }
+        if (Jsp->M1_sizes != NULL) { free(Jsp->M1_sizes); }
         if (Jsp->work_x != NULL)    { 
             int i;
             for (i = 0; i < Jsp->max_threads; i++) {
@@ -958,7 +1020,7 @@ int jmi_linear_completed_integrator_step(jmi_block_solver_t* block) {
 void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver = block->solver;
     
-    if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) {
+    if (block->Jacobian_structure) {
         jmi_linear_solver_sparse_delete(block);
     }
     

@@ -485,8 +485,8 @@ aspect InstLookupComponents {
             return array;
         }
         
-        InstComponentDecl icd = lookupArrayElement(array.unresolved().target());
-        if (icd == array.unresolved().target()) {
+        InstComponentDecl icd = lookupArrayElement(array.target());
+        if (icd == array.target()) {
             return array;
         }
         return array.create(icd);

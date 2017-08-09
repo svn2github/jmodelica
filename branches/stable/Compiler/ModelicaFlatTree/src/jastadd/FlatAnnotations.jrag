@@ -15,7 +15,7 @@
 */
 
 aspect FlatAnnotations {
-    
+
     public FlatAnnotation FFunctionDecl.flatAnnotation(String ... path) {     return FlatAnnotation.createFor(this, path); }
     public FlatAnnotation FVariable.flatAnnotation(String ... path) {         return FlatAnnotation.createFor(this, path); }
     public FlatAnnotation FAbstractEquation.flatAnnotation(String ... path) { return FlatAnnotation.createFor(this, path); }
@@ -24,11 +24,11 @@ aspect FlatAnnotations {
     /*******************
      *    Java Stuff    
      ******************/
-    
+
     public class FlatAnnotation extends GenericAnnotationNode<FlatAnnotation, FlatAnnotationProvider, FExp> {
-        
+
         public static final FlatAnnotation AMBIGUOUS_ANNOTATION =  new FlatAnnotation(null, null, null);
-        
+
         protected FlatAnnotation(String name, FlatAnnotationProvider node, FlatAnnotation parent) {
             super(name, node, parent);
         }
@@ -47,14 +47,20 @@ aspect FlatAnnotations {
         protected FlatAnnotation ambiguousNode() {
             return AMBIGUOUS_ANNOTATION;
         }
-        
+
         public static FlatAnnotation createFor(FlatAnnotationProvider node, String[] path) {
             return new FlatAnnotation(null, node, null).forPath(path);
         }
-        
+
         @Override
         protected ConstValue evaluatedValue() {
             return value().evaluateValue();
+        }
+
+        @Override
+        protected FlatAnnotationProvider valueAsProvider() {
+            FExp value = value();
+            return value == null ? null : value.asAnnotationProvider();
         }
     }
 
@@ -100,8 +106,6 @@ aspect FlatAnnotations {
     /*******************
      *       FExp       
      ******************/
-    FExp implements PossiblyAnnotation<FlatAnnotationProvider>;
-
     syn FlatAnnotationProvider FExp.asAnnotationProvider() = null;
 
     /*******************

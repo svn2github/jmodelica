@@ -1137,42 +1137,6 @@ class TestXMLParser:
         vrefs = [0,7]
         nose.tools.assert_equal(self.md.get_p_opt_value_reference(), vrefs)
         
-            
-    @testattr(stddist = True)
-    def test_get_external_libraries(self):
-        """
-        Test xmlparser.ModelDescription.get_external_libraries method.
-        """
-        
-        extlib = ['addNumbers1']
-        nose.tools.assert_equal(self.md.get_external_libraries(), extlib)
-
-    @testattr(stddist = True)
-    def test_get_external_includes(self):
-        """
-        Test xmlparser.ModelDescription.get_external_includes method.
-        """
-        
-        extincl = ['#include \"addNumbers1.h\"']
-        nose.tools.assert_equal(self.md.get_external_includes(), extincl)
-        
-    @testattr(stddist = True)
-    def test_get_external_lib_dirs(self):
-        """
-        Test xmlparser.ModelDescription.get_external_lib_dirs method.
-        """
-        
-        extlibdirs = ['/Library']
-        nose.tools.assert_equal(self.md.get_external_lib_dirs(), extlibdirs)
-        
-    @testattr(stddist = True)
-    def test_get_external_incl_dirs(self):
-        """
-        Test xmlparser.ModelDescription.get_external_incl_dirs method.
-        """
-        
-        extincldirs = ['/Include']
-        nose.tools.assert_equal(self.md.get_external_incl_dirs(), extincldirs)
 
     @testattr(stddist = True)
     def test_get_opt_starttime(self):

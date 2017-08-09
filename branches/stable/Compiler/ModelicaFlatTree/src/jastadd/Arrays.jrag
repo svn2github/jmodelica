@@ -1162,7 +1162,7 @@ aspect Arrays {
 	 * 
 	 * Size of new Array will be (n + m), where n = indices.size() and m = ndims().  
 	 */
-    public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices, boolean scalarize) {
+    public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
 		if (!forIndices.iterator().hasNext())
 			return (Array) fullCopy();
 		Indices newIndices = Indices.create(forIndices);
@@ -1172,45 +1172,32 @@ aspect Arrays {
 			newIndices.fillIndexMap(indexMap, i, forIndices);
 			for (CommonForIndex fi : forIndices)
 				indexMap.put(fi.uniqueIterExpName(), fi.evaluationValue().buildLiteral());
-            fillSubset(arr, i, indexMap, scalarize);
+            fillSubset(arr, i, indexMap);
 		}
-        for (CommonForIndex fi : forIndices)
+        for (CommonForIndex fi : forIndices) {
             fi.clearEvaluationValue();
+        }
 		return arr;
 	}
 	
 	protected Size Array.expandedSize(Size size) {
 		return size().expand(size);
 	}
-	
-    protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap, boolean scalarize) {
+
+    protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
 		for (Index i2 : indices()) {
-            arr.set(i.expand(i2), createSubsetExp(get(i2), indexMap, scalarize));
+            arr.set(i.expand(i2), createSubsetExp(get(i2), indexMap));
 		}
 	}
-    
-    protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap, boolean scalarize) {
-        arr.set(i, createSubsetExp(get(Index.NULL), indexMap, scalarize));
+
+    protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
+        arr.set(i, createSubsetExp(get(Index.NULL), indexMap));
     }
-    
-    protected FExp Array.createSubsetExp(FExp e, Map<String,FExp> indexMap, boolean scalarize) {
-        FExp res;
-        if (scalarize) {
-            res = e.dynamicFExp(e.scalarize(indexMap));
-            e.flushForScalarization(false);
-        } else {
-            res = e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
-        }
-        return res;
+
+    protected FExp Array.createSubsetExp(FExp e, Map<String,FExp> indexMap) {
+        return e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
     }
-    
-    public void ASTNode.flushForScalarization(boolean removeTempNames) {
-        flushAllRecursive();
-        if (removeTempNames) {
-            flushTempVarNames();
-        }
-    }
-	
+
 	/**
 	 * Replaces all uses of indices in <code>indexMap</code> with the respective expressions.
 	 * 
@@ -1296,7 +1283,7 @@ aspect Arrays {
     syn Array FExp.createTempArray() {
         Array res = new Array(indices());
         for (Index i : res.indices()) {
-            res.set(i, tempExp(i.createFArraySubscripts()));
+            res.set(i, tempExp(i));
         }
         return res;
     }
@@ -1569,7 +1556,7 @@ aspect Arrays {
 		return new FIterExp(exp, fil);
 	}
 	
-    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), false);
+    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList());
 	eq FIterExp.getArray() = copyArray();
 	
     eq FSubscriptedExp.getArray() {
@@ -1901,41 +1888,9 @@ aspect Arrays {
             return super.getArray();
         }
         
-        FArraySubscripts fas = collectIterExpSubscripts();
-        Array arr = new Array(indices());
-        for (Index i : arr.indices()) {
-            FArraySubscripts fas2 = fas.fullCopy();
-            fas2.addFSubscripts(i);
-            arr.set(i, new FIdUseExp(tempVarName(), fas2));
-        }
-        return arr;
+        return createTempArray();
     }
 
-	/**
-	 * Collect an FArraySubscriptss for the indexes of surrounding iteration expressions, 
-	 * to use in getArray() for children.
-	 */
-	inh FArraySubscripts FExp.collectIterExpSubscripts();
-	eq FClass.getChild().collectIterExpSubscripts()   = new FArraySubscripts();
-	eq InstRoot.getChild().collectIterExpSubscripts() = new FArraySubscripts();
-	eq FIterExp.getFExp().collectIterExpSubscripts() {
-		FArraySubscripts res = collectIterExpSubscripts();
-		for (CommonForIndex i : getForIndexs())
-			res.addFSubscript(i.iterExpSubscript());
-		return res;
-	}
-	
-	/**
-	 * Creates an FSubscript to use when scalarizing iteration expressions.
-	 * 
-	 * Returns a use of {@link #uniqueIterExpName()} if there is no current evaluation value, 
-	 * or that value if there is one.
-	 */
-	syn FSubscript CommonForIndex.iterExpSubscript() = 
-		evaluationValue().isUnknown() ? 
-			new FExpSubscript(new FIdUseExp(uniqueIterExpName())) : 
-			new FIntegerSubscript(evaluationValue().intValue());
-	
 	/**
 	 * A name that is not a valid Modelica identifier, and is unique among the iteraton indices 
 	 * of nestled iteration expressions.

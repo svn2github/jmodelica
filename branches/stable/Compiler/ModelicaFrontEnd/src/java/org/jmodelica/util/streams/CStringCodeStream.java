@@ -21,11 +21,10 @@ import java.nio.charset.Charset;
 public class CStringCodeStream extends CodeStream {
     private int limit;
     private int n = 0;
-    private boolean first = true;
     private String beginString = "(truncated) ";
     private String endString = "...";
-    private StringBuilder buffer;
-    private CodeStream str;
+    private byte[] buffer;
+    private StringBuilder extraBuffer = null;
 
     public static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -35,42 +34,47 @@ public class CStringCodeStream extends CodeStream {
     }
     
     public CStringCodeStream(CodeStream str, int lim) {
-        super((PrintStream)null);
-        this.limit = lim - endString.length() - beginString.length();
-        buffer = new StringBuilder();
-        this.str = str;
+        super(str);
+        this.limit = lim;
+        buffer = new byte[lim];
     }
     
     public void print(String s) {
-        if (n < limit) {
+        if (n <= limit) {
             byte[] bytes = s.getBytes(UTF8);
-            encode(bytes, Math.min(bytes.length, limit - n));
+            int len = Math.min(bytes.length, limit - n);
+            System.arraycopy(bytes, 0, buffer, n, len);
             n += bytes.length;
         }
     }
     
+    public void format(String format, Object... args) {
+        print(String.format(format, args));
+    }
+    
     public void close() {
-        boolean trunc = buffer.length() >= limit;
-        if (trunc)
-            str.print(beginString);
-        str.print(buffer.toString());
-        if (trunc)
-            str.print(endString);
+        boolean trunc = n > limit;
+        if (trunc) {
+            parent.print(beginString);
+            encode(limit - beginString.length() - endString.length());
+            parent.print(endString);
+        } else {
+            encode(n);
+        }
     }
 
-    private void encode(byte[] str, int n) {
+    private void encode(int n) {
         for (int i = 0; i < n; i++) {
-            byte c = str[i];
+            byte c = buffer[i];
             if (c == '\n') {
-                buffer.append("\\n");
+                parent.print("\\n");
             } else if (c > 31 && c < 127) {
                 if (c == '"' || c == '\\')
-                    buffer.append('\\');
-                buffer.append((char) c);
+                    parent.print('\\');
+                parent.print((char) c);
             } else if (c != 0) {
                 int c2 = (c < 0) ? 256 + c : c;
-                buffer.append((c2 < 16) ? "\\x0" : "\\x");
-                buffer.append(Integer.toHexString(c2));
+                parent.format("\\x%02x", c2);
             }
         }
     }

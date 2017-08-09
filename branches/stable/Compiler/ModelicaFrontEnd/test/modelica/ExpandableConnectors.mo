@@ -2507,13 +2507,11 @@ fclass ExpandableConnectors.ArrayIndexationType1
  Real a[3];
 equation
  a[1] = ec.x[1];
- a[2] = ec.y[true];
- a[3] = ec.z[ExpandableConnectors.ArrayIndexationType1.E.a];
+ a[2] = ec.y[2];
+ a[3] = ec.z[1];
  ec.x[2] = 0.0;
  ec.x[3] = 0.0;
  ec.y[1] = 0.0;
- ec.y[2] = 0.0;
- ec.z[1] = 0.0;
  ec.z[2] = 0.0;
  ec.z[3] = 0.0;
 
@@ -2602,16 +2600,12 @@ fclass ExpandableConnectors.ArrayIndexationType3
  Real a[6];
 equation
  a[1] = ec.x[1];
- a[2] = ec.y[true];
- a[3] = ec.z[ExpandableConnectors.ArrayIndexationType3.E.a];
+ a[2] = ec.y[2];
+ a[3] = ec.z[1];
  a[4] = ec.x[3];
- a[5] = ec.y[false];
- a[6] = ec.z[ExpandableConnectors.ArrayIndexationType3.E.b];
+ a[5] = ec.y[1];
+ a[6] = ec.z[2];
  ec.x[2] = 0.0;
- ec.y[1] = 0.0;
- ec.y[2] = 0.0;
- ec.z[1] = 0.0;
- ec.z[2] = 0.0;
 
 public
  type ExpandableConnectors.ArrayIndexationType3.E = enumeration(a, b, c);

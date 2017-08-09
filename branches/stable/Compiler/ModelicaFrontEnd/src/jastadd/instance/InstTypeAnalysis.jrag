@@ -677,6 +677,7 @@ aspect InstClassRestriction {
      */
     syn boolean InstClassDecl.hasInstRestriction() = false;
     eq InstBaseClassDecl.hasInstRestriction()      = true;
+    eq InstBuiltInClassDecl.hasInstRestriction()   = true;
 
     /**
      * Get the restriction of this class.
@@ -684,6 +685,12 @@ aspect InstClassRestriction {
     public InstRestriction InstClassDecl.getInstRestriction() {
         throw new UnsupportedOperationException();
     }
+
+    public InstRestriction InstBuiltInClassDecl.getInstRestriction() {
+        return root().getInstBuiltInClassRestriction();
+    }
+    
+    syn nta InstRestriction Root.getInstBuiltInClassRestriction() = new InstMType();
 
 }
 

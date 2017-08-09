@@ -828,7 +828,7 @@ aspect CCodeGenExpressions {
      * default implementation, subclasses may override it.
      */
     public void FExp.genStringExpWrite_C(CodePrinter p, CodeStream str, String indent, String dest) {
-        str.format("%ssnprintf(JMI_STR_END(%s), JMI_STR_LEFT(%s), ", indent, dest, dest);
+        str.print(indent, "snprintf(JMI_STR_END(", dest, "), JMI_STR_LEFT(", dest, "), ");
         genStringFormat_C(p, str, indent);
         str.print(", ");
         genStringParts_C(p, str, indent);
@@ -1166,7 +1166,7 @@ aspect CCodeGenExpressions {
         if (myOptions().getBooleanOption("generate_dae") || !generatesEvent(p.inInitialSystem())) {
             super.genTempVars_C(p, str, outerIndent);
         } else if (p.writeSwitches()) {
-            str.format("%sif (", outerIndent);
+            str.print(outerIndent, "if (");
             if (p.inBlock())
                 str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
             else
@@ -1201,9 +1201,9 @@ aspect CCodeGenExpressions {
                 str.print(")");
             }
             
-            str.formatln(");");
+            str.print(");\n");
             printIndicator(p.PostStep, str, indent, false);
-            str.formatln("%s}", outerIndent);
+            str.print(outerIndent, "}\n");
         }
     }
     
@@ -1258,9 +1258,9 @@ aspect CCodeGenExpressions {
      */
     private void FRelExp.printSwitchMacro_C(CodePrinter p, CodeStream str, String indent) {
         if (originalFExp().generatesEventInDAE()) {
-            str.format("_sw(%d)", mySwitchIndex());
+            str.print("_sw(", mySwitchIndex(), ")");
         } else {
-            str.format("_sw_init(%d)", relExpInInitialEquationsIndex());
+            str.print("_sw_init(", relExpInInitialEquationsIndex(), ")");
         }
     }
 

@@ -474,7 +474,7 @@ int jmi_save_last_successful_values(jmi_t *jmi) {
 
     z = jmi_get_z(jmi);
     z_last = jmi_get_z_last(jmi);
-    /* memcpy(z_last, z, jmi->n_z*sizeof(jmi_real_t)); */
+
     memcpy(&z_last[jmi->offs_real_dx], &z[jmi->offs_real_dx], (jmi->n_z-jmi->offs_real_dx)*sizeof(jmi_real_t));
 
     return 0;

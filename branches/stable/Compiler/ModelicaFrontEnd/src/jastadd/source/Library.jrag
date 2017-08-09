@@ -136,7 +136,7 @@ aspect Library {
                     if (match == null) {
                         match = (ClassDecl) e;
                     }
-                } else if (equalsLowerCase(name, e.name())) {
+                } else if (name.equalsIgnoreCase(e.name())) {
                     if (wrongCase == null) {
                         wrongCase = (ClassDecl) e;
                     }
@@ -214,7 +214,7 @@ aspect Library {
             public ProblemSeverity severity(StoredDefinition sd, String name) {
                 // If the class simply has the wrong case, give a warning instead
                 boolean warn = sd != null && sd.getNumElement() == 1 && 
-                        ASTNode.equalsLowerCase(sd.getElement(0).name(), name);
+                        sd.getElement(0).name().equalsIgnoreCase(name);
                 return warn ? ProblemSeverity.WARNING : ProblemSeverity.ERROR;
             }
 

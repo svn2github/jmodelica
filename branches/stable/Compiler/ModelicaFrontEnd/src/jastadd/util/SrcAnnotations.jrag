@@ -19,7 +19,6 @@ import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
 import org.jmodelica.util.annotations.GenericAnnotationNode;
 import org.jmodelica.util.annotations.IterableAnnotationProvider;
-import org.jmodelica.util.annotations.PossiblyAnnotation;
 import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.collections.TransformerIterable;
 import org.jmodelica.util.values.Evaluator;
@@ -136,6 +135,12 @@ aspect SrcAnnotations {
         @Override
         protected ConstValue evaluatedValue() {
             return evaluator.evaluate(value());
+        }
+
+        @Override
+        protected SrcAnnotationProvider valueAsProvider() {
+            Exp value = value();
+            return value == null ? null : value.asAnnotationProvider();
         }
 
         public static Evaluator defaultEvaluator() { return SrcAnnotation.defaultEvaluator; }
@@ -359,7 +364,6 @@ aspect SrcAnnotations {
      *      a(b,c,d)=e
      * while annotationValue() points at 'e' in this case.
      */
-    Exp implements PossiblyAnnotation<SrcAnnotationProvider>;
 
     syn SrcAnnotationProvider Exp.asAnnotationProvider() = null;
     eq ArrayConstructor.asAnnotationProvider()           = getFunctionArguments();
