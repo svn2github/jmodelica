@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+
+
+================= Stable-2017-08-09 ==================
 ; Fixed ; Minor ; Compiler ; #5416
 Fixed generation of VendorAnnotation tag in FMI XML file to correctly handle FMI 2.0.
 
