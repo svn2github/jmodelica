@@ -27,7 +27,7 @@ public final class ListUtil {
         }
         return list;
     }
-    
+
     /**
      * Creates a list of strings from the string representation of elements.
      * 
