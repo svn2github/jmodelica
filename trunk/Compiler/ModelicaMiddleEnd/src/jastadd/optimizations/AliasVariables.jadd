@@ -940,6 +940,12 @@ aspect AliasVariables {
             }
         }
 
+        // Annotations
+        score *= 10;
+        if (containsActiveAnnotations()) {
+            score += 1;
+        }
+
         // Stateselect level
         score *= 100;
         FAttribute stateSelectAttribute = findAttribute(FAttribute.STATE_SELECT);
@@ -949,12 +955,6 @@ aspect AliasVariables {
             } else {
                 score += stateSelectAttribute().ordinal();
             }
-        }
-
-        // Annotations
-        score *= 10;
-        if (containsActiveAnnotations()) {
-            score += 1;
         }
 
         // Fixed attribute == true
