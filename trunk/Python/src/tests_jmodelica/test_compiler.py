@@ -384,9 +384,17 @@ class Test_Compiler_functions:
     @testattr(stddist = True)
     def test_no_source_files_in_fmu(self):
         """
-        Test that no c source files are added to the fmu when copy_source_files_to_fmu is false
+        Test that no c source files are added to the fmu when copy_source_files_to_fmu is false.
         """
-        fmuname = compile_fmu("BouncingBall", [os.path.join(get_files_path(), 'Modelica', 'BouncingBall.mo')], compiler_options={'copy_source_files_to_fmu':False})
+
+        try :
+            fmuname = compile_fmu("BouncingBall", [os.path.join(get_files_path(), 'Modelica', 'BouncingBall.mo')], \
+                    compiler_options={'copy_source_files_to_fmu':False})
+
+        except pym.compiler_exceptions.UnknownOptionError as e :
+            self.assert_compiler_option_missing("copy_source_files_to_fmu", e)
+            return
+
         zf = zipfile.ZipFile(fmuname, 'r')
         includedFiles = zf.namelist()
         for f in includedFiles:
@@ -398,11 +406,30 @@ class Test_Compiler_functions:
         """
         Test that c source files are added to the fmu when copy_source_files_to_fmu is true
         """
-        fmuname = compile_fmu("BouncingBall", [os.path.join(get_files_path(), 'Modelica', 'BouncingBall.mo')], compiler_options={'copy_source_files_to_fmu':True})
+
+        try :
+            fmuname = compile_fmu("BouncingBall", [os.path.join(get_files_path(), 'Modelica', 'BouncingBall.mo')], \
+                    compiler_options={'copy_source_files_to_fmu':True})
+
+        except pym.compiler_exceptions.UnknownOptionError as e :
+            self.assert_compiler_option_missing("copy_source_files_to_fmu", e)
+            return
+
         zf = zipfile.ZipFile(fmuname, 'r')
         includedFiles = zf.namelist()
         assert 'sources/' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
         assert 'sources/BouncingBall.c' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
+
+    def assert_compiler_option_missing(self, option_name, exception) :
+        """
+            Tests that an option is missing, deducing it from an exception message.
+
+            @param option_name  the name of the option asserted to be missing.
+            @param exception    the exception that was raised trying to use a compiler option.
+        """
+
+        assert str(exception).startswith("Unknown option \"%s\"" % option_name), "Option %s was expected to be " \
+                "missing, but was not." % option_name
 
 # 64-bit FMUs no longer supported by SDK
 #    @testattr(windows = True)
