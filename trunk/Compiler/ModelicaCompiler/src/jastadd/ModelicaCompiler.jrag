@@ -311,11 +311,16 @@ public class ModelicaCompiler {
             out.delete();
             setOutDir(out);
         } catch (IOException e) {
-            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and temp base directory '" + tempDir + "'! java.io.tmpdir: '" + System.getProperty("java.io.tmpdir") + "'. TMP: '" + System.getenv("TMP") + "'. TEMP: '" + System.getenv("TEMP") + "'.", e);
+            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and " +
+                    "temp base directory '" + tempDir + "'! java.io.tmpdir: '" + System.getProperty("java.io.tmpdir") + 
+                    "'. TMP: '" + System.getenv("TMP") + "'. TEMP: '" + System.getenv("TEMP") + "'.", e);
         }
     }
 
-    public void deleteOutDir() {
+    /**
+     * Deletes the temporary out directory.
+     */
+    private void deleteOutDir() {
         if (outDir != null) {
             FileUtil.recursiveDelete(outDir);
         }
@@ -794,6 +799,7 @@ public class ModelicaCompiler {
      */
     protected String compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
         /*
          * Always set certain options when compiling.
          * First save these options in the temporary options' registry to reset when compiling has finished.
@@ -804,13 +810,15 @@ public class ModelicaCompiler {
          * Set options for the target.
          */
         target.setDefaultOptions(options);
-        
+
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
             return doCompileUnit(className, fileName, target, compileTo);
         } finally {
+            deleteOutDir();
             tryTearDown(doTearDown);
+
             /*
              * Reset all options.
              */
@@ -824,11 +832,11 @@ public class ModelicaCompiler {
         try {
             // set invokegc if set
             StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
-            
-            // Set output dir
-            if (outDir == null)
+
+            if (outDir == null) {
                 setRandomOutDir();
-            
+            }
+
             if (target.getMakeFileFlag() != null) {
                 // Might be used by constant evaluation
                 CCompilerDelegator ccompiler = getCCompiler();
@@ -865,7 +873,6 @@ public class ModelicaCompiler {
             File unitPath = packUnit(className, compileTo, target, fc);
             unitFile = unitPath.getPath();
             log.logCompiledUnit(unitPath, fc.numberOfComponents());
-            deleteOutDir();
             ASTNode.endStep("packUnit()");
         } finally {
             log.debug("Time usage and memory usage change during compilation steps:");
@@ -2190,8 +2197,6 @@ public class ModelicaCompiler {
             throw e;
         } catch (Exception e) {
             throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile));
-        } finally {
-            deleteOutDir();
         }
 
         hookFmuPacked(unitFile.getAbsoluteFile());

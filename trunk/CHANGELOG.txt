@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Changed ; Minor ; Compiler ; #5214
+The temporary directory is always deleted, regardless of whether compilation fails or succeeds.
+
 ; Changed ; Minor ; Compiler ; #5430
 Added option removers to the option registry. Also added a test case for options.
 
