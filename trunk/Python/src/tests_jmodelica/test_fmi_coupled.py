@@ -58,6 +58,10 @@ class Test_CoupledFMUModelME2:
         cls.ls_event_sub1 = compile_fmu("LinearStability.SubSystemWithEvents1" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
         cls.ls_event_sub2 = compile_fmu("LinearStability.SubSystemWithEvents2" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
         
+        cls.ls_event_full_v2 = compile_fmu("LinearStability.FullSystemWithEvents_v2" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
+        cls.ls_event_sub1_v2 = compile_fmu("LinearStability.SubSystemWithEvents1_v2" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
+        cls.ls_event_sub2_v2 = compile_fmu("LinearStability.SubSystemWithEvents2_v2" , os.path.join(path_to_mofiles,"CoupledME.mo"), version=2.0)
+        
         cls.qc_full = compile_fmu("QuarterCar.QuarterCarComplete", os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
         cls.qc_sub1 = compile_fmu("QuarterCar.QuarterCarWithoutFeedThrough1", os.path.join(path_to_mofiles,"CoupledME.mo"),version="2.0")
         cls.qc_sub2 = compile_fmu("QuarterCar.QuarterCarWithoutFeedThrough2", os.path.join(path_to_mofiles,"CoupledME.mo"),version="2.0")
@@ -394,59 +398,30 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.initial("First.u1"),res_full.initial("p1.u1"), places=4)
         nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"), places=4)
 
+    @testattr(stddist = True)
+    def test_linear_example_with_time_event_v2(self):
+        
+        m_full      = load_fmu(Test_CoupledFMUModelME2.ls_event_full_v2)
 
+        res_full = m_full.simulate(final_time=0.2)
 
+        m_primary   = load_fmu(Test_CoupledFMUModelME2.ls_event_sub1_v2)
+        m_secondary = load_fmu(Test_CoupledFMUModelME2.ls_event_sub2_v2)
 
-from pymodelica import compile_fmu
-from pyfmi.fmi_coupled import CoupledFMUModelME2
-from pyfmi import load_fmu
+        models = [("First", m_primary), ("Second", m_secondary)]
+        connections = [(m_primary,"y1",m_secondary,"u2"),
+                   (m_secondary,"y2",m_primary,"u1")]
+        
+        master = CoupledFMUModelME2(models, connections=connections)
 
-if True:
-    compile_fmu("LinearStability.FullSystemWithEvents_v2" ,"CoupledMETests.mo", version=2.0)
-    compile_fmu("LinearStability.SubSystemWithEvents1_v2" ,"CoupledMETests.mo", version=2.0)
-    compile_fmu("LinearStability.SubSystemWithEvents2_v2" ,"CoupledMETests.mo", version=2.0)
+        res = master.simulate(final_time=0.2)
 
-m_full      = load_fmu("LinearStability_FullSystemWithEvents_v2.fmu")
-
-res_full = m_full.simulate(final_time=0.2)
-
-m_primary   = load_fmu("LinearStability_SubSystemWithEvents1_v2.fmu")
-m_secondary = load_fmu("LinearStability_SubSystemWithEvents2_v2.fmu")
-
-models = [("First", m_primary), ("Second", m_secondary)]
-connections = [(m_primary,"y1",m_secondary,"u2"),
-           (m_secondary,"y2",m_primary,"u1")]
-
-
-
-master = CoupledFMUModelME2(models, connections=connections)
-
-opts = master.simulate_options()
-
-res = master.simulate(final_time=0.2, options=opts)
-
-
-import pylab as plt
-
-plt.subplot(311)
-plt.plot(res["time"], res["First.x1"], "x-", label="x1")
-plt.plot(res_full["time"], res_full["p1.x1"], label="Full x1")
-plt.plot(res["time"], res["Second.x2"], "x-", label="x2")
-plt.plot(res_full["time"], res_full["p2.x2"], label="Full x2")
-plt.grid()
-plt.legend()
-plt.subplot(312)
-plt.plot(res["time"], res["First.u1"], "x-", label="u1")
-plt.plot(res_full["time"], res_full["p1.u1"], label="Full u1")
-plt.plot(res["time"], res["Second.u2"], "x-", label="u2")
-plt.plot(res_full["time"], res_full["p2.u2"], label="Full u2")
-plt.grid()
-plt.legend()
-plt.subplot(313)
-plt.plot(res["time"], res["First.y1"], "x-", label="y1")
-plt.plot(res_full["time"], res_full["p1.y1"], label="Full y1")
-plt.plot(res["time"], res["Second.y2"], "x-", label="y2")
-plt.plot(res_full["time"], res_full["p2.y2"], label="Full y2")
-plt.grid()
-plt.legend()
-plt.show()
+        nose.tools.assert_almost_equal(res.final("First.x1"),res_full.final("p1.x1"), places=4)
+        nose.tools.assert_almost_equal(res.final("Second.x2"),res_full.final("p2.x2"), places=4)
+        nose.tools.assert_almost_equal(res.initial("First.x1"),res_full.initial("p1.x1"), places=4)
+        nose.tools.assert_almost_equal(res.initial("Second.x2"),res_full.initial("p2.x2"), places=4)
+        
+        nose.tools.assert_almost_equal(res.final("First.u1"),res_full.final("p1.u1"), places=4)
+        nose.tools.assert_almost_equal(res.final("Second.u2"),res_full.final("p2.u2"), places=4)
+        nose.tools.assert_almost_equal(res.initial("First.u1"),res_full.initial("p1.u1"), places=4)
+        nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"), places=4)
