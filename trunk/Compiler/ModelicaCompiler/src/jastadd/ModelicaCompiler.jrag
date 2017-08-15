@@ -1618,6 +1618,30 @@ public class ModelicaCompiler {
         }
     }
 
+    private static String javaExecutablePlatform = null;
+    private static String systemPlatform = null;
+
+    /**
+     * Helper function. Returns string describing the platform that the JVM is compiled for. 
+     * This can differ from getPlatform() on Windows.
+     * 
+     * Possible return values:
+     * <ul>
+     * <li>win32</li>
+     * <li>win64</li>
+     * <li>darwin32</li>
+     * <li>darwin64</li>
+     * <li>linux32</li>
+     * <li>linux64</li>
+     * </ul>
+     */
+    public static String getJavaPlatform() {
+        if (javaExecutablePlatform == null) {
+            calcPlatform();
+        }
+        return javaExecutablePlatform;
+    }
+
     /**
      * Helper function. Returns string describing the platform on which jmodelica is run. 
      * 
@@ -1632,7 +1656,31 @@ public class ModelicaCompiler {
      * </ul>
      */
     public static String getPlatform() {
-        String platform = "";
+        if (systemPlatform == null) {
+            calcPlatform();
+        }
+        return systemPlatform;
+    }
+
+    /**
+     * Helper function. Returns an array describing the platforms that we can run executables 
+     * compiled for. 
+     * 
+     * The possible strings in the array are the same as for {@link #getPatform()}.
+     */
+    public static String[] getExecutablePlatforms() {
+        if (systemPlatform == null) {
+            calcPlatform();
+        }
+        if (systemPlatform.equals("win64")) {
+            return new String[] { "win64", "win32" };
+        } else {
+            return new String[] { systemPlatform };
+        }
+    }
+    
+    private static void calcPlatform() {
+        String platform;
         
         String sunPltform = System.getProperty("os.name");
         if (sunPltform.startsWith("Windows")) {
@@ -1645,13 +1693,12 @@ public class ModelicaCompiler {
         }
         
         String architecture = System.getProperty("os.arch");
-        if (architecture.endsWith("64")) {
-            platform = platform+"64";
-        } else {
-            platform = platform+"32";
-        }
+        String wow6432Arch = System.getenv("PROCESSOR_ARCHITEW6432");
+        boolean exeIs64 = architecture.endsWith("64");
+        boolean sysIs64 = exeIs64 || (wow6432Arch != null && wow6432Arch.endsWith("64"));
         
-        return platform;
+        javaExecutablePlatform = platform + (exeIs64 ? "64" : "32");
+        systemPlatform = platform + (sysIs64 ? "64" : "32");
     }
 
     /**
