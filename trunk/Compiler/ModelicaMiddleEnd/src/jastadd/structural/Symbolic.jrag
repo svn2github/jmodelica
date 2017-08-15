@@ -102,38 +102,43 @@ aspect EquationSolve {
 	syn FExp FEquation.solution(FVariable var) {
 		return solution(var, false);
 	}
-	
-	syn nta FExp FEquation.solution(FVariable var, boolean duringTearing) {
-		
-		// Get terms
-		ArrayList<FExp> t = terms();
-		
-		ArrayList<FExp> activeTerms = new ArrayList<FExp>();
-		ArrayList<FExp> inactiveTerms = new ArrayList<FExp>();
-		// Find terms
-		for (FExp e : t) {
-			if (e.nbrUses(var.name())==1) {
-				activeTerms.add(e);
-			} else if (e.nbrUses(var.name())==0) {
-			    inactiveTerms.add(e);
-			} else {
-			    return new FNoExp();
-			}
-		}
-		
-        // Compute new expressions for the inactive and active terms
-        FExp inactiveTerm = computeInactiveSolution(inactiveTerms);
-        FExp activeTerm = computeActiveSolution(activeTerms, var,
-                duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing") ||
-                inactiveTerm.isLiteralZero(), duringTearing ? myOptions().getRealOption("tearing_division_tolerance") : 0);
-        
-        if (activeTerm.isNoExp()) {
-            return new FNoExp();
+
+    syn nta FExp FEquation.solution(FVariable var, boolean duringTearing) {
+        try {
+            // Get terms
+            ArrayList<FExp> t = terms();
+            
+            ArrayList<FExp> activeTerms = new ArrayList<FExp>();
+            ArrayList<FExp> inactiveTerms = new ArrayList<FExp>();
+            //Find terms
+            for (FExp e : t) {
+                if (e.nbrUses(var.name())==1) {
+                    activeTerms.add(e);
+                } else if (e.nbrUses(var.name())==0) {
+                    inactiveTerms.add(e);
+                } else {
+                    return new FNoExp();
+                }
+            }
+            
+            // Compute new expressions for the inactive and active terms
+            FExp inactiveTerm = computeInactiveSolution(inactiveTerms);
+            FExp activeTerm = computeActiveSolution(activeTerms, var,
+                    duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing") ||
+                    inactiveTerm.isLiteralZero(), duringTearing ? myOptions().getRealOption("tearing_division_tolerance") : 0);
+            
+            if (activeTerm.isNoExp()) {
+                return new FNoExp();
+            }
+            if (inactiveTerm.isLiteralZero() || activeTerm.isLiteralOne()) {
+                return inactiveTerm;
+            }
+            return new FDivExp(inactiveTerm, activeTerm);
+        } catch (ModelicaException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new org.jmodelica.util.exceptions.InternalCompilerError("Exception caught while solving equation '" + prettyPrint("") + "' for variable '" + var.name() + "'", e);
         }
-        if (inactiveTerm.isLiteralZero() || activeTerm.isLiteralOne()) {
-            return inactiveTerm;
-        }
-        return new FDivExp(inactiveTerm, activeTerm);
     }
 
     private static FExp FEquation.computeInactiveSolution(Collection<FExp> exps) {
