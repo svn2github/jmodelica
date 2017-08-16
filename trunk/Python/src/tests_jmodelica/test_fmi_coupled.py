@@ -308,7 +308,29 @@ class Test_CoupledFMUModelME2:
                        (model_sub_1,"u1",model_sub_2,"y2")]
                        
         nose.tools.assert_raises(fmi.FMUException,  CoupledFMUModelME2, models, connections)
+
+    @testattr(stddist = True)
+    def test_inputs_list(self):
         
+        model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
+        model_sub_2 = load_fmu(Test_CoupledFMUModelME2.ls_sub2)
+        model_full  = load_fmu(Test_CoupledFMUModelME2.ls_full)
+        
+        models = [("First", model_sub_1), ("Second", model_sub_2)]
+        connections = [(model_sub_1,"y1",model_sub_2,"u2"),
+                       (model_sub_2,"y2",model_sub_1,"u1")]
+        
+        coupled = CoupledFMUModelME2(models, connections=connections)
+
+        #Inputs should not be listed if they are internally connected
+        vars = coupled.get_input_list().keys()
+        assert len(vars) == 0
+        
+        coupled = CoupledFMUModelME2(models, connections=[])
+        vars = coupled.get_input_list().keys()
+        assert "First.u1" in vars
+        assert "Second.u2" in vars
+
     @testattr(stddist = True)
     def test_linear_example(self):
         
