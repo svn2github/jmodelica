@@ -1171,7 +1171,31 @@ aspect Flattening {
         flattenUsedFuncsAndEnums(fc);
     }
 
-    
+    public void InstEnum.flattenMyType(FClass fc) {
+        myInstClass().flattenEnum(fc);
+        flattenUsedFuncsAndEnums(fc);
+    }
+
+    public void InstExternalObject.flattenMyType(FClass fc) {
+        myInstClass().addFDerivedType(fc);
+        flattenUsedFuncsAndEnums(fc);
+    }
+
+    public void InstPartialFunction.flattenMyType(FClass fc) {
+        throw new UnsupportedOperationException("Partial function component only allowed in functions");
+    }
+
+    public void InstRecord.flattenMyType(FClass fc) {
+        if (flattenRedeclaredType()) {
+            InstComponentDecl rec = scalar();
+            if (rec != null) {
+                rec.flattenThisRecord(fc);
+            }
+        } else {
+            myInstClass().flattenRecord(fc);
+        }
+    }
+
     syn InstComponentDecl InstComponentDecl.scalar() {
         InstComponentDecl rec = this;
         for (int i = 0; i < ndims(); i++) {
@@ -1183,18 +1207,7 @@ aspect Flattening {
         }
         return rec;
     }
-    
-    public void InstRecord.flattenMyType(FClass fc) {
-        if (flattenRedeclaredType()) {
-            InstComponentDecl rec = scalar();
-            if (rec != null) {
-                rec.flattenThisRecord(fc);
-            }
-        } else {
-            myInstClass().flattenRecord(fc);
-        }
-    }
-    
+
     syn String InstNode.qualifiedTypeName() = qualifiedName();
     eq InstComponentDecl.qualifiedTypeName() {
         if (flattenRedeclaredType()) {
@@ -1229,16 +1242,6 @@ aspect Flattening {
     eq InstReplacingFullClassDecl.containsRedeclared() = true;
     eq InstReplacingShortClassDecl.containsRedeclared() = true;
     eq InstReplacingSimpleShortClassDecl.containsRedeclared() = true;
-    
-    
-    public void InstEnum.flattenMyType(FClass fc) {
-        myInstClass().flattenEnum(fc);
-        flattenUsedFuncsAndEnums(fc);
-    }
-
-    public void InstPartialFunction.flattenMyType(FClass fc) {
-        throw new UnsupportedOperationException("Partial function component only allowed in functions");
-    }
 
     /*
      * Flattening of string comments.

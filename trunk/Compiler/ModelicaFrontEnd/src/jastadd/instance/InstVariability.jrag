@@ -113,16 +113,8 @@ aspect InstVariability {
 
     syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
     eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();
-    eq InstPrimitive.defaultVariability() {
-        if (isReal())
-            return fContinuous();
-        else if (isExternalObject())
-            return fParameter();
-        else
-            return fDiscrete();
-    }
-    eq InstRecord.defaultVariability() = fContinuous();
-    
+    eq InstPrimitive.defaultVariability()                             = isReal() ? fContinuous() : fDiscrete(); 
+
     // Parameters variabilities also depend on binding expressions since its nice
     // to propagate known values, these include: 
     // * Structural parameters, marked during error checking.
