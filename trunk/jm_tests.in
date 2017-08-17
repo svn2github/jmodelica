@@ -116,29 +116,20 @@ function python_tests() {
     TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
   fi 
   print_name Python
+  res=0
   case ${OUTPUT} in
     v)
-      if build_jmodelica; then
+      if build_jmodelica 2>&1 | log; then
         find_python_tests
         cd ${TEST_DIR}
-        for TEST in ${TESTS}; do
-          echo ""
-          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
-          nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v ${TEST}
-        done
-      fi 2>&1 | log
+        python_tests_v || res=1
+      fi
       ;;
     q)
       if build_jmodelica 2>&1 | log > /dev/null; then
         find_python_tests
         cd ${TEST_DIR}
-        for TEST in ${TESTS}; do
-          echo "" | log > /dev/null
-          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log > /dev/null
-          nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v ${TEST} 2>&1 \
-          | log \
-	      | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p' || echo NOSETESTS_NOT_OK
-        done | filter_python_separate
+        python_tests_q | filter_python_separate || res=1
       else
         echo BUILD FAILED
       fi
@@ -148,18 +139,9 @@ function python_tests() {
         echo Building...
       fi
       if build_jmodelica | log > /dev/null; then
-        PATTERN="[-=]{40,}"
         find_python_tests
         cd ${TEST_DIR}
-        for TEST in ${TESTS}; do
-          echo "" | log
-          echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log
-          nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v ${TEST} 2>&1 \
-          | log \
-          | egrep -v '^Exception .* ignored$' \
-          | egrep -A500 "${PATTERN}" \
-          | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!' || echo NOSETESTS_NOT_OK
-        done | filter_python_separate
+        python_tests_n | filter_python_separate || res=1
       fi
       ;;
   esac
@@ -167,6 +149,48 @@ function python_tests() {
     cd ..
     rm -rf ${TEST_DIR}
   fi
+  return $res
+}
+
+function python_tests_v() {
+    res=0
+    for TEST in ${TESTS}; do
+      echo ""
+      echo ${TEST} | sed -e 's!^.*jmodelica.!Running !'
+      nose_test ${TEST} \
+      | log \
+      || res=1
+    done
+    return $res
+}
+
+function python_tests_q() {
+    res=0
+    for TEST in ${TESTS}; do
+      echo "" | log > /dev/null
+      echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log > /dev/null
+      nose_test ${TEST} 2>&1 \
+      | log \
+      | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p' \
+      || (res=1 && echo NOSETESTS_NOT_OK)
+    done
+    return $res
+}
+
+function python_tests_n() {
+    PATTERN="[-=]{40,}"
+    res=0
+    for TEST in ${TESTS}; do
+      echo "" | log
+      echo ${TEST} | sed -e 's!^.*jmodelica.!Running !' | log
+      nose_test ${TEST} 2>&1 \
+      | log \
+      | egrep -v '^Exception .* ignored$' \
+      | egrep -A500 "${PATTERN}" \
+      | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!' \
+      || (res=1 && echo NOSETESTS_NOT_OK)
+    done
+    return $res
 }
 
 # Helper functions
@@ -203,45 +227,66 @@ function filter_python_separate() {
   | sed \
     -e 's!0 0 [1-9].*!CRASHED!' \
     -e 's!0 0 0!PASSED!' \
-	-e 's!\([0-9]\+\) \([0-9]\+\) .*!TEST FAILED (errors=\1, failures=\2)!'
+    -e 's!\([0-9]\+\) \([0-9]\+\) .*!TEST FAILED (errors=\1, failures=\2)!'
   rm -f ${TMP}
 }
   
 function junit_test() {
   print_name $1
   cd ${BUILD}/java
+  res=0
   case ${OUTPUT} in
-    v)
-      ant_test $1 2>&1 \
-      | log
-      ;;
-    q)
-      ant_test $1 2>&1 \
-      | log \
-      | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
-      | sed -n \
-        -e '1 i\
-            0 0' \
-        -e 's!^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$!BUILD FAILED!' \
-        -e 's!^.*\[java\] Error when parsing file:.*$!BUILD FAILED!' \
-        -e 's!^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$!r\1+r\2+!p' \
-        -e 's!^.*\(BUILD FAILED\).*$![\1]pq!p' \
-        -e '$ a\
-            [errors=]nn[, failures=]np' \
-      | dc \
-      | sed \
-        -e 's!errors=0, failures=0!PASSED!' \
-	    -e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!'
-      ;;
-    n)
-      ant_test $1 \
-      | log \
-      | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))"
-      ;;
+    v) junit_test_v $1 || res=1 ;;
+    q) junit_test_q $1 || res=1 ;;
+    n) junit_test_n $1 || res=1 ;;
   esac
   if [ -n "${XML_RES_PATH:-}" ]; then
     cp "doc/junit-reports/TESTS-TestSuites.xml" "${XML_RES_PATH}"
   fi
+  return $res
+}
+
+function junit_test_v() {
+    res=0
+    ant_test $1 2>&1 \
+        | log \
+        || res=1
+    return $res
+}
+
+function junit_test_q() {
+    res=0
+    ant_test $1 2>&1 \
+        | log \
+        | egrep "(\[(jastadd|junit)\]|BUILD FAILED|\[java\] Error when parsing file:)" \
+        | sed -n \
+            -e '1 i\
+                0 0' \
+            -e 's!^.*\[jastadd\] \(Semantic errors\|Syntax error\).*$!BUILD FAILED!' \
+            -e 's!^.*\[java\] Error when parsing file:.*$!BUILD FAILED!' \
+            -e 's!^.*Failures: \([0-9]*\), Errors: \([0-9]*\),.*$!r\1+r\2+!p' \
+            -e 's!^.*\(BUILD FAILED\).*$![\1]pq!p' \
+            -e '$ a\
+                [errors=]nn[, failures=]np' \
+        | dc \
+        | sed \
+            -e 's!errors=0, failures=0!PASSED!' \
+            -e 's!\(errors=.*, failures=.*\)!TEST FAILED (\1)!' \
+        || res=1
+    return $res
+}
+
+function junit_test_n() {
+    res=0
+    ant_test $1 \
+        | log \
+        | egrep "(\[junit\]|\[(java|jastadd)\].*([Ee]rror|[A-Za-z.]*:[1-9][0-9]*))" \
+        || res=1
+    return $res
+}
+
+function nose_test() {
+  nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v $1
 }
 
 function ant_test() {
@@ -353,6 +398,9 @@ function read_args() {
           x)
             ARG_TYPE=xmlResPath
             ;;
+          e)
+            RETURN_WITH_ERROR=1
+            ;;
           h)
             echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...] [-x path]"
             echo "The -ajmop options each control a set of tests, and select all tests in set "
@@ -382,7 +430,10 @@ function read_args() {
             echo "      absolute or relative to current directory"
             echo "  -x  Path to folder where jUnit like xml files are written. The xml files"
             echo "      contains the results of the tests. Currently doesn't handle spaces"
-			echo "      in the supplied path!"
+            echo "      in the supplied path!"
+            echo "  -e  When enabled, exit with error code (after running all "
+            echo "      tests) if any test suite return with an error code (won't trigger on "
+            echo "      regular failures or errors). Default behaviour is exit 0.".
             echo "  -h  Print this help and exit"
             exit
             ;;
@@ -429,9 +480,10 @@ if [[ ${SYS} == Win ]]; then
   echo Note: If modelica or optimica tests seem to hang, press enter a couple of times.
 fi
 
+res=0
 for a in ${tests}; do
   if [[ "${test[${!a}]}" == 1 ]]; then
-    ${a}_tests
+    ${a}_tests || res=1
   fi
 done
 
@@ -439,3 +491,9 @@ if [[ "${OUTPUT}" != q ]]; then
   echo ========================
 fi
 echo $(date +%s) ${TIME}"-[Total time: ]nd60/n[:]n60%[0n]sxd10>xp" | dc
+
+if [ "${RETURN_WITH_ERROR}" == 1 ]; then
+    exit $res
+else
+    exit 0
+fi
