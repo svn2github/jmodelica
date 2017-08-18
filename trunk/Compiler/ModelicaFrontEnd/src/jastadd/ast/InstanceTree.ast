@@ -113,7 +113,7 @@ InstEnum                      : InstPrimitive;
 InstRecord                    : InstAssignable;
 InstBuiltIn                   : InstPrimitive;
 InstEnumLiteral               : InstBuiltIn;
-InstExternalObject            : InstAssignable ::= /DestructorCall:FFunctionCallStmt/;
+InstExternalObject            : InstPrimitive ::= /DestructorCall:FFunctionCallStmt/;
 InstPartialFunction           : InstAssignable;
 UnknownInstComponentDecl      : InstComponentDecl;
 InstArrayComponentDecl        : InstComponentDecl ::= <Index:int>;

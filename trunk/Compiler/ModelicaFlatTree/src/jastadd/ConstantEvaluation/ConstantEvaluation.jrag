@@ -4389,24 +4389,23 @@ aspect CircularExpressions {
 	
 	syn boolean FQNamePart.isCircular() = false;
 	eq FQNamePartArray.isCircular()     = getFArraySubscripts().isCircular();
-
-    syn lazy boolean InstComponentDecl.isCircular(int dim) circular [true] = false;
-    eq InstAssignable.isCircular(int dim) {
-        if (hasFArraySubscripts()) {
-            if (dim == -1) {
-                if (getFArraySubscripts().isCircular()) {
-                    return true;
-                }
-            } else {
-                if (getFArraySubscripts().getFSubscript(dim).isCircular()) {
-                    return true;
-                }
-            }
-        }
+	
+	syn lazy boolean InstComponentDecl.isCircular(int dim) circular [true] = false;
+	eq InstPrimitive.isCircular(int dim) {
+	    if (hasFArraySubscripts()) {
+	        if (dim == -1) {
+	            if (getFArraySubscripts().isCircular()) {
+	                return true;
+	            }
+	        } else {
+	            if (getFArraySubscripts().getFSubscript(dim).isCircular()) {
+	                return true;
+	            }
+	        }
+	    }
         return (hasBindingFExp() && getBindingFExp().isCircular());
-    }
-    eq InstRecord.isCircular(int dim) = false;
-
+	}	
+	
 	syn boolean FArraySubscripts.isCircular() {
 		for (FSubscript fs : getFSubscripts())
 			if (fs.isCircular())

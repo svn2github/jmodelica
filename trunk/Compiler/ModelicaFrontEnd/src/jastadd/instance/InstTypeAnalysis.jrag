@@ -61,6 +61,7 @@ aspect InstTypeAnalysis {
 
     eq InstEnum.primitiveScalarType()              = myInstClass().enumType();
     eq InstClassDecl.primitiveScalarType()         = isEnum() ? enumType() : super.primitiveScalarType();
+    eq InstExternalObject.primitiveScalarType()    = myInstClass().enumType();
     eq InstForIndexPrimitive.primitiveScalarType() = myInstForIndexType();
 
     inh FType InstForIndexPrimitive.myInstForIndexType();
@@ -204,7 +205,7 @@ aspect InstTypeAnalysis {
     eq InstPrimitive.isBoolean()        = myInstClass().isBoolean();
     eq InstPrimitive.isString()         = myInstClass().isString();
     eq InstEnum.isEnum()                = true;
-    eq InstExternalObject.isExternalObject() = true;
+    eq InstPrimitive.isExternalObject() = myInstClass().isExternalObject();
     eq InstPartialFunction.isPartialFunction() = true;
     
     eq InstClassDecl.isReal()    = finalClass().primitiveName().equals("Real");

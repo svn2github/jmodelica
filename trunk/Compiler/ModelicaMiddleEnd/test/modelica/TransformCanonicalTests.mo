@@ -302,34 +302,6 @@ end TransformCanonicalTests.TransformCanonicalTest8;
 ")})));
 end TransformCanonicalTest8;
 
-  model TransformCanonicalTest9_Err
-        model EO
-            extends ExternalObject;
-            function constructor
-                output EO eo;
-                external;
-            end constructor;
-            
-            function destructor
-                input EO eo;
-                external;
-            end destructor;
-        end EO;
-        
-        EO eo = eo;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="TransformCanonicalTest9_Err",
-            description="Circularity in external object binding expression",
-            errorMessage="
-1 errors found:
-
-Error at line 110, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
-  Circularity in binding expression of parameter: eo = eo
-")})));
-  end TransformCanonicalTest9_Err;
-
   model EvalTest1
 
     parameter Real p1 = sin(1);
@@ -6890,10 +6862,6 @@ model TestExternalObj8
 
 Error at line 6205, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   External object classes may not contain any elements except the constructor and destructor
-  
-Error at line 0, column 0, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
-  The binding expression of the variable x does not match the declared type of the variable
-
 ")})));
 end TestExternalObj8;
 
