@@ -697,7 +697,7 @@ aspect InstLookupComponents {
 
     // This is needed since the member components of InstPrimitive:s (which are attributes)
     // are not instantiated
-    eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+    eq InstPrimitive.memberInstComponent(String name)      = myInstClass().memberInstComponent(name);
     eq InstExtends.memberInstComponent(String name)   = 
         extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 

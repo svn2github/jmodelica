@@ -7592,4 +7592,128 @@ model FinalRedeclare3
     F f;
 end FinalRedeclare3;
 
+model ExternalObjectInConstrainingType1
+        model EO
+            extends ExternalObject;
+            function constructor
+                output EO eo;
+                external;
+            end constructor;
+            
+            function destructor
+                input EO eo;
+                external;
+            end destructor;
+        end EO;
+        
+        model A
+            Real x;
+            EO eo = EO();
+        end A;
+        
+        model B
+            Real x = time;
+            EO eo = EO();
+        end B;
+        
+        replaceable B b constrainedby A;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalObjectInConstrainingType1",
+            description="",
+            flatModel="
+fclass RedeclareTests.ExternalObjectInConstrainingType1
+ Real b.x = time;
+ parameter RedeclareTests.ExternalObjectInConstrainingType1.EO b.eo = RedeclareTests.ExternalObjectInConstrainingType1.EO.constructor() /* {} */;
+
+public
+ function RedeclareTests.ExternalObjectInConstrainingType1.EO.destructor
+  input RedeclareTests.ExternalObjectInConstrainingType1.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end RedeclareTests.ExternalObjectInConstrainingType1.EO.destructor;
+
+ function RedeclareTests.ExternalObjectInConstrainingType1.EO.constructor
+  output RedeclareTests.ExternalObjectInConstrainingType1.EO eo;
+ algorithm
+  external \"C\" eo = constructor();
+  return;
+ end RedeclareTests.ExternalObjectInConstrainingType1.EO.constructor;
+
+ type RedeclareTests.ExternalObjectInConstrainingType1.EO = ExternalObject;
+end RedeclareTests.ExternalObjectInConstrainingType1;
+")})));
+end ExternalObjectInConstrainingType1;
+
+model ExternalObjectInConstrainingType2
+    // This one should give an error?
+        model EO1
+            extends ExternalObject;
+            function constructor
+                output EO1 eo;
+                external;
+            end constructor;
+            
+            function destructor
+                input EO1 eo;
+                external;
+            end destructor;
+        end EO1;
+        
+        model EO2
+            extends ExternalObject;
+            function constructor
+                output EO2 eo;
+                external;
+            end constructor;
+            
+            function destructor
+                input EO2 eo;
+                external;
+            end destructor;
+        end EO2;
+        
+        model A
+            Real x;
+            EO1 eo = EO1();
+        end A;
+        
+        model B
+            Real x = time;
+            EO2 eo = EO2();
+        end B;
+        
+        replaceable B b constrainedby A;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalObjectInConstrainingType2",
+            description="",
+            flatModel="
+fclass RedeclareTests.ExternalObjectInConstrainingType2
+ Real b.x = time;
+ parameter RedeclareTests.ExternalObjectInConstrainingType2.EO2 b.eo = RedeclareTests.ExternalObjectInConstrainingType2.EO2.constructor() /* {} */;
+
+public
+ function RedeclareTests.ExternalObjectInConstrainingType2.EO2.destructor
+  input RedeclareTests.ExternalObjectInConstrainingType2.EO2 eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end RedeclareTests.ExternalObjectInConstrainingType2.EO2.destructor;
+
+ function RedeclareTests.ExternalObjectInConstrainingType2.EO2.constructor
+  output RedeclareTests.ExternalObjectInConstrainingType2.EO2 eo;
+ algorithm
+  external \"C\" eo = constructor();
+  return;
+ end RedeclareTests.ExternalObjectInConstrainingType2.EO2.constructor;
+
+ type RedeclareTests.ExternalObjectInConstrainingType2.EO2 = ExternalObject;
+end RedeclareTests.ExternalObjectInConstrainingType2;
+")})));
+end ExternalObjectInConstrainingType2;
+
 end RedeclareTests;
