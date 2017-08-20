@@ -65,7 +65,11 @@ class Test_CoupledFMUModelME2:
         cls.qc_full = compile_fmu("QuarterCar.QuarterCarComplete", os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
         cls.qc_sub1 = compile_fmu("QuarterCar.QuarterCarWithoutFeedThrough1", os.path.join(path_to_mofiles,"CoupledME.mo"),version="2.0")
         cls.qc_sub2 = compile_fmu("QuarterCar.QuarterCarWithoutFeedThrough2", os.path.join(path_to_mofiles,"CoupledME.mo"),version="2.0")
-
+        
+        cls.piplant = compile_fmu("PIPlant", os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
+        cls.pi      = compile_fmu("PI",      os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
+        cls.plant   = compile_fmu("Plant",   os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
+        
     @testattr(stddist = True)
     def test_loading(self):
         
@@ -447,3 +451,26 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.final("Second.u2"),res_full.final("p2.u2"), places=4)
         nose.tools.assert_almost_equal(res.initial("First.u1"),res_full.initial("p1.u1"), places=4)
         nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"), places=4)
+
+
+    @testattr(stddist = True)
+    def test_example_with_events(self):
+
+        pi      = load_fmu(Test_CoupledFMUModelME2.pi)
+        plant   = load_fmu(Test_CoupledFMUModelME2.plant)
+        piplant = load_fmu(Test_CoupledFMUModelME2.piplant)
+
+        res_full = piplant.simulate(final_time=4) 
+
+        connections = [(pi, "loadTorque", plant, "inputTorque"),
+                       (plant, "speed", pi, "speed")]
+
+        coupled_model = CoupledFMUModelME2([("pi",pi),("plant",plant)], connections)
+
+        res = coupled_model.simulate(final_time=4)
+        
+        nose.tools.assert_almost_equal(res.final("plant.speed"),res_full.final("plant.speed"), places=4)
+        nose.tools.assert_almost_equal(res.final("plant.inputTorque"),res_full.final("plant.inputTorque"), places=4)
+        nose.tools.assert_almost_equal(res.initial("plant.speed"),res_full.initial("plant.speed"), places=4)
+        nose.tools.assert_almost_equal(res.initial("plant.inputTorque"),res_full.initial("plant.inputTorque"), places=4)
+        

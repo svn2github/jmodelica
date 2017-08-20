@@ -271,3 +271,110 @@ equation
 end DoublePendula;
 
 end DoublePendulum;
+
+model PI
+    parameter Modelica.SIunits.Angle driveAngle=1.57;
+    Modelica.Blocks.Continuous.LimPID PI(
+      k=100,
+      Ti=0.1,
+      yMax=12,
+      Ni=0.1,
+      initType=Modelica.Blocks.Types.InitPID.SteadyState,
+      limitsAtInit=false,
+      controllerType=Modelica.Blocks.Types.SimpleController.PI,
+      Td=0.1) annotation (Placement(transformation(extent={{-14,-14},{6,6}})));
+    Modelica.Blocks.Sources.KinematicPTP kinematicPTP(
+      startTime=0.5,
+      deltaq={driveAngle},
+      qd_max={1},
+      qdd_max={1}) annotation (Placement(transformation(extent={{-50,26},{-30,
+              46}})));
+    Modelica.Blocks.Continuous.Integrator integrator(initType=Modelica.Blocks.Types.Init.InitialState)
+      annotation (Placement(transformation(extent={{-21,26},{-1,46}})));
+    Modelica.Blocks.Interfaces.RealInput speed annotation (Placement(
+          transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=90,
+          origin={-4,-64})));
+    Modelica.Blocks.Interfaces.RealOutput loadTorque
+      annotation (Placement(transformation(extent={{78,-14},{98,6}})));
+  equation
+    connect(kinematicPTP.y[1],integrator. u)
+      annotation (Line(points={{-29,36},{-23,36}}, color={0,0,127}));
+    connect(integrator.y,PI. u_s) annotation (Line(points={{0,36},{5,36},{5,17},
+            {-25,17},{-25,-4},{-16,-4}},       color={0,0,127}));
+    connect(PI.y, loadTorque)
+      annotation (Line(points={{7,-4},{8.5,-4},{88,-4}}, color={0,0,127}));
+    connect(PI.u_m, speed)
+      annotation (Line(points={{-4,-16},{-4,-64}}, color={0,0,127}));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false), graphics={
+          Text(
+            extent={{-56,65},{11,57}},
+            lineColor={255,0,0},
+            textString="reference speed generation")}));
+  end PI;
+
+  model Plant
+    Modelica.Mechanics.Rotational.Components.Inertia inertia1(
+      phi(fixed=true, start=0),
+      J=1,
+      a(fixed=true, start=0)) annotation (Placement(transformation(extent={{-20,14},
+              {0,34}})));
+    Modelica.Mechanics.Rotational.Sources.Torque torque annotation (Placement(
+          transformation(extent={{-47,14},{-27,34}})));
+    Modelica.Mechanics.Rotational.Components.SpringDamper spring(
+      c=1e4,
+      d=100,
+      stateSelect=StateSelect.prefer,
+      w_rel(fixed=true)) annotation (Placement(transformation(extent={{10,14},{
+              30,34}})));
+    Modelica.Mechanics.Rotational.Components.Inertia inertia2(J=2) annotation (
+        Placement(transformation(extent={{38,14},{58,34}})));
+    Modelica.Mechanics.Rotational.Sensors.SpeedSensor speedSensor annotation (
+        Placement(transformation(extent={{0,-16},{-20,4}})));
+    Modelica.Mechanics.Rotational.Sources.ConstantTorque loadTorque(
+        tau_constant=10, useSupport=false) annotation (Placement(transformation(
+            extent={{76,19},{66,29}})));
+    Modelica.Blocks.Interfaces.RealOutput speed annotation (Placement(
+          transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=270,
+          origin={-42,-62})));
+    Modelica.Blocks.Interfaces.RealInput inputTorque annotation (Placement(
+          transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=0,
+          origin={-100,24})));
+  equation
+    connect(spring.flange_b,inertia2. flange_a)
+      annotation (Line(points={{30,24},{38,24}}));
+    connect(inertia1.flange_b,spring. flange_a)
+      annotation (Line(points={{0,24},{10,24}}));
+    connect(torque.flange,inertia1. flange_a)
+      annotation (Line(points={{-27,24},{-20,24}}));
+    connect(speedSensor.flange,inertia1. flange_b)
+      annotation (Line(points={{0,-6},{0,24}}));
+    connect(loadTorque.flange,inertia2. flange_b)
+      annotation (Line(points={{66,24},{58,24}}));
+    connect(speedSensor.w, speed) annotation (Line(points={{-21,-6},{-21,-11},{
+            -42,-11},{-42,-62}}, color={0,0,127}));
+    connect(torque.tau, inputTorque)
+      annotation (Line(points={{-49,24},{-66,24},{-100,24}}, color={0,0,127}));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end Plant;
+
+  model PIPlant
+    PI pI annotation (Placement(transformation(extent={{-42,28},{-22,48}})));
+    Plant plant annotation (Placement(transformation(extent={{14,-12},{34,8}})));
+  equation
+    connect(pI.loadTorque, plant.inputTorque) annotation (Line(points={{-23.2,
+            37.6},{-24,37.6},{-24,38},{0,38},{0,20},{0,0},{14,0},{14,0.4}},
+                                                    color={0,0,127}));
+    connect(plant.speed, pI.speed) annotation (Line(points={{19.8,-8.2},{18,
+            -8.2},{18,-8},{18,-22},{-32,-22},{-32,31.6},{-32.4,31.6}},
+                                             color={0,0,127}));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end PIPlant;
