@@ -1417,6 +1417,57 @@ end ArrayTests.General.ArrayTest51;
 ")})));
 end ArrayTest51;
 
+model ArrayTest52
+        model M
+            constant Real x;
+        end M;
+        
+        M[0] m(x=1:0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest52",
+            description="Binding expression in modifier on empty array #5443",
+            flatModel="
+fclass ArrayTests.General.ArrayTest52
+end ArrayTests.General.ArrayTest52;
+")})));
+end ArrayTest52;
+
+model ArrayTest53
+        model M
+            parameter Real x;
+        end M;
+        
+        M[0] m(final x=1:0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest53",
+            description="Binding expression in modifier on empty array #5443",
+            flatModel="
+fclass ArrayTests.General.ArrayTest53
+end ArrayTests.General.ArrayTest53;
+")})));
+end ArrayTest53;
+
+model ArrayTest54
+        model M
+            Real[0] x;
+        end M;
+        
+        M[1] m(x= {1:0});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest54",
+            description="Binding expression in modifier on empty array #5443",
+            flatModel="
+fclass ArrayTests.General.ArrayTest54
+end ArrayTests.General.ArrayTest54;
+")})));
+end ArrayTest54;
+
 end General;
 
 

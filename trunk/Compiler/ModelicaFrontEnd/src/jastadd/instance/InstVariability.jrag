@@ -94,11 +94,10 @@ aspect InstVariability {
         }
         return new FCompositeVariability(l).combineInherit(super.calcVariability());
     }
-    
-    syn boolean InstAssignable.isFinalIndependent() {
-        InstValueModification mod = myInstValueMod();
-        return mod != null && mod.isFinal() && getBindingFExp().isIndependentParameterExp();
-    }
+
+    syn boolean InstAssignable.isFinalIndependent() =
+        hasBindingFExp() && myInstValueMod().isFinal() && getBindingFExp().isIndependentParameterExp();
+
     syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool() || inEvalAnnotated();
     inh boolean InstComponentDecl.inEvalAnnotated();
     eq InstClassDecl.getChild().inEvalAnnotated()          = false;
