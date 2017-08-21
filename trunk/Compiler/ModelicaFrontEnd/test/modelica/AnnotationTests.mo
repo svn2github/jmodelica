@@ -67,5 +67,45 @@ model ShortClassConstrainedBy3
 ")})));
 end ShortClassConstrainedBy3;
 
+model ComponentConstrainedByOnlyNormal
+    model A
+    end A;
+    replaceable A a annotation(a = b) constrainedby A;
+    annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="ComponentConstrainedByOnlyNormal",
+            description="Tests annotations on replaceable constrainedby declarations.",
+            methodName="printComponentAnnotations",
+            methodResult="
+(a = b)
+")})));
+end ComponentConstrainedByOnlyNormal;
+model ComponentConstrainedByOnlyConstrained
+    model A
+    end A;
+    replaceable A a constrainedby A annotation(a = b);
+    annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="ComponentConstrainedByOnlyConstrained",
+            description="Tests annotations on replaceable constrainedby declarations.",
+            methodName="printComponentAnnotations",
+            methodResult="
+(a = b)
+")})));
+end ComponentConstrainedByOnlyConstrained;
+model ComponentConstrainedByBoth
+    model A
+    end A;
+    replaceable A a annotation(a = b) constrainedby A annotation(b = c);
+    annotation(__JModelica(UnitTesting(tests={
+        InstClassMethodTestCase(
+            name="ComponentConstrainedByBoth",
+            description="Tests annotations on replaceable constrainedby declarations.",
+            methodName="printComponentAnnotations",
+            methodResult="
+(a = b, b = c)
+")})));
+end ComponentConstrainedByBoth;
+
 
 end AnnotationTests;

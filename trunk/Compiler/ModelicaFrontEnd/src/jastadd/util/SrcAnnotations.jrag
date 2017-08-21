@@ -271,8 +271,12 @@ aspect SrcAnnotations {
     /*******************
      * Component Decls  
      ******************/
-    syn SrcAnnotationProvider ComponentDecl.srcAnnotationProvider() =
-            SrcAnnotation.createProviderFor(getComment().getAnnotationOpt());
+    syn SrcAnnotationProvider ComponentDecl.srcAnnotationProvider() {
+        if (getCCComment().hasAnnotation()) {
+            return SrcAnnotation.createProviderFor(getComment().getAnnotationOpt(), getCCComment().getAnnotationOpt());
+        }
+        return SrcAnnotation.createProviderFor(getComment().getAnnotationOpt());
+    }
     syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getComponentDecl().srcAnnotationProvider();
     eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
 
