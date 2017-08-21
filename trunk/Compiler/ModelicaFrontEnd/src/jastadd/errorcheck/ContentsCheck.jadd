@@ -450,7 +450,7 @@ aspect ContentCheck {
             boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
             boolean functionCallEqu = hasFunctionCallEquations(); 
             if (hasOnlyFixedParamTests()) {
-                forceTestVariability(checkType, balanced ? ASTNode.fTestParameter() : ASTNode.fStructParameter());
+                markTestsAsStructuralParameter(checkType);
             } else {
                 if (!balanced) {
                     error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
@@ -465,14 +465,12 @@ aspect ContentCheck {
 			error("Only assignment equations are allowed in when clauses");
 	}
 
-    protected void FIfWhenElseEquation.forceTestVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    protected void FIfWhenElseEquation.markTestsAsStructuralParameter(ErrorCheckType checkType) {}
 
-    @Override
-    protected void FIfEquation.forceTestVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        getTest().forceVariability(checkType, v);
-        if (hasElse()) {
-            getElse().forceTestVariability(checkType, v);
-        }
+    protected void FIfEquation.markTestsAsStructuralParameter(ErrorCheckType checkType) {
+        getTest().markAsStructuralParameter(checkType);
+        if (hasElse())
+            getElse().markTestsAsStructuralParameter(checkType);
     }
 
 	syn boolean FIfWhenElseEquation.isBalancedEquations() = true; 

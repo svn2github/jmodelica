@@ -163,11 +163,6 @@ FFixedParameter : FParameter;
 FIndexParameter : FParameter;
 
 /**
- * Evaluate false parameter variability.
- */
-FEvalFalseParameter : FFixedParameter;
-
-/**
  * Parameter with known value variability
  */
 abstract FKnownParameter : FParameter;
@@ -178,15 +173,9 @@ abstract FKnownParameter : FParameter;
 FStructParameter : FKnownParameter;
 
 /**
- * Used to force variability for if equation tests
- * Is canceled by setting Evaluate=false
- */
-FTestParameter   : FStructParameter;
-
-/**
  * Evaluate true parameter variability.
  */
-FEvalTrueParameter : FKnownParameter;
+FEvalParameter : FKnownParameter;
 
 /**
  * Final parameter variability.
