@@ -285,50 +285,6 @@ public class ModelicaCompiler {
 
     protected ModelicaCompiler() {}
 
-    /**
-     * Sets the directory new temporary files are created in. 
-     * The default value is <code>null</code>, and is interpreted as the current working directory.
-     */
-    public void setTempFileDir(File temp) {
-        tempDir = temp;
-    }
-    
-    public void setOutDir(File out) {
-        outDir = out;
-        sourceDir = new File(outDir, "sources");
-        resourceDir = new File(outDir, "resources");
-        sourceDir.mkdirs();
-        resourceDir.mkdir();
-    }
-    
-    public void setSubOutDir(String out) {
-        setOutDir(new File(tempDir, out));
-    }
-
-    public void setRandomOutDir() {
-        try {
-            File out = File.createTempFile("jmc", "out", tempDir);
-            out.delete();
-            setOutDir(out);
-        } catch (IOException e) {
-            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and " +
-                    "temp base directory '" + tempDir + "'! java.io.tmpdir: '" + System.getProperty("java.io.tmpdir") + 
-                    "'. TMP: '" + System.getenv("TMP") + "'. TEMP: '" + System.getenv("TEMP") + "'.", e);
-        }
-    }
-
-    /**
-     * Deletes the temporary out directory.
-     */
-    private void deleteOutDir() {
-        if (outDir != null) {
-            FileUtil.recursiveDelete(outDir);
-        }
-        outDir = null;
-        sourceDir = null;
-        resourceDir = null;
-    }
-
     public CCompilerDelegator getCCompiler() {
         String c_compiler = options.getStringOption(CCompilerDelegator.OPTION);
         if (delegator == null || !c_compiler.equals(delegator_name)) {
@@ -735,69 +691,69 @@ public class ModelicaCompiler {
 
     /**
      * Compiles a model and creates an FMU, convenience method for compileUnit that uses default version.
-     * 
+     * <p>
      * Compiles a model (parsing, instantiating, flattening, code generation and 
      * binary file compilation) and packs the result in a FMU.
      * 
-     * @param className Name of model class in the model file to compile.
-     * @param fileName Array of model file or library paths.
-     * @param target The compiler target. Valid options are 'me' or 'cs'.
-     * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
-     * @return the path to the compiled FMU, if successful 
+     * @param className name of model class in the model file to compile.
+     * @param fileName  array of model file or library paths.
+     * @param target    the compiler target. Valid options are 'me' or 'cs'.
+     * @param compileTo specify location of the compiled FMU. A directory will be created if it does not exist.
+     * @return          a {@link CompiledUnit} result object.
      */
-    public String compileFMU(String className, String fileName[], String target, String compileTo) 
+    public CompiledUnit compileFMU(String className, String fileName[], String target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
         return compileUnit(className, fileName, target, "1.0" , compileTo);
     }
 
     /**
      * Compiles a model and creates an FMUX, convenience method for compileUnit.
-     * 
+     * <p>
      * Compiles a model (parsing, instantiating, flattening and XML code 
      * generation) and packs the result in a FMUX.
      * 
-     * @param className Name of model class in the model file to compile.
-     * @param fileName Array of model file or library paths.
-     * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
-     * @return the path to the compiled FMUX, if successful 
+     * @param className name of model class in the model file to compile.
+     * @param fileName  array of model file or library paths.
+     * @param compileTo specify location of the compiled FMUX. Directory will be created if it does not exist.
+     * @return          a {@link CompiledUnit} result object.
      */
-    public String compileFMUX(String className, String fileName[], String compileTo) 
+    public CompiledUnit compileFMUX(String className, String fileName[], String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
         return compileUnit(className, fileName, "fmux", null , compileTo);
     }
 
     /**
      * Compiles a FMU or FMUX. Is a wrapper.
-     * 
+     * <p>
      * Compiles a model (parsing, instantiating, flattening, code generation and 
      * binary file compilation) and packs the result in a FMU/FMUX.
      * 
-     * @param className Name of model class in the model file to compile.
-     * @param fileName Array of model file or library paths.
-     * @param target The compiler target. Valid options are 'me' or 'cs'.
-     * @param version The FMI version. Valid options are '1.0' or '2.0'.
-     * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
-     * @return the path to the compiled unit, if successful 
+     * @param className name of model class in the model file to compile.
+     * @param fileName  array of model file or library paths.
+     * @param target    the compiler target. Valid options are 'me' or 'cs'.
+     * @param version   the FMI version. Valid options are '1.0' or '2.0'.
+     * @param compileTo specify location of the compiled FMU. Directory will be created if it does not exist.
+     * @return          a {@link CompiledUnit} result object.
      */
-    public String compileUnit(String className, String fileName[], String target, String version, String compileTo) 
+    public CompiledUnit compileUnit(String className, String fileName[], String target, String version, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        //Create the target object.
+
         TargetObject targetObject = TargetObject.getTarget(target, version);
-        
-        //Compile.
         return compileUnit(className, fileName, targetObject, compileTo);
     }
 
     /**
      * Compiles a FMU or FMUX.
      * 
-     * @param className Name of model class in the model file to compile.
-     * @param fileName Array of model file or library paths.
-     * @param target Target object, contains information about the target, its unit suffix for example.
-     * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist.
-     * @return the path to the compiled unit, if successful 
+     * @param className name of model class in the model file to compile.
+     * @param fileName  array of model file or library paths.
+     * @param target    target object, contains information about the target, its unit suffix for example.
+     * @param compileTo specify location of the compiled unit. Directory will be created if it does not exist.
+     * @return          a {@link CompiledUnit} result object.
      */
-    protected String compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
+    protected CompiledUnit compileUnit(String className, String fileName[], TargetObject target, String compileTo) 
             throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 
         /*
@@ -825,12 +781,12 @@ public class ModelicaCompiler {
             options.copyAllOptions(tempOptions);
         }
     }
-    
-    protected String doCompileUnit(String className, String fileName[], TargetObject target, String compileTo) 
+
+    protected CompiledUnit doCompileUnit(String className, String fileName[], TargetObject target, String compileTo) 
         throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        String unitFile = null;
+
+        CompiledUnit unit = null;
         try {
-            // set invokegc if set
             StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
 
             if (outDir == null) {
@@ -838,16 +794,18 @@ public class ModelicaCompiler {
             }
 
             if (target.getMakeFileFlag() != null) {
-                // Might be used by constant evaluation
+                // Might be used by constant evaluation.
                 CCompilerDelegator ccompiler = getCCompiler();
                 ccompiler.setTargetPlatforms(targetPlatforms);
 
-                // Get loadable module settings
+                // Get loadable module settings.
                 ModulesSettings modulesSettings = createModulesSettings(options);
                 ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
             }
-            
-            // compile mo-file + generate code for all templates that are not null
+
+            /*
+             * Compile mo-file and generate code for all templates that are not null.
+             */
             String flatName = null;
             File compileToPath = new File(compileTo);
             if (!compileToPath.isDirectory()) {
@@ -857,23 +815,28 @@ public class ModelicaCompiler {
                     flatName = flatName.substring(0, i);
             }
             FClass fc = compileModel(fileName, className, target, flatName);
-            
+
             if (!target.getCodeGenFlag()) {
-                //No code have been generated.
+                /*
+                 * No code has been generated.
+                 */
                 return null;
             }
-            
-            // compile c code if Makefile flag is not null
+
+            /*
+             * Compile C code if the Makefile flag is not null.
+             */
             hookCheckAbort();
             doCompileCCode(target, fc, className, flatName);
 
-            
-            // package unit
+            /*
+             * Package unit.
+             */
             ASTNode.beginStep("packUnit()");
             File unitPath = packUnit(className, compileTo, target, fc);
-            unitFile = unitPath.getPath();
-            log.logCompiledUnit(unitPath, fc.numberOfComponents());
+            unit = log.logCompiledUnit(unitPath, warnings, fc.numberOfComponents());
             ASTNode.endStep("packUnit()");
+
         } finally {
             log.debug("Time usage and memory usage change during compilation steps:");
             ASTNode.getStepInfo().logReport();
@@ -881,7 +844,7 @@ public class ModelicaCompiler {
                 ASTNode.getStepInfo().writeCSVFile(new File(FClass.removeModifiersFromClassName(className) + ".csv"));
         }
         
-        return unitFile;
+        return unit;
     }
 
     protected void parseFiles(String[] paths) {
@@ -1971,6 +1934,50 @@ public class ModelicaCompiler {
     }
 
 }
+
+    /**
+     * Sets the directory new temporary files are created in. 
+     * The default value is <code>null</code>, and is interpreted as the current working directory.
+     */
+    public void ModelicaCompiler.setTempFileDir(File temp) {
+        tempDir = temp;
+    }
+
+    public void ModelicaCompiler.setOutDir(File out) {
+        outDir = out;
+        sourceDir = new File(outDir, "sources");
+        resourceDir = new File(outDir, "resources");
+        sourceDir.mkdirs();
+        resourceDir.mkdir();
+    }
+
+    public void ModelicaCompiler.setSubOutDir(String out) {
+        setOutDir(new File(tempDir, out));
+    }
+
+    public void ModelicaCompiler.setRandomOutDir() {
+        try {
+            File out = File.createTempFile("jmc", "out", tempDir);
+            out.delete();
+            setOutDir(out);
+        } catch (IOException e) {
+            throw new ModelicaException("Unable to create temporary directory with prefix 'jmc', suffix 'out' and " +
+                    "temp base directory '" + tempDir + "'! java.io.tmpdir: '" + System.getProperty("java.io.tmpdir") + 
+                    "'. TMP: '" + System.getenv("TMP") + "'. TEMP: '" + System.getenv("TEMP") + "'.", e);
+        }
+    }
+
+    /**
+     * Deletes the temporary out directory.
+     */
+    private void ModelicaCompiler.deleteOutDir() {
+        if (outDir != null) {
+            FileUtil.recursiveDelete(outDir);
+        }
+        outDir = null;
+        sourceDir = null;
+        resourceDir = null;
+    }
 
     /**
      * Compiles a Modelica model. A model file name and class must be provided.

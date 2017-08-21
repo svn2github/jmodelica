@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2015 Modelon AB
+    Copyright (C) 2015-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,11 @@
 package org.jmodelica.util;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
+import org.jmodelica.api.problemHandling.Problem;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.XMLLogger;
 import org.jmodelica.util.logging.units.LoggingUnit;
@@ -26,30 +30,76 @@ import org.jmodelica.util.logging.units.LoggingUnit;
  */
 public class CompiledUnit implements LoggingUnit {
 
+    /**
+     * Serial version UID.
+     */
     private static final long serialVersionUID = 2L;
 
-    private final File file;
+    private Iterator<Problem> warnings = Collections.<Problem> emptyIterator();
+    private final File fmu;
     private final int numberOfComponents;
 
-    public CompiledUnit(File file, int numberOfComponents) {
-        this.file = file;
+    /**
+     * Construct a compiled unit representing the artifacts produced by a compilation process.
+     * 
+     * @param fmu                   the file object pointing to the produced FMU.
+     * @param numberOfComponents    the number of components in the compiled unit.
+     * @deprecated                  use {@link #CompiledUnit(File, Collection, int)} instead.
+     */
+    public CompiledUnit(File fmu, int numberOfComponents) {
+        this(fmu, Collections.<Problem> emptyList(), numberOfComponents);
+    }
+
+    /**
+     * Construct a compiled unit representing the artifacts produced by a compilation process.
+     * 
+     * @param fmu                   the file object pointing to the produced FMU.
+     * @param warnings              the warnings generated during the compilation.
+     * @param numberOfComponents    the number of components in the compiled unit.
+     */
+    public CompiledUnit(File fmu, Collection<Problem> warnings, int numberOfComponents) {
+        this.fmu = fmu;
+        this.warnings = warnings.iterator();
         this.numberOfComponents = numberOfComponents;
     }
 
     /**
      * Get the file object pointing to the generated file.
+     * 
+     * @return  the path to the FMU.
      */
-    public File getFile() {
-        return file;
+    public File fmu() {
+        return fmu;
     }
 
+    /**
+     * Retrieve the number of components produced by the compilation.
+     * 
+     * @return  the number of components produced by the compilation.
+     */
     public int getNumberOfComponents() {
         return numberOfComponents;
     }
 
+    /**
+     * Retrieve the warnings generated during the compilation.
+     * 
+     * @return  the warnings generated during the compilation.
+     */
+    public Iterable<Problem> warnings() {
+        return new Iterable<Problem>() {
+
+            @SuppressWarnings("synthetic-access")
+            @Override
+            public Iterator<Problem> iterator() {
+                return warnings;
+            }
+        };
+    }
+
     @Override
     public String toString() {
-        return file.toString();
+        return fmu.toString();
     }
 
     @Override
@@ -64,6 +114,9 @@ public class CompiledUnit implements LoggingUnit {
 
     @Override
     public void prepareForSerialization() {
+        /*
+         * Do nothing.
+         */
     }
 
 }
