@@ -1576,13 +1576,9 @@ aspect Flattening {
             InstValueModification im = myInstValueMod();
             exp = im.getFExp();
             if (ndims() < exp.ndims()) {
-                if (exp.size().isEmpty()) {
-                    exp = null;
-                } else {
-                    InstNode decl = im.myInstNode();
-                    decl = matchingAncestor(decl);
-                    exp = exp.dynamicFExp(splitBindingFExp(exp, decl, ndims()));
-                }
+                InstNode decl = im.myInstNode();
+                decl = matchingAncestor(decl);
+                exp = exp.dynamicFExp(splitBindingFExp(exp, decl, ndims()));
             }
         }
         return exp;

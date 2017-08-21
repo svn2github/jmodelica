@@ -97,7 +97,7 @@ aspect InstVariability {
     
     syn boolean InstAssignable.isFinalIndependent() {
         InstValueModification mod = myInstValueMod();
-        return mod != null && mod.isFinal() && hasBindingFExp() && getBindingFExp().isIndependentParameterExp();
+        return mod != null && mod.isFinal() && getBindingFExp().isIndependentParameterExp();
     }
     syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool() || inEvalAnnotated();
     inh boolean InstComponentDecl.inEvalAnnotated();
