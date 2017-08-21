@@ -963,14 +963,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         __sampleItr_1_6 = pre__sampleItr_1_6;
         _y_1 = pre_y_1;
         _a_3 = pre_a_3;
-        if (jmi->atInitial || jmi->atEvent) {
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(0) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6), _sw(0), JMI_REL_GEQ);
         }
         _temp_1_4 = LOG_EXP_AND(LOG_EXP_NOT(_atInitial), _sw(0));
         if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
             __sampleItr_1_6 = pre__sampleItr_1_6 + 1;
         }
-        if (jmi->atInitial || jmi->atEvent) {
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(1) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
         }
         if (_sw(1) == JMI_FALSE) {
@@ -1091,14 +1091,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         __sampleItr_1_6 = pre__sampleItr_1_6;
         _y_1 = pre_y_1;
         _a_3 = pre_a_3;
-        if (jmi->atInitial || jmi->atEvent) {
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(0) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6), _sw(0), JMI_REL_GEQ);
         }
         _temp_1_4 = LOG_EXP_AND(LOG_EXP_NOT(_atInitial), _sw(0));
         if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
             __sampleItr_1_6 = pre__sampleItr_1_6 + 1;
         }
-        if (jmi->atInitial || jmi->atEvent) {
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(1) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
         }
         if (_sw(1) == JMI_FALSE) {
