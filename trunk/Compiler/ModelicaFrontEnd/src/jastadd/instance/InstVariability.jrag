@@ -68,16 +68,20 @@ aspect InstVariability {
             return fDiscrete();
         }
         if (v.parameterVariability() && !inRecordDecl()) {
-            
-            if (isSetAsInitial()) {
-                v = fInitialParameter();
-            } else if (!isRecord() && isEvalAnnotated()) {
-                v = fEvalParameter();
-            } else if (isFinalIndependent()) {
-                v = fFinalParameter();
+            if (!isRecord()) {
+                if (isSetAsInitial()) {
+                    v = fInitialParameter();
+                } else if (isEvalAnnotated(true)) {
+                    v = fEvalTrueParameter();
+                } else if (isEvalAnnotated(false)) {
+                    v = fEvalFalseParameter();
+                } else if (isFinalIndependent()) {
+                    v = fFinalParameter();
+                }
+                if (!(forcedVariability.testParameterVariability() && v.evalFalseParameterVariability())) {
+                    v = v.combineDown(forcedVariability);
+                }
             }
-            
-            v = v.combineDown(forcedVariability);
             v = bExpVariability().combinePropagate(v);
         }
         return v;
@@ -98,14 +102,27 @@ aspect InstVariability {
     syn boolean InstAssignable.isFinalIndependent() =
         hasBindingFExp() && myInstValueMod().isFinal() && getBindingFExp().isIndependentParameterExp();
 
-    syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool() || inEvalAnnotated();
-    inh boolean InstComponentDecl.inEvalAnnotated();
-    eq InstClassDecl.getChild().inEvalAnnotated()          = false;
-    eq InstComponentDecl.getChild().inEvalAnnotated()      = false;
-    eq InstAssignable.getChild().inEvalAnnotated()         = isEvalAnnotated();
-    eq InstArrayComponentDecl.getChild().inEvalAnnotated() = inEvalAnnotated();
-    eq InstRecordConstructor.getChild().inEvalAnnotated()  = false;
-    
+
+    syn boolean InstAssignable.isEvalAnnotated(boolean b) {
+        AnnotationNode an = evalAnnotation();
+        return an.exists() && an.isBoolValue() && (!b ^ an.bool());
+    }
+
+    syn AnnotationNode InstAssignable.evalAnnotation() {
+        AnnotationNode res = parentEvalAnnotation();
+        if (!res.exists()) {
+            res = annotation().forPath("Evaluate");
+        }
+        return res;
+    }
+
+    inh AnnotationNode InstComponentDecl.parentEvalAnnotation();
+    eq InstClassDecl.getChild().parentEvalAnnotation()          = AnnotationNode.NO_ANNOTATION;
+    eq InstComponentDecl.getChild().parentEvalAnnotation()      = AnnotationNode.NO_ANNOTATION;
+    eq InstAssignable.getChild().parentEvalAnnotation()         = evalAnnotation();
+    eq InstArrayComponentDecl.getChild().parentEvalAnnotation() = parentEvalAnnotation();
+    eq InstRecordConstructor.getChild().parentEvalAnnotation()  = AnnotationNode.NO_ANNOTATION;
+
     syn boolean InstAssignable.isSetAsInitial() = isPrimitive() && 
             attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && 
             !fixedAttributeCValue().reduceBooleanAnd();
@@ -145,8 +162,10 @@ aspect InstVariability {
     eq FConstant.combinePropagate(FTypePrefixVariability other)             = other.combineDown(fFixedParameter());
     eq FParameter.combinePropagate(FTypePrefixVariability other)            = other.combineDown(this);
     eq FInitialParameter.combinePropagate(FTypePrefixVariability other)     = this;
-    eq FEvalParameter.combinePropagate(FTypePrefixVariability other)        =
+    eq FEvalTrueParameter.combinePropagate(FTypePrefixVariability other)    =
             fStructParameter().combinePropagate(other);
+    eq FEvalFalseParameter.combinePropagate(FTypePrefixVariability other)    =
+            other.testParameterVariability() ? this : super.combinePropagate(other);
     
     class FCompositeVariability {
         protected static Combiner propagateCombiner = new Combiner() {

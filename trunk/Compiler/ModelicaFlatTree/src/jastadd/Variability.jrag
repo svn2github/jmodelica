@@ -24,14 +24,18 @@ aspect Variability {
     eq FConstant.constantVariability() = true;	
     syn boolean FTypePrefixVariability.structParameterVariability() = false;
     eq FStructParameter.structParameterVariability() = true;
-    syn boolean FTypePrefixVariability.evalParameterVariability() = false;
-    eq FEvalParameter.evalParameterVariability() = true;
+    syn boolean FTypePrefixVariability.testParameterVariability() = false;
+    eq FTestParameter.testParameterVariability() = true;
+    syn boolean FTypePrefixVariability.evalTrueParameterVariability() = false;
+    eq FEvalTrueParameter.evalTrueParameterVariability() = true;
     syn boolean FTypePrefixVariability.finalParameterVariability() = false;
     eq FFinalParameter.finalParameterVariability() = true;
     syn boolean FTypePrefixVariability.knownParameterVariability() = false;
     eq FKnownParameter.knownParameterVariability() = true;
     syn boolean FTypePrefixVariability.indexParameterVariability() = false;
     eq FIndexParameter.indexParameterVariability() = true;
+    syn boolean FTypePrefixVariability.evalFalseParameterVariability() = false;
+    eq FEvalFalseParameter.evalFalseParameterVariability() = true;
     syn boolean FTypePrefixVariability.fixedParameterVariability()    = false;
     eq FFixedParameter.fixedParameterVariability()                    = true;
     syn boolean FTypePrefixVariability.initialParameterVariability() = false;
@@ -59,7 +63,7 @@ aspect Variability {
     syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
             compareTo(other) <= 0;
 	
-    syn boolean FTypePrefixVariability.evalOrLess()           = lessOrEqual(fEvalParameter());
+    syn boolean FTypePrefixVariability.evalOrLess()           = lessOrEqual(fEvalTrueParameter());
     syn boolean FTypePrefixVariability.knownParameterOrLess() = lessOrEqual(fFinalParameter());
     syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fInitialParameter());
     syn boolean FTypePrefixVariability.indexParameterOrLess() = lessOrEqual(fIndexParameter());
@@ -77,25 +81,29 @@ aspect Variability {
      * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
      */
     abstract protected int FTypePrefixVariability.variabilityLevel();
-    protected int FConstant.variabilityLevel()        { return VARIABILITY_LEVEL; }
-    protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
-    protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
-    protected int FFinalParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FIndexParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FFixedParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FInitialParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
-    protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
-    protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
+    protected int FConstant.variabilityLevel()             { return VARIABILITY_LEVEL; }
+    protected int FStructParameter.variabilityLevel()      { return VARIABILITY_LEVEL; }
+    protected int FTestParameter.variabilityLevel()        { return VARIABILITY_LEVEL; }
+    protected int FEvalTrueParameter.variabilityLevel()    { return VARIABILITY_LEVEL; }
+    protected int FFinalParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
+    protected int FIndexParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
+    protected int FEvalFalseParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
+    protected int FFixedParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
+    protected int FInitialParameter.variabilityLevel()     { return VARIABILITY_LEVEL; }
+    protected int FDiscrete.variabilityLevel()             { return VARIABILITY_LEVEL; }
+    protected int FContinuous.variabilityLevel()           { return VARIABILITY_LEVEL; }
     protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
-    protected static final int FConstant.VARIABILITY_LEVEL          = 0;
-    protected static final int FEvalParameter.VARIABILITY_LEVEL     = 3;
-    protected static final int FStructParameter.VARIABILITY_LEVEL   = 4;
-    protected static final int FFinalParameter.VARIABILITY_LEVEL    = 5;
-    protected static final int FIndexParameter.VARIABILITY_LEVEL    = 8;
-    protected static final int FFixedParameter.VARIABILITY_LEVEL    = 10;
-    protected static final int FInitialParameter.VARIABILITY_LEVEL = 11;
-    protected static final int FDiscrete.VARIABILITY_LEVEL          = 20;
-    protected static final int FContinuous.VARIABILITY_LEVEL        = 30;
+    protected static final int FConstant.VARIABILITY_LEVEL           = 0;
+    protected static final int FEvalTrueParameter.VARIABILITY_LEVEL  = 3;
+    protected static final int FStructParameter.VARIABILITY_LEVEL    = 4;
+    protected static final int FTestParameter.VARIABILITY_LEVEL      = 5;
+    protected static final int FFinalParameter.VARIABILITY_LEVEL     = 6;
+    protected static final int FIndexParameter.VARIABILITY_LEVEL     = 8;
+    protected static final int FEvalFalseParameter.VARIABILITY_LEVEL = 9;
+    protected static final int FFixedParameter.VARIABILITY_LEVEL     = 10;
+    protected static final int FInitialParameter.VARIABILITY_LEVEL   = 11;
+    protected static final int FDiscrete.VARIABILITY_LEVEL           = 20;
+    protected static final int FContinuous.VARIABILITY_LEVEL         = 30;
     
     /**
      * Combines (up) component variabilities to a single primitive variability.
@@ -631,15 +639,17 @@ aspect Variability {
 
 aspect VariabilitySingletons {
 
-    public static final FContinuous      FContinuous.instance      = new FContinuous();
-    public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
-    public static final FInitialParameter FInitialParameter.instance = new FInitialParameter();
-    public static final FFixedParameter  FFixedParameter.instance  = new FFixedParameter();
-    public static final FIndexParameter  FIndexParameter.instance  = new FIndexParameter();
-    public static final FFinalParameter  FFinalParameter.instance  = new FFinalParameter();
-    public static final FEvalParameter   FEvalParameter.instance   = new FEvalParameter();
-    public static final FStructParameter FStructParameter.instance = new FStructParameter();
-    public static final FConstant        FConstant.instance        = new FConstant();
+    public static final FContinuous         FContinuous.instance         = new FContinuous();
+    public static final FDiscrete           FDiscrete.instance           = new FDiscrete();
+    public static final FInitialParameter   FInitialParameter.instance   = new FInitialParameter();
+    public static final FFixedParameter     FFixedParameter.instance     = new FFixedParameter();
+    public static final FEvalFalseParameter FEvalFalseParameter.instance = new FEvalFalseParameter();
+    public static final FIndexParameter     FIndexParameter.instance     = new FIndexParameter();
+    public static final FFinalParameter     FFinalParameter.instance     = new FFinalParameter();
+    public static final FEvalTrueParameter  FEvalTrueParameter.instance  = new FEvalTrueParameter();
+    public static final FStructParameter    FStructParameter.instance    = new FStructParameter();
+    public static final FTestParameter      FTestParameter.instance      = new FTestParameter();
+    public static final FConstant           FConstant.instance           = new FConstant();
 
     public static FContinuous ASTNode.fContinuous() {
         return FContinuous.instance;
@@ -664,6 +674,10 @@ aspect VariabilitySingletons {
         return FFixedParameter.instance;
     }
     
+    public static FEvalFalseParameter ASTNode.fEvalFalseParameter() {
+        return FEvalFalseParameter.instance;
+    }
+    
     public static FParameter ASTNode.fIndexParameter() {
         return FIndexParameter.instance;
     }
@@ -672,12 +686,16 @@ aspect VariabilitySingletons {
         return FFinalParameter.instance;
     }
     
-    public static FEvalParameter ASTNode.fEvalParameter() {
-        return FEvalParameter.instance;
+    public static FEvalTrueParameter ASTNode.fEvalTrueParameter() {
+        return FEvalTrueParameter.instance;
     }
     
     public static FStructParameter ASTNode.fStructParameter() {
         return FStructParameter.instance;
+    }
+    
+    public static FTestParameter ASTNode.fTestParameter() {
+        return FTestParameter.instance;
     }
     
     public static FConstant ASTNode.fConstant() {
