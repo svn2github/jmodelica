@@ -19736,7 +19736,7 @@ REQUIRE_OPTIMICA_COMPILER=True
 
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/SuperLU/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
 
 
 cat >confcache <<\_ACEOF
@@ -20981,6 +20981,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "ThirdParty/Blas/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Blas/Makefile" ;;
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
+    "ThirdParty/SuperLU/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/SuperLU/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/Minpack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minpack/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
