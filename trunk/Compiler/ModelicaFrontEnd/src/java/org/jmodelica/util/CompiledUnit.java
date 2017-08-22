@@ -16,6 +16,7 @@
 package org.jmodelica.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -35,7 +36,7 @@ public class CompiledUnit implements LoggingUnit {
      */
     private static final long serialVersionUID = 2L;
 
-    private Iterator<Problem> warnings = Collections.<Problem> emptyIterator();
+    private Collection<Problem> warnings = Collections.<Problem> emptyList();
     private final File fmu;
     private final int numberOfComponents;
 
@@ -59,7 +60,7 @@ public class CompiledUnit implements LoggingUnit {
      */
     public CompiledUnit(File fmu, Collection<Problem> warnings, int numberOfComponents) {
         this.fmu = fmu;
-        this.warnings = warnings.iterator();
+        this.warnings = new ArrayList<Problem>(warnings);
         this.numberOfComponents = numberOfComponents;
     }
 
@@ -92,7 +93,7 @@ public class CompiledUnit implements LoggingUnit {
             @SuppressWarnings("synthetic-access")
             @Override
             public Iterator<Problem> iterator() {
-                return warnings;
+                return warnings.iterator();
             }
         };
     }
