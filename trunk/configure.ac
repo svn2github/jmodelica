@@ -451,7 +451,6 @@ AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
- ThirdParty/SuperLU/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile
