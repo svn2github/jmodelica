@@ -16,7 +16,7 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python
+SUBDIRS = ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -171,11 +171,11 @@ if WITH_SUPERLU
 	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
 	*-cygwin*) \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
 	*-mingw*) \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" $(NUMPY_NO_MSVCR_ARG) --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" $(NUMPY_NO_MSVCR_ARG) --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
 	*) \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 	esac
 endif
 endif
