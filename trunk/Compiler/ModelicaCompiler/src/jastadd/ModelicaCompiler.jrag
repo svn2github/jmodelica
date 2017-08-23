@@ -1479,7 +1479,7 @@ public class ModelicaCompiler {
         // platform argument
         String platforms = programarguments.get("platform");
         if (platforms != null) {
-            targetPlatforms =  platforms.split(",");
+            setTargetPlatforms(platforms.split(","));
         }
         
         // set options
@@ -1934,6 +1934,24 @@ public class ModelicaCompiler {
     }
 
 }
+
+    /**
+     * Retrieves the target platforms.
+     * 
+     * @return  the target platforms.
+     */
+    public String[] ModelicaCompiler.getTargetPlatforms() {
+        return targetPlatforms;
+    }
+
+    /**
+     * Sets the target platforms.
+     * 
+     * @param platforms the platforms to set as compilation targets.
+     */
+    public void ModelicaCompiler.setTargetPlatforms(String... platforms) {
+        this.targetPlatforms = platforms;
+    }
 
     /**
      * Sets the directory new temporary files are created in. 
