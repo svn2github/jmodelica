@@ -212,26 +212,34 @@ public class CompilerInstance {
             args.add("-cp");
             args.add(join(File.pathSeparator, classPath));
         }
-        if (jvmArguments != null)
+        if (jvmArguments != null) {
             args.add(jvmArguments);
+        }
         args.add(compiler.className);
-        if (target != null)
+        if (target != null) {
             args.add("-target=" + target);
-        if (version != null)
+        }
+        if (version != null) {
             args.add("-version=" + version);
-        if (modelicaPath.size() > 0)
+        }
+        if (modelicaPath.size() > 0) {
             args.add("-modelicapath=" + join(File.pathSeparator, modelicaPath));
-        if (log.size() > 0)
+        }
+        if (log.size() > 0) {
             args.add("-log=w|os|stderr," + join(",", log));
-        else
+        } else {
             args.add("-log=w|os|stderr");
-        if (compilerOptions.size() > 0)
+        }
+        if (compilerOptions.size() > 0) {
             args.add("-opt=" + join(",", ":", compilerOptions));
-        if (platform != null)
+        }
+        if (platform != null) {
             args.add("-platform=" + platform);
-        if (outputPath != null)
+        }
+        if (outputPath != null) {
             args.add("-out=\"" + outputPath + "\"");
-        args.add("," + join(",", sourceFiles));
+        }
+        args.add(sourceFiles == null ? "," : join(",", sourceFiles));
         args.add(modelName);
         return args;
     }
