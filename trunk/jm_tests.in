@@ -399,7 +399,7 @@ function read_args() {
             ARG_TYPE=xmlResPath
             ;;
           e)
-            RETURN_WITH_ERROR=1
+            ERROR_ON_TEST_FAIL=1
             ;;
           h)
             echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...] [-x path]"
@@ -432,8 +432,9 @@ function read_args() {
             echo "      contains the results of the tests. Currently doesn't handle spaces"
             echo "      in the supplied path!"
             echo "  -e  When enabled, exit with error code (after running all "
-            echo "      tests) if any test suite return with an error code (won't trigger on "
+            echo "      tests) if any test suite return with an error code or a test fails"
             echo "      regular failures or errors). Default behaviour is exit 0.".
+            echo "      Requires -x".
             echo "  -h  Print this help and exit"
             exit
             ;;
@@ -460,6 +461,13 @@ export JAVA_HOME JMODELICA_HOME IPOPT_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS S
 TIME=$(date +%s)
 
 read_args "$@"
+
+if [[ $ERROR_ON_TEST_FAIL == 1 ]]; then
+    if [[ -z $XML_RES_PATH ]]; then
+        echo "-e needs -x"
+        exit 1
+    fi
+fi
 
 if [ "${LOG}" == 1 ]; then
   echo "Log of jm_tests $(date):" > "${LOGFILE}"
@@ -492,7 +500,11 @@ if [[ "${OUTPUT}" != q ]]; then
 fi
 echo $(date +%s) ${TIME}"-[Total time: ]nd60/n[:]n60%[0n]sxd10>xp" | dc
 
-if [ "${RETURN_WITH_ERROR}" == 1 ]; then
+if [[ "${ERROR_ON_TEST_FAIL}" == 1 ]]; then
+    if [[ $res == 0 ]]; then
+        grep -R testsuite $XML_RES_PATH | sed -n -e "/.*errors=\"[0]*[1-9][0-9]*\".*/ q1" -e "/.*failures=\"[0]*[1-9][0-9]*\".*/ q1"
+        exit $?
+    fi
     exit $res
 else
     exit 0
