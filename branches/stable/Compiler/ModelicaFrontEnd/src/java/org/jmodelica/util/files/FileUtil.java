@@ -13,7 +13,12 @@ import java.util.List;
 /**
  * Utility class for files.
  */
-public class FileUtil {
+public final class FileUtil {
+
+    /**
+     * Hidden default constructor to prevent instantiation.
+     */
+    private FileUtil() {}
 
     /**
      * Retrieves all the files from the specified sources.
@@ -116,6 +121,19 @@ public class FileUtil {
      */
     public static List<String> allFileNames(File... sources) {
         return allFileNames(false, sources);
+    }
+
+    /**
+     * Retrieves all the names of the files from the specified sources.
+     * 
+     * @param sources
+     *            The file sources.
+     * @return
+     *         a list of file names from the specified sources.
+     * @see #allFileNames(boolean, File...)
+     */
+    public static Collection<String> allFileNames(Collection<File> sources) {
+        return allFileNames(sources.toArray(new File[sources.size()]));
     }
 
     /**
@@ -244,6 +262,27 @@ public class FileUtil {
     }
 
     /**
+     * Filters a set of file on their extensions.
+     * 
+     * @param files         the files to filter.
+     * @param extensions    the extensions to filter on.
+     * @return              a collection of files from {@code files} with a file extension present
+     *                      in {@code extensions}.
+     */
+    public static Collection<File> filterOnExtensions(Collection<File> files, String... extensions) {
+        Collection<File> filtered = new ArrayList<File>();
+        for (File file : files) {
+            for (String ext : extensions) {
+                if (file.getName().endsWith(ext)) {
+                    filtered.add(file);
+                    break;
+                }
+            }
+        }
+        return filtered;
+    }
+    
+    /**
      * Quick method for specifying {@link StandardCopyOption#REPLACE_EXISTING}.
      * 
      * @param replace
@@ -256,4 +295,33 @@ public class FileUtil {
     private static StandardCopyOption replace(boolean replace) {
         return replace ? StandardCopyOption.REPLACE_EXISTING : null;
     }
+
+    /**
+     * Creates a list of {@link File} objects from a list of string paths.
+     * 
+     * @param paths the string paths.
+     * @return      a list of {@link File} objects.
+     */
+    public static Collection<File> toFile(String... paths) {
+        java.util.List<File> files = new ArrayList<File>();
+        for (String name : paths) {
+            files.add(new File(name));
+        }
+        return files;
+    }
+    
+    /**
+     * Creates a list of {@link File} objects from a list of string paths.
+     * 
+     * @param paths the string paths.
+     * @return      a list of {@link File} objects.
+     */
+    public static Collection<File> toFile(List<String> paths) {
+        java.util.List<File> files = new ArrayList<File>();
+        for (String name : paths) {
+            files.add(new File(name));
+        }
+        return files;
+    }
+
 }

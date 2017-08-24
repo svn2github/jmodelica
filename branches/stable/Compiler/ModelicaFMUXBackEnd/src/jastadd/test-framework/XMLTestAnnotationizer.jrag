@@ -23,15 +23,17 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class XMLCodeGenTestCase extends CodeGenTestCase {
 
-		/**
-		 * Constructor for XML code generation test.
-		 * 
-		 * Delegates to super class.
-		 */
-		public XMLCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for XML code generation test.
+         * 
+         * Delegates to super class.
+         */
+        public XMLCodeGenTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for XML code generation test.
 		 * 

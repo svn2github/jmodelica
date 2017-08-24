@@ -862,12 +862,12 @@ aspect FlatAPI {
      * variable.
      */
     syn FClass.ZVariability FTypePrefixVariability.zVariability(FVariable var) = null;
-    eq FConstant.zVariability(FVariable var)         = FClass.ZVariability.CONSTANT;
-    eq FFixedParameter.zVariability(FVariable var)   = FClass.ZVariability.REGULAR_PARAMETER;
-    eq FStructParameter.zVariability(FVariable var)  = FClass.ZVariability.STRUCTURAL_PARAMETER;
-    eq FFinalParameter.zVariability(FVariable var)   = FClass.ZVariability.FINAL_PARAMETER;
-    eq FEvalParameter.zVariability(FVariable var)    = FClass.ZVariability.EVAL_PARAMETER;
-    eq FInitialParameter.zVariability(FVariable var) = FClass.ZVariability.INITIAL_PARAMETER;
+    eq FConstant.zVariability(FVariable var)          = FClass.ZVariability.CONSTANT;
+    eq FFixedParameter.zVariability(FVariable var)    = FClass.ZVariability.REGULAR_PARAMETER;
+    eq FStructParameter.zVariability(FVariable var)   = FClass.ZVariability.STRUCTURAL_PARAMETER;
+    eq FFinalParameter.zVariability(FVariable var)    = FClass.ZVariability.FINAL_PARAMETER;
+    eq FEvalTrueParameter.zVariability(FVariable var) = FClass.ZVariability.EVAL_PARAMETER;
+    eq FInitialParameter.zVariability(FVariable var)  = FClass.ZVariability.INITIAL_PARAMETER;
     eq FDiscrete.zVariability(FVariable var) {
         if (var.isInput()) {
             return FClass.ZVariability.INPUT;

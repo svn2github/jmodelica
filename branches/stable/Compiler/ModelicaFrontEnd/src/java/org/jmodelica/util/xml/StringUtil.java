@@ -6,7 +6,16 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public abstract class StringUtil {
+/**
+ * Utility methods for strings.
+ */
+public final class StringUtil {
+    
+    /**
+     * Hidden default constructor to prevent instantiation.
+     */
+    private StringUtil() {}
+
     private static void doWrap(Writer out, String text, String prefix, String partSep, String suffix, char splitAt,
             int width) {
         try {
@@ -58,11 +67,8 @@ public abstract class StringUtil {
      * Trims a string and replaces all whitespace occurrences with singular
      * spaces.
      * 
-     * @param text
-     *            The text to "conform."
-     * @return
-     *         {@code text}, trimmed, with all remaining white spaces replaced
-     *         by singular spaces.
+     * @param text  the text to "conform."
+     * @return      {@code text}, trimmed, with all remaining white spaces replaced by singular spaces.
      */
     public static String conformWhiteSpace(String text) {
         return text.trim().replaceAll("\\s+", " ");

@@ -15,10 +15,22 @@
 */
 package org.jmodelica.util;
 
-public class XMLUtil {
+/**
+ * Utility methods for XML formatting.
+ */
+public final class XMLUtil {
 
+    /**
+     * Hidden default constructor to prevent instantiation.
+     */
     private XMLUtil() {}
 
+    /**
+     * Escapes XML characters in a string.
+     * 
+     * @param message   the string with XML characters to escape.
+     * @return          {@code message} with escaped XML characters.
+     */
     public static String escape(String message) {
         if (message == null)
             return message;
@@ -36,7 +48,7 @@ public class XMLUtil {
             } else if (c == '>') {
                 sb.append("&gt;");
             } else if ((c >= 0x0 && c <= 0x8) || (c >= 0xB && c <= 0xC) || (c >= 0xE && c <= 0x1F)) {
-                // These characters aren't allowed by the XML specification
+                // These characters aren't allowed by the XML specification.
             } else {
                 sb.append(c);
             }
@@ -44,6 +56,13 @@ public class XMLUtil {
         return sb.toString();
     }
 
+    /**
+     * Escapes XML characters in several messages.
+     * 
+     * @param messages  the strings to escape.
+     * @return          {@code messages} with escaped XML characters.
+     * @see             #escape(String)
+     */
     public static String[] escape(String... messages) {
         String[] escaped = new String[messages.length];
         for (int i = 0; i < messages.length; i++)

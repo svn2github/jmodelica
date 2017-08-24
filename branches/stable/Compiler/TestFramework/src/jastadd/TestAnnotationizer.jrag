@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
@@ -49,7 +50,13 @@ aspect TestAnnotationizer {
  */
 abstract public class TestAnnotationizerHelper {
 
-    // TODO: Use more code directly from the test case classes.
+    /*
+     *  TODO:   <ul>
+     *              <li>Use more code directly from the test case classes.</li>
+     *              <li>Add support for MethodTestCase to use arguments=[...].</li>
+     *          </ul>
+     *  
+     */
     
     /**
      * This is the main method for creating the annotation.
@@ -64,13 +71,17 @@ abstract public class TestAnnotationizerHelper {
      * @param libs         list of libraries needed
      * @param write        if <code>true</code>, write the annotation directly in the Modelica file
      */
-    public static void doAnnotation(String filePath, String testType, String modelName, 
-            String description, String[] opts, String data, String checkType, String[] libs, 
-            boolean write) throws Exception {
+    public static void doAnnotation(String filePath, String testType, String modelName, String description,
+            String[] opts, String data, String checkType, String[] libs, boolean write) throws Exception {
+
         try {
             Class cl = getTestCase(testType);
-            Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String[].class, String.class);
-            TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
+            Constructor constructor =
+                    cl.getConstructor(String.class, String.class, String.class, String[].class, String[].class);
+
+            TestAnnotationizerHelper ta =
+                    (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
+
             ta.setCheckType(checkType);
             ta.setModelicaLibraries(libs);
             ta.createAnnotation(write);
@@ -239,33 +250,35 @@ abstract public class TestAnnotationizerHelper {
     protected String className;
     protected String testName;
     protected String description;
-    protected String data;
     protected SourceRoot root;
+    protected Object[] data;
     protected String[] opts;
     protected String[] libs;
     protected OptionRegistry or = null;
     protected ErrorCheckType checkType = null;
 
-	/**
-	 * Standard constructor for test case creators.
-	 * 
-	 * Parses the Modelica file containing the test model and saves the source root.
-	 * 
-	 * All subclasses should have a constructor with the same arguments that calls this constructor.
-	 * 
-	 * @param filePath     the path to the Modelica file containing the test model
-	 * @param className    the name of the test model
-	 * @param description  the text to put in the "description" field of the test annotation
-	 * @param opts         comma-separated list of compiler options to override defaults for
-	 * @param data         any extra data to send to the delegate object
-	 */
-	public TestAnnotationizerHelper(String filePath, String className, String description, String[] opts, String data) throws Exception {
-		this.filePath = filePath;
-		this.className = className;
-		this.description = prepare(description);
-		this.opts = opts;
-		this.data = data;
-	}
+    /**
+     * Standard constructor for test case creators.
+     * 
+     * Parses the Modelica file containing the test model and saves the source root.
+     * 
+     * All subclasses should have a constructor with the same arguments that calls this constructor.
+     * 
+     * @param filePath     the path to the Modelica file containing the test model
+     * @param className    the name of the test model
+     * @param description  the text to put in the "description" field of the test annotation
+     * @param opts         comma-separated list of compiler options to override defaults for
+     * @param data         any extra data to send to the delegate object
+     */
+    public TestAnnotationizerHelper(String filePath, String className, String description,
+            String[] opts, Object[] data) throws Exception {
+
+        this.filePath = filePath;
+        this.className = className;
+        this.description = prepare(description);
+        this.opts = opts;
+        this.data = data;
+    }
 
     /**
      * Test regeneration constructor for test case creators.
@@ -282,7 +295,7 @@ abstract public class TestAnnotationizerHelper {
         this.className = className;
         AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
         this.description = annotationString(a.forPath("description"), false);
-        this.data = annotationString(a.forPath(dataName()), false);
+        this.data = getData(a, dataNames(), false);
         setCheckType(annotationString(a.forPath("checkType"), false));
         String libs = annotationString(a.forPath("modelicaLibraries"), false);
         setModelicaLibraries((libs == null) ? new String[0] : libs.split(","));
@@ -291,6 +304,19 @@ abstract public class TestAnnotationizerHelper {
             if (a2.name().indexOf('_') >= 0) 
                 optStrings.add(a2.name() + '=' + annotationString(a2, true));
         opts = optStrings.toArray(new String[optStrings.size()]);
+    }
+
+    /*
+     * Note that a special case is needed to handle null values among arguments else constant evaluation fails.
+     */
+    private Object[] getData(AnnotationNode node, String[] annotationNames, boolean option) {
+        int length = annotationNames.length;
+        Object[] data = new Object[length];
+
+        for (int i = 0; i < length; ++i) {
+            data[i] = node.forPath(annotationNames[i]).ceval().objectValue();
+        }
+        return data;
     }
 
 	protected static String annotationString(AnnotationNode a, boolean option) {
@@ -304,13 +330,13 @@ abstract public class TestAnnotationizerHelper {
 		}
 		return null;
 	}
-	
-	/**
-	 * Get the name of the extra data parameter in the annotation, if any.
-	 */
-	protected String dataName() {
-		return "";
-	}
+
+    /**
+     * Get the name of the extra data parameters in the annotation, if any.
+     */
+    protected String[] dataNames() {
+        return new String[] {};
+    }
 
     /**
      * Process input and prepare all data needed for creating annotation.
@@ -454,7 +480,16 @@ abstract public class TestAnnotationizerHelper {
 			PrintStream out, String indent, String name, boolean value, boolean last) {
 		doPrintSpecificLine(out, indent, name, Boolean.toString(value), last, false);
 	}
-	
+
+    protected void printSpecificLine(PrintStream out, String indent, String name, Object[] value, boolean last) {
+        doPrintSpecificLine(out, indent, name, arrayString(value), last, false);
+    }
+
+    private <T> String arrayString(T[] array) {
+        String arrayString = Arrays.toString(array);
+        return "{ " + arrayString.substring(1, arrayString.length() - 2) + " }";
+    }
+
 	protected void doPrintSpecificLine(
 			PrintStream out, String indent, String name, String value, boolean last, boolean multi) {
 		out.print(indent + name + "=" + value);
@@ -627,14 +662,15 @@ abstract public class TestAnnotationizerHelper {
 	protected boolean keepProblem(Problem p) {
 		return p.isTestError(false);
 	}
-	
-	/**
-	 * Ensure that user has passed extra data for test case.
-	 */
-	protected void checkData(String data) throws Exception {
-		if (data == null)
-			throw new ModelicaException(getClass().getSimpleName() + " needs extra data.");
-	}
+
+    /**
+     * Ensure that user has passed extra data for test case.
+     */
+    protected void checkData(Object[] data) throws Exception {
+        if (data == null || data.length == 0) {
+            throw new ModelicaException(getClass().getSimpleName() + " needs extra data.");
+        }
+    }
 
 	/**
 	 * Generate and print the part of the annotation that is specific to 
@@ -652,16 +688,18 @@ abstract public class TestAnnotationizerHelper {
 		protected String template;
 		protected String code;
 
-		/**
-		 * Constructor for base code generation test.
-		 * 
-		 * Compiles the model and generates code using the code template passed in 
-		 * <code>data</code> and a code generator created by subclass.
-		 */
-		public CodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for base code generation test.
+         * 
+         * Compiles the model and generates code using the code template passed in 
+         * <code>data</code> and a code generator created by subclass.
+         */
+        public CodeGenTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for base code generation test.
 		 * 
@@ -673,15 +711,15 @@ abstract public class TestAnnotationizerHelper {
 		public CodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
-		
-		protected String dataName() {
-			return "template";
-		}
+
+        protected String[] dataNames() {
+            return new String[] { "template" };
+        }
 
         protected void process() throws Exception {
             super.process();
             checkData(data);
-            template = prepare(data.replaceAll("\\\\n", "\n"));
+            template = prepare(data[0].toString().replaceAll("\\\\n", "\n"));
             FClass fc = compile();
             AbstractGenerator generator = createGenerator(fc);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -716,15 +754,17 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class GenericCodeGenTestCase extends CodeGenTestCase {
 
-		/**
-		 * Constructor for generic code generation test.
-		 * 
-		 * Delegates to super class.
-		 */
-		public GenericCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for generic code generation test.
+         * 
+         * Delegates to super class.
+         */
+        public GenericCodeGenTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for generic code generation test.
 		 * 
@@ -763,15 +803,17 @@ abstract public class TestAnnotationizerHelper {
 		
 		protected FClass fc;
 
-		/**
-		 * Constructor for flattening test.
-		 * 
-		 * Performs the flattening and instantiation steps of compilation.
-		 */
-		public FlatteningTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for flattening test.
+         * 
+         * Performs the flattening and instantiation steps of compilation.
+         */
+        public FlatteningTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for flattening test.
 		 * 
@@ -807,16 +849,18 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class TransformCanonicalTestCase extends FlatteningTestCase {
 
-		/**
-		 * Constructor for transform canonical test.
-		 * 
-		 * Performs the transform canonical step of compilation.
-		 * (Superclass performs the flattening and instantiation steps.)
-		 */
-		public TransformCanonicalTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for transform canonical test.
+         * 
+         * Performs the transform canonical step of compilation.
+         * (Superclass performs the flattening and instantiation steps.)
+         */
+        public TransformCanonicalTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for transform canonical test.
 		 * 
@@ -843,17 +887,19 @@ abstract public class TestAnnotationizerHelper {
 
 		private String message;
 
-		/**
-		 * Constructor for error test case.
-		 * 
-		 * Compiles the model and catches any compiler exceptions thrown. If an 
-		 * exception is caught, an error message is composed, to be included in 
-		 * the annotation.
-		 */
-		public ErrorTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for error test case.
+         * 
+         * Compiles the model and catches any compiler exceptions thrown. If an 
+         * exception is caught, an error message is composed, to be included in 
+         * the annotation.
+         */
+        public ErrorTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for error test.
 		 * 
@@ -908,15 +954,17 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class WarningTestCase extends ErrorTestCase {
 
-		/**
-		 * Constructor for warning test.
-		 * 
-		 * Delegates to super class.
-		 */
-		public WarningTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for warning test.
+         * 
+         * Delegates to super class.
+         */
+        public WarningTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for warning test.
 		 * 
@@ -952,15 +1000,17 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class ComplianceErrorTestCase extends ErrorTestCase {
 
-		/**
-		 * Constructor for compliance error test.
-		 * 
-		 * Delegates to super class.
-		 */
-		public ComplianceErrorTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for compliance error test.
+         * 
+         * Delegates to super class.
+         */
+        public ComplianceErrorTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for compliance test.
 		 * 
@@ -989,18 +1039,21 @@ abstract public class TestAnnotationizerHelper {
      */
     public static abstract class MethodTestCase extends TestAnnotationizerHelper {
 
+        private Object[] arguments;
         private String methodName;
         private String methodResult;
-        
+
         /**
          * Constructor for generic method test case.
          * 
          * Performs any specified processing.
          */
-        public MethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
+        public MethodTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
             super(filePath, className, description, opts, data);
         }
-        
+
         /**
          * Test regeneration constructor for generic method test case.
          * 
@@ -1013,15 +1066,16 @@ abstract public class TestAnnotationizerHelper {
             super(cd, filePath, className);
         }
         
-        protected String dataName() {
-            return "methodName";
+        protected String[] dataNames() {
+            return new String[] { "arguments", "methodName" };
         }
         
         protected void callMethod(Object o) throws Exception {
             checkData(data);
-            methodName = data;
-            Method method = o.getClass().getMethod(methodName);
-            methodResult = method.invoke(o).toString();
+            arguments = (Object[]) data[0];
+            methodName = data[1].toString();
+            Method method = o.getClass().getMethod(methodName, TestCase.unwrapClasses(arguments));
+            methodResult = method.invoke(o, arguments).toString();
         }
         
         /**
@@ -1031,6 +1085,7 @@ abstract public class TestAnnotationizerHelper {
         @Override
         protected void printSpecific(PrintStream out, String indent) throws Exception {
             printSpecificLine(out, indent, "methodName", methodName, false);
+            printSpecificLine(out, indent, "arguments", arguments, false);
             printSpecificLine(out, indent, "methodResult", prepare(methodResult), true);
         }
         
@@ -1054,10 +1109,12 @@ abstract public class TestAnnotationizerHelper {
          * 
          * Compiles the model.
          */
-        public FClassMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
+        public FClassMethodTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
             super(filePath, className, description, opts, data);
         }
-        
+
         /**
          * Test regeneration constructor for FClass method test case.
          * 
@@ -1088,10 +1145,12 @@ abstract public class TestAnnotationizerHelper {
          * 
          * Compiles the model.
          */
-        public InstClassMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
+        public InstClassMethodTestCase(String filePath, String className, String description, String[] opts,
+                Object[] data) throws Exception {
+
             super(filePath, className, description, opts, data);
         }
-        
+
         /**
          * Test regeneration constructor for InstClassDecl method test case.
          * 
@@ -1116,15 +1175,16 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class SourceMethodTestCase extends MethodTestCase {
 
+        /**
+         * Constructor for SourceRoot method test case.
+         *
+         * Compiles the model.
+         */
+        public SourceMethodTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
 
-		/**
-		 * Constructor for SourceRoot method test case.
-		 *
-		 * Compiles the model.
-		 */
-		public SourceMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
+            super(filePath, className, description, opts, data);
+        }
 
 		/**
 		 * Test regeneration constructor for SourceRoot method test case.
@@ -1153,16 +1213,18 @@ abstract public class TestAnnotationizerHelper {
 		private String values;
 		private String variables;
 		protected FClass fc;
-		
-		/**
-		 * Constructor for parameter value evaluation test case.
-		 * 
-		 * Compiles the model.
-		 */
-		public EvalTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+
+        /**
+         * Constructor for parameter value evaluation test case.
+         * 
+         * Compiles the model.
+         */
+        public EvalTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for parameter value evaluation test case.
 		 * 
@@ -1174,19 +1236,19 @@ abstract public class TestAnnotationizerHelper {
 		public EvalTestCase(ClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
-		
-		protected String dataName() {
-			return "variables";
-		}
-		
-		protected void process() throws Exception {
-			super.process();
-			fc = compile();
-			checkData(data);
-			variables = makeVariableList(data);
-			values = prepare(evaluateVars(variables.split("[\\n\\r]+")));
-		}
-		
+
+        protected String[] dataNames() {
+            return new String[]{ "variables" };
+        }
+
+        protected void process() throws Exception {
+            super.process();
+            fc = compile();
+            checkData(data);
+            variables = makeVariableList(data[0].toString());
+            values = prepare(evaluateVars(variables.split("[\\n\\r]+")));
+        }
+
 		/**
 		 * Create newline-separated list of scalarized variables from comma-separated list of 
 		 * possibly non-scalarized variables.
@@ -1257,10 +1319,12 @@ abstract public class TestAnnotationizerHelper {
 		
 		private double time;
 
-		public TimeTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        public TimeTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for compilation time test case.
 		 * 
@@ -1272,14 +1336,14 @@ abstract public class TestAnnotationizerHelper {
 		public TimeTestCase(ClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
-		
-		protected String dataName() {
-			return "maxTime";
-		}
-		
+
+        protected String[] dataNames() {
+            return new String[] { "maxTime" };
+        }
+
 		protected void process() throws Exception {
 			super.process();
-			time = Double.parseDouble(data);
+			time = Double.parseDouble(data[0].toString());
 		}
 		
 		/**
@@ -1299,6 +1363,74 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 	}
+
+    /**
+     * A class for testing options.
+     */
+    public static class OptionTestCase extends TestAnnotationizerHelper {
+        private Object[] defaults;
+        private String[] names;
+
+        /**
+         * Creates a test case for options.
+         * <p>
+         * Note that this test case accepts a single default value argument for several options. I.e., for N names,
+         * default values can be set to either "defaults=value" or "defaults={ value1, value2, ..., valueN}".
+         * Using "defaults={ value }" also works.
+         * 
+         * @param filePath     the path to the Modelica file containing the test model.
+         * @param className    the name of the test model.
+         * @param description  the text to put in the "description" field of the test annotation.
+         * @param opts         comma-separated list of compiler options to override defaults for.
+         * @param data         any extra data to send to the delegate object.
+         */
+        public OptionTestCase(String filePath, String className,
+                String description, String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
+        /**
+         * Constructor for test regeneration.
+         * 
+         * @param filePath     the path to the Modelica file containing the test model
+         * @param className    the name of the test model
+         */
+        public OptionTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+            super(cd, filePath, className);
+        }
+
+        @Override
+        public String[] dataNames() {
+            return new String[] { "names", "defaults" };
+        }
+
+        @Override
+        protected void printSpecific(PrintStream out, String indent) throws Exception {
+            printSpecificLine(out, indent, "names",  names, false);
+            printSpecificLine(out, indent, "defaults", defaults, true);
+        }
+
+        @Override
+        protected void process() throws Exception {
+            super.process();
+            defaults = (Object[]) data[0];
+            Object[] opts = (Object[]) data;
+
+            int length = opts.length;
+            names = new String[length];
+            for (int i = 0; i < length; ++i) {
+                names[i] = opts[i].toString();
+            }
+        }
+
+        /**
+         * Prints a usage message for this test case type.
+         */
+        public static void usage(String cl, String extra) {
+            TestAnnotationizerHelper.usage(cl, "names");
+        }
+    }
 
 }
 

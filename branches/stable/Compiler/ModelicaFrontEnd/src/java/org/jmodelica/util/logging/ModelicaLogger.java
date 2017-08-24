@@ -25,13 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jmodelica.util.streams.NullStream;
 import org.jmodelica.api.problemHandling.Problem;
 import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.logging.units.StringLoggingUnit;
 import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
+import org.jmodelica.util.streams.NullStream;
 
 /**
  * \brief Base class for logging messages from the tree.
@@ -165,9 +165,30 @@ public abstract class ModelicaLogger {
 
     /**
      * Log the compiled unit, it will be written on level info.
+     * 
+     * @param unitFile              the file object pointing to the compiled FMU.
+     * @param numberOfComponents    the number of components in the FMU.
+     * @return                      an object representing the successful compilation.
+     * @deprecated                  use {@link #logCompiledUnit(File, Collection, int)} instead.
      */
-    public void logCompiledUnit(File unitFile, int numberOfComponents) {
-        logCompiledUnit(new CompiledUnit(unitFile, numberOfComponents));
+    public CompiledUnit logCompiledUnit(File unitFile, int numberOfComponents) {
+        CompiledUnit unit = new CompiledUnit(unitFile, numberOfComponents);
+        logCompiledUnit(unit);
+        return unit;
+    }
+
+    /**
+     * Log the compiled unit, it will be written on level info.
+     * 
+     * @param unitFile              the file object pointing to the compiled FMU.
+     * @param warnings              the warnings generated during compilation.
+     * @param numberOfComponents    the number of components in the FMU.
+     * @return                      an object representing the successful compilation.
+     */
+    public CompiledUnit logCompiledUnit(File unitFile, Collection<Problem> warnings, int numberOfComponents) {
+        CompiledUnit unit = new CompiledUnit(unitFile, warnings, numberOfComponents);
+        logCompiledUnit(unit);
+        return unit;
     }
 
     /**

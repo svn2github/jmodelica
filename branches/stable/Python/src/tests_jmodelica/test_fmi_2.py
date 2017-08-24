@@ -726,13 +726,11 @@ class Test_FMUModelME2:
         
         model.set("one", 2)
         assert model.get("one") == 2
-    
+
     @testattr(windows = True)
     def test_malformed_xml(self):
-        malformed = load_fmu(os.path.join(path_to_fmus_me2, "MalFormed.fmu"))
-        
-        nose.tools.assert_raises(FMUException, malformed.get_states_list)
-    
+        nose.tools.assert_raises(FMUException, load_fmu, os.path.join(path_to_fmus_me2, "MalFormed.fmu"))
+
     @testattr(fmi = True)
     def test_log_file_name(self):
         path, file_name = os.path.split(self.coupled_name)

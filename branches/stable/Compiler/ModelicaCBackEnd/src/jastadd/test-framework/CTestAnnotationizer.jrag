@@ -23,15 +23,17 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	public static class CCodeGenTestCase extends CodeGenTestCase {
 
-		/**
-		 * Constructor for C code generation test.
-		 * 
-		 * Delegates to super class.
-		 */
-		public CCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for C code generation test.
+         * 
+         * Delegates to super class.
+         */
+        public CCodeGenTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for C code generation test.
 		 * 
@@ -65,15 +67,17 @@ abstract public class TestAnnotationizerHelper {
 	
 	public static class CADCodeGenTestCase extends CodeGenTestCase {
 
-		/**
-		 * Constructor for CAD code generation test.
-		 * 
-		 * Delegates to super class.
-		 */
-		public CADCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
+        /**
+         * Constructor for CAD code generation test.
+         * 
+         * Delegates to super class.
+         */
+        public CADCodeGenTestCase(String filePath, String className, String description,
+                String[] opts, Object[] data) throws Exception {
+
+            super(filePath, className, description, opts, data);
+        }
+
 		/**
 		 * Test regeneration constructor for CAD code generation test.
 		 * 

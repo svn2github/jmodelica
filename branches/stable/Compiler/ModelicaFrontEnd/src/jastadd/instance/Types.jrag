@@ -35,6 +35,8 @@ aspect Types {
         t.isArrayPartType() && compareCompositeTypes(t, this, top);
     eq InstRecord.subType(InstNode t, boolean top)             = 
         t.isUnknown() || t.isRecordType()    && compareCompositeTypes(t, this, top);
+    eq InstExternalObject.subType(InstNode t, boolean top)     = 
+        t.isUnknown() || t.isExternalObject() && comparePrimitiveTypes(t, this, top);
     eq InstPrimitive.subType(InstNode t, boolean top)          = 
         t.isPrimitiveType() && comparePrimitiveTypes(t, this, top);
 

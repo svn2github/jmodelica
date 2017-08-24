@@ -2019,7 +2019,7 @@ aspect FlatPrettyPrint {
     eq FFixedParameter.toString()       = "parameter ";
     eq FInitialParameter.toString()     = "initial parameter ";
     eq FIndexParameter.toString()       = "index parameter";
-    eq FEvalParameter.toString()        = "eval parameter ";
+    eq FEvalTrueParameter.toString()    = "eval parameter ";
     eq FFinalParameter.toString()       = "final parameter ";
     eq FStructParameter.toString()      = "structural parameter ";
     eq FDiscrete.toString()             = "discrete ";
@@ -2030,13 +2030,13 @@ aspect FlatPrettyPrint {
         getVariability().toString() + " /* " + getName() + " */ ";
 
     syn String FTypePrefixVariability.toStringLiteral();
-    eq FParameter.toStringLiteral()       = "parameter";
-    eq FEvalParameter.toStringLiteral()   = "eval parameter";
-    eq FFinalParameter.toStringLiteral()  = "final parameter";
-    eq FStructParameter.toStringLiteral() = "structural parameter";
-    eq FDiscrete.toStringLiteral()        = "discrete-time";
-    eq FConstant.toStringLiteral()        = "constant";
-    eq FContinuous.toStringLiteral()      = "continuous-time";
+    eq FParameter.toStringLiteral()         = "parameter";
+    eq FEvalTrueParameter.toStringLiteral() = "eval parameter";
+    eq FFinalParameter.toStringLiteral()    = "final parameter";
+    eq FStructParameter.toStringLiteral()   = "structural parameter";
+    eq FDiscrete.toStringLiteral()          = "discrete-time";
+    eq FConstant.toStringLiteral()          = "constant";
+    eq FContinuous.toStringLiteral()        = "continuous-time";
     eq FCompositeVariability.toStringLiteral() = combine().toStringLiteral();
 
     syn String Restriction.toString();
@@ -2276,4 +2276,23 @@ aspect AnnotationPrettyPrinting {
         return string.toString();
     }
     eq InstAbstractShortClassDecl.printClassAnnotations(String prefix) = getShortClassDecl().srcAnnotation().toString();
+
+    /**
+     * Returns a string listing the annotations for components in this class.
+     *
+     * @param prefix
+     *          The string to prefix the annotation string with.
+     */
+    syn String InstClassDecl.printComponentAnnotations() = "";
+    
+    eq InstFullClassDecl.printComponentAnnotations() {
+        StringBuilder sb = new StringBuilder();
+        for (InstComponentDecl decl : getInstComponentDecls()) {
+            if (sb.length() > 0) {
+                sb.append('\n');
+            }
+            sb.append(decl.srcAnnotation().toString());
+        }
+        return sb.toString();
+    }
 }

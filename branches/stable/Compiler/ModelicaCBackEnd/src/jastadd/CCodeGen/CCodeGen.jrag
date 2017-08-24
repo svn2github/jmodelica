@@ -780,11 +780,11 @@ aspect CCodeGen {
     syn VariabilityCausality_C FTypePrefixVariability.variabilityCausality_C(FVariable fv) {
         throw new UnsupportedOperationException();
     }
-    eq FConstant.variabilityCausality_C(FVariable fv)        = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
-    eq FParameter.variabilityCausality_C(FVariable fv)       = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
-    eq FStructParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
-    eq FFinalParameter.variabilityCausality_C(FVariable fv)  = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
-    eq FEvalParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
+    eq FConstant.variabilityCausality_C(FVariable fv)          = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
+    eq FParameter.variabilityCausality_C(FVariable fv)         = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
+    eq FStructParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
+    eq FFinalParameter.variabilityCausality_C(FVariable fv)    = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
+    eq FEvalTrueParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
     
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
@@ -2861,7 +2861,7 @@ aspect CCodeGen {
             if (sideEffect) {
                 p.print(this, str, indent);
             } else {
-                prettyPrintNoSideEffect_C(str, indent, forVariables);
+                prettyPrintNoSideEffect_C(p, str, indent, forVariables);
             }
         }
     }
@@ -3012,7 +3012,7 @@ aspect CCodeGen {
     public void FAlgorithm.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         if (visited == null || visited.add(this)) {
             p.printPreSteps(this, str, indent);
-            prettyPrintNoSideEffect_C(str, indent, null);
+            prettyPrintNoSideEffect_C(p, str, indent, null);
             p.printPostSteps(this, str, indent);
         }
         Enumerator indexCounter = new Enumerator();
@@ -3026,7 +3026,7 @@ aspect CCodeGen {
      * Prints the algorithm, statements which restore LHS variables,
      * and statements which put the new values in temporaries.
      */
-    public void FAlgorithm.prettyPrintNoSideEffect_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
+    public void FAlgorithm.prettyPrintNoSideEffect_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables) {
         String switchTemp = this.tempName_C();
         Collection<FIdUseExp> lhs = uniqueFIdUseExpsInLHS();
         for (FIdUseExp use : lhs) {
@@ -3034,7 +3034,7 @@ aspect CCodeGen {
                 FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
             }
         }
-        prettyPrint_C(str, indent);
+        p.print(this, str, indent);
         for (FIdUseExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
                 FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
