@@ -164,7 +164,7 @@ endif
 build-python-packages:
 
 if WITH_SUNDIALS
-if WITH_SUPERLU
+if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
@@ -180,7 +180,7 @@ if WITH_SUPERLU
 endif
 endif
 if WITH_SUNDIALS
-if !WITH_SUPERLU
+if !WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
