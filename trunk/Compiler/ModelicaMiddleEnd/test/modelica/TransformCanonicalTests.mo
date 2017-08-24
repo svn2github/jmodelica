@@ -2029,7 +2029,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1701, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 1701, column 16, in file '...', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 ")})));
 end AttributeBindingExpTest1_Err;
@@ -2049,7 +2049,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1721, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 1721, column 16, in file '...', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2
 ")})));
 end AttributeBindingExpTest2_Err;
@@ -2068,7 +2068,7 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1740, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 1740, column 16, in file '...', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2 + p
 
 Error at line 1740, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -2120,14 +2120,32 @@ model AttributeBindingExpTest5_Err
             errorMessage="
 2 errors found:
 
-Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo',
+Error at line 1790, column 18, in file '...', START_VALUE_NOT_PARAMETER,
 In component a:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 
-Error at line 1794, column 15, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 1794, column 15, in file '...', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p2
 ")})));
 end AttributeBindingExpTest5_Err;
+
+model AttributeBindingExpTest6_Warn
+
+    parameter Real p(fixed=false);
+    Real x(start=p) = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="AttributeBindingExpTest6_Warn",
+            description="Test errors in binding expressions..",
+            errorMessage="
+1 warnings found:
+
+Compliance warning at line 0, column 0, in file '...', START_VALUE_INITIAL_PARAMETER:
+  Variability of binding expression for attribute 'start' is  initial parameter variability: p
+
+")})));
+end AttributeBindingExpTest6_Warn;
 
 model IncidenceTest1
 

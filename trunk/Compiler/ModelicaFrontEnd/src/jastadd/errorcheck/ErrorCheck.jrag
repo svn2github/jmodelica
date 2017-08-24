@@ -994,7 +994,16 @@ aspect InstanceErrorCheck {
     }
     
 	public void InstAssignable.checkAttributes(ErrorCheckType checkType) {}
-	
+
+    public static final SimpleProblemProducer ASTNode.START_VALUE_NOT_PARAMETER =
+            new SimpleErrorProducer("START_VALUE_NOT_PARAMETER", ProblemKind.SEMANTIC,
+                    "Variability of binding expression for attribute '%s' is not less"
+                    + " than or equal to parameter variability: %s");
+    public static final SimpleProblemProducer ASTNode.START_VALUE_INITIAL_PARAMETER =
+            new SimpleWarningProducer("START_VALUE_INITIAL_PARAMETER", ProblemKind.COMPLIANCE,
+                    "Variability of binding expression for attribute '%s' is "
+                    + " initial parameter variability: %s");
+
 	public void InstPrimitive.checkAttributes(ErrorCheckType checkType) {
 		// Check if the expressions of the attributes can be evaluated
 		// Note that this check has to be done locally in the
@@ -1007,11 +1016,13 @@ aspect InstanceErrorCheck {
 				InstComponentModification icm = (InstComponentModification)im;
 				if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
-					if (val_mod.variability().lessOrEqual(fConstant())) 
-						val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
-					else if (!val_mod.variability().parameterOrLess()) 
-						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
-								icm.getName().name(), val_mod);
+                    if (val_mod.variability().lessOrEqual(fConstant())) {
+                        val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
+                    } else if (!val_mod.variability().parameterOrLess()) {
+                        ASTNode.START_VALUE_NOT_PARAMETER.invoke(val_mod, icm.getName().name(), val_mod);
+                    } else if (!val_mod.variability().initialParameterVariability()) {
+                        ASTNode.START_VALUE_INITIAL_PARAMETER.invoke(val_mod, icm.getName().name(), val_mod);
+                    }
 					if (val_mod.isCircular() && !checkType.allowConstantNoValue())
 						error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", 
 								icm.getName().name(), val_mod);

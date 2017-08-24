@@ -1133,7 +1133,7 @@ model RecordBinding7
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 0, column 0, in file '...', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: y
 ")})));
 end RecordBinding7;
