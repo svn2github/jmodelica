@@ -1,4 +1,4 @@
-================= Unreleased ==================
+================= Stable-2017-08-24 ==================
 ; Changed ; Minor ; Compiler ; #5214
 The temporary directory is always deleted, regardless of whether compilation fails or succeeds.
 
