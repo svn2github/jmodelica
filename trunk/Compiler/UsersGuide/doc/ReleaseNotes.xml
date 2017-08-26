@@ -30,10 +30,8 @@
     <section>
       <title>Compiler</title>
 
-      <section>
-        <title>Compliance</title>
-        <section xml:id="MSL20">
-        <title>Modelica Standard Library (MSL)</title>
+      <section><title>Compliance</title>
+        <section xml:id="MSL20"><title>Modelica Standard Library (MSL)</title>
         <para>For this release, the Modelica Standard Library (MSL) version
         3.2.2 build 3 with the following patches applied is used:
         <itemizedlist>
@@ -89,8 +87,7 @@
     especially with regards to event handling.</para>
     </section>
 
-    <section>
-      <title>A novel co-simulation algorithm</title>
+    <section><title>A novel co-simulation algorithm</title>
 
       <para>A novel co-simulation master algorithm is now available in the
       Python package PyFMI. The master algorithm supports FMUs 2.0 for
@@ -104,7 +101,7 @@
     </section>
     
   </section>
-
+</section>
   <section>
     <title>Release notes for JModelica.org version 1.17</title>
 
