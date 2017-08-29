@@ -1033,14 +1033,14 @@ aspect CCodeGen {
         public void reset(String name, FExp src, Size s, boolean external, String indent) {
             this.src = src;
             levels = new Stack<Level>();
-            levels.push(new Level(name, indent, !s.variability().knownParameterOrLess() || external));
+            levels.push(new Level(name, indent, !s.variability().knownParameterOrLess() || external, src));
             this.external = external;
         }
         
         public void resetUnknown(String name, FType type, String indent) {
             this.src = null;
             levels = new Stack<Level>();
-            levels.push(new Level(name, indent, type.isArray() || type.isExternalObject()));
+            levels.push(new Level(name, indent, type.isArray() || type.isExternalObject(), null));
             this.external = false;
         }
         
@@ -1054,19 +1054,21 @@ aspect CCodeGen {
             String name;
             String indent;
             boolean dynamic;
-            public Level(String name, String indent, boolean dynamic) {
+            FExp src;
+            public Level(String name, String indent, boolean dynamic, FExp src) {
                 this.name    = name;
                 this.indent  = indent;
                 this.dynamic = dynamic;
+                this.src = src;
             }
         }
         
-        protected void pushLevel(String name, boolean indent, Size s) {
-            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), !s.variability().knownParameterOrLess() || dynamic()));
+        protected void pushLevel(String name, boolean indent, Size s, FExp src) {
+            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), !s.variability().knownParameterOrLess() || dynamic(), src));
         }
         
         protected void pushLevelExt(String name, boolean indent, Size s) {
-            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), s.ndims() > 0));
+            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), s.ndims() > 0, null));
         }
         
         protected void popLevel() {
@@ -1094,6 +1096,22 @@ aspect CCodeGen {
             printComposite(type);
         }
         
+        FExp levelSrc(Index i) {
+            FExp exp = levels.peek().src;
+            if (exp != null && exp instanceof FArray && exp.type().isRecord()) {
+                return exp.fArrayCell(i, 0);
+            }
+            return null;
+        }
+        
+        FExp levelSrc(String name) {
+            FExp exp = levels.peek().src;
+            if (exp != null && exp instanceof FRecordConstructor) {
+                return exp.component(name);
+            }
+            return null;
+        }
+        
         public void printComposite(FType type) {
             print(type);
             if (type.isArray()) {
@@ -1101,7 +1119,7 @@ aspect CCodeGen {
                     printDynArray(type);
                 } else {
                     for (Index i : type.indices()) {
-                        pushLevel(type.arrayAccess(type.ndims(), name(), i.toUnclosedString()), false, Size.SCALAR);
+                        pushLevel(type.arrayAccess(type.ndims(), name(), i.toUnclosedString()), false, Size.SCALAR, levelSrc(i));
                         printComps(type);
                         popLevel();
                     }
@@ -1123,8 +1141,13 @@ aspect CCodeGen {
                     String compName = name() + "->" + comp.getName();
                     boolean useTempName = !dynamic() && comp.getFType().isComposite();
                     String tempName = useTempName ? acquireTemp(compName) : compName;
-                    pushLevel(tempName, false, comp.getFType().size());
-                    comp.getFType().print(this);
+                    FExp compExp = levelSrc(comp.getName());
+                    pushLevel(tempName, false, comp.getFType().size(), compExp);
+                    if (compExp == null || compExp.type().isNoType()) {
+                        comp.getFType().print(this);
+                    } else {
+                        compExp.type().print(this);
+                    }
                     popLevel();
                     if (useTempName)
                         tempWriteBack(compName, tempName);
@@ -1239,14 +1262,14 @@ aspect CCodeGen {
             String ind    = acquireTemp(name());
             String maxind = ind + "_max";
             print = true;
-            pushLevel(ind, false, Size.SCALAR);
+            pushLevel(ind, false, Size.SCALAR, null);
             type.fRealScalarType().print(this);
             popLevel();
-            pushLevel(maxind, false, Size.SCALAR);
+            pushLevel(maxind, false, Size.SCALAR, null);
             type.fRealScalarType().print(this);
             popLevel();
             print = type.isExternalObject();
-            pushLevel(type.arrayAccess(1, name(), ind), false, new MutableSize(1));
+            pushLevel(type.arrayAccess(1, name(), ind), false, new MutableSize(1), null);
             printComps(type);
             popLevel();
             print = true;
@@ -1284,7 +1307,7 @@ aspect CCodeGen {
                 str.println(" + 1;");
             }
             str.formatln("%sfor (%s = 1; %s < %s; %s++) {", indent(), ind, ind, maxind, ind);
-            pushLevel(type.arrayAccess(1, name(), ind), true, new MutableSize(1));
+            pushLevel(type.arrayAccess(1, name(), ind), true, new MutableSize(1), null);
             printComps(type);
             popLevel();
             str.println(indent() + "}");
