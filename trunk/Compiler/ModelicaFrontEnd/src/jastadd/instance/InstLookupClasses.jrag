@@ -163,6 +163,7 @@ aspect InstLookupClasses {
     eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
     eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
     eq InstExtends.getInstClassDecl().lookupRedeclareExtendsInstClass(String name)         = lookupTopRedeclareExtendsInstClass(name);
+    eq InstExtends.getElementInstModification().lookupRedeclareExtendsInstClass(String name) = lookupTopRedeclareExtendsInstClass(name);
     eq InstExtends.getInstExtends().lookupRedeclareExtendsInstClass(String name)           = myInstClass().lookupRedeclareExtendsInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupRedeclareExtendsInstClass(String name) = myInstClassDecl().genericLookupInstClass(name);
     eq InstNode.getRedeclaredInstClassDecl().lookupRedeclareExtendsInstClass(String name)  = lookupNextRedeclareExtendsInstClass(name);

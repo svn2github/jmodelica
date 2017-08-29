@@ -6452,7 +6452,7 @@ model CRecordDecl21
     type T = Real(min=1);
 
     record B
-        Real x = time+1;
+        replaceable Real x = time+1;
     end B;
     
     function f

@@ -2490,13 +2490,13 @@ class RedeclareTest22 "Test of merging of modifications in parametrized classes"
    model F
      parameter Real pF = 4;
      replaceable model myB2 = B(x=6,y=pF);
-     E e(redeclare model myB = myB2);
+     E e(redeclare replaceable model myB = myB2);
    end F;
  
    model G
    	 parameter Real pG = 6;
      replaceable model myC = C(y=7,z=pG);
-     F f(e(redeclare model myB = myC));
+     F f(e(redeclare replaceable model myB = myC));
    end G;
     
    parameter Real p0 = 5; 
@@ -2658,13 +2658,13 @@ class RedeclareTest24 "Test of merging of modifications in parametrized classes"
    model F
      parameter Real pF = 4;
      replaceable model myB2 = B(x=6,y=pF);
-     E e(redeclare model myB = myB2(y=8));
+     E e(redeclare replaceable model myB = myB2(y=8));
    end F;
  
    model G
    	 parameter Real pG = 6;
      replaceable model myC = C(y=7,z=pG);
-     F f(e(redeclare model myB = myC(z=9)));
+     F f(e(redeclare replaceable model myB = myC(z=9)));
    end G;
     
    parameter Real p0 = 5; 
@@ -3741,7 +3741,7 @@ model RedeclareTest52
 
     model M
         parameter Integer n;
-        R[:] r;
+        replaceable R[:] r;
     end M;
 
     parameter Integer k = 0;
@@ -7380,7 +7380,7 @@ model RedeclareInRecord6
     type T = Real(min=1);
 
     record B
-        Real x = time+1;
+        replaceable Real x = time+1;
     end B;
     
     B b(redeclare T x = time + 2);
@@ -7407,7 +7407,7 @@ model RedeclareInRecord7
     type T = Real(min=1);
 
     record B
-        Real x = time+1;
+        replaceable Real x = time+1;
     end B;
     
     B[2] b(redeclare T x = time + 2);
@@ -7508,13 +7508,13 @@ model FinalRedeclare1
     F f;
 
     annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
+        ErrorTestCase(
             name="FinalRedeclare1",
             description="Check that final redeclares are enforced for modification component redeclares",
             errorMessage="
-1 warnings found:
+1 errors found:
 
-Warning at line 7422, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
 In component f:
   In the declaration 'redeclare C a', a can't be redeclared since it has already been redeclared without 'replaceable'
 ")})));
@@ -7550,20 +7550,18 @@ model FinalRedeclare2
     F f;
 
     annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
+        ErrorTestCase(
             name="FinalRedeclare2",
             description="Check that final redeclares are enforced for element component redeclares",
             errorMessage="
-1 warnings found:
+1 errors found:
 
-Warning at line 7464, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
   In the declaration 'redeclare C a', a can't be redeclared since it has already been redeclared without 'replaceable'
 ")})));
 end FinalRedeclare2;
 
 
-// TODO: Does not generate an error - seem like redeclared classes aren't error checked at all.
-//       Add this test once #5088 is fixed.
 model FinalRedeclare3
     model A
     end A;
@@ -7590,7 +7588,321 @@ model FinalRedeclare3
     end F;
     
     F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FinalRedeclare3",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
+In component f:
+  In the declaration 'redeclare model G = C', G can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
 end FinalRedeclare3;
+
+
+model FinalRedeclare4
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model C
+        parameter Real c = 2;
+    end C;
+    
+    model D
+        replaceable model G = A;
+        G g;
+    end D;
+    
+    model E
+        extends D;
+        redeclare model G = B;
+    end E;
+    
+    model F
+        extends E;
+        redeclare model G = C;
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FinalRedeclare4",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
+  In the declaration 'redeclare model G = C', G can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
+end FinalRedeclare4;
+
+
+model FinalRedeclare5
+    model A
+        parameter Real a = 0;
+    end A;
+    
+    model B
+        extends A;
+        parameter Real b = 1;
+    end B;
+    
+    model C
+        extends A;
+        parameter Real c = 2;
+    end C;
+    
+    model D
+        replaceable model G = A(a = 3);
+        G g;
+    end D;
+    
+    model E
+        extends D(redeclare model G = B(b = 4));
+    end E;
+    
+    model F
+        extends E(redeclare model G = C(c = 5));
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FinalRedeclare5",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
+In component f:
+  In the declaration 'redeclare model G = C(c = 5)', G can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
+end FinalRedeclare5;
+
+
+model FinalRedeclare6
+    model A
+        parameter Real a = 0;
+    end A;
+    
+    model B
+        extends A;
+        parameter Real b = 1;
+    end B;
+    
+    model C
+        extends A;
+        parameter Real c = 2;
+    end C;
+    
+    model D
+        replaceable model G = A(a = 3);
+        G g;
+    end D;
+    
+    model E
+        extends D;
+        redeclare model G = B(b = 4);
+    end E;
+    
+    model F
+        extends E;
+        redeclare model G = C(c = 5);
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FinalRedeclare6",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
+  In the declaration 'redeclare model G = C(c = 5)', G can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
+end FinalRedeclare6;
+
+
+model FinalRedeclare7
+    model A
+        replaceable model B
+        end B;
+        
+        B b;
+    end A;
+    
+    model C
+        extends A;
+        redeclare model B
+            parameter Real e = 1;
+        end B;
+    end C;
+    
+    model D
+        extends C;
+        redeclare model B
+            parameter Real f = 2;
+        end B;
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FinalRedeclare7",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
+  In the declaration 'redeclare model B
+ parameter Real f = 2;
+end B', B can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
+end FinalRedeclare7;
+
+
+model NotReplacable1
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model D
+        A a;
+    end D;
+    
+    model E
+        extends D(redeclare B a);
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NotReplacable1",
+            description="Check that redeclaring a non-replaceable as an modification component redeclare is not allowed",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', ORIGINAL_NOT_REPLACEABLE,
+In component e:
+  In the declaration 'redeclare B a', a can't be redeclared since the original declaration is not replaceable
+")})));
+end NotReplacable1;
+
+
+model NotReplacable2
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model D
+        A a;
+    end D;
+    
+    model E
+        extends D;
+        redeclare B a;
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NotReplacable2",
+            description="Check that redeclaring a non-replaceable as an element component redeclare is not allowed",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', ORIGINAL_NOT_REPLACEABLE:
+  In the declaration 'redeclare B a', a can't be redeclared since the original declaration is not replaceable
+")})));
+end NotReplacable2;
+
+
+model NotReplacable3
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model D
+        model G = A;
+        G g;
+    end D;
+    
+    model E
+        extends D(replaceable model G = B);
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NotReplacable3",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', ORIGINAL_NOT_REPLACEABLE,
+In component e:
+  In the declaration 'replaceable model G = B', G can't be redeclared since the original declaration is not replaceable
+")})));
+end NotReplacable3;
+
+
+model NotReplacable4
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model D
+        model G = A;
+        G g;
+    end D;
+    
+    model E
+        extends D;
+        redeclare model G = B;
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NotReplacable4",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', ORIGINAL_NOT_REPLACEABLE:
+  In the declaration 'redeclare model G = B', G can't be redeclared since the original declaration is not replaceable
+")})));
+end NotReplacable4;
+
+
 
 model ExternalObjectInConstrainingType1
         model EO

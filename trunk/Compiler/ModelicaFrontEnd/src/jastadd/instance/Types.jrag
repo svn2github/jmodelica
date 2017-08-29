@@ -25,24 +25,41 @@ import org.jmodelica.util.ErrorCheckType;
 
 aspect Types { 
 
-    syn boolean InstNode.subType(InstNode t)                   = subType(t, true);
+    syn boolean InstNode.subType(InstNode t)                   = subType(t.actualType(), true);
+    eq InstSimpleShortClassDecl.subType(InstNode t)            = actualInstClass().subType(t);
 
     // TODO: return true for more cases involving unknown to reduce secondary errors?
     syn boolean InstNode.subType(InstNode t, boolean top)      = false;
     eq InstComposite.subType(InstNode t, boolean top)          = 
-        t.isUnknown() || t.isCompositeType() && compareCompositeTypes(t, this, top);
+        t.isUnknown() || t.isCompositeType()  && compareCompositeTypes(t, this, top);
     eq InstArrayComponentDecl.subType(InstNode t, boolean top) = 
         t.isArrayPartType() && compareCompositeTypes(t, this, top);
     eq InstRecord.subType(InstNode t, boolean top)             = 
-        t.isUnknown() || t.isRecordType()    && compareCompositeTypes(t, this, top);
+        t.isUnknown() || t.isRecordType()     && compareCompositeTypes(t, this, top);
     eq InstExternalObject.subType(InstNode t, boolean top)     = 
         t.isUnknown() || t.isExternalObject() && comparePrimitiveTypes(t, this, top);
     eq InstPrimitive.subType(InstNode t, boolean top)          = 
         t.isPrimitiveType() && comparePrimitiveTypes(t, this, top);
+    eq InstClassDecl.subType(InstNode t, boolean top) {
+        if (t.isUnknown()) {
+            return true;
+        } else if (isExternalObject()) {
+            return t.isExternalObject() && comparePrimitiveTypes(t, this, top);
+        } else if (isPrimitiveType()) {
+            return t.isPrimitiveType()  && comparePrimitiveTypes(t, this, top);
+        } else if (isRecordType()) {
+            return t.isRecordType()     && compareCompositeTypes(t, this, top);
+        } else {
+            return t.isCompositeType()  && compareCompositeTypes(t, this, top);
+        }
+    }
+
+    syn InstNode InstNode.actualType() = this;
+    eq InstClassDecl.actualType()      = actualInstClass();
 
     syn boolean InstNode.isCompositeType() = false;
     eq InstComposite.isCompositeType()     = true;
-    eq InstClassDecl.isCompositeType()     = !isRecord() && !isPrimitive();
+    eq InstClassDecl.isCompositeType()     = !isRecord() && !isOrExtendsPrimitive();
 
     syn boolean InstNode.isArrayPartType()      = false;
     eq InstArrayComponentDecl.isArrayPartType() = true;
@@ -134,6 +151,9 @@ aspect Types {
 
     syn InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
         hasInstConstrainingComponent() ? (InstComponentDecl) getInstConstrainingComponent().getInstNode() : this;
+
+    syn InstClassDecl InstClassDecl.constrainingInstClassDecl() = 
+        hasInstConstrainingClass() ? (InstClassDecl) getInstConstrainingClass().getInstNode() : this;
 
     syn InstNode InstComponentDecl.constrainingTypeOfMyClass() = getClassName().constrainingTypeOfClass();
 
