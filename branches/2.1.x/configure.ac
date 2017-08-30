@@ -16,7 +16,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
+AC_PREREQ(2.62)
 AC_INIT([jmodelica.org], 0.0.0, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
@@ -59,7 +59,7 @@ AC_DEFUN([C_FLAG_CHECK],
   AC_MSG_RESULT([$c_flag_check])
   CFLAGS="$ac_saved_cflags" 
   AC_LANG_POP([C])
-])
+])  
 
 # F77_FLAG_CHECK [compiler flags]
 # check whether compiler supports given Fortran 77 flags or not
@@ -78,7 +78,6 @@ AC_DEFUN([F77_FLAG_CHECK],
   AC_LANG_POP([Fortran 77])
 ])
 
-
 # ALL_FLAG_CHECK [compiler flags]
 # check whether compilers supports given flags or not for all of C, C++ and Fortran 77
 AC_DEFUN([ALL_FLAG_CHECK], 
@@ -92,7 +91,8 @@ AC_DEFUN([ALL_FLAG_CHECK],
 ])
 
 # ============= end of helper macros ===================
-
+AC_OPENMP
+AM_CONDITIONAL([WITH_OPENMP],[test "x$OPENMP_CFLAGS" != x])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -451,6 +451,7 @@ AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
+ ThirdParty/SuperLU/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile

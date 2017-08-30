@@ -114,6 +114,7 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OPENMP_CFLAGS = @OPENMP_CFLAGS@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -206,6 +207,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUNDIALS_DIR = ../../sundials_build
 SUNDIALS_DIR64 = ../../sundials_build64
+@WITH_OPENMP_FALSE@SUPERLU_ADDON = 
+# This is to ensure that the install target of the Sundials
+# make system is run whenever make all is run. This is needed
+# in order to trigger a complete install, local in the build
+# directory, early in the build process.
+@WITH_OPENMP_TRUE@SUPERLU_ADDON = -DSUPERLUMT_THREAD_TYPE=OpenMP -DSUPERLUMT_ENABLE=ON -DSUPERLUMT_LIBRARY_DIR=$(abs_builddir)/../../superlu_build/lib -DSUPERLUMT_INCLUDE_DIR=$(abs_builddir)/../../superlu_build/SRC
 all: all-am
 
 .SUFFIXES:
@@ -218,9 +225,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/Sundials/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Sundials/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ThirdParty/Sundials/Makefile
+	  $(AUTOMAKE) --gnu ThirdParty/Sundials/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -392,27 +399,23 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
-# This is to ensure that the install target of the Sundials
-# make system is run whenever make all is run. This is needed
-# in order to trigger a complete install, local in the build
-# directory, early in the build process.
 
 $(SUNDIALS_DIR):
 	mkdir -p $(SUNDIALS_DIR) && \
 	cd $(SUNDIALS_DIR) && \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cmake -G "MSYS Makefiles" -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/ ;; \
+	cmake -G "MSYS Makefiles" $(SUPERLU_ADDON) -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-m32 -mincoming-stack-boundary=2 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/ ;; \
 	*-apple*) \
-	cmake -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/ ;; \
+	cmake -DEXAMPLES_ENABLE=OFF $(SUPERLU_ADDON) -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/ ;; \
 	*) \
-	cmake -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/ ;; \
+	cmake -DEXAMPLES_ENABLE=OFF $(SUPERLU_ADDON) -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/ ;; \
 	esac
 
 @JM_WIN64_TRUE@$(SUNDIALS_DIR64):
 @JM_WIN64_TRUE@	mkdir -p $(SUNDIALS_DIR64)
 @JM_WIN64_TRUE@	cd $(SUNDIALS_DIR64) && \
-@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/
+@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" $(SUPERLU_ADDON) -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/
 
 @JM_WIN64_TRUE@all-local: $(SUNDIALS_DIR) $(SUNDIALS_DIR64)
 @JM_WIN64_TRUE@	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
