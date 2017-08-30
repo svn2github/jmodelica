@@ -872,5 +872,29 @@ equation
  100*(y^2-0.1) = 0;
 end NonLinear5;
 
+model NonLinear6
+parameter Real x_start(fixed=false);
+Real x(start=x_start) = log(x)*y*z^2+1;
+Real z(start=0);
+Real y;
+initial equation
+x_start=1.0;
+equation
+y = x_start;
+z^2 = x^2;
+end NonLinear6;
+
+model NonLinear7
+parameter Real x_start(fixed=false);
+Real x(start=x_start, nominal=1e50) = log(x)*y*z^2+1;
+Real z(start=0);
+Real y;
+initial equation
+x_start=1.0;
+equation
+y = x_start;
+z = x^2;
+end NonLinear7;
+
 end NonLinear;
 
