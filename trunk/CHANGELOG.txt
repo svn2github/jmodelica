@@ -1,3 +1,8 @@
+================= Unreleased ==================
+; Feature ; Major ; Python ; #5344
+Added support for the sparse solver SuperLU when simulating FMI2 FMUs
+for ME.
+
 ================= Stable-2017-08-24 ==================
 ; Changed ; Minor ; Compiler ; #5214
 The temporary directory is always deleted, regardless of whether compilation fails or succeeds.

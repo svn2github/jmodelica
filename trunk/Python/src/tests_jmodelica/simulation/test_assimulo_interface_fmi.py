@@ -1393,8 +1393,22 @@ class Test_FMI_ODE_2:
         _ex2_name = compile_fmu("NoState.Example2", file_name, version=2.0)
         #_in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
         #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
-        #_cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=2.0)
         #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+    
+    @testattr(stddist = True)
+    def test_cc_with_sparse(self):
+
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["with_jacobian"] = True
+        opts["CVode_options"]["rtol"] = 1e-7
+        opts["CVode_options"]["linear_solver"] = "SPARSE"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
     
     @testattr(stddist = True)
     def test_no_state1(self):
