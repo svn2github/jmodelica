@@ -258,20 +258,8 @@
     }
 
     public void ClassDecl.addToFullClassDecl(FullClassDecl fcd) {
+        // TODO: add redeclared to ElementModifications instead of class list
         fcd.addClassDecl(this);
-    }
-
-    public void ExtendClassDecl.addToFullClassDecl(FullClassDecl fcd) {
-        fcd.addClassDecl(this);
-    }
-
-    public void BaseClassDecl.addToFullClassDecl(FullClassDecl fcd) {
-        if (hasRedeclare()) {
-            ClassAccess ca = new ClassAccess(getName().getID());
-            fcd.addElementModification(new ClassRedeclare(new Opt(), new Opt(), ca, this));
-        } else {
-            fcd.addClassDecl(this);
-        }
     }
 
     public void ImportClause.addToFullClassDecl(FullClassDecl fcd) {

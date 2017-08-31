@@ -403,23 +403,18 @@ end NameTest12_Err;
             errorMessage="
 4 errors found:
 
-Error at line 0, column 0, in file '...':
+Error at line 388, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 0, column 0, in file '...', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare model BB
- extends C(y = 4);
-end BB', the replacing class is not a subtype of the constraining class from the declaration 'replaceable model BB = B(z = 3)'
-
-Error at line 0, column 0, in file '...',
+Error at line 393, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component bb:
   Cannot find class declaration for C
 
-Error at line 0, column 0, in file '...',
+Error at line 393, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component bb:
   Cannot find component declaration for y
 
-Error at line 0, column 0, in file '...':
+Error at line 396, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for y
 ")})));
 end NameTest13_Err;

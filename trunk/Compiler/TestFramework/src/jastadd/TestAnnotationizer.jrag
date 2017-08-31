@@ -77,7 +77,7 @@ abstract public class TestAnnotationizerHelper {
         try {
             Class cl = getTestCase(testType);
             Constructor constructor =
-                    cl.getConstructor(String.class, String.class, String.class, String[].class, Object[].class);
+                    cl.getConstructor(String.class, String.class, String.class, String[].class, String[].class);
 
             TestAnnotationizerHelper ta =
                     (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);

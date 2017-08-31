@@ -163,6 +163,13 @@ aspect Environment {
         	env.addAll(this);
         	return env;
         }
+    	
+    	/**
+    	 * TODO: implement!
+    	 */
+        public Environment peel(String name) {
+        	return new Environment();
+        }
 
         public String toString() {
             StringBuilder str = new StringBuilder();
@@ -2112,15 +2119,10 @@ aspect InstanceAST_API {
     eq Root.getChild().enclosedBy(InstNode node)     = false;
     
     syn InstNode InstNode.commonAncestor(InstNode node) {
-        if (this == node) {
-            return this;
-        }
         HashSet<InstNode> theirs = new HashSet<InstNode>(node.instAncestors());
-        for (InstNode mine : instAncestors()) {
-            if (theirs.contains(mine)) {
+        for (InstNode mine : instAncestors())
+            if (theirs.contains(mine))
                 return mine;
-            }
-        }
         return null;
     }
     
