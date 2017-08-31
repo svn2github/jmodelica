@@ -769,7 +769,7 @@ end NominalStart6;
 
 model DoubleRoot1
     Real x(start=p);
-    parameter Real p=1.5;
+    parameter Real p(start=1.5);
 equation
     0=(x-1.5)^2-1e-7;
 end DoubleRoot1;
@@ -851,9 +851,10 @@ model NonLinear4
     parameter Real opAmp2_v_out = -9.9400010271391164E+00;
     parameter Real k1 = (Vps*2)/3*100/scale; //1000; 
     parameter Real k2 = 100*Vps/scale;
+    parameter Real i_start(start= -9.9760004108556469E-03*scale);
     Real v_in(start=0);
     Real v_out;
-    Real i(nominal=1e3);
+    Real i(nominal=1e3, start=i_start);
     Real r1_v, r2_v;
     
 equation

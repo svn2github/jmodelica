@@ -929,7 +929,7 @@ class Test_NonLinear_Systems:
         def run_model(init):
             model = load_fmu("NonLinear_DoubleRoot1.fmu")
             model.set("_use_Brent_in_1d", True)
-            model.set("x", init)
+            model.set("p", init)
             model.initialize()
             return model.get("x")
         
@@ -963,19 +963,19 @@ class Test_NonLinear_Systems:
         
         scale = model.get("scale")
         i = -9.9760004108556469E-03*scale
-        model.set("i",i)
+        model.set("i_start",i)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
         model.reset()
         
-        model.set("i", i+i*1e-15)
+        model.set("i_start", i+i*1e-15)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
         model.reset()
         
-        model.set("i", i-i*1e-15)
+        model.set("i_start", i-i*1e-15)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
