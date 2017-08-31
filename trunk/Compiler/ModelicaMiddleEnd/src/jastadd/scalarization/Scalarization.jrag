@@ -1424,8 +1424,7 @@ aspect Scalarization {
         isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
     eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
-    eq FIfExp.scalarizeExpanded()              = super.scalarizeExpanded() && !isFunctionCallIO()
-            && !type().isRecord(); /* Workaround for test RecordScalarize52 */
+    eq FIfExp.scalarizeExpanded()              = false;
     
     syn boolean FFunctionCall.isVectorized() = false;
     eq FVectorFunctionCall.isVectorized() = true;
