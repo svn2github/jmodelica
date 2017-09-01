@@ -364,101 +364,6 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
       </section>
     </section>
 
-    <section>
-      <title>Compiling in a separate process</title>
-
-      <para>In JModelica.org, the compilers
-      (<literal>ModelicaCompiler</literal> and
-      <literal>OptimicaCompiler</literal>) are written in Java. When compiling
-      a model from the Python interface, with e.g.
-      <literal>compile_fmu</literal>, the default behavior is to compile the
-      model in a separate process. This means that a specific JRE (Java
-      Runtime Environment) is used for the compilation. For those on a 64 bit
-      Windows this is can be very useful as the default JRE used with JPype is
-      32 bit. Also, in most cases, the JVM (Java Virtual Machine) can be given
-      a larger heap space (especially when using a 64 bit JRE instead of a 32
-      bit) which enables compilation of larger models.</para>
-
-      <para>The environment variable <literal>SEPARATE_PROCESS_JVM</literal>
-      can be set to point at a specific Java installation (JRE or JDK) for the
-      compilation. For Windows users, the environment variable can be found
-      (and set) in the file <filename>setenv.bat</filename> which is located
-      in the JModelica.org installation folder. It can also be set locally in
-      the Python shell. If <literal>SEPARATE_PROCESS_JVM</literal> is not set,
-      <literal>JAVA_HOME</literal> will be used instead. It is also possible
-      to pass arguments to the JVM with the <literal>compile_fmu</literal>
-      argument '<literal>jvm_args</literal>'.</para>
-
-      <para>The following example demonstrates how to set the maximum heap
-      space for the JVM to one gigabyte by setting the argument
-      <literal>jvm_args</literal>:<programlisting># Import the compiler function
-from pymodelica import compile_fmu
-
-# Compile in separate process
-compile_fmu('myPackage.myModel', 'myModelFile.mo', jvm_args='-Xmx1g')</programlisting>Another
-      option is to access the compilers through the Python package
-      <emphasis>JPype</emphasis>. This
-      option is still available and can be enabled by setting the argument
-      <literal>separate_process</literal> to <literal>False</literal> when
-      calling e.g. <literal>compile_fmu</literal>.</para>
-    </section>
-
-    <section xml:id="models_sec_compilation_in_more_detail">
-      <title>Compilation in more detail</title>
-
-      <para>Compiling with <literal>compile_fmu</literal> bundles quite a few
-      steps required for the compilation from model file to FMU. Some of these
-      steps will be briefly described in this section with code examples.</para>
-
-      <section>
-        <title>Creating a compiler</title>
-
-        <para>A compiler (which can be either a Modelica or Optimica compiler)
-        is created by importing the Python classes from the compiler module.
-        This example code will create a Modelica compiler and a target
-        object.<programlisting language="python"># Import the class ModelicaCompiler from the compiler module
-from pymodelica.compiler_wrappers import ModelicaCompiler
-
-# Create a compiler and compiler target object for FMU-ME version 1.0
-mc = ModelicaCompiler()
-target = mc.create_target_object("me", "1.0")
-</programlisting></para>
-      </section>
-
-      <section>
-        <title>Source tree generation and flattening</title>
-
-        <para>In the first step of the compilation, the model is parsed and
-        instantiated. Then the model is transformed into a flat representation
-        which can be used to generate C and XML code. If there are errors in
-        the model, for example syntax or type errors, Python exceptions will
-        be thrown during these steps.</para>
-
-        <para>Note that the default setting for the compiler is to compile an
-        FMU.</para>
-
-        <para><programlisting language="python"># Parse the model and get a reference to the root of the source AST
-source_root = mc.parse_model('myPackage.mo')
-
-# Generate an instance tree representation and get a reference to the model instance
-model_instance = mc.instantiate_model(source_root, 'myPackage.myModel', target)
-
-# Perform flattening and get a flat representation
-flat_rep = mc.flatten_model(model_instance, target)
-</programlisting></para>
-      </section>
-
-      <section>
-        <title>Code generation</title>
-
-        <para>The next step is code generation, which produces C code
-        containing the model equations, and XML files containing model meta
-        data such as variable names and types.<programlisting
-        language="python"># Generate code
-mc.generate_code(flat_rep, target)
-</programlisting></para>
-      </section>
-    </section>
   </section>
 
   <section xml:id="models_sec_loading_models">
@@ -483,22 +388,6 @@ mc.generate_code(flat_rep, target)
     for variable and parameter manipulation are explained in <xref
     linkend="models_sec_variable_and_parameter_manipulation"/>.</para>
 
-    <section>
-      <title>The FMU</title>
-
-      <para>The FMU (Functional Mock-up Unit) is a compressed file which
-      follows the FMI (Functional Mock-up Interface) standard. An FMU is
-      created when compiling a Modelica model with
-      <literal>pymodelica.compile_fmu</literal>.</para>
-
-      <para>There are two types of FMUs, Model Exchange and Co-Simulation. In
-      a Co-Simulation FMU, the integrator for solving the system is contained
-      in the model, while in an Model Exchange FMU, an external integrator is
-      needed to solve the system. JModelica.org supports export and import of
-      FMU-ME and FMU-CS version 1.0 and 2.0. The solvers supported for FMU-CS
-      export are CVode and Explicit Euler.</para>
-    </section>
-
     <section xml:id="models_sec_loading_an_fmu">
       <title>Loading an FMU</title>
 
@@ -516,7 +405,7 @@ myModel = load_fmu('myFMU.fmu')
     </section>
 
     <section xml:id="models_sec_transferring_an_optproblem">
-      <title>Transferring an OptimizationProblem</title>
+      <title>Transferring an Optimization Problem</title>
 
       <para>An optimization problem can be transferred directly from the
       compiler in JModelica.org into the class
@@ -644,165 +533,10 @@ compile_fmu('myModel', 'myModels.mo', compiler_log_level= 'w,i:log.txt')
       contains only the most important information, but it also provides a
       better overview. Opening the file
       <literal>Model_Name_diagnostics/index.html</literal> in a web browser,
-      results in a page similar to the one shown below.</para>
+      results in a page with information on number of variables, parameters
+	  and equations as well as other statistics about the model.</para>
 
-      <programlisting>Modelica.Mechanics.Rotational.Examples.First
-
-Problems:
-0 errors, 0 compliance errors, 0 warnings
-
-Model before transformation
-
-Number of independent constants:                   0(    0 scalars)
-  Number of Real independent constants:            0(    0 scalars)
-  Number of Real independent constants:            0(    0 scalars)
-  Number of Integer independent constants:         0(    0 scalars)
-  Number of Enum independent constants:            0(    0 scalars)
-  Number of Boolean independent constants:         0(    0 scalars)
-  Number of String independent constants:          0(    0 scalars)
-Number of dependent constants:                     0(    0 scalars)
-  Number of Real dependent constants:              0(    0 scalars)
-  Number of Integer dependent constants:           0(    0 scalars)
-  Number of Enum dependent constants:              0(    0 scalars)
-  Number of Boolean dependent constants:           0(    0 scalars)
-  Number of String dependent constants:            0(    0 scalars)
-Number of independent parameters:                 21(   21 scalars)
-  Number of Real independent parameters:          14(   14 scalars)
-  Number of Integer independent parameters:        0(    0 scalars)
-  Number of Enum independent parameters:           4(    4 scalars)
-  Number of Boolean independent parameters:        3(    3 scalars)
-  Number of String independent parameters:         0(    0 scalars)
-Number of dependent parameters:                    6(    6 scalars)
-  Number of Real dependent parameters:             6(    6 scalars)
-  Number of Integer dependent parameters:          0(    0 scalars)
-  Number of Enum dependent parameters:             0(    0 scalars)
-  Number of Boolean dependent parameters:          0(    0 scalars)
-  Number of String dependent parameters:           0(    0 scalars)
-Number of initial parameters:                      0(    0 scalars)
-  Number of Real dependent parameters:             0(    0 scalars)
-  Number of Integer dependent parameters:          0(    0 scalars)
-  Number of Enum dependent parameters:             0(    0 scalars)
-  Number of Boolean dependent parameters:          0(    0 scalars)
-  Number of String dependent parameters:           0(    0 scalars)
-Number of variables:                              54(   54 scalars)
-  Number of Real variables:                       54(   54 scalars)
-  Number of Integer variables:                     0(    0 scalars)
-  Number of Enum variables:                        0(    0 scalars)
-  Number of Boolean variables:                     0(    0 scalars)
-  Number of String variables:                      0(    0 scalars)
-Number of Real differentiated variables:           8(    8 scalars)
-Number of Real derivative variables:               0(    0 scalars)
-Number of Real continous algebraic variables:     46(   46 scalars)
-Number of inputs:                                  0(    0 scalars)
-  Number of Real inputs:                           0(    0 scalars)
-  Number of Integer inputs:                        0(    0 scalars)
-  Number of Enum inputs:                           0(    0 scalars)
-  Number of Boolean inputs:                        0(    0 scalars)
-  Number of String inputs:                         0(    0 scalars)
-Number of discrete variables:                      0(    0 scalars)
-  Number of Real discrete variables:               0(    0 scalars)
-  Number of Integer discrete variables:            0(    0 scalars)
-  Number of Enum discrete variables:               0(    0 scalars)
-  Number of Boolean discrete variables:            0(    0 scalars)
-  Number of String discrete variables:             0(    0 scalars)
-Number of equations:                              52(   52 scalars)
-Number of variables with binding expression:       4(    4 scalars)
-  Number of Real variables with binding exp:       4(    4 scalars)
-  Number of Integer variables binding exp:         0(    0 scalars)
-  Number of Enum variables binding exp:            0(    0 scalars)
-  Number of Boolean variables binding exp:         0(    0 scalars)
-  Number of String variables binding exp:          0(    0 scalars)
-Total number of equations:                        56(   56 scalars)
-Number of initial equations:                       0(    0 scalars)
-Number of event indicators in equations:           0
-Number of event indicators in init equations:      0
-Flattened model
-
-Connection sets
-
-Model after transformation
-
-Number of independent constants:                   1(    1 scalars)
-  Number of Real independent constants:            1(    1 scalars)
-  Number of Real independent constants:            1(    1 scalars)
-  Number of Integer independent constants:         0(    0 scalars)
-  Number of Enum independent constants:            0(    0 scalars)
-  Number of Boolean independent constants:         0(    0 scalars)
-  Number of String independent constants:          0(    0 scalars)
-Number of dependent constants:                     0(    0 scalars)
-  Number of Real dependent constants:              0(    0 scalars)
-  Number of Integer dependent constants:           0(    0 scalars)
-  Number of Enum dependent constants:              0(    0 scalars)
-  Number of Boolean dependent constants:           0(    0 scalars)
-  Number of String dependent constants:            0(    0 scalars)
-Number of independent parameters:                 60(   60 scalars)
-  Number of Real independent parameters:          28(   28 scalars)
-  Number of Integer independent parameters:       13(   13 scalars)
-  Number of Enum independent parameters:           4(    4 scalars)
-  Number of Boolean independent parameters:       15(   15 scalars)
-  Number of String independent parameters:         0(    0 scalars)
-Number of dependent parameters:                   12(   12 scalars)
-  Number of Real dependent parameters:            12(   12 scalars)
-  Number of Integer dependent parameters:          0(    0 scalars)
-  Number of Enum dependent parameters:             0(    0 scalars)
-  Number of Boolean dependent parameters:          0(    0 scalars)
-  Number of String dependent parameters:           0(    0 scalars)
-Number of initial parameters:                      0(    0 scalars)
-  Number of Real dependent parameters:             0(    0 scalars)
-  Number of Integer dependent parameters:          0(    0 scalars)
-  Number of Enum dependent parameters:             0(    0 scalars)
-  Number of Boolean dependent parameters:          0(    0 scalars)
-  Number of String dependent parameters:           0(    0 scalars)
-Number of variables:                              36(   36 scalars)
-  Number of Real variables:                       36(   36 scalars)
-  Number of Integer variables:                     0(    0 scalars)
-  Number of Enum variables:                        0(    0 scalars)
-  Number of Boolean variables:                     0(    0 scalars)
-  Number of String variables:                      0(    0 scalars)
-Number of Real differentiated variables:           4(    4 scalars)
-Number of Real derivative variables:               4(    4 scalars)
-Number of Real continous algebraic variables:     28(   28 scalars)
-Number of inputs:                                  0(    0 scalars)
-  Number of Real inputs:                           0(    0 scalars)
-  Number of Integer inputs:                        0(    0 scalars)
-  Number of Enum inputs:                           0(    0 scalars)
-  Number of Boolean inputs:                        0(    0 scalars)
-  Number of String inputs:                         0(    0 scalars)
-Number of discrete variables:                      0(    0 scalars)
-  Number of Real discrete variables:               0(    0 scalars)
-  Number of Integer discrete variables:            0(    0 scalars)
-  Number of Enum discrete variables:               0(    0 scalars)
-  Number of Boolean discrete variables:            0(    0 scalars)
-  Number of String discrete variables:             0(    0 scalars)
-Number of equations:                              32(   32 scalars)
-Number of variables with binding expression:       0(    0 scalars)
-  Number of Real variables with binding exp:       0(    0 scalars)
-  Number of Integer variables binding exp:         0(    0 scalars)
-  Number of Enum variables binding exp:            0(    0 scalars)
-  Number of Boolean variables binding exp:         0(    0 scalars)
-  Number of String variables binding exp:          0(    0 scalars)
-Total number of equations:                        32(   32 scalars)
-Number of initial equations:                       4(    4 scalars)
-Number of event indicators in equations:           0
-Number of event indicators in init equations:      0
-Transformed model
-
-Alias sets (10 sets, 25 eliminated variables)
-
-BLT for DAE System
-
-BLT for Initialization System
-
-BLT diagnostics table
-
-Number of unsolved equation blocks in DAE initialization system: 1: {8}
-Number of unsolved equation blocks in DAE system: 1: {8}
-
-Number of unsolved equation blocks in DAE initialization system after tearing: 1: {1}
-Number of unsolved equation blocks in DAE system after tearing: 1: {1}
-</programlisting>
-
-      <para>Note that some of the entries, including
+      <para>Note that some of the entries in <literal>Model_Name_diagnostics/index.html</literal>, including
       <literal>Problems</literal>, <literal>Flattened model</literal>,
       <literal>Connection sets</literal>, <literal>Transformed
       model</literal>, <literal>Alias sets</literal>, <literal>BLT diagnostics
@@ -875,7 +609,7 @@ model.set_log_level(7)</programlisting>
         Example: (the following examples are based on the example
         <filename>pyjmi.examples.logger_example</filename>.)</para>
 
-        <programlisting>...
+        <programlisting font-size="6pt">...
 FMIL: module = FMICAPI, log level = 5: Calling fmiInitialize
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK] &lt;EquationSolve&gt;Model equations evaluation invoked at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]   &lt;BlockEventIterations&gt;Starting block (local) event iteration at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;in&lt;value name="block"&gt;0&lt;/value&gt;
