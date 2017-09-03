@@ -7,8 +7,10 @@ SUNDIALS_DIR64=../../sundials_build64
 
 if WITH_OPENMP
 SUPERLU_ADDON=-DSUPERLUMT_THREAD_TYPE=OpenMP -DSUPERLUMT_ENABLE=ON -DSUPERLUMT_LIBRARY_DIR=$(abs_builddir)/../../superlu_build/lib -DSUPERLUMT_INCLUDE_DIR=$(abs_builddir)/../../superlu_build/SRC
+SUPERLU_ADDON64=-DSUPERLUMT_THREAD_TYPE=OpenMP -DSUPERLUMT_ENABLE=ON -DSUPERLUMT_LIBRARY_DIR=$(abs_builddir)/../../superlu_build64/lib -DSUPERLUMT_INCLUDE_DIR=$(abs_builddir)/../../superlu_build64/SRC
 else
 SUPERLU_ADDON=
+SUPERLU_ADDON64=
 endif
 
 $(SUNDIALS_DIR):
@@ -28,7 +30,7 @@ if JM_WIN64
 $(SUNDIALS_DIR64):
 	mkdir -p $(SUNDIALS_DIR64)
 	cd $(SUNDIALS_DIR64) && \
-	cmake -G "MSYS Makefiles" $(SUPERLU_ADDON) -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/
+	cmake -G "MSYS Makefiles" $(SUPERLU_ADDON64) -DEXAMPLES_ENABLE=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/
 
 all-local: $(SUNDIALS_DIR) $(SUNDIALS_DIR64)
 	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=

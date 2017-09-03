@@ -18,13 +18,20 @@ $(SUPERLU_DIR64):
 	cp -r $(abs_top_srcdir)/ThirdParty/SuperLU/superlu_mt_3.1/* $(abs_builddir)/../../superlu_build64/
 
 all-local: $(SUPERLU_DIR) $(SUPERLU_DIR64)
-	cd $(SUPERLU_DIR) && make blaslib $(AM_MAKEFLAGS) DESTDIR= && make superlulib $(AM_MAKEFLAGS) DESTDIR=
+	cd $(SUPERLU_DIR) && make blaslib EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR= && make superlulib EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR=
 	cd $(SUPERLU_DIR64) && make blaslib $(AM_MAKEFLAGS) DESTDIR= && make superlulib $(AM_MAKEFLAGS) DESTDIR=
 
 else !JM_WIN64
 
 all-local: $(SUPERLU_DIR)
+	case $(build) in \
+	*-cygwin*|*-mingw*) \
+	cd $(SUPERLU_DIR) && make blaslib EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR= && make superlulib EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR=
+	*-apple*) \
 	cd $(SUPERLU_DIR) && make blaslib $(AM_MAKEFLAGS) DESTDIR= && make superlulib $(AM_MAKEFLAGS) DESTDIR=
+	*) \
+	cd $(SUPERLU_DIR) && make blaslib $(AM_MAKEFLAGS) DESTDIR= && make superlulib $(AM_MAKEFLAGS) DESTDIR=
+	esac
 
 endif !JM_WIN64
 

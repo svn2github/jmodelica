@@ -47,14 +47,14 @@ RANLIB       = ranlib
 PREDEFS      	= -D__OPENMP
 #
 CC           = gcc
-CFLAGS       = $(PREDEFS) -g -O3 -fPIC
+CFLAGS       = $(PREDEFS) -g -O3 -fPIC $(EXTRA_CFLAGS)
 # Uncomment the following to use 64-bit integer
 # CFLAGS	    += -D_LONGINT
 
 # There are a few files that should NOT be optimized, which appear in the
 # end of SRC/Makefile, taking the flag $(NOOPTS)
 # NOOPTS should be defined to explicitly turn off any optimization.
-NOOPTS	 = -O0 -fPIC
+NOOPTS	 = -O0 -fPIC $(EXTRA_CFLAGS)
 
 ############################################################################
 

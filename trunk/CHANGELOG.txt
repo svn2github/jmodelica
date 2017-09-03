@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Python ; #5454
+Fixed build system to handle 64bit SuperLU builds correctly.
+
 ; Feature ; Major ; Python ; #5344
 Added support for the sparse solver SuperLU when simulating FMI2 FMUs
 for ME.
