@@ -608,8 +608,8 @@ model.set_log_level(7)</programlisting>
         ends up mixed with FMI Library output in the resulting log file.
         Example: (the following examples are based on the example
         <filename>pyjmi.examples.logger_example</filename>.)</para>
-
-        <programlisting font-size="6pt">...
+	
+        <programlisting linenumbering="numbered"><?dbfo linenumbering.everyNth="1"?> ...
 FMIL: module = FMICAPI, log level = 5: Calling fmiInitialize
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK] &lt;EquationSolve&gt;Model equations evaluation invoked at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]   &lt;BlockEventIterations&gt;Starting block (local) event iteration at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;in&lt;value name="block"&gt;0&lt;/value&gt;
@@ -625,6 +625,7 @@ FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                  -1.0
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         &lt;/matrix&gt;
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       &lt;/JacobianUpdated&gt;
 ...</programlisting>
+
 
         <para>The log can be inspected manually, using general purpose XML
         tools, or parsed using the tools in <literal>pyjmi.log</literal>. A
@@ -666,7 +667,7 @@ log = pyjmi.log.parse_jmi_log(log_file_name)</programlisting>
         children. The following example is from
         pyjmi.examples.logger_example:</para>
 
-        <programlisting># Parse the entire XML log
+        <programlisting linenumbering="numbered"><?dbfo linenumbering.everyNth="1"?># Parse the entire XML log
 log = pyjmi.log.parse_jmi_log(log_file_name)
 # Gather information pertaining to equation solves
 solves = pyjmi.log.gather_solves(log)
