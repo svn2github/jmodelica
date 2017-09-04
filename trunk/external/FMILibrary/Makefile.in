@@ -206,6 +206,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 FMIL_BUILD_DIR = $(abs_builddir)/../../FMIL_build
+FMIL_BUILD_DIR64 = $(abs_builddir)/../../FMIL_build64
 all: all-am
 
 .SUFFIXES:
@@ -412,8 +413,17 @@ $(FMIL_BUILD_DIR):
 	cmake -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
 	esac
 
-all-local: $(FMIL_BUILD_DIR)
-	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@$(FMIL_BUILD_DIR64):
+@JM_WIN64_TRUE@	mkdir -p $(FMIL_BUILD_DIR64)
+@JM_WIN64_TRUE@	cd $(FMIL_BUILD_DIR64) && \
+@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_CXX_FLAGS="-m64 -fPIC" -DCMAKE_SHARED_LINKER_FLAGS="-m64 -fPIC" -DCMAKE_EXE_LINKER_FLAGS="-m64 -fPIC" -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install64 $(abs_top_srcdir)/external/FMILibrary/FMILibrary/
+
+@JM_WIN64_TRUE@all-local: $(FMIL_BUILD_DIR) $(FMIL_BUILD_DIR64)
+@JM_WIN64_TRUE@	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@	cd $(FMIL_BUILD_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR=
+
+@JM_WIN64_FALSE@all-local: $(FMIL_BUILD_DIR)
+@JM_WIN64_FALSE@	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 check-local:
 	cd $(FMIL_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
