@@ -1330,8 +1330,9 @@ aspect BLT{
                 return ProblemSeverity.ERROR;
             }
             
-            public void invoke(ReporterNode src, AbstractEquationBlock block) {
-                invoke(src, ProblemSeverity.ERROR, "%s\nBlock which produced the error:\n%s", message, block);
+            public void invoke(ReporterNode src, AbstractEquationBlock block, Object ... messageArgs) {
+                String processedMessage = String.format(message, messageArgs);
+                invoke(src, ProblemSeverity.ERROR, "%s\nBlock which produced the error:\n%s", processedMessage, block);
             }
 
             @Override
@@ -1715,6 +1716,7 @@ aspect BLT{
             for (SimpleEquationBlock seb : unsolvedBlocks()) {
                 seb.errorCheck(fclass);
             }
+            errorCheckStartValueDependencies(fclass);
         }
 
         @Override
@@ -3600,4 +3602,72 @@ aspect TearingPrinting {
         for (AbstractEquationBlock subBlock : solvedBlocks())
             subBlock.printTearingPairs(str);
     }
+}
+
+aspect StartValueDependency {
+    
+    public abstract class AbstractBiPGraph {
+        private static final StartVarRefContributor START_VAR_REF_CONTRIBUTOR = addSCCContributor(new StartVarRefContributor());
+        
+        /**
+         * Contributor that ensures that referenced variables in matched iteration
+         * variables always is computed before this equation. This is necessary in
+         * the initial system since start value of iteration variables may depend
+         * on initial parameter which are calculated in the same BLT. These must be
+         * computed before the block where the iteration variable is used!
+         */
+        private static class StartVarRefContributor extends SCCContributor {
+            @Override
+            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
+                Collection<E> res = Collections.emptyList();
+                V var = equation.getMatching();
+                if (!graph.isInitialSystem() || var == null) {
+                    return res;
+                }
+                FExp startExp = var.getVariable().startAttributeExp();
+                if (startExp == null) {
+                    return res;
+                }
+                for (V depVar : graph.lookupVars(startExp.findFIdUseExpsInTree())) {
+                    // This is only some optimization so that we don't create a million of empty lists!
+                    if (res.isEmpty()) {
+                        res = new ArrayList<E>();
+                    }
+                    res.add(depVar.getMatching());
+                }
+                return res;
+            }
+    
+            @Override
+            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> sameBlockMembers(E equation, AbstractBiPGraph<E, V, ?> graph) {
+                return Collections.emptyList();
+            }
+    
+            @Override
+            public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
+                return Collections.emptyMap();
+            }
+        }
+    }
+    
+    public static final AbstractEquationBlock.BlockProblemProducer ASTNode.START_VALUE_DEPEND_ON_BLOCK_ERROR =
+            new AbstractEquationBlock.BlockProblemProducer("START_VALUE_DEPEND_ON_BLOCK_ERROR",
+                    "The start value ('%s') for variable %s depends on variables which are computed in the same block, this is not allowed!");
+    
+    public void EquationBlock.errorCheckStartValueDependencies(FClass fclass) {
+        Collection<FVariable> allVariables = allVariables();
+        Set<FVariable> memberVariables = new HashSet<FVariable>(allVariables);
+        for (FVariable var : allVariables) {
+            FExp startExpression = var.startAttributeExp();
+            if (startExpression == null) {
+                continue;
+            }
+            for (FVariable referencedVar : startExpression.referencedFVariablesInFExp()) {
+                if (memberVariables.contains(referencedVar)) {
+                    ASTNode.START_VALUE_DEPEND_ON_BLOCK_ERROR.invoke(fclass, this, startExpression, var.displayName());
+                }
+            }
+        }
+    }
+    
 }
