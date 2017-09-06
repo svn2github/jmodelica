@@ -57,7 +57,7 @@ def test_bounds_warnings():
     for xstart in [-20,20]:
         model = load_model('TestInit', log_file_name)        
 #        model.reset() # todo: clear the old log file so that we can use reset instead of reloading the fmu
-        model.set('x', xstart)
+        model.set('x_start', xstart)
         model.initialize()
         assert abs(model.get('x')-2) < 1e-6
         log = parse_jmi_log(log_file_name)

@@ -18,7 +18,8 @@ within ;
 
 model TestInit
   parameter Real y = 10;
-  output Real x(start = 0, min = -10, max = 10, nominal=1);
+  parameter Real x_start(start=0);
+  output Real x(start = x_start, min = -10, max = 10, nominal=1);
 equation
   x + x^3 = y;
 end TestInit;

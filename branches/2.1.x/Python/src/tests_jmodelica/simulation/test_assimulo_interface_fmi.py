@@ -892,6 +892,8 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
         compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
         compile_fmu("NonLinear.EventIteration1", file_name)
+        compile_fmu("NonLinear.NonLinear6", file_name)
+        compile_fmu("NonLinear.NonLinear7", file_name)
     
     @testattr(stddist = True)
     def test_Brent_AD(self):
@@ -927,7 +929,7 @@ class Test_NonLinear_Systems:
         def run_model(init):
             model = load_fmu("NonLinear_DoubleRoot1.fmu")
             model.set("_use_Brent_in_1d", True)
-            model.set("x", init)
+            model.set("p", init)
             model.initialize()
             return model.get("x")
         
@@ -961,19 +963,19 @@ class Test_NonLinear_Systems:
         
         scale = model.get("scale")
         i = -9.9760004108556469E-03*scale
-        model.set("i",i)
+        model.set("i_start",i)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
         model.reset()
         
-        model.set("i", i+i*1e-15)
+        model.set("i_start", i+i*1e-15)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
         model.reset()
         
-        model.set("i", i-i*1e-15)
+        model.set("i_start", i-i*1e-15)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
@@ -1047,6 +1049,20 @@ class Test_NonLinear_Systems:
         model = load_fmu("NonLinear_EventIteration1.fmu")
         model.initialize()
         nose.tools.assert_almost_equal(model.get('iter_var_1'), 872.98062403)
+        
+    @testattr(stddist = True)
+    def test_fixed_false_start_attribute(self):
+        model = load_fmu("NonLinear_NonLinear6.fmu")
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('x'), 1.0)
+        nose.tools.assert_almost_equal(model.get('z'), -1.0)
+        
+    @testattr(stddist = True)
+    def test_fixed_false_start_attribute_brent(self):
+        model = load_fmu("NonLinear_NonLinear7.fmu")
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('x'), 1.0)
+        nose.tools.assert_almost_equal(model.get('z'), 1.0)
     
 class Test_Singular_Systems:
     

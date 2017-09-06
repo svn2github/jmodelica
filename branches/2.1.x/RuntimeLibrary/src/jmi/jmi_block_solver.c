@@ -301,7 +301,7 @@ int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver
     return 0;
 }
 
-int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes) {
+int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes, int atInitial) {
     int ef;
     clock_t c0=jmi_block_solver_start_clock(block_solver); /*timers*/
     jmi_log_t* log = block_solver->log;
@@ -334,7 +334,11 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         block_solver->F(block_solver->problem_data,block_solver->min,block_solver->res,JMI_BLOCK_MIN);
         block_solver->F(block_solver->problem_data,block_solver->max,block_solver->res,JMI_BLOCK_MAX);
-        block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_INITIALIZE);
+        if(atInitial) {
+            block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_START);
+        } else {
+            block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_INITIALIZE);
+        }
         block_solver->F(block_solver->problem_data,real_vrs,block_solver->res,JMI_BLOCK_VALUE_REFERENCE);
         block_solver->F(block_solver->problem_data,block_solver->start_set,block_solver->res,JMI_BLOCK_START_SET);
         jmi_setup_f_residual_scaling(block_solver);
