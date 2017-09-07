@@ -21,4 +21,12 @@ aspect SrcUtil {
     eq IntegerLitExp.isLiteral() = true;
     eq RealLitExp.isLiteral()    = true;
     eq StringLitExp.isLiteral()  = true;
+
+    /**
+     * Returns the class declaration which surrounds this element. Null if no
+     * such declaration can be found.
+     */
+    inh ClassDecl Element.myClassDecl();
+    eq ClassDecl.getChild().myClassDecl() = this;
+    eq SourceRoot.getChild().myClassDecl() = null;
 }
