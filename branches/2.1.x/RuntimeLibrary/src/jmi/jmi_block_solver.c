@@ -453,7 +453,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 block_solver->nominal[i] = -block_solver->nominal[i];
             block_solver->x[i] = initi;
         }
+        /* Make sure the start values are written back to jmi */
+        if(atInitial) {
+             block_solver->F(block_solver->problem_data, block_solver->x,NULL,JMI_BLOCK_WRITE_BACK);
+        }
         free(real_vrs);
+
     }
     
     if (handle_discrete_changes) {
