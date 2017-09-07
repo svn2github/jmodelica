@@ -7716,4 +7716,38 @@ end RedeclareTests.ExternalObjectInConstrainingType2;
 ")})));
 end ExternalObjectInConstrainingType2;
 
+
+model ConstrainingModifiers1
+    model A
+        parameter Integer n = 1;
+    end A;
+    
+    model B
+        replaceable A a constrainedby A(n = 2);
+    end B;
+    
+    model C
+        extends A;
+        parameter Real y[n] = {1};
+    end C;
+    
+    model D
+        extends B(replaceable C a constrainedby C(y = 2:3));
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConstrainingModifiers1",
+            description="",
+            flatModel="
+fclass RedeclareTests.ConstrainingModifiers1
+ parameter Real d.a.y[2] = 2:3 /* { 2, 3 } */;
+ structural parameter Integer d.a.n = 2 /* 2 */;
+end RedeclareTests.ConstrainingModifiers1;
+")})));
+end ConstrainingModifiers1;
+
+
 end RedeclareTests;
