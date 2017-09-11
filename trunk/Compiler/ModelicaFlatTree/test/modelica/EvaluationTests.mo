@@ -3863,7 +3863,7 @@ model ParameterMinMax5
             flatModel="
 fclass EvaluationTests.ParameterMinMax5
  structural parameter Real n = 1.2 /* 1.2 */;
- Real x[integer(1.2)] = 1:size(x[1:1], 1);
+ Real x[1] = 1:size(x[1:1], 1);
 end EvaluationTests.ParameterMinMax5;
 ")})));
 end ParameterMinMax5;
@@ -3880,7 +3880,7 @@ model ParameterMinMax6
             flatModel="
 fclass EvaluationTests.ParameterMinMax6
  structural parameter Real n = -1.2 /* -1.2 */;
- Real x[integer(1.2)] = 1:size(x[1:1], 1);
+ Real x[1] = 1:size(x[1:1], 1);
 end EvaluationTests.ParameterMinMax6;
 ")})));
 end ParameterMinMax6;
@@ -3899,7 +3899,7 @@ model ParameterMinMax7
             flatModel="
 fclass EvaluationTests.ParameterMinMax7
  structural parameter EvaluationTests.ParameterMinMax7.B n = EvaluationTests.ParameterMinMax7.A.d /* EvaluationTests.ParameterMinMax7.A.d */;
- Real x[Integer(EvaluationTests.ParameterMinMax7.A.d)] = 1:size(x[1:4], 1);
+ Real x[4] = 1:size(x[1:4], 1);
 
 public
  type EvaluationTests.ParameterMinMax7.B = enumeration(a, b, c, d, e)(start = EvaluationTests.ParameterMinMax7.A.c);
@@ -3924,7 +3924,7 @@ model ParameterMinMax8
             flatModel="
 fclass EvaluationTests.ParameterMinMax8
  structural parameter EvaluationTests.ParameterMinMax8.B n = EvaluationTests.ParameterMinMax8.A.b /* EvaluationTests.ParameterMinMax8.A.b */;
- Real x[Integer(EvaluationTests.ParameterMinMax8.A.b)] = 1:size(x[1:2], 1);
+ Real x[2] = 1:size(x[1:2], 1);
 
 public
  type EvaluationTests.ParameterMinMax8.B = enumeration(a, b, c, d, e)(start = EvaluationTests.ParameterMinMax8.A.c);

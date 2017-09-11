@@ -48,6 +48,22 @@ end VariabilityTests.Structural1;
 ")})));
 end Structural1;
 
+model Structural2
+    parameter Boolean b = true;
+    parameter Real[:] x = if not b then 1:2 else 1:3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Structural2",
+            description="If expression branch selection for size",
+            flatModel="
+fclass VariabilityTests.Structural2
+ structural parameter Boolean b = true /* true */;
+ structural parameter Real x[3] = {1, 2, 3} /* { 1, 2, 3 } */;
+end VariabilityTests.Structural2;
+")})));
+end Structural2;
+
 
 model EvaluateAnnotation1
 	parameter Real a = 1.0;
