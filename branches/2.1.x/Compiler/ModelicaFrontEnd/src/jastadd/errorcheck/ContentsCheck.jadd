@@ -760,63 +760,34 @@ aspect ContentCheck {
 }
 
 aspect ForceVariability {
-    
+
     private FTypePrefixVariability InstAssignable.forcedVariability = fContinuous();
-    
+
     public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
         forceVariability(checkType, fStructParameter());
     }
-    
+
     public void FExp.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
-        if (inFunction())
-            return;
-        forceUsesVariability(checkType, v);
+        if (!inFunction()) {
+            forceUsesVariability(checkType, v);
+        }
     }
-    
+
     public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
-        for (FSubscript s : getFSubscripts())
+        for (FSubscript s : getFSubscripts()) {
             s.forceVariability(checkType, v);
+        }
     }
-    
+
     public void FSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {}
-    
+
     public void FExpSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
         getFExp().forceVariability(checkType, v);
     }
-    
-    
-    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        for (ASTNode n : this)
-            n.forceUsesVariability(checkType, v);
-    }
-    
-    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        getDimOpt().forceUsesVariability(checkType, v);
-    }
-    
-    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
-    
-    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        myInstComponentDecl().forceVariability(checkType, v);
-        forceUsesInSubscriptsVariability(checkType, v);
-    }
-    
-    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
-    
-    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        for (InstAccess ia : getInstAccesss())
-            ia.forceUsesInSubscriptsVariability(checkType, v);
-    }
-    
-    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        getFArraySubscripts().forceUsesVariability(checkType, v);
-    }
-    
-    
-    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        // TODO: should probably do something constructive here?
-    }
-    
+
+
+    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+
     public void InstAssignable.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
         if (forcedVariability.lessOrEqual(v)) {
             return;
@@ -824,7 +795,6 @@ aspect ForceVariability {
         FTypePrefixVariability currentVariability = variability().combine();
         if (!currentVariability.parameterVariability() || inFunction() || isForIndex())
             return;
-        // TODO: hierarchical check for records?
         if (indices().numElements() > 0 && currentVariability.initialParameterVariability()) {
             compliance("Parameters with fixed=false can not be used as structural parameters");
             return;
@@ -839,17 +809,62 @@ aspect ForceVariability {
             getBindingFExp().forceUsesVariability(checkType, v);
         }
     }
-    
+
     public void InstRecord.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
             icd.forceVariability(checkType, v);
         }
     }
-    
-    public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        
+
+    public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+
+
+    public void Size.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+
+    public void MutableSize.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        for (FExp e : exps) {
+            if (e != null) {
+                e.forceVariability(checkType, v);
+            }
+        }
     }
-    
+
+
+    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        for (ASTNode n : this) {
+            n.forceUsesVariability(checkType, v);
+        }
+    }
+
+    public void FAbstractExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        super.forceUsesVariability(checkType, v);
+        setVariabilityNotCalculated();
+    }
+
+    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        getDimOpt().forceUsesVariability(checkType, v);
+    }
+
+    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+
+    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        myInstComponentDecl().forceVariability(checkType, v);
+        forceUsesInSubscriptsVariability(checkType, v);
+    }
+
+    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+
+    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        for (InstAccess ia : getInstAccesss()) {
+            ia.forceUsesInSubscriptsVariability(checkType, v);
+        }
+    }
+
+    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+        getFArraySubscripts().forceUsesVariability(checkType, v);
+    }
+
+
     public void InstComponentDecl.setVariabilityNotCalculated() {
         if (!variability_computed) {
             return;
@@ -860,17 +875,9 @@ aspect ForceVariability {
         }
         variability_computed = false;
     }
-    
-    public void Size.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        
+
+    public void FAbstractExp.setVariabilityNotCalculated() {
+        variability_computed = false;
     }
-    
-    public void MutableSize.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        for (FExp e : exps) {
-            if (e != null) {
-                e.forceVariability(checkType, v);
-            }
-        }
-    }
-    
+
 }

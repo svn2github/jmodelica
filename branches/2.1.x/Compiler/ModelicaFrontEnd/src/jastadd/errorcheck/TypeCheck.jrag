@@ -433,7 +433,16 @@ aspect FlatTypeCheck {
             size().markAsStructuralParameter(checkType, this);
         }
     }
-    
+
+    public void FIfExp.typeCheck(ErrorCheckType checkType) {
+        if (!type().isUnknown()) {
+            if (!getThenExp().size().equivalent(getElseExp().size(), false)) {
+                getIfExp().markAsStructuralParameter(checkType);
+            }
+        }
+        super.typeCheck(checkType);
+    }
+
     public void Size.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {}
     
     public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {
