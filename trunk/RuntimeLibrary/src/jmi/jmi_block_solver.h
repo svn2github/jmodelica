@@ -394,7 +394,7 @@ struct jmi_block_solver_callbacks_t {
  * be collected therefrom the first time the block is called during the initialization phase. When 
  * false start values are collected from JMI_BLOCK_INITIALIZE.
 */
-int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes, int atInitial);
+int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes, int at_initial);
 
 /** \brief Start the clock for profiling. */
 clock_t jmi_block_solver_start_clock(jmi_block_solver_t * block_solver);

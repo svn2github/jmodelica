@@ -301,7 +301,7 @@ int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver
     return 0;
 }
 
-int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes, int atInitial) {
+int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes, int at_initial) {
     int ef;
     clock_t c0=jmi_block_solver_start_clock(block_solver); /*timers*/
     jmi_log_t* log = block_solver->log;
@@ -334,7 +334,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         block_solver->F(block_solver->problem_data,block_solver->min,block_solver->res,JMI_BLOCK_MIN);
         block_solver->F(block_solver->problem_data,block_solver->max,block_solver->res,JMI_BLOCK_MAX);
-        if(atInitial) {
+        if(at_initial) {
             block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_START);
         } else {
             block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_INITIALIZE);
@@ -454,7 +454,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             block_solver->x[i] = initi;
         }
         /* Make sure the start values are written back to jmi */
-        if(atInitial) {
+        if(at_initial) {
              block_solver->F(block_solver->problem_data, block_solver->x,NULL,JMI_BLOCK_WRITE_BACK);
         }
         free(real_vrs);
