@@ -290,7 +290,7 @@ function nose_test() {
 }
 
 function ant_test() {
-  ant -f ${JMODELICA_SRC}/Compiler/$1Compiler/build.xml ${CLEAN_JUNIT} test
+  ant -f ${JMODELICA_SRC}/Compiler/$1Compiler/build.xml ${CLEAN_JUNIT} clean-test test
 }
 
 function build_jmodelica() {
