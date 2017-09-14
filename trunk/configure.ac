@@ -415,7 +415,40 @@ AC_SUBST(CMAKE_PYTHON_INCLUDE)
 
 
 AC_SUBST(PYTHON_HOME)
-PYTHON_HOME=$PYTHON_HOME
+AC_SUBST(ORIG_PYTHON_HOME)
+PYTHON_HOME=$PYTHON_HOME_ABS
+ORIG_PYTHON_HOME=$PYTHON_HOME_ABS
+AC_SUBST(ORIG_PATH)
+ORIG_PATH=$PATH
+
+# Detect if Python installation is specified with environment var
+AC_ARG_VAR(PYTHON64_HOME, [Python 64 bit installation to use])
+AS_IF([test "${PYTHON64_HOME}"],
+      [
+          PYTHON64_HOME_ABS="`cd ${PYTHON64_HOME}; pwd`"
+          AC_MSG_RESULT([Using Python 64 installation ${PYTHON64_HOME_ABS}])
+          CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_HOME_ABS}/libs/libpython27.a"
+          CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON64_HOME_ABS}/include"
+      ], [
+          AS_IF([test "${PYTHON64_LIB}" && test "${PYTHON64_INCLUDE}"], 
+            [
+                AC_MSG_RESULT([Using Python 64 bit lib ${PYTHON64_LIB} and Python include ${PYTHON64_INCLUDE}])
+                CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_LIB}"
+                CMAKE_PYTHON64_INCLUDE="-DPYTHON64_INCLUDE_DIR=${PYTHON64_INCLUDE}"
+            ], [
+                AC_MSG_RESULT([Python 64 installation not specified.])
+                # Empty arguments will make cmake fail, so use dummies instead
+                CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY_DUMMY="
+                CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR_DUMMY="
+            ])
+      ])
+AC_SUBST(CMAKE_PYTHON64_LIB)
+AC_SUBST(CMAKE_PYTHON64_INCLUDE)
+
+
+AC_SUBST(PYTHON64_HOME)
+PYTHON64_HOME=$PYTHON64_HOME_ABS
+AM_CONDITIONAL([WITH_PYTHON64], [test "x$PYTHON64_HOME" != x])
 
 # Checks for header files.
 AC_HEADER_STDC
