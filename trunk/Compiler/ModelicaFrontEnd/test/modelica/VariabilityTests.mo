@@ -739,6 +739,20 @@ end VariabilityTests.IfEquations.EvaluateAnnotation4;
 ")})));
 end EvaluateAnnotation4;
 
+model EvaluateAnnotation5
+    parameter Real[:] p = {i for i in 1:1} annotation(Evaluate=false);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation5",
+            description="For index in evaluate false",
+            flatModel="
+fclass VariabilityTests.IfEquations.EvaluateAnnotation5
+ parameter Real p[1] = {1};
+end VariabilityTests.IfEquations.EvaluateAnnotation5;
+")})));
+end EvaluateAnnotation5;
+
 model EvaluateAnnotationUnbalanced1
     parameter Boolean p = false annotation(Evaluate=false);
     Real x;

@@ -115,6 +115,7 @@ aspect InstVariability {
         }
         return res;
     }
+    eq InstForIndexPrimitive.evalAnnotation() = AnnotationNode.NO_ANNOTATION;
 
     inh AnnotationNode InstComponentDecl.parentEvalAnnotation();
     eq InstClassDecl.getChild().parentEvalAnnotation()          = AnnotationNode.NO_ANNOTATION;
