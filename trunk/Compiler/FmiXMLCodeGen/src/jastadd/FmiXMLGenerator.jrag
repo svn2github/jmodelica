@@ -1594,8 +1594,10 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.derivativeVariables()) {
-					variable = var;
-					super.generateChildren(genPrinter);
+                    if (var.generateXMLVariable()) {
+                        variable = var;
+                        super.generateChildren(genPrinter);
+                    }
 				}
 			}
 		}
@@ -1615,8 +1617,10 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.outputs()) {
-					variable = var;
-					super.generateChildren(genPrinter);
+                    if (var.generateXMLVariable()) {
+                        variable = var;
+                        super.generateChildren(genPrinter);
+                    }
 				}
 			}
 		}
