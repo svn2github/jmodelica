@@ -560,10 +560,10 @@ aspect NodeMethods {
 	    /**
 	     * Adds all nodes in an iterable to the list.
 	     */
-	    public void addAll(Iterable<? extends T> list) {
-	        for (T e : list)
-	            add(e);
-	    }
+//	    public void addAll(Iterable<? extends T> list) {
+//	        for (T e : list)
+//	            add(e);
+//	    }
 	    
 	    /**
 	     * Adds all nodes in an array to the list.
