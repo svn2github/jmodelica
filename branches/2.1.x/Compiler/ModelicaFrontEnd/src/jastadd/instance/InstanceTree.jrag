@@ -450,6 +450,7 @@ aspect Environments {
     */
     syn lazy Environment InstNode.getMergedEnvironment() = 
         filteredEnvironment().mergeInnerClone(getElementInstModifications(), localInstModifications());
+    eq InstForIndexPrimitive.getMergedEnvironment() = new Environment();
     eq InstExtendsShortClass.getMergedEnvironment() {
         if (inInstComponent()) {
             return myEnvironmentNoClass().mergeInnerClone(
