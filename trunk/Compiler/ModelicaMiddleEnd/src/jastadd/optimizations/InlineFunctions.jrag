@@ -389,20 +389,16 @@ aspect FunctionInlining {
         
         private FClass fc;
         private List<FVariable> vars;
-        private List<FAbstractEquation> initialEqns;
-        private List<FAbstractEquation> normalEqns;
-        private List<FAbstractEquation> paramEqns;
+        private List<FAbstractEquation> initialEqns = new List<FAbstractEquation>();
+        private List<FAbstractEquation> normalEqns  = new List<FAbstractEquation>();
+        private List<FAbstractEquation> paramEqns   = new List<FAbstractEquation>();
 
         public FunctionInliner(FClass fc, String level, boolean late) {
             this.fc = fc;
             this.level = level;
             this.late = late;
             vars = fc.getFVariables();
-            initialEqns = fc.getFInitialEquations();
-            normalEqns = fc.getFAbstractEquations();
-            paramEqns = fc.getFParameterEquations();
             // Make sure maps are calculated
-            fc.parameterEquationsMap();
             fc.variablesMap();
         }
 
@@ -430,9 +426,6 @@ aspect FunctionInlining {
             } else {
                 toList.add(eqn);
             }
-            if (variability.fixedParameterVariability()) {
-                eqn.addToParameterEquationsMap(fc.parameterEquationsMap());
-            }
         }
         
         @Override
@@ -451,22 +444,17 @@ aspect FunctionInlining {
          * Inline all function calls that we can.
          */
         public void inline() {
-            List<FAbstractEquation> oldInitialEqns = initialEqns;
-            initialEqns = new List<FAbstractEquation>();
             setContextVariability(ASTNode.fInitialParameter());
-            inlineFCList(oldInitialEqns, initialEqns);
-            fc.setFInitialEquationList(initialEqns);
+            inlineFCList(fc.getFInitialEquations(), initialEqns);
             
-            List<FAbstractEquation> oldNormalEqns = normalEqns;
-            normalEqns = new List<FAbstractEquation>();
             setContextVariability(ASTNode.fContinuous());
-            inlineFCList(oldNormalEqns, normalEqns);
-            fc.setFAbstractEquationList(normalEqns);
+            inlineFCList(fc.getFAbstractEquations(), normalEqns);
             
-            List<FAbstractEquation> oldParamEqns = paramEqns;
-            paramEqns = new List<FAbstractEquation>();
             setContextVariability(ASTNode.fFixedParameter());
-            inlineFCList(oldParamEqns, paramEqns);
+            inlineFCList(fc.getFParameterEquations(), paramEqns);
+            
+            fc.setFInitialEquationList(initialEqns);
+            fc.setFAbstractEquationList(normalEqns);
             fc.setFParameterEquationList(paramEqns);
         }
         
@@ -948,21 +936,6 @@ aspect FunctionInlining {
      */
     public void FFunctionCall.inline(AbstractFunctionInliner fi) {
         myFCallable().inline(fi, getArgs());
-    }
-
-    /**
-     * Create a use exp for non-constant variables, and a literal for constant variables.
-     */
-    public FExp FVariable.createInlineUseFExp() {
-        if (isConstant()) {
-            try {
-                CValue cval = ceval();
-                if (cval.hasBuildLiteral()) {
-                    return cval.buildLiteral();
-                }
-            } catch (ConstantEvaluationException e) {}
-        }
-        return createUseExp();
     }
 
     private static final String ASTNode.REPLACE_UNKNOWN_CHILD_MSG = 
