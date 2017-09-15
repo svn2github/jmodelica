@@ -1,4 +1,9 @@
 ================= Unreleased ==================
+; Fixed ; Major ; Build system ; #5459
+Added support for building Assimulo, PyFMI, PyJMI, pymodelica  in
+both 32 and 64 bit modes on windows when corresponding Python distributions
+are available.
+
 ; Fixed ; Minor ; Compiler ; #5219
 Fixed bug in BLT computation for initial system where start value of variables
 could depend on variables which were computed after the variable it self.
