@@ -1086,13 +1086,13 @@ install-python-packages: build-python-packages
 @JM_WIN64_TRUE@	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
 @JM_WIN64_TRUE@	fi; \
 @JM_WIN64_TRUE@	done
-@JM_WIN64_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-@JM_WIN64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
-@JM_WIN64_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
-@JM_WIN64_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
-@JM_WIN64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-@JM_WIN64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
-@JM_WIN64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
+@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
 	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
 	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
 	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
