@@ -44,6 +44,10 @@ aspect OptimicaFlattening {
         private List<FConstraint> constraints = new List<FConstraint>();
         private List<FAttribute> attributes = new List<FAttribute>();
         
+        public boolean isFlatteningOptimica() {
+            return fc instanceof FOptClass;
+        }
+        
         public List<FConstraint> getFConstraints() {
             return constraints;
         }

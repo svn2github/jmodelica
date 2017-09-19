@@ -144,10 +144,6 @@ aspect Flattening {
             this.fc = fc;
         }
         
-        public boolean isFlatteningOptimica() {
-            return fc instanceof FOptClass;
-        }
-        
         //analoguous to FClass.lookupFunc(String name)
         public FFunctionDecl lookupFFunctionDecl(InstClassDecl icd) {
             String name = icd.qualifiedName();
