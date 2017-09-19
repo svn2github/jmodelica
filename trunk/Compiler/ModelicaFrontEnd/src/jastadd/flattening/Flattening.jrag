@@ -95,13 +95,16 @@ aspect Flattening {
         buildConnectionSets(fc);
         breakOnErrors();
         beginStep("flattenComponents()");
-        flatten(fc, FlattenBindingExp.ALL, level);
-        getInstGeneratedInners().flatten(fc, FlattenBindingExp.ALL, level);
-        flattenUsedFuncsAndEnums(fc);
-        flattenInstClassDeclExtra(fc);
+        Flattener f = new Flattener(fc);
+        flatten(f, FlattenBindingExp.ALL, level);
+        getInstGeneratedInners().flatten(f, FlattenBindingExp.ALL, level);
+        flattenUsedFuncsAndEnums(f);
+        flattenInstClassDeclExtra(f);
+        fc.update(f);
         endStep("flattenComponents()");
         fc.updateVariabilityForVariablesInWhen();
-        fc.genConnectionEquations();
+        fc.genConnectionEquations(f);
+        fc.update(f);
         fc.createExperiment(annotation("experiment"));
         breakOnErrors();
         endStep("flattenInstClassDecl()");
@@ -118,6 +121,154 @@ aspect Flattening {
     public void InstLibNode.flattenInstClassDecl(FClass fc) {
         actualInstClass().flattenInstClassDecl(fc);
     }
+    
+    /** This class accumulates all flattened equations and variables. It is a layer
+     * of abstraction between the flat AST and the flattening operation. After the operation is
+     * done, the flat AST needs to be updated by calling the attribute FClass.updateFC().
+     *
+     */ 
+    public class Flattener {
+        private FClass fc;
+        private List<FVariable>         variables   = new List<FVariable>();
+        private List<FAbstractEquation> normalEqns  = new List<FAbstractEquation>();
+        private List<FAbstractEquation> initialEqns = new List<FAbstractEquation>();
+        private List<FAbstractEquation> parameterEqns = new List<FAbstractEquation>();
+        
+        private List<FFunctionDecl> functionDecls = new List<FFunctionDecl>();
+        private List<FRecordDecl> recordDecls = new List<FRecordDecl>();
+        private List<FEnumDecl> enumDecls = new List<FEnumDecl>();        
+        private List<FDerivedType> derivedTypes = new List<FDerivedType>();
+        
+        
+        public Flattener(FClass fc) {
+            this.fc = fc;
+        }
+        
+        public boolean isFlatteningOptimica() {
+            return fc instanceof FOptClass;
+        }
+        
+        //analoguous to FClass.lookupFunc(String name)
+        public FFunctionDecl lookupFFunctionDecl(InstClassDecl icd) {
+            String name = icd.qualifiedName();
+        	for (FFunctionDecl f : getFFunctionDecls())
+				if (f.name().equals(name))
+					return f;
+			return null;
+        }
+        
+        // has corresponding flat function declaration
+        public boolean hasCorrFFunctionDecl(InstClassDecl icd) {
+            return lookupFFunctionDecl(icd) != null;
+        }
+        
+         //analoguous to FClass.lookupFRec(String name)
+        public FRecordDecl lookupFRecord(InstNode n) {
+            String name = n.qualifiedTypeName();
+        	for (FRecordDecl r : getFRecordDecls())
+				if (r.name().equals(name))
+					return r;
+			return null;
+        }
+        
+        public boolean hasCorrFRecord(InstNode n) {
+            return lookupFRecord(n) != null;
+        }
+        
+        
+        public List<FAbstractEquation> getNormalEquations() {
+            return normalEqns;
+        }
+        
+        public List<FAbstractEquation> getInitialEquations() {
+            return initialEqns;
+        }
+        
+        public List<FAbstractEquation> getParameterEquations() {
+            return parameterEqns;
+        }
+        
+        public List<FVariable> getFVariables() {
+            return variables;
+        }
+        
+        public List<FFunctionDecl> getFFunctionDecls() {
+            return functionDecls;
+        }
+        
+        public List<FRecordDecl> getFRecordDecls() {
+            return recordDecls;
+        }
+        
+        public List<FEnumDecl> getFEnumDecls() {
+            return enumDecls;
+        }
+        
+        public List<FDerivedType> getFDerivedTypes() {
+            return derivedTypes;
+        }
+        
+        public List<FVariable> addFVariable(FVariable fvariable) {
+            return variables.add(fvariable);
+        }
+        
+        public List<FAbstractEquation> addNormalEquation(FAbstractEquation fae) {
+            return normalEqns.add(fae);
+        }
+        
+         public List<FAbstractEquation> addFParameterEquation(FAbstractEquation fae) {
+            return parameterEqns.add(fae);
+        }
+        
+        public List<FFunctionDecl> addFFunctionDecl(FFunctionDecl ffd) {
+            return functionDecls.add(ffd);
+        }
+        
+        public List<FRecordDecl> addFRecordDecl(FRecordDecl frd) {
+            return recordDecls.add(frd);
+        }
+        
+        public List<FEnumDecl> addFEnumDecl(FEnumDecl fed) {
+            return enumDecls.add(fed);
+        }
+        
+        public List<FDerivedType> addFDerivedType(FDerivedType fdt) {
+            return derivedTypes.add(fdt);
+        }
+        
+        public FlatAnnotation flatAnnotation(String ... path) {
+            return fc.flatAnnotation(path);
+        }
+        
+        private int numComponents = 0;
+
+        public void countComponent() {
+            numComponents++;
+        }
+        
+        public int getComponentCount() {
+            return numComponents;
+        }
+        
+        public void contribute(InstNode n) {
+            n.contribute(fc);
+        }
+    }
+    
+    // refined in OptimicaFlattening
+    public void FClass.update(Flattener f) {
+        setFVariableList(f.getFVariables());
+        setFAbstractEquationList(f.getNormalEquations());
+        setFInitialEquationList(f.getInitialEquations());
+        setFParameterEquationList(f.getParameterEquations());
+        
+        setFFunctionDeclList(f.getFFunctionDecls());
+        setFRecordDeclList(f.getFRecordDecls());
+        setFEnumDeclList(f.getFEnumDecls());
+        setFDerivedTypeList(f.getFDerivedTypes());
+        
+        numComponents = f.getComponentCount();
+    }
 
     /**
      * Delegate for adding extra flattening code to top-level model.
@@ -132,88 +283,88 @@ aspect Flattening {
         }
         
         public static abstract class ExtraFlattener {
-            public abstract void flattenExtra(InstClassDecl icd, FClass fc);
+            public abstract void flattenExtra(Flattener f, InstClassDecl icd);
         }
     }
     
-    protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {
+    protected void InstClassDecl.flattenInstClassDeclExtra(Flattener f) {
         for (ExtraFlattener ef : extraFlatteners) {
-            ef.flattenExtra(this, fc);
+            ef.flattenExtra(f, this);
         }
     }
 
     /**
      * Find functions, record and enumeration declarations that need to be flattened.
      */
-    public void ASTNode.flattenUsedFuncsAndEnums(FClass fc) {
+    public void ASTNode.flattenUsedFuncsAndEnums(Flattener f) {
         for (ASTNode n : this) 
-            n.flattenUsedFuncsAndEnums(fc);
+            n.flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstNode.flattenUsedFuncsAndEnums(FClass fc) {
-        getInstComponentDeclList().flattenUsedFuncsAndEnums(fc);
-        getFAbstractEquationList().flattenUsedFuncsAndEnums(fc);
-        getInstExtendsList().flattenUsedFuncsAndEnums(fc);
+    public void InstNode.flattenUsedFuncsAndEnums(Flattener f) {
+        getInstComponentDeclList().flattenUsedFuncsAndEnums(f);
+        getFAbstractEquationList().flattenUsedFuncsAndEnums(f);
+        getInstExtendsList().flattenUsedFuncsAndEnums(f);
         for (InstModification im : totalMergedEnvironment()) 
-            im.flattenUsedFuncsAndEnums(fc);
-        super.flattenUsedFuncsAndEnums(fc);
+            im.flattenUsedFuncsAndEnums(f);
+        super.flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstComponentDecl.flattenUsedFuncsAndEnums(FClass fc) {
+    public void InstComponentDecl.flattenUsedFuncsAndEnums(Flattener f) {
         if (useInFlattening()) {
-            super.flattenUsedFuncsAndEnums(fc);
+            super.flattenUsedFuncsAndEnums(f);
             if (isOperatorRecord() && isFlow())
-                type().matchOverloadedZero().flattenFunction(fc);
+                type().matchOverloadedZero().flattenFunction(f);
         }
     }
 
     @Override
-    public void InstClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
-        super.flattenUsedFuncsAndEnums(fc);
-        getInstGeneratedInners().flattenUsedFuncsAndEnums(fc);
+    public void InstClassDecl.flattenUsedFuncsAndEnums(Flattener f) {
+        super.flattenUsedFuncsAndEnums(f);
+        getInstGeneratedInners().flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
-        actualInstClass().flattenUsedFuncsAndEnums(fc);
+    public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(Flattener f) {
+        actualInstClass().flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstLibNode.flattenUsedFuncsAndEnums(FClass fc) {
-        actualInstClass().flattenUsedFuncsAndEnums(fc);
+    public void InstLibNode.flattenUsedFuncsAndEnums(Flattener f) {
+        actualInstClass().flattenUsedFuncsAndEnums(f);
     }
 
-    public void FConnectClause.flattenUsedFuncsAndEnums(FClass fc) {
-        super.flattenUsedFuncsAndEnums(fc);
-        getConnector1().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
-        getConnector2().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
+    public void FConnectClause.flattenUsedFuncsAndEnums(Flattener f) {
+        super.flattenUsedFuncsAndEnums(f);
+        getConnector1().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(f);
+        getConnector2().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(f);
     }
     
-    public void InstNode.flattenOverloadedOperatorsForFlow(FClass fc) {
+    public void InstNode.flattenOverloadedOperatorsForFlow(Flattener f) {
         for (InstComponentDecl icd : getInstComponentDecls())
-            icd.flattenOverloadedOperatorsForFlow(fc);
+            icd.flattenOverloadedOperatorsForFlow(f);
         for (InstExtends ie : getInstExtendss())
-            ie.flattenOverloadedOperatorsForFlow(fc);
+            ie.flattenOverloadedOperatorsForFlow(f);
     }
 
-    public void InstComponentDecl.flattenOverloadedOperatorsForFlow(FClass fc) {
+    public void InstComponentDecl.flattenOverloadedOperatorsForFlow(Flattener f) {
         if (useInFlattening()) {
             if (isOperatorRecord() && isFlow())
-                type().flattenOverloadedOperatorsForFlow(fc);
+                type().flattenOverloadedOperatorsForFlow(f);
             else
-                super.flattenOverloadedOperatorsForFlow(fc);
+                super.flattenOverloadedOperatorsForFlow(f);
         }
     }
 
-    public void FType.flattenOverloadedOperatorsForFlow(FClass fc) {}
+    public void FType.flattenOverloadedOperatorsForFlow(Flattener f) {}
 
-    public void FOperatorRecordType.flattenOverloadedOperatorsForFlow(FClass fc) {
-        matchOverloadedOperator(null, FExp.OP_NEG).flattenFunction(fc);
-        matchOverloadedOperator(this, FExp.OP_SUB).flattenFunction(fc);
-        matchOverloadedOperator(this, FExp.OP_ADD).flattenFunction(fc);
+    public void FOperatorRecordType.flattenOverloadedOperatorsForFlow(Flattener f) {
+        matchOverloadedOperator(null, FExp.OP_NEG).flattenFunction(f);
+        matchOverloadedOperator(this, FExp.OP_SUB).flattenFunction(f);
+        matchOverloadedOperator(this, FExp.OP_ADD).flattenFunction(f);
     }
 
-    public void InstValueModification.flattenUsedFuncsAndEnums(FClass fc) {
+    public void InstValueModification.flattenUsedFuncsAndEnums(Flattener f) {
         if (isFlattened(this)) {
-            getFExp().flattenUsedFuncsAndEnums(fc);
+            getFExp().flattenUsedFuncsAndEnums(f);
         }
     }
     
@@ -225,49 +376,49 @@ aspect Flattening {
     eq Root.getChild().isFlattened(InstValueModification ivm)                  = true;
 
 
-    public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
+    public void InstFunctionCall.flattenUsedFuncsAndEnums(Flattener f) {
         InstCallable target = myInstCallable();
-        target.flattenFunction(fc);
-        getArgs().flattenUsedFuncsAndEnums(fc);
+        target.flattenFunction(f);
+        getArgs().flattenUsedFuncsAndEnums(f);
     }
     
-    public void FBuiltInFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
+    public void FBuiltInFunctionCall.flattenUsedFuncsAndEnums(Flattener f) {
         for (ASTNode n : this) {
             if (n != getOriginalArgs()) {
-                n.flattenUsedFuncsAndEnums(fc);
+                n.flattenUsedFuncsAndEnums(f);
             }
         }
     }
     
-    public void InstExternalObject.flattenUsedFuncsAndEnums(FClass fc) {
-        myDestructor().flattenFunction(fc);
-        super.flattenUsedFuncsAndEnums(fc);
+    public void InstExternalObject.flattenUsedFuncsAndEnums(Flattener f) {
+        myDestructor().flattenFunction(f);
+        super.flattenUsedFuncsAndEnums(f);
     }
     
-    public void InstRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
-        getRecord().flattenMyRecord(fc);
-        getArgs().flattenUsedFuncsAndEnums(fc);
+    public void InstRecordConstructor.flattenUsedFuncsAndEnums(Flattener f) {
+        getRecord().flattenMyRecord(f);
+        getArgs().flattenUsedFuncsAndEnums(f);
     }
     
-    public void InstDefaultArgument.flattenUsedFuncsAndEnums(FClass fc) {
-        getFExp().flattenUsedFuncsAndEnums(fc);
+    public void InstDefaultArgument.flattenUsedFuncsAndEnums(Flattener f) {
+        getFExp().flattenUsedFuncsAndEnums(f);
     }
 
-    public void FIdUseInstAccess.flattenUsedFuncsAndEnums(FClass fc) {
-        super.flattenUsedFuncsAndEnums(fc);
+    public void FIdUseInstAccess.flattenUsedFuncsAndEnums(Flattener f) {
+        super.flattenUsedFuncsAndEnums(f);
         InstAccess ia = getInstAccess();
         if (ia.myInstComponentDecl().isRecord() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
-            ((InstAssignable) ia.myInstComponentDecl()).flattenMyType(fc);
+            ((InstAssignable) ia.myInstComponentDecl()).flattenMyType(f);
     }
 
-    public void FExp.flattenUsedFuncsAndEnums(FClass fc) {
-        super.flattenUsedFuncsAndEnums(fc);
+    public void FExp.flattenUsedFuncsAndEnums(Flattener f) {
+        super.flattenUsedFuncsAndEnums(f);
         InstClassDecl oper = overloadedOperator(true);
         boolean scalar = oper == null;
         if (scalar)
             oper = overloadedOperator(false);
         if (oper != null) {
-            oper.flattenFunction(fc);
+            oper.flattenFunction(f);
             int i = 0;
             for (FExp arg : childFExps()) {
                 FType inType = oper.myInputs().get(i).type();
@@ -275,64 +426,64 @@ aspect Flattening {
                 if (scalar) 
                     argType = argType.scalarType();
                 if (!inType.typeCompatible(argType, true))
-                    inType.matchOverloadedConstructor(argType).flattenFunction(fc);
+                    inType.matchOverloadedConstructor(argType).flattenFunction(f);
                 i++;
             }
         }
     }
 
-    public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
+    public void InstClassAccess.flattenUsedFuncsAndEnums(Flattener f) {
         if (myInstClassDecl().extendsEnum())
-            myInstClassDecl().flattenEnum(fc);
+            myInstClassDecl().flattenEnum(f);
     }
 
-    public void FReinit.flattenUsedFuncsAndEnums(FClass fc) {
-        containingInstNode().flattenStateSelect(fc);
-        getFExp().flattenUsedFuncsAndEnums(fc);
+    public void FReinit.flattenUsedFuncsAndEnums(Flattener f) {
+        containingInstNode().flattenStateSelect(f);
+        getFExp().flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstNode.flattenStateSelect(FClass fc) {
-        lookupInstClass("StateSelect").target().flattenEnum(fc);
+    public void InstNode.flattenStateSelect(Flattener f) {
+        lookupInstClass("StateSelect").target().flattenEnum(f);
     }
 
-    public void InstAccess.flattenMyRecord(FClass fc) {
-        myInstClassDecl().flattenRecord(fc);
+    public void InstAccess.flattenMyRecord(Flattener f) {
+        myInstClassDecl().flattenRecord(f);
     }
     
     // Flatten function if not already done
-    public void InstPartialFunction.flattenFunction(FClass fc) {
-        myInstClass().flattenFunction(fc);
+    public void InstPartialFunction.flattenFunction(Flattener f) {
+        myInstClass().flattenFunction(f);
     }
     
-    public void InstClassDecl.flattenFunction(FClass fc) {}
+    public void InstClassDecl.flattenFunction(Flattener f) {}
     
-    public void InstBaseClassDecl.flattenFunction(FClass fc) {
-        getInstRestriction().flattenFunction(fc, this);
+    public void InstBaseClassDecl.flattenFunction(Flattener f) {
+        getInstRestriction().flattenFunction(f, this);
     }
     
-    public void InstSimpleShortClassDecl.flattenFunction(FClass fc) {
-        actualInstClass().flattenFunction(fc);
+    public void InstSimpleShortClassDecl.flattenFunction(Flattener f) {
+        actualInstClass().flattenFunction(f);
     }
     
-    public void InstLibNode.flattenFunction(FClass fc) {
-        actualInstClass().flattenFunction(fc);
+    public void InstLibNode.flattenFunction(Flattener f) {
+        actualInstClass().flattenFunction(f);
     }
     
-    public void InstRestriction.flattenFunction(FClass fc, InstBaseClassDecl icd) {}
+    public void InstRestriction.flattenFunction(Flattener f, InstBaseClassDecl icd) {}
     
-    public void InstFunction.flattenFunction(FClass fc, InstBaseClassDecl icd) {
-        icd.flattenThisFunction(fc);
+    public void InstFunction.flattenFunction(Flattener f, InstBaseClassDecl icd) {
+        icd.flattenThisFunction(f);
     }
 
-    public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
-        if (fc.lookupFunc(qualifiedName()) == null) {
-            FFunctionDecl ffd = createFFunction(fc, findFunctionExternal());
-            copyDerivativeAnnotations(fc, ffd.annotation());
+    public void InstBaseClassDecl.flattenThisFunction(Flattener f) {
+        if (!f.hasCorrFFunctionDecl(this)) {
+            FFunctionDecl ffd = createFFunction(f, findFunctionExternal());
+            copyDerivativeAnnotations(f, ffd.annotation());
             ffd.copyInlineAnnotation(findInlineAnnotationRoot());
             ffd.smoothOrder(smoothOrder());
             
-            addLocalFunctionConstants(ffd, fc);
-            flattenUsedFuncsAndEnums(fc);
+            addLocalFunctionConstants(f, ffd);
+            flattenUsedFuncsAndEnums(f);
             ffd.updateRecordArraySizes();
             
             contribute(ffd);
@@ -353,22 +504,22 @@ aspect Flattening {
         return res;
     }
     
-    protected FFunctionDecl InstBaseClassDecl.createFFunction(FClass fc, InstExternal ie) {
+    protected FFunctionDecl InstBaseClassDecl.createFFunction(Flattener f, InstExternal ie) {
         FFunctionDecl ffd = createFFunctionDecl();
         ffd.setFQName(new FQNameString(qualifiedName()));
-        fc.addFFunctionDecl(ffd);
+        f.addFFunctionDecl(ffd);
         
         List<FFunctionVariable> vars = new List<FFunctionVariable>();
         List<FStatement> stmts = new List<FStatement>();
         
         
-        flattenComponentsInFunction(vars, stmts, fc, new HashSet<String>(), FUNC_AND_REC_MOD_LEVEL);
+        flattenComponentsInFunction(f, vars, stmts, new HashSet<String>(), FUNC_AND_REC_MOD_LEVEL);
         
         if (ie != null) {
-            flattenExternal(stmts, fc, ie);
+            flattenExternal(f, stmts, ie);
         } else {
-            FStatement.flattenFStatementList(findFunctionAlgorithm().getFStatements(),
-                stmts, fc, new FQNameEmpty());
+            FStatement.flattenFStatementList(f, findFunctionAlgorithm().getFStatements(),
+                stmts, new FQNameEmpty());
         }
 
         int num = stmts.getNumChild();
@@ -382,16 +533,16 @@ aspect Flattening {
 
     public static final int InstNode.FUNC_AND_REC_MOD_LEVEL = 1000;
 
-    protected void InstBaseClassDecl.flattenExternal(List<FStatement> stmts, FClass fc, InstExternal ie) {
+    protected void InstBaseClassDecl.flattenExternal(Flattener f, List<FStatement> stmts, InstExternal ie) {
         List<FStatement> stmts2 = new List<FStatement>();
-        ie.flatten(stmts2, fc, new FQNameEmpty());
+        ie.flatten(f, stmts2, new FQNameEmpty());
         for (FStatement stmt : stmts2) {
             stmts.addChild(stmt);
         }
     }
     
-    private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, AnnotationNode dest) {
-        copyDerivativeAnnotations(fc, findDerivativeAnnotationRoot(), dest);
+    private void InstBaseClassDecl.copyDerivativeAnnotations(Flattener f, AnnotationNode dest) {
+        copyDerivativeAnnotations(f, findDerivativeAnnotationRoot(), dest);
     }
 
     /**
@@ -455,12 +606,12 @@ aspect Flattening {
         return findAnnotationRoot(true, true, "smoothOrder");
     }
 
-    private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, AnnotationNode src, AnnotationNode dest) {
+    private void InstBaseClassDecl.copyDerivativeAnnotations(Flattener f, AnnotationNode src, AnnotationNode dest) {
         for (AnnotationNode derSrcNode : src.allFor("derivative")) {
             String derName = derSrcNode.string();
             InstClassDecl fd_decl = lookupDerivativeFunction(derName).target();
             AnnotationNode derDestNode = dest.addNode("derivative");
-            fd_decl.flattenFunction(fc);
+            fd_decl.flattenFunction(f);
             FExp derNameExp = new FIdUseExp(new FQNameString(fd_decl.qualifiedName()));
             derDestNode.setValue(derNameExp);
             for (AnnotationNode attrSrcNode : derSrcNode) {
@@ -478,7 +629,7 @@ aspect Flattening {
         }
     }
 
-    private void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
+    private void InstBaseClassDecl.addLocalFunctionConstants(Flattener f, FFunctionDecl ffd) {
         Set<InstAssignable> added = new HashSet<InstAssignable>();
         Set<InstAssignable> all = localFunctionConstantList();
         List<FFunctionVariable> ffvs = new List<FFunctionVariable>();
@@ -489,8 +640,8 @@ aspect Flattening {
             // We need a copy of all since it can be modified during iteration
             for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
                 if (added.add(cons)) {
-                    cons.flattenInFunction(ffvs, stmts, fc, true, this);
-                    cons.flattenUsedFuncsAndEnums(fc);
+                    cons.flattenInFunction(f, ffvs, stmts, true, this);
+                    cons.flattenUsedFuncsAndEnums(f);
                     all.remove(cons);
                 }
             }
@@ -533,17 +684,17 @@ aspect Flattening {
             comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getOutputs()));
     }
 
-    public void InstNode.flattenComponentsInFunction(List<FFunctionVariable> vars, List<FStatement> stmts,
-            FClass fc, Set<String> added, int level) {
+    public void InstNode.flattenComponentsInFunction(Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts,
+            Set<String> added, int level) {
         HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
         for (InstExtends ie : getInstExtendss()) {
-            ie.flattenComponentsInFunction(vars, stmts, fc, added, level + 1);
+            ie.flattenComponentsInFunction(f, vars, stmts, added, level + 1);
         }
         for (InstComponentDecl icd : getInstComponentDecls()) {
             if (added.add(icd.name())) {
                 HashMap<InstNode,Integer> oldLevels2 = icd.setModificationLevel(level + 1);
-                icd.flattenInFunction(vars, stmts, fc, false, null);
-                icd.flattenUsedFuncsAndEnums(fc);
+                icd.flattenInFunction(f, vars, stmts, false, null);
+                icd.flattenUsedFuncsAndEnums(f);
                 icd.clearModificationLevel(oldLevels2);
             }
         }
@@ -580,60 +731,60 @@ aspect Flattening {
     eq InstLibNode.findFunctionExternal()              = actualInstClass().findFunctionExternal();
     
     // Flatten record if not already done
-    public void InstClassDecl.flattenRecord(FClass fc) {}
+    public void InstClassDecl.flattenRecord(Flattener f) {}
     
-    public void InstBaseClassDecl.flattenRecord(FClass fc) {
-        getInstRestriction().flattenRecord(fc, this);
+    public void InstBaseClassDecl.flattenRecord(Flattener f) {
+        getInstRestriction().flattenRecord(f, this);
     }
     
-    public void InstRestriction.flattenRecord(FClass fc, InstBaseClassDecl icd) {}
+    public void InstRestriction.flattenRecord(Flattener f, InstBaseClassDecl icd) {}
     
-    public void InstConnector.flattenRecord(FClass fc, InstBaseClassDecl icd) {
+    public void InstConnector.flattenRecord(Flattener f, InstBaseClassDecl icd) {
         if (inheritedRestriction() != null)
-            inheritedRestriction().flattenRecord(fc, icd);
+            inheritedRestriction().flattenRecord(f, icd);
     }
 
-    public void InstMRecord.flattenRecord(FClass fc, InstBaseClassDecl icd) {
-        icd.flattenThisRecord(fc);
+    public void InstMRecord.flattenRecord(Flattener f, InstBaseClassDecl icd) {
+        icd.flattenThisRecord(f);
     }
 
-    public void InstNode.flattenThisRecord(FClass fc) {
+    public void InstNode.flattenThisRecord(Flattener f) {
         String name = qualifiedTypeName();
-        if (fc.lookupFRec(name) == null) {
+        if (!f.hasCorrFRecord(this)) {
             FRecordDecl frd = new FRecordDecl();
             frd.setFQName(new FQNameString(name));
             
             Set<String> names = new HashSet<String>();
-            flattenComponentsInRecord(frd, fc, names, FUNC_AND_REC_MOD_LEVEL);
+            flattenComponentsInRecord(f, frd, names, FUNC_AND_REC_MOD_LEVEL);
             
-            fc.addFRecordDecl(frd);
+            f.addFRecordDecl(frd);
             
-            flattenUsedFuncsAndEnums(fc);
+            flattenUsedFuncsAndEnums(f);
         }
     }
 
-    public void InstNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
+    public void InstNode.flattenComponentsInRecord(Flattener f, FRecordDecl frd, Set<String> names, int level) {
         HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
         for (InstExtends ie : getInstExtendss())
-            ie.flattenComponentsInRecord(frd, fc, names, level + 1);
+            ie.flattenComponentsInRecord(f, frd, names, level + 1);
         for (InstComponentDecl icd : getInstComponentDecls()) {
             HashMap<InstNode,Integer> oldLevels2 = icd.setModificationLevel(level + 1);
-            icd.flattenInRecord(frd, fc, names);
+            icd.flattenInRecord(f, frd, names);
             icd.clearModificationLevel(oldLevels2);
         }
         clearModificationLevel(oldLevels);
     }
 
-    public void InstSimpleShortClassDecl.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
-        actualInstClass().flattenComponentsInRecord(frd, fc, names, level);
+    public void InstSimpleShortClassDecl.flattenComponentsInRecord(Flattener f, FRecordDecl frd, Set<String> names, int level) {
+        actualInstClass().flattenComponentsInRecord(f, frd, names, level);
     }
 
-    public void InstLibNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
-        actualInstClass().flattenComponentsInRecord(frd, fc, names, level);
+    public void InstLibNode.flattenComponentsInRecord(Flattener f, FRecordDecl frd, Set<String> names, int level) {
+        actualInstClass().flattenComponentsInRecord(f, frd, names, level);
     }
 
-    public void InstExternal.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
-        getFAlgorithm().getFStatement(0).flatten(sl, fc, prefix);
+    public void InstExternal.flatten(Flattener f, List<FStatement> sl, FQName prefix) {
+        getFAlgorithm().getFStatement(0).flatten(f, sl, prefix);
     }
     
     syn nta FAlgorithm InstExternal.getFAlgorithm() {
@@ -690,7 +841,7 @@ aspect Flattening {
     syn boolean FExternalLanguage.canBeReturn(FType type) = !type.isArray();
     eq FFortran77ExternalLanguage.canBeReturn(FType type) = !type.isComposite() && !type.isString();
     
-    public boolean FExternalStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+    public boolean FExternalStmt.flatten(Flattener f, List<FStatement> sl, FQName prefix) {
         List<FExp> args = new List<FExp>();
         for (FExp arg : getArgs()) {
             args.add(arg.flatten(prefix));
@@ -706,16 +857,16 @@ aspect Flattening {
     }
     
     public void InstComponentDecl.flattenInFunction(
-            List<FFunctionVariable> vars, List<FStatement> stmts, FClass fc, boolean useConstant, InstClassDecl func) {}
+            Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts, boolean useConstant, InstClassDecl func) {}
     
     @Override
     public void InstAssignable.flattenInFunction(
-            List<FFunctionVariable> vars, List<FStatement> stmts, FClass fc, boolean useConstant, InstClassDecl func) {
+            Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts, boolean useConstant, InstClassDecl func) {
         if (useConstant || !flattenAsFunctionConstant()) {
             InstClassDecl old = temporarilyInFunction;
             temporarilyInFunction = func;
             if (hasInstValueMod())
-                getBindingFExp().flattenUsedFuncsAndEnums(fc);
+                getBindingFExp().flattenUsedFuncsAndEnums(f);
             Opt eo = new Opt();
             FQName fqn = createFQNameForFuncVar(func);
             fqn.removeFArraySubscripts();
@@ -731,7 +882,7 @@ aspect Flattening {
             if (!isInput()) {
                 addBindingAssignments(stmts);
             }
-            myInstClass().flattenRecord(fc);
+            myInstClass().flattenRecord(f);
             temporarilyInFunction = old;
         }
     }
@@ -1007,24 +1158,24 @@ aspect Flattening {
     }
 
     // Generic method for flattening
-    public void ASTNode.flatten(FClass fc, FlattenBindingExp binding, int level) {
+    public void ASTNode.flatten(Flattener f, FlattenBindingExp binding, int level) {
         for (ASTNode n : this) {
-            n.flatten(fc, binding, level);
+            n.flatten(f, binding, level);
         }
     }
 
-    public void InstNode.flatten(FClass fc, FlattenBindingExp binding, int level) {
+    public void InstNode.flatten(Flattener f, FlattenBindingExp binding, int level) {
         HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
-        flattenEquations(getFQName(), fc);
-        getInstComponentDeclList().flatten(fc, binding, level + 1);
-        getInstExtendsList().flatten(fc, binding, level + 1);
-        contribute(fc);
+        flattenEquations(f, getFQName());
+        getInstComponentDeclList().flatten(f, binding, level + 1);
+        getInstExtendsList().flatten(f, binding, level + 1);
+        f.contribute(this);
         clearModificationLevel(oldLevels);
     }
 
-    public void InstNode.flattenEquations(FQName name, FClass fc) {
+    public void InstNode.flattenEquations(Flattener f, FQName name) {
         for (FAbstractEquation ae : getFAbstractEquations()) 
-            ae.flatten(name, fc);
+            ae.flatten(f, name);
     }
 
     /**
@@ -1039,17 +1190,17 @@ aspect Flattening {
      */
     syn boolean InstComponentDecl.useInFlattening()    = isPresent() && !(isOuter() && !isInner());
 
-    public void InstComponentDecl.flatten(FClass fc, FlattenBindingExp binding, int level) {
+    public void InstComponentDecl.flatten(Flattener f, FlattenBindingExp binding, int level) {
         if (useInFlattening()) {
-            super.flatten(fc, binding, level);
+            super.flatten(f, binding, level);
             if (!isPrimitive() && !hasFArraySubscripts() && !isConnector()) {
-                fc.countComponent();
+                f.countComponent();
             }
         }
     }
 
-    public void InstExpandableConnectorDecl.flatten(FClass fc, FlattenBindingExp binding, int level) {
-        super.flatten(fc, FlattenBindingExp.PARAMETER, level);
+    public void InstExpandableConnectorDecl.flatten(Flattener f, FlattenBindingExp binding, int level) {
+        super.flatten(f, FlattenBindingExp.PARAMETER, level);
     }
 
     public void InstClassDecl.buildConnectionSets(FClass fc) {
@@ -1061,10 +1212,10 @@ aspect Flattening {
         endStep("buildConnectionSets()");
     }
     
-    public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {}
+    public void InstComponentDecl.flattenInRecord(Flattener f, FRecordDecl frd, Set<String> names) {}
     
     public boolean FVariable.modifiableInRecord = true;
-    public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
+    public void InstAssignable.flattenInRecord(Flattener f, FRecordDecl frd, Set<String> names) {
         if (names.add(name())) {
             FQName fqn;
             if (isArray()) {
@@ -1077,7 +1228,7 @@ aspect Flattening {
             FVariable fv = createFVariable(fqn, FlattenBindingExp.NONE);
             fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
-            flattenMyType(fc);
+            flattenMyType(f);
         }
     }
     
@@ -1105,32 +1256,32 @@ aspect Flattening {
         return new FExpSubscript(exps[i].flatten(exps[i].sizeFlatteningPrefix()));
     }
 
-    public void InstAssignable.flatten(FClass fc, FlattenBindingExp binding, int level) {
+    public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level) {
         if (useInFlattening()) {
             if (hasBindingFExp()) {
-                getBindingFExp().flattenAssertExternal(fc, myInstValueMod().myInstNode().retrieveFQName());
+                getBindingFExp().flattenAssertExternal(f, myInstValueMod().myInstNode().retrieveFQName());
             }
             HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
-            fc.addFVariableNoTransform(createFVariable(getFQName().copyAndAddFas(size().flattenFArraySubscripts()), binding));
-            flattenMyType(fc);
+            f.addFVariable(createFVariable(getFQName().copyAndAddFas(size().flattenFArraySubscripts()), binding));
+            flattenMyType(f);
             clearModificationLevel(oldLevels);
         }
     }
     
-    public void ASTNode.flattenAssertExternal(FClass fc, FQName prefix) {
+    public void ASTNode.flattenAssertExternal(Flattener f, FQName prefix) {
         for (ASTNode n : this) {
-            n.flattenAssertExternal(fc, prefix);
+            n.flattenAssertExternal(f, prefix);
         }
     }
     
-    public void InstFunctionCall.flattenAssertExternal(FClass fc, FQName prefix) {
+    public void InstFunctionCall.flattenAssertExternal(Flattener f, FQName prefix) {
         if (variability().knownParameterOrLess() && myInstCallable().isExternalFunction()) {
             try {
                 String msg = runtimeErrorString("Structural parameter external function call '"
                         + name() + "' did not evaluate to same result as during compilation");
                 CValue cval = ceval();
                 if (cval.hasBuildLiteral()) {
-                    fc.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
+                    f.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
                             new FAssert(new FEqExp(cval.buildLiteral(), flatten(prefix)),
                                     new FStringLitExp(msg), new Opt<FExp>())));
                 }
@@ -1164,35 +1315,35 @@ aspect Flattening {
     syn lazy boolean InstFullClassDecl.externalDependency() = hasInstExternal() || super.externalDependency();
     
     
-    public abstract void InstAssignable.flattenMyType(FClass fc);
+    public abstract void InstAssignable.flattenMyType(Flattener f);
 
-    public void InstPrimitive.flattenMyType(FClass fc) {
-        myInstClass().addFDerivedType(fc);
-        flattenUsedFuncsAndEnums(fc);
+    public void InstPrimitive.flattenMyType(Flattener f) {
+        myInstClass().addFDerivedType(f);
+        flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstEnum.flattenMyType(FClass fc) {
-        myInstClass().flattenEnum(fc);
-        flattenUsedFuncsAndEnums(fc);
+    public void InstEnum.flattenMyType(Flattener f) {
+        myInstClass().flattenEnum(f);
+        flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstExternalObject.flattenMyType(FClass fc) {
-        myInstClass().addFDerivedType(fc);
-        flattenUsedFuncsAndEnums(fc);
+    public void InstExternalObject.flattenMyType(Flattener f) {
+        myInstClass().addFDerivedType(f);
+        flattenUsedFuncsAndEnums(f);
     }
 
-    public void InstPartialFunction.flattenMyType(FClass fc) {
+    public void InstPartialFunction.flattenMyType(Flattener f) {
         throw new UnsupportedOperationException("Partial function component only allowed in functions");
     }
 
-    public void InstRecord.flattenMyType(FClass fc) {
+    public void InstRecord.flattenMyType(Flattener f) {
         if (flattenRedeclaredType()) {
             InstComponentDecl rec = scalar();
             if (rec != null) {
-                rec.flattenThisRecord(fc);
+                rec.flattenThisRecord(f);
             }
         } else {
-            myInstClass().flattenRecord(fc);
+            myInstClass().flattenRecord(f);
         }
     }
 
@@ -1307,11 +1458,11 @@ aspect Flattening {
         return e;
     }
 
-    private FClass InstClassDecl.flatEnumClassDeclAddedTo = null;
+    private Flattener InstClassDecl.flatEnumClassDeclAddedTo = null;
     
-    public void InstClassDecl.flattenEnum(FClass fc) {      
-        if (flatEnumClassDeclAddedTo != fc) {
-            flatEnumClassDeclAddedTo = fc;
+    public void InstClassDecl.flattenEnum(Flattener f) {      
+        if (flatEnumClassDeclAddedTo != f) {
+            flatEnumClassDeclAddedTo = f;
             // Flatten all InstEnums corresponding to FEnumLiterals
             FEnumLiteralList l = new FEnumLiteralList();
             for (InstEnumLiteral ie : enumLiterals()) 
@@ -1323,17 +1474,17 @@ aspect Flattening {
                 comment = new Opt(classDecl.getStringComment().flatten());
             else 
                 comment = new Opt();
-            fc.addFEnumDecl(new FEnumDecl(id, l, comment)); 
-            addFDerivedType(fc);
+            f.addFEnumDecl(new FEnumDecl(id, l, comment)); 
+            addFDerivedType(f);
         }
     }
     
-    public void InstSimpleShortClassDecl.flattenEnum(FClass fc) {
-        actualInstClass().flattenEnum(fc);
+    public void InstSimpleShortClassDecl.flattenEnum(Flattener f) {
+        actualInstClass().flattenEnum(f);
     }
     
-    public void InstLibNode.flattenEnum(FClass fc) {
-        actualInstClass().flattenEnum(fc);
+    public void InstLibNode.flattenEnum(Flattener f) {
+        actualInstClass().flattenEnum(f);
     }
     
     public abstract FVariable InstAssignable.createEmptyFVariable();
@@ -1480,22 +1631,22 @@ aspect Flattening {
     
     private boolean InstClassDecl.derivedTypeAdded;
     
-    public void InstClassDecl.addFDerivedType(FClass fc) {
+    public void InstClassDecl.addFDerivedType(Flattener f) {
         if (!derivedTypeAdded && extendsPrimitive()) {
             derivedTypeAdded = true;
             List<FAttribute> attr = new List<FAttribute>();
             addAttributes(attr, totalMergedEnvironment());
             FType baseType = primitiveScalarType().fullCopy();
-            fc.addFDerivedType(new FDerivedType(qualifiedName(), baseType, attr));
+            f.addFDerivedType(new FDerivedType(qualifiedName(), baseType, attr));
         }
     }
     
-    public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
-        actualInstClass().addFDerivedType(fc);
+    public void InstSimpleShortClassDecl.addFDerivedType(Flattener f) {
+        actualInstClass().addFDerivedType(f);
     }
     
-    public void InstLibNode.addFDerivedType(FClass fc) {
-        actualInstClass().addFDerivedType(fc);
+    public void InstLibNode.addFDerivedType(Flattener f) {
+        actualInstClass().addFDerivedType(f);
     }
 
     public FVariable InstAssignable.createFVariable() {

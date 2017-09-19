@@ -1795,7 +1795,7 @@ aspect MultiDeclMethods {
         public ArrayList<InstComponentDecl> myOutputs();
         public ArrayList<InstComponentDecl> myNonInputs();
         
-        public void flattenFunction(FClass fc);
+        public void flattenFunction(Flattener f);
     }
     
     syn InstClassDecl InstClassDecl.asInstClassDecl() = this;
