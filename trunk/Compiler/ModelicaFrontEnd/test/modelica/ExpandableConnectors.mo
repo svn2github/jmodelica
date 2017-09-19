@@ -3050,6 +3050,62 @@ end ExpandableConnectors.ConnectorArray7;
 ")})));
 end ConnectorArray7;
 
+model ConnectorArray8
+    expandable connector EC
+    end EC;
+    
+    connector C = Real;
+    
+    EC ec1;
+    C c[2];
+equation
+    for i in 1:2 loop
+        connect(c[i], ec1.a[i]);
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray8",
+            description="Expandable connector with for index",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArray8
+ Real ec1.a[2];
+ Real c[2];
+equation
+ c[1] = ec1.a[1];
+ c[2] = ec1.a[2];
+end ExpandableConnectors.ConnectorArray8;
+")})));
+end ConnectorArray8;
+
+model ConnectorArray9
+    expandable connector EC
+    end EC;
+    
+    connector C = Real;
+    
+    EC ec1;
+    C c[2];
+equation
+    for i in 1:1 loop
+        connect(c, ec1.a[i:i+1]);
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray9",
+            description="Expandable connector with for index",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArray9
+ Real ec1.a[2];
+ Real c[2];
+equation
+ c[1] = ec1.a[1];
+ c[2] = ec1.a[2];
+end ExpandableConnectors.ConnectorArray9;
+")})));
+end ConnectorArray9;
+
 
 model ExpandableWithInputOutput1
     connector CI = input Real;

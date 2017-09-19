@@ -1134,7 +1134,7 @@ aspect Connections {
             Indices rightInd = right.indices();
             Iterator<Index> leftIter = leftInd.iterator();
             Iterator<Index> rightIter = rightInd.iterator();
-            while (leftIter.hasNext()) {
+            while (leftIter.hasNext() && rightIter.hasNext()) {
                 Index leftI = leftInd.translate(leftIter.next());
                 Index rightI = rightInd.translate(rightIter.next());
                 InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
@@ -2808,21 +2808,25 @@ aspect ExpandableConnectors {
                     private FArraySubscripts fas;
                     private boolean errorReported = false;
                     
+                    private Size s;
+                    private boolean[] fixed;
+                    
                     public Source(InstAccess target, FArraySubscripts fas) {
                         this.target = target;
                         this.fas = fas;
+                        calculateSize();
                     }
                     
                     public Source(Source other) {
                         this.target = other.target;
                         this.fas = other.fas;
+                        this.s      = other.s;
+                        this.fixed  = other.fixed;
                     }
                     
-                    public void collectSize(SummedSize ss) {
+                    private void calculateSize() {
                         // Calculate local size
-                        Size s;
                         Size ts = target.size();
-                        boolean[] fixed;
                         if (fas != null) {
                             MutableSize ms = new MutableSize(fas.getNumFSubscript());
                             fixed = new boolean[ms.ndims()];
@@ -2844,6 +2848,9 @@ aspect ExpandableConnectors {
                             fixed = new boolean[s.ndims()];
                             Arrays.fill(fixed, true);
                         }
+                    }
+                    
+                    public void collectSize(SummedSize ss) {
                         if (errorReported)
                             return;
                         
