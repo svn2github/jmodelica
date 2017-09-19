@@ -48,6 +48,14 @@ set -o pipefail
 
 PYTHONPATH="$(merge_path "${PYTHONPATH}" "${JMODELICA_HOME}/Python/")"
 
+# Default paths to ant files used for unit tests
+if [[ -z "MC_ANT_ARGS" ]]; then
+    MC_ANT_ARGS=${JMODELICA_SRC}/Compiler/ModelicaCompiler/build.xml
+fi
+if [[ -z "OC_ANT_ARGS" ]]; then
+    OC_ANT_ARGS=${JMODELICA_SRC}/Compiler/OptimicaCompiler/build.xml
+fi
+
 # Find operating system
 SYS="$(uname -s)"
 if [[ "${SYS}" == "Darwin" ]]; then
@@ -290,7 +298,11 @@ function nose_test() {
 }
 
 function ant_test() {
-  ant -f ${JMODELICA_SRC}/Compiler/$1Compiler/build.xml ${CLEAN_JUNIT} clean-test test
+  if [[ "$1" == "Modelica" ]]; then
+    ant -f ${MC_ANT_ARGS} ${CLEAN_JUNIT} clean-test test
+  else
+    ant -f ${OC_ANT_ARGS} ${CLEAN_JUNIT} clean-test test
+  fi
 }
 
 function build_jmodelica() {
