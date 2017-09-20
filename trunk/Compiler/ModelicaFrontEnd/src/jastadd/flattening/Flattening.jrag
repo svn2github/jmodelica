@@ -139,39 +139,17 @@ aspect Flattening {
         private List<FEnumDecl> enumDecls = new List<FEnumDecl>();        
         private List<FDerivedType> derivedTypes = new List<FDerivedType>();
         
+        private Set<String> flattenedNodes = new HashSet<String>();
+        
         
         public Flattener(FClass fc) {
             this.fc = fc;
         }
         
-        //analoguous to FClass.lookupFunc(String name)
-        public FFunctionDecl lookupFFunctionDecl(InstClassDecl icd) {
-            String name = icd.qualifiedName();
-        	for (FFunctionDecl f : getFFunctionDecls())
-				if (f.name().equals(name))
-					return f;
-			return null;
+        public boolean isFlattened(InstNode n) {
+            return flattenedNodes.contains(n.qualifiedTypeName());
         }
-        
-        // has corresponding flat function declaration
-        public boolean hasCorrFFunctionDecl(InstClassDecl icd) {
-            return lookupFFunctionDecl(icd) != null;
-        }
-        
-         //analoguous to FClass.lookupFRec(String name)
-        public FRecordDecl lookupFRecord(InstNode n) {
-            String name = n.qualifiedTypeName();
-        	for (FRecordDecl r : getFRecordDecls())
-				if (r.name().equals(name))
-					return r;
-			return null;
-        }
-        
-        public boolean hasCorrFRecord(InstNode n) {
-            return lookupFRecord(n) != null;
-        }
-        
-        
+
         public List<FAbstractEquation> getNormalEquations() {
             return normalEqns;
         }
@@ -217,20 +195,28 @@ aspect Flattening {
         }
         
         public List<FFunctionDecl> addFFunctionDecl(FFunctionDecl ffd) {
+            addFlattened(ffd.name());
             return functionDecls.add(ffd);
         }
         
         public List<FRecordDecl> addFRecordDecl(FRecordDecl frd) {
+            addFlattened(frd.name());
             return recordDecls.add(frd);
         }
         
         public List<FEnumDecl> addFEnumDecl(FEnumDecl fed) {
+            addFlattened(fed.name());
             return enumDecls.add(fed);
         }
         
         public List<FDerivedType> addFDerivedType(FDerivedType fdt) {
             return derivedTypes.add(fdt);
         }
+
+        private void addFlattened(String name) {
+            flattenedNodes.add(name);
+        }
+        
         
         public FlatAnnotation flatAnnotation(String ... path) {
             return fc.flatAnnotation(path);
@@ -472,7 +458,7 @@ aspect Flattening {
     }
 
     public void InstBaseClassDecl.flattenThisFunction(Flattener f) {
-        if (!f.hasCorrFFunctionDecl(this)) {
+        if (!f.isFlattened(this)) {
             FFunctionDecl ffd = createFFunction(f, findFunctionExternal());
             copyDerivativeAnnotations(f, ffd.annotation());
             ffd.copyInlineAnnotation(findInlineAnnotationRoot());
@@ -746,7 +732,7 @@ aspect Flattening {
 
     public void InstNode.flattenThisRecord(Flattener f) {
         String name = qualifiedTypeName();
-        if (!f.hasCorrFRecord(this)) {
+        if (!f.isFlattened(this)) {
             FRecordDecl frd = new FRecordDecl();
             frd.setFQName(new FQNameString(name));
             
@@ -1454,11 +1440,8 @@ aspect Flattening {
         return e;
     }
 
-    private Flattener InstClassDecl.flatEnumClassDeclAddedTo = null;
-    
     public void InstClassDecl.flattenEnum(Flattener f) {      
-        if (flatEnumClassDeclAddedTo != f) {
-            flatEnumClassDeclAddedTo = f;
+        if (!f.isFlattened(this)) {
             // Flatten all InstEnums corresponding to FEnumLiterals
             FEnumLiteralList l = new FEnumLiteralList();
             for (InstEnumLiteral ie : enumLiterals()) 
