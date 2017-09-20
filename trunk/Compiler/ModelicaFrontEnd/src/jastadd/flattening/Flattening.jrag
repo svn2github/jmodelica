@@ -210,6 +210,7 @@ aspect Flattening {
         }
         
         public List<FDerivedType> addFDerivedType(FDerivedType fdt) {
+            addFlattened(fdt.name());
             return derivedTypes.add(fdt);
         }
 
@@ -1453,8 +1454,8 @@ aspect Flattening {
                 comment = new Opt(classDecl.getStringComment().flatten());
             else 
                 comment = new Opt();
-            f.addFEnumDecl(new FEnumDecl(id, l, comment)); 
             addFDerivedType(f);
+            f.addFEnumDecl(new FEnumDecl(id, l, comment)); 
         }
     }
     
@@ -1608,11 +1609,8 @@ aspect Flattening {
         }
     }
     
-    private boolean InstClassDecl.derivedTypeAdded;
-    
     public void InstClassDecl.addFDerivedType(Flattener f) {
-        if (!derivedTypeAdded && extendsPrimitive()) {
-            derivedTypeAdded = true;
+        if (!f.isFlattened(this) && extendsPrimitive()) {
             List<FAttribute> attr = new List<FAttribute>();
             addAttributes(attr, totalMergedEnvironment());
             FType baseType = primitiveScalarType().fullCopy();
