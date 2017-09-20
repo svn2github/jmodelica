@@ -536,7 +536,6 @@
                     <arg value="--cacheCycle" />
                     <arg value="--visitCheck=false" />
                     <arg value="--lazyMaps" />
-                    <arg value="--emptyContainerSingletons" />
                     <arg value="--indent=4space" />
                     <arg value="--inhEqCheck=false" />
                     <arg line="${jastadd_files}" />
