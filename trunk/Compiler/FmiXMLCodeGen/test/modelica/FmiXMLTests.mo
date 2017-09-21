@@ -1473,25 +1473,25 @@ $modelStructure$
     <ScalarVariable name=\"x1[1]\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"der(x1[1])\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <ScalarVariable name=\"_der_x1[1]\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"x1[2]\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"der(x1[2])\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <ScalarVariable name=\"_der_x1[2]\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"x2[1]\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"der(x2[1])\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <ScalarVariable name=\"_der_x2[1]\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
     <ScalarVariable name=\"x2[2]\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"der(x2[2])\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <ScalarVariable name=\"_der_x2[2]\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
 </ModelVariables>
@@ -1740,5 +1740,55 @@ model VendorAnnotations2
 </VendorAnnotations>
 ")})));
 end VendorAnnotations2;
+
+model DummyDerivative1
+
+    model M
+        Real x1;
+        Real x2;
+    equation
+        der(x1) + der(x2) = 2;
+        x1 + x2*time = 0;
+    end M;
+
+    M m;
+
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DummyDerivative1",
+            description="XML name of dummy derivative",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+$modelStructure$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"m.x1\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"m._der_x1\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"m.x2\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(m.x2)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"3\" />
+    </ScalarVariable>
+</ModelVariables>
+
+<ModelStructure>
+    <Derivatives>
+        <Unknown index=\"4\" dependencies=\"3\" />
+    </Derivatives>
+    <InitialUnknowns>
+        <Unknown index=\"3\" dependencies=\"\" />
+        <Unknown index=\"4\" dependencies=\"\" />
+    </InitialUnknowns>
+</ModelStructure>
+")})));
+end DummyDerivative1;
 
 end FmiXMLTests;
