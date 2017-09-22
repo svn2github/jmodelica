@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Documentation ; #5466
+Added information about limitation regarding Q-identifiers. 
+
 ; Fixed ; Minor ; Compiler ; #5460
 Fixed bug where indices in for expressions got modifications intended for actual variables. 
 
