@@ -689,8 +689,8 @@ class Test_FMUModelME1:
         bounce = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
         const = bounce.get_real([3,4])
 
-        nose.tools.assert_almost_equal(const[0],-9.81000000)
-        nose.tools.assert_almost_equal(const[1],0.70000000)
+        nose.tools.assert_almost_equal(const[1],-9.81000000)
+        nose.tools.assert_almost_equal(const[0],0.70000000)
 
         const = bounce.get(['der(v)','e'])
 

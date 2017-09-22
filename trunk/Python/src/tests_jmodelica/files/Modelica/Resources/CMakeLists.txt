@@ -26,7 +26,11 @@ project (TestLibraries)
 install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Include/)")
 
 #Make the directory for lib files to be installed in.
-set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Library/${JM_PLATFORM})
+if(" ${JM_PLATFORM} " MATCHES " win64 ")
+    set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python_64/tests_jmodelica/files/Modelica/Resources/Library/${JM_PLATFORM})
+else ()
+    set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Library/${JM_PLATFORM})
+endif ()
 install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 
 #Add test libraries

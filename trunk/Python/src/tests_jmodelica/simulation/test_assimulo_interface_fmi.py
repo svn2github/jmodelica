@@ -1999,7 +1999,7 @@ class Test_FMI_ODE:
         """
         This tests a FMU with typeDefinitions including StringType and BooleanType
         """
-        model = load_fmu('Robot_Dym74FD01.fmu', path_to_fmus_me1)
+        model = load_fmu('Robot3d_0MultiBody.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
