@@ -54,10 +54,6 @@ aspect FmiXML {
         return name();
     }
 
-    public String FDummyDerivativeVariable.generateXMLName() {
-        return displayName();
-    }
-
     public int FVariable.generateXMLValueReference() {
         return valueReference();
     }
