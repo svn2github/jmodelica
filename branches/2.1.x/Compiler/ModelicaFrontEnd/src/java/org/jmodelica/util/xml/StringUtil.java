@@ -1,10 +1,13 @@
 package org.jmodelica.util.xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Utility methods for strings.
@@ -74,4 +77,69 @@ public final class StringUtil {
         return text.trim().replaceAll("\\s+", " ");
     }
 
+    /**
+     * Joins together a collection of strings, separating them by a delimiter.
+     * 
+     * @param delimiter the delimiter.
+     * @param args      the strings to join.
+     * @return          all strings in {@code args}, delimited by {@code delimiter}.
+     */
+    public static String join(String delimiter, Collection<String> args) {
+        return join(delimiter, args.toArray(new String[args.size()]));
+    }
+
+    /**
+     * Joins together a collection of strings, separating them by a delimiter.
+     * 
+     * @param delimiter the delimiter.
+     * @param args      the strings to join.
+     * @return          all strings in {@code args}, delimited by {@code delimiter}.
+     */
+    public static String join(String delimiter, String... args) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String str : args) {
+            if (!first)
+                sb.append(delimiter);
+            first = false;
+            sb.append(str);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Joins together a collection of string pairs, separating pairs by a delimiter, and pair members by
+     * another delimiter.
+     * 
+     * @param delimiter     the delimiter to separate pairs.
+     * @param pairDelimiter the delimiter to separate pair members.
+     * @param args          the pairs.
+     * @return              all string pairs in {@code args}, delimited by {@code delimiter} and {@code pairDelimiter}.
+     */
+    public static String join(String delimiter, String pairDelimiter, Map<String, String> args) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> pair : args.entrySet()) {
+            if (!first) {
+                sb.append(delimiter);
+            }
+            first = false;
+            sb.append(pair.getKey());
+            sb.append(pairDelimiter);
+            sb.append(pair.getValue());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Joins together a collection of strings into a path.
+     * <p>
+     * Calls {@link #join(String, String...)} with the first argument as {@link File#separator}.
+     * 
+     * @param args  the strings to join.
+     * @return      all strings in {@code args}, delimited by {@link File#separator}.
+     */
+    public static String joinPath(String... args) {
+        return join(File.separator, args);
+    }
 }
