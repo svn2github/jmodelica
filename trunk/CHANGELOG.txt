@@ -1,5 +1,8 @@
 ================= Unreleased ==================
 ; Changed; Minor; Tests; #5459
+Updated more of tests_jmodelica FMUs to have 64 bit binaries as well.
+
+; Changed; Minor; Tests; #5459
 Updated tests_jmodelica FMUs to have 64 bit binaries as well.
 
 ; Fixed ; Minor ; Documentation ; #5466
