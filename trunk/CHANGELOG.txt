@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5465
+Added derivative attribute to dummy derivatives in model description so it's FMI compliant.
+
 ; Changed; Minor; Tests; #5459
 Updated more of tests_jmodelica FMUs to have 64 bit binaries as well.
 
