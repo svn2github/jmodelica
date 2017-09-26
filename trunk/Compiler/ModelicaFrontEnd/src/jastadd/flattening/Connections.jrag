@@ -3145,7 +3145,7 @@ aspect ExpandableConnectors {
     syn boolean InstAccess.isExpandableConnectorPart() = false;
     eq InstDot.isExpandableConnectorPart() {
         InstComponentDecl conn = findReferencedExpandableConnector();
-        return conn != null && conn != myInstComponentDecl();
+        return conn != null && conn != getLastInstAccess().findReferencedExpandableConnector();
     }
     
     syn InstComponentDecl InstAccess.findReferencedExpandableConnector() = null;
