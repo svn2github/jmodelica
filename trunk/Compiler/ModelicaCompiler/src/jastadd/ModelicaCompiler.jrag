@@ -1581,8 +1581,31 @@ public class ModelicaCompiler {
         }
     }
 
+    private static String javaExecutablePlatform = null;
+    private static String systemPlatform = null;
+
     /**
-     * Helper function. Returns string describing the platform on which jmodelica is run. 
+     * Helper function. Returns string describing the platform on which jmodelica is run.
+     * 
+     * @deprecated
+     * The use cases for this function can require different answers when on 64-bit windows. 
+     * Instead use one of:
+     * <ul>
+     * <li>{@link #getJavaPlatform()}</li>
+     * <li>{@link #getSystemPlatform()}</li>
+     * <li>{@link #getExecutablePlatforms()}</li>
+     * </ul>
+     * 
+     * This function retains the old behavior, the same as getJavaPlatform().
+     */
+    @Deprecated
+    public static String getPlatform() {
+        return getJavaPlatform();
+    }
+
+    /**
+     * Helper function. Returns string describing the platform that the JVM is compiled for. 
+     * This can differ from getSystemPlatform() on Windows.
      * 
      * Possible return values:
      * <ul>
@@ -1594,8 +1617,44 @@ public class ModelicaCompiler {
      * <li>linux64</li>
      * </ul>
      */
-    public static String getPlatform() {
-        String platform = "";
+    public static String getJavaPlatform() {
+        if (javaExecutablePlatform == null) {
+            calcPlatform();
+        }
+        return javaExecutablePlatform;
+    }
+
+    /**
+     * Helper function. Returns string describing the system platform on which jmodelica is run. 
+     * 
+     * The possible return values are the same as for {@link #getJavaPlatform()}.
+     */
+    public static String getSystemPlatform() {
+        if (systemPlatform == null) {
+            calcPlatform();
+        }
+        return systemPlatform;
+    }
+
+    /**
+     * Helper function. Returns an array describing the platforms that we can run executables 
+     * compiled for. 
+     * 
+     * The possible strings in the array are the same as for {@link #getJavaPlatform()}.
+     */
+    public static String[] getExecutablePlatforms() {
+        if (systemPlatform == null) {
+            calcPlatform();
+        }
+        if (systemPlatform.equals("win64")) {
+            return new String[] { "win64", "win32" };
+        } else {
+            return new String[] { systemPlatform };
+        }
+    }
+    
+    private static void calcPlatform() {
+        String platform;
         
         String sunPltform = System.getProperty("os.name");
         if (sunPltform.startsWith("Windows")) {
@@ -1608,13 +1667,12 @@ public class ModelicaCompiler {
         }
         
         String architecture = System.getProperty("os.arch");
-        if (architecture.endsWith("64")) {
-            platform = platform+"64";
-        } else {
-            platform = platform+"32";
-        }
+        String wow6432Arch = System.getenv("PROCESSOR_ARCHITEW6432");
+        boolean exeIs64 = architecture.endsWith("64");
+        boolean sysIs64 = exeIs64 || (wow6432Arch != null && wow6432Arch.endsWith("64"));
         
-        return platform;
+        javaExecutablePlatform = platform + (exeIs64 ? "64" : "32");
+        systemPlatform = platform + (sysIs64 ? "64" : "32");
     }
 
     /**
