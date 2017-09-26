@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; Examples ; #5459
+Updated furuta example asserts to correspond to updated FMU.
+
 ; Fixed ; Minor ; Compiler ; #5465
 Added derivative attribute to dummy derivatives in model description so it's FMI compliant.
 

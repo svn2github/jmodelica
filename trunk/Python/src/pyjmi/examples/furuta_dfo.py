@@ -149,7 +149,7 @@ def run_demo(with_plots=True):
     t_opt  = res['time']
 
     assert N.abs(res.final('armJoint.phi') + 0.314)      < 2e-3
-    assert N.abs(res.final('pendulumJoint.phi') - 3.130) < 2e-3
+    assert N.abs(res.final('pendulumJoint.phi') - 3.137) < 2e-3
     assert N.abs(res.final('time') - 40.0)               < 1e-3
 
     # Plot
