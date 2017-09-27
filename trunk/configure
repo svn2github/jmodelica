@@ -625,12 +625,12 @@ REQUIRE_BEAVER_PATH
 REQUIRE_COMPILER_JARS
 REQUIRE_SUNDIALS_HOME
 REQUIRE_IPOPT_HOME
+ORIG_PATH
 WITH_PYTHON64_FALSE
 WITH_PYTHON64_TRUE
 CMAKE_PYTHON64_INCLUDE
 CMAKE_PYTHON64_LIB
 PYTHON64_HOME
-ORIG_PATH
 ORIG_PYTHON_HOME
 CMAKE_PYTHON_INCLUDE
 CMAKE_PYTHON_LIB
@@ -1492,7 +1492,7 @@ Some influential environment variables:
   CXXCPP      C++ preprocessor
   PYTHON_HOME Python installation to use
   PYTHON64_HOME
-              Python 64 bit installation to use
+              Python 64bit installation to use
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -19463,13 +19463,16 @@ as_fn_error $? "Cannot find Apache Ant - please install in order to build compil
 See \`config.log' for more details" "$LINENO" 5 ; }
 fi
 
+
+
+
 # Detect if Python installation is specified with environment var
 
 if test "${PYTHON_HOME}"; then :
 
           PYTHON_HOME_ABS="`cd ${PYTHON_HOME}; pwd`"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME_ABS}" >&5
-$as_echo "Using Python installation ${PYTHON_HOME_ABS}" >&6; }
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python  installation ${PYTHON_HOME_ABS}" >&5
+$as_echo "Using Python  installation ${PYTHON_HOME_ABS}" >&6; }
           CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/libpython27.a"
           CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME_ABS}/include"
 
@@ -19484,8 +19487,8 @@ $as_echo "Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >
 
 else
 
-                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
-$as_echo "Python installation not specified." >&6; }
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python  installation not specified." >&5
+$as_echo "Python  installation not specified." >&6; }
                 # Empty arguments will make cmake fail, so use dummies instead
                 CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY_DUMMY="
                 CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR_DUMMY="
@@ -19496,21 +19499,19 @@ fi
 
 
 
-
-
-
 PYTHON_HOME=$PYTHON_HOME_ABS
+
+
 ORIG_PYTHON_HOME=$PYTHON_HOME_ABS
 
-ORIG_PATH=$PATH
 
 # Detect if Python installation is specified with environment var
 
 if test "${PYTHON64_HOME}"; then :
 
           PYTHON64_HOME_ABS="`cd ${PYTHON64_HOME}; pwd`"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python 64 installation ${PYTHON64_HOME_ABS}" >&5
-$as_echo "Using Python 64 installation ${PYTHON64_HOME_ABS}" >&6; }
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python 64bit installation ${PYTHON64_HOME_ABS}" >&5
+$as_echo "Using Python 64bit installation ${PYTHON64_HOME_ABS}" >&6; }
           CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_HOME_ABS}/libs/libpython27.a"
           CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON64_HOME_ABS}/include"
 
@@ -19518,15 +19519,15 @@ else
 
           if test "${PYTHON64_LIB}" && test "${PYTHON64_INCLUDE}"; then :
 
-                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python 64 bit lib ${PYTHON64_LIB} and Python include ${PYTHON64_INCLUDE}" >&5
-$as_echo "Using Python 64 bit lib ${PYTHON64_LIB} and Python include ${PYTHON64_INCLUDE}" >&6; }
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python lib ${PYTHON64_LIB} and Python include ${PYTHON64_INCLUDE}" >&5
+$as_echo "Using Python lib ${PYTHON64_LIB} and Python include ${PYTHON64_INCLUDE}" >&6; }
                 CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY=${PYTHON64_LIB}"
-                CMAKE_PYTHON64_INCLUDE="-DPYTHON64_INCLUDE_DIR=${PYTHON64_INCLUDE}"
+                CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON64_INCLUDE}"
 
 else
 
-                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python 64 installation not specified." >&5
-$as_echo "Python 64 installation not specified." >&6; }
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python 64bit installation not specified." >&5
+$as_echo "Python 64bit installation not specified." >&6; }
                 # Empty arguments will make cmake fail, so use dummies instead
                 CMAKE_PYTHON64_LIB="-DPYTHON_LIBRARY_DUMMY="
                 CMAKE_PYTHON64_INCLUDE="-DPYTHON_INCLUDE_DIR_DUMMY="
@@ -19537,9 +19538,8 @@ fi
 
 
 
-
-
 PYTHON64_HOME=$PYTHON64_HOME_ABS
+
  if test "x$PYTHON64_HOME" != x; then
   WITH_PYTHON64_TRUE=
   WITH_PYTHON64_FALSE='#'
@@ -19548,6 +19548,9 @@ else
   WITH_PYTHON64_FALSE=
 fi
 
+
+
+ORIG_PATH=$PATH
 
 # Checks for header files.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
