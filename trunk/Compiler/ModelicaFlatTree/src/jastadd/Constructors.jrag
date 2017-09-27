@@ -578,10 +578,16 @@ aspect Constructors {
         
     }
 
+    /**
+     * Don't use this one, or improve it before using it! The parser error
+     * needs to be handled better!
+     * TODO: Remove uses of this constructor or refactor!
+     */
     public ComponentDecl.ComponentDecl(boolean isParameter,
                                        String type,
                                        String name,
-                                       String bexp) {
+                                       String bexp,
+                                       ParserHandler parserHandler) {
         this(new Opt(),
              new Opt(),
              new Opt(),
@@ -605,9 +611,9 @@ aspect Constructors {
         
         if (!bexp.equals("")) {
             try {
-                bexp_ast = ParserHandler.parseExpString(bexp);
+                bexp_ast = parserHandler.parseExpString(bexp);
             } catch (Exception e) { 
-                log.error("Error when parsing string"); 
+                throw new InternalCompilerError("Error when parsing string" + bexp, e);
             }
             this.setModification(new ValueModification(bexp_ast));
         }

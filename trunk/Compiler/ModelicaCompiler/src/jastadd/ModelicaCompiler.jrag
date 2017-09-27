@@ -962,7 +962,7 @@ public class ModelicaCompiler {
      */
     private SourceRoot parseModel(String name) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        return ParserHandler.parseModel(createUtilInterface(), name);
+        return parserHandler.parseModel(createUtilInterface(), name);
     }
 
     /**
@@ -1019,7 +1019,7 @@ public class ModelicaCompiler {
     public SourceRoot parseString(String code, String name) 
       throws IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
-        return ParserHandler.parseString(createUtilInterface(), code, name);
+        return parserHandler.parseString(createUtilInterface(), code, name);
     }
 
     public SourceRoot doParseModel(String names[]) 
@@ -1027,7 +1027,7 @@ public class ModelicaCompiler {
         checkSetUp();
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
-        SourceRoot sr = ParserHandler.parseModel(createUtilInterface(), names);
+        SourceRoot sr = parserHandler.parseModel(createUtilInterface(), names);
         hookFilesParsed(sr);
         ASTNode.endStep("parseModel()");
         

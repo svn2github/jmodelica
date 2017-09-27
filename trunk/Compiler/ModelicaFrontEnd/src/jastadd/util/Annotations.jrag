@@ -956,8 +956,6 @@ aspect AnnotationAPI {
 		
 		@Override
 		public void setValue(Exp exp) {
-			if (exp() != null && exp != null)
-				exp.copyFormattingFrom(exp());
 			setExp(exp);
 		}
 

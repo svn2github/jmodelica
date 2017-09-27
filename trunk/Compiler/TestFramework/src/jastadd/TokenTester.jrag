@@ -36,10 +36,8 @@ public class TokenTester {
 		boolean testSuccess = true;
 		boolean done = false;
 
-		AbstractFlatModelicaScanner fms1 = 
-			ParserHandler.createModelicaFlatScanner(new StringReader(s1));
-		AbstractFlatModelicaScanner fms2 = 
-			ParserHandler.createModelicaFlatScanner(new StringReader(s2));
+		AbstractFlatModelicaScanner fms1 = TestCase.PARSER_HANDLER.createModelicaFlatScanner(new StringReader(s1));
+		AbstractFlatModelicaScanner fms2 = TestCase.PARSER_HANDLER.createModelicaFlatScanner(new StringReader(s2));
 
 		try {
 			while (!done && testSuccess) {

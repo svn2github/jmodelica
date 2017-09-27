@@ -23,7 +23,8 @@
 %header {:
  package $PARSER_PACKAGE$;
  import $AST_PACKAGE$.*;
- import org.jmodelica.util.formattedPrint.FormattingInfo;
+ import org.jmodelica.util.formatting.FormattingRecorder;
+ import org.jmodelica.util.formatting.FormattingType;
  import org.jmodelica.api.problemHandling.Problem;
  import org.jmodelica.api.problemHandling.ProblemSeverity;
  import org.jmodelica.api.problemHandling.ProblemKind;
@@ -171,10 +172,10 @@
         lineBreakMap = map;
     }
 
-    private FormattingInfo formatting;
+    private FormattingRecorder<ASTNode<?>> formattingRecorder;
 
-    public void setFormattingInfo(FormattingInfo formatting) {
-        this.formatting = formatting;
+    public void setFormattingRecorder(FormattingRecorder<ASTNode<?>> formattingRecorder) {
+        this.formattingRecorder = formattingRecorder;
     }
 
     public void setFileName(String fn) {
@@ -205,7 +206,7 @@ StoredDefinition stored_definition
     = within? base_class_decl_list {:
         StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
         def.setLineBreakMap(lineBreakMap);
-        def.setFormatting(formatting);
+        formattingRecorder.postParsing(def);
     	return def; 
     :}
     | error {: 
@@ -1132,8 +1133,9 @@ Exp primary =
   | STRING.s               {: return new StringLitExp(s); :}
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
-  | LPAREN exp.a RPAREN {: formatting.addParenthesis(LPAREN, RPAREN);
-						   return a; :}
+  | LPAREN exp.a RPAREN {: formattingRecorder.addItem(FormattingType.PARENTHESIS, "(", LPAREN);
+                           formattingRecorder.addItem(FormattingType.PARENTHESIS, ")", RPAREN);
+                           return a; :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}

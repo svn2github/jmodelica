@@ -16,22 +16,22 @@
 package org.jmodelica.util;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.jmodelica.util.formattedPrint.FormattingInfo;
-import org.jmodelica.util.formattedPrint.FormattingItem;
+import org.jmodelica.util.formatting.DefaultFormattingRecorder;
+import org.jmodelica.util.formatting.FormattingRecorder;
+import org.jmodelica.util.formatting.FormattingType;
 
-public abstract class AbstractModelicaScanner extends beaver.Scanner {
+public abstract class AbstractModelicaScanner<T> extends beaver.Scanner {
 
-	private static final int INITIAL_LINEBREAK_MAP_SIZE = 64;
-	private int[] lineBreakMap;
-	private FormattingInfo formattingInfo;
-	private int maxLineBreakLine;
+    private static final int INITIAL_LINEBREAK_MAP_SIZE = 64;
+    private int[] lineBreakMap;
+    private FormattingRecorder<T> formattingRecorder;
+    private int maxLineBreakLine;
 
-	public AbstractModelicaScanner() {
-		reset();
-	}
+    public AbstractModelicaScanner() {
+        formattingRecorder = new DefaultFormattingRecorder<T>();
+        reset();
+    }
 
 	public int[] getLineBreakMap() {
 		if (lineBreakMap.length > maxLineBreakLine + 1)
@@ -48,10 +48,18 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 	public void reset(java.io.Reader reader) {
 		reset();
 	}
-	
-	public void resetFormatting() {
-		formattingInfo = new FormattingInfo();
-	}
+
+    public void setFormattingRecorder(FormattingRecorder<T> formattingRecorder) {
+        this.formattingRecorder = formattingRecorder;
+    }
+
+    public void resetFormatting() {
+        formattingRecorder.reset();
+    }
+
+    public FormattingRecorder<T> getFormattingRecorder() {
+        return formattingRecorder;
+    }
 
 	protected int addLineBreaks(String text) {
 		int numberOfLineBreaksAdded = 0;
@@ -98,7 +106,7 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 					currentSpaces.append('\n');
 					++i;
 				}
-				formattingInfo.addItem(FormattingItem.Type.LINE_BREAK, currentSpaces.toString(), line, startColumn,
+				formattingRecorder.addItem(FormattingType.LINE_BREAK, currentSpaces.toString(), line, startColumn,
 						line, startColumn + currentSpaces.length() - 1);
 				currentSpaces = new StringBuilder();
 				++line;
@@ -106,7 +114,7 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 				break;
 			case '\n':
 				startColumn = currentColumn;
-				formattingInfo.addItem(FormattingItem.Type.LINE_BREAK, "\n", line, startColumn,
+				formattingRecorder.addItem(FormattingType.LINE_BREAK, "\n", line, startColumn,
 						line, startColumn);
 				currentSpaces = new StringBuilder();
 				++line;
@@ -120,14 +128,14 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 				}
 				currentSpaces.append(data.charAt(i));
 				if (i + 1 < data.length() && (data.charAt(i + 1) == '\r' || data.charAt(i + 1) == '\n')) {
-					formattingInfo.addItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, currentSpaces.toString(),
+					formattingRecorder.addItem(FormattingType.NON_BREAKING_WHITESPACE, currentSpaces.toString(),
 							line, startColumn, line, currentColumn);
 					currentSpaces = new StringBuilder();
 				}
 				break;
 			default:
 				if (currentSpaces.length() > 0) {
-					formattingInfo.addItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, currentSpaces.toString(),
+					formattingRecorder.addItem(FormattingType.NON_BREAKING_WHITESPACE, currentSpaces.toString(),
 							line, startColumn, line, currentColumn - 1);
 					currentSpaces = new StringBuilder();
 				}
@@ -138,26 +146,22 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 		}
 		
 		if (currentSpaces.length() > 0) {
-			formattingInfo.addItem(FormattingItem.Type.NON_BREAKING_WHITESPACE, currentSpaces.toString(), line,
+			formattingRecorder.addItem(FormattingType.NON_BREAKING_WHITESPACE, currentSpaces.toString(), line,
 					startColumn, line, currentColumn - 1);
 		}
 	}
 	
-	protected void addFormattingInformation(FormattingItem.Type type, String data) {
+	protected void addFormattingInformation(FormattingType type, String data) {
 		addFormattingInformation(type, data, 0);
 	}
 
-	protected void addFormattingInformation(FormattingItem.Type type, String data, int numberOfLineBreaks) {
+	protected void addFormattingInformation(FormattingType type, String data, int numberOfLineBreaks) {
 		int endColumn;
 		if (numberOfLineBreaks > 0)
 			endColumn = data.length() - Math.max(data.lastIndexOf('\n'), data.lastIndexOf('\r')) - 1;
 		else
 			endColumn = matchColumn() + matchLength();
-		formattingInfo.addItem(type, data, matchLine() + 1, matchColumn() + 1, matchLine() + numberOfLineBreaks + 1, endColumn);
-	}
-
-	public FormattingInfo getFormattingInfo() {
-		return formattingInfo;
+		formattingRecorder.addItem(type, data, matchLine() + 1, matchColumn() + 1, matchLine() + numberOfLineBreaks + 1, endColumn);
 	}
 
 	protected abstract int matchLength();

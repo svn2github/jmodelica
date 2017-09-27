@@ -756,7 +756,7 @@ aspect InstanceTreeConstruction {
         ClassDecl res = anonymousClassMap.get(code);
         if (res == null) {
             try {
-                addAnonymousClass(ParserHandler.parseAnonymousClassString(code, restriction, targetName));
+                addAnonymousClass(root().getUtilInterface().getParserHandler().parseAnonymousClassString(code, restriction, targetName));
                 res = getAnonymousClass(getNumAnonymousClass() - 1);
                 anonymousClassMap.put(code, res);
             } catch (IOException e) {
