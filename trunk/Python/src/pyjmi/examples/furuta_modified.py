@@ -102,8 +102,8 @@ def run_demo(with_plots=True):
     theta_opt = res['pendulumJoint.phi']
     t_opt  = res['time']
     
-    assert N.abs(res.final('armJoint.phi') + 0.309)      < 3e-3
-    assert N.abs(res.final('pendulumJoint.phi') - 3.130) < 3e-3
+    assert N.abs(res.final('armJoint.phi') + 0.309)      < 3e-2
+    assert N.abs(res.final('pendulumJoint.phi') - 3.130) < 3e-2
     assert N.abs(res.final('time') - 40.0)               < 1e-3
     
     if with_plots:
