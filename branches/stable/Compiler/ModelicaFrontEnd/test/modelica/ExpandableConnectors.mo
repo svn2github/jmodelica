@@ -2414,6 +2414,44 @@ end ExpandableConnectors.NestedExpandable10;
     end NestedExpandable10;
 
 
+    model NestedExpandable11
+        expandable connector EC1
+            EC2[1] ec2;
+        end EC1;
+        
+        expandable connector EC2
+        end EC2;
+        
+        connector C = Real;
+        
+        EC1 ec1;
+        model M
+            EC2 ec2;
+        end M;
+        C c;
+        M[1] m;
+    equation
+        connect(c, ec1.ec2[1].a);
+        for i in 1:1 loop
+            connect(ec1.ec2[i], m[i].ec2);
+        end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NestedExpandable11",
+            description="Nested with for index on last part",
+            flatModel="
+fclass ExpandableConnectors.NestedExpandable11
+ Real ec1.ec2[1].a;
+ Real c;
+ Real m[1].ec2.a;
+equation
+ c = ec1.ec2[1].a;
+ ec1.ec2[1].a = m[1].ec2.a;
+end ExpandableConnectors.NestedExpandable11;
+")})));
+    end NestedExpandable11;
+
     model NestedExpandableError1
         expandable connector EC
         end EC;
@@ -3049,6 +3087,62 @@ equation
 end ExpandableConnectors.ConnectorArray7;
 ")})));
 end ConnectorArray7;
+
+model ConnectorArray8
+    expandable connector EC
+    end EC;
+    
+    connector C = Real;
+    
+    EC ec1;
+    C c[2];
+equation
+    for i in 1:2 loop
+        connect(c[i], ec1.a[i]);
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray8",
+            description="Expandable connector with for index",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArray8
+ Real ec1.a[2];
+ Real c[2];
+equation
+ c[1] = ec1.a[1];
+ c[2] = ec1.a[2];
+end ExpandableConnectors.ConnectorArray8;
+")})));
+end ConnectorArray8;
+
+model ConnectorArray9
+    expandable connector EC
+    end EC;
+    
+    connector C = Real;
+    
+    EC ec1;
+    C c[2];
+equation
+    for i in 1:1 loop
+        connect(c, ec1.a[i:i+1]);
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectorArray9",
+            description="Expandable connector with for index",
+            flatModel="
+fclass ExpandableConnectors.ConnectorArray9
+ Real ec1.a[2];
+ Real c[2];
+equation
+ c[1] = ec1.a[1];
+ c[2] = ec1.a[2];
+end ExpandableConnectors.ConnectorArray9;
+")})));
+end ConnectorArray9;
 
 
 model ExpandableWithInputOutput1

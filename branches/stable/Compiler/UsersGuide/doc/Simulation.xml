@@ -266,7 +266,7 @@ input_object = (['u1','u2'],input_function)
       </section>
 
       <section>
-        <title>Options for FMUModelME1 and FMUModelME2</title>
+        <title>Options for Model Exchange FMUs</title>
 
         <para>The options attribute are where options to the specified
         algorithm are stored, and are preferably used together with:</para>
@@ -498,7 +498,7 @@ opts['ncp'] = 1000        # Changing the number of communication points.
       </section>
 
       <section>
-        <title>Options for FMUModelCS1 and FMUModelCS2</title>
+        <title>Options for Co-Simulation FMUs</title>
 
         <para>The options attribute are where options to the specified
         algorithm are stored, and are preferably used together with:</para>
@@ -749,7 +749,7 @@ from pyfmi import load_fmu
       <para>Next, the model is compiled and loaded:</para>
 
       <programlisting language="python"># Compile model
-fmu_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.First",())
+fmu_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.First")
 
 # Load model
 model = load_fmu(fmu_name)
@@ -1004,26 +1004,17 @@ opts["ncp"] = 1000 #Specify that 1000 output points should be returned</programl
       <para>The simulation result is returned and stored into the
       <literal>res</literal> object. Result for a trajectory is easily
       retrieved using a Python dictionary syntax. Below is the visualization
-      code for viewing the engine torque and the engine speed. One could
+      code for viewing the engine torque. One could
       instead use the Plot GUI for the visualization as the result are stored
       in a file in the current directory.</para>
 
-      <programlisting>P.subplot(211)
-P.suptitle("EngineV6")
+      <programlisting>
 P.plot(res["time"],res["filteredEngineTorque"], label="Filtered Engine Torque")
-P.grid()
-P.legend()
-P.ylabel("Torque [N.m]")
-P.subplot(212)
-P.plot(res["time"],res["engineSpeed_rpm"], label="Engine Speed")
-P.grid()
-P.legend()
-P.xlabel("Time [s]")
-P.ylabel("Speed [1/min]")
 P.show()</programlisting>
 
       <para>In <xref linkend="sim_fig_result_engine"/> the trajectories are
-      shown.</para>
+      shown for he engine torque and the engine speed utilizing subplots from
+	  Matplotlib.</para>
 
       <figure xml:id="sim_fig_result_engine">
         <title>Resulting trajectories for the engine model.</title>
@@ -1124,13 +1115,13 @@ P.show()</programlisting>
 
         <programlisting language="python">import numpy as N 
 import pylab as P                  # Used for plotting
-from pyfmi.fmi import FMUModelME1  # The FMI Interface for Model Exchange
+from pyfmi.fmi import load_fmu  # Used for loading the FMU
 </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized</para>
 
         <programlisting language="python"># Load the FMU by specifying the fmu together with the path.
-bouncing_fmu = FMUModelME1('/path/to/FMU/bouncingBall.fmu')
+bouncing_fmu = load_fmu('/path/to/FMU/bouncingBall.fmu')
 
 Tstart = 0.5                 # The start time.
 Tend   = 3.0                 # The final simulation time.  

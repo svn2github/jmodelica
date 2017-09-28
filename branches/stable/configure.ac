@@ -16,7 +16,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
+AC_PREREQ(2.62)
 AC_INIT([jmodelica.org], 0.0.0, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
@@ -59,7 +59,7 @@ AC_DEFUN([C_FLAG_CHECK],
   AC_MSG_RESULT([$c_flag_check])
   CFLAGS="$ac_saved_cflags" 
   AC_LANG_POP([C])
-])
+])  
 
 # F77_FLAG_CHECK [compiler flags]
 # check whether compiler supports given Fortran 77 flags or not
@@ -78,7 +78,6 @@ AC_DEFUN([F77_FLAG_CHECK],
   AC_LANG_POP([Fortran 77])
 ])
 
-
 # ALL_FLAG_CHECK [compiler flags]
 # check whether compilers supports given flags or not for all of C, C++ and Fortran 77
 AC_DEFUN([ALL_FLAG_CHECK], 
@@ -92,7 +91,8 @@ AC_DEFUN([ALL_FLAG_CHECK],
 ])
 
 # ============= end of helper macros ===================
-
+AC_OPENMP
+AM_CONDITIONAL([WITH_OPENMP],[test "x$OPENMP_CFLAGS" != x])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -389,33 +389,44 @@ AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 AS_IF([test "x$ANT" = x],
       [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
 
+AC_DEFUN([PYTHON_DISTRO_CHECK],
+[   
 # Detect if Python installation is specified with environment var
-AC_ARG_VAR(PYTHON_HOME, [Python installation to use])
-AS_IF([test "${PYTHON_HOME}"],
+AC_ARG_VAR($1, [Python $7 installation to use])
+AS_IF([test "${$1}"],
       [
-          PYTHON_HOME_ABS="`cd ${PYTHON_HOME}; pwd`"
-          AC_MSG_RESULT([Using Python installation ${PYTHON_HOME_ABS}])
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/libpython27.a"
-          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME_ABS}/include"
+          $2="`cd ${$1}; pwd`"
+          AC_MSG_RESULT([Using Python $7 installation ${$2}])
+          $5="-DPYTHON_LIBRARY=${$2}/libs/libpython27.a"
+          $6="-DPYTHON_INCLUDE_DIR=${$2}/include"
       ], [
-          AS_IF([test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"], 
+          AS_IF([test "${$3}" && test "${$4}"], 
             [
-                AC_MSG_RESULT([Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}])
-                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
-                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
+                AC_MSG_RESULT([Using Python lib ${$3} and Python include ${$4}])
+                $5="-DPYTHON_LIBRARY=${$3}"
+                $6="-DPYTHON_INCLUDE_DIR=${$4}"
             ], [
-                AC_MSG_RESULT([Python installation not specified.])
+                AC_MSG_RESULT([Python $7 installation not specified.])
                 # Empty arguments will make cmake fail, so use dummies instead
-                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY_DUMMY="
-                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR_DUMMY="
+                $5="-DPYTHON_LIBRARY_DUMMY="
+                $6="-DPYTHON_INCLUDE_DIR_DUMMY="
             ])
       ])
-AC_SUBST(CMAKE_PYTHON_LIB)
-AC_SUBST(CMAKE_PYTHON_INCLUDE)
+AC_SUBST($5)
+AC_SUBST($6)
+AC_SUBST($1)
+$1=$$2
+])
 
+PYTHON_DISTRO_CHECK([PYTHON_HOME], [PYTHON_HOME_ABS], [PYTHON_LIB], [PYTHON_INCLUDE], [CMAKE_PYTHON_LIB], [CMAKE_PYTHON_INCLUDE], [])
+AC_SUBST(ORIG_PYTHON_HOME)
+ORIG_PYTHON_HOME=$PYTHON_HOME_ABS
+   
+PYTHON_DISTRO_CHECK([PYTHON64_HOME], [PYTHON64_HOME_ABS], [PYTHON64_LIB], [PYTHON64_INCLUDE], [CMAKE_PYTHON64_LIB], [CMAKE_PYTHON64_INCLUDE], [64bit])
+AM_CONDITIONAL([WITH_PYTHON64], [test "x$PYTHON64_HOME" != x])
 
-AC_SUBST(PYTHON_HOME)
-PYTHON_HOME=$PYTHON_HOME
+AC_SUBST(ORIG_PATH)
+ORIG_PATH=$PATH
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -451,6 +462,7 @@ AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
+ ThirdParty/SuperLU/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile

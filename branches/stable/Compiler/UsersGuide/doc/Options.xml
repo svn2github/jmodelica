@@ -87,7 +87,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;msvs&apos;</literal>
                 </entry>
                 <entry>
                 The C compiler to use to compile generated C code.
@@ -134,19 +134,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>copy_source_files_to_fmu</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, the generated source files will be copied to the FMU.
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>divide_by_vars_in_tearing</literal>
                 </entry>
                 <entry>
@@ -186,6 +173,19 @@
               </row>
               <row>
                 <entry>
+                  <literal>event_output_vars</literal>
+                </entry>
+                <entry>
+                  <literal>boolean</literal>
+                  /
+                  <literal>false</literal>
+                </entry>
+                <entry>
+                If enabled, output variables are generated for each generated event.
+                </entry>
+              </row>
+              <row>
+                <entry>
                   <literal>expose_scalar_equation_ blocks_in_interactive_fmu</literal>
                 </entry>
                 <entry>
@@ -217,7 +217,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;&apos;</literal>
                 </entry>
                 <entry>
                 A comma separated list of warning identifiers that should be omitted from the logs.
@@ -347,7 +347,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;kinsol&apos;</literal>
                 </entry>
                 <entry>
                 Decides which nonlinear equation solver to use in the initial system. Alternatives are &apos;kinsol or <literal>&apos;minpack&apos;</literal>.
@@ -386,7 +386,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;&apos;</literal>
                 </entry>
                 <entry>
                 Path to the Microsoft Visual Studio Compiler to compile C code with.Will cause compilation to fail if no installation is found.
@@ -399,10 +399,10 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;&apos;</literal>
                 </entry>
                 <entry>
-                Microsoft Visual Studio Compiler version to compile C code with.Will cause compilation to fail if no installation is found. Will be ignored if the <literal>msvs_path</literal> option is set.
+                Microsoft Visual Studio Compiler version to compile C code with.If the <literal>msvs_path</literal> option is not set, then this option will be used to find an installation among the default install locations. If the <literal>msvs_path</literal> option is set, then this option will be used to verify the compiler version. In both cases the compilation will fail if the installation found mismatches the version specified with this option.
                 </entry>
               </row>
               <row>
@@ -412,7 +412,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;kinsol&apos;</literal>
                 </entry>
                 <entry>
                 Decides which nonlinear equation solver to use. Alternatives are &apos;kinsol or <literal>&apos;minpack&apos;</literal>.
@@ -503,7 +503,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;level1&apos;</literal>
                 </entry>
                 <entry>
                 Controls if HGT blocks are allowed to have more than one residual.<literal>&apos;false&apos;</literal> - All HGT blocks can only have one residual. An error is given if there are HGT blocks with more than one residual.&apos;level1&apos; - Only blocks with HGT level=1 are allowed to have more than one residual. An error is given if there are HGT blocks at level=2 (or higher) with more than one residual. As a consequence combining this option with <literal>merge_blt_blocks</literal>=<literal>true</literal> garantees a single unsolved block in the FMU.<literal>&apos;true&apos;</literal> - No error check is done, all HGT blocks may have multiple residuals.
@@ -542,7 +542,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;:O1&apos;</literal>
                 </entry>
                 <entry>
                 Optimization level for c-code compilation
@@ -555,7 +555,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;functions&apos;</literal>
                 </entry>
                 <entry>
                 Parts of c-code to compile with extra compiler flags specified by <literal>ccompiler_extra_flags</literal>
@@ -789,7 +789,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;none&apos;</literal>
                 </entry>
                 <entry>
                 Controls how matching algorithm computes incidences for function call equations. Possible values: <literal>&apos;none&apos;</literal>, <literal>&apos;all&apos;</literal>. With <literal>&apos;none&apos;</literal> all outputs are assumed to depend on all inputs. With <literal>&apos;all&apos;</literal> the compiler analyses the function to determine dependencies.
@@ -802,7 +802,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;actual&apos;</literal>
                 </entry>
                 <entry>
                 Decides how homotopy expressions are interpreted during compilation. Can be set to either <literal>&apos;simplified&apos;</literal> or <literal>&apos;actual&apos;</literal> which will compile the model using only the simplified or actual expressions of the homotopy() operator.
@@ -828,7 +828,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;trivial&apos;</literal>
                 </entry>
                 <entry>
                 Controlles what function calls are inlined. <literal>&apos;none&apos;</literal> - no function calls are inlined. <literal>&apos;trivial&apos;</literal> - inline function calls that will not increase the number of variables in the system. <literal>&apos;all&apos;</literal> - inline all function calls that are possible.
@@ -841,7 +841,7 @@
                 <entry>
                   <literal>string</literal>
                   /
-                  <literal>&apos;null&apos;</literal>
+                  <literal>&apos;off&apos;</literal>
                 </entry>
                 <entry>
                 This option controls whether equations can be solved local in tearing. Possible options are: <literal>&apos;off&apos;</literal>, local iterations are not used (default). <literal>&apos;annotation&apos;</literal>, only equations that are annotated are candidates. <literal>&apos;all&apos;</literal>, all equations are candidates.
@@ -1005,7 +1005,20 @@
               </row>
               <row>
                 <entry>
-                  <literal>generate_sparse_block_ jacobian</literal>
+                  <literal>generate_sparse_block_ jacobian_threshold</literal>
+                </entry>
+                <entry>
+                  <literal>integer</literal>
+                  /
+                  <literal>100</literal>
+                </entry>
+                <entry>
+                Threshold for when a sparse Jacobian should be generated. If the number of torn variablesis less than the threshold a dense Jacobian is generated.
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <literal>source_code_fmu</literal>
                 </entry>
                 <entry>
                   <literal>boolean</literal>
@@ -1013,7 +1026,7 @@
                   <literal>false</literal>
                 </entry>
                 <entry>
-                If enabled, then a sparse Jacobian is additionally generated for linear blocks.
+                If enabled, external source code is packaged with the FMU.
                 </entry>
               </row>
               <row>
@@ -1127,7 +1140,7 @@
                 <entry>
                   <literal>real</literal>
                   /
-                  <literal>1.490116119384766E-8</literal>
+                  <literal>1.49E-08</literal>
                 </entry>
                 <entry>
                 Delta to use when calculating finite difference Jacobians.
@@ -1390,7 +1403,7 @@
                   <literal>10.0</literal>
                 </entry>
                 <entry>
-                Factor limiting the step-size taken by the nonlinear solver.
+                Factor limiting the step-size taken by the nonlinear block solver.
                 </entry>
               </row>
               <row>
@@ -1439,7 +1452,7 @@
                 <entry>
                   <literal>real</literal>
                   /
-                  <literal>2.220446049250313E-14</literal>
+                  <literal>2.22E-14</literal>
                 </entry>
                 <entry>
                 Default tolerance for the time event iterations.
@@ -1495,19 +1508,6 @@
                 </entry>
                 <entry>
                 Activates experimental features of CS ode solvers
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>le_sparse_jacobian_ threshold</literal>
-                </entry>
-                <entry>
-                  <literal>integer</literal>
-                  /
-                  <literal>-1</literal>
-                </entry>
-                <entry>
-                Threshold for computing the Jacobian using sparse matrices (-1 indicates that Dense computation is used).
                 </entry>
               </row>
             </tbody>

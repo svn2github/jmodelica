@@ -892,6 +892,8 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
         compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
         compile_fmu("NonLinear.EventIteration1", file_name)
+        compile_fmu("NonLinear.NonLinear6", file_name)
+        compile_fmu("NonLinear.NonLinear7", file_name)
     
     @testattr(stddist = True)
     def test_Brent_AD(self):
@@ -927,7 +929,7 @@ class Test_NonLinear_Systems:
         def run_model(init):
             model = load_fmu("NonLinear_DoubleRoot1.fmu")
             model.set("_use_Brent_in_1d", True)
-            model.set("x", init)
+            model.set("p", init)
             model.initialize()
             return model.get("x")
         
@@ -961,19 +963,19 @@ class Test_NonLinear_Systems:
         
         scale = model.get("scale")
         i = -9.9760004108556469E-03*scale
-        model.set("i",i)
+        model.set("i_start",i)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
         model.reset()
         
-        model.set("i", i+i*1e-15)
+        model.set("i_start", i+i*1e-15)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
         model.reset()
         
-        model.set("i", i-i*1e-15)
+        model.set("i_start", i-i*1e-15)
         model.initialize()
         nose.tools.assert_almost_equal(model.get("i"),i)
         
@@ -1047,6 +1049,20 @@ class Test_NonLinear_Systems:
         model = load_fmu("NonLinear_EventIteration1.fmu")
         model.initialize()
         nose.tools.assert_almost_equal(model.get('iter_var_1'), 872.98062403)
+        
+    @testattr(stddist = True)
+    def test_fixed_false_start_attribute(self):
+        model = load_fmu("NonLinear_NonLinear6.fmu")
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('x'), 1.0)
+        nose.tools.assert_almost_equal(model.get('z'), -1.0)
+        
+    @testattr(stddist = True)
+    def test_fixed_false_start_attribute_brent(self):
+        model = load_fmu("NonLinear_NonLinear7.fmu")
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('x'), 1.0)
+        nose.tools.assert_almost_equal(model.get('z'), 1.0)
     
 class Test_Singular_Systems:
     
@@ -1393,8 +1409,22 @@ class Test_FMI_ODE_2:
         _ex2_name = compile_fmu("NoState.Example2", file_name, version=2.0)
         #_in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
         #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
-        #_cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=2.0)
         #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+    
+    @testattr(stddist = True)
+    def test_cc_with_sparse(self):
+
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["with_jacobian"] = True
+        opts["CVode_options"]["rtol"] = 1e-7
+        opts["CVode_options"]["linear_solver"] = "SPARSE"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
     
     @testattr(stddist = True)
     def test_no_state1(self):
@@ -1866,8 +1896,8 @@ class Test_FMI_ODE:
     
         nose.tools.assert_almost_equal(res.initial('x'), 1.000000, 4)
         nose.tools.assert_almost_equal(res.initial('y'), 0.000000, 4)
-        nose.tools.assert_almost_equal(res.final('x'), 0.25370773767354998, 4)
-        nose.tools.assert_almost_equal(res.final('y'), -0.96728092291979395, 4)
+        nose.tools.assert_almost_equal(res.final('x'), 0.27510283167449501, 4)
+        nose.tools.assert_almost_equal(res.final('y'), -0.96141480746068897, 4)
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
@@ -1884,16 +1914,16 @@ class Test_FMI_ODE:
         opts["solver"] = "Radau5ODE"
         res = model.simulate(final_time=10, options=opts)
     
-        assert N.abs(res.final('y')+0.956993467) < 1e-2
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.96069759894208395) < 1e-2
+        assert N.abs(res.final('x')-0.27759705219420999) < 1e-1
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         opts["ncp"] = 1000
         res = model.simulate(final_time=10, options=opts)
 
-        assert N.abs(res.final('y')+0.956993467) < 1e-2
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.96069759894208395) < 1e-2
+        assert N.abs(res.final('x')-0.27759705219420999) < 1e-1
         
     @testattr(windows = True)
     def test_simulation_completed_step_dopri(self):
@@ -1903,16 +1933,16 @@ class Test_FMI_ODE:
         opts["solver"] = "Dopri5"
         res = model.simulate(final_time=10, options=opts)
     
-        assert N.abs(res.final('y')+0.956993467) < 1e-1
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.95766129067717698) < 1e-1
+        assert N.abs(res.final('x')-0.28789729477457998) < 1e-1
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         opts["ncp"] = 1000
         res = model.simulate(final_time=10, options=opts)
 
-        assert N.abs(res.final('y')+0.956993467) < 1e-1
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.95766129067716799) < 1e-1
+        assert N.abs(res.final('x')-0.28789729477461101) < 1e-1
     
     @testattr(windows = True)
     def test_simulation_completed_step_rodas(self):
@@ -1922,16 +1952,16 @@ class Test_FMI_ODE:
         opts["solver"] = "RodasODE"
         res = model.simulate(final_time=10, options=opts)
     
-        assert N.abs(res.final('y')+0.956993467) < 1e-1
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.96104146428710602) < 1e-1
+        assert N.abs(res.final('x')-0.27640424005592701) < 1e-1
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         opts["ncp"] = 1000
         res = model.simulate(final_time=10, options=opts)
 
-        assert N.abs(res.final('y')+0.956993467) < 1e-1
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.96104146428710602) < 1e-1
+        assert N.abs(res.final('x')-0.27640424005592701) < 1e-1
         
     @testattr(windows = True)
     def test_simulation_completed_step_lsodar(self):
@@ -1941,16 +1971,16 @@ class Test_FMI_ODE:
         opts["solver"] = "LSODAR"
         res = model.simulate(final_time=10, options=opts)
     
-        assert N.abs(res.final('y')+0.956993467) < 1e-1
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.96311062033198303) < 1e-1
+        assert N.abs(res.final('x')-0.26910580261997902) < 1e-1
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         opts["ncp"] = 1000
         res = model.simulate(final_time=10, options=opts)
 
-        assert N.abs(res.final('y')+0.956993467) < 1e-1
-        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        assert N.abs(res.final('y')+0.96311062033198303) < 1e-1
+        assert N.abs(res.final('x')-0.26910580261997902) < 1e-1
     
     @testattr(windows = True)
     def test_terminate_simulation(self):
@@ -1969,7 +1999,7 @@ class Test_FMI_ODE:
         """
         This tests a FMU with typeDefinitions including StringType and BooleanType
         """
-        model = load_fmu('Robot_Dym74FD01.fmu', path_to_fmus_me1)
+        model = load_fmu('Robot3d_0MultiBody.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver

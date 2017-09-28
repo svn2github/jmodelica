@@ -129,7 +129,7 @@ aspect InstFunctionBinding {
         Map<InstComponentDecl,InstFunctionArgument> res = new HashMap<InstComponentDecl, InstFunctionArgument>();
         int i = 0;
         for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
-            res.put(icd, icd.isInput() ? getArg(i++) : null);
+            res.put(icd, i < getNumArg() && icd.isInput() ? getArg(i++) : null);
         }
         return res;
     }

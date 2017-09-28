@@ -128,6 +128,10 @@
            </para>
        </listitem>
        <listitem>
+      <para>There is limited support for Q-identifiers (e.g. component names
+      starting with a single quote) </para>
+    </listitem>
+       <listitem>
            <para>No support for non-parameter array size declarations. This means that all array size
                  declarations must be of constant or parameter variability.
            </para>

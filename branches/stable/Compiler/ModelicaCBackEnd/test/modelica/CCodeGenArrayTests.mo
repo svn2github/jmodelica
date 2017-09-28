@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Modelon AB
+    Copyright (C) 2016-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 ")})));
 end UnknownSizeInEquation4;
 
-model PrimitiveInRecord1
+model RecordArray1
     record R
         parameter Integer n = 3;
         Real[n] x = 1:3;
@@ -196,12 +196,12 @@ model PrimitiveInRecord1
     
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
-            name="PrimitiveInRecord1",
+            name="RecordArray1",
             description="",
             inline_functions="none",
             template="$C_functions$",
             generatedCode="
-void func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(jmi_real_t x_v, jmi_real_t* y_o) {
+void func_CCodeGenArrayTests_RecordArray1_f_def0(jmi_real_t x_v, jmi_real_t* y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     JMI_RECORD_STATIC(R_0_r, r_v)
@@ -218,13 +218,578 @@ void func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(jmi_real_t x_v, jmi_real_
     return;
 }
 
-jmi_real_t func_CCodeGenArrayTests_PrimitiveInRecord1_f_exp0(jmi_real_t x_v) {
+jmi_real_t func_CCodeGenArrayTests_RecordArray1_f_exp0(jmi_real_t x_v) {
     JMI_DEF(REA, y_v)
-    func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(x_v, &y_v);
+    func_CCodeGenArrayTests_RecordArray1_f_def0(x_v, &y_v);
     return y_v;
 }
 
 ")})));
-end PrimitiveInRecord1;
+end RecordArray1;
+
+model RecordArray2
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    Real y = f({R({1,2}),R({time})});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray2",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_rec_1(tmp_1, 1)->x = tmp_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    jmi_array_rec_1(tmp_1, 2)->x = tmp_3;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 1) = _time;
+    _y_0 = func_CCodeGenArrayTests_RecordArray2_f_exp0(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray2;
+
+model RecordArray3
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    function g
+        input Real[:] x;
+        output Real[:] y = x;
+        algorithm
+    end g;
+    
+    Real y = f({R(g({1,2})),R(g({time}))});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray3",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1)
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_5, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_7, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+    func_CCodeGenArrayTests_RecordArray3_g_def1(tmp_2, tmp_1);
+    memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
+    jmi_array_ref_1(tmp_4, 1) = _time;
+    func_CCodeGenArrayTests_RecordArray3_g_def1(tmp_4, tmp_3);
+    _temp_2_1_3 = (jmi_array_val_1(tmp_3, 1));
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_5, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1, 2)
+    jmi_array_rec_1(tmp_5, 1)->x = tmp_6;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_7, 1, 1, 1)
+    jmi_array_rec_1(tmp_5, 2)->x = tmp_7;
+    memcpy(&jmi_array_ref_1(jmi_array_rec_1(tmp_5, 1)->x, 1), &_temp_1_1_1, 2 * sizeof(jmi_real_t));
+    jmi_array_ref_1(jmi_array_rec_1(tmp_5, 2)->x, 1) = _temp_2_1_3;
+    _y_0 = func_CCodeGenArrayTests_RecordArray3_f_exp0(tmp_5);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray3;
+
+model RecordArray4
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    function g
+        input Real x;
+        output Real y = x;
+        algorithm
+    end g;
+    
+    Real y = f({R(g({1,2})),R(g({time}))});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray4",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_rec_1(tmp_1, 1)->x = tmp_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    jmi_array_rec_1(tmp_1, 2)->x = tmp_3;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 1) = func_CCodeGenArrayTests_RecordArray4_g_exp1(AD_WRAP_LITERAL(1));
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 2) = func_CCodeGenArrayTests_RecordArray4_g_exp1(AD_WRAP_LITERAL(2));
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 1) = func_CCodeGenArrayTests_RecordArray4_g_exp1(_time);
+    _y_0 = func_CCodeGenArrayTests_RecordArray4_f_exp0(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray4;
+
+model RecordArray5
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    function g
+        input Real x1;
+        input Real[:] x2;
+        output Real y = x1 + sum(x2);
+        algorithm
+    end g;
+    
+    Real y = f({R(g({1,2}, {1,2,time})),R(g({time}, {1,2,3,time}))});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray5",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 4, 1)
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_4, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_6, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = _time;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_2, 3) = _time;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 4, 1, 4)
+    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(tmp_3, 4) = _time;
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_4, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 2, 1, 2)
+    jmi_array_rec_1(tmp_4, 1)->x = tmp_5;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_6, 1, 1, 1)
+    jmi_array_rec_1(tmp_4, 2)->x = tmp_6;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_4, 1)->x, 1) = func_CCodeGenArrayTests_RecordArray5_g_exp1(AD_WRAP_LITERAL(1), tmp_1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_4, 1)->x, 2) = func_CCodeGenArrayTests_RecordArray5_g_exp1(AD_WRAP_LITERAL(2), tmp_2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_4, 2)->x, 1) = func_CCodeGenArrayTests_RecordArray5_g_exp1(_time, tmp_3);
+    _y_0 = func_CCodeGenArrayTests_RecordArray5_f_exp0(tmp_4);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray5;
+
+model RecordArray6
+    record R1
+        Real[:] x;
+    end R1;
+    
+    record R2
+        R1[:] r1;
+    end R2;
+    
+    function f
+        input R2 r2;
+        output Real y;
+    algorithm
+        for i in 1:size(r2.r1,1) loop
+            y := y + sum(r2.r1[i].x);
+        end for;
+    end f;
+    
+    Real y = f(R2({R1({1,2}),R1({time})}));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray6",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(R2_1_r, tmp_1)
+    JMI_ARR(STAT, R1_0_r, R1_0_ra, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, R1_0_r, R1_0_ra, tmp_2, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_rec_1(tmp_2, 1)->x = tmp_3;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
+    jmi_array_rec_1(tmp_2, 2)->x = tmp_4;
+    tmp_1->r1 = tmp_2;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1->r1, 1)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1->r1, 1)->x, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1->r1, 2)->x, 1) = _time;
+    _y_0 = func_CCodeGenArrayTests_RecordArray6_f_exp0(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray6;
+
+model RecordArray7
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    input Boolean b;
+    Real y = f(if b then {R({1,2}),R({time})} else {R({1}),R({time, 2})});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray7",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_4, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1)
+    if (_b_0) {
+        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_1, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+        jmi_array_rec_1(tmp_1, 1)->x = tmp_2;
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+        jmi_array_rec_1(tmp_1, 2)->x = tmp_3;
+        jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 1) = AD_WRAP_LITERAL(1);
+        jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 2) = AD_WRAP_LITERAL(2);
+        jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 1) = _time;
+    } else {
+        JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_4, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
+        jmi_array_rec_1(tmp_4, 1)->x = tmp_5;
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_6, 2, 1, 2)
+        jmi_array_rec_1(tmp_4, 2)->x = tmp_6;
+        jmi_array_ref_1(jmi_array_rec_1(tmp_4, 1)->x, 1) = AD_WRAP_LITERAL(1);
+        jmi_array_ref_1(jmi_array_rec_1(tmp_4, 2)->x, 1) = _time;
+        jmi_array_ref_1(jmi_array_rec_1(tmp_4, 2)->x, 2) = AD_WRAP_LITERAL(2);
+    }
+    _y_1 = func_CCodeGenArrayTests_RecordArray7_f_exp0(COND_EXP_EQ(_b_0, JMI_TRUE, tmp_1, tmp_4));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray7;
+
+model RecordArray8
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    parameter Boolean b = false;
+    Real y = f({if b then R({1,2}) else R({1}), if b then R({time}) else R({time, 2})});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray8",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_rec_1(tmp_1, 1)->x = tmp_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_rec_1(tmp_1, 2)->x = tmp_3;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 1) = _time;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 2) = AD_WRAP_LITERAL(2);
+    _y_1 = func_CCodeGenArrayTests_RecordArray8_f_exp0(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray8;
+
+model RecordArray9
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        input R[:,:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            for j in 1:size(r,2) loop
+                y := y + sum(r[i, j].x);
+            end for;
+        end for;
+    end f;
+    
+    parameter Boolean b = false;
+    Real y = f({if b then {R({1,2}), R({3})} else {R({1})}, if b then {R({time}), R({time})} else {R({time, 2})}});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray9",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_1, 2, 2)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARRAY_INIT_2(STAT, R_0_r, R_0_ra, tmp_1, 2, 2, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_rec_2(tmp_1, 1,1)->x = tmp_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    jmi_array_rec_2(tmp_1, 2,1)->x = tmp_3;
+    jmi_array_ref_1(jmi_array_rec_2(tmp_1, 1,1)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_2(tmp_1, 2,1)->x, 1) = _time;
+    jmi_array_ref_1(jmi_array_rec_2(tmp_1, 2,1)->x, 2) = AD_WRAP_LITERAL(2);
+    _y_1 = func_CCodeGenArrayTests_RecordArray9_f_exp0(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray9;
+
+model RecordArray10
+    record R
+        Real[:] x;
+        String[:] s;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real y;
+    algorithm
+        for i in 1:size(r,1) loop
+            y := y + sum(r[i].x);
+        end for;
+    end f;
+    
+    function g
+        input Real x;
+        input String s;
+        output Real y = f({R({1,2}, {s}),R({time}, {s + "s2", s + "s3"})});
+        algorithm
+    end g;
+    
+    Real y = g(time, "s1");
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray10",
+            description="Test for bug in #5346",
+            inline_functions="none",
+            template="
+$C_functions$
+$C_ode_derivatives$
+            ",
+            generatedCode="
+void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF_STR_DYNA(tmp_1)
+    JMI_DEF_STR_DYNA(tmp_2)
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_3, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, tmp_5, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_6, 1, 1)
+    JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, tmp_7, 2, 1)
+    JMI_INI_STR_DYNA(tmp_1, JMI_LEN(s_v) + 2)
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"s2\");
+    JMI_INI_STR_DYNA(tmp_2, JMI_LEN(s_v) + 2)
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%s\", s_v);
+    snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%s\", \"s3\");
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    jmi_array_rec_1(tmp_3, 1)->x = tmp_4;
+    JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, tmp_5, 1, 1, 1)
+    jmi_array_rec_1(tmp_3, 1)->s = tmp_5;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_6, 1, 1, 1)
+    jmi_array_rec_1(tmp_3, 2)->x = tmp_6;
+    JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, tmp_7, 2, 1, 2)
+    jmi_array_rec_1(tmp_3, 2)->s = tmp_7;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_3, 1)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_3, 1)->x, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_3, 1)->s, 1) = s_v;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_3, 2)->x, 1) = _time;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_3, 2)->s, 1) = tmp_1;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_3, 2)->s, 2) = tmp_2;
+    y_v = func_CCodeGenArrayTests_RecordArray10_f_exp1(tmp_3);
+    JMI_FREE(tmp_1)
+    JMI_FREE(tmp_2)
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenArrayTests_RecordArray10_g_exp0(jmi_real_t x_v, jmi_string_t s_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenArrayTests_RecordArray10_g_def0(x_v, s_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenArrayTests_RecordArray10_f_def1(R_0_ra* r_a, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
+    jmi_real_t i_0i;
+    jmi_real_t i_0ie;
+    jmi_real_t i1_1i;
+    jmi_real_t i1_1ie;
+    i_0ie = jmi_array_size(r_a, 0) + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        temp_1_v = 0.0;
+        i1_1ie = jmi_array_size(jmi_array_rec_1(r_a, i_0i)->x, 0) + 1 / 2.0;
+        for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+            temp_1_v = temp_1_v + jmi_array_val_1(jmi_array_rec_1(r_a, i_0i)->x, i1_1i);
+        }
+        y_v = y_v + temp_1_v;
+    }
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenArrayTests_RecordArray10_f_exp1(R_0_ra* r_a) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenArrayTests_RecordArray10_f_def1(r_a, &y_v);
+    return y_v;
+}
+
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _y_0 = func_CCodeGenArrayTests_RecordArray10_g_exp0(_time, \"s1\");
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray10;
 
 end CCodeGenArrayTests;

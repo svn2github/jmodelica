@@ -28,28 +28,33 @@ aspect OptimicaPredefinedTypes {
                 continue;
             }
 			PrimitiveClassDecl cd = (PrimitiveClassDecl)l.getChild(i);
+            ParserHandler parserHandler = root().getUtilInterface().getParserHandler();
 			if (cd.name().equals("Real")) {
 			    ComponentDecl compDecl = new ComponentDecl(true,
 				                                      "RealType",
 				                                      "initialGuess",
-				                                      "0.0"); 
+				                                      "0.0",
+				                                      parserHandler); 
 				cd.addComponentDecl(compDecl);
 				compDecl = new ComponentDecl(true,
 				                                      "BooleanType",
 				                                      "free",
-				                                      "false"); 
+				                                      "false",
+				                                      parserHandler); 
 				cd.addComponentDecl(compDecl);
 			}
 			if (cd.name().equals("Integer")) {
 			    ComponentDecl compDecl = new ComponentDecl(true,
 				                                      "IntegerType",
 				                                      "initialGuess",
-				                                      "0"); 
+				                                      "0",
+				                                      parserHandler); 
 				cd.addComponentDecl(compDecl);
 				compDecl = new ComponentDecl(true,
 				                                      "BooleanType",
 				                                      "free",
-				                                      "false"); 
+				                                      "false",
+				                                      parserHandler); 
 				cd.addComponentDecl(compDecl);
 			}
 

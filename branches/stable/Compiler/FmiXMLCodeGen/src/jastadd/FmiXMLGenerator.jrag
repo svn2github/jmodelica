@@ -1466,7 +1466,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			}
             
             private int getDerivativeIdx(FVariable var) {
-                return fclass.xmlVariableIndexMap().get(((FDerivativeVariable)var).myDifferentiatedVariable().generateXMLName());
+                return fclass.xmlVariableIndexMap().get(((FAbstractDerivativeVariable)var).myDifferentiatedVariable().generateXMLName());
             }
 
 			public void generateAttributes(CodeStream genPrinter) {
@@ -1477,7 +1477,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);
                 generateStartAttributeIfSet(variable, genPrinter);
-                if (variable.isDerivativeVariable()) {
+                if (variable.isDerivativeVariable() || variable.isDummyDerivativeVariable()) {
                     generateAttribute("derivative", getDerivativeIdx(variable), genPrinter);
                 }
                 super.generateAttributes(genPrinter);
@@ -1594,8 +1594,10 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.derivativeVariables()) {
-					variable = var;
-					super.generateChildren(genPrinter);
+                    if (var.generateXMLVariable()) {
+                        variable = var;
+                        super.generateChildren(genPrinter);
+                    }
 				}
 			}
 		}
@@ -1615,8 +1617,10 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public void generateChildren(CodeStream genPrinter) {
                 for (FVariable var : fclass.outputs()) {
-					variable = var;
-					super.generateChildren(genPrinter);
+                    if (var.generateXMLVariable()) {
+                        variable = var;
+                        super.generateChildren(genPrinter);
+                    }
 				}
 			}
 		}

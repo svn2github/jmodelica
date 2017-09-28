@@ -40,34 +40,66 @@ aspect OptimicaFlattening {
     	return copyLocationTo(new InstOptimizationClass());
     }
     
-    public void InstOptClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
-		getFConstraints().flattenUsedFuncsAndEnums(fc);
+    public class Flattener {
+        private List<FConstraint> constraints = new List<FConstraint>();
+        private List<FAttribute> attributes = new List<FAttribute>();
+        
+        public boolean isFlatteningOptimica() {
+            return fc instanceof FOptClass;
+        }
+        
+        public List<FConstraint> getFConstraints() {
+            return constraints;
+        }
+        
+        public List<FAttribute> getFAttributes() {
+            return attributes;
+        }
+        
+        public List<FConstraint> addFConstraint(FConstraint c) {
+            return constraints.add(c);
+        }
+        
+        public void setFAttributeList(List<FAttribute> a) {
+            attributes = a;
+        }
+    }
+    refine Flattening public void FClass.update(Flattener f) {
+            refined(f);
+            if (f.isFlatteningOptimica()){
+	            FOptClass foc = (FOptClass) this;
+	            foc.setFConstraintList(f.getFConstraints());
+	            foc.setFAttributeList(f.getFAttributes());
+            }
+        }
+    
+    public void InstOptClassDecl.flattenUsedFuncsAndEnums(Flattener f) {
+		getFConstraints().flattenUsedFuncsAndEnums(f);
 		if (hasInstClassModification()) 
-			getInstClassModification().flattenUsedFuncsAndEnums(fc);
-		super.flattenUsedFuncsAndEnums(fc);
+			getInstClassModification().flattenUsedFuncsAndEnums(f);
+		super.flattenUsedFuncsAndEnums(f);
     }
 
     private static final ExtraFlattener InstOptClassDecl.optimicaExtraFlattener = InstClassDecl.addExtraFlattener(
             new InstClassDecl.ExtraFlattener() {
-                public void flattenExtra(InstClassDecl icd, FClass fc) {
-                    if (!(fc instanceof FOptClass)) {
+                public void flattenExtra(Flattener f, InstClassDecl icd) {
+                    if (!f.isFlatteningOptimica()) {
                         return;
                     }
-                    FOptClass foc = (FOptClass) fc;
                     FQName empty = new FQNameEmpty();
                     if (icd.hasInstClassModification()) {
                         List attr = new List();
                         icd.getInstClassModification().collectAttributes(attr, empty, AttributeExpRetriever.DEFAULT, true);
-                        foc.setFAttributeList(attr);
+                        f.setFAttributeList(attr);
                     }
                 }
             });
 
-	refine Flattening public void InstNode.flattenEquations(FQName name, FClass fc) {
+	refine Flattening public void InstNode.flattenEquations(Flattener f, FQName name) {
         for (FAbstractEquation ae : getFAbstractEquations()) 
-            ae.flatten(name, fc);
+            ae.flatten(f, name);
         for (FConstraint c : getFConstraints()) 
-            c.flatten(name, fc);
+            c.flatten(f, name);
     }
 
 	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
@@ -125,30 +157,27 @@ aspect OptimicaFlattening {
 	}
 	
 	
-    public void FConstraint.flatten(FQName prefix, FClass fc) {}
+    public void FConstraint.flatten(Flattener f, FQName prefix) {}
 	
-	public void FConstraintEq.flatten(FQName prefix, FClass fc) {
-		FOptClass foc = (FOptClass)fc;
-		foc.addFConstraint(new FConstraintEq(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	public void FConstraintEq.flatten(Flattener f, FQName prefix) {
+		f.addFConstraint(new FConstraintEq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public void FConstraintLeq.flatten(FQName prefix, FClass fc) {
-		FOptClass foc = (FOptClass)fc;
-		foc.addFConstraint(new FConstraintLeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	public void FConstraintLeq.flatten(Flattener f, FQName prefix) {
+		f.addFConstraint(new FConstraintLeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public void FConstraintGeq.flatten(FQName prefix, FClass fc) {
-		FOptClass foc = (FOptClass)fc;
-		foc.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
+	public void FConstraintGeq.flatten(Flattener f, FQName prefix) {
+		f.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
 	}
 
-	public void InstForClauseC.flatten(FQName prefix, FClass fc) {
+	public void InstForClauseC.flatten(Flattener f, FQName prefix) {
         Indices ind = Indices.create(getInstForIndexs());
         for (Index i : ind) {
             ind.translate(i).setValues(getInstForIndexs());
             getFConstraints().flushAllRecursive();
             for (FConstraint c : getFConstraints()) {
-                c.flatten(prefix, fc);
+                c.flatten(f, prefix);
             }
         }
         for (InstForIndex ifi : getInstForIndexs()) {

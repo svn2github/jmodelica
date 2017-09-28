@@ -18,7 +18,8 @@ package $PARSER_PACKAGE$;
 
 import $PARSER_PACKAGE$.OptimicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
-import org.jmodelica.util.formattedPrint.FormattingItem;
+import org.jmodelica.util.formatting.FormattingType;
+import org.jmodelica.optimica.compiler.ASTNode;
 import beaver.Scanner;
 
 
@@ -27,7 +28,7 @@ import beaver.Scanner;
 %public
 %final
 %class OptimicaScanner
-%extends AbstractModelicaScanner
+%extends AbstractModelicaScanner<ASTNode>
 %unicode
 %function nextTokenInner
 %type Symbol
@@ -175,9 +176,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "external"      { return newSymbol(Terminals.EXTERNAL); }
   
   
-  "public"        { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
+  "public"        { addFormattingInformation(FormattingType.VISIBILITY_INFO, yytext());
 	  				return newSymbol(Terminals.PUBLIC); }
-  "protected"     { addFormattingInformation(FormattingItem.Type.VISIBILITY_INFO, yytext());
+  "protected"     { addFormattingInformation(FormattingType.VISIBILITY_INFO, yytext());
 	  				return newSymbol(Terminals.PROTECTED); }
   
   "extends"       { return newSymbol(Terminals.EXTENDS); }
@@ -276,7 +277,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
 
-  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
+  "+"             { addFormattingInformation(FormattingType.NON_BREAKING_WHITESPACE, yytext());
                     return newSymbol(Terminals.PLUS); }  
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
@@ -312,12 +313,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   							 if (yytext().charAt(1) == '/') {
   								 numberOfLineBreaks = 0;
   							 }
-                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); 
+                             addFormattingInformation(FormattingType.COMMENT, yytext(), numberOfLineBreaks); 
                              return null; }
-  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); 
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingType.NON_BREAKING_WHITESPACE, yytext()); 
                              return null; }
   {LineTerminator} 		   { addLineBreak();
-                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); 
+                             addFormattingInformation(FormattingType.LINE_BREAK, yytext()); 
                              return null; }
                              
   .|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }

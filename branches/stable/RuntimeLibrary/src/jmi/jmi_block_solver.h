@@ -388,8 +388,13 @@ struct jmi_block_solver_callbacks_t {
     jmi_block_restore_solver_state_mode_t restore_solver_state_mode;                            /**< \brief Function for deciding when during the simulation/solver phase the solver state should be saved/restored. */
 };
 
-/** \brief Solve the equations in the associated problem. */
-int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
+/** \brief Solve the equations in the associated problem. 
+ * 
+ * atInitial should only be set to true if JMI_BLOCK_START exists as a flag and start values should
+ * be collected therefrom the first time the block is called during the initialization phase. When 
+ * false start values are collected from JMI_BLOCK_INITIALIZE.
+*/
+int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes, int at_initial);
 
 /** \brief Start the clock for profiling. */
 clock_t jmi_block_solver_start_clock(jmi_block_solver_t * block_solver);

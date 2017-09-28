@@ -142,7 +142,7 @@ int main() {
                          1,
                          &options,
                          &sw);
-    jmi_block_solver_solve(block_solver, 0, 1);
+    jmi_block_solver_solve(block_solver, 0, 1, 0);
     jmi_delete_block_solver(&block_solver);
 	if (JMI_ABS(sw.x - 1.3333333333) > 1e-4) {
         return -1; /* Something went wrong */

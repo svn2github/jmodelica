@@ -3642,4 +3642,39 @@ end ModificationTests.SupersededModification4;
 ")})));
 end SupersededModification4;
 
+model ForExpModifier1
+    model A
+        Real[:] p;
+    end A;
+    
+    A a(p = {p for p in 1:1});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ForExpModifier1",
+            description="Test for bug in #5640. For index in modification.",
+            flatModel="
+fclass ModificationTests.ForExpModifier1
+ Real a.p[1] = {1};
+end ModificationTests.ForExpModifier1;
+")})));
+end ForExpModifier1;
+
+model ForExpModifier2
+    model A
+        Real[:] p;
+    end A;
+    replaceable A a constrainedby A(p = {i for i in 1:1});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ForExpModifier2",
+            description="Test for bug in #5640. For index in constrainedby modification.",
+            flatModel="
+fclass ModificationTests.ForExpModifier2
+ Real a.p[1] = {1};
+end ModificationTests.ForExpModifier2;
+")})));
+end ForExpModifier2;
+
 end ModificationTests;

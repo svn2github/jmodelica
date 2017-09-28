@@ -63,6 +63,8 @@ CASADI_HOME = @CASADI_HOME@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CMAKE_PYTHON64_INCLUDE = @CMAKE_PYTHON64_INCLUDE@
+CMAKE_PYTHON64_LIB = @CMAKE_PYTHON64_LIB@
 CMAKE_PYTHON_INCLUDE = @CMAKE_PYTHON_INCLUDE@
 CMAKE_PYTHON_LIB = @CMAKE_PYTHON_LIB@
 CP = @CP@
@@ -114,6 +116,9 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OPENMP_CFLAGS = @OPENMP_CFLAGS@
+ORIG_PATH = @ORIG_PATH@
+ORIG_PYTHON_HOME = @ORIG_PYTHON_HOME@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -124,6 +129,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PYTHON64_HOME = @PYTHON64_HOME@
 PYTHON_HOME = @PYTHON_HOME@
 RANLIB = @RANLIB@
 REQUIRE_BEAVER_PATH = @REQUIRE_BEAVER_PATH@
@@ -205,6 +211,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 FMIL_BUILD_DIR = $(abs_builddir)/../../FMIL_build
+FMIL_BUILD_DIR64 = $(abs_builddir)/../../FMIL_build64
 all: all-am
 
 .SUFFIXES:
@@ -217,9 +224,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign external/FMILibrary/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu external/FMILibrary/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign external/FMILibrary/Makefile
+	  $(AUTOMAKE) --gnu external/FMILibrary/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -411,8 +418,17 @@ $(FMIL_BUILD_DIR):
 	cmake -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install $(abs_top_srcdir)/external/FMILibrary/FMILibrary/ ;; \
 	esac
 
-all-local: $(FMIL_BUILD_DIR)
-	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@$(FMIL_BUILD_DIR64):
+@JM_WIN64_TRUE@	mkdir -p $(FMIL_BUILD_DIR64)
+@JM_WIN64_TRUE@	cd $(FMIL_BUILD_DIR64) && \
+@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_CXX_FLAGS="-m64 -fPIC" -DCMAKE_SHARED_LINKER_FLAGS="-m64 -fPIC" -DCMAKE_EXE_LINKER_FLAGS="-m64 -fPIC" -DFMILIB_INSTALL_PREFIX:PATH=$(abs_builddir)/../../FMIL_install64 $(abs_top_srcdir)/external/FMILibrary/FMILibrary/
+
+@JM_WIN64_TRUE@all-local: $(FMIL_BUILD_DIR) $(FMIL_BUILD_DIR64)
+@JM_WIN64_TRUE@	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@	cd $(FMIL_BUILD_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR=
+
+@JM_WIN64_FALSE@all-local: $(FMIL_BUILD_DIR)
+@JM_WIN64_FALSE@	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 check-local:
 	cd $(FMIL_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test

@@ -1,3 +1,49 @@
+================= Stable-2017-09-28 ==================
+; Change ; Minor ; Build system ; #5459
+Refactored configure.ac.
+
+; Change ; Minor ; Examples ; #5459
+Updated furuta example asserts to correspond to updated FMU.
+
+; Fixed ; Minor ; Compiler ; #5465
+Added derivative attribute to dummy derivatives in model description so it's FMI compliant.
+
+; Changed; Minor; Tests; #5459
+Updated more of tests_jmodelica FMUs to have 64 bit binaries as well.
+
+; Changed; Minor; Tests; #5459
+Updated tests_jmodelica FMUs to have 64 bit binaries as well.
+
+; Fixed ; Minor ; Documentation ; #5466
+Added information about limitation regarding Q-identifiers. 
+
+; Fixed ; Minor ; Compiler ; #5460
+Fixed bug where indices in for expressions got modifications intended for actual variables. 
+
+; Fixed ; Major ; Build system ; #5459
+Added support for building Assimulo, PyFMI, PyJMI, pymodelica  in
+both 32 and 64 bit modes on windows when corresponding Python distributions
+are available.
+
+; Fixed ; Minor ; Compiler ; #5346
+Fixed code generation error for expanded expressions of arrays in record arrays
+
+; Fixed ; Minor ; Compiler ; #5219
+Fixed bug in BLT computation for initial system where start value of variables
+could depend on variables which were computed after the variable it self.
+
+; Fixed ; Minor ; Python ; #5455
+Fixed build system to handle 64bit FMIL builds correctly.
+
+; Fixed ; Minor ; Python ; #5454
+Fixed build system to handle 64bit SuperLU builds correctly.
+
+; Feature ; Major ; Python ; #5344
+Added support for the sparse solver SuperLU when simulating FMI2 FMUs
+for ME.
+
+; Fixed ; Minor ; Compiler ; #5312
+Fixed branch selection when test expression was dependent on Evaluate=false.
 ================= Stable-2017-08-24 ==================
 ; Changed ; Minor ; Compiler ; #5214
 The temporary directory is always deleted, regardless of whether compilation fails or succeeds.
@@ -52,6 +98,5 @@ generated for each event indicator.
 
 ; Other ; Minor ; General ; #5393
 Added a changelog to JModelica.org.
-
 
 ==================== JM 2.0 ===================

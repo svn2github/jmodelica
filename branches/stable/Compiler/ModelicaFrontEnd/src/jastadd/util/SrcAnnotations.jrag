@@ -215,11 +215,10 @@ aspect SrcAnnotations {
     }
     @Override
     public void ComponentModification.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
-        if (hasModification()) {
-            getModification().setAnnotationValue(newValue);
-        } else {
-            throw new FailedToSetAnnotationValueException();
+        if (!hasModification()) {
+            setModification(new CompleteModification(new ClassModification()));
         }
+        getModification().setAnnotationValue(newValue);
     }
     @Override
     public void CompleteModification.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
@@ -236,14 +235,21 @@ aspect SrcAnnotations {
     }
     @Override
     public SrcAnnotationProvider ClassModification.addAnnotationSubNode(String name) {
-        ComponentModification cm =
-                new ComponentModification(new ParseAccess(name), new CompleteModification(new ClassModification()));
+        ComponentModification cm = new ComponentModification(new Opt<Each>(), new Opt<Final>(), new ParseAccess(name),
+                new Opt<Modification>(), new Comment());
         addArgument(cm);
         return cm;
     }
     @Override
     public SrcAnnotationProvider CompleteModification.addAnnotationSubNode(String name) {
         return getClassModification().addAnnotationSubNode(name);
+    }
+    @Override
+    public SrcAnnotationProvider ComponentModification.addAnnotationSubNode(String name) {
+        if (!hasModification()) {
+            setModification(new CompleteModification(new ClassModification()));
+        }
+        return getModification().addAnnotationSubNode(name);
     }
 
     syn boolean Modification.isEach() = false;

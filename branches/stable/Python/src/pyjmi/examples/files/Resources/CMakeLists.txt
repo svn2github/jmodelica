@@ -22,11 +22,19 @@ cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
 project (pyjmi_TestLibraries)
 
-#Make the directory for header files to be installed in. 
+#Make the directory for header files to be installed in.
+if( " ${JM_PLATFORM} " MATCHES " win64 ")
+install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${JMODELICA_INSTALL_DIR}/Python_64/pyjmi/examples/files/Resources/Include/)")
+else () 
 install(CODE "file(MAKE_DIRECTORY $ENV{DESTDIR}${JMODELICA_INSTALL_DIR}/Python/pyjmi/examples/files/Resources/Include/)")
+endif ()
 
 #Make the directory for lib files to be installed in.
+if( " ${JM_PLATFORM} " MATCHES " win64 ")
+set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python_64/pyjmi/examples/files/Resources/Library/${JM_PLATFORM})
+else ()
 set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/pyjmi/examples/files/Resources/Library/${JM_PLATFORM})
+endif ()
 install(CODE "file(MAKE_DIRECTORY  $ENV{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 
 include_directories(Include)

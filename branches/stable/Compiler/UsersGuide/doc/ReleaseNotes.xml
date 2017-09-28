@@ -9,7 +9,22 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
-
+  <section>
+    <title>Release notes for JModelica.org version 2.1</title>
+	<section><title>Highlights</title>
+	<para> One of the focus areas for this release has been performance. 
+	The following are the main improvements:
+	<itemizedlist>
+		<listitem>With this release compiler performance has been improved
+	with up to 30% in compilation time and 20% in memory reduction
+	for some benchmark models. </listitem>
+	<listitem> Support for the sparse solver SuperLU is added for simulation of
+	FMI2 ME FMUs in PyFMI.</listitem>
+	<listitem> A sparse solver has been added to solve large linear blocks. </listitem>
+	</itemizedlist>
+	</para>
+	</section>
+	</section>
   <section>
     <title>Release notes for JModelica.org version 2.0</title>
 
@@ -30,10 +45,8 @@
     <section>
       <title>Compiler</title>
 
-      <section>
-        <title>Compliance</title>
-        <section xml:id="MSL20">
-        <title>Modelica Standard Library (MSL)</title>
+      <section><title>Compliance</title>
+        <section xml:id="MSL20"><title>Modelica Standard Library (MSL)</title>
         <para>For this release, the Modelica Standard Library (MSL) version
         3.2.2 build 3 with the following patches applied is used:
         <itemizedlist>
@@ -89,8 +102,7 @@
     especially with regards to event handling.</para>
     </section>
 
-    <section>
-      <title>A novel co-simulation algorithm</title>
+    <section><title>A novel co-simulation algorithm</title>
 
       <para>A novel co-simulation master algorithm is now available in the
       Python package PyFMI. The master algorithm supports FMUs 2.0 for
@@ -104,7 +116,7 @@
     </section>
     
   </section>
-
+</section>
   <section>
     <title>Release notes for JModelica.org version 1.17</title>
 

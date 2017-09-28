@@ -25,7 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.logging.IllegalLogStringException;
+import org.jmodelica.util.xml.StringUtil;
 
+/**
+ * Class representing a compiler instance to be used when compiling with a separate process.
+ */
 public class CompilerInstance {
 
     private String javaHome;
@@ -83,8 +87,9 @@ public class CompilerInstance {
     }
 
     /**
-     * TODO
-     * @param paths
+     * Sets the class path for this compiler instance.
+     * 
+     * @param paths the class paths.
      */
     public void setClassPath(String... paths) {
         classPath.clear();
@@ -158,8 +163,10 @@ public class CompilerInstance {
     public void addLog(String... logs) {
         if (logs != null) {
             for (String log : logs) {
-                if (log.contains("|stderr"))
-                    throw new IllegalLogStringException("Piping compiler log to stderr is not allowed while separate process is used.", null);
+                if (log.contains("|stderr")) {
+                    throw new IllegalLogStringException("Piping compiler log to stderr is not allowed while " + 
+                            "separate process is used.", null);
+                }
                 this.log.add(log);
             }
         }
@@ -205,26 +212,34 @@ public class CompilerInstance {
             args.add("-cp");
             args.add(join(File.pathSeparator, classPath));
         }
-        if (jvmArguments != null)
+        if (jvmArguments != null) {
             args.add(jvmArguments);
+        }
         args.add(compiler.className);
-        if (target != null)
+        if (target != null) {
             args.add("-target=" + target);
-        if (version != null)
+        }
+        if (version != null) {
             args.add("-version=" + version);
-        if (modelicaPath.size() > 0)
+        }
+        if (modelicaPath.size() > 0) {
             args.add("-modelicapath=" + join(File.pathSeparator, modelicaPath));
-        if (log.size() > 0)
+        }
+        if (log.size() > 0) {
             args.add("-log=w|os|stderr," + join(",", log));
-        else
+        } else {
             args.add("-log=w|os|stderr");
-        if (compilerOptions.size() > 0)
+        }
+        if (compilerOptions.size() > 0) {
             args.add("-opt=" + join(",", ":", compilerOptions));
-        if (platform != null)
+        }
+        if (platform != null) {
             args.add("-platform=" + platform);
-        if (outputPath != null)
+        }
+        if (outputPath != null) {
             args.add("-out=\"" + outputPath + "\"");
-        args.add("," + join(",", sourceFiles));
+        }
+        args.add(sourceFiles == null ? "," : join(",", sourceFiles));
         args.add(modelName);
         return args;
     }
@@ -234,51 +249,34 @@ public class CompilerInstance {
     }
 
     private static String join(String delimiter, String... args) {
-        if (args == null)
-            return "";
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String str : args) {
-            if (!first)
-                sb.append(delimiter);
-            first = false;
-            sb.append(str);
-        }
-        return sb.toString();
-    }
-
-    private static String joinPath(String... args) {
-        return join(File.separator, args);
+        return StringUtil.join(delimiter, args);
     }
 
     private static String join(String delimiter, Collection<String> args) {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String str : args) {
-            if (!first)
-                sb.append(delimiter);
-            first = false;
-            sb.append(str);
-        }
-        return sb.toString();
+        return StringUtil.join(delimiter, args);
     }
 
     private static String join(String delimiter, String pairDelimiter, Map<String, String> args) {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<String, String> pair : args.entrySet()) {
-            if (!first)
-                sb.append(delimiter);
-            first = false;
-            sb.append(pair.getKey());
-            sb.append(pairDelimiter);
-            sb.append(pair.getValue());
-        }
-        return sb.toString();
+        return StringUtil.join(delimiter, pairDelimiter, args);
     }
 
+    private static String joinPath(String... args) {
+        return StringUtil.joinPath(args);
+    }
+
+    /**
+     * Enumeration class representing the compiler type.
+     */
     public enum Compiler {
-        MODELICA("org.jmodelica.modelica.compiler.ModelicaCompiler"), OPTIMICA("org.jmodelica.optimica.compiler.OptimicaCompiler");
+        /**
+         * {@link org.jmodelica.modelica.compiler.ModelicaCompiler ModelicaCompiler}.
+         */
+        MODELICA("org.jmodelica.modelica.compiler.ModelicaCompiler"),
+
+        /**
+         * {@link org.jmodelica.optimica.compiler.OptimicaCompiler OptimicaCompiler}.
+         */
+        OPTIMICA("org.jmodelica.optimica.compiler.OptimicaCompiler");
 
         private final String className;
 

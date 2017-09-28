@@ -147,7 +147,7 @@ class UKF:
         L = len(options['P_0']) #Dimension of state vector
         lambd = (options['alpha']**2) * (L + options['kappa']) - L   
         c = L + lambd
-        Wm = (0.5 / c) * N.ones(2.0 * L + 1.0)
+        Wm = (0.5 / c) * N.ones(2 * L + 1)
         Wm[0] = lambd / c  
         Wc = N.copy(Wm)
         Wc[0] = Wc[0] + (1.0 - options['alpha']**2 + options['beta'])

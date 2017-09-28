@@ -161,10 +161,10 @@ aspect InstTypeAnalysis {
     
     syn FFunctionType InstFunctionCall.declType() = myInstCallable().actualInstClassDecl().functionType();
     
-    syn lazy FType InstFunctionCall.getFType() = declType().removeInputs().createSizeFExp(this);
-    eq InstVectorFunctionCall.getFType()       = declType().removeInputs().createSizeFExp(this).sizedType(vectorizedSize());
+    syn lazy FType InstFunctionCall.getFType() = declType().treeCopy().removeInputs().createSizeFExp(this);
+    eq InstVectorFunctionCall.getFType()       = declType().treeCopy().removeInputs().createSizeFExp(this).sizedType(vectorizedSize());
     eq InstPartialFunctionCall.getFType() {
-        FFunctionType type = declType();
+        FFunctionType type = declType().treeCopy();
         Set<String> s = new HashSet(namedArgs());
         List<FRecordComponentType> n = new List<FRecordComponentType>();
         for (FRecordComponentType frc : type.getInputs()) {

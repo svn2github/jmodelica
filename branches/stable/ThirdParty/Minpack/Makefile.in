@@ -63,6 +63,8 @@ CASADI_HOME = @CASADI_HOME@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CMAKE_PYTHON64_INCLUDE = @CMAKE_PYTHON64_INCLUDE@
+CMAKE_PYTHON64_LIB = @CMAKE_PYTHON64_LIB@
 CMAKE_PYTHON_INCLUDE = @CMAKE_PYTHON_INCLUDE@
 CMAKE_PYTHON_LIB = @CMAKE_PYTHON_LIB@
 CP = @CP@
@@ -114,6 +116,9 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OPENMP_CFLAGS = @OPENMP_CFLAGS@
+ORIG_PATH = @ORIG_PATH@
+ORIG_PYTHON_HOME = @ORIG_PYTHON_HOME@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -124,6 +129,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PYTHON64_HOME = @PYTHON64_HOME@
 PYTHON_HOME = @PYTHON_HOME@
 RANLIB = @RANLIB@
 REQUIRE_BEAVER_PATH = @REQUIRE_BEAVER_PATH@
@@ -218,9 +224,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/Minpack/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Minpack/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ThirdParty/Minpack/Makefile
+	  $(AUTOMAKE) --gnu ThirdParty/Minpack/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

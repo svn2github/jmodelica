@@ -151,7 +151,7 @@ SUNDIALS_LIB_DIR64 = $(SUNDIALS_HOME)/lib64
 
 # Flags needed for specific libs
 LIB_MINPACK  = "-L$(MINPACK_LIB_DIR)" -l:libcminpack.a
-LIB_SUNDIALS = "-L$(SUNDIALS_LIB_DIR)" -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a
+LIB_SUNDIALS = "-L$(SUNDIALS_LIB_DIR)" -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a -l:libquadmath.a
 STATIC_PTHREADS_CONT = $(shell dir "$(STATIC_PTHREADS_HOME)")
 ifneq ($(findstring ..,$(STATIC_PTHREADS_CONT)),)
 LIB_PTHREADS = "-L$(STATIC_PTHREADS_HOME)/lib" -lpthreadGC2-2-9-1

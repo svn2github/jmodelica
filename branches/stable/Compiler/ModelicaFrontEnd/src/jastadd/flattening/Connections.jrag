@@ -39,11 +39,11 @@ aspect Connections {
 		return connectionSetManager;
 	}
 
-    public void FClass.genConnectionEquations() {
+    public void FClass.genConnectionEquations(Flattener f) {
         beginStep("genConnectionEquations()");
         for (ConnectionSet set : connectionSetManager.getConnectionSetList()) 
-            set.generateEquations(this);
-        connectionSetManager.generateEqualityConstraints(this);
+            set.generateEquations(f);
+        connectionSetManager.generateEqualityConstraints(f);
         connectionSetManager.disconnectFromInstanceTree();
         endStep("genConnectionEquations()");
     }
@@ -477,7 +477,7 @@ aspect Connections {
 		 * 
 		 * @param eqns  equation list to add equations to
 		 */
-		public abstract void generateEquations(FClass fc);
+		public abstract void generateEquations(Flattener f);
 		
 		/**
 		 * Return all ConnectionSetEntrys corresponding to flow variables based
@@ -533,16 +533,16 @@ aspect Connections {
 			return cses;
 		}
 
-        public void generateEquations(FClass fc) {
-            ConnectionSetEntry f = first();
-            if (size() == 1 && f.isInside() && f.getVar().isTopLevelInputOutput()) {
+        public void generateEquations(Flattener f) {
+            ConnectionSetEntry fst = first();
+            if (size() == 1 && fst.isInside() && fst.getVar().isTopLevelInputOutput()) {
                 return;
             }
             FExp e = null;
             for (ConnectionSetEntry cse : this) 
                 e = cse.buildFlow(e);
-            FExp zero = f.createZeroExp();
-            fc.addFAbstractEquationNoTransform(new FEquation(e, zero));
+            FExp zero = fst.createZeroExp();
+            f.addNormalEquation(new FEquation(e, zero));
         }
 
 	}
@@ -559,7 +559,7 @@ aspect Connections {
             return "stream";
         }
 
-        public void generateEquations(FClass fc) {
+        public void generateEquations(Flattener f) {
             for (ConnectionSetEntry e : this) {
                 nominal = Math.min(e.flowNominal(), nominal);
             }
@@ -567,7 +567,7 @@ aspect Connections {
                 if (e.isOutside()) {
                     FExp left = e.createFIdUseExp();
                     FExp right = expandInStreamExp(e, null, e.createZeroExp());
-                    fc.addFAbstractEquationNoTransform(new FEquation(left, right));
+                    f.addNormalEquation(new FEquation(left, right));
                 }
             }
         }
@@ -647,16 +647,16 @@ aspect Connections {
             return "potential";
         }
 
-        public void generateEquations(FClass fc) {
+        public void generateEquations(Flattener f) {
             if (size() == 1) {
                 // Cell that is not connected to in array in expandable connector
-                fc.addFAbstractEquationNoTransform(first().createZeroEquation());
+                f.addNormalEquation(first().createZeroEquation());
             } else {
                 FExp e1 = null;
                 for (ConnectionSetEntry cse : this) {
                     FExp e2 = cse.createFIdUseExp();
                     if (e1 != null) {
-                        fc.addFAbstractEquationNoTransform(new FEquation(e1, e2));
+                        f.addNormalEquation(new FEquation(e1, e2));
                     }
                     e1 = e2;
                 }
@@ -843,9 +843,9 @@ aspect Connections {
 			equalityConstraints = null;
 		}
 		
-		public void generateEqualityConstraints(FClass fc) {
+		public void generateEqualityConstraints(Flattener f) {
 			for (EqualityConstraintConnection ecc : equalityConstraints)
-				ecc.generate(fc);
+				ecc.generate(f);
 		}
 		
 		public String printConnectionSets() {
@@ -1134,7 +1134,7 @@ aspect Connections {
             Indices rightInd = right.indices();
             Iterator<Index> leftIter = leftInd.iterator();
             Iterator<Index> rightIter = rightInd.iterator();
-            while (leftIter.hasNext()) {
+            while (leftIter.hasNext() && rightIter.hasNext()) {
                 Index leftI = leftInd.translate(leftIter.next());
                 Index rightI = rightInd.translate(rightIter.next());
                 InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
@@ -1440,9 +1440,9 @@ aspect OverconstrainedConnections {
 		/**
 		 * Generate the equalityConstraint() call.
 		 */
-		public void generate(FClass fc) {
+		public void generate(Flattener f) {
 			InstClassDecl func = cse1.getVar().equalityConstraint();
-			func.flattenFunction(fc);
+			func.flattenFunction(f);
 			Size s = func.myOutputs().get(0).size();
 			FFunctionCall right = new FFunctionCall();
 			right.setName(new FQNameString(func.qualifiedName()).createFIdUse());
@@ -1454,7 +1454,7 @@ aspect OverconstrainedConnections {
 				eqn = new FFunctionCallEquation(new List<FFunctionCallLeft>(), right);
 			else
 				eqn = new FEquation(s.createZeroFExp(), right);
-			fc.addFAbstractEquationNoTransform(eqn);
+			f.addNormalEquation(eqn);
 		}
 		
 	}
@@ -2808,21 +2808,25 @@ aspect ExpandableConnectors {
                     private FArraySubscripts fas;
                     private boolean errorReported = false;
                     
+                    private Size s;
+                    private boolean[] fixed;
+                    
                     public Source(InstAccess target, FArraySubscripts fas) {
                         this.target = target;
                         this.fas = fas;
+                        calculateSize();
                     }
                     
                     public Source(Source other) {
                         this.target = other.target;
                         this.fas = other.fas;
+                        this.s      = other.s;
+                        this.fixed  = other.fixed;
                     }
                     
-                    public void collectSize(SummedSize ss) {
+                    private void calculateSize() {
                         // Calculate local size
-                        Size s;
                         Size ts = target.size();
-                        boolean[] fixed;
                         if (fas != null) {
                             MutableSize ms = new MutableSize(fas.getNumFSubscript());
                             fixed = new boolean[ms.ndims()];
@@ -2844,6 +2848,9 @@ aspect ExpandableConnectors {
                             fixed = new boolean[s.ndims()];
                             Arrays.fill(fixed, true);
                         }
+                    }
+                    
+                    public void collectSize(SummedSize ss) {
                         if (errorReported)
                             return;
                         
@@ -3138,7 +3145,7 @@ aspect ExpandableConnectors {
     syn boolean InstAccess.isExpandableConnectorPart() = false;
     eq InstDot.isExpandableConnectorPart() {
         InstComponentDecl conn = findReferencedExpandableConnector();
-        return conn != null && conn != myInstComponentDecl();
+        return conn != null && conn != getLastInstAccess().findReferencedExpandableConnector();
     }
     
     syn InstComponentDecl InstAccess.findReferencedExpandableConnector() = null;

@@ -46,6 +46,11 @@ aspect TestCases {
  */
 abstract public class TestCase implements GenericTestCase {
 
+    /**
+     * A simple ParserHandler instance which is used for tests.
+     */
+    public static final ParserHandler PARSER_HANDLER = new ParserHandler();
+
     private String name = null;
     private String description = null;
     private String sourceFileName = null;
@@ -476,9 +481,9 @@ abstract public class TestCase implements GenericTestCase {
                 names[i] = new File(parent, modelicaLibraries[i]).getAbsolutePath();
             }
             names[modelicaLibraries.length] = getSourceFileName();
-            sr = ParserHandler.parseModel(uif, names);
+            sr = PARSER_HANDLER.parseModel(uif, names);
         } else {
-            sr = ParserHandler.parseFile(uif, getSourceFileName());
+            sr = PARSER_HANDLER.parseFile(uif, getSourceFileName());
         }
 
         if (testOptions(options)) {

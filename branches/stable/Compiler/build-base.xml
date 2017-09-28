@@ -536,6 +536,7 @@
                     <arg value="--cacheCycle" />
                     <arg value="--visitCheck=false" />
                     <arg value="--lazyMaps" />
+                    <arg value="--emptyContainerSingletons" />
                     <arg value="--indent=4space" />
                     <arg value="--inhEqCheck=false" />
                     <arg line="${jastadd_files}" />
@@ -809,8 +810,11 @@
                                     <not><isset property="@{module}.@{scanner}.uptodate" /></not>
                                     <then>
                                         <copy file="${@{module}.path}/src/parser/${@{module}.@{scanner}}" tofile="${scanners.file}" overwrite="true" />
-                                        <replace file="${scanners.file}" token="$PARSER_PACKAGE$" value="${scanners.package}" />
-                                        <jflex file="${scanners.file}" outdir="${scanners.output}" nobak="yes" />
+                                        <replace file="${scanners.file}">
+                                            <replacefilter token="$PARSER_PACKAGE$" value="${scanners.package}" />
+                                            <replacefilter token="$AST_PACKAGE$" value="${ast_package}" />
+                                        </replace>
+                                    	<jflex file="${scanners.file}" outdir="${scanners.output}" nobak="yes" />
                                         <!-- clean up intermediate file
                                     	<echo>
                                             scanners.file=${scanners.file}

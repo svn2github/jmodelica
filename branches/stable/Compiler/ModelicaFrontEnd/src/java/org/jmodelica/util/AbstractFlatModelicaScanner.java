@@ -16,7 +16,6 @@
 package org.jmodelica.util;
 
 import java.io.IOException;
-import java.util.Map;
 
 public abstract class AbstractFlatModelicaScanner {
 

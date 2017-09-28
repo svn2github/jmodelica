@@ -467,7 +467,7 @@ aspect GenerateEventIndicators {
         @Override
         public void visit(FAlgorithm alg) {
             super.visit(alg);
-            fClass.getFAbstractEquationList().addAll(generatedEquations);
+            fClass.addFEquations(generatedEquations);
             generatedEquations.clear();
         }
 

@@ -16,17 +16,25 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python
+SUBDIRS = ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
 pyfmi_install_dir=$(abs_builddir)/PyFMI_install
 pyjmi_install_dir=$(abs_builddir)/PyJMI_install
+assimulo_install_dir64=$(abs_builddir)/Assimulo_install64
+pymodelica_install_dir64=$(abs_builddir)/pymodelica_install64
+pyfmi_install_dir64=$(abs_builddir)/PyFMI_install64
+pyjmi_install_dir64=$(abs_builddir)/PyJMI_install64
 
 assimulo_build_dir=$(abs_builddir)/Assimulo_build
 pymodelica_build_dir=$(abs_builddir)/pymodelica_build
 pyfmi_build_dir=$(abs_builddir)/PyFMI_build
 pyjmi_build_dir=$(abs_builddir)/PyJMI_build
+assimulo_build_dir64=$(abs_builddir)/Assimulo_build64
+pymodelica_build_dir64=$(abs_builddir)/pymodelica_build64
+pyfmi_build_dir64=$(abs_builddir)/PyFMI_build64
+pyjmi_build_dir64=$(abs_builddir)/PyJMI_build64
 
 bindistdir=JModelica.org-$(VERSION)-bin
 
@@ -164,23 +172,36 @@ endif
 build-python-packages:
 
 if WITH_SUNDIALS
-if WITH_SUPERLU
+if WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
 	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
 	*-cygwin*) \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
 	*-mingw*) \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" $(NUMPY_NO_MSVCR_ARG) --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" $(NUMPY_NO_MSVCR_ARG) --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
 	*) \
-	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build/ --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 	esac
+if JM_WIN64
+if WITH_PYTHON64
+	mkdir -p $(assimulo_build_dir64); \
+	cd $(abs_top_srcdir)/external; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
+	cd $(assimulo_build_dir)/Assimulo; \
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:"${PATH}"; \
+	export PYTHON_HOME=$(PYTHON64_HOME); \
+	python setup.py install --with_openmp=True --superlu-home=$(abs_builddir)/superlu_build64/ --sundials-home=$(SUNDIALS_HOME)64 --sundials-with-superlu=True --blas-home=$(abs_builddir)/blas_install64/ --lapack-home=$(abs_builddir)/lapack_install64/ --force-32bit="false" $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir64); \
+	export PATH="$(ORIG_PATH)"; \
+	export PYTHON_HOME=$(ORIG_PYTHON_HOME)
+endif
+endif
 endif
 endif
 if WITH_SUNDIALS
-if !WITH_SUPERLU
+if !WITH_OPENMP
 	mkdir -p $(assimulo_build_dir); \
 	cd $(abs_top_srcdir)/external; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
@@ -193,12 +214,35 @@ if !WITH_SUPERLU
 	*) \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 	esac
+if JM_WIN64
+if WITH_PYTHON64
+	mkdir -p $(assimulo_build_dir64); \
+	cd $(abs_top_srcdir)/external; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir64); \
+	cd $(assimulo_build_dir64)/Assimulo; \
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:"${PATH}"; \
+	export PYTHON_HOME=$(PYTHON64_HOME); \
+	python setup.py install --sundials-home=$(SUNDIALS_HOME)64 --blas-home=$(abs_builddir)/blas_install64/ --lapack-home=$(abs_builddir)/lapack_install64/ --force-32bit="false" $(NUMPY_NO_MSVCR_ARG) --prefix=$(assimulo_install_dir64) ; \
+	export PATH="$(ORIG_PATH)"; \
+	export PYTHON_HOME=$(ORIG_PYTHON_HOME)
+endif
+endif
 endif
 endif
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
-
+if JM_WIN64
+if WITH_PYTHON64
+	cd $(abs_top_srcdir)/Python/src; \
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:"${PATH}"; \
+	export PYTHON_HOME=$(PYTHON64_HOME); \
+	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir64); \
+	export PATH="$(ORIG_PATH)"; \
+	export PYTHON_HOME=$(ORIG_PYTHON_HOME); \
+	rm -rf build
+endif
+endif
 	mkdir -p $(pyfmi_build_dir); \
 	cd $(abs_top_srcdir)/external; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir); \
@@ -212,16 +256,44 @@ endif
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --prefix=$(pyfmi_install_dir) ;; \
 	esac
 	rm -rf build
-
+if JM_WIN64
+if WITH_PYTHON64
+	mkdir -p $(pyfmi_build_dir64); \
+	cd $(abs_top_srcdir)/external; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir64); \
+	cd $(pyfmi_build_dir64)/PyFMI; \
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:"${PATH}"; \
+	export PYTHON_HOME=$(PYTHON64_HOME); \
+	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install64/ $(NUMPY_NO_MSVCR_ARG) --prefix=$(pyfmi_install_dir64); \
+	export PATH="$(ORIG_PATH)"; \
+	export PYTHON_HOME=$(ORIG_PYTHON_HOME); \
+	rm -rf build
+endif
+endif
 	cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyjmi.py install --prefix=$(pyjmi_install_dir); \
 	rm -rf build
-
+if JM_WIN64
+if WITH_PYTHON64
+	cd $(abs_top_srcdir)/Python/src; \
+	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:"${PATH}"; \
+	export PYTHON_HOME=$(PYTHON64_HOME); \
+	python setup_pyjmi.py install --prefix=$(pyjmi_install_dir64); \
+	export PATH="$(ORIG_PATH)"; \
+	export PYTHON_HOME=$(ORIG_PYTHON_HOME); \
+	rm -rf build
+endif
+endif
 install-python-packages: build-python-packages
 	mkdir -p $(DESTDIR)$(prefix)/Python
 	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
 	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
+if JM_WIN64
+	mkdir -p $(DESTDIR)$(prefix)/Python_64
+	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python_64/
+	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
+endif
 if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
@@ -255,6 +327,47 @@ endif
 	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
 	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
+if JM_WIN64
+if WITH_SUNDIALS
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(assimulo_install_dir64)/$${pkgdir}/site-packages/; \
+	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	fi; \
+	done
+endif
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(pymodelica_install_dir64)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(pymodelica_install_dir64)/$${pkgdir}/site-packages/; \
+	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	fi; \
+	done
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(pyjmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(pyjmi_install_dir64)/$${pkgdir}/site-packages/; \
+	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	fi; \
+	done
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
+	if [ -e $(pyfmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
+	then \
+	cd $(pyfmi_install_dir64)/$${pkgdir}/site-packages/; \
+	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	fi; \
+	done
+if WITH_PYTHON64 
+	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
+	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
+	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
+	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
+	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
+endif
+endif
 	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
 	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
 	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
