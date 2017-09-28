@@ -28,7 +28,7 @@ import beaver.Scanner;
 %public
 %final
 %class OptimicaScanner
-%extends AbstractModelicaScanner<ASTNode>
+%extends AbstractModelicaScanner<ASTNode<?>>
 %unicode
 %function nextTokenInner
 %type Symbol

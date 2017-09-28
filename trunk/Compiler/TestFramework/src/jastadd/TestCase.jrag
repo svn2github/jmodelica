@@ -359,7 +359,8 @@ abstract public class TestCase implements GenericTestCase {
 	private Assert asserter;
 
     /**
-     * Perform an assertion that two strings are equal.
+     * Perform an assertion that two strings are equal. Whitespaces and line
+     * endings are removed before comparing!
      * 
      * @param msg       a message describing what went wrong
      * @param expected  the expected value
@@ -369,6 +370,13 @@ abstract public class TestCase implements GenericTestCase {
         expected = filterForAssert(expected);
         actual = applyRegexps(actual);
         actual = filterForAssert(actual);
+        assertExactlyEquals(msg, expected, actual);
+    }
+
+    /**
+     * Tests if two strings are exactly equal.
+     */
+    protected void assertExactlyEquals(String msg, String expected, String actual) {
         msg = getDescription() + "\n" + getClass().getSimpleName() + ": " + msg;
         asserter.assertEquals(msg, expected, actual);
     }
@@ -481,9 +489,9 @@ abstract public class TestCase implements GenericTestCase {
                 names[i] = new File(parent, modelicaLibraries[i]).getAbsolutePath();
             }
             names[modelicaLibraries.length] = getSourceFileName();
-            sr = PARSER_HANDLER.parseModel(uif, names);
+            sr = getParserHandler().parseModel(uif, names);
         } else {
-            sr = PARSER_HANDLER.parseFile(uif, getSourceFileName());
+            sr = getParserHandler().parseFile(uif, getSourceFileName());
         }
 
         if (testOptions(options)) {
@@ -708,6 +716,13 @@ abstract public class TestCase implements GenericTestCase {
 		}
 		return buf.toString();
 	}
+
+    /**
+     * Allows us to switch parser.
+     */
+    protected ParserHandler getParserHandler() {
+        return PARSER_HANDLER;
+    }
 
 }
 
