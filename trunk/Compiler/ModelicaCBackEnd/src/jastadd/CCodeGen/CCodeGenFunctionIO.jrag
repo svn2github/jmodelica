@@ -76,8 +76,6 @@ aspect CCodeGenFunctionIO {
     @Override
     public void FFunctionCall.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
         if (isComposite()) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
-            myFCallable().prettyPrintCall_C(p, str, indent, this);
         } else {
             super.genTempInputAssigns_C(p, str, indent);
         }
@@ -326,14 +324,16 @@ aspect CodeFuncCallInOutArgPrinters {
         @Override
         public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-            WriteBackResidualPrinter p = new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
-            p.print(str, indent, left.getFExp().type(), left.name_C(), left.getFExp());
+            left.genWriteBackResidual_C(str, indent, enumerator, forIndices, indexCounter);
         }
+        //TODO printWriteBackResidual function with fiduseexp instead of ffunctioncallleft, se falgorithm.genResidual_C
     }
 
     public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        if (hasFExp()) 
-            printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
+        if (hasFExp()) {
+            CodePrinter.WriteBackResidualPrinter p = printer_C.new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
+            p.print(str, indent, getFExp().type(), name_C(), getFExp());
+        }
         if (replaceWithTemp()) {
             type().printFree_C(str, indent, false, getFExp().tempName_C());
         }

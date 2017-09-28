@@ -76,7 +76,7 @@ public class CADGenerator extends CGenerator {
 				}
 				Enumerator enumerator = new Enumerator();
 				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_CAD(enumerator, INDENT, genPrinter, null, new HashSet<Integer>());
+					e.genResidual_CAD(ASTNode.printer_CAD, enumerator, INDENT, genPrinter, null, new HashSet<Integer>());
 				}
 			}
 		}
