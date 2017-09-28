@@ -151,8 +151,9 @@ aspect CCodeGenAlgorithms {
         prettyPrintElse_C(p, str, indent);
         str.print(indent);
         str.print("}\n");
-        for (FIfWhenClause clause : getFIfWhenClauses())
+        for (FIfWhenClause clause : getFIfWhenClauses()) {
             p.printPostSteps(clause.getTest(), str, indent);
+        }
     }
 
     protected void FIfWhenStmt.prettyPrintElse_C(CodePrinter p, CodeStream str, String indent) {}

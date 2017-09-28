@@ -16,9 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect CADCodeGenAlgorithms {
 
-	/*-------------------------------------------------------------------------
-	 * CAD code for Statements resides bellow
-	 *-----------------------------------------------------------------------*/
 	//Methods to handle If clauses starts here
     @Override
 	public void FIfWhenStmt.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
@@ -102,9 +99,5 @@ aspect CADCodeGenAlgorithms {
             str.print(";\n");
         }
     }
-	
-	/*-------------------------------------------------------------------------
-	 * END CAD code for statements
-	 *-----------------------------------------------------------------------*/
-	
+
 }
