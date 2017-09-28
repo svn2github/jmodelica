@@ -1,4 +1,6 @@
 ================= Unreleased ==================
+
+================= Stable-2017-09-28 ==================
 ; Change ; Minor ; Build system ; #5459
 Refactored configure.ac.
 
