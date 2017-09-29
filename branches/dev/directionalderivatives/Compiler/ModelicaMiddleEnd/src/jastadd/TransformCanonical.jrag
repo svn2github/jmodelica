@@ -3200,10 +3200,7 @@ aspect FunctionAndRecordCleanup {
         UseType oldType = functionUsed;
         functionUsed = functionUsed.combine(type);
         if (functionUsed != oldType) {
-            if (functionUsed == UseType.DIRECT &&
-               (myOptions().getBooleanOption("generate_block_jacobian") ||
-                myOptions().getBooleanOption("generate_dae_jacobian") ||
-                myOptions().getBooleanOption("generate_ode_jacobian"))) {
+            if (functionUsed == UseType.DIRECT && myFClass().generateBlockJacobians()) {
                 if (requiresDerivative() && !canDifferentiate()) {
                     error("Unable to determine derivative function for function '" + name() + "'");
                 } else if (derivativeFunctionUnrestricted() != null) {
@@ -3213,6 +3210,8 @@ aspect FunctionAndRecordCleanup {
             super.markUsedFunctionsAndRecords(functionUsed);
         }
     }
+    
+    syn boolean FClass.generateBlockJacobians() = myOptions().getBooleanOption("generate_block_jacobian");
     
     @Override
     public void FFunctionVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {

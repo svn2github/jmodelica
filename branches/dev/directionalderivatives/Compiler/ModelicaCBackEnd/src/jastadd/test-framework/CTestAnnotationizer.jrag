@@ -64,51 +64,6 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 	}
-	
-	public static class CADCodeGenTestCase extends CodeGenTestCase {
-
-        /**
-         * Constructor for CAD code generation test.
-         * 
-         * Delegates to super class.
-         */
-        public CADCodeGenTestCase(String filePath, String className, String description,
-                String[] opts, Object[] data) throws Exception {
-
-            super(filePath, className, description, opts, data);
-        }
-
-		/**
-		 * Test regeneration constructor for CAD code generation test.
-		 * 
-		 * Delegates to superclass implementation.
-		 * 
-		 * @param filePath     the path to the Modelica file containing the test model
-		 * @param className    the name of the test model
-		 */
-		public CADCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
-			super(cd, filePath, className);
-		}
-		
-		/**
-		 * Prints a usage message for this test case type.
-		 */
-		public static void usage(String cl, String extra) {
-			TestAnnotationizerHelper.usage(cl, "CAD code template");
-		}
-
-		/**
-		 * Create the code generator to use.
-		 * 
-		 * Creates a CADGenerator.
-		 */
-		@Override
-		public AbstractGenerator createGenerator(FClass fc) {
-			return new CADGenerator(ASTNode.prettyPrinter, '$', fc);
-		}
-		
-	}
-
 }
 
 }

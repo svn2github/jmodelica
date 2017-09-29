@@ -602,16 +602,14 @@ public class CGenerator extends GenericGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-            if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
-                CodePrinter p = ASTNode.printer_C;
-                String indent = p.indent("");
-                OptionRegistry options = fclass.myOptions();
+            CodePrinter p = ASTNode.printer_C;
+            String indent = p.indent("");
+            OptionRegistry options = fclass.myOptions();
 
-                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false,
-                            false, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
-                            options.getStringOption("nonlinear_solver"), -1);
-            }
+            for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                block.genBlockAddCall_C(p, genPrinter, indent, false,
+                        false, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
+                        options.getStringOption("nonlinear_solver"), -1);
         }
     }
 
@@ -678,16 +676,14 @@ public class CGenerator extends GenericGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-            if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
-                CodePrinter p = ASTNode.printer_C;
-                String indent = p.indent("");
-                OptionRegistry options = fclass.myOptions();
+            CodePrinter p = ASTNode.printer_C;
+            String indent = p.indent("");
+            OptionRegistry options = fclass.myOptions();
 
-                for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false,
-                            true, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
-                            fclass.myOptions().getStringOption("init_nonlinear_solver"), -1);
-            }
+            for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+                block.genBlockAddCall_C(p, genPrinter, indent, false,
+                        true, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
+                        fclass.myOptions().getStringOption("init_nonlinear_solver"), -1);
         }
     }
 

@@ -1295,7 +1295,7 @@ public class ModelicaCompiler {
      * Override for subclasses needing another subclass of CGenerator.
      */
     protected CGenerator createCGenerator(FClass fc) {
-        return new CADGenerator(ASTNode.prettyPrinter, '$', fc);
+        return new CGenerator(ASTNode.prettyPrinter, '$', fc);
     }
 
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
