@@ -236,7 +236,9 @@ aspect CCodeGenBlocks {
     @Override
     protected void MetaEquationBlock.genSolved(CodePrinter p, CodeStream str, String indent,
             boolean inResFunc, Set<FAbstractEquation> visited) {
+        p.printPreSteps(equation(), str, indent);
         p.print(equation(), str, indent);
+        p.printPostSteps(equation(), str, indent);
     }
     
     @Override

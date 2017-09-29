@@ -174,25 +174,14 @@ aspect CCodeGen {
     @Override
     public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         getArgs().genTempArg(p.PreStep, str, indent);
-        if (isFunctionCallArg()) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
-        }
         if (isStringExp()) {
             str.print(indent);
             str.print(tempName_C());
             str.print(" = ");
             myFCallable().prettyPrintCall_C(p, str, indent, this);
             str.println(";");
-        } else if (!functionCallIsExp()) {
-            p.print(this, str, indent);
-            getArgs().genTempArg(p.PostStep, str, indent);
         }
     }
-
-	
-	
-    @Override
-    public void FArraySubscripts.genTempVars_C(CodePrinter p, CodeStream str, String indent) {}
 
     @Override
     public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -1622,9 +1611,11 @@ aspect CCodeGen {
 	public void FFunctionCallStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		if (!getCall().isIgnored()) {
 			p.printPreSteps(this, str, indent);
+			p.print(getCall(), str, indent);
 			for (FFunctionCallLeft l : getLefts()) {
 				l.genWriteBackAssignment_C(str, indent, null);
 			}
+            p.printPostSteps(this, str, indent);
 		}
 	}
 	
@@ -1632,6 +1623,8 @@ aspect CCodeGen {
 	public void FFunctionCallEquation.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		if (!getCall().isIgnored()) {
 			p.printPreSteps(this, str, indent);
+			p.print(getCall(), str, indent);
+            p.printPostSteps(this, str, indent);
 		}
 	}
 	
@@ -1641,7 +1634,6 @@ aspect CCodeGen {
         if (isWhen() && p.inInitialSystem() && !getTest().isInitialGuard()) {
             return;
         }
-        p.printPreSteps(this, str, indent);
         genIfStart_C(p, str, indent);
         for (FAbstractEquation equation : getFAbstractEquations())
             p.print(equation, str, p.indent(indent));
@@ -2865,6 +2857,8 @@ aspect CCodeGen {
         if (!getCall().isIgnored()) {
             if (firstVisit) {
                 p.printPreSteps(this, str, indent);
+                p.print(getCall(), str, indent);
+                p.printPostSteps(this, str, indent);
             }
         }
     }
@@ -2972,20 +2966,6 @@ aspect CCodeGen {
     }
     
     
-    public class CStatement {
-        public static class Residual {
-            public static void print(FEquation eqn, CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        		p.printPreSteps(eqn, str, indent);
-				str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-				p.print(eqn.getRight(), str, "");
-				str.print(" - (");
-				p.print(eqn.getLeft(), str, "");
-				str.print(");\n");
-        		p.printPostSteps(eqn, str, indent);
-            }
-        }
-    }
-
     
     /**
      * Generate residual code for equations
@@ -2999,7 +2979,13 @@ aspect CCodeGen {
     @Override
     public void FEquation.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         boolean firstVisit = visited == null || visited.add(this);
-        CStatement.Residual.print(this, p, str, indent, enumerator);
+        p.printPreSteps(this, str, indent);
+        str.print(indent + "(*res)[" + enumerator.next() + "] = ");
+        p.print(getRight(), str, "");
+        str.print(" - (");
+        p.print(getLeft(), str, "");
+        str.print(");\n");
+        p.printPostSteps(this, str, indent);
     }
 
     @Override
@@ -3008,10 +2994,12 @@ aspect CCodeGen {
         if (!getCall().isIgnored()) {
             if (firstVisit) {
                 p.printPreSteps(this, str, indent);
+                p.print(getCall(), str, indent);
+                p.printPostSteps(this, str, indent);
             }
             Enumerator indexCounter = new Enumerator();
             for (FFunctionCallLeft l : getLefts())
-                p.printWriteBackResidual(str, indent, l, enumerator, forIndices, indexCounter);
+                l.genWriteBackResidual_C(str, indent, enumerator, forIndices, indexCounter);
         }
     }
 

@@ -38,8 +38,6 @@ aspect CCodeGenExpressions {
     @Override
     public void FAssert.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(getTest(), str, indent);
-		prettyPrint_C(p, str, indent);
-        p.printPostSteps(getTest(), str, indent);
     }
 
     @Override
@@ -334,12 +332,6 @@ aspect CCodeGenExpressions {
         str.print("jmi_flag_termination(jmi, ");
         p.print(getFExp(), str, indent);
         str.print(");\n");
-    }
-
-    @Override
-    public void FTerminate.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        //super.genTempVars_C(p, str, indent); //CR: do we need this here (ASTNode, traverse all children)
-        p.print(this, str, indent);
     }
 
     @Override
@@ -655,12 +647,6 @@ aspect CCodeGenExpressions {
         str.format("%s%s = ", indent, tempName_C());
         p.print(getFExp(), str, indent);
         str.println(";");
-    }
-
-    @Override
-    public void FReinit.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        super.genTempVars_C(p, str, indent);
-        p.print(this, str, indent);
     }
 
     /**
@@ -1457,9 +1443,6 @@ aspect CCodeGenExpressions {
         p.printPreSteps(getIn1(), str, indent);
         p.printPreSteps(getX(), str, indent);
         p.printPreSteps(getPositiveVelocity(), str, indent);
-        if (!functionCallIsExp()) {// printed later if part of expression
-            p.print(this, str, indent);
-        }
     }
 
     @Override
