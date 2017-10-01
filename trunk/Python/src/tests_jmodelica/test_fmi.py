@@ -493,7 +493,7 @@ class Test_FMUModelCS1:
         #rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
         rlc = FMUModelCS1(Test_FMUModelCS1.rlc_circuit)
 
-        res = rlc.simulate()
+        res = rlc.simulate(options={"result_handling":"file"})
 
         #Default name
         assert res.result_file == "RLC_Circuit_result.txt"

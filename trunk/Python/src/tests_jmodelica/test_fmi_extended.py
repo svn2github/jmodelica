@@ -301,7 +301,7 @@ class Test_FMUModelME1Extended:
     def test_result_name_file(self):
 
         rlc = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
-        res = rlc.simulate()
+        res = rlc.simulate(options={"result_handling":"file"})
 
         #Default name
         assert res.result_file == "RLC_Circuit_result.txt"

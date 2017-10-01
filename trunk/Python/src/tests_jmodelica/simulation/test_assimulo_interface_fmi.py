@@ -1685,7 +1685,7 @@ class Test_FMI_ODE:
         """
         Tests user naming of result file (FMIODE).
         """
-        res = self._dq.simulate(options={"initialize":False})
+        res = self._dq.simulate(options={"initialize":False, "result_handling":"file"})
         
         #Default name
         assert res.result_file == "dq_result.txt"
