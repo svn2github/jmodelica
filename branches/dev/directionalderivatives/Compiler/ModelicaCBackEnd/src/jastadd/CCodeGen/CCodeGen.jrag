@@ -977,7 +977,7 @@ aspect CCodeGen {
 
     @Override
     public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        FInitArrayStmt.genInit_C(p, str, indent, name_C(), this, type());
+        p.printInit(str, indent, this, type());
     }
 
     public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
@@ -2614,7 +2614,7 @@ aspect CCodeGen {
         str.print(indent + dst + " = " + src + ";\n");
     }
 
-    public void FType.printAssign_C(CodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
+    public void FType.printAssign_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
         str.print(indent);
         p.print(dst, str, indent);
         str.print(" = ");
@@ -2623,7 +2623,7 @@ aspect CCodeGen {
     }
 
     @Override
-    public void FStringType.printAssign_C(CodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
+    public void FStringType.printAssign_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp dst, FExp src) {
         str.print(indent);
         str.print("JMI_ASG(");
         str.print(macroType());

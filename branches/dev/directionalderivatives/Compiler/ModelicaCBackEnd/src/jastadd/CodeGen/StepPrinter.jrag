@@ -18,6 +18,7 @@ aspect StepPrinter {
     
     public abstract class CodePrinter extends Printer {
         public abstract class StepPrinter {
+            public CodePrinter codePrinter() { return CodePrinter.this; }
             public abstract void print(ASTNode n, CodeStream str, String indent);
             public abstract void printIO(FExp n, CodeStream str, String indent);
             public void print(CodeStream str, String s) {
@@ -27,53 +28,61 @@ aspect StepPrinter {
         
         public StepPrinter DeclStep  = new DeclCodePrinter();
         public StepPrinter PreStep   = new PreCodePrinter();
-        public StepPrinter ExecStep  = new ExecuteCodePrinter();
+        public ExecuteCodePrinter ExecStep  = new ExecuteCodePrinter();
         public StepPrinter PostStep  = new PostCodePrinter();
         
         class DeclCodePrinter extends StepPrinter {
             @Override
             public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.printVarDecls(n, str, indent);
+                codePrinter().printVarDecls(n, str, indent);
             }
             @Override
             public void printIO(FExp n, CodeStream str, String indent) {
                 print(n, str, indent);
-                CodePrinter.this.printIODecl(n, str, indent);
+                codePrinter().printIODecl(n, str, indent);
             }
         }
         
         class PreCodePrinter extends StepPrinter {
             @Override
             public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.printPreSteps(n, str, indent);
+                codePrinter().printPreSteps(n, str, indent);
             }
             @Override
             public void printIO(FExp n, CodeStream str, String indent) {
                 print(n, str, indent);
-                CodePrinter.this.printIOPre(n, str, indent);
+                codePrinter().printIOPre(n, str, indent);
             }
         }
         
         class ExecuteCodePrinter extends StepPrinter {
             @Override
             public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.print(n, str, indent);
+                codePrinter().print(n, str, indent);
             }
             @Override
             public void printIO(FExp n, CodeStream str, String indent) {
-                CodePrinter.this.printIOExec(n, str, indent);
+                codePrinter().printIOExec(n, str, indent);
             }
             
             @Override
             public void print(CodeStream str, String s) {
                 str.print(s);
             }
+            
+            public String returnName(FFunctionVariable v) {
+                return v.nameReturn_C();
+            }
+            
+            public String name(FFunctionVariable v) {
+                return v.name_C();
+            }
         }
         
         class PostCodePrinter extends StepPrinter {
             @Override
             public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.printPostSteps(n, str, indent);
+                codePrinter().printPostSteps(n, str, indent);
             }
             @Override
             public void printIO(FExp n, CodeStream str, String indent) {

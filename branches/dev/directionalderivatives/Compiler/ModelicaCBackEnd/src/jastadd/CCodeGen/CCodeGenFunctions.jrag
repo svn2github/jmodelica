@@ -25,7 +25,7 @@ aspect CCodeGenFunctions {
     public void FFunctionDecl.printReturnWrite(CodePrinter p, CodeStream str, String indent) {
         for (FFunctionVariable v : myOutputs()) {
             if ((!v.isArray() && !v.isRecord()) || (v.isArray() && v.isString())) {
-                p.printReturnWrite(v, str, indent);
+                p.printReturnWrite(str, indent, v);
             }
         }
         ASTNode.genDynMemFree(str, indent);
@@ -33,29 +33,26 @@ aspect CCodeGenFunctions {
     }
     
     abstract class CodePrinter {
-        public abstract void printReturnWrite(FFunctionVariable v, CodeStream str, String indent);
+        public abstract void printReturnWrite(CodeStream str, String indent, FFunctionVariable v);
     }
     
     class CPrettyPrinter {
         @Override
-        public void printReturnWrite(FFunctionVariable v, CodeStream str, String indent) {
-            v.printReturnWrite_C(this, str, indent);
+        public void printReturnWrite(CodeStream str, String indent, FFunctionVariable v) {
+            v.printReturnWrite(ExecStep, str, indent);
         }
+        
+        
     }
     
-    public void FFunctionVariable.printReturnWrite_C(CodePrinter p, CodeStream str, String indent) {
-        printReturnWrite(p, str, indent, nameReturn_C(), name_C());
-    }
-    
-    public void FFunctionVariable.printReturnWrite(CodePrinter p, CodeStream str, String indent, 
-            String dst, String src) {
+    public void FFunctionVariable.printReturnWrite(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         str.print(indent);
         str.print("JMI_RET(");
         str.print(type().macroType());
         str.print(", ");
-        str.print(dst);
+        str.print(p.returnName(this));
         str.print(", ");
-        str.print(src);
+        str.print(p.name(this));
         str.print(")\n");
     }
 }
