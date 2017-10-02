@@ -337,35 +337,15 @@ aspect CCodeGen {
         
         str.print(")");
     }
-	
-	public String FunctionReturnDefinition.getDeclaredType_C() {
-		if (outputs.size() > 0) 
-			return outputs.get(0).type_C();
-		else
-			return "void";
-	}
-	
-	public void FunctionReturnDefinition.printReturnForExp_C(CodeStream str, String indent) {
-		str.print(indent);
-		str.print("return");
-		if (outputs.size() > 0) { 
-			str.print(" ");
-			str.print(outputs.get(0).name_C());
-		}
-		str.print(";\n");
-	}
-	
-	public void FunctionReturnDefinition.printDeclarationForExp_C(CodePrinter p, CodeStream str, String indent) {
-		if (outputs.size() > 0) 
-			outputs.get(0).genVarDecls_C(p, str, indent);
-	}
-	
-	public void FunctionReturnDefinition.printReturnWrite_C(CodeStream str, String indent) {
-		for (FFunctionVariable v : outputs) 
-			v.printReturnWrite_C(str, indent);
-	}
-	
-	
+
+    public String FFunctionDecl.getDeclaredType_C() {
+        if (myOutputs().size() > 0) {
+            return myOutputs().get(0).type_C();
+        } else {
+            return "void";
+        }
+    }
+
 	private void FFunctionDecl.prettyPrintHead_C(CodePrinter p, CodeStream str, String indent, 
 			String type, String suffix, boolean returnArgs) {
 		str.print(indent);
@@ -388,7 +368,13 @@ aspect CCodeGen {
 		}
 		str.print(")");
 	}
-	
+
+    public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
+        str.print(typeReturn_C());
+        str.print(" ");
+        str.print(nameReturn_C());
+    }
+
 	private void FFunctionDecl.prettyPrintWrappedCall_C(CodeStream str, String indent) {
 		if (!shouldPrintFuncDecl_C())
 			return;
@@ -568,12 +554,28 @@ aspect CCodeGen {
 			str.print(" {\n");
 			returnDefinition().printDeclarationForExp_C(p, str, next);
 			prettyPrintWrappedCall_C(str, next);
-			returnDefinition().printReturnForExp_C(str, next);
+            printReturnForExp_C(p, str, next);
 	    	str.print(indent);
 	    	str.print("}\n\n");
     	}
 	}
-	
+
+    public void FFunctionDecl.printReturnForExp_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent);
+        str.print("return");
+        if (myOutputs().size() > 0) { 
+            str.print(" ");
+            str.print(myOutputs().get(0).name_C());
+        }
+        str.print(";\n");
+    }
+
+    public void FFunctionDecl.printDeclarationForExp_C(CodePrinter p, CodeStream str, String indent) {
+        if (myOutputs().size() > 0) { 
+            myOutputs().get(0).genVarDecls_C(p, str, indent);
+        }
+    }
+
     /**
      * \brief Generates FPCL and FPCR functions used by partial function calls.
      */
@@ -945,27 +947,8 @@ aspect CCodeGen {
         str.print(indent);
         str.print("JMI_DYNAMIC_FREE()\n");
     }
-    
-    
-	public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
-		str.print(typeReturn_C());
-		str.print(" ");
-		str.print(nameReturn_C());
-	}
-	
-	public void FFunctionVariable.printReturnWrite_C(CodeStream str, String indent) {
-		if (!isRecord()) {
-			getType().printReturn_C(str, indent, nameReturn_C(), name_C());
-		}
-	}
-    
-    @Override
-    public void FFunctionArray.printReturnWrite_C(CodeStream str, String indent) {
-        if (isString()) {
-            getType().printReturn_C(str, indent, nameReturn_C(), name_C());
-        }
-    }
-    
+
+
 	public void FFunctionVariable.printArgument_C(CodeStream str) {
 		str.print(type_C());
 		str.print(" ");
@@ -2648,17 +2631,6 @@ aspect CCodeGen {
         p.print(dst, str, indent);
         str.print(", ");
         p.print(src, str, indent);
-        str.print(")\n");
-    }
-
-    public void FType.printReturn_C(CodeStream str, String indent, String dst, String src) {
-        str.print(indent);
-        str.print("JMI_RET(");
-        str.print(macroType());
-        str.print(", ");
-        str.print(dst);
-        str.print(", ");
-        str.print(src);
         str.print(")\n");
     }
 

@@ -4098,6 +4098,10 @@ void func_CCodeGenTests_CArrayInput7_f1_def0(jmi_real_t* out_o) {
         jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(5);
         jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(6);
         out_v = func_CCodeGenTests_CArrayInput7_f2_exp1(tmp_2);
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+        jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+        jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+        jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     }
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()

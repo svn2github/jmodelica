@@ -131,9 +131,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FReturnStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        returnDefinition().printReturnWrite_C(str, indent);
-        ASTNode.genDynMemFree(str, indent);
-        str.print(indent + "return;\n");
+        containingFFunctionDecl().printReturnWrite(p, str, indent);
     }
 
     @Override
@@ -181,7 +179,9 @@ aspect CCodeGenAlgorithms {
         str.print("while (");
         p.print(getTest(), str, "");
         str.print(") {\n");
-        p.print(getWhileStmts(), str, p.indent(indent));
+        String next = p.indent(indent);
+        p.print(getWhileStmts(), str, next);
+        p.printPreSteps(getTest(), str, next);
         str.print(indent);
         str.print("}\n");
         p.printPostSteps(getTest(), str, indent);

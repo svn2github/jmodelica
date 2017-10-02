@@ -1,0 +1,61 @@
+
+/*
+Copyright (C) 2009-2017 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect CCodeGenFunctions {
+    
+
+    /*
+     * Return from functions
+     */
+
+    public void FFunctionDecl.printReturnWrite(CodePrinter p, CodeStream str, String indent) {
+        for (FFunctionVariable v : myOutputs()) {
+            if ((!v.isArray() && !v.isRecord()) || (v.isArray() && v.isString())) {
+                p.printReturnWrite(v, str, indent);
+            }
+        }
+        ASTNode.genDynMemFree(str, indent);
+        str.print(indent + "return;\n");
+    }
+    
+    abstract class CodePrinter {
+        public abstract void printReturnWrite(FFunctionVariable v, CodeStream str, String indent);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printReturnWrite(FFunctionVariable v, CodeStream str, String indent) {
+            v.printReturnWrite_C(this, str, indent);
+        }
+    }
+    
+    public void FFunctionVariable.printReturnWrite_C(CodePrinter p, CodeStream str, String indent) {
+        printReturnWrite(p, str, indent, nameReturn_C(), name_C());
+    }
+    
+    public void FFunctionVariable.printReturnWrite(CodePrinter p, CodeStream str, String indent, 
+            String dst, String src) {
+        str.print(indent);
+        str.print("JMI_RET(");
+        str.print(type().macroType());
+        str.print(", ");
+        str.print(dst);
+        str.print(", ");
+        str.print(src);
+        str.print(")\n");
+    }
+}
