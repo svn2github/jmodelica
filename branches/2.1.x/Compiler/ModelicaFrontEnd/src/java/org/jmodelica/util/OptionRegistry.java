@@ -688,7 +688,7 @@ abstract public class OptionRegistry {
         RUNTIME_PARAM
             ("generate_runtime_option_parameters",
              OptionType.compiler,
-             Category.internal,
+             Category.uncommon,
              true,
              "If enabled, generate parameters for runtime options. Should always be true for normal compilation."),
         WRITE_ITER_VARS
