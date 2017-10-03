@@ -205,18 +205,19 @@ aspect ConnectorTypes {
 
 aspect DerivativeFunctions {
 
-	syn boolean FType.shouldBeDifferentiated()             = isReal() || isComposite();
-	syn boolean FAbstractVariable.shouldBeDifferentiated() = false;
-	eq FFunctionVariable.shouldBeDifferentiated()          = delegateShouldBeDifferentiated();
-	eq FVariable.shouldBeDifferentiated()                  = variability().continuousVariability();
-	syn boolean FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
-	syn boolean FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
-	eq FDivFuncExp.shouldBeDifferentiated()                = false;
-	eq FSignExp.shouldBeDifferentiated()                   = false;
-	eq FLitExp.shouldBeDifferentiated()                    = false;
-	syn boolean FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
-	syn boolean FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
-	syn boolean FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;
+    syn boolean ASTNode.shouldBeDifferentiated()  = false;
+    eq FType.shouldBeDifferentiated()             = isReal() || isComposite();
+    eq FFunctionVariable.shouldBeDifferentiated() = delegateShouldBeDifferentiated();
+    eq FVariable.shouldBeDifferentiated()         = variability().continuousVariability();
+    eq FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
+    eq FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && 
+            (inFunction() && !isConstantExp() || isContinuousExp());
+    eq FDivFuncExp.shouldBeDifferentiated()       = false;
+    eq FSignExp.shouldBeDifferentiated()          = false;
+    eq FLitExp.shouldBeDifferentiated()           = false;
+    eq FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
+    eq FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
+    eq FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;
 
 
     /**

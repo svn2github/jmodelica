@@ -289,9 +289,10 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
 
-    public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
+    public void FFunctionCallLeft.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent,
+            Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
-            printer_C.printWriteBackAssignment(str, indent, this, forVariables);
+            p.printWriteBackAssignment(str, indent, this, forVariables);
             type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
@@ -368,7 +369,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
-                use.genWriteBackAssignment_C(str, indent, name, forVariables);
+                use.genWriteBackAssignment_C(CodePrinter.this, str, indent, name, forVariables);
             }
 
             @Override
@@ -378,7 +379,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
-                firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
+                firstUse.genArrayWriteBackAssignment_C(CodePrinter.this, str, indent, firstName, n);
             }
        }
 
@@ -506,7 +507,8 @@ aspect CodeFuncCallInOutArg {
         return getFExp().tempName_C();
     }
     
-    public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+    public void FIdUseExp.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name,
+            Collection<FVariable> forVariables) {
         if (forVariables != null && !forVariables.contains(myFV()))
             return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
@@ -516,14 +518,14 @@ aspect CodeFuncCallInOutArg {
                 str.print("_Z");
             }
             str.print(", ");
-            genAssignedRef_C(ASTNode.printer_C, str, indent);
+            genAssignedRef_C(p, str, indent);
             str.print(", ");
             str.print(name);
             str.println(")");
             return;
         }
         str.print(indent);
-        genAssignedRef_C(ASTNode.printer_C, str, indent);
+        genAssignedRef_C(p, str, indent);
         str.print(" = (");
         str.print(name);
         str.print(")");
@@ -535,10 +537,10 @@ aspect CodeFuncCallInOutArg {
         str.print(";\n");
     }
     
-    public void FIdUseExp.genArrayWriteBackAssignment_C(CodeStream str, String indent, String name, int n) {
+    public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
         str.print(indent);
         str.print("memcpy(&");
-        genAssignedRef_C(ASTNode.printer_C, str, indent);
+        genAssignedRef_C(p, str, indent);
         str.print(", &");
         str.print(name);
         str.print(", ");

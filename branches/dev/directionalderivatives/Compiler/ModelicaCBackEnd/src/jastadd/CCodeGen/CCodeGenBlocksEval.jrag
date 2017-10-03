@@ -33,11 +33,15 @@ aspect CCodeGenBlocksEval {
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         FVariable fv = forVariables.iterator().next();
         FExp sol = solution(fv);
+        
         p.printPreSteps(sol, str, indent);
-        str.print(indent, fv.name_C(), " = ");
-        p.print(sol, str, indent);
-        str.print(";\n");
+        p.printAssign(str, indent, fv.type(), fv, sol);
         p.printPostSteps(sol, str, indent);
+    }
+
+    @Override
+    public void FAbstractVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(name_C());
     }
 
     @Override
@@ -46,7 +50,7 @@ aspect CCodeGenBlocksEval {
         if (!getCall().isIgnored()) {
             genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
             for (FFunctionCallLeft l : getLefts()) {
-                l.genWriteBackAssignment_C(str, indent, forVariables);
+                l.genWriteBackAssignment_C(p, str, indent, forVariables);
             }
         }
     }
@@ -70,7 +74,7 @@ aspect CCodeGenBlocksEval {
         genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
         if (!sideEffect && (!firstVisit || !forVariables.iterator().next().isReal())) {
             for (FIdUseExp use : uniqueFIdUseExpsInLHS())
-                use.genWriteBackAssignment_C(str, indent, use.tempName_C(), forVariables);
+                use.genWriteBackAssignment_C(p, str, indent, use.tempName_C(), forVariables);
         }
     }
 

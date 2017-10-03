@@ -15,23 +15,80 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect CCodeGenAlgorithms {
 
-    public class CodePrinter {
-        public abstract void printAssign(FAssignStmt stmt, CodeStream str, String indent);
-        public abstract void printInit(CodeStream str, String indent, FFunctionVariable v, FType type);
-    }
+    /*
+     * Hook for printing assignment
+     */
     
+    public class CodePrinter {
+        public abstract void printAssign(CodeStream str, String indent, FType type, ASTNode left, ASTNode right);
+    }
+
     public class CPrettyPrinter {
         @Override
-        public void printAssign(FAssignStmt stmt, CodeStream str, String indent) {
-            stmt.printAssign(ExecStep, str, indent);
+        public void printAssign(CodeStream str, String indent, FType type, ASTNode left, ASTNode right) {
+            type.printAssign(ExecStep, str, indent, left, right);
         }
-        
+    }
+
+    public void FType.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+            ASTNode dst, ASTNode src) {
+        str.print(indent);
+        p.print(dst, str, indent);
+        str.print(" = ");
+        p.print(src, str, indent);
+        str.print(";\n");
+    }
+
+    @Override
+    public void FStringType.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+            ASTNode dst, ASTNode src) {
+        str.print(indent);
+        str.print("JMI_ASG(");
+        str.print(macroType());
+        str.print(", ");
+        p.print(dst, str, indent);
+        str.print(", ");
+        p.print(src, str, indent);
+        str.print(")\n");
+    }
+
+    /*
+     * Hook for printing array initialization
+     */
+
+    public class CodePrinter {
+        public abstract void printInit(CodeStream str, String indent, FFunctionVariable v, FType type);
+    }
+
+    public class CPrettyPrinter {
         @Override
         public void printInit(CodeStream str, String indent, FFunctionVariable v, FType type) {
             v.printInit(ExecStep, str, indent, type);
         }
     }
 
+    public void FFunctionVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
+        String name = p.name(this);
+        setDummyExp();
+        TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
+        if (isComposite() && isOutput() && !isString()) {
+            String next = p.codePrinter().indent(indent);
+            String iniName = name + C_SUFFIX_NULL;
+            str.print(indent + "if (" + name + " == NULL) {\n");
+            tp.reset(iniName, getBindingExp(), type.size(), false, next);
+            type.print(tp);
+            str.print(next + name + " = " + iniName + ";\n");
+            str.print(indent + "}\n");
+        } else {
+            tp.reset(name, getBindingExp(), type.size(), false, indent);
+            type.print(tp);
+        }
+        resetDummyExp();
+    }
+
+    /*
+     * End of hooks
+     */
 
     public void ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
         throw new UnsupportedOperationException("ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables, boolean solved) not implemented for class '" + getClass().getSimpleName() +"'");
@@ -110,31 +167,12 @@ aspect CCodeGenAlgorithms {
         p.printInit(str, indent, getFIdUseExp().myFuncFV(), type());
     }
 
-    public void FFunctionVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
-        String name = p.name(this);
-        setDummyExp();
-        TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
-        if (isComposite() && isOutput() && !isString()) {
-            String next = p.codePrinter().indent(indent);
-            String iniName = name + C_SUFFIX_NULL;
-            str.print(indent + "if (" + name + " == NULL) {\n");
-            tp.reset(iniName, getBindingExp(), type.size(), false, next);
-            type.print(tp);
-            str.print(next + name + " = " + iniName + ";\n");
-            str.print(indent + "}\n");
-        } else {
-            tp.reset(name, getBindingExp(), type.size(), false, indent);
-            type.print(tp);
-        }
-        resetDummyExp();
-    }
-
     @Override
     public void FFunctionCallStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (!getCall().isIgnored()) {
             p.printPreSteps(this, str, indent);
             for (FFunctionCallLeft l : getLefts()) {
-                l.genWriteBackAssignment_C(str, indent, null);
+                l.genWriteBackAssignment_C(p, str, indent, null);
             }
         }
     }
@@ -142,12 +180,8 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FAssignStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        p.printAssign(this, str, indent);
+        p.printAssign(str, indent, getLeft().type(), getLeft(), getRight());
         p.printPostSteps(this, str, indent);
-    }
-
-    public void FAssignStmt.printAssign(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        getLeft().type().printAssign_C(p, str, indent, getLeft(), getRight());
     }
 
     @Override
