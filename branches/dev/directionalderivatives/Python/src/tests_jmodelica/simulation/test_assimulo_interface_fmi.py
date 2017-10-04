@@ -112,8 +112,6 @@ class Test_Sensitivities_FMI2:
     def setUpClass(cls):
         file_name = os.path.join(get_files_path(), 'Modelica', 'Sensitivities.mo')
         compile_fmu("BasicSens1", file_name, version=2.0)
-        compile_fmu("BasicSens2", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True})
-        compile_fmu("BasicSens1", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True}, compile_to="BasicSens1Dir.fmu")
         
     @testattr(noncompliantfmi = True)
     def test_basicsens1(self):
@@ -129,7 +127,7 @@ class Test_Sensitivities_FMI2:
         
     @testattr(noncompliantfmi = True)
     def test_basicsens1dir(self):
-        model = load_fmu("BasicSens1Dir.fmu")
+        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens1.fmu"))
         
         opts = model.simulate_options()
         opts["sensitivities"] = ["d"]
@@ -141,7 +139,7 @@ class Test_Sensitivities_FMI2:
         
     @testattr(stddist = True)
     def test_basicsens2(self):
-        model = load_fmu("BasicSens2.fmu")
+        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens2.fmu"))
         
         opts = model.simulate_options()
         opts["sensitivities"] = ["d"]
@@ -890,7 +888,6 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NonLinear3", file_name)
         compile_fmu("NonLinear.NonLinear4", file_name)
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
-        compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
         compile_fmu("NonLinear.EventIteration1", file_name)
         compile_fmu("NonLinear.NonLinear6", file_name)
         compile_fmu("NonLinear.NonLinear7", file_name)
@@ -898,7 +895,7 @@ class Test_NonLinear_Systems:
     @testattr(stddist = True)
     def test_Brent_AD(self):
         
-        model = load_fmu("NonLinear_NonLinear5.fmu", log_level=6)
+        model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "NonLinear_NonLinear5.fmu"), log_level=6)
         model.set("_log_level", 8)
         
         model.initialize()
