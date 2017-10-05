@@ -64,7 +64,9 @@ aspect OptimicaParsers {
     }
 
     public AbstractModelicaScanner ParserHandler.createOptimicaScanner(Reader in) {
-    	return new org.jmodelica.optimica.parser.OptimicaScanner(in);
+        AbstractModelicaScanner<ASTNode<?>> scanner = new org.jmodelica.optimica.parser.OptimicaScanner(in);
+        scanner.setFormattingRecorder(formattingRecorder);
+        return scanner;
     }
 
     public short ParserHandler.expOptimicaGoal() {

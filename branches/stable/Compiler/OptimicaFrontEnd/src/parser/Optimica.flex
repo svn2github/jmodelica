@@ -28,7 +28,7 @@ import beaver.Scanner;
 %public
 %final
 %class OptimicaScanner
-%extends AbstractModelicaScanner<ASTNode>
+%extends AbstractModelicaScanner<ASTNode<?>>
 %unicode
 %function nextTokenInner
 %type Symbol
@@ -277,8 +277,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "."             { return newSymbol(Terminals.DOT); }
   ","             { return newSymbol(Terminals.COMMA); }
 
-  "+"             { addFormattingInformation(FormattingType.NON_BREAKING_WHITESPACE, yytext());
-                    return newSymbol(Terminals.PLUS); }  
+  "+"             { return newSymbol(Terminals.PLUS); }
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
   "/"             { return newSymbol(Terminals.DIV); }

@@ -531,7 +531,7 @@ class Test_FMUModelCS2:
         coupled = load_fmu(self.coupled_name)
 
         #Test the result file
-        res = coupled.simulate()
+        res = coupled.simulate(options={"result_handling":"file"})
         assert res.result_file == coupled.get_identifier()+'_result.txt'
         assert os.path.exists(res.result_file)
 
@@ -1070,7 +1070,7 @@ class Test_FMUModelME2:
         assert opts['ncp'] == 0
 
         #Test the result file
-        res=coupled.simulate()
+        res=coupled.simulate(options={"result_handling":"file"})
         assert res.result_file == coupled.get_identifier()+'_result.txt'
         assert os.path.exists(res.result_file)
 
