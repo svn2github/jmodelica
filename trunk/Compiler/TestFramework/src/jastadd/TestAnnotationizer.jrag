@@ -77,10 +77,10 @@ abstract public class TestAnnotationizerHelper {
         try {
             Class cl = getTestCase(testType);
             Constructor constructor =
-                    cl.getConstructor(String.class, String.class, String.class, String[].class, String[].class);
+                    cl.getConstructor(String.class, String.class, String.class, String[].class, Object[].class);
 
             TestAnnotationizerHelper ta =
-                    (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
+                    (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, new Object[] { data });
 
             ta.setCheckType(checkType);
             ta.setModelicaLibraries(libs);
