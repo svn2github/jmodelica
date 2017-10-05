@@ -1344,12 +1344,6 @@ aspect FlatFunctionUtils {
      syn FFunctionVariable FFunctionVariable.expOutput() = myOutputs().get(0);
      syn FFunctionVariable FFunctionCall.expOutput()     = myCallOutputs().get(0);
      syn InstComponentDecl InstFunctionCall.expOutput()  = myCallOutputs().get(0);
-    
-     syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
-     inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
-     eq InstProgramRoot.getChild().returnDefinition()         = null;
-     eq FClass.getChild().returnDefinition()                  = null;
      
      inh String InstFunctionArgument.funcName();
      inh String FFunctionCallLeft.funcName();

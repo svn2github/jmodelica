@@ -403,8 +403,7 @@ aspect CCodeGen {
 		prettyPrintHead_C(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
 		str.print(";\n");
     	if (generateExpFunction()) {
-    		String type = returnDefinition().getDeclaredType_C();
-			prettyPrintHead_C(printer_C, str, indent, type, C_SUFFIX_EXP, false);
+            prettyPrintHead_C(printer_C, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
 			str.print(";\n");
     	}
 	}
@@ -437,7 +436,7 @@ aspect CCodeGen {
         endStruct_C(str, indent);
         
         beginStruct_C(str, indent, fp);
-        str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, returnDefinition().getDeclaredType_C(), fp, out);
+        str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, getDeclaredType_C(), fp, out);
         str.formatln("%s%s* (*fpcr)(%s*, %s*, ...);", next, fp, fp, fp);
         for (FFunctionVariable ffv : myInputs()) {
             String name = ffv.name_C();
@@ -512,7 +511,8 @@ aspect CCodeGen {
      * \brief Generate header for FPCL function.
      */
     public void FFunctionDecl.prettyPrintHeadFPCL_C(CodeStream str, String indent) {
-        str.format("%s%s %s(%s* fp_in, %s* out, ...)", indent, returnDefinition().getDeclaredType_C(), funcNameUnderscore(C_SUFFIX_FPCL), funcNameUnderscore(C_SUFFIX_FP), funcNameUnderscore(C_SUFFIX_FPOUT));
+        str.format("%s%s %s(%s* fp_in, %s* out, ...)", indent, getDeclaredType_C(),funcNameUnderscore(C_SUFFIX_FPCL),
+                funcNameUnderscore(C_SUFFIX_FP), funcNameUnderscore(C_SUFFIX_FPOUT));
     }
     
     /**
@@ -549,10 +549,10 @@ aspect CCodeGen {
     	
     	// Print wrapper for expressions
     	if (generateExpFunction()) {
-	    	String type = returnDefinition().getDeclaredType_C();
+            String type = getDeclaredType_C();
 			prettyPrintHead_C(p, str, indent, type, C_SUFFIX_EXP, false);
 			str.print(" {\n");
-			returnDefinition().printDeclarationForExp_C(p, str, next);
+            printDeclarationForExp_C(p, str, next);
 			prettyPrintWrappedCall_C(str, next);
             printReturnForExp_C(p, str, next);
 	    	str.print(indent);
