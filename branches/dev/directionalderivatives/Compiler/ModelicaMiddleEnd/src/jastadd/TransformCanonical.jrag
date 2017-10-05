@@ -3200,18 +3200,14 @@ aspect FunctionAndRecordCleanup {
         UseType oldType = functionUsed;
         functionUsed = functionUsed.combine(type);
         if (functionUsed != oldType) {
-            if (functionUsed == UseType.DIRECT && myFClass().generateBlockJacobians()) {
-                if (requiresDerivative() && !canDifferentiate()) {
-                    error("Unable to determine derivative function for function '" + name() + "'");
-                } else if (derivativeFunctionUnrestricted() != null) {
-                    derivativeFunctionUnrestricted().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
-                }
-            }
+            markUsedFunctionsAndRecordsExtra(type);
             super.markUsedFunctionsAndRecords(functionUsed);
         }
     }
     
-    syn boolean FClass.generateBlockJacobians() = myOptions().getBooleanOption("generate_block_jacobian");
+    public void FFunctionDecl.markUsedFunctionsAndRecordsExtra(UseType type) {
+        // Hook to facilitate extensions
+    }
     
     @Override
     public void FFunctionVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {

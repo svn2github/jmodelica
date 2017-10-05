@@ -22,17 +22,6 @@ aspect ExtraCodeGen {
     
     public class CGenerator {
         
-        public class DAETag_C_equationResidualDD extends DAETag {
-            
-            public DAETag_C_equationResidualDD(AbstractGenerator myGenerator, FClass fclass) {
-                super("C_DAE_equation_directional_derivative", myGenerator, fclass);
-            }
-            
-            public void generate(CodeStream str) {
-                fclass.generateDDEquationResidual(str);
-            }
-        }
-        
         public class DAETag_CAD_function_headers extends DAETag {
             
             public DAETag_CAD_function_headers(AbstractGenerator myGenerator, FClass fclass) {
@@ -124,34 +113,6 @@ aspect ExtraCodeGen {
                 fclass.generateDDODEDerivatives(str);
             }
         }
-        
-        public class DAETag_C_ODESparsity extends DAETag {
-            
-            public DAETag_C_ODESparsity(AbstractGenerator myGenerator, FClass fclass) {
-                super("C_DAE_ODE_jacobian_sparsity", myGenerator, fclass);
-            }
-            
-            public void generate(CodeStream str) {
-                fclass.generateDDODESparsity(str);
-            } 
-        }
-        
-        public class DAETag_C_equationSparsity extends DAETag {
-            
-            public DAETag_C_equationSparsity(AbstractGenerator myGenerator, FClass fclass) {
-                super("C_DAE_equation_sparsity", myGenerator, fclass);
-            }
-            
-            public void generate(CodeStream str) {
-                fclass.generateDDEquationsSparsity(str);
-            }
-            
-        }
-    }
-
-
-    public void FClass.generateDDEquationResidual(CodeStream str) {
-        
     }
 
     public void FClass.generateDDFunctionHeaders(CodeStream str) {
@@ -181,13 +142,4 @@ aspect ExtraCodeGen {
     public void FClass.generateDDODEDerivatives(CodeStream str) {
         
     }
-
-    public void FClass.generateDDODESparsity(CodeStream str) {
-        
-    }
-
-    public void FClass.generateDDEquationsSparsity(CodeStream str) {
-        
-    }
-
 }
