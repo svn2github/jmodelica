@@ -1,4 +1,6 @@
 ================= Unreleased ==================
+
+================= Stable-2017-10-05 ==================
 ; Feature ; Minor ; PyFMI ; #5470
 Added support to store result files on binary format.
 
