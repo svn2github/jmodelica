@@ -985,13 +985,8 @@ public class CGenerator extends GenericGenerator {
             super("C_function_headers", myGenerator, fclass);
         }
 
-        public void generate(CodeStream genPrinter) {
-            for (FFunctionDecl func : fclass.myFFunctionDeclsPartial())
-                func.genStructsPartial_C(genPrinter, "");
-            for (FFunctionDecl func : fclass.myFFunctionDeclsPartialCalled())
-                func.genHeadersPartial_C(genPrinter, "");
-            for (FFunctionDecl func : fclass.getFFunctionDecls())
-                func.genHeader_C(genPrinter, "");
+        public void generate(CodeStream str) {
+            fclass.generateFunctionHeaders(ASTNode.printer_C, str, "");
         }
     }
     
