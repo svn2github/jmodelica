@@ -77,6 +77,10 @@ aspect StepPrinter {
             public String name(FFunctionVariable v) {
                 return v.name_C();
             }
+            
+            public String residual() {
+                return "res";
+            }
         }
         
         class PostCodePrinter extends StepPrinter {

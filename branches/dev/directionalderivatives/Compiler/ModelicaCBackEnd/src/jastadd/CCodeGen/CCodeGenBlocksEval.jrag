@@ -95,7 +95,7 @@ aspect CCodeGenBlocksEval {
     @Override
     public void FIfWhenElseEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
-        genIfStart_C(p, str, indent);
+        genIfStart_C(p.testPrinter(), str, indent);
         if (forVariables == null) {
             for (FAbstractEquation equation : getFAbstractEquations()) {
                 equation.genAssignment_C(p, str, p.indent(indent));
@@ -133,13 +133,13 @@ aspect CCodeGenBlocksEval {
         super.genBlock_C(p, str, indent, visited, forVariables, forIndices);
         if (hasElse())
             getElse().genBlock_C(p, str, indent, visited, forVariables, forIndices);
-        genIfEnd_C(p, str, indent);
+        genIfEnd_C(p.testPrinter(), str, indent);
     }
 
     @Override
     public void FIfWhenElseEquation.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
-        genIfStart_C(p, str, indent);
+        genIfStart_C(p.testPrinter(), str, indent);
         Iterator<FVariable> fvIt = forVariables.iterator();
         Iterator<Integer> fiIt = forIndices.iterator();
         int i = 0;
@@ -165,7 +165,7 @@ aspect CCodeGenBlocksEval {
         super.genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
         if (hasElse())
             getElse().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
-        genIfEnd_C(p, str, indent);
+        genIfEnd_C(p.testPrinter(), str, indent);
     }
     
 }
