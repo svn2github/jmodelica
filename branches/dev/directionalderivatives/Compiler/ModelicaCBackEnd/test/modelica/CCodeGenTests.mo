@@ -14678,6 +14678,40 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end VariableArrayIndex8;
 
+model VariableArrayIndex9
+    Integer table[:] = {42, 3};
+    Integer i = if time > 1 then 1 else 2;
+    Real x = table[table[i]];
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex9",
+            description="Test of nested variable array index",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _i_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2));
+    pre_i_2 = _i_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = 42;
+    jmi_array_ref_1(tmp_1, 2) = 3;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = 42;
+    jmi_array_ref_1(tmp_2, 2) = 3;
+    _x_3 = jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_2));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end VariableArrayIndex9;
+
 model TestRelationalOp1
 Real v1(start=-1);
 Real v2(start=-1);

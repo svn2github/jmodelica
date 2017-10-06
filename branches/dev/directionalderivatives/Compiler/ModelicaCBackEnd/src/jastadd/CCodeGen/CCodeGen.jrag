@@ -189,11 +189,6 @@ aspect CCodeGen {
         }
     }
 
-	
-	
-    @Override
-    public void FArraySubscripts.genTempVars_C(CodePrinter p, CodeStream str, String indent) {}
-
     @Override
     public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (isStringExp()) {
