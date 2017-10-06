@@ -268,7 +268,7 @@ aspect CCodeGenFunctionPartial {
             int lefts = call.myLefts().size();
             for (int i = 0; i < tot; i++) {
                 if (i < lefts) {
-                    String n = call.myLefts().get(i).prettyPrint_C(indent);
+                    String n = call.myLefts().get(i).prettyPrint_C();
                     str.formatln("%s%s = %s.%s;", indent, n, call.tempName_C(), n);
                 }
             }

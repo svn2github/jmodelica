@@ -155,10 +155,10 @@ aspect CCodeGenAlgorithms {
         if (isDiscrete()) {
             return myPreVariable().name_C();
         } else if (isParameter() && hasBindingExp()) {
-            return getBindingExp().prettyPrint_C("");
+            return getBindingExp().prettyPrint_C();
         } else {
             FExp e = startAttributeExp();
-            return (e == null) ? "0.0" : e.prettyPrint_C("");
+            return (e == null) ? "0.0" : e.prettyPrint_C();
         }
     }
 
@@ -421,7 +421,7 @@ aspect CCodeGenAlgorithms {
 
     public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         String tempName = tempName_C();
-        String src = myCodeGenContext().alias(prettyPrint_C(indent));
+        String src = myCodeGenContext().alias(prettyPrint_C());
         useTempVar = true;
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);

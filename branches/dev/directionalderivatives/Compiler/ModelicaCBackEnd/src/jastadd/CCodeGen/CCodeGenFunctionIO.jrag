@@ -353,7 +353,7 @@ aspect CodeFuncCallInOutArgPrinters {
             str.print("] = ");
             str.print(name);
             str.print(" - (");
-            prettyPrint_C(str, "");
+            prettyPrint_C(printer_C, str, "");
             str.print(");\n");
         }
     }

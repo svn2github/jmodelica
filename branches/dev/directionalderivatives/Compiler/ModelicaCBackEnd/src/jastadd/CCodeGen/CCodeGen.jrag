@@ -115,34 +115,35 @@ aspect CCodeGen {
         }
     }
 
-	public String ASTNode.prettyPrint_C(String indent) {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		CodeStream str = new CodeStream(os);
-		prettyPrint_C(str,indent);
-		return os.toString();
-	}
+    public String ASTNode.prettyPrint_C() {
+        // This method should not exist
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        CodeStream str = new CodeStream(os);
+        prettyPrint_C(ASTNode.printer_C, str, "");
+        return os.toString();
+    }
 
-	public void ASTNode.prettyPrint_C(CodeStream str, String indent) {
- 		prettyPrint_C(printer_C, str, indent);
-	}
 
     public void ASTNode.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (ASTNode node : this)
-            node.genVarDecls_C(p, str, indent);
+        for (ASTNode node : this) {
+            p.printVarDecls(node, str, indent);
+        }
     }
-    
+
     public void ASTNode.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        for (ASTNode node : this)
+        for (ASTNode node : this) {
             p.printPreSteps(node, str, indent);
+        }
     }
-    
-	public void ASTNode.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
- 		prettyPrint(p, str, indent);
-	}
-	
+
+    public void ASTNode.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        prettyPrint(p, str, indent);
+    }
+
     public void ASTNode.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        for (ASTNode node : this)
+        for (ASTNode node : this) {
             p.printPostSteps(node, str, indent);
+        }
     }
 
     syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
@@ -711,14 +712,14 @@ aspect CCodeGen {
         }
         protected void printNumElements(FType type) {
             if (external && dynamic())
-                type.size().printNumElements_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C("")));
+                type.size().printNumElements_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C()));
             else
                 type.size().printNumElements_C(p, str, indent(), src);
         }
         protected void printDimensions(FType type) {
             str.print(", ");
             if (external && dynamic())
-                type.size().printDimensions_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C("")));
+                type.size().printDimensions_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C()));
             else
                 type.size().printDimensions_C(p, str, indent(), src);
         }
@@ -1430,37 +1431,37 @@ aspect CCodeGen {
         super.genTempVars_C(p, str, indent);
         // Case 1: time is before offset 
         str.print("  if (SURELY_LT_ZERO(_t - (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print("))) {\n");
         str.format("%sjmi_min_time_event(%s, 1, 0, ", indent, res);
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.println(");");
         //str.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
         str.print("  } ");   
         // Case 2: we are at a sample                                   
         str.print(" else if (ALMOST_ZERO(jmi_dremainder(jmi, _t - (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print("), ");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print("))) {\n");
         // nSamp should be almost an integer - round to get it exact
         str.print("    nSamp = jmi_dround((_t - (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print(")) / (");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print("));\n");
         str.format("%sjmi_min_time_event(%s, 1, 0, ", indent, res);
         str.print("(nSamp + 1.0) * (");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print(") + (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.println("));");
 /*----*//*
         str.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
         str.print("(_t-");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print(")/(");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print("));\n");
 
 *//*---*/
@@ -1468,29 +1469,29 @@ aspect CCodeGen {
 
         // Case 3: Neither of the above: in between samples
         str.print(" else if (SURELY_GT_ZERO(jmi_dremainder(jmi, _t - (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print("), ");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print("))) {\n");
         // User the floor function to get the number of previous
         // samples
         str.print("    nSamp = floor((_t - (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print(")) / (");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print("));\n");
         str.format("%sjmi_min_time_event(%s, 1, 0, ", indent, res);
         str.print("(nSamp + 1.0) * (");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print(") + (");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.println("));");
 /*----*//*
         str.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
         str.print("(_t-");
-        getOffset().prettyPrint_C(str,"");
+        p.print(getOffset(), str, indent);
         str.print(")/(");
-        getInterval().prettyPrint_C(str,"");
+        p.print(getInterval(), str, indent);
         str.print("));\n");
 
 *//*---*/
