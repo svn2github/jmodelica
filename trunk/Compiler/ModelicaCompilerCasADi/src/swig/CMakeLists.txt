@@ -14,6 +14,11 @@ find_library(CASADI_DLL
   NO_DEFAULT_PATH
 )
 
+if(" ${CMAKE_C_FLAGS} " MATCHES " -m64 " AND CMAKE_HOST_WIN32)
+    add_definitions(-DMS_WIN64)
+    message(STATUS "Adding MS_WIN64 definition")
+endif()
+
 #JNI
 find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS})
