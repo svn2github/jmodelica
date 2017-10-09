@@ -25,11 +25,15 @@ from tests_jmodelica import testattr, get_files_path
 from pyjmi import transfer_optimization_problem
 import numpy as N
 import os
-import casadi
 from pyfmi import load_fmu
-from pymodelica import compile_fmu
-from pyjmi.optimization.casadi_collocation import ExternalData
 from collections import OrderedDict
+from pymodelica import compile_fmu
+
+try: 
+    import casadi
+    from pyjmi.optimization.casadi_collocation import ExternalData
+except (NameError, ImportError):
+    pass
 
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
