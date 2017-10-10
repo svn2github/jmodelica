@@ -74,8 +74,12 @@ aspect StepPrinter {
                 return v.nameReturn_C();
             }
             
-            public String name(FFunctionVariable v) {
+            public String name(FAbstractVariable v) {
                 return v.name_C();
+            }
+            
+            public String name(FExp exp) {
+                return exp.tempName_C();
             }
             
             public String residual() {
