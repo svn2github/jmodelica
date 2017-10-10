@@ -20,9 +20,7 @@ Tests for pyjmi.symbolic_elimination.
 """
 
 import sys
-from pyjmi.symbolic_elimination import BLTOptimizationProblem, EliminationOptions
 from tests_jmodelica import testattr, get_files_path
-from pyjmi import transfer_optimization_problem
 import numpy as N
 import os
 from pyfmi import load_fmu
@@ -30,6 +28,8 @@ from collections import OrderedDict
 from pymodelica import compile_fmu
 
 try: 
+    from pyjmi.symbolic_elimination import BLTOptimizationProblem, EliminationOptions
+    from pyjmi import transfer_optimization_problem
     import casadi
     from pyjmi.optimization.casadi_collocation import ExternalData
 except (NameError, ImportError):
