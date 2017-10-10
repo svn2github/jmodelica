@@ -1,5 +1,8 @@
 ================= Unreleased ==================
-
+; Fixed ; Major ; Build system; #5459
+Added support for building CasADi in 32 and 64 bit modes
+in parallel when 64 bit Python and Ipopt available.
+ 
 ================= Stable-2017-10-05 ==================
 ; Feature ; Minor ; PyFMI ; #5470
 Added support to store result files on binary format.
