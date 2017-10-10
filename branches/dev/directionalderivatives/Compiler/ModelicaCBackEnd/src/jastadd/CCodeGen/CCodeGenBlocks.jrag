@@ -546,24 +546,37 @@ aspect BlockSetup {
         str.print(indent + "} else ");
     }
 
-    public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
 
+    public abstract class CodePrinter {
+        public abstract void genBlockResidualFunction(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold);
+        public abstract void genBlockResidualFunctionName(AbstractEquationBlock block, CodePrinter p, CodeStream str);
+        public abstract void genBlockResidualFunctionArgumentList(AbstractEquationBlock block, CodePrinter p, CodeStream str);
+    }
+
+    public class CPrettyPrinter {
+        @Override
+        public void genBlockResidualFunction(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
+            block.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+        }
+    }
+
+    public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
         if (!hasResidualFunction()) {
             return;
         }
-
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C()) {
-            subBlock.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+            p.genBlockResidualFunction(subBlock, p, str, outerIndent, generateSparseThreshold);
         }
 
         Map<FVariable,String> solverArrayMap = createSolverArrayMap(localUnsolvedVariables());
         
         genBlockResidualSetUpFunctionDecl_C(p, str, outerIndent);
         
+        genBlockResidualFunctionSignature(p, str, outerIndent);
+
         String indent = p.indent(outerIndent);
         String nextIndent = p.indent(indent);
-        str.format("%sstatic int %s(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
-                outerIndent, genBlockResidualFunctionName_C(p));
+
         String label = getLabel();
         if (label == null) {
             label = getClass().getSimpleName();
@@ -656,6 +669,34 @@ aspect BlockSetup {
         str.print(indent + "}\n");
         ASTNode.genFunctionEnd(str, indent);
         str.print(outerIndent + "}\n\n");
+    }
+
+    public void AbstractEquationBlock.genBlockResidualFunctionSignature(CodePrinter p, CodeStream str, String outerIndent) { //CR: declare before or after genResidualFunction()?
+        str.format("%sstatic int ", outerIndent);
+        p.genBlockResidualFunctionName(this, p, str);
+        p.genBlockResidualFunctionArgumentList(this, p, str);
+        str.print(" {\n");
+
+    }
+
+    public class CPrettyPrinter {
+        @Override
+        public void genBlockResidualFunctionName(AbstractEquationBlock block, CodePrinter p, CodeStream str) {
+            block.genBlockResidualFunctionName2_C(p, str);
+        }
+        @Override
+        public void genBlockResidualFunctionArgumentList(AbstractEquationBlock block, CodePrinter p, CodeStream str) {
+            block.genBlockResidualFunctionArgumentList_C(p, str);
+        }
+    }
+
+
+    public void AbstractEquationBlock.genBlockResidualFunctionName2_C(CodePrinter p, CodeStream str) {
+        str.print(genBlockResidualFunctionName_C(p));
+    }
+
+    public void AbstractEquationBlock.genBlockResidualFunctionArgumentList_C(CodePrinter p, CodeStream str) {
+        str.print("(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode)");
     }
 
     @Override
