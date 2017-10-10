@@ -582,8 +582,11 @@ aspect BlockSetup {
             label = getClass().getSimpleName();
         }
         str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", label);
-        str.print(indent + "jmi_real_t** res = &residual;\n");
+
+        str.print(indent);
+        str.println("jmi_real_t** res = &residual;");
         ASTNode.genFunctionStart(str, indent);
+
         genVarDecls(p, str, indent, null);
         
         str.print(indent);
