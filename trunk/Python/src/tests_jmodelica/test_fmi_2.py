@@ -53,8 +53,20 @@ class Test_FMUModelBase2:
         Sets up the test class.
         """
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
+        cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
+    @testattr(fmi = True)
+    def test_declared_enumeration_type(self):
+        enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)
+        
+        enum = enumeration_model.get_variable_declared_type("x")
+        assert len(enum.items.keys()) == 2
+        enum = enumeration_model.get_variable_declared_type("home")
+        assert len(enum.items.keys()) == 4
+        
+        nose.tools.assert_raises(FMUException, enumeration_model.get_variable_declared_type, "z")
+       
     @testattr(fmi = True)
     def test_version(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
