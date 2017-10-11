@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-; Change ; Minor ; External; #5474
-Updated the external MSL C-Sources to be compliant with hardware platforms.
-
 ; Fixed ; Major ; Build system; #5459
 Added support for building CasADi in 32 and 64 bit modes
 in parallel when 64 bit Python and Ipopt available.
