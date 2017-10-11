@@ -341,15 +341,6 @@ aspect CCodeGenBlocks {
     }
 
     /**
-     * CAD specific dispatch method for
-     * AbstractEquationBlock.genBlockResidualCall()
-     */
-    public void AbstractEquationBlock.genBlockResidualCall_CAD(CodePrinter p, CodeStream str, String indent) {
-        String var = p.inInitialSystem() ? "dae_init_block_residuals" : "dae_block_residuals";
-        str.formatln("%sef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);", indent, var, getSequenceNumber());
-    }
-
-    /**
      * Generates solution statements for all solved equations in this block. 
      * This method is usually called when generating residual functions
      */
