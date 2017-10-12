@@ -559,14 +559,12 @@ aspect BlockSetup {
             p.genBlockResidualFunction(subBlock, p, str, outerIndent, generateSparseThreshold);
         }
 
-        Map<FVariable,String> solverArrayMap = createSolverArrayMap(localUnsolvedVariables());
         
         genBlockResidualSetUpFunctionDecl_C(p, str, outerIndent);
         
         genBlockResidualFunctionSignature(p, str, outerIndent);
 
         String indent = p.indent(outerIndent);
-        String nextIndent = p.indent(indent);
 
         String label = getLabel();
         if (label == null) {
@@ -580,6 +578,15 @@ aspect BlockSetup {
 
         genVarDecls(p, str, indent, null);
         
+        genResidualFunctionEvalModes(p, str, indent, generateSparseThreshold);
+        str.print(indent + "}\n");
+        ASTNode.genFunctionEnd(str, indent);
+        str.print(outerIndent + "}\n\n");
+    }
+
+	public void AbstractEquationBlock.genResidualFunctionEvalModes(CodePrinter p, CodeStream str, String indent, int generateSparseThreshold) {
+		Map<FVariable,String> solverArrayMap = createSolverArrayMap(localUnsolvedVariables());
+		String nextIndent = p.indent(indent);
         str.print(indent);
 
         genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_NOMINAL",   FAttribute.NOMINAL, solverArrayMap); 
@@ -608,62 +615,15 @@ aspect BlockSetup {
         genEvalModeSwitchIndex_C(p, str, indent, "JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX",
                 directlyActiveSwitches_C);
 
-        // Equation nominal values
-        if (hasEquationNominal_C(false)) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_EQUATION_NOMINAL");
-            Map<FAbstractEquation,FExp> nominalMap = new HashMap<FAbstractEquation,FExp>();
-            genEquationNominalVarDecl_C(p, str, p.indent(indent), false, nominalMap);
-            genEquationNominal_C(p, str, p.indent(indent), false, nominalMap);
-            genCloseEvalMode_C(str, indent);
-        }
-
-        if (hasEquationNominal_C(true)) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_EQUATION_NOMINAL_AUTO");
-            Map<FAbstractEquation,FExp> nominalMap = new HashMap<FAbstractEquation,FExp>();
-            genEquationNominalVarDecl_C(p, str, p.indent(indent), true, nominalMap);
-            genEquationNominal_C(p, str, p.indent(indent), true, nominalMap);
-            genCloseEvalMode_C(str, indent);
-        }
-
-        // Loop over all active variables and write their value to x
-        if (localUnsolvedVariables().size() > 0) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_INITIALIZE");
-            for (FVariable fv : localUnsolvedVariables()) 
-                fv.genBlockResidualInit_C(p, str, nextIndent, solverArrayMap);
-            genCloseEvalMode_C(str, indent);
-        }
-
-        // Generate code for Jacobian
-        if (isLinear() && generateSparseThreshold >= localSolvedRealVariables().size()) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_EVALUATE_JACOBIAN");
-            // TODO: Merge the two functions?
-            genBlockResidualFunction_jacobianDecls_C(p, str, p.indent(indent));
-            genBlockResidualFunction_jacobian_C(p, str, p.indent(indent));
-            genCloseEvalMode_C(str, indent);
-        } else if (isLinear()) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_EVALUATE_JACOBIAN");
-            str.print(nextIndent + "ef = -1;\n");
-            genCloseEvalMode_C(str, indent);
-        }
+        genEvalModeNominal(p, str, indent, "JMI_BLOCK_EQUATION_NOMINAL");
+        genEvalModeNominalAuto(p, str, indent, "JMI_BLOCK_EQUATION_NOMINAL_AUTO");
+        genEvalModeInitialize(p, str, indent, solverArrayMap, nextIndent, "JMI_BLOCK_INITIALIZE");
+        genEvalModeJacobian(p, str, indent, generateSparseThreshold, "JMI_BLOCK_EVALUATE_JACOBIAN");
         
         p = p.evalPrinter();
         
-        str.print("if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
-        // Loop over all active variables and write the values in x to the z vector
-        str.print(nextIndent + "if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {\n"); // TODO: remove guard when correct x is given to JMI_BLOCK_EVALUATE_NON_REALS
-        for (FVariable fv : localUnsolvedVariables()) 
-            fv.genBlockResidualEvalInit_C(p, str, p.indent(nextIndent), solverArrayMap);
-        str.print(nextIndent + "}\n");
-        Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
-        genSolvedPart(p, str, nextIndent, visitedList);
-        str.print(nextIndent + "if (evaluation_mode & JMI_BLOCK_EVALUATE) {\n");
-        // Write the residual expressions
-        genResidualPart(p, str, p.indent(nextIndent), new Enumerator(), visitedList);
-        str.print(nextIndent + "}\n");
-        str.print(indent + "}\n");
-        ASTNode.genFunctionEnd(str, indent);
-        str.print(outerIndent + "}\n\n");
-    }
+        genEvalModeEvalOrWriteBack(p, str, nextIndent, solverArrayMap);
+	}
 
     public void AbstractEquationBlock.genBlockResidualFunctionSignature(CodePrinter p, CodeStream str, String outerIndent) { //CR: declare before or after genResidualFunction()?
         str.format("%sstatic int ", outerIndent);
@@ -692,6 +652,71 @@ aspect BlockSetup {
     public void AbstractEquationBlock.genBlockResidualFunctionArgumentList_C(CodePrinter p, CodeStream str) {
         str.print("(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode)");
     }
+
+
+	public void AbstractEquationBlock.genEvalModeNominal(CodePrinter p, CodeStream str, String indent, String mode) {
+		// Equation nominal values
+        if (hasEquationNominal_C(false)) {
+			genOpenEvalMode_C(str, indent, mode);
+            Map<FAbstractEquation,FExp> nominalMap = new HashMap<FAbstractEquation,FExp>();
+            genEquationNominalVarDecl_C(p, str, p.indent(indent), false, nominalMap);
+            genEquationNominal_C(p, str, p.indent(indent), false, nominalMap);
+            genCloseEvalMode_C(str, indent);
+        }
+	}
+
+	public void AbstractEquationBlock.genEvalModeNominalAuto(CodePrinter p, CodeStream str, String indent, String mode) {
+		if (hasEquationNominal_C(true)) {
+			genOpenEvalMode_C(str, indent, mode);
+            Map<FAbstractEquation,FExp> nominalMap = new HashMap<FAbstractEquation,FExp>();
+            genEquationNominalVarDecl_C(p, str, p.indent(indent), true, nominalMap);
+            genEquationNominal_C(p, str, p.indent(indent), true, nominalMap);
+            genCloseEvalMode_C(str, indent);
+        }
+	}
+
+	public void AbstractEquationBlock.genEvalModeInitialize(CodePrinter p, CodeStream str, String indent,
+			Map<FVariable, String> solverArrayMap, String nextIndent, String mode) {
+		// Loop over all active variables and write their value to x
+        if (localUnsolvedVariables().size() > 0) {
+			genOpenEvalMode_C(str, indent, mode);
+            for (FVariable fv : localUnsolvedVariables()) 
+                fv.genBlockResidualInit_C(p, str, nextIndent, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+        }
+	}
+
+	public void AbstractEquationBlock.genEvalModeJacobian(CodePrinter p, CodeStream str, String indent, int generateSparseThreshold,
+			String mode) {
+		// Generate code for Jacobian
+		if (isLinear() && generateSparseThreshold >= localSolvedRealVariables().size()) {
+            genOpenEvalMode_C(str, indent, mode);
+            // TODO: Merge the two functions?
+            genBlockResidualFunction_jacobianDecls_C(p, str, p.indent(indent));
+            genBlockResidualFunction_jacobian_C(p, str, p.indent(indent));
+            genCloseEvalMode_C(str, indent);
+        } else if (isLinear()) {
+            genOpenEvalMode_C(str, indent, mode);
+            str.print(p.indent(indent) + "ef = -1;\n");
+            genCloseEvalMode_C(str, indent);
+        }
+	}
+
+	public void AbstractEquationBlock.genEvalModeEvalOrWriteBack(CodePrinter p, CodeStream str, String nextIndent,
+			Map<FVariable, String> solverArrayMap) {
+		str.print("if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
+        // Loop over all active variables and write the values in x to the z vector
+        str.print(nextIndent + "if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {\n"); // TODO: remove guard when correct x is given to JMI_BLOCK_EVALUATE_NON_REALS
+        for (FVariable fv : localUnsolvedVariables()) 
+            fv.genBlockResidualEvalInit_C(p, str, p.indent(nextIndent), solverArrayMap);
+        str.print(nextIndent + "}\n");
+        Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
+        genSolvedPart(p, str, nextIndent, visitedList);
+        str.print(nextIndent + "if (evaluation_mode & JMI_BLOCK_EVALUATE) {\n");
+        // Write the residual expressions
+        genResidualPart(p, str, p.indent(nextIndent), new Enumerator(), visitedList);
+        str.print(nextIndent + "}\n");
+	}
 
     @Override
     public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
