@@ -146,75 +146,6 @@ aspect CCodeGen {
         }
     }
 
-    syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
-            inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
-    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
-
-    public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(indent);
-        str.print("static ");
-        type().printScalarDecl_C(str, indent, false, tempName_C());
-        str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
-    }
-
-    public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = 0;\n", indent, tempNameComputed_C());
-    }
-
-    @Override
-    public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        getArgs().genTempArg(p.DeclStep, str, indent);
-        if (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall()) {
-            str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
-        }
-        if (isStringExp()) {
-            type().printScalarDecl_C(str, indent, false, tempName_C());
-        }
-    }
-    
-    @Override
-    public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        getArgs().genTempArg(p.PreStep, str, indent);
-        if (isFunctionCallArg()) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
-        }
-        if (isStringExp()) {
-            str.print(indent);
-            str.print(tempName_C());
-            str.print(" = ");
-            myFCallable().prettyPrintCall_C(p, str, indent, this);
-            str.println(";");
-        } else if (!functionCallIsExp()) {
-            p.print(this, str, indent);
-            getArgs().genTempArg(p.PostStep, str, indent);
-        }
-    }
-
-    @Override
-    public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (isStringExp()) {
-            str.print(tempName_C());
-        } else if (impureCodeGen(p)) {
-            str.format("JMI_CACHED(%s, ", tempName_C());
-            myFCallable().prettyPrintCall_C(p, str, indent, this);
-            str.print(")");
-        } else {
-            myFCallable().prettyPrintCall_C(p, str, indent, this);
-        }
-    }
-
-    @Override
-    public void FFunctionCall.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        getArgs().genTempArg(p.PostStep, str, indent);
-        if (isStringExp()) {
-            type().printFree_C(str, indent, false, tempName_C());
-        }
-    }
-
-    syn boolean FFunctionCall.isStringExp() = functionCallIsExp() && type().isString();
-    
-    
-
     /*
      * Record declaration
      */
@@ -497,7 +428,7 @@ aspect CCodeGen {
 
     @Override
     public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(str, indent, this, type());
+        p.printInit(this, str, indent, type());
     }
 
     public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
@@ -514,6 +445,10 @@ aspect CCodeGen {
 
     public void FType.printInit_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
         print(p.createInitSetPrinter(str), indent, name, src, external);
+    }
+
+    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, FExp src, boolean external) {
+        print(tp, indent, ep.name(src), src, external);
     }
 
     public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {

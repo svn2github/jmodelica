@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Modelon AB
+Copyright (C) 2016-2017 Modelon AB
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1299,6 +1299,111 @@ aspect CCodeGenExpressions {
     eq FGeqExp.isPhased_sub() = getRight() instanceof FTimeExp;
     eq FLtExp.isPhased_sub()  = getRight() instanceof FTimeExp;
     eq FLeqExp.isPhased_sub() = getLeft() instanceof FTimeExp;
+    
+    /*=========================================================================
+     * Function calls
+     ========================================================================*/
+
+    syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
+            inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
+    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
+
+    public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent);
+        str.print("static ");
+        type().printScalarDecl_C(str, indent, false, tempName_C());
+        str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
+    }
+
+    public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        str.format("%s%s = 0;\n", indent, tempNameComputed_C());
+    }
+
+    class CodePrinter {
+        public abstract boolean needsTemp(FFunctionCall call);
+        public abstract boolean needsStatement(FFunctionCall call);
+        public abstract void printCall(FFunctionCall call, CodeStream str, String indent);
+        public abstract void print(FExp n, String indent, FType type, TypePrinter_C tp);
+    }
+
+    class CPrettyPrinter {
+        @Override
+        public boolean needsTemp(FFunctionCall call) {
+            return call.needsTemp_C(this);
+        }
+        
+        @Override
+        public boolean needsStatement(FFunctionCall call) {
+            return call.needsStatement_C(this);
+        }
+        
+        @Override
+        public void printCall(FFunctionCall call, CodeStream str, String indent) {
+            call.myFCallable().prettyPrintCall_C(this, str, indent, call);
+        }
+        
+        @Override
+        public void print(FExp n, String indent, FType type, TypePrinter_C tp) {
+            type.print(tp, indent, ExecStep, n, false);
+        }
+        
+    }
+
+    syn boolean FFunctionCall.needsTemp_C(CodePrinter p) =
+            (!isFunctionCallClause() && isComposite()) || isStringExp() ||
+            (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
+
+    syn boolean FFunctionCall.needsStatement_C(CodePrinter p) = 
+            (functionCallIsExp() && isComposite()) || isStringExp() || !functionCallIsExp();
+
+    @Override
+    public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        getArgs().genTempArg(p.DeclStep, str, indent);
+        if (p.needsTemp(this)) {
+            if (myFCallable().isPartialFunction()) {
+                str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
+            } else {
+                p.print(this, indent, type(), p.createDeclPrinter(str));
+            }
+        }
+    }
+    
+    @Override
+    public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        getArgs().genTempArg(p.PreStep, str, indent);
+        if (p.needsTemp(this)) {
+            p.print(this, indent, type(), p.createInitPrinter(str));
+        }
+        if (p.needsStatement(this)) {
+            p.printCall(this, str, indent);
+            getArgs().genTempArg(p.PostStep, str, indent);
+        }
+    }
+
+    @Override
+    public void FFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.needsStatement(this)) {
+            str.print(tempName_C());
+        } else if (impureCodeGen(p)) {
+            str.format("JMI_CACHED(%s, ", tempName_C());
+            p.printCall(this, str, indent);
+            str.print(")");
+        } else {
+            p.printCall(this, str, indent);
+        }
+    }
+
+    @Override
+    public void FFunctionCall.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.needsStatement(this)) {
+            getArgs().genTempArg(p.PostStep, str, indent);
+        }
+        if (isStringExp()) {
+            type().printFree_C(str, indent, false, tempName_C());
+        }
+    }
+
+    syn boolean FFunctionCall.isStringExp() = functionCallIsExp() && type().isString();
     
     /*=========================================================================
      * Delay and Spacial Distribution Expressions

@@ -146,7 +146,7 @@ aspect CCodeGenFunctionReturn {
     public void FFunctionDecl.printReturnWrite(CodePrinter p, CodeStream str, String indent) {
         for (FFunctionVariable v : myOutputs()) {
             if ((!v.isArray() && !v.isRecord()) || (v.isArray() && v.isString())) {
-                p.printReturnWrite(str, indent, v);
+                p.printReturnWrite(v, str, indent);
             }
         }
         ASTNode.genDynMemFree(str, indent);
@@ -154,16 +154,14 @@ aspect CCodeGenFunctionReturn {
     }
     
     abstract class CodePrinter {
-        public abstract void printReturnWrite(CodeStream str, String indent, FFunctionVariable v);
+        public abstract void printReturnWrite(FFunctionVariable v, CodeStream str, String indent);
     }
     
     class CPrettyPrinter {
         @Override
-        public void printReturnWrite(CodeStream str, String indent, FFunctionVariable v) {
+        public void printReturnWrite(FFunctionVariable v, CodeStream str, String indent) {
             v.printReturnWrite(ExecStep, str, indent);
         }
-        
-        
     }
     
     public void FFunctionVariable.printReturnWrite(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
@@ -189,8 +187,11 @@ aspect CCodeGenFunctionCall {
     @Override
     public void FFunctionDecl.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call) {
         boolean exp = call.functionCallIsExp();
-        if (!exp)
+        if (!exp) {
             str.print(indent);
+        } else if (call.type().isString()) {
+            str.print(indent, call.tempName_C(), " = ");
+        }
         str.print(funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
         str.print("(");
         String sep = "";
@@ -203,8 +204,9 @@ aspect CCodeGenFunctionCall {
             call.prettyPrintCallOutputs_C(p, str, indent, myOutputs().size(), sep);
         }
         str.print(")");
-        if (!exp)
+        if (!exp || call.type().isString()) {
             str.print(";\n");
+        }
     }
     
     public void FAbstractFunctionCall.prettyPrintCallOutputs_C(CodePrinter p, CodeStream str, String indent, int outputs, String sep) {

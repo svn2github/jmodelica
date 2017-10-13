@@ -35,7 +35,7 @@ aspect CCodeGenBlocksEval {
         FExp sol = solution(fv);
         
         p.printPreSteps(sol, str, indent);
-        p.printAssign(str, indent, fv.type(), fv, sol);
+        p.printAssign(fv.type(), str, indent, fv, sol);
         p.printPostSteps(sol, str, indent);
     }
 

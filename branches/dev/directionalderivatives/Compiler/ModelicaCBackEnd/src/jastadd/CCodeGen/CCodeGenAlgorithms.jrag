@@ -20,12 +20,12 @@ aspect CCodeGenAlgorithms {
      */
     
     public class CodePrinter {
-        public abstract void printAssign(CodeStream str, String indent, FType type, ASTNode left, ASTNode right);
+        public abstract void printAssign(FType type, CodeStream str, String indent, ASTNode left, ASTNode right);
     }
 
     public class CPrettyPrinter {
         @Override
-        public void printAssign(CodeStream str, String indent, FType type, ASTNode left, ASTNode right) {
+        public void printAssign(FType type, CodeStream str, String indent, ASTNode left, ASTNode right) {
             type.printAssign(ExecStep, str, indent, left, right);
         }
     }
@@ -57,12 +57,12 @@ aspect CCodeGenAlgorithms {
      */
 
     public class CodePrinter {
-        public abstract void printInit(CodeStream str, String indent, FFunctionVariable v, FType type);
+        public abstract void printInit(FFunctionVariable v, CodeStream str, String indent, FType type);
     }
 
     public class CPrettyPrinter {
         @Override
-        public void printInit(CodeStream str, String indent, FFunctionVariable v, FType type) {
+        public void printInit(FFunctionVariable v, CodeStream str, String indent, FType type) {
             v.printInit(ExecStep, str, indent, type);
         }
     }
@@ -164,7 +164,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(str, indent, getFIdUseExp().myFuncFV(), type());
+        p.printInit(getFIdUseExp().myFuncFV(), str, indent, type());
     }
 
     @Override
@@ -180,7 +180,7 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FAssignStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        p.printAssign(str, indent, getLeft().type(), getLeft(), getRight());
+        p.printAssign(getLeft().type(), str, indent, getLeft(), getRight());
         p.printPostSteps(this, str, indent);
     }
 

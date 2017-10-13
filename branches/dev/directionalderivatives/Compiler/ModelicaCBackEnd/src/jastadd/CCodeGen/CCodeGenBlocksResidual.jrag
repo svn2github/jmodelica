@@ -20,13 +20,13 @@ aspect CCodeGenBlocksResidual {
      */
     
     public class CodePrinter {
-        public abstract void printResidual(CodeStream str, String indent, FType type,
+        public abstract void printResidual(FType type, CodeStream str, String indent,
                 ASTNode left, ASTNode right, int index);
     }
 
     public class CPrettyPrinter {
         @Override
-        public void printResidual(CodeStream str, String indent, FType type,
+        public void printResidual(FType type, CodeStream str, String indent,
                 ASTNode left, ASTNode right, int index) {
             type.printResidual(ExecStep, str, indent, left, right, index);
         }
@@ -54,7 +54,7 @@ aspect CCodeGenBlocksResidual {
     public void FEquation.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         boolean firstVisit = visited == null || visited.add(this);
         p.printPreSteps(this, str, indent);
-        p.printResidual(str, indent, type(), getLeft(), getRight(), enumerator.next());
+        p.printResidual(type(), str, indent, getLeft(), getRight(), enumerator.next());
         p.printPostSteps(this, str, indent);
     }
 

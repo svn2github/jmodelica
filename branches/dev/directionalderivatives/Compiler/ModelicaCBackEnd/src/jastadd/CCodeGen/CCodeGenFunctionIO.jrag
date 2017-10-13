@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Modelon AB
+Copyright (C) 2016-2017 Modelon AB
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,8 +53,13 @@ aspect CCodeGenFunctionIO {
     
     public void FExp.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
-            type().printDecl_C(p, str, indent, tempName_C(), this);
+            p.print(this, indent, type(), p.createDeclPrinter(str));
         }
+    }
+    
+    @Override
+    public void FFunctionCall.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
+        // Handled in genVarDecls
     }
     
     @Override
@@ -68,17 +73,14 @@ aspect CCodeGenFunctionIO {
     
     public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
+            p.print(this, indent, type(), p.createInitPrinter(str));
             p.printTempInputAssigns(str, indent, this);
         }
     }
     
     @Override
     public void FFunctionCall.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-        } else {
-            super.genTempInputAssigns_C(p, str, indent);
-        }
+        // Handled in genTempVars
     }
     
     @Override
