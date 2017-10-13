@@ -132,6 +132,12 @@ public class CodeStream {
         println();
     }
 
+    public void println(Object... o) {
+        print(o);
+        println();
+    }
+
+
     public void formatln(String format, Object... args) {
         format(format, args);
         println();
