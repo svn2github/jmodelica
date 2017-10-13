@@ -625,7 +625,7 @@ aspect BlockSetup {
         genEvalModeEvalOrWriteBack(p, str, nextIndent, solverArrayMap);
 	}
 
-    public void AbstractEquationBlock.genBlockResidualFunctionSignature(CodePrinter p, CodeStream str, String outerIndent) { //CR: declare before or after genResidualFunction()?
+    public void AbstractEquationBlock.genBlockResidualFunctionSignature(CodePrinter p, CodeStream str, String outerIndent) {
         str.format("%sstatic int ", outerIndent);
         p.genBlockResidualFunctionName(this, p, str);
         p.genBlockResidualFunctionArgumentList(this, p, str);
