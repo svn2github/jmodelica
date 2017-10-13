@@ -1,11 +1,15 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Build system ; #5459
+Fixed so that the Python_64 folder isn't created when there
+is no Python 64 bit distribution available.
+ 
 ; Feature ; Minor ; PyFMI ; #5475
 Added support for getting the declared type when using FMI2.
 
 ; Fixed ; Minor ; PyFMI ; #5476
 Fixed issue with results for parameters when using memory storing option.
 
-; Fixed ; Major ; Build system; #5459
+; Feature ; Major ; Build system; #5459
 Added support for building CasADi in 32 and 64 bit modes
 in parallel when 64 bit Python and Ipopt available.
  

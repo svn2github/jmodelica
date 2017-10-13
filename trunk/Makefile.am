@@ -371,9 +371,11 @@ install-python-packages: build-python-packages
 	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 if JM_WIN64
+if WITH_PYTHON64
 	mkdir -p $(DESTDIR)$(prefix)/Python_64
 	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python_64/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
+endif
 endif
 if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
