@@ -537,31 +537,15 @@ aspect BlockSetup {
         str.print(indent + "} else ");
     }
 
-
-    public abstract class CodePrinter {
-        public abstract void genBlockResidualFunction(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold);
-        public abstract void genBlockResidualFunctionName(AbstractEquationBlock block, CodePrinter p, CodeStream str);
-        public abstract void genBlockResidualFunctionArgumentList(AbstractEquationBlock block, CodePrinter p, CodeStream str);
-    }
-
-    public class CPrettyPrinter {
-        @Override
-        public void genBlockResidualFunction(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
-            block.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
-        }
-    }
-
-    public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
-        if (!hasResidualFunction()) {
+	public void AbstractEquationBlock.genBlockResidualFunction(CodePrinter p, CodeStream str, String outerIndent,
+			int generateSparseThreshold) {
+		if (!hasResidualFunction())
             return;
-        }
-        for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C()) {
-            p.genBlockResidualFunction(subBlock, p, str, outerIndent, generateSparseThreshold);
-        }
+        for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
+            subBlock.genBlockResidualFunction(p, str, outerIndent, generateSparseThreshold);
 
-        
-        genBlockResidualSetUpFunctionDecl_C(p, str, outerIndent);
-        
+        p.genBlockResidualSetUpFunctionDecl(this, p, str, outerIndent);
+
         genBlockResidualFunctionSignature(p, str, outerIndent);
 
         String indent = p.indent(outerIndent);
@@ -572,19 +556,44 @@ aspect BlockSetup {
         }
         str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", label);
 
+        p.genBlockResidualFunctionVectorDecls(this, p, str, indent);
+        genVarDecls(p, str, indent, null);
+        
+        p.genResidualFunctionEvalModes(this, p, str, indent, generateSparseThreshold);
+        ASTNode.genFunctionEnd(str, indent);
+        str.print(outerIndent + "}\n\n");
+	}
+
+    public abstract class CodePrinter {
+        public abstract void genBlockResidualSetUpFunctionDecl(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent);
+        public abstract void genBlockResidualFunctionName(AbstractEquationBlock block, CodePrinter p, CodeStream str);
+        public abstract void genBlockResidualFunctionArgumentList(AbstractEquationBlock block, CodePrinter p, CodeStream str);
+        public abstract void genBlockResidualFunctionVectorDecls(AbstractEquationBlock block, CodePrinter p, CodeStream str, String indent);
+        public abstract void genResidualFunctionEvalModes(AbstractEquationBlock block, CodePrinter p, CodeStream str, String indent, int generateSparseThreshold);
+    }
+
+    public class CPrettyPrinter {
+        @Override
+        public void genBlockResidualSetUpFunctionDecl(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent) {
+            block.genBlockResidualSetUpFunctionDecl_C(p, str, outerIndent);
+        }
+        @Override
+        public void genBlockResidualFunctionVectorDecls(AbstractEquationBlock block, CodePrinter p, CodeStream str, String indent) {
+            block.genBlockResidualFunctionVectorDecls_C(p, str, indent);
+        }
+        @Override
+        public void genResidualFunctionEvalModes(AbstractEquationBlock block, CodePrinter p, CodeStream str, String indent, int generateSparseThreshold) {
+            block.genResidualFunctionEvalModes_C(p, str, indent, generateSparseThreshold);
+        }
+    }
+
+    public void AbstractEquationBlock.genBlockResidualFunctionVectorDecls_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
         str.println("jmi_real_t** res = &residual;");
         ASTNode.genFunctionStart(str, indent);
-
-        genVarDecls(p, str, indent, null);
-        
-        genResidualFunctionEvalModes(p, str, indent, generateSparseThreshold);
-        str.print(indent + "}\n");
-        ASTNode.genFunctionEnd(str, indent);
-        str.print(outerIndent + "}\n\n");
     }
 
-	public void AbstractEquationBlock.genResidualFunctionEvalModes(CodePrinter p, CodeStream str, String indent, int generateSparseThreshold) {
+	public void AbstractEquationBlock.genResidualFunctionEvalModes_C(CodePrinter p, CodeStream str, String indent, int generateSparseThreshold) {
 		Map<FVariable,String> solverArrayMap = createSolverArrayMap(localUnsolvedVariables());
 		String nextIndent = p.indent(indent);
         str.print(indent);
@@ -702,8 +711,9 @@ aspect BlockSetup {
         }
 	}
 
-	public void AbstractEquationBlock.genEvalModeEvalOrWriteBack(CodePrinter p, CodeStream str, String nextIndent,
+	public void AbstractEquationBlock.genEvalModeEvalOrWriteBack(CodePrinter p, CodeStream str, String indent,
 			Map<FVariable, String> solverArrayMap) {
+		String nextIndent = p.indent(indent);
 		str.print("if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
         // Loop over all active variables and write the values in x to the z vector
         str.print(nextIndent + "if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {\n"); // TODO: remove guard when correct x is given to JMI_BLOCK_EVALUATE_NON_REALS
@@ -716,31 +726,32 @@ aspect BlockSetup {
         // Write the residual expressions
         genResidualPart(p, str, p.indent(nextIndent), new Enumerator(), visitedList);
         str.print(nextIndent + "}\n");
+        str.print(indent + "}\n");
 	}
 
     @Override
-    public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
+    public void AbstractSubBLTBlock.genBlockResidualFunction(CodePrinter p, CodeStream str, String outerIndent, int generateSparseThreshold) {
 
         for (T blt : subBLTs) {
             for (AbstractEquationBlock block : blt) {
-                block.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+                block.genBlockResidualFunction(p, str, outerIndent, generateSparseThreshold);
             }
         }
     }
 
     @Override
-    public void HomotopyBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str,
+    public void HomotopyBlock.genBlockResidualFunction(CodePrinter p, CodeStream str,
             String outerIndent, int generateSparseThreshold) {
 
-        homotopySubBlock.genBlockResidualFunction_C(p, str, outerIndent, generateSparseThreshold);
+        homotopySubBlock.genBlockResidualFunction(p, str, outerIndent, generateSparseThreshold);
         CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
 
         for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS]) {
-            block.genBlockResidualFunction_C(simplifiedPrinter, str, outerIndent, generateSparseThreshold);
+            block.genBlockResidualFunction(simplifiedPrinter, str, outerIndent, generateSparseThreshold);
         }
     }
     /*
-     * Various dispatch methods used in genBlockResidualFunction_C():
+     * Various dispatch methods used in genBlockResidualFunction():
      */
 
     /**
