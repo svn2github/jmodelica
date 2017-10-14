@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Major ; PyFMI; #5479
+Changed default file storing method to binary format. 
+
 ; Fixed ; Minor ; Build system ; #5459
 Fixed so that the Python_64 folder isn't created when there
 is no Python 64 bit distribution available.
