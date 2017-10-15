@@ -193,7 +193,7 @@ class TestAlgo3(SimulationTest):
     @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
-        self.run()
+        self.run(cvode_options={'store_event_points':False})
         self.load_expected_data('Algorithm_AlgoTest3_result.txt')
 
     @testattr(stddist = True)
@@ -425,7 +425,7 @@ class TestHybrid7(SimulationTest):
     @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=10, time_step = 0.01)
-        self.run()
+        self.run(cvode_options={'store_event_points':False})
         self.load_expected_data(
             'HybridTests_ZeroOrderHold1_result.txt')
 
@@ -461,7 +461,7 @@ class TestHybrid9(SimulationTest):
     @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1e-9, time_step = 1e-11)
-        self.run()
+        self.run(cvode_options={'store_event_points':False})
         self.load_expected_data(
             'HybridTests_WhenEqu12_result.txt')
 
