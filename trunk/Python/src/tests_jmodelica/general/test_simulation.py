@@ -194,7 +194,7 @@ class TestAlgo3(SimulationTest):
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
         self.run(cvode_options={'store_event_points':False})
-        self.load_expected_data('Algorithm_AlgoTest3_result.txt')
+        self.load_expected_data('Algorithm_AlgoTest3_result.mat')
 
     @testattr(stddist = True)
     def test_trajectories(self):
@@ -463,7 +463,7 @@ class TestHybrid9(SimulationTest):
         self.setup_base(start_time=0.0, final_time=1e-9, time_step = 1e-11)
         self.run(cvode_options={'store_event_points':False})
         self.load_expected_data(
-            'HybridTests_WhenEqu12_result.txt')
+            'HybridTests_WhenEqu12_result.mat')
 
     @testattr(stddist = True)
     def test_trajectories(self):
