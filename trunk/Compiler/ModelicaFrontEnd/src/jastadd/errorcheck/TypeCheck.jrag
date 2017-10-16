@@ -581,7 +581,7 @@ aspect FlatTypeCheck {
     }
 
     public void FLinspace.typeError(ErrorCheckType checkType) {
-        boolean badVar = !getN().variability().parameterOrLess();
+        boolean badVar = !getN().variability().fixedParameterOrLess();
         boolean canCeval = getN().canCeval();
         boolean badVal = canCeval && getN().ceval().intValue() < 2;
         if (badVar || !canCeval || badVal) {

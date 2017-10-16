@@ -2706,7 +2706,7 @@ end Linspace3;
 model Linspace4
  Real a = 1;
  Real b = 2;
- Integer c = 3;
+ parameter Integer c(fixed=false);
  Real x[3] = linspace(a, b, c);
 
     annotation(__JModelica(UnitTesting(tests={
@@ -2718,7 +2718,7 @@ model Linspace4
 
 Error at line 2709, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
-    'c' is of discrete-time variability
+    'c' is of initial parameter variability
 ")})));
 end Linspace4;
 
