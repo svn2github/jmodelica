@@ -40,7 +40,7 @@ path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
 path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
-
+ 
 
 def input_linear(t):
     if t < 0.5:
@@ -1682,7 +1682,7 @@ class Test_FMI_ODE:
         """
         Tests user naming of result file (FMIODE).
         """
-        res = self._dq.simulate(options={"initialize":False})
+        res = self._dq.simulate(options={"initialize":False, "result_handling":"file"})
         
         #Default name
         assert res.result_file == "dq_result.txt"

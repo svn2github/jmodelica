@@ -488,7 +488,7 @@ aspect eliminateLinearEquations {
     eq FIdUseExp.isSimpleLinearExp()        = true;
     eq FTimeExp.isSimpleLinearExp()         = true;
     eq FIntegerLitExp.isSimpleLinearExp()   = true;
-    eq FRealLitExp.isSimpleLinearExp()      = getValue() == ((int) getValue()) && !isLiteralZero();
+    eq FRealLitExp.isSimpleLinearExp()      = getValue() == ((int) getValue());
 
     syn boolean FAbstractEquation.isSimpleAlias() = false;
     eq FEquation.isSimpleAlias() = getLeft().isSimpleAlias() && getRight().isSimpleAlias();

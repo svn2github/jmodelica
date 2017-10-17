@@ -22,7 +22,7 @@ import java.io.PrintStream;
 
 public class NullStream {
 	
-	public static final OutputStream OUPUT = new OutputStream() {
+	public static final OutputStream OUTPUT = new OutputStream() {
 		public void write(int b) throws IOException {}
 
 		public void write(byte[] b) throws IOException {}
@@ -30,7 +30,7 @@ public class NullStream {
 		public void write(byte[] b, int off, int len) throws IOException {}
 	};
 
-	public static final PrintStream PRINT = new PrintStream(OUPUT);
+	public static final PrintStream PRINT = new PrintStream(OUTPUT);
 	
 	public static final InputStream INPUT = new InputStream() {
 		public int read() throws IOException {

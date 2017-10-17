@@ -581,7 +581,7 @@ aspect FlatTypeCheck {
     }
 
     public void FLinspace.typeError(ErrorCheckType checkType) {
-        boolean badVar = !getN().variability().parameterOrLess();
+        boolean badVar = !getN().variability().fixedParameterOrLess();
         boolean canCeval = getN().canCeval();
         boolean badVal = canCeval && getN().ceval().intValue() < 2;
         if (badVar || !canCeval || badVal) {
@@ -677,25 +677,34 @@ aspect FlatTypeCheck {
 	  if (!isComponentSizeClass() || !isInstComponentSize())
 		  top.error("Illegal access to class in expression: " + top.name());
   }
-  
-  public void FIfExp.typeError(ErrorCheckType checkType) {
-		FType thenType = getThenExp().type();
-		FType elseType = getElseExp().type();
-		FType scalar = thenType.scalarType();
-		scalar = scalar.typePromotion(elseType.scalarType());
-		
-		if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims()) {
-			getIfExp().error("Test expression of if expression must be scalar boolean");
-		} else if (scalar.isUnknown()) { 
-			error("Branches of if expression has incompatible types");
-		} else {
-			if (isParameterIf())
-				error("Failed to evaluate test expression in if expression with branches that have different array sizes");
-			else
-				error("If expression with branches that have different array sizes must have parameter test expression");
-		}
-  }
-  
+
+    public void FIfExp.typeError(ErrorCheckType checkType) {
+        FType thenType = getThenExp().type();
+        FType elseType = getElseExp().type();
+        FType scalar = thenType.scalarType().typePromotion(elseType.scalarType());
+        
+        if (!getIfExp().isOKTestExp()) {
+            getIfExp().error("Test expression of if expression must be scalar boolean:\n    %s is %s", 
+                    getIfExp(), getIfExp().type());
+        } else if (thenType.ndims() != elseType.ndims()) { 
+            error("Branches of if expression have different number of array dimensions:" + 
+                    "\n    %s has size %s\n    %s has size %s", 
+                getThenExp(), thenType.size(), getElseExp(), elseType.size());
+        } else if (scalar.isUnknown()) { 
+            error("Branches of if expression have incompatible types:\n    %s is %s\n    %s is %s", 
+                    getThenExp(), thenType, getElseExp(), elseType);
+        } else {
+            if (isParameterIf())
+                error("Failed to evaluate test expression in if expression with branches that have different array sizes:" + 
+                        "\n    %s has size %s\n    %s has size %s", 
+                    getThenExp(), thenType.size(), getElseExp(), elseType.size());
+            else
+                error("If expression with branches that have different array sizes must have parameter test expression:" + 
+                        "\n    %s has size %s\n    %s has size %s", 
+                    getThenExp(), thenType.size(), getElseExp(), elseType.size());
+        }
+    }
+
   public void FIdUseExp.typeCheck(ErrorCheckType checkType) {
 	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
             getFIdUse().typeError(checkType, this);

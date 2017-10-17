@@ -242,6 +242,31 @@ end LinearEquationElimination.Constant3;
 ")})));
     end Constant3;
 
+    model ZerosOnOneSide1
+        Real a,b,c,d;
+    equation
+        b = sin(time);
+        d = cos(time);
+        a + b + c = 0.0;
+        - a + (- b) + d = 0.0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ZerosOnOneSide1",
+            description="Ensure that we are able to eliminate equations where we have zeroes on the left hand side.",
+            flatModel="
+fclass LinearEquationElimination.ZerosOnOneSide1
+ Real a;
+ Real b;
+ Real d;
+equation
+ b = sin(time);
+ d = cos(time);
+ a + b + (- d) = 0.0;
+end LinearEquationElimination.ZerosOnOneSide1;
+")})));
+    end ZerosOnOneSide1;
+
 
     model Coefficient1
         Real a;

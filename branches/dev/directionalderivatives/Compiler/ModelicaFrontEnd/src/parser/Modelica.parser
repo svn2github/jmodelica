@@ -1117,7 +1117,8 @@ Exp relation =
 Exp unary_exp =
    pow_exp          {: return pow_exp; :}
    | MINUS unary_exp       {: return new NegExp(unary_exp); :}
-   | PLUS unary_exp        {: return unary_exp; :}
+   | PLUS unary_exp        {: formattingRecorder.addItem(FormattingType.NON_BREAKING_WHITESPACE, "+", PLUS);
+                              return unary_exp; :}
    ;
 
 Exp pow_exp =

@@ -26,7 +26,7 @@ import nose
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
-from pyfmi.common.io import ResultDymolaTextual, ResultDymolaBinary, ResultWriterDymola, JIOError, ResultHandlerCSV, ResultCSVTextual
+from pyfmi.common.io import ResultDymolaTextual, ResultDymolaBinary, ResultWriterDymola, JIOError, ResultHandlerCSV, ResultCSVTextual, ResultHandlerBinaryFile
 from pyjmi.common.io import VariableNotTimeVarying
 from pyfmi.common.io import ResultHandlerFile as fmi_ResultHandlerFile
 from pyjmi.optimization import ipopt
@@ -90,6 +90,28 @@ class test_ResultWriterDymola:
         res_traj = res.result_data.get_variable_data('y')
         nose.tools.assert_equal(len(res_traj.x), 2, 
             "Wrong size of y returned by result_data.get_variable_data")
+
+class TestResultMemory:
+    @classmethod
+    def setUpClass(cls):
+        model_file = os.path.join(get_files_path(), 'Modelica', 'NegatedAlias.mo')
+        name = compile_fmu("NegatedAlias", model_file)
+        model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
+        name = compile_fmu("ParameterAlias", model_file)
+        
+    @testattr(stddist = True)
+    def test_only_parameters(self):
+        model = load_fmu("ParameterAlias.fmu")
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "memory"
+        opts["filter"] = "p2"
+        
+        res = model.simulate(options=opts)
+        
+        nose.tools.assert_almost_equal(model.get("p2"), res["p2"][0])
+        assert not isinstance(res.initial("p2"), N.ndarray)
+        assert not isinstance(res.final("p2"), N.ndarray)
 
 class TestResultCSVTextual:
     
@@ -173,6 +195,95 @@ class TestResultCSVTextual:
         
         opts = simple_alias.simulate_options()
         opts["result_handling"] = "csv"
+        
+        res = simple_alias.simulate(options=opts)
+        
+        # test that res['y'] returns a vector of the same length as the time
+        # vector
+        nose.tools.assert_equal(len(res['y']),len(res['time']), 
+            "Wrong size of result vector.")
+            
+        x = res["x"]
+        y = res["y"]
+        
+        for i in range(len(x)):
+            nose.tools.assert_equal(x[i], -y[i])
+    
+
+
+class TestResultFileBinary:
+    
+    @classmethod
+    def setUpClass(cls):
+        model_file = os.path.join(get_files_path(), 'Modelica', 'NegatedAlias.mo')
+        name = compile_fmu("NegatedAlias", model_file)
+        name = compile_fmu("NegatedAlias", model_file, target="cs", compile_to="NegatedAliasCS.fmu")
+        model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
+        name = compile_fmu("ParameterAlias", model_file)
+    
+    @testattr(stddist = True)
+    def test_only_parameters(self):
+        model = load_fmu("ParameterAlias.fmu")
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "custom"
+        opts["result_handler"] = ResultHandlerBinaryFile(model)
+        opts["filter"] = "p2"
+        
+        res = model.simulate(options=opts)
+        
+        nose.tools.assert_almost_equal(model.get("p2"), res["p2"][0])
+    
+    @testattr(stddist = True)
+    def test_variable_alias(self):
+
+        simple_alias = load_fmu("NegatedAlias.fmu")
+        
+        opts = simple_alias.simulate_options()
+        opts["result_handling"] = "custom"
+        opts["result_handler"] = ResultHandlerBinaryFile(simple_alias)
+        
+        res = simple_alias.simulate(options=opts)
+        
+        # test that res['y'] returns a vector of the same length as the time
+        # vector
+        nose.tools.assert_equal(len(res['y']),len(res['time']), 
+            "Wrong size of result vector.")
+            
+        x = res["x"]
+        y = res["y"]
+        
+        for i in range(len(x)):
+            nose.tools.assert_equal(x[i], -y[i])
+            
+    @testattr(fmi = True)
+    def test_binary_options_me(self):
+        
+        simple_alias = load_fmu("NegatedAlias.fmu")
+        
+        opts = simple_alias.simulate_options()
+        opts["result_handling"] = "binary"
+        
+        res = simple_alias.simulate(options=opts)
+        
+        # test that res['y'] returns a vector of the same length as the time
+        # vector
+        nose.tools.assert_equal(len(res['y']),len(res['time']), 
+            "Wrong size of result vector.")
+            
+        x = res["x"]
+        y = res["y"]
+        
+        for i in range(len(x)):
+            nose.tools.assert_equal(x[i], -y[i])
+            
+    @testattr(fmi = True)
+    def test_binary_options_cs(self):
+        
+        simple_alias = load_fmu("NegatedAliasCS.fmu")
+        
+        opts = simple_alias.simulate_options()
+        opts["result_handling"] = "binary"
         
         res = simple_alias.simulate(options=opts)
         

@@ -181,38 +181,44 @@ AS_IF([test "$WIN32" = yes],
       ])
 AM_CONDITIONAL([JM_WIN64],[test "$jm_win64" = yes])
 
+AC_DEFUN([IPOPT_ARG_CHECK],
+[
 # Checks for libraries.
-AC_ARG_WITH([ipopt],
-   [AS_HELP_STRING([--with-ipopt],
+AC_ARG_WITH([$1],
+   [AS_HELP_STRING([--$2],
      [IPOPT installation directory @<:@default=check@:>@])],
-   [ipopt=$withval],
-   [with_ipopt=no])
+   [$1=$withval],
+   [$3=no])
 
-AS_IF([test "x$with_ipopt" = xno],
+AS_IF([test "x$$3" = xno],
       [AC_MSG_RESULT([ ])
        AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([* --with-ipopt option not specified - compiling without IPOPT support *])
+       AC_MSG_RESULT([* --$2 option not specified - compiling without $4 support *])
        AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([ ])],
        [AC_MSG_RESULT([ ])
        AC_MSG_RESULT([***********************************************************************])
-       AC_MSG_RESULT([* --with-ipopt option specified - compiling with IPOPT support        *])
+       AC_MSG_RESULT([* --$2 option specified - compiling with $4 support        *])
        AC_MSG_RESULT([***********************************************************************])
        AC_MSG_RESULT([ ])
-       AC_CHECK_FILE($ipopt/include/coin/IpStdCInterface.h,
+       AC_CHECK_FILE($$1/include/coin/IpStdCInterface.h,
                      [],
-                     [AC_MSG_FAILURE([--with-ipopt option was specified but does not seem to point at a valid IPOPT installation])])])
+                     [AC_MSG_FAILURE([--$2 option was specified but does not seem to point at a valid IPOPT installation])])])
 
-AM_CONDITIONAL([COMPILE_WITH_IPOPT],[test "x$with_ipopt" != xno])
+AM_CONDITIONAL([$8],[test "x$$3" != xno])
 
 # Set output variables to be exported to the Makefiles
-AC_SUBST(IPOPT_INC)
-AC_SUBST(IPOPT_LIB)
-AC_SUBST(IPOPT_HOME)
+AC_SUBST($5)
+AC_SUBST($6)
+AC_SUBST($7)
 
-IPOPT_INC=$ipopt/include/coin
-IPOPT_LIB=$ipopt/lib
-IPOPT_HOME=$ipopt
+$5=$$1/include/coin
+$6=$$1/lib
+$7=$$1
+])
+
+IPOPT_ARG_CHECK([ipopt], [with-ipopt], [with_ipopt], [IPOPT], [IPOPT_INC], [IPOPT_LIB], [IPOPT_HOME], [COMPILE_WITH_IPOPT])
+IPOPT_ARG_CHECK([ipopt64], [with-ipopt64], [with_ipopt64], [IPOPT64], [IPOPT64_INC], [IPOPT64_LIB], [IPOPT64_HOME], [COMPILE_WITH_IPOPT64])
 
 AC_SUBST(WITH_CASADI)
 AS_IF([test "x$with_casadi" != xno],

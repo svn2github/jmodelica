@@ -24,7 +24,7 @@ public class StreamGobbler extends Thread {
     private OutputStream os;
     
     public StreamGobbler(InputStream is) {
-        this(is, NullStream.OUPUT);
+        this(is, NullStream.OUTPUT);
     }
     
     public StreamGobbler(InputStream is, OutputStream redirect) {
