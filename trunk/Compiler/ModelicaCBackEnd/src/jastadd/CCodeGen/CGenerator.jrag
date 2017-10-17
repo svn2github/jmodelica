@@ -1505,9 +1505,11 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            String inc = ext.include();
-            if (inc != null)
+            Set<String> incs = new LinkedHashSet<String>();
+            ext.externalDependencies(incs, null, null, null);
+            for (String inc : incs) {
                 str.println(inc);
+            }
         }
     }
     

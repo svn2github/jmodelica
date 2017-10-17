@@ -533,6 +533,200 @@ $ECE_free$
 ")})));
 end ExtObj2;
 
+model ExtObj3
+    function use1
+        input  Os.Obj1 o1;
+        output Real x;
+        external annotation(Library="extObjectsUse", Include="#include \"extObjectsUse.h\"");
+    end use1;
+
+    Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
+    Real x = use1(o1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ExtObj3",
+            description="Test code gen for external C functions evaluation. External objects.",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
+$ECE_external_includes$
+",
+            generatedCode="
+#include \"extObjects.h\"
+#include \"extObjectsUse.h\"
+")})));
+end ExtObj3;
+
+model ExtObj4
+    function use1
+        input  Os.Obj1 o1;
+        output Real x;
+        external annotation(Library="extObjectsUse", Include="#include \"extObjectsUse.h\"",
+            LibraryDirectory="Library2", IncludeDirectory="Include2");
+    end use1;
+
+    Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
+    Real x = use1(o1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExtObj4",
+            methodName="externalDependencies",
+            description="",
+            methodResult="
+destructor
+#include \"extObjects.h\"
+Include
+extObjects
+Library
+
+my_constructor1
+#include \"extObjects.h\"
+Include
+extObjects
+Library
+
+use1
+#include \"extObjects.h\"
+#include \"extObjectsUse.h\"
+Include
+Include2
+extObjects
+extObjectsUse
+Library
+Library2
+")})));
+end ExtObj4;
+
+model ExtObj5
+    class Obj2
+        extends ExternalObject;
+        function constructor
+            input Real[:] x;
+            input Integer[2] y;
+            input Boolean[:] b;
+            input String[:] s;
+            output Obj2 o2;
+            external "C" my_constructor2(x,y,o2,b,s)
+                annotation(Library="extObjects2", Include="#include \"extObjects2.h\"");
+        end constructor;
+        function destructor
+            input Obj2 o2;
+            external "C"
+                annotation(Library="extObjects2b", Include="#include \"extObjects2b.h\"",
+                    LibraryDirectory="Library2b", IncludeDirectory="Include2b");
+        end destructor;
+    end Obj2;
+    class Obj3
+        extends ExternalObject;
+        function constructor
+            input Os.Obj1 o1;
+            input Obj2[:] o2;
+            output Obj3 o3;
+            external "C" my_constructor3(o1,o2,o3)
+                annotation(Library="extObjects3", Include="#include \"extObjects3.h\"");
+        end constructor;
+        function destructor
+            input Obj3 o3;
+            external "C"
+                annotation(Library="extObjects3b", Include="#include \"extObjects3b.h\"");
+        end destructor;
+    end Obj3;
+    function use3
+        input  Obj3 o3;
+        output Real x;
+        external annotation(Library="extObjects4", Include="#include \"extObjects4.h\"");
+    end use3;
+    Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
+    Obj2 o2 = Obj2({3.13,3.14}, {3,4}, {false, true}, {"A message 1", "A message 2"});
+    Obj3 o3 = Obj3(o1,{o2,o2});
+    Real x = use3(o3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExtObj5",
+            methodName="externalDependencies",
+            description="",
+            methodResult="
+destructor
+#include \"extObjects.h\"
+Include
+extObjects
+Library
+
+my_constructor1
+#include \"extObjects.h\"
+Include
+extObjects
+Library
+
+destructor
+#include \"extObjects2.h\"
+#include \"extObjects2b.h\"
+Include
+Include2b
+extObjects2
+extObjects2b
+Library
+Library2b
+
+my_constructor2
+#include \"extObjects2.h\"
+Include
+extObjects2
+Library
+
+destructor
+#include \"extObjects.h\"
+#include \"extObjects2.h\"
+#include \"extObjects2b.h\"
+#include \"extObjects3.h\"
+#include \"extObjects3b.h\"
+Include
+Include2b
+extObjects
+extObjects2
+extObjects2b
+extObjects3
+extObjects3b
+Library
+Library2b
+
+my_constructor3
+#include \"extObjects.h\"
+#include \"extObjects2.h\"
+#include \"extObjects2b.h\"
+#include \"extObjects3.h\"
+Include
+Include2b
+extObjects
+extObjects2
+extObjects2b
+extObjects3
+Library
+Library2b
+
+use3
+#include \"extObjects.h\"
+#include \"extObjects2.h\"
+#include \"extObjects2b.h\"
+#include \"extObjects3.h\"
+#include \"extObjects3b.h\"
+#include \"extObjects4.h\"
+Include
+Include2b
+extObjects
+extObjects2
+extObjects2b
+extObjects3
+extObjects3b
+extObjects4
+Library
+Library2b
+")})));
+end ExtObj5;
+
 model Dgelsx
     function dgelsx
       "Computes the minimum-norm solution to a real linear least squares problem with rank deficient A"
