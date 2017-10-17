@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5478
+Fixed a bug where external constant evaluation of functions using external objects did not include all resource annotations
+
 ; Fixed ; Minor ; Compiler ; #5482
 Fixed a bug where instance tree was kept 
 
