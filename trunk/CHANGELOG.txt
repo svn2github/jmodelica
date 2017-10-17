@@ -1,5 +1,5 @@
 ================= Unreleased ==================
-; Fixed ; Minor ; Compiler ; #5468
+; Fixed ; Minor ; Compiler ; #5482
 Fixed a bug where instance tree was kept 
 
 ; Change ; Major ; PyFMI; #5479
