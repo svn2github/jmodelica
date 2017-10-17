@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5468
+Fixed a bug where instance tree was kept 
+
 ; Change ; Major ; PyFMI; #5479
 Changed default file storing method to binary format. 
 
