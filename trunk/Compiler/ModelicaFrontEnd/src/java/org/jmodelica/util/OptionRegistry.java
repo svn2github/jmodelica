@@ -371,25 +371,6 @@ abstract public class OptionRegistry {
         	 "Threshold for when a sparse Jacobian should be generated. If the number of torn variables"
         	 + "is less than the threshold a dense Jacobian is generated.",
         	 0,Integer.MAX_VALUE),
-        GEN_DAE_JAC
-            ("generate_dae_jacobian", 
-             OptionType.compiler, 
-             Category.user,
-             false, 
-             "If enabled, then code for computing DAE Jacobians are generated."),
-        GEN_ODE_JAC
-            ("generate_ode_jacobian", 
-             OptionType.compiler, 
-             Category.user,
-             false,
-             "If enabled, then code for computing ODE Jacobians are generated."),
-        GEN_BLOCK_JAC
-            ("generate_block_jacobian", 
-             OptionType.compiler, 
-             Category.user,
-             false,
-             "If enabled, then code for computing block Jacobians is generated. "+
-             "If blocks are needed to compute ODE jacobians they will be generated anyway"),
         GEN_ODE
             ("generate_ode", 
              OptionType.compiler, 

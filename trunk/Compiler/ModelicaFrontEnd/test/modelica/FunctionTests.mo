@@ -12403,30 +12403,6 @@ model ExternalFuncLibs8
  )})));
 end ExternalFuncLibs8;
 
-model ExternalFuncError1
-	function f
-		input Real x;
-		output Real y;
-		external;
-	end f;
-	Real x;
-equation
-	x = f(x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ExternalFuncError1",
-            description="",
-            variability_propagation=false,
-            generate_block_jacobian=true,
-            errorMessage="
-1 errors found:
-
-Error in flattened model:
-  Unable to determine derivative function for function 'FunctionTests.ExternalFuncError1.f'
-")})));
-end ExternalFuncError1;
-
 
 
 model ExtendFunc1

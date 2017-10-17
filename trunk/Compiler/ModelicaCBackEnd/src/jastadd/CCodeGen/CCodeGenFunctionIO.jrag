@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Modelon AB
+Copyright (C) 2016-2017 Modelon AB
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,8 +53,13 @@ aspect CCodeGenFunctionIO {
     
     public void FExp.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
-            type().printDecl_C(p, str, indent, tempName_C(), this);
+            p.print(this, indent, type(), p.createDeclPrinter(str));
         }
+    }
+    
+    @Override
+    public void FFunctionCall.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
+        // Handled in genVarDecls
     }
     
     @Override
@@ -68,19 +73,14 @@ aspect CCodeGenFunctionIO {
     
     public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
+            p.print(this, indent, type(), p.createInitPrinter(str));
             p.printTempInputAssigns(str, indent, this);
         }
     }
     
     @Override
     public void FFunctionCall.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
-            myFCallable().prettyPrintCall_C(p, str, indent, this);
-        } else {
-            super.genTempInputAssigns_C(p, str, indent);
-        }
+        // Handled in genTempVars
     }
     
     @Override
@@ -291,9 +291,10 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
 
-    public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
+    public void FFunctionCallLeft.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent,
+            Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
-            printer_C.printWriteBackAssignment(str, indent, this, forVariables);
+            p.printWriteBackAssignment(str, indent, this, forVariables);
             type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
@@ -326,14 +327,16 @@ aspect CodeFuncCallInOutArgPrinters {
         @Override
         public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-            WriteBackResidualPrinter p = new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
-            p.print(str, indent, left.getFExp().type(), left.name_C(), left.getFExp());
+            left.genWriteBackResidual_C(str, indent, enumerator, forIndices, indexCounter);
         }
+        //TODO printWriteBackResidual function with fiduseexp instead of ffunctioncallleft, se falgorithm.genResidual_C
     }
 
     public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        if (hasFExp()) 
-            printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
+        if (hasFExp()) {
+            CodePrinter.WriteBackResidualPrinter p = printer_C.new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
+            p.print(str, indent, getFExp().type(), name_C(), getFExp());
+        }
         if (replaceWithTemp()) {
             type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
@@ -352,7 +355,7 @@ aspect CodeFuncCallInOutArgPrinters {
             str.print("] = ");
             str.print(name);
             str.print(" - (");
-            prettyPrint_C(str, "");
+            prettyPrint_C(printer_C, str, "");
             str.print(");\n");
         }
     }
@@ -368,7 +371,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
-                use.genWriteBackAssignment_C(str, indent, name, forVariables);
+                use.genWriteBackAssignment_C(CodePrinter.this, str, indent, name, forVariables);
             }
 
             @Override
@@ -378,7 +381,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
-                firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
+                firstUse.genArrayWriteBackAssignment_C(CodePrinter.this, str, indent, firstName, n);
             }
        }
 
@@ -506,7 +509,8 @@ aspect CodeFuncCallInOutArg {
         return getFExp().tempName_C();
     }
     
-    public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+    public void FIdUseExp.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name,
+            Collection<FVariable> forVariables) {
         if (forVariables != null && !forVariables.contains(myFV()))
             return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
@@ -516,14 +520,14 @@ aspect CodeFuncCallInOutArg {
                 str.print("_Z");
             }
             str.print(", ");
-            genAssignedRef_C(ASTNode.printer_C, str, indent);
+            genAssignedRef_C(p, str, indent);
             str.print(", ");
             str.print(name);
             str.println(")");
             return;
         }
         str.print(indent);
-        genAssignedRef_C(ASTNode.printer_C, str, indent);
+        genAssignedRef_C(p, str, indent);
         str.print(" = (");
         str.print(name);
         str.print(")");
@@ -535,10 +539,10 @@ aspect CodeFuncCallInOutArg {
         str.print(";\n");
     }
     
-    public void FIdUseExp.genArrayWriteBackAssignment_C(CodeStream str, String indent, String name, int n) {
+    public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
         str.print(indent);
         str.print("memcpy(&");
-        genAssignedRef_C(ASTNode.printer_C, str, indent);
+        genAssignedRef_C(p, str, indent);
         str.print(", &");
         str.print(name);
         str.print(", ");

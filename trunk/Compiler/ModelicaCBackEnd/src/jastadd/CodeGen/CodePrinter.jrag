@@ -148,6 +148,10 @@ aspect CodePrinter {
             return this;
         }
 
+        public CodePrinter testPrinter() {
+            return this; // Hook to facilitate extensions
+        }
+
         public boolean inInitialSystem() {
             return inInitialSystem;
         }

@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Major ; Compiler; #5468
+Removed CAD generation
+
 ; Fixed ; Minor ; Compiler ; #5478
 Fixed a bug where external constant evaluation of functions using external objects did not include all resource annotations
 

@@ -45,8 +45,7 @@ def run_demo(with_plots=True):
     u_2_nom = 15
 
     # Simulate model with sensititivies to generate initial guess for optimization
-    file_path = os.path.join(get_files_path(), "fed_batch_reactor.mop")
-    model = load_fmu(compile_fmu('FedBatchReactor', file_path, compiler_options={"generate_ode_jacobian":True}, version=2.0))
+    model = load_fmu(os.path.join(get_files_path(), "FMUs", "FedBatchReactor.fmu"))
     sim_opts = model.simulate_options()
     sim_opts['sensitivities'] = parameters
     sim_opts['CVode_options']['rtol'] = 1e-8

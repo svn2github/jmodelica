@@ -126,7 +126,7 @@ aspect CCodeGenExternal {
         if (useTempVar) {
             str.print(tempName_C());
         } else {
-            str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
+            str.print(myCodeGenContext().alias(prettyPrint_C()));
         }
         if (isArray()) {
             str.print("->var");
@@ -144,7 +144,7 @@ aspect CCodeGenExternal {
         if (useTempVar) {
             str.print(tempName_C());
         } else {
-            str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
+            str.print(myCodeGenContext().alias(prettyPrint_C()));
         }
         if (isArray()) {
             str.print("->var");
@@ -153,7 +153,7 @@ aspect CCodeGenExternal {
 
     @Override
     public void FSizeExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
-        str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
+        str.print(myCodeGenContext().alias(prettyPrint_C()));
     }
     
 }

@@ -86,10 +86,6 @@ const char *C_GUID = $C_guid$;
 
 $C_DAE_output_vrefs$
 
-$C_DAE_equation_sparsity$
-
-$C_DAE_ODE_jacobian_sparsity$
-
 $C_DAE_initial_relations$
 
 $C_DAE_relations$
@@ -127,26 +123,6 @@ $C_ode_outputs$
 
 int model_ode_guards_init(jmi_t* jmi) {
 $C_ode_guards_init$
-    return 0;
-}
-
-static int model_dae_F(jmi_t* jmi, jmi_real_t** res) {
-$C_DAE_equation_residuals$
-    return 0;
-}
-
-static int model_dae_dir_dF(jmi_t* jmi, jmi_real_t** res, jmi_real_t** dF, jmi_real_t** dz) {
-$C_DAE_equation_directional_derivative$
-    return 0;
-}
-
-static int model_init_F0(jmi_t* jmi, jmi_real_t** res) {
-$C_DAE_initial_equation_residuals$
-    return 0;
-}
-
-static int model_init_F1(jmi_t* jmi, jmi_real_t** res) {
-$C_DAE_initial_guess_equation_residuals$
     return 0;
 }
 
