@@ -954,7 +954,7 @@ aspect Connections {
         }
 
         public FExp createFIdUseExp() {
-            return fqName.createFIdUseExp();
+            return new FIdUseExp(fqName.treeCopy());
         }
 
         /**
@@ -1446,8 +1446,8 @@ aspect OverconstrainedConnections {
 			Size s = func.myOutputs().get(0).size();
 			FFunctionCall right = new FFunctionCall();
 			right.setName(new FQNameString(func.qualifiedName()).createFIdUse());
-			right.addArg(cse1.getFQName().createFIdUseExp());
-			right.addArg(cse2.getFQName().createFIdUseExp());
+            right.addArg(cse1.createFIdUseExp());
+            right.addArg(cse2.createFIdUseExp());
             right.setFType(func.functionType().flatten(prefix, null, true));
 			FAbstractEquation eqn;
 			if (!s.isUnknown() && s.numElements() == 0) 
