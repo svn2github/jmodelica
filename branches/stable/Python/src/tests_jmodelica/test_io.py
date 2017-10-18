@@ -91,6 +91,28 @@ class test_ResultWriterDymola:
         nose.tools.assert_equal(len(res_traj.x), 2, 
             "Wrong size of y returned by result_data.get_variable_data")
 
+class TestResultMemory:
+    @classmethod
+    def setUpClass(cls):
+        model_file = os.path.join(get_files_path(), 'Modelica', 'NegatedAlias.mo')
+        name = compile_fmu("NegatedAlias", model_file)
+        model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
+        name = compile_fmu("ParameterAlias", model_file)
+        
+    @testattr(stddist = True)
+    def test_only_parameters(self):
+        model = load_fmu("ParameterAlias.fmu")
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "memory"
+        opts["filter"] = "p2"
+        
+        res = model.simulate(options=opts)
+        
+        nose.tools.assert_almost_equal(model.get("p2"), res["p2"][0])
+        assert not isinstance(res.initial("p2"), N.ndarray)
+        assert not isinstance(res.final("p2"), N.ndarray)
+
 class TestResultCSVTextual:
     
     @classmethod

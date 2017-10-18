@@ -101,7 +101,7 @@ aspect CCodeGenExternalCeval {
             String name = acquireTemp(name());
             stmt.getCodeGenContext().setAlias(out.name_C(), name());
             for (FExp arg : args)
-                stmt.getCodeGenContext().setAlias(arg.prettyPrint_C(""), name + "_arg" + i++);
+                stmt.getCodeGenContext().setAlias(arg.prettyPrint_C(), name + "_arg" + i++);
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
@@ -145,7 +145,7 @@ aspect CCodeGenExternalCeval {
             FExternalStmt stmt = type.myDestructorStmt();
             ArrayList<FExp> args = stmt.myConstructorArgs();
             stmt.setCodeGenContext(cgc.createProxy());
-            stmt.getCodeGenContext().setAlias(args.get(0).prettyPrint_C(""), name());
+            stmt.getCodeGenContext().setAlias(args.get(0).prettyPrint_C(), name());
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
@@ -312,7 +312,7 @@ aspect CCodeGenExternalCeval {
     /**
      * Declarations of records used in this function
      */
-    syn Map<String,FType> FExternalStmt.usedTypes() {
+    public Map<String,FType> FExternalStmt.usedTypes() {
         Map<String,FType> res = new LinkedHashMap<String,FType>();
         for (CommonVariableDecl cvd : varsToSerialize()) {
             cvd.type().usedTypes(res);
@@ -347,13 +347,109 @@ aspect CCodeGenExternalCeval {
             if (par) {
                 t.setParent(stmt);
             }
-            exp.type().usedTypes(res);
+            t.usedTypes(res);
             if (par) {
                 t.setParent(null);
             }
         }
     }
+
+    public String FClass.externalDependencies() {
+        StringBuilder sb = new StringBuilder();
+        for (FExternalStmt stmt : myExternals()) {
+            Set<String> incs    = new LinkedHashSet();
+            Set<String> incDirs = new LinkedHashSet();
+            Set<String> libs    = new LinkedHashSet();
+            Set<String> libDirs = new LinkedHashSet();
+            stmt.externalDependencies(incs, incDirs, libs, libDirs);
+            
+            sb.append(stmt.getName());
+            sb.append("\n");
+            for (String s : incs) {
+                sb.append(s);
+                sb.append("\n");
+            }
+            for (String s : incDirs) {
+                sb.append(new File(s).getName());
+                sb.append("\n");
+            }
+            for (String s : libs) {
+                sb.append(s);
+                sb.append("\n");
+            }
+            for (String s : libDirs) {
+                sb.append(new File(s).getName());
+                sb.append("\n");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    public void FExternalStmt.externalDependencies(
+            Set<String> incs, Set<String> incDirs,
+            Set<String> libs, Set<String> libDirs) {
+        for (FExternalStmt dep : externalDependencies()) {
+            if (incs != null && dep.include() != null) {
+                incs.add(dep.include());
+            }
+            if (incDirs != null && dep.includeDirectory() != null) {
+                incDirs.add(dep.includeDirectory());
+            }
+            if (libs != null && dep.library() != null) {
+                for (String lib : dep.library()) {
+                    libs.add(lib);
+                }
+            }
+            if (libDirs != null && dep.libraryDirectory() != null) {
+                libDirs.add(dep.libraryDirectory());
+            }
+        }
+    }
+
+    public Set<FExternalStmt> FExternalStmt.externalDependencies() {
+        Set<FExternalStmt> res = new LinkedHashSet<FExternalStmt>();
+        externalDependencies(res);
+        return res;
+    }
+
+    public void FExternalStmt.externalDependencies(Set<FExternalStmt> res) {
+        if (res.contains(this)) {
+            return;
+        }
+        res.add(this);
+        
+        for (FExp exp : myConstructorArgs()) {
+            FType t = exp.type();
+            boolean par = t.getParent() == null;
+            if (par) {
+                t.setParent(this);
+            }
+            t.externalDependencies(res);
+            if (par) {
+                t.setParent(null);
+            }
+        }
+        
+        res.remove(this);
+        res.add(this);
+    }
+
+    public void FType.externalDependencies(Set<FExternalStmt> res) {
+        
+    }
+
+    public void FRecordType.externalDependencies(Set<FExternalStmt> res) {
+        for (FRecordComponentType frct : getComponents()) {
+            frct.getFType().externalDependencies(res);
+        }
+    }
     
+    public void FExternalObjectType.externalDependencies(Set<FExternalStmt> res) {
+        myConstructorStmt().externalDependencies(res);
+        myDestructorStmt().externalDependencies(res);
+    }
+
     /*
      * Some code generation for the instance tree.
      */

@@ -225,32 +225,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>generate_block_jacobian</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, then code for computing block Jacobians is generated. If blocks are needed to compute ODE jacobians they will be generated anyway
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>generate_dae_jacobian</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, then code for computing DAE Jacobians are generated.
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>generate_html_diagnostics</literal>
                 </entry>
                 <entry>
@@ -273,19 +247,6 @@
                 </entry>
                 <entry>
                 If enabled, then flat model before and after transformations will be generated.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>generate_ode_jacobian</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, then code for computing ODE Jacobians are generated.
                 </entry>
               </row>
               <row>

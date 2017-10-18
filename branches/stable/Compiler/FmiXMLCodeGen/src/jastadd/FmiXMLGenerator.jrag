@@ -101,7 +101,7 @@ aspect FmiXML {
         return res;
     }
 
-
+    syn boolean FClass.supportDirDer() = false; // Hook to facilitate extensions
 }
 
 aspect FmiXMLGenerator {
@@ -1034,7 +1034,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 
         @Override
         public void generateAttributes(CodeStream genPrinter) {
-            Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
+            Boolean supportDirDer = fclass.supportDirDer();
             
             generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
             generateAttribute("needsExecutionTool",                  false,                   genPrinter);
@@ -1076,7 +1076,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         }
 
         public void generateAttributes(CodeStream genPrinter) {
-            Boolean supportDirDer = fclass.myOptions().getBooleanOption("generate_ode_jacobian");
+            Boolean supportDirDer = fclass.supportDirDer();
             
             generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
             generateAttribute("needsExecutionTool",                     false,                   genPrinter);

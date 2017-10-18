@@ -29,16 +29,26 @@ static const char *getenv_checked(const char *name) {
 jint initJVM()
 {
     string jmhome = string(getenv_checked("JMODELICA_HOME"));    
-    string mclib = jmhome + "/lib/casadi_interface";
+    string mclib;
+    try {
+        mclib = string(getenv_checked("CASADI_INTERFACE_HOME"));
+    } catch (std::runtime_error& e) {
+        mclib = jmhome + "/lib/casadi_interface";
+    }
     
     string mcjar = mclib + "/ModelicaCompiler.jar";
     string ocjar = mclib + "/OptimicaCompiler.jar";
     string utiljar = mclib + "/util.jar";
     string beaverjar = jmhome + "/ThirdParty/Beaver/lib/beaver-rt.jar";
     string classpath = mcjar + CLASSPATH_SEP + ocjar + CLASSPATH_SEP + utiljar + CLASSPATH_SEP + beaverjar;
-
-    string libpath = jmhome + "/lib/casadi_interface" + CLASSPATH_SEP
-                   + jmhome + "/ThirdParty/CasADi/lib";
+    string casadilib;
+    try {
+        casadilib = string(getenv_checked("CASADI_LIB_HOME"));
+    } catch (std::runtime_error& e) {
+        casadilib = jmhome + "/ThirdParty/CasADi/lib";
+    }
+    string libpath = mclib + CLASSPATH_SEP
+                   + casadilib;
     
     return initJVM(classpath.data(), libpath.data());
 }

@@ -82,7 +82,10 @@ class _BaseSimOptTest:
           name -  the file name of the results file, relative to files dir
         """
         path = os.path.join(get_files_path(), 'Results', name)
-        self.expected = ResultDymolaTextual(path)
+        if path.endswith("txt"):
+            self.expected = ResultDymolaTextual(path)
+        else:
+            self.expected = ResultDymolaBinary(path)
 
 
     def assert_all_inital_values(self, variables, rel_tol = None, abs_tol = None):

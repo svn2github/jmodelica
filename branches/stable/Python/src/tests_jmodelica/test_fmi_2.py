@@ -53,8 +53,20 @@ class Test_FMUModelBase2:
         Sets up the test class.
         """
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
+        cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
+    @testattr(fmi = True)
+    def test_declared_enumeration_type(self):
+        enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)
+        
+        enum = enumeration_model.get_variable_declared_type("x")
+        assert len(enum.items.keys()) == 2
+        enum = enumeration_model.get_variable_declared_type("home")
+        assert len(enum.items.keys()) == 4
+        
+        nose.tools.assert_raises(FMUException, enumeration_model.get_variable_declared_type, "z")
+       
     @testattr(fmi = True)
     def test_version(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
@@ -139,7 +151,6 @@ class Test_FMUModelCS2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
-        cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="cs", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
         cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
     
@@ -387,35 +398,6 @@ class Test_FMUModelCS2:
         nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
         
     @testattr(fmi = True)
-    def test_get_directional_derivative(self):
-        """
-        Test the method get_directional_derivative in FMUModelCS2
-        """
-        
-        # Setup
-        jacobian = load_fmu(self.jacobian_name)
-        jacobian.setup_experiment()
-        jacobian.initialize()
-        
-        jacobian.set('x1', 1.0)
-        jacobian.set('x2', 1.0)
-        
-        states_list = jacobian.get_states_list()
-        der_list    = jacobian.get_derivatives_list()
-        states_ref  = [s.value_reference for s in states_list.values()]
-        der_ref     = [s.value_reference for s in der_list.values()]
-
-        dir_der1 = jacobian.get_directional_derivative(states_ref, der_ref, [1, 0])
-        assert len(dir_der1) == 2
-        nose.tools.assert_almost_equal(dir_der1[0], 1.)
-        nose.tools.assert_almost_equal(dir_der1[1], 14.)
-        
-        dir_der2 = jacobian.get_directional_derivative(states_ref, der_ref, [0, 1])
-        assert len(dir_der2) == 2
-        nose.tools.assert_almost_equal(dir_der2[0], 16.)
-        nose.tools.assert_almost_equal(dir_der2[1], 4.)
-
-    @testattr(fmi = True)
     def test_simulate(self):
         """
         Test the main features of the method simulate() in FMUmodelCS2
@@ -553,147 +535,6 @@ class Test_FMUModelCS2:
         assert len(res['time']) == 251
 
 
-class Test_State_Space_Repr:
-    """
-    This class tests pyfmi.fmi.FMUModelME2.get_state_space_representation
-    """
-    @classmethod
-    def setUpClass(cls):
-        cls.directional1 = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
-        cls.directional2 = compile_fmu("JacFuncTests.BasicJacobianTest2",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
-        cls.cc           = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
-        cls.quadratic = compile_fmu("JacFuncTests.Quadratic",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
-        
-    def _run_test(self, name, matrix):
-        model = load_fmu(name)
-        model.setup_experiment()
-        model.initialize()
-        
-        def get_matrix(matrix):
-            if matrix == "A":
-                M = model._get_A()
-            elif matrix == "B":
-                M = model._get_B()
-            elif matrix == "C":
-                M = model._get_C()
-            elif matrix == "D":
-                M = model._get_D()
-            return M
-        
-        M1 = get_matrix(matrix)
-        model.force_finite_differences = True
-        M2 = get_matrix(matrix)
-        
-        print model.get_states_list()
-        print model.get_input_list()
-        print matrix, M1
-        print matrix, M2
-        
-        M1 = M1.toarray().flatten()
-        M2 = M2.toarray().flatten()
-        
-        for i in range(len(M1)):
-            nose.tools.assert_almost_equal(M1[i], M2[i], places=4)
-    
-    @testattr(fmi = True)
-    def test_sparse_dense_repr(self):
-        model = load_fmu(self.cc)
-        model.setup_experiment()
-        model.initialize()
-        
-        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
-        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
-        
-        assert isinstance(A1, scipy.sparse.csc.csc_matrix)
-        assert isinstance(A2, N.ndarray)
-        
-        model.force_finite_differences = 1
-        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
-        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
-        
-        assert isinstance(A1, scipy.sparse.csc.csc_matrix)
-        assert isinstance(A2, N.ndarray)
-        
-        model.force_finite_differences = 2
-        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
-        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
-        
-        assert isinstance(A1, scipy.sparse.csc.csc_matrix)
-        assert isinstance(A2, N.ndarray)
-        
-    @testattr(fmi = True)
-    def test_finite_difference(self):
-        model = load_fmu(self.quadratic)
-        model.setup_experiment()
-        model.initialize()
-        
-        model.force_finite_differences = 1 #Forward difference
-        
-        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
-        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
-        
-        nose.tools.assert_almost_equal(A1.todense()[0,0], 6)
-        nose.tools.assert_almost_equal(A2[0,0], 6)
-        
-        model.force_finite_differences = 2 #Central difference
-        
-        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
-        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
-        
-        nose.tools.assert_almost_equal(A1.todense()[0,0], 6, places=8)
-        nose.tools.assert_almost_equal(A2[0,0], 6, places=8)
-        
-        
-    @testattr(fmi = True)
-    def test_directional_without_initialize(self):
-		model = load_fmu(self.directional1)
-		
-		nose.tools.assert_raises(FMUException, model._get_A)
-		
-		model.force_finite_differences = True
-		
-		nose.tools.assert_raises(FMUException, model._get_A)
-    
-    @testattr(fmi = True)
-    def test_A_matrix1(self):
-        pass
-        #Should be actived after https://trac.jmodelica.org/ticket/4739
-        #self._run_test(self.directional1, "A")
-    
-    @testattr(fmi = True)
-    def test_A_matrix2(self):
-        pass
-        ##Should be actived after https://trac.jmodelica.org/ticket/4739
-        #self._run_test(self.directional2, "A")
-    
-    @testattr(fmi = True)
-    def test_B_matrix1(self):
-        pass
-        #self._run_test(self.directional1, "B")
-    
-    @testattr(fmi = True)
-    def test_B_matrix2(self):
-        self._run_test(self.directional2, "B")
-    
-    @testattr(fmi = True)
-    def test_C_matrix1(self):
-        pass
-        #self._run_test(self.directional1, "C")
-    
-    @testattr(fmi = True)
-    def test_C_matrix2(self):
-        self._run_test(self.directional2, "C")
-    
-    @testattr(fmi = True)
-    def test_D_matrix1(self):
-        pass
-        #self._run_test(self.directional1, "D")
-    
-    @testattr(fmi = True)
-    def test_D_matrix2(self):
-        self._run_test(self.directional2, "D")
-
-
 class Test_FMUModelME2:
     """
     This class tests pyfmi.fmi.FMUModelME2
@@ -705,7 +546,6 @@ class Test_FMUModelME2:
         """
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
-        cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
         cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
@@ -1018,34 +858,6 @@ class Test_FMUModelME2:
         # Bouncing ball don't have the capability, check that this is handled
         nose.tools.assert_raises(FMUException, bounce.get_directional_derivative, [1], [1], [1])
         
-    @testattr(fmi = True)
-    def test_get_directional_derivative(self):
-        """
-        Test the method get_directional_derivative in FMUModelME2
-        """
-        
-        # Setup
-        jacobian = load_fmu(self.jacobian_name)
-        jacobian.setup_experiment()
-        jacobian.initialize()
-        
-        jacobian.set('x1', 1.0)
-        jacobian.set('x2', 1.0)
-        
-        states_list = jacobian.get_states_list()
-        der_list    = jacobian.get_derivatives_list()
-        states_ref  = [s.value_reference for s in states_list.values()]
-        der_ref     = [s.value_reference for s in der_list.values()]
-
-        dir_der1 = jacobian.get_directional_derivative(states_ref, der_ref, [1, 0])
-        assert len(dir_der1) == 2
-        nose.tools.assert_almost_equal(dir_der1[0], 1.)
-        nose.tools.assert_almost_equal(dir_der1[1], 14.)
-        
-        dir_der2 = jacobian.get_directional_derivative(states_ref, der_ref, [0, 1])
-        assert len(dir_der2) == 2
-        nose.tools.assert_almost_equal(dir_der2[0], 16.)
-        nose.tools.assert_almost_equal(dir_der2[1], 4.)
         
     @testattr(fmi = True)
     def test_simulate_with_debug_option(self):
@@ -1092,17 +904,6 @@ class Test_FMUModelME2:
         coupled.enter_continuous_time_mode()
         res=coupled.simulate(options=opts)
         assert len(res['time']) > 250
-    
-    @testattr(fmi = True)
-    def test_simulate_no_state(self):
-        
-        name = compile_fmu("Modelica.Blocks.Examples.IntegerNetwork1", version = 2.0, compiler_options={"generate_ode_jacobian":True, "eliminate_alias_constants":False})
-
-        model = load_fmu(name)
-
-        res = model.simulate(final_time=3)
-
-        assert res.final("integerStep.y") == 3.0
     
     @testattr(fmi = True)
     def test_simulate(self):

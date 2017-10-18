@@ -575,7 +575,7 @@ public class CGenerator extends GenericGenerator {
             int generateSparseThreshold = fclass.myOptions().getIntegerOption("generate_sparse_block_jacobian_threshold");
             for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                 CodePrinter printer = block.blockPrinter();
-                block.genBlockResidualFunction_C(printer, genPrinter, indent, generateSparseThreshold);
+                block.genBlockResidualFunction(printer, genPrinter, indent, generateSparseThreshold);
                 if (block.isLinear() && generateSparseThreshold < block.localSolvedRealVariables().size()) {
                     block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, false);
                 }
@@ -602,16 +602,14 @@ public class CGenerator extends GenericGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-            if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
-                CodePrinter p = ASTNode.printer_C;
-                String indent = p.indent("");
-                OptionRegistry options = fclass.myOptions();
+            CodePrinter p = ASTNode.printer_C;
+            String indent = p.indent("");
+            OptionRegistry options = fclass.myOptions();
 
-                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false,
-                            false, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
-                            options.getStringOption("nonlinear_solver"), -1);
-            }
+            for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                block.genBlockAddCall_C(p, genPrinter, indent, false,
+                        false, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
+                        options.getStringOption("nonlinear_solver"), -1);
         }
     }
 
@@ -655,7 +653,7 @@ public class CGenerator extends GenericGenerator {
 
             for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
                 CodePrinter printer = block.blockPrinter().initialSystemPrinter();
-                block.genBlockResidualFunction_C(printer, genPrinter, indent, generateSparseThreshold);
+                block.genBlockResidualFunction(printer, genPrinter, indent, generateSparseThreshold);
 
                 if (block.isLinear() && generateSparseThreshold < block.localSolvedRealVariables().size()) {
                     block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, true);
@@ -678,16 +676,14 @@ public class CGenerator extends GenericGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-            if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
-                CodePrinter p = ASTNode.printer_C;
-                String indent = p.indent("");
-                OptionRegistry options = fclass.myOptions();
+            CodePrinter p = ASTNode.printer_C;
+            String indent = p.indent("");
+            OptionRegistry options = fclass.myOptions();
 
-                for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false,
-                            true, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
-                            fclass.myOptions().getStringOption("init_nonlinear_solver"), -1);
-            }
+            for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+                block.genBlockAddCall_C(p, genPrinter, indent, false,
+                        true, block.isLinear() && options.getIntegerOption("generate_sparse_block_jacobian_threshold") < block.localSolvedRealVariables().size(),
+                        fclass.myOptions().getStringOption("init_nonlinear_solver"), -1);
         }
     }
 
@@ -721,19 +717,19 @@ public class CGenerator extends GenericGenerator {
             addOptions("generate_ode");
         }
 
-        public void generate(CodeStream genPrinter) {
+        public void generate(CodeStream str) {
             if (!fclass.onlyInitBLT()) {
                 for (FExp e : fclass.guardExpInEquations()) 
-                    e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+                    e.genVarDecls_C(ASTNode.printer_C, str, INDENT);
                 int i=0;
                 for (FExp e : fclass.guardExpInEquations()) {
-                    genPrinter.print("  _guards(" + i + ") = ");
-                    e.prettyPrint_C(genPrinter,"");     
-                    genPrinter.print(";\n");        
+                    str.print("  _guards(" + i + ") = ");
+                    ASTNode.printer_C.print(e, str, "");
+                    str.print(";\n");        
                     i++;
                 }
             } else {
-                genPrinter.print("  model_ode_guards_init(jmi);\n");
+                str.print("  model_ode_guards_init(jmi);\n");
             }
         }
     }
@@ -989,13 +985,8 @@ public class CGenerator extends GenericGenerator {
             super("C_function_headers", myGenerator, fclass);
         }
 
-        public void generate(CodeStream genPrinter) {
-            for (FFunctionDecl func : fclass.myFFunctionDeclsPartial())
-                func.genStructsPartial_C(genPrinter, "");
-            for (FFunctionDecl func : fclass.myFFunctionDeclsPartialCalled())
-                func.genHeadersPartial_C(genPrinter, "");
-            for (FFunctionDecl func : fclass.getFFunctionDecls())
-                func.genHeader_C(genPrinter, "");
+        public void generate(CodeStream str) {
+            fclass.generateFunctionHeaders(ASTNode.printer_C, str, "");
         }
     }
     
@@ -1011,11 +1002,13 @@ public class CGenerator extends GenericGenerator {
             super("C_functions", myGenerator, fclass);
         }
 
-        public void generate(CodeStream genPrinter) {
-            for (FFunctionDecl func : fclass.myFFunctionDeclsPartialCalled())
-                func.prettyPrintPartial_C(genPrinter, "");
-            for (FFunctionDecl func : fclass.getFFunctionDecls())
-                func.prettyPrint_C(genPrinter, "");
+        public void generate(CodeStream str) {
+            for (FFunctionDecl func : fclass.myFFunctionDeclsPartialCalled()) {
+                func.prettyPrintPartial_C(str, "");
+            }
+            for (FFunctionDecl func : fclass.getFFunctionDecls()) {
+                ASTNode.printer_C.print(func, str, "");
+            }
         }
     }
     
@@ -1031,9 +1024,10 @@ public class CGenerator extends GenericGenerator {
             super("C_records", myGenerator, fclass);
         }
 
-        public void generate(CodeStream genPrinter) {
-            for (FRecordDecl rec : fclass.getFRecordDecls())
-                rec.prettyPrint_C(genPrinter, "");
+        public void generate(CodeStream str) {
+            for (FRecordDecl rec : fclass.getFRecordDecls()) {
+                ASTNode.printer_C.print(rec, str, "");
+            }
         }
     }
     
@@ -1049,9 +1043,10 @@ public class CGenerator extends GenericGenerator {
             super("C_enum_strings", myGenerator, fclass);
         }
 
-        public void generate(CodeStream genPrinter) {
-            for (FEnumDecl e : fclass.getFEnumDecls())
-                e.prettyPrint_C(genPrinter, "");
+        public void generate(CodeStream str) {
+            for (FEnumDecl e : fclass.getFEnumDecls()) {
+                ASTNode.printer_C.print(e, str, "");
+            }
         }
     }
     
@@ -1505,9 +1500,11 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            String inc = ext.include();
-            if (inc != null)
+            Set<String> incs = new LinkedHashSet<String>();
+            ext.externalDependencies(incs, null, null, null);
+            for (String inc : incs) {
                 str.println(inc);
+            }
         }
     }
     

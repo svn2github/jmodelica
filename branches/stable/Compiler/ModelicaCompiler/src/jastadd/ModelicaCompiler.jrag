@@ -1295,7 +1295,7 @@ public class ModelicaCompiler {
      * Override for subclasses needing another subclass of CGenerator.
      */
     protected CGenerator createCGenerator(FClass fc) {
-        return new CADGenerator(ASTNode.prettyPrinter, '$', fc);
+        return new CGenerator(ASTNode.prettyPrinter, '$', fc);
     }
 
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
@@ -1387,27 +1387,15 @@ public class ModelicaCompiler {
     }
     
     /**
-     * Executes the given command as a separate process, writing any output to
-     * the inputstream argument if non-null, otherwise to the logger.
+     * Executes the given command as a separate process, writing any output to the logger.
+     * 
+     * Stdout goes on log level "verbose", and stderr on "warning. If the process fails, 
+     * then all output goes on "warning".
      */
-    public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir, OutputStream output) {
+    public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
         MemoryLogger logger = log.memoryLogger(Level.WARNING);
         try {
-            String[] e = (env != null) ? convertEnv(env) : null;
-            Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
-            
-            // Eat any output unless a stream 'ouput' is supplied.
-            Thread err = new StreamGobbler(proc.getErrorStream(), logger.warningStream());
-            OutputStream outputStream = output == null ? logger.verboseStream() : output;
-            Thread out = new StreamGobbler(proc.getInputStream(), outputStream);
-            
-            err.start();
-            out.start();
-            
-            // Wait for process to finish and return result
-            int code = proc.waitFor();
-            err.join();
-            out.join();
+            int code = executeProcessInternal(cmd, env, workDir, logger.verboseStream(), logger.warningStream());
             if (code > 0) {
                 logger.printCache();
             }
@@ -1420,6 +1408,39 @@ public class ModelicaCompiler {
             logger.close();
         }
         return 1;
+    }
+    
+    /**
+     * Executes the given command as a separate process, writing any output to
+     * the given output streams.
+     */
+    public static int executeProcess(
+            String[] cmd, Map<String,String> env, File workDir, OutputStream stdout, OutputStream stderr) {
+        try {
+            return executeProcessInternal(cmd, env, workDir, stdout, stderr);
+        } catch (IOException e) {
+        } catch (InterruptedException e) {
+        }
+        return 1;
+    }
+    
+    private static int executeProcessInternal(
+            String[] cmd, Map<String,String> env, File workDir, OutputStream stdout, OutputStream stderr)
+    throws IOException, InterruptedException {
+        String[] e = (env != null) ? convertEnv(env) : null;
+        Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
+        
+        Thread err = new StreamGobbler(proc.getErrorStream(), stderr);
+        Thread out = new StreamGobbler(proc.getInputStream(), stdout);
+        
+        err.start();
+        out.start();
+        
+        // Wait for process to finish and return result
+        int code = proc.waitFor();
+        err.join();
+        out.join();
+        return code;
     }
 
     private void setOptions(Arguments programarguments) {
@@ -3249,7 +3270,9 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         };
 
         OutputStream os = new ByteArrayOutputStream();
-        if (ModelicaCompiler.loggedProcess(cmd, getEnv(), new File("."), os) > 0) {
+        OutputStream es = NullStream.OUTPUT;
+        if (ModelicaCompiler.executeProcess(cmd, getEnv(), new File("."), os, es) > 0) {
+            // TODO: give a useful error message here
             return null;
         }
         
@@ -3304,7 +3327,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             ASTNode.log.debug("C-code compilation command:");
             ASTNode.log.debug(printStringArrayObject(cmd));
 
-            if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir, null) != 0) {
+            if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir) != 0) {
                 File sourceDir = new File(workDir, "sources");
                 File cfile = new File(sourceDir, args.getFileName()+".c");
                 throw new CcodeCompilationException("Compilation of generated C code failed.\n" +

@@ -255,7 +255,7 @@ public abstract class ModelicaLogger {
         if (getLevel().shouldLog(level))
             return new LogOutputStream(level);
         else
-            return NullStream.OUPUT;
+            return NullStream.OUTPUT;
     }
 
     /**

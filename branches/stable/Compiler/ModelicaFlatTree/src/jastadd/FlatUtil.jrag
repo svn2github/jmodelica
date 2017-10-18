@@ -1344,12 +1344,6 @@ aspect FlatFunctionUtils {
      syn FFunctionVariable FFunctionVariable.expOutput() = myOutputs().get(0);
      syn FFunctionVariable FFunctionCall.expOutput()     = myCallOutputs().get(0);
      syn InstComponentDecl InstFunctionCall.expOutput()  = myCallOutputs().get(0);
-    
-     syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
-     inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
-     eq InstProgramRoot.getChild().returnDefinition()         = null;
-     eq FClass.getChild().returnDefinition()                  = null;
      
      inh String InstFunctionArgument.funcName();
      inh String FFunctionCallLeft.funcName();
@@ -1472,8 +1466,8 @@ aspect FlatFunctionUtils {
       * Only valid in flat tree.
       */
      inh FFunctionDecl FExp.containingFFunctionDecl();
-     inh FFunctionDecl FVariable.containingFFunctionDecl();
-     inh FFunctionDecl FExternalStmt.containingFFunctionDecl();
+     inh FFunctionDecl FFunctionVariable.containingFFunctionDecl();
+     inh FFunctionDecl FStatement.containingFFunctionDecl();
      eq FFunctionDecl.getChild().containingFFunctionDecl()  = this;
      eq InstNode.getChild().containingFFunctionDecl()       = null;
      eq Root.getChild().containingFFunctionDecl()           = null;

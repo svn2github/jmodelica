@@ -2031,6 +2031,7 @@ aspect FlatPrettyPrint {
 
     syn String FTypePrefixVariability.toStringLiteral();
     eq FParameter.toStringLiteral()         = "parameter";
+    eq FInitialParameter.toStringLiteral()  = "initial parameter";
     eq FEvalTrueParameter.toStringLiteral() = "eval parameter";
     eq FFinalParameter.toStringLiteral()    = "final parameter";
     eq FStructParameter.toStringLiteral()   = "structural parameter";

@@ -1,0 +1,249 @@
+
+/*
+Copyright (C) 2009-2017 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect CCodeGenFunctionDecl {
+
+    public void FClass.generateFunctionHeaders(CodePrinter p, CodeStream str, String indent) {
+        for (FFunctionDecl func : myFFunctionDeclsPartial()) {
+            func.genStructsPartial_C(str, "");
+        }
+        for (FFunctionDecl func : myFFunctionDeclsPartialCalled()) {
+            func.genHeadersPartial_C(str, "");
+        }
+        for (FFunctionDecl func : getFFunctionDecls()) {
+            func.genHeader_C(str, "");
+        }
+    }
+
+    /**
+     * Helper method that checks wether the functiondecl should be printed.
+     */
+    syn boolean FFunctionDecl.shouldPrintFuncDecl_C() = functionIsUsed();
+
+    /**
+     * Check if we need to generate a wrapper for expressions for this function.
+     */
+    syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
+
+
+    public void FFunctionDecl.genHeader_C(CodeStream str, String indent) {
+        if (!shouldPrintFuncDecl_C())
+            return;
+        prettyPrintHead_C(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
+        str.print(";\n");
+        if (generateExpFunction()) {
+            prettyPrintHead_C(printer_C, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
+            str.print(";\n");
+        }
+    }
+
+    private void FFunctionDecl.prettyPrintHead_C(CodePrinter p, CodeStream str, String indent, 
+            String type, String suffix, boolean returnArgs) {
+        str.print(indent);
+        str.print(type);
+        str.print(" ");
+        str.print(funcNameUnderscore(suffix));
+        str.print("(");
+        String sep = "";
+        for (FFunctionVariable v : myInputs()) {
+            str.print(sep);
+            v.printArgument_C(str);
+            sep = ", ";
+        }
+        if (returnArgs) {
+            for (FFunctionVariable v : myOutputs()) {
+                str.print(sep);
+                v.printReturnArgument_C(str);
+                sep = ", ";
+            }
+        }
+        str.print(")");
+    }
+
+    public String FFunctionDecl.getDeclaredType_C() {
+        if (myOutputs().size() > 0) {
+            return myOutputs().get(0).type_C();
+        } else {
+            return "void";
+        }
+    }
+
+    public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
+        str.print(typeReturn_C());
+        str.print(" ");
+        str.print(nameReturn_C());
+    }
+
+    @Override
+    public void FFunctionDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (!shouldPrintFuncDecl_C())
+            return;
+        String next = p.indent(indent);
+        // Print definition
+        prettyPrintHead_C(p, str, indent, "void", C_SUFFIX_DEF, true);
+        str.print(" {\n");
+        ASTNode.genDynMemInit(str, next);
+        genVarDecls_C(p, str, p.indent(indent));
+        for (FFunctionVariable ffv : myNonInputs()) {
+            if (!ffv.isArray()) {
+                p.print(ffv, str, next);
+            }
+        }
+        p.print(getFAlgorithm(), str, next);
+        str.print(indent);
+        str.print("}\n\n");
+        
+        // Print wrapper for expressions
+        if (generateExpFunction()) {
+            String type = getDeclaredType_C();
+            prettyPrintHead_C(p, str, indent, type, C_SUFFIX_EXP, false);
+            str.print(" {\n");
+            printDeclarationForExp_C(p, str, next);
+            prettyPrintWrappedCall_C(str, next);
+            printReturnForExp_C(p, str, next);
+            str.print(indent);
+            str.print("}\n\n");
+        }
+    }
+
+    public void FFunctionDecl.printReturnForExp_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent);
+        str.print("return");
+        if (myOutputs().size() > 0) { 
+            str.print(" ");
+            str.print(myOutputs().get(0).name_C());
+        }
+        str.print(";\n");
+    }
+
+    public void FFunctionDecl.printDeclarationForExp_C(CodePrinter p, CodeStream str, String indent) {
+        if (myOutputs().size() > 0) { 
+            myOutputs().get(0).genVarDecls_C(p, str, indent);
+        }
+    }
+}
+
+aspect CCodeGenFunctionReturn {
+
+    /*
+     * Return from functions
+     */
+
+    public void FFunctionDecl.printReturnWrite(CodePrinter p, CodeStream str, String indent) {
+        for (FFunctionVariable v : myOutputs()) {
+            if ((!v.isArray() && !v.isRecord()) || (v.isArray() && v.isString())) {
+                p.printReturnWrite(v, str, indent);
+            }
+        }
+        ASTNode.genDynMemFree(str, indent);
+        str.print(indent + "return;\n");
+    }
+    
+    abstract class CodePrinter {
+        public abstract void printReturnWrite(FFunctionVariable v, CodeStream str, String indent);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printReturnWrite(FFunctionVariable v, CodeStream str, String indent) {
+            v.printReturnWrite(ExecStep, str, indent);
+        }
+    }
+    
+    public void FFunctionVariable.printReturnWrite(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(indent);
+        str.print("JMI_RET(");
+        str.print(type().macroType());
+        str.print(", ");
+        str.print(p.returnName(this));
+        str.print(", ");
+        str.print(p.name(this));
+        str.print(")\n");
+    }
+}
+
+aspect CCodeGenFunctionCall {
+    public interface FCallable {
+        /**
+         * \brief Generate a call to this callable.
+         */
+        public void prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call);
+    }
+    
+    @Override
+    public void FFunctionDecl.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call) {
+        boolean exp = call.functionCallIsExp();
+        if (!exp) {
+            str.print(indent);
+        } else if (call.type().isString()) {
+            str.print(indent, call.tempName_C(), " = ");
+        }
+        str.print(funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
+        str.print("(");
+        String sep = "";
+        for (FExp arg : call.getArgs()) {
+            str.print(sep);
+            arg.genTempArg(p.ExecStep, str, indent);
+            sep = ", ";
+        }
+        if (!exp) {
+            call.prettyPrintCallOutputs_C(p, str, indent, myOutputs().size(), sep);
+        }
+        str.print(")");
+        if (!exp || call.type().isString()) {
+            str.print(";\n");
+        }
+    }
+    
+    public void FAbstractFunctionCall.prettyPrintCallOutputs_C(CodePrinter p, CodeStream str, String indent, int outputs, String sep) {
+        int lefts = myLefts().size();
+        for (int i = 0; i < outputs; i++) {
+            str.print(sep);
+            if (i < lefts) {
+                myLefts().get(i).genArgument_C(str);
+            } else if (i == 0 && lefts == 0 && isFunctionCallArg()) {
+                str.print(tempName_C());
+            } else {
+                str.print("NULL");
+            }
+            sep = ", ";
+        }
+    }
+
+    private void FFunctionDecl.prettyPrintWrappedCall_C(CodeStream str, String indent) {
+        if (!shouldPrintFuncDecl_C())
+            return;
+        str.print(indent);
+        str.print(funcNameUnderscore(C_SUFFIX_DEF));
+        str.print("(");
+        String sep = "";
+        for (FFunctionVariable v : myInputs()) {
+            str.print(sep);
+            str.print(v.name_C());
+            sep = ", ";
+        }
+        if (myOutputs().size() > 0) {
+            str.print(sep);
+            str.print("&");
+            str.print(myOutputs().get(0).name_C());
+            for (int i = myOutputs().size() - 1; i > 0; i--)
+                str.print(", NULL");
+        }
+        str.print(");\n");
+    }
+
+}
