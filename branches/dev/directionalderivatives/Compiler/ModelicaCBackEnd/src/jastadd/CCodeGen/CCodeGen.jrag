@@ -400,12 +400,6 @@ aspect CCodeGen {
     }
 
 
-	public void FFunctionVariable.printArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-		str.print(p.type(this));
-		str.print(" ");
-		str.print(p.name(this));
-	}
-	
 	private FExp FFunctionVariable.dummyFExp = null;
 	
 	public void FFunctionVariable.setDummyExp() {

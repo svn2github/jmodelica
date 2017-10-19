@@ -87,6 +87,13 @@ aspect CCodeGenFunctionDecl {
         }
     }
 
+	public void FFunctionVariable.printArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+		str.print(p.type(this));
+		str.print(" ");
+		str.print(p.name(this));
+	}
+	
+
     public String FFunctionDecl.getDeclaredType_C() {
         if (myOutputs().size() > 0) {
             return myOutputs().get(0).type_C();
