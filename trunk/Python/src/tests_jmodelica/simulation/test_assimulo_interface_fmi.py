@@ -125,7 +125,7 @@ class Test_Sensitivities_FMI2:
         
         assert res.solver.statistics["nsensfcnfcns"] > 0
         
-    @testattr(noncompliantfmi = True)
+    @testattr(windows = True)
     def test_basicsens1dir(self):
         model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens1.fmu"))
         
@@ -137,7 +137,7 @@ class Test_Sensitivities_FMI2:
         
         assert res.solver.statistics["nsensfcnfcns"] > 0
         
-    @testattr(stddist = True)
+    @testattr(windows = True)
     def test_basicsens2(self):
         model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "BasicSens2.fmu"))
         
@@ -892,7 +892,7 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NonLinear6", file_name)
         compile_fmu("NonLinear.NonLinear7", file_name)
     
-    @testattr(stddist = True)
+    @testattr(windows = True)
     def test_Brent_AD(self):
         
         model = load_fmu(os.path.join(get_files_path(), "FMUs/ME2.0", "NonLinear_NonLinear5.fmu"), log_level=6)
