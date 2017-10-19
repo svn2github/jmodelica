@@ -69,7 +69,7 @@ aspect CCodeGenFunctionDecl {
         if (returnArgs) {
             for (FFunctionVariable v : myOutputs()) {
                 str.print(sep);
-                v.printReturnArgument_C(str);
+                p.printReturnArgument(v, str, indent);
                 sep = ", ";
             }
         }
@@ -93,6 +93,22 @@ aspect CCodeGenFunctionDecl {
 		str.print(p.name(this));
 	}
 	
+    abstract class CodePrinter {
+        public abstract void printReturnArgument(FFunctionVariable v, CodeStream str, String indent);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printReturnArgument(FFunctionVariable v, CodeStream str, String indent) {
+            v.printReturnArgument(ExecStep, str, indent);
+        }
+    }
+
+	public void FFunctionVariable.printReturnArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+		str.print(p.returnType(this));
+		str.print(" ");
+		str.print(p.returnName(this));
+	}
 
     public String FFunctionDecl.getDeclaredType_C() {
         if (myOutputs().size() > 0) {
@@ -100,12 +116,6 @@ aspect CCodeGenFunctionDecl {
         } else {
             return "void";
         }
-    }
-
-    public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
-        str.print(typeReturn_C());
-        str.print(" ");
-        str.print(nameReturn_C());
     }
 
     @Override
