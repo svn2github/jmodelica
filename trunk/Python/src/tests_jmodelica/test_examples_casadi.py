@@ -36,13 +36,7 @@ def test_greybox_identification_example():
 
 @testattr(casadi = True)
 def test_cart_pendulum():
-    """Run the Combined Cycle Power Plant example."""
     cart_pendulum.run_demo(False)
-
-@testattr(casadi = True)
-def test_ccpp():
-    """Run the Combined Cycle Power Plant example."""
-    ccpp.run_demo(False)
 
 @testattr(casadi = True)
 def test_vdp_casadi():
@@ -108,13 +102,3 @@ def test_fed_batch_oed():
 def test_double_pendulum():
     """Run the double pendulum optimizaiton example."""
     double_pendulum.run_demo(False)
-
-@testattr(ma57 = True)
-def test_fourbar1():
-    """Run the fourbar1 optimization example."""
-    fourbar1.run_demo(False)
-
-@testattr(casadi = True)
-def test_elimination_example():
-    """Run the elimination example."""
-    elimination_example.run_demo(False)

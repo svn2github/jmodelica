@@ -29,7 +29,7 @@ import platform
 
 __all__ = ['general', 'initialization', 'optimization', 'simulation', 
            'test_compiler', 'test_core', 'test_examples_casadi',
-           'test_examples_casadi_new', 'test_examples_fmi',
+           'test_examples_casadi_2', 'test_examples_fmi',
            'test_examples_jmi', 'test_fmi', 'test_fmi_jacobians', 'test_init',
            'test_io', 'test_jmi', 'test_linearization', 'test_xmlparser',
            'test_fmi_2', 'test_delay', 'test_symbolic_elimination']
