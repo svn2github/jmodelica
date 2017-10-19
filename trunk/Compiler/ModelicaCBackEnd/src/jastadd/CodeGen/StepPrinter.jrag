@@ -69,7 +69,11 @@ aspect StepPrinter {
             public void print(CodeStream str, String s) {
                 str.print(s);
             }
-            
+
+            public void printArgument(FFunctionVariable v, CodeStream str, String indent, HeadComputation hc) {
+                v.printArgument(this, str, indent, hc);
+            }
+
             public String returnName(FFunctionVariable v) {
                 return v.nameReturn_C();
             }

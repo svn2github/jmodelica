@@ -45,71 +45,86 @@ aspect CCodeGenFunctionDecl {
     public void FFunctionDecl.genHeader_C(CodePrinter p, CodeStream str, String indent) {
         if (!p.shouldPrintFuncDecl(this))
             return;
-        prettyPrintHead_C(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
+        prettyPrintHead(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
         str.print(";\n");
         if (generateExpFunction()) {
-            prettyPrintHead_C(printer_C, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
+            prettyPrintHead(printer_C, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
             str.print(";\n");
         }
     }
+    
+    public class HeadComputation {
+        AnnotationNode derNode;
+        String sep;
+        public HeadComputation(AnnotationNode derNode, String sep){
+            this.derNode = derNode;
+            this.sep = sep;
+        }
+    }
 
-    private void FFunctionDecl.prettyPrintHead_C(CodePrinter p, CodeStream str, String indent, 
+    private void FFunctionDecl.prettyPrintHead(CodePrinter p, CodeStream str, String indent, 
             String type, String suffix, boolean returnArgs) {
         str.print(indent);
         str.print(type);
         str.print(" ");
         str.print(funcNameUnderscore(suffix));
         str.print("(");
-        String sep = "";
-        for (FFunctionVariable v : myInputs()) {
-            str.print(sep);
-            p.printArgument(v, str, indent);
-            sep = ", ";
-        }
+        HeadComputation hc = new HeadComputation(derivativeAnnotationUnrestricted(), "");
+        p.printArguments(this, str, indent, hc);
         if (returnArgs) {
-            for (FFunctionVariable v : myOutputs()) {
-                str.print(sep);
-                p.printReturnArgument(v, str, indent);
-                sep = ", ";
-            }
+            p.printReturnArguments(this, str, indent, hc);
         }
         str.print(")");
     }
 
     abstract class CodePrinter {
-        public abstract void printArgument(FFunctionVariable v, CodeStream str, String indent);
+        public abstract void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc);
     }
     
     class CPrettyPrinter {
         @Override
-        public void printArgument(FFunctionVariable v, CodeStream str, String indent) {
-            v.printArgument(ExecStep, str, indent);
+        public void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc) {
+            fd.printArguments(ExecStep, str, indent, hc);
         }
     }
 
-	public void FFunctionVariable.printArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-		str.print(p.type(this));
-		str.print(" ");
-		str.print(p.name(this));
+	public void FFunctionDecl.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc) {
+        for (FFunctionVariable v : myInputs()) {
+            p.printArgument(v, str, indent, hc);
+            hc.sep = ", ";
+        }
+    }
+
+	public void FFunctionVariable.printArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc) {
+		str.print(hc.sep);
+	    if(isInput()) {
+			str.print(p.type(this));
+			str.print(" ");
+			str.print(p.name(this));
+		} else {
+			str.print(p.returnType(this));
+			str.print(" ");
+			str.print(p.returnName(this));
+		}
 	}
-	
     abstract class CodePrinter {
-        public abstract void printReturnArgument(FFunctionVariable v, CodeStream str, String indent);
+        public abstract void printReturnArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc);
     }
     
     class CPrettyPrinter {
         @Override
-        public void printReturnArgument(FFunctionVariable v, CodeStream str, String indent) {
-            v.printReturnArgument(ExecStep, str, indent);
+        public void printReturnArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc) {
+            fd.printReturnArguments(ExecStep, str, indent, hc);
         }
     }
 
-	public void FFunctionVariable.printReturnArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-		str.print(p.returnType(this));
-		str.print(" ");
-		str.print(p.returnName(this));
-	}
-
+	public void FFunctionDecl.printReturnArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc) {
+            for (FFunctionVariable v : myOutputs()) {
+                p.printArgument(v, str, indent, hc);
+                hc.sep = ", ";
+            }
+    }
+	
     public String FFunctionDecl.getDeclaredType_C() {
         if (myOutputs().size() > 0) {
             return myOutputs().get(0).type_C();
@@ -124,7 +139,7 @@ aspect CCodeGenFunctionDecl {
             return;
         String next = p.indent(indent);
         // Print definition
-        prettyPrintHead_C(p, str, indent, "void", C_SUFFIX_DEF, true);
+        prettyPrintHead(p, str, indent, "void", C_SUFFIX_DEF, true);
         str.print(" {\n");
         ASTNode.genDynMemInit(str, next);
         genVarDecls_C(p, str, p.indent(indent));
@@ -140,7 +155,7 @@ aspect CCodeGenFunctionDecl {
         // Print wrapper for expressions
         if (generateExpFunction()) {
             String type = getDeclaredType_C();
-            prettyPrintHead_C(p, str, indent, type, C_SUFFIX_EXP, false);
+            prettyPrintHead(p, str, indent, type, C_SUFFIX_EXP, false);
             str.print(" {\n");
             printDeclarationForExp_C(p, str, next);
             prettyPrintWrappedCall_C(p, str, next);
