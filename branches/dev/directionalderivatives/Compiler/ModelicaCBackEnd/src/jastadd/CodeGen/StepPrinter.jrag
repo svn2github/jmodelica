@@ -77,10 +77,15 @@ aspect StepPrinter {
             public String name(FAbstractVariable v) {
                 return v.name_C();
             }
-            
+
             public String name(FExp exp) {
                 return exp.tempName_C();
             }
+
+            public String type(FAbstractVariable v) {
+                return v.type_C();
+            }
+            
             
             public String residual() {
                 return "res";

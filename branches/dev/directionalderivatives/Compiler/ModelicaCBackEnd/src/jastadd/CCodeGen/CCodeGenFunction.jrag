@@ -25,13 +25,15 @@ aspect CCodeGenFunctionDecl {
             func.genHeadersPartial_C(str, "");
         }
         for (FFunctionDecl func : getFFunctionDecls()) {
-            func.genHeader_C(str, "");
+            func.genHeader_C(p, str, "");
         }
     }
 
-    /**
-     * Helper method that checks wether the functiondecl should be printed.
-     */
+    public abstract boolean CodePrinter.shouldPrintFuncDecl(FFunctionDecl ffd);
+    @Override
+    public boolean CPrettyPrinter.shouldPrintFuncDecl(FFunctionDecl ffd) {
+        return ffd.shouldPrintFuncDecl_C();
+    }
     syn boolean FFunctionDecl.shouldPrintFuncDecl_C() = functionIsUsed();
 
     /**
@@ -40,8 +42,8 @@ aspect CCodeGenFunctionDecl {
     syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 
 
-    public void FFunctionDecl.genHeader_C(CodeStream str, String indent) {
-        if (!shouldPrintFuncDecl_C())
+    public void FFunctionDecl.genHeader_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.shouldPrintFuncDecl(this))
             return;
         prettyPrintHead_C(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
         str.print(";\n");
@@ -61,7 +63,7 @@ aspect CCodeGenFunctionDecl {
         String sep = "";
         for (FFunctionVariable v : myInputs()) {
             str.print(sep);
-            v.printArgument_C(str);
+            p.printArgument(v, str, indent);
             sep = ", ";
         }
         if (returnArgs) {
@@ -72,6 +74,17 @@ aspect CCodeGenFunctionDecl {
             }
         }
         str.print(")");
+    }
+
+    abstract class CodePrinter {
+        public abstract void printArgument(FFunctionVariable v, CodeStream str, String indent);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printArgument(FFunctionVariable v, CodeStream str, String indent) {
+            v.printArgument(ExecStep, str, indent);
+        }
     }
 
     public String FFunctionDecl.getDeclaredType_C() {
@@ -90,7 +103,7 @@ aspect CCodeGenFunctionDecl {
 
     @Override
     public void FFunctionDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (!shouldPrintFuncDecl_C())
+        if (!p.shouldPrintFuncDecl(this))
             return;
         String next = p.indent(indent);
         // Print definition
@@ -113,7 +126,7 @@ aspect CCodeGenFunctionDecl {
             prettyPrintHead_C(p, str, indent, type, C_SUFFIX_EXP, false);
             str.print(" {\n");
             printDeclarationForExp_C(p, str, next);
-            prettyPrintWrappedCall_C(str, next);
+            prettyPrintWrappedCall_C(p, str, next);
             printReturnForExp_C(p, str, next);
             str.print(indent);
             str.print("}\n\n");
@@ -224,8 +237,8 @@ aspect CCodeGenFunctionCall {
         }
     }
 
-    private void FFunctionDecl.prettyPrintWrappedCall_C(CodeStream str, String indent) {
-        if (!shouldPrintFuncDecl_C())
+    private void FFunctionDecl.prettyPrintWrappedCall_C(CodePrinter p, CodeStream str, String indent) {
+        if (!p.shouldPrintFuncDecl(this))
             return;
         str.print(indent);
         str.print(funcNameUnderscore(C_SUFFIX_DEF));
