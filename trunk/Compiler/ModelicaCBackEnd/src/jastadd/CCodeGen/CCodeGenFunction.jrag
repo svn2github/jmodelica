@@ -45,13 +45,17 @@ aspect CCodeGenFunctionDecl {
     public void FFunctionDecl.genHeader_C(CodePrinter p, CodeStream str, String indent) {
         if (!p.shouldPrintFuncDecl(this))
             return;
-        prettyPrintHead(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
-        str.print(";\n");
+        prettyPrintHeader(p, str, indent, "void", C_SUFFIX_DEF, true);
         if (generateExpFunction()) {
-            prettyPrintHead(printer_C, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
-            str.print(";\n");
+            prettyPrintHeader(p, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
         }
     }
+
+	public void FFunctionDecl.prettyPrintHeader(CodePrinter p, CodeStream str, String indent, String type, String cSuffix,
+			boolean returnArgs) {
+		prettyPrintHead(p, str, indent, type, cSuffix, returnArgs);
+        str.print(";\n");
+	}
     
     public class HeadComputation {
         AnnotationNode derNode;
@@ -116,14 +120,23 @@ aspect CCodeGenFunctionDecl {
         }
     }
 
+	public void FFunctionDecl.genOpenFunctionDecl(CodePrinter p, CodeStream str, String indent, String type, String cSuffix,
+			boolean returnArgs) {
+		prettyPrintHead(p, str, indent, type, cSuffix, returnArgs);
+        str.print(" {\n");
+	}
+
+	public void FFunctionDecl.genCloseFunctionDecl(CodePrinter p, CodeStream str, String indent) {
+            str.print(indent);
+            str.print("}\n\n");
+	}
+
     @Override
     public void FFunctionDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (!p.shouldPrintFuncDecl(this))
             return;
         String next = p.indent(indent);
-        // Print definition
-        prettyPrintHead(p, str, indent, "void", C_SUFFIX_DEF, true);
-        str.print(" {\n");
+        genOpenFunctionDecl(p, str, indent, "void", C_SUFFIX_DEF, true);
         ASTNode.genDynMemInit(str, next);
         genVarDecls_C(p, str, p.indent(indent));
         for (FFunctionVariable ffv : myNonInputs()) {
@@ -132,21 +145,19 @@ aspect CCodeGenFunctionDecl {
             }
         }
         p.print(getFAlgorithm(), str, next);
-        str.print(indent);
-        str.print("}\n\n");
+        genCloseFunctionDecl(p, str, indent);
         
         // Print wrapper for expressions
         if (generateExpFunction()) {
             String type = getDeclaredType_C();
-            prettyPrintHead(p, str, indent, type, C_SUFFIX_EXP, false);
-            str.print(" {\n");
+            genOpenFunctionDecl(p, str, indent, type, C_SUFFIX_EXP, false);
             printDeclarationForExp_C(p, str, next);
             prettyPrintWrappedCall_C(p, str, next);
             printReturnForExp_C(p, str, next);
-            str.print(indent);
-            str.print("}\n\n");
+            genCloseFunctionDecl(p, str, indent);
         }
     }
+
 
     public void FFunctionDecl.printReturnForExp_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
