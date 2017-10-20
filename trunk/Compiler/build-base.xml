@@ -150,17 +150,24 @@
     <var name="jastadd_file_list_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
-            <fileset dir="${@{module}.path}" id="jastadd_files_temp_set">
-                <include name="src/jastadd/**/*.ast" />
-                <include name="src/jastadd/**/*.jadd" />
-                <include name="src/jastadd/**/*.jrag" />
-            </fileset>
-            <for list="${toString:jastadd_files_temp_set}" delimiter=";:" param="file">
-                <sequential>
-                    <var name="jastadd_files_temp" value="${jastadd_files_temp} &quot;${@{module}.path}/@{file}&quot;" />
-                    <var name="jastadd_file_list_temp" value="${jastadd_file_list_temp},${@{module}.path}/@{file}" />
-                </sequential>
-            </for>
+            <if>
+                <and>
+                    <available file="${@{module}.path}/src/jastadd" type="dir" />
+                </and>
+                <then>
+                    <fileset dir="${@{module}.path}" id="jastadd_files_temp_set">
+                        <include name="src/jastadd/**/*.ast" />
+                        <include name="src/jastadd/**/*.jadd" />
+                        <include name="src/jastadd/**/*.jrag" />
+                    </fileset>
+                    <for list="${toString:jastadd_files_temp_set}" delimiter=";:" param="file">
+                        <sequential>
+                            <var name="jastadd_files_temp" value="${jastadd_files_temp} &quot;${@{module}.path}/@{file}&quot;" />
+                            <var name="jastadd_file_list_temp" value="${jastadd_file_list_temp},${@{module}.path}/@{file}" />
+                        </sequential>
+                    </for>
+                </then>
+            </if>
         </sequential>
     </for>
     <property name="jastadd_files" value="${jastadd_files_temp}" />
@@ -499,16 +506,23 @@
             <sequential>
                 <for list="${@{set}.modules}" param="module" >
                     <sequential>
-                        <uptodate property="@{module}.ast_uptodate" targetfile="${ast_output}/ASTNode.java">
-                            <srcfiles dir="${@{set}.base}/@{module}/src/jastadd">
-                                <include name="**/*.ast" />
-                                <include name="**/*.jadd" />
-                                <include name="**/*.jrag" />
-                            </srcfiles>
-                        </uptodate>
                         <if>
-                            <not><isset property="@{module}.ast_uptodate" /></not>
-                            <then><var name="ast_uptodate_temp" value="false" /></then>
+                            <and>
+                                <available file="${@{module}.path}/src/jastadd" type="dir" />
+                            </and>
+                            <then>
+                                <uptodate property="@{module}.ast_uptodate" targetfile="${ast_output}/ASTNode.java">
+                                    <srcfiles dir="${@{set}.base}/@{module}/src/jastadd">
+                                        <include name="**/*.ast" />
+                                        <include name="**/*.jadd" />
+                                        <include name="**/*.jrag" />
+                                    </srcfiles>
+                                </uptodate>
+                                <if>
+                                    <not><isset property="@{module}.ast_uptodate" /></not>
+                                    <then><var name="ast_uptodate_temp" value="false" /></then>
+                                </if>
+                            </then>
                         </if>
                     </sequential>
                 </for>
