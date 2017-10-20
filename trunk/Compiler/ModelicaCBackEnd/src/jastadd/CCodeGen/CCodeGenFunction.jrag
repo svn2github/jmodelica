@@ -138,13 +138,7 @@ aspect CCodeGenFunctionDecl {
         String next = p.indent(indent);
         genOpenFunctionDecl(p, str, indent, "void", C_SUFFIX_DEF, true);
         ASTNode.genDynMemInit(str, next);
-        genVarDecls_C(p, str, p.indent(indent));
-        for (FFunctionVariable ffv : myNonInputs()) {
-            if (!ffv.isArray()) {
-                p.print(ffv, str, next);
-            }
-        }
-        p.print(getFAlgorithm(), str, next);
+        p.printFunctionBody(this, str, indent);
         genCloseFunctionDecl(p, str, indent);
         
         // Print wrapper for expressions
@@ -158,6 +152,27 @@ aspect CCodeGenFunctionDecl {
         }
     }
 
+    abstract class CodePrinter {
+        public abstract void printFunctionBody(FFunctionDecl fd, CodeStream str, String indent);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printFunctionBody(FFunctionDecl fd, CodeStream str, String indent) {
+            fd.genFunctionBodyAlgorithm(this, str, indent);
+        }
+    }
+
+	public void FFunctionDecl.genFunctionBodyAlgorithm(CodePrinter p, CodeStream str, String indent) {
+        String next = p.indent(indent);
+		p.printVarDecls(this, str, next);
+        for (FFunctionVariable ffv : myNonInputs()) {
+            if (!ffv.isArray()) {
+                p.print(ffv, str, next);
+            }
+        }
+        p.print(getFAlgorithm(), str, next);
+	}
 
     public void FFunctionDecl.printReturnForExp_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
