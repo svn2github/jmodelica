@@ -467,8 +467,11 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-    memcpy(&jmi_array_ref_1(tmp_1, 1), &_c_1_0, 2 * sizeof(jmi_real_t));
+    if (_atInitial) {
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+        memcpy(&jmi_array_ref_1(tmp_1, 1), &_c_1_0, 2 * sizeof(jmi_real_t));
+    } else {
+    }
     _x_2 = COND_EXP_EQ(_atInitial, JMI_TRUE, func_CCodeGenTests_CCodeGenTest14_f_exp0(tmp_1), pre_x_2);
     pre_x_2 = _x_2;
     JMI_DYNAMIC_FREE()
@@ -577,8 +580,11 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (jmi->atInitial || jmi->atEvent) {
         _sw_init(0) = jmi_turn_switch(jmi, _time - (AD_WRAP_LITERAL(1)), _sw_init(0), JMI_REL_GEQ);
     }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw_init(1) = jmi_turn_switch(jmi, _time - (AD_WRAP_LITERAL(2)), _sw_init(1), JMI_REL_GEQ);
+    if (_sw_init(0)) {
+    } else {
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw_init(1) = jmi_turn_switch(jmi, _time - (AD_WRAP_LITERAL(2)), _sw_init(1), JMI_REL_GEQ);
+        }
     }
     _der_x_3 = COND_EXP_EQ(_sw_init(0), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(_sw_init(1), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(5)));
     if (jmi->atInitial || jmi->atEvent) {
@@ -10362,8 +10368,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 _sw(2) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
             }
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(3) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_LT);
+            if (LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2))) {
+            } else {
+                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                    _sw(3) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_LT);
+                }
             }
             _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
         }
@@ -10478,8 +10487,11 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (jmi->atInitial || jmi->atEvent) {
         _sw(2) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
     }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_LT);
+    if (LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2))) {
+    } else {
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(3) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_LT);
+        }
     }
     _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
     _dummy_11 = 0.0;
@@ -11357,9 +11369,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
         JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
         memset(residual, 0, 1 * sizeof(jmi_real_t));
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-        jmi_array_ref_1(tmp_2, 1) = _time;
-        jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+        if (_b_1) {
+            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+            jmi_array_ref_1(tmp_2, 1) = _time;
+            jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
+        } else {
+        }
         residual[0] = - COND_EXP_EQ(_b_1, JMI_TRUE, func_CCodeGenTests_BlockTest10_F_exp0(tmp_2), AD_WRAP_LITERAL(0));
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
@@ -11372,9 +11387,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _b_1 = _sw(0);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-            jmi_array_ref_1(tmp_1, 1) = _time;
-            jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+            if (_b_1) {
+                JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+                jmi_array_ref_1(tmp_1, 1) = _time;
+                jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+            } else {
+            }
             (*res)[0] = COND_EXP_EQ(_b_1, JMI_TRUE, _x_0 * func_CCodeGenTests_BlockTest10_F_exp0(tmp_1), AD_WRAP_LITERAL(-1)) - (0);
         }
     }
@@ -11404,9 +11422,12 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
         JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
         memset(residual, 0, 1 * sizeof(jmi_real_t));
-        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
-        jmi_array_ref_1(tmp_3, 1) = _time;
-        jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+        if (_b_1) {
+            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+            jmi_array_ref_1(tmp_3, 1) = _time;
+            jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+        } else {
+        }
         residual[0] = - COND_EXP_EQ(_b_1, JMI_TRUE, func_CCodeGenTests_BlockTest10_F_exp0(tmp_3), AD_WRAP_LITERAL(0));
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
@@ -11419,9 +11440,12 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _b_1 = _sw(0);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-            jmi_array_ref_1(tmp_1, 1) = _time;
-            jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+            if (_b_1) {
+                JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+                jmi_array_ref_1(tmp_1, 1) = _time;
+                jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+            } else {
+            }
             (*res)[0] = COND_EXP_EQ(_b_1, JMI_TRUE, _x_0 * func_CCodeGenTests_BlockTest10_F_exp0(tmp_1), AD_WRAP_LITERAL(-1)) - (0);
         }
     }
@@ -13249,8 +13273,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 _sw(2) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
             }
-            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(3) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_LT);
+            if (LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2))) {
+            } else {
+                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                    _sw(3) = jmi_turn_switch(jmi, _v_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_LT);
+                }
             }
             _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
         }
@@ -13479,13 +13506,19 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             double beta = 1;
             int n1 = 2;
             int n2 = 2;
-            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
-            jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1.0);
+            if (_b1_5) {
+                JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
+                jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1.0);
+            } else {
+            }
             Q1[0] = - COND_EXP_EQ(_b1_5, JMI_TRUE, jmi_array_val_1(tmp_4, _i1_6), AD_WRAP_LITERAL(0));
             Q1[3] = -1.0;
             for (i = 0; i < 4; i += 2) {
-                JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
-                jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(0.0);
+                if (_b1_5) {
+                    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+                    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(0.0);
+                } else {
+                }
                 Q1[i + 0] = (Q1[i + 0]) / (AD_WRAP_LITERAL(1.0) - COND_EXP_EQ(_b1_5, JMI_TRUE, jmi_array_val_1(tmp_3, _i1_6), AD_WRAP_LITERAL(0)));
                 Q1[i + 1] = (Q1[i + 1] - (-2) * Q1[i + 0]) / (1.0);
             }
@@ -17594,8 +17627,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(0) = jmi_turn_switch(jmi, _x_2 - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
         }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(1) = jmi_turn_switch(jmi, _a_3 - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+        if (_sw(0)) {
+        } else {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(jmi, _a_3 - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+            }
         }
         _y_4 = COND_EXP_EQ(_sw(0), JMI_TRUE, _x_2, COND_EXP_EQ(_sw(1), JMI_TRUE, _x_2 * AD_WRAP_LITERAL(2), - _x_2));
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
@@ -17667,8 +17703,11 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(0) = jmi_turn_switch(jmi, _x_2 - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
         }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(1) = jmi_turn_switch(jmi, _a_3 - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+        if (_sw(0)) {
+        } else {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(jmi, _a_3 - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+            }
         }
         _y_4 = COND_EXP_EQ(_sw(0), JMI_TRUE, _x_2, COND_EXP_EQ(_sw(1), JMI_TRUE, _x_2 * AD_WRAP_LITERAL(2), - _x_2));
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
