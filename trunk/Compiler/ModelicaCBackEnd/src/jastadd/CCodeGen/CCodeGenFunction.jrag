@@ -136,19 +136,27 @@ aspect CCodeGenFunctionDecl {
         if (!p.shouldPrintFuncDecl(this))
             return;
         String next = p.indent(indent);
-        genOpenFunctionDecl(p, str, indent, "void", C_SUFFIX_DEF, true);
+        genOpenFunctionDecl(p, str, indent, "void", p.functionDefSuffix(), true);
         ASTNode.genDynMemInit(str, next);
         p.printFunctionBody(this, str, indent);
         genCloseFunctionDecl(p, str, indent);
+        p.printExpFunc(this, str, indent);
+   }
         
-        // Print wrapper for expressions
-        if (generateExpFunction()) {
-            String type = getDeclaredType_C();
-            genOpenFunctionDecl(p, str, indent, type, C_SUFFIX_EXP, false);
-            printDeclarationForExp_C(p, str, next);
-            prettyPrintWrappedCall_C(p, str, next);
-            printReturnForExp_C(p, str, next);
-            genCloseFunctionDecl(p, str, indent);
+    abstract class CodePrinter {
+        public abstract void printExpFunc(FFunctionDecl fd, CodeStream str, String indent);
+        public abstract String functionDefSuffix();
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printExpFunc(FFunctionDecl fd, CodeStream str, String indent) {
+            fd.prettyPrintExpFunc_C(this, str, indent);
+        }
+        
+        @Override
+        public String functionDefSuffix() {
+            return ASTNode.C_SUFFIX_DEF;
         }
     }
 
@@ -173,6 +181,17 @@ aspect CCodeGenFunctionDecl {
         }
         p.print(getFAlgorithm(), str, next);
 	}
+
+    public void FFunctionDecl.prettyPrintExpFunc_C(CodePrinter p, CodeStream str, String indent) {
+        String next = p.indent(indent);
+        if (generateExpFunction()) {
+            genOpenFunctionDecl(p, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
+            printDeclarationForExp_C(p, str, next);
+            prettyPrintWrappedCall_C(p, str, next);
+            printReturnForExp_C(p, str, next);
+            genCloseFunctionDecl(p, str, indent);
+        }
+    }
 
     public void FFunctionDecl.printReturnForExp_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
