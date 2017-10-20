@@ -70,26 +70,26 @@ aspect CCodeGenFunctionDecl {
         str.print(funcNameUnderscore(suffix));
         str.print("(");
         HeadComputation hc = new HeadComputation(derivativeAnnotationUnrestricted(), "");
-        p.printArguments(this, str, indent, hc);
+        p.printArguments(this, str, indent, hc, myInputs());
         if (returnArgs) {
-            p.printReturnArguments(this, str, indent, hc);
+			p.printArguments(this, str, indent, hc, myOutputs());
         }
         str.print(")");
     }
 
     abstract class CodePrinter {
-        public abstract void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc);
+        public abstract void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables);
     }
     
     class CPrettyPrinter {
         @Override
-        public void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc) {
-            fd.printArguments(ExecStep, str, indent, hc);
+        public void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables) {
+            fd.printArguments(ExecStep, str, indent, hc, variables);
         }
     }
 
-	public void FFunctionDecl.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc) {
-        for (FFunctionVariable v : myInputs()) {
+	public void FFunctionDecl.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables) {
+        for (FFunctionVariable v : variables) {
             p.printArgument(v, str, indent, hc);
             hc.sep = ", ";
         }
@@ -107,23 +107,6 @@ aspect CCodeGenFunctionDecl {
 			str.print(p.returnName(this));
 		}
 	}
-    abstract class CodePrinter {
-        public abstract void printReturnArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc);
-    }
-    
-    class CPrettyPrinter {
-        @Override
-        public void printReturnArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc) {
-            fd.printReturnArguments(ExecStep, str, indent, hc);
-        }
-    }
-
-	public void FFunctionDecl.printReturnArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc) {
-            for (FFunctionVariable v : myOutputs()) {
-                p.printArgument(v, str, indent, hc);
-                hc.sep = ", ";
-            }
-    }
 	
     public String FFunctionDecl.getDeclaredType_C() {
         if (myOutputs().size() > 0) {
