@@ -25,7 +25,7 @@ aspect CCodeGenFunctionDecl {
             func.genHeadersPartial_C(str, "");
         }
         for (FFunctionDecl func : getFFunctionDecls()) {
-            func.genHeader_C(p, str, "");
+            func.genHeader(p, str, "");
         }
     }
 
@@ -42,13 +42,11 @@ aspect CCodeGenFunctionDecl {
     syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 
 
-    public void FFunctionDecl.genHeader_C(CodePrinter p, CodeStream str, String indent) {
+    public void FFunctionDecl.genHeader(CodePrinter p, CodeStream str, String indent) {
         if (!p.shouldPrintFuncDecl(this))
             return;
-        prettyPrintHeader(p, str, indent, "void", C_SUFFIX_DEF, true);
-        if (generateExpFunction()) {
-            prettyPrintHeader(p, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
-        }
+        prettyPrintHeader(p, str, indent, "void", p.functionDefSuffix(), true);
+        p.printExpHeader(this, str, indent);
     }
 
 	public void FFunctionDecl.prettyPrintHeader(CodePrinter p, CodeStream str, String indent, String type, String cSuffix,
@@ -112,6 +110,23 @@ aspect CCodeGenFunctionDecl {
 		}
 	}
 	
+    abstract class CodePrinter {
+        public abstract void printExpHeader(FFunctionDecl fd, CodeStream str, String indent);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printExpHeader(FFunctionDecl fd, CodeStream str, String indent) {
+            fd.printExpHeader_C(this, str, indent);
+        }
+    }
+
+    public void FFunctionDecl.printExpHeader_C(CodePrinter p, CodeStream str, String indent) {
+        if (generateExpFunction()) {
+            prettyPrintHeader(p, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
+        }
+    }
+
     public String FFunctionDecl.getDeclaredType_C() {
         if (myOutputs().size() > 0) {
             return myOutputs().get(0).type_C();
