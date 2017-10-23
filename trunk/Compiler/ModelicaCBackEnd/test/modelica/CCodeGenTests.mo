@@ -391,22 +391,25 @@ end CCodeGenTest12;
 
 
 model CCodeGenTest13
-	constant Integer ci = 1;
-	constant Integer cd = ci;
-	parameter Integer pi = 2;
-	parameter Integer pd = pi;
+    constant Integer ci = 1;
+    constant Integer cd = ci;
+    parameter Integer pi = 2;
+    parameter Integer pd = pi;
+    parameter Integer pii(fixed = false); 
 
-	type A = enumeration(a, b, c);
-	type B = enumeration(d, e, f);
-	
-	constant A aic = A.a;
-	constant B bic = B.e;
-	constant A adc = aic;
-	constant B bdc = bic;
-	parameter A aip = A.b;
-	parameter B bip = B.f;
-	parameter A adp = aip;
-	parameter B bdp = bip;
+    type A = enumeration(a, b, c);
+    type B = enumeration(d, e, f);
+
+    constant A aic = A.a;
+    constant B bic = B.e;
+    constant A adc = aic;
+    constant B bdc = bic;
+    parameter A aip = A.b;
+    parameter B bip = B.f;
+    parameter A adp = aip;
+    parameter B bdp = bip;
+initial equation
+    pii = pd;
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -418,16 +421,17 @@ model CCodeGenTest13
             generatedCode="
 #define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
 #define _cd_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _aic_4 ((*(jmi->z))[jmi->offs_integer_ci+2])
-#define _bic_5 ((*(jmi->z))[jmi->offs_integer_ci+3])
-#define _adc_6 ((*(jmi->z))[jmi->offs_integer_ci+4])
-#define _bdc_7 ((*(jmi->z))[jmi->offs_integer_ci+5])
+#define _aic_5 ((*(jmi->z))[jmi->offs_integer_ci+2])
+#define _bic_6 ((*(jmi->z))[jmi->offs_integer_ci+3])
+#define _adc_7 ((*(jmi->z))[jmi->offs_integer_ci+4])
+#define _bdc_8 ((*(jmi->z))[jmi->offs_integer_ci+5])
 #define _pi_2 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _aip_8 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _bip_9 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define _aip_9 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _bip_10 ((*(jmi->z))[jmi->offs_integer_pi+2])
 #define _pd_3 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _adp_10 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define _bdp_11 ((*(jmi->z))[jmi->offs_integer_pd+2])
+#define _adp_11 ((*(jmi->z))[jmi->offs_integer_pd+1])
+#define _bdp_12 ((*(jmi->z))[jmi->offs_integer_pd+2])
+#define _pii_4 ((*(jmi->z))[jmi->offs_integer_pd+3])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 ")})));
