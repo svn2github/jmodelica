@@ -86,27 +86,28 @@ aspect CCodeGenFunctionDecl {
     class CPrettyPrinter {
         @Override
         public void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables) {
-            fd.printArguments(ExecStep, str, indent, hc, variables);
+            hc.printArguments(ExecStep, str, indent, variables);
         }
     }
 
-	public void FFunctionDecl.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables) {
+	public void HeadComputation.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables) {
+	// before the loop, sep is either empty or a separator depending on whether it is the first argument in the list that is printed
         for (FFunctionVariable v : variables) {
-            p.printArgument(v, str, indent, hc);
-            hc.sep = ", ";
+            p.printArgument(v, str, indent, this);
+            sep = ", ";
         }
     }
 
-	public void FFunctionVariable.printArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, HeadComputation hc) {
-		str.print(hc.sep);
-	    if(isInput()) {
-			str.print(p.type(this));
+	public void HeadComputation.printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+		str.print(sep);
+	    if(v.isInput()) {
+			str.print(p.type(v));
 			str.print(" ");
-			str.print(p.name(this));
+			str.print(p.name(v));
 		} else {
-			str.print(p.returnType(this));
+			str.print(p.returnType(v));
 			str.print(" ");
-			str.print(p.returnName(this));
+			str.print(p.returnName(v));
 		}
 	}
 	
@@ -153,7 +154,7 @@ aspect CCodeGenFunctionDecl {
         String next = p.indent(indent);
         genOpenFunctionDecl(p, str, indent, "void", p.functionDefSuffix(), true);
         ASTNode.genDynMemInit(str, next);
-        p.printFunctionBody(this, str, indent);
+        p.printFunctionBody(this, str, next);
         genCloseFunctionDecl(p, str, indent);
         p.printExpFunc(this, str, indent);
    }
@@ -187,14 +188,13 @@ aspect CCodeGenFunctionDecl {
     }
 
 	public void FFunctionDecl.genFunctionBodyAlgorithm(CodePrinter p, CodeStream str, String indent) {
-        String next = p.indent(indent);
-		p.printVarDecls(this, str, next);
+		p.printVarDecls(this, str, indent);
         for (FFunctionVariable ffv : myNonInputs()) {
             if (!ffv.isArray()) {
-                p.print(ffv, str, next);
+                p.print(ffv, str, indent);
             }
         }
-        p.print(getFAlgorithm(), str, next);
+        p.print(getFAlgorithm(), str, indent);
 	}
 
     public void FFunctionDecl.prettyPrintExpFunc_C(CodePrinter p, CodeStream str, String indent) {
@@ -312,26 +312,58 @@ aspect CCodeGenFunctionCall {
         }
     }
 
+    public abstract class ParameterComputation extends HeadComputation {
+		public ParameterComputation(AnnotationNode derNode, String sep) {
+			super(derNode, sep);
+	    }
+
+    }
+
+
     private void FFunctionDecl.prettyPrintWrappedCall_C(CodePrinter p, CodeStream str, String indent) {
         if (!p.shouldPrintFuncDecl(this))
             return;
         str.print(indent);
         str.print(funcNameUnderscore(C_SUFFIX_DEF));
         str.print("(");
-        String sep = "";
-        for (FFunctionVariable v : myInputs()) {
-            str.print(sep);
-            str.print(v.name_C());
-            sep = ", ";
-        }
+        ParameterComputation hc = new ParameterComputation_wrapped(derivativeAnnotationUnrestricted(), "");
+        p.printArguments(this, str, indent, hc, myInputs());
         if (myOutputs().size() > 0) {
-            str.print(sep);
-            str.print("&");
-            str.print(myOutputs().get(0).name_C());
-            for (int i = myOutputs().size() - 1; i > 0; i--)
-                str.print(", NULL");
+            p.printArguments(this, str, indent, hc, myOutputs());
         }
         str.print(");\n");
     }
 
+    public class ParameterComputation_wrapped extends ParameterComputation {
+        public ParameterComputation_wrapped(AnnotationNode derNode, String sep){
+            super(derNode, sep);
+        }
+    	@Override
+		public void printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables) {
+			int i = 0;
+			for (FFunctionVariable v : variables) {
+				if (i>0 && v.isOutput()){
+					str.print(sep);
+					str.print("NULL");
+				} else {
+					p.printArgument(v, str, indent, this);
+				}
+				sep = ", ";
+				i++;
+			}
+		}
+    }
+
+    @Override
+	public void ParameterComputation.printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+		str.print(sep);
+	    if(v.isInput()) {
+			str.print(p.name(v));
+		} else {
+            if (!v.isComposite()) {
+                str.print("&");
+            }
+			str.print(p.name(v));
+		}
+	}
 }
