@@ -1,4 +1,6 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5486
+Fixed circularity bug in variability calculation
 
 ================= Stable-2017-10-18 ==================
 ; Change ; Major ; Compiler; #5468
