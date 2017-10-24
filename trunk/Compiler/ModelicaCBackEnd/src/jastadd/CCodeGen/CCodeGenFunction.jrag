@@ -51,7 +51,10 @@ aspect CCodeGenFunctionDecl {
 
 	public void FFunctionDecl.prettyPrintHeader(CodePrinter p, CodeStream str, String indent, String type, String cSuffix,
 			boolean returnArgs) {
-		prettyPrintHead(p, str, indent, type, cSuffix, returnArgs);
+        str.print(indent);
+        str.print(type);
+        str.print(" ");
+		new HeadComputation(derivativeAnnotationUnrestricted(), "").prettyPrintHead(this, p, str, indent, cSuffix, returnArgs);
         str.print(";\n");
 	}
     
@@ -63,18 +66,18 @@ aspect CCodeGenFunctionDecl {
             this.sep = sep;
         }
     }
+    public void HeadComputation.prettyPrintHead(FFunctionDecl fd, CodePrinter p, CodeStream str, String indent, 
+            String suffix, boolean returnArgs) {
+        prettyPrintHead(fd, fd, p, str, indent, suffix, returnArgs);
+    }
 
-    private void FFunctionDecl.prettyPrintHead(CodePrinter p, CodeStream str, String indent, 
-            String type, String suffix, boolean returnArgs) {
-        str.print(indent);
-        str.print(type);
-        str.print(" ");
-        str.print(funcNameUnderscore(suffix));
+    public void HeadComputation.prettyPrintHead(FFunctionDecl caller, FFunctionDecl called, CodePrinter p, CodeStream str, String indent, 
+            String suffix, boolean returnArgs) {
+        str.print(called.funcNameUnderscore(suffix));
         str.print("(");
-        HeadComputation hc = new HeadComputation(derivativeAnnotationUnrestricted(), "");
-        p.printArguments(this, str, indent, hc, myInputs());
+        p.printArguments(caller, str, indent, this, caller.myInputs());
         if (returnArgs) {
-			p.printArguments(this, str, indent, hc, myOutputs());
+			p.printArguments(caller, str, indent, this, caller.myOutputs());
         }
         str.print(")");
     }
@@ -138,7 +141,10 @@ aspect CCodeGenFunctionDecl {
 
 	public void FFunctionDecl.genOpenFunctionDecl(CodePrinter p, CodeStream str, String indent, String type, String cSuffix,
 			boolean returnArgs) {
-		prettyPrintHead(p, str, indent, type, cSuffix, returnArgs);
+        str.print(indent);
+        str.print(type);
+        str.print(" ");
+		new HeadComputation(derivativeAnnotationUnrestricted(), "").prettyPrintHead(this, p, str, indent, cSuffix, returnArgs);
         str.print(" {\n");
 	}
 
@@ -323,15 +329,8 @@ aspect CCodeGenFunctionCall {
     private void FFunctionDecl.prettyPrintWrappedCall_C(CodePrinter p, CodeStream str, String indent) {
         if (!p.shouldPrintFuncDecl(this))
             return;
-        str.print(indent);
-        str.print(funcNameUnderscore(C_SUFFIX_DEF));
-        str.print("(");
-        ParameterComputation hc = new ParameterComputation_wrapped(derivativeAnnotationUnrestricted(), "");
-        p.printArguments(this, str, indent, hc, myInputs());
-        if (myOutputs().size() > 0) {
-            p.printArguments(this, str, indent, hc, myOutputs());
-        }
-        str.print(");\n");
+        new ParameterComputation_wrapped(derivativeAnnotationUnrestricted(), "").prettyPrintHead(this, p, str, indent, C_SUFFIX_DEF, myOutputs().size() > 0);
+        str.print(";\n");
     }
 
     public class ParameterComputation_wrapped extends ParameterComputation {
