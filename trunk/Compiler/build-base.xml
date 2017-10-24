@@ -49,6 +49,8 @@
     <property name="beaver-rt_jar" value="${beaver_dir}/lib/beaver-rt.jar"/>
     <property name="ant-contrib_dir" value="${base.dir}/../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 
+    <property name="extra_modules" value="" />
+
     <property name="timestamp_format" value="yyyyDDDHHmmssSSS"/>
 
     <!-- for ant-contrib (foreach, etc) -->
@@ -102,7 +104,9 @@
         </then>
     </if>
     <property name="javadoc_output" value="${target}/${javadoc.path}" />
-    
+
+    <!-- inject any extra packages into set -->
+
     <!-- calculate module list -->
     <var name="modules_temp" value=""/>
     <for list="${sets}" param="set">
@@ -119,6 +123,24 @@
                     <var name="modules_temp" value="${modules_temp},${@{set}.modules}"/>
                 </else>
             </if>
+        </sequential>
+    </for>
+    <!-- add any extra modules specified on command line -->
+    <for list="${extra_modules}" param="extra">
+        <sequential>
+            <propertyregex property="extra_mod" input="@{extra}" regexp="^[^:]+:" replace="" global="true" />
+            <propertyregex property="extra_set" input="@{extra}" regexp=":[^:]+$" replace="" global="true" />
+            <for list="${extra_set}" param="set">
+                <sequential>
+                    <if>
+                        <isset property="@{set}.found" />
+                        <then>
+                            <property name="${extra_mod}.path" value="${@{set}.base}/${extra_mod}"/>
+                            <var name="modules_temp" value="${modules_temp},${extra_mod}"/>
+                        </then>
+                    </if>
+                </sequential>
+            </for>
         </sequential>
     </for>
     <propertyregex property="modules" input="${modules_temp}" regexp="(^)[,]*|[,]+($|,)" replace="\1" global="true" />
@@ -502,30 +524,24 @@
     <!-- generates ast files with JastAdd -->
     <target name="ast">
         <var name="ast_uptodate_temp" value="true" />
-        <for list="${sets}" param="set">
+        <for list="${modules}" param="module" >
             <sequential>
-                <for list="${@{set}.modules}" param="module" >
-                    <sequential>
+                <if>
+                    <available file="${@{module}.path}/src/jastadd" type="dir" />
+                    <then>
+                        <uptodate property="@{module}.ast_uptodate" targetfile="${ast_output}/ASTNode.java">
+                            <srcfiles dir="${@{module}.path}/src/jastadd">
+                                <include name="**/*.ast" />
+                                <include name="**/*.jadd" />
+                                <include name="**/*.jrag" />
+                            </srcfiles>
+                        </uptodate>
                         <if>
-                            <and>
-                                <available file="${@{module}.path}/src/jastadd" type="dir" />
-                            </and>
-                            <then>
-                                <uptodate property="@{module}.ast_uptodate" targetfile="${ast_output}/ASTNode.java">
-                                    <srcfiles dir="${@{set}.base}/@{module}/src/jastadd">
-                                        <include name="**/*.ast" />
-                                        <include name="**/*.jadd" />
-                                        <include name="**/*.jrag" />
-                                    </srcfiles>
-                                </uptodate>
-                                <if>
-                                    <not><isset property="@{module}.ast_uptodate" /></not>
-                                    <then><var name="ast_uptodate_temp" value="false" /></then>
-                                </if>
-                            </then>
+                            <not><isset property="@{module}.ast_uptodate" /></not>
+                            <then><var name="ast_uptodate_temp" value="false" /></then>
                         </if>
-                    </sequential>
-                </for>
+                    </then>
+                </if>
             </sequential>
         </for>
         <if>
