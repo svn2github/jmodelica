@@ -208,8 +208,12 @@ aspect FlatAPI {
                 return index ^ valueReferenceMask;
             }
 
-            public String zOffsetName() {
-                return zOffsetName;
+            public String calcZOffsetName(ZVariability var, ParaDependency dependency) {
+                if (this == EXTERNAL) {
+                    return zOffsetName;
+                } else {
+                    return String.format(var.zOffsetNameFormat(), zOffsetName, dependency.zOffsetName());
+                }
             }
 
         }
@@ -232,7 +236,7 @@ aspect FlatAPI {
             CONTINUOUS      ("w");
 
             private final boolean isParameter;
-            private final String zOffsetName;
+            private final String zOffsetNameFormat;
 
             private ZVariability() {
                 this("p%s", true);
@@ -244,15 +248,15 @@ aspect FlatAPI {
 
             private ZVariability(String zOffsetName, boolean isParameter) {
                 this.isParameter = isParameter;
-                this.zOffsetName = "%s_" + zOffsetName;
+                this.zOffsetNameFormat = "%s_" + zOffsetName;
             }
 
             public boolean isParameter() {
                 return isParameter;
             }
 
-            public String calcZOffsetName(ZType type, ParaDependency dependency) {
-                return String.format(zOffsetName, type.zOffsetName(), dependency.zOffsetName());
+            public String zOffsetNameFormat() {
+                return zOffsetNameFormat;
             }
         }
 
@@ -391,7 +395,7 @@ aspect FlatAPI {
                 this.dependency = dependency;
                 this.type = type;
                 this.variability = variability;
-                this.zOffsetName = variability.calcZOffsetName(type,dependency);
+                this.zOffsetName = type.calcZOffsetName(variability, dependency);
                 lookupMap.put(computeLookupKey(this), this);
             }
 
