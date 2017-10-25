@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Major ; Build system ; #5489
+Adding posibility to run Python tests in both 32 and 64 bit modes.
+
 ; Fixed ; Minor ; Compiler ; #5486
 Fixed circularity bug in variability calculation
 
