@@ -625,6 +625,8 @@ REQUIRE_BEAVER_PATH
 REQUIRE_COMPILER_JARS
 REQUIRE_SUNDIALS_HOME
 REQUIRE_IPOPT_HOME
+JVMDLL64_HOME
+JVMDLL_HOME
 ORIG_PATH
 WITH_PYTHON64_FALSE
 WITH_PYTHON64_TRUE
@@ -19641,6 +19643,16 @@ fi
 
 
 ORIG_PATH=$PATH
+if test "x$JVMDLL_HOME" != x; then :
+  jvmdll_home="$JVMDLL_HOME"
+fi
+
+JVMDLL_HOME=$jvmdll_home
+if test "x$JVMDLL64_HOME" != x; then :
+  jvmdll64_home="$JVMDLL64_HOME"
+fi
+
+JVMDLL64_HOME=$jvmdll64_home
 
 # Checks for header files.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
