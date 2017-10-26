@@ -61,6 +61,7 @@ abstract public class TestCase implements GenericTestCase {
     private ErrorCheckType checkType = ErrorCheckType.COMPILE;
     
     private String[] modelicaLibraries = new String[0];
+    private String   modelicaModel     = null;
 
     protected OptionRegistry options = createOptionRegistry();
     private Exception exception = null;
@@ -245,7 +246,7 @@ abstract public class TestCase implements GenericTestCase {
 	 * @return the className
 	 */
 	public String getClassName() {
-		return className;
+        return hasModelicaModel() ? getModelicaModel() : className;
 	}
 
 	/**
@@ -314,6 +315,18 @@ abstract public class TestCase implements GenericTestCase {
     
     public boolean hasModelicaLibraries() {
         return modelicaLibraries.length > 0;
+    }
+    
+    public void setModelicaModel(String s) {
+        modelicaModel = s;
+    }
+    
+    public String getModelicaModel() {
+        return modelicaModel;
+    }
+    
+    public boolean hasModelicaModel() {
+        return modelicaModel != null;
     }
 	
 	/**
@@ -506,7 +519,7 @@ abstract public class TestCase implements GenericTestCase {
         InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
         Collection<Problem> problems = null;
         try {
-            ipr.checkErrorsInInstClass(className, checkType);
+            ipr.checkErrorsInInstClass(getClassName(), checkType);
             problems = sr.collectWarnings();
         } catch (CompilerException e) {
             problems = e.getProblems();
