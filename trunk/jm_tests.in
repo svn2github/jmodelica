@@ -70,10 +70,10 @@ PYTHONPATH="$PYTHONPATH32"
 PYTHON64=0
 
 # Default paths to ant files used for unit tests
-if [[ -z "MC_ANT_ARGS" ]]; then
+if [[ -z "${MC_ANT_ARGS}" ]]; then
     MC_ANT_ARGS=${JMODELICA_SRC}/Compiler/ModelicaCompiler/build.xml
 fi
-if [[ -z "OC_ANT_ARGS" ]]; then
+if [[ -z "${OC_ANT_ARGS}" ]]; then
     OC_ANT_ARGS=${JMODELICA_SRC}/Compiler/OptimicaCompiler/build.xml
 fi
 
