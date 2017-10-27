@@ -75,20 +75,20 @@ aspect CCodeGenFunctionDecl {
             String suffix, boolean returnArgs) {
         str.print(called.funcNameUnderscore(suffix));
         str.print("(");
-        p.printArguments(caller, str, indent, this, caller.myInputs());
+        p.printArguments(this, str, indent, caller.myInputs());
         if (returnArgs) {
-			p.printArguments(caller, str, indent, this, caller.myOutputs());
+			p.printArguments(this, str, indent, caller.myOutputs());
         }
         str.print(")");
     }
 
     abstract class CodePrinter {
-        public abstract void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables);
+        public abstract void printArguments(HeadComputation hc, CodeStream str, String indent, ArrayList<FFunctionVariable> variables);
     }
     
     class CPrettyPrinter {
         @Override
-        public void printArguments(FFunctionDecl fd, CodeStream str, String indent, HeadComputation hc, ArrayList<FFunctionVariable> variables) {
+        public void printArguments(HeadComputation hc, CodeStream str, String indent, ArrayList<FFunctionVariable> variables) {
             hc.printArguments(ExecStep, str, indent, variables);
         }
     }
@@ -277,6 +277,14 @@ aspect CCodeGenFunctionCall {
          */
         public void prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call);
     }
+
+    public class ParameterComputation_genTempArg extends ParameterComputation {
+        FFunctionCall call;
+        public ParameterComputation_genTempArg(String sep, FFunctionCall call){
+            super(null, sep);
+            this.call = call;
+        }
+    }
     
     @Override
     public void FFunctionDecl.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call) {
@@ -284,26 +292,30 @@ aspect CCodeGenFunctionCall {
         if (!exp) {
             str.print(indent);
         } else if (call.type().isString()) {
-            str.print(indent, call.tempName_C(), " = ");
+            str.print(indent, p.ExecStep.name(call), " = ");
         }
-        str.print(funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
-        str.print("(");
-        String sep = "";
-        for (FExp arg : call.getArgs()) {
-            str.print(sep);
-            arg.genTempArg(p.ExecStep, str, indent);
-            sep = ", ";
-        }
-        if (!exp) {
-            call.prettyPrintCallOutputs_C(p, str, indent, myOutputs().size(), sep);
-        }
-        str.print(")");
+        new ParameterComputation_genTempArg("", call).prettyPrintHead(this, p, str, indent, exp?C_SUFFIX_EXP:p.functionDefSuffix(), !exp);
         if (!exp || call.type().isString()) {
             str.print(";\n");
         }
     }
+
+    //TODO: very similar in structure to HeadComputation.prettyPrintHead, however here we also propagate an extra argument downwards, call.getArgs and call.myLefts
+    @Override
+    public void ParameterComputation_genTempArg.prettyPrintHead(FFunctionDecl fd , CodePrinter p, CodeStream str, String indent, 
+            String suffix, boolean returnArgs) {
+        str.print(fd.funcNameUnderscore(suffix));
+        str.print("(");
+		p.printArguments(this, str, indent, fd.myInputs(), call.getArgs());
+		if(returnArgs) {
+			p.printArguments(this, str, indent, fd.myOutputs(), call.myLefts());
+		}
+        str.print(")");
+    }
+
     
-    public void FAbstractFunctionCall.prettyPrintCallOutputs_C(CodePrinter p, CodeStream str, String indent, int outputs, String sep) {
+    //TODO: This is duplicated code and FSpatialDistExp is a function call. make it fit into the printArguments pattern by creating a function declaration?
+    public void FSpatialDistExp.prettyPrintCallOutputs_C(CodePrinter p, CodeStream str, String indent, int outputs, String sep) {
         int lefts = myLefts().size();
         for (int i = 0; i < outputs; i++) {
             str.print(sep);
@@ -317,6 +329,98 @@ aspect CCodeGenFunctionCall {
             sep = ", ";
         }
     }
+
+    abstract class CodePrinter {
+        public abstract void printArguments(HeadComputation hc, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, Iterable<FExp> args);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printArguments(HeadComputation hc, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, Iterable<FExp> args) {
+            hc.printArguments(ExecStep, str, indent, variables, args);
+        }
+    }
+
+	public void HeadComputation.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, Iterable<FExp> args) {}
+	@Override
+	public void ParameterComputation_genTempArg.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, Iterable<FExp> args) {
+		int i = 0;
+		for (FExp arg : args) {
+			p.printArgument(variables.get(i), arg, str, indent, this);
+			sep = ", ";
+			i++;
+		}
+    }
+
+	public void HeadComputation.printArgument(FFunctionVariable v, FExp arg, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {}
+	@Override
+	public void ParameterComputation_genTempArg.printArgument(FFunctionVariable v, FExp arg, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+		str.print(sep);
+		if (v.isInput()) {
+            arg.genTempArg(p, str, indent); //is either print or printIO
+        } else {
+			if (!v.isComposite()) 
+				str.print("&");
+            str.print(p.name(arg));
+		}
+	}
+
+    abstract class CodePrinter {
+        public abstract void printArguments(HeadComputation hc, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args);
+    }
+    
+    class CPrettyPrinter {
+        @Override
+        public void printArguments(HeadComputation hc, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {
+            hc.printArguments(ExecStep, str, indent, variables, args);
+        }
+    }
+    
+	public void HeadComputation.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {}
+	@Override
+	public void ParameterComputation_genTempArg.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {
+	    if(call.functionCallIsExp()) {
+	        //TODO: this has the same structure as in ParameterComputation_wrapped, except we pass along an extra FExp parameter 'call' to printArgument
+			int i = 0;
+			for (FFunctionVariable v : variables) {
+				if (i>0 && v.isOutput()){
+					str.print(sep);
+					str.print("NULL");
+				} else {
+					p.printArgument(v, call, str, indent, this);
+				}
+				sep = ", ";
+				i++;
+			}
+		} else {
+		   //only this branch used in c-version, it is similar to prettyPrintOutputs
+			int i = 0;
+			for (FFunctionCallLeft arg : args) {
+			    p.printArgument(variables.get(i), arg, str, indent, this);
+				sep = ", ";
+			    i++;
+			}
+		    while (i<variables.size()) {
+				FFunctionVariable v = variables.get(i);
+				if (i==0 && args.isEmpty() && call.isFunctionCallArg() && v.isOutput()) {
+					p.printArgument(v, call, str, indent, this);
+				} else {
+					str.print(sep);
+					str.print("NULL");
+				}
+				sep = ", ";
+				i++;
+			}
+		}
+	}
+
+	public void HeadComputation.printArgument(FFunctionVariable v, FFunctionCallLeft arg, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {}
+	@Override
+	public void ParameterComputation_genTempArg.printArgument(FFunctionVariable v, FFunctionCallLeft arg, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+		str.print(sep);
+		arg.genArgument(p, str);
+	}
+
 
     public abstract class ParameterComputation extends HeadComputation {
 		public ParameterComputation(AnnotationNode derNode, String sep) {
@@ -337,32 +441,29 @@ aspect CCodeGenFunctionCall {
         public ParameterComputation_wrapped(AnnotationNode derNode, String sep){
             super(derNode, sep);
         }
-    	@Override
-		public void printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables) {
-			int i = 0;
-			for (FFunctionVariable v : variables) {
-				if (i>0 && v.isOutput()){
-					str.print(sep);
-					str.print("NULL");
-				} else {
-					p.printArgument(v, str, indent, this);
-				}
-				sep = ", ";
-				i++;
-			}
-		}
     }
+	@Override
+	public void ParameterComputation_wrapped.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables) {
+	    // very similar to prettyPrintCallOutputs_C
+		int i = 0;
+		for (FFunctionVariable v : variables) {
+			if (i>0 && v.isOutput()){
+				str.print(sep);
+				str.print("NULL");
+			} else {
+				p.printArgument(v, str, indent, this);
+			}
+			sep = ", ";
+			i++;
+		}
+	}
 
     @Override
 	public void ParameterComputation.printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
 		str.print(sep);
-	    if(v.isInput()) {
-			str.print(p.name(v));
-		} else {
-            if (!v.isComposite()) {
-                str.print("&");
-            }
-			str.print(p.name(v));
-		}
+        if (v.isOutput() && !v.isComposite()) {
+            str.print("&");
+        }
+		str.print(p.name(v));
 	}
 }
