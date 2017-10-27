@@ -158,6 +158,7 @@ int main(int argc, const char* argv[])
     size_t vi,di;
     
 $ECE_decl$
+$ECE_setup_decl$
 
     JMCEVAL_setup(); /* This needs to happen first */
 
@@ -165,9 +166,7 @@ $ECE_decl$
     if (JMCEVAL_try()) {
         JMI_DYNAMIC_INIT()
         /* Init phase */
-$ECE_setup_decl$
 $ECE_setup_init$
-$ECE_setup_free$
         JMI_DYNAMIC_FREE()
     } else {
         JMCEVAL_failed();
@@ -193,6 +192,7 @@ $ECE_calc_free$
     if (JMCEVAL_try()) {
         /* End phase */
 $ECE_free$
+$ECE_setup_free$
     } else {
         JMCEVAL_failed();
     }
