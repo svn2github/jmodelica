@@ -113,12 +113,14 @@ fclass Differentiation.Expressions.Exp
  Real x2(stateSelect = StateSelect.prefer);
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
+ Real temp_1;
 initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
- x1 + exp(x2 * p * time) = 0;
- _der_x1 + exp(x2 * p * time) * (x2 * p + der(x2) * p * time) = 0;
+ x1 + temp_1 = 0;
+ _der_x1 + temp_1 * (x2 * p + der(x2) * p * time) = 0;
+ temp_1 = exp(x2 * p * time);
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -418,12 +420,14 @@ fclass Differentiation.Expressions.Sqrt
  Real x2;
  parameter Real p = 2 /* 2 */;
  Real _der_x1;
+ Real temp_1;
 initial equation
  x2 = 0.0;
 equation
  _der_x1 + der(x2) = 1;
- x1 + sqrt(x2) = 0;
- _der_x1 + der(x2) / (2 * sqrt(x2)) = 0;
+ x1 + temp_1 = 0;
+ _der_x1 + der(x2) / (2 * temp_1) = 0;
+ temp_1 = sqrt(x2);
 end Differentiation.Expressions.Sqrt;
 ")})));
         end Sqrt;
@@ -504,14 +508,15 @@ fclass Differentiation.Expressions.Pow2
  Real x3;
  Real _der_x1;
  Real _der_x2;
+ parameter Real temp_1 = 2.302585092994046 /* 2.302585092994046 */;
 initial equation
  x3 = 0.0;
 equation
  _der_x1 + _der_x2 = 1;
  x1 + x2 = 10 ^ x3;
  10 ^ x3 - x2 = 1;
- _der_x1 + _der_x2 = 10 ^ x3 * (der(x3) * log(10));
- 10 ^ x3 * (der(x3) * log(10)) - _der_x2 = 0;
+ _der_x1 + _der_x2 = 10 ^ x3 * (der(x3) * temp_1);
+ 10 ^ x3 * (der(x3) * temp_1) - _der_x2 = 0;
 end Differentiation.Expressions.Pow2;
 ")})));
         end Pow2;
@@ -537,6 +542,7 @@ fclass Differentiation.Expressions.Pow3
  Real _der_x1;
  Real _der_x2;
  Real _der_x4;
+ Real temp_1;
 initial equation
  x3 = 0.0;
 equation
@@ -544,9 +550,10 @@ equation
  x1 + x2 = x3 ^ x4;
  x3 ^ x4 - x2 = 1;
  x3 * x3 = x4;
- _der_x1 + _der_x2 = x3 ^ x4 * (der(x3) * (x4 / x3) + _der_x4 * log(x3));
- x3 ^ x4 * (der(x3) * (x4 / x3) + _der_x4 * log(x3)) - _der_x2 = 0;
+ _der_x1 + _der_x2 = x3 ^ x4 * (der(x3) * (x4 / x3) + _der_x4 * temp_1);
+ x3 ^ x4 * (der(x3) * (x4 / x3) + _der_x4 * temp_1) - _der_x2 = 0;
  x3 * der(x3) + der(x3) * x3 = _der_x4;
+ temp_1 = log(x3);
 end Differentiation.Expressions.Pow3;
 ")})));
         end Pow3;

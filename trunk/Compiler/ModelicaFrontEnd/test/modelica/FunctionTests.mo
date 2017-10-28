@@ -15049,12 +15049,10 @@ model Sin
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Sin
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = sin(time);
- y[1] = sin(time);
  y[2] = sin(time * 2);
+ x = sin(time);
 end FunctionTests.FunctionLike.Math.Sin;
 ")})));
 end Sin;
@@ -15070,12 +15068,10 @@ model Cos
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Cos
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = cos(time);
- y[1] = cos(time);
  y[2] = cos(time * 2);
+ x = cos(time);
 end FunctionTests.FunctionLike.Math.Cos;
 ")})));
 end Cos;
@@ -15091,12 +15087,10 @@ model Tan
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Tan
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = tan(time);
- y[1] = tan(time);
  y[2] = tan(time * 2);
+ x = tan(time);
 end FunctionTests.FunctionLike.Math.Tan;
 ")})));
 end Tan;
@@ -15112,12 +15106,10 @@ model Asin
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Asin
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = asin(time);
- y[1] = asin(time);
  y[2] = asin(time * 2);
+ x = asin(time);
 end FunctionTests.FunctionLike.Math.Asin;
 ")})));
 end Asin;
@@ -15133,12 +15125,10 @@ model Acos
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Acos
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = acos(time);
- y[1] = acos(time);
  y[2] = acos(time * 2);
+ x = acos(time);
 end FunctionTests.FunctionLike.Math.Acos;
 ")})));
 end Acos;
@@ -15154,12 +15144,10 @@ model Atan
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Atan
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = atan(time);
- y[1] = atan(time);
  y[2] = atan(time * 2);
+ x = atan(time);
 end FunctionTests.FunctionLike.Math.Atan;
 ")})));
 end Atan;
@@ -15175,12 +15163,10 @@ model Atan2
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Atan2
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = atan2(time, 5);
- y[1] = atan2(time, 5);
  y[2] = atan2(time * 2, 6);
+ x = atan2(time, 5);
 end FunctionTests.FunctionLike.Math.Atan2;
 ")})));
 end Atan2;
@@ -15196,12 +15182,10 @@ model Sinh
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Sinh
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = sinh(time);
- y[1] = sinh(time);
  y[2] = sinh(time * 2);
+ x = sinh(time);
 end FunctionTests.FunctionLike.Math.Sinh;
 ")})));
 end Sinh;
@@ -15217,12 +15201,10 @@ model Cosh
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Cosh
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = cosh(time);
- y[1] = cosh(time);
  y[2] = cosh(time * 2);
+ x = cosh(time);
 end FunctionTests.FunctionLike.Math.Cosh;
 ")})));
 end Cosh;
@@ -15238,12 +15220,10 @@ model Tanh
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Tanh
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = tanh(time);
- y[1] = tanh(time);
  y[2] = tanh(time * 2);
+ x = tanh(time);
 end FunctionTests.FunctionLike.Math.Tanh;
 ")})));
 end Tanh;
@@ -15259,12 +15239,10 @@ model Exp
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Exp
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = exp(time);
- y[1] = exp(time);
  y[2] = exp(time * 2);
+ x = exp(time);
 end FunctionTests.FunctionLike.Math.Exp;
 ")})));
 end Exp;
@@ -15280,12 +15258,10 @@ model Log
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Log
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = log(time);
- y[1] = log(time);
  y[2] = log(time * 2);
+ x = log(time);
 end FunctionTests.FunctionLike.Math.Log;
 ")})));
 end Log;
@@ -15301,12 +15277,10 @@ model Log10
             flatModel="
 fclass FunctionTests.FunctionLike.Math.Log10
  Real x;
- Real y[1];
  Real y[2];
 equation
- x = log10(time);
- y[1] = log10(time);
  y[2] = log10(time * 2);
+ x = log10(time);
 end FunctionTests.FunctionLike.Math.Log10;
 ")})));
 end Log10;
@@ -15330,10 +15304,12 @@ fclass FunctionTests.FunctionLike.Special.Homotopy1
  Real x;
  Real y[1];
  Real y[2];
+ Real temp_1;
 equation
- x = sin(time * 10) .+ 1;
- y[1] = sin(time * 10) .+ 1;
+ x = temp_1 .+ 1;
+ y[1] = x;
  y[2] = time .+ 1;
+ temp_1 = sin(time * 10);
 end FunctionTests.FunctionLike.Special.Homotopy1;
 ")})));
 end Homotopy1;
@@ -15404,7 +15380,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear1
  parameter Real p;
  discrete Real k;
  discrete Boolean temp_1;
-initial equation 
+ Real temp_2;
+initial equation
  k = if time >= 0 then time else time * 2;
  pre(temp_1) = false;
 parameter equation
@@ -15412,9 +15389,10 @@ parameter equation
 equation
  temp_1 = time > 1;
  k = if temp_1 and not pre(temp_1) then if time >= 0 then time else time * 2 else pre(k);
- x = if sin(time * 10) >= 0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[1] = if sin(time * 10) >= 0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ x = if temp_2 >= 0 then temp_2 * 2 else temp_2 * -10;
+ y[1] = if temp_2 >= 0 then temp_2 * 2 else temp_2 * -10;
  y[2] = if time >= 0 then time * 2 else time * 3;
+ temp_2 = sin(time * 10);
 end FunctionTests.FunctionLike.Special.SemiLinear1;
 ")})));
 end SemiLinear1;

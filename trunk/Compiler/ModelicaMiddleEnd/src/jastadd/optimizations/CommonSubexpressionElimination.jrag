@@ -53,7 +53,7 @@ aspect CommonSubexpressionElimination {
                 }
             }
             
-            public void add(FFunctionCall fc) {
+            public void add(FAbstractFunctionCall fc) {
                 String s = fc.prettyPrint("");
                 CSESet l = m.get(s);
                 if (l == null) {
@@ -63,14 +63,14 @@ aspect CommonSubexpressionElimination {
                 l.add(fc);
             }
             
-            public class CSESet extends ArrayList<FFunctionCall> {
+            public class CSESet extends ArrayList<FAbstractFunctionCall> {
                 private FExp repl = null;
                 private List<FFunctionCallLeft> res = null;
                 
                 public boolean eliminate() {
                     if (size() > 1) {
-                        FFunctionCall fc = get(0);
-                        FFunctionCall fcCopy = (FFunctionCall) fc.copySymbolic();
+                        FAbstractFunctionCall fc = get(0);
+                        FAbstractFunctionCall fcCopy = (FAbstractFunctionCall) fc.copySymbolic();
                         res = new List<FFunctionCallLeft>();
                         res.setParent(fc);
                         
@@ -90,7 +90,7 @@ aspect CommonSubexpressionElimination {
                 }
                 
                 public void merge() {
-                    for (FFunctionCall ffc : this) {
+                    for (FAbstractFunctionCall ffc : this) {
                         if (ffc.isFunctionCallClause()) {
                             FFunctionCallEquation fce = (FFunctionCallEquation) ffc.myFEquation();
                             for (int i = 0; i < fce.getNumLeft(); i++) {
@@ -126,7 +126,7 @@ aspect CommonSubexpressionElimination {
                         return repl;
                     }
 
-                    FFunctionCall call = get(0);
+                    FAbstractFunctionCall call = get(0);
 
                     final FTypePrefixVariability variability = call.variability().combine(
                             ASTNode.fFixedParameter()).combineDown(call.type().funcOutputVariability());
@@ -168,6 +168,10 @@ aspect CommonSubexpressionElimination {
     
     public void FFunctionCall.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {
         /* We dont try to eliminate nested function call expressions to avoid some complicated cases */
+        m.add(this);
+    }
+    
+    public void FMathematicalFunctionCall.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {
         m.add(this);
     }
     
