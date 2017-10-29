@@ -679,9 +679,11 @@ class TestMPCClass(object):
 
         # Compile and load optimization problems
         op = transfer_to_casadi_interface("CSTR.CSTR_MPC", self.cstr_file_path,
-                                compiler_options={"state_initial_equations":True})
+                                compiler_options={"state_initial_equations":True,
+                                                  "common_subexp_elim":False})
         op_elim = transfer_to_casadi_interface("CSTR.CSTR_elim_vars_MPC", self.cstr_file_path,
-                                compiler_options={"state_initial_equations":True,'equation_sorting':True, 'automatic_tearing':False})
+                                compiler_options={"state_initial_equations":True,'equation_sorting':True, 'automatic_tearing':False,
+                                            "common_subexp_elim":False})
 
         # Define MPC options
         sample_period = 5                           # s

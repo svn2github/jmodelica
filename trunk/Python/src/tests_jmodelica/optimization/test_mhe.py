@@ -151,7 +151,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         (o_value, o_i_value) = \
@@ -215,7 +216,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, 
                          self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, 
@@ -427,7 +429,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, 
                          self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, 
@@ -488,7 +491,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, 
                          self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, 
@@ -741,7 +745,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         u = [('Tc', 350.)]
@@ -820,7 +825,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, sample_time, horizon, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         #Get the names for the inputs and measured variables
@@ -1018,7 +1024,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, sample_time, horizon, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         
@@ -1155,7 +1162,8 @@ class TestMHE:
                                            accept_model = True, 
                                            compiler_options = \
                                            {"state_initial_equations":True,
-                                            "propagate_derivatives":False})
+                                            "propagate_derivatives":False,
+                                            "common_subexp_elim":False})
         MHE_opts = MHEOptions()
         #Process noise and input specifications
         MHE_opts['process_noise_cov'] = [('Tc', 1.)]

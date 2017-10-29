@@ -183,7 +183,7 @@ class TestLocalDAECollocator(object):
     
     @staticmethod
     def compile_options():
-        compiler_options = dict()
+        compiler_options = {"common_subexp_elim":False}
         return compiler_options
 
     @testattr(casadi = True)
