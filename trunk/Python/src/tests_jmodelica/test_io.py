@@ -222,6 +222,13 @@ class TestResultFileBinary:
         name = compile_fmu("ParameterAlias", model_file)
     
     @testattr(stddist = True)
+    def test_read_all_variables(self):
+        res = ResultDymolaBinary(os.path.join(get_files_path(), "Results", "DoublePendulum.mat"))
+        
+        for var in res.name:
+            res.get_variable_data(var)
+    
+    @testattr(stddist = True)
     def test_only_parameters(self):
         model = load_fmu("ParameterAlias.fmu")
         

@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5494
+Fixed problem with binary files that includes spaces in the variable names.
+
 ; Feature ; Minor ; Compiler ; #5492
 Added common subexpression elimination of builtin math operators.
 
