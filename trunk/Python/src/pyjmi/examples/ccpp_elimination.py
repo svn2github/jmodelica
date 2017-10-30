@@ -102,7 +102,7 @@ def run_demo(with_plots=True):
     ### 2. Solve the optimal control problem
     # Compile model
     from pyjmi import transfer_to_casadi_interface
-    compiler_options={'equation_sorting':True}
+    compiler_options={'equation_sorting':True, "common_subexp_elim":False}
     op = transfer_to_casadi_interface("CombinedCycleStartup.Startup6",
                                       file_paths, compiler_options)
     
