@@ -145,12 +145,13 @@ fi
 if [[ "${PYTHON64_HOME}" != "" ]]; then
 TAGS64="${TAGS64} stddist_full"
 if [[ "${IPOPT64_HOME}" != "" ]]; then
-if [[ "${SYS}" == Win ]]; then
+  if [[ "${SYS}" == Win ]]; then
     TAGS64="${TAGS64} -a windows_full"
   fi
   if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
     TAGS64="${TAGS64} -a casadi_full"
-fi
+  fi
+fi  
 else
 TAGS="${TAGS} stddist_full"
 if [[ "${IPOPT_HOME}" != "" ]]; then
