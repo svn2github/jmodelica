@@ -38,7 +38,7 @@ def get_fmu():
     return fmu
 
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 class Test_ScaledVariable:
     def setUp(self):
         self.var = ScaledVariable('x',100,8)
@@ -76,7 +76,7 @@ class Test_ScaledVariable:
         assert str(self.var) == '{x | Value : 100.0 | Nominal : 8.0}\n'
 
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 class Test_UKFOptions:
     def setUp(self):
         self.opt = UKFOptions()
@@ -154,7 +154,7 @@ class Test_UKFOptions:
         assert_raises(InvalidAlgorithmOptionException, self.opt.update, P_0={'x1':'a'})
 
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 class Test_Create_UKF:
     def setUp(self):
         self.model = load_fmu(get_fmu())
@@ -221,7 +221,7 @@ class Test_Create_UKF:
         assert self.options == self.ukf.get_options()
 
       
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 class Test_AlgorithmMethods_UKF:
     def setUp(self):
         self.model = load_fmu(get_fmu())

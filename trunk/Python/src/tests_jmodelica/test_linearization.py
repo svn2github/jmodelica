@@ -48,7 +48,7 @@ class TestOptLinearization:
         cls.vdp_sim = compile_fmu("VDP_pack.VDP",os.path.join(path_to_mofiles,"VDP_pack.mo"))
 
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_linearize_dae_with_simresult(self):
         
         from pyjmi.casadi_interface import linearize_dae_with_simresult

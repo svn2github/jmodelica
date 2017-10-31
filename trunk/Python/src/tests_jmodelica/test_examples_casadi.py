@@ -29,31 +29,31 @@ try:
 except (NameError, ImportError):
     pass
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_greybox_identification_example():
     """ Test the greybox example."""
     greybox_identification.run_demo()
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_cart_pendulum():
     cart_pendulum.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_vdp_casadi():
     """Run the VDP CasADi example."""
     vdp_casadi.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_vdp_minimum_time_casadi():
     """Run the VDP CasADi minimum time example."""
     vdp_minimum_time_casadi.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_cstr_casadi():
     """Run the CSTR CasADi example."""
     cstr_casadi.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_qt_par_casadi():
     """Run the QT CasADi example."""
     qt_par_est_casadi.run_demo(False)
@@ -78,17 +78,17 @@ def test_distillation4_opt():
     """Run the large distillation optimization example."""
     distillation4_opt.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_cstr_mpc_casadi():
     """Run the cstr mpc optimization example."""
     cstr_mpc_casadi.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_ccpp_variable_elimination():
     """Run the Combined Cycle Power Plant example."""
     ccpp_elimination.run_demo(False)
 
-@testattr(casadi = True) 
+@testattr(casadi_base = True) 
 def test_ccpp_sym_elim(): 
     """Run the Combined Cycle Power Plant example with symbolic elimination.""" 
     ccpp_sym_elim.run_demo(False) 

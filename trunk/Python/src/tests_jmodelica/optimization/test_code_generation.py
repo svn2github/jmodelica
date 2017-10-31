@@ -32,7 +32,7 @@ def result_distance(res1, res2, names):
     assert N.array_equal(res1['time'], res2['time'])
     return max([N.max(N.abs(res1[name] - res2[name])) for name in names])
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_code_gen():
     var_names = ('x1', 'x2', 'u')
     func_names = ['nlp_test', 'grad_f_test', 'jac_g_test', 'hess_lag_test']

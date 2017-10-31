@@ -98,7 +98,7 @@ class TestSymbolicElimination(object):
         self.op_der_loop_manual = transfer_optimization_problem(
                 class_path, file_path, self.compiler_opts_manual)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_automatic_tearing(self):
         """
         Test consistency between with and without automatic tearing.
@@ -124,7 +124,7 @@ class TestSymbolicElimination(object):
         assert_results(res_automatic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_manual, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_hybrid_tearing(self):
         """
         Test consistency between manual and automatic tearing as well as the combination of both.
@@ -180,7 +180,7 @@ class TestSymbolicElimination(object):
             if '(y1*y4)+sqrt(y3)' in eq.getResidual().getRepresentation():
                 eq.setTearing(True)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ineliminable(self):
         """
         Test ineliminable variables for both manual and automatic tearing.
@@ -232,7 +232,7 @@ class TestSymbolicElimination(object):
             if '(y1*y4)+sqrt(y3)' in eq.getResidual().getRepresentation():
                 eq.setTearing(True)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_sparsity_preservation(self):
         """
         Test sparsity preservation for both LMFI and Markowitz.
@@ -286,7 +286,7 @@ class TestSymbolicElimination(object):
             if 'y1)*y2)*y4)' in eq.getResidual().getRepresentation():
                 eq.setTearing(False)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_closed_form(self):
         """
         Test creation of closed form expressions when not using tearing.
@@ -301,7 +301,7 @@ class TestSymbolicElimination(object):
                 residual = res.getRepresentation()
         N.testing.assert_string_equal(residual, "SX(((((2*y1)*y2)*sqrt(y5))-sqrt(x1)))")
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_constraint_and_objective(self):
         """
         Test eliminating variables occurring in constraints and objective.
@@ -343,7 +343,7 @@ class TestSymbolicElimination(object):
             if 'y1)*y2)*y4)' in eq.getResidual().getRepresentation():
                 eq.setTearing(False)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_block_solve(self):
         """
         Test solution of linear blocks both symbolically with SX and numerically with MX.
@@ -389,7 +389,7 @@ class TestSymbolicElimination(object):
         assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         #~ assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_linear_tearing(self):
         """
         Test solution of torn linear blocks both symbolically with SX and numerically with MX.
@@ -437,7 +437,7 @@ class TestSymbolicElimination(object):
         assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         #~ assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_derivative_elimination(self):
         """
         Test that state derivatives are not eliminated even if causalized in torn blocks.
@@ -466,7 +466,7 @@ class TestSymbolicElimination(object):
         assert_results(res_manual, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_automatic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_par_est(self):
         """
         Test parameter estimation.

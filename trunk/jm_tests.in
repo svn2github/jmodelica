@@ -114,31 +114,55 @@ test_set_p="python"
 test_set_z="python64"
 
 # Standard set of tags
-TAGS="-a stddist -a fmi -a noncompliantfmi"
+TAGS="-a stddist_base -a fmi -a noncompliantfmi"
 if [[ "${IPOPT_HOME}" != "" ]]; then
   TAGS="${TAGS} -a ipopt"
   if [[ "${SYS}" == Win ]]; then
-    TAGS="${TAGS} -a windows"
+    TAGS="${TAGS} -a windows_base"
   fi
   if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
-    TAGS="${TAGS} -a casadi"
+    TAGS="${TAGS} -a casadi_base"
   else
     echo Skipping casadi tests, since CasADi does not seem to be installed.
   fi
 fi
 
 # Standard set of tags
-TAGS64="-a stddist -a fmi -a noncompliantfmi"
+TAGS64="-a stddist_base -a fmi -a noncompliantfmi"
 if [[ "${IPOPT64_HOME}" != "" ]]; then
   TAGS64="${TAGS64} -a ipopt"
   if [[ "${SYS}" == Win ]]; then
-    TAGS64="${TAGS64} -a windows"
+    TAGS64="${TAGS64} -a windows_base"
   fi
   if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
-    TAGS64="${TAGS64} -a casadi"
+    TAGS64="${TAGS64} -a casadi_base"
   else
     echo Skipping casadi tests, since CasADi does not seem to be installed.
   fi
+fi
+
+# Extend with all tests for default version of Python/bitness
+if [[ "${PYTHON64_HOME}" != "" ]]; then
+TAGS64="${TAGS64} stddist_full"
+if [[ "${IPOPT64_HOME}" != "" ]]; then
+if [[ "${SYS}" == Win ]]; then
+    TAGS64="${TAGS64} -a windows_full"
+  fi
+  if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
+    TAGS64="${TAGS64} -a casadi_full"
+fi
+else
+TAGS="${TAGS} stddist_full"
+if [[ "${IPOPT_HOME}" != "" ]]; then
+  if [[ "${SYS}" == Win ]]; then
+    TAGS="${TAGS} -a windows_full"
+  fi
+  if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
+    TAGS="${TAGS} -a casadi_full"
+  else
+    echo Skipping casadi tests, since CasADi does not seem to be installed.
+  fi
+fi
 fi
 
 # Functions for running specific tests

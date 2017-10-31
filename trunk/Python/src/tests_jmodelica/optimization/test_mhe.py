@@ -136,7 +136,7 @@ class TestMHE:
                                '_MHE_v_y3':0.03,
                                '_MHE_mask':1.}
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_init(self):
         """
         """
@@ -207,7 +207,7 @@ class TestMHE:
         small = 1e-6
         assert(N.abs(op.get('_MHE_beta') - 1.) < small) == True
     
-    @testattr(casadi = True)    
+    @testattr(casadi_base = True)    
     def test_matrix_set(self):
         """
         """
@@ -414,7 +414,7 @@ class TestMHE:
                                       [value_dict['_MHE_mask']])[0].getValue()
         return (o_value, o_i_value)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_set_beta(self):
         """
         """
@@ -483,7 +483,7 @@ class TestMHE:
         assert(N.abs(o_value - 6.879) < small) == True
         assert(N.abs(o_i_value - 6.029999999999999) < small) == True
        
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_linearization(self):
         """
         """
@@ -717,7 +717,7 @@ class TestMHE:
         P = MHE_object.EKF_object.get_next_P(t, x, dx, u, c)
         return P
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_step(self):
         """
         """
@@ -786,7 +786,7 @@ class TestMHE:
 
         return x_est
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def CSTR_test(self):
         """
         """
@@ -848,7 +848,7 @@ class TestMHE:
                 #Check that the estimation match the expected values
                 assert(N.abs(x_est_t[name] - res[name][k]) < small) == True
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def VDP_test(self):
         """
         """
@@ -908,7 +908,7 @@ class TestMHE:
                 #Check that the estimation match the expected values
                 assert(N.abs(x_est_t[name] - res[name][k]) < small) == True
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def alg_test(self):
         """
         """
@@ -975,7 +975,7 @@ class TestMHE:
                 #Check that the estimation match the expected values
                 assert(N.abs(x_est_t[name] - res[name][k]) < small) == True
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_recalculate_jacobian_functions(self):
         """
         """

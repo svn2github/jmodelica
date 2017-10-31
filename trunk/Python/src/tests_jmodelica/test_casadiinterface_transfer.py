@@ -56,7 +56,7 @@ def assertNear(val1, val2, tol):
 class ModelicaTransfer(object):
     """Base class for Modelica transfer tests. Subclasses define load_model"""
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaAliasVariables(self):
         model = self.load_model("atomicModelAlias", modelFile)
         assert not model.getVariable("x").isNegated()
@@ -75,22 +75,22 @@ class ModelicaTransfer(object):
                strnorm("Real y;")
     
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaSimpleEquation(self):
         assert strnorm(self.load_model("AtomicModelSimpleEquation", modelFile).getDaeResidual()) ==\
                strnorm(der_x1 - x1) 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaSimpleInitialEquation(self):
         assert strnorm(self.load_model("AtomicModelSimpleInitialEquation", modelFile).getInitialResidual()) == strnorm(x1 - MX(1))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaFunctionCallEquations(self):
         assert( strnorm(repr(self.load_model("AtomicModelFunctionCallEquation", modelFile, compiler_options={"inline_functions":"none"}).getDaeResidual())) == 
                     strnorm("MX(vertcat((der(x1)-x1), (vertcat(x2, x3)-vertcat(function(\"AtomicModelFunctionCallEquation.f\")" + 
                     ".call([der(x1)]){0}, function(\"AtomicModelFunctionCallEquation.f\").call([der(x1)]){1}))))") )  
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBindingExpression(self):
         model =  self.load_model("AtomicModelAttributeBindingExpression", modelFile)
         dependent =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
@@ -99,94 +99,94 @@ class ModelicaTransfer(object):
         expected = str(MX(2)) + str(MX.sym("p1"))
         assert strnorm(actual) == strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaUnit(self):
         model =  self.load_model("AtomicModelAttributeUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("unit")) ==\
                strnorm(MX.sym("kg"))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaQuantity(self):
         model =  self.load_model("AtomicModelAttributeQuantity", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("quantity")) ==\
                strnorm(MX.sym("kg")) 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaDisplayUnit(self):
         model =  self.load_model("AtomicModelAttributeDisplayUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("displayUnit")) ==\
                strnorm(MX.sym("kg")) 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaMin(self):
         model =  self.load_model("AtomicModelAttributeMin", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm((diffs[0].getAttribute("min"))) ==\
                strnorm(MX(0)) 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaMax(self):
         model =  self.load_model("AtomicModelAttributeMax", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("max")) == strnorm(MX(100))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaStart(self):
         model =  self.load_model("AtomicModelAttributeStart", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("start"))  ==\
                strnorm(MX(0.0005))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaFixed(self):
         model =  self.load_model("AtomicModelAttributeFixed", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("fixed")) ==\
                strnorm(MX(True))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaNominal(self):
         model =  self.load_model("AtomicModelAttributeNominal", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("nominal")) ==\
                strnorm(MX(0.1))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaComment(self):
         model =  self.load_model("AtomicModelComment", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diffs[0].getAttribute("comment")) ==\
                strnorm(MX.sym("I am x1's comment"))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaRealDeclaredType(self):
         model =  self.load_model("AtomicModelDerivedRealTypeVoltage", modelFile)
         assert strnorm(model.getVariableType("Voltage")) ==\
                strnorm("Voltage type = Real (quantity = ElectricalPotential, unit = V);")
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaDerivedTypeDefaultType(self):
         model =  self.load_model("AtomicModelDerivedTypeAndDefaultType", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
         assert int(diffs[0].getDeclaredType().this) == int(model.getVariableType("Voltage").this)
         assert int(diffs[1].getDeclaredType().this) == int(model.getVariableType("Real").this)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaIntegerDeclaredType(self):
         model =  self.load_model("AtomicModelDerivedIntegerTypeSteps", modelFile)
         assert strnorm(model.getVariableType("Steps")) ==\
                strnorm("Steps type = Integer (quantity = steps);")
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBooleanDeclaredType(self):
         model =  self.load_model("AtomicModelDerivedBooleanTypeIsDone", modelFile)
         assert strnorm(model.getVariableType("IsDone")) ==\
                strnorm("IsDone type = Boolean (quantity = Done);")
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaRealConstant(self):
         model =  self.load_model("atomicModelRealConstant", modelFile)
         constVars =  model.getVariables(Model.REAL_CONSTANT)
@@ -194,7 +194,7 @@ class ModelicaTransfer(object):
                strnorm(MX.sym("pi"))
         assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaRealIndependentParameter(self):
         model =  self.load_model("atomicModelRealIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
@@ -202,7 +202,7 @@ class ModelicaTransfer(object):
                strnorm(MX.sym("pi"))
         assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaRealDependentParameter(self):
         model =  self.load_model("atomicModelRealDependentParameter", modelFile)
         depParam =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
@@ -210,41 +210,41 @@ class ModelicaTransfer(object):
         assert strnorm(2*(indepParam[0].getVar())) ==\
                strnorm(depParam[0].getAttribute("bindingExpression"))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaDerivative(self):
         model =  self.load_model("atomicModelRealDerivative", modelFile)
         assert strnorm(model.getVariables(Model.DERIVATIVE)[0].getVar()) ==\
                strnorm(der_x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaDifferentiated(self):
         model = self.load_model("atomicModelRealDifferentiated", modelFile)
         diff = model.getVariables(Model.DIFFERENTIATED)
         assert strnorm(diff[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaRealInput(self):
         model =  self.load_model("atomicModelRealInput", modelFile)
         ins =  model.getVariables(Model.REAL_INPUT)
         assert strnorm(ins[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaAlgebraic(self):
         model =  self.load_model("atomicModelRealAlgebraic", modelFile)
         alg =  model.getVariables(Model.REAL_ALGEBRAIC)
         assert strnorm(alg[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaRealDisrete(self):
         model =  self.load_model("atomicModelRealDiscrete", modelFile)
         realDisc =  model.getVariables(Model.REAL_DISCRETE)
         assert strnorm(realDisc[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaIntegerConstant(self):
         model =  self.load_model("atomicModelIntegerConstant", modelFile)
         constVars =  model.getVariables(Model.INTEGER_CONSTANT)
@@ -252,7 +252,7 @@ class ModelicaTransfer(object):
                strnorm(MX.sym("pi"))
         assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaIntegerIndependentParameter(self):
         model =  self.load_model("atomicModelIntegerIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
@@ -260,7 +260,7 @@ class ModelicaTransfer(object):
                strnorm(MX.sym("pi"))
         assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaIntegerDependentConstants(self):
         model =  self.load_model("atomicModelIntegerDependentParameter", modelFile)    
         depParam =  model.getVariables(Model.INTEGER_PARAMETER_DEPENDENT)
@@ -268,21 +268,21 @@ class ModelicaTransfer(object):
         assert strnorm(2*(indepParam[0].getVar())) ==\
                strnorm(depParam[0].getAttribute("bindingExpression"))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaIntegerDiscrete(self):
         model =  self.load_model("atomicModelIntegerDiscrete", modelFile)
         intDisc =  model.getVariables(Model.INTEGER_DISCRETE)
         assert strnorm(intDisc[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaIntegerInput(self):
         model =  self.load_model("atomicModelIntegerInput", modelFile)    
         intIns =  model.getVariables(Model.INTEGER_INPUT)
         assert strnorm(intIns[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBooleanConstant(self):
         model =  self.load_model("atomicModelBooleanConstant", modelFile)
         constVars =  model.getVariables(Model.BOOLEAN_CONSTANT)
@@ -290,7 +290,7 @@ class ModelicaTransfer(object):
                strnorm(MX.sym("pi"))
         assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBooleanIndependentParameter(self):
         model =  self.load_model("atomicModelBooleanIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
@@ -298,7 +298,7 @@ class ModelicaTransfer(object):
                strnorm(MX.sym("pi"))
         assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBooleanDependentParameter(self):
         model =  self.load_model("atomicModelBooleanDependentParameter", modelFile)    
         depParam =  model.getVariables(Model.BOOLEAN_PARAMETER_DEPENDENT)  
@@ -306,21 +306,21 @@ class ModelicaTransfer(object):
         assert strnorm( indepParam[0].getVar().logic_and(MX(True)) ) ==\
                strnorm(depParam[0].getAttribute("bindingExpression"))
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBooleanDiscrete(self):
         model =  self.load_model("atomicModelBooleanDiscrete", modelFile)        
         boolDisc =  model.getVariables(Model.BOOLEAN_DISCRETE)
         assert strnorm(boolDisc[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaBooleanInput(self):
         model =  self.load_model("atomicModelBooleanInput", modelFile)
         boolIns =  model.getVariables(Model.BOOLEAN_INPUT)
         assert strnorm(boolIns[0].getVar()) ==\
                strnorm(x1)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaModelFunction(self):
         model =  self.load_model("simpleModelWithFunctions", modelFile)
         expectedPrint = ("ModelFunction : function(\"simpleModelWithFunctions.f\")\n Inputs (2):\n"
@@ -352,7 +352,7 @@ class ModelicaTransfer(object):
         actual = str(mf_1) + str(mf_2)
         assert strnorm(expectedPrint) == strnorm(actual)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaDependentParametersCalculated(self):
         model =  self.load_model("atomicModelDependentParameter", modelFile)
         model.calculateValuesForDependentParameters()
@@ -361,7 +361,7 @@ class ModelicaTransfer(object):
         assert depVars[1].getAttribute("evaluatedBindingExpression").getValue() == 20
         assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaFunctionCallEquationForParameterBinding(self):
         model =  self.load_model("atomicModelPolyOutFunctionCallForDependentParameter", modelFile, compiler_options={"inline_functions":"none"})
         model.calculateValuesForDependentParameters()
@@ -374,7 +374,7 @@ class ModelicaTransfer(object):
         assert strnorm(actual) == strnorm(expected)
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelicaTimeVariable(self):
         model = self.load_model("atomicModelTime", modelFile)
         t = model.getTimeVariable()
@@ -387,7 +387,7 @@ class ModelicaTransfer(object):
     #                                            #
     ##############################################
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementaryDivision(self):
         model = self.load_model("AtomicModelElementaryDivision", modelFile)
         params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
@@ -400,7 +400,7 @@ class ModelicaTransfer(object):
        parameter Real p5[3](bindingExpression = (p1[3]/p2[1])) = (p1[3]/p2[1]);], dtype=object)"""
         assert strnorm(repr(params)) == strnorm(expected)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementaryMultiplication(self):
         model = self.load_model("AtomicModelElementaryMultiplication", modelFile)
         params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
@@ -413,7 +413,7 @@ class ModelicaTransfer(object):
        parameter Real p5[3](bindingExpression = (p1[3]*p2[1])) = (p1[3]*p2[1]);], dtype=object)"""
         assert strnorm(repr(params)) == strnorm(expected)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementaryAddition(self):
         model = self.load_model("AtomicModelElementaryAddition", modelFile)
         params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
@@ -422,7 +422,7 @@ class ModelicaTransfer(object):
        parameter Real p3[3](bindingExpression = (p1[3]+p2[3])) = (p1[3]+p2[3]);], dtype=object)"""
         assert strnorm(repr(params)) == strnorm(expected)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementarySubtraction(self):
         model = self.load_model("AtomicModelElementarySubtraction", modelFile)
         params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
@@ -431,7 +431,7 @@ class ModelicaTransfer(object):
        parameter Real p3[3](bindingExpression = (p1[3]-p2[3])) = (p1[3]-p2[3]);], dtype=object)"""
         assert strnorm(repr(params)) == strnorm(expected)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementaryExponentiation(self):
         model = self.load_model("AtomicModelElementaryExponentiation", modelFile)
         params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
@@ -455,19 +455,19 @@ class ModelicaTransfer(object):
        parameter Real p10[2,2](bindingExpression = pow(p7[1,1],p8[2,2])) = pow(p7[1,1],p8[2,2]);], dtype=object)"""
         assert strnorm(repr(params)) == strnorm(expected) 
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementaryExpression(self):
         dae = self.load_model("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
         expected ="MX(vertcat((der(x1)-(2+x1)), (der(x2)-(x2-x1)), (der(x3)-(x3*x2)), (der(x4)-(x4/x3))))"
         assert strnorm(repr(dae)) == strnorm(expected) 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructElementaryFunctions(self):
         dae = self.load_model("AtomicModelElementaryFunctions", modelFile).getDaeResidual()
         expected = ("MX(vertcat((der(x1)-pow(x1,5)), (der(x2)-fabs(x2)), (der(x3)-fmin(x3,x2)), (der(x4)-fmax(x4,x3)), (der(x5)-sqrt(x5)), (der(x6)-sin(x6)), (der(x7)-cos(x7)), (der(x8)-tan(x8)), (der(x9)-asin(x9)), (der(x10)-acos(x10)), (der(x11)-atan(x11)), (der(x12)-atan2(x12,x11)), (der(x13)-sinh(x13)), (der(x14)-cosh(x14)), (der(x15)-tanh(x15)), (der(x16)-exp(x16)), (der(x17)-log(x17)), (der(x18)-(0.434294*log(x18))), (der(x19)+x18)))")# CasADi converts log10 to log with constant.
         assert strnorm(repr(dae)) == strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructBooleanExpressions(self):
         dae = self.load_model("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
         expected = ("MX(vertcat((der(x1)-((x2?1:0)+((!x2)?2:0))), " + 
@@ -475,7 +475,7 @@ class ModelicaTransfer(object):
                     "(x5-(x1<=0)), (x6-(x5==x4)), (x7-(x6!=x5)), (x8-(x6&&x5)), (x9-(x6||x5))))")
         assert strnorm(repr(dae)) == strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructMisc(self):
         model = self.load_model("AtomicModelMisc", modelFile)
         expected = (
@@ -486,7 +486,7 @@ class ModelicaTransfer(object):
 
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructVariableLaziness(self):
         model = self.load_model("AtomicModelVariableLaziness", modelFile)
         x2_eq = model.getDaeResidual()[0].getDep(1)
@@ -495,7 +495,7 @@ class ModelicaTransfer(object):
         x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
         assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructArrayInOutFunction1(self):
         model = self.load_model("AtomicModelVector1", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelVector1.f\")\n"
@@ -515,7 +515,7 @@ class ModelicaTransfer(object):
         expected = ("MX(vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector1.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector1.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2])))")
         assert strnorm(model.getDaeResidual()) == strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructArrayInOutFunction2(self):
         model = self.load_model("AtomicModelVector2", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelVector2.f\")\n"
@@ -536,7 +536,7 @@ class ModelicaTransfer(object):
 
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructArrayInOutFunctionCallEquation(self):
         model = self.load_model("AtomicModelVector3", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
         expected = ("ModelFunction : function(\"AtomicModelVector3.f\")\n"
@@ -567,13 +567,13 @@ class ModelicaTransfer(object):
         assert str(model.getDaeResidual()).replace('\n','') == expected.replace('\n','')
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_FunctionCallEquationOmittedOuts(self):
         model = self.load_model("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
         expected = "MX(vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){0}, function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){2}))))"
         assert strnorm(model.getDaeResidual()) == strnorm(expected)  
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_FunctionCallStatementOmittedOuts(self):
         model = self.load_model("atomicModelFunctionCallStatementIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredOuts.f2\")\n"
@@ -585,13 +585,13 @@ class ModelicaTransfer(object):
                     "output[0] = @2\n")
         assert strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2")) == strnorm(expected)
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ParameterIndexing(self):
         model = self.load_model("ParameterIndexing1", modelFile)
         expected = "[x[1] = 0 x[2] = 2]"
         assert strnorm(model.getDaeEquations()) == strnorm(expected)
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_OmittedArrayRecordOuts(self):
         model = self.load_model("atomicModelFunctionCallStatementIgnoredArrayRecordOuts", modelFile, compiler_options={"inline_functions":"none"})
         expectedFunctionPrint = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\")\n"
@@ -618,7 +618,7 @@ class ModelicaTransfer(object):
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expectedResidualPrint)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructFunctionMatrix(self):
         model = self.load_model("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none","variability_propagation":False})
         expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"
@@ -643,7 +643,7 @@ class ModelicaTransfer(object):
         assert strnorm(model.getDaeResidual()) ==\
                strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructFunctionMatrixDimsGreaterThanTwo(self):
         model = self.load_model("AtomicModelLargerThanTwoDimensionArray", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelLargerThanTwoDimensionArray.f\")\n"
@@ -685,7 +685,7 @@ class ModelicaTransfer(object):
         assert strnorm(model.getDaeResidual()).replace('\n','') ==\
                strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructNestedRecordFunctions(self):
         model = self.load_model("AtomicModelRecordNestedArray",  modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelRecordNestedArray.generateCurves\")\n"
@@ -720,7 +720,7 @@ class ModelicaTransfer(object):
                strnorm(expected)
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructRecordInFunctionInFunction(self):
         model = self.load_model("AtomicModelRecordInOutFunctionCallStatement", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelRecordInOutFunctionCallStatement.f1\")\n"
@@ -752,7 +752,7 @@ class ModelicaTransfer(object):
 
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructRecordArbitraryDimension(self):
         model = self.load_model("AtomicModelRecordArbitraryDimension", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelRecordArbitraryDimension.f\")\n"
@@ -790,7 +790,7 @@ class ModelicaTransfer(object):
 
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructArrayFlattening(self):
         model =  self.load_model("atomicModelSimpleArrayIndexing", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"atomicModelSimpleArrayIndexing.f\")\n"
@@ -811,7 +811,7 @@ class ModelicaTransfer(object):
         assert strnorm(model.getModelFunction("atomicModelSimpleArrayIndexing.f")) ==\
                strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructRecordNestedSeveralVars(self):
         model = self.load_model("AtomicModelRecordSeveralVars", modelFile, compiler_options={"inline_functions":"none"})
         expected = ("ModelFunction : function(\"AtomicModelRecordSeveralVars.f\")\n"
@@ -855,7 +855,7 @@ class ModelicaTransfer(object):
 
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructFunctionsInRhs(self):
         model = self.load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"})
         expected = "MX(vertcat((der(x1)-sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})), (der(x2)-function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1, x2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){0}, function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){1})), (der(x7)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\").call([x7]){0}), (der(x8)-function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\").call([x8]){0}), (der(x9)-function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\").call([x9]){0}), (der(x10)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\").call([x10]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){1}))))"
@@ -876,7 +876,7 @@ class ModelicaTransfer(object):
 
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructVariousRealValuedFunctions(self):
         model = self.load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
         #function monoInMonoOut
@@ -1062,7 +1062,7 @@ class ModelicaTransfer(object):
                strnorm(expected)
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructVariousIntegerValuedFunctions(self):
         model = self.load_model("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
         #function monoInMonoOut
@@ -1250,7 +1250,7 @@ class ModelicaTransfer(object):
                strnorm(expected)
 
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ConstructVariousBooleanValuedFunctions(self):
         model = self.load_model("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
         #function monoInMonoOut
@@ -1431,7 +1431,7 @@ class ModelicaTransfer(object):
         assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal"))==\
                strnorm(expected)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_TransferVariableType(self):
         model = self.load_model("AtomicModelMisc", modelFile)
         x1 = model.getVariable('x1')
@@ -1441,7 +1441,7 @@ class ModelicaTransfer(object):
         assert isinstance(model.getVariable('x3'), BooleanVariable)
         assert isinstance(model.getVariable('x4'), BooleanVariable)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_ModelIdentifier(self):
         model = self.load_model("identifierTest.identfierTestModel", modelFile)
         assert model.getIdentifier().replace('\n','') ==\
@@ -1476,56 +1476,56 @@ def computeStringRepresentationForContainer(myContainer):
     return stringRepr
     
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaLessThanPathConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQ", optproblemsFile)
     expected = str(x1.getName()) + " <= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expected))
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaGreaterThanPathConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQ", optproblemsFile)
     expected = str(x1.getName()) + " >= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expected))
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaSevaralPathConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQ", optproblemsFile)
     expected = str(x2.getName()) + " <= " + str(1) +  str(x1.getName()) + " >= " + str(1) 
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
             strnorm(expected))    
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaEqualityPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationEQpoint", optproblemsFile)
     expected = str(MX.sym("x1(finalTime)").getName()) + " = " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaLessThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQpoint", optproblemsFile)
     expected = str(MX.sym("x1(finalTime)").getName()) + " <= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaGreaterThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQpoint", optproblemsFile)
     expected = str(MX.sym("x1(finalTime)").getName()) + " >= " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaSevaralPointConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQandEQpoint", optproblemsFile)
     expected = str(MX.sym("x2(startTime + 1)").getName()) + " <= " + str(1) +  str(MX.sym("x1(startTime + 1)").getName()) + " >= " + str(1) + str(MX.sym("x2(finalTime + 1)").getName()) + " = " + str(1)
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expected))
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaMixedConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationMixedConstraints", optproblemsFile)
     expectedPath = str(MX.sym("x3(startTime + 1)").getName()) + " <= " + str(x1.getName())
@@ -1535,7 +1535,7 @@ def test_OptimicaMixedConstraints():
     assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
             strnorm(expectedPoint))
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaTimedVariables():
     optProblem =  load_optimization_problem("atomicOptimizationTimedVariables", optproblemsFile)
     # test there are 3 timed
@@ -1580,43 +1580,43 @@ def test_OptimicaTimedVariables():
     assert tv3.isEqual(path_constraints[1].getLhs())
     assert tv4.isEqual(optProblem.getObjective())
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaStartTime():
     optProblem =  load_optimization_problem("atomicOptimizationStart5", optproblemsFile)
     assert( optProblem.getStartTime().getValue() == 5)
     
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_OptimicaFinalTime():
     optProblem =  load_optimization_problem("atomicOptimizationFinal10", optproblemsFile)
     assert( optProblem.getFinalTime().getValue() == 10)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaObjectiveIntegrand():
     optProblem =  load_optimization_problem("atomicLagrangeX1", optproblemsFile)
     assert str(optProblem.getObjectiveIntegrand()) == str(x1) 
     optProblem =  load_optimization_problem("atomicLagrangeNull", optproblemsFile)
     assert str(optProblem.getObjectiveIntegrand()) == str(MX(0))  
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaObjective():
     optProblem =  load_optimization_problem("atomicMayerFinalTime", optproblemsFile)
     assert str(optProblem.getObjective()) == str(MX.sym("finalTime")) 
     optProblem =  load_optimization_problem("atomicMayerNull", optproblemsFile)
     assert str(optProblem.getObjective()) == str(MX(0))
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaFree():
     model =  load_optimization_problem("atomicWithFree", optproblemsFile)
     diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("free"))) == str(MX(False))
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaInitialGuess():
     model =  load_optimization_problem("atomicWithInitialGuess", optproblemsFile)
     diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_OptimicaNormalizedTimeFlag():
     optProblem = load_optimization_problem("atomicWithInitialGuess", optproblemsFile)
     assert optProblem.getNormalizedTimeFlag()
@@ -1626,7 +1626,7 @@ def test_OptimicaNormalizedTimeFlag():
     assert not optProblem.getNormalizedTimeFlag()
     
 
-@testattr(casadi = True)    
+@testattr(casadi_base = True)    
 def test_ModelIdentifier():
     optProblem = load_optimization_problem("identifierTest.identfierTestModel", optproblemsFile)
     assert strnorm(optProblem.getIdentifier()) ==\

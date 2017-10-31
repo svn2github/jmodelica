@@ -68,7 +68,7 @@ class Test_FMUModelME1Extended:
         cls.simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"), version="1.0")
         cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"), version="1.0")
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_custom_result_handler(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
 
@@ -88,7 +88,7 @@ class Test_FMUModelME1Extended:
         opts["result_handler"] = B()
         res = model.simulate(options=opts)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_filter(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
 
@@ -114,14 +114,14 @@ class Test_FMUModelME1Extended:
         data = res["resistor.v"]
 
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_simulation_no_state(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.no_state3)
 
         res = model.simulate(final_time=1.0)
         nose.tools.assert_almost_equal(res.final("x"),1.0)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_input_derivatives(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input)
 
@@ -140,7 +140,7 @@ class Test_FMUModelME1Extended:
         model.do_step(2, 1)
         nose.tools.assert_almost_equal(model.get("u"),4.0)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_input_derivatives2(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input2)
 
@@ -161,7 +161,7 @@ class Test_FMUModelME1Extended:
         nose.tools.assert_almost_equal(model.get("u2"),3.0)
         nose.tools.assert_almost_equal(model.get("u1"),3.0)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_input_derivatives3(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input)
 
@@ -174,7 +174,7 @@ class Test_FMUModelME1Extended:
         model.do_step(1, 1)
         nose.tools.assert_almost_equal(model.get("u"),0.5)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_input_derivatives4(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.simple_input)
 
@@ -189,7 +189,7 @@ class Test_FMUModelME1Extended:
         nose.tools.assert_almost_equal(model.get("u"),8.0)
 
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_zero_step_size(self):
         model = FMUModelME1Extended(Test_FMUModelME1Extended.input_discontinuity)
 
@@ -200,17 +200,17 @@ class Test_FMUModelME1Extended:
         model.do_step(1,0)
         nose.tools.assert_almost_equal(model.get("x"),1.0)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_version(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
         assert rlc._get_version() == '1.0'
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_valid_platforms(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
         assert rlc._get_types_platform() == 'standard32'
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_simulation_with_reset_cs_2(self):
         rlc  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)
         res1 = rlc.simulate(final_time=30)
@@ -221,7 +221,7 @@ class Test_FMUModelME1Extended:
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_simulation_with_reset_cs_3(self):
         rlc_square  = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit_square)
         res1 = rlc_square.simulate()
@@ -233,14 +233,14 @@ class Test_FMUModelME1Extended:
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_simulation_cs(self):
 
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         res = model.simulate(final_time=1.5)
         assert (res.final("J1.w") - 3.245091100366517) < 1e-4
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_simulation_with_reset_cs(self):
 
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
@@ -250,7 +250,7 @@ class Test_FMUModelME1Extended:
         res2 = model.simulate(final_time=1.5)
         assert (res2["J1.w"][-1] - 3.245091100366517) < 1e-4
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_default_experiment(self):
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
 
@@ -258,28 +258,28 @@ class Test_FMUModelME1Extended:
         assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
         assert N.abs(model.get_default_experiment_tolerance()-0.0001) < 1e-4
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_types_platform(self):
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         assert model.types_platform == "standard32"
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_exception_input_derivatives(self):
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         nose.tools.assert_raises(FMUException, model.set_input_derivatives, "u",1.0,1)
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_exception_output_derivatives(self):
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         nose.tools.assert_raises(FMUException, model.get_output_derivatives, "u",1)
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_default_simulation_stop_time(self):
         model = FMUModelME1Extended("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu",path_to_fmus_me1)
         res = model.simulate()
         assert N.abs(1.5 - res.final('time')) < 1e-4
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_multiple_loadings_and_simulations(self):
         model = FMUModelME1Extended("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
         res = model.simulate(final_time=1.0)
@@ -290,14 +290,14 @@ class Test_FMUModelME1Extended:
             res = model.simulate(final_time=1.0)
         assert N.abs(h_res - res.final('h')) < 1e-4
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_log_file_name(self):
         model = FMUModelME1Extended("bouncingBall.fmu",path_to_fmus_me1)
         assert os.path.exists("bouncingBall_log.txt")
         model = FMUModelME1Extended("bouncingBall.fmu",path_to_fmus_me1,log_file_name="Test_log.txt")
         assert os.path.exists("Test_log.txt")
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_result_name_file(self):
 
         rlc = FMUModelME1Extended(Test_FMUModelME1Extended.rlc_circuit)

@@ -48,7 +48,7 @@ def check_solution(solver):
     violations = solver.get_nlp_residuals()
     assert N.max(N.abs(violations)) < 1e-12
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_nlp_variable_indices():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
     op = transfer_optimization_problem("TestVariableTypes", file_path)
@@ -79,7 +79,7 @@ def test_nlp_variable_indices():
             tinds += 1
         assert N.max(N.abs(res[name][tinds] - xx[inds])) < 1e-12
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_get_residuals():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
     op = transfer_optimization_problem("TestResiduals", file_path)
@@ -146,7 +146,7 @@ def test_get_residuals():
         else:
             assert dest['kind'] == 'eq'
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_find_nonfinite_jacobian_entry():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
     op = transfer_optimization_problem("TestJacInf", file_path)
@@ -164,7 +164,7 @@ def test_find_nonfinite_jacobian_entry():
         assert var == op.getVariable('x2')
         assert 'sqrt' in str(solver.get_equations(eqtype,eqind))
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_duals():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
     op = transfer_optimization_problem("TestDuals", file_path)
@@ -196,7 +196,7 @@ def test_duals():
     l0 = (t-2)*h
     assert N.max(N.abs((l.ravel()-l0)[2:])) < 1e-12
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_get_equations():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestBackTracking.mop')
     op = transfer_optimization_problem("TestEquations", file_path)
