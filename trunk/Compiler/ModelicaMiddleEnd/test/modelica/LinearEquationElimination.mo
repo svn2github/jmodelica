@@ -223,7 +223,7 @@ end LinearEquationElimination.Constant2;
         b = sin(time);
         c = sin(time);
 
-    annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Constant3",
             description="Find alias expressions when a variable should be equal to a constant.",
@@ -231,11 +231,13 @@ end LinearEquationElimination.Constant2;
 fclass LinearEquationElimination.Constant3
  Real a;
  Real b;
+ Real c;
  Real x;
 equation
- x = a + b + b;
+ x = a + b + c;
  1 = x;
  b = sin(time);
+ c = sin(time);
 end LinearEquationElimination.Constant3;
 ")})));
     end Constant3;

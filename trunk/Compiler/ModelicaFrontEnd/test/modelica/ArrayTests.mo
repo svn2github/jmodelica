@@ -1923,11 +1923,11 @@ fclass ArrayTests.Subscripts.SubscriptExpression11
  Real x[4];
  Real x[5];
 equation
- x[2] = x[1] * 2;
- x[3] = x[2];
- x[4] = x[1] * 2 * 2;
- x[5] = x[1] * 2 * 3;
  x[1] = sin(time);
+ x[2] = sin(time) * 2;
+ x[3] = sin(time) * 2;
+ x[4] = sin(time) * 2 * 2;
+ x[5] = sin(time) * 2 * 3;
 end ArrayTests.Subscripts.SubscriptExpression11;
 ")})));
 end SubscriptExpression11;

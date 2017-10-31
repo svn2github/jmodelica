@@ -3415,13 +3415,14 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     _f_2_8 = sin(_time);
     _g_10 = cos(_time);
     _f_3_9 = sin(_time + 0.5);
+    _h_11 = - cos(_time);
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 6, 1, 6)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 6, 1, 6)
     jmi_array_ref_1(tmp_2, 1) = _e_3;
     memcpy(&jmi_array_ref_1(tmp_2, 2), &_f_1_7, 2 * sizeof(jmi_real_t));
     jmi_array_ref_1(tmp_2, 4) = _g_10;
     jmi_array_ref_1(tmp_2, 5) = _f_3_9;
-    jmi_array_ref_1(tmp_2, 6) = - _g_10;
+    jmi_array_ref_1(tmp_2, 6) = _h_11;
     func_CCodeGenTests_CFunctionTest23_F_def0(tmp_2, tmp_1);
     _a_0 = (jmi_array_val_1(tmp_1, 1));
     memcpy(&_b_1_4, &jmi_array_val_1(tmp_1, 2), 2 * sizeof(jmi_real_t));
@@ -12694,15 +12695,12 @@ cos(w_other_3_1)*4*(w_other_3_2) + (w_other_3_3) + 4*(x_4) - sin(x_4) + (x_3) + 
             equation_sorting=true,
             variability_propagation=false,
             template="
-
 $n_outputs$
 				   $C_DAE_output_vrefs$
 ",
             generatedCode="
-
 30
-				   static const int Output_vrefs[30] = {5,6,7,8,9,14,17,20,23,26,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,268435554,536871011};
-
+				   static const int Output_vrefs[30] = {5,6,7,8,9,14,17,20,23,26,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,268435514,536870971};
 ")})));
 end OutputTest1;
 
@@ -15639,7 +15637,6 @@ model TestRelationalOp15
             name="TestRelationalOp15",
             description="Ensure that guards are generated correctly",
             template="
-
 $C_ode_time_events$
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
@@ -15649,23 +15646,23 @@ $C_DAE_event_indicator_residuals$
     jmi_real_t nSamp;
 
 
+
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _temp_1_2 = sin(_time);
-    _temp_2_3 = cos(_time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _temp_1_2 - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _temp_2_3 - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
     }
     _a_0 = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, AD_WRAP_LITERAL(1), _time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _temp_1_2 - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(jmi, _temp_2_3 - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
+        _sw(2) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
     }
     _b_1 = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(2)), JMI_TRUE, _time, AD_WRAP_LITERAL(1));
     JMI_DYNAMIC_FREE()
@@ -15674,12 +15671,11 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = _temp_1_2 - (AD_WRAP_LITERAL(0));
-    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, _temp_2_3 - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
-    (*res)[2] = COND_EXP_EQ(_sw(0), JMI_TRUE, _temp_2_3 - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[0] = sin(_time) - (AD_WRAP_LITERAL(0));
+    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[2] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
     JMI_DYNAMIC_FREE()
     return ef;
-
 ")})));
 end TestRelationalOp15;
 model TestRelationalOp16
@@ -15691,7 +15687,6 @@ model TestRelationalOp16
             name="TestRelationalOp16",
             description="Ensure that guards are generated correctly",
             template="
-
 $C_ode_time_events$
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
@@ -15701,30 +15696,29 @@ $C_DAE_event_indicator_residuals$
     jmi_real_t nSamp;
 
 
+
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _temp_1_2 = sin(_time);
-    _temp_2_3 = cos(_time);
-    _temp_3_4 = cos(_time + 0.5);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _temp_1_2 - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _temp_2_3 - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(jmi, _temp_3_4 - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
+        _sw(2) = jmi_turn_switch(jmi, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
     }
     _a_0 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(_sw(0), _sw(1)), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), _time);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _temp_1_2 - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(jmi, _temp_2_3 - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_GT);
+        _sw(3) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(4) = jmi_turn_switch(jmi, _temp_3_4 - (AD_WRAP_LITERAL(0)), _sw(4), JMI_REL_GT);
+        _sw(4) = jmi_turn_switch(jmi, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), _sw(4), JMI_REL_GT);
     }
     _b_1 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(_sw(0), _sw(3)), _sw(4)), JMI_TRUE, _time, AD_WRAP_LITERAL(1));
     JMI_DYNAMIC_FREE()
@@ -15733,14 +15727,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = _temp_1_2 - (AD_WRAP_LITERAL(0));
-    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, _temp_2_3 - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
-    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, _temp_3_4 - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
-    (*res)[3] = COND_EXP_EQ(_sw(0), JMI_TRUE, _temp_2_3 - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
-    (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(3)), JMI_TRUE, _temp_3_4 - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[0] = sin(_time) - (AD_WRAP_LITERAL(0));
+    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[3] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(3)), JMI_TRUE, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
     JMI_DYNAMIC_FREE()
     return ef;
-
 ")})));
 end TestRelationalOp16;
 model TestRelationalOp17

@@ -37,9 +37,11 @@ B b;
 fclass InnerOuterTests.InnerOuterTest1
  Real b.T0;
  Real b.a1.z;
+ Real b.a2.z;
 equation
  b.T0 = time;
  b.a1.z = sin(b.T0);
+ b.a2.z = sin(b.T0);
 end InnerOuterTests.InnerOuterTest1;
 ")})));
 end InnerOuterTest1;

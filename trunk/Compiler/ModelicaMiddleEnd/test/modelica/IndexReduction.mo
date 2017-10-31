@@ -2139,6 +2139,7 @@ end IndexReduction.NonDiffArgs.Test2;
         TransformCanonicalTestCase(
             name="NonDiffArgs_Test3",
             description="Test so that no diff for variables in nested function calls is computed correctly",
+            common_subexp_elim=true,
             flatModel="
 fclass IndexReduction.NonDiffArgs.Test3
  Real x;
@@ -2326,17 +2327,17 @@ equation
  v2 = _der_s2;
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(sin(time), w, T);
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(cos(time), w, T);
- w = _der_s2 + (- temp_14);
+ w = _der_s2 + sin(time);
  T = sin(s2);
  temp_7 = w;
+ temp_4 = cos(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * temp_7, temp_7, T);
- _der_w = a2 + temp_4;
+ _der_w = a2 + cos(time);
  a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
  temp_17 = w;
+ temp_14 = - sin(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * temp_17, temp_17, T);
  a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * temp_17) * temp_17, temp_17, T);
- - temp_14 = sin(time);
- temp_4 = cos(time);
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1
@@ -2415,7 +2416,8 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test2
  Real _der_w;
  Real temp_4;
  Real temp_7;
- Real temp_12;
+ Real temp_14;
+ Real temp_17;
 equation
  v1 = _der_s1;
  v2 = _der_s2;
@@ -2423,18 +2425,19 @@ equation
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(sin(time), w, T);
  s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(cos(time), sin(time), T);
  s1 + s2 + s3 = 0;
- w = _der_s2 + temp_12;
+ w = _der_s2 + sin(time);
  T = sin(s2);
  temp_7 = w;
+ temp_4 = cos(time);
  _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * temp_7, temp_7, T);
- _der_w = a2 + temp_4;
+ _der_w = a2 + cos(time);
  a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
- _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((- temp_12) * temp_12, temp_12, T);
- a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(((- temp_12) * cos(time) + (- cos(time)) * temp_12) * temp_12, temp_12, T);
+ temp_17 = sin(time);
+ temp_14 = - sin(time);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_17, temp_17, T);
+ a1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_17) * temp_17, temp_17, T);
  _der_s1 + _der_s2 + _der_s3 = 0;
  a1 + a2 + a3 = 0;
- temp_12 = sin(time);
- temp_4 = cos(time);
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1
@@ -2520,7 +2523,10 @@ fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test3
  Real _der_w;
  Real temp_4;
  Real temp_7;
- Real temp_22;
+ Real temp_14;
+ Real temp_17;
+ Real temp_24;
+ Real temp_27;
 equation
  v1a = _der_s1a;
  v1b = _der_s1b;
@@ -2530,20 +2536,23 @@ equation
  s1a - s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(sin(time), cos(time), T);
  s1a + s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(cos(time), sin(time), T);
  s1a + s1b + s2 + s3 = 0;
- w = _der_s2 + temp_22;
+ w = _der_s2 + sin(time);
  T = sin(s2);
  temp_7 = w;
+ temp_4 = cos(time);
  _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * temp_7, temp_7, T);
- _der_w = a2 + temp_4;
+ _der_w = a2 + cos(time);
  a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
- _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * temp_4, temp_4, T);
- a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * (- sin(time)) + (- sin(time)) * temp_4) * temp_4, temp_4, T);
- _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((- temp_22) * temp_22, temp_22, T);
- a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(((- temp_22) * cos(time) + (- cos(time)) * temp_22) * temp_22, temp_22, T);
+ temp_17 = cos(time);
+ temp_14 = cos(time);
+ _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_17, temp_17, T);
+ a1a - a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_17) * temp_17, temp_17, T);
+ temp_27 = sin(time);
+ temp_24 = - sin(time);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_27, temp_27, T);
+ a1a + a1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_27) * temp_27, temp_27, T);
  _der_s1a + _der_s1b + _der_s2 + _der_s3 = 0;
  a1a + a1b + a2 + a3 = 0;
- temp_22 = sin(time);
- temp_4 = cos(time);
 
 public
  function IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1
@@ -4569,6 +4578,7 @@ end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
             TransformCanonicalTestCase(
                 name="IncidencesThroughFunctions_AllIncidencesFallback",
                 description="If we fail with the incidence calculation (if statement in F2) then we should fall back to using all incidences",
+                common_subexp_elim=true,
                 flatModel="
 fclass IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback
  Real x;

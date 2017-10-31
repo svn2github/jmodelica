@@ -342,29 +342,26 @@ model OutputVarsState1
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="OutputVarsState1",
-            description="State event generating expressions should generate indicator equations.",
+            name="EventGeneration_OutputVarsState1",
             event_output_vars=true,
+            description="State event generating expressions should generate indicator equations.",
             flatModel="
 fclass EventGeneration.OutputVarsState1
  discrete input Integer i;
  discrete Real t;
  output Real _eventIndicator_1;
  discrete Boolean temp_1;
- discrete Real temp_2;
 initial equation
  pre(t) = 0.0;
- pre(temp_2) = 0.0;
  pre(temp_1) = false;
 equation
- temp_1 = temp_2 > 1;
+ temp_1 = sin(i) > 1;
 algorithm
  if temp_1 and not pre(temp_1) then
   t := 1;
  end if;
 equation
- _eventIndicator_1 = temp_2 - 1;
- temp_2 = sin(i);
+ _eventIndicator_1 = sin(i) - 1;
 end EventGeneration.OutputVarsState1;
 ")})));
 end OutputVarsState1;
