@@ -44,7 +44,7 @@ def load_model(classname):
     fmu.set('_log_level', log_level)
     return fmu
 
-@testattr(stddist_base = True)
+@testattr(stddist_full = True)
 def test_cubic():
     model = load_model('TestBrent.Cubic')
     for t in N.linspace(0,1,101):
@@ -59,7 +59,7 @@ def test_cubic():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
-@testattr(stddist_base = True)
+@testattr(stddist_full = True)
 def test_logarithmic():
     model = load_model('TestBrent.Logarithmic')
     for t in N.linspace(0,1,101):
@@ -94,7 +94,7 @@ def test_logarithmic_with_assert():
         assert abs(relativeDiff) < 1e-6
         model.reset()
         
-@testattr(stddist_base = True)
+@testattr(stddist_full = True)
 def test_xlogx():
     model = load_model('TestBrent.XLogX')
 
@@ -148,7 +148,7 @@ def test_xlogx_neg():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
-@testattr(stddist_base = True)
+@testattr(stddist_full = True)
 def test_arcsin():
     model = load_model('TestBrent.Arcsin')
 
@@ -178,7 +178,7 @@ def test_bracketing_failure_Brent():
     z = m.get('z')
     assert N.exp(x)-(1+abs(abs(z)-N.sqrt(y0))) < 1e-10
     
-@testattr(stddist_base = True)
+@testattr(stddist_full = True)
 def test_negative_nominal_Brent():
     m = load_model('TestBrent.NegativeNominal')
     m.initialize(tolerance=1e-6)
