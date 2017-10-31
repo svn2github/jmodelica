@@ -174,7 +174,7 @@ class Test_CoupledFMUModelME2:
         
         aliases = coupled.get_variable_alias("First.J4.phi")
         assert "First.J4.phi" in aliases.keys()
-        assert coupled.get_variable_alias("First.J4.phi") == "First.J4.flange_a.phi"
+        assert coupled.get_variable_alias_base("First.J4.phi") == "First.J4.flange_a.phi"
         
     @testattr(stddist_full = True)
     def test_get_set_real(self):
