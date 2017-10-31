@@ -692,7 +692,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.CacheExtObj"
         fmu_name = compile_fmu(cpath, self.fpath)
         model = load_fmu(fmu_name)
-        res = model.simulate()s
+        res = model.simulate()
         nose.tools.assert_equals(res.final('n3'), 5)
         
     @testattr(stddist_base = True)
