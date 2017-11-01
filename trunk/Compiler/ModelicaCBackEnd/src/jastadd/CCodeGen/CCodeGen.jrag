@@ -817,7 +817,7 @@ aspect CCodeGen {
                 if (exp == null) {
                     str.print(size[i]);
                 } else {
-                    boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
+                    boolean addParenthesis = exp.addParenthesis(Precedence.MULTIPLICATIVE);
                     if (addParenthesis) {
                         str.print("(");
                     }

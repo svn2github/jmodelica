@@ -1534,68 +1534,6 @@ aspect FlatPrettyPrint {
 	eq FFortran77ExternalLanguage.getLanguage() = LANGUAGE_STRING;
 	eq FBuiltinExternalLanguage.getLanguage()   = LANGUAGE_STRING;
 	
-	public static final int FExp.PRECEDENCE_LOWEST         = 0;
-	public static final int FExp.PRECEDENCE_CONDITIONAL    = 1;
-	public static final int FExp.PRECEDENCE_ARRAY_RANGE    = 2;
-	public static final int FExp.PRECEDENCE_LOGICAL_OR     = 3;
-	public static final int FExp.PRECEDENCE_LOGICAL_AND    = 4;
-	public static final int FExp.PRECEDENCE_UNARY          = 5;
-	public static final int FExp.PRECEDENCE_RELATIONAL     = 6;
-	public static final int FExp.PRECEDENCE_ADDITIVE       = 7;
-	public static final int FExp.PRECEDENCE_MULTIPLICATIVE = 8;
-	public static final int FExp.PRECEDENCE_EXPONENTIATION = 9;
-	public static final int FExp.PRECEDENCE_HIGHEST        = 10;
-	
-	syn int FExp.precedence()  = PRECEDENCE_HIGHEST;
-	eq FDotAddExp.precedence() = PRECEDENCE_ADDITIVE;
-	eq FDotDivExp.precedence() = PRECEDENCE_MULTIPLICATIVE;
-	eq FDotMulExp.precedence() = PRECEDENCE_MULTIPLICATIVE;
-	eq FDotPowExp.precedence() = PRECEDENCE_EXPONENTIATION;
-	eq FDotSubExp.precedence() = PRECEDENCE_ADDITIVE;
-	eq FAndExp.precedence()    = PRECEDENCE_LOGICAL_AND;
-	eq FOrExp.precedence()     = PRECEDENCE_LOGICAL_OR;
-	eq FRelExp.precedence()    = PRECEDENCE_RELATIONAL;
-	eq FIfExp.precedence()     = PRECEDENCE_CONDITIONAL;
-	eq FRangeExp.precedence()  = PRECEDENCE_ARRAY_RANGE;
-	eq FNegExp.precedence()    = PRECEDENCE_ADDITIVE;
-	eq FNotExp.precedence()    = PRECEDENCE_UNARY;
-
-	/**
-	 * The reason for using parent here is that this attribute is intended to be used by 
-	 * prettyPrint(), that is in turn used by toString(). Checking if our parent is null lets   
-	 * us use toString() on expressions that are not yet in the AST without getting a 
-	 * NullPointerException. This is useful e.g. when debugging. */
-	syn int FExp.parentPrecedence() = parent != null ? retrieveParentPrecedence() : FExp.PRECEDENCE_LOWEST;
-	syn int List.parentPrecedence() = parent != null ? retrieveParentPrecedence() : FExp.PRECEDENCE_LOWEST;
-	syn int Opt.parentPrecedence()  = parent != null ? retrieveParentPrecedence() : FExp.PRECEDENCE_LOWEST;
-	
-	inh int FExp.retrieveParentPrecedence();
-	inh int List.retrieveParentPrecedence();
-	inh int Opt.retrieveParentPrecedence();
-	eq FExp.getChild().retrieveParentPrecedence() {
-		int precedence = precedence();
-		if (precedence == PRECEDENCE_HIGHEST)
-			return PRECEDENCE_LOWEST;
-		else
-			return precedence;
-	}
-	eq List.getChild().retrieveParentPrecedence()                  = parentPrecedence();
-	eq Opt.getChild().retrieveParentPrecedence()                   = parentPrecedence();
-	eq ASTNode.getChild().retrieveParentPrecedence()               = FExp.PRECEDENCE_LOWEST;
-	
-	/**
-	 * Used if precedence is equal for node and its parent.
-	 */
-	inh boolean FExp.shouldhaveParenthesis();
-	eq BaseNode.getChild().shouldhaveParenthesis()  = false;
-	eq FBinExp.getRight().shouldhaveParenthesis()   = true;
-	eq FDotPowExp.getLeft().shouldhaveParenthesis() = true;
-	eq FNegExp.getFExp().shouldhaveParenthesis()    = true;
-	
-	/**
-	 * Returns true if this exp should add parenthesis given a certain precedence.
-	 */
-	syn boolean FExp.addParenthesis(int parentPrecedence) = precedence() < parentPrecedence || precedence() == parentPrecedence && shouldhaveParenthesis();
 	
 	public final void FExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		boolean addParenthesis = addParenthesis(parentPrecedence());
