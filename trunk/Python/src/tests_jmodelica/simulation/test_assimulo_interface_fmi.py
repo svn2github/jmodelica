@@ -65,7 +65,7 @@ class Test_When:
         
         compile_fmu("WhenTests.WhenTest5", file_name)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_sequence_of_pre(self):
         model = load_fmu("WhenTests_WhenTest5.fmu")
         
@@ -180,7 +180,7 @@ class Test_Time_Events_FMU10:
         compile_fmu("TimeEvents.TestSampling9", file_name, version="1.0")
         compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name, version="1.0")
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_1(self):
         model = load_fmu("TimeEvents_Basic1.fmu")
         model.initialize()
@@ -188,7 +188,7 @@ class Test_Time_Events_FMU10:
         print ev.nextEventTime
         assert ev.nextEventTime == 1
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_2(self):
         model = load_fmu("TimeEvents_Basic2.fmu")
         model.initialize()
@@ -197,7 +197,7 @@ class Test_Time_Events_FMU10:
         assert ev.nextEventTime == 2
         assert ev.nextEventTime == model.get("p")
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_3(self):
         model = load_fmu("TimeEvents_Basic3.fmu")
         model.initialize()
@@ -205,7 +205,7 @@ class Test_Time_Events_FMU10:
         print ev.nextEventTime
         assert ev.nextEventTime == 1.5
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_4(self):
         model = load_fmu("TimeEvents_Basic4.fmu")
         
@@ -277,7 +277,7 @@ class Test_Time_Events_FMU10:
         assert model.get("i") == 1
         assert model.get("j") == 1
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_mixed1(self):
         model = load_fmu("TimeEvents_Mixed1.fmu")
         model.initialize()
@@ -414,7 +414,7 @@ class Test_Time_Events_FMU20:
         compile_fmu("TimeEvents.TestSampling9", file_name, version="2.0")
         compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name, version="2.0")
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_1(self):
         model = load_fmu("TimeEvents_Basic1.fmu")
         model.initialize()
@@ -424,7 +424,7 @@ class Test_Time_Events_FMU20:
         print ev.nextEventTime
         assert ev.nextEventTime == 1
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_2(self):
         model = load_fmu("TimeEvents_Basic2.fmu")
         model.initialize()
@@ -435,7 +435,7 @@ class Test_Time_Events_FMU20:
         assert ev.nextEventTime == 2
         assert ev.nextEventTime == model.get("p")
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_3(self):
         model = load_fmu("TimeEvents_Basic3.fmu")
         model.initialize()
@@ -445,7 +445,7 @@ class Test_Time_Events_FMU20:
         print ev.nextEventTime
         assert ev.nextEventTime == 1.5
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_4(self):
         model = load_fmu("TimeEvents_Basic4.fmu")
         
@@ -528,7 +528,7 @@ class Test_Time_Events_FMU20:
         assert model.get("i") == 1
         assert model.get("j") == 1
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_mixed1(self):
         model = load_fmu("TimeEvents_Mixed1.fmu")
         model.initialize()
@@ -647,7 +647,7 @@ class Test_DynamicStates:
 
         compile_fmu("StrippedRevoluteConstraint", file_name)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_switch_of_states(self):
         model = load_fmu("StrippedRevoluteConstraint.fmu")
         
@@ -680,7 +680,7 @@ class Test_Events:
         compile_fmu("EventIter.EventIterDiscreteReals", file_name)
         compile_fmu("EventIter.EventAfterTimeEvent", file_name)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_reinit_after_two_time_events(self):
         model = load_fmu("EventIter_EventAfterTimeEvent.fmu")
         
@@ -688,22 +688,22 @@ class Test_Events:
         
         nose.tools.assert_almost_equal(res.final("s"), -1.0)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_event_infinite_iteration_1(self):
         model = load_fmu("EventIter_EventInfiniteIteration1.fmu")
         nose.tools.assert_raises(FMUException, model.initialize)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_event_infinite_iteration_2(self):
         model = load_fmu("EventIter_EventInfiniteIteration2.fmu")
         nose.tools.assert_raises(FMUException, model.initialize)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_event_infinite_iteration_3(self):
         model = load_fmu("EventIter_EventInfiniteIteration3.fmu")
         nose.tools.assert_raises(FMUException, model.simulate)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_singular_system_event_1(self):
         model = load_fmu("EventIter_SingularSystem1.fmu")
         
@@ -745,7 +745,7 @@ class Test_Events:
         
         nose.tools.assert_almost_equal(model.get("x"), -1e-6)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_initial_phasing_1(self):
         model = load_fmu("EventIter_InitialPhasing1.fmu")
         res = model.simulate(final_time=0.1)
@@ -776,7 +776,7 @@ class Test_Relations:
         compile_fmu("RelationTests.RelationGEInit", file_name)
         compile_fmu("RelationTests.TestRelationalOp1", file_name)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_le(self):
         model = load_fmu("RelationTests_RelationLE.fmu")
         opts = model.simulate_options()
@@ -791,7 +791,7 @@ class Test_Relations:
         nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
         nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_leinv(self):
         model = load_fmu("RelationTests_RelationLEInv.fmu")
         opts = model.simulate_options()
@@ -806,7 +806,7 @@ class Test_Relations:
         nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
         nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_ge(self):
         model = load_fmu("RelationTests_RelationGE.fmu")
         opts = model.simulate_options()
@@ -821,7 +821,7 @@ class Test_Relations:
         nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
         nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_geinv(self):
         model = load_fmu("RelationTests_RelationGEInv.fmu")
         opts = model.simulate_options()
@@ -836,7 +836,7 @@ class Test_Relations:
         nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
         nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_leinit(self):
         model = load_fmu("RelationTests_RelationLEInit.fmu")
         
@@ -845,7 +845,7 @@ class Test_Relations:
         nose.tools.assert_almost_equal(res.initial("x"),1.0,places=3)
         nose.tools.assert_almost_equal(res.initial("y"),0.0,places=3)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_geinit(self):
         model = load_fmu("RelationTests_RelationGEInit.fmu")
         
@@ -854,7 +854,7 @@ class Test_Relations:
         nose.tools.assert_almost_equal(res.initial("x"),0.0,places=3)
         nose.tools.assert_almost_equal(res.initial("y"),1.0,places=3)
 
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_relation_op_1(self):
         model = load_fmu("RelationTests_TestRelationalOp1.fmu")
         
@@ -1281,7 +1281,7 @@ class Test_FMI_ODE_CS_2:
         res = model.simulate(final_time=0.8, options=opts, input=input)
         nose.tools.assert_almost_equal(res.final("T"), 20.67587, 2)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()
@@ -1291,7 +1291,7 @@ class Test_FMI_ODE_CS_2:
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
             
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_simulation_without_initialization(self):
         model = load_fmu("TimeEvents_Basic5.fmu")
         opts = model.simulate_options()
@@ -1299,7 +1299,7 @@ class Test_FMI_ODE_CS_2:
 
         nose.tools.assert_raises(FMUException, model.simulate, options=opts)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_event_basic_5(self):
         model = load_fmu("TimeEvents_Basic5.fmu")
         opts = model.simulate_options()
@@ -1332,7 +1332,7 @@ class Test_FMI_ODE_CS:
         _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs", version=1.0)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version=1.0)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_time_out(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         
@@ -1358,7 +1358,7 @@ class Test_FMI_ODE_CS:
         
         nose.tools.assert_almost_equal(res.final("x"), 3.89, 2)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_simulation_without_initialization(self):
         model = load_fmu("TimeEvents_Advanced5.fmu")
         opts = model.simulate_options()
@@ -1366,7 +1366,7 @@ class Test_FMI_ODE_CS:
 
         nose.tools.assert_raises(FMUException, model.simulate, options=opts)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_returned_result(self):
         model = load_fmu("TimeEvents_Advanced5.fmu")
         opts = model.simulate_options()
@@ -1376,7 +1376,7 @@ class Test_FMI_ODE_CS:
 
         nose.tools.assert_raises(Exception,res._get_result_data)
             
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()
@@ -1423,7 +1423,7 @@ class Test_FMI_ODE_2:
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_state1(self):
         """
         Tests simulation when there is no state in the model (Example1).
@@ -1439,7 +1439,7 @@ class Test_FMI_ODE_2:
         nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
         nose.tools.assert_almost_equal(res.final('z'),4.000000000)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_state2(self):
         """
         Tests simulation when there is no state in the model (Example2).
@@ -1451,7 +1451,7 @@ class Test_FMI_ODE_2:
         nose.tools.assert_almost_equal(res.initial('x') ,-1.000000000)
         nose.tools.assert_almost_equal(res.final('x'),-1.000000000)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_state1_radau(self):
         """
         Tests simulation when there is no state in the model (Example1).
@@ -1500,7 +1500,7 @@ class Test_FMI_ODE:
         self._bounceSim = FMIODE(self._bounce)
         self._dqSim     = FMIODE(self._dq)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()
@@ -1511,7 +1511,7 @@ class Test_FMI_ODE:
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
             
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_maxord_is_set(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
@@ -1533,7 +1533,7 @@ class Test_FMI_ODE:
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_result(self):
         opts = self._bounce.simulate_options()
         opts["result_handling"] = "none"
@@ -1542,7 +1542,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_raises(Exception,res._get_result_data)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_returned_result(self):
         opts = self._bounce.simulate_options()
         opts["return_result"] = False
@@ -1551,7 +1551,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_raises(Exception,res._get_result_data)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_simulation_without_initialization(self):
         bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
         opts = bounce.simulate_options()
@@ -1559,7 +1559,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_raises(FMUException, bounce.simulate, options=opts)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_reset_internal_variables(self):
         model = load_fmu("Inputs_SimpleInput.fmu")
         
@@ -1572,7 +1572,7 @@ class Test_FMI_ODE:
         model.time = 0.5
         assert model.get("u") == 2.0
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_reset_internal_variables2(self):
         model = load_fmu("Inputs_SimpleInput3.fmu")
         
@@ -1649,7 +1649,7 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=1.5,options=opts)
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-2
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_state1(self):
         """
         Tests simulation when there is no state in the model (Example1).
@@ -1665,7 +1665,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
         nose.tools.assert_almost_equal(res.final('z'),4.000000000)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_no_state2(self):
         """
         Tests simulation when there is no state in the model (Example2).
@@ -1677,7 +1677,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(res.initial('x') ,-1.000000000)
         nose.tools.assert_almost_equal(res.final('x'),-1.000000000)
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_result_name_file(self):
         """
         Tests user naming of result file (FMIODE).
@@ -1696,7 +1696,7 @@ class Test_FMI_ODE:
         assert res.result_file == "bouncingBallt_result_test.txt"
         assert os.path.exists(res.result_file)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_result_enumeration(self):
         """
         Tests that enumerations are written to the result
@@ -1731,7 +1731,7 @@ class Test_FMI_ODE:
         res = model.simulate(options=opts)
         res["mode"] #Check that the enumeration variable is in the dict, otherwise exception
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_result_enumeration_2(self):
         file_name = os.path.join(get_files_path(), 'Modelica', 'Enumerations.mo')
 
@@ -1774,7 +1774,7 @@ class Test_FMI_ODE:
         assert res["three"][0] == 3
         assert res["three"][-1] == 3
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_init(self):
         """
         This tests the functionality of the method init. 
@@ -1799,7 +1799,7 @@ class Test_FMI_ODE:
         #nose.tools.assert_almost_equal(sol[0][2],0.000000000)
         #nose.tools.assert_almost_equal(sol[0][3],-9.81000000)
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_f(self):
         """
         This tests the functionality of the rhs.
@@ -1813,7 +1813,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(rhs[1],-9.8100000)
 
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_g(self):
         """
         This tests the functionality of the event indicators.
@@ -1831,7 +1831,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(event[0],0.50000000)
 
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_t(self):
         """
         This tests the functionality of the time events.
@@ -1845,7 +1845,7 @@ class Test_FMI_ODE:
         #Further testing of the time event function is needed.
         
         
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_handle_event(self):
         """
         This tests the functionality of the method handle_event.
@@ -1867,7 +1867,7 @@ class Test_FMI_ODE:
         
         #Further testing of the handle_event function is needed.
     
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_completed_step(self):
         """
         This tests the functionality of the method completed_step.
@@ -1991,7 +1991,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_almost_equal(solver.t, 1.856045, places=3)    
         
-    @testattr(windows_base = True)
+    @testattr(windows_full = True)
     def test_typeDefinitions_simulation(self):
         """
         This tests a FMU with typeDefinitions including StringType and BooleanType
@@ -2017,7 +2017,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_raises(FMUException,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
         
-    @testattr(windows_base = True)
+    @testattr(windows_full = True)
     def test_assert_raises_sensitivity_without_jmodelica(self):
         model = load_fmu("CoupledClutches_Mod_Generation_Tool.fmu", path_to_fmus_me1)
         opts = model.simulate_options()
@@ -2025,7 +2025,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_raises(FMUException,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
 
-    @testattr(stddist_base = True)
+    @testattr(stddist_full = True)
     def test_event_iteration(self):
         """
         This tests FMUs with event iteration (JModelica.org).
