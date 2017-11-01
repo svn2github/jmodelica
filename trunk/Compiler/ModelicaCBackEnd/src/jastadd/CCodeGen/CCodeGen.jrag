@@ -216,6 +216,7 @@ aspect CCodeGen {
     public static final String ASTNode.C_SUFFIX_FPCL     = "fpcl";
     public static final String ASTNode.C_SUFFIX_FPCR     = "fpcr";
     public static final String ASTNode.C_SUFFIX_FPOUT    = "fpout";
+    public static final String ASTNode.C_SUFFIX_SETFLAG  = "_s";
     
     public class FTypePrefixVariability {
         public enum VariabilityCausality_C {

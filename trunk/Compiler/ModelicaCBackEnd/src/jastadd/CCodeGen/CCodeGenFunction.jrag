@@ -19,7 +19,7 @@ aspect CCodeGenFunctionDecl {
 
     public void FClass.generateFunctionHeaders(CodePrinter p, CodeStream str, String indent) {
         for (FFunctionDecl func : myFFunctionDeclsPartial()) {
-            func.genStructsPartial_C(str, "");
+            func.genStructsPartial(p, str, "");
         }
         for (FFunctionDecl func : myFFunctionDeclsPartialCalled()) {
             func.genHeadersPartial_C(str, "");
@@ -422,7 +422,7 @@ aspect CCodeGenFunctionCall {
 	}
 
 
-    public abstract class ParameterComputation extends HeadComputation {
+    public class ParameterComputation extends HeadComputation {
 		public ParameterComputation(AnnotationNode derNode, String sep) {
 			super(derNode, sep);
 	    }
