@@ -113,9 +113,7 @@ test_set_p="python"
 test_set_z="python64"
 
 # Standard set of tags
-# -a noncompliantfmi takes extremely long time to run and will thus not 
-# be part of default test tags 
-TAGS="-a stddist_base"
+TAGS="-a stddist_base -a noncompliantfmi"
 if [[ "${IPOPT_HOME}" != "" ]]; then
   TAGS="${TAGS} -a ipopt"
   if [[ "${SYS}" == Win ]]; then
@@ -129,9 +127,7 @@ if [[ "${IPOPT_HOME}" != "" ]]; then
 fi
 
 # Standard set of tags
-# -a noncompliantfmi takes extremely long time to run and will thus not 
-# be part of default test tags 
-TAGS64="-a stddist_base"
+TAGS64="-a stddist_base -a noncompliantfmi"
 if [[ "${IPOPT64_HOME}" != "" ]]; then
   TAGS64="${TAGS64} -a ipopt"
   if [[ "${SYS}" == Win ]]; then
