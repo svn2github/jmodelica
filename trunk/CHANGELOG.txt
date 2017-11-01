@@ -3,7 +3,7 @@
 Fixed bug where certain combinations of Integer and enumeration parameters 
 gave wrong values of those parameters reported from the FMU.
 
-; Change ; Major ; TestsM #5489
+; Change ; Major ; Tests ; #5489
 Divided the test tags stddist, windows and casadi into stddist_base,
 stddist_full, windows_base, windows_full, casadi_base and casadi_full. 
 The _base indicates tests that should run on both 32 and 64 bit platform 
