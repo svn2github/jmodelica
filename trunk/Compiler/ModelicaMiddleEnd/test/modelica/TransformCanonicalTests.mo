@@ -2022,9 +2022,6 @@ Error at line 1761, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/Tran
 
 Error at line 1762, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p1
-
-Error at line 1762, column 25, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
-  Could not evaluate binding expression for attribute 'start' due to circularity: p1
 ")})));
 end AttributeBindingExpTest4_Err;
 
@@ -2053,24 +2050,6 @@ Error at line 1794, column 15, in file '...', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p2
 ")})));
 end AttributeBindingExpTest5_Err;
-
-model AttributeBindingExpTest6_Warn
-
-    parameter Real p(fixed=false);
-    Real x(start=p) = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="AttributeBindingExpTest6_Warn",
-            description="Test errors in binding expressions..",
-            errorMessage="
-1 warnings found:
-
-Compliance warning at line 0, column 0, in file '...', START_VALUE_INITIAL_PARAMETER:
-  Variability of binding expression for attribute 'start' is  initial parameter variability: p
-
-")})));
-end AttributeBindingExpTest6_Warn;
 
 model IncidenceTest1
 
