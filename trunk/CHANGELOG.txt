@@ -1,4 +1,6 @@
 ================= Unreleased ==================
+
+================= Stable-2017-11-02 ==================
 ; Fixed ; Minor ; Compiler ; #5326
 Fixed bug where certain combinations of Integer and enumeration parameters 
 gave wrong values of those parameters reported from the FMU.
