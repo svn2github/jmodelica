@@ -62,12 +62,23 @@ aspect InstVariability {
     eq UnknownInstComponentDecl.calcVariability()                  = fConstant();
     eq InstExternalObject.calcVariability()                        = fParameter();
     
+    // Parameters variabilities also depend on binding expressions since its nice
+    // to propagate known values, these include: 
+    // * Structural parameters, marked during error checking.
+    // * Evaluate=true parameters
+    // * Final independent parameters
+    //
+    // Since this is used before/during error checks and depend on expressions
+    // we have to guard agains circularity.
+    private boolean InstAssignable.circularVariability = false;
+    
     eq InstAssignable.calcVariability() {
         FTypePrefixVariability v =  super.calcVariability();
         if (v.constantVariability() && isInput() && inFunction() && isTopLevelInputOutput()) {
             return fDiscrete();
         }
-        if (v.parameterVariability() && !inRecordDecl()) {
+        if (v.parameterVariability() && !inRecordDecl() && !circularVariability) {
+            circularVariability = true;
             if (!isRecord()) {
                 if (isSetAsInitial()) {
                     v = fInitialParameter();
@@ -83,6 +94,7 @@ aspect InstVariability {
                 }
             }
             v = bExpVariability().combinePropagate(v);
+            circularVariability = false;
         }
         return v;
     }
@@ -131,28 +143,14 @@ aspect InstVariability {
     syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
     eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();
     eq InstPrimitive.defaultVariability()                             = isReal() ? fContinuous() : fDiscrete(); 
-
-    // Parameters variabilities also depend on binding expressions since its nice
-    // to propagate known values, these include: 
-    // * Structural parameters, marked during error checking.
-    // * Evaluate=true parameters
-    // * Final independent parameters
-    //
-    // Since this is used before/during error checks and depend on expressions
-    // we have to guard agains circularity.
-    private boolean InstAssignable.circularVariability = false;
     
     syn FTypePrefixVariability InstComponentDecl.bExpVariability() = fContinuous();
     eq InstAssignable.bExpVariability() {
-        FTypePrefixVariability v = super.bExpVariability();
-        if (!circularVariability && hasBindingFExp()) {
-            if (!getBindingFExp().type().isUnknown()) {
-                circularVariability = true;
-                v = getBindingFExp().variability();
-                circularVariability = false;
-            }
+        if (hasBindingFExp() && !getBindingFExp().type().isUnknown()) {
+            return getBindingFExp().variability();
+        } else {
+            return super.bExpVariability();
         }
-        return v;
     }
     
     /**

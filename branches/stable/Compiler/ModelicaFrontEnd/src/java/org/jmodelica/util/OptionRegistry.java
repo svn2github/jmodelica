@@ -440,6 +440,7 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.uncommon,
              true,
+             false,
              "If enabled, the compiler performs a global analysis on the equation system and extract identical " +
              "function calls into common equations."),
         EXT_CEVAL

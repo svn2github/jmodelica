@@ -2139,6 +2139,7 @@ end IndexReduction.NonDiffArgs.Test2;
         TransformCanonicalTestCase(
             name="NonDiffArgs_Test3",
             description="Test so that no diff for variables in nested function calls is computed correctly",
+            common_subexp_elim=true,
             flatModel="
 fclass IndexReduction.NonDiffArgs.Test3
  Real x;
@@ -4577,6 +4578,7 @@ end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
             TransformCanonicalTestCase(
                 name="IncidencesThroughFunctions_AllIncidencesFallback",
                 description="If we fail with the incidence calculation (if statement in F2) then we should fall back to using all incidences",
+                common_subexp_elim=true,
                 flatModel="
 fclass IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback
  Real x;

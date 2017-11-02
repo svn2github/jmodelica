@@ -30,13 +30,13 @@ class TestFunction1(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.FunctionTest1')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('FunctionTest1+2_res.txt')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -54,13 +54,13 @@ class TestFunction2(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.FunctionTest2')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('FunctionTest1+2_res.txt')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -78,12 +78,12 @@ class TestIntegerArg1(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.IntegerArg1')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
         self.run()
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_result(self):
         """
         Test that results match the expected ones.
@@ -100,12 +100,12 @@ class TestZeroDimArray(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.TestZeroDimArray')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_result(self):
         """
         Test that results match the expected ones.
@@ -122,11 +122,11 @@ class TestAssertSize(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.TestAssertSize', options={'inline_functions':'none', 'variability_propagation':False})
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_result(self):
         """
         Test that results match the expected ones.
@@ -145,12 +145,12 @@ class TestUnkRecArray(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.TestUnkRecArray', options={'inline_functions':'none', 'variability_propagation':False})
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_result(self):
         """
         Test that results match the expected ones.
@@ -168,12 +168,12 @@ class TestLoadResource(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.LoadResource1', options={'inline_functions':'none', 'variability_propagation':False})
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_constantEvaluation(self):
         """
         Test that constant evaluated load resource compiles
@@ -190,12 +190,12 @@ class TestStringArray(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.StringArray1', options={'inline_functions':'none', 'variability_propagation':False, 'relational_time_events':False})
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_stringArrayInFunction(self):
         """
         Test that string arrays in function compiles and simulates
@@ -212,12 +212,12 @@ class TestFuncCallInputOutputArray1(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.FuncCallInputOutputArray1')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_stringArrayInFunction(self):
         """
         Test that string arrays in function compiles and simulates

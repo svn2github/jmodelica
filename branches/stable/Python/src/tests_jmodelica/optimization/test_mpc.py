@@ -66,7 +66,7 @@ class TestMPCClass(object):
         else:
             return op.optimize_options(alg)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_auto_bl_factors(self):
         """
         Test blocking factors generated in the mpc-class.
@@ -110,7 +110,7 @@ class TestMPCClass(object):
         
 
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_du_quad_pen(self):
         """
         Test with blocking_factor du_quad_pen.
@@ -184,7 +184,7 @@ class TestMPCClass(object):
 
         N.testing.assert_(largest_delta_quad<largest_delta)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_du_bounds(self):
         """
         Test with blocking_factor du_bounds.
@@ -232,7 +232,7 @@ class TestMPCClass(object):
             
         N.testing.assert_(largest_delta<5)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_softening_bounds(self):
         """
         Test the automatic softening of hard variable bounds.
@@ -272,7 +272,7 @@ class TestMPCClass(object):
         N.testing.assert_('Solve_Succeeded', MPC_object.collocator.
                                         solver_object.getStat('return_status'))
 
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_shift_xx(self):
         #~ """
         #~ Test that the result from the shift operation equals the result from
@@ -311,7 +311,7 @@ class TestMPCClass(object):
         #~ N.testing.assert_array_almost_equal(MPC_object.collocator.xx_init, 
                                             #~ MPC_object.shifted_xx)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_infeasible_return_input(self):
         """
         Test that the input returned from an unsuccessful optimization is the 
@@ -375,7 +375,7 @@ class TestMPCClass(object):
  
         N.testing.assert_almost_equal(u_k3[1](0)[0], result1['Tc'][7],decimal=10)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_infeasible_start(self):
         """
         Test that the MPC class throws an exception if the first optimization 
@@ -411,7 +411,7 @@ class TestMPCClass(object):
         
         N.testing.assert_raises(Exception, MPC_object.sample)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_get_results_this_sample(self):
         """
         Test that get_results_this_sample returns the optimization result for
@@ -457,7 +457,7 @@ class TestMPCClass(object):
         N.testing.assert_equal(sample_period, result2['time'][0])
         N.testing.assert_equal(sample_period*(horizon+1), result2['time'][-1])
 
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_set(self):
         #~ """
         #~ Test the set function for single parameter, list of parameters and 
@@ -511,25 +511,25 @@ class TestMPCClass(object):
         #~ N.testing.assert_equal(MPC_object.collocator._par_vals[ind_Tc_ref], 0)
 
         
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_update_with_sim_results(self):
         #~ """
         #~ Test where the states are updated from a simulation result file.
         #~ """
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_update_with_state_dict(self):
         #~ """
         #~ Test where the states are updated from a dictionary containing the 
         #~ estimated states.
         #~ """
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_update_no_input(self):
         #~ """
         #~ Test where update is called with no input, meaning estimates of the
         #~ states are to be extracted from previous optimization result.
         #~ """
 
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_element_interpolation(self):
         #~ """ 
         #~ Test result_mode = element_interpolation.
@@ -572,7 +572,7 @@ class TestMPCClass(object):
         #~ dh()
         #~ N.testing.assert_array_almost_equal(res['Tc'], correct_res)
 
-    #~ @testattr(casadi = True)
+    #~ @testattr(casadi_base = True)
     #~ def test_mesh_points(self):
         #~ """ 
         #~ Test result_mode = mesh_points.
@@ -612,7 +612,7 @@ class TestMPCClass(object):
         #~ res = MPC_object.get_complete_results()
         #~ N.testing.assert_array_almost_equal(res['Tc'], correct_res)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_warm_start_options(self):
         """ 
         Test that the warm start options are activated.
@@ -653,7 +653,7 @@ class TestMPCClass(object):
         N.testing.assert_equal(mu_init, 1e-3)
         N.testing.assert_equal(prl,  0)
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_eliminated_variables(self):
         """ 
         Test that the results when using eliminated variables are the same as when not using them.
@@ -679,9 +679,11 @@ class TestMPCClass(object):
 
         # Compile and load optimization problems
         op = transfer_to_casadi_interface("CSTR.CSTR_MPC", self.cstr_file_path,
-                                compiler_options={"state_initial_equations":True})
+                                compiler_options={"state_initial_equations":True,
+                                                  "common_subexp_elim":False})
         op_elim = transfer_to_casadi_interface("CSTR.CSTR_elim_vars_MPC", self.cstr_file_path,
-                                compiler_options={"state_initial_equations":True,'equation_sorting':True, 'automatic_tearing':False})
+                                compiler_options={"state_initial_equations":True,'equation_sorting':True, 'automatic_tearing':False,
+                                            "common_subexp_elim":False})
 
         # Define MPC options
         sample_period = 5                           # s

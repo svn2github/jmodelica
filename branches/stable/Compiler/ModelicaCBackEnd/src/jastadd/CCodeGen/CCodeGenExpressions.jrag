@@ -162,62 +162,62 @@ aspect CCodeGenExpressions {
     @Override
     public void FIfExp.genTempVars_C(CodePrinter p, CodeStream ostr, String indent) {
         boolean arg = isFunctionCallArg();
+        p.printPreSteps(getIfExp(), ostr, indent);
+        ConditionalCodeStream  str = new ConditionalCodeStream(ostr);
+        String next = p.indent(indent);
+        str.setBufferMode(true);
+        str.print(indent);
+        str.print("if (");
+        p.print(getIfExp(), str, next);
+        str.print(") {\n");
+        str.setBufferMode(false);
         if (arg) {
-            p.printPreSteps(getIfExp(), ostr, indent);
-            ConditionalCodeStream  str = new ConditionalCodeStream(ostr);
-            String next = p.indent(indent);
-            str.setBufferMode(true);
-            str.print(indent);
-            str.print("if (");
-            p.print(getIfExp(), str, next);
-            str.print(") {\n");
-            str.setBufferMode(false);
-            if (arg) {
-                getThenExp().genTempArg(p.PreStep, str, next);
-            } else {
-                p.printPreSteps(getThenExp(), str, indent);
-            }
-            str.setBufferMode(true);
-            str.print(indent);
-            str.print("}");
-            str.clear();
-            str.print(" else {\n");
-            str.setBufferMode(false);
-            if (arg) {
-                getElseExp().genTempArg(p.PreStep, str, next);
-            } else {
-                p.printPreSteps(getElseExp(), str, indent);
-            }
-            str.setBufferMode(true);
-            str.print(indent);
-            str.print("}\n");
-            str.close();
+            getThenExp().genTempArg(p.PreStep, str, next);
         } else {
-            super.genTempVars_C(p, ostr, indent);
+            p.printPreSteps(getThenExp(), str, next);
         }
+        str.setBufferMode(true);
+        str.print(indent);
+        str.print("}");
+        str.clear();
+        str.print(" else {\n");
+        str.setBufferMode(false);
+        if (arg) {
+            getElseExp().genTempArg(p.PreStep, str, next);
+        } else {
+            p.printPreSteps(getElseExp(), str, next);
+        }
+        str.setBufferMode(true);
+        str.print(indent);
+        str.print("}\n");
+        str.close();
     }
     
     @Override
     public void FIfExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        prettyPrint_C(p.ExecStep, str, indent);
+    }
+
+    public void FIfExp.prettyPrint_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         boolean arg = isFunctionCallArg();
         str.print(FEqExp.macro_C);
         str.print("(");
         p.print(getIfExp(), str, indent);
         str.print(", JMI_TRUE, ");
         if (arg) {
-            getThenExp().genTempArg(p.ExecStep, str, indent);
+            getThenExp().genTempArg(p, str, indent);
         } else {
             p.print(getThenExp(),str,indent);
         }
         str.print(", ");
         if (arg) {
-            getElseExp().genTempArg(p.ExecStep, str, indent);
+            getElseExp().genTempArg(p, str, indent);
         } else {
             p.print(getElseExp(),str,indent);
         }
         str.print(")");
     }
-    
+
     @Override
     public void FIfExp.genTempFree_C(CodePrinter p, CodeStream ostr, String indent) {
 

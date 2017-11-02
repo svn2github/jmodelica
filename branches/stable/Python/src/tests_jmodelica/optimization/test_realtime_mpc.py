@@ -37,7 +37,7 @@ def check_result(results, ref):
         assert abs(ref[key] - results[key][-1]) < 1e-5
         
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_realtime_mpc():
     start_values = {'_start_phi': 0, '_start_v': 0, '_start_z': 0}
     par_changes = ParameterChanges({1: {'z_ref': 5}})
@@ -55,7 +55,7 @@ def test_realtime_mpc():
     results, _ = mpc.run()
     check_result(results, ref)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_realtime_mpc_ia():
     start_values = {'_start_h1': 0, '_start_h2': 0,
                     '_start_h3': 0, '_start_h4': 0}
@@ -89,7 +89,7 @@ def test_realtime_mpc_ia():
     results, _ = mpc.run()
     check_result(results, ref)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_realtime_mpc_cg():
     start_values = {'_start_px': 0, '_start_py': 0, '_start_l': 1,
                     '_start_vx': 0, '_start_vy': 0, '_start_der_l': 0,

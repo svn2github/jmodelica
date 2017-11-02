@@ -278,8 +278,9 @@ def run_demo(with_plots=True, use_ma57=True, latex_plots=False):
 
     ### 4. Solve optimal control problem
     # Compile optimization problem
+    compiler_options={"common_subexp_elim":False}
     op = transfer_optimization_problem("JMExamples_opt.Distillation4_Opt",
-                                       file_name)
+                                       file_name, compiler_options)
 
     # Set initial conditions for post breakdown
     op.set('Q_elec_ref', Q_ref)

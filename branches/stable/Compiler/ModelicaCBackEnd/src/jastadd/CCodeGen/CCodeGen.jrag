@@ -400,12 +400,6 @@ aspect CCodeGen {
     }
 
 
-	public void FFunctionVariable.printArgument_C(CodeStream str) {
-		str.print(type_C());
-		str.print(" ");
-		str.print(name_C());
-	}
-	
 	private FExp FFunctionVariable.dummyFExp = null;
 	
 	public void FFunctionVariable.setDummyExp() {
@@ -1578,12 +1572,8 @@ aspect CCodeGen {
 
     @Override
 	public void StructuredBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%s/********* Initialize reinits *******/", indent);
-        for (AbstractEquationBlock eb : getAllBlocks()) {
-            eb.genReinitTempInits_C(p, str, indent);
-        }
+        p.genOdeDerivativeBlocksInitReinit(this, p, str, indent);
 		str.formatln("%s/************* ODE section *********/", indent);
-		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
 			eb.genSolvedInBLT(p, str, indent);
 		}
@@ -1599,6 +1589,31 @@ aspect CCodeGen {
 		for (AbstractEquationBlock eb : getOtherBlocks()) {
 			eb.genSolvedInBLT(p, str, indent);
 		}
+        p.genOdeDerivativeBlocksWriteBackReinit(this, p, str, indent);
+	}
+    
+    public abstract class CodePrinter {
+	    public abstract void genOdeDerivativeBlocksInitReinit(StructuredBLT sblt, CodePrinter p, CodeStream str, String indent);
+	    public abstract void genOdeDerivativeBlocksWriteBackReinit(StructuredBLT sblt, CodePrinter p, CodeStream str, String indent);
+    }
+
+    public class CPrettyPrinter {
+	    public void genOdeDerivativeBlocksInitReinit(StructuredBLT sblt, CodePrinter p, CodeStream str, String indent) {
+			sblt.genOdeDerivativeBlocksInitReinit(p, str, indent);
+	    }
+	    public void genOdeDerivativeBlocksWriteBackReinit(StructuredBLT sblt, CodePrinter p, CodeStream str, String indent) {
+            sblt.genOdeDerivativeBlocksWriteBackReinit(p, str, indent);
+	    }
+    }
+
+	public void StructuredBLT.genOdeDerivativeBlocksInitReinit(CodePrinter p, CodeStream str, String indent) {
+        str.formatln("%s/********* Initialize reinits *******/", indent);
+        for (AbstractEquationBlock eb : getAllBlocks()) {
+            eb.genReinitTempInits_C(p, str, indent);
+        }
+	}
+
+	public void StructuredBLT.genOdeDerivativeBlocksWriteBackReinit(CodePrinter p, CodeStream str, String indent) {
         str.formatln("%s/********* Write back reinits *******/", indent);
         for (AbstractEquationBlock eb : getAllBlocks()) {
             eb.genReinitWritebacks_C(p, indent, str);

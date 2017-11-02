@@ -233,7 +233,7 @@ public class TestAnnotationizer {
     }
 
     private static void usageError() throws Exception {
-        getHelperClass(ANY).getMethod("usageError", int.class).invoke(null);
+        getHelperClass(ANY).getMethod("usageError").invoke(null);
     }
 
 	private static final String[] MODELICA = { "org.jmodelica.modelica.compiler.TestAnnotationizerHelper" };

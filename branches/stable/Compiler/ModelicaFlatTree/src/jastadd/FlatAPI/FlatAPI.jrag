@@ -43,12 +43,25 @@ aspect FlatAPI {
          * of a variable that is represented in our z-vector.
          */
         public static interface ZCategory {
-            public static final ZCategory TIME = new FixedSizeCategory(1, "TIME");
-            public static final ZCategory HOMOTOPY_LAMBDA = new FixedSizeCategory(1, "HOMOTOPY_LAMBDA");
+            public static final ZCategory TIME = 
+                    new FixedSizeCategory("TIME", "t", "time");
+            public static final ZCategory HOMOTOPY_LAMBDA = 
+                    new FixedSizeCategory("HOMOTOPY_LAMBDA", "homotopy_lambda", "_homotopy_lambda");
             
             public ZStructVector zStructVector();
-            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator);
+            public String zOffsetName();
+            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator, Integer offset);
             public Comparator<FVariable> sorter(Collection<FVariable> vars, FClass fclass);
+            public int valueReferenceFromIndex(int index);
+            public void visitZOrder(ZVisitor v);
+        }
+        
+        /**
+         * A visitor for visiting each variable in Z order.
+         */
+        public static interface ZVisitor {
+            public void visitVariable(FVariable fv, ZCategoryEntry entry);
+            public void visitVirtualVariable(String name, String zOffsetName, int offset);
         }
 
         /**
@@ -58,10 +71,14 @@ aspect FlatAPI {
         public static class FixedSizeCategory implements ZCategory {
             private final int size;
             private final String name;
+            private final String zOffsetName;
+            private final String[] memberNames;
 
-            public FixedSizeCategory(int size, String name) {
-                this.size = size;
+            public FixedSizeCategory(String name, String zOffsetName, String... memberNames) {
+                this.size = memberNames.length;
                 this.name = name;
+                this.zOffsetName = zOffsetName;
+                this.memberNames = memberNames;
             }
 
             @Override
@@ -70,11 +87,11 @@ aspect FlatAPI {
             }
 
             @Override
-            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator) {
+            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator, Integer groupOffset) {
                 if (vars.size() > 0) {
                     throw new IllegalArgumentException("Special z index categories are not allowed to have entries!");
                 }
-                return new ZCategoryEntry(size, enumerator);
+                return new ZCategoryEntry(this, size, enumerator, groupOffset);
             }
 
             @Override
@@ -86,6 +103,24 @@ aspect FlatAPI {
             public String toString() {
                 return name;
             }
+
+            @Override
+            public String zOffsetName() {
+                return zOffsetName;
+            }
+
+            @Override
+            public int valueReferenceFromIndex(int index) {
+                return index;
+            }
+
+            @Override
+            public void visitZOrder(ZVisitor v) {
+                for (int i = 0; i < size; i++) {
+                    v.visitVirtualVariable(memberNames[i], zOffsetName, i);
+                }
+            }
+
         }
 
         /**
@@ -107,8 +142,18 @@ aspect FlatAPI {
          * Currently there is only independent constants.
          */
         public static enum ParaDependency {
-            INDEPENDENT,
-            DEPENDENT
+            INDEPENDENT ("i"),
+            DEPENDENT   ("d");
+
+            private final String zOffsetName;
+
+            private ParaDependency(String zOffsetName) {
+                this.zOffsetName = zOffsetName;
+            }
+
+            public String zOffsetName() {
+                return zOffsetName;
+            }
         }
 
         /**
@@ -120,14 +165,15 @@ aspect FlatAPI {
          */
         public static enum ZType {
             REAL,
-            INTEGER(1 << 28),
-            BOOLEAN(2 << 28),
-            ENUM(1 << 28),
-            STRING(3 << 28, ZStructVector.STRING),
-            EXTERNAL(0, ZStructVector.EXTERNAL);
+            INTEGER   (1 << 28),
+            BOOLEAN   (2 << 28),
+            ENUM      (1 << 28, "integer"),
+            STRING    (3 << 28, ZStructVector.STRING),
+            EXTERNAL  (0, ZStructVector.EXTERNAL);
 
             private final int valueReferenceMask;
             private final ZStructVector zStructVector;
+            private final String zOffsetName;
 
             private ZType() {
                 this(0);
@@ -137,9 +183,18 @@ aspect FlatAPI {
                 this(valueReferenceMask, ZStructVector.DEFAULT);
             }
 
+            private ZType(int valueReferenceMask, String zOffsetName) {
+                this(valueReferenceMask, ZStructVector.DEFAULT, zOffsetName);
+            }
+
             private ZType(int valueReferenceMask, ZStructVector zStructVector) {
+                this(valueReferenceMask, zStructVector, null);
+            }
+
+            private ZType(int valueReferenceMask, ZStructVector zStructVector, String zOffsetName) {
                 this.valueReferenceMask = valueReferenceMask;
                 this.zStructVector = zStructVector;
+                this.zOffsetName = (zOffsetName != null) ? zOffsetName : toString().toLowerCase();
             }
 
             public ZStructVector zStructVector() {
@@ -153,37 +208,55 @@ aspect FlatAPI {
                 return index ^ valueReferenceMask;
             }
 
+            public String calcZOffsetName(ZVariability var, ParaDependency dependency) {
+                if (this == EXTERNAL) {
+                    return zOffsetName;
+                } else {
+                    return String.format(var.zOffsetNameFormat(), zOffsetName, dependency.zOffsetName());
+                }
+            }
+
         }
 
         /**
          * Represents the different variabilities that are possible in the z-vector
          */
         public static enum ZVariability {
-            CONSTANT(),
-            REGULAR_PARAMETER(true),
-            STRUCTURAL_PARAMETER(true),
-            FINAL_PARAMETER(true),
-            EVAL_PARAMETER(true),
-            FREE_PARAMETER(true), // Only for Optimica!
-            INITIAL_PARAMETER(true),
-            DISCRETE,
-            INPUT,
-            DIFFERENTIATED,
-            DERIVATIVE,
-            CONTINUOUS;
+            CONSTANT        ("c%s"),
+            REGULAR_PARAMETER,
+            STRUCTURAL_PARAMETER,
+            FINAL_PARAMETER,
+            EVAL_PARAMETER,
+            FREE_PARAMETER, // Only for Optimica!
+            INITIAL_PARAMETER,
+            DISCRETE        ("d"),
+            INPUT           ("u"),
+            DIFFERENTIATED  ("x"),
+            DERIVATIVE      ("dx"),
+            CONTINUOUS      ("w");
 
             private final boolean isParameter;
+            private final String zOffsetNameFormat;
 
             private ZVariability() {
-                this(false);
+                this("p%s", true);
             }
 
-            private ZVariability(boolean isParameter) {
+            private ZVariability(String zOffsetName) {
+                this(zOffsetName, false);
+            }
+
+            private ZVariability(String zOffsetName, boolean isParameter) {
                 this.isParameter = isParameter;
+                this.zOffsetNameFormat = "%s_" + zOffsetName;
             }
 
             public boolean isParameter() {
                 return isParameter;
+            }
+
+            public String zOffsetNameFormat() {
+                return zOffsetNameFormat;
             }
         }
 
@@ -313,6 +386,7 @@ aspect FlatAPI {
             public final ParaDependency dependency;
             public final ZType type;
             public final ZVariability variability;
+            private final String zOffsetName;
 
             /**
              * Use create method instead!
@@ -321,6 +395,7 @@ aspect FlatAPI {
                 this.dependency = dependency;
                 this.type = type;
                 this.variability = variability;
+                this.zOffsetName = type.calcZOffsetName(variability, dependency);
                 lookupMap.put(computeLookupKey(this), this);
             }
 
@@ -330,8 +405,21 @@ aspect FlatAPI {
             }
 
             @Override
-            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator) {
-                return new ZCategoryEntry(vars, enumerator);
+            public String zOffsetName() {
+                return zOffsetName;
+            }
+
+            @Override
+            public int valueReferenceFromIndex(int index) {
+                return type.mask(index);
+            }
+
+            @Override
+            public void visitZOrder(ZVisitor v) {}
+
+            @Override
+            public ZCategoryEntry createEntry(Collection<FVariable> vars, Enumerator enumerator, Integer groupOffset) {
+                return new ZCategoryEntry(this, vars, enumerator, groupOffset);
             }
 
             private static int computeLookupKey(ZOrdinaryCategory category) {
@@ -343,7 +431,7 @@ aspect FlatAPI {
             }
 
             public static ZOrdinaryCategory resolve(FVariable var) {
-                if (var.isPreVariable()) {
+                if (var == null || var.isPreVariable()) {
                     // Pre variables should be excluded!
                     return null;
                 }
@@ -472,11 +560,30 @@ aspect FlatAPI {
                     ZOrdinaryCategory.DEPENDENT_EXTERNAL_OBJECT,
             };
 
+            private static final ZCategory[] zIndexOrderPre = new ZCategory[] {
+                    ZOrdinaryCategory.DERIVATIVE,
+                    ZOrdinaryCategory.DIFFERENTIATED,
+                    ZOrdinaryCategory.REAL_INPUT,
+                    ZOrdinaryCategory.CONTINUOUS,
+
+                    ZOrdinaryCategory.DISCRETE_REAL,
+
+                    ZOrdinaryCategory.DISCRETE_INTEGER,
+                    ZOrdinaryCategory.DISCRETE_ENUM,
+
+                    ZOrdinaryCategory.INTEGER_INPUT,
+                    ZOrdinaryCategory.ENUM_INPUT,
+
+                    ZOrdinaryCategory.DISCRETE_BOOLEAN,
+                    ZOrdinaryCategory.BOOLEAN_INPUT,
+            };
+
             private final Map<ZCategory, ZCategoryEntry> categoryMap;
 
             public VarRefMap(Iterable<FVariable> vars, FClass fclass) {
-                Map<ZCategory, java.util.List<FVariable>> varMap = new HashMap<ZCategory, java.util.List<FVariable>>(zIndexOrder.length);
-                Map<ZStructVector, Enumerator> vectorEnumerators = new HashMap<ZStructVector, Enumerator>(zIndexOrder.length);
+                Map<ZCategory, java.util.List<FVariable>> varMap = new HashMap<>(zIndexOrder.length);
+                Map<String, Integer> zOffsetMap = new HashMap<>(zIndexOrder.length);
+                Map<ZStructVector, Enumerator> vectorEnumerators = new HashMap<>(zIndexOrder.length);
                 for (ZCategory category : zIndexOrder) {
                     if (varMap.put(category, new ArrayList<FVariable>()) != null) {
                         throw new IllegalArgumentException("There are multiple entries for " + category + " in z index map");
@@ -500,6 +607,7 @@ aspect FlatAPI {
                     catVars.add(var);
                 }
                 categoryMap = new LinkedHashMap<ZCategory, ZCategoryEntry>(zIndexOrder.length);
+                String prevZOffsetName = null;
                 for (ZCategory category : zIndexOrder) {
                     java.util.List<FVariable> categoryVars = varMap.get(category);
                     Comparator<FVariable> sorter = category.sorter(categoryVars, fclass);
@@ -507,7 +615,17 @@ aspect FlatAPI {
                         Collections.sort(categoryVars, sorter);
                     }
                     Enumerator enumerator = vectorEnumerators.get(category.zStructVector());
-                    categoryMap.put(category, category.createEntry(categoryVars, enumerator));
+                    String zOffsetName = category.zOffsetName();
+                    ZCategoryEntry entry = category.createEntry(
+                            categoryVars, enumerator, zOffsetMap.get(zOffsetName));
+                    categoryMap.put(category, entry);
+                    if (!zOffsetMap.containsKey(zOffsetName)) {
+                        zOffsetMap.put(zOffsetName, entry.offset());
+                    } else if (!zOffsetName.equals(prevZOffsetName)) {
+                        throw new IllegalArgumentException(
+                                "Z offset category '" + zOffsetName + "' is not continuous in z index map.");
+                    }
+                    prevZOffsetName = zOffsetName;
                 }
             }
 
@@ -623,6 +741,16 @@ aspect FlatAPI {
 
             public ZCategoryEntry getBy(ZCategory category) {
                 return categoryMap.get(category);
+            }
+
+            /**
+             * Visit all variables in z-order, using provided visitor.
+             * If pre is true, then visit only those categories that have pre versions.
+             */
+            public void visitZOrder(ZVisitor v, boolean pre) {
+                for (ZCategory category : (pre ? zIndexOrderPre : zIndexOrder)) {
+                    getBy(category).visitZOrder(v);
+                }
             }
 
             @Override
@@ -762,23 +890,30 @@ aspect FlatAPI {
          */
         public static class ZCategoryEntry implements Collection<FVariable> {
             private final int offset;
+            private final int groupOffset;
             private final int size;
             private final Map<FVariable, Integer> indexMap;
+            private final ZCategory category;
 
-            public ZCategoryEntry(int size, Enumerator enumerator) {
-                offset = enumerator.peek();
+            public ZCategoryEntry(ZCategory category, int size, Enumerator enumerator, Integer groupOffset) {
+                this.category = category;
+                this.offset = enumerator.peek();
+                this.groupOffset = (groupOffset == null) ? this.offset : groupOffset;
                 this.size = size;
                 this.indexMap = Collections.emptyMap();
                 // Now wind forward the enumerator
                 for (int i = 0; i < size; i++, enumerator.next());
             }
-            public ZCategoryEntry(Collection<FVariable> vars, Enumerator enumerator) {
+
+            public ZCategoryEntry(ZCategory category, Collection<FVariable> vars, Enumerator enumerator, Integer groupOffset) {
+                this.category = category;
+                this.offset = enumerator.peek();
+                this.groupOffset = (groupOffset == null) ? this.offset : groupOffset;
                 Map<FVariable, Integer> indexMap = new LinkedHashMap<FVariable, Integer>(vars.size());
-                offset = enumerator.peek();
                 for (FVariable var : vars) {
                     indexMap.put(var, var.incrementValueReferenceIndex(enumerator));
                 }
-                size = enumerator.peek() - offset;
+                size = enumerator.peek() - this.offset;
                 this.indexMap = Collections.unmodifiableMap(indexMap);
             }
 
@@ -786,10 +921,29 @@ aspect FlatAPI {
                 return indexMap.get(var);
             }
 
+            public int getOffsetIndexFor(FVariable var) {
+                return indexMap.get(var) - groupOffset;
+            }
+
+            public int getValueReferenceFor(FVariable var) {
+                return category.valueReferenceFromIndex(getIndexFor(var));
+            }
+
             public int offset() {
                 return offset;
             }
-            
+
+            public ZCategory category() {
+                return category;
+            }
+
+            public void visitZOrder(ZVisitor v) {
+                category.visitZOrder(v);
+                for (FVariable fv : this) {
+                    v.visitVariable(fv, this);
+                }
+            }
+
             @Override
             public Iterator<FVariable> iterator() {
                 return indexMap.keySet().iterator();
@@ -893,11 +1047,11 @@ aspect FlatAPI {
      * derivative variables!
      */
     coll LinkedHashSet<FVariable> FClass.differentiatedByFDerExp() 
-    [new LinkedHashSet<FVariable>()] with add root FClass;
+        [new LinkedHashSet<FVariable>()] with add root FClass;
     FDerExp contributes getFIdUse().myFV().asFVariable() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
-    to FClass.differentiatedByFDerExp() for myFClass();
-            FDerivativeVariable contributes myDifferentiatedVariable() when (shouldContribute())
-            to FClass.differentiatedByFDerExp() for myFClass();
+        to FClass.differentiatedByFDerExp() for myFClass();
+    FDerivativeVariable contributes myDifferentiatedVariable() when (shouldContribute())
+        to FClass.differentiatedByFDerExp() for myFClass();
 
     syn boolean FVariable.differentiatedByFDerExp() = myFClass().differentiatedByFDerExp().contains(this);
 

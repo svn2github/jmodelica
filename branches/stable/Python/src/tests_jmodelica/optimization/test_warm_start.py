@@ -30,7 +30,7 @@ def result_distance(res1, res2, names):
     assert N.array_equal(res1['time'], res2['time'])
     return max([N.max(N.abs(res1[name] - res2[name])) for name in names])
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_warm_start():
     file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
     op = transfer_optimization_problem("VDP_pack.VDP_Opt2", file_path)
@@ -88,7 +88,7 @@ def test_warm_start():
     # Warm starting from the right result should need very few iterations
     assert res2w2.get_solver_statistics()[1] < 4
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_set_init_traj():
     """Test that OptimizationSolver.set_init_traj works"""
     file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
@@ -149,42 +149,42 @@ def check_changed_input(model_name, signal_name, ext_data_constructor, eliminate
     assert result_distance(res1, res2, var_names) > 1e-2
     assert result_distance(res2, res2b, var_names) < 1e-6
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_eliminated_input(eliminate_algebraics=False, result_mode='collocation_points'):
     check_changed_input('DisturbedIntegrator', 'w',
         (lambda input:ExternalData(eliminated=input)),
         eliminate_algebraics, result_mode)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_constrained_input(eliminate_algebraics=False):
     check_changed_input('DisturbedIntegrator', 'w',
         (lambda input:ExternalData(constr_quad_pen=input, Q = N.atleast_2d(1))),
         eliminate_algebraics)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_quad_pen_input(eliminate_algebraics=False):
     check_changed_input('Integrator', 'u',
         (lambda input:ExternalData(quad_pen=input, Q = N.atleast_2d(1))),
         eliminate_algebraics)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_eliminated_input_with_elim():
     test_change_eliminated_input(True)
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_constrained_input_with_elim():
     test_change_constrained_input(True)
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_quad_pen_input_with_elim():
     test_change_quad_pen_input(True)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_eliminated_input_element_interpolation():
     test_change_eliminated_input(result_mode = 'element_interpolation')
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_change_eliminated_input_mesh_points():
     test_change_eliminated_input(result_mode = 'mesh_points')
     
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_times():
     file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
     op = transfer_optimization_problem("VDP_pack.VDP_Opt2", file_path)
@@ -200,7 +200,7 @@ def test_times():
     assert abs(res1.times['update']+res1.times['sol']+res1.times['post_processing'] - res1.times['tot']) <1e-4
     assert abs(res2.times['init'] - res2.times['init']) < 1e-4
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_update_dependent_parameter():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestWarmStart.mop')
     compiler_options={"eliminate_alias_parameters": True}

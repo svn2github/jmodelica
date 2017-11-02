@@ -26,7 +26,7 @@ from pyjmi.examples import (blood_glucose,
                             bounds_kinsol,
                             furuta_dfo_using_algorithm_drivers)
 
-@testattr(stddist = True)
+@testattr(stddist_base = True)
 def test_blood_glucose():
     """ Test the blood_glucose example. """    
     blood_glucose.run_demo(False)
@@ -46,12 +46,12 @@ def test_qt_par_est():
     """ Run parameter estimation example """
     qt_par_est.run_demo(False)
 
-@testattr(stddist = True)
+@testattr(stddist_base = True)
 def bounds_kinsol_example():
     """ Test the bounds_kinsol example."""
     bounds_kinsol.run_demo(False)
 
-@testattr(stddist = True)
+@testattr(stddist_base = True)
 def furuta_dfo_using_algorithm_drivers_example():
     """ Test the Furuta DFO example."""
     furuta_dfo_using_algorithm_drivers.run_demo(False)

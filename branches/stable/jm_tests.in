@@ -33,12 +33,27 @@ DEFAULT_ARGS=""
 JMODELICA_HOME="@prefix@"
 JMODELICA_SRC="@abs_top_srcdir@"
 IPOPT_HOME="@IPOPT_HOME@"
+IPOPT32_HOME="@IPOPT_HOME@"
+IPOPT64_HOME="@IPOPT64_HOME@"
+PYTHON64_HOME="@PYTHON64_HOME@"
+PYTHON32_HOME="@PYTHON_HOME@"
 SUNDIALS_HOME="@prefix@/ThirdParty/Sundials"
 CASADI_HOME="@prefix@/ThirdParty/CasADi"
+CASADI64_HOME="@prefix@/ThirdParty/CasADi64"
+CASADI_INTERFACE_HOME="@prefix@/lib/casadi_interface"
+CASADI_INTERFACE_HOME64="@prefix@/lib/casadi_interface64"
+CASADI_INTERFACE_HOME32=${CASADI_INTERFACE_HOME}
 ECLIPSE_HOME="@ECLIPSE_HOME@"
+JPYPE32_JVM="@JVMDLL_HOME@/jvm.dll"
+JPYPE64_JVM="@JVMDLL64_HOME@/jvm.dll"
+ORIG_PATH="@ORIG_PATH@"
 BUILD="@abs_builddir@"
 if [[ "${JAVA_HOME}" == "" ]]; then
   JAVA_HOME="@_JAVA_HOME_@"
+fi
+
+if [[ "${PYTHON64_HOME}" != "" ]]; then
+DEFAULT_TESTS="${DEFAULT_TESTS} python64"
 fi
 
 # ====== End variables to set ======
@@ -46,13 +61,18 @@ fi
 # Configure Bash
 set -o pipefail
 
-PYTHONPATH="$(merge_path "${PYTHONPATH}" "${JMODELICA_HOME}/Python/")"
+PYTHONPATH64="${JMODELICA_HOME}/Python_64/"
+PYTHONPATH32="$(merge_path "${PYTHONPATH}" "${JMODELICA_HOME}/Python/")"
+PYTHONPATH="$PYTHONPATH32"
+
+# To know if we are running python 64 tests
+PYTHON64=0
 
 # Default paths to ant files used for unit tests
-if [[ -z "MC_ANT_ARGS" ]]; then
+if [[ -z "${MC_ANT_ARGS}" ]]; then
     MC_ANT_ARGS=${JMODELICA_SRC}/Compiler/ModelicaCompiler/build.xml
 fi
-if [[ -z "OC_ANT_ARGS" ]]; then
+if [[ -z "${OC_ANT_ARGS}" ]]; then
     OC_ANT_ARGS=${JMODELICA_SRC}/Compiler/OptimicaCompiler/build.xml
 fi
 
@@ -79,25 +99,70 @@ if [[ "${LIB_PATH}" != "" ]]; then
 fi
 
 # Test sets
-tests="modelica optimica python"
+if [[ "${PYTHON64_HOME}" != "" ]]; then
+test_set_a="modelica optimica python python64"
+tests="modelica optimica python python64"
+else
 test_set_a="modelica optimica python"
+tests="modelica optimica python"
+fi
 test_set_j="modelica optimica"
 test_set_m="modelica"
 test_set_o="optimica"
 test_set_p="python"
+test_set_z="python64"
 
 # Standard set of tags
-TAGS="-a stddist -a fmi -a noncompliantfmi"
+TAGS="-a stddist_base -a fmi -a noncompliantfmi"
 if [[ "${IPOPT_HOME}" != "" ]]; then
   TAGS="${TAGS} -a ipopt"
   if [[ "${SYS}" == Win ]]; then
-    TAGS="${TAGS} -a windows"
+    TAGS="${TAGS} -a windows_base"
   fi
   if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
-    TAGS="${TAGS} -a casadi"
+    TAGS="${TAGS} -a casadi_base"
   else
     echo Skipping casadi tests, since CasADi does not seem to be installed.
   fi
+fi
+
+# Standard set of tags
+TAGS64="-a stddist_base -a fmi -a noncompliantfmi"
+if [[ "${IPOPT64_HOME}" != "" ]]; then
+  TAGS64="${TAGS64} -a ipopt"
+  if [[ "${SYS}" == Win ]]; then
+    TAGS64="${TAGS64} -a windows_base"
+  fi
+  if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
+    TAGS64="${TAGS64} -a casadi_base"
+  else
+    echo Skipping casadi tests, since CasADi does not seem to be installed.
+  fi
+fi
+
+# Extend with all tests for default version of Python/bitness
+if [[ "${PYTHON64_HOME}" != "" ]]; then
+TAGS64="${TAGS64} -a stddist_full"
+if [[ "${IPOPT64_HOME}" != "" ]]; then
+  if [[ "${SYS}" == Win ]]; then
+    TAGS64="${TAGS64} -a windows_full"
+  fi
+  if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
+    TAGS64="${TAGS64} -a casadi_full"
+  fi
+fi  
+else
+TAGS="${TAGS} -a stddist_full"
+if [[ "${IPOPT_HOME}" != "" ]]; then
+  if [[ "${SYS}" == Win ]]; then
+    TAGS="${TAGS} -a windows_full"
+  fi
+  if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
+    TAGS="${TAGS} -a casadi_full"
+  else
+    echo Skipping casadi tests, since CasADi does not seem to be installed.
+  fi
+fi
 fi
 
 # Functions for running specific tests
@@ -158,6 +223,36 @@ function python_tests() {
     rm -rf ${TEST_DIR}
   fi
   return $res
+}
+
+TESTS64_DIR="${JMODELICA_HOME}/Python_64/tests_jmodelica"
+function python64_tests() {
+# Set necessary paths etc to run 64 bit tests
+export PYTHONPATH=${PYTHONPATH64}
+export PYTHONHOME=${PYTHON64_HOME}
+export JPYPE_JVM=${JPYPE64_JVM}
+export CASADI_LIB_HOME=${CASADI64_HOME}/lib
+export CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME64}
+export PATH=${PYTHON64_HOME}:${PYTHON64_HOME}/Scripts:${PYTHON64_HOME}/Lib:${IPOPT64_HOME}/bin:${CASADI_LIB_HOME}:"${PATH}"
+TESTS32=$TESTS
+TESTS=$TESTS64
+TAGS32=$TAGS
+TAGS=$TAGS64
+TESTS_DIR=${TESTS64_DIR}
+PYTHON64=1
+# Call python_tests 
+python_tests
+# Reset to original paths etc that was for original Python
+TESTS=$TESTS32
+TAGS=$TAGS32
+PYTHON64=0
+export PYTHONPATH=${PYTHONPATH32}
+export PYTHONHOME=${PYTHON32_HOME}
+export JPYPE_JVM=${JPYPE32_JVM}
+export CASADI_LIB_HOME=${CASADI_HOME}/lib
+export CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME32}
+export PATH="${ORIG_PATH}"
+TESTS_DIR="${JMODELICA_HOME}/Python/tests_jmodelica"
 }
 
 function python_tests_v() {
@@ -333,12 +428,16 @@ function switch_test_flags() {
 function compute_nose_extra_args() { # Argument is test name
     if [ -n "${XML_RES_PATH:-}" ]; then
         RES_FILE_NAME=`echo $1 | sed -e 's!^.*jmodelica.!!g' -e 's!/!_!g'`
+        if [[ "$PYTHON64" = 1 ]]; then
+            RES_FILE_NAME="python64_${RES_FILE_NAME}"
+        fi
         echo --with-xunit --xunit-file=${XML_RES_PATH}/${RES_FILE_NAME}.xml
     fi
 }
 
 function read_args() {
   TESTS=
+  TESTS64=
   ARG_TYPE=flag
   for a in ${DEFAULT_ARGS} "$@"; do
     if [[ "$(echo $a | head -c1)" == "-" ]]; then
@@ -352,17 +451,29 @@ function read_args() {
       tag)
         TAGS="${TAGS} -a ${a}"
         ;;
+      tag64)
+        TAGS64="${TAGS64} -a ${a}"
+        ;;
       file)
         if [[ -f "${a}" ]]; then
           FILE="$(readlink -f ${a})"
         else
           FILE="${TESTS_DIR}/${a}"
+          FILE64="${TESTS64_DIR}/${a}"
         fi
         if [[ -f ${FILE} ]]; then
           TESTS="${TESTS} ${FILE}"
         else
           echo "Cannot find test file ${a}"
           exit
+        fi
+        if [[ "${PYTHON64_HOME}" != "" ]]; then
+         if [[ -f ${FILE64} ]]; then
+          TESTS64="${TESTS64} ${FILE64}"
+         else
+           echo "Cannot find test file ${a}"
+           exit
+         fi
         fi
         ;;
       xmlResPath)
@@ -379,6 +490,14 @@ function read_args() {
             OUTPUT=${b}
             ;;
           a|j|m|o|p)
+            test_set="test_set_${b}"
+            switch_test_flags ${!test_set}
+            ;;
+          z)
+            if ! [[ "${PYTHON64_HOME}" != "" ]]; then
+                echo "Python 64 bit tests not supported!"
+                exit
+            fi
             test_set="test_set_${b}"
             switch_test_flags ${!test_set}
             ;;
@@ -404,8 +523,23 @@ function read_args() {
             TAGS=""
             ARG_TYPE=tag
             ;;
+          u)
+            if ! [[ "${PYTHON64_HOME}" != "" ]]; then
+                echo "Python 64 bit tests not supported!"
+                exit
+            fi
+            TAGS64=""
+            ARG_TYPE=tag64
+            ;;
           g)
+            if ! [[ "${PYTHON64_HOME}" != "" ]]; then
+                echo "Python 64 bit tests not supported!"
+                exit
+            fi
             ARG_TYPE=tag
+            ;;
+          r)
+            ARG_TYPE=tag64
             ;;
           x)
             ARG_TYPE=xmlResPath
@@ -414,40 +548,45 @@ function read_args() {
             ERROR_ON_TEST_FAIL=1
             ;;
           h)
-            echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...] [-x path]"
-            echo "The -ajmop options each control a set of tests, and select all tests in set "
+            echo "usage: tests [-ajmopzvnqcCh] { [-(t|u|g|r) [tag1 ...]] } [-f file1 ...] [-x path]"
+            echo "The -ajmopz options each control a set of tests, and select all tests in set "
             echo "for running, or, if all in set are already selected, deselects them. "
             echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
             echo "a default set is run (${DEFAULT_TESTS})." 
-            echo "  -a  Select/deselect all tests"
-            echo "  -j  Select/deselect junit tests"
-            echo "  -m  Select/deselect modelica tests"
-            echo "  -o  Select/deselect optimca tests"
-            echo "  -p  Select/deselect python tests"
-            echo "  -v  Verbose output, show everything"
-            echo "  -n  Normal output, only show results and compilation errors"
-            echo "  -q  Quiet output, only show brief results"
-            echo "  -c  Do a clean before junit tests"
-            echo "  -C  Do a clean before each test suite"
-            echo "  -i  Do not re-build before python tests"
-            echo "  -k  Keep generated files from python tests"
-            echo "  -l  Toggle creating log file with the equivalent of the output with -v" 
-            echo "      (on by default)"
-            echo "  -t  When running python tests, only run tests marked with one of the "
-            echo "      listed tags. If given without tags, all tests are run. If -t is "
-            echo "      given several times, only the last one will be used"
-            echo "  -g  When running python tests, add the listed tags to the tags to use"
-            echo "  -f  When running python tests, only run tests from the listed files. "
-            echo "      Paths relative to the tests directory are accepted, as well as "
-            echo "      absolute or relative to current directory"
-            echo "  -x  Path to folder where jUnit like xml files are written. The xml files"
-            echo "      contains the results of the tests. Currently doesn't handle spaces"
-            echo "      in the supplied path!"
-            echo "  -e  When enabled, exit with error code (after running all "
-            echo "      tests) if any test suite return with an error code or a test fails"
-            echo "      regular failures or errors). Default behaviour is exit 0.".
-            echo "      Requires -x".
-            echo "  -h  Print this help and exit"
+            echo "  -a   Select/deselect all tests"
+            echo "  -j   Select/deselect junit tests"
+            echo "  -m   Select/deselect modelica tests"
+            echo "  -o   Select/deselect optimca tests"
+            echo "  -p   Select/deselect python tests"
+            echo "  -z   Select/deselect python 64 bit tests (not always a valid option)"
+            echo "  -v   Verbose output, show everything"
+            echo "  -n   Normal output, only show results and compilation errors"
+            echo "  -q   Quiet output, only show brief results"
+            echo "  -c   Do a clean before junit tests"
+            echo "  -C   Do a clean before each test suite"
+            echo "  -i   Do not re-build before python tests"
+            echo "  -k   Keep generated files from python tests"
+            echo "  -l   Toggle creating log file with the equivalent of the output with -v" 
+            echo "       (on by default)"
+            echo "  -t   When running python tests, only run tests marked with one of the "
+            echo "       listed tags. If given without tags, all tests are run. If -t is "
+            echo "       given several times, only the last one will be used (not always a valid option)"
+            echo "  -u   When running python64 tests, only run tests marked with one of the "
+            echo "       listed tags. If given without tags, all tests are run. If -u is "
+            echo "       given several times, only the last one will be used"
+            echo "  -g   When running python tests, add the listed tags to the tags to use"
+            echo "  -r   When running python 64tests, add the listed tags to the tags to use"
+            echo "  -f   When running python tests, only run tests from the listed files. "
+            echo "       Paths relative to the tests directory are accepted, as well as "
+            echo "       absolute or relative to current directory"
+            echo "  -x   Path to folder where jUnit like xml files are written. The xml files"
+            echo "       contains the results of the tests. Currently doesn't handle spaces"
+            echo "       in the supplied path!"
+            echo "  -e   When enabled, exit with error code (after running all "
+            echo "       tests) if any test suite return with an error code or a test fails"
+            echo "       regular failures or errors). Default behaviour is exit 0.".
+            echo "       Requires -x".
+            echo "  -h   Print this help and exit"
             exit
             ;;
           *)
@@ -511,6 +650,16 @@ if [[ "${OUTPUT}" != q ]]; then
   echo ========================
 fi
 echo $(date +%s) ${TIME}"-[Total time: ]nd60/n[:]n60%[0n]sxd10>xp" | dc
+
+# Rename test names in xml when run with 64 bit python
+if [ -n "${XML_RES_PATH:-}" ]; then
+for f in ${XML_RES_PATH}/*; do
+if [[ "${f}" == *"python64_"* ]]; then
+sed -e 's#classname=\"#classname=\"python64.#g' $f > temp.xml
+mv -f temp.xml $f
+fi
+done
+fi
 
 if [[ "${ERROR_ON_TEST_FAIL}" == 1 ]]; then
     if [[ $res == 0 ]]; then

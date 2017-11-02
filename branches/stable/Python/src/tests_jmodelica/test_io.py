@@ -49,7 +49,7 @@ class test_ResultWriterDymola:
         self._bounce.initialize()
         self._dq.initialize()
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_work_flow(self):
         """Tests the work flow of write_header, write_point, write_finalize."""
         
@@ -72,7 +72,7 @@ class test_ResultWriterDymola:
         nose.tools.assert_almost_equal(derh.x, 0.000000, 5)
 #        nose.tools.assert_almost_equal(g.x, 9.810000, 5)
 
-    @testattr(windows = True)
+    @testattr(windows_full = True)
     def test_variable_alias(self):
         """ 
         Tests the variable with parameter alias is presented as variable in the 
@@ -99,7 +99,7 @@ class TestResultMemory:
         model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
         name = compile_fmu("ParameterAlias", model_file)
         
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_only_parameters(self):
         model = load_fmu("ParameterAlias.fmu")
         
@@ -123,7 +123,7 @@ class TestResultCSVTextual:
         model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
         name = compile_fmu("ParameterAlias", model_file)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_only_parameters(self):
         model = load_fmu("ParameterAlias.fmu")
         
@@ -136,7 +136,7 @@ class TestResultCSVTextual:
         
         nose.tools.assert_almost_equal(model.get("p2"), res["p2"][0])
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_variable_alias(self):
 
         simple_alias = load_fmu("NegatedAlias.fmu")
@@ -158,7 +158,7 @@ class TestResultCSVTextual:
         for i in range(len(x)):
             nose.tools.assert_equal(x[i], -y[i])
             
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_delimiter(self):
         
         res = ResultCSVTextual(os.path.join(get_files_path(), 'Results', 'TestCSV.csv'), delimiter=",")
@@ -167,7 +167,7 @@ class TestResultCSVTextual:
         
         assert x.x[-1] == 1
     
-    @testattr(fmi = True)
+    @testattr(stddist_full = True)
     def test_csv_options_me(self):
         
         simple_alias = load_fmu("NegatedAlias.fmu")
@@ -188,7 +188,7 @@ class TestResultCSVTextual:
         for i in range(len(x)):
             nose.tools.assert_equal(x[i], -y[i])
             
-    @testattr(fmi = True)
+    @testattr(stddist_full = True)
     def test_csv_options_cs(self):
         
         simple_alias = load_fmu("NegatedAliasCS.fmu")
@@ -221,7 +221,14 @@ class TestResultFileBinary:
         model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
         name = compile_fmu("ParameterAlias", model_file)
     
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
+    def test_read_all_variables(self):
+        res = ResultDymolaBinary(os.path.join(get_files_path(), "Results", "DoublePendulum.mat"))
+        
+        for var in res.name:
+            res.get_variable_data(var)
+    
+    @testattr(stddist_base = True)
     def test_only_parameters(self):
         model = load_fmu("ParameterAlias.fmu")
         
@@ -234,7 +241,7 @@ class TestResultFileBinary:
         
         nose.tools.assert_almost_equal(model.get("p2"), res["p2"][0])
     
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_variable_alias(self):
 
         simple_alias = load_fmu("NegatedAlias.fmu")
@@ -256,7 +263,7 @@ class TestResultFileBinary:
         for i in range(len(x)):
             nose.tools.assert_equal(x[i], -y[i])
             
-    @testattr(fmi = True)
+    @testattr(stddist_base = True)
     def test_binary_options_me(self):
         
         simple_alias = load_fmu("NegatedAlias.fmu")
@@ -277,7 +284,7 @@ class TestResultFileBinary:
         for i in range(len(x)):
             nose.tools.assert_equal(x[i], -y[i])
             
-    @testattr(fmi = True)
+    @testattr(stddist_base = True)
     def test_binary_options_cs(self):
         
         simple_alias = load_fmu("NegatedAliasCS.fmu")

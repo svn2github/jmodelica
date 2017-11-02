@@ -1,3 +1,27 @@
+================= Stable-2017-11-02 ==================
+; Fixed ; Minor ; Compiler ; #5326
+Fixed bug where certain combinations of Integer and enumeration parameters 
+gave wrong values of those parameters reported from the FMU.
+
+; Change ; Major ; Tests ; #5489
+Divided the test tags stddist, windows and casadi into stddist_base,
+stddist_full, windows_base, windows_full, casadi_base and casadi_full. 
+The _base indicates tests that should run on both 32 and 64 bit platform 
+whereas _full will only be run in one mode. Also the tests tagged with fmi
+are now tagged as stddist_base/full. 
+
+; Fixed ; Minor ; PyFMI ; #5494
+Fixed problem with binary files that includes spaces in the variable names.
+
+; Feature ; Minor ; Compiler ; #5492
+Added common subexpression elimination of builtin math operators.
+
+; Feature ; Major ; Build system ; #5489
+Adding posibility to run Python tests in both 32 and 64 bit modes.
+
+; Fixed ; Minor ; Compiler ; #5486
+Fixed circularity bug in variability calculation
+
 ================= Stable-2017-10-18 ==================
 ; Change ; Major ; Compiler; #5468
 Removed CAD generation

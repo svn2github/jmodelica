@@ -1877,16 +1877,23 @@ der(_ds.1.s1) := dsDer(1, 1)
             name="Special_FunctionCallEquationJacobian",
             description="Test that verifies that we are able to compute the jacobian for a function call equation correctly, no dynamic states should be needed for this model!",
             dynamic_states=true,
+            common_subexp_elim=true,
             methodName="printDAEBLT",
             methodResult="
 --- Solved equation ---
-der(sx) := cos(time)
+der2_sy := cos(time)
+
+--- Solved equation ---
+der(sx) := der2_sy
 
 --- Solved equation ---
 der_sx := der(sx)
 
 --- Solved equation ---
-der(sy) := sin(time)
+der2_sx := - sin(time)
+
+--- Solved equation ---
+der(sy) := - der2_sx
 
 --- Solved equation ---
 der_sy := der(sy)
@@ -1912,12 +1919,6 @@ _der_r[2] := der_r_check[2]
 
 --- Solved equation ---
 der_r[2] := _der_r[2]
-
---- Solved equation ---
-der2_sx := - sin(time)
-
---- Solved equation ---
-der2_sy := cos(time)
 
 --- Solved function call equation ---
 ({der_der_r[1], der_der_r[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der_der(sx, sy, der(sx), der(sy), der2_sx, der2_sy)

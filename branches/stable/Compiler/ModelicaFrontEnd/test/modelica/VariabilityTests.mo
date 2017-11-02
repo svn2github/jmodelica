@@ -842,6 +842,21 @@ end EvaluateAnnotationNoValue1;
 
 end IfEquations;
 
+model Circular1
+    final parameter Real x = y;
+    final parameter Real y = x;
 
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Circular1",
+            description="",
+            errorMessage="
+Error at line 0, column 0, in file '...':
+  Circularity in binding expression of parameter: x = y
+
+Error at line 0, column 0, in file '...':
+  Circularity in binding expression of parameter: y = x
+")})));
+end Circular1;
 
 end VariabilityTests;

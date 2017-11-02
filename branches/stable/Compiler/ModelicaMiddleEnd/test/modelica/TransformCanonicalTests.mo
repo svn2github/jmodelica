@@ -4938,6 +4938,7 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEqu25",
 			description="Check that if elimination handles tests with external functions",
+            common_subexp_elim=true,
 			flatModel="
 fclass TransformCanonicalTests.IfEqu25
  Real x;

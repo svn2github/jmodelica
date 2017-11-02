@@ -364,95 +364,57 @@ public class CGenerator extends GenericGenerator {
             super("C_variable_aliases", myGenerator, fclass);
         }
         
-        private void generateVar(CodeStream genPrinter, FVariable fv, String offset, int index, boolean pre) {
-            genPrinter.print("#define ");
-            if (pre) {
-                genPrinter.print("pre" + fv.name_C());
-                genPrinter.print(" ((*(jmi->z))[jmi->offs_pre_");
-            } else {
-                genPrinter.print(fv.name_C());
-                genPrinter.print(" ((*(jmi->z))[jmi->offs_");
+        private class Visitor implements FClass.ZVisitor {
+
+            private static final String FMT_DEFAULT       = 
+                    "#define %s ((*(jmi->z))[jmi->offs%s_%s+%d])\n";
+            private static final String FMT_EXTERNAL      = 
+                    "#define %s ((jmi->ext_objs)[%d])\n";
+            private static final String FMT_VIRTUAL_FIRST = 
+                    "#define _%s ((*(jmi->z))[jmi->offs_%s])\n";
+            private static final String FMT_VIRTUAL       = 
+                    "#define _%s ((*(jmi->z))[jmi->offs_%s + %d])\n";
+
+            private boolean pre;
+            private String prefix;
+            private CodeStream cs;
+
+            public Visitor(CodeStream cs, boolean pre) {
+                this.pre = pre;
+                prefix = pre ? "_pre" : "";
+                this.cs = cs;
             }
-            genPrinter.print(offset);
-            genPrinter.print("+");
-            genPrinter.print(index);
-            genPrinter.print("])\n");
-        }
-        
-        private void generateVarList(CodeStream genPrinter, String offset, Iterable<? extends FVariable>... lists) {
-            generateVarList(genPrinter, offset, false, lists);
-        }
-        private void generatePreVarList(CodeStream genPrinter, String offset, Iterable<? extends FVariable>... lists) {
-            generateVarList(genPrinter, offset, true, lists);
-        }
-        private void generateVarList(CodeStream genPrinter, String offset, boolean pre, Iterable<? extends FVariable>... lists) {
-            int index = 0;
-            for (Iterable<? extends FVariable> list : lists) {
-                for (FVariable fv : list) {
-                    generateVar(genPrinter, fv, offset, index, pre);
-                    index = index + fv.numScalars();
+
+            public void visitVariable(FVariable fv, FClass.ZCategoryEntry entry) {
+                switch (entry.category().zStructVector()) {
+                case DEFAULT:
+                    cs.format(FMT_DEFAULT, (pre ? fv.preName_C() : fv.name_C()), prefix, 
+                            entry.category().zOffsetName(), entry.getOffsetIndexFor(fv));
+                    break;
+                case STRING:
+                    // TODO: Implement when adding String support.
+                    break;
+                case EXTERNAL:
+                    cs.format(FMT_EXTERNAL, fv.name_C(), entry.getOffsetIndexFor(fv));
+                    break;
                 }
             }
-        }
-        
-        private void generateExtObject(CodeStream genPrinter, FVariable fv, int index) {
-            genPrinter.print("#define ");
-            genPrinter.print(fv.name_C());
-            genPrinter.print(" ((jmi->ext_objs)[");
-            genPrinter.print(index);
-            genPrinter.print("])\n");
-        }
-        
-        private void generateExtObjectList(CodeStream genPrinter, Iterable<FVariable> list) {
-            int index = 0;
-            for (FVariable fv : list)
-                generateExtObject(genPrinter, fv, index++);
-        }
-        
-        public void generate(CodeStream genPrinter) {
-            generateVarList(genPrinter, "real_ci",    fclass.independentRealConstants());
-            generateVarList(genPrinter, "real_cd",    fclass.dependentRealConstants());
-            generateVarList(genPrinter, "real_pi",    fclass.independentRealParameters());
-            generateVarList(genPrinter, "real_pd",    fclass.dependentRealParameters());
-            // Handle enums as Integers
-            generateVarList(genPrinter, "integer_ci", fclass.independentIntegerConstants(),            fclass.independentEnumConstants());
-            generateVarList(genPrinter, "integer_cd", fclass.dependentIntegerConstants(),              fclass.dependentEnumConstants());
-            generateVarList(genPrinter, "integer_pi", fclass.regularIndependentIntegerParameters(),    fclass.regularIndependentEnumParameters(),
-                                                      fclass.structuralIndependentIntegerParameters(), fclass.structuralIndependentEnumParameters(),
-                                                      fclass.finalIndependentIntegerParameters(),      fclass.finalIndependentEnumParameters(),
-                                                      fclass.evalIndependentIntegerParameters(),       fclass.evalIndependentEnumParameters());
-            generateVarList(genPrinter, "integer_pd", fclass.dependentIntegerParameters(),
-                                                      fclass.dependentEnumParameters());
-            generateVarList(genPrinter, "boolean_ci", fclass.independentBooleanConstants());
-            generateVarList(genPrinter, "boolean_cd", fclass.dependentBooleanConstants());
-            generateVarList(genPrinter, "boolean_pi", fclass.independentBooleanParameters());
-            generateVarList(genPrinter, "boolean_pd", fclass.dependentBooleanParameters());
-            generateVarList(genPrinter, "real_dx",    fclass.derivativeVariables());
-            generateVarList(genPrinter, "real_x",     fclass.differentiatedRealVariables());
-            generateVarList(genPrinter, "real_u",     fclass.realInputs());
-            generateVarList(genPrinter, "real_w",     fclass.algebraicContinousRealVariables());
-            genPrinter.print("#define _time ((*(jmi->z))[jmi->offs_t])\n"); 
-            genPrinter.print("#define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])\n"); 
-            generateVarList(genPrinter, "real_d",     fclass.discreteRealVariables());
-            generateVarList(genPrinter, "integer_d",  fclass.discreteIntegerVariables(), fclass.discreteEnumVariables());
-            generateVarList(genPrinter, "integer_u",  fclass.integerInputs(),            fclass.enumInputs());
-            generateVarList(genPrinter, "boolean_d",  fclass.discreteBooleanVariables());
-            generateVarList(genPrinter, "boolean_u",  fclass.booleanInputs());
-            if (fclass.myOptions().getBooleanOption("generate_ode")) {
-                generatePreVarList(genPrinter, "real_dx",   fclass.derivativeVariables());
-                generatePreVarList(genPrinter, "real_x",    fclass.differentiatedRealVariables());
-                generatePreVarList(genPrinter, "real_u",    fclass.realInputs());
-                generatePreVarList(genPrinter, "real_w",    fclass.algebraicContinousRealVariables());
-                generatePreVarList(genPrinter, "real_d",    fclass.discreteRealVariables());
-                generatePreVarList(genPrinter, "integer_d", fclass.discreteIntegerVariables(), fclass.discreteEnumVariables());
-                generatePreVarList(genPrinter, "integer_u", fclass.integerInputs(),            fclass.enumInputs());
-                generatePreVarList(genPrinter, "boolean_d", fclass.discreteBooleanVariables());
-                generatePreVarList(genPrinter, "boolean_u", fclass.booleanInputs());
+
+            public void visitVirtualVariable(String name, String zOffsetName, int offset) {
+                String format = (offset == 0) ? FMT_VIRTUAL_FIRST : FMT_VIRTUAL;
+                cs.format(format, name, zOffsetName, offset);
             }
-            generateExtObjectList(genPrinter, fclass.externalObjectVariables());
+
+        }
+
+        public void generate(CodeStream genPrinter) {
+            fclass.varRefMap().visitZOrder(new Visitor(genPrinter, false), false);
+            if (fclass.myOptions().getBooleanOption("generate_ode")) {
+                fclass.varRefMap().visitZOrder(new Visitor(genPrinter, true), true);
+            }
         }
     }
-    
+
     class ZOffsets {
         private LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable> m = 
                 new LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable>();
