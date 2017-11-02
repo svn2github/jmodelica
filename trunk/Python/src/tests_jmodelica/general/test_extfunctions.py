@@ -80,19 +80,19 @@ class TestUtilities:
 class TestExternalShared:
     
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         """
         Sets up the test class.
         """
-        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        self.cpath = "ExtFunctionTests.ExtFunctionTest1"
+        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
         
     @testattr(stddist_base = True)
     def test_ExtFuncShared(self):
         """ 
         Test compiling a model with external functions in a shared library. Simple.
         """
-        cpath = "ExtFunctionTests.ExtFunctionTest1"
-        fmu_name = compile_fmu(cpath, TestExternalShared.fpath, compiler_options={'variability_propagation':False})
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(fmu_name)
         res = model.simulate()
         nose.tools.assert_equals(res.final('c'), 3) 
@@ -102,10 +102,20 @@ class TestExternalShared:
         """ 
         Test compiling a model with external functions in a shared library. Constant evaluation during compilation.
         """
-        cpath = "ExtFunctionTests.ExtFunctionTest1"
-        fmu_name = compile_fmu(cpath, TestExternalShared.fpath, compiler_options={'variability_propagation':True})
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
         model = load_fmu(fmu_name)
         nose.tools.assert_equals(model.get('c'), 3)
+        
+    @testattr(stddist_base = True)
+    def test_ExtFuncSharedCevalDisabled(self):
+        """ 
+        Test compiling a model with external functions in a shared library. Disabling external evaluation during
+        variability propagation.
+        """
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True,
+            'variability_propagation_external':False})
+        model = load_fmu(fmu_name)
+        nose.tools.assert_equals(model.get_variable_variability('c'), 1)
 
 class TestExternalBool:
     

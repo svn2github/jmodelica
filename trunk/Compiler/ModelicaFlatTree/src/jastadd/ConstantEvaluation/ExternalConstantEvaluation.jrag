@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,9 +31,10 @@ aspect ExternalConstantEvaluation {
     /**
      * Check if this external function can be evaluated.
      */
-    syn boolean FExternalStmt.canEvaluate() {
-        if (myOptions().getIntegerOption("external_constant_evaluation") == 0)
+    syn boolean FExternalStmt.canEvaluate(AlgorithmEvaluator evaluator) {
+        if (evaluator.externalEvaluation() == 0) {
             return false;
+        }
         for (FExp arg : getArgs()) {
             if (!arg.type().externalValid()) {
                 return false;
@@ -156,14 +157,16 @@ aspect ExternalConstantEvaluation {
     /**
      * Evaluate this external statement.
      */
-    public int FExternalStmt.evaluateExternal(Map<CommonVariableDecl, CValue> values) {
+    public int FExternalStmt.evaluateExternal(AlgorithmEvaluator evaluator) {
+        
+        Map<CommonVariableDecl, CValue> values = evaluator.getValues();
         
         if (isConstructorStmt()) {
             return evaluateConstructor(values);
         }
         
         int res = 0;
-        int timeout = myOptions().getIntegerOption("external_constant_evaluation");
+        int timeout = evaluator.externalEvaluation();
         ExternalFunctionCache.ExternalFunction ef = myExternalFunction();
         String error = null;
         try {
@@ -280,15 +283,14 @@ aspect ExternalConstantEvaluationCaching {
         /**
          * Kill cached processes
          */
-        public void destroyProcesses(OptionRegistry options) {
-            int timeout = options.getIntegerOption("external_constant_evaluation");
+        public void destroyProcesses(AlgorithmEvaluator evaluator) {
             for (ExternalFunction ef : new ArrayList<ExternalFunction>(livingCachedExternals)) {
-                ef.destroyProcess(timeout);
+                ef.destroyProcess(evaluator.externalEvaluation());
             }
         }
         
-        public void tearDown(OptionRegistry options) {
-            destroyProcesses(options);
+        public void tearDown(AlgorithmEvaluator evaluator) {
+            destroyProcesses(evaluator);
             removeExternalFunctions();
         }
         

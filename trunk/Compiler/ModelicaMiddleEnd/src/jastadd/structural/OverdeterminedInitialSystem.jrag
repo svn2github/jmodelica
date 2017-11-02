@@ -103,6 +103,10 @@ aspect OverdeterminedInitialSystem {
             private Map<CommonVariableDecl, CValue> evaluationCache = new LinkedHashMap<CommonVariableDecl, CValue>();
             private Set<FVariable> visitedParameters = new LinkedHashSet<FVariable>();
             
+            public OISVariableEvaluator() {
+                super(true);
+            }
+            
             @Override
             public CValue ceval(CommonVariableDecl variable) {
                 ASTNode.log.verbose("    %s", variable.name());

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2392,7 +2392,7 @@ aspect UtilInterface {
     public void UtilInterface.clean() {
         ExternalFunctionCache efc = getExternalFunctionCache();
         if (efc != null) {
-            efc.destroyProcesses(getOptionRegistry());
+            efc.destroyProcesses(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(options));
         }
     }
     

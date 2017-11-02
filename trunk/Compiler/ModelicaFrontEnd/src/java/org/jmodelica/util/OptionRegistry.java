@@ -428,13 +428,6 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true,
              "If enabled, then equations with linear sub expressions are substituted and eliminated."),
-        VPROP
-            ("variability_propagation", 
-             OptionType.compiler, 
-             Category.uncommon,
-             true,
-             "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
-             "constants and parameters where applicable."),
         COMMON_SUBEXP_ELIM
             ("common_subexp_elim", 
              OptionType.compiler, 

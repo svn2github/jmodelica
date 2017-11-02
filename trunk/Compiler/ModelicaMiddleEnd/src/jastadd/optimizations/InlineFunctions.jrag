@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014-2015 Modelon AB
+    Copyright (C) 2014-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -956,27 +956,6 @@ aspect FunctionInlining {
     }
 
     /**
-     * Replace a child of this node with a list of new nodes.
-     * 
-     * @param child  the child to replace
-     * @param repl   the node to replace it with
-     * @throws IllegalArgumentException  if <code>child</code> is not a child of this node
-     */
-    private void ASTNode.replaceChildWithList(ASTNode child, Iterable<? extends ASTNode> repl) {
-        int i = getIndexOfChild(child);
-        if (i < 0)
-            throw new IllegalArgumentException(REPLACE_UNKNOWN_CHILD_MSG);
-        Iterator<? extends ASTNode> it = repl.iterator();
-        if (it.hasNext()) {
-            setChild(it.next(), i);
-            while (it.hasNext())
-                insertChild(it.next(), ++i);
-        } else {
-            removeChild(i);
-        }
-    }
-
-    /**
      * Replace this node in the tree.
      * 
      * @param repl  the node to replace it with
@@ -989,17 +968,6 @@ aspect FunctionInlining {
             else
                 p.replaceChild(this, repl);
         }
-    }
-
-    /**
-     * Replace this node in the tree with a list of new nodes.
-     * 
-     * @param repl  the list of nodes to replace it with
-     */
-    protected void ASTNode.replaceMeWithList(Iterable<? extends ASTNode> repl) {
-        ASTNode p = getParent();
-        if (p != null)
-            p.replaceChildWithList(this, repl);
     }
 
     public interface FCallable {

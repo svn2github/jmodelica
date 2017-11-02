@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,8 +56,10 @@ public abstract class ExternalCEvalTag extends AbstractTag {
     public  void generate(CodeStream str) {
         if (ext == null) {
             for (FExternalStmt ext : fClass.myExternals()) {
-                if (ext.canEvaluate() && !ext.isConstructorStmt() && !ext.isDestructorStmt())
+                if (ext.canEvaluate(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(ext.myOptions()))
+                        && !ext.isConstructorStmt() && !ext.isDestructorStmt()) {
                     generate_wrap(str, ext, unitCgc, unitTempMap);
+                }
             }
         } else {
             generate_wrap(str, ext, cgc, tempMap);

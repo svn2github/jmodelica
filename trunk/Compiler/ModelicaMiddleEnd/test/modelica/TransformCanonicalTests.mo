@@ -1358,7 +1358,7 @@ end AliasTest34;
         algorithm
             v1 := x;
             v2 := y - 1;
-            z := x + (v2 * x * v1);
+            z := 2*x + (v2 * x * v1);
             w := v1 * v2;
             annotation(Inline=true);
         end f;
