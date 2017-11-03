@@ -20617,4 +20617,77 @@ $C_dae_add_blocks_residual_functions$
 ")})));
 end LinearityCheckPow1;
 
+model NonlinearSolverChoice1
+    Real a,b;
+equation
+    a^2 + a  = 2; 
+    b.^2 + b = 2; 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="NonlinearSolverChoice1",
+            description="",
+            init_nonlinear_solver="realtime",
+            template="
+$C_dae_init_add_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 1, \"2\", -1);
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
+")})));
+end NonlinearSolverChoice1;
+
+model NonlinearSolverChoice2
+    Real a,b;
+equation
+    a^2 + a  = 2; 
+    b.^2 + b = 2; 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="NonlinearSolverChoice2",
+            description="",
+            nonlinear_solver="realtime",
+            template="
+$C_dae_init_add_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 1, \"2\", -1);
+")})));
+end NonlinearSolverChoice2;
+
+model NonlinearSolverChoice3
+    Real a,b;
+equation
+    a^2 + a  = 2; 
+    b.^2 + b = 2; 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="NonlinearSolverChoice3",
+            description="",
+            nonlinear_solver="realtime",
+            init_nonlinear_solver="realtime",
+            template="
+$C_dae_init_add_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 1, \"2\", -1);
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_REALTIME_SOLVER, 1, \"2\", -1);
+")})));
+end NonlinearSolverChoice3;
+
 end CCodeGenTests;

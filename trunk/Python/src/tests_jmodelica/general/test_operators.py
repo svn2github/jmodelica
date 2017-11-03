@@ -17,6 +17,8 @@
 
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
+from assimulo.solvers.sundials import CVodeError
+from pyfmi.fmi import FMUException
 
 class TestHomotopy(SimulationTest):
     """

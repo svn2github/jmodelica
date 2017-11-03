@@ -274,6 +274,7 @@ abstract public class OptionRegistry {
     public interface NonlinearSolver {
         public static final String KINSOL  = "kinsol";
         public static final String MINPACK = "minpack";
+        public static final String REALTIME = "realtime";
     }
     public interface FMIVersion {
         public static final String FMI10  = "1.0";
@@ -707,14 +708,14 @@ abstract public class OptionRegistry {
              Category.user,
              NonlinearSolver.KINSOL,
              "Decides which nonlinear equation solver to use. Alternatives are 'kinsol or 'minpack'.",
-             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
+             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK, NonlinearSolver.REALTIME),
         INIT_NLE_SOLVER
             ("init_nonlinear_solver",
              OptionType.compiler,
              Category.user,
              NonlinearSolver.KINSOL,
              "Decides which nonlinear equation solver to use in the initial system. Alternatives are 'kinsol or 'minpack'.",
-             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
+             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK, NonlinearSolver.REALTIME),
         GENERATE_EVENT_SWITCHES
             ("generate_event_switches",
              OptionType.compiler,
