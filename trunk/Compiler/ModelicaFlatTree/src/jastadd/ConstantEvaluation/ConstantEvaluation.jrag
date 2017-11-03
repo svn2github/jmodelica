@@ -3371,7 +3371,7 @@ aspect ConstantEvaluation {
     }
     
     public static void FFunctionDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values, CommonCallable cc, FAlgorithm fab) {
-        AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(fab, values);
+        AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(fab.myOptions(), values);
         Map<CommonVariableDecl, CValue> oldVal = FFunctionDecl.resetAfterCeval(cc, fab, values);
         try {
             for (CommonVariableDecl cvd : cc.myInputs()) {
@@ -4591,8 +4591,8 @@ aspect VariableEvaluator {
             return use.cevalUse(this);
         }
         
-        public AlgorithmEvaluator createAlgorithmEvaluator(ASTNode n, Map<CommonVariableDecl, CValue> values) {
-            return new AlgorithmEvaluator(externalEvaluationEnabled, n.myOptions(), values);
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            return new AlgorithmEvaluator(externalEvaluationEnabled, options, values);
         }
         
         public AlgorithmEvaluator createEmptyAlgorithmEvaluator(OptionRegistry options) {
@@ -4661,8 +4661,8 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(ASTNode n, Map<CommonVariableDecl, CValue> values) {
-            return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), n.myOptions(), values, this);
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), options, values, this);
         }
         
         @Override
@@ -4695,11 +4695,11 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(ASTNode n, Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             if (this.values == null) {
                 this.values = values;
             }
-            return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), n.myOptions(), values, this);
+            return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), options, values, this);
         }
         
         @Override
@@ -4876,8 +4876,8 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(ASTNode n, Map<CommonVariableDecl, CValue> values) {
-            return variableEvaluator.createAlgorithmEvaluator(n, values);
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            return variableEvaluator.createAlgorithmEvaluator(options, values);
         }
         
         @Override

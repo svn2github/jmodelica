@@ -67,21 +67,6 @@ aspect ConstantFolding {
         }
     }
 
-    public void FIdUseExp.constantFolding(VariableEvaluator evaluator) {
-        if (type().isString()) {
-            try {
-                CValue value = ceval(evaluator);
-                if (!value.size().isEmpty()) {
-                    replaceMe(value.buildLiteral());
-                }
-            } catch (ConstantEvaluationException e) {
-                compliance("Could not evaluate string variable " + name());
-            }
-        } else {
-            super.constantFolding(evaluator);
-        }
-    }
-
     public void FPreExp.constantFolding(VariableEvaluator evaluator) {
         if (!variability().knownParameterOrLess() && variability().parameterOrLess()) {
             replaceMe(new FIdUseExp(getFIdUse().fullCopy()));

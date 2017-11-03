@@ -587,7 +587,9 @@ aspect Scalarization {
     /**
      * Check if this FVariable should have a binding exp after scalarization
      */
-    syn boolean FVariable.keepBExp(FTypePrefixVariability variability, FExp bexp) = variability.knownParameterOrLess() || isString() || (variability.parameterVariability() && bexp.isIndependentParameterExp());
+    syn boolean FVariable.keepBExp(FTypePrefixVariability variability, FExp bexp) =
+            variability.knownParameterOrLess() ||
+            (variability.parameterVariability() && bexp.isIndependentParameterExp());
     
     /**
      * Lightweight representation of an FVariable used to scalarize record variables.
