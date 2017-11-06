@@ -100,11 +100,11 @@ fi
 
 # Test sets
 if [[ "${PYTHON64_HOME}" != "" ]]; then
-test_set_a="modelica optimica python python64"
-tests="modelica optimica python python64"
+    test_set_a="modelica optimica python python64"
+    tests="modelica optimica python python64"
 else
-test_set_a="modelica optimica python"
-tests="modelica optimica python"
+    test_set_a="modelica optimica python"
+    tests="modelica optimica python"
 fi
 test_set_j="modelica optimica"
 test_set_m="modelica"
@@ -142,27 +142,27 @@ fi
 
 # Extend with all tests for default version of Python/bitness
 if [[ "${PYTHON64_HOME}" != "" ]]; then
-TAGS64="${TAGS64} -a stddist_full"
-if [[ "${IPOPT64_HOME}" != "" ]]; then
-  if [[ "${SYS}" == Win ]]; then
-    TAGS64="${TAGS64} -a windows_full"
-  fi
-  if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
-    TAGS64="${TAGS64} -a casadi_full"
-  fi
-fi  
+    TAGS64="${TAGS64} -a stddist_full"
+    if [[ "${IPOPT64_HOME}" != "" ]]; then
+        if [[ "${SYS}" == Win ]]; then
+            TAGS64="${TAGS64} -a windows_full"
+        fi
+        if [[ -e "${JMODELICA_HOME}/Python_64/casadi" ]]; then
+            TAGS64="${TAGS64} -a casadi_full"
+        fi
+    fi  
 else
-TAGS="${TAGS} -a stddist_full"
-if [[ "${IPOPT_HOME}" != "" ]]; then
-  if [[ "${SYS}" == Win ]]; then
-    TAGS="${TAGS} -a windows_full"
-  fi
-  if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
-    TAGS="${TAGS} -a casadi_full"
-  else
-    echo Skipping casadi tests, since CasADi does not seem to be installed.
-  fi
-fi
+    TAGS="${TAGS} -a stddist_full"
+    if [[ "${IPOPT_HOME}" != "" ]]; then
+        if [[ "${SYS}" == Win ]]; then
+            TAGS="${TAGS} -a windows_full"
+        fi
+        if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
+            TAGS="${TAGS} -a casadi_full"
+        else
+            echo Skipping casadi tests, since CasADi does not seem to be installed.
+        fi
+    fi
 fi
 
 # Functions for running specific tests
@@ -228,12 +228,12 @@ function python_tests() {
 TESTS64_DIR="${JMODELICA_HOME}/Python_64/tests_jmodelica"
 function python64_tests() {
 # Set necessary paths etc to run 64 bit tests
-export PYTHONPATH=${PYTHONPATH64}
-export PYTHONHOME=${PYTHON64_HOME}
-export JPYPE_JVM=${JPYPE64_JVM}
-export CASADI_LIB_HOME=${CASADI64_HOME}/lib
-export CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME64}
-export PATH=${PYTHON64_HOME}:${PYTHON64_HOME}/Scripts:${PYTHON64_HOME}/Lib:${IPOPT64_HOME}/bin:${CASADI_LIB_HOME}:"${PATH}"
+PYTHONPATH=${PYTHONPATH64}
+PYTHONHOME=${PYTHON64_HOME}
+JPYPE_JVM=${JPYPE64_JVM}
+CASADI_LIB_HOME=${CASADI64_HOME}/lib
+CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME64}
+PATH=${PYTHON64_HOME}:${PYTHON64_HOME}/Scripts:${PYTHON64_HOME}/Lib:${IPOPT64_HOME}/bin:${CASADI_LIB_HOME}:"${PATH}"
 TESTS32=$TESTS
 TESTS=$TESTS64
 TAGS32=$TAGS
@@ -241,18 +241,20 @@ TAGS=$TAGS64
 TESTS_DIR=${TESTS64_DIR}
 PYTHON64=1
 # Call python_tests 
-python_tests
+res=0 
+python_tests || res=1
 # Reset to original paths etc that was for original Python
 TESTS=$TESTS32
 TAGS=$TAGS32
 PYTHON64=0
-export PYTHONPATH=${PYTHONPATH32}
-export PYTHONHOME=${PYTHON32_HOME}
-export JPYPE_JVM=${JPYPE32_JVM}
-export CASADI_LIB_HOME=${CASADI_HOME}/lib
-export CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME32}
-export PATH="${ORIG_PATH}"
+PYTHONPATH=${PYTHONPATH32}
+PYTHONHOME=${PYTHON32_HOME}
+JPYPE_JVM=${JPYPE32_JVM}
+CASADI_LIB_HOME=${CASADI_HOME}/lib
+CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME32}
+PATH="${ORIG_PATH}"
 TESTS_DIR="${JMODELICA_HOME}/Python/tests_jmodelica"
+return $res
 }
 
 function python_tests_v() {
@@ -653,12 +655,12 @@ echo $(date +%s) ${TIME}"-[Total time: ]nd60/n[:]n60%[0n]sxd10>xp" | dc
 
 # Rename test names in xml when run with 64 bit python
 if [ -n "${XML_RES_PATH:-}" ]; then
-for f in ${XML_RES_PATH}/*; do
-if [[ "${f}" == *"python64_"* ]]; then
-sed -e 's#classname=\"#classname=\"python64.#g' $f > temp.xml
-mv -f temp.xml $f
-fi
-done
+    for f in ${XML_RES_PATH}/*; do
+        if [[ "${f}" == *"python64_"* ]]; then
+            sed -e 's#classname=\"#classname=\"python64.#g' $f > temp.xml
+            mv -f temp.xml $f
+        fi
+    done
 fi
 
 if [[ "${ERROR_ON_TEST_FAIL}" == 1 ]]; then
