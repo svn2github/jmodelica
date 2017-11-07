@@ -227,34 +227,34 @@ function python_tests() {
 
 TESTS64_DIR="${JMODELICA_HOME}/Python_64/tests_jmodelica"
 function python64_tests() {
-# Set necessary paths etc to run 64 bit tests
-PYTHONPATH=${PYTHONPATH64}
-PYTHONHOME=${PYTHON64_HOME}
-JPYPE_JVM=${JPYPE64_JVM}
-CASADI_LIB_HOME=${CASADI64_HOME}/lib
-CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME64}
-PATH=${PYTHON64_HOME}:${PYTHON64_HOME}/Scripts:${PYTHON64_HOME}/Lib:${IPOPT64_HOME}/bin:${CASADI_LIB_HOME}:"${PATH}"
-TESTS32=$TESTS
-TESTS=$TESTS64
-TAGS32=$TAGS
-TAGS=$TAGS64
-TESTS_DIR=${TESTS64_DIR}
-PYTHON64=1
-# Call python_tests 
-res=0 
-python_tests || res=1
-# Reset to original paths etc that was for original Python
-TESTS=$TESTS32
-TAGS=$TAGS32
-PYTHON64=0
-PYTHONPATH=${PYTHONPATH32}
-PYTHONHOME=${PYTHON32_HOME}
-JPYPE_JVM=${JPYPE32_JVM}
-CASADI_LIB_HOME=${CASADI_HOME}/lib
-CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME32}
-PATH="${ORIG_PATH}"
-TESTS_DIR="${JMODELICA_HOME}/Python/tests_jmodelica"
-return $res
+    # Set necessary paths etc to run 64 bit tests
+    PYTHONPATH=${PYTHONPATH64}
+    PYTHONHOME=${PYTHON64_HOME}
+    JPYPE_JVM=${JPYPE64_JVM}
+    CASADI_LIB_HOME=${CASADI64_HOME}/lib
+    CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME64}
+    PATH=${PYTHON64_HOME}:${PYTHON64_HOME}/Scripts:${PYTHON64_HOME}/Lib:${IPOPT64_HOME}/bin:${CASADI_LIB_HOME}:"${PATH}"
+    TESTS32=$TESTS
+    TESTS=$TESTS64
+    TAGS32=$TAGS
+    TAGS=$TAGS64
+    TESTS_DIR=${TESTS64_DIR}
+    PYTHON64=1
+    # Call python_tests 
+    res=0 
+    python_tests || res=1
+    # Reset to original paths etc that was for original Python
+    TESTS=$TESTS32
+    TAGS=$TAGS32
+    PYTHON64=0
+    PYTHONPATH=${PYTHONPATH32}
+    PYTHONHOME=${PYTHON32_HOME}
+    JPYPE_JVM=${JPYPE32_JVM}
+    CASADI_LIB_HOME=${CASADI_HOME}/lib
+    CASADI_INTERFACE_HOME=${CASADI_INTERFACE_HOME32}
+    PATH="${ORIG_PATH}"
+    TESTS_DIR="${JMODELICA_HOME}/Python/tests_jmodelica"
+    return $res
 }
 
 function python_tests_v() {
