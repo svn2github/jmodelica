@@ -22,7 +22,7 @@ aspect CCodeGenFunctionDecl {
             func.genStructsPartial(p, str, "");
         }
         for (FFunctionDecl func : myFFunctionDeclsPartialCalled()) {
-            func.genHeadersPartial_C(str, "");
+            func.genHeadersPartial(p, str, "");
         }
         for (FFunctionDecl func : getFFunctionDecls()) {
             func.genHeader(p, str, "");

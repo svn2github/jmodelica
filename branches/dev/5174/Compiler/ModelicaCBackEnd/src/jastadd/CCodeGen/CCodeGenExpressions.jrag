@@ -1320,6 +1320,7 @@ aspect CCodeGenExpressions {
     }
 
     class CodePrinter {
+        public abstract boolean needsTemp(FExp exp);
         public abstract boolean needsTemp(FFunctionCall call);
         public abstract boolean needsStatement(FFunctionCall call);
         public abstract void printCall(FFunctionCall call, CodeStream str, String indent);
@@ -1327,6 +1328,10 @@ aspect CCodeGenExpressions {
     }
 
     class CPrettyPrinter {
+        @Override
+        public boolean needsTemp(FExp exp) {
+            return exp.needsTemp(this);
+        }
         @Override
         public boolean needsTemp(FFunctionCall call) {
             return call.needsTemp_C(this);
@@ -1349,6 +1354,7 @@ aspect CCodeGenExpressions {
         
     }
 
+    syn boolean FExp.needsTemp(CodePrinter p) = isComposite();
     syn boolean FFunctionCall.needsTemp_C(CodePrinter p) =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
@@ -1361,7 +1367,7 @@ aspect CCodeGenExpressions {
         getArgs().genTempArg(p.DeclStep, str, indent);
         if (p.needsTemp(this)) {
             if (myFCallable().isPartialFunction()) {
-                str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
+                str.formatln("%s%s %s;", indent, p.funcNameUnderscore(myFCallable().actualFFunctionDecl(), C_SUFFIX_FPOUT), tempName_C());
             } else {
                 p.print(this, indent, type(), p.createDeclPrinter(str));
             }

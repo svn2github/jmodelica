@@ -64,7 +64,7 @@ aspect CCodeGenFunctionIO {
     
     @Override
     public void FPartialFunctionCall.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
-        String fp = myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP);
+        String fp = p.funcNameUnderscore(myFCallable().actualFFunctionDecl(), C_SUFFIX_FP);
         if (myFCallable().isPartialFunction()) {
             fp = fp + "*";
         }
@@ -102,7 +102,7 @@ aspect CCodeGenFunctionIO {
     @Override
     public void FPartialFunctionCall.genArgument_C(CodePrinter p, CodeStream str, String indent) {
         str.print("(");
-        str.print(myCorrespondingInput().type().type_C());
+        str.print(p.funcNameUnderscore((FFunctionVariable)myCorrespondingInput(), C_SUFFIX_FP)+ "*");//TODO this is instead of type_C(), push this definition to FPartialFunctionCall.type_C()? pointer from genTempInputDecl_C
         str.print(")");
         if (myFCallable().isPartialFunction()) {
             str.print(tempName_C());
