@@ -55,7 +55,7 @@ aspect OptimicaParsers {
         return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.abstract_equation;
     }
 
-    refine Parsers public short ParserHandler.modificationGoal() {
+    refine Parsers public short ParserHandler.modifierGoal() {
         return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.argument;
     }
 
