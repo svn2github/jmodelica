@@ -30,3 +30,7 @@
 jmi_dynamic_list** jmi_dyn_mem_last() {
     return &jmi_get_current()->dyn_mem_last;
 }
+
+jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
+    return jmi_get_current()->dyn_fcn_mem;
+}

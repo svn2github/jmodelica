@@ -309,6 +309,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->dyn_mem_head.next = NULL;
     jmi_->dyn_mem_head.data = NULL;
     jmi_dyn_mem_init(&jmi_->dyn_mem, &jmi_->dyn_mem_head, &jmi_->dyn_mem_last);
+    jmi_->dyn_fcn_mem = jmi_dynamic_function_pool_create(10);
 
     return 0;
 }
@@ -360,6 +361,7 @@ int jmi_delete(jmi_t* jmi){
     jmi_log_delete(jmi->log);
 
     jmi_destroy_delay_if(jmi);
+    jmi_dynamic_function_pool_destroy(jmi->dyn_fcn_mem);
 
     return 0;
 }

@@ -131,8 +131,8 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 
 /* Assign string not in z vector */
 #define JMI_ASG_STR(DEST,SRC) \
-    jmi_set_str(&(DEST), SRC); \
-    JMI_DYNAMIC_ADD_POINTER(DEST)
+    jmi_set_str(&(DEST), SRC);
+    /* jmi_dynamic_add_pointer(&dyn_mem, DEST); */
 
 /* Assign string in z vector */
 #define JMI_ASG_STR_Z(DEST,SRC) \
@@ -169,8 +169,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_FREE(NAME) free(NAME);
 
 /* Length of string */
-#define JMI_LEN(NAME) \
-    strlen(NAME)
+#define JMI_LEN(NAME) strlen(NAME)
     
 /* Pointer to end of string */
 #define JMI_STR_END(DEST) DEST + JMI_LEN(DEST)

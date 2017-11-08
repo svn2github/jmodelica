@@ -464,6 +464,7 @@ struct jmi_t {
     jmi_dynamic_list dyn_mem_head;   /**< \brief List of pointers to memory allocated during function evaluations. */
     jmi_dynamic_list* dyn_mem_last;  /**< \brief List of pointers to memory allocated during function evaluations. */
     jmi_dyn_mem_t dyn_mem;
+    jmi_dynamic_function_memory_t* dyn_fcn_mem;
 };
 
 /**

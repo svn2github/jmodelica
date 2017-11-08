@@ -20,6 +20,25 @@
 #ifndef _JMI_DYN_MEM_H
 #define _JMI_DYN_MEM_H
 
+#include <stdio.h>
+
+typedef struct jmi_dynamic_function_memory_t {
+    char* cur_pos;
+    char* start_pos;
+    size_t block_size;
+    size_t new_block_size;
+    void* memory_block;
+    size_t nbr_trailing_memory;
+    char** trailing_memory; /* Temporary usage when the memory block is all used up */
+} jmi_dynamic_function_memory_t;
+
+typedef struct jmi_local_dynamic_function_memory_t {
+    jmi_dynamic_function_memory_t* mem;
+    char* start_pos;
+} jmi_local_dynamic_function_memory_t;
+
+
+
 /* Linked list for saving pointers to be freed at return */
 typedef struct _jmi_dynamic_list jmi_dynamic_list;
 struct _jmi_dynamic_list {
@@ -52,29 +71,27 @@ void jmi_dyn_mem_free(jmi_dyn_mem_t* mem);
 
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
-    jmi_dyn_mem_t dyn_mem = {NULL, NULL};
-
-/* Macro for adding a pointer to dynamic list - used from generated code */
-#define JMI_DYNAMIC_ADD(pointer) \
-    JMI_DYNAMIC_ADD_POINTER(pointer)
+    jmi_local_dynamic_function_memory_t dyn_mem = {NULL, NULL};
 
 void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data);
-
-/* Macro for adding a pointer to dynamic list - only for use in other macros */
-#define JMI_DYNAMIC_ADD_POINTER(pointer) \
-    do {\
-        if (!dyn_mem.head) {\
-            jmi_dynamic_list** last = jmi_dyn_mem_last();\
-            jmi_dyn_mem_init(&dyn_mem, *last, last);\
-        }\
-        jmi_dyn_mem_add(&dyn_mem, pointer);\
-    } while (0);
+void jmi_dynamic_add_pointer(jmi_dyn_mem_t* dyn_mem, void* pointer);
 
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() \
-    if (dyn_mem.head) jmi_dyn_mem_free(&dyn_mem);
+    jmi_dynamic_function_free(&dyn_mem);
 
 /* Evaluate and assign expression only if computed flag is false. Sets computed flag to true. */
 #define JMI_CACHED(var, exp) ((!var##_computed && (var##_computed = 1)) ? (var = exp) : var)
+
+
+jmi_dynamic_function_memory_t* jmi_dynamic_function_memory();
+
+jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t block);
+void jmi_dynamic_function_pool_destroy(jmi_dynamic_function_memory_t* mem);
+
+void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t block);
+
+void jmi_dynamic_function_init(jmi_local_dynamic_function_memory_t* local_block);
+void jmi_dynamic_function_free(jmi_local_dynamic_function_memory_t* local_block);
 
 #endif /* _JMI_DYN_MEM_H */
