@@ -274,8 +274,9 @@ int i;
             str.print(")");
         }
         str.print(")");
-        if (!exp)
+        if (!exp) {
             str.print(";\n");
+        }
         if (!exp) {
             int tot = myOutputs().size();
             int lefts = call.myLefts().size();
