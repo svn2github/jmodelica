@@ -294,7 +294,7 @@ aspect CCodeGenFunctionCall {
     
     @Override
     public void FFunctionDecl.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, FFunctionCall call) {
-        boolean exp = call.functionCallIsExp();
+        boolean exp = p.functionCallIsExp(call);
         if (!exp) {
             str.print(indent);
         } else if (call.type().isString()) {
@@ -305,6 +305,13 @@ aspect CCodeGenFunctionCall {
         if (!exp || call.type().isString()) {
             str.print(";\n");
         }
+    }
+    
+    public abstract boolean CodePrinter.functionCallIsExp(FFunctionCall call);
+
+    @Override
+    public boolean CPrettyPrinter.functionCallIsExp(FFunctionCall call) {
+        return call.functionCallIsExp();
     }
 
     //TODO: very similar in structure to HeadComputation.prettyPrintHead, however here we also propagate an extra argument downwards, call.getArgs and call.myLefts
