@@ -739,8 +739,6 @@ void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s
     jmi_array_ref_1(jmi_array_rec_1(tmp_3, 2)->s, 1) = tmp_1;
     jmi_array_ref_1(jmi_array_rec_1(tmp_3, 2)->s, 2) = tmp_2;
     y_v = func_CCodeGenArrayTests_RecordArray10_f_exp1(tmp_3);
-    JMI_FREE(tmp_1)
-    JMI_FREE(tmp_2)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
