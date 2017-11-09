@@ -285,8 +285,9 @@ int i;
             p.printCastArgument(arg, str, indent);
         }
         str.print(")");
-        if (!exp)
+        if (!exp) {
             str.print(";\n");
+        }
         if (!exp) {
             //unpack the struct
 			for (FFunctionCallLeft arg : call.myLefts()) {

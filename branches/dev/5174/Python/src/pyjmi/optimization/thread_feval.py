@@ -34,6 +34,8 @@ class FevalThread(threading.Thread):
             l.append(str(val))
         x_string = ' '.join(l)
         eval_path = os.path.join(curr_dir, 'func_eval.py')
+        if not os.path.isfile(eval_path):
+            eval_path = os.path.join(curr_dir, 'func_eval.pyc')
         python_path = sys.executable
         cmd = ' '.join([python_path, eval_path, x_string, self.func_file_name, self.dir_name])
         if self.debug:

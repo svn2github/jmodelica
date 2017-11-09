@@ -3371,7 +3371,7 @@ aspect ConstantEvaluation {
     }
     
     public static void FFunctionDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values, CommonCallable cc, FAlgorithm fab) {
-        AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
+        AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(fab.myOptions(), values);
         Map<CommonVariableDecl, CValue> oldVal = FFunctionDecl.resetAfterCeval(cc, fab, values);
         try {
             for (CommonVariableDecl cvd : cc.myInputs()) {
@@ -4572,10 +4572,11 @@ aspect VariableEvaluator {
     }
     
     public class VariableEvaluator {
-        public static final VariableEvaluator instance = new VariableEvaluator();
+        public static final VariableEvaluator instance = new VariableEvaluator(true);
+        private boolean externalEvaluationEnabled;
         
-        protected VariableEvaluator() {
-            
+        public VariableEvaluator(boolean externalEvaluationEnabled) {
+            this.externalEvaluationEnabled = externalEvaluationEnabled;
         }
         
         public CValue ceval(CommonVariableDecl variable) {
@@ -4590,8 +4591,12 @@ aspect VariableEvaluator {
             return use.cevalUse(this);
         }
         
-        public AlgorithmEvaluator createAlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
-            return new AlgorithmEvaluator(values);
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            return new AlgorithmEvaluator(externalEvaluationEnabled, options, values);
+        }
+        
+        public AlgorithmEvaluator createEmptyAlgorithmEvaluator(OptionRegistry options) {
+            return new AlgorithmEvaluator(true, options, Collections.<CommonVariableDecl, CValue>emptyMap());
         }
         
         public boolean hasEvaluationValue(CommonVariableDecl variable) {
@@ -4619,6 +4624,10 @@ aspect VariableEvaluator {
             return CValue.UNKNOWN;
         }
         
+        public boolean externalEvaluationEnabled() {
+            return externalEvaluationEnabled;
+        }
+        
         public CValue evalBinOp(FBinExp exp, CValue left, CValue right) {
             return exp.cevalEval(left, right);
         }
@@ -4629,8 +4638,9 @@ aspect VariableEvaluator {
     }
     
     public class PartialVariableEvaluator extends VariableEvaluator {
-        public PartialVariableEvaluator() {
-            
+        
+        public PartialVariableEvaluator(boolean externalEvaluationEnabled) {
+            super(externalEvaluationEnabled);
         }
         
         @Override
@@ -4651,8 +4661,8 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
-            return new PartialAlgorithmEvaluator(this, values);
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), options, values, this);
         }
         
         @Override
@@ -4680,12 +4690,16 @@ aspect VariableEvaluator {
     public class DependencyVariableEvaluator extends PartialVariableEvaluator {
         Map<CommonVariableDecl,CValue> values;
         
+        public DependencyVariableEvaluator() {
+            super(false);
+        }
+        
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
             if (this.values == null) {
                 this.values = values;
             }
-            return new PartialAlgorithmEvaluator(this, values);
+            return new PartialAlgorithmEvaluator(externalEvaluationEnabled(), options, values, this);
         }
         
         @Override
@@ -4770,10 +4784,18 @@ aspect VariableEvaluator {
     }
     
     public class AlgorithmEvaluator extends VariableEvaluator {
-        protected Map<CommonVariableDecl, CValue> values;
         
-        public AlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
-            this.values = values;
+        protected Map<CommonVariableDecl, CValue> values;
+        private OptionRegistry options;
+        
+        public AlgorithmEvaluator(boolean evaluateExternalEnabled, OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            super(evaluateExternalEnabled);
+            this.values  = values;
+            this.options = options;
+        }
+        
+        public int externalEvaluation() {
+            return externalEvaluationEnabled() ? options.getIntegerOption("external_constant_evaluation") : 0;
         }
         
         @Override
@@ -4837,8 +4859,9 @@ aspect VariableEvaluator {
         protected PartialVariableEvaluator variableEvaluator;
         protected ArrayList<IfEvaluation> ifStack;
         
-        public PartialAlgorithmEvaluator(PartialVariableEvaluator variableEvaluator, Map<CommonVariableDecl, CValue> values) {
-            super(values);
+        public PartialAlgorithmEvaluator(boolean evaluateExternalEnabled, OptionRegistry options,
+                Map<CommonVariableDecl, CValue> values, PartialVariableEvaluator variableEvaluator) {
+            super(evaluateExternalEnabled, options, values);
             this.variableEvaluator = variableEvaluator;
             ifStack = new ArrayList<IfEvaluation>();
         }
@@ -4853,8 +4876,8 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public AlgorithmEvaluator createAlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
-            return variableEvaluator.createAlgorithmEvaluator(values);
+        public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
+            return variableEvaluator.createAlgorithmEvaluator(options, values);
         }
         
         @Override

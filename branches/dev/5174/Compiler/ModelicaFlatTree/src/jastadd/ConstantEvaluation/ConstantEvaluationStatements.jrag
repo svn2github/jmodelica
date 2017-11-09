@@ -315,10 +315,10 @@ aspect ConstantEvaluationStatements {
 
     @Override
     public int FExternalStmt.evaluate(AlgorithmEvaluator evaluator) {
-        if (!canEvaluate() || hasUnknownArguments(evaluator.getValues())) {
+        if (!canEvaluate(evaluator) || hasUnknownArguments(evaluator.getValues())) {
             throw new ConstantEvaluationException(null, "Could not evaluate external function");
         }
-        return evaluateExternal(evaluator.getValues());
+        return evaluateExternal(evaluator);
     }
 
     @Override
