@@ -80,12 +80,14 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
  * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
     if (name == NULL) {\
-        name            = (arr*) jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr));\
+        char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type));\
+        name            = (arr*) tmp_ptr;\
         name->num_dims  = (int)  (nd);\
-        name->size      = (int*) jmi_dynamic_function_pool_alloc(&dyn_mem, name->num_dims*sizeof(int));\
-    }\
-    name->num_elems = (int) (ne);\
-    if (name == NULL || name->num_elems > name->num_elems_alloced) { \
+        name->size      = (int*) (tmp_ptr+sizeof(arr));\
+        name->num_elems = (int) (ne);\
+        name->num_elems_alloced = (int) (ne);\
+        name->var = (type*) (tmp_ptr+sizeof(arr)+(int)nd*sizeof(int));\
+    } else if ((name->num_elems = (int) (ne)) > name->num_elems_alloced) {\
         name->var = (type*) jmi_dynamic_function_pool_alloc(&dyn_mem, name->num_elems*sizeof(type));\
         name->num_elems_alloced = name->num_elems;\
     }
