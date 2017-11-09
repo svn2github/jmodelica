@@ -30,7 +30,6 @@ FlatRoot : Root ::= FClass;
 FClass : BaseNode ::= FQName 
                       FVariable* 
                       AliasVariable:FVariable* 
-                      AliasConstant:FVariable*
                       FInitialEquation:FAbstractEquation*
                       FParameterEquation:FAbstractEquation*
                       FAbstractEquation*

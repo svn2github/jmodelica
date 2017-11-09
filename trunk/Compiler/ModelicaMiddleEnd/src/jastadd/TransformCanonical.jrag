@@ -142,9 +142,9 @@ aspect TransformCanonical {
             transformations.add(new commonSubexpressionEliminationIfSet());
             transformations.add(new addFPreVariables());
             transformations.add(new aliasEliminationIfSet());
+            transformations.add(new eliminateLinearEquations());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
-            transformations.add(new eliminateLinearEquations());
             transformations.add(new computeMatchingsAndBLT());
         }
 

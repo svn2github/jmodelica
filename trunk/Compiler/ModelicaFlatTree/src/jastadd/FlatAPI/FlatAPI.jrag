@@ -1105,7 +1105,6 @@ aspect FlatAPI {
         return category.type.mask(varRefMap().getBy(category).getIndexFor(var));
     }
     eq FClass.getAliasVariable(int i).valueReference() = getAliasVariable(i).aliasValueReference();
-    eq FClass.getAliasConstant(int i).valueReference() = getAliasConstant(i).aliasValueReference();
     eq FClass.getFAbstractEquation().valueReference()  = -1;
     eq Root.getChild().valueReference()                = -1;
     

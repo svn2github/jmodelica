@@ -660,7 +660,7 @@ aspect Scalarization {
             Index ti = index.expand(i);
             if (nbexp != null && nbexp.isArray()) {
                 Index ni = ti.subIndex(ti.ndims() - nbexp.ndims());
-                nbexp = nbexp.getArray().get(ni);
+                nbexp = nbexp.fArrayCell(ni, 0);
             }
             return new ScalarizingVariableInstance(i.ndims() > 0 ? name + i : name, mattrs, nbexp, variability,
                     inputOutput, ti);
