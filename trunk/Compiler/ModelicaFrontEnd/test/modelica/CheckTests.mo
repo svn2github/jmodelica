@@ -33,7 +33,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 26, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 8, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 ")})));
 end InnerOuter1;
@@ -61,7 +61,7 @@ model InnerOuter2
             errorMessage="
 1 errors found:
 
-Error at line 54, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 13, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable w does not match the declared type of the variable
 ")})));
 end InnerOuter2;
@@ -84,7 +84,7 @@ model InnerOuter3
             errorMessage="
 1 errors found:
 
-Error at line 77, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 8, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable w does not match the declared type of the variable
 ")})));
 end InnerOuter3;
@@ -111,7 +111,7 @@ model InnerOuter4
             errorMessage="
 1 errors found:
 
-Error at line 104, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 12, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable w does not match the declared type of the variable
 ")})));
 end InnerOuter4;
@@ -135,7 +135,7 @@ model InnerOuter5
             errorMessage="
 1 errors found:
 
-Warning at line 127, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter w does not have a binding expression
 ")})));
 end InnerOuter5;
@@ -158,7 +158,7 @@ model ConditionalError1
             errorMessage="
 1 errors found:
 
-Error at line 66, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
 In component a:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -230,7 +230,7 @@ model ConditionalError4
             errorMessage="
 1 errors found:
 
-Error at line 137, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
+Error at line 3, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
 In component a:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -311,7 +311,7 @@ model ParamBinding1
             errorMessage="
 1 errors found:
 
-Error at line 173, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 17, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end ParamBinding1;
@@ -334,7 +334,7 @@ model ParamBinding2
             errorMessage="
 1 errors found:
 
-Error at line 196, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 8, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end ParamBinding2;
@@ -356,7 +356,7 @@ model ArraySize1
             errorMessage="
 1 errors found:
 
-Error at line 218, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 7, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable e does not match the declared type of the variable
 ")})));
 end ArraySize1;
@@ -422,7 +422,7 @@ model FunctionNoAlgorithm1
             errorMessage="
 1 errors found:
 
-Error at line 241, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 8, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm1;
@@ -447,7 +447,7 @@ model FunctionNoAlgorithm2
             errorMessage="
 1 errors found:
 
-Error at line 266, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 10, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm2;
@@ -469,7 +469,7 @@ model FunctionNoAlgorithm3
             errorMessage="
 1 errors found:
 
-Error at line 288, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 7, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end FunctionNoAlgorithm3;
@@ -496,7 +496,7 @@ model FunctionNoAlgorithm4
             errorMessage="
 1 errors found:
 
-Error at line 315, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 12, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm4;
@@ -526,7 +526,7 @@ model FunctionNoAlgorithm5
             errorMessage="
 1 errors found:
 
-Error at line 345, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 15, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm5;
@@ -636,7 +636,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 451, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 4, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   All branches in if equation with non-parameter tests must have the same number of equations
 ")})));
 end IfEquationElse3;
@@ -657,7 +657,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 477, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 8, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Break statement must be inside while- or for-statement
 ")})));
 end BreakWithoutLoop;
@@ -677,7 +677,7 @@ model ComponentNameError1
             errorMessage="
 1 errors found:
 
-Error at line 493, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
+Error at line 3, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
 In component a:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -699,7 +699,7 @@ model ComponentNameError2
             errorMessage="
 1 errors found:
 
-Error at line 514, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
+Error at line 3, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
 In components:
     a1
     a2
@@ -792,10 +792,10 @@ model ExtObjConstructor
             errorMessage="
 2 errors found:
 
-Error at line 556, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 21, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Constructors for external objects can only be used as binding expressions
 
-Error at line 570, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 35, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Constructors for external objects can only be used as binding expressions
 ")})));
 end ExtObjConstructor;
@@ -827,7 +827,7 @@ model ExtObjConstructor2
             errorMessage="
 1 errors found:
 
-Error at line 603, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 17, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Missing binding expression for external object
 ")})));
 end ExtObjConstructor2;
@@ -866,10 +866,10 @@ model PartialCall1
             errorMessage="
 2 errors found:
 
-Error at line 644, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 22, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function fullFunc(): missing argument for required input x
 
-Error at line 644, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 22, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc()' is Real
     expected type is ((Real y) = CheckTests.Functional.PartialCall1.partFunc(Real x))
@@ -906,10 +906,10 @@ model PartialCall2
             errorMessage="
 2 errors found:
 
-Error at line 680, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 19, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function partFunc(): can only call functions that have one algorithm section or external function specification
 
-Error at line 683, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 22, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function partFunc(): can only call functions that have one algorithm section or external function specification
 ")})));
 end PartialCall2;
@@ -946,16 +946,16 @@ model NumArgs1
             errorMessage="
 4 errors found:
 
-Error at line 719, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 20, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function pf(): too many positional arguments
 
-Error at line 719, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 20, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function pf(): missing argument for required input x
 
-Error at line 722, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 23, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Creating functional input argument fullFunc(): missing argument for required input x2
 
-Error at line 723, column 45, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 24, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Creating functional input argument fullFunc(): no input matching named argument x found
 ")})));
 end NumArgs1;
@@ -990,7 +990,7 @@ model Array1
             errorMessage="
 1 errors found:
 
-Compliance error at line 759, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_ARRAY_INPUT:
+Compliance error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_ARRAY_INPUT:
   Arrays of functional input arguments is currently not supported
 ")})));
 end Array1;
@@ -1025,7 +1025,7 @@ model Bind1
             errorMessage="
 1 errors found:
 
-Compliance error at line 794, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_FROM_FUNCTION_DEFAULT:
+Compliance error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_FROM_FUNCTION_DEFAULT:
   Creating functional input arguments from functions with default input arguments is currently not supported
 ")})));
 end Bind1;
@@ -1062,22 +1062,22 @@ model Bind2
             errorMessage="
 6 errors found:
 
-Compliance error at line 829, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
+Compliance error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
-Error at line 830, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 15, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable pf1 does not match the declared type of the variable
 
-Compliance error at line 830, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
+Compliance error at line 15, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
-Error at line 831, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 16, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Illegal access to class in expression: fullFunc
 
-Compliance error at line 831, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
+Compliance error at line 16, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
-Error at line 832, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 17, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Illegal access to class in expression: fullFunc
 ")})));
 end Bind2;
@@ -1126,10 +1126,10 @@ model Bind3
             errorMessage="
 2 errors found:
 
-Compliance error at line 895, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+Compliance error at line 28, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 
-Compliance error at line 896, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+Compliance error at line 29, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 ")})));
 end Bind3;
@@ -1163,10 +1163,10 @@ model Duplicate1
             errorMessage="
 2 errors found:
 
-Error at line 927, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 8, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Duplicate component in same class: input Real x1
 
-Error at line 940, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 21, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Creating functional input argument fullFunc(): multiple arguments matches input x1
 ")})));
 end Duplicate1;
@@ -1199,7 +1199,7 @@ model Vectorized1
             errorMessage="
 1 errors found:
 
-Error at line 976, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 20, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc(x1={1})' is Real[1]
     expected type is ((Real y) = CheckTests.Functional.Vectorized1.partFunc())
@@ -1228,7 +1228,7 @@ model FortranStrings
             errorMessage="
 1 errors found:
 
-Error at line 994, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Passing strings to external fortran functions is not allowed
 ")})));
 end FortranStrings;
@@ -1252,7 +1252,7 @@ model SpatialDist1
             errorMessage="
 1 errors found:
 
-Error at line 1028, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 10, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Calling function spatialDistribution(): missing argument for required input positiveVelocity
 ")})));
 end SpatialDist1;
@@ -1325,10 +1325,10 @@ model SizeInDisabled1
             errorMessage="
 2 errors found:
 
-Warning at line 1227, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 1, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 
-Warning at line 1229, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Warning at line 3, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Found error in disabled conditional:
   Array size mismatch in declaration of z, size of declaration is [0] and size of binding expression is [2]
 ")})));
@@ -1347,10 +1347,10 @@ model SizeInDisabled2
             errorMessage="
 2 errors found:
 
-Error at line 1250, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 3, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of z, size of declaration is [0] and size of binding expression is [2, 2]
 
-Warning at line 1248, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 1, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled2;
@@ -1376,14 +1376,14 @@ model SizeInDisabled3
             errorMessage="
 2 errors found:
 
-Warning at line 1275, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION,
+Warning at line 7, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION,
 In component a:
   Found error in disabled conditional:
   Type error in expression: cat(1, {x[1]}, x[2:end] .- 1) .* x
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of 'x' is Real[0]
 
-Warning at line 1276, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 8, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled3;
@@ -1409,13 +1409,13 @@ model SizeInDisabled4
             errorMessage="
 2 errors found:
 
-Error at line 1306, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION,
+Error at line 7, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION,
 In component a:
   Type error in expression: cat(1, {x[1]}, x[2:end] .- 1) .* {x, x}
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of '{x, x}' is Real[2, 0]
 
-Warning at line 1307, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 8, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled4;
@@ -1448,10 +1448,10 @@ model FortranRecord
             errorMessage="
 2 errors found:
 
-Error at line 1427, column 5, in file '...':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Passing records to external fortran functions is not allowed
 
-Error at line 1433, column 5, in file '...':
+Error at line 12, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Passing records to external fortran functions is not allowed
 ")})));
 end FortranRecord;
@@ -1481,10 +1481,10 @@ model ExternalRecordArray1
             errorMessage="
 1 errors found:
 
-Error at line 1467, column 5, in file '...':
+Error at line 10, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Record type used as input or output to external function can only contain scalar record or scalar simple types
   
-Compliance error at line 1467, column 5, in file '...', UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE:
+Compliance error at line 10, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE:
   Using records as return value from external functions is not supported
 
 ")})));
@@ -1511,7 +1511,7 @@ model ExternalRecordArray2
             errorMessage="
 1 errors found:
 
-Error at line 1493, column 5, in file '...':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Record type used as input or output to external function can only contain scalar record or scalar simple types
 ")})));
 end ExternalRecordArray2;
@@ -1527,7 +1527,7 @@ model NegativeFill1
             errorMessage="
 1 errors found:
 
-Error at line 1519, column 43, in file '...', NEGATIVE_SIZE_FILL:
+Error at line 2, column 43, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', NEGATIVE_SIZE_FILL:
   The dimension arguments of the fill() operator may not be negative
 
 ")})));
@@ -1574,13 +1574,13 @@ equation
     (y1,y2) = f(size(x,1));
     annotation(__JModelica(UnitTesting(tests={
         WarningTestCase(
-            name="InnerOuter1",
+            name="FunctionOutputSize1",
             description="Check that error for function outputs does not trigger in inactive branch",
             checkType=check,
             errorMessage="
 1 warnings found:
 
-Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 7, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter x does not have a binding expression
 
 ")})));
@@ -1597,7 +1597,7 @@ model UnknownSizeArrayIndexBounds1
             errorMessage="
 1 warnings found:
 
-Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 1, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter x does not have a binding expression
 
 ")})));
@@ -1620,16 +1620,16 @@ model ExternalFunctionAnnotation1
             errorMessage="
 4 errors found:
 
-Error at line 9, column 19, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
-Error at line 9, column 30, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
-Error at line 9, column 51, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 51, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
-Error at line 9, column 63, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
 ")})));

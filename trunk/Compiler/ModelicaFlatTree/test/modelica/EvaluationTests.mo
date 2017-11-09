@@ -826,13 +826,13 @@ model FunctionEval23
             errorMessage="
 3 errors found:
 
-Error at line 802, column 9, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Cannot find class or component declaration for z
 
-Error at line 803, column 18, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 7, column 18, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Cannot find class or component declaration for z
 
-Error at line 806, column 23, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 10, column 23, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'p': 'f(3)'
 ")})));
 end FunctionEval23;
@@ -854,10 +854,10 @@ model FunctionEval24
             errorMessage="
 2 errors found:
 
-Error at line 834, column 20, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 9, column 20, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Calling function f(): missing argument for required input x
 
-Error at line 834, column 20, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 9, column 20, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'z': 'f()'
     Unspecified constant evaluation failure
 ")})));
@@ -1936,15 +1936,15 @@ model EvalNoBinding5
             errorMessage="
 3 errors found:
 
-Error at line 2416, column 10, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 21, column 10, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Missing binding expression for external object
 
-Error at line 2419, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for structural parameter 'n': 'f(a)'
     in function 'EvaluationTests.EvalNoBinding5.f'
     Could not evaluate external function
 
-Error at line 2420, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 25, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate array size expression: n
 ")})));
 end EvalNoBinding5;
@@ -4059,7 +4059,7 @@ model FScalarExpEval
             errorMessage="
 1 errors found:
 
-Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 3, column 17, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FScalarExpEval;

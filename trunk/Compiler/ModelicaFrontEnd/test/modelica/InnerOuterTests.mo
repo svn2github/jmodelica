@@ -329,10 +329,10 @@ model InnerOuterTest9
             errorMessage="
 2 errors found:
 
-Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 1, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer parameter Real T = 5'
 
-Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 1, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter T does not have a binding expression
 ")})));
 end InnerOuterTest9;
@@ -349,10 +349,10 @@ model InnerOuterTest10
             errorMessage="
 2 errors found:
 
-Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 1, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer constant Real T = 5'
 
-Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
+Warning at line 1, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
   The constant T does not have a binding expression
 ")})));
 end InnerOuterTest10;
@@ -700,7 +700,8 @@ model InnerOuterAccess1
             description="Access to component in outer that only exist in inner",
             errorMessage="
 1 errors found:
-Error at line 590, column 11, in file '...',
+
+Error at line 13, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo',
 In component a:
   Cannot use component y in inner 'inner R r', because it is not present in outer 'outer R_0 r'
 
@@ -739,11 +740,11 @@ model InnerOuterAccess2
             errorMessage="
 2 errors found:
 
-Error at line 622, column 11, in file '...',
+Error at line 13, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo',
 In component b.a:
   Cannot find class or component declaration for y
 
-Error at line 629, column 11, in file '...',
+Error at line 20, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo',
 In component b:
   Cannot use component y in inner 'inner R r', because it is not present in outer 'inner outer R_0 r'
 
@@ -779,7 +780,7 @@ model InnerOuterAccess3
             errorMessage="
 1 errors found:
 
-Error at line 665, column 11, in file '...',
+Error at line 17, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo',
 In component a:
   Cannot use component k in inner 'inner R r', because it is not present in outer 'outer R_0 r'
 ")})));
@@ -905,7 +906,7 @@ end InnerOuterTests.NoInner1;
             errorMessage="
 1 errors found:
 
-Warning at line 537, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer Real r'
 ")})));
 end NoInner1;
@@ -941,7 +942,7 @@ end InnerOuterTests.NoInner2;
             errorMessage="
 1 errors found:
 
-Warning at line 569, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo',
+Warning at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo',
 In component b:
   Generated missing inner declaration for 'outer Real r'
 ")})));
@@ -1044,7 +1045,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 670, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Error at line 1, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Can not generate missing inner declaration for x, due to presence of component with same name on top level
 ")})));
 end NoInner6;
@@ -1067,7 +1068,7 @@ model NoInner7
             errorMessage="
 1 errors found:
 
-Error at line 689, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Can not generate missing inner declaration for r, due to presence of component with same name on top level
 ")})));
 end NoInner7;
@@ -1091,7 +1092,7 @@ model NoInner8
             errorMessage="
 1 errors found:
 
-Error at line 716, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Error at line 6, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Can not generate missing inner declaration for outer component a of partial type InnerOuterTests.NoInner8.A
 ")})));
 end NoInner8;
@@ -1124,7 +1125,7 @@ model NoInner9
             errorMessage="
 1 errors found:
 
-Error at line 744, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Error at line 10, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Can't generate missing inner declaration for a, due to the outer declarations being of different types: 
     InnerOuterTests.NoInner9.A c.a
     InnerOuterTests.NoInner9.B d.a
@@ -1171,7 +1172,7 @@ model NoInner10
             errorMessage="
 1 errors found:
 
-Error at line 779, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Error at line 10, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/InnerOuterTests.mo':
   Can't generate missing inner declaration for a, due to the outer declarations being of different types: 
     InnerOuterTests.NoInner10.A a
     InnerOuterTests.NoInner10.A c1.a
@@ -1229,13 +1230,13 @@ end InnerOuterTests.NoInner11;
             errorMessage="
 3 errors found:
 
-Warning at line 850, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 11, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer A a'
 
-Warning at line 851, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 12, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer Real z'
 
-Warning at line 858, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 19, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer B b'
 ")})));
 end NoInner11;

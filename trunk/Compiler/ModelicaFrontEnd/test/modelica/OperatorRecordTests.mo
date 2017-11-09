@@ -328,7 +328,7 @@ end OperatorRecordTests.OperatorOverload3;
             errorMessage="
 1 errors found:
 
-Error at line 322, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 4, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 - b
     type of 'c1' is OperatorRecordTests.Cplx
     type of 'b' is Boolean
@@ -541,7 +541,7 @@ end OperatorRecordTests.OperatorOverload8;
             errorMessage="
 1 errors found:
 
-Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 17, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.OperatorOverload9.Op[2]
     type of 'c2' is OperatorRecordTests.OperatorOverload9.Op[2]
@@ -561,7 +561,7 @@ Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/Operat
             errorMessage="
 1 errors found:
 
-Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 4, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.Cplx[2]
     type of 'c2' is OperatorRecordTests.Cplx[2, 2]
@@ -1796,7 +1796,7 @@ end OperatorRecordTests.OperatorRecordConnect5;
             errorMessage="
 1 errors found:
 
-Error at line 1779, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator classes are only allowed in operator records and packages in operator records
 ")})));
     end OperatorLimitations1;
@@ -1873,7 +1873,7 @@ end OperatorRecordTests.OperatorLimitations2;
             errorMessage="
 1 errors found:
 
-Error at line 1848, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+Error at line 3, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In components:
     a
     b
@@ -1906,7 +1906,7 @@ In components:
             errorMessage="
 1 errors found:
 
-Error at line 1883, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Invalid name for operator class: ':'
 ")})));
     end OperatorLimitations4;
@@ -1934,7 +1934,7 @@ Error at line 1883, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 1913, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Invalid name for operator class: f
 ")})));
     end OperatorLimitations5;
@@ -1970,10 +1970,10 @@ Error at line 1913, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 2 errors found:
 
-Error at line 1941, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions must have at least one argument that is of the type of the operator record the function belongs to
 
-Error at line 1949, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 13, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   First argument of conversion operator functions must be of the type of the operator record the function belongs to
 ")})));
     end OperatorLimitations6;
@@ -2006,10 +2006,10 @@ Error at line 1949, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 2 errors found:
 
-Error at line 1981, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 6, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Output of operator record constructor must be of the type of the operator record the constructor belongs to
 
-Error at line 1987, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 12, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Output of operator record constructor must be of the type of the operator record the constructor belongs to
 ")})));
     end OperatorLimitations7;
@@ -2045,10 +2045,10 @@ Error at line 1987, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 2 errors found:
 
-Error at line 2016, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions must have exactly one output, but '*' has 0
 
-Error at line 2022, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 11, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions must have exactly one output, but '-' has 2
 ")})));
     end OperatorLimitations8;
@@ -2086,10 +2086,10 @@ Error at line 2022, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 2 errors found:
 
-Error at line 2055, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator classes must be encapsulated
 
-Error at line 2065, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 15, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator classes must be encapsulated
 ")})));
     end OperatorLimitations9;
@@ -2165,13 +2165,13 @@ end OperatorRecordTests.OperatorLimitations10;
             errorMessage="
 3 errors found:
 
-Error at line 2139, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Components are not allowed in packages in operator records
 
-Error at line 2142, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 8, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Classes other than operators, operator functions, functions and packages are not allowed in operator record classes
 
-Error at line 2147, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 13, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Classes other than operators, operator functions, functions and packages are not allowed in operator record classes
 ")})));
     end OperatorLimitations11;
@@ -2192,7 +2192,7 @@ Error at line 2147, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2176, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 3, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Extending operator records is only allowed as a short class declaration
 ")})));
     end OperatorLimitations12;
@@ -2211,7 +2211,7 @@ Error at line 2176, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+Error at line 2, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
@@ -2252,7 +2252,7 @@ In component c2:
             errorMessage="
 1 errors found:
 
-Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+Error at line 24, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In component b:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
@@ -2287,7 +2287,7 @@ In component b:
             errorMessage="
 1 errors found:
 
-Error at line 2271, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+Error at line 18, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In component b:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
@@ -2411,7 +2411,7 @@ end OperatorRecordTests.OperatorLimitations15b;
             errorMessage="
 1 errors found:
 
-Error at line 2393, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+Error at line 2, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
@@ -2450,7 +2450,7 @@ In component c2:
             errorMessage="
 1 errors found:
 
-Error at line 2415, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Ambiguous overloaded constructors in OperatorRecordTests.OperatorLimitations17.A and OperatorRecordTests.OperatorLimitations17.B
 ")})));
     end OperatorLimitations17;
@@ -2520,7 +2520,7 @@ end OperatorRecordTests.OperatorLimitations18;
             errorMessage="
 1 errors found:
 
-Error at line 2496, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   The '0' operator record constructor may not have any inputs, but has 1
 ")})));
     end OperatorLimitations19;
@@ -2554,7 +2554,7 @@ Error at line 2496, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2523, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   The '0' operator may not contain more than one function, but has 2
 ")})));
     end OperatorLimitations20;
@@ -2581,7 +2581,7 @@ Error at line 2523, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2557, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   'String' operator functions must have one output of type String, but returns Real
 ")})));
     end OperatorLimitations21;
@@ -2610,7 +2610,7 @@ Error at line 2557, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2585, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 6, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   'String' operator functions must have one output of type String, but a returns String[1]
 ")})));
     end OperatorLimitations22;
@@ -2641,7 +2641,7 @@ Error at line 2585, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2625, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 17, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined
 ")})));
     end OperatorLimitations23;
@@ -2781,7 +2781,7 @@ end OperatorRecordTests.OperatorLimitations25;
             errorMessage="
 1 errors found:
 
-Error at line 2760, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 19, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined
 ")})));
     end OperatorLimitations26;
@@ -2808,7 +2808,7 @@ Error at line 2760, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2785, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 1
 ")})));
     end OperatorLimitations27;
@@ -2837,7 +2837,7 @@ Error at line 2785, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2812, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 3
 ")})));
     end OperatorLimitations28;
@@ -2865,7 +2865,7 @@ Error at line 2812, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2841, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 1
 ")})));
     end OperatorLimitations29;
@@ -2894,7 +2894,7 @@ Error at line 2841, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2869, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations30;
@@ -2956,7 +2956,7 @@ end OperatorRecordTests.OperatorLimitations31;
             errorMessage="
 1 errors found:
 
-Error at line 2932, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions for unary operators must have exactly 1 input without default value, but 'not' has 2
 ")})));
     end OperatorLimitations32;
@@ -2983,7 +2983,7 @@ Error at line 2932, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2960, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions for unary operators must have exactly 1 input without default value, but 'not' has 0
 ")})));
     end OperatorLimitations33;
@@ -3011,7 +3011,7 @@ Error at line 2960, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2987, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations34;
@@ -3073,7 +3073,7 @@ end OperatorRecordTests.OperatorLimitations35;
             errorMessage="
 1 errors found:
 
-Error at line 3048, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Operator functions for operators that are both unary and binary must have exactly 1 or 2 inputs without default value, but '-' has 3
 ")})));
     end OperatorLimitations36;
@@ -3102,7 +3102,7 @@ Error at line 3048, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 3077, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations37;
@@ -3130,7 +3130,7 @@ Error at line 3077, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 3106, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations38;

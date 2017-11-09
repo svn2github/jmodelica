@@ -58,10 +58,10 @@ model LibraryTest3
             errorMessage="
 2 errors found:
 
-Error at line 0, column 0, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\EmptyLib\\package.mo', LIBRARY_FILE_CONTENTS:
+Error at line 0, column 0, in file 'Compiler/ModelicaCompiler/test/modelica/EmptyLib/package.mo', LIBRARY_FILE_CONTENTS:
   Class 'EmptyLib' must be alone at top level of library file, but the file was empty.
 
-Error at line 51, column 26, in file 'Compiler/ModelicaCompiler/test/modelica/LibraryTests.mo':
+Error at line 2, column 26, in file 'Compiler/ModelicaCompiler/test/modelica/LibraryTests.mo':
   Cannot find class declaration for M
 ")})));
 end LibraryTest3;
@@ -78,7 +78,7 @@ model LibraryTest4
             errorMessage="
 1 errors found:
 
-Error at line 1, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\A1.mo', LIBRARY_FILE_CONTENTS:
+Error at line 16, column 1, in file 'Compiler/ModelicaCompiler/test/modelica/WrongContent/A1.mo', LIBRARY_FILE_CONTENTS:
   Class 'A1' must be alone at top level of library file, but the file also contains 'A2', 'A3' and 'A4'.
 ")})));
 end LibraryTest4;
@@ -95,7 +95,7 @@ model LibraryTest5
             errorMessage="
 1 errors found:
 
-Error at line 1, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\B1.mo', LIBRARY_FILE_CONTENTS:
+Error at line 16, column 1, in file 'Compiler/ModelicaCompiler/test/modelica/WrongContent/B1.mo', LIBRARY_FILE_CONTENTS:
   Class 'B1' must be alone at top level of library file, but the file contains 2 classes of that name, and also 'B2', 'B3' and 'B4'.
 ")})));
 end LibraryTest5;
@@ -112,7 +112,7 @@ model LibraryTest6
             errorMessage="
 1 errors found:
 
-Error at line 1, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\C1.mo', LIBRARY_FILE_CONTENTS:
+Error at line 16, column 1, in file 'Compiler/ModelicaCompiler/test/modelica/WrongContent/C1.mo', LIBRARY_FILE_CONTENTS:
   Class 'C1' must be alone at top level of library file, but the file contains 'C2', 'C3' and 'C4' instead.
 ")})));
 end LibraryTest6;
@@ -129,7 +129,7 @@ model LibraryTest7
             errorMessage="
 1 errors found:
 
-Error at line 1, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\D1.mo', LIBRARY_FILE_CONTENTS:
+Error at line 16, column 1, in file 'Compiler/ModelicaCompiler/test/modelica/WrongContent/D1.mo', LIBRARY_FILE_CONTENTS:
   Class 'D1' must be alone at top level of library file, but the file contains 2 classes of that name.
 ")})));
 end LibraryTest7;
@@ -146,7 +146,7 @@ model LibraryTest8
             errorMessage="
 1 warnings found:
 
-Warning at line 16, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\EE.mo', LIBRARY_FILE_CONTENTS:
+Warning at line 16, column 1, in file 'Compiler/ModelicaCompiler/test/modelica/WrongContent/EE.mo', LIBRARY_FILE_CONTENTS:
   Class 'EE' must be alone at top level of library file, but the file contains 'Ee' instead.
 ")})));
 end LibraryTest8;
@@ -163,10 +163,10 @@ model LibraryTest9
             errorMessage="
 1 errors and 1 warnings found:
 
-Error at line 156, column 26, in file 'Compiler/ModelicaCompiler/test/modelica/LibraryTests.mo':
+Error at line 2, column 26, in file 'Compiler/ModelicaCompiler/test/modelica/LibraryTests.mo':
   Cannot find class declaration for EE
 
-Warning at line 16, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\EE.mo', LIBRARY_FILE_CONTENTS:
+Warning at line 16, column 1, in file 'Compiler/ModelicaCompiler/test/modelica/WrongContent/EE.mo', LIBRARY_FILE_CONTENTS:
   Class 'EE' must be alone at top level of library file, but the file contains 'Ee' instead.
 ")})));
 end LibraryTest9;

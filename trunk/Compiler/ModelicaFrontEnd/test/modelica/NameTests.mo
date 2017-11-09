@@ -89,7 +89,7 @@ A a;
             errorMessage="
 1 errors found:
 
-Error at line 82, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 4, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for A
 ")})));
   end NameTest3_Err;
@@ -116,7 +116,7 @@ model NameTest4_Err
             errorMessage="
 1 errors found:
 
-Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 8, column 4, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component m:
   Cannot find class declaration for B
 ")})));
@@ -142,10 +142,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 136, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 10, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for b
 
-Error at line 136, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 10, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end NameTest5_Err;
@@ -168,7 +168,7 @@ model NameTest55_Err
             errorMessage="
 1 errors found:
 
-Error at line 159, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 7, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Cannot find class or component declaration for x
 ")})));
@@ -191,7 +191,7 @@ model NameTest6_Err
             errorMessage="
 1 errors found:
 
-Error at line 182, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 5, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Cannot find class or component declaration for y
 ")})));
@@ -214,7 +214,7 @@ model NameTest7_Err
             errorMessage="
 1 errors found:
 
-Error at line 204, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 5, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In components:
     a1
     a2
@@ -236,7 +236,7 @@ model NameTest8_Err
             errorMessage="
 1 errors found:
 
-Error at line 228, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 4, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component c:
   Cannot find class declaration for D
 ")})));
@@ -267,7 +267,7 @@ model NameTest9_Err
             errorMessage="
 1 warnings found:
 
-Warning at line 260, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
   end NameTest9_Err;
@@ -305,7 +305,7 @@ model NameTest10_Err
             errorMessage="
 1 warnings found:
 
-Warning at line 298, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 24, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to class B not recommended, it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
 ")})));
   end NameTest10_Err;
@@ -327,7 +327,7 @@ Warning at line 298, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/
             errorMessage="
 1 errors found:
 
-Error at line 320, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 8, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for p1
 ")})));
   end NameTest11_Err;
@@ -361,7 +361,7 @@ M m(redeclare B a);
             errorMessage="
 1 errors found:
 
-Error at line 353, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 18, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for B
 ")})));
 end NameTest12_Err;
@@ -403,18 +403,18 @@ end NameTest12_Err;
             errorMessage="
 4 errors found:
 
-Error at line 388, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 19, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 393, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 24, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component bb:
   Cannot find class declaration for C
 
-Error at line 393, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 24, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component bb:
   Cannot find component declaration for y
 
-Error at line 396, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 27, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for y
 ")})));
 end NameTest13_Err;
@@ -456,13 +456,13 @@ end NameTest13_Err;
             errorMessage="
 3 errors found:
 
-Error at line 447, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 26, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 449, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 28, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 449, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 28, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for pp
 ")})));
 end NameTest14_Err;
@@ -779,7 +779,7 @@ model NameTest25_Err
             errorMessage="
 1 warnings found:
 
-Warning at line 777, column 18, in file '...', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 16, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B b constrainedby B'
 ")})));
 end NameTest25_Err;
@@ -1032,7 +1032,7 @@ end ConstantLookup9;
 
 
 // TODO: Maybe the last error message each in ConstantLookup10-11 are redundant - let lookup succeed?
-class ConstantLookup10
+model ConstantLookup10
  package P
   parameter Real x;
  end P;
@@ -1047,16 +1047,16 @@ class ConstantLookup10
             errorMessage="
 2 errors found:
 
-Error at line 949, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Packages may only contain classes and constants
 
-Error at line 954, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 7, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end ConstantLookup10;
 
 
-class ConstantLookup11
+model ConstantLookup11
  package P
   parameter Real x;
  end P;
@@ -1071,17 +1071,17 @@ class ConstantLookup11
             errorMessage="
 2 errors found:
 
-Error at line 973, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Packages may only contain classes and constants
 
-Error at line 978, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 7, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for x2
 ")})));
 end ConstantLookup11;
 
 
 // TODO: Maybe a better error message is needed here
-class ConstantLookup12
+model ConstantLookup12
  package P
   parameter Real x;
  end P;
@@ -1096,7 +1096,7 @@ class ConstantLookup12
             errorMessage="
 1 errors found:
 
-Error at line 1003, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 7, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end ConstantLookup12;
@@ -1149,11 +1149,11 @@ model ConstantLookup16
             errorMessage="
 2 errors found:
 
-Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Could not evaluate binding expression for constant 'a': 'b[c]'
     Cannot get int value of CValueUnknown
 
-Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for d
 ")})));
 end ConstantLookup16;
@@ -1178,7 +1178,7 @@ model ConstantLookup17
             errorMessage="
 1 errors found:
 
-Error at line 1078, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Packages may only contain classes and constants
 ")})));
 end ConstantLookup17;
@@ -1419,7 +1419,7 @@ model ConstantLookup23
             errorMessage="
 1 warnings found:
 
-Warning at line 1338, column 13, in file '...', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 11, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to component x not recommended, it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end ConstantLookup23;
@@ -2055,7 +2055,7 @@ model ConstantLookup39
             errorMessage="
 1 errors found:
 
-Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line -7, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for e
 ")})));
 end ConstantLookup39;
@@ -2134,7 +2134,7 @@ end NameTests.ExtendsTest2;
 ")})));
 end ExtendsTest2;
 
-class ExtendsTest3
+model ExtendsTest3
   class C
     class D
       Real x;
@@ -2150,7 +2150,7 @@ class ExtendsTest3
             errorMessage="
 1 errors found:
 
-Error at line 2045, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 8, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for D
 ")})));
 end ExtendsTest3;
@@ -2275,7 +2275,7 @@ model ImportTest3
             errorMessage="
 1 errors found:
 
-Error at line 2169, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 14, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for B
 ")})));
 end ImportTest3;
@@ -2479,10 +2479,10 @@ model ImportTest12
             errorMessage="
 2 errors found:
 
-Error at line 2373, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for NotHere
 
-Error at line 2374, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for SI
 ")})));
 end ImportTest12;
@@ -2584,11 +2584,11 @@ model ShortClassDeclTest35_Err
             errorMessage="
 2 errors found:
 
-Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 2, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component x:
   Cannot find component declaration for q
 
-Error at line 2478, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for t
 ")})));
 end ShortClassDeclTest35_Err;
@@ -2858,7 +2858,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2745, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 6, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for k
 ")})));
 end ForTest2_Err;
@@ -2962,7 +2962,7 @@ model ConditionalComponentTest1_Err
             errorMessage="
 1 errors found:
 
-Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+Error at line 1, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
@@ -2978,7 +2978,7 @@ model ConditionalComponentTest2_Err
             errorMessage="
 1 errors found:
 
-Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 2, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest2_Err;
@@ -2994,10 +2994,10 @@ model ConditionalComponentTest3_Err
             errorMessage="
 2 errors found:
 
-Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+Error at line 2, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 
-Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 2, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;
@@ -3051,7 +3051,7 @@ model ConditionalComponentTest6_Err
             errorMessage="
 1 errors found:
 
-Error at line 2939, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   The component x is conditional: Access of conditional components is only valid in connect statements
 ")})));
 end ConditionalComponentTest6_Err;
@@ -3071,7 +3071,7 @@ model ConditionalComponentTest7_Err
             errorMessage="
 1 errors found:
 
-Error at line 2959, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 7, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   The component m is conditional: Access of conditional components is only valid in connect statements
 ")})));
 end ConditionalComponentTest7_Err;
@@ -3295,10 +3295,10 @@ model ConditionalComponentTest13_Err
             errorMessage="
 2 errors found:
 
-Error at line 3183, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 14, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   The component y1 is conditional: Access of conditional components is only valid in connect statements
 
-Error at line 3183, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 14, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   The component y2 is conditional: Access of conditional components is only valid in connect statements
 ")})));
 end ConditionalComponentTest13_Err;
@@ -3331,7 +3331,7 @@ model AttributeDot1
             errorMessage="
 1 errors found:
 
-Error at line 3219, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can not access attribute of primitive with dot notation: x.start
 ")})));
 end AttributeDot1;
@@ -3617,7 +3617,7 @@ model InheritInputTest3
             errorMessage="
 1 errors found:
 
-Error at line 3503, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritInputTest3;
@@ -3637,7 +3637,7 @@ model InheritInputTest4
             errorMessage="
 1 errors found:
 
-Error at line 3523, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritInputTest4;
@@ -3699,7 +3699,7 @@ model InheritOutputTest3
             errorMessage="
 1 errors found:
 
-Error at line 3585, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest3;
@@ -3719,7 +3719,7 @@ model InheritOutputTest4
             errorMessage="
 1 errors found:
 
-Error at line 3605, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest4;
@@ -3773,7 +3773,7 @@ model InheritFlowTest2
             errorMessage="
 1 errors found:
 
-Error at line 3659, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as flow, since it contains a component declared as flow
 ")})));
 end InheritFlowTest2;
@@ -3839,7 +3839,7 @@ model DuplicateVariables3
             errorMessage="
 1 errors found:
 
-Error at line 3726, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables3;
@@ -3885,7 +3885,7 @@ model DuplicateVariables6
             errorMessage="
 1 errors found:
 
-Error at line 3769, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 3, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Duplicate component in same class: Real x
 ")})));
@@ -3903,13 +3903,13 @@ model BadEscape1
             errorMessage="
 3 errors found:
 
-Error at line 3790, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 1 in string: '\\q'
 
-Error at line 3790, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 27 in string: '\\#'
 
-Error at line 3790, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 6 in string: '\\ '
 ")})));
 end BadEscape1;
@@ -3926,22 +3926,22 @@ model BadEscape2
             errorMessage="
 6 errors found:
 
-Error at line 3811, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
 
-Error at line 3811, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
 
-Error at line 3811, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 
-Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
 
-Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
 
-Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 ")})));
 end BadEscape2;
@@ -4014,7 +4014,7 @@ model ClassThroughComponent1
             errorMessage="
 1 errors found:
 
-Error at line 4008, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
+Error at line 11, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
   Can not access non-function class through component access: 'a.B.x'
 ")})));
 end ClassThroughComponent1;
@@ -4043,7 +4043,7 @@ model ClassThroughComponent2
             errorMessage="
 1 errors found:
 
-Error at line 4037, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
+Error at line 15, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
   Can not access non-function class through component access: 'c.a.B.x'
 ")})));
 end ClassThroughComponent2;
@@ -4072,7 +4072,7 @@ model ClassThroughComponent3
             errorMessage="
 1 errors found:
 
-Error at line 4066, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
+Error at line 15, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', ACCESS_TO_CLASS_THROUGH_COMPONENT:
   Can not access non-function class through component access: 'c.a[1].B.x'
 ")})));
 end ClassThroughComponent3;
@@ -4099,7 +4099,7 @@ model ClassThroughComponent4
             errorMessage="
 1 errors found:
 
-Error at line 4093, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for a
 ")})));
 end ClassThroughComponent4;

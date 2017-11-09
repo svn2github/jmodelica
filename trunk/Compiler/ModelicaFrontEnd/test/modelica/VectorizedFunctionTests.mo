@@ -1297,7 +1297,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 14489, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/VectorizedFunctionTests.mo':
   Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
 ")})));
 end SemiLinear3;

@@ -99,6 +99,7 @@ aspect TestFramework {
                 // Set generic information of the test case and add to list
                 tc.setSourceFileName(fileName());
                 tc.setClassName(qualifiedName());
+                tc.setBeginLine(beginLine());
                 ts.add(tc);
                 log.debug("Created test case '" + className + "' for class '" + tc.getClassName() + "'");
             }
