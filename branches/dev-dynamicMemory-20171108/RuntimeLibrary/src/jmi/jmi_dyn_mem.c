@@ -22,51 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void jmi_dynamic_list_free(jmi_dynamic_list* head) {
-    jmi_dynamic_list* next = head->next;
-    jmi_dynamic_list* curr;
-    while ((curr = next)) {
-        next = curr->next;
-        free(curr->data);
-        free(curr);
-    }
-    head->next = NULL;
-}
-
-void jmi_dynamic_add_pointer(jmi_dyn_mem_t* dyn_mem, void* pointer) {
-    if (!(dyn_mem->head)) {
-        jmi_dynamic_list** last = jmi_dyn_mem_last();
-        jmi_dyn_mem_init(dyn_mem, *last, last);
-    }
-    jmi_dyn_mem_add(dyn_mem, pointer);
-}
-
-void jmi_dyn_mem_init(jmi_dyn_mem_t* mem, jmi_dynamic_list* head, jmi_dynamic_list** last) {
-    *last = head;
-    mem->head = head;
-    mem->last = last;
-}
-
-void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data) {
-    jmi_dynamic_list* l = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));
-    (*mem->last)->next = l;
-    l->data = data;
-    l->next = NULL;
-    *mem->last = l;
-}
-
-void jmi_dyn_mem_free(jmi_dyn_mem_t* mem) {
-    if (mem->head) {
-        jmi_dynamic_list_free(mem->head);
-        *mem->last = mem->head;
-    }
-}
-
-
-
-
-
-
 
 jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t block) {
     jmi_dynamic_function_memory_t* mem = (jmi_dynamic_function_memory_t*)calloc(1, sizeof(jmi_dynamic_function_memory_t));

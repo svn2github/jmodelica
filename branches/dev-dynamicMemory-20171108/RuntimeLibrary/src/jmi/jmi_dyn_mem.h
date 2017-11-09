@@ -38,43 +38,9 @@ typedef struct jmi_local_dynamic_function_memory_t {
 } jmi_local_dynamic_function_memory_t;
 
 
-
-/* Linked list for saving pointers to be freed at return */
-typedef struct _jmi_dynamic_list jmi_dynamic_list;
-struct _jmi_dynamic_list {
-    void* data;
-    jmi_dynamic_list* next;
-};
-
-/**
- * Free list nodes following <code>head</code> and their data.
- */
-void jmi_dynamic_list_free(jmi_dynamic_list* head);
-
-/* Keeps pointers to the head and last elements of a list.
- * Might be tail in a longer list. */
-typedef struct jmi_dyn_mem_t {
-    jmi_dynamic_list* head;
-    jmi_dynamic_list** last;
-} jmi_dyn_mem_t;
-
-/**
- * Find the end of the memory list
- */
-jmi_dynamic_list** jmi_dyn_mem_last();
-
-void jmi_dyn_mem_init(jmi_dyn_mem_t* mem, jmi_dynamic_list* head, jmi_dynamic_list** last);
-
-void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data);
-
-void jmi_dyn_mem_free(jmi_dyn_mem_t* mem);
-
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
     jmi_local_dynamic_function_memory_t dyn_mem = {NULL, NULL};
-
-void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data);
-void jmi_dynamic_add_pointer(jmi_dyn_mem_t* dyn_mem, void* pointer);
 
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() \
