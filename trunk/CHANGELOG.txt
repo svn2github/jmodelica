@@ -3,6 +3,7 @@
 Disabled automatic addition of derivatives for variables with state select set
 to prefer if index reduction is disabled.
 
+================= Stable-2017-11-10 ==================
 ; Change ; Minor ; Compiler ; #5497
 Added option for disabling external evaluation during variability propagation
 
