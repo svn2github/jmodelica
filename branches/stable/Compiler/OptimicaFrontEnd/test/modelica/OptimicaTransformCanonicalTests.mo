@@ -316,7 +316,7 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
             errorMessage="
 1 errors found:
 
-Error at line 293, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 1, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute objective for the optimization ArrayTest3_Err, expected size is scalar and size of objective expression is [2]
 ")})));
   end ArrayTest3_Err;
@@ -384,7 +384,7 @@ constraint
             errorMessage="
 1 errors found:
 
-Error at line 364, column 7, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
+Error at line 5, column 7, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
   The argument of a timed variable must be a scalar parameter Real expression
     type of '\"0\"' is String
 ")})));
@@ -404,7 +404,7 @@ constraint
             errorMessage="
 1 errors found:
 
-Error at line 384, column 7, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
+Error at line 5, column 7, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
   The argument of a timed variable must be a scalar parameter Real expression
     'y' is of continuous-time variability
 ")})));

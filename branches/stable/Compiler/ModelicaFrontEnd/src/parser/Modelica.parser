@@ -19,6 +19,7 @@
 %goal exp;
 %goal element;
 %goal abstract_equation
+%goal argument
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -736,7 +737,7 @@ Argument argument =
                                                                new Opt(),
                                                                new Opt(),
                                                                new Opt(),
-                                                               new Opt(new Replaceable()),
+                                                               new Opt(replaceable),
                                                                type_prefix_flow,
                                                                type_prefix_variability,
                                                                type_prefix_input_output,
@@ -746,18 +747,18 @@ Argument argument =
                                                                constraining_clause,
                                                                new Comment(new Opt(),new Opt()))); 
                                          return cdr; :}
-  |REDECLARE 
+  |redeclare 
    each? 
    final_?  
    base_class_decl {: ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
                       pa.setLocationNoTree(base_class_decl.getName());       
-                      base_class_decl.setRedeclare(new Redeclare());
+                      base_class_decl.setRedeclare(redeclare);
                       ClassRedeclare cdr = new ClassRedeclare(each,
                                                               final_,
                                                               pa,
                                                               base_class_decl);
                       return cdr; :}
-  |REDECLARE
+  |redeclare
    each? 
    final_? 
    type_prefix_flow?
@@ -775,7 +776,7 @@ Argument argument =
    				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
-                                        new PN_ComponentClause(new Opt(new Redeclare()),
+                                        new PN_ComponentClause(new Opt(redeclare),
                                                                new Opt(),
                                                                new Opt(),
                                                                new Opt(),
@@ -790,21 +791,21 @@ Argument argument =
                                                                new Comment(new Opt(),new Opt()))); 
                  return cdr; :}
                                                  
-  |REDECLARE
+  |redeclare
    each? 
    final_? 
    replaceable 
    base_class_decl 
    constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
                             base_class_decl.setReplaceable(replaceable);
-                            base_class_decl.setRedeclare(new Redeclare());
+                            base_class_decl.setRedeclare(redeclare);
                             ClassAccess ca = new ClassAccess(base_class_decl.getName().getID());
                             ca.setLocationNoTree(base_class_decl.getName());
                              return new  ClassRedeclare(each,
                                                          final_,
                                                          ca,
                                                          base_class_decl); :} 
-  |REDECLARE
+  |redeclare
    each? 
    final_? 
    replaceable 
@@ -824,11 +825,11 @@ Argument argument =
        PN_ComponentRedeclare cr = new PN_ComponentRedeclare(each,
                                         final_,
                                         pa,
-                                        new PN_ComponentClause(new Opt(new Redeclare()),
+                                        new PN_ComponentClause(new Opt(redeclare),
                                                                new Opt(),
                                                                new Opt(),
                                                                new Opt(),
-                                                               new Opt(new Replaceable()),
+                                                               new Opt(replaceable),
                                                                type_prefix_flow,
                                                                type_prefix_variability,
                                                                type_prefix_input_output,

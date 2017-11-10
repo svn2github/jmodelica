@@ -78,7 +78,8 @@ aspect StepPrinter {
                 hc.printArgument(v, arg, this, str, indent);
             }
 
-            public void printArgument(FFunctionVariable v, FFunctionCallLeft arg, CodeStream str, String indent, HeadComputation hc) {
+            public void printArgument(FFunctionVariable v, FFunctionCallLeft arg, CodeStream str, String indent,
+                    HeadComputation hc) {
                 hc.printArgument(v, arg, this, str, indent);
             }
 

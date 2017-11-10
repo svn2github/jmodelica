@@ -289,6 +289,29 @@ aspect SrcAnnotations {
     /*******************
      *  AST Annotation  
      ******************/
+    Annotation implements SrcAnnotationProvider;
+
+    syn Exp Annotation.annotationValue() = null;
+
+    @Override
+    public void Annotation.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+    }
+
+    syn boolean Annotation.isEach() = false;
+
+    syn boolean Annotation.isFinal() = false;
+
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> Annotation.annotationSubNodes() = Collections.emptyList();
+    eq ParseAnnotation.annotationSubNodes() = getClassModification().annotationSubNodes();
+
+    public SrcAnnotationProvider Annotation.addAnnotationSubNode(String name) {
+        return null;
+    }
+    @Override
+    public SrcAnnotationProvider ParseAnnotation.addAnnotationSubNode(String name) {
+        return getClassModification().addAnnotationSubNode(name);
+    }
+
     /**
      * Interface which should be implemented by all AST nodes which have a
      * Opt<Annotation> as child (which we wan't to traverse with this API).
@@ -297,7 +320,6 @@ aspect SrcAnnotations {
         public Annotation getAnnotation();
         public boolean hasAnnotation();
         public void setAnnotation(Annotation annotation);
-        public String resolveURI(String str);
     }
 
     FullClassDecl implements ASTNodeWithAnnotation;
@@ -305,58 +327,83 @@ aspect SrcAnnotations {
     ExtendsClause implements ASTNodeWithAnnotation;
     Comment implements ASTNodeWithAnnotation;
 
-    class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> implements SrcAnnotationProvider {
+    public abstract class RootAnnotationProviderProxy<T extends ASTNode, S extends ASTNode & SrcAnnotationProvider> implements SrcAnnotationProvider {
+        protected final T owningNode;
 
-        private final T owningNode;
-
-        public ASTAnnotationAnnotationProvider(T owningNode) {
+        public RootAnnotationProviderProxy(T owningNode) {
             this.owningNode = owningNode;
         }
 
         @Override
-        public Exp annotationValue() {
+        public final Exp annotationValue() {
             return null;
         }
 
         @Override
+        public final void setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+            throw new FailedToSetAnnotationValueException();
+        }
+
+        protected abstract boolean hasProvider();
+        protected abstract void createProvider();
+        protected abstract S getProvider();
+
+        @Override
         public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
-            Annotation astNode = owningNode.getAnnotation();
-            if (astNode != null) {
-                return astNode.annotationSubNodes();
+            SrcAnnotationProvider provider = (SrcAnnotationProvider) getProvider();
+            if (provider != null) {
+                return provider.annotationSubNodes();
             } else {
                 return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
             }
         }
 
         @Override
-        public void setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
-            throw new FailedToSetAnnotationValueException();
-        }
-
-        @Override
         public SrcAnnotationProvider addAnnotationSubNode(String name) {
-            if (!owningNode.hasAnnotation()) {
-                ClassModification cm = new ClassModification();
-                owningNode.setAnnotation(new ParseAnnotation(cm));
+            if (!hasProvider()) {
+                createProvider();
             }
-            return owningNode.getAnnotation().addAnnotationSubNode(name);
+            return getProvider().addAnnotationSubNode(name);
         }
 
         @Override
-        public boolean isEach() {
+        public final boolean isEach() {
             return false;
         }
 
         @Override
-        public boolean isFinal() {
+        public final boolean isFinal() {
             return false;
         }
 
         @Override
-        public String resolveURI(String str) {
+        public final String resolveURI(String str) {
             return owningNode.resolveURI(str);
         }
 
+    }
+
+    class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> extends RootAnnotationProviderProxy<T, Annotation> {
+
+        public ASTAnnotationAnnotationProvider(T owningNode) {
+            super(owningNode);
+        }
+
+        @Override
+        protected boolean hasProvider() {
+            return owningNode.hasAnnotation();
+        }
+
+        @Override
+        protected void createProvider() {
+            ClassModification cm = new ClassModification();
+            owningNode.setAnnotation(new ParseAnnotation(cm));
+        }
+
+        @Override
+        protected Annotation getProvider() {
+            return owningNode.getAnnotation();
+        }
     }
 
     public class SrcAnnotation {
@@ -525,17 +572,6 @@ aspect SrcAnnotations {
     /*******************
      *     Helpers      
      ******************/
-    syn Iterable<SubNodePair<SrcAnnotationProvider>> Annotation.annotationSubNodes() = Collections.emptyList();
-    eq ParseAnnotation.annotationSubNodes() = getClassModification().annotationSubNodes();
-
-    public SrcAnnotationProvider Annotation.addAnnotationSubNode(String name) {
-        return null;
-    }
-    @Override
-    public SrcAnnotationProvider ParseAnnotation.addAnnotationSubNode(String name) {
-        return getClassModification().addAnnotationSubNode(name);
-    }
-
     public class SrcSingeltonProvider implements SrcAnnotationProvider {
 
         private final SrcAnnotationProvider provider;

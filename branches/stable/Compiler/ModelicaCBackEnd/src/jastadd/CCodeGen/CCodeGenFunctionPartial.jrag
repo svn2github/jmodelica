@@ -31,26 +31,23 @@ aspect CCodeGenFunctionPartial {
     /**
      * \brief Generates FP and OUT structs used by partial function calls.
      */
-    public void FFunctionDecl.genStructsPartial_C(CodeStream str, String indent) {
-        CodePrinter p = ASTNode.printer_C;
+    public void FFunctionDecl.genStructsPartial(CodePrinter p, CodeStream str, String indent) {
         String fp  = funcNameUnderscore(C_SUFFIX_FP);
         String out = funcNameUnderscore(C_SUFFIX_FPOUT);
         String next = p.indent(indent);
         
         beginStruct_C(str, indent, out);
         str.formatln("%sint n;", next);
-        for (FFunctionVariable ffv : myOutputs()) {
-            str.formatln("%s%s %s;", next, ffv.type().type_C(), ffv.name_C());
+		for (FFunctionVariable ffv : myOutputs()) {
+            p.printStructDecl(ffv, str, next);
         }
         endStruct_C(str, indent);
         
         beginStruct_C(str, indent, fp);
         str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, getDeclaredType_C(), fp, out);
         str.formatln("%s%s* (*fpcr)(%s*, %s*, ...);", next, fp, fp, fp);
-        for (FFunctionVariable ffv : myInputs()) {
-            String name = ffv.name_C();
-            str.formatln("%s%s %s;", next, ffv.type().type_C(), name);
-            str.formatln("%sint %s_s;", next, name);
+		for (FFunctionVariable ffv : myInputs()) {
+            p.printStructDecl(ffv, str, next);
         }
         endStruct_C(str, indent);
     }
@@ -68,6 +65,22 @@ aspect CCodeGenFunctionPartial {
      */
     public static void FFunctionDecl.endStruct_C(CodeStream str, String indent) {
         str.formatln("%s};", indent);
+    }
+
+    /**
+    * \brief Generate variable declarations inside an FP or OUT struct
+    */
+    public abstract void CodePrinter.printStructDecl(FFunctionVariable ffv, CodeStream str, String indent);
+    
+	@Override
+	public void CPrettyPrinter.printStructDecl(FFunctionVariable v, CodeStream str, String indent) {
+		v.printStructDecl(ExecStep, str, indent);
+	}
+    
+    public void FFunctionVariable.printStructDecl(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+            str.println(indent, p.type(this)," ", p.name(this), ";");
+            if(isInput())
+                str.println(indent, "int ", p.name(this), C_SUFFIX_SETFLAG, ";");
     }
 
     /**
@@ -135,9 +148,8 @@ aspect CCodeGenFunctionPartial {
     /**
      * \brief Generates FPCL and FPCR functions used by partial function calls.
      */
-    public void FFunctionDecl.prettyPrintPartial_C(CodeStream str, String indent) {
-        int i;
-        CodePrinter p = ASTNode.printer_C;
+    public void FFunctionDecl.prettyPrintPartial_C(CodePrinter p, CodeStream str, String indent) {
+int i;
         String next = p.indent(indent);
         String next2 = p.indent(next);
         String next3 = p.indent(next2);
@@ -156,25 +168,26 @@ aspect CCodeGenFunctionPartial {
         
         i = 0;
         for (FFunctionVariable ffv : inputs) {
-            str.formatln("%s%s %s;", next, ffv.type_C(), names[i++]);
+            str.formatln("%s%s %s;", next, p.ExecStep.type(ffv), names[i++]);
         }
         for (FFunctionVariable ffv : outputs) {
-            str.formatln("%s%s %s;", next, ffv.type_C(), names[i++]);
+            str.formatln("%s%s %s;", next, p.ExecStep.type(ffv), names[i++]);
         }
         
         genVarArgsDecl(str, next);
         genVarArgsOpen(str, next, "out");
         i = 0;
         for (FFunctionVariable ffv : inputs) {
-              str.formatln("%sif (fp_in->%s_s) {", next, ffv.name_C());
-              str.formatln("%s%s = fp_in->%s;", next2, names[i], ffv.name_C());
+              str.formatln("%sif (fp_in->%s_s) {", next, p.ExecStep.name(ffv));
+              str.formatln("%s%s = fp_in->%s;", next2, names[i], p.ExecStep.name(ffv));
               str.formatln("%s} else {", next);
-              genVarArgsRead(str, next2, names[i], ffv.type_C());
+              genVarArgsRead(str, next2, names[i], p.ExecStep.type(ffv));
               str.formatln("%s}", next);
               i++;
         }
         genVarArgsClose(str, next);
         
+//        new ParameterComputation(null, "").prettyPrintHead(this, p, str, indent, C_SUFFIX_DEF, true);
         str.format("%s%s(", next, funcNameUnderscore("def"));
         String prefix = "";
         i = 0;
@@ -194,7 +207,7 @@ aspect CCodeGenFunctionPartial {
         i = 0;
         for (FFunctionVariable ffv : outputs) {
               str.formatln("%sif (out->n > %d) {", next2, i);
-              str.formatln("%sout->%s = %s;", next3, ffv.name_C(), names[i + inputs.size()]);
+              str.formatln("%sout->%s = %s;", next3, p.ExecStep.name(ffv), names[i + inputs.size()]);
               str.formatln("%s}", next2);
               i++;
         }
@@ -217,11 +230,11 @@ aspect CCodeGenFunctionPartial {
         
         str.formatln("%sif (fp_in == NULL) {", next);
         for (FFunctionVariable ffv : inputs) {
-            str.formatln("%sfp_out->%s_s = 0;", next2, ffv.name_C());
+            str.formatln("%sfp_out->%s_s = 0;", next2, p.ExecStep.name(ffv));
         }
         str.formatln("%s} else {", next);
         for (FFunctionVariable ffv : inputs) {
-            String name = ffv.name_C();
+            String name = p.ExecStep.name(ffv);
             str.formatln("%sfp_out->%s_s = fp_in->%s_s;", next2, name, name);
             str.formatln("%sfp_out->%s = fp_in->%s;", next2, name, name);
         }
@@ -229,12 +242,12 @@ aspect CCodeGenFunctionPartial {
         
         genVarArgsOpen(str, next, "fp_out");
         for (FFunctionVariable ffv : inputs) {
-            String name = ffv.name_C();
+            String name = p.ExecStep.name(ffv);
             str.format("%sif (!fp_out->%s_s && ", next, name);
             genVarArgsRead(str, "int");
             str.println(") {");
             str.formatln("%sfp_out->%s_s = 1;", next2, name);
-            genVarArgsRead(str, next2, "fp_out->" + name, ffv.type_C());
+            genVarArgsRead(str, next2, "fp_out->" + name, p.ExecStep.type(ffv));
             str.formatln("%s}", next);
         }
         genVarArgsClose(str, next);
@@ -248,12 +261,12 @@ aspect CCodeGenFunctionPartial {
         boolean exp = call.functionCallIsExp();
         String out = "NULL";
         if (!exp) {
-            out = call.tempName_C();
+            out = p.ExecStep.name(call);
             str.formatln("%s%s.n = %s;", indent, out, call.myLefts().size());
             out = "&" +out;
             str.print(indent);
         }
-        str.format("%s->fpcl(%s, %s", name_C(), name_C(), out);
+        str.format("%s->fpcl(%s, %s", p.ExecStep.name(this), p.ExecStep.name(this), out);
         String sep = ", ";
         for (FExp arg : call.getArgs()) {
             str.format("%s(%s)(", sep, arg.type().type_C());
@@ -261,15 +274,16 @@ aspect CCodeGenFunctionPartial {
             str.print(")");
         }
         str.print(")");
-        if (!exp)
+        if (!exp) {
             str.print(";\n");
+        }
         if (!exp) {
             int tot = myOutputs().size();
             int lefts = call.myLefts().size();
             for (int i = 0; i < tot; i++) {
                 if (i < lefts) {
                     String n = call.myLefts().get(i).prettyPrint_C();
-                    str.formatln("%s%s = %s.%s;", indent, n, call.tempName_C(), n);
+                    str.formatln("%s%s = %s.%s;", indent, n, p.ExecStep.name(call), n);
                 }
             }
         }
@@ -282,9 +296,9 @@ aspect CCodeGenFunctionPartial {
         String previous = "NULL";
         String result   = "NULL";
         if (fc.isPartialFunction()) {
-            previous = ((FFunctionVariable) fc).name_C();
+            previous = p.ExecStep.name((FFunctionVariable) fc);
         } else {
-            result = "&" + tempName_C();
+            result = "&" + p.ExecStep.name(this);
         }
         if (fc.isPartialFunction()) {
             str.print(previous);

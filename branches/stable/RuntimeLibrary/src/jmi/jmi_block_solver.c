@@ -43,6 +43,7 @@
 #include "jmi_minpack_solver.h"
 #endif
 #include "jmi_block_solver_impl.h"
+#include "jmi_realtime_solver.h"
 #include "jmi_math.h"
 
 #define Ith(v,i)    NV_Ith_S(v,i)
@@ -175,6 +176,15 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->solve = jmi_linear_solver_solve;
             block_solver->delete_solver = jmi_linear_solver_delete;
             block_solver->completed_integrator_step = jmi_linear_completed_integrator_step;
+        }
+        break;
+        
+        case JMI_REALTIME_SOLVER: {
+            jmi_realtime_solver_t* solver;
+            jmi_realtime_solver_new(&solver, block_solver);
+            block_solver->solver = solver;
+            block_solver->solve = jmi_realtime_solver_solve;
+            block_solver->delete_solver = jmi_realtime_solver_delete;
         }
         break;
 

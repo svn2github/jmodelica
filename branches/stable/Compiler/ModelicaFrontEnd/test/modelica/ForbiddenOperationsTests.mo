@@ -39,7 +39,7 @@ model WhenInFunction
             errorMessage="
 1 errors found:
 
-Error at line 27, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line -4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When statements are not allowed in functions
 ")})));
 end WhenInFunction;
@@ -60,7 +60,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 51, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks1;
@@ -81,7 +81,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 72, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks2;
@@ -102,7 +102,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 93, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks3;
@@ -123,7 +123,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 114, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks4;
@@ -146,10 +146,10 @@ initial equation
             errorMessage="
 2 errors found:
 
-Error at line 134, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When statements are not allowed in initial algorithms
 
-Error at line 138, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 8, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   When equations are not allowed in initial equation sections
 ")})));
 end WhenInInitial;
@@ -165,7 +165,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 159, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 3, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   Return statements are only allowed in functions
 ")})));
 end ReturnOutsideFunction;
@@ -190,7 +190,7 @@ equation
             errorMessage="
 1 errors found:
 
-Compliance error at line 174, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
+Compliance error at line 2, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
   Boolean variables of discrete variability is currently only supported when compiling FMUs
 ")})));
 end IfEquTest_ComplErr;
@@ -214,7 +214,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 206, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 7, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   Only assignment equations are allowed in when clauses
 ")})));
 end WhenContents1;
@@ -238,7 +238,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 227, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   All branches in when equation must assign the same variables
 ")})));
 end WhenContents2;
@@ -265,7 +265,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 254, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 8, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   All branches in if equation with non-parameter tests within when equation must assign the same variables
 ")})));
 end WhenContents3;
@@ -297,7 +297,7 @@ model LongIntConst2
             errorMessage="
 1 errors found:
 
-Warning at line 291, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Warning at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   Integer literal \"1000000000000\" is too large to represent as 32-bit Integer, using Real instead.
 ")})));
 end LongIntConst2;
@@ -320,7 +320,7 @@ model TerminateInFunc
             errorMessage="
 1 errors found:
 
-Error at line 310, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo':
   The terminate() statement is not allowed in functions
 ")})));
 end TerminateInFunc;

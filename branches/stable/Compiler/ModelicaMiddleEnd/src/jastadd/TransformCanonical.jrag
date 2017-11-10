@@ -142,9 +142,9 @@ aspect TransformCanonical {
             transformations.add(new commonSubexpressionEliminationIfSet());
             transformations.add(new addFPreVariables());
             transformations.add(new aliasEliminationIfSet());
+            transformations.add(new eliminateLinearEquations());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
-            transformations.add(new eliminateLinearEquations());
             transformations.add(new computeMatchingsAndBLT());
         }
 
@@ -1029,8 +1029,8 @@ aspect TransformCanonical {
 		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
 	}
 
-    public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIALBE =
-            new SimpleErrorProducer("DIFFERENTIATED_DISCRETE_VARIALBE", ProblemKind.SEMANTIC,
+    public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIABLE =
+            new SimpleErrorProducer("DIFFERENTIATED_DISCRETE_VARIABLE", ProblemKind.SEMANTIC,
                     "Unable to differentiate the variable %s which is declared or infered to be discrete");
 	
     public class FClass {
@@ -1054,7 +1054,7 @@ aspect TransformCanonical {
                 }
                 for (FVariable fv : variablesToVisit()) {
                     if (fv.isDiscrete()) {
-                        DIFFERENTIATED_DISCRETE_VARIALBE.invoke(fv, fv.name());
+                        DIFFERENTIATED_DISCRETE_VARIABLE.invoke(fv, fv.name());
                     }
                     l.add(fv.createFDerivativeVariable());
                 }

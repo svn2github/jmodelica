@@ -168,7 +168,7 @@ end OptimicaTests.ClassAttrTest4;
             errorMessage="
 1 errors found:
 
-Error at line 154, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
+Error at line 1, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   The class attribute 'objective' must have parameter or timed variability.
 ")})));
   end ClassAttrTest5;
@@ -182,7 +182,7 @@ Error at line 154, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/Optimi
             errorMessage="
 1 errors found:
 
-Error at line 177, column 41, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
+Error at line 1, column 41, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   Cannot find class or component declaration for x
 ")})));
   end ClassAttrTest6;
@@ -204,7 +204,7 @@ Error at line 177, column 41, in file 'Compiler/OptimicaFrontEnd/src/test/Optimi
             errorMessage="
 1 errors found:
 
-Error at line 190, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
+Error at line 1, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   The class attribute 'objectiveIntegrand' must not have timed variability.
 ")})));
   end ClassAttrTest7;
@@ -430,7 +430,7 @@ Input variables:
             errorMessage="
 1 errors found:
 
-Error at line 422, column 10, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
+Error at line 4, column 10, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   Timed variables are not allowed in equations
 ")})));
   end InstantValueTest3_Err;

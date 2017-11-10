@@ -154,11 +154,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     protected boolean isSubNodesCacheFresh() {
-        return subNodes_cache != null;
+        return subNodesNameMap_cache != null;
     }
 
     private void resetSubNodesCache() {
-        subNodes_cache = null;
+        subNodesNameMap_cache = null;
     }
 
     /**

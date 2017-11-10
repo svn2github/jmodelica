@@ -17,6 +17,8 @@
 
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
+from assimulo.solvers.sundials import CVodeError
+from pyfmi.fmi import FMUException
 
 class TestHomotopy(SimulationTest):
     """
@@ -436,3 +438,81 @@ class TestOutOfRangeOps(SimulationTest):
         self.assert_end_value('x6', float('Inf'))
         self.assert_end_value('x7', float('Inf'))
         
+class TestAssertEqu1(SimulationTest):
+    '''Test assert in equation without event'''
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertEqu1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist_full = True)
+    def test_simulate(self):
+        try:
+            self.run(cvode_options={"minh":1e-15})
+            assert False, 'Simulation not stopped by failed assertions'
+        except CVodeError, e:
+            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+    
+class TestAssertEqu2(SimulationTest):
+    '''Test assert in equation with event'''
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertEqu2')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist_full = True)
+    def test_simulate(self):
+        try:
+            self.run()
+            assert False, 'Simulation not stopped by failed assertions'
+        except FMUException, e:
+            self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
+        
+class TestAssertFunc(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertFunc')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(stddist_full = True)
+    def test_simulate(self):
+        try:
+            self.run(cvode_options={"minh":1e-15})
+            assert False, 'Simulation not stopped by failed assertions'
+        except CVodeError, e:
+            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+
+     
+class TestTerminateWhen(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.TerminateWhen')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        self.run()
+
+    @testattr(stddist_full = True)
+    def test_end_values(self):
+        self.assert_end_value('time', 2.0)
+        self.assert_end_value('x', 2.0)

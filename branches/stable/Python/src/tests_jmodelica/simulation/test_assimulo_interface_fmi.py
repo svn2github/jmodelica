@@ -891,6 +891,37 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.EventIteration1", file_name)
         compile_fmu("NonLinear.NonLinear6", file_name)
         compile_fmu("NonLinear.NonLinear7", file_name)
+        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_init.fmu", compiler_options={"init_nonlinear_solver":"realtime"})
+        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_ode.fmu", compiler_options={"nonlinear_solver":"realtime"})
+    
+    @testattr(stddist_base= True)
+    def test_realtime_solver_init(self):
+        model = load_fmu("RT_init.fmu", log_level=4)
+        model.set("_log_level", 4)
+        
+        model.initialize()
+        
+        from pyjmi.log import parser
+        
+        log = parser.parse_jmi_log("RT_init_log.txt")
+        assert len(log.find("RealtimeConvergence")) > 0
+        
+    @testattr(stddist_base= True)
+    def test_realtime_solver(self):
+        model = load_fmu("RT_ode.fmu", log_level=4)
+        model.set("_log_level", 4)
+        
+        model.initialize()
+        
+        from pyjmi.log import parser
+        
+        log = parser.parse_jmi_log("RT_ode_log.txt")
+        assert len(log.find("RealtimeConvergence")) == 3 #Three invocations during initialization
+        
+        model.simulate(options={"initialize":False})
+        
+        log = parser.parse_jmi_log("RT_ode_log.txt")
+        assert len(log.find("RealtimeConvergence")) > 3
     
     @testattr(windows_base = True)
     def test_Brent_AD(self):

@@ -30,8 +30,8 @@
 
 void ModelicaMessage(const char* string) 
 {
-	/* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
-	jmi_global_log(1, "ModelicaMessage", "<msg:%s>", string);
+    /* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
+    jmi_global_log(1, "ModelicaMessage", "<msg:%s>", string);
 }
 
 void ModelicaFormatMessage(const char* string, ...)
@@ -44,7 +44,7 @@ void ModelicaFormatMessage(const char* string, ...)
 
 void ModelicaVFormatMessage(const char* string, va_list arg_ptr) 
 {
-	char buf[BUF_SIZE];
+    char buf[BUF_SIZE];
     int n;
 
     n = vsnprintf(buf, BUF_SIZE, string, arg_ptr);
@@ -55,7 +55,7 @@ void ModelicaVFormatMessage(const char* string, va_list arg_ptr)
 
 void ModelicaError(const char* string)
 {
-	jmi_global_log(1, "ModelicaError", "<msg:%s>", string);
+    jmi_global_log(1, "ModelicaError", "<msg:%s>", string);
     jmi_throw();
     jmi_global_log(1, "Error", "<msg:%s>", "Could not throw an exception from ModelicaError");
 }
@@ -70,12 +70,12 @@ void ModelicaFormatError(const char* string, ...)
 
 void ModelicaVFormatError(const char* string, va_list arg_ptr)
 {
-	char buf[BUF_SIZE];
+    char buf[BUF_SIZE];
     int n;
 
     n = vsnprintf(buf, BUF_SIZE, string, arg_ptr);
     if (n == -1 || n >= BUF_SIZE)
-    	strcpy(BUF_OVERRUN_TAG, buf + BUF_SIZE - BUF_OVERRUN_TAG_LEN);
+        strcpy(BUF_OVERRUN_TAG, buf + BUF_SIZE - BUF_OVERRUN_TAG_LEN);
     ModelicaError(buf);
 }
 
@@ -91,8 +91,6 @@ char* ModelicaAllocateString(size_t len)
 
 char* ModelicaAllocateStringWithErrorReturn(size_t len) 
 {
-    /*JMI_DYNAMIC_INIT()*/
     char* res = (char*) jmi_global_calloc(len + 1, sizeof(char));
-    /*JMI_DYNAMIC_ADD(res);*/
     return res;
 }

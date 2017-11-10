@@ -298,7 +298,7 @@ Residual equations:
                     errorMessage="
 1 errors found:
 
-Error at line 302, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/LocalIteration.mo':
+Error at line 5, column 72, in file 'Compiler/ModelicaMiddleEnd/test/modelica/LocalIteration.mo':
   The type of the enabled expression is not boolean
 ")})));
             end Error1;
@@ -318,7 +318,7 @@ Error at line 302, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/Local
                     errorMessage="
 1 errors found:
 
-Error at line 322, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/LocalIteration.mo':
+Error at line 5, column 72, in file 'Compiler/ModelicaMiddleEnd/test/modelica/LocalIteration.mo':
   Cannot find class or component declaration for unknownParameter3
 ")})));
             end Error2;
@@ -338,7 +338,7 @@ Error at line 322, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/Local
                     errorMessage="
 1 errors found:
 
-Error at line 342, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/LocalIteration.mo':
+Error at line 5, column 72, in file 'Compiler/ModelicaMiddleEnd/test/modelica/LocalIteration.mo':
   Array size mismatch for the enabled attribute, size of component declaration is scalar and size of expression is [2]
 ")})));
             end Error3;

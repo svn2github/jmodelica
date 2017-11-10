@@ -216,6 +216,7 @@ aspect CCodeGen {
     public static final String ASTNode.C_SUFFIX_FPCL     = "fpcl";
     public static final String ASTNode.C_SUFFIX_FPCR     = "fpcr";
     public static final String ASTNode.C_SUFFIX_FPOUT    = "fpout";
+    public static final String ASTNode.C_SUFFIX_SETFLAG  = "_s";
     
     public class FTypePrefixVariability {
         public enum VariabilityCausality_C {
@@ -817,7 +818,7 @@ aspect CCodeGen {
                 if (exp == null) {
                     str.print(size[i]);
                 } else {
-                    boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
+                    boolean addParenthesis = exp.addParenthesis(Precedence.MULTIPLICATIVE);
                     if (addParenthesis) {
                         str.print("(");
                     }

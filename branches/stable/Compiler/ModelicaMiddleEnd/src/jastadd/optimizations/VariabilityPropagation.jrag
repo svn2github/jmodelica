@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2013-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,44 @@
 
 
 aspect VariabilityPropagation {
-	
+
+    private static final OptionRegistry.OptionContributor ModelicaCompiler.VARIABILITY_PROPAGATION = 
+            OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+                
+                @Override
+                public void addOptions(OptionRegistry options) {
+                    options.addBooleanOption("variability_propagation",
+                            OptionRegistry.OptionType.compiler,
+                            OptionRegistry.Category.uncommon,
+                            true,
+                            "If enabled, the compiler performs a global analysis on the equation system and reduces "
+                            + "variables to constants and parameters where applicable.");
+                }
+                
+                public Object identity() {
+                    return "org.jmodelica.modelica.compiler.ModelicaCompiler.VARIABILITY_PROPAGATION";
+                }
+            });
+
+    private static final OptionRegistry.OptionContributor ModelicaCompiler.VARIABILITY_PROPAGATION_EXTERNAL = 
+            OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+                
+                @Override
+                public void addOptions(OptionRegistry options) {
+                    options.addBooleanOption("variability_propagation_external",
+                            OptionRegistry.OptionType.compiler,
+                            OptionRegistry.Category.uncommon,
+                            true,
+                            "If enabled, the compiler allows external constant evaluation during variability "
+                            + "propagation.");
+                }
+                
+                public Object identity() {
+                    return "org.jmodelica.modelica.compiler.ModelicaCompiler.VARIABILITY_PROPAGATION_EXTERNAL";
+                }
+            });
+
+
     public boolean FFunctionCallEquation.taggedForCleanup = false;
 	public boolean FAbstractEquation.taggedByVProp = false;
 	public boolean FAbstractVariable.taggedByVProp = false;
@@ -167,21 +204,45 @@ aspect VariabilityPropagation {
             }
             
             public void perform() {
-                variabilityPropagation();
-                enableConstantFolding();
-                root().flushAllRecursiveClearFinal(); // Enable expression rewrites
+                FClass.VariabilityPropagator propagator = new FClass.VariabilityPropagator();
+                variabilityPropagation(propagator);
+                constantFolding(propagator.evaluator());
+                root().flushAllRecursiveClearFinal();
             }
         }
         
         public class VariabilityPropagator {
-            private LinkedHashSet<FAbstractEquation> worklist;
+            private LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
             private boolean splitAliasParameters = !(myOptions().getBooleanOption("eliminate_alias_variables") 
                     && myOptions().getBooleanOption("eliminate_alias_parameters"));
             private boolean splitAliasConstants  = !(myOptions().getBooleanOption("eliminate_alias_variables") 
                     && myOptions().getBooleanOption("eliminate_alias_constants"));
             
-            public VariabilityPropagator(LinkedHashSet<FAbstractEquation> worklist) {
-                this.worklist = worklist;
+            private VariableEvaluator evaluator       = 
+                    new VariableEvaluator(
+                            myOptions().getBooleanOption("variability_propagation_external"));
+            private VariableEvaluator partialEvaluator = 
+                    new PartialVariableEvaluator(
+                            myOptions().getBooleanOption("variability_propagation_external"));
+            
+            public VariabilityPropagator() {
+                
+            }
+            
+            public LinkedHashSet<FAbstractEquation> getWorklist() {
+                return worklist;
+            }
+            
+            public VariableEvaluator evaluator() {
+                return evaluator;
+            }
+            
+            public VariableEvaluator evaluator(FTypePrefixVariability variability) {
+                if (variability.knownParameterOrLess()) {
+                    return evaluator;
+                } else {
+                    return partialEvaluator;
+                }
             }
             
             public void addEquation(FTypePrefixVariability v, FAbstractEquation fae) {
@@ -218,16 +279,15 @@ aspect VariabilityPropagation {
             }
         }
     }
-    
-	/**
+
+    /**
 	 * Runs variability propagation.
 	 */
-	public void FClass.variabilityPropagation() {
+    public void FClass.variabilityPropagation(FClass.VariabilityPropagator propagator) {
 
 		List<FAbstractEquation> parameterEquations = getFParameterEquations();
-		LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
+        LinkedHashSet<FAbstractEquation> worklist = propagator.getWorklist();
 		List<FAbstractEquation> equations = getFAbstractEquations();
-        FClass.VariabilityPropagator propagator = new FClass.VariabilityPropagator(worklist);
 
 		// Build worklist
 		for (FAbstractEquation equation: equations) {
@@ -317,7 +377,7 @@ aspect VariabilityPropagation {
         if (solutionVariability.knownParameterOrLess()) {
             FExp newSolution = null;
             try {
-                CValue cval = solution.ceval();
+                CValue cval = solution.ceval(propagator.evaluator());
                 if (cval.hasBuildLiteral()) {
                     newSolution = cval.buildLiteral();
                     solution.collectLocations(newSolution);
@@ -353,13 +413,7 @@ aspect VariabilityPropagation {
         CValue[] val = null;
         if (eval) {
             try {
-                VariableEvaluator evaluator;
-                boolean fullEval = variability.knownParameterOrLess();
-                if (fullEval) {
-                    evaluator = defaultVariableEvaluator();
-                } else {
-                    evaluator = new PartialVariableEvaluator();
-                }
+                VariableEvaluator evaluator = propagator.evaluator(variability);
                 val = getCall().evaluate(evaluator);
             } catch (ConstantEvaluationException e) {
                 eval = false;
@@ -639,130 +693,4 @@ aspect VariabilityPropagation {
             type().zeroCValue() : refined(evaluator);
     refine ConstantEvaluation eq FDotDivExp.cevalCalc(VariableEvaluator evaluator) = taggedByVProp ? 
             type().zeroCValue() : refined(evaluator);
-}
-
-aspect ConstantFolding {
-	public boolean FAbstractExp.constantFoldingEnabled = false;
-	
-	/**
-	 * Enables constant folding
-	 */
-	public void ASTNode.enableConstantFolding() {
-	    for (ASTNode n : this)
-	        n.enableConstantFolding();
-	}
-    
-    public void FFunctionDecl.enableConstantFolding() {
-        
-    }
-    
-    public void FFunctionCallEquation.enableConstantFolding() {
-        if (getCall() instanceof FAssert) {
-            return;
-        }
-		for (FExp childExp : getCall().childFExps()) {
-			childExp.enableConstantFolding();
-		}
-	}
-    
-    public void FAssignStmt.enableConstantFolding() {
-        getRight().enableConstantFolding();
-    }
-    
-    public void FFunctionCallStmt.enableConstantFolding() {
-        for (FExp childExp : getCall().childFExps()) {
-            childExp.enableConstantFolding();
-        }
-    }
-
-    public void FPartialFunctionCall.enableConstantFolding() {
-        for (ASTNode n : this)
-            n.enableConstantFolding();
-    }
-
-    public void FIfExp.enableConstantFolding() {
-        super.enableConstantFolding();
-        if (!constantFoldingEnabled && getIfExp().variability().knownParameterOrLess()) {
-            rewriteIfExp = true;
-            is$Final = false;
-        }
-    }
-
-    private boolean FIfExp.rewriteIfExp = false;
-
-    rewrite FIfExp {
-        when (rewriteIfExp) to FExp {
-            rewriteIfExp = false;
-
-            try {
-                if (getIfExp().isConstantExp()) {
-                    CValue cval = getIfExp().ceval();
-                    if (cval.hasBooleanValue()) {
-                        return cval.booleanValue() ? getThenExp() : getElseExp();
-                    }
-                }
-            } catch (ConstantEvaluationException e) {}
-            return this;
-        }
-    }
-
-	public void FAbstractExp.enableConstantFolding() {
-        if (variability().knownParameterOrLess()) {
-			constantFoldingEnabled = true;
-			is$Final = false;
-			return;
-		}
-		super.enableConstantFolding();
-	}
-	public void FIdUseExp.enableConstantFolding() {
-		if (type().isString()) {
-			constantFoldingEnabled = true;
-			is$Final = false;
-			return;
-		}
-		super.enableConstantFolding();
-	}
-	public void FPreExp.enableConstantFolding() {
-		if (variability().parameterOrLess()) {
-			constantFoldingEnabled = true;
-			is$Final = false;
-			return;
-		}
-	}
-
-    rewrite FAbstractExp {
-        when (constantFoldingEnabled && variability().knownParameterOrLess()) to FExp {
-            try {
-                CValue value = ceval();
-                if (value.hasBuildLiteral() && !value.size().isEmpty()) {
-                    return value.buildLiteral();
-                }
-            } catch (ConstantEvaluationException e) {}
-            constantFoldingEnabled = false;
-            return this;
-        }
-    }
-
-	rewrite FIdUseExp {
-		when (constantFoldingEnabled && type().isString()) to FExp {
-			try {
-				CValue value = ceval();
-				if (!value.size().isEmpty()) 
-					return value.buildLiteral();
-			} catch (ConstantEvaluationException e) {
-				compliance("Could not evaluate string variable " + name());
-			}
-			constantFoldingEnabled = false;
-			return this;
-		}
-	}
-	
-	rewrite FPreExp {
-		when (constantFoldingEnabled) to FExp {
-            FIdUseExp res = new FIdUseExp(getFIdUse().fullCopy());
-            res.constantFoldingEnabled = true;
-            return res;
-		}
-	}
-	
 }
