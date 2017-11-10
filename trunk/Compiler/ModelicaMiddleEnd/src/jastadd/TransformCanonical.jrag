@@ -1081,14 +1081,19 @@ aspect TransformCanonical {
             protected Set<FVariable> variablesToVisit() {
                 ssPreferVars = new HashSet<FVariable>();
                 Set<FVariable> fvsToVisit = super.variablesToVisit();
+                boolean indexReductionActive = myOptions().getBooleanOption("index_reduction");
                 for (FVariable fv : variables()) {
-                    if (!fv.isReal())
+                    if (!fv.isReal()) {
                         continue;
+                    }
                     FRealVariable.StateSelect ss = ((FRealVariable)fv).stateSelectAttribute();
-                    if (ss != FRealVariable.StateSelect.ALWAYS && ss != FRealVariable.StateSelect.PREFER)
+                    if (!(ss == FRealVariable.StateSelect.ALWAYS
+                            || ss == FRealVariable.StateSelect.PREFER && indexReductionActive)) {
                         continue;
-                    if (ss == FRealVariable.StateSelect.PREFER && !fvsToVisit.contains(fv))
+                    }
+                    if (ss == FRealVariable.StateSelect.PREFER && !fvsToVisit.contains(fv)) {
                         ssPreferVars.add(fv);
+                    }
                     fvsToVisit.add(fv);
                 }
                 return fvsToVisit;

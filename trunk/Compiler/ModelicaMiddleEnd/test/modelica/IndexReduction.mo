@@ -1055,7 +1055,7 @@ end IndexReduction.IndexReduction52;
 ")})));
 end IndexReduction52;
 
-model IndexReduction53
+model NonDifferentiatedVariableWithPrefer
     Real x,y(stateSelect=StateSelect.prefer);
 equation
     der(x) = -x;
@@ -1063,10 +1063,10 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="IndexReduction53",
+            name="NonDifferentiatedVariableWithPrefer",
             description="Test of system with non differentiated variable with StateSelect always and prefer",
             flatModel="
-fclass IndexReduction.IndexReduction53
+fclass IndexReduction.NonDifferentiatedVariableWithPrefer
  Real x;
  Real y(stateSelect = StateSelect.prefer);
  Real _der_x;
@@ -1080,9 +1080,37 @@ equation
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
-end IndexReduction.IndexReduction53;
+end IndexReduction.NonDifferentiatedVariableWithPrefer;
 ")})));
-end IndexReduction53;
+end NonDifferentiatedVariableWithPrefer;
+
+model NonDifferentiatedVariableWithPreferWithoutIndexReduction
+    Real x,y(stateSelect=StateSelect.prefer);
+equation
+    der(x) = -x;
+    y=100*x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonDifferentiatedVariableWithPreferWithoutIndexReduction",
+            description="Test of system with non differentiated variable with StateSelect always and prefer but index reduction disabled",
+            index_reduction=false,
+            flatModel="
+fclass IndexReduction.NonDifferentiatedVariableWithPreferWithoutIndexReduction
+ Real x;
+ Real y(stateSelect = StateSelect.prefer);
+initial equation
+ x = 0.0;
+equation
+ der(x) = - x;
+ y = 100 * x;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.NonDifferentiatedVariableWithPreferWithoutIndexReduction;
+")})));
+end NonDifferentiatedVariableWithPreferWithoutIndexReduction;
 
 model IndexReduction53b
     function F
