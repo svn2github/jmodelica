@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Change ; Minor ; Runtime ; #5505
+Added the compiler flags -msse2 -mfpmath=sse for runtime builds using GCC,
+the same are used for our FMUs.
+
 ; Fixed ; Minor ; Compiler ; #5503
 Disabled automatic addition of derivatives for variables with state select set
 to prefer if index reduction is disabled.
