@@ -3460,13 +3460,17 @@ aspect FVariableUses {
     FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
         FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
 
-    syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
+    syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAccessLocation() && myFV().isAlgebraicVariable();
 
-    inh boolean FIdUseExp.inAlgebraicAccessLocation();
-    eq FlatRoot.getChild().inAlgebraicAccessLocation()   = false;
-    eq SourceRoot.getChild().inAlgebraicAccessLocation()   = false;
-    eq FAbstractEquation.getFAttribute().inAlgebraicAccessLocation() = false;
-    eq FAbstractEquation.getChild().inAlgebraicAccessLocation() = true;
+    /**
+     * Returns true if this access is in a location where it should be
+     * contributed to the equation system.
+     */
+    inh boolean FIdUseExp.inAccessLocation();
+    eq FlatRoot.getChild().inAccessLocation()               = false;
+    eq SourceRoot.getChild().inAccessLocation()             = false;
+    eq FAbstractEquation.getFAttribute().inAccessLocation() = false;
+    eq FAbstractEquation.getChild().inAccessLocation()      = true;
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
         FClass.intersectFVSet(algebraicVariables(), myFClass().normalAlgebraicContinousRealVariables());
@@ -3494,7 +3498,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FDerivativeVariable> FAbstractEquation.derivativeVariables() 
         [new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
 
-    FDerExp contributes (FDerivativeVariable) myFV() when myFV().isDerivativeVariable() to 
+    FDerExp contributes (FDerivativeVariable) myFV() when myFV().isDerivativeVariable() && inAccessLocation() to 
         FAbstractEquation.derivativeVariables() for each enclosingEquationsIterator();
 
     /**
@@ -3504,7 +3508,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedRealVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() && inAccessLocation() to 
         FAbstractEquation.differentiatedRealVariables() for each enclosingEquationsIterator();
 
     /**
@@ -3514,7 +3518,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.dependentParameters() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when myFV().isDependentParameter() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDependentParameter() && inAccessLocation() to 
         FAbstractEquation.dependentParameters() for each enclosingEquationsIterator();
         
     /**
@@ -3524,7 +3528,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.parameters() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when myFV().isParameter() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isParameter() && inAccessLocation() to 
         FAbstractEquation.parameters() for each enclosingEquationsIterator();
 
     /**
@@ -3534,7 +3538,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when myFV().isDiscreteVariable() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDiscreteVariable() && inAccessLocation() to 
         FAbstractEquation.discreteVariables() for each enclosingEquationsIterator();
 
     /**
@@ -3544,7 +3548,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.initialParameters()
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when myFV().isInitialParameter() to
+    FIdUseExp contributes (FVariable) myFV() when myFV().isInitialParameter() && inAccessLocation() to
         FAbstractEquation.initialParameters() for each enclosingEquationsIterator();
 
     /**
@@ -3554,7 +3558,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.discretePreVariables() 
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FPreExp contributes (FVariable) myFV() when myFV().isPreVariable() to 
+    FPreExp contributes (FVariable) myFV() when myFV().isPreVariable() && inAccessLocation() to 
         FAbstractEquation.discretePreVariables() for each enclosingEquationsIterator();
 
     syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {
@@ -3564,6 +3568,19 @@ aspect FVariableUses {
         l.addAll(algebraicVariables());
         l.addAll(discreteVariables());
         return l;
+    }
+
+    /**
+     * Returns all variables known to this equation that are part of the
+     * equation system, e.g. variables in the attributes isn't included in this
+     * list.
+     * <p>
+     * Word of causion, this method is used for debug output right now and I
+     * got a feeling that it might return the same variable twice! So test well
+     * if you're going to use it "for real".
+     */
+    syn Iterable<FVariable> FAbstractEquation.allVariables() {
+        return new ChainedIterable<FVariable>(variables(), discretePreVariables(), parameters());
     }
 
     /**
@@ -4095,34 +4112,33 @@ aspect FlatDiagnostics {
         }
         return res;
     }
-    
+
     public String FClass.incidence() {
+        return incidence(false);
+    }
+
+    public String FClass.incidence(boolean printAllVariables) {
         StringBuilder str = new StringBuilder();
-        
-        LinkedHashSet<FVariable> h;
-        LinkedHashSet<FDerivativeVariable> dh;
         
         str.append("Incidence:\n");
         
         int i = 0;
         for (FAbstractEquation fe : equations()) {
-            str.append(" eq " + i + ": ");
-            dh = fe.derivativeVariables();
-            for (FVariable fv : dh) {
-                str.append(fv.name() + " ");
+            Iterable<? extends FVariable> vars;
+            if (printAllVariables) {
+                vars = fe.allVariables();
+            } else {
+                vars = new ChainedIterable<FVariable>(fe.derivativeVariables(), fe.algebraicVariables());
             }
-            h = fe.algebraicVariables();
-            for (FVariable fv : h) {
-                str.append(fv.name() + " ");
+            str.append(" eq " + i + ":");
+            for (FVariable var : vars) {
+                str.append(" " + var.name());
             }
             str.append("\n");
-//          str.append(fe.getClass().getName() + " " + fe.prettyPrint(""));
-//          str.append("\n");
             i++;
         }
         
         return str.toString();
-        
     }
     
     public String FClass.dersAndDiffs() {
