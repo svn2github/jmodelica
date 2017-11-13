@@ -52,12 +52,19 @@ typedef struct jmi_local_dynamic_function_memory_t {
 
 jmi_dynamic_function_memory_t* jmi_dynamic_function_memory();
 
+/* Creates a memory pool and returns the allocated object */
 jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t block);
+/* Destroys the memory pool */
 void jmi_dynamic_function_pool_destroy(jmi_dynamic_function_memory_t* mem);
 
+/* Allocates memory from the memory pool (i.e. no actually system allocating takes place if there is memory available in the pool */
 void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t block);
+/* Internal method for the allocation */
+void *_jmi_dynamic_function_pool_alloc(jmi_dynamic_function_memory_t* mem, size_t block);
 
+/* Initializes the local block to point to the current place in memory pool */
 void jmi_dynamic_function_init(jmi_local_dynamic_function_memory_t* local_block);
+/* Rewinds the memory pool to the position of the local block */
 void jmi_dynamic_function_free(jmi_local_dynamic_function_memory_t* local_block);
 
 #endif /* _JMI_DYN_MEM_H */

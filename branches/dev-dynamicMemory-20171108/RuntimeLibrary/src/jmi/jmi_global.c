@@ -212,11 +212,8 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  */
 void* jmi_global_calloc(size_t n, size_t s) {
     jmi_t* jmi = jmi_get_current();
-    if (jmi->jmi_callbacks.allocate_memory != NULL) {
-        return (char*) jmi->jmi_callbacks.allocate_memory(n, s);
-    } else {
-        return (char*) calloc(n, s);
-    }
+    /* VERIFY HOW LONG IT HAS TO LIVE */
+    return _jmi_dynamic_function_pool_alloc(jmi->dyn_fcn_mem, n*s);
 }
 
 /**

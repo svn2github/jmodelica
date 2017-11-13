@@ -95,11 +95,6 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
     JMCEVAL_printString(value);
 }
 
-void* jmi_global_calloc(size_t n, size_t s)
-{
-    return calloc(n, s);
-}
-
 jmp_buf jmceval_try_location;
 
 #define JMCEVAL_try() (setjmp(jmceval_try_location) == 0)
@@ -112,8 +107,13 @@ void jmi_throw()
 jmi_dynamic_function_memory_t* dyn_fcn_mem = NULL;
 
 jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
-    if (dyn_fcn_mem == NULL) { dyn_fcn_mem = jmi_dynamic_function_pool_create(1024); }
+    if (dyn_fcn_mem == NULL) { dyn_fcn_mem = jmi_dynamic_function_pool_create(1024*1024); }
     return dyn_fcn_mem;
+}
+
+void* jmi_global_calloc(size_t n, size_t s)
+{
+    return _jmi_dynamic_function_pool_alloc(dyn_fcn_mem, n*s);
 }
 
 void JMCEVAL_setup() {
