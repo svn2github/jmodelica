@@ -65,7 +65,7 @@ SourceRoot : Root ::= Program;
  
 
 Program : SourceBaseNode ::= 
-	        UnstructuredEntity:StoredDefinition* 
+            UnstructuredEntity:StoredDefinition* 
             /UnknownClassDecl/
             /UnknownComponentDecl/
             /EnumBaseDecl:EnumClassDecl/
@@ -82,14 +82,14 @@ Within : SourceBaseNode ::= [PackageName:Access];
 
 abstract ClassDecl : Element       ::= Name:IdDecl;
 abstract BaseClassDecl : ClassDecl ::= VisibilityType 
-                                       [Encapsulated] 
-                                       [Partial] 
+                                       <Encapsulated:boolean>
+                                       <Partial:boolean>
                                        Restriction 
-                                       [Redeclare]
-                                       [Final]
-                                       [Inner]
-                                       [Outer]
-                                       [Replaceable]
+                                       <Redeclare:boolean>
+                                       <Final:boolean>
+                                       <Inner:boolean>
+                                       <Outer:boolean>
+                                       <Replaceable:boolean>
                                        [ConstrainingClause]
                                        [ConstrainingClauseComment:Comment];
 
@@ -145,6 +145,7 @@ IntegerClassDecl   : PrimitiveClassDecl;
 BooleanClassDecl   : PrimitiveClassDecl;
 StringClassDecl    : PrimitiveClassDecl;
 EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Sumbol> is necessary to achieve formatted pretty print.
+//EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol> EnumSpecification; // <Symbol> is necessary to achieve formatted pretty print.
 
 PN_EnumDecl : BaseClassDecl ::= <Symbol:Symbol> EnumSpecification Comment;  // <Sumbol> is necessary to achieve formatted pretty print.
 abstract EnumSpecification : SourceBaseNode;
@@ -172,18 +173,12 @@ OperatorRecord      : Record;
 Operator            : Restriction;
 OperatorFunction    : Function;
 
-Replaceable  : SourceBaseNode;
-Redeclare    : SourceBaseNode;
-Encapsulated : SourceBaseNode;
-Partial      : SourceBaseNode;
-Inner        : SourceBaseNode;
-Outer        : SourceBaseNode;
-
 abstract VisibilityType : SourceBaseNode;
 PublicVisibilityType    : VisibilityType;
 ProtectedVisibilityType : VisibilityType;
 UnknownVisibilityType   : VisibilityType;
 
+// Delete Composition?
 Composition : SourceBaseNode ::= Clause* [ExternalClause];
 
 ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
@@ -206,6 +201,7 @@ Algorithm             : Clause ::= [Initial] Statement*;
 abstract Element : Clause;
 PN_ExtendsClause        : Element ::= Super:Access [ClassModification] [Annotation];
 ExtendsClause           : Element ::= VisibilityType Super:Access [ClassModification] [Annotation];
+//ExtendsClause           : Element ::= Super:Access [ClassModification] [Annotation];
 InlineExtendsClause     : ExtendsClause;
 abstract ImportClause   : Element ::= PackageName:Access Comment;
 ImportClauseQualified   : ImportClause;
@@ -216,11 +212,11 @@ ImportClauseRename      : ImportClause ::= IdDecl;
 abstract AbstractComponentDecl : Element;
 UnknownComponentDecl : ComponentDecl;
 abstract BaseComponentDecl : AbstractComponentDecl ::= 
-	                       [Redeclare] 
-                           [Final] 
-                           [Inner] 
-                           [Outer] 
-                           [Replaceable] 
+                           <Redeclare:boolean> 
+                           <Final:boolean> 
+                           <Inner:boolean> 
+                           <Outer:boolean> 
+                           <Replaceable:boolean> 
                            [TypePrefixFlow] 
                            [TypePrefixVariability] 
                            [TypePrefixInputOutput] 
@@ -271,9 +267,6 @@ Comment       : SourceBaseNode ::= [StringComment] [Annotation];
 StringComment : SourceBaseNode ::= <Comment:String>;
 
 // Annotations and modifications
-Each  : SourceBaseNode;
-Final : SourceBaseNode;
-
 ConditionalAttribute : SourceBaseNode ::= Exp;
 
 abstract Modification : SourceBaseNode;
@@ -283,7 +276,7 @@ ValueModification     : Modification ::= Exp;
 DummyModification     : ValueModification;
 
 ClassModification : Modification ::= Argument*;
-abstract Argument : Modification ::= [Each] [Final];
+abstract Argument : Modification ::= <Each:boolean> <Final:boolean>;
 
 abstract NamedModification   : Argument ::= Name:Access;
 abstract ElementModification : NamedModification ::= [Modification] Comment;

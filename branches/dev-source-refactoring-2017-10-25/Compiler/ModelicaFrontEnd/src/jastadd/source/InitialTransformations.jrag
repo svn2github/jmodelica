@@ -57,14 +57,14 @@
             FullClassDecl fc = new FullClassDecl(
                     getName(),
                     visibility(),
-                    getEncapsulatedOpt(),
-                    getPartialOpt(),
+                    getEncapsulated(),
+                    getPartial(),
                     getRestriction(),
-                    getRedeclareOpt(),
-                    getFinalOpt(),
-                    getInnerOpt(),
-                    getOuterOpt(),
-                    getReplaceableOpt(),
+                    getRedeclare(),
+                    getFinal(),
+                    getInner(),
+                    getOuter(),
+                    getReplaceable(),
                     getConstrainingClauseOpt(),
                     getConstrainingClauseCommentOpt(),
                     getStringCommentOpt(),
@@ -83,22 +83,7 @@
             	fc.setAnnotation(getAnnotation());
             getComposition().extractElementsTo(fc);
             
-            if (hasRedeclare())
-            	fc.setLocationNoTree(getRedeclare(), this);
-            else if (hasFinal())
-            	fc.setLocationNoTree(getFinal(), this);
-            else if (hasInner())
-            	fc.setLocationNoTree(getInner(), this);
-            else if (hasOuter())
-            	fc.setLocationNoTree(getOuter(), this);
-            else if (hasReplaceable())
-            	fc.setLocationNoTree(getReplaceable(), this);
-            else if (hasEncapsulated())
-            	fc.setLocationNoTree(getEncapsulated(), this);
-            else if (hasPartial())
-            	fc.setLocationNoTree(getPartial(), this);
-            else
-            	fc.setLocationNoTree(getRestriction(), this);
+            fc.setLocationNoTree(this);
             return fc;
         }
     }
@@ -111,14 +96,14 @@
             ExtendClassDecl ec = new ExtendClassDecl(
                     getName(),
                     visibility(),
-                    getEncapsulatedOpt(),
-                    getPartialOpt(),
+                    getEncapsulated(),
+                    getPartial(),
                     getRestriction(),
-                    getRedeclareOpt(),
-                    getFinalOpt(),
-                    getInnerOpt(),
-                    getOuterOpt(),
-                    getReplaceableOpt(),
+                    getRedeclare(),
+                    getFinal(),
+                    getInner(),
+                    getOuter(),
+                    getReplaceable(),
                     getConstrainingClauseOpt(),
                     getConstrainingClauseCommentOpt(),
                     getStringCommentOpt(),
@@ -140,8 +125,6 @@
             if (hasAnnotation())
             	ec.setAnnotation(getAnnotation());
             getComposition().extractElementsTo(ec);
-            if (!hasRedeclare())
-            	ec.setRedeclare(copyLocationTo(new Redeclare()));
 
             ca.setLocationNoTree(getName());
             // TODO: iec should probably include "extends" token as well, but that needs parser change
@@ -160,15 +143,15 @@
         	
         	// Copy fields
         	ecd.setVisibilityType(visibility());
-        	ecd.setEncapsulatedOpt(getEncapsulatedOpt());
-        	ecd.setPartialOpt(getPartialOpt());
+        	ecd.setEncapsulated(getEncapsulated());
+        	ecd.setPartial(getPartial());
         	ecd.setRestriction(getRestriction());
         	ecd.setName(getName());
-        	ecd.setRedeclareOpt(getRedeclareOpt());
-        	ecd.setFinalOpt(getFinalOpt());
-        	ecd.setInnerOpt(getInnerOpt());
-        	ecd.setOuterOpt(getOuterOpt());
-        	ecd.setReplaceableOpt(getReplaceableOpt());
+        	ecd.setRedeclare(getRedeclare());
+        	ecd.setFinal(getFinal());
+        	ecd.setInner(getInner());
+        	ecd.setOuter(getOuter());
+        	ecd.setReplaceable(getReplaceable());
         	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
         	if (getComment().hasAnnotation())
         		ecd.setAnnotation(getComment().getAnnotation());
@@ -229,9 +212,9 @@
     public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
 
     public void ComponentDecl.addToFullClassDecl(FullClassDecl fcd) {
-        if (hasRedeclare()) {
+        if (getRedeclare()) {
             ComponentAccess ca = new ComponentAccess(getName().getID(), getVarArraySubscriptsOpt().fullCopy());
-            fcd.addElementModification(new ComponentRedeclare(new Opt(), new Opt(), ca, this));
+            fcd.addElementModification(new ComponentRedeclare(false, false, ca, this));
         } else {
             fcd.addComponentDecl(this);
         }
@@ -324,11 +307,11 @@
                 if (getName(i)!=null) l.add(getName(i));
             }
 
-            ComponentClause c = new ComponentClause(getRedeclareOpt(),
-                                                    getFinalOpt(),
-                                                    getInnerOpt(),
-                                                    getOuterOpt(),
-                                                    getReplaceableOpt(),
+            ComponentClause c = new ComponentClause(getRedeclare(),
+                                                    getFinal(),
+                                                    getInner(),
+                                                    getOuter(),
+                                                    getReplaceable(),
                                                     getTypePrefixFlowOpt(),
                                                     getTypePrefixVariabilityOpt(),
                                                     getTypePrefixInputOutputOpt(),
@@ -361,7 +344,7 @@
      */
      rewrite PN_ComponentRedeclare {
         to ComponentRedeclare {
-           ComponentRedeclare c = new ComponentRedeclare(getEachOpt(), getFinalOpt(), getName(),
+           ComponentRedeclare c = new ComponentRedeclare(getEach(), getFinal(), getName(),
                    (ComponentDecl) getBaseComponentDecl());
            c.setLocationNoTree(this);
            return c;
@@ -402,11 +385,11 @@
             c.setVarArraySubscripts(new ArraySubscripts(as));
         }
 
-        c.setRedeclareOpt(getRedeclareOpt().fullCopy());
-        c.setFinalOpt(getFinalOpt().fullCopy());
-        c.setInnerOpt(getInnerOpt().fullCopy());
-        c.setOuterOpt(getOuterOpt().fullCopy());
-        c.setReplaceableOpt(getReplaceableOpt().fullCopy());
+        c.setRedeclare(getRedeclare());
+        c.setFinal(getFinal());
+        c.setInner(getInner());
+        c.setOuter(getOuter());
+        c.setReplaceable(getReplaceable());
         c.setTypePrefixFlowOpt(getTypePrefixFlowOpt().fullCopy());
         c.setTypePrefixVariabilityOpt(getTypePrefixVariabilityOpt().fullCopy());
         c.setTypePrefixInputOutputOpt(getTypePrefixInputOutputOpt().fullCopy());
@@ -427,16 +410,17 @@
         when (getName().isQualified())
         to ComponentModification{
             log.debug("ComponentModification -> ComponentModification: " + getName().qualifiedName());
-            ComponentModification e = new ComponentModification(new Opt(),
-                                           new Opt(),
+            ComponentModification e = new ComponentModification(
+                                           false,
+                                           false,
                                            getName().getFirstAccess(),
                                            //getModificationOpt(),
                                            new Opt(new CompleteModification(
                                                     new ClassModification(
                                                      new List().add(
                                                       new ComponentModification(
-                                                       getEachOpt(),
-                                                       getFinalOpt(),
+                                                       getEach(),
+                                                       getFinal(),
                                                        getName().stripFirstAccess(),
                                                        getModificationOpt(),
                                                     getComment()))),
@@ -468,14 +452,14 @@
             ShortClassDecl scd = new ShortClassDecl(
                     getName(),
                     (VisibilityType) ecsc.getVisibilityType().fullCopy(),
-                    getEncapsulatedOpt(),
-                    getPartialOpt(),
+                    getEncapsulated(),
+                    getPartial(),
                     getRestriction(),
-                    getRedeclareOpt(),
-                    getFinalOpt(),
-                    getInnerOpt(),
-                    getOuterOpt(),
-                    getReplaceableOpt(),
+                    getRedeclare(),
+                    getFinal(),
+                    getInner(),
+                    getOuter(),
+                    getReplaceable(),
                     getConstrainingClauseOpt(),
                     getConstrainingClauseCommentOpt(),
                     ecsc); 

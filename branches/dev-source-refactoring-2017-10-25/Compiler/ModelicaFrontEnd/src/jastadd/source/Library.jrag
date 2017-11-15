@@ -295,15 +295,15 @@ aspect Library {
     
     public void LibClassDecl.assignFields(FullClassDecl fcd) {
         setVisibilityType(fcd.getVisibilityType());
-        setEncapsulatedOpt(fcd.getEncapsulatedOpt());
-        setPartialOpt(fcd.getPartialOpt());
+        setEncapsulated(fcd.getEncapsulated());
+        setPartial(fcd.getPartial());
         setRestriction(fcd.getRestriction());
         setName(fcd.getName());
-        setRedeclareOpt(fcd.getRedeclareOpt());
-        setFinalOpt(fcd.getFinalOpt());
-        setInnerOpt(fcd.getInnerOpt());
-        setOuterOpt(fcd.getOuterOpt());
-        setReplaceableOpt(fcd.getReplaceableOpt());
+        setRedeclare(fcd.getRedeclare());
+        setFinal(fcd.getFinal());
+        setInner(fcd.getInner());
+        setOuter(fcd.getOuter());
+        setReplaceable(fcd.getReplaceable());
         setConstrainingClauseOpt(fcd.getConstrainingClauseOpt());
         setConstrainingClauseCommentOpt(fcd.getConstrainingClauseCommentOpt());
         setStringCommentOpt(fcd.getStringCommentOpt());

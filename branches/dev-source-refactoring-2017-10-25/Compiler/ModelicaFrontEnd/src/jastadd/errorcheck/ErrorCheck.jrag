@@ -583,7 +583,7 @@ aspect ErrorCheck {
     inh InstComponentDecl ASTNode.errorEnclosingComponent();
     eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
     eq InstComponentDecl.getChild().errorEnclosingComponent() {
-        if (isRedeclared() || getComponentDecl().hasRedeclare()) {
+        if (isRedeclared() || getComponentDecl().getRedeclare()) {
             return errorEnclosingComponent();
         } else {
             return containingInstComponent();

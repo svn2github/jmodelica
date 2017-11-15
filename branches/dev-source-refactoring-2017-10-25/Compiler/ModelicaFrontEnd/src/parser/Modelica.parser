@@ -18,7 +18,7 @@
 %goal anonymous_short_class;
 %goal exp;
 %goal element;
-%goal abstract_equation
+%goal abstract_equation;
 
 %header {:
  package $PARSER_PACKAGE$;
@@ -185,157 +185,212 @@
     
     Symbol annotationTok = null;
     
+    private static class Bool extends Symbol {
+        public final boolean value;
+        
+        public Bool(boolean val) {
+            value = val;
+        }
+    }
+    
+    private static Bool newTrue() {
+        return new Bool(true);
+    }
+    
+    private static Bool newFalse() {
+        return new Bool(false);
+    }
+    
+    private static class RedeclareReplaceableHeader extends Symbol {
+        public final boolean has_redeclare;
+        public final boolean has_each;
+        public final boolean has_final;
+        
+        public RedeclareReplaceableHeader(boolean has_redeclare,
+                                          boolean has_each,
+                                          boolean has_final) {
+            this.has_redeclare = has_redeclare;
+            this.has_each = has_each;
+            this.has_final = has_final;
+        }
+    }
+    
+    private static class TypePrefixes extends Symbol {
+        public final Opt<TypePrefixFlow> flow;
+        public final Opt<TypePrefixVariability> variability;
+        public final Opt<TypePrefixInputOutput> input_output;
+        
+        public TypePrefixes(Opt<TypePrefixFlow> flow, 
+                            Opt<TypePrefixVariability> variability, 
+                            Opt<TypePrefixInputOutput> input_output) {
+            this.flow = flow;
+            this.variability = variability;
+            this.input_output = input_output;
+        }
+    }
 :};
  
 SourceRoot source_root
-    = /* nothing */ {: 
+    = /* blank */ 
+    {: 
         SourceRoot sr = new SourceRoot(new Program(new List()));
         return sr; 
-      :}
-   | program {: 
+    :}
+    | program 
+    {: 
        SourceRoot sr = new SourceRoot(program); 
        return sr; 
-   :};
+    :};
 
 Program program
-    = stored_definition   {: 
+    = stored_definition 
+    {: 
         return new Program(new List().add(stored_definition)); 
     :};
   
 StoredDefinition stored_definition
-    = within? base_class_decl_list {:
+    = within? base_class_decl_list 
+    {:
         StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
         def.setLineBreakMap(lineBreakMap);
         formattingRecorder.postParsing(def);
-    	return def; 
+        return def; 
     :}
-    | error {: 
+    | error 
+    {: 
         return new BadDefinition(); 
     :};
 
 Within within
-    = WITHIN parse_access? SEMICOLON {: 
+    = WITHIN parse_access? SEMICOLON 
+    {: 
         return new Within(parse_access); 
     :};
   
-List base_class_decl_list  
-    = base_class_decl SEMICOLON {: 
+List base_class_decl_list
+    = base_class_decl SEMICOLON 
+    {: 
         return new List().add(base_class_decl); 
     :}
-    | base_class_decl_list base_class_decl SEMICOLON {: 
+    | base_class_decl_list base_class_decl SEMICOLON 
+    {: 
         base_class_decl_list.add(base_class_decl);
         return base_class_decl_list; 
     :};
 
-BaseClassDecl anonymous_short_class = class_access class_modification?
-        {: return new PN_ShortClassDecl(
-                   new IdDecl("'Anonymous Class'"),
-                   new UnknownVisibilityType(),
-                   new Opt(), new Opt(), 
-                   new MClass(), 
-                   new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
-                   new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
-                   class_access,
-                   new Opt(), 
-                   class_modification, 
-                   new Comment()); 
-        :};
+BaseClassDecl anonymous_short_class 
+    = class_access class_modification?
+    {: 
+        return new PN_ShortClassDecl(
+        new IdDecl("'Anonymous Class'"),
+        new UnknownVisibilityType(),
+        false, false, 
+        new MClass(), 
+        false, false, false, false, false, 
+        new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
+        class_access,
+        new Opt(), 
+        class_modification, 
+        new Comment()); 
+    :};
 
 BaseClassDecl base_class_decl 
-    =               
-    encapsulated? 
-    partial? 
-    restriction  
-    id_decl.start 
-    string_comment? 
-    composition 
-    annotation_sc?
-    end_decl   {:   
+    = has_encapsulated 
+      has_partial 
+      restriction  
+      id_decl.start 
+      string_comment? 
+      composition 
+      annotation_sc?
+      end_decl
+    {:
         return new PN_FullClassDecl(
             start,
             new UnknownVisibilityType(),
-            encapsulated,
-            partial,
+            has_encapsulated.value,
+            has_partial.value,
             restriction,
-            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            false, false, false, false, false, 
+            new Opt(), new Opt(),
             string_comment,
             composition,
             annotation_sc,
             end_decl); 
     :}
-    |
-    encapsulated? 
-    partial? 
-    restriction  
-    id_decl.class_name EQUALS
-    type_prefix_flow?
-    type_prefix_variability?
-    type_prefix_input_output?
-    class_access /*name*/
-    array_subscripts?
-    class_modification?
-    comment {:
+    | has_encapsulated 
+      has_partial 
+      restriction  
+      id_decl.class_name EQUALS
+      type_prefixes
+      class_access
+      array_subscripts?
+      class_modification?
+      comment 
+    {:
         return new PN_ShortClassDecl(
             class_name, 
             new UnknownVisibilityType(),
-            encapsulated, 
-            partial, 
+            has_encapsulated.value, 
+            has_partial.value, 
             restriction, 
-            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
-            type_prefix_flow, 
-            type_prefix_variability, 
-            type_prefix_input_output, 
+            false, false, false, false, false, 
+            new Opt(), new Opt(),
+            type_prefixes.flow, 
+            type_prefixes.variability, 
+            type_prefixes.input_output, 
             class_access,
             array_subscripts, 
             class_modification, 
             comment); 
     :}
-    |
-    encapsulated? 
-    partial? 
-    restriction 
-    EXTENDS 
-    id_decl.start 
-    class_modification?
-    string_comment? 
-    composition 
-    annotation_sc?
-    end_decl {:
+    | has_encapsulated 
+      has_partial 
+      restriction 
+      EXTENDS 
+      id_decl.start 
+      class_modification?
+      string_comment? 
+      composition 
+      annotation_sc?
+      end_decl 
+    {:
         return new PN_ExtendClassDecl(
             start,
             new UnknownVisibilityType(),
-            encapsulated,
-            partial,
+            has_encapsulated.value,
+            has_partial.value,
             restriction,
-            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            false, false, false, false, false, 
+            new Opt(), new Opt(),
             string_comment,
             composition,
             annotation_sc,
             end_decl, 
             class_modification); 
-  :}  
-   |
-    encapsulated? 
-    partial? 
-    restriction  
-    id_decl.enum_name EQUALS
-    ENUMERATION LPAREN enum_specification RPAREN
-    comment {:
-    return new PN_EnumDecl(
+    :}
+    | has_encapsulated 
+      has_partial 
+      restriction  
+      id_decl.enum_name EQUALS
+      ENUMERATION LPAREN enum_specification RPAREN
+      comment 
+    {:
+        return new PN_EnumDecl(
             enum_name,
             new UnknownVisibilityType(),
-            encapsulated,
-            partial,
+            has_encapsulated.value,
+            has_partial.value,
             restriction,
-            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            false, false, false, false, false, 
+            new Opt(), new Opt(),
             ENUMERATION,
             enum_specification,
             comment); 
-    
     :}
-  | error {: 
+    | error 
+    {: 
       return new BadClassDecl();
-  :};
+    :};
 
 EnumSpecification enum_specification =
   COLON {: return new EnumUnspecified(); :}
@@ -352,24 +407,30 @@ EnumLiteral enum_literal =
   id_decl comment {: return new EnumLiteral(id_decl,comment); :}
   ;
 
-Partial partial = 
-  PARTIAL {: return new Partial(); :}
-  ;
+TypePrefixFlow type_prefix_flow 
+    = FLOW     {: return new Flow(); :}
+    | STREAM   {: return new Stream(); :}
+    ;
 
-Encapsulated encapsulated = 
-  ENCAPSULATED {: return new Encapsulated(); :}
-  ;
+TypePrefixVariability type_prefix_variability 
+    = DISCRETE        {: return new Discrete(); :}
+    | PARAMETER       {: return new Parameter(); :}
+    | CONSTANT        {: return new Constant(); :}
+    ;
 
-TypePrefix type_prefix_variability = 
-   DISCRETE         {: return new Discrete(); :}
-  | PARAMETER       {: return new Parameter(); :}
-  | CONSTANT        {: return new Constant(); :}
-  ;
-  
-TypePrefix type_prefix_input_output = 
-    INPUT           {: return new Input(); :}
-  | OUTPUT          {: return new Output(); :}
-  ;
+TypePrefixInputOutput type_prefix_input_output 
+    = INPUT           {: return new Input(); :}
+    | OUTPUT          {: return new Output(); :}
+    ;
+
+TypePrefixes type_prefixes 
+    = type_prefix_flow?
+      type_prefix_variability?
+      type_prefix_input_output?
+    {:
+        return new TypePrefixes(type_prefix_flow, type_prefix_variability, type_prefix_input_output);
+    :}
+    ;
 
 
 Restriction restriction = 
@@ -387,31 +448,58 @@ Restriction restriction =
   | OPERATOR               {: return new Operator(); :}
   ;
 
-Final final_ = 
-  FINAL {: return new Final(); :}
-  ;
-  
-Inner inner = 
-  INNER {: return new Inner(); :}
-  ;
-  
- Outer outer = 
-  OUTER {: return new Outer(); :}
-  ;
-   
-Replaceable replaceable = 
-  REPLACEABLE  {: return new Replaceable(); :}
-  ;
-    
-Redeclare redeclare = 
-  REDECLARE  {: return new Redeclare(); :}
-  ;  
-  
-Each each =
-  EACH  {: return new Each(); :}
-  ;  
+Bool has_partial
+    = PARTIAL     {: return newTrue();  :}
+    | /* blank */ {: return newFalse(); :}
+    ;
 
-    
+Bool has_encapsulated 
+    = ENCAPSULATED {: return newTrue();  :}
+    | /* blank */  {: return newFalse(); :}
+    ;
+
+Bool has_inner
+    = INNER       {: return newTrue();  :}
+    | /* blank */ {: return newFalse(); :}
+    ;
+
+Bool has_outer
+    = OUTER       {: return newTrue();  :}
+    | /* blank */ {: return newFalse(); :}
+    ;
+
+Bool has_redeclare
+    = REDECLARE   {: return newTrue();  :}
+    | /* blank */ {: return newFalse(); :}
+    ;
+
+Bool has_each
+    = EACH        {: return newTrue();  :}
+    | /* blank */ {: return newFalse(); :}
+    ;
+
+Bool has_final
+    = FINAL       {: return newTrue();  :}
+    | /* blank */ {: return newFalse(); :}
+    ;
+
+RedeclareReplaceableHeader redeclare_replaceable_header
+    = REDECLARE 
+      has_each
+      has_final 
+      REPLACEABLE 
+    {:
+        return new RedeclareReplaceableHeader(true, has_each.value, has_final.value);
+    :}
+    | has_each
+      has_final 
+      REPLACEABLE 
+    {:
+        return new RedeclareReplaceableHeader(false, has_each.value, has_final.value);
+    :}
+    ;
+
+
 Composition composition = 
   composition_clauses  external_clause?
                {: return new Composition(composition_clauses,external_clause); :}
@@ -473,106 +561,121 @@ ExternalFunctionCall external_function_call =
 
 	
 Element element 
-    = 
-    redeclare? 
-    final_? 
-    inner? 
-    outer? 
-    base_class_decl SEMICOLON {: 
-        base_class_decl.setRedeclareOpt(redeclare);
-        base_class_decl.setFinalOpt(final_);   
-        base_class_decl.setInnerOpt(inner);
-        base_class_decl.setOuterOpt(outer);
+    = has_redeclare
+      has_final 
+      has_inner 
+      has_outer 
+      base_class_decl 
+      SEMICOLON 
+    {: 
+        base_class_decl.setRedeclare(has_redeclare.value);
+        base_class_decl.setFinal(has_final.value);
+        base_class_decl.setInner(has_inner.value);
+        base_class_decl.setOuter(has_outer.value);
         return base_class_decl;
     :}
-    |
-    redeclare? 
-    final_? 
-    inner? 
-    outer? 
-    replaceable
-    base_class_decl
-    constraining_clause? 
-    comment SEMICOLON {: 
-        base_class_decl.setRedeclareOpt(redeclare);
-        base_class_decl.setFinalOpt(final_);   
-        base_class_decl.setInnerOpt(inner);
-        base_class_decl.setOuterOpt(outer);
-        base_class_decl.setReplaceableOpt(new Opt(replaceable));
+    | has_redeclare
+      has_final 
+      has_inner 
+      has_outer 
+      REPLACEABLE
+      base_class_decl
+      constraining_clause? 
+      comment 
+      SEMICOLON 
+    {: 
+        base_class_decl.setRedeclare(has_redeclare.value);
+        base_class_decl.setFinal(has_final.value);
+        base_class_decl.setInner(has_inner.value);
+        base_class_decl.setOuter(has_outer.value);
+        base_class_decl.setReplaceable(true);
         base_class_decl.setConstrainingClauseOpt(constraining_clause);
         base_class_decl.setConstrainingClauseComment(comment);
-        return base_class_decl;  
+        return base_class_decl;
     :}  
-    | extends_clause SEMICOLON {: 
+    | extends_clause SEMICOLON 
+    {: 
         return extends_clause;
     :}
-    | import_clause SEMICOLON {: 
+    | import_clause SEMICOLON 
+    {: 
         return import_clause;
     :}
-    |
-    redeclare? 
-    final_? 
-    inner? 
-    outer? 
-    type_prefix_flow? 
-    type_prefix_variability? 
-    type_prefix_input_output? 
-    class_access/*name*/ 
-    array_subscripts? 
-    component_list 
-    SEMICOLON {:
+    | has_redeclare
+      has_final 
+      has_inner 
+      has_outer 
+      type_prefixes 
+      class_access/*name*/ 
+      array_subscripts? 
+      component_list 
+      SEMICOLON 
+    {:
         return new PN_ComponentClause(
-            redeclare,
-            final_,
-            inner,
-            outer,
-            new Opt(),
-            type_prefix_flow,
-            type_prefix_variability,
-            type_prefix_input_output,
+            has_redeclare.value,
+            has_final.value,
+            has_inner.value,
+            has_outer.value,
+            false,
+            type_prefixes.flow,
+            type_prefixes.variability,
+            type_prefixes.input_output,
             class_access,
             array_subscripts,
             component_list,
             new Opt(),
             new Comment(new Opt(), new Opt()));
-  :}
-  | redeclare? 
-    final_? 
-    inner? 
-    outer? 
-    replaceable 
-    type_prefix_flow? 
-    type_prefix_variability? 
-    type_prefix_input_output? 
-    class_access/*name*/ 
-    array_subscripts? 
-    component_list 
-    constraining_clause? 
-    comment 
-    SEMICOLON {: 
+    :}
+    | has_redeclare 
+      has_final 
+      has_inner 
+      has_outer 
+      REPLACEABLE 
+      type_prefixes 
+      class_access 
+      array_subscripts? 
+      component_list 
+      constraining_clause? 
+      comment 
+      SEMICOLON 
+    {: 
         return new PN_ComponentClause(
-            redeclare,
-            final_,
-            inner,
-            outer,
-            new Opt(replaceable),
-            type_prefix_flow,
-            type_prefix_variability,
-            type_prefix_input_output,
+            has_redeclare.value,
+            has_final.value,
+            has_inner.value,
+            has_outer.value,
+            true,
+            type_prefixes.flow,
+            type_prefixes.variability,
+            type_prefixes.input_output,
             class_access,
             array_subscripts,
             component_list,
-            constraining_clause,comment); 
-  :}
-  | error SEMICOLON						  {: return new BadElement(); :}
-  ;
-  
-ConstrainingClause constraining_clause = 
-  CONSTRAINEDBY class_access/*name*/ class_modification?{: return new ConstrainingClause(class_access,class_modification); :}
-  ;
-  
-PN_ExtendsClause extends_clause = 
-   EXTENDS  class_access/*name*/ class_modification? annotation?    {: return new PN_ExtendsClause(class_access,class_modification,annotation); :}
+            constraining_clause,comment);
+    :}
+    | error SEMICOLON
+    {: 
+        return new BadElement();
+    :}
+    ;
+
+ConstrainingClause constraining_clause 
+    = CONSTRAINEDBY 
+      class_access 
+      class_modification?
+    {: 
+        return new ConstrainingClause(class_access, class_modification);
+    :}
+    ;
+
+PN_ExtendsClause extends_clause 
+    = EXTENDS 
+      class_access 
+      class_modification? 
+      annotation?
+    {: 
+        return new PN_ExtendsClause(class_access, class_modification, annotation);
+    :}
   ;
 
 ImportClause import_clause = 
@@ -621,11 +724,6 @@ PN_ComponentDecl pn_component_decl =
 ConditionalAttribute conditional_attribute = 
   IF exp {: return new ConditionalAttribute(exp); :}
   ;  
-  
-TypePrefix type_prefix_flow = 
-    FLOW     {: return new Flow(); :}
-  | STREAM   {: return new Stream(); :}
-  ;
   
 EquationClause equation_clause =
   EQUATION abstract_equation*  {:  return new EquationClause(abstract_equation); :}
@@ -690,157 +788,131 @@ List argument_list =
                                        return argument_list; :}
   ;
 
-Argument argument = 
-  each? 
-  final_? 
-  parse_access 
-  modification? 
-  comment {: return new ComponentModification(each, 
-                                                    final_,
-                                                    parse_access,
-                                                    modification,
-                                                    comment); :}
-  |each? 
-   final_? 
-   replaceable 
-   base_class_decl 
-   constraining_clause? {:  ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
-   							pa.setLocationNoTree(base_class_decl.getName());
-   							base_class_decl.setConstrainingClauseOpt(constraining_clause);
-   							base_class_decl.setReplaceable(replaceable);
-   							ClassRedeclare cdr = new ClassRedeclare(each,
-                                                         final_,
-                                                         pa,
-                                                         base_class_decl); 
-                            return cdr; :} 
-  |each? 
-   final_? 
-   replaceable 
-   type_prefix_flow?
-   type_prefix_variability? 
-   type_prefix_input_output? 
-   class_access 
-   id_decl.comp_name 
-   array_subscripts? 
-   modification? 
-   comment
-   constraining_clause? 
-   {: 			ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
-   				pa.setLocationNoTree(comp_name);
-       			PN_ComponentDecl cd = new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment);
-       			cd.setLocationNoTree(comp_name, comment);
-   				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
-                                        final_,
-                                        pa,
-                                        new PN_ComponentClause(new Opt(new Redeclare()),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               new Opt(new Replaceable()),
-                                                               type_prefix_flow,
-                                                               type_prefix_variability,
-                                                               type_prefix_input_output,
-                                                               class_access,
-                                                               new Opt(),
-                                                               new List().add(cd),
-                                                               constraining_clause,
-                                                               new Comment(new Opt(),new Opt()))); 
-                                         return cdr; :}
-  |REDECLARE 
-   each? 
-   final_?  
-   base_class_decl {: ClassAccess pa = new ClassAccess(base_class_decl.getName().getID());
-                      pa.setLocationNoTree(base_class_decl.getName());       
-                      base_class_decl.setRedeclare(new Redeclare());
-                      ClassRedeclare cdr = new ClassRedeclare(each,
-                                                              final_,
-                                                              pa,
-                                                              base_class_decl);
-                      return cdr; :}
-  |REDECLARE
-   each? 
-   final_? 
-   type_prefix_flow?
-   type_prefix_variability? 
-   type_prefix_input_output? 
-   class_access 
-   id_decl.comp_name 
-   array_subscripts? 
-   modification? 
-   comment
-   {: ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
-   				pa.setLocationNoTree(comp_name, array_subscripts);
-           		PN_ComponentDecl cd = new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment);
-       			cd.setLocationNoTree(comp_name, comment);
-   				PN_ComponentRedeclare cdr = new PN_ComponentRedeclare(each,
-                                        final_,
-                                        pa,
-                                        new PN_ComponentClause(new Opt(new Redeclare()),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               type_prefix_flow,
-                                                               type_prefix_variability,
-                                                               type_prefix_input_output,
-                                                               class_access,
-                                                               new Opt(),
-                                                               new List().add(cd),
-                                                               new Opt(),
-                                                               new Comment(new Opt(),new Opt()))); 
-                 return cdr; :}
-                                                 
-  |REDECLARE
-   each? 
-   final_? 
-   replaceable 
-   base_class_decl 
-   constraining_clause? {:  base_class_decl.setConstrainingClauseOpt(constraining_clause);
-                            base_class_decl.setReplaceable(replaceable);
-                            base_class_decl.setRedeclare(new Redeclare());
-                            ClassAccess ca = new ClassAccess(base_class_decl.getName().getID());
-                            ca.setLocationNoTree(base_class_decl.getName());
-                             return new  ClassRedeclare(each,
-                                                         final_,
-                                                         ca,
-                                                         base_class_decl); :} 
-  |REDECLARE
-   each? 
-   final_? 
-   replaceable 
-   type_prefix_flow?
-   type_prefix_variability? 
-   type_prefix_input_output? 
-   class_access 
-   id_decl.comp_name 
-   array_subscripts? 
-   modification? 
-   comment
-   constraining_clause? 
-   {:  ParseAccess pa = new ParseAccess(comp_name.getID(),array_subscripts);
-       pa.setLocationNoTree(comp_name);
-       PN_ComponentDecl cd = new PN_ComponentDecl(comp_name,array_subscripts,modification,new Opt(),comment);
-       cd.setLocationNoTree(comp_name, comment);
-       PN_ComponentRedeclare cr = new PN_ComponentRedeclare(each,
-                                        final_,
-                                        pa,
-                                        new PN_ComponentClause(new Opt(new Redeclare()),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               new Opt(),
-                                                               new Opt(new Replaceable()),
-                                                               type_prefix_flow,
-                                                               type_prefix_variability,
-                                                               type_prefix_input_output,
-                                                               class_access,
-                                                               new Opt(),
-                                                               new List().add(cd),
-                                                               constraining_clause,
-                                                               new Comment(new Opt(),new Opt()))); 
-        return cr;                                                       
-                                                               :}
-   | error				{: return new BadArgument(); :}                                              
-   ;
+Argument argument
+    = has_each 
+      has_final 
+      parse_access 
+      modification? 
+      comment
+    {: 
+        return new ComponentModification(
+            has_each.value, 
+            has_final.value, 
+            parse_access, 
+            modification, 
+            comment);
+    :}
+    | redeclare_replaceable_header 
+      base_class_decl 
+      constraining_clause?
+    {:
+        ClassAccess name = new ClassAccess(base_class_decl.getName().getID());
+        name.setLocationNoTree(base_class_decl.getName());
+        base_class_decl.setConstrainingClauseOpt(constraining_clause);
+        base_class_decl.setReplaceable(true);
+        base_class_decl.setRedeclare(redeclare_replaceable_header.has_redeclare);
+        return new ClassRedeclare(
+            redeclare_replaceable_header.has_each, 
+            redeclare_replaceable_header.has_final, 
+            name, 
+            base_class_decl);
+    :} 
+    | REDECLARE 
+      has_each 
+      has_final  
+      base_class_decl 
+    {: 
+        ClassAccess name = new ClassAccess(base_class_decl.getName().getID());
+        name.setLocationNoTree(base_class_decl.getName());
+        base_class_decl.setRedeclare(true);
+        return new ClassRedeclare(
+            has_each.value,
+            has_final.value,
+            name,
+            base_class_decl);
+    :}
+    | redeclare_replaceable_header 
+      type_prefixes 
+      class_access 
+      id_decl.comp_name 
+      array_subscripts? 
+      modification? 
+      comment
+      constraining_clause? 
+    {:
+        ParseAccess pa = new ParseAccess(comp_name.getID(), array_subscripts);
+        pa.setLocationNoTree(comp_name);
+        PN_ComponentDecl cd = new PN_ComponentDecl(
+            comp_name, 
+            array_subscripts, 
+            modification, 
+            new Opt(), 
+            comment);
+        cd.setLocationNoTree(comp_name, comment);
+        PN_ComponentClause cc = new PN_ComponentClause(
+            true,   // TODO: Shouldn't this be redeclare_replaceable_header.has_redeclare?
+            false, 
+            false, 
+            false, 
+            true, 
+            type_prefixes.flow, 
+            type_prefixes.variability, 
+            type_prefixes.input_output, 
+            class_access, 
+            new Opt(), 
+            new List().add(cd), 
+            constraining_clause, 
+            new Comment(new Opt(), new Opt()));
+        return new PN_ComponentRedeclare(
+            redeclare_replaceable_header.has_each, 
+            redeclare_replaceable_header.has_final, 
+            pa,
+            cc); 
+    :}
+    | REDECLARE
+      has_each 
+      has_final 
+      type_prefixes 
+      class_access 
+      id_decl.comp_name 
+      array_subscripts? 
+      modification? 
+      comment
+    {: 
+        ParseAccess pa = new ParseAccess(comp_name.getID(), array_subscripts);
+        pa.setLocationNoTree(comp_name, array_subscripts);
+        PN_ComponentDecl cd = new PN_ComponentDecl(
+            comp_name, 
+            array_subscripts, 
+            modification, 
+            new Opt(), 
+            comment);
+        cd.setLocationNoTree(comp_name, comment);
+        PN_ComponentClause cc = new PN_ComponentClause(
+            true,
+            false,
+            false,
+            false,
+            false,
+            type_prefixes.flow,
+            type_prefixes.variability,
+            type_prefixes.input_output,
+            class_access,
+            new Opt(),
+            new List().add(cd),
+            new Opt(),
+            new Comment(new Opt(), new Opt()));
+        return new PN_ComponentRedeclare(
+            has_each.value,
+            has_final.value,
+            pa,
+            cc); 
+    :}
+    | error 
+    {: 
+        return new BadArgument();
+    :}
+    ;
 
 Annotation annotation = 
   annotation_tok class_modification {: annotationTok = null; return new ParseAnnotation(class_modification); :}
@@ -891,29 +963,34 @@ List for_indices =
                                      return for_indices; :}
   ;
   
-ForIndex for_index = 
-  id_decl for_in_exp? {: ForIndex f = new ForIndex(new ForIndexDecl(new Opt(),
-                                                              new Opt(),
-                                                              new Opt(),
-                                                              new Opt(),
-                                                              new Opt(),
-                                                              new Opt(),
-                                                              new Opt(new IndexParameter()),
-                                                              new Opt(),
-                                                              new ParseAccess("Integer",new Opt()),
-                                                              new Opt(),
-                                                              new PublicVisibilityType(),
-                                                              id_decl,
-                                                              new Opt(),
-                                                              new Opt(),
-                                                              new Opt(),
-                                                              new Comment(new Opt(),new Opt()),
-                                                              new Opt(),
-                                                              new Comment(new Opt(),new Opt())),
-                                                   for_in_exp); 
-                          f.setLocationNoTree(id_decl, for_in_exp); 
-                          return f; :}
-  ;
+ForIndex for_index 
+    = id_decl for_in_exp? 
+    {: 
+        ForIndex f = new ForIndex(
+            new ForIndexDecl(
+                false,
+                false,
+                false,
+                false,
+                false,
+                new Opt(),
+                new Opt(new IndexParameter()),
+                new Opt(),
+                new ParseAccess("Integer",new Opt()),
+                new Opt(),
+                new PublicVisibilityType(),
+                id_decl,
+                new Opt(),
+                new Opt(),
+                new Opt(),
+                new Comment(new Opt(),new Opt()),
+                new Opt(),
+                new Comment(new Opt(),new Opt())),
+            for_in_exp); 
+        f.setLocationNoTree(id_decl, for_in_exp); 
+        return f; 
+    :}
+    ;
 
 Exp for_in_exp =
   IN exp.e {: return e; :}

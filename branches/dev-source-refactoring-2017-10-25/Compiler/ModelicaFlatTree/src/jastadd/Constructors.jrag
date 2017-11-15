@@ -556,11 +556,11 @@ aspect Constructors {
     }
 
     public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
-        this(new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
+        this(false,
+             false,
+             false,
+             false,
+             false,
              new Opt(),
              new Opt(new Constant()),
              new Opt(),
@@ -576,47 +576,6 @@ aspect Constructors {
              new Comment(new Opt(),new Opt()));
         this.setLocation(name);
         
-    }
-
-    /**
-     * Don't use this one, or improve it before using it! The parser error
-     * needs to be handled better!
-     * TODO: Remove uses of this constructor or refactor!
-     */
-    public ComponentDecl.ComponentDecl(boolean isParameter,
-                                       String type,
-                                       String name,
-                                       String bexp,
-                                       ParserHandler parserHandler) {
-        this(new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             isParameter? new Opt(new Parameter()): new Opt(),
-             new Opt(),
-             new ClassAccess(type),
-             new Opt(),
-             new PublicVisibilityType(),
-             new IdDecl(name),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Comment(new Opt(),new Opt()),
-             new Opt(),
-             new Comment(new Opt(),new Opt()));
-        
-        Exp bexp_ast=null;
-        
-        if (!bexp.equals("")) {
-            try {
-                bexp_ast = parserHandler.parseExpString(bexp);
-            } catch (Exception e) { 
-                throw new InternalCompilerError("Error when parsing string" + bexp, e);
-            }
-            this.setModification(new ValueModification(bexp_ast));
-        }
     }
 
 	/**

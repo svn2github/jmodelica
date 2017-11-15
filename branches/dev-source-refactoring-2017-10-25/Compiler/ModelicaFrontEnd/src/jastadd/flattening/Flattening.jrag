@@ -2069,9 +2069,9 @@ aspect Flattening {
                     InstValueModification ivm = im.getInstValueMod();
                     a.setValue(aer.retrieve(ivm, ivm.hasEach()).flatten(prefix));
                 }
-                if (getComponentModification().hasEach())
+                if (getComponentModification().getEach())
                     a.setFEach(new FEach());
-                if (getComponentModification().hasFinal())
+                if (getComponentModification().getFinal())
                     a.setFFinal(new FFinal());
                 List<FAttribute> l = new List<FAttribute>();
                 l.addAll(a.getFAttributes());

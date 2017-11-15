@@ -313,57 +313,68 @@ aspect PrettyPrint {
 	
     public void ShortClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent);
-	    if (hasEncapsulated())
-	    	str.print("encapsulated ");
-	    if (hasPartial())
-	    	str.print("partial ");
-	    if (hasRedeclare())
-	    	str.print("redeclare ");
-	    if (hasFinal())
-	    	str.print("final ");
-	    if (hasInner())
-	    	str.print("inner ");
-	    if (hasOuter())
-	    	str.print("outer ");
-	    if (hasReplaceable())
-	    	str.print("replaceable ");
-	    
-	    
-	    str.print(getRestriction().toString());
- 		str.print(" " + getName().getID());
-	    str.print(" = ");
-	    str.print(getExtendsClauseShortClass().getSuper().name());
-	    if (getExtendsClauseShortClass().hasArraySubscripts())
-	    	p.print(getExtendsClauseShortClass().getArraySubscripts(),str,p.indent(indent));
-	    if (getExtendsClauseShortClass().hasClassModification())
-	    	p.print(getExtendsClauseShortClass().getClassModification(),str,p.indent(indent));
-	    if (hasConstrainingClause())
-	    	p.print(getConstrainingClause(),str,p.indent(indent));
-	    
-	}
+        indent = p.indent(indent);
+        if (getEncapsulated()) {
+            str.print("encapsulated ");
+        }
+        if (getPartial()) {
+            str.print("partial ");
+        }
+        if (getRedeclare()) {
+            str.print("redeclare ");
+        }
+        if (getFinal()) {
+            str.print("final ");
+        }
+        if (getInner()) {
+            str.print("inner ");
+        }
+        if (getOuter()) {
+            str.print("outer ");
+        }
+        if (getReplaceable()) {
+            str.print("replaceable ");
+        }
+        
+        str.print(getRestriction() + " " + getName().getID() + " = ");
+        str.print(getExtendsClauseShortClass().getSuper().name());
+        if (getExtendsClauseShortClass().hasArraySubscripts()) {
+            p.print(getExtendsClauseShortClass().getArraySubscripts(), str, indent);
+        }
+        if (getExtendsClauseShortClass().hasClassModification()) {
+            p.print(getExtendsClauseShortClass().getClassModification(), str, indent);
+        }
+        if (hasConstrainingClause()) {
+            p.print(getConstrainingClause(), str, indent);
+        }
+    }
 
     public void FullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent);
-        if (hasEncapsulated())
+        if (getEncapsulated()) {
             str.print("encapsulated ");
-        if (hasPartial())
+        }
+        if (getPartial()) {
             str.print("partial ");
-        if (hasRedeclare())
+        }
+        if (getRedeclare()) {
             str.print("redeclare ");
-        if (hasFinal())
+        }
+        if (getFinal()) {
             str.print("final ");
-        if (hasInner())
+        }
+        if (getInner()) {
             str.print("inner ");
-        if (hasOuter())
+        }
+        if (getOuter()) {
             str.print("outer ");
-        if (hasReplaceable())
+        }
+        if (getReplaceable()) {
             str.print("replaceable ");
+        }
         
-        
-        str.print(getRestriction().toString());
-        str.println(" " + getName().getID());
+        str.println(getRestriction() + " " + getName().getID());
 
-        
         // Print all local classes
         int numPubClass = 0;
         for (ClassDecl cl : getClassDecls()) {
@@ -571,40 +582,54 @@ aspect PrettyPrint {
 				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
-	public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.print(indent);//+getVisibilityType().toString()+" ";
-		
-		if (hasRedeclare())
-			str.print(getRedeclare().toString() + " ");
-		if (hasFinal())
-			str.print(getFinal().toString() + " ");
-		if (hasInner())
-			str.print(getInner().toString() + " ");
-		if (hasOuter())
-			str.print(getOuter().toString() + " ");
-		if (hasReplaceable())
-			str.print(getReplaceable().toString() + " ");	
-		if (hasTypePrefixFlow())
-			str.print(getTypePrefixFlow().toString() + " ");
-		if (hasTypePrefixVariability())
-			str.print(getTypePrefixVariability().toString() + " ");
-		if (hasTypePrefixInputOutput())
-			str.print(getTypePrefixInputOutput().toString() + " ");
-		
-		p.print(getClassName(),str,indent);
-		if (hasTypeArraySubscripts())
-			p.print(getTypeArraySubscripts(),str,indent);
-		str.print(" " + getName().getID()); 
-	    if (hasVarArraySubscripts())
-			p.print(getVarArraySubscripts(),str,indent);
-		p.print(getModificationOpt(),str,indent);
-		 
-		if (hasConditionalAttribute()) 
-		    p.print(getConditionalAttribute(), str, indent);
-				 
-		if (hasConstrainingClause()) 
-		    p.print(getConstrainingClause(), str, indent);
-	}
+    public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent);//+getVisibilityType().toString()+" ";
+        
+        if (getRedeclare()) {
+            str.print("redeclare ");
+        }
+        if (getFinal()) {
+            str.print("final ");
+        }
+        if (getInner()) {
+            str.print("inner ");
+        }
+        if (getOuter()) {
+            str.print("outer ");
+        }
+        if (getReplaceable()) {
+            str.print("replaceable ");
+        }
+        if (hasTypePrefixFlow()) {
+            str.print(getTypePrefixFlow());
+            str.print(" ");
+        }
+        if (hasTypePrefixVariability()) {
+            str.print(getTypePrefixVariability());
+            str.print(" ");
+        }
+        if (hasTypePrefixInputOutput()) {
+            str.print(getTypePrefixInputOutput());
+            str.print(" ");
+        }
+        
+        p.print(getClassName(), str, indent);
+        if (hasTypeArraySubscripts()) {
+            p.print(getTypeArraySubscripts(), str, indent);
+        }
+        str.print(" " + getName().getID()); 
+        if (hasVarArraySubscripts()) {
+            p.print(getVarArraySubscripts(), str, indent);
+        }
+        p.print(getModificationOpt(), str, indent);
+         
+        if (hasConditionalAttribute()) {
+            p.print(getConditionalAttribute(), str, indent);
+        }
+        if (hasConstrainingClause()) {
+            p.print(getConstrainingClause(), str, indent);
+        }
+    }
 
     public void ConditionalAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(" if ");
@@ -678,37 +703,37 @@ aspect PrettyPrint {
 		}
 		str.print(")");
 	}
-	
-	public void ElementModification.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (hasEach())
-			str.print(getEach() + " ");
-		if (hasFinal())
-		 	str.print(getFinal() + " ");
-		p.print(getName(),str, indent);
-		if (hasModification())
-			p.print(getModification(),str,indent);
-	}
 
+    public void ElementModification.prettyPrint(Printer p, CodeStream str, String indent) {
+        if (getEach()) {
+            str.print("each ");
+        }
+        if (getFinal()) {
+            str.print("final ");
+        }
+        p.print(getName(), str, indent);
+        if (hasModification()) {
+            p.print(getModification(), str, indent);
+        }
+    }
 
-	public void ComponentRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (hasEach())
-			str.print(getEach().toString() + " ");
-		if (hasFinal())
-		 	str.print(getFinal().toString() + " ");
-		p.print(getComponentDecl(),str,indent);
-		
+    public void ComponentRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
+        if (getEach()) {
+            str.print("each ");
+        }
+        if (getFinal()) {
+            str.print("final ");
+        }
+        p.print(getComponentDecl(), str, indent);
+    }
 
-	}
-
-	public void ClassRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (hasEach())
-			str.print(getEach().toString() + " ");
-		if (hasFinal())
-		 	str.print(getFinal().toString() + " ");
-		p.print(getBaseClassDecl(),str,indent);
-		
-
-	}	
+    public void ClassRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
+        if (getEach())
+            str.print("each ");
+        if (getFinal())
+            str.print("final ");
+        p.print(getBaseClassDecl(), str, indent);
+    }
 
 	public void Opt.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumChild()>0)
@@ -951,12 +976,6 @@ aspect PrettyPrint {
 	}
 
 
-	syn String Redeclare.toString() = "redeclare";
-    syn String Each.toString() = "each";
-    syn String Final.toString() = "final";
-	syn String Inner.toString() = "inner";
-	syn String Outer.toString() = "outer";
-	syn String Replaceable.toString() = "replaceable";
 	syn String TypePrefixFlow.toString();
 	eq Flow.toString()   = "flow";
 	eq Stream.toString() = "stream";

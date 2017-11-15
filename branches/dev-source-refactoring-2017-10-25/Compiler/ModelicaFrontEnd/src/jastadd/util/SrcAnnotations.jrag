@@ -235,7 +235,7 @@ aspect SrcAnnotations {
     }
     @Override
     public SrcAnnotationProvider ClassModification.addAnnotationSubNode(String name) {
-        ComponentModification cm = new ComponentModification(new Opt<Each>(), new Opt<Final>(), new ParseAccess(name),
+        ComponentModification cm = new ComponentModification(false, false, new ParseAccess(name),
                 new Opt<Modification>(), new Comment());
         addArgument(cm);
         return cm;
@@ -253,10 +253,10 @@ aspect SrcAnnotations {
     }
 
     syn boolean Modification.isEach() = false;
-    eq Argument.isEach()              = hasEach();
+    eq Argument.isEach()              = getEach();
 
     syn boolean Modification.isFinal() = false;
-    eq Argument.isFinal()              = hasFinal();
+    eq Argument.isFinal()              = getFinal();
 
     /*******************
      *   Class Decls    

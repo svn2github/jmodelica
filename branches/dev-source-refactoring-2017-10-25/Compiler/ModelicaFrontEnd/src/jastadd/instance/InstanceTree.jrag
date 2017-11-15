@@ -251,7 +251,7 @@ aspect InstModifications{
 		return new InstClassModification(this,l);
 	}
 	public InstComponentModification ComponentModification.newInstModification() {
-		InstComponentModification icm = new InstComponentModification(this,hasEach(),hasFinal(),getName().newInstAccess(),new Opt());
+		InstComponentModification icm = new InstComponentModification(this, getEach(), getFinal(), getName().newInstAccess(), new Opt());
 		if (hasModification())
 			icm.setInstModification(getModification().newInstModification());
 		icm.setLocation(this);
@@ -259,7 +259,7 @@ aspect InstModifications{
 	}
 	public InstComponentRedeclare ComponentRedeclare.newInstModification() {
 	    // TODO: Can this component be redeclared?
-		InstComponentRedeclare icr = new InstComponentRedeclare(this,hasEach(),hasFinal(),getName().newInstAccess());
+		InstComponentRedeclare icr = new InstComponentRedeclare(this, getEach(), getFinal(), getName().newInstAccess());
 		icr.setLocation(this);
 		return icr;
 	}
@@ -269,7 +269,7 @@ aspect InstModifications{
 	}	
 	
 	public InstClassRedeclare ClassRedeclare.newInstModification() {
-		InstClassRedeclare icr = new InstClassRedeclare(this,hasEach(),hasFinal(),getName().newInstAccess());
+		InstClassRedeclare icr = new InstClassRedeclare(this, getEach(), getFinal(), getName().newInstAccess());
 		icr.setLocation(this);
 		return icr;
 	}
@@ -908,7 +908,7 @@ aspect InstanceTreeConstruction {
         List l = new List();
         
         for (ClassDecl cd : classes()) {
-            if (!cd.hasRedeclare()) {
+            if (!cd.isRedeclare()) {
                 InstClassDecl icd = createInstClassDecl(cd);
                 if (icd != null)
                     l.add(icd);
@@ -918,21 +918,27 @@ aspect InstanceTreeConstruction {
         return l;
     }
 
-	syn lazy List InstNode.getRedeclaredInstClassDeclList() {
-		List l = new List();
-		
-		for (ClassDecl cd : classes()) {
-			if (cd.hasRedeclare()) {
-			    InstNode icd = cd.newInstClassDecl();
-			    if (icd != null)
-			    	l.add(icd);
-			}
-		}				
-		
-		return l;
-	}
-    
-    syn boolean ClassDecl.hasRedeclare() = false;
+    syn lazy List InstNode.getRedeclaredInstClassDeclList() {
+        List l = new List();
+        
+        for (ClassDecl cd : classes()) {
+            if (cd.isRedeclare()) {
+                InstNode icd = cd.newInstClassDecl();
+                if (icd != null)
+                    l.add(icd);
+            }
+        }
+        
+        return l;
+    }
+
+    syn boolean ClassDecl.getRedeclare() = false;
+
+    syn boolean ClassDecl.isRedeclare() = getRedeclare();
+    eq ExtendClassDecl.isRedeclare()    = true;
+    eq PN_ExtendClassDecl.isRedeclare() = true;
+
+    syn boolean ComponentDecl.isRedeclare() = getRedeclare();
 
     syn lazy List InstNode.getInstExtendsList() {
         List l = new List();
@@ -2039,8 +2045,8 @@ aspect InstanceAST_API {
      * Is this declaration replaceable?
      */
     syn boolean InstNode.isReplaceable() = false;
-    eq InstClassDecl.isReplaceable()     = getClassDecl().hasReplaceable();
-    eq InstComponentDecl.isReplaceable() = getComponentDecl().hasReplaceable();
+    eq InstClassDecl.isReplaceable()     = getClassDecl().getReplaceable();
+    eq InstComponentDecl.isReplaceable() = getComponentDecl().getReplaceable();
 
     /**
      * Is this declaration affected by a constraining type?
@@ -2048,7 +2054,7 @@ aspect InstanceAST_API {
     syn boolean InstNode.isConstrained() = isReplaceable() || isRedeclared();
 
     // Overridden in BaseClassDecl by generated API for optional child
-    syn boolean ClassDecl.hasReplaceable() = false;
+    syn boolean ClassDecl.getReplaceable() = false;
 
     syn boolean InstNode.extendsPrimitive()        = false;
     eq InstShortClassDecl.extendsPrimitive()       = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();

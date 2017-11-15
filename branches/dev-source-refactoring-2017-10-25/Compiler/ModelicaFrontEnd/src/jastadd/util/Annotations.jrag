@@ -1069,12 +1069,12 @@ aspect AnnotationAPI {
 		
 		@Override
 		public boolean isEach() {
-		    return mod.hasEach();
+		    return mod.getEach();
 		}
 		
 		@Override
 		public boolean isFinal() {
-		    return mod.hasFinal();
+		    return mod.getFinal();
 		}
 		
 	}

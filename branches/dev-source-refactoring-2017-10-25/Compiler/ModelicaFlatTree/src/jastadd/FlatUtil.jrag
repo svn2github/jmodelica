@@ -1223,7 +1223,7 @@ aspect FlatFunctionUtils {
       */
      syn boolean InstComponentDecl.isModifiable() = 
              !(definedVariability().constantVariability() && hasBindingExp()) &&
-             !(definedVariability().parameterVariability() && getComponentDecl().hasFinal());
+             !(definedVariability().parameterVariability() && getComponentDecl().getFinal());
      
      /**
       * Returns a list of all FFunctionVariables declared as "input".

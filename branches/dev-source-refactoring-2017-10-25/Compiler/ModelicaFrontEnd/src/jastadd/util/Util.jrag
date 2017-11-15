@@ -1545,35 +1545,35 @@ aspect ComponentDeclMethods {
     /**
      * Check if a ComponentDecl is declared inner.
      */
-    syn boolean ComponentDecl.isInner() = hasInner();
+    syn boolean ComponentDecl.isInner() = getInner();
 
     /**
      * Check if a ComponentDecl is declared outer.
      */
-    syn boolean ComponentDecl.isOuter() = hasOuter();
+    syn boolean ComponentDecl.isOuter() = getOuter();
 
     /**
      * Check if a ComponentDecl is declared inner or outer.
      */
-    syn boolean ComponentDecl.hasInnerOrOuter() = hasInner() || hasOuter();
+    syn boolean ComponentDecl.hasInnerOrOuter() = getInner() || getOuter();
 
     /**
      * Check if a ClassDecl is declared inner.
      */
     syn boolean ClassDecl.isInner() = false;
-    eq BaseClassDecl.isInner() = hasInner();
+    eq BaseClassDecl.isInner() = getInner();
 
     /**
      * Check if a ClassDecl is declared outer.
      */
     syn boolean ClassDecl.isOuter() = false;
-    eq BaseClassDecl.isOuter() = hasOuter();
+    eq BaseClassDecl.isOuter() = getOuter();
 
     /**
      * Check if a ClassDecl is declared inner or outer.
      */
     syn boolean ClassDecl.hasInnerOrOuter() = false;
-    eq BaseClassDecl.hasInnerOrOuter()      = hasInner() || hasOuter();
+    eq BaseClassDecl.hasInnerOrOuter()      = getInner() || getOuter();
     
 
     /**
