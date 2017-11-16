@@ -121,9 +121,8 @@ void jmi_dynamic_function_init(jmi_local_dynamic_function_memory_t* local_block)
         local_block->mem = jmi_dynamic_function_memory();
     }
     
-    /* Quick mark and return */
+    /* Quick check for the most common case ... */
     if (local_block->mem->trailing_memory == NULL) {
-        
     } else if (local_block->mem->cur_pos == local_block->mem->start_pos && local_block->mem->trailing_memory != NULL) {
         /* If trailing memory has been used, see if we can allocate a larger block */
         jmi_dynamic_function_resize(local_block->mem);
