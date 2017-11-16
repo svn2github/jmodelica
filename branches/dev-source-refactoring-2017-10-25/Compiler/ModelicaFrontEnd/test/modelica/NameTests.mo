@@ -2962,7 +2962,7 @@ model ConditionalComponentTest1_Err
             errorMessage="
 1 errors found:
 
-Error at line 1, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+Error at line 2, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
@@ -2978,7 +2978,7 @@ model ConditionalComponentTest2_Err
             errorMessage="
 1 errors found:
 
-Error at line 2, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest2_Err;
@@ -2994,10 +2994,10 @@ model ConditionalComponentTest3_Err
             errorMessage="
 2 errors found:
 
-Error at line 2, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 
-Error at line 2, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;
@@ -3617,7 +3617,7 @@ model InheritInputTest3
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritInputTest3;
@@ -3637,7 +3637,7 @@ model InheritInputTest4
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritInputTest4;
@@ -3699,7 +3699,7 @@ model InheritOutputTest3
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest3;
@@ -3719,7 +3719,7 @@ model InheritOutputTest4
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest4;
@@ -3773,7 +3773,7 @@ model InheritFlowTest2
             errorMessage="
 1 errors found:
 
-Error at line 4, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Can't declare x as flow, since it contains a component declared as flow
 ")})));
 end InheritFlowTest2;
@@ -3839,7 +3839,7 @@ model DuplicateVariables3
             errorMessage="
 1 errors found:
 
-Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables3;
@@ -3885,7 +3885,7 @@ model DuplicateVariables6
             errorMessage="
 1 errors found:
 
-Error at line 3, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
+Error at line 4, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Duplicate component in same class: Real x
 ")})));
@@ -3926,13 +3926,13 @@ model BadEscape2
             errorMessage="
 6 errors found:
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 
 Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':

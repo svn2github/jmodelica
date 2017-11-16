@@ -1106,7 +1106,7 @@ equation
  y = 100 * x;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end IndexReduction.NonDifferentiatedVariableWithPreferWithoutIndexReduction;
 ")})));
@@ -1458,13 +1458,13 @@ equation
             errorMessage="
 3 errors found:
 
-Warning at line 2, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
+Warning at line 3, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
   a_v has stateSelect=always, but could not be selected as state
 
-Warning at line 5, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
+Warning at line 6, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
   Iteration variable \"b_v\" is missing start value!
 
-Warning at line 6, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
+Warning at line 7, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/IndexReduction.mo':
   Iteration variable \"v1\" is missing start value!
 ")})));
 end IndexReduction57;

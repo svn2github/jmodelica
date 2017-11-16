@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5490
+Fixed bug that caused some errors to be reported on the wrong line.
+
 ; Change ; Minor ; Runtime ; #5505
 Added the compiler flags -msse2 -mfpmath=sse for runtime builds using GCC,
 the same are used for our FMUs.

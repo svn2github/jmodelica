@@ -24,6 +24,7 @@
 %header {:
  package $PARSER_PACKAGE$;
  import $AST_PACKAGE$.*;
+ import org.jmodelica.util.AdjustableSymbol;
  import org.jmodelica.util.formatting.FormattingRecorder;
  import org.jmodelica.util.formatting.FormattingType;
  import org.jmodelica.api.problemHandling.Problem;
@@ -186,7 +187,33 @@
     
     Symbol annotationTok = null;
     
-    private static class Bool extends Symbol {
+    private void adjustStart(Symbol... syms) {
+        AdjustableSymbol[] aSyms = new AdjustableSymbol[syms.length];
+        for (int i = 0; i < syms.length; i++) {
+            /* All symbols involved implements AdjustableSymbol, but since we can't change 
+             * Beaver, the Java compiler can't verify that. If any Symbol used doesn't then
+             * we want to know that - thus the raw cast. */
+            aSyms[i] = (AdjustableSymbol) syms[i];
+        }
+        if (aSyms.length > 0) {
+            aSyms[0].adjustStartOfEmptySymbols(aSyms, 1);
+        }
+    }
+    
+    private static class TempSymbol extends Symbol implements AdjustableSymbol {
+        /* NB: This method is duplicated in:
+         * ModelicaFrontEnd/src/jastadd/source/Parser.jrag, ASTNode
+         * ModelicaFrontEnd/src/parser/Modelica.flex, Symbol
+         * OptimicaFrontEnd/src/parser/Optimica.flex, Symbol */
+        public int adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i) {
+            if (start == end && i < syms.length) {
+                start = end = syms[i].adjustStartOfEmptySymbols(syms, i + 1);
+            }
+            return start;
+        }
+    }
+    
+    private static class Bool extends TempSymbol {
         public final boolean value;
         
         public Bool(boolean val) {
@@ -202,7 +229,7 @@
         return new Bool(false);
     }
     
-    private static class RedeclareReplaceableHeader extends Symbol {
+    private static class RedeclareReplaceableHeader extends TempSymbol {
         public final boolean has_redeclare;
         public final boolean has_each;
         public final boolean has_final;
@@ -216,7 +243,7 @@
         }
     }
     
-    private static class TypePrefixes extends Symbol {
+    private static class TypePrefixes extends TempSymbol {
         public final Opt<TypePrefixFlow> flow;
         public final Opt<TypePrefixVariability> variability;
         public final Opt<TypePrefixInputOutput> input_output;
@@ -305,6 +332,7 @@ BaseClassDecl base_class_decl
       annotation_sc?
       end_decl
     {:
+        adjustStart(has_encapsulated, has_partial, restriction);
         return new PN_FullClassDecl(
             start,
             new UnknownVisibilityType(),
@@ -328,6 +356,7 @@ BaseClassDecl base_class_decl
       class_modification?
       comment 
     {:
+        adjustStart(has_encapsulated, has_partial, restriction);
         return new PN_ShortClassDecl(
             class_name, 
             new UnknownVisibilityType(),
@@ -355,6 +384,7 @@ BaseClassDecl base_class_decl
       annotation_sc?
       end_decl 
     {:
+        adjustStart(has_encapsulated, has_partial, restriction);
         return new PN_ExtendClassDecl(
             start,
             new UnknownVisibilityType(),
@@ -376,6 +406,7 @@ BaseClassDecl base_class_decl
       ENUMERATION LPAREN enum_specification RPAREN
       comment 
     {:
+        adjustStart(has_encapsulated, has_partial, restriction);
         return new PN_EnumDecl(
             enum_name,
             new UnknownVisibilityType(),
@@ -429,6 +460,7 @@ TypePrefixes type_prefixes
       type_prefix_variability?
       type_prefix_input_output?
     {:
+        adjustStart(type_prefix_flow, type_prefix_variability, type_prefix_input_output);
         return new TypePrefixes(type_prefix_flow, type_prefix_variability, type_prefix_input_output);
     :}
     ;
@@ -496,6 +528,7 @@ RedeclareReplaceableHeader redeclare_replaceable_header
       has_final 
       REPLACEABLE 
     {:
+        adjustStart(has_each, has_final, REPLACEABLE);
         return new RedeclareReplaceableHeader(false, has_each.value, has_final.value);
     :}
     ;
@@ -569,6 +602,7 @@ Element element
       base_class_decl 
       SEMICOLON 
     {: 
+        adjustStart(has_redeclare, has_final, has_inner, has_outer, base_class_decl);
         base_class_decl.setRedeclare(has_redeclare.value);
         base_class_decl.setFinal(has_final.value);
         base_class_decl.setInner(has_inner.value);
@@ -585,6 +619,7 @@ Element element
       comment 
       SEMICOLON 
     {: 
+        adjustStart(has_redeclare, has_final, has_inner, has_outer, REPLACEABLE);
         base_class_decl.setRedeclare(has_redeclare.value);
         base_class_decl.setFinal(has_final.value);
         base_class_decl.setInner(has_inner.value);
@@ -612,6 +647,7 @@ Element element
       component_list 
       SEMICOLON 
     {:
+        adjustStart(has_redeclare, has_final, has_inner, has_outer, type_prefixes, class_access);
         return new PN_ComponentClause(
             has_redeclare.value,
             has_final.value,
@@ -640,6 +676,7 @@ Element element
       comment 
       SEMICOLON 
     {: 
+        adjustStart(has_redeclare, has_final, has_inner, has_outer, REPLACEABLE);
         return new PN_ComponentClause(
             has_redeclare.value,
             has_final.value,
@@ -796,6 +833,7 @@ Argument argument
       modification? 
       comment
     {: 
+        adjustStart(has_each, has_final, parse_access);
         return new ComponentModification(
             has_each.value, 
             has_final.value, 
@@ -807,6 +845,7 @@ Argument argument
       base_class_decl 
       constraining_clause?
     {:
+        adjustStart(redeclare_replaceable_header, base_class_decl);
         ClassAccess name = new ClassAccess(base_class_decl.getName().getID());
         name.setLocationNoTree(base_class_decl.getName());
         base_class_decl.setConstrainingClauseOpt(constraining_clause);
@@ -841,6 +880,7 @@ Argument argument
       comment
       constraining_clause? 
     {:
+        adjustStart(redeclare_replaceable_header, type_prefixes, class_access);
         ParseAccess pa = new ParseAccess(comp_name.getID(), array_subscripts);
         pa.setLocationNoTree(comp_name);
         PN_ComponentDecl cd = new PN_ComponentDecl(

@@ -809,7 +809,7 @@ model RecordType7
             errorMessage="
 1 errors found:
 
-Error at line 4, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 6, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordType7;
@@ -1726,7 +1726,7 @@ model RecordBinding28
             errorMessage="
 1 errors found:
 
-Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
+Error at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
 In component d:
   Can not infer array size of the variable a
 ")})));
@@ -3324,7 +3324,7 @@ model RecordConstructor30
             errorMessage="
 1 warnings found:
 
-Warning at line 14, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
+Warning at line 14, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
 In component c:
   Assuming 'each' for the modification 'd = {R()}'
 ")})));
@@ -7064,7 +7064,7 @@ model RecordWithColonArray2
             errorMessage="
 1 errors found:
 
-Error at line 2, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 3, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordWithColonArray2;
@@ -7488,7 +7488,7 @@ model RecordParam8
             errorMessage="
 1 warnings found:
 
-Warning at line 3, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 4, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter a.y does not have a binding expression
 ")})));
 end RecordParam8;
@@ -7510,7 +7510,7 @@ model RecordParam9
             errorMessage="
 1 warnings found:
 
-Warning at line 7, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 8, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam9;
@@ -7538,7 +7538,7 @@ model RecordParam10
             errorMessage="
 1 warnings found:
 
-Warning at line 13, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam10;

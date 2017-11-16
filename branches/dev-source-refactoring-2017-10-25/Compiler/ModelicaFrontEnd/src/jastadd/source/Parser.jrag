@@ -1,0 +1,35 @@
+/*
+    Copyright (C) 2017 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import org.jmodelica.util.AdjustableSymbol;
+
+aspect Parser {
+
+    ASTNode implements AdjustableSymbol;
+
+    /* NB: This method is duplicated in:
+     * ModelicaFrontEnd/src/parser/Modelica.Parser, TempSymbol
+     * ModelicaFrontEnd/src/parser/Modelica.flex, Symbol
+     * OptimicaFrontEnd/src/parser/Optimica.flex, Symbol  */
+    public int ASTNode.adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i) {
+        if (start == end && i < syms.length) {
+            start = end = syms[i].adjustStartOfEmptySymbols(syms, i + 1);
+        }
+        return start;
+    }
+
+}

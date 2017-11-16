@@ -441,7 +441,7 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
             errorMessage="
 1 errors found:
 
-Error at line 17, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 18, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx95_Err;
@@ -924,7 +924,7 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 21, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 24, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
 
 Error at line 24, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
@@ -3720,15 +3720,15 @@ model RedeclareTest51
             errorMessage="
 3 warnings found:
 
-Warning at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION,
+Warning at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION,
 In component a:
   The parameter a.b does not have a binding expression
 
-Compliance warning at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS,
+Compliance warning at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS,
 In component a:
   String parameters are only partially supported
 
-Compliance warning at line 6, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
+Compliance warning at line 7, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
   String parameters are only partially supported
 ")})));
 end RedeclareTest51;
@@ -6416,7 +6416,7 @@ model ShortClassDeclEqu2 = ShortClassDeclEqu2Extra
             errorMessage="
 1 errors found:
 
-Error at line 0, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo':
+Error at line -2, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo':
   Cannot find class or component declaration for y
 ")})));
 

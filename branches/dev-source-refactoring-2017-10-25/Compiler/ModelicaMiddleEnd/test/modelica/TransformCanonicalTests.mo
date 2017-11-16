@@ -1497,13 +1497,13 @@ equation
             errorMessage="
 3 errors found:
 
-Error at line 2, column 41, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 3, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable x2 is part of alias set that results in min/max combination with no possible values, min = 2.6, max = 2.5
 
-Error at line 3, column 39, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 4, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable y1 is part of alias set that results in min/max combination with no possible values, min = 3, max = 2
 
-Error at line 6, column 40, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 7, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
 ")})));
 end AliasPropMinMax2;
@@ -1818,7 +1818,7 @@ equation
             errorMessage="
 1 warnings found:
 
-Warning at line 2, column 56, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Warning at line 3, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   a_s2 has stateSelect=always, but could not be selected as state
 ")})));
 end AliasStateSelect2;
@@ -1934,7 +1934,7 @@ model ParameterBindingExpTest3_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 1, column 35, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 3, column 3, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
@@ -6678,7 +6678,7 @@ model TestExternalObj4
             errorMessage="
 1 errors found:
 
-Error at line 9, column 21, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 11, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Cannot find function declaration for NoDestructor.destructor()
 ")})));
 end TestExternalObj4;
@@ -6742,7 +6742,7 @@ model TestExternalObj6
 Error at line 10, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
 
-Error at line 13, column 23, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 15, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   The class BadDestructor.destructor is not a function
 ")})));
 end TestExternalObj6;

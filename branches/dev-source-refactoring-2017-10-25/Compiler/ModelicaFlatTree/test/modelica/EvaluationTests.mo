@@ -1936,7 +1936,7 @@ model EvalNoBinding5
             errorMessage="
 3 errors found:
 
-Error at line 21, column 10, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+Error at line 23, column 5, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Missing binding expression for external object
 
 Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':

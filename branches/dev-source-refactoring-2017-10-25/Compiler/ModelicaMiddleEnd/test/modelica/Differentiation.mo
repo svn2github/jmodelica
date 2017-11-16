@@ -1540,7 +1540,7 @@ package DiscreteTime
             errorMessage="
 1 errors found:
 
-Error at line 1, column 40, in file 'Compiler/ModelicaMiddleEnd/test/modelica/Differentiation.mo', DIFFERENTIATED_DISCRETE_VARIABLE:
+Error at line 2, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/Differentiation.mo', DIFFERENTIATED_DISCRETE_VARIABLE:
   Unable to differentiate the variable x1 which is declared or infered to be discrete
 ")})));
     end DifferentiatedDiscreteVariable;
