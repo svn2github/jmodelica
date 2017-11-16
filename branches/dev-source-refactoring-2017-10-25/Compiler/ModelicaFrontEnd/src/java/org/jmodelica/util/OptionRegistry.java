@@ -274,6 +274,7 @@ abstract public class OptionRegistry {
     public interface NonlinearSolver {
         public static final String KINSOL  = "kinsol";
         public static final String MINPACK = "minpack";
+        public static final String REALTIME = "realtime";
     }
     public interface FMIVersion {
         public static final String FMI10  = "1.0";
@@ -428,18 +429,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true,
              "If enabled, then equations with linear sub expressions are substituted and eliminated."),
-        VPROP
-            ("variability_propagation", 
-             OptionType.compiler, 
-             Category.uncommon,
-             true,
-             "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
-             "constants and parameters where applicable."),
         COMMON_SUBEXP_ELIM
             ("common_subexp_elim", 
              OptionType.compiler, 
              Category.uncommon,
              true,
+             false,
              "If enabled, the compiler performs a global analysis on the equation system and extract identical " +
              "function calls into common equations."),
         EXT_CEVAL
@@ -713,14 +708,14 @@ abstract public class OptionRegistry {
              Category.user,
              NonlinearSolver.KINSOL,
              "Decides which nonlinear equation solver to use. Alternatives are 'kinsol or 'minpack'.",
-             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
+             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK, NonlinearSolver.REALTIME),
         INIT_NLE_SOLVER
             ("init_nonlinear_solver",
              OptionType.compiler,
              Category.user,
              NonlinearSolver.KINSOL,
              "Decides which nonlinear equation solver to use in the initial system. Alternatives are 'kinsol or 'minpack'.",
-             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
+             NonlinearSolver.KINSOL, NonlinearSolver.MINPACK, NonlinearSolver.REALTIME),
         GENERATE_EVENT_SWITCHES
             ("generate_event_switches",
              OptionType.compiler,

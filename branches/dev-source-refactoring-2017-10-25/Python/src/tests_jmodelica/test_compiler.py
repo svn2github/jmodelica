@@ -52,7 +52,7 @@ class Test_Compiler:
             'Pendulum_pack.mop')
         cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
     
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_FMUME10(self):
         """
         Test that it is possible to compile an FMU ME version 1.0 from a .mo 
@@ -64,7 +64,7 @@ class Test_Compiler:
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_FMUCS10(self):
         """
         Test that it is possible to compile an FMU CS version 1.0 from a .mo 
@@ -76,7 +76,7 @@ class Test_Compiler:
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
         
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_FMUME20(self):
         """
         Test that it is possible to compile an FMU ME version 2.0 from a .mo 
@@ -88,7 +88,7 @@ class Test_Compiler:
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
         
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_FMUCS20(self):
         """
         Test that it is possible to compile an FMU CS version 2.0 from a .mo 
@@ -100,7 +100,7 @@ class Test_Compiler:
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
         
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_FMUMECS20(self):
         """
         Test that it is possible to compile an FMU MECS version 2.0 from a .mo 
@@ -112,7 +112,7 @@ class Test_Compiler:
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_stepbystep(self):
         """ Test that it is possible to compile step-by-step with ModelicaCompiler. """
         target = Test_Compiler.mc.create_target_object("me", "1.0")
@@ -121,7 +121,7 @@ class Test_Compiler:
         fclass = Test_Compiler.mc.flatten_model(icd, target)
         Test_Compiler.mc.generate_code(fclass, target)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_optimica_stepbystep(self):
         """ Test that it is possible to compile step-by-step with OptimicaCompiler. """
         target = Test_Compiler.oc.create_target_object("me", "1.0")
@@ -131,19 +131,19 @@ class Test_Compiler:
         Test_Compiler.oc.generate_code(fclass, target)
 
     '''
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_class_not_found_error(self):
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
         errorcl = 'NonExisting.Class'
         nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, pym.compile_fmu, errorcl, self.fpath_mc, separate_process=True)
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_IO_error(self):
         """ Test that an IOError is raised if the model file is not found. """
         errorpath = os.path.join(get_files_path(), 'Modelica','NonExistingModel.mo')
         nose.tools.assert_raises(IOError, pym.compile_fmu, Test_Compiler.cpath_mc, errorpath, separate_process=True)
     '''
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_modelicapath(self):
         """ Test modelicapath setter and getter. """
         newpath = os.path.join(Test_Compiler.jm_home,'ThirdParty','MSL')
@@ -151,14 +151,14 @@ class Test_Compiler:
         nose.tools.assert_equal(Test_Compiler.mc.get_modelicapath(),newpath)
         nose.tools.assert_equal(Test_Compiler.oc.get_modelicapath(),newpath)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_parse_multiple(self):
         """ Test that it is possible to parse two model files. """
         lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
         opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
         Test_Compiler.oc.parse_model([lib, opt])
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_boolean_option(self):
         """ Test boolean option setter and getter. """
         option = 'halt_on_warning'
@@ -171,14 +171,14 @@ class Test_Compiler:
         # reset to original value
         Test_Compiler.mc.set_boolean_option(option, value)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_boolean_option_error(self):
         """ Test that boolean option getter raises the proper error. """
         option = 'nonexist_boolean'
         #try to get an unknown option
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_boolean_option, option)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_integer_option(self):
         """ Test integer option setter and getter. """
         option = 'log_level'
@@ -192,14 +192,14 @@ class Test_Compiler:
         # reset to original value
         Test_Compiler.mc.set_integer_option(option, default_value)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_integer_option_error(self):
         """ Test that integer option getter raises the proper error. """
         option = 'nonexist_integer'
         #try to get an unknown option
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_integer_option, option) 
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_real_option(self):
         """ Test real option setter and getter. """
         option = 'events_tol_factor'
@@ -213,14 +213,14 @@ class Test_Compiler:
         # reset to original value
         Test_Compiler.mc.set_real_option(option, default_value)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_real_option_error(self):
         """ Test that real option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_real_option, option)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_string_option(self):
         """ Test string option setter and getter. """
         option = 'inline_functions'
@@ -234,14 +234,14 @@ class Test_Compiler:
         # reset to original value
         Test_Compiler.mc.set_string_option(option, default_value)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_setget_string_option_error(self):
         """ Test that string option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_string_option, option)
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def TO_ADDtest_MODELICAPATH(self):
         """ Test that the MODELICAPATH is loaded correctly.
     
@@ -290,7 +290,7 @@ class Test_Compiler_functions:
             'Pendulum_pack.mop')
         cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
    
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_compile_fmu_illegal_target_error(self):
         """Test that an exception is raised when an incorrect target is given to compile_fmu"""
         cl = Test_Compiler_functions.cpath_mc 
@@ -302,7 +302,7 @@ class Test_Compiler_functions:
         #Incorrect version, correct target 'me'.
         nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="me", version="notValidVersion") 
                
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_fmu_mop(self):
         """
         Test that it is possible to compile an FMU from a .mop file with 
@@ -315,7 +315,7 @@ class Test_Compiler_functions:
                fmuname+" was not created."
         os.remove(fmuname)
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_fmu_mop_separate_process(self):
         """
         Test that it is possible to compile an FMU from a .mop file with 
@@ -327,14 +327,14 @@ class Test_Compiler_functions:
                fmuname+" was not created."
         os.remove(fmuname)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_compiler_error(self):
         """ Test that a CompilerError is raised if compilation errors are found in the model."""
         path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
         cl = 'CorruptCodeGenTests.CorruptTest1'
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_compiler_modification_error(self):
         """ Test that a CompilerError is raised if compilation errors are found in the modification on the classname."""
         path = os.path.join(get_files_path(), 'Modelica','Diode.mo')
@@ -342,7 +342,7 @@ class Test_Compiler_functions:
         nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(wrong_name=2)', path)
         nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(===)', path)
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_fmu_separate_process_options(self):
         """
         Test that it is possible to call separate process compilation with compiler options
@@ -359,7 +359,7 @@ class Test_Compiler_functions:
         shutil.rmtree(diag_name)
     
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_compile_fmu_separate_process_jvm_args(self):
         """
         Test that it is possible to call separate process compilation with multiple jvm args
@@ -370,7 +370,7 @@ class Test_Compiler_functions:
                fmuname+" was not created."
         os.remove(fmuname)
 
-    @testattr(stddist = True)
+    @testattr(stddist_base = True)
     def test_separate_process_control_characters(self):
         """
         Test that the separate process pipe can handle control characters
@@ -381,7 +381,7 @@ class Test_Compiler_functions:
                fmuname+" was not created."
         os.remove(fmuname)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_no_source_files_in_fmu(self):
         """
         Test that no c source files are added to the fmu when copy_source_files_to_fmu is false.
@@ -401,7 +401,7 @@ class Test_Compiler_functions:
             assert f != 'sources/', 'Source files should not be present when copy_source_files_to_fmu is set to false'
             assert '.c' not in f, f + ' should not be present when copy_source_files_to_fmu is set to false'
             
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_source_files_in_fmu(self):
         """
         Test that c source files are added to the fmu when copy_source_files_to_fmu is true
@@ -432,28 +432,28 @@ class Test_Compiler_functions:
                 "missing, but was not." % option_name
 
 # 64-bit FMUs no longer supported by SDK
-#    @testattr(windows = True)
+#    @testattr(windows_base = True)
 #    def test_compile_fmu_me_1_64bit(self):
 #        """Test that it is possible to compile an FMU-ME 1.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
 #        pym.compile_fmu(cl, path, platform='win64')
 #
-#    @testattr(windows = True)
+#    @testattr(windows_base = True)
 #    def test_compile_fmu_me_2_64bit(self):
 #        """Test that it is possible to compile an FMU-ME 2.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
 #        pym.compile_fmu(cl, path, version='2.0', platform='win64')
 #
-#    @testattr(windows = True)
+#    @testattr(windows_base = True)
 #    def test_compile_fmu_cs_1_64bit(self):
 #        """Test that it is possible to compile an FMU-CS 1.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 
 #        path = Test_Compiler_functions.fpath_mc
 #        pym.compile_fmu(cl, path, target='cs', platform='win64')
 #
-#    @testattr(windows = True)
+#    @testattr(windows_base = True)
 #    def test_compile_fmu_cs_2_64bit(self):
 #        """Test that it is possible to compile an FMU-CS 2.0 64bit FMU on Windows"""
 #        cl = Test_Compiler_functions.cpath_mc 

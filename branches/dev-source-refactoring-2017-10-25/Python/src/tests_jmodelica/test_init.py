@@ -62,14 +62,14 @@ class Test_init_std:
         """
         pass
     
-    #@testattr(stddist = True)
+    #@testattr(stddist_full = True)
     #def test_exception_raised(self):
         #""" Test compact functions without passing mofile raises exception."""
         #cpath = "Pendulum_pack.Pendulum"   
         #nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
         #nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_inlined_switches(self):
         """ Test a model that need in-lined switches to initialize. """
         path = os.path.join(get_files_path(), 'Modelica', 'event_init.mo')

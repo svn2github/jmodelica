@@ -1341,7 +1341,7 @@ model FunctionBinding3
             errorMessage="
 1 errors found:
 
-Error at line 1330, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction1(): too many positional arguments
 ")})));
 end FunctionBinding3;
@@ -1357,10 +1357,10 @@ model FunctionBinding4
             errorMessage="
 2 errors found:
 
-Error at line 1346, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i1
 
-Error at line 1346, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
 end FunctionBinding4;
@@ -1376,7 +1376,7 @@ model FunctionBinding5
             errorMessage="
 1 errors found:
 
-Error at line 1365, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
 end FunctionBinding5;
@@ -1501,7 +1501,7 @@ model FunctionBinding10
             errorMessage="
 1 errors found:
 
-Error at line 1490, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
 end FunctionBinding10;
@@ -1517,7 +1517,7 @@ model FunctionBinding11
             errorMessage="
 1 errors found:
 
-Error at line 1506, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): no input matching named argument i3 found
 ")})));
 end FunctionBinding11;
@@ -1533,7 +1533,7 @@ model FunctionBinding12
             errorMessage="
 1 errors found:
 
-Error at line 1522, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): no input matching named argument o1 found
 ")})));
 end FunctionBinding12;
@@ -1549,7 +1549,7 @@ model FunctionBinding13
             errorMessage="
 1 errors found:
 
-Error at line 1538, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
 end FunctionBinding13;
@@ -1565,7 +1565,7 @@ model FunctionBinding14
             errorMessage="
 1 errors found:
 
-Error at line 1554, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
 end FunctionBinding14;
@@ -1952,10 +1952,10 @@ model BadFunctionCall1
             errorMessage="
 2 errors found:
 
-Error at line 1829, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for NonExistingFunction()
 
-Error at line 1830, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for NonExistingFunction()
 ")})));
 end BadFunctionCall1;
@@ -1973,10 +1973,10 @@ model BadFunctionCall2
             errorMessage="
 2 errors found:
 
-Error at line 1850, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for notAFunction()
 
-Error at line 1851, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for notAFunction()
 ")})));
 end BadFunctionCall2;
@@ -1997,10 +1997,10 @@ model BadFunctionCall3
             errorMessage="
 2 errors found:
 
-Error at line 1874, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The class NotAFunctionClass is not a function
 
-Error at line 1875, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The class NotAFunctionClass is not a function
 ")})));
 end BadFunctionCall3;
@@ -2029,7 +2029,7 @@ model BadFunctionCall4
             errorMessage="
 1 warnings found:
 
-Warning at line 1908, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to function C.f() not recommended, it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end BadFunctionCall4;
@@ -2335,7 +2335,7 @@ model FunctionType2
             errorMessage="
 1 errors found:
 
-Error at line 2181, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end FunctionType2;
@@ -2405,7 +2405,7 @@ model FunctionType5
             errorMessage="
 1 errors found:
 
-Error at line 2251, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'true' is Boolean
     expected type is Real
@@ -2424,7 +2424,7 @@ model FunctionType6
             errorMessage="
 1 errors found:
 
-Error at line 2270, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 3, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'a' is Boolean
     expected type is Real
@@ -2474,7 +2474,7 @@ model FunctionType8
             errorMessage="
 1 errors found:
 
-Error at line 2320, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 3, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
     type of 'true' is Boolean
     expected type is Real
@@ -2492,7 +2492,7 @@ model FunctionType9
             errorMessage="
 1 errors found:
 
-Compliance error at line 2337, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
+Compliance error at line 1, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
   String variables are not supported
 ")})));
 end FunctionType9;
@@ -2509,7 +2509,7 @@ model FunctionType10
             errorMessage="
 1 errors found:
 
-Compliance error at line 2354, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
+Compliance error at line 2, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
   String variables are not supported
 ")})));
 end FunctionType10;
@@ -2525,10 +2525,10 @@ model FunctionType11
             errorMessage="
 2 errors found:
 
-Compliance error at line 2370, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
+Compliance error at line 1, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
   String variables are not supported
 
-Error at line 2371, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
     type of '1' is Integer
     expected type is String
@@ -2549,7 +2549,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2395, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction2(): component y is of type Integer and output o2 is of type Real - they are not compatible
 ")})));
 end FunctionType12;
@@ -2569,10 +2569,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 2415, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 6, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): component x is of type Integer and output o1 is of type Real - they are not compatible
 
-Error at line 2415, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 6, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): component z is of type Integer and output o3 is of type Real - they are not compatible
 ")})));
 end FunctionType13;
@@ -2592,7 +2592,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2438, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 6, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Too many components assigned from function call: TestFunction2() has 2 output(s)
 ")})));
 end FunctionType14;
@@ -2611,7 +2611,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2457, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunction3(): component z is of type Integer and output o3 is of type Real - they are not compatible
 ")})));
 end FunctionType15;
@@ -2630,7 +2630,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2476, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Too many components assigned from function call: sin() has 1 output(s)
 ")})));
 end FunctionType16;
@@ -2654,7 +2654,7 @@ model FunctionType17
             errorMessage="
 1 errors found:
 
-Error at line 2497, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 7, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real[size(x, 1), size(x, 2)]
     type of 'y' is Real[2, size(y, 2)]
@@ -2726,7 +2726,7 @@ model BuiltInCallType1
             errorMessage="
 1 errors found:
 
-Error at line 2572, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function sin(): types of positional argument 1 and input u are not compatible
     type of 'true' is Boolean
     expected type is Real
@@ -2744,7 +2744,7 @@ model BuiltInCallType2
             errorMessage="
 1 errors found:
 
-Error at line 2590, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
     type of '\"test\"' is String
     expected type is Real
@@ -2777,7 +2777,7 @@ model BuiltInCallType4
             errorMessage="
 1 errors found:
 
-Error at line 2623, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end BuiltInCallType4;
@@ -2793,7 +2793,7 @@ model BuiltInCallType5
             errorMessage="
 1 errors found:
 
-Error at line 2639, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function sin(): missing argument for required input u
 ")})));
 end BuiltInCallType5;
@@ -2809,7 +2809,7 @@ model BuiltInCallType6
             errorMessage="
 1 errors found:
 
-Error at line 2655, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function atan2(): missing argument for required input u2
 ")})));
 end BuiltInCallType6;
@@ -2825,7 +2825,7 @@ model BuiltInCallType7
             errorMessage="
 1 errors found:
 
-Error at line 2671, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
     type of '\"test\"' is String
     expected type is Real
@@ -2860,7 +2860,7 @@ model BuiltInCallType9
             errorMessage="
 1 errors found:
 
-Error at line 2706, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Argument of zeros() is not compatible with Integer: 3.0
 ")})));
 end BuiltInCallType9;
@@ -2876,10 +2876,10 @@ model BuiltInCallType10
             errorMessage="
 2 errors found:
 
-Error at line 2722, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 2, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, \"test\"]
 
-Error at line 2722, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Argument of ones() is not compatible with Integer: \"test\"
 ")})));
 end BuiltInCallType10;
@@ -3339,7 +3339,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3183, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf1;
@@ -3360,7 +3360,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3204, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf2;
@@ -3381,7 +3381,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3225, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf3;
@@ -3401,7 +3401,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3245, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf4;
@@ -3444,7 +3444,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3290, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
 end AlgorithmTypeWhen1;
@@ -3465,7 +3465,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3311, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
 end AlgorithmTypeWhen2;
@@ -3486,7 +3486,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3332, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
 end AlgorithmTypeWhen3;
@@ -3554,7 +3554,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3400, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile1;
@@ -3575,7 +3575,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3421, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile2;
@@ -3596,7 +3596,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3442, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile3;
@@ -3616,7 +3616,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3462, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile4;
@@ -3657,7 +3657,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3505, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The right and left expression types of assignment are not compatible, type of left-hand side is Integer, and type of right-hand side is Real
 ")})));
 end AlgorithmTypeAssign1;
@@ -3713,7 +3713,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3561, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The right and left expression types of assignment are not compatible, type of left-hand side is Real, and type of right-hand side is String
 ")})));
 end AlgorithmTypeAssign4;
@@ -3735,7 +3735,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3581, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Can not assign a value to a for loop index
 ")})));
 end AlgorithmTypeForIndex1;
@@ -3756,7 +3756,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3603, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 4, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Can not assign a value to a for loop index
 ")})));
 end AlgorithmTypeForIndex2;
@@ -9318,7 +9318,7 @@ model UnknownArray6
             errorMessage="
 1 errors found:
 
-Error at line 8485, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 9, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end UnknownArray6;
@@ -9345,7 +9345,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 8512, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 12, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function f(): component y is of size [2] and output c is of size [3] - they are not compatible
 ")})));
 end UnknownArray7;
@@ -9369,10 +9369,10 @@ model UnknownArray8
             errorMessage="
 2 errors found:
 
-Error at line 8536, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 9, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [:]
 
-Error at line 8536, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
+Error at line 9, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 ")})));
 end UnknownArray8;
@@ -9875,13 +9875,13 @@ model UnknownArray19
             errorMessage="
 3 errors found:
 
-Error at line 9037, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 4, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find class or component declaration for b
 
-Error at line 9041, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 8, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, :]
 
-Error at line 9041, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
+Error at line 8, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output c
 ")})));
 end UnknownArray19;
@@ -11615,10 +11615,10 @@ model UnknownArray50
             errorMessage="
 2 errors found:
 
-Error at line 10763, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for missingFunction()
 
-Error at line 10763, column 42, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 42, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find class or component declaration for notAVariable
 ")})));
 end UnknownArray50;
@@ -11660,7 +11660,7 @@ model UnknownArray52
             errorMessage="
 1 errors found:
 
-Compliance error at line 10925, column 5, in file '...', CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT:
+Compliance error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT:
   Can not infer array size of the function output r.x
 ")})));
 end UnknownArray52;
@@ -11814,7 +11814,7 @@ model IncompleteFunc1
             errorMessage="
 1 errors found:
 
-Error at line 10791, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end IncompleteFunc1;
@@ -11840,7 +11840,7 @@ model IncompleteFunc2
             errorMessage="
 1 errors found:
 
-Error at line 10817, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 11, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end IncompleteFunc2;
@@ -11865,7 +11865,7 @@ model IncompleteFunc3
             errorMessage="
 1 errors found:
 
-Error at line 10842, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 10, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end IncompleteFunc3;
@@ -12099,10 +12099,10 @@ model ExternalFunc7
             errorMessage="
 2 errors found:
 
-Error at line 11067, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The external language specification \"C++\" is not supported
 
-Error at line 11070, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The external language specification \"C++\" is not supported
 ")})));
 end ExternalFunc7;
@@ -12722,10 +12722,10 @@ model InputAsArraySize5
             errorMessage="
 2 errors found:
 
-Error at line 11425, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 10, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [n]
 
-Error at line 11425, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
+Error at line 10, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output x
 ")})));
 end InputAsArraySize5;
@@ -12749,7 +12749,7 @@ model InputAsArraySize6
             errorMessage="
 1 errors found:
 
-Error at line 11452, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 9, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 end InputAsArraySize6;
@@ -13720,7 +13720,7 @@ model ComponentFunc5
             errorMessage="
 1 errors found:
 
-Error at line 13196, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS:
+Error at line 18, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS:
   Can not access function through component unless only the first part of the name is a component: 'b.a.f'
 ")})));
 end ComponentFunc5;
@@ -13748,7 +13748,7 @@ model ComponentFunc6
             errorMessage="
 1 errors found:
 
-Error at line 13224, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+Error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
   Can not access function through array component access: 'a[1].f'
 ")})));
 end ComponentFunc6;
@@ -13776,7 +13776,7 @@ model ComponentFunc7
             errorMessage="
 1 errors found:
 
-Error at line 13252, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+Error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
   Can not access function through array component access: 'a.f'
 ")})));
 end ComponentFunc7;
@@ -15577,7 +15577,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 14679, column 3, in file 'ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 12, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
 y = semiLinear(x, sa, s[1])
 y = semiLinear(x, s[1], s[2])
@@ -15626,7 +15626,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 15325, column 5, in file '...':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
 y = semiLinear(x, sa, s1 + 1)
 y = semiLinear(x, s1, s2)
@@ -15647,7 +15647,7 @@ model Delay1
             errorMessage="
 1 errors found:
 
-Error at line 15662, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NOT_PARAMETER:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NOT_PARAMETER:
   Calling function delay(): third argument must be of parameter variability: z
 ")})));
 end Delay1;
@@ -15664,7 +15664,7 @@ model Delay2
             errorMessage="
 1 errors found:
 
-Error at line 15680, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NOT_PARAMETER:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NOT_PARAMETER:
   Calling function delay(): second argument must be of parameter variability when third argument is not given: y
 ")})));
 end Delay2;
@@ -15682,7 +15682,7 @@ model Delay3
             errorMessage="
 1 errors found:
 
-Error at line 15697, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_OVER_MAX:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_OVER_MAX:
   Calling function delay(): second argument may not be larger than third argument: y = 2.0 > z = 1.0
 ")})));
 end Delay3;
@@ -15699,7 +15699,7 @@ model Delay4
             errorMessage="
 1 errors found:
 
-Error at line 15715, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NEGATIVE:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_NEGATIVE:
   Calling function delay(): second argument may not be negative: y = -1.0 < 0
 ")})));
 end Delay4;
@@ -15717,7 +15717,7 @@ model Delay5
             errorMessage="
 1 errors found:
 
-Error at line 15732, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NEGATIVE:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', DELAY_MAX_NEGATIVE:
   Calling function delay(): third argument may not be negative: z = -1.0 < 0
 ")})));
 end Delay5;
@@ -16045,7 +16045,7 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="FunctionLike_EventRel_SampleTest1",
+            name="FunctionLike_EventRel_SampleTest2",
             description="sample(): basic test",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.SampleTest2
@@ -16091,7 +16091,7 @@ package DerivativeAnnotation
             errorMessage="
 1 errors found:
 
-Error at line 14834, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Function name is missing in derivative annotation declaration
 ")})));
     end MissingReference1;
@@ -16113,7 +16113,7 @@ Error at line 14834, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 14856, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for notAFunction
 ")})));
     end MissingDecl1;
@@ -16135,7 +16135,7 @@ Error at line 14856, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 14878, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Invalid derivative function reference
 ")})));
     end InvalidDecl1;
@@ -16160,7 +16160,7 @@ Error at line 14878, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 14900, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The class B is not a function
 ")})));
     end InvalidDecl2;
@@ -16192,7 +16192,7 @@ Error at line 14900, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 14925, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple declarations of the order attribute
 ")})));
     end MultipleOrder1;
@@ -16224,7 +16224,7 @@ Error at line 14925, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 14957, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Expecting integer typed expression for order attribute
 ")})));
     end InvalidOrder1;
@@ -16256,7 +16256,7 @@ Error at line 14957, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 14989, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Order attribute must be greater or equal to one
 ")})));
     end InvalidOrder2;
@@ -16289,7 +16289,7 @@ Error at line 14989, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15022, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 8, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions1;
@@ -16322,7 +16322,7 @@ Error at line 15022, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15055, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 8, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions2;
@@ -16355,7 +16355,7 @@ Error at line 15055, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15088, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 8, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions3;
@@ -16387,7 +16387,7 @@ Error at line 15088, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15120, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Expecting variable reference for noDerivative annotation
 ")})));
     end InvalidVariable1;
@@ -16419,7 +16419,7 @@ Error at line 15120, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15152, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Expecting variable reference for zeroDerivative annotation
 ")})));
     end InvalidVariable2;
@@ -16451,7 +16451,7 @@ Error at line 15152, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15184, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Unable to find notAVar
 ")})));
     end InvalidVariable3;
@@ -16483,7 +16483,7 @@ Error at line 15184, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15216, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Unable to find notAVar
 ")})));
     end InvalidVariable4;
@@ -16515,7 +16515,7 @@ Error at line 15216, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica
             errorMessage="
 1 errors found:
 
-Error at line 15248, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   noDerivative annotation may only reference input variables
 ")})));
     end NonInputVariable1;
@@ -16767,7 +16767,7 @@ model ConstantInFunction1
             errorMessage="
 1 errors found:
 
-Error at line 15794, column 14, in file '...', CONSTANT_INPUT:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CONSTANT_INPUT:
   Function input may not be constant
 
 ")})));
@@ -16847,12 +16847,12 @@ model ConstantInFunction4
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="ConstantInFunction1",
+            name="ConstantInFunction4",
             description="Constant input",
             errorMessage="
 1 errors found:
 
-Error at line 15890, column 27, in file '...':
+Error at line 5, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Could not evaluate binding expression for constant 'z': 'x'
 
 ")})));

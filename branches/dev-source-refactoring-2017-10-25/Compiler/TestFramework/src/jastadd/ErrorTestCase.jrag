@@ -19,6 +19,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ErrorTestCase extends TestCase {
 
@@ -38,8 +40,8 @@ public class ErrorTestCase extends TestCase {
 
         String test = new CompilerException(problems).getMessage(true);
         String correct = getErrorMessage();
-        String f_test = filterTestResult(test, resultFilters);
-        String f_correct = filterTestResult(correct, resultFilters);
+        String f_test = filterTestResult(test, true);
+        String f_correct = filterTestResult(correct, false);
 
         compareResult("Wrong errors reported.", f_correct, f_test);
         return true;
@@ -55,18 +57,25 @@ public class ErrorTestCase extends TestCase {
 			fail("No errors reported.");
 		return true;
 	}
-    
+
     private static Map<Pattern, String> resultFilters = createResultFilters();
-    
+
     private static Map<Pattern, String> createResultFilters() {
         Map<Pattern, String> m = new LinkedHashMap<Pattern, String>();
         m.put(Pattern.compile("^\\s*[0-9]+.+:"), "");
-        m.put(Pattern.compile("at line [0-9]+, column [0-9]+"), "at line 0, column 0");
         m.put(Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.)+'([:,])"), "in $1 '...'$3");
-        m.put(Pattern.compile("'[A-Z]:\\\\([^\\\\^']+\\\\)*([^']+)'"), "'$2'");
+        m.put(Pattern.compile("'[a-zA-Z]:\\\\([^\\\\^']+\\\\)*([^']+)'"), "'$2'");
         return m;
     }
-    
+
+    public String filterTestResult(String str, boolean adjustLine) {
+        if (adjustLine) {
+            str = adjustErrorLines(str, getSourceFileName(), getBeginLine());
+        }
+        str = filterTestResult(str, resultFilters);
+        return str;
+    }
+
 	/**
 	 * @return the errorMessage
 	 */

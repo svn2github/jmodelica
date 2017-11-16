@@ -32,7 +32,7 @@ except (NameError, ImportError):
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_delayed_feedback_optimization(with_plots = False):
     if with_plots:
         import matplotlib.pyplot as plt

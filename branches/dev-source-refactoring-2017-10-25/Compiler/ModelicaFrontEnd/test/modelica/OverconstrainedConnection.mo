@@ -16,26 +16,26 @@
 
 package OverconstrainedConnection
 
-type TBase = Real[2];
-
-type T1
-	extends TBase;
-	
-	function equalityConstraint
-		input T1 i1;
-		input T1 i2;
-		output Real[1] o;
-	algorithm
-		o := sum(i1 .+ i2);
-	end equalityConstraint;
-end T1;
-
-connector C1
-	T1 t;
-end C1;
-
 model OverconstrainedCorrect1
-	C1 c1;
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
+    C1 c1;
     C1 c2;
     C1 c3;
     C1 c4;
@@ -55,37 +55,55 @@ equation
             description="Basic test of overconstrained connection graphs",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect1
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
- OverconstrainedConnection.T1 c4.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect1.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect1.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect1.T1 c3.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect1.T1 c4.t[2];
 equation
  c1.t[1:2] = c2.t[1:2];
  c3.t[1:2] = c4.t[1:2];
  c1.t[1] = 0;
  c1.t[1:2] = c3.t[1:2];
- zeros(1) = OverconstrainedConnection.T1.equalityConstraint(c2.t[1:2], c4.t[1:2]);
+ zeros(1) = OverconstrainedConnection.OverconstrainedCorrect1.T1.equalityConstraint(c2.t[1:2], c4.t[1:2]);
 
 public
- function OverconstrainedConnection.T1.equalityConstraint
+ function OverconstrainedConnection.OverconstrainedCorrect1.T1.equalityConstraint
   input Real[:] i1;
   input Real[:] i2;
   output Real[:] o;
  algorithm
-  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
-  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.OverconstrainedCorrect1.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.OverconstrainedCorrect1.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
- end OverconstrainedConnection.T1.equalityConstraint;
+ end OverconstrainedConnection.OverconstrainedCorrect1.T1.equalityConstraint;
 
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect1.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect1;
 ")})));
 end OverconstrainedCorrect1;
 
 
 model OverconstrainedCorrect2
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     C1 c3;
@@ -107,37 +125,55 @@ equation
             description="Overconstrained connection graphs with potential roots",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect2
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
- OverconstrainedConnection.T1 c4.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect2.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect2.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect2.T1 c3.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect2.T1 c4.t[2];
 equation
  c1.t[1:2] = c2.t[1:2];
  c3.t[1:2] = c4.t[1:2];
  c1.t[1] = 0;
  c1.t[1:2] = c3.t[1:2];
- zeros(1) = OverconstrainedConnection.T1.equalityConstraint(c2.t[1:2], c4.t[1:2]);
+ zeros(1) = OverconstrainedConnection.OverconstrainedCorrect2.T1.equalityConstraint(c2.t[1:2], c4.t[1:2]);
 
 public
- function OverconstrainedConnection.T1.equalityConstraint
+ function OverconstrainedConnection.OverconstrainedCorrect2.T1.equalityConstraint
   input Real[:] i1;
   input Real[:] i2;
   output Real[:] o;
  algorithm
-  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
-  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.OverconstrainedCorrect2.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.OverconstrainedCorrect2.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
- end OverconstrainedConnection.T1.equalityConstraint;
+ end OverconstrainedConnection.OverconstrainedCorrect2.T1.equalityConstraint;
 
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect2.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect2;
 ")})));
 end OverconstrainedCorrect2;
 
 
 model OverconstrainedCorrect3
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     constant Boolean c1Root1 = Connections.isRoot(c1.t);
@@ -157,8 +193,8 @@ equation
             description="Simple root selection and isRoot()",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect3
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect3.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect3.T1 c2.t[2];
  constant Boolean c1Root1 = false;
  constant Boolean c1Root2 = false;
  constant Boolean c2Root1 = true;
@@ -168,13 +204,31 @@ equation
  c1.t[1] = 0;
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect3.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect3;
 ")})));
 end OverconstrainedCorrect3;
 
 
 model OverconstrainedCorrect4
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     constant Boolean c1Root1 = Connections.isRoot(c1.t);
@@ -193,8 +247,8 @@ equation
             description="Simple root selection and isRoot()",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect4
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect4.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect4.T1 c2.t[2];
  constant Boolean c1Root1 = false;
  constant Boolean c1Root2 = false;
  constant Boolean c2Root1 = true;
@@ -204,13 +258,31 @@ equation
  c1.t[1] = 0;
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect4.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect4;
 ")})));
 end OverconstrainedCorrect4;
 
 
 model OverconstrainedCorrect5
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     constant Boolean c1Root1 = Connections.isRoot(c1.t);
@@ -230,8 +302,8 @@ equation
             description="Simple root selection and isRoot(), unbreakable branch",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect5
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect5.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect5.T1 c2.t[2];
  constant Boolean c1Root1 = true;
  constant Boolean c1Root2 = true;
  constant Boolean c2Root1 = false;
@@ -241,7 +313,7 @@ equation
  c1.t[1] = 0;
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect5.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect5;
 ")})));
 end OverconstrainedCorrect5;
@@ -268,6 +340,24 @@ end OverconstrainedCorrect6;
 
 
 model OverconstrainedCorrect7
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     constant Boolean c1Root1 = Connections.isRoot(c1.t);
@@ -287,8 +377,8 @@ equation
             description="Simple root selection and isRoot(), breakable branch",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect7
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect7.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect7.T1 c2.t[2];
  constant Boolean c1Root1 = true;
  constant Boolean c1Root2 = true;
  constant Boolean c2Root1 = false;
@@ -299,13 +389,31 @@ equation
  c1.t[1:2] = c2.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect7.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect7;
 ")})));
 end OverconstrainedCorrect7;
 
 
 model OverconstrainedCorrect8
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     C1 c3;
@@ -325,9 +433,9 @@ equation
             description="Test model that failed due to ordering of roots",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect8
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect8.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect8.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect8.T1 c3.t[2];
  constant Boolean c1Root1 = false;
  constant Boolean c1Root2 = false;
  constant Boolean c2Root1 = true;
@@ -336,12 +444,30 @@ equation
  c1.t[1:2] = c2.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect8.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect8;
 ")})));
 end OverconstrainedCorrect8;
 
 model OverconstrainedCorrect9
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
 equation
@@ -356,19 +482,37 @@ equation
             description="Ensure that we handle multiple connections between the same nodes",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect9
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect9.T1 c1.t[2];
+ OverconstrainedConnection.OverconstrainedCorrect9.T1 c2.t[2];
 equation
  c1.t[1:2] = {time, - time};
  c1.t[1:2] = c2.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedCorrect9.T1 = Real;
 end OverconstrainedConnection.OverconstrainedCorrect9;
 ")})));
 end OverconstrainedCorrect9;
 
 model OverconstrainedUnrooted1
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1;
     C1 c2;
     C1 c3;
@@ -385,7 +529,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c3.t
     c4.t
@@ -394,6 +538,24 @@ end OverconstrainedUnrooted1;
 
 
 model OverconstrainedUnrooted2
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1,c2,c3,c4,c5;
 equation
     Connections.branch(c1.t, c2.t);
@@ -407,13 +569,13 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c1.t
     c2.t
     c3.t
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c4.t
     c5.t
@@ -422,6 +584,24 @@ end OverconstrainedUnrooted2;
 
 
 model OverconstrainedMultipleRoot1
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1,c2,c3,c4;
 equation
     Connections.branch(c1.t, c2.t);
@@ -437,7 +617,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple definite roots in unbreakable subgraph in overconstrained connection graph
     Selected root: c1.t
     Other root: c2.t
@@ -446,6 +626,24 @@ end OverconstrainedMultipleRoot1;
 
 
 model OverconstrainedMultipleRoot2
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1,c2,c3,c4,c5,c6;
 equation
     Connections.branch(c1.t, c2.t);
@@ -464,7 +662,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple definite roots in unbreakable subgraph in overconstrained connection graph
     Selected root: c1.t
     Other root: c3.t
@@ -474,6 +672,24 @@ end OverconstrainedMultipleRoot2;
 
 
 model OverconstrainedUnbreakableLoop1
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1,c2;
 equation
 	Connections.root(c1.t);
@@ -487,7 +703,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Unbreakable loop in overconstrained connection graph
     Selected root: c1.t
 ")})));
@@ -495,6 +711,24 @@ end OverconstrainedUnbreakableLoop1;
 
 
 model OverconstrainedUnbreakableLoop2
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1,c2,c3,c4,c5,c6;
 equation
     Connections.branch(c1.t, c2.t);
@@ -512,7 +746,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Unbreakable loop in overconstrained connection graph
     Selected root: c4.t
 ")})));
@@ -520,6 +754,24 @@ end OverconstrainedUnbreakableLoop2;
 
 
 model OverconstrainedMultiRootDef1
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
 	C1 c1,c2;
 equation
     Connections.branch(c1.t, c2.t);
@@ -536,11 +788,11 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple root definitions for single connector in overconstrained connection graph
     Connector: c1.t
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple root definitions for single connector in overconstrained connection graph
     Connector: c2.t
 ")})));
@@ -548,6 +800,24 @@ end OverconstrainedMultiRootDef1;
 
 
 model OverconstrainedArray1
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     model A
         C1 c1;
         C1 c2;
@@ -573,12 +843,12 @@ equation
             description="Test that the overconstrained connection graph is built correctly when using slice access in connect",
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedArray1
- OverconstrainedConnection.T1 a[1].c1.t[2];
- OverconstrainedConnection.T1 a[1].c2.t[2];
- OverconstrainedConnection.T1 a[2].c1.t[2];
- OverconstrainedConnection.T1 a[2].c2.t[2];
- OverconstrainedConnection.T1 b.c[1].t[2];
- OverconstrainedConnection.T1 b.c[2].t[2];
+ OverconstrainedConnection.OverconstrainedArray1.T1 a[1].c1.t[2];
+ OverconstrainedConnection.OverconstrainedArray1.T1 a[1].c2.t[2];
+ OverconstrainedConnection.OverconstrainedArray1.T1 a[2].c1.t[2];
+ OverconstrainedConnection.OverconstrainedArray1.T1 a[2].c2.t[2];
+ OverconstrainedConnection.OverconstrainedArray1.T1 b.c[1].t[2];
+ OverconstrainedConnection.OverconstrainedArray1.T1 b.c[2].t[2];
 equation
  a[1].c1.t[1:2] = b.c[1].t[1:2];
  a[1].c1.t[1:2] = a[1].c2.t[1:2];
@@ -586,13 +856,31 @@ equation
  a[2].c1.t[1:2] = a[2].c2.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.OverconstrainedArray1.T1 = Real;
 end OverconstrainedConnection.OverconstrainedArray1;
 ")})));
 end OverconstrainedArray1;
 
 
 model PureConnectLoop1
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
 equation
@@ -607,20 +895,38 @@ equation
             description="Two overconstrained connectors double connected to each other",
             flatModel="
 fclass OverconstrainedConnection.PureConnectLoop1
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.PureConnectLoop1.T1 c1.t[2];
+ OverconstrainedConnection.PureConnectLoop1.T1 c2.t[2];
 equation
  c1.t[1:2] = {time, - time};
  c1.t[1:2] = c2.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.PureConnectLoop1.T1 = Real;
 end OverconstrainedConnection.PureConnectLoop1;
 ")})));
 end PureConnectLoop1;
 
 
 model PureConnectLoop2
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     C1 c3;
@@ -637,22 +943,40 @@ equation
             description="Three overconstrained connectors connected in a loop",
             flatModel="
 fclass OverconstrainedConnection.PureConnectLoop2
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
+ OverconstrainedConnection.PureConnectLoop2.T1 c1.t[2];
+ OverconstrainedConnection.PureConnectLoop2.T1 c2.t[2];
+ OverconstrainedConnection.PureConnectLoop2.T1 c3.t[2];
 equation
  c1.t[1:2] = {time, - time};
  c1.t[1:2] = c2.t[1:2];
  c2.t[1:2] = c3.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.PureConnectLoop2.T1 = Real;
 end OverconstrainedConnection.PureConnectLoop2;
 ")})));
 end PureConnectLoop2;
 
 
 model PureConnectLoop3
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     C1 c3;
@@ -674,37 +998,55 @@ equation
             description="Two overconstrained connectors double connected to each other, as part of a normal overconstrained loop",
             flatModel="
 fclass OverconstrainedConnection.PureConnectLoop3
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
- OverconstrainedConnection.T1 c4.t[2];
+ OverconstrainedConnection.PureConnectLoop3.T1 c1.t[2];
+ OverconstrainedConnection.PureConnectLoop3.T1 c2.t[2];
+ OverconstrainedConnection.PureConnectLoop3.T1 c3.t[2];
+ OverconstrainedConnection.PureConnectLoop3.T1 c4.t[2];
 equation
  c1.t[1:2] = {time, - time};
  c2.t[1:2] = c3.t[1:2];
  c4.t[1:2] = c1.t[1:2];
  c1.t[1:2] = c2.t[1:2];
- zeros(1) = OverconstrainedConnection.T1.equalityConstraint(c3.t[1:2], c4.t[1:2]);
+ zeros(1) = OverconstrainedConnection.PureConnectLoop3.T1.equalityConstraint(c3.t[1:2], c4.t[1:2]);
 
 public
- function OverconstrainedConnection.T1.equalityConstraint
+ function OverconstrainedConnection.PureConnectLoop3.T1.equalityConstraint
   input Real[:] i1;
   input Real[:] i2;
   output Real[:] o;
  algorithm
-  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
-  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.PureConnectLoop3.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.PureConnectLoop3.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
- end OverconstrainedConnection.T1.equalityConstraint;
+ end OverconstrainedConnection.PureConnectLoop3.T1.equalityConstraint;
 
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.PureConnectLoop3.T1 = Real;
 end OverconstrainedConnection.PureConnectLoop3;
 ")})));
 end PureConnectLoop3;
 
 
 model PureConnectLoop4
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     C1 c3;
@@ -728,39 +1070,57 @@ equation
             description="Three overconstrained connectors connected in a loop, as part of a normal overconstrained loop",
             flatModel="
 fclass OverconstrainedConnection.PureConnectLoop4
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
- OverconstrainedConnection.T1 c4.t[2];
- OverconstrainedConnection.T1 c5.t[2];
+ OverconstrainedConnection.PureConnectLoop4.T1 c1.t[2];
+ OverconstrainedConnection.PureConnectLoop4.T1 c2.t[2];
+ OverconstrainedConnection.PureConnectLoop4.T1 c3.t[2];
+ OverconstrainedConnection.PureConnectLoop4.T1 c4.t[2];
+ OverconstrainedConnection.PureConnectLoop4.T1 c5.t[2];
 equation
  c1.t[1:2] = {time, - time};
  c2.t[1:2] = c4.t[1:2];
  c5.t[1:2] = c1.t[1:2];
  c1.t[1:2] = c2.t[1:2];
  c2.t[1:2] = c3.t[1:2];
- zeros(1) = OverconstrainedConnection.T1.equalityConstraint(c4.t[1:2], c5.t[1:2]);
+ zeros(1) = OverconstrainedConnection.PureConnectLoop4.T1.equalityConstraint(c4.t[1:2], c5.t[1:2]);
 
 public
- function OverconstrainedConnection.T1.equalityConstraint
+ function OverconstrainedConnection.PureConnectLoop4.T1.equalityConstraint
   input Real[:] i1;
   input Real[:] i2;
   output Real[:] o;
  algorithm
-  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
-  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.PureConnectLoop4.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.PureConnectLoop4.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
- end OverconstrainedConnection.T1.equalityConstraint;
+ end OverconstrainedConnection.PureConnectLoop4.T1.equalityConstraint;
 
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.PureConnectLoop4.T1 = Real;
 end OverconstrainedConnection.PureConnectLoop4;
 ")})));
 end PureConnectLoop4;
 
 
 model PureConnectLoop5
+    type TBase = Real[2];
+    
+    type T1
+        extends TBase;
+        
+        function equalityConstraint
+            input T1 i1;
+            input T1 i2;
+            output Real[1] o;
+        algorithm
+            o := sum(i1 .+ i2);
+        end equalityConstraint;
+    end T1;
+    
+    connector C1
+        T1 t;
+    end C1;
+
     C1 c1;
     C1 c2;
     C1 c3;
@@ -788,11 +1148,11 @@ equation
             description="Five overconstrained connectors with multiple redundant connects between them",
             flatModel="
 fclass OverconstrainedConnection.PureConnectLoop5
- OverconstrainedConnection.T1 c1.t[2];
- OverconstrainedConnection.T1 c2.t[2];
- OverconstrainedConnection.T1 c3.t[2];
- OverconstrainedConnection.T1 c4.t[2];
- OverconstrainedConnection.T1 c5.t[2];
+ OverconstrainedConnection.PureConnectLoop5.T1 c1.t[2];
+ OverconstrainedConnection.PureConnectLoop5.T1 c2.t[2];
+ OverconstrainedConnection.PureConnectLoop5.T1 c3.t[2];
+ OverconstrainedConnection.PureConnectLoop5.T1 c4.t[2];
+ OverconstrainedConnection.PureConnectLoop5.T1 c5.t[2];
 equation
  c1.t[1:2] = {time, - time};
  c1.t[1:2] = c2.t[1:2];
@@ -801,7 +1161,7 @@ equation
  c4.t[1:2] = c5.t[1:2];
 
 public
- type OverconstrainedConnection.T1 = Real;
+ type OverconstrainedConnection.PureConnectLoop5.T1 = Real;
 end OverconstrainedConnection.PureConnectLoop5;
 ")})));
 end PureConnectLoop5;

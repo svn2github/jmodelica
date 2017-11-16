@@ -370,7 +370,7 @@ class RealTimeMPCBase(RealTimeBase):
                          par_values, constr_viol_costs={}, mpc_options={}):
     
         op = transfer_optimization_problem(opt_name, file_path,
-                                           compiler_options = {'state_initial_equations' : True})
+                                           compiler_options = {'state_initial_equations' : True,"common_subexp_elim":False})
         op.set(par_values.keys(), par_values.values())
                                            
         opt_opts = op.optimize_options()

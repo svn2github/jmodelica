@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -426,9 +426,9 @@ public class ModelicaCompiler {
     /**
      * Calls the hook to be called after the FMU is packed.
      */
-    protected void hookFmuPacked(File path) {
+    protected void hookFmuPacked(FClass fc, File path) {
         for (CompilationHooks hooks : hooksList)
-            hooks.fmuPacked(this, path);
+            hooks.fmuPacked(this, fc, path);
     }
     
     public String getStringOption(String key) throws UnknownOptionException {
@@ -1228,7 +1228,7 @@ public class ModelicaCompiler {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
-        getExternalFunctionCache().tearDown(getOptions());
+        getExternalFunctionCache().tearDown(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(fc.myOptions()));
         fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
@@ -2303,7 +2303,7 @@ public class ModelicaCompiler {
             throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile));
         }
 
-        hookFmuPacked(unitFile.getAbsoluteFile());
+        hookFmuPacked(fClass, unitFile.getAbsoluteFile());
         return unitFile;
     }
 
@@ -2756,7 +2756,30 @@ public interface CompilationHooks {
     /**
      * Called after the FMU is packed.
      */
-    public void fmuPacked(ModelicaCompiler instance, File path);
+    public void fmuPacked(ModelicaCompiler instance, FClass fc, File path);
+}
+
+public abstract class CompilationHooksImpl implements CompilationHooks {
+    @Override
+    public boolean shouldAbort(ModelicaCompiler instance) { return false; }
+    @Override
+    public void modelTransformed(ModelicaCompiler instance, FClass fc) {}
+    @Override
+    public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd) {}
+    @Override
+    public void modelFlattened(ModelicaCompiler instance, FClass fc) {}
+    @Override
+    public void fmuPacked(ModelicaCompiler instance, FClass fc, File path) {}
+    @Override
+    public void flatModelChecked(ModelicaCompiler instance, FClass fc) {}
+    @Override
+    public void filesParsed(ModelicaCompiler instance, SourceRoot sr) {}
+    @Override
+    public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen) {}
+    @Override
+    public void codeGenerated(ModelicaCompiler instance, File dir) {}
+    @Override
+    public void codeCompiled(ModelicaCompiler instance) {}
 }
 
 public class JModelicaHomeNotFoundException extends ModelicaException {

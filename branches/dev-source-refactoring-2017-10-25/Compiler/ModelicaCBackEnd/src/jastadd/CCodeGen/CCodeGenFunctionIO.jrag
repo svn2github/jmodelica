@@ -111,14 +111,18 @@ aspect CCodeGenFunctionIO {
         }
     }
     
-    public void FFunctionCallLeft.genArgument_C(CodeStream str) {
+    public void FFunctionCallLeft.genArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str) {
         if (hasFExp()) {
-            if (!getFExp().isComposite())
+            if (!getFExp().isComposite()) {
                 str.print("&");
-            str.print(name_C());
+            }
+            str.print(p.name(this));
         } else {
             str.print("NULL");
         }
+    }
+    public void FFunctionCallLeft.genArgument_C(CodeStream str) {
+        genArgument(ASTNode.printer_C.ExecStep, str);
     }
     
     @Override

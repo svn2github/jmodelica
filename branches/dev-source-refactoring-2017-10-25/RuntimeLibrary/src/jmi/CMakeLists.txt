@@ -51,6 +51,7 @@ set(JMIBlockSourcesPartial
     jmi_brent_solver.h
     jmi_minpack_solver.h
     jmi_linear_solver.h
+    jmi_realtime_solver.h
     jmi_simple_newton.h
 
     jmi_block_solver.c
@@ -59,6 +60,7 @@ set(JMIBlockSourcesPartial
     jmi_brent_solver.c
     jmi_minpack_solver.c
     jmi_linear_solver.c
+    jmi_realtime_solver.c
     jmi_simple_newton.c
 )
 
@@ -158,7 +160,7 @@ OPTION(BUILD_BLOCK_SOLVER_LIB "Build the block solver library" ON)
 if (${BUILD_BLOCK_SOLVER_LIB})
     add_library(jmi_block_solver STATIC ${JMIBlockSources})
     if(NOT MSVC)
-        set_target_properties(jmi_block_solver PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2")
+        set_target_properties(jmi_block_solver PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2 -msse2 -mfpmath=sse")
     endif()
     
     if(JMI_SUNDIALS AND JMI_LAPACK AND JMI_MINPACK)
@@ -172,7 +174,7 @@ OPTION(BUILD_ODE_SOLVER_LIB "Build the ode solver library" ON)
 if (${BUILD_ODE_SOLVER_LIB})
     add_library(jmi_ode_solver STATIC ${JMIODESolverSources})
     if(NOT MSVC)
-        set_target_properties(jmi_ode_solver PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2")
+        set_target_properties(jmi_ode_solver PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2 -msse2 -mfpmath=sse")
     endif()
     
     if(JMI_SUNDIALS)
@@ -186,7 +188,7 @@ OPTION(BUILD_JMI_LIB "Build the jmi library" ON)
 if (${BUILD_JMI_LIB})
     add_library(jmi STATIC ${JMISources})
     if(NOT MSVC)
-        set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2")
+        set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2 -msse2 -mfpmath=sse")
         if (WIN32)
             include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
         endif()

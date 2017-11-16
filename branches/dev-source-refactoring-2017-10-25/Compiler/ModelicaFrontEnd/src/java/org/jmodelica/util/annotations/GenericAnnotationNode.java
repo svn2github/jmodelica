@@ -74,7 +74,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     private void computeSubNodesCache() {
-        if (subNodes_cache != null) {
+        if (isSubNodesCacheFresh()) {
             return;
         }
         if (!exists() || isAmbiguous()) {
@@ -83,9 +83,32 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             return;
         }
         List<T> subNodes = new ArrayList<T>();
+        // These maps are necessary since if we recompute the cache, then we
+        // wan't to preserve the old nodes as far as possible. Also note that
+        // we may have multiple nodes with the same name. That is why we have
+        // a list in the map
+        Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes_cache);
+        Map<String, Integer> oldNodeListPosMap = new HashMap<String, Integer>();
+        
         Map<String, T> subNodesNameMap = new HashMap<String, T>();
         for (SubNodePair<N> subNodePair : node.annotationSubNodes()) {
-            T subNode = createNode(subNodePair.name, subNodePair.node);
+            String name = subNodePair.name;
+            T subNode = null;
+            
+            List<T> oldNodes = oldNodesMap.get(name);
+            Integer oldNodesPos = oldNodeListPosMap.get(name);
+            if (oldNodesPos == null) {
+                oldNodesPos = 0;
+            }
+            if (oldNodes != null && oldNodesPos < oldNodes.size()) {
+                subNode = oldNodes.get(oldNodesPos);
+                oldNodesPos++;
+                oldNodeListPosMap.put(name, oldNodesPos);
+            }
+            
+            if (subNode == null) {
+                subNode = createNode(name, subNodePair.node);
+            }
             if (subNode == null) {
                 continue;
             }
@@ -99,8 +122,43 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         subNodesNameMap_cache = Collections.unmodifiableMap(subNodesNameMap);
     }
 
+    /**
+     * Computes a map that maps between name and node, the list is needed since
+     * there may be multiple nodes with the same name, if that is the case,
+     * then they are put in the list in the order that they are found!
+     */
+    private static <A extends GenericAnnotationNode<?, ?, ?>>
+    Map<String, List<A>> constructMapIncludingAmbiguous(Collection<A> nodes) {
+        if (nodes == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<A>> res = new HashMap<String, List<A>>();
+        for (A node : nodes) {
+            String name = node.name();
+            List<A> withSameName = res.get(name);
+            // Using some optimization here, if we only have one child,
+            // which should be most common, then use a singleton list to
+            // save memory!
+            if (withSameName == null) {
+                withSameName = Collections.singletonList(node);
+                res.put(name, withSameName);
+            } else if (withSameName.size() == 1) {
+                withSameName = new ArrayList<A>(withSameName);
+                withSameName.add(node);
+                res.put(name, withSameName);
+            } else {
+                withSameName.add(node);
+            }
+        }
+        return res;
+    }
+
+    protected boolean isSubNodesCacheFresh() {
+        return subNodesNameMap_cache != null;
+    }
+
     private void resetSubNodesCache() {
-        subNodes_cache = null;
+        subNodesNameMap_cache = null;
     }
 
     /**

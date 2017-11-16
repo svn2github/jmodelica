@@ -70,7 +70,7 @@ class Test_CoupledFMUModelME2:
         cls.pi      = compile_fmu("PI",      os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
         cls.plant   = compile_fmu("Plant",   os.path.join(path_to_mofiles,"CoupledME.mo"), version="2.0")
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_loading(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -96,7 +96,7 @@ class Test_CoupledFMUModelME2:
         connections = [(model_cc_1, "J1.phi", model_cc_2, "J2.phi")]
         nose.tools.assert_raises(fmi.FMUException, CoupledFMUModelME2, models, connections)
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_basic_simulation(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -121,7 +121,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.final("First.J1.w"),res.final("Second.J1.w"))
         nose.tools.assert_almost_equal(res.final("First.J1.w"), 3.2501079, places=3)
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_get_variable_valueref(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -145,7 +145,7 @@ class Test_CoupledFMUModelME2:
         assert var_name_1 == "First.J1.w"
         assert var_name_2 == "Second.J1.w"
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_ode_sizes(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -161,7 +161,7 @@ class Test_CoupledFMUModelME2:
         assert nbr_states == 16
         assert nbr_event_ind == 66
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_alias(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -176,7 +176,7 @@ class Test_CoupledFMUModelME2:
         assert "First.J4.phi" in aliases.keys()
         assert coupled.get_variable_alias_base("First.J4.phi") == "First.J4.flange_a.phi"
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_get_set_real(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -195,7 +195,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(coupled.get("First.J1.w"),3)
         nose.tools.assert_almost_equal(coupled.get("Second.J1.w"),4)
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_variable_variability(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -212,7 +212,7 @@ class Test_CoupledFMUModelME2:
         
         assert variability == model_cc_1.get_variable_variability("J1.w")
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_variable_causality(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -229,7 +229,7 @@ class Test_CoupledFMUModelME2:
         
         assert causality == model_cc_1.get_variable_causality("J1.w")
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_model_variables(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -258,7 +258,7 @@ class Test_CoupledFMUModelME2:
         
         assert len(vars) == len(vars_1) + len(vars_2)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_states_list(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -277,7 +277,7 @@ class Test_CoupledFMUModelME2:
             alias_vars = coupled.get_variable_alias(var).keys()
             assert state in alias_vars
             
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_derivatives_list(self):
         
         model_cc_1 = load_fmu(Test_CoupledFMUModelME2.cc_name)
@@ -296,7 +296,7 @@ class Test_CoupledFMUModelME2:
             alias_vars = coupled.get_variable_alias(var).keys()
             assert state in alias_vars
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_reversed_connections(self):
         model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
         model_sub_2 = load_fmu(Test_CoupledFMUModelME2.ls_sub2)
@@ -313,7 +313,7 @@ class Test_CoupledFMUModelME2:
                        
         nose.tools.assert_raises(fmi.FMUException,  CoupledFMUModelME2, models, connections)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_inputs_list(self):
         
         model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
@@ -335,7 +335,7 @@ class Test_CoupledFMUModelME2:
         assert "First.u1" in vars
         assert "Second.u2" in vars
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_linear_example(self):
         
         model_sub_1 = load_fmu(Test_CoupledFMUModelME2.ls_sub1)
@@ -361,7 +361,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.initial("First.u1"),res_full.initial("p1.u1"))
         nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"))
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_quarter_car(self):
 
         model = load_fmu(Test_CoupledFMUModelME2.qc_full)
@@ -396,7 +396,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.initial("Wheel.v_wheel"),res_full.initial("v_wheel"), places=4)
         nose.tools.assert_almost_equal(res.initial("Chassi.v_chassi"),res_full.initial("v_chassi"), places=4)
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_linear_example_with_time_event(self):
         
         m_full      = load_fmu(Test_CoupledFMUModelME2.ls_event_full)
@@ -424,7 +424,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.initial("First.u1"),res_full.initial("p1.u1"), places=4)
         nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"), places=4)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_linear_example_with_time_event_v2(self):
         
         m_full      = load_fmu(Test_CoupledFMUModelME2.ls_event_full_v2)
@@ -453,7 +453,7 @@ class Test_CoupledFMUModelME2:
         nose.tools.assert_almost_equal(res.initial("Second.u2"),res_full.initial("p2.u2"), places=4)
 
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_example_with_events(self):
 
         pi      = load_fmu(Test_CoupledFMUModelME2.pi)

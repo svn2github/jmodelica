@@ -69,10 +69,6 @@
     compiler options and arguments which can be modified. These will be
     explained in <xref linkend="models_sec_compiler_settings"/>.</para>
 
-    <para><xref linkend="models_sec_compilation_in_more_detail"/>, will go
-    through some parts of the compilation process and how to perform these
-    steps one by one.</para>
-
     <section xml:id="models_sec_simple_fmume_compilation">
       <title>Simple FMU-ME compilation example</title>
 

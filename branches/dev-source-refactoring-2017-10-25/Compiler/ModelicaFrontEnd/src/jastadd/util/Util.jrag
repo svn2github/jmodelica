@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -178,6 +178,10 @@ aspect Parsers {
         return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.abstract_equation;
     }
 
+    public short ParserHandler.modifierGoal() {
+        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.argument;
+    }
+    
     public SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseModelicaFile(uif, fileName);
@@ -295,6 +299,21 @@ aspect Parsers {
         return eqn;
     }
 
+    public Argument ParserHandler.parseModifier(String code, String parentSourceFile)
+            throws ParserException, beaver.Parser.Exception, IOException {
+        return parseModifier(code, parentSourceFile, false);
+    }
+    public Argument ParserHandler.parseModifier(String code, String parentSourceFile,
+            boolean preservFormatting) throws ParserException, beaver.Parser.Exception, IOException {
+        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
+        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
+        Argument eqn = (Argument) parser.parse(scanner, modifierGoal());
+        if (preservFormatting) {
+            scanner.getFormattingRecorder().postParsing(eqn);
+        }
+        return eqn;
+    }
+    
     public Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
         return new InputStreamReader(new FileInputStream(file), ASTNode.UTF8);
     }
@@ -2392,7 +2411,7 @@ aspect UtilInterface {
     public void UtilInterface.clean() {
         ExternalFunctionCache efc = getExternalFunctionCache();
         if (efc != null) {
-            efc.destroyProcesses(getOptionRegistry());
+            efc.destroyProcesses(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(options));
         }
     }
     

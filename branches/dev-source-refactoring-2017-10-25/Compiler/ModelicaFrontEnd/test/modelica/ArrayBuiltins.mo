@@ -110,7 +110,7 @@ model SizeExp6
             errorMessage="
 1 errors found:
 
-Error at line 104, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     'd' is of discrete-time variability
 ")})));
@@ -127,7 +127,7 @@ model SizeExp7
             errorMessage="
 1 errors found:
 
-Error at line 121, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is Integer
@@ -145,7 +145,7 @@ model SizeExp8
             errorMessage="
 1 errors found:
 
-Error at line 139, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '1.0' is Real
     expected type is Integer
@@ -163,7 +163,7 @@ model SizeExp9
             errorMessage="
 1 errors found:
 
-Error at line 157, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     '0' evaluates to 0, and 'ones(2, 3)' has 2 dimensions
 ")})));
@@ -180,7 +180,7 @@ model SizeExp10
             errorMessage="
 1 errors found:
 
-Error at line 174, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     '3' evaluates to 3, and 'ones(2, 3)' has 2 dimensions
 ")})));
@@ -330,7 +330,7 @@ model FillExp3
             errorMessage="
 1 errors found:
 
-Error at line 324, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Too few arguments to fill(), must have at least 2
 ")})));
 end FillExp3;
@@ -346,7 +346,7 @@ model FillExp4
             errorMessage="
 1 errors found:
 
-Error at line 340, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end FillExp4;
@@ -362,7 +362,7 @@ model FillExp5
             errorMessage="
 1 errors found:
 
-Error at line 356, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Argument of fill() is not compatible with Integer: 2.0
 ")})));
 end FillExp5;
@@ -379,10 +379,10 @@ model FillExp6
             errorMessage="
 2 errors found:
 
-Error at line 373, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 3, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [n]
 
-Error at line 373, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Argument of fill() does not have constant or parameter variability: n
 ")})));
 end FillExp6;
@@ -398,10 +398,10 @@ model FillExp7
             errorMessage="
 2 errors found:
 
-Error at line 392, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is scalar
 
-Error at line 392, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function fill(): missing argument for required input s
 ")})));
 end FillExp7;
@@ -513,7 +513,7 @@ model MinExp5
             errorMessage="
 1 errors found:
 
-Error at line 507, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: min(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -531,12 +531,12 @@ model MinExp6
             errorMessage="
 2 errors found:
 
-Error at line 525, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
 
-Error at line 525, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
@@ -554,7 +554,7 @@ model MinExp7
             errorMessage="
 1 errors found:
 
-Error at line 548, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is array of Real, Integer, Boolean, String or enumeration
@@ -605,10 +605,10 @@ model MinExp10
             errorMessage="
 2 errors found:
 
-Error at line 599, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
 
-Error at line 599, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 end MinExp10;
@@ -624,7 +624,7 @@ model MinExp11
             errorMessage="
 1 errors found:
 
-Error at line 618, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of a reduction-expression must be scalar, except for sum(): {i * j, 2} has 1 dimension(s)
 ")})));
 end MinExp11;
@@ -640,7 +640,7 @@ model MinExp12
             errorMessage="
 1 errors found:
 
-Error at line 634, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MinExp12;
@@ -731,7 +731,7 @@ model MaxExp5
             errorMessage="
 1 errors found:
 
-Error at line 725, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: max(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -749,12 +749,12 @@ model MaxExp6
             errorMessage="
 2 errors found:
 
-Error at line 743, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
 
-Error at line 743, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
@@ -772,7 +772,7 @@ model MaxExp7
             errorMessage="
 1 errors found:
 
-Error at line 766, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is array of Real, Integer, Boolean, String or enumeration
@@ -822,10 +822,10 @@ model MaxExp10
             errorMessage="
 2 errors found:
 
-Error at line 816, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
 
-Error at line 816, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 end MaxExp10;
@@ -840,7 +840,7 @@ model MaxExp12
             errorMessage="
 1 errors found:
 
-Error at line 834, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MaxExp12;
@@ -931,7 +931,7 @@ model SumExp5
             errorMessage="
 1 errors found:
 
-Error at line 925, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function sum(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
     expected type is Real array
@@ -1064,7 +1064,7 @@ model ProductExp5
             errorMessage="
 1 errors found:
 
-Error at line 1058, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function product(): missing argument for required input A
 ")})));
 end ProductExp5;
@@ -1079,7 +1079,7 @@ model ProductExp6
             errorMessage="
 1 errors found:
 
-Error at line 1073, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function product(): types of positional argument 1 and input A are not compatible
     type of '42' is Integer
     expected type is Real array
@@ -1278,7 +1278,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1272, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 5, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
     expected type is matrix of Real, Integer, Boolean, String or enumeration
@@ -1296,7 +1296,7 @@ model Transpose6
             errorMessage="
 1 errors found:
 
-Error at line 1290, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
     expected type is matrix of Real, Integer, Boolean, String or enumeration
@@ -1314,7 +1314,7 @@ model Transpose7
             errorMessage="
 1 errors found:
 
-Error at line 1308, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Transpose7;
@@ -1607,7 +1607,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1601, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 5, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
     expected type is square matrix
@@ -1625,7 +1625,7 @@ model Symmetric6
             errorMessage="
 1 errors found:
 
-Error at line 1619, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
     expected type is square matrix
@@ -1643,7 +1643,7 @@ model Symmetric7
             errorMessage="
 1 errors found:
 
-Error at line 1637, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Symmetric7;
@@ -1718,7 +1718,7 @@ model Cross3
             errorMessage="
 1 errors found:
 
-Error at line 1712, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Cross3; 
@@ -1734,12 +1734,12 @@ model Cross4
             errorMessage="
 2 errors found:
 
-Error at line 1728, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is Real[3]
 
-Error at line 1728, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
     expected type is Real[3]
@@ -1757,12 +1757,12 @@ model Cross5
             errorMessage="
 2 errors found:
 
-Error at line 1751, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
     expected type is Real[3]
 
-Error at line 1751, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{4, 5, 6, 7}' is Integer[4]
     expected type is Real[3]
@@ -1780,12 +1780,12 @@ model Cross6
             errorMessage="
 2 errors found:
 
-Error at line 1774, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
     expected type is Real[3]
 
-Error at line 1774, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
     expected type is Real[3]
@@ -1803,12 +1803,12 @@ model Cross7
             errorMessage="
 2 errors found:
 
-Error at line 1797, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
     expected type is Real[3]
 
-Error at line 1797, column 52, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 52, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
     expected type is Real[3]
@@ -1860,12 +1860,12 @@ model Skew2
             errorMessage="
 2 errors found:
 
-Error at line 1853, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
     expected type is Real[3]
 
-Error at line 1854, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
     expected type is Real[3]
@@ -1932,7 +1932,7 @@ model OuterProduct3
             errorMessage="
 1 errors found:
 
-Error at line 1926, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end OuterProduct3; 
@@ -1948,12 +1948,12 @@ model OuterProduct4
             errorMessage="
 2 errors found:
 
-Error at line 1942, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is Real[:]
 
-Error at line 1942, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
     expected type is Real[:]
@@ -1971,12 +1971,12 @@ model OuterProduct5
             errorMessage="
 2 errors found:
 
-Error at line 1965, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
     expected type is Real[:]
 
-Error at line 1965, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
     expected type is Real[:]
@@ -1994,12 +1994,12 @@ model OuterProduct6
             errorMessage="
 2 errors found:
 
-Error at line 1988, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
     expected type is Real[:]
 
-Error at line 1988, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
     expected type is Real[:]
@@ -2084,7 +2084,7 @@ model ArrayCat4
             errorMessage="
 1 errors found:
 
-Error at line 2078, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat4;
@@ -2100,7 +2100,7 @@ model ArrayCat5
             errorMessage="
 1 errors found:
 
-Error at line 2094, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat5;
@@ -2116,7 +2116,7 @@ model ArrayCat6
             errorMessage="
 1 errors found:
 
-Error at line 2110, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ArrayCat6;
@@ -2132,7 +2132,7 @@ model ArrayCat6b
             errorMessage="
 1 errors found:
 
-Error at line 2126, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat6b;
@@ -2149,7 +2149,7 @@ model ArrayCat7
             errorMessage="
 1 errors found:
 
-Error at line 2143, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Dimension argument of cat() does not have constant variability: d
 ")})));
 end ArrayCat7;
@@ -2182,7 +2182,7 @@ model ArrayCat9
             errorMessage="
 1 errors found:
 
-Error at line 2176, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Dimension argument of cat() is not compatible with Integer: 1.0
 ")})));
 end ArrayCat9;
@@ -2198,7 +2198,7 @@ model ArrayCat10
             errorMessage="
 1 errors found:
 
-Error at line 2192, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat10;
@@ -2375,7 +2375,7 @@ model ArrayShortCat4
             errorMessage="
 1 errors found:
 
-Error at line 2368, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayShortCat4;
@@ -2391,7 +2391,7 @@ model ArrayShortCat5
             errorMessage="
 1 errors found:
 
-Error at line 2384, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayShortCat5;
@@ -2434,7 +2434,7 @@ model ArrayEnd2
             errorMessage="
 1 errors found:
 
-Error at line 2427, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The end operator may only be used in array subscripts
 ")})));
 end ArrayEnd2;
@@ -2504,12 +2504,12 @@ model Scalar2
             errorMessage="
 2 errors found:
 
-Error at line 2495, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[1, 1, 2]
     expected type is array with exactly 1 element
 
-Error at line 2496, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 4, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of '{{{{3}, {4}}}}' is Integer[1, 1, 2, 1]
     expected type is array with exactly 1 element
@@ -2571,12 +2571,12 @@ model Vector3
             errorMessage="
 2 errors found:
 
-Error at line 2563, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     expected type is scalar or vector-shaped array
 
-Error at line 2564, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{{{{1}, {2}}}, {{{3}, {4}}}}}' is Integer[1, 2, 1, 2, 1]
     expected type is scalar or vector-shaped array
@@ -2622,7 +2622,7 @@ model Matrix2
             errorMessage="
 1 errors found:
 
-Error at line 2615, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function matrix(): types of positional argument 1 and input A are not compatible
     type of '{{{1, 2}, {3, 4}}}' is Integer[1, 2, 2]
     expected type is scalar, vector or matrix-shaped array
@@ -2695,7 +2695,7 @@ model Linspace3
             errorMessage="
 1 errors found:
 
-Error at line 2688, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 5, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function linspace(): types of positional argument 3 and input n are not compatible
     type of 'c' is Real
     expected type is Integer
@@ -2716,7 +2716,7 @@ model Linspace4
             errorMessage="
 1 errors found:
 
-Error at line 2709, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 5, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
     'c' is of initial parameter variability
 ")})));
@@ -2733,7 +2733,7 @@ model Linspace5
             errorMessage="
 1 errors found:
 
-Error at line 2726, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Linspace5;
@@ -2827,7 +2827,7 @@ model Linspace8
             errorMessage="
 1 errors found:
 
-Error at line 2820, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 5, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
     'c' evaluates to 1
 ")})));
@@ -3008,7 +3008,7 @@ model Identity2
             errorMessage="
 1 errors found:
 
-Error at line 3001, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 2, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of A, size of declaration is scalar and size of binding expression is [3, 3]
 ")})));
 end Identity2;
@@ -3025,7 +3025,7 @@ model Identity3
             errorMessage="
 1 errors found:
 
-Error at line 3018, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Argument of identity() must be a scalar parameter Integer expression
     'n' is of discrete-time variability
 ")})));
@@ -3042,7 +3042,7 @@ model Identity4
             errorMessage="
 1 errors found:
 
-Error at line 3035, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function identity(): types of positional argument 1 and input n are not compatible
     type of '3.0' is Real
     expected type is Integer
@@ -3092,17 +3092,17 @@ model Diagonal2
             errorMessage="
 3 errors found:
 
-Error at line 3083, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     expected type is Real[:]
 
-Error at line 3084, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 3, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '1' is Integer
     expected type is Real[:]
 
-Error at line 3085, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 4, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{true, true}' is Boolean[2]
     expected type is Real[:]
@@ -3136,7 +3136,7 @@ model ScalarSize2
             errorMessage="
 1 errors found:
 
-Error at line 3129, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1} + Modelica.Constants.pi
     type of '{1}' is Integer[1]
     type of 'Modelica.Constants.pi' is Real
@@ -3297,7 +3297,7 @@ model InfArgsWithNamed
             errorMessage="
 1 errors found:
 
-Error at line 3290, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
+Error at line 2, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function ones(): no input matching named argument xxx found
 ")})));
 end InfArgsWithNamed;

@@ -1397,7 +1397,7 @@ end ExpandableConnectors.Expandable37;
             errorMessage="
 1 errors found:
 
-Error at line 1391, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Can not match size of connector to access introducing member in external connector
 ")})));
     end ExpandableErr1;
@@ -1421,7 +1421,7 @@ Error at line 1391, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1415, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Can not match size of connector to access introducing member in external connector
 ")})));
     end ExpandableErr2;
@@ -1445,7 +1445,7 @@ Error at line 1415, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1439, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Can not match size of connector to access introducing member in external connector
 ")})));
     end ExpandableErr3;
@@ -1469,7 +1469,7 @@ Error at line 1439, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1463, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Can not match size of connector to access introducing member in external connector
 ")})));
     end ExpandableErr3b;
@@ -1494,7 +1494,7 @@ Error at line 1463, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1488, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr4;
@@ -1519,7 +1519,7 @@ Error at line 1488, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1513, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr5;
@@ -1544,7 +1544,7 @@ Error at line 1513, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1538, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr6;
@@ -1569,7 +1569,7 @@ Error at line 1538, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1563, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr7;
@@ -1594,7 +1594,7 @@ Error at line 1563, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1588, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr8;
@@ -1626,7 +1626,7 @@ Error at line 1588, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1620, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 18, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
 ")})));
 	end ExpandableErr9;
@@ -1654,7 +1654,7 @@ Error at line 1620, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1648, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 14, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr10;
@@ -1679,7 +1679,7 @@ Error at line 1648, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1673, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr11;
@@ -1704,7 +1704,7 @@ Error at line 1673, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1698, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr12;
@@ -1734,7 +1734,7 @@ Error at line 1698, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1728, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
 ")})));
     end ExpandableErr13;
@@ -1761,7 +1761,7 @@ Error at line 1728, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1755, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
     end ExpandableErr14;
@@ -1788,7 +1788,7 @@ Error at line 1755, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1782, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
     end ExpandableErr15;
@@ -1824,7 +1824,7 @@ Error at line 1782, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1805, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 9, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
 ")})));
     end ExpandableErr16;
@@ -1860,7 +1860,7 @@ Error at line 1805, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/
             errorMessage="
 1 errors found:
 
-Error at line 1841, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 9, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
 ")})));
     end ExpandableErr17;
@@ -1887,7 +1887,7 @@ Error at line 1841, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/
             errorMessage="
 1 errors found:
 
-Error at line 1881, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE:
+Error at line 13, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo', CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE:
   Connecting an expandable connector to a non-expandable connector is not allowed
 ")})));
 	end ExpandableErr18;
@@ -1910,7 +1910,7 @@ Error at line 1881, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 1904, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 9, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Using member of expandable connector is only allowed if the member is connected to in the connection set
 ")})));
     end ExpandableErr19;
@@ -1931,7 +1931,7 @@ Error at line 1904, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/
             errorMessage="
 1 errors found:
 
-Error at line 1925, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 7, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Using member of expandable connector is only allowed if the member is connected to in the connection set
 ")})));
     end ExpandableErr20;
@@ -1956,7 +1956,7 @@ Error at line 1925, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/
             errorMessage="
 1 errors found:
 
-Error at line 1950, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 11, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Using member of expandable connector is only allowed if the member is connected to in the connection set
 ")})));
     end ExpandableErr21;
@@ -1989,7 +1989,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1982, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 19, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
 ")})));
 end ExpandableErr22;
@@ -2014,10 +2014,10 @@ end ExpandableErr22;
             errorMessage="
 2 errors found:
 
-Compliance error at line 2007, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 10, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported
 
-Compliance error at line 2008, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 11, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Nested expandable connectors where some of the intermediate expandable connectors are neither connected to or declared are not supported
 ")})));
     end ExpandableCompliance3;
@@ -2043,7 +2043,7 @@ Compliance error at line 2008, column 11, in file 'Compiler/ModelicaFrontEnd/tes
             errorMessage="
 1 errors found:
 
-Compliance error at line 2037, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 12, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expandable connectors containing a non-expandable connector component, that in turn contains an expandable connector, is not supported
 ")})));
     end ExpandableCompliance4;
@@ -2277,7 +2277,7 @@ end ExpandableConnectors.NestedExpandable6;
             errorMessage="
 1 errors found:
 
-Error at line 2271, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Connect introduces a copy of ec2 into a connector that is (possibly indirectly) connected back to ec2. This creates an infinite recursive structure, and is not allowed:
     connect(ec1.ec, ec2)
 ")})));
@@ -2301,11 +2301,11 @@ Error at line 2271, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 2 errors found:
 
-Error at line 2293, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 7, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Connect introduces a copy of ec2 into a connector that is (possibly indirectly) connected back to ec2. This creates an infinite recursive structure, and is not allowed:
     connect(ec1.ec, ec2)
 
-Error at line 2294, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 8, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Connect introduces a copy of ec3 into a connector that is (possibly indirectly) connected back to ec3. This creates an infinite recursive structure, and is not allowed:
     connect(ec2.ec, ec3)
 ")})));
@@ -2476,7 +2476,7 @@ end ExpandableConnectors.NestedExpandable11;
             errorMessage="
 1 errors found:
 
-Error at line 2271, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Can not connect to non-existing member of non-expandable connector in expandable connector
 ")})));
     end NestedExpandableError1;
@@ -2510,7 +2510,7 @@ Error at line 2271, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/E
             errorMessage="
 1 errors found:
 
-Error at line 2305, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 20, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Can not connect to non-existing member of non-expandable connector in expandable connector
 ")})));
     end NestedExpandableError2;
@@ -2588,22 +2588,22 @@ equation
             errorMessage="
 6 errors found:
 
-Error at line 2380, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 15, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expected array index of type 'Integer' found 'ExpandableConnectors.ArrayIndexationType2.E'
 
-Error at line 2381, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 16, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expected array index of type 'Integer' found 'Boolean'
 
-Error at line 2382, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 17, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expected array index of type 'Boolean' found 'ExpandableConnectors.ArrayIndexationType2.E'
 
-Error at line 2383, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 18, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expected array index of type 'Boolean' found 'Integer'
 
-Error at line 2384, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 19, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expected array index of type 'ExpandableConnectors.ArrayIndexationType2.E' found 'Integer'
 
-Error at line 2385, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 20, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Expected array index of type 'ExpandableConnectors.ArrayIndexationType2.E' found 'Boolean'
 ")})));
 end ArrayIndexationType2;
@@ -2677,13 +2677,13 @@ equation
             errorMessage="
 3 errors found:
 
-Error at line 2474, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Array index type of component introduced to external connector does not match other connections to same name in connection set
 
-Error at line 2476, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Array index type of component introduced to external connector does not match other connections to same name in connection set
 
-Error at line 2478, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 17, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Array index type of component introduced to external connector does not match other connections to same name in connection set
 ")})));
 end ArrayIndexationType4;

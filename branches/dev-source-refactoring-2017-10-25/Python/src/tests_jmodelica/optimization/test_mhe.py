@@ -136,7 +136,7 @@ class TestMHE:
                                '_MHE_v_y3':0.03,
                                '_MHE_mask':1.}
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_init(self):
         """
         """
@@ -151,7 +151,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         (o_value, o_i_value) = \
@@ -206,7 +207,7 @@ class TestMHE:
         small = 1e-6
         assert(N.abs(op.get('_MHE_beta') - 1.) < small) == True
     
-    @testattr(casadi = True)    
+    @testattr(casadi_base = True)    
     def test_matrix_set(self):
         """
         """
@@ -215,7 +216,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, 
                          self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, 
@@ -412,7 +414,7 @@ class TestMHE:
                                       [value_dict['_MHE_mask']])[0].getValue()
         return (o_value, o_i_value)
 
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_set_beta(self):
         """
         """
@@ -427,7 +429,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, 
                          self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, 
@@ -480,7 +483,7 @@ class TestMHE:
         assert(N.abs(o_value - 6.879) < small) == True
         assert(N.abs(o_i_value - 6.029999999999999) < small) == True
        
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_linearization(self):
         """
         """
@@ -488,7 +491,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, 
                          self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, 
@@ -713,7 +717,7 @@ class TestMHE:
         P = MHE_object.EKF_object.get_next_P(t, x, dx, u, c)
         return P
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_step(self):
         """
         """
@@ -741,7 +745,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, 0.1, 5, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         u = [('Tc', 350.)]
@@ -781,7 +786,7 @@ class TestMHE:
 
         return x_est
     
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def CSTR_test(self):
         """
         """
@@ -820,7 +825,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, sample_time, horizon, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         #Get the names for the inputs and measured variables
@@ -842,7 +848,7 @@ class TestMHE:
                 #Check that the estimation match the expected values
                 assert(N.abs(x_est_t[name] - res[name][k]) < small) == True
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def VDP_test(self):
         """
         """
@@ -902,7 +908,7 @@ class TestMHE:
                 #Check that the estimation match the expected values
                 assert(N.abs(x_est_t[name] - res[name][k]) < small) == True
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def alg_test(self):
         """
         """
@@ -969,7 +975,7 @@ class TestMHE:
                 #Check that the estimation match the expected values
                 assert(N.abs(x_est_t[name] - res[name][k]) < small) == True
         
-    @testattr(casadi = True)
+    @testattr(casadi_base = True)
     def test_recalculate_jacobian_functions(self):
         """
         """
@@ -1018,7 +1024,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "common_subexp_elim":False})
         MHE_object = MHE(op, sample_time, horizon, self.CSTR_x_0_guess, 
                          self.CSTR_dx_0, self.CSTR_c_0, self.CSTR_MHE_opts)
         
@@ -1155,7 +1162,8 @@ class TestMHE:
                                            accept_model = True, 
                                            compiler_options = \
                                            {"state_initial_equations":True,
-                                            "propagate_derivatives":False})
+                                            "propagate_derivatives":False,
+                                            "common_subexp_elim":False})
         MHE_opts = MHEOptions()
         #Process noise and input specifications
         MHE_opts['process_noise_cov'] = [('Tc', 1.)]

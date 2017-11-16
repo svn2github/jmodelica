@@ -74,11 +74,24 @@ aspect StepPrinter {
                 hc.printArgument(v, this, str, indent);
             }
 
+            public void printArgument(FFunctionVariable v, FExp arg, CodeStream str, String indent, HeadComputation hc) {
+                hc.printArgument(v, arg, this, str, indent);
+            }
+
+            public void printArgument(FFunctionVariable v, FFunctionCallLeft arg, CodeStream str, String indent,
+                    HeadComputation hc) {
+                hc.printArgument(v, arg, this, str, indent);
+            }
+
             public String returnName(FFunctionVariable v) {
                 return v.nameReturn_C();
             }
             
             public String name(FAbstractVariable v) {
+                return v.name_C();
+            }
+
+            public String name(FFunctionCallLeft v) {
                 return v.name_C();
             }
 

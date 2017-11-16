@@ -31,7 +31,7 @@ from pyfmi.common.core import *
 
 class Test_TrajectoryConstantInterpolationExtrapolation:
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_one_dimensional(self):
         t = N.array([1,2,3,4,5])
         x = N.array([[2,2.5,4,5,9]]).transpose()
@@ -61,7 +61,7 @@ class Test_TrajectoryConstantInterpolationExtrapolation:
         assert interp.eval([0, 1.5, 2.6, 6])[2,0] == 4.0
         assert interp.eval([0, 1.5, 2.6, 6])[3,0] == 9.0
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_two_dimensional(self):
         t = N.array([1,2,3,4,5])
         x = N.array([[2,2.5,4,5,9], [1,1.5,3,4,8]]).transpose()
@@ -110,7 +110,7 @@ class Test_TrajectoryConstantInterpolationExtrapolation:
 
 class Test_TrajectoryLinearInterpolationExtrapolation:
     
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_one_dimensional(self):
         t = N.array([1,2,3,4,5])
         x = N.array([[2,2.5,4,5,9]]).transpose()
@@ -127,7 +127,7 @@ class Test_TrajectoryLinearInterpolationExtrapolation:
         nose.tools.assert_almost_equal(interp.eval([0, 1.5, 2.6, 6])[2,0],3.4)
         nose.tools.assert_almost_equal(interp.eval([0, 1.5, 2.6, 6])[3,0],13.0)
         
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_two_dimensional(self):
         t = N.array([1,2,3,4,5])
         x = N.array([[2,2.5,4,5,9], [1,1.5,3,4,8]]).transpose()

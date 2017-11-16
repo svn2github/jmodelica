@@ -1020,12 +1020,7 @@ aspect InstanceErrorCheck {
                         val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
                     } else if (!val_mod.variability().parameterOrLess()) {
                         ASTNode.START_VALUE_NOT_PARAMETER.invoke(val_mod, icm.getName().name(), val_mod);
-                    } else if (val_mod.variability().initialParameterVariability()) {
-                        ASTNode.START_VALUE_INITIAL_PARAMETER.invoke(val_mod, icm.getName().name(), val_mod);
                     }
-					if (val_mod.isCircular() && !checkType.allowConstantNoValue())
-						error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", 
-								icm.getName().name(), val_mod);
 				}
 			}
 		}

@@ -29,7 +29,7 @@ try:
 except (NameError, ImportError):
     pass
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_ccpp():
     ccpp.run_demo(False)
 
@@ -38,7 +38,7 @@ def test_fourbar1():
     """Run the fourbar1 optimization example."""
     fourbar1.run_demo(False)
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_elimination_example():
     """Run the elimination example."""
     elimination_example.run_demo(False)

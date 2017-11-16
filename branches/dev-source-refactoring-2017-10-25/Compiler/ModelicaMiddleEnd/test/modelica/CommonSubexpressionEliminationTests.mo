@@ -33,6 +33,7 @@ model FunctionCall1
         TransformCanonicalTestCase(
             name="FunctionCall1",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall1
  Real y1;
@@ -66,6 +67,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionCall2",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall2
  Real y1;
@@ -100,6 +102,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionCall3",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall3
  Real y1;
@@ -134,6 +137,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionCall4",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall4
  Real y2;
@@ -167,6 +171,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionCall5",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall5
  Real y1;
@@ -216,6 +221,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionCall6",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall6
  Real y1;
@@ -265,6 +271,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionCall7",
             description="Elimination of duplicate function call",
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.FunctionCall7
 equation
@@ -308,6 +315,7 @@ equation
             name="ParameterFunctionCall1",
             description="",
             variability_propagation=false,
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.ParameterFunctionCall1
  parameter Real p1 = 1 /* 1 */;
@@ -357,6 +365,7 @@ equation
             name="ParameterFunctionCall2",
             description="",
             variability_propagation=false,
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.ParameterFunctionCall2
  parameter Real p1 = 1 /* 1 */;
@@ -447,6 +456,7 @@ model DuplicateTemporaries
             description="Verifies that temporary variables used for function calls aren't created twice.
                          This caused an inifinite loop. #5389.",
             variability_propagation=false,
+            common_subexp_elim=true,
             flatModel="
 fclass CommonSubexpressionEliminationTests.DuplicateTemporaries
  discrete Real x;
@@ -474,5 +484,270 @@ public
 end CommonSubexpressionEliminationTests.DuplicateTemporaries;
 ")})));
 end DuplicateTemporaries;
+
+
+package Math
+
+model Sin
+    Real x = sin(time);
+    Real y[2] = sin({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Sin",
+            description="Basic test of sin().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Sin
+ Real x;
+ Real y[2];
+equation
+ y[2] = sin(time * 2);
+ x = sin(time);
+end CommonSubexpressionEliminationTests.Math.Sin;
+")})));
+end Sin;
+
+model Cos
+    Real x = cos(time);
+    Real y[2] = cos({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Cos",
+            description="Basic test of cos().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Cos
+ Real x;
+ Real y[2];
+equation
+ y[2] = cos(time * 2);
+ x = cos(time);
+end CommonSubexpressionEliminationTests.Math.Cos;
+")})));
+end Cos;
+
+model Tan
+    Real x = tan(time);
+    Real y[2] = tan({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Tan",
+            description="Basic test of tan().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Tan
+ Real x;
+ Real y[2];
+equation
+ y[2] = tan(time * 2);
+ x = tan(time);
+end CommonSubexpressionEliminationTests.Math.Tan;
+")})));
+end Tan;
+
+model Asin
+    Real x = asin(time);
+    Real y[2] = asin({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Asin",
+            description="Basic test of asin().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Asin
+ Real x;
+ Real y[2];
+equation
+ y[2] = asin(time * 2);
+ x = asin(time);
+end CommonSubexpressionEliminationTests.Math.Asin;
+")})));
+end Asin;
+
+model Acos
+    Real x = acos(time);
+    Real y[2] = acos({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Acos",
+            description="Basic test of acos().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Acos
+ Real x;
+ Real y[2];
+equation
+ y[2] = acos(time * 2);
+ x = acos(time);
+end CommonSubexpressionEliminationTests.Math.Acos;
+")})));
+end Acos;
+
+model Atan
+    Real x = atan(time);
+    Real y[2] = atan({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Atan",
+            description="Basic test of atan().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Atan
+ Real x;
+ Real y[2];
+equation
+ y[2] = atan(time * 2);
+ x = atan(time);
+end CommonSubexpressionEliminationTests.Math.Atan;
+")})));
+end Atan;
+
+model Atan2
+    Real x = atan2(time,5);
+    Real y[2] = atan2({time,time*2}, {5,6});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Atan2",
+            description="Basic test of atan2().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Atan2
+ Real x;
+ Real y[2];
+equation
+ y[2] = atan2(time * 2, 6);
+ x = atan2(time, 5);
+end CommonSubexpressionEliminationTests.Math.Atan2;
+")})));
+end Atan2;
+
+model Sinh
+    Real x = sinh(time);
+    Real y[2] = sinh({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Sinh",
+            description="Basic test of sinh().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Sinh
+ Real x;
+ Real y[2];
+equation
+ y[2] = sinh(time * 2);
+ x = sinh(time);
+end CommonSubexpressionEliminationTests.Math.Sinh;
+")})));
+end Sinh;
+
+model Cosh
+    Real x = cosh(time);
+    Real y[2] = cosh({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Cosh",
+            description="Basic test of cosh().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Cosh
+ Real x;
+ Real y[2];
+equation
+ y[2] = cosh(time * 2);
+ x = cosh(time);
+end CommonSubexpressionEliminationTests.Math.Cosh;
+")})));
+end Cosh;
+
+model Tanh
+    Real x = tanh(time);
+    Real y[2] = tanh({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Tanh",
+            description="Basic test of tanh().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Tanh
+ Real x;
+ Real y[2];
+equation
+ y[2] = tanh(time * 2);
+ x = tanh(time);
+end CommonSubexpressionEliminationTests.Math.Tanh;
+")})));
+end Tanh;
+
+model Exp
+    Real x = exp(time);
+    Real y[2] = exp({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Exp",
+            description="Basic test of exp().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Exp
+ Real x;
+ Real y[2];
+equation
+ y[2] = exp(time * 2);
+ x = exp(time);
+end CommonSubexpressionEliminationTests.Math.Exp;
+")})));
+end Exp;
+
+model Log
+    Real x = log(time);
+    Real y[2] = log({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Log",
+            description="Basic test of log().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Log
+ Real x;
+ Real y[2];
+equation
+ y[2] = log(time * 2);
+ x = log(time);
+end CommonSubexpressionEliminationTests.Math.Log;
+")})));
+end Log;
+
+model Log10
+    Real x = log10(time);
+    Real y[2] = log10({time,time*2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Math_Log10",
+            description="Basic test of log10().",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.Math.Log10
+ Real x;
+ Real y[2];
+equation
+ y[2] = log10(time * 2);
+ x = log10(time);
+end CommonSubexpressionEliminationTests.Math.Log10;
+")})));
+end Log10;
+
+end Math;
 
 end CommonSubexpressionEliminationTests;

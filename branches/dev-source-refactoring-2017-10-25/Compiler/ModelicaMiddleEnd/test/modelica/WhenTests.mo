@@ -30,7 +30,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 24, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   The reinit() operator is only allowed in when equations
 ")})));
 end ReinitErr1;
@@ -51,7 +51,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 44, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   First argument to reinit() must be an access to a Real variable
 ")})));
 end ReinitErr2;
@@ -72,7 +72,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 65, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr3;
@@ -93,7 +93,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 86, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr4;
@@ -117,7 +117,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 102, column 16, in file 'ModelicaMiddleEnd/test/modelica/WhenTests.mo':
+Error at line 1, column 16, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   The variable x is assigned in reinit() clauses in more than one when clause:
     reinit(x, 1);
     reinit(x, 2);
@@ -141,7 +141,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 134, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr6;
@@ -162,7 +162,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 155, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr7;
@@ -183,7 +183,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 176, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   First argument to reinit() must be an access to a Real variable
 ")})));
 end ReinitErr8;
@@ -204,7 +204,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 197, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Built-in operator reinit() must have a continuous variable access as its first argument
 ")})));
 end ReinitErr9;
@@ -227,7 +227,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 217, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 5, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Built-in operator reinit() must have a continuous variable access as its first argument
 ")})));
 end ReinitErr10;
@@ -249,7 +249,7 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 242, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 7, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   The reinit() operator is only allowed in when equations
 ")})));
 end ReinitErr11;
@@ -273,7 +273,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 258, column 17, in file 'ModelicaMiddleEnd/test/modelica/WhenTests.mo':
+Error at line 1, column 17, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   The variable x[2] is assigned in reinit() clauses in more than one when clause:
     reinit(x[2], 1);
     reinit(x[2], 1);
@@ -298,7 +298,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 291, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 7, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is (no return value)
 ")})));
 end ReinitErr13;
@@ -319,7 +319,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 312, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
+Error at line 6, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr14;

@@ -433,6 +433,14 @@ AM_CONDITIONAL([WITH_PYTHON64], [test "x$PYTHON64_HOME" != x])
 
 AC_SUBST(ORIG_PATH)
 ORIG_PATH=$PATH
+AS_IF([test "x$JVMDLL_HOME" != x], 
+[jvmdll_home=["$JVMDLL_HOME"]])
+AC_SUBST(JVMDLL_HOME)
+JVMDLL_HOME=$jvmdll_home
+AS_IF([test "x$JVMDLL64_HOME" != x], 
+[jvmdll64_home=["$JVMDLL64_HOME"]])
+AC_SUBST(JVMDLL64_HOME)
+JVMDLL64_HOME=$jvmdll64_home
 
 # Checks for header files.
 AC_HEADER_STDC

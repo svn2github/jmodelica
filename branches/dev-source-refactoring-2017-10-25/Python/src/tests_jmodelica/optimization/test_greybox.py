@@ -36,7 +36,7 @@ def strnorm(StringnotNorm):
         StringnotNorm = StringnotNorm.replace(c, '')
     return StringnotNorm
     
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_op_structure():
     
     # Locate the model and file paths 
@@ -85,7 +85,7 @@ def test_op_structure():
     assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('(((0.499*sq((E-GreyBox_measured_E)))/GreyBox_r_E)+((0.499*sq((P-GreyBox_measured_P)))/GreyBox_r_P))')
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((500*log(GreyBox_r_E))+(sq((E(0.000000)-133.837))/GreyBox_r_E))+(500*log(GreyBox_r_P)))+(sq((P(0.000000)-138))/GreyBox_r_P))')
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_op_structure_sum():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -131,7 +131,7 @@ def test_op_structure_sum():
     print strnorm(GB.op.getObjective().getDescription())
     assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((((((sq((E(0.000000)-133.837))/GreyBox_r_E)+(sq((E(2.004008)-132.493))/GreyBox_r_E))+(sq((E(4.008016)-129.124))/GreyBox_r_E))+(3*log(GreyBox_r_E)))+(sq((P(0.000000)-138))/GreyBox_r_P))+(sq((P(2.004008)-141.156))/GreyBox_r_P))+(sq((P(4.008016)-132.906))/GreyBox_r_P))+(3*log(GreyBox_r_P)))')
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_identification_object():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -182,7 +182,7 @@ def test_identification_object():
     N.testing.assert_allclose(res.final('x20'), 40.696009354038303, 1e-3)
 
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_nonuniform_element_length():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -231,7 +231,7 @@ def test_nonuniform_element_length():
     
     assert N.allclose(GB.options['hs'][0:4], [ 0.00200803,  0.00401606,  0.00200803,  0.00401606])
     
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_compare():
     # Locate the model and file paths 
     file_path = os.path.join(get_files_path(),'Modelica',"DrumBoiler.mo")
@@ -314,7 +314,7 @@ def test_compare():
     assert identification.calculate_risk(identification.get_cost()-idObj1.get_cost(),1,2) == result[0]['risk'] 
     
 
-@testattr(casadi = True)
+@testattr(casadi_base = True)
 def test_risk_calculation():
 	
     idObj = Identification([],[],[],0)

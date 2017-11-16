@@ -897,5 +897,11 @@ y = x_start;
 z = x^2;
 end NonLinear7;
 
+model RealTimeSolver1
+    Real x(start=0.9);
+equation
+    x^2 + x = 2;
+end RealTimeSolver1;
+
 end NonLinear;
 

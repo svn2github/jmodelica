@@ -396,12 +396,21 @@ aspect NodeTypes {
     syn boolean Element.isShortClassDecl() = false;
     eq ShortClassDecl.isShortClassDecl()   = true;
 
+    syn ShortClassDecl Element.asShortClassDecl() {
+        throw new UnsupportedOperationException("asShortClassDecl() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq ShortClassDecl.asShortClassDecl() = this;
+
     /**
      * Is this element a full class decl?
      */
     syn boolean Element.isFullClassDecl() = false;
     eq FullClassDecl.isFullClassDecl()    = true;
 
+    syn FullClassDecl Element.asFullClassDecl() {
+        throw new UnsupportedOperationException("asFullClassDecl() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq FullClassDecl.asFullClassDecl() = this;
 }
 
 

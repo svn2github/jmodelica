@@ -19,6 +19,7 @@
 %goal exp;
 %goal element;
 %goal abstract_equation;
+%goal argument;
 
 %header {:
  package $PARSER_PACKAGE$;

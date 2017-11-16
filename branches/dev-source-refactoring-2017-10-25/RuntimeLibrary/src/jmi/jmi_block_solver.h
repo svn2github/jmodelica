@@ -103,7 +103,8 @@ typedef enum {
      JMI_SIMPLE_NEWTON_SOLVER, /* Only used for testing at some point. Not maintained. */
      JMI_KINSOL_SOLVER,
      JMI_LINEAR_SOLVER,
-     JMI_MINPACK_SOLVER
+     JMI_MINPACK_SOLVER,
+     JMI_REALTIME_SOLVER
 } jmi_block_solver_kind_t;
 
 /** \brief Scaling mode for the residuals in non-linear solver*/

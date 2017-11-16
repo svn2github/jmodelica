@@ -86,7 +86,7 @@ end ConnectTests.ConnectTest1;
             errorMessage="
 1 errors found:
 
-Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo',
+Error at line 17, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo',
 In component c2:
   Cannot find class or component declaration for cc
 ")})));
@@ -1085,7 +1085,7 @@ equation
             errorMessage="
 1 warnings found:
 
-Warning at line 1079, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Warning at line 5, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Ignored connection from connector to itself
 ")})));
 end ConnectTest25;
@@ -1603,7 +1603,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1597, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
+Error at line 13, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
   Connecting to an instance of a non-connector type is not allowed
 ")})));
 end ConnectErrTest1;
@@ -1622,10 +1622,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1616, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
   Connecting to an instance of a non-connector type is not allowed
 
-Error at line 1616, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
+Error at line 5, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
   Connecting to an instance of a non-connector type is not allowed
 ")})));
 end ConnectErrTest2;
@@ -1653,7 +1653,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1647, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 14, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest3;
@@ -1691,7 +1691,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1685, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 24, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest4;
@@ -1718,7 +1718,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1712, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest5;
@@ -1740,7 +1740,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1734, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+Error at line 8, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', ARRAY_SIZE_MISMATCH_IN_CONNECT:
   Sizes do not match in connection, size of 'a1' is [3] and size of 'a2[1:2]' is [2]
 ")})));
 end ConnectErrTest6;
@@ -1767,7 +1767,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1761, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest7;
@@ -1794,7 +1794,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1788, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest8;
@@ -1821,7 +1821,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1815, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 13, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest9;
@@ -1846,7 +1846,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1839, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 ")})));
 end ConnectErrTest10;
@@ -1877,7 +1877,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1871, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
+Error at line 17, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest11;
@@ -1903,7 +1903,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1896, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 12, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 ")})));
 end ConnectErrTest12;
@@ -1937,16 +1937,16 @@ equation
             errorMessage="
 4 errors found:
 
-Error at line 1921, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 11, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 
-Error at line 1923, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 13, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 
-Error at line 1927, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 17, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 
-Error at line 1929, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 19, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 ")})));
 end ConnectErrTest13;
@@ -1980,7 +1980,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1970, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 17, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Could not evaluate test expression for if equation containing connect clause
 ")})));
 end ConnectErrTest14;
@@ -2528,10 +2528,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 2521, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 12, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Argument of inStream() must be a stream variable
 
-Error at line 2522, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 13, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Argument of actualStream() must be a stream variable
 ")})));
 end StreamTest3;
@@ -2558,10 +2558,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 2551, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 12, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Argument of inStream() must be a stream variable
 
-Error at line 2552, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 13, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Argument of actualStream() must be a stream variable
 ")})));
 end StreamTest4;
@@ -2582,10 +2582,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 2575, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 6, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Argument of inStream() must be a stream variable
 
-Error at line 2576, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 7, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   Argument of actualStream() must be a stream variable
 ")})));
 end StreamTest5;
@@ -2737,10 +2737,10 @@ model Cardinality3
             errorMessage="
 1 errors and 1 warnings found:
 
-Compliance error at line 2721, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', INCORRECT_USE_OF_CARDINALITY:
+Compliance error at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', INCORRECT_USE_OF_CARDINALITY:
   The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()
 
-Warning at line 2721, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', DEPRECATED_CARDINALITY:
+Warning at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo', DEPRECATED_CARDINALITY:
   The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
 ")})));
 end Cardinality3;
@@ -2797,7 +2797,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2787, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
+Error at line 9, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ConnectTests.mo':
   The argument of cardinality() must be a scalar reference to a connector
 ")})));
 end Cardinality5;

@@ -75,7 +75,7 @@ def sol_repeating_events(t, d=1):
 
 
 class TestDelay:
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_next_event(self):
         # Test bug where delay in inactive if branch does not compute next time event correctly. #5692.
         res = compile_and_simulate('TestNextEvent', 2)
@@ -94,14 +94,14 @@ class TestFixedDelay:
     def compile_and_simulate(self, class_name, *args, **kwargs):
         return compile_and_simulate(class_name+self.get_class_postfix(), *args, filename=path_to_fixed_delay_mo, **kwargs)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_delay_time(self):
         res = compile_and_simulate('TestDelayTime', final_time = 5, maxh = 0.5)
         t, x = res['time'], res['x']
         x_expected = N.maximum(0, t-1)
         assert_close(x, x_expected, 1e-8)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_delay_quadratic(self):
         fmu = compile_and_load('TestDelayQuadratic')
         res = simulate(fmu, final_time = 5, maxh = 0.25)
@@ -117,21 +117,21 @@ class TestFixedDelay:
 
         assert_close(x, x_expected, 0.1)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_integrate_delayed_time(self):
         res = self.compile_and_simulate('TestIntegrateDelayedTime', final_time = 5)
         t, x = res['time'], res['x']
         x_expected = N.maximum(0, t-1)**2/2
         assert_close(x, x_expected, 1e-4)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_integrate_delayed_quadratic(self):
         res = self.compile_and_simulate('TestIntegrateDelayedQuadratic', final_time = 5)
         t, x = res['time'], res['x']
         x_expected = N.maximum(0,t-1)**3/3
         assert_close(x, x_expected, 0.2)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_sinusoid(self):
         res = self.compile_and_simulate('TestSinusoid', final_time = 20)
         t, x = res['time'], res['x']
@@ -139,7 +139,7 @@ class TestFixedDelay:
         inds = (t >= 0.5)
         assert_close(x[inds], x_expected[inds], 0.1)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_sinusoid_noevent(self):
         # Check that we get the same answer as above with noEvent
         res = self.compile_and_simulate('TestSinusoidNoEvent', final_time = 20)
@@ -148,7 +148,7 @@ class TestFixedDelay:
         inds = (t >= 0.5)
         assert_close(x[inds], x_expected[inds], 0.1)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_short_delay(self):
         fmu = self.compile_and_load('TestShortDelay')
         fmu.set('d', 1e-3)
@@ -169,7 +169,7 @@ class TestFixedDelay:
             assert_close(x, x_expected, 1e-3)
             assert len(t) < 200
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_commute(self):
         res = self.compile_and_simulate('TestCommute', final_time = 10, maxh = 1/5.5)
         t, x_delay, delay_x = res['time'], res['x_delay'], res['delay_x']
@@ -177,7 +177,7 @@ class TestFixedDelay:
         assert_close(x_delay, x_expected, 1e-2)
         assert_close(delay_x, x_expected, 1e-2)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_repeating_events(self):
         fmu = self.compile_and_load('TestRepeatingEvents')
 
@@ -193,7 +193,7 @@ class TestFixedDelay:
             assert_close(t[inds], [1,2,3,4,5], 1e-7)
             assert_close(x, x_expected, 1e-7)
 
-    #@testattr(stddist = True)
+    #@testattr(stddist_full = True)
     @nottest # why is it not working?
     def test_repeat_noevent(self):
         res = self.compile_and_simulate('TestRepeatNoEvent', final_time = 5.5, maxh = 1/10.5)
@@ -225,7 +225,7 @@ class TestFixedDelaySpatialDistRev(TestFixedDelay):
     def get_class_postfix(self):
         return "(redeclare block FD=FixedDelaySDReverse)"
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_repeat_noevent():
     res = compile_and_simulate('TestRepeatNoEvent', final_time = 5.5, maxh = 1/10.5)
     t, x = res['time'], res['x']
@@ -237,14 +237,14 @@ def test_repeat_noevent():
     assert sum(N.abs(x-x_expected) > 1e-8) <= 6
 
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_variably_delayed_time():
     res = compile_and_simulate('TestVariablyDelayedTime', final_time = 5, maxh = 0.1)
     t, x = res['time'], res['x']
     x_expected = N.maximum(0,t-(N.sin(5*t)*0.5+0.5))
     assert_close(x, x_expected, 1e-7)
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_state_dependent_delay_time():
     res = compile_and_simulate('TestStateDependentDelay', final_time = 0.75, maxh = 0.1)
     t, x = res['time'], res['x']
@@ -253,14 +253,14 @@ def test_state_dependent_delay_time():
     x_expected[t > 0.5] = x_expected2[t > 0.5]
     assert_close(x, x_expected, 1e-3)
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_delay_starting_at_zero():
     res = compile_and_simulate('TestDelayStartingAtZero', final_time = 5, maxh = 0.1)
     t, x = res['time'], res['x']
     x_expected = N.exp(-t)
     assert_close(x, x_expected, 1e-2)
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_delay_starting_at_zero_no_event():
     # Check that we get the same answer as above with noEvent
     res = compile_and_simulate('TestDelayStartingAtZeroNoEvent', final_time = 5, maxh = 0.1)
@@ -268,7 +268,7 @@ def test_delay_starting_at_zero_no_event():
     x_expected = N.exp(-t)
     assert_close(x, x_expected, 1e-2)
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_variable_delay_events():
     res = compile_and_simulate('TestVariableDelayEvents', final_time = 4, maxh = 0.1)
     t, x = res['time'], res['x']
@@ -283,7 +283,7 @@ def test_variable_delay_events():
     assert_close(t[inds], N.array([0.43439307, 0.92808171, 1.0, 1.47239509,
                                    1.64366485, 2.24956004, 2.67833465]), 1e-7)
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_delay_going_to_zero():
     res = compile_and_simulate('TestDelayGoingToZero', final_time = 2, maxh = 0.1)
     t, x = res['time'], res['x']
@@ -299,7 +299,7 @@ def check_zeno_repeat(t, x, ownevents=True):
     tau = 1-t[sw]
     if ownevents: assert_close(tau[1:], N.sqrt(0.5)*tau[0:-1], 1e-7)    
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_zeno_repeat():
     res = compile_and_simulate('TestZenoRepeat', final_time = 2, maxh = 0.1)
     t, x = res['time'], res['x']
@@ -316,7 +316,7 @@ def check_zeno_repeat_noevent(t, x, ownevents=True):
     assert all(N.minimum(xe1, xe2) <= x)
     assert all(x <= N.maximum(xe1, xe2))
 
-@testattr(stddist = True)
+@testattr(stddist_full = True)
 def test_zeno_repeat_noevent():
     res = compile_and_simulate('TestZenoRepeatNoEvent', final_time = 0.75, maxh = 1/20.5)
     t, x = res['time'], res['x']
@@ -329,7 +329,7 @@ def sol_repeating_events2(t, d=1):
     x_expected[inds+1] = N.mod(t[inds]+1e-7, d)
     return x_expected
 
-#@testattr(stddist = True)
+#@testattr(stddist_full = True)
 @nottest
 def test_multiple_delays():
     res = compile_and_simulate('TestMultipleDelays', final_time = 10)
@@ -357,28 +357,28 @@ class TestSpatialDistribution:
     def compile_and_simulate(self, class_name, *args, **kwargs):
         return compile_and_simulate(class_name+self.get_class_postfix(), *args, filename=path_to_spatialdist_mo, **kwargs)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_forward_flow(self):
         res = self.compile_and_simulate('TestForwardFlow', final_time = 2, maxh = 0.01)
         t, x = res['time'], res['x']
         x_expected = switch_signal(t, N.sqrt(N.maximum(0, t**2-1)), 1+t*0, t-1);
         assert_close(x, x_expected, 1e-2)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_back_flow(self):
         res = self.compile_and_simulate('TestBackFlow', final_time = 3, maxh = 0.01)
         t, x = res['time'], res['x']
         x_expected = (t < 1)*t + (t >= 1)*((t<2)*(1-N.sqrt(N.maximum(0,t-1))) + (t>=2)*(2-t))
         assert_close(x, x_expected, 1e-2)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_initial_contents(self):
         res = self.compile_and_simulate('TestInitialContents', final_time = 2, maxh = 0.01)
         t, x = res['time'], res['x']
         x_expected = switch_signal(t, switch_signal(t, N.minimum(4*t, (0.75-t)/0.5), (1-t)/0.25, 0.75-t), -1, 1-t)
         assert_close(x, x_expected, 1e-8)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_reversing_flow(self):
         res = self.compile_and_simulate('TestReversingFlow', final_time = 10, maxh = 0.1)
         t, x = res['time'], res['x']
@@ -387,7 +387,7 @@ class TestSpatialDistribution:
         assert_close(x, x_expected, 1e-15)
         assert_close(t[inds], N.pi*N.array([1.0/2, 5.0/6, 1+1.0/2, 1+5.0/6, 2+1.0/2, 2+5.0/6]), 1e-7)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_sinusoid(self):
         res = self.compile_and_simulate('TestSinusoid', final_time = 5, maxh = 0.1)
         t, x = res['time'], res['x']
@@ -395,14 +395,14 @@ class TestSpatialDistribution:
         inds = (t >= 0.5)
         assert_close(x[inds], x_expected[inds], 0.1)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_feed_loop(self, model_name = 'TestFeedLoop'):
         res = self.compile_and_simulate(model_name, final_time = 10, maxh = 0.1)
         t, x = res['time'], res['x']
         x_expected = switch_signal(t, N.mod(4.5*N.sin(t)+0.5,2)-0.5, -(N.mod(4.5*N.sin(t)-0.5,2)-0.5), N.sin(N.pi*4.5*N.sin(t)))
         assert_close(x, x_expected, 1e-8)
 
-    @testattr(stddist = True)
+    @testattr(stddist_full = True)
     def test_feed_loop_no_pvel_events(self):
         if self.get_class_postfix() != "":
             def get_class_postfix():

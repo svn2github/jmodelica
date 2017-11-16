@@ -792,4 +792,34 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end RecordArray10;
 
+model RecordArray11
+    record R
+        Boolean b;
+    end R;
+    
+    R[1] r2 = {R(time>1)};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray11",
+            description="Test for bug in #5487",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _r2_1_b_0 = _sw(0);
+    pre_r2_1_b_0 = _r2_1_b_0;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray11;
+
 end CCodeGenArrayTests;
