@@ -22,6 +22,8 @@
 
 #include <stdio.h>
 
+#define JMI_MEMORY_POOL_SIZE (1024*1024)
+
 typedef struct jmi_dynamic_function_memory_t {
     char* cur_pos;
     char* start_pos;
@@ -29,28 +31,34 @@ typedef struct jmi_dynamic_function_memory_t {
     size_t new_block_size;
     void* memory_block;
     size_t nbr_trailing_memory;
+    size_t cur_trailing_memory;
     char** trailing_memory; /* Temporary usage when the memory block is all used up */
 } jmi_dynamic_function_memory_t;
 
 typedef struct jmi_local_dynamic_function_memory_t {
     jmi_dynamic_function_memory_t* mem;
     char* start_pos;
+    size_t cur_trailing_memory;
 } jmi_local_dynamic_function_memory_t;
 
 
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
-    jmi_local_dynamic_function_memory_t dyn_mem = {NULL, NULL};
+    jmi_local_dynamic_function_memory_t dyn_mem = {NULL, NULL, 0};
+
+#define JMI_DYNAMIC_INIT_GLOBAL() \
+    jmi_local_dynamic_function_memory_t dyn_mem = {jmi->dyn_fcn_mem, jmi->dyn_fcn_mem->start_pos, jmi->dyn_fcn_mem->cur_trailing_memory};
 
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
-#define JMI_DYNAMIC_FREE() \
-    jmi_dynamic_function_free(&dyn_mem);
+#define JMI_DYNAMIC_FREE() jmi_dynamic_function_free(&dyn_mem);
 
 /* Evaluate and assign expression only if computed flag is false. Sets computed flag to true. */
 #define JMI_CACHED(var, exp) ((!var##_computed && (var##_computed = 1)) ? (var = exp) : var)
 
 
 jmi_dynamic_function_memory_t* jmi_dynamic_function_memory();
+
+void jmi_dynamic_function_resize(jmi_dynamic_function_memory_t* mem);
 
 /* Creates a memory pool and returns the allocated object */
 jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t block);

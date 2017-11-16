@@ -306,7 +306,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->nbr_event_iter = 0;
     jmi_->nbr_consec_time_events = 0;
 
-    jmi_->dyn_fcn_mem = jmi_dynamic_function_pool_create(1024*1024);
+    jmi_->dyn_fcn_mem = jmi_dynamic_function_pool_create(JMI_MEMORY_POOL_SIZE);
 
     return 0;
 }

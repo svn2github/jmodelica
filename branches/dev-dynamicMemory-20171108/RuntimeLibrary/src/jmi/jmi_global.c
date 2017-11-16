@@ -212,7 +212,8 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  */
 void* jmi_global_calloc(size_t n, size_t s) {
     jmi_t* jmi = jmi_get_current();
-    /* VERIFY HOW LONG IT HAS TO LIVE */
+    /* VERIFY HOW LONG IT HAS TO LIVE, HOW IS THIS REGISTERED TO THE LOCAL BLOCK? 
+     * ADD INITIALIZATION USING THE JMI STRUCT */
     return _jmi_dynamic_function_pool_alloc(jmi->dyn_fcn_mem, n*s);
 }
 
