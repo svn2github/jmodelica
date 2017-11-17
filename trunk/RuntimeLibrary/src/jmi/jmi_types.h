@@ -25,9 +25,6 @@
 #define _JMI_TYPES_H
 
 #include <stdio.h>
-#include "jmi_dyn_mem.h"
-
-void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block);
 
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
@@ -64,115 +61,6 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define JMI_ABS(X)   ((X) < (0) ? (-1*(X)) : (X))
 #define JMI_SIGN(X)  ((X) >= (0) ? 1 : (-1))
-
-#define JMI_DEF(TYPE, NAME) \
-    JMI_DEF_##TYPE(NAME)
-#define JMI_DEF_REA(NAME) \
-    jmi_real_t NAME = 0;
-#define JMI_DEF_INT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_BOO(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_ENU(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_STR(NAME) \
-    jmi_string_t NAME = "";
-#define JMI_DEF_EXO(NAME) \
-    jmi_extobj_t NAME = NULL;
-
-#define JMI_DEF_REA_EXT(NAME) \
-    JMI_DEF_REA(NAME)
-#define JMI_DEF_INT_EXT(NAME) \
-    jmi_int_t NAME = 0;
-#define JMI_DEF_BOO_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_ENU_EXT(NAME) \
-    JMI_DEF_INT_EXT(NAME)
-#define JMI_DEF_STR_EXT(NAME) \
-    JMI_DEF_STR(NAME)
-#define JMI_DEF_EXO_EXT(NAME) \
-    JMI_DEF_EXO(NAME)
-
-/* Max allowed length of strings */
-#define JMI_STR_MAX 16 * 1024 - 1
-
-/* Declaration for string */
-#define JMI_DEF_STR_STAT(NAME, LEN) \
-    size_t NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
-    char NAME[JMI_MIN(LEN, JMI_STR_MAX) + 1];
-#define JMI_DEF_STR_DYNA(NAME) \
-    size_t NAME##_len; \
-    jmi_string_t NAME;
-
-/* Initialization of strings from expressions */
-#define JMI_INI_STR_STAT(NAME) \
-    NAME[0] = '\0';
-#define JMI_INI_STR_DYNA(NAME, LEN) \
-    NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
-    NAME = jmi_dynamic_function_pool_alloc(&dyn_mem, JMI_MIN(LEN, JMI_STR_MAX) + 1); \
-    JMI_INI_STR_STAT(NAME)
-
-/* Initialization of function variables */
-#define JMI_INI(TYPE, NAME) \
-    JMI_INI_##TYPE(NAME)
-#define JMI_INI_STR(NAME) \
-    NAME = "";
-
-/* Assign (copy) SRC to DEST */
-#define JMI_ASG(TYPE, DEST, SRC) \
-    JMI_ASG_##TYPE(DEST, SRC)
-#define JMI_ASG_GEN_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        jmi_array_ref_1(DEST,i) = jmi_array_val_1(SRC,i); \
-      }\
-    }
-
-/* Assign string not in z vector */
-#define JMI_ASG_STR(DEST,SRC) \
-    jmi_set_str(&(DEST), SRC, &dyn_mem);
-    /* jmi_dynamic_add_pointer(&dyn_mem, DEST); */
-
-/* Assign string in z vector */
-#define JMI_ASG_STR_Z(DEST,SRC) \
-    free(DEST); \
-    jmi_set_str(&(DEST), SRC, NULL);
-    
-/* Assign string array not in z vector */
-#define JMI_ASG_STR_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        JMI_ASG_STR(jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
-      }\
-    }
-    
-/* Handle return value */
-#define JMI_RET(TYPE, DEST, SRC) \
-    if (DEST != NULL) { JMI_RET_##TYPE(DEST, SRC) }
-    
-/* Put return value in return variable in function */
-#define JMI_RET_GEN(DEST, SRC) \
-    *DEST = SRC;
-#define JMI_RET_STR(DEST, SRC) \
-    jmi_set_str(DEST, SRC, &dyn_mem);
-#define JMI_RET_STR_ARR(DEST, SRC) \
-    { \
-      int i; \
-      for (i = 1; i <= DEST->num_elems; i++) { \
-        JMI_RET_STR(&jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
-      }\
-    }
-
-/* Length of string */
-#define JMI_LEN(NAME) strlen(NAME)
-    
-/* Pointer to end of string */
-#define JMI_STR_END(DEST) DEST + JMI_LEN(DEST)
-    
-/* Number of empty bytes at end of string */
-#define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
 
 typedef int BOOL;
 
