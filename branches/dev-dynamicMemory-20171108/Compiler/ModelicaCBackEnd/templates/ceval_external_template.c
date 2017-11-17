@@ -113,7 +113,7 @@ jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
 
 void* jmi_global_calloc(size_t n, size_t s)
 {
-    return _jmi_dynamic_function_pool_alloc(dyn_fcn_mem, n*s);
+    return jmi_dynamic_function_pool_direct_alloc(dyn_fcn_mem, n*s);
 }
 
 void JMCEVAL_setup() {
