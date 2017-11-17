@@ -3109,8 +3109,7 @@ void func_CCodeGenTests_CFunctionTest17_F1_def0(jmi_real_t x_v, jmi_array_t* y_a
     jmi_array_ref_1(y_a, 2) = 2 * x_v;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_CFunctionTest17_F2_def1(y_a, tmp_1);
-    jmi_array_ref_1(y_a, 1) = (jmi_array_val_1(tmp_1, 1));
-    jmi_array_ref_1(y_a, 2) = (jmi_array_val_1(tmp_1, 2));
+    JMI_ASG(GEN_ARR, y_a, tmp_1)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -16411,8 +16410,7 @@ void func_CCodeGenTests_StringOperations10_f2_def0(jmi_real_t x_v, jmi_real_t* y
     JMI_ASG(STR, jmi_array_ref_1(s_a, 2), \"str\")
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_StringOperations10_f1_def1(s_a, tmp_1);
-    JMI_ASG(STR, jmi_array_ref_1(s_a, 1), jmi_array_val_1(tmp_1, 1))
-    JMI_ASG(STR, jmi_array_ref_1(s_a, 2), jmi_array_val_1(tmp_1, 2))
+    JMI_ASG(STR_ARR, s_a, tmp_1)
     jmi_free_str_arr(tmp_1);
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
