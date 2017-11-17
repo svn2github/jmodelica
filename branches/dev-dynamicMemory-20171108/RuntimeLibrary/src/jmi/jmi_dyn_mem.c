@@ -65,6 +65,10 @@ void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local
 void *_jmi_dynamic_function_pool_alloc(jmi_dynamic_function_memory_t* mem, size_t block) {
     void *ptr = NULL;
     
+    if (mem == NULL) {
+        mem = jmi_dynamic_function_memory();
+    }
+    
     if (jmi_dynamic_function_pool_available(mem) < block) { /* Not enough memory in the block */
         
         /* Move current position to block end, necessary */
