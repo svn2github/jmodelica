@@ -697,6 +697,7 @@ aspect Scalarization {
             Index cell = index.subIndex(index.ndims() - comp.ndims());
             FVariable fv = comp.copyForName(s, name, cell);
             if (bExp != null) {
+                bExp.resetOriginalReferences(); /* Workaround for test RecordArray12 */
                 if (comp.keepBExp(variability, bExp)) {
                     fv.setBindingExp(bExp);
                 } else {
