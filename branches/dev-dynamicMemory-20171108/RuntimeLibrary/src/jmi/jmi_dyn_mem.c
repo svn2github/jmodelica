@@ -23,14 +23,13 @@
 #include <string.h>
 
 
-jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t block) {
+jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t pool_size) {
     jmi_dynamic_function_memory_t* mem = (jmi_dynamic_function_memory_t*)calloc(1, sizeof(jmi_dynamic_function_memory_t));
     
-    mem->memory_block = (void*)calloc(1, block);
+    mem->memory_block = (void*)calloc(1, pool_size);
     mem->start_pos = (char*)(mem->memory_block);
     mem->cur_pos = mem->start_pos;
-    mem->block_size = block;
-    mem->new_block_size = 0;
+    mem->block_size = pool_size;
     mem->trailing_memory = NULL;
     mem->nbr_trailing_memory = 0;
     mem->cur_trailing_memory = 0;
@@ -59,10 +58,10 @@ void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local
         jmi_dynamic_function_init(local_block);
     }
     
-    return _jmi_dynamic_function_pool_alloc(local_block->mem, block);
+    return jmi_dynamic_function_pool_direct_alloc(local_block->mem, block);
 }
 
-void *_jmi_dynamic_function_pool_alloc(jmi_dynamic_function_memory_t* mem, size_t block) {
+void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem, size_t block) {
     void *ptr = NULL;
     
     if (mem == NULL) {
@@ -78,7 +77,6 @@ void *_jmi_dynamic_function_pool_alloc(jmi_dynamic_function_memory_t* mem, size_
             mem->trailing_memory = (char**)calloc(1, sizeof(char*));
             mem->trailing_memory[0] = (char*)calloc(1, block);
             mem->nbr_trailing_memory = 1;
-            mem->new_block_size += block*2;
         } else {
             mem->nbr_trailing_memory = mem->nbr_trailing_memory + 1;
             mem->trailing_memory = (char**)realloc(mem->trailing_memory, mem->nbr_trailing_memory*sizeof(char*));
@@ -107,15 +105,12 @@ void jmi_dynamic_function_resize(jmi_dynamic_function_memory_t* mem) {
     if (mem->trailing_memory != NULL) {
         free(mem->trailing_memory);
         mem->trailing_memory = NULL;
-    }
     
-    /* If more memory is request, allocate larger block */
-    if (mem->new_block_size != 0) {
-        mem->block_size = 2*(mem->block_size+mem->new_block_size);
+        /* More memory has been used, allocate larger block */
+        mem->block_size = 2*(mem->block_size);
         mem->memory_block = (void*)realloc(mem->memory_block, mem->block_size);
         mem->start_pos = (char*)(mem->memory_block);
         mem->cur_pos = mem->start_pos;
-        mem->new_block_size = 0;
     }
 }
 

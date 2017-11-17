@@ -28,7 +28,6 @@ typedef struct jmi_dynamic_function_memory_t {
     char* cur_pos;
     char* start_pos;
     size_t block_size;
-    size_t new_block_size;
     void* memory_block;
     size_t nbr_trailing_memory;
     size_t cur_trailing_memory;
@@ -46,33 +45,90 @@ typedef struct jmi_local_dynamic_function_memory_t {
 #define JMI_DYNAMIC_INIT() \
     jmi_local_dynamic_function_memory_t dyn_mem = {NULL, NULL, 0};
 
-#define JMI_DYNAMIC_INIT_GLOBAL() \
-    jmi_local_dynamic_function_memory_t dyn_mem = {jmi->dyn_fcn_mem, jmi->dyn_fcn_mem->start_pos, jmi->dyn_fcn_mem->cur_trailing_memory};
-
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() jmi_dynamic_function_free(&dyn_mem);
 
 /* Evaluate and assign expression only if computed flag is false. Sets computed flag to true. */
 #define JMI_CACHED(var, exp) ((!var##_computed && (var##_computed = 1)) ? (var = exp) : var)
 
+/**
+ * \brief Retrieves the memory pool from the jmi struct
+ *
+ * @return The memory pool.
+ */
+jmi_dynamic_function_memory_t* jmi_dynamic_function_memory(void);
 
-jmi_dynamic_function_memory_t* jmi_dynamic_function_memory();
-
+/**
+ * \brief Resizes the memory pool.
+ *
+ * @param mem (Input) The memory pool to be resized.
+ */
 void jmi_dynamic_function_resize(jmi_dynamic_function_memory_t* mem);
 
-/* Creates a memory pool and returns the allocated object */
-jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t block);
-/* Destroys the memory pool */
+
+/**
+ * \brief Creates a memory pool and returns the allocated object
+ *
+ * This function creates and returns a memory pool given the size
+ * of the pool. This pool is then used when dynamic memory is requested
+ * during simulation.
+ *
+ * @param pool_size (Input) The size of the memory pool.
+ * @return The memory pool.
+ */
+jmi_dynamic_function_memory_t* jmi_dynamic_function_pool_create(size_t pool_size);
+
+/**
+ * \brief Destroys the memory pool
+ * 
+ * @param A pointer to the memory pool to be destroyed.
+ */
 void jmi_dynamic_function_pool_destroy(jmi_dynamic_function_memory_t* mem);
 
-/* Allocates memory from the memory pool (i.e. no actually system allocating takes place if there is memory available in the pool */
-void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t block);
-/* Internal method for the allocation */
-void *_jmi_dynamic_function_pool_alloc(jmi_dynamic_function_memory_t* mem, size_t block);
+/**
+ * \brief Allocates memory from the memory pool (given a local block)
+ * 
+ * This function tries to allocate memory from the memory pool. If
+ * there is not enough memory available in the pool, an additional
+ * allocation is done to accomodate the request. The memory pool is
+ * extended in jmi_dynamic_function_init() if this extra allocation
+ * was necessary.
+ * 
+ * @param local_block A pointer to the local block
+ * @param memory_size Size of the requested memory
+ */
+void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t memory_size);
 
-/* Initializes the local block to point to the current place in memory pool */
+/**
+ * \brief Allocates memory from the memory pool
+ * 
+ * This function tries to allocate memory from the memory pool. If
+ * there is not enough memory available in the pool, an additional
+ * allocation is done to accomodate the request. The memory pool is
+ * extended in jmi_dynamic_function_init() if this extra allocation
+ * was necessary.
+ * 
+ * @param mem The memory pool
+ * @param memory_size Size of the requested memory
+ */
+void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem, size_t memory_size);
+
+/**
+ * \brief Initializes the local block with the memory pool
+ *
+ * This function initializes the local block to point
+ * to the current place in the memory pool. If more memory than whats 
+ * contained in the pool, we also try to resize the pool.
+ *
+ * @param local_block (Input) The local block.
+ */
 void jmi_dynamic_function_init(jmi_local_dynamic_function_memory_t* local_block);
-/* Rewinds the memory pool to the position of the local block */
+
+/**
+ * \brief Rewinds the memory pool according to the local block.
+ *
+ * @param local_block (Input) The local block.
+ */
 void jmi_dynamic_function_free(jmi_local_dynamic_function_memory_t* local_block);
 
 #endif /* _JMI_DYN_MEM_H */
