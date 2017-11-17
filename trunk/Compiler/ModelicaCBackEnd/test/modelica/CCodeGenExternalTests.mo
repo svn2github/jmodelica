@@ -543,7 +543,6 @@ void func_CCodeGenExternalTests_SimpleExternal11_fw_def0(jmi_real_t x_v, jmi_rea
     JMI_DEF(STR, tmp_1)
     tmp_1 = func_CCodeGenExternalTests_SimpleExternal11_f_exp2();
     y_v = x_v + func_CCodeGenExternalTests_SimpleExternal11_strlen_exp1(tmp_1);
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;

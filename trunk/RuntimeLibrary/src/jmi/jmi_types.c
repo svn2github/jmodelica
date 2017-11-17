@@ -22,9 +22,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-void jmi_set_str(char **dest, const char* src) {
+void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block) {
     size_t len = JMI_MIN(JMI_LEN(src), JMI_STR_MAX) + 1;
-    *dest = calloc(len, sizeof(char));
+    if (local_block == NULL) {
+        *dest = calloc(len, sizeof(char));
+    } else {
+        *dest = jmi_dynamic_function_pool_alloc(local_block, len*sizeof(char));
+    }
     strncpy(*dest, src, len);
     (*dest)[len-1] = '\0';
 }

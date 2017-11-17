@@ -95,11 +95,6 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
     JMCEVAL_printString(value);
 }
 
-void* jmi_global_calloc(size_t n, size_t s)
-{
-    return calloc(n, s);
-}
-
 jmp_buf jmceval_try_location;
 
 #define JMCEVAL_try() (setjmp(jmceval_try_location) == 0)
@@ -109,11 +104,16 @@ void jmi_throw()
     longjmp(jmceval_try_location, 1);
 }
 
-jmi_dynamic_list dyn_mem_head = {NULL, NULL};
-jmi_dynamic_list* dyn_mem_last = &dyn_mem_head;
+jmi_dynamic_function_memory_t* dyn_fcn_mem = NULL;
 
-jmi_dynamic_list** jmi_dyn_mem_last() {
-    return &dyn_mem_last;
+jmi_dynamic_function_memory_t* jmi_dynamic_function_memory() {
+    if (dyn_fcn_mem == NULL) { dyn_fcn_mem = jmi_dynamic_function_pool_create(1024*1024); }
+    return dyn_fcn_mem;
+}
+
+void* jmi_global_calloc(size_t n, size_t s)
+{
+    return jmi_dynamic_function_pool_direct_alloc(dyn_fcn_mem, n*s);
 }
 
 void JMCEVAL_setup() {
@@ -196,7 +196,7 @@ $ECE_setup_free$
     } else {
         JMCEVAL_failed();
     }
-
+    jmi_dynamic_function_pool_destroy(dyn_fcn_mem);
     JMCEVAL_check("END");
     return 0;
 }

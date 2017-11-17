@@ -25,9 +25,9 @@
 #define _JMI_TYPES_H
 
 #include <stdio.h>
+#include "jmi_dyn_mem.h"
 
-
-void jmi_set_str(char **dest, const char* src);
+void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block);
 
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
@@ -109,7 +109,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
     NAME[0] = '\0';
 #define JMI_INI_STR_DYNA(NAME, LEN) \
     NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
-    NAME = calloc(JMI_MIN(LEN, JMI_STR_MAX) + 1, 1); \
+    NAME = jmi_dynamic_function_pool_alloc(&dyn_mem, JMI_MIN(LEN, JMI_STR_MAX) + 1); \
     JMI_INI_STR_STAT(NAME)
 
 /* Initialization of function variables */
@@ -131,13 +131,13 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 
 /* Assign string not in z vector */
 #define JMI_ASG_STR(DEST,SRC) \
-    jmi_set_str(&(DEST), SRC); \
-    JMI_DYNAMIC_ADD_POINTER(DEST)
+    jmi_set_str(&(DEST), SRC, &dyn_mem);
+    /* jmi_dynamic_add_pointer(&dyn_mem, DEST); */
 
 /* Assign string in z vector */
 #define JMI_ASG_STR_Z(DEST,SRC) \
-    JMI_FREE(DEST) \
-    jmi_set_str(&(DEST), SRC);
+    free(DEST); \
+    jmi_set_str(&(DEST), SRC, NULL);
     
 /* Assign string array not in z vector */
 #define JMI_ASG_STR_ARR(DEST, SRC) \
@@ -156,7 +156,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_RET_GEN(DEST, SRC) \
     *DEST = SRC;
 #define JMI_RET_STR(DEST, SRC) \
-    jmi_set_str(DEST, SRC);
+    jmi_set_str(DEST, SRC, &dyn_mem);
 #define JMI_RET_STR_ARR(DEST, SRC) \
     { \
       int i; \
@@ -165,12 +165,8 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
       }\
     }
 
-/* Free string */
-#define JMI_FREE(NAME) free(NAME);
-
 /* Length of string */
-#define JMI_LEN(NAME) \
-    strlen(NAME)
+#define JMI_LEN(NAME) strlen(NAME)
     
 /* Pointer to end of string */
 #define JMI_STR_END(DEST) DEST + JMI_LEN(DEST)

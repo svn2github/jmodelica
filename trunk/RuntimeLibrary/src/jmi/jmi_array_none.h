@@ -52,9 +52,6 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 /* Size macro - gives the size of array arr for dimension d */
 #define jmi_array_size(arr, d) ((arr)->size[(int) d])
 
-/* Frees strings in this array struct but not the array struct itself */
-void jmi_free_str_arr(jmi_string_array_t* arr);
-
 /* Array decl macro, delegates*/
 #define JMI_ARR(dyn, type, arr, name, ne, nd) \
     JMI_ARRAY_DECL_##dyn(type, arr, name, ne, nd)
@@ -83,17 +80,16 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
  * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
     if (name == NULL) {\
-        name            = (arr*) calloc((int) 1, sizeof(arr));\
+        char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type));\
+        name            = (arr*) tmp_ptr;\
         name->num_dims  = (int)  (nd);\
-        name->size      = (int*) calloc(name->num_dims, sizeof(int));\
-        JMI_DYNAMIC_ADD_POINTER(name)\
-        JMI_DYNAMIC_ADD_POINTER(name->size)\
-    }\
-    name->num_elems = (int) (ne);\
-    if (name == NULL || name->num_elems > name->num_elems_alloced) { \
-        name->var = (type*) calloc(name->num_elems, sizeof(type));\
+        name->size      = (int*) (tmp_ptr+sizeof(arr));\
+        name->num_elems = (int) (ne);\
+        name->num_elems_alloced = (int) (ne);\
+        name->var = (type*) (tmp_ptr+sizeof(arr)+(int)nd*sizeof(int));\
+    } else if ((name->num_elems = (int) (ne)) > name->num_elems_alloced) {\
+        name->var = (type*) jmi_dynamic_function_pool_alloc(&dyn_mem, name->num_elems*sizeof(type));\
         name->num_elems_alloced = name->num_elems;\
-        JMI_DYNAMIC_ADD_POINTER(name->var)\
     }
 
 #define JMI_ARRAY_INIT_1(dyn, type, arr, name, ne, nd, d1) \
