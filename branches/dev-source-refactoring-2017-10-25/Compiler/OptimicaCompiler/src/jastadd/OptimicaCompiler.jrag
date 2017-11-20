@@ -23,8 +23,6 @@ import java.util.Collection;
 
 import org.jmodelica.util.OptionRegistry;
 
-//import beaver.Parser.Exception;
-
 /**
  * 
  * Main compiler class which bundles the tasks needed to compile an Optimica

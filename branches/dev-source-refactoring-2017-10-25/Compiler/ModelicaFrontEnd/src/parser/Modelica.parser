@@ -25,6 +25,7 @@
  package $PARSER_PACKAGE$;
  import $AST_PACKAGE$.*;
  import org.jmodelica.util.AdjustableSymbol;
+ import org.jmodelica.util.AbstractAdjustableSymbol;
  import org.jmodelica.util.formatting.FormattingRecorder;
  import org.jmodelica.util.formatting.FormattingType;
  import org.jmodelica.api.problemHandling.Problem;
@@ -200,20 +201,7 @@
         }
     }
     
-    private static class TempSymbol extends Symbol implements AdjustableSymbol {
-        /* NB: This method is duplicated in:
-         * ModelicaFrontEnd/src/jastadd/source/Parser.jrag, ASTNode
-         * ModelicaFrontEnd/src/parser/Modelica.flex, Symbol
-         * OptimicaFrontEnd/src/parser/Optimica.flex, Symbol */
-        public int adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i) {
-            if (start == end && i < syms.length) {
-                start = end = syms[i].adjustStartOfEmptySymbols(syms, i + 1);
-            }
-            return start;
-        }
-    }
-    
-    private static class Bool extends TempSymbol {
+    private static class Bool extends AbstractAdjustableSymbol {
         public final boolean value;
         
         public Bool(boolean val) {
@@ -229,7 +217,7 @@
         return new Bool(false);
     }
     
-    private static class RedeclareReplaceableHeader extends TempSymbol {
+    private static class RedeclareReplaceableHeader extends AbstractAdjustableSymbol {
         public final boolean has_redeclare;
         public final boolean has_each;
         public final boolean has_final;
@@ -243,7 +231,7 @@
         }
     }
     
-    private static class TypePrefixes extends TempSymbol {
+    private static class TypePrefixes extends AbstractAdjustableSymbol {
         public final Opt<TypePrefixFlow> flow;
         public final Opt<TypePrefixVariability> variability;
         public final Opt<TypePrefixInputOutput> input_output;

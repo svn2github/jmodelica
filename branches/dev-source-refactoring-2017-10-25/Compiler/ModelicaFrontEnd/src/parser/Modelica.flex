@@ -18,7 +18,7 @@ package $PARSER_PACKAGE$;
 
 import $PARSER_PACKAGE$.ModelicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
-import org.jmodelica.util.AdjustableSymbol;
+import org.jmodelica.util.AbstractAdjustableSymbol;
 import org.jmodelica.util.formatting.FormattingType;
 import $AST_PACKAGE$.ASTNode;
 import beaver.Scanner;
@@ -49,7 +49,7 @@ import beaver.Scanner;
      * of tokens. Start, end, offset and length are extracted from scanner variables
      * in constructors.
      */
-    public class Symbol extends beaver.Symbol implements AdjustableSymbol {
+    public class Symbol extends AbstractAdjustableSymbol {
     
         private int offset;
         private int length;
@@ -75,19 +75,9 @@ import beaver.Scanner;
         public int getLength() {
             return length;
         }
-        
-        /* NB: This method is duplicated in:
-         * ModelicaFrontEnd/src/jastadd/source/Parser.jrag, ASTNode
-         * ModelicaFrontEnd/src/parser/Modelica.Parser, TempSymbol
-         * OptimicaFrontEnd/src/parser/Optimica.flex, Symbol  */
-        public int adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i) {
-            if (start == end && i < syms.length) {
-                start = end = syms[i].adjustStartOfEmptySymbols(syms, i + 1);
-            }
-            return start;
-        }
     }
-    
+
+
     /**
      * Subclass of Scanner.Exception that carries extra information. 
      * Used to give error reporting class for parser access to offset of error. 
