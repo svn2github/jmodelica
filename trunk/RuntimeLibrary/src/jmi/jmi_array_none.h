@@ -82,7 +82,7 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
  * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
     if (name == NULL) {\
-        char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type));\
+        char *tmp_ptr = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(arr)+nd*sizeof(int)+ne*sizeof(type), TRUE);\
         name            = (arr*) tmp_ptr;\
         name->num_dims  = (int)  (nd);\
         name->size      = (int*) (tmp_ptr+sizeof(arr));\
@@ -90,7 +90,7 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
         name->num_elems_alloced = (int) (ne);\
         name->var = (type*) (tmp_ptr+sizeof(arr)+(int)nd*sizeof(int));\
     } else if ((name->num_elems = (int) (ne)) > name->num_elems_alloced) {\
-        name->var = (type*) jmi_dynamic_function_pool_alloc(&dyn_mem, name->num_elems*sizeof(type));\
+        name->var = (type*) jmi_dynamic_function_pool_alloc(&dyn_mem, name->num_elems*sizeof(type), TRUE);\
         name->num_elems_alloced = name->num_elems;\
     }
 
@@ -322,7 +322,7 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
     NAME[0] = '\0';
 #define JMI_INI_STR_DYNA(NAME, LEN) \
     NAME##_len = JMI_MIN(LEN, JMI_STR_MAX) + 1; \
-    NAME = jmi_dynamic_function_pool_alloc(&dyn_mem, JMI_MIN(LEN, JMI_STR_MAX) + 1); \
+    NAME = jmi_dynamic_function_pool_alloc(&dyn_mem, JMI_MIN(LEN, JMI_STR_MAX) + 1, TRUE); \
     JMI_INI_STR_STAT(NAME)
 
 /* Initialization of function variables */

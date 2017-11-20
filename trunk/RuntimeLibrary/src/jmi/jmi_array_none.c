@@ -24,9 +24,10 @@ void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory
     if (local_block == NULL) {
         *dest = calloc(len, sizeof(char));
     } else {
-        *dest = jmi_dynamic_function_pool_alloc(local_block, len*sizeof(char));
+        *dest = jmi_dynamic_function_pool_alloc(local_block, len*sizeof(char), FALSE);
     }
-    strncpy(*dest, src, len);
+    /* strncpy(*dest, src, len); */
+    memmove(*dest, src, len*sizeof(char)); /* Handle overlapping regions */
     (*dest)[len-1] = '\0';
 }
 

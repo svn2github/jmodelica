@@ -53,15 +53,15 @@ static size_t jmi_dynamic_function_pool_available(jmi_dynamic_function_memory_t 
     return mem->block_size - (size_t)(mem->cur_pos - mem->start_pos);
 }
 
-void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t block) {
+void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t block, int reset_memory) {
     if (local_block->mem == NULL) {
         jmi_dynamic_function_init(local_block);
     }
     
-    return jmi_dynamic_function_pool_direct_alloc(local_block->mem, block);
+    return jmi_dynamic_function_pool_direct_alloc(local_block->mem, block, reset_memory);
 }
 
-void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem, size_t block) {
+void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem, size_t block, int reset_memory) {
     void *ptr = NULL;
     
     if (mem == NULL) {
@@ -86,7 +86,9 @@ void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem,
         ptr = mem->trailing_memory[mem->nbr_trailing_memory-1];
     } else {
         ptr = mem->cur_pos;
-        memset(ptr, 0, block); /* Zero out memory */
+        if (reset_memory) {
+            memset(ptr, 0, block); /* Zero out memory */
+        }
         mem->cur_pos += block;
     }
         

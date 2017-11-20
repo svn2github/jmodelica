@@ -212,7 +212,7 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  */
 void* jmi_global_calloc(size_t n, size_t s) {
     jmi_t* jmi = jmi_get_current();
-    return jmi_dynamic_function_pool_direct_alloc(jmi->dyn_fcn_mem, n*s);
+    return jmi_dynamic_function_pool_direct_alloc(jmi->dyn_fcn_mem, n*s, TRUE);
 }
 
 /**

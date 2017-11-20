@@ -96,8 +96,9 @@ void jmi_dynamic_function_pool_destroy(jmi_dynamic_function_memory_t* mem);
  * 
  * @param local_block A pointer to the local block
  * @param memory_size Size of the requested memory
+ * @param reset_memory If the memory requested should be zeroed
  */
-void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t memory_size);
+void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local_block, size_t memory_size, int reset_memory);
 
 /**
  * \brief Allocates memory from the memory pool
@@ -110,8 +111,9 @@ void *jmi_dynamic_function_pool_alloc(jmi_local_dynamic_function_memory_t* local
  * 
  * @param mem The memory pool
  * @param memory_size Size of the requested memory
+ * @param reset_memory If the memory requested should be zeroed
  */
-void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem, size_t memory_size);
+void *jmi_dynamic_function_pool_direct_alloc(jmi_dynamic_function_memory_t* mem, size_t memory_size, int reset_memory);
 
 /**
  * \brief Initializes the local block with the memory pool
