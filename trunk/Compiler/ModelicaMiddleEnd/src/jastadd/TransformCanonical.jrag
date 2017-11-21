@@ -817,63 +817,6 @@ aspect TransformCanonical {
 		return unbalanced;
 	}
 	
-	/**
-	 * Create an FExp that represents a specific component of this record expression.
-	 * 
-	 * @param suffix    the suffix to add to a use of the record to access the specific component
-	 */
-	public FExp FExp.extractRecordFExp(String suffix) {
-        return new FComponentExp(treeCopy(), suffix);
-	}
-    
-    public FExp FIdUseExp.extractRecordFExp(String suffix) {
-        return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
-    }
-    
-    public FIdUse FIdUse.extractRecordFExp(String suffix) {
-        return new FIdUse(getFQName().copyAsFQNameFull().append(suffix));
-    }
-    
-    public FIdUse FIdUseInstAccess.extractRecordFExp(String suffix) {
-        return new FIdUseInstAccess(getInstAccess().copyAndAppend(suffix));
-    }
-	
-    public FExp FRecordConstructor.extractRecordFExp(String suffix) {
-        return component(suffix).fullCopy();
-    }
-    
-    public FExp InstRecordConstructor.extractRecordFExp(String suffix) {
-        return component(suffix).fullCopy();
-    }
-	
-	public FExp FArray.extractRecordFExp(String suffix) {
-		FArray res = createEmptyNode();
-		for (FExp e : getFExps())
-			res.addFExp(e.extractRecordFExp(suffix));
-		return res;
-	}
-    
-    public FExp FIterExp.extractRecordFExp(String suffix) {
-        return new FIterExp(getFExp().extractRecordFExp(suffix), getForIndexList().treeCopy());
-    }
-    
-	public FExp FAbstractCat.extractRecordFExp(String suffix) {
-		FInfArgsFunctionCall res = createEmptyNode();
-		for (FExp e : getFExps())
-			res.addFExp(e.extractRecordFExp(suffix));
-		return res;
-	}
-	
-	public FExp FCatExp.extractRecordFExp(String suffix) {
-		FCatExp res = (FCatExp) super.extractRecordFExp(suffix);
-		res.setDim(getDim().fullCopy());
-		return res;
-	}
-	
-	public FExp FNoEventExp.extractRecordFExp(String suffix) {
-		return createNode(getFExp().extractRecordFExp(suffix));
-	}
-
     public class FClass {
         public class genAlgorithmFunctionsIfSet extends Transformation {
             public genAlgorithmFunctionsIfSet() {

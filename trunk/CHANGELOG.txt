@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5487
+Fixed some issues with relational expressions in arrays in records
+
 ; Feature ; Major ; Compiler, Runtime ; #5501
 Added a memory pool to be used for dynamic allocations during evaluation
 of the equations (significant speedup in cases with lots of dynamic

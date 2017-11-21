@@ -857,4 +857,42 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end RecordArray12;
 
+model RecordArray13
+    record R
+        Boolean[:] b;
+    end R;
+    
+    R[:] r2 = if time > 1 then {R({time>1})} else {R({time>2})};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordArray13",
+            description="Test for bug in #5487",
+            template="
+$C_ode_derivatives$
+            ",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    if (_sw(0)) {
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        }
+    } else {
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(1) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(2)), _sw(1), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        }
+    }
+    _r2_1_b_1_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, _sw(0), _sw(1));
+    pre_r2_1_b_1_0 = _r2_1_b_1_0;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end RecordArray13;
+
 end CCodeGenArrayTests;
