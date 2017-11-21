@@ -420,7 +420,6 @@ abstract public class TestAnnotationizerHelper {
     protected OptionRegistry optionRegistry() {
         if (or == null) {
             or = new TestOptions();
-            or.setBooleanOption("generate_runtime_option_parameters", false);
             for (String opt : opts) {
                 String parts[] = opt.split("=");
                 if (parts.length != 2)
