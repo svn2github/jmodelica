@@ -345,7 +345,6 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 /* Assign string not in z vector */
 #define JMI_ASG_STR(DEST,SRC) \
     jmi_set_str(&(DEST), SRC, &dyn_mem);
-    /* jmi_dynamic_add_pointer(&dyn_mem, DEST); */
 
 /* Assign string in z vector */
 #define JMI_ASG_STR_Z(DEST,SRC) \
@@ -366,10 +365,9 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
     if (DEST != NULL) { JMI_RET_##TYPE(DEST, SRC) }
     
 /* Put return value in return variable in function */
-#define JMI_RET_GEN(DEST, SRC) \
-    *DEST = SRC;
-#define JMI_RET_STR(DEST, SRC) \
-    jmi_set_str(DEST, SRC, &dyn_mem);
+#define JMI_RET_GEN(DEST, SRC) *DEST = SRC;
+#define JMI_RET_STR(DEST, SRC) JMI_RET_GEN(DEST, SRC)
+
 #define JMI_RET_STR_ARR(DEST, SRC) \
     { \
       int i; \
