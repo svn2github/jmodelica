@@ -378,7 +378,7 @@ aspect CCodeGenFunctionCall {
             CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         str.print(sep);
         if (v.isInput()) {
-            arg.genTempArg(p, str, indent); //is either print or printIO
+            arg.genTempArg(p, str, indent);
         } else {
             if (!v.isComposite()) {
                 str.print("&");
@@ -419,7 +419,7 @@ aspect CCodeGenFunctionCall {
                 i++;
             }
         } else {
-           //only this branch used in c-version, it is similar to prettyPrintOutputs
+           //TODO this branch is similar to prettyPrintOutputs
             int i = 0;
             for (FFunctionCallLeft arg : args) {
                 p.printArgument(variables.get(i), arg, str, indent, this);
@@ -475,7 +475,7 @@ aspect CCodeGenFunctionCall {
             @Override
             public void printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str,
                     String indent, ArrayList<FFunctionVariable> variables) {
-                // very similar to prettyPrintCallOutputs_C
+                //TODO very similar to prettyPrintCallOutputs_C
                 int i = 0;
                 for (FFunctionVariable v : variables) {
                     if (i>0 && v.isOutput()){
