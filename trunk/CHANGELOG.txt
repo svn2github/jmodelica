@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler ; #5513
+Changed code generation to use hard coded values in the z-vector for 
+performance.
+
 ; Fixed ; Minor ; Compiler ; #5487
 Fixed some issues with relational expressions in arrays in records
 
