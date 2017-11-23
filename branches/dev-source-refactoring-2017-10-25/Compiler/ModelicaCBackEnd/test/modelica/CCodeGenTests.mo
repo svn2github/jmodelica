@@ -3109,8 +3109,7 @@ void func_CCodeGenTests_CFunctionTest17_F1_def0(jmi_real_t x_v, jmi_array_t* y_a
     jmi_array_ref_1(y_a, 2) = 2 * x_v;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_CFunctionTest17_F2_def1(y_a, tmp_1);
-    jmi_array_ref_1(y_a, 1) = (jmi_array_val_1(tmp_1, 1));
-    jmi_array_ref_1(y_a, 2) = (jmi_array_val_1(tmp_1, 2));
+    JMI_ASG(GEN_ARR, y_a, tmp_1)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -15960,7 +15959,6 @@ void func_CCodeGenTests_StringOperations4_f_def0(jmi_string_t s_v, jmi_real_t* x
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"123\");
     func_CCodeGenTests_StringOperations4_f_def0(tmp_1, NULL);
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, x_o, x_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16028,7 +16026,6 @@ void func_CCodeGenTests_StringOperations5_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", t_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16086,7 +16083,6 @@ void func_CCodeGenTests_StringOperations6_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     JMI_ASG(STR, s_v, \"str\")
     tmp_1 = func_CCodeGenTests_StringOperations6_f1_exp1(s_v);
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16164,7 +16160,6 @@ void func_CCodeGenTests_StringOperations7_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     JMI_INI(STR, tmp_1)
     func_CCodeGenTests_StringOperations7_f1_def1(s_v, &tmp_1, NULL);
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16252,10 +16247,7 @@ void func_CCodeGenTests_StringOperations8_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     snprintf(JMI_STR_END(tmp_4), JMI_STR_LEFT(tmp_4), \"%-.*g\", (int) 6, x_v);
     snprintf(JMI_STR_END(tmp_4), JMI_STR_LEFT(tmp_4), \"%s\", \" |\");
     func_CCodeGenTests_StringOperations8_f1_def1(tmp_4, &tmp_1, NULL);
-    JMI_FREE(tmp_3)
-    JMI_FREE(tmp_4)
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     func_Modelica_Utilities_Streams_print_def2(s_v, \"\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -16357,7 +16349,6 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_real_t x_v, jmi_real_t i_v,
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16411,9 +16402,7 @@ void func_CCodeGenTests_StringOperations10_f2_def0(jmi_real_t x_v, jmi_real_t* y
     JMI_ASG(STR, jmi_array_ref_1(s_a, 2), \"str\")
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_StringOperations10_f1_def1(s_a, tmp_1);
-    JMI_ASG(STR, jmi_array_ref_1(s_a, 1), jmi_array_val_1(tmp_1, 1))
-    JMI_ASG(STR, jmi_array_ref_1(s_a, 2), jmi_array_val_1(tmp_1, 2))
-    jmi_free_str_arr(tmp_1);
+    JMI_ASG(STR_ARR, s_a, tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16496,7 +16485,6 @@ void func_CCodeGenTests_StringOperations11_f2_def0(jmi_real_t x_v, jmi_real_t n_
     JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_1, n_v, 1, n_v)
     func_CCodeGenTests_StringOperations11_f1_def1(s_a, tmp_1);
     JMI_ASG(STR_ARR, s_a, tmp_1)
-    jmi_free_str_arr(tmp_1);
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;

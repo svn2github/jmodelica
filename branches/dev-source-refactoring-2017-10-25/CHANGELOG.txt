@@ -2,6 +2,14 @@
 ; Fixed ; Minor ; Compiler ; #5490
 Fixed bug that caused some errors to be reported on the wrong line.
 
+; Fixed ; Minor ; Compiler ; #5487
+Fixed some issues with relational expressions in arrays in records
+
+; Feature ; Major ; Compiler, Runtime ; #5501
+Added a memory pool to be used for dynamic allocations during evaluation
+of the equations (significant speedup in cases with lots of dynamic
+allocations).
+
 ; Change ; Minor ; Runtime ; #5505
 Added the compiler flags -msse2 -mfpmath=sse for runtime builds using GCC,
 the same are used for our FMUs.

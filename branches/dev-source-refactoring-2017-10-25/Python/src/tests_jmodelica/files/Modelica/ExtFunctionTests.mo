@@ -930,4 +930,38 @@ model StructuralAsserts
     parameter Integer n = f() annotation(Evaluate=true);
 end StructuralAsserts;
 
+
+model TestString
+    import Modelica.Utilities.Strings.*;
+    function Str1
+        input  Real x;
+        output Real y;
+    protected
+        String str;
+    algorithm
+        str := Str2(x);
+        y := length(str);
+        assert(str == "Hej", "Failed to provide the correct string, was: "+str);
+        annotation(Inline=false);
+    end Str1;
+    function Str2
+        input  Real x;
+        output String str;
+    algorithm
+        str := fStringScalarLit("jeH");
+        assert(str == "Hej", "Failed to provide the correct string, was: "+str);
+        annotation(Inline=false);
+    end Str2;
+    function fStringScalarLit
+        input  String x_in;
+        output String x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fStringScalarLit;
+    parameter Real x(fixed=false);
+initial equation
+    x = Str1(1.0);
+end TestString;
+
 end ExtFunctionTests;

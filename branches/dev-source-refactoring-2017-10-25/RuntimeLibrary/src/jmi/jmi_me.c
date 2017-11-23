@@ -194,6 +194,9 @@ int jmi_initialize(jmi_t* jmi) {
         jmi_log_leave(jmi->log, top_node);
     }
     
+    /* Resize the dynamic memory pool */
+    jmi_dynamic_function_resize(jmi->dyn_fcn_mem);
+    
     return 0;
 }
 
