@@ -457,15 +457,20 @@ int i;
 
     @Override
     public void FPartialFunctionCall.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        prettyPrint(p.ExecStep, str, indent);
+    }
+
+    public void FPartialFunctionCall.prettyPrint(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+       //TODO Move prettyPrint to the myFCallable, i.e FFunctionVariable.prettyPrintPartialCall, similar FFV.prettyPrintCall_C?
         FCallable fc = myFCallable();
 
         String previous = "NULL";
         if (fc.isPartialFunction()) {
-            previous = p.ExecStep.name((FFunctionVariable) fc);
+            previous = p.name((FFunctionVariable) fc);
             str.print(previous);
             str.print("->fpcr");
         } else {
-            str.print(p.funcNameUnderscore(fc, C_SUFFIX_FPCR));
+            str.print(p.codePrinter().funcNameUnderscore(fc, C_SUFFIX_FPCR));
         }
         str.print("(");
         str.print(previous);
@@ -473,7 +478,7 @@ int i;
 
 		String result = "NULL"; 
         if(!fc.isPartialFunction()) {
-            result = "&" + p.ExecStep.name(this);
+            result = "&" + tempName_C();
          }
         str.print(result);
         
@@ -486,7 +491,7 @@ int i;
                 str.print(", 0");
             }
             str.print(", 1");
-            p.printCastArgument(arg, str, indent);
+            p.codePrinter().printCastArgument(arg, str, indent);
         }
         while (it2.hasNext()) {
             str.print(", 0");
