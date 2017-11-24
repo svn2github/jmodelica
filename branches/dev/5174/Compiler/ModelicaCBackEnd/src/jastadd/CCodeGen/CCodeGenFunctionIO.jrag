@@ -64,7 +64,7 @@ aspect CCodeGenFunctionIO {
     
     @Override
     public void FPartialFunctionCall.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
-        String fp = p.funcNameUnderscore(myFCallable().actualFFunctionDecl(), C_SUFFIX_FP);
+        String fp = p.funcNameUnderscore(myFCallable().actualFFunctionDecl(), C_SUFFIX_FP); // align with FExp.genTempInputDecl_C? see FFunctionType.type_C()
         if (myFCallable().isPartialFunction()) {
             fp = fp + "*";
         }
@@ -101,13 +101,18 @@ aspect CCodeGenFunctionIO {
     
     @Override
     public void FPartialFunctionCall.genArgument_C(CodePrinter p, CodeStream str, String indent) {
+        genArgument_C(p.ExecStep, str, indent);
+    }
+
+    public void FPartialFunctionCall.genArgument_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        //TODO similar to p.printCastArgument
         str.print("(");
-        str.print(p.funcNameUnderscore((FFunctionVariable)myCorrespondingInput(), C_SUFFIX_FP)+ "*");//TODO this is instead of type_C(), push this definition to FPartialFunctionCall.type_C()? pointer from genTempInputDecl_C
+        str.print(p.type((FFunctionVariable)myCorrespondingInput()));
         str.print(")");
         if (myFCallable().isPartialFunction()) {
             str.print(tempName_C());
         } else {
-            p.print(this, str, indent);
+            p.codePrinter().print(this, str, indent); //TODO don't need to call codePrinter() and can propagate down the ExecuteCodePrinter once the FFunctionVariable.printCall has been refactored
         }
     }
     

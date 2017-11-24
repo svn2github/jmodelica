@@ -1368,6 +1368,9 @@ aspect CCodeGenExpressions {
         if (p.needsTemp(this)) {
             if (myFCallable().isPartialFunction()) {
                 str.formatln("%s%s %s;", indent, p.funcNameUnderscore(myFCallable().actualFFunctionDecl(), C_SUFFIX_FPOUT), tempName_C());
+                if (p.needsOutputVarArgs()) {
+                    p.print(this, indent, type(), p.createDeclPrinter(str));
+                }
             } else {
                 p.print(this, indent, type(), p.createDeclPrinter(str));
             }
