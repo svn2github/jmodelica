@@ -602,7 +602,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 15, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType2.B, and type of right-hand side is RecordTests.RecordType2.A
 ")})));
 end RecordType2;
@@ -632,7 +632,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 15, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType3.B, and type of right-hand side is RecordTests.RecordType3.A
 ")})));
 end RecordType3;
@@ -736,7 +736,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 25, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType5.D, and type of right-hand side is RecordTests.RecordType5.C
 ")})));
 end RecordType5;
@@ -809,7 +809,7 @@ model RecordType7
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 4, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordType7;
@@ -1045,7 +1045,7 @@ model RecordBinding3
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 12, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end RecordBinding3;
@@ -1068,7 +1068,7 @@ model RecordBinding4
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 7, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is scalar and size of binding expression is [2]
 ")})));
 end RecordBinding4;
@@ -1090,7 +1090,7 @@ model RecordBinding5
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 7, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
 end RecordBinding5;
@@ -1133,7 +1133,7 @@ model RecordBinding7
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 6, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: y
 ")})));
 end RecordBinding7;
@@ -1726,7 +1726,7 @@ model RecordBinding28
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
+Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
 In component d:
   Can not infer array size of the variable a
 ")})));
@@ -1756,7 +1756,7 @@ model RecordBinding29
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo',
+Error at line 13, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo',
 In component d:
   Circularity in binding expression of parameter: d.b.a = b.a
 ")})));
@@ -2425,7 +2425,7 @@ model RecordConstructor4
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 8, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: types of positional argument 3 and input c are not compatible
     type of '3' is Integer
     expected type is String
@@ -2450,10 +2450,10 @@ model RecordConstructor5
             errorMessage="
 2 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, )).c'
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: missing argument for required input c
 ")})));
 end RecordConstructor5;
@@ -2476,10 +2476,10 @@ model RecordConstructor6
             errorMessage="
 2 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, \"foo\")).c'
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 8, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: too many positional arguments
 ")})));
 end RecordConstructor6;
@@ -2686,7 +2686,7 @@ model RecordConstructor13
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 7, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of positional argument 2 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is Real[3]
@@ -3324,7 +3324,7 @@ model RecordConstructor30
             errorMessage="
 1 warnings found:
 
-Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
+Warning at line 14, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
 In component c:
   Assuming 'each' for the modification 'd = {R()}'
 ")})));
@@ -3350,7 +3350,7 @@ M m(r={R(x={1},y=1:2),R(x={2,3})});
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 12, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of named argument y and input y are not compatible
     type of '1:2' is Integer[2]
     expected type is Real[1]
@@ -7064,7 +7064,7 @@ model RecordWithColonArray2
             errorMessage="
 1 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 2, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordWithColonArray2;
@@ -7488,7 +7488,7 @@ model RecordParam8
             errorMessage="
 1 warnings found:
 
-Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 3, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter a.y does not have a binding expression
 ")})));
 end RecordParam8;
@@ -7510,7 +7510,7 @@ model RecordParam9
             errorMessage="
 1 warnings found:
 
-Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 7, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam9;
@@ -7538,7 +7538,7 @@ model RecordParam10
             errorMessage="
 1 warnings found:
 
-Warning at line 0, column 0, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 13, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam10;

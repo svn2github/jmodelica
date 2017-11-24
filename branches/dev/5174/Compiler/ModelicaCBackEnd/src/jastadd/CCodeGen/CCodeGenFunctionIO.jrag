@@ -417,7 +417,7 @@ aspect CodeFuncCallInOutArg {
 
     public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
         if (isArray()) {
-            if (size().isUnknown()) {
+            if (exp.genAssignMacro()) {
                 // Works for now!
                 str.format("%sJMI_ASG(%s, ", indent, macroType());
                 ASTNode.printer_C.print(exp, str, indent);
@@ -435,6 +435,9 @@ aspect CodeFuncCallInOutArg {
         }
         p.endComponent(str, indent);
     }
+    
+    syn boolean FExp.genAssignMacro() = false;
+    eq FIdUseExp.genAssignMacro()     = true;
     
     @Override
     public void FNoType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {

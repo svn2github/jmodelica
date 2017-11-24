@@ -99,7 +99,7 @@ end EnumerationTests.EnumerationTest3;
             errorMessage="
 1 errors found:
 
-Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 4, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/EnumerationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
   end EnumerationTest4;
@@ -119,7 +119,7 @@ Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Enumera
             errorMessage="
 1 errors found:
 
-Error at line 113, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo', TYPE_MISMATCH_IN_EQUATION:
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/EnumerationTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is EnumerationTests.EnumerationTest5.A, and type of right-hand side is EnumerationTests.EnumerationTest5.B
 ")})));
   end EnumerationTest5;
@@ -258,17 +258,17 @@ end EnumerationTests.EnumerationTest10;
             errorMessage="
 3 errors found:
 
-Error at line 250, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Error at line 2, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '\"1\"' is String
     expected type is enumeration
 
-Error at line 251, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Error at line 3, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '1.0' is Real
     expected type is enumeration
 
-Error at line 252, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Error at line 4, column 35, in file 'Compiler/ModelicaFrontEnd/test/modelica/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is enumeration

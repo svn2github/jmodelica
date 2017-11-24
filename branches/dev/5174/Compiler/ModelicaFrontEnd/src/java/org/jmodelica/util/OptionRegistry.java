@@ -661,12 +661,6 @@ abstract public class OptionRegistry {
              Category.debug,
              false,
              "If enabled, flat tree will be checked for consistency between transformation steps."),
-        RUNTIME_PARAM
-            ("generate_runtime_option_parameters",
-             OptionType.compiler,
-             Category.uncommon,
-             true,
-             "If enabled, generate parameters for runtime options. Should always be true for normal compilation."),
         WRITE_ITER_VARS
             ("write_iteration_variables_to_file",
              OptionType.compiler,

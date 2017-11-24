@@ -22,13 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void jmi_set_str(char **dest, const char* src) {
-    size_t len = JMI_MIN(JMI_LEN(src), JMI_STR_MAX) + 1;
-    *dest = calloc(len, sizeof(char));
-    strncpy(*dest, src, len);
-    (*dest)[len-1] = '\0';
-}
-
 jmi_matrix_sparse_csc_t *jmi_linear_solver_create_sparse_matrix(jmi_int_t rows, jmi_int_t cols, jmi_int_t nnz) {
     jmi_matrix_sparse_csc_t *A = calloc(1, sizeof(jmi_matrix_sparse_csc_t));
     if (!A) { return NULL; }

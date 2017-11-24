@@ -697,6 +697,7 @@ aspect Scalarization {
             Index cell = index.subIndex(index.ndims() - comp.ndims());
             FVariable fv = comp.copyForName(s, name, cell);
             if (bExp != null) {
+                bExp.resetOriginalReferences(); /* Workaround for test RecordArray12 */
                 if (comp.keepBExp(variability, bExp)) {
                     fv.setBindingExp(bExp);
                 } else {
@@ -1424,7 +1425,7 @@ aspect Scalarization {
 
     syn boolean FExp.scalarizeExpanded()       = 
         isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
-    eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
+    eq FIdUseExp.scalarizeExpanded()           = (!inFunction() || isSlice()) && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FIfExp.scalarizeExpanded()              = super.scalarizeExpanded() && !isFunctionCallIO()
             && !type().isRecord(); /* Workaround for test RecordScalarize52 */

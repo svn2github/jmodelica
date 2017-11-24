@@ -351,6 +351,22 @@ class TestModelicaError:
         except CVodeError, e:
             assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
         
+
+class TestStrings:
+    @classmethod
+    def setUpClass(self):
+        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        
+    @testattr(stddist_full = True)
+    def testTmpString(self):
+        '''
+        Test that strings are propagated correctly
+        '''
+        cpath = "ExtFunctionTests.TestString"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={"variability_propagation":False, "inline_functions":"none"})
+        model = load_fmu(fmu_name)
+        res = model.simulate() #No asserts should be raised (in the model)
+
         
 class TestCBasic:
     '''

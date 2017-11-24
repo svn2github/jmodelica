@@ -113,7 +113,7 @@ initial equation
             errorMessage="
 1 warnings found:
 
-Warning at line 1684, column 30, in file 'Compiler/ModelicaFlatTree/test/modelica/VariabilityTests.mo':
+Warning at line 1, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 ")})));
 end EvaluateAnnotation2_Warn;
@@ -851,10 +851,12 @@ model Circular1
             name="Circular1",
             description="",
             errorMessage="
-Error at line 0, column 0, in file '...':
+2 errors found:
+
+Error at line 2, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
   Circularity in binding expression of parameter: x = y
 
-Error at line 0, column 0, in file '...':
+Error at line 3, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
   Circularity in binding expression of parameter: y = x
 ")})));
 end Circular1;

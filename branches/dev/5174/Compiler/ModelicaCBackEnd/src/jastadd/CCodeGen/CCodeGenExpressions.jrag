@@ -202,7 +202,7 @@ aspect CCodeGenExpressions {
         boolean arg = isFunctionCallArg();
         str.print(FEqExp.macro_C);
         str.print("(");
-        p.print(getIfExp(), str, indent);
+        p.codePrinter().print(getIfExp(), str, indent);
         str.print(", JMI_TRUE, ");
         if (arg) {
             getThenExp().genTempArg(p, str, indent);
@@ -338,7 +338,6 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FTerminate.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        //super.genTempVars_C(p, str, indent); //CR: do we need this here (ASTNode, traverse all children)
         p.print(this, str, indent);
     }
 

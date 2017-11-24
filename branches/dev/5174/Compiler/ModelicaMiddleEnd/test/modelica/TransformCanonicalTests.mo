@@ -92,13 +92,13 @@ end TransformCanonicalTests.TransformCanonicalTest2;
             errorMessage="
 3 errors found:
 
-Error at line 84, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 4, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p4 = p3 * p3
 
-Error at line 85, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 5, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p3 = p2 + p1
 
-Error at line 86, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 6, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p4 * p1
 ")})));
   end TransformCanonicalTest3_Err;
@@ -118,13 +118,13 @@ Error at line 86, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/Transf
             errorMessage="
 3 errors found:
 
-Error at line 110, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 4, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p4 = p3 * p3
 
-Error at line 111, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 5, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p3 = p2 + p1
 
-Error at line 112, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 6, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p1 * p2
 ")})));
   end TransformCanonicalTest4_Err;
@@ -250,7 +250,7 @@ end TransformCanonicalTests.TransformCanonicalTest7;
             errorMessage="
 1 errors found:
 
-Error at line 110, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 15, column 17, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: eo = eo
 ")})));
   end TransformCanonicalTest9_Err;
@@ -1497,13 +1497,13 @@ equation
             errorMessage="
 3 errors found:
 
-Error at line 1435, column 41, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 2, column 41, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable x2 is part of alias set that results in min/max combination with no possible values, min = 2.6, max = 2.5
 
-Error at line 1436, column 39, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 3, column 39, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable y1 is part of alias set that results in min/max combination with no possible values, min = 3, max = 2
 
-Error at line 1439, column 40, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 6, column 40, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
 ")})));
 end AliasPropMinMax2;
@@ -1818,7 +1818,7 @@ equation
             errorMessage="
 1 warnings found:
 
-Warning at line 1755, column 56, in file 'ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Warning at line 2, column 56, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   a_s2 has stateSelect=always, but could not be selected as state
 ")})));
 end AliasStateSelect2;
@@ -1934,7 +1934,7 @@ model ParameterBindingExpTest3_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 1, column 35, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
@@ -1954,7 +1954,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1701, column 16, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 4, column 16, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 ")})));
 end AttributeBindingExpTest1_Err;
@@ -1974,7 +1974,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1721, column 16, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 5, column 16, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2
 ")})));
 end AttributeBindingExpTest2_Err;
@@ -1993,10 +1993,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1740, column 16, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 4, column 16, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2 + p
 
-Error at line 1740, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 4, column 21, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Cannot find class or component declaration for p
 ")})));
 end AttributeBindingExpTest3_Err;
@@ -2015,12 +2015,12 @@ equation
             name="AttributeBindingExpTest4_Err",
             description="Test errors in binding expressions..",
             errorMessage="
-3 errors found:
+2 errors found:
 
-Error at line 1761, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 3, column 23, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p1 = p2
 
-Error at line 1762, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 4, column 23, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p1
 ")})));
 end AttributeBindingExpTest4_Err;
@@ -2042,11 +2042,11 @@ model AttributeBindingExpTest5_Err
             errorMessage="
 2 errors found:
 
-Error at line 1790, column 18, in file '...', START_VALUE_NOT_PARAMETER,
+Error at line 5, column 18, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', START_VALUE_NOT_PARAMETER,
 In component a:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 
-Error at line 1794, column 15, in file '...', START_VALUE_NOT_PARAMETER:
+Error at line 9, column 15, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', START_VALUE_NOT_PARAMETER:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p2
 ")})));
 end AttributeBindingExpTest5_Err;
@@ -5388,7 +5388,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4839, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 6, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Could not evaluate binding expression for attribute 'start': 'f()'
     in function 'TransformCanonicalTests.StateInitialPars7.f'
     Failed to evaluate external function 'f', external function cache unavailable
@@ -6628,7 +6628,7 @@ model TestExternalObj2
             errorMessage="
 1 errors found:
 
-Error at line 6038, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 2, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition
 ")})));
 end TestExternalObj2;
@@ -6653,7 +6653,7 @@ model TestExternalObj3
             errorMessage="
 1 errors found:
 
-Error at line 6063, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 11, column 24, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Cannot find function declaration for NoConstructor.constructor()
 ")})));
 end TestExternalObj3;
@@ -6678,7 +6678,7 @@ model TestExternalObj4
             errorMessage="
 1 errors found:
 
-Error at line 6086, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 9, column 21, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Cannot find function declaration for NoDestructor.destructor()
 ")})));
 end TestExternalObj4;
@@ -6707,10 +6707,10 @@ model TestExternalObj5
             errorMessage="
 2 errors found:
 
-Error at line 6107, column 3, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 5, column 3, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   An external object constructor must have exactly one output of the same type as the constructor
 
-Error at line 6117, column 25, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 15, column 25, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   The class BadConstructor.constructor is not a function
 ")})));
 end TestExternalObj5;
@@ -6739,10 +6739,10 @@ model TestExternalObj6
             errorMessage="
 2 errors found:
 
-Error at line 6144, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 10, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
 
-Error at line 6147, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 13, column 23, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   The class BadDestructor.destructor is not a function
 ")})));
 end TestExternalObj6;
@@ -6779,7 +6779,7 @@ model TestExternalObj7
             errorMessage="
 1 errors found:
 
-Error at line 6168, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 2, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   External object classes may not contain any elements except the constructor and destructor
 ")})));
 end TestExternalObj7;
@@ -6809,12 +6809,12 @@ model TestExternalObj8
             name="TestExternalObj8",
             description="External object with extra elements",
             errorMessage="
-1 errors found:
+2 errors found:
 
-Error at line 6205, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 2, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   External object classes may not contain any elements except the constructor and destructor
-  
-Error at line 0, column 0, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+
+Error at line 18, column 23, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 
 ")})));
@@ -6847,10 +6847,10 @@ model TestExternalObj9
             errorMessage="
 2 errors found:
 
-Error at line 6240, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 5, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   An external object constructor must have exactly one output of the same type as the constructor
 
-Error at line 6246, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 11, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
 ")})));
 end TestExternalObj9;
@@ -6869,13 +6869,13 @@ equation
             errorMessage="
 3 errors found:
 
-Error at line 6272, column 26, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 2, column 26, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Constructors and destructors for ExternalObjects can not be used directly
 
-Error at line 6274, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 4, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Constructors and destructors for ExternalObjects can not be used directly
 
-Error at line 6275, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 5, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Constructors and destructors for ExternalObjects can not be used directly
 ")})));
 end TestExternalObj10;
@@ -6931,7 +6931,7 @@ model GetInstanceName2
             errorMessage="
 1 errors found:
 
-Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 3, column 18, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable dummy does not match the declared type of the variable
 ")})));
 end GetInstanceName2;

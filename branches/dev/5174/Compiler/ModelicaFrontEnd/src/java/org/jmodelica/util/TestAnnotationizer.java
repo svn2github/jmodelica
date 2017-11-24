@@ -201,7 +201,9 @@ public class TestAnnotationizer {
                         models.add(top);
                     }
                 }
-                packStack.add(top);
+                if (!(line.length > 2 && line[2].startsWith("="))) {
+                    packStack.add(top);
+                }
             } else if (line[0].equals("end")){
                 String[] t = packStack.get(packStack.size()-1).split("\\.");
                 if (line[1].equals(t[t.length-1] + ";")) {

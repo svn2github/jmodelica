@@ -19,6 +19,18 @@
 
 #include "jmi_util.h"
 
+void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block) {
+    size_t len = JMI_MIN(JMI_LEN(src), JMI_STR_MAX) + 1;
+    if (local_block == NULL) {
+        *dest = calloc(len, sizeof(char));
+    } else {
+        *dest = jmi_dynamic_function_pool_alloc(local_block, len*sizeof(char), FALSE);
+    }
+    /* strncpy(*dest, src, len); */
+    memmove(*dest, src, len*sizeof(char)); /* Handle overlapping regions */
+    (*dest)[len-1] = '\0';
+}
+
 #define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
     int i, j, tmp1, tmp2, k, n, dim, s; \
@@ -60,9 +72,3 @@ TRANSPOSE_FUNC(jmi_matrix_from_fortran_int, jmi_int_t, jmi_real_t, 0)
 COPY_FUNC(jmi_copy_matrix_to_int, jmi_real_t, jmi_int_t)
 COPY_FUNC(jmi_copy_matrix_from_int, jmi_int_t, jmi_real_t)
 
-void jmi_free_str_arr(jmi_string_array_t* arr) {
-    int i;
-    for (i = 1; i <= arr->num_elems; i++) {
-        JMI_FREE(jmi_array_val_1(arr,i));
-    }
-}

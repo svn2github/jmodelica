@@ -1032,11 +1032,6 @@ aspect CCodeGen {
 
     @Override
     public void FStringType.printFree_C(CodeStream str, String indent, boolean external, String name) {
-        if (isArray()) {
-            str.formatln("%sjmi_free_str_arr(%s);", indent, name);
-        } else {
-            str.formatln("%sJMI_FREE(%s)", indent, name);
-        }
     }
 
     /**
