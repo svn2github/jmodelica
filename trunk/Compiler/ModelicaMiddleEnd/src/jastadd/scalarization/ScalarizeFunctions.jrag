@@ -1005,7 +1005,7 @@ aspect FunctionScalarizationHelpers {
         public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp exp, int d1, int d2) {
             FExp[] sizes = new FExp[d2];
             for (int i = d1; i < d2; i++) {
-                sizes[i] = exp.size().createFExp(i);
+                sizes[i] = exp.size().scalarize(null, i);
             }
             createForLoops(outer, inner, sizes, d1);
         }
