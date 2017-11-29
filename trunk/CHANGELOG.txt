@@ -2,6 +2,7 @@
 ; Fixed ; Minor ; Compiler ; #5514
 Fixed problem with temporary generation for for-loop ranges
 
+================= Stable-2017-11-29 ==================
 ; Change ; Minor ; Compiler ; #5513
 Changed code generation to use hard coded values in the z-vector for 
 performance.
