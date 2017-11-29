@@ -1,3 +1,24 @@
+================= Stable-2017-11-29 ==================
+; Change ; Minor ; Compiler ; #5513
+Changed code generation to use hard coded values in the z-vector for 
+performance.
+
+; Fixed ; Minor ; Compiler ; #5487
+Fixed some issues with relational expressions in arrays in records
+
+; Feature ; Major ; Compiler, Runtime ; #5501
+Added a memory pool to be used for dynamic allocations during evaluation
+of the equations (significant speedup in cases with lots of dynamic
+allocations).
+
+; Change ; Minor ; Runtime ; #5505
+Added the compiler flags -msse2 -mfpmath=sse for runtime builds using GCC,
+the same are used for our FMUs.
+
+; Fixed ; Minor ; Compiler ; #5503
+Disabled automatic addition of derivatives for variables with state select set
+to prefer if index reduction is disabled.
+
 ================= Stable-2017-11-10 ==================
 ; Change ; Minor ; Compiler ; #5497
 Added option for disabling external evaluation during variability propagation

@@ -93,7 +93,6 @@ abstract public class TestCase implements GenericTestCase {
 		String modelica_path = ModelicaCompiler.getJModelicaHome().getPath() + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
 		or.setStringOption("MODELICAPATH", modelica_path);
-		or.setBooleanOption("generate_runtime_option_parameters", false);
 		return or;
 	}
     

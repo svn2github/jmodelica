@@ -2114,8 +2114,8 @@ aspect FlatAPI {
     /**
      * Check if an expression will generate an event.
      * 
-     * @param ignoreVariability        Controles whether variability should be ignored.
-     * @param checkInitialParameters  Controls whether parameters with fixed = false should be
+     * @param ignoreVariability        Controls whether variability should be ignored.
+     * @param checkInitialParameters   Controls whether parameters with fixed = false should be
      *                                 considered to generate events.
      */
     syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkInitialParameters) =
@@ -2138,6 +2138,7 @@ aspect FlatAPI {
     eq FSpatialDistExp.hasEventGeneratingType() = true;
     eq FDelayExp.hasEventGeneratingType()     = true;
     eq FSampleExp.hasEventGeneratingType()    = true;
+    eq FActualStream.hasEventGeneratingType() = true;
     
     syn boolean FExp.generatesEventInDAE() = generatesEventInDAE(originalFExp());
     syn boolean FRelExp.generatesEventInInitDAE() = generatesEventInInitDAE(originalFExp());

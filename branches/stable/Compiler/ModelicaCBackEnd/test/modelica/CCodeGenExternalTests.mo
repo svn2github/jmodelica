@@ -543,7 +543,6 @@ void func_CCodeGenExternalTests_SimpleExternal11_fw_def0(jmi_real_t x_v, jmi_rea
     JMI_DEF(STR, tmp_1)
     tmp_1 = func_CCodeGenExternalTests_SimpleExternal11_f_exp2();
     y_v = x_v + func_CCodeGenExternalTests_SimpleExternal11_strlen_exp1(tmp_1);
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -2902,7 +2901,7 @@ $C_functions$
 $C_destruct_external_object$
 ",
             generatedCode="
-#define _y_1 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _y_1 ((*(jmi->z))[0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define _myEO_0 ((jmi->ext_objs)[0])
@@ -2983,7 +2982,7 @@ $C_functions$
 $C_destruct_external_object$
 ",
             generatedCode="
-#define _y_2 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _y_2 ((*(jmi->z))[0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define _myEO_0 ((jmi->ext_objs)[0])
@@ -3358,7 +3357,7 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_functions$
 ",
             generatedCode="
-#define _z_2 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _z_2 ((*(jmi->z))[0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define _myEOs_1_0 ((jmi->ext_objs)[0])

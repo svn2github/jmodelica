@@ -368,6 +368,8 @@ public class CGenerator extends GenericGenerator {
 
             private static final String FMT_DEFAULT       = 
                     "#define %s ((*(jmi->z))[jmi->offs%s_%s+%d])\n";
+            private static final String FMT_DEFAULT_INDEX = 
+                    "#define %s ((*(jmi->z))[%d])\n";
             private static final String FMT_EXTERNAL      = 
                     "#define %s ((jmi->ext_objs)[%d])\n";
             private static final String FMT_VIRTUAL_FIRST = 
@@ -388,8 +390,11 @@ public class CGenerator extends GenericGenerator {
             public void visitVariable(FVariable fv, FClass.ZCategoryEntry entry) {
                 switch (entry.category().zStructVector()) {
                 case DEFAULT:
-                    cs.format(FMT_DEFAULT, (pre ? fv.preName_C() : fv.name_C()), prefix, 
-                            entry.category().zOffsetName(), entry.getOffsetIndexFor(fv));
+                    if (pre) { //TODO: Should also be changed to direct index once the mapping from pre to index is defined
+                        cs.format(FMT_DEFAULT, fv.preName_C(), prefix, entry.category().zOffsetName(), entry.getOffsetIndexFor(fv));
+                    } else {
+                        cs.format(FMT_DEFAULT_INDEX, fv.name_C(), entry.getIndexFor(fv));
+                    }
                     break;
                 case STRING:
                     // TODO: Implement when adding String support.

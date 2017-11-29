@@ -817,63 +817,6 @@ aspect TransformCanonical {
 		return unbalanced;
 	}
 	
-	/**
-	 * Create an FExp that represents a specific component of this record expression.
-	 * 
-	 * @param suffix    the suffix to add to a use of the record to access the specific component
-	 */
-	public FExp FExp.extractRecordFExp(String suffix) {
-        return new FComponentExp(treeCopy(), suffix);
-	}
-    
-    public FExp FIdUseExp.extractRecordFExp(String suffix) {
-        return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
-    }
-    
-    public FIdUse FIdUse.extractRecordFExp(String suffix) {
-        return new FIdUse(getFQName().copyAsFQNameFull().append(suffix));
-    }
-    
-    public FIdUse FIdUseInstAccess.extractRecordFExp(String suffix) {
-        return new FIdUseInstAccess(getInstAccess().copyAndAppend(suffix));
-    }
-	
-    public FExp FRecordConstructor.extractRecordFExp(String suffix) {
-        return component(suffix).fullCopy();
-    }
-    
-    public FExp InstRecordConstructor.extractRecordFExp(String suffix) {
-        return component(suffix).fullCopy();
-    }
-	
-	public FExp FArray.extractRecordFExp(String suffix) {
-		FArray res = createEmptyNode();
-		for (FExp e : getFExps())
-			res.addFExp(e.extractRecordFExp(suffix));
-		return res;
-	}
-    
-    public FExp FIterExp.extractRecordFExp(String suffix) {
-        return new FIterExp(getFExp().extractRecordFExp(suffix), getForIndexList().treeCopy());
-    }
-    
-	public FExp FAbstractCat.extractRecordFExp(String suffix) {
-		FInfArgsFunctionCall res = createEmptyNode();
-		for (FExp e : getFExps())
-			res.addFExp(e.extractRecordFExp(suffix));
-		return res;
-	}
-	
-	public FExp FCatExp.extractRecordFExp(String suffix) {
-		FCatExp res = (FCatExp) super.extractRecordFExp(suffix);
-		res.setDim(getDim().fullCopy());
-		return res;
-	}
-	
-	public FExp FNoEventExp.extractRecordFExp(String suffix) {
-		return createNode(getFExp().extractRecordFExp(suffix));
-	}
-
     public class FClass {
         public class genAlgorithmFunctionsIfSet extends Transformation {
             public genAlgorithmFunctionsIfSet() {
@@ -1081,14 +1024,19 @@ aspect TransformCanonical {
             protected Set<FVariable> variablesToVisit() {
                 ssPreferVars = new HashSet<FVariable>();
                 Set<FVariable> fvsToVisit = super.variablesToVisit();
+                boolean indexReductionActive = myOptions().getBooleanOption("index_reduction");
                 for (FVariable fv : variables()) {
-                    if (!fv.isReal())
+                    if (!fv.isReal()) {
                         continue;
+                    }
                     FRealVariable.StateSelect ss = ((FRealVariable)fv).stateSelectAttribute();
-                    if (ss != FRealVariable.StateSelect.ALWAYS && ss != FRealVariable.StateSelect.PREFER)
+                    if (!(ss == FRealVariable.StateSelect.ALWAYS
+                            || ss == FRealVariable.StateSelect.PREFER && indexReductionActive)) {
                         continue;
-                    if (ss == FRealVariable.StateSelect.PREFER && !fvsToVisit.contains(fv))
+                    }
+                    if (ss == FRealVariable.StateSelect.PREFER && !fvsToVisit.contains(fv)) {
                         ssPreferVars.add(fv);
+                    }
                     fvsToVisit.add(fv);
                 }
                 return fvsToVisit;
@@ -2609,98 +2557,6 @@ aspect StateInitialEquations {
         }
     }
 
-}
-
-aspect RuntimeOptions {
-	
-
-    public class FClass {
-        /**
-         * Add parameters for all defined runtime options.
-         */
-        public class addRuntimeOptionParameters extends Transformation {
-            public boolean active() {
-                OptionRegistry opt = myOptions();
-                return opt.getBooleanOption("generate_runtime_option_parameters") && opt.getBooleanOption("generate_ode");
-            }
-            
-            public void perform() {
-                OptionRegistry opt = myOptions();
-                for (String key : opt.getRuntimeOptionKeys()) {
-                    FVariable v = null;
-                    String name = "_" + key;
-                    if (opt.isBooleanOption(key))
-                        v = createBooleanRuntimeOptionParameter(name, opt.getBooleanOption(key));
-                    else if (opt.isStringOption(key))
-                        v = createStringRuntimeOptionParameter(name, opt.getStringOption(key));
-                    else if (opt.isIntegerOption(key))
-                        v = createIntegerRuntimeOptionParameter(name, opt.getIntegerOption(key));
-                    else if (opt.isRealOption(key))
-                        v = createRealRuntimeOptionParameter(name, opt.getRealOption(key));
-                    addFVariable(v);
-                }
-            }
-        }
-    }
-	
-	/**
-	 * Create a parameter for a boolean runtime option. 
-	 */
-	public FVariable FClass.createBooleanRuntimeOptionParameter(String name, boolean val) {
-		return commonCreateRuntimeOptionParameter(new FBooleanVariable(), name, FBooleanLitExp.create(val));
-	}
-	
-	/**
-	 * Create a parameter for a string runtime option. 
-	 */
-	public FVariable FClass.createStringRuntimeOptionParameter(String name, String val) {
-		return commonCreateRuntimeOptionParameter(new FStringVariable(), name, new FStringLitExp(val));
-	}
-	
-	/**
-	 * Create a parameter for a integer runtime option. 
-	 */
-	public FVariable FClass.createIntegerRuntimeOptionParameter(String name, int val) {
-		return commonCreateRuntimeOptionParameter(new FIntegerVariable(), name, new FIntegerLitExp(val));
-	}
-	
-	/**
-	 * Create a parameter for a real runtime option. 
-	 */
-	public FVariable FClass.createRealRuntimeOptionParameter(String name, double val) {
-		return commonCreateRuntimeOptionParameter(new FRealVariable(), name, new FRealLitExp(val));
-	}
-	
-	/**
-	 * Set the children of a runtime option parameter.
-	 * 
-	 * @param v     the variable to set fields on
-	 * @param name  the name of the variable
-	 * @param bExp  the burrent value of the option
-	 * @return  <code>v</code>, for convenience
-	 */
-	public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
-		v.setFVisibilityType(new FRuntimeOptionVisibilityType());
-		v.setFTypePrefixVariability(fFixedParameter());
-		v.setBindingExp(bExp);
-		v.setFQName(new FQNameString(name));
-		return v;
-	}
-	
-	syn int FClass.numRuntimeOptionParameters() = runtimeOptionParameters().size();
-	syn lazy SortedSet<FVariable> FClass.runtimeOptionParameters() {
-	    SortedSet<FVariable> res = new TreeSet<FVariable>(new VariableNameComparator());
-		for (FVariable fv : independentParameters())  // They are always independent
-			if (fv.isRuntimeOption())
-				res.add(fv);
-		return res;
-	}
-	
-	syn boolean FVariable.isRuntimeOption() = getFVisibilityType().isRuntimeOptionVisibility();
-	
-	syn boolean FVisibilityType.isRuntimeOptionVisibility()     = false;
-	eq FRuntimeOptionVisibilityType.isRuntimeOptionVisibility() = true;
-	
 }
 
 aspect SemiLinear {

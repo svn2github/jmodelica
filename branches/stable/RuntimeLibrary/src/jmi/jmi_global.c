@@ -180,7 +180,6 @@ void jmi_finalize_try(jmi_t* jmi, int depth) {
         fprintf(stderr, "jmi_finalize_try(): Unexpected try depth=%d, resetting to 0\n",depth);
         depth = 0;
     }
-    jmi_dyn_mem_free(&jmi->dyn_mem);
     jmi->current_try_depth = depth;
     if (depth == 0) {
         jmi_set_current(NULL);
@@ -213,11 +212,7 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  */
 void* jmi_global_calloc(size_t n, size_t s) {
     jmi_t* jmi = jmi_get_current();
-    if (jmi->jmi_callbacks.allocate_memory != NULL) {
-        return (char*) jmi->jmi_callbacks.allocate_memory(n, s);
-    } else {
-        return (char*) calloc(n, s);
-    }
+    return jmi_dynamic_function_pool_direct_alloc(jmi->dyn_fcn_mem, n*s, TRUE);
 }
 
 /**

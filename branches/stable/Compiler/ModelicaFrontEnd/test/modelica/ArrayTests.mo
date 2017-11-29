@@ -7610,6 +7610,82 @@ end ArrayTests.Slices.SliceTest3;
 ")})));
 end SliceTest3;
 
+model SliceTest4
+    function f
+        input Real[2] i;
+        output Real[2] o;
+        output Real dummy = 1;
+    algorithm
+        o := i;
+    end f;
+    
+    function fw
+        output Real[5] o;
+        output Real dummy = 1;
+    algorithm
+        o[{1,3,5}] := {1,1,1};
+        (o[{2,4}],) := f(o[{3,5}]);
+    end fw;
+    
+    Real[5] a,ae;
+algorithm
+    (a[{2,4}],) := f({1,1});
+    (a[{5,4,3,2,1}],) := fw();
+equation
+    (ae[{5,4,3,2,1}],) = fw();
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Slices_SliceTest4",
+            description="Slice operations: test with vector indices",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass ArrayTests.Slices.SliceTest4
+ Real a[1];
+ Real a[2];
+ Real a[3];
+ Real a[4];
+ Real a[5];
+ parameter Real ae[5];
+ parameter Real ae[4];
+ parameter Real ae[3];
+ parameter Real ae[2];
+ parameter Real ae[1];
+parameter equation
+ ({ae[5], ae[4], ae[3], ae[2], ae[1]}, ) = ArrayTests.Slices.SliceTest4.fw();
+algorithm
+ ({a[2], a[4]}, ) := ArrayTests.Slices.SliceTest4.f({1, 1});
+ ({a[5], a[4], a[3], a[2], a[1]}, ) := ArrayTests.Slices.SliceTest4.fw();
+
+public
+ function ArrayTests.Slices.SliceTest4.fw
+  output Real[:] o;
+  output Real dummy;
+ algorithm
+  init o as Real[5];
+  dummy := 1;
+  o[1] := 1;
+  o[3] := 1;
+  o[5] := 1;
+  ({o[2], o[4]}, ) := ArrayTests.Slices.SliceTest4.f({o[3], o[5]});
+  return;
+ end ArrayTests.Slices.SliceTest4.fw;
+
+ function ArrayTests.Slices.SliceTest4.f
+  input Real[:] i;
+  output Real[:] o;
+  output Real dummy;
+ algorithm
+  init o as Real[2];
+  dummy := 1;
+  o[1] := i[1];
+  o[2] := i[2];
+  return;
+ end ArrayTests.Slices.SliceTest4.f;
+
+end ArrayTests.Slices.SliceTest4;
+")})));
+end SliceTest4;
 
 
 model MixedIndices1

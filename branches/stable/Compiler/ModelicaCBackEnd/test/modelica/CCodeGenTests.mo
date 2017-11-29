@@ -39,13 +39,13 @@ $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
             generatedCode="
-#define _p_3 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _der_x1_5 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _der_x2_6 ((*(jmi->z))[jmi->offs_real_dx+1])
-#define _x1_0 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _x2_1 ((*(jmi->z))[jmi->offs_real_x+1])
-#define _u_2 ((*(jmi->z))[jmi->offs_real_u+0])
-#define _w_4 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _p_3 ((*(jmi->z))[0])
+#define _der_x1_5 ((*(jmi->z))[1])
+#define _der_x2_6 ((*(jmi->z))[2])
+#define _x1_0 ((*(jmi->z))[3])
+#define _x2_1 ((*(jmi->z))[4])
+#define _u_2 ((*(jmi->z))[5])
+#define _w_4 ((*(jmi->z))[6])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 
@@ -80,12 +80,12 @@ $C_DAE_initial_equation_residuals$
 $C_DAE_initial_guess_equation_residuals$
 ",
             generatedCode="
-#define _der_x_4 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _der_v_5 ((*(jmi->z))[jmi->offs_real_dx+1])
-#define _x_0 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _v_3 ((*(jmi->z))[jmi->offs_real_x+1])
-#define _y_1 ((*(jmi->z))[jmi->offs_real_w+0])
-#define _w_2 ((*(jmi->z))[jmi->offs_real_w+1])
+#define _der_x_4 ((*(jmi->z))[0])
+#define _der_v_5 ((*(jmi->z))[1])
+#define _x_0 ((*(jmi->z))[2])
+#define _v_3 ((*(jmi->z))[3])
+#define _y_1 ((*(jmi->z))[4])
+#define _w_2 ((*(jmi->z))[5])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 
@@ -419,19 +419,19 @@ initial equation
             eliminate_alias_variables=false,
             template="$C_variable_aliases$",
             generatedCode="
-#define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _cd_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _aic_5 ((*(jmi->z))[jmi->offs_integer_ci+2])
-#define _bic_6 ((*(jmi->z))[jmi->offs_integer_ci+3])
-#define _adc_7 ((*(jmi->z))[jmi->offs_integer_ci+4])
-#define _bdc_8 ((*(jmi->z))[jmi->offs_integer_ci+5])
-#define _pi_2 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _aip_9 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _bip_10 ((*(jmi->z))[jmi->offs_integer_pi+2])
-#define _pd_3 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _adp_11 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define _bdp_12 ((*(jmi->z))[jmi->offs_integer_pd+2])
-#define _pii_4 ((*(jmi->z))[jmi->offs_integer_pd+3])
+#define _ci_0 ((*(jmi->z))[0])
+#define _cd_1 ((*(jmi->z))[1])
+#define _aic_5 ((*(jmi->z))[2])
+#define _bic_6 ((*(jmi->z))[3])
+#define _adc_7 ((*(jmi->z))[4])
+#define _bdc_8 ((*(jmi->z))[5])
+#define _pi_2 ((*(jmi->z))[6])
+#define _aip_9 ((*(jmi->z))[7])
+#define _bip_10 ((*(jmi->z))[8])
+#define _pd_3 ((*(jmi->z))[9])
+#define _adp_11 ((*(jmi->z))[10])
+#define _bdp_12 ((*(jmi->z))[11])
+#define _pii_4 ((*(jmi->z))[12])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 ")})));
@@ -624,8 +624,8 @@ $C_ode_initialization$
             generatedCode="
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _a_0 ((*(jmi->z))[jmi->offs_integer_d+0])
-#define _temp_1_1 ((*(jmi->z))[jmi->offs_boolean_d+0])
+#define _a_0 ((*(jmi->z))[2])
+#define _temp_1_1 ((*(jmi->z))[3])
 #define pre_a_0 ((*(jmi->z))[jmi->offs_pre_integer_d+0])
 #define pre_temp_1_1 ((*(jmi->z))[jmi->offs_pre_boolean_d+0])
 
@@ -818,9 +818,9 @@ initial equation
             description="Test alias generation for structural dependent variables",
             template="$C_variable_aliases$",
             generatedCode="
-#define _p_0 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _ip2_2 ((*(jmi->z))[jmi->offs_real_pi+1])
-#define _ip1_1 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _p_0 ((*(jmi->z))[0])
+#define _ip2_2 ((*(jmi->z))[1])
+#define _ip1_1 ((*(jmi->z))[2])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 ")})));
@@ -1263,29 +1263,29 @@ $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
             generatedCode="
-#define _c1_0 ((*(jmi->z))[jmi->offs_real_ci+0])
-#define _c2_1 ((*(jmi->z))[jmi->offs_real_ci+1])
-#define _p1_2 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _p2_3 ((*(jmi->z))[jmi->offs_real_pd+0])
-#define _ci1_8 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _ci2_9 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _pi1_10 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _pi2_11 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _cb1_14 ((*(jmi->z))[jmi->offs_boolean_ci+0])
-#define _cb2_15 ((*(jmi->z))[jmi->offs_boolean_ci+1])
-#define _pb1_16 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define _pb2_17 ((*(jmi->z))[jmi->offs_boolean_pd+0])
-#define _der_x_26 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _x_6 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _w_7 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _c1_0 ((*(jmi->z))[0])
+#define _c2_1 ((*(jmi->z))[1])
+#define _p1_2 ((*(jmi->z))[2])
+#define _p2_3 ((*(jmi->z))[3])
+#define _ci1_8 ((*(jmi->z))[4])
+#define _ci2_9 ((*(jmi->z))[5])
+#define _pi1_10 ((*(jmi->z))[6])
+#define _pi2_11 ((*(jmi->z))[7])
+#define _cb1_14 ((*(jmi->z))[8])
+#define _cb2_15 ((*(jmi->z))[9])
+#define _pb1_16 ((*(jmi->z))[10])
+#define _pb2_17 ((*(jmi->z))[11])
+#define _der_x_26 ((*(jmi->z))[12])
+#define _x_6 ((*(jmi->z))[13])
+#define _w_7 ((*(jmi->z))[14])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _rd1_4 ((*(jmi->z))[jmi->offs_real_d+0])
-#define _rd2_5 ((*(jmi->z))[jmi->offs_real_d+1])
-#define _rid1_12 ((*(jmi->z))[jmi->offs_integer_d+0])
-#define _rid2_13 ((*(jmi->z))[jmi->offs_integer_d+1])
-#define _rbd1_18 ((*(jmi->z))[jmi->offs_boolean_d+0])
-#define _rbd2_19 ((*(jmi->z))[jmi->offs_boolean_d+1])
+#define _rd1_4 ((*(jmi->z))[17])
+#define _rd2_5 ((*(jmi->z))[18])
+#define _rid1_12 ((*(jmi->z))[19])
+#define _rid2_13 ((*(jmi->z))[20])
+#define _rbd1_18 ((*(jmi->z))[21])
+#define _rbd2_19 ((*(jmi->z))[22])
 
     (*res)[0] = - _x_6 - (_der_x_26);
     (*res)[1] = 4 - (_rd1_4);
@@ -1466,25 +1466,25 @@ o->n = 4;
 
 
 ---
-#define _reg1_0 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _dummy_1_20 ((*(jmi->z))[jmi->offs_real_pi+1])
-#define _dummy_2_21 ((*(jmi->z))[jmi->offs_real_pi+2])
-#define _struct1_5 ((*(jmi->z))[jmi->offs_real_pi+3])
-#define _final1_10 ((*(jmi->z))[jmi->offs_real_pi+4])
-#define _eval1_15 ((*(jmi->z))[jmi->offs_real_pi+5])
-#define _reg2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _reg3_2 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define _struct2_6 ((*(jmi->z))[jmi->offs_integer_pi+2])
-#define _n_22 ((*(jmi->z))[jmi->offs_integer_pi+3])
-#define _struct3_7 ((*(jmi->z))[jmi->offs_integer_pi+4])
-#define _final2_11 ((*(jmi->z))[jmi->offs_integer_pi+5])
-#define _final3_12 ((*(jmi->z))[jmi->offs_integer_pi+6])
-#define _eval2_16 ((*(jmi->z))[jmi->offs_integer_pi+7])
-#define _eval3_17 ((*(jmi->z))[jmi->offs_integer_pi+8])
-#define _reg4_3 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define _struct4_8 ((*(jmi->z))[jmi->offs_boolean_pi+1])
-#define _final4_13 ((*(jmi->z))[jmi->offs_boolean_pi+2])
-#define _eval4_18 ((*(jmi->z))[jmi->offs_boolean_pi+3])
+#define _reg1_0 ((*(jmi->z))[0])
+#define _dummy_1_20 ((*(jmi->z))[1])
+#define _dummy_2_21 ((*(jmi->z))[2])
+#define _struct1_5 ((*(jmi->z))[3])
+#define _final1_10 ((*(jmi->z))[4])
+#define _eval1_15 ((*(jmi->z))[5])
+#define _reg2_1 ((*(jmi->z))[6])
+#define _reg3_2 ((*(jmi->z))[7])
+#define _struct2_6 ((*(jmi->z))[8])
+#define _n_22 ((*(jmi->z))[9])
+#define _struct3_7 ((*(jmi->z))[10])
+#define _final2_11 ((*(jmi->z))[11])
+#define _final3_12 ((*(jmi->z))[12])
+#define _eval2_16 ((*(jmi->z))[13])
+#define _eval3_17 ((*(jmi->z))[14])
+#define _reg4_3 ((*(jmi->z))[15])
+#define _struct4_8 ((*(jmi->z))[16])
+#define _final4_13 ((*(jmi->z))[17])
+#define _eval4_18 ((*(jmi->z))[18])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 
@@ -1681,10 +1681,10 @@ o->n = 0;
 
 
 ---
-#define _initial1_0 ((*(jmi->z))[jmi->offs_real_pd+0])
-#define _initial2_1 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _initial3_2 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define _initial4_3 ((*(jmi->z))[jmi->offs_boolean_pd+0])
+#define _initial1_0 ((*(jmi->z))[0])
+#define _initial2_1 ((*(jmi->z))[1])
+#define _initial3_2 ((*(jmi->z))[2])
+#define _initial4_3 ((*(jmi->z))[3])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 
@@ -1748,10 +1748,10 @@ $C_variable_aliases$
 $C_DAE_equation_residuals$
 ",
             generatedCode="
-#define _der_x_y_3 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _x_y_0 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _x_y_1 ((*(jmi->z))[jmi->offs_real_w+0])
-#define _der_x_y_2 ((*(jmi->z))[jmi->offs_real_w+1])
+#define _der_x_y_3 ((*(jmi->z))[0])
+#define _x_y_0 ((*(jmi->z))[1])
+#define _x_y_1 ((*(jmi->z))[2])
+#define _der_x_y_2 ((*(jmi->z))[3])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 
@@ -3109,8 +3109,7 @@ void func_CCodeGenTests_CFunctionTest17_F1_def0(jmi_real_t x_v, jmi_array_t* y_a
     jmi_array_ref_1(y_a, 2) = 2 * x_v;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_CFunctionTest17_F2_def1(y_a, tmp_1);
-    jmi_array_ref_1(y_a, 1) = (jmi_array_val_1(tmp_1, 1));
-    jmi_array_ref_1(y_a, 2) = (jmi_array_val_1(tmp_1, 2));
+    JMI_ASG(GEN_ARR, y_a, tmp_1)
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -6394,8 +6393,8 @@ model CRecordDecl18
             generate_dae=true,
             template="$C_variable_aliases$",
             generatedCode="
-#define _b_c_a_1_r_0 ((*(jmi->z))[jmi->offs_real_w+0])
-#define _b_c_a_2_r_1 ((*(jmi->z))[jmi->offs_real_w+1])
+#define _b_c_a_1_r_0 ((*(jmi->z))[0])
+#define _b_c_a_2_r_1 ((*(jmi->z))[1])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 ")})));
@@ -14136,46 +14135,46 @@ const int fmi_runtime_options_map_vrefs[] = {
 };
 
 const int fmi_runtime_options_map_length = 39;
-#define __block_jacobian_check_tol_2 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define __cs_rel_tol_6 ((*(jmi->z))[jmi->offs_real_pi+1])
-#define __cs_step_size_8 ((*(jmi->z))[jmi->offs_real_pi+2])
-#define __events_default_tol_10 ((*(jmi->z))[jmi->offs_real_pi+3])
-#define __events_tol_factor_11 ((*(jmi->z))[jmi->offs_real_pi+4])
-#define __nle_jacobian_finite_difference_delta_17 ((*(jmi->z))[jmi->offs_real_pi+5])
-#define __nle_solver_default_tol_20 ((*(jmi->z))[jmi->offs_real_pi+6])
-#define __nle_solver_max_residual_scaling_factor_24 ((*(jmi->z))[jmi->offs_real_pi+7])
-#define __nle_solver_min_residual_scaling_factor_25 ((*(jmi->z))[jmi->offs_real_pi+8])
-#define __nle_solver_min_tol_26 ((*(jmi->z))[jmi->offs_real_pi+9])
-#define __nle_solver_regularization_tolerance_27 ((*(jmi->z))[jmi->offs_real_pi+10])
-#define __nle_solver_step_limit_factor_28 ((*(jmi->z))[jmi->offs_real_pi+11])
-#define __nle_solver_tol_factor_29 ((*(jmi->z))[jmi->offs_real_pi+12])
-#define __time_events_default_tol_36 ((*(jmi->z))[jmi->offs_real_pi+13])
-#define __block_solver_experimental_mode_3 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define __cs_experimental_mode_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
-#define __cs_solver_7 ((*(jmi->z))[jmi->offs_integer_pi+2])
-#define __iteration_variable_scaling_12 ((*(jmi->z))[jmi->offs_integer_pi+3])
-#define __log_level_13 ((*(jmi->z))[jmi->offs_integer_pi+4])
-#define __nle_active_bounds_mode_14 ((*(jmi->z))[jmi->offs_integer_pi+5])
-#define __nle_jacobian_calculation_mode_16 ((*(jmi->z))[jmi->offs_integer_pi+6])
-#define __nle_jacobian_update_mode_18 ((*(jmi->z))[jmi->offs_integer_pi+7])
-#define __nle_solver_exit_criterion_21 ((*(jmi->z))[jmi->offs_integer_pi+8])
-#define __nle_solver_max_iter_22 ((*(jmi->z))[jmi->offs_integer_pi+9])
-#define __nle_solver_max_iter_no_jacobian_23 ((*(jmi->z))[jmi->offs_integer_pi+10])
-#define __residual_equation_scaling_34 ((*(jmi->z))[jmi->offs_integer_pi+11])
-#define __block_jacobian_check_1 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define __block_solver_profiling_4 ((*(jmi->z))[jmi->offs_boolean_pi+1])
-#define __enforce_bounds_9 ((*(jmi->z))[jmi->offs_boolean_pi+2])
-#define __nle_brent_ignore_error_15 ((*(jmi->z))[jmi->offs_boolean_pi+3])
-#define __nle_solver_check_jac_cond_19 ((*(jmi->z))[jmi->offs_boolean_pi+4])
-#define __nle_solver_use_last_integrator_step_30 ((*(jmi->z))[jmi->offs_boolean_pi+5])
-#define __nle_solver_use_nominals_as_fallback_31 ((*(jmi->z))[jmi->offs_boolean_pi+6])
-#define __rescale_after_singular_jac_32 ((*(jmi->z))[jmi->offs_boolean_pi+7])
-#define __rescale_each_step_33 ((*(jmi->z))[jmi->offs_boolean_pi+8])
-#define __runtime_log_to_file_35 ((*(jmi->z))[jmi->offs_boolean_pi+9])
-#define __use_Brent_in_1d_37 ((*(jmi->z))[jmi->offs_boolean_pi+10])
-#define __use_jacobian_equilibration_38 ((*(jmi->z))[jmi->offs_boolean_pi+11])
-#define __use_newton_for_brent_39 ((*(jmi->z))[jmi->offs_boolean_pi+12])
-#define _x_0 ((*(jmi->z))[jmi->offs_real_w+0])
+#define __block_jacobian_check_tol_2 ((*(jmi->z))[0])
+#define __cs_rel_tol_6 ((*(jmi->z))[1])
+#define __cs_step_size_8 ((*(jmi->z))[2])
+#define __events_default_tol_10 ((*(jmi->z))[3])
+#define __events_tol_factor_11 ((*(jmi->z))[4])
+#define __nle_jacobian_finite_difference_delta_17 ((*(jmi->z))[5])
+#define __nle_solver_default_tol_20 ((*(jmi->z))[6])
+#define __nle_solver_max_residual_scaling_factor_24 ((*(jmi->z))[7])
+#define __nle_solver_min_residual_scaling_factor_25 ((*(jmi->z))[8])
+#define __nle_solver_min_tol_26 ((*(jmi->z))[9])
+#define __nle_solver_regularization_tolerance_27 ((*(jmi->z))[10])
+#define __nle_solver_step_limit_factor_28 ((*(jmi->z))[11])
+#define __nle_solver_tol_factor_29 ((*(jmi->z))[12])
+#define __time_events_default_tol_36 ((*(jmi->z))[13])
+#define __block_solver_experimental_mode_3 ((*(jmi->z))[14])
+#define __cs_experimental_mode_5 ((*(jmi->z))[15])
+#define __cs_solver_7 ((*(jmi->z))[16])
+#define __iteration_variable_scaling_12 ((*(jmi->z))[17])
+#define __log_level_13 ((*(jmi->z))[18])
+#define __nle_active_bounds_mode_14 ((*(jmi->z))[19])
+#define __nle_jacobian_calculation_mode_16 ((*(jmi->z))[20])
+#define __nle_jacobian_update_mode_18 ((*(jmi->z))[21])
+#define __nle_solver_exit_criterion_21 ((*(jmi->z))[22])
+#define __nle_solver_max_iter_22 ((*(jmi->z))[23])
+#define __nle_solver_max_iter_no_jacobian_23 ((*(jmi->z))[24])
+#define __residual_equation_scaling_34 ((*(jmi->z))[25])
+#define __block_jacobian_check_1 ((*(jmi->z))[26])
+#define __block_solver_profiling_4 ((*(jmi->z))[27])
+#define __enforce_bounds_9 ((*(jmi->z))[28])
+#define __nle_brent_ignore_error_15 ((*(jmi->z))[29])
+#define __nle_solver_check_jac_cond_19 ((*(jmi->z))[30])
+#define __nle_solver_use_last_integrator_step_30 ((*(jmi->z))[31])
+#define __nle_solver_use_nominals_as_fallback_31 ((*(jmi->z))[32])
+#define __rescale_after_singular_jac_32 ((*(jmi->z))[33])
+#define __rescale_each_step_33 ((*(jmi->z))[34])
+#define __runtime_log_to_file_35 ((*(jmi->z))[35])
+#define __use_Brent_in_1d_37 ((*(jmi->z))[36])
+#define __use_jacobian_equilibration_38 ((*(jmi->z))[37])
+#define __use_newton_for_brent_39 ((*(jmi->z))[38])
+#define _x_0 ((*(jmi->z))[39])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
@@ -15960,7 +15959,6 @@ void func_CCodeGenTests_StringOperations4_f_def0(jmi_string_t s_v, jmi_real_t* x
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"123\");
     func_CCodeGenTests_StringOperations4_f_def0(tmp_1, NULL);
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, x_o, x_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16028,7 +16026,6 @@ void func_CCodeGenTests_StringOperations5_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", t_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16086,7 +16083,6 @@ void func_CCodeGenTests_StringOperations6_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     JMI_ASG(STR, s_v, \"str\")
     tmp_1 = func_CCodeGenTests_StringOperations6_f1_exp1(s_v);
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16164,7 +16160,6 @@ void func_CCodeGenTests_StringOperations7_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     JMI_INI(STR, tmp_1)
     func_CCodeGenTests_StringOperations7_f1_def1(s_v, &tmp_1, NULL);
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16252,10 +16247,7 @@ void func_CCodeGenTests_StringOperations8_f2_def0(jmi_real_t x_v, jmi_real_t* y_
     snprintf(JMI_STR_END(tmp_4), JMI_STR_LEFT(tmp_4), \"%-.*g\", (int) 6, x_v);
     snprintf(JMI_STR_END(tmp_4), JMI_STR_LEFT(tmp_4), \"%s\", \" |\");
     func_CCodeGenTests_StringOperations8_f1_def1(tmp_4, &tmp_1, NULL);
-    JMI_FREE(tmp_3)
-    JMI_FREE(tmp_4)
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     func_Modelica_Utilities_Streams_print_def2(s_v, \"\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -16357,7 +16349,6 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_real_t x_v, jmi_real_t i_v,
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(JMI_TRUE, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*s\", \"%*s\"), (int) i_v, COND_EXP_EQ(b_v, JMI_TRUE, \"true\", \"false\"));
     JMI_ASG(STR, s_v, tmp_1)
-    JMI_FREE(tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16411,9 +16402,7 @@ void func_CCodeGenTests_StringOperations10_f2_def0(jmi_real_t x_v, jmi_real_t* y
     JMI_ASG(STR, jmi_array_ref_1(s_a, 2), \"str\")
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_StringOperations10_f1_def1(s_a, tmp_1);
-    JMI_ASG(STR, jmi_array_ref_1(s_a, 1), jmi_array_val_1(tmp_1, 1))
-    JMI_ASG(STR, jmi_array_ref_1(s_a, 2), jmi_array_val_1(tmp_1, 2))
-    jmi_free_str_arr(tmp_1);
+    JMI_ASG(STR_ARR, s_a, tmp_1)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -16496,7 +16485,6 @@ void func_CCodeGenTests_StringOperations11_f2_def0(jmi_real_t x_v, jmi_real_t n_
     JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_1, n_v, 1, n_v)
     func_CCodeGenTests_StringOperations11_f1_def1(s_a, tmp_1);
     JMI_ASG(STR_ARR, s_a, tmp_1)
-    jmi_free_str_arr(tmp_1);
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -18062,14 +18050,14 @@ model IntegerEnumIndices
             variability_propagation=false,
             template="$C_variable_aliases$",
             generatedCode="
-#define _i1_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _e1_3 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _i2_1 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _e2_4 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _i1_0 ((*(jmi->z))[0])
+#define _e1_3 ((*(jmi->z))[1])
+#define _i2_1 ((*(jmi->z))[2])
+#define _e2_4 ((*(jmi->z))[3])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _i3_2 ((*(jmi->z))[jmi->offs_integer_d+0])
-#define _e3_5 ((*(jmi->z))[jmi->offs_integer_d+1])
+#define _i3_2 ((*(jmi->z))[6])
+#define _e3_5 ((*(jmi->z))[7])
 #define pre_i3_2 ((*(jmi->z))[jmi->offs_pre_integer_d+0])
 #define pre_e3_5 ((*(jmi->z))[jmi->offs_pre_integer_d+1])
 ")})));
