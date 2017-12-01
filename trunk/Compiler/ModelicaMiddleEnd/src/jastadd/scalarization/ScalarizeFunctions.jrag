@@ -434,7 +434,7 @@ aspect FunctionScalarization {
                     FExp right = arg.tempExp(names.createFArraySubscripts(0, dimDiff + 1));
                     List<FStatement> inner = new List<FStatement>();
                     inner.add(new FAssignStmt(left, right));
-                    names.createForLoops(firstLoop, inner, arg, 1, dimDiff + 1);
+                    names.createForLoops(s, firstLoop, inner, arg, 1, dimDiff + 1);
                     names.removeLayer();
                 } else {
                     newArgs.add(arg.scalarize(s));
@@ -447,7 +447,7 @@ aspect FunctionScalarization {
         FFunctionCall funcRight = new FFunctionCall(getName().fullCopy(), newArgs, getFType().scalarType());
         firstLoop.add(new FAssignStmt(funcLeft, funcRight));
 
-        names.createForLoops(outer, firstLoop, this, 0, 1);
+        names.createForLoops(s, outer, firstLoop, this, 0, 1);
         names.removeLayer();
     }
     
@@ -667,8 +667,8 @@ aspect FunctionScalarization {
         mid.add(new FAssignStmt(reducerTempExp(s), scalarReduceStartValue().buildLiteral()));
         inner.add(new FAssignStmt(reducerTempExp(s), scalarReduceExp(reducerTempExp(s), exp.scalarize(s))));
 
-        names.createForLoops(mid, inner, exp, ndims(), exp.ndims());
-        names.createForLoops(clauses, mid, exp, 0, ndims());
+        names.createForLoops(s, mid, inner, exp, ndims(), exp.ndims());
+        names.createForLoops(s, clauses, mid, exp, 0, ndims());
         names.removeLayer();
     }
     
@@ -957,9 +957,9 @@ aspect FunctionScalarizationHelpers {
          *  
          * Adds the outermost for loop to a list of statements.
          * 
-         * @param stmts  list to add the created for statements to
+         * @param outer  list to add the created for statements to
+         * @param inner  list of statements put inside the loop
          * @param sizes  array of expressions describing the size of each dimension
-         * @return  the list of statements of the innermost loop
          */
         public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp[] sizes, int startDim) {
             if (startDim < sizes.length) {
@@ -977,9 +977,9 @@ aspect FunctionScalarizationHelpers {
          *  
          * Adds the outermost for loop to a list of statements.
          * 
-         * @param stmts  list to add the created for statements to
+         * @param outer  list to add the created for statements to
+         * @param inner  list of statements put inside the loop
          * @param var    name of the variable to loop over
-         * @return  the list of statements of the innermost loop
          */
         public void createForLoops(List<FStatement> outer, List<FStatement> inner, FQName var) {
             int n = topLayer().length;
@@ -996,16 +996,16 @@ aspect FunctionScalarizationHelpers {
          *  
          * Adds the outermost for loop to a list of statements.
          * 
-         * @param stmts  list to add the created for statements to
+         * @param outer  list to add the created for statements to
+         * @param inner  list of statements put inside the loop
          * @param exp    expression to loop over
          * @param d1     dimensions to start in
          * @param d2     dimensions to end in
-         * @return  the list of statements of the innermost loop
          */
-        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp exp, int d1, int d2) {
+        public void createForLoops(Scalarizer s, List<FStatement> outer, List<FStatement> inner, FExp exp, int d1, int d2) {
             FExp[] sizes = new FExp[d2];
             for (int i = d1; i < d2; i++) {
-                sizes[i] = exp.size().scalarize(null, i);
+                sizes[i] = exp.size().scalarize(s, i);
             }
             createForLoops(outer, inner, sizes, d1);
         }
@@ -1015,12 +1015,12 @@ aspect FunctionScalarizationHelpers {
          *  
          * Adds the outermost for loop to a list of statements.
          * 
-         * @param stmts  list to add the created for statements to
+         * @param outer  list to add the created for statements to
+         * @param inner  list of statements put inside the loop
          * @param exp    expression to loop over
-         * @return  the list of statements of the innermost loop
          */
-        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FExp exp) {
-            createForLoops(outer, inner, exp, 0, exp.ndims());
+        public void createForLoops(Scalarizer s, List<FStatement> outer, List<FStatement> inner, FExp exp) {
+            createForLoops(s, outer, inner, exp, 0, exp.ndims());
         }
 
         /**
