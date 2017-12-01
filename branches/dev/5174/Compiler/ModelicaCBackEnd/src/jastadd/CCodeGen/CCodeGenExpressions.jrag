@@ -1310,7 +1310,7 @@ aspect CCodeGenExpressions {
     public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
         str.print("static ");
-        type().printScalarDecl_C(str, indent, false, tempName_C());
+        type().printScalarDecl_C(p, str, indent, false, tempName_C());
         str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
     }
 

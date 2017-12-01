@@ -113,7 +113,7 @@ aspect CCodeGenFunctionDecl {
             str.print(" ");
             str.print(p.name(v));
         } else {
-            str.print(p.returnType(v));
+            str.print(v.typeReturn_C(p.codePrinter()));
             str.print(" ");
             str.print(p.returnName(v));
         }
@@ -132,13 +132,13 @@ aspect CCodeGenFunctionDecl {
 
     public void FFunctionDecl.printExpHeader_C(CodePrinter p, CodeStream str, String indent) {
         if (generateExpFunction()) {
-            prettyPrintHeader(p, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
+            prettyPrintHeader(p, str, indent, getDeclaredType_C(p), C_SUFFIX_EXP, false);
         }
     }
 
-    public String FFunctionDecl.getDeclaredType_C() {
+    public String FFunctionDecl.getDeclaredType_C(CodePrinter p) {
         if (myOutputs().size() > 0) {
-            return myOutputs().get(0).type_C();
+            return myOutputs().get(0).type_C(p);
         } else {
             return "void";
         }
@@ -212,7 +212,7 @@ aspect CCodeGenFunctionDecl {
     public void FFunctionDecl.prettyPrintExpFunc_C(CodePrinter p, CodeStream str, String indent) {
         String next = p.indent(indent);
         if (generateExpFunction()) {
-            genOpenFunctionDecl(p, str, indent, getDeclaredType_C(), C_SUFFIX_EXP, false);
+            genOpenFunctionDecl(p, str, indent, getDeclaredType_C(p), C_SUFFIX_EXP, false);
             printDeclarationForExp_C(p, str, next);
             prettyPrintWrappedCall_C(p, str, next);
             printReturnForExp_C(p, str, next);

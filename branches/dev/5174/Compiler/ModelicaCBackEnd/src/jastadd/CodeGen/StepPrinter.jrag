@@ -103,12 +103,8 @@ aspect StepPrinter {
                 return ffc.tempName_C();
             }
 
-            public String returnType(FFunctionVariable v) {
-                return v.typeReturn_C();
-            }
-
             public String type(FAbstractVariable v) {
-                return v.type_C();
+                return v.type_C(codePrinter());
             }
             
             

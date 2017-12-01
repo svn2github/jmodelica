@@ -56,7 +56,7 @@ aspect CCodeGenFunctionPartial {
         endStruct_C(str, indent);  
         
         beginStruct_C(str, indent, fp);
-        str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, getDeclaredType_C(), fp, out);
+        str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, getDeclaredType_C(p), fp, out);
         str.formatln("%s%s* (*fpcr)(%s*, %s*, ...);", next, fp, fp, fp);
         new StructComputation()
         .prettyPrintHead(myInputs(), p, str, next);
@@ -152,7 +152,7 @@ aspect CCodeGenFunctionPartial {
      * \brief Generate header for FPCL function.
      */
     public void FFunctionDecl.prettyPrintHeadFPCL(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s %s(%s* fp_in, %s* out, ...)", indent, getDeclaredType_C(),p.funcNameUnderscore(this, C_SUFFIX_FPCL),
+        str.format("%s%s %s(%s* fp_in, %s* out, ...)", indent, getDeclaredType_C(p),p.funcNameUnderscore(this, C_SUFFIX_FPCL),
                 p.funcNameUnderscore(this, C_SUFFIX_FP), p.funcNameUnderscore(this, C_SUFFIX_FPOUT));
     }
 
@@ -450,7 +450,7 @@ int i;
             // just like the normal printArgument, except sep is a constant ", ", 
             // this is by luck since we know that in the contexts where we use this method 
             // (for now), we always have a preceding argument(the function pointers). Generalize this?
-            str.print(", ", "(", type().type_C(),")","(");
+            str.print(", ", "(", type().type_C(p.codePrinter()),")","(");
             genTempArg(p, str, indent);
             str.print(")");
     }
