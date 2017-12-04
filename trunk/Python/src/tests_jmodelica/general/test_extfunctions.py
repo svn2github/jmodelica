@@ -592,9 +592,13 @@ class TestAdvanced:
         Test failing of partial constant evaluation on external function
         '''
         cpath = "ExtFunctionTests.CEval.Advanced.UnknownInput"
-        fmu_name = compile_fmu(cpath, self.fpath)
+        fmu_name = compile_fmu(cpath, self.fpath, version=1.0) 
         model = load_fmu(fmu_name)
         assert model.get_variable_variability("y") == 3, 'y should be continuous'
+        
+        fmu_name = compile_fmu(cpath, self.fpath, version=2.0) #Continuous variability is == 4 with FMI2
+        model = load_fmu(fmu_name)
+        assert model.get_variable_variability("y") == 4, 'y should be continuous'
         
         
     

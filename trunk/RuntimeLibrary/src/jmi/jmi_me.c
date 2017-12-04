@@ -481,11 +481,13 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     /* Used for logging */
     switches = jmi_get_sw(jmi);
     
-    jmi->model_terminate = 0;  /* Reset terminate flag. */
     max_iterations = 30;       /* Maximum number of event iterations */
 
     /* Performed at the first event iteration: */
     if (jmi->nbr_event_iter == 0) {
+        
+        /* Reset terminate flag. */
+        jmi->model_terminate = 0;
 
         /* Reset eventInfo */
         event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */

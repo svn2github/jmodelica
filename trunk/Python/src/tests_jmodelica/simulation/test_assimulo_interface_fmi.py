@@ -891,8 +891,8 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.EventIteration1", file_name)
         compile_fmu("NonLinear.NonLinear6", file_name)
         compile_fmu("NonLinear.NonLinear7", file_name)
-        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_init.fmu", compiler_options={"init_nonlinear_solver":"realtime"})
-        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_ode.fmu", compiler_options={"nonlinear_solver":"realtime"})
+        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_init.fmu", version=1.0, compiler_options={"init_nonlinear_solver":"realtime"})
+        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_ode.fmu", version=1.0, compiler_options={"nonlinear_solver":"realtime"})
     
     @testattr(stddist_base= True)
     def test_realtime_solver_init(self):
