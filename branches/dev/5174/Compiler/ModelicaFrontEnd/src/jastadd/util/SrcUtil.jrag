@@ -29,4 +29,23 @@ aspect SrcUtil {
     inh ClassDecl Element.myClassDecl();
     eq ClassDecl.getChild().myClassDecl() = this;
     eq SourceRoot.getChild().myClassDecl() = null;
+
+    /**
+     * Returns true if this import is an unqualified import.
+     */
+    syn boolean ImportClause.isUnqualifiedImport()   = false;
+    eq ImportClauseUnqualified.isUnqualifiedImport() = true;
+
+    /**
+     * Return true if this import is a renaming import
+     */
+    syn boolean ImportClause.isRenamingImport() = false;
+    eq ImportClauseRename.isRenamingImport()    = true;
+
+    /**
+     * Returns the rename string for this import, or null if this import
+     * isn't a renaming import.
+     */
+    syn String ImportClause.renameStringOrNull() = null;
+    eq ImportClauseRename.renameStringOrNull() = getIdDecl().name();
 }

@@ -46,6 +46,10 @@ aspect SrcAnnotations {
         return getExtendsClause().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
     }
 
+    public SrcAnnotation ImportClause.srcAnnotation(String ... path) {
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+
     public SrcAnnotation AbstractEquation.srcAnnotation(String ... path) {
         return getComment().srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
     }
@@ -71,6 +75,9 @@ aspect SrcAnnotations {
     }
     public SrcAnnotation ExtendsClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
         return SrcAnnotation.createFor(this, evaluator, path);
+    }
+    public SrcAnnotation ImportClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
+        return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ExternalClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
         return SrcAnnotation.createFor(this, evaluator, path);
@@ -285,6 +292,11 @@ aspect SrcAnnotations {
     }
     syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getComponentDecl().srcAnnotationProvider();
     eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
+    
+    /**
+     * Import clause
+     */
+    syn SrcAnnotationProvider ImportClause.srcAnnotationProvider() = SrcAnnotation.createProviderFor(getComment());
 
     /*******************
      *  AST Annotation  

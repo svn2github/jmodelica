@@ -8231,6 +8231,78 @@ end TransformCanonicalTests.ForOfUnknownSize5;
 ")})));
 end ForOfUnknownSize5;
 
+package RangeBugTests
+model RangeInSumInSum
+	function F
+		input Integer p_i;
+		input Integer nrows_p[:];
+		input Real nrow[:];
+		input Real vf[:];
+		output Real n;
+		algorithm
+		 n := sum({vf[i]*nrow[i] for i in (sum(nrows_p[1:(p_i-1)])+1):sum(nrows_p[1:p_i])});
+	end F;
+	Real n;
+	equation
+	n = F(2, {0,3}, {1,2,time}, {1,2,time});
+	
+	
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RangeInSumInSum",
+            description="Scalarization of range exp in a Sum",
+            flatModel="
+fclass TransformCanonicalTests.RangeBugTests.RangeInSumInSum
+ Real n;
+equation
+ n = TransformCanonicalTests.RangeBugTests.RangeInSumInSum.F(2, {0, 3}, {1, 2, time}, {1, 2, time});
+
+public
+ function TransformCanonicalTests.RangeBugTests.RangeInSumInSum.F
+  input Integer p_i;
+  input Integer[:] nrows_p;
+  input Real[:] nrow;
+  input Real[:] vf;
+  output Real n;
+  Real temp_1;
+  Integer temp_3;
+  Integer temp_4;
+  Real[:] temp_2;
+  Integer temp_5;
+  Integer temp_6;
+ algorithm
+  init temp_2 as Real[max(integer(temp_3 - (temp_4 + 1)) + 1, 0)];
+  temp_3 := 0;
+  for i2 in 1:max(p_i, 0) loop
+   temp_3 := temp_3 + nrows_p[i2];
+  end for;
+  temp_4 := 0;
+  for i2 in 1:max(p_i - 1, 0) loop
+   temp_4 := temp_4 + nrows_p[i2];
+  end for;
+  for i2 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop
+   temp_5 := 0;
+   for i3 in 1:max(p_i - 1, 0) loop
+    temp_5 := temp_5 + nrows_p[i3];
+   end for;
+   temp_6 := 0;
+   for i3 in 1:max(p_i, 0) loop
+    temp_6 := temp_6 + nrows_p[i3];
+   end for;
+   temp_2[i2] := vf[i2] * nrow[i2];
+  end for;
+  temp_1 := 0.0;
+  for i1 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop
+   temp_1 := temp_1 + temp_2[i1];
+  end for;
+  n := temp_1;
+  return;
+ end TransformCanonicalTests.RangeBugTests.RangeInSumInSum.F;
+
+end TransformCanonicalTests.RangeBugTests.RangeInSumInSum;
+")})));
+end RangeInSumInSum;
+end RangeBugTests;
 
 model FunctionWithZeroSizeOutput1
     function f
