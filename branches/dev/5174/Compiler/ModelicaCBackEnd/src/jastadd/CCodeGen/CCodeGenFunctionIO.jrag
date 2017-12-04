@@ -27,7 +27,7 @@ aspect CCodeGenFunctionIO {
         }
         @Override
         public void printIOExec(FExp n, CodeStream str, String indent) {
-            n.genArgument_C(this, str, indent);
+            n.genArgument(ExecStep, str, indent);
         }
     }
     
@@ -91,21 +91,16 @@ aspect CCodeGenFunctionIO {
         }
     }
     
-    public void FExp.genArgument_C(CodePrinter p, CodeStream str, String indent) {
+    public void FExp.genArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
-            str.print(tempName_C());
+            str.print(p.name(this));
         } else {
             p.print(this, str, indent);
         }
     }
-    
-    @Override
-    public void FPartialFunctionCall.genArgument_C(CodePrinter p, CodeStream str, String indent) {
-        genArgument_C(p.ExecStep, str, indent);
-    }
 
-    public void FPartialFunctionCall.genArgument_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        //TODO similar to p.printCastArgument
+    @Override
+    public void FPartialFunctionCall.genArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         str.print("(");
         str.print(p.type((FFunctionVariable)myCorrespondingInput()));
         str.print(")");
@@ -115,7 +110,7 @@ aspect CCodeGenFunctionIO {
             p.codePrinter().print(this, str, indent); //TODO don't need to call codePrinter() and can propagate down the ExecuteCodePrinter once the FFunctionVariable.printCall has been refactored
         }
     }
-    
+
     public void FFunctionCallLeft.genArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str) {
         if (hasFExp()) {
             if (!getFExp().isComposite()) {
@@ -125,9 +120,6 @@ aspect CCodeGenFunctionIO {
         } else {
             str.print("NULL");
         }
-    }
-    public void FFunctionCallLeft.genArgument_C(CodeStream str) {
-        genArgument(ASTNode.printer_C.ExecStep, str);
     }
     
     @Override

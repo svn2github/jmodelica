@@ -301,7 +301,7 @@ aspect CCodeGenFunctionCall {
             str.print(indent, p.ExecStep.name(call), " = ");
         }
         new FunctionCallParameterComputation("", call).prettyPrintHead(this, p, str, indent,
-                exp?C_SUFFIX_EXP:p.functionDefSuffix(), !exp);
+                exp ? C_SUFFIX_EXP : p.functionDefSuffix(), !exp);
         if (!exp || call.type().isString()) {
             str.print(";\n");
         }
@@ -335,7 +335,7 @@ aspect CCodeGenFunctionCall {
         for (int i = 0; i < outputs; i++) {
             str.print(sep);
             if (i < lefts) {
-                myLefts().get(i).genArgument_C(str);
+                myLefts().get(i).genArgument(p.ExecStep, str);
             } else if (i == 0 && lefts == 0 && isFunctionCallArg()) {
                 str.print(tempName_C());
             } else {

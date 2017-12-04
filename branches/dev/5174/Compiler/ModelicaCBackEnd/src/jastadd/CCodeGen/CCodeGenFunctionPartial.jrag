@@ -203,8 +203,8 @@ int i;
         final String next3 = p.indent(next2);
         final String fp = p.funcNameUnderscore(this, C_SUFFIX_FP);
 
-        String[] inputNames = new String[p.numInputArguments(this)];
-        String[] outputNames = new String[p.numOutputArguments(this)];
+        String[] inputNames = new String[p.numArguments(this, myInputs())];
+        String[] outputNames = new String[p.numArguments(this, myOutputs())];
 
         //Initialize inputNames and outputNames
         new TempNameStructComputation() {
@@ -364,21 +364,14 @@ int i;
         str.formatln("%sreturn fp_out;", next);
         str.format("%s}\n\n", indent);
     }
-    
-    public abstract int CodePrinter.numInputArguments(FFunctionDecl ffd);
+
+    public abstract int CodePrinter.numArguments(FFunctionDecl ffd, Collection<FFunctionVariable> vars);
 
     @Override
-    public int CPrettyPrinter.numInputArguments(FFunctionDecl ffd) {
-        return ffd.myInputs().size();
+    public int CPrettyPrinter.numArguments(FFunctionDecl ffd, Collection<FFunctionVariable> vars) {
+        return vars.size();
     }
 
-    public abstract int CodePrinter.numOutputArguments(FFunctionDecl ffd);
-
-    @Override
-    public int CPrettyPrinter.numOutputArguments(FFunctionDecl ffd) {
-        return ffd.myOutputs().size();
-    }
-    
     public abstract boolean CodePrinter.needsOutputVarArgs();
 
     @Override
@@ -435,22 +428,18 @@ int i;
     }
     
 
-    //TODO: move printCastArgument to CCodeGenFunctionIO?
     /**
     * \brief Generate cast argument
     */
     public abstract void CodePrinter.printCastArgument(FExp arg, CodeStream str, String indent);
-    
-	@Override
-	public void CPrettyPrinter.printCastArgument(FExp arg, CodeStream str, String indent) {
-		arg.printCastArgument(ExecStep, str, indent);
-	}
-    
+
+    @Override
+    public void CPrettyPrinter.printCastArgument(FExp arg, CodeStream str, String indent) {
+        arg.printCastArgument(ExecStep, str, indent);
+    }
+
     public void FExp.printCastArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-            // just like the normal printArgument, except sep is a constant ", ", 
-            // this is by luck since we know that in the contexts where we use this method 
-            // (for now), we always have a preceding argument(the function pointers). Generalize this?
-            str.print(", ", "(", type().type_C(p.codePrinter()),")","(");
+            str.print(", (", type().type_C(p.codePrinter()),")(");
             genTempArg(p, str, indent);
             str.print(")");
     }
