@@ -93,4 +93,67 @@ end VariabilityPropagationInitialTests.InitialEquation3;
 ")})));
 end InitialEquation3;
 
+model InitialEquation4
+    parameter Real p1;
+initial equation
+    p1 = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquation4",
+            description="Test no propagation of initial equations",
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialEquation3
+ discrete Real x;
+ parameter Real p1 = 3 /* 3 */;
+ parameter Real p2;
+ discrete Boolean temp_1;
+initial equation 
+ x = p2;
+ pre(temp_1) = false;
+parameter equation
+ p2 = p1;
+equation
+ temp_1 = time > 1;
+ x = if temp_1 and not pre(temp_1) then time else pre(x);
+end VariabilityPropagationInitialTests.InitialEquation3;
+")})));
+end InitialEquation4;
+
+model InitialEquationPropagate1
+    parameter Real p1(fixed=false);
+initial equation
+    p1 = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquationPropagate1",
+            description="Test propagation of initial equations",
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialEquationPropagate1
+ constant Real p1 = 3;
+end VariabilityPropagationInitialTests.InitialEquationPropagate1;
+")})));
+end InitialEquationPropagate1;
+
+model InitialEquationPropagate2
+    parameter Real p1(fixed=false);
+    parameter Real p2(fixed=false);
+initial equation
+    p2 = p1 + 1;
+    p1 = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquationPropagate2",
+            description="Test propagation of initial equations",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialEquationPropagate2
+ constant Real p1 = 3;
+ constant Real p2 = 3;
+end VariabilityPropagationInitialTests.InitialEquationPropagate2;
+")})));
+end InitialEquationPropagate2;
+
 end VariabilityPropagationInitialTests;
