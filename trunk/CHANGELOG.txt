@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature; Minor; Compiler ; #5516
+Index added to variables and equations in blocks in HTML diagnostics.
+
 ; Fixed ; Minor ; Compiler ; #5514
 Fixed problem with temporary generation for for-loop ranges
 
