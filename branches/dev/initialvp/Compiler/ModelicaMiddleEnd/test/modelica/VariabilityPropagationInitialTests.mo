@@ -16,6 +16,8 @@
 
 package VariabilityPropagationInitialTests
 
+package InitialEquation
+
 model InitialEquation1
     parameter Boolean c = false;
     Boolean b = c;
@@ -27,12 +29,12 @@ initial equation
             name="InitialEquation1",
             description="Tests that corresponding initial equations are removed",
             flatModel="
-fclass VariabilityPropagationInitialTests.InitialEquation1
+fclass VariabilityPropagationInitialTests.InitialEquation.InitialEquation1
  parameter Boolean c = false /* false */;
  parameter Boolean b;
 parameter equation
  b = c;
-end VariabilityPropagationInitialTests.InitialEquation1;
+end VariabilityPropagationInitialTests.InitialEquation.InitialEquation1;
 ")})));
 end InitialEquation1;
 
@@ -49,14 +51,14 @@ equation
             name="InitialEquation2",
             description="Check fixed=true",
             flatModel="
-fclass VariabilityPropagationInitialTests.InitialEquation2
+fclass VariabilityPropagationInitialTests.InitialEquation.InitialEquation2
  parameter Real y;
  parameter Real x(fixed = true,start = 3.14);
  parameter Real p1 = 1 /* 1 */;
 parameter equation
  y = p1 + 1;
  x = y + 1;
-end VariabilityPropagationInitialTests.InitialEquation2;
+end VariabilityPropagationInitialTests.InitialEquation.InitialEquation2;
 ")})));
 end InitialEquation2;
 
@@ -76,7 +78,7 @@ equation
             name="InitialEquation3",
             description="Test no propagation of initial equations",
             flatModel="
-fclass VariabilityPropagationInitialTests.InitialEquation3
+fclass VariabilityPropagationInitialTests.InitialEquation.InitialEquation3
  discrete Real x;
  parameter Real p1 = 3 /* 3 */;
  parameter Real p2;
@@ -89,7 +91,7 @@ parameter equation
 equation
  temp_1 = time > 1;
  x = if temp_1 and not pre(temp_1) then time else pre(x);
-end VariabilityPropagationInitialTests.InitialEquation3;
+end VariabilityPropagationInitialTests.InitialEquation.InitialEquation3;
 ")})));
 end InitialEquation3;
 
@@ -99,26 +101,22 @@ initial equation
     p1 = 3;
 
     annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
+        ErrorTestCase(
             name="InitialEquation4",
             description="Test no propagation of initial equations",
-            flatModel="
-fclass VariabilityPropagationInitialTests.InitialEquation3
- discrete Real x;
- parameter Real p1 = 3 /* 3 */;
- parameter Real p2;
- discrete Boolean temp_1;
-initial equation 
- x = p2;
- pre(temp_1) = false;
-parameter equation
- p2 = p1;
-equation
- temp_1 = time > 1;
- x = if temp_1 and not pre(temp_1) then time else pre(x);
-end VariabilityPropagationInitialTests.InitialEquation3;
+            errorMessage="
+Error in flattened model:
+  The DAE initialization system has 1 equations and 0 free variables.
+
+Error in flattened model:
+  The initialization system is structurally singular. The following equation(s) could not be matched to any variable:
+    p1 = 3
 ")})));
 end InitialEquation4;
+
+end InitialEquation;
+
+package InitialEquationPropagate
 
 model InitialEquationPropagate1
     parameter Real p1(fixed=false);
@@ -129,10 +127,11 @@ initial equation
         TransformCanonicalTestCase(
             name="InitialEquationPropagate1",
             description="Test propagation of initial equations",
+            variability_propagation_initial=true,
             flatModel="
-fclass VariabilityPropagationInitialTests.InitialEquationPropagate1
- constant Real p1 = 3;
-end VariabilityPropagationInitialTests.InitialEquationPropagate1;
+fclass VariabilityPropagationInitialTests.InitialEquationPropagate.InitialEquationPropagate1
+ constant Real p1(fixed = true) = 3;
+end VariabilityPropagationInitialTests.InitialEquationPropagate.InitialEquationPropagate1;
 ")})));
 end InitialEquationPropagate1;
 
@@ -147,13 +146,16 @@ initial equation
         TransformCanonicalTestCase(
             name="InitialEquationPropagate2",
             description="Test propagation of initial equations",
+            variability_propagation_initial=true,
             eliminate_alias_variables=false,
             flatModel="
-fclass VariabilityPropagationInitialTests.InitialEquationPropagate2
- constant Real p1 = 3;
- constant Real p2 = 3;
-end VariabilityPropagationInitialTests.InitialEquationPropagate2;
+fclass VariabilityPropagationInitialTests.InitialEquationPropagate.InitialEquationPropagate2
+ constant Real p1(fixed = true) = 3;
+ constant Real p2(fixed = true) = 4.0;
+end VariabilityPropagationInitialTests.InitialEquationPropagate.InitialEquationPropagate2;
 ")})));
 end InitialEquationPropagate2;
+
+end InitialEquationPropagate;
 
 end VariabilityPropagationInitialTests;
