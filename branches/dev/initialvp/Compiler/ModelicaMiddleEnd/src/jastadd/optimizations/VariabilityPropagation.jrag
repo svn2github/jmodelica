@@ -56,9 +56,9 @@ aspect VariabilityPropagation {
     syn boolean FAbstractEquation.canPropagate(FClass.VariabilityPropagator propagator) =
             canPropagateContext(propagator) && !containsActiveAnnotations();
     eq FEquation.canPropagate(FClass.VariabilityPropagator propagator) = 
-            super.canPropagate(propagator) && propagator.variables(this).size() == 1;
+            super.canPropagate(propagator) && propagator.canPropagate(this);
     eq FFunctionCallEquation.canPropagate(FClass.VariabilityPropagator propagator) {
-        getCall().flushAllRecursiveClearFinal();
+        getCall().flushAllRecursive();
         return super.canPropagate(propagator) && propagator.variables(this).size() > 0 && numScalarEquations() > 0 && 
                 ((propagator.variables(this).size() == numScalarEquations() && getCall().variability().parameterOrLess()) 
                         || potentialPartialVariability().knownParameterOrLess());
@@ -67,7 +67,7 @@ aspect VariabilityPropagation {
             super.canPropagate(propagator) && propagator.variables(this).size() > 0 &&
             propagator.variables(this).size() == numScalarEquations() && variabilityRHS().parameterOrLess();
 
-    inh boolean FAbstractEquation.canPropagateContext(FClass.VariabilityPropagator propagator);
+    inh boolean FAbstractEquation   .canPropagateContext(FClass.VariabilityPropagator propagator);
     eq Root  .getChild()            .canPropagateContext(FClass.VariabilityPropagator propagator) = false;
     eq FClass.getFAbstractEquation().canPropagateContext(FClass.VariabilityPropagator propagator) = true;
     eq FClass.getFInitialEquation() .canPropagateContext(FClass.VariabilityPropagator propagator) =
@@ -202,6 +202,10 @@ aspect VariabilityPropagation {
                 return equation.isInitial() ? equation.initialParameters() : equation.variables();
             }
             
+            public Set<FVariable> variables(FAbstractEquation equation, FTypePrefixVariability variability) {
+                return variability.initialParameterVariability() ? equation.initialParameters() : equation.variables();
+            }
+            
             public List<FAbstractEquation> cleanEquations(FTypePrefixVariability v, 
                     List<FAbstractEquation> equations) {
                 ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
@@ -209,6 +213,22 @@ aspect VariabilityPropagation {
                     equation.cleanEquations(newEquations, v);
                 }
                 return new List<FAbstractEquation>(newEquations);
+            }
+            
+            public boolean canPropagate(FEquation equation) {
+                if (equation.isInitial()) {
+                    return equation.initialParameters().size() == 1 && equation.variables().isEmpty();
+                } else {
+                    return equation.variables().size() == 1;
+                }
+            }
+            
+            public void updateEquation(FVariable fv, FAbstractEquation equation,
+                    FTypePrefixVariability newVariability) {
+                variables(equation, fv.variability()).remove(fv);
+                if (newVariability != null && !newVariability.fixedParameterOrLess()) {
+                    variables(equation, newVariability).add(fv);
+                }
             }
         }
     }
@@ -335,7 +355,6 @@ aspect VariabilityPropagation {
                 propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
             } else {
                 propagator.addEquation(solutionVariability, this);
-                propagator.variables(this).add(fVariable);
                 solution.flushAllRecursive();
             }
         }
@@ -524,28 +543,13 @@ aspect VariabilityPropagation {
             FExp bindingExp) {
         
         FAbstractEquation equation;
-        boolean wasDiscrete = isDiscrete();
         boolean isZero = variability.constantVariability() && bindingExp.isLiteralZero();
-        
-        // Declaration
-        // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
-        if (variability.evalTrueParameterVariability())
-            variability = fStructParameter();
-        setFTypePrefixVariability(variability);
-        if (variability.knownParameterOrLess()) {
-            setBindingExp(bindingExp.fullCopy());
-        }
-        if (variability.fixedParameterOrLess()) {
-            if (fixedAttributeSet()) {
-                setFixedAttribute(true);
-            }
-        }
         
         // Uses
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
-                propagator.variables(equation).remove(this);
+                propagator.updateEquation(this, equation, variability);
                 
                 if (isZero) {
                     // Adjust variable set for special case y = 0 * z
@@ -559,7 +563,7 @@ aspect VariabilityPropagation {
                         
                         for (FVariable tFV : fvsInTop) {
                             if (!fvsInEq.contains(tFV)) {
-                                propagator.variables(equation).remove(tFV);
+                                propagator.updateEquation(tFV, equation, null);
                             }
                         }
                         
@@ -574,6 +578,23 @@ aspect VariabilityPropagation {
                     // Remove empty initial equation
                     equation.taggedByVProp = ASTNode.fConstant();
                 }
+            }
+        }
+        
+        boolean wasDiscrete = isDiscrete();
+        
+        // Declaration
+        // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
+        if (variability.evalTrueParameterVariability()) {
+            variability = fStructParameter();
+        }
+        setFTypePrefixVariability(variability);
+        if (variability.knownParameterOrLess()) {
+            setBindingExp(bindingExp.fullCopy());
+        }
+        if (variability.fixedParameterOrLess()) {
+            if (fixedAttributeSet()) {
+                setFixedAttribute(true);
             }
         }
         
