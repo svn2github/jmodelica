@@ -201,6 +201,15 @@ aspect VariabilityPropagation {
             public Set<FVariable> variables(FAbstractEquation equation) {
                 return equation.isInitial() ? equation.initialParameters() : equation.variables();
             }
+            
+            public List<FAbstractEquation> cleanEquations(FTypePrefixVariability v, 
+                    List<FAbstractEquation> equations) {
+                ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
+                for (FAbstractEquation equation: equations) {
+                    equation.cleanEquations(newEquations, v);
+                }
+                return new List<FAbstractEquation>(newEquations);
+            }
         }
     }
 
@@ -263,20 +272,8 @@ aspect VariabilityPropagation {
         setAliasVariableList(new List<FVariable>(newAliases));
         
         // Clean equations
-        ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
-        for (FAbstractEquation equation: equations) {
-            equation.cleanEquations(newEquations);
-        }
-        setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
-        
-        // Clean initial equations
-        newEquations = new ArrayList<FAbstractEquation>();
-        for (FAbstractEquation equation: initialEquations()) {
-            if (!equation.taggedByVProp) {
-                newEquations.add(equation);
-            }
-        }
-        setFInitialEquationList(new List<FAbstractEquation>(newEquations));
+        setFAbstractEquationList(propagator.cleanEquations(ASTNode.fContinuous(),       equations));
+        setFInitialEquationList( propagator.cleanEquations(ASTNode.fInitialParameter(), initialEquations));
     }
     
     public void FAbstractEquation.variabilityPropagation(FClass.VariabilityPropagator propagator) {
@@ -330,12 +327,18 @@ aspect VariabilityPropagation {
             }
         }
         
-        if (!solutionVariability.knownParameterOrLess()) {
-            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
-        }
-        
-        this.taggedByVProp = true;
+        taggedByVProp = solutionVariability;
         fVariable.variabilityPropagation(propagator, solutionVariability, solution);
+        
+        if (!solutionVariability.knownParameterOrLess()) {
+            if (solutionVariability.fixedParameterOrLess()) {
+                propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
+            } else {
+                propagator.addEquation(solutionVariability, this);
+                propagator.variables(this).add(fVariable);
+                solution.flushAllRecursive();
+            }
+        }
         
     }
 
@@ -374,15 +377,15 @@ aspect VariabilityPropagation {
         }
         
         if (allRemoved) {
-            this.taggedByVProp = true;
+            taggedByVProp = ASTNode.fConstant();
         } else {
             variability = variability.combine(fFixedParameter());
             if (variability.parameterVariability()) {
                 propagator.addEquation(variability, this);
-                this.taggedByVProp = true;
+                taggedByVProp = variability;
             }
         }
-        this.taggedForCleanup = true;
+        taggedForCleanup = true;
     }
 
     public void FAlgorithm.variabilityPropagation(FClass.VariabilityPropagator propagator) {
@@ -392,7 +395,7 @@ aspect VariabilityPropagation {
                 fv.variabilityPropagation(propagator, variability, null);
             }
             propagator.addEquation(variability, this);
-            this.taggedByVProp = true;
+            taggedByVProp = variability;
         }
     }
 
@@ -449,7 +452,7 @@ aspect VariabilityPropagation {
         if (value != CValue.UNKNOWN) {
             a = (CValueArray) value;
         }
-        taggedByVProp = this.variabilityPropagationArray(propagator, a, variability, new Enumerator());
+        taggedByVProp = variabilityPropagationArray(propagator, a, variability, new Enumerator());
         return taggedByVProp;
     }
 
@@ -458,7 +461,7 @@ aspect VariabilityPropagation {
             CValueArray value,
             FTypePrefixVariability variability,
             Enumerator enumerator) {
-        return this.variabilityPropagation(propagator,
+        return variabilityPropagation(propagator,
                     value == null ? CValue.UNKNOWN : value.values[enumerator.next()], variability);
     }
 
@@ -568,7 +571,8 @@ aspect VariabilityPropagation {
                 if (equation.inInitialEquationSection() 
                         && equation.variables().isEmpty()
                         && equation.initialParameters().isEmpty()) {
-                    equation.taggedByVProp = true; // Initial equation
+                    // Remove empty initial equation
+                    equation.taggedByVProp = ASTNode.fConstant();
                 }
             }
         }
@@ -639,27 +643,25 @@ aspect VariabilityPropagation {
 
 aspect VariabilityPropagationCleanup {
     public boolean FFunctionCallEquation.taggedForCleanup = false;
-    public boolean FAbstractEquation.taggedByVProp = false;
     public boolean FAbstractVariable.taggedByVProp = false;
     public boolean FFunctionCallLeft.taggedByVProp = false;
     public boolean FExp.taggedByVProp              = false;
+    public FTypePrefixVariability FAbstractEquation.taggedByVProp = ASTNode.fContinuous();
 
-    public void FAbstractEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
-        if (!taggedByVProp) {
+    public void FAbstractEquation.cleanEquations(ArrayList<FAbstractEquation> l, FTypePrefixVariability v) {
+        if (v.lessOrEqual(taggedByVProp)) {
             l.add(this);
         }
-        taggedByVProp = false;
     }
 
-    public void FIfWhenElseEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
-        if (!isTempAssign() || !getFAbstractEquation(0).taggedByVProp) {
+    public void FIfWhenElseEquation.cleanEquations(ArrayList<FAbstractEquation> l, FTypePrefixVariability v) {
+        if (!isTempAssign() || v.lessOrEqual(getFAbstractEquation(0).taggedByVProp)) {
             l.add(this);
         }
-        taggedByVProp = false;
     }
 
-    public void FFunctionCallEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
-        super.cleanEquations(l);
+    public void FFunctionCallEquation.cleanEquations(ArrayList<FAbstractEquation> l, FTypePrefixVariability v) {
+        super.cleanEquations(l, v);
         if (taggedForCleanup) {
             for (FFunctionCallLeft left : getLefts()) {
                 left.cleanEquations();
