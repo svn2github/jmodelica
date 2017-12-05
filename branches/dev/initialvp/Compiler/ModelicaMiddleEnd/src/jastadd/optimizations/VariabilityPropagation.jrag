@@ -31,8 +31,7 @@ aspect VariabilityPropagation {
                     
                     options.addBooleanOption("variability_propagation_initial",
                             OptionRegistry.OptionType.compiler,
-                            OptionRegistry.Category.uncommon,
-                            false,
+                            OptionRegistry.Category.experimental,
                             false,
                             "If enabled, the compiler performs a global analysis on the initial equation system "
                             + "and reduces initial parameters to constants and parameters where applicable.");
@@ -256,8 +255,10 @@ aspect VariabilityPropagation {
         List<FAbstractEquation> equations          = getFAbstractEquations();
         
         // Build worklist
-        for (FAbstractEquation equation: initialEquations) {
-            equation.addEquationsToWorkList(worklist);
+        if (propagator.propagateInitial()) {
+            for (FAbstractEquation equation: initialEquations) {
+                equation.addEquationsToWorkList(worklist);
+            }
         }
         for (FAbstractEquation equation: equations) {
             equation.addEquationsToWorkList(worklist);
