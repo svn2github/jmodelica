@@ -17,6 +17,7 @@
 
 package RedeclareTests
 
+package Basic
 
 model RedeclareTestOx1 "Basic redeclare test"
  // This is perfectly ok.
@@ -42,10 +43,10 @@ model RedeclareTestOx1 "Basic redeclare test"
             name="RedeclareTestOx1",
             description="Basic redeclares.",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx1
+fclass RedeclareTests.Basic.RedeclareTestOx1
  Real c.a.x = 2;
  Real c.a.y = 3;
-end RedeclareTests.RedeclareTestOx1;
+end RedeclareTests.Basic.RedeclareTestOx1;
 ")})));
 end RedeclareTestOx1;
  
@@ -86,7 +87,8 @@ model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
 1 errors found:
 
 Error at line 27, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
+  In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTestOx2_Err;
  
@@ -121,10 +123,10 @@ model RedeclareTestOx3 "Redeclare deeper into instance hierarchy."
             name="RedeclareTestOx3",
             description="Basic test of redeclares.",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx3
+fclass RedeclareTests.Basic.RedeclareTestOx3
  Real d.c.a.x = 2;
  Real d.c.a.y = 3;
-end RedeclareTests.RedeclareTestOx3;
+end RedeclareTests.Basic.RedeclareTestOx3;
 ")})));
 end RedeclareTestOx3;
  
@@ -171,7 +173,8 @@ model RedeclareTestOx4_Err "Redeclare deeper into instance hierarchy."
 1 errors found:
 
 Error at line 33, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
+  In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTestOx4_Err;
  
@@ -207,11 +210,11 @@ model RedeclareTestOx5 "Redeclare deeper into instance hierarchy and redeclarati
             name="RedeclareTestOx5",
             description="Basic test of redeclares.",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx5
+fclass RedeclareTests.Basic.RedeclareTestOx5
  Real e.d.a.x = 2;
  Real e.d.a.y = 3;
  Real e.d.a.z = 4;
-end RedeclareTests.RedeclareTestOx5;
+end RedeclareTests.Basic.RedeclareTestOx5;
 ")})));
 end RedeclareTestOx5;
 
@@ -291,7 +294,8 @@ model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redecl
 1 errors found:
 
 Error at line 22, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a'
+  In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTestOx65_Err;
  
@@ -368,10 +372,10 @@ model RedeclareTestOx8 "Constraining clause example"
             name="RedeclareTestOx8",
             description="Basic test of redeclares.",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx8
+fclass RedeclareTests.Basic.RedeclareTestOx8
  Real d.c.x = 2;
  Real d.c.y = 3;
-end RedeclareTests.RedeclareTestOx8;
+end RedeclareTests.Basic.RedeclareTestOx8;
 ")})));
 end RedeclareTestOx8;
  
@@ -406,7 +410,8 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
 1 errors found:
 
 Error at line 21, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby B'
+  In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby B',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTestOx9_Err;
 
@@ -442,7 +447,8 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
 1 errors found:
 
 Error at line 17, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
+  In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class,
+    because z from the constraining type is missing
 ")})));
 end RedeclareTestOx95_Err;
 
@@ -482,10 +488,10 @@ model RedeclareTestOx10 "Constraining clause example."
             name="RedeclareTestOx10",
             description="Basic test of redeclares.",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx10
+fclass RedeclareTests.Basic.RedeclareTestOx10
  Real e.d.c.x = 2;
  Real e.d.c.y = 3;
-end RedeclareTests.RedeclareTestOx10;
+end RedeclareTests.Basic.RedeclareTestOx10;
 ")})));
 end RedeclareTestOx10;
 
@@ -526,19 +532,13 @@ model RedeclareTestOx11_Err "Constraining clause example."
 1 errors found:
 
 Error at line 23, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
+  In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTestOx11_Err;
 
 
 model RedeclareTestOx115_Err "Constraining clause example."
-/*
-  Should give an error message like
-  Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 431, column 32:
-  'B' is not a subtype of 'C'
-*/
- 
   model A
     Real x=1;
   end A;
@@ -571,20 +571,14 @@ Semantic error at line 431, column 32:
             errorMessage="
 1 errors found:
 
-Error at line 29, column 81, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
+Error at line 22, column 81, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class,
+    because z from the constraining type is missing
 ")})));
 end RedeclareTestOx115_Err;
 
 
 model RedeclareTestOx116_Err "Constraining clause example."
-/*
-  Should give an error message like
-  Error: in file 'src\test\modelica\RedeclareTests.mo':
-Semantic error at line 470, column 58:
-  'A' is not a subtype of 'B'
- */
- 
   model A
     Real x=1;
   end A;
@@ -618,8 +612,9 @@ Semantic error at line 470, column 58:
             errorMessage="
 1 errors found:
 
-Error at line 30, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
+Error at line 23, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTestOx116_Err;
 
@@ -648,9 +643,9 @@ model RedeclareTestOx12 "Constraining clause example."
             name="RedeclareTestOx12",
             description="Check that the declaration is a subtype of the constraining clause",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx12
+fclass RedeclareTests.Basic.RedeclareTestOx12
  Real d.c.x = 5;
-end RedeclareTests.RedeclareTestOx12;
+end RedeclareTests.Basic.RedeclareTestOx12;
 ")})));
 end RedeclareTestOx12;
 
@@ -676,9 +671,9 @@ model RedeclareTestOx121
             name="RedeclareTestOx121",
             description="Modification to parameter that is not available in final component but valid at the point it is added",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx121
+fclass RedeclareTests.Basic.RedeclareTestOx121
  Real c.a.x;
-end RedeclareTests.RedeclareTestOx121;
+end RedeclareTests.Basic.RedeclareTestOx121;
 ")})));
 end RedeclareTestOx121;
 
@@ -716,11 +711,11 @@ model RedeclareTestOx13 "Constraining clause example."
             name="RedeclareTestOx13",
             description="Check that the declaration is a subtype of the constraining clause",
             flatModel="
-fclass RedeclareTests.RedeclareTestOx13
+fclass RedeclareTests.Basic.RedeclareTestOx13
  Real e.d.c.x = 4;
  Real e.d.c.y = 3;
  Real e.d.c.z = 5;
-end RedeclareTests.RedeclareTestOx13;
+end RedeclareTests.Basic.RedeclareTestOx13;
 ")})));
 end RedeclareTestOx13;
 
@@ -761,7 +756,8 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
 1 errors found:
 
 Error at line 23, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class,
+    because z from the constraining type is missing
 ")})));
 end RedeclareTest_Constr_14_Err;
 
@@ -801,7 +797,8 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
 1 errors found:
 
 Error at line 23, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class,
+    because z from the constraining type is missing
 ")})));
 end RedeclareTest_Constr_15_Err;
 
@@ -841,7 +838,8 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
 1 errors found:
 
 Error at line 26, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable A c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable B c constrainedby B'
+  In the declaration 'redeclare replaceable A c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable B c constrainedby B',
+    because y from the constraining type is missing
 ")})));
 end RedeclareTest_Constr_16_Err;
 
@@ -881,10 +879,12 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
 2 errors found:
 
 Error at line 26, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable D d(redeclare replaceable B c) constrainedby D (redeclare replaceable C c constrainedby C)', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable D d(redeclare replaceable B c) constrainedby D (redeclare replaceable C c constrainedby C)', the declared class is not a subtype of the constraining class,
+    because c.z from the constraining type is missing
 
 Error at line 26, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
+  In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C',
+    because z from the constraining type is missing
 ")})));
 end RedeclareTest_Constr_17_Err;
 
@@ -925,10 +925,12 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
 2 errors found:
 
 Error at line 21, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
+  In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class,
+    because c.z from the constraining type is missing
 
 Error at line 24, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C'
+  In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C',
+    because z from the constraining type is missing
 ")})));
 end RedeclareTest_Constr_18_Err;
 
@@ -965,11 +967,11 @@ model RedeclareTest_Classes_1 "Redeclaration of classes example."
             name="RedeclareTest_Classes_1",
             description="Test of parametrized classes.",
             flatModel="
-fclass RedeclareTests.RedeclareTest_Classes_1
+fclass RedeclareTests.Basic.RedeclareTest_Classes_1
  Real e.d.a.x = 4;
  Real e.d.a.y = 3;
  Real e.d.a.z = 4;
-end RedeclareTests.RedeclareTest_Classes_1;
+end RedeclareTests.Basic.RedeclareTest_Classes_1;
 ")})));
 end RedeclareTest_Classes_1;
 
@@ -1003,6 +1005,11 @@ model RedeclareTestOx6b_Err
  
 end RedeclareTestOx6b_Err;
 
+
+end Basic;
+
+
+package General
 
 model RedeclareTest0
   model A
@@ -1074,14 +1081,14 @@ model RedeclareTest1
 			name="RedeclareTest1",
 			description="Basic redeclares.",
 			flatModel="
- fclass RedeclareTests.RedeclareTest1
+ fclass RedeclareTests.General.RedeclareTest1
  Real a.c2.x = 3 /*(3)*/;
  Real a.c2.y = 4 /*(4)*/;
  Real b.a.c2.x = 5 /*(5)*/;
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real b.aa.c2.x = 2 /*(2)*/;
-end RedeclareTests.RedeclareTest1;
+end RedeclareTests.General.RedeclareTest1;
 ")})));
 end RedeclareTest1;
 
@@ -1122,7 +1129,7 @@ model RedeclareTest2
 			description="Basic redeclares.",
 			flatModel="
 /*
-fclass RedeclareTests.RedeclareTest2;
+fclass RedeclareTests.General.RedeclareTest2;
   Real p.c1.r = 1;
   Real p.c1.g = 0.1;
   Real p.c1.b = 0.1;
@@ -1132,9 +1139,9 @@ fclass RedeclareTests.RedeclareTest2;
   Real p.c3.r = 0;
   Real p.c3.g = 1;
   Real p.c3.b = 0;
-end RedeclareTests.RedeclareTest2;
+end RedeclareTests.General.RedeclareTest2;
 */
-fclass RedeclareTests.RedeclareTest2
+fclass RedeclareTests.General.RedeclareTest2
  Real p.c1.r = 1 /*(1)*/;
  Real p.c1.g = 0.1 /*(0.1)*/;
  Real p.c1.b = 0.1 /*(0.1)*/;
@@ -1144,7 +1151,7 @@ fclass RedeclareTests.RedeclareTest2
  Real p.c3.r = 0 /*(0)*/;
  Real p.c3.g = 1 /*(1)*/;
  Real p.c3.b = 0 /*(0)*/;
-end RedeclareTests.RedeclareTest2;
+end RedeclareTests.General.RedeclareTest2;
 ")})));
 end RedeclareTest2;
 
@@ -1206,7 +1213,7 @@ end C0;
 			name="RedeclareTest3",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest3
+fclass RedeclareTests.General.RedeclareTest3
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
  Real palette.p.b = 0.0010 /*(0.0010)*/;
@@ -1240,7 +1247,7 @@ fclass RedeclareTests.RedeclareTest3
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
  Real p.q = 0.4 /*(0.4)*/;
-end RedeclareTests.RedeclareTest3;
+end RedeclareTests.General.RedeclareTest3;
 ")})));
 end RedeclareTest3;
 
@@ -1292,7 +1299,7 @@ end C0;
 			name="RedeclareTest4",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest4
+fclass RedeclareTests.General.RedeclareTest4
  Real c0.q = 0.3 /*(0.3)*/;
  Real c0.p.c1.r = 1 /*(1)*/;
  Real c0.p.c1.g = 0.2 /*(0.2)*/;
@@ -1313,7 +1320,7 @@ fclass RedeclareTests.RedeclareTest4
  Real p.c3.r = 0.56 /*(0.56)*/;
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
-end RedeclareTests.RedeclareTest4;
+end RedeclareTests.General.RedeclareTest4;
 ")})));
 end RedeclareTest4;
 
@@ -1358,11 +1365,11 @@ end C222;
 			name="RedeclareTest5",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest5
+fclass RedeclareTests.General.RedeclareTest5
  Real u.c1.c2.x = 55 /*(55)*/;
  Real u.c1.c2.y = 4 /*(4)*/;
  Real u.c1.c2.z = 66 /*(66)*/;
-end RedeclareTests.RedeclareTest5;
+end RedeclareTests.General.RedeclareTest5;
 ")})));
 end RedeclareTest5;
 
@@ -1399,13 +1406,13 @@ model RedeclareTest6
 			name="RedeclareTest6",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest6
+fclass RedeclareTests.General.RedeclareTest6
  Real b.a.c2.x = 6 /*(6)*/;
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real bb.a.c2.x = 55 /*(55)*/;
  Real bb.a.c2.y = 8 /*(8)*/;
-end RedeclareTests.RedeclareTest6;
+end RedeclareTests.General.RedeclareTest6;
 ")})));
 end RedeclareTest6;
 
@@ -1432,11 +1439,11 @@ model RedeclareTest7
 			name="RedeclareTest7",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest7
+fclass RedeclareTests.General.RedeclareTest7
  Real p = 4 /*(4)*/;
  Real a.d.b.x = p;
  Real a.d.b.y = 5 /*(5)*/;
-end RedeclareTests.RedeclareTest7;
+end RedeclareTests.General.RedeclareTest7;
 ")})));
 end RedeclareTest7;
 
@@ -1514,14 +1521,14 @@ model RedeclareTest9
 			name="RedeclareTest9",
 			description="Basic redeclares.",
 			flatModel="
- fclass RedeclareTests.RedeclareTest9
+ fclass RedeclareTests.General.RedeclareTest9
  Real a.c2.x = 3 /*(3)*/;
  Real a.c2.y = 4 /*(4)*/;
  Real b.a.c2.x = 8 /*(8)*/;
  Real b.a.c2.y = 4 /*(4)*/;
  Real b.a.c2.z = 9 /*(9)*/;
  Real b.aa.c2.x = 2 /*(2)*/;
-end RedeclareTests.RedeclareTest9;
+end RedeclareTests.General.RedeclareTest9;
 ")})));
 end RedeclareTest9;
 
@@ -1670,7 +1677,7 @@ end C0;
 			name="RedeclareTest10",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest10
+fclass RedeclareTests.General.RedeclareTest10
  Real r = 0.1 /*(0.1)*/;
  Real palette.q = 0.3 /*(0.3)*/;
  Real palette.p.b = 0.0010 /*(0.0010)*/;
@@ -1704,7 +1711,7 @@ fclass RedeclareTests.RedeclareTest10
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
  Real p.q = 0.4 /*(0.4)*/;
-end RedeclareTests.RedeclareTest10;
+end RedeclareTests.General.RedeclareTest10;
 ")})));
 end RedeclareTest10;
 
@@ -1756,7 +1763,7 @@ end C0;
 			name="RedeclareTest11",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest11
+fclass RedeclareTests.General.RedeclareTest11
  Real c0.q = 0.3 /*(0.3)*/;
  Real c0.p.c1.r = 1 /*(1)*/;
  Real c0.p.c1.g = 0.2 /*(0.2)*/;
@@ -1777,7 +1784,7 @@ fclass RedeclareTests.RedeclareTest11
  Real p.c3.r = 0.56 /*(0.56)*/;
  Real p.c3.g = 0.85 /*(0.85)*/;
  Real p.c3.b = 0.24 /*(0.24)*/;
-end RedeclareTests.RedeclareTest11;
+end RedeclareTests.General.RedeclareTest11;
 ")})));
 end RedeclareTest11;
 
@@ -1821,11 +1828,11 @@ end C222;
 			name="RedeclareTest12",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest12
+fclass RedeclareTests.General.RedeclareTest12
  Real u.c1.c2.x = 55 /*(55)*/;
  Real u.c1.c2.y = 44 /*(44)*/;
  Real u.c1.c2.z = 66 /*(66)*/;
-end RedeclareTests.RedeclareTest12;
+end RedeclareTests.General.RedeclareTest12;
 ")})));
 end RedeclareTest12;
 
@@ -1854,14 +1861,14 @@ model RedeclareTest13
 			name="RedeclareTest13",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest13
+fclass RedeclareTests.General.RedeclareTest13
  Real c.b1.z = 3 /*(3)*/;
  Real c.b1.x = 5 /*(5)*/;
  Real c.b1.y = 4 /*(4)*/;
  Real c.b2.z = 3 /*(3)*/;
  Real c.b2.x = 5 /*(5)*/;
  Real c.b2.y = 3 /*(3)*/;
-end RedeclareTests.RedeclareTest13;
+end RedeclareTests.General.RedeclareTest13;
 ")})));
 end RedeclareTest13;
 
@@ -1889,14 +1896,14 @@ model RedeclareTest14
 			name="RedeclareTest14",
 			description="Basic redeclares.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest14
+fclass RedeclareTests.General.RedeclareTest14
  Real c.b1.z = 3 /*(3)*/;
  Real c.b1.x = 5 /*(5)*/;
  Real c.b1.y = 4 /*(4)*/;
  Real c.b2.z = 5 /*(5)*/;
  Real c.b2.x = 1 /*(1)*/;
  Real c.b2.y = 3 /*(3)*/;
-end RedeclareTests.RedeclareTest14;
+end RedeclareTests.General.RedeclareTest14;
 ")})));
 end RedeclareTest14;
 
@@ -1929,10 +1936,10 @@ class RedeclareTest15 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest15",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest15
+fclass RedeclareTests.General.RedeclareTest15
  Real d.c.a.x = 4 /*(4)*/;
  Real d.c.a.y = 5 /*(5)*/;
-end RedeclareTests.RedeclareTest15;
+end RedeclareTests.General.RedeclareTest15;
 ")})));
 end RedeclareTest15;
 
@@ -1972,11 +1979,11 @@ class RedeclareTest16 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest16",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest16
+fclass RedeclareTests.General.RedeclareTest16
  Real e.d.a.x = 5 /*(5)*/;
  Real e.d.a.y = 4 /*(4)*/;
  Real e.d.a.z = 6 /*(6)*/;
-end RedeclareTests.RedeclareTest16;
+end RedeclareTests.General.RedeclareTest16;
 ")})));
 end RedeclareTest16;
 
@@ -2011,11 +2018,11 @@ class RedeclareTest161 "Test of merging of modifications in parametrized classes
 			name="RedeclareTest161",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest161
+fclass RedeclareTests.General.RedeclareTest161
  Real e.x = 6 /*(6)*/;
  Real e.y = 4 /*(4)*/;
  Real e.z = 6 /*(6)*/;
-end RedeclareTests.RedeclareTest161;
+end RedeclareTests.General.RedeclareTest161;
 ")})));
 end RedeclareTest161;
 
@@ -2067,7 +2074,7 @@ class RedeclareTest165
 			name="RedeclareTest165",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest165
+fclass RedeclareTests.General.RedeclareTest165
  parameter Real e.pE = 5 /*(5)*/;
  Real e.d.a.x = 5 /*(5)*/;
  Real e.d.a.y = e.pE /*(5)*/;
@@ -2075,7 +2082,7 @@ fclass RedeclareTests.RedeclareTest165
  Real e.d.a.u = 5 /*(5)*/;
  Real e.d.a.v = 6 /*(6)*/;
  Real e.d.a.w = 7 /*(7)*/;
-end RedeclareTests.RedeclareTest165;
+end RedeclareTests.General.RedeclareTest165;
 ")})));
 end RedeclareTest165;
 
@@ -2112,11 +2119,11 @@ model RedeclareTest17
 			name="RedeclareTest17",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest17
+fclass RedeclareTests.General.RedeclareTest17
  Real bb.x = 3 /*(3)*/;
  Real bb.y = 3 /*(3)*/;
  Real bb.z = 4 /*(4)*/;
-end RedeclareTests.RedeclareTest17;
+end RedeclareTests.General.RedeclareTest17;
 
 ")})));
 end RedeclareTest17;
@@ -2155,11 +2162,11 @@ model RedeclareTest175
 			name="RedeclareTest175",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest175
+fclass RedeclareTests.General.RedeclareTest175
  Real bb.x = 2 /*(2)*/;
  Real bb.y = 6 /*(6)*/;
  Real bb.z = 5 /*(5)*/;
-end RedeclareTests.RedeclareTest175;
+end RedeclareTests.General.RedeclareTest175;
 
 ")})));
 end RedeclareTest175;
@@ -2199,11 +2206,11 @@ model RedeclareTest176
 			name="RedeclareTest176",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest176
+fclass RedeclareTests.General.RedeclareTest176
  Real bb.x = 3 /*(3)*/;
  Real bb.y = 6 /*(6)*/;
  Real bb.z = 4 /*(4)*/;
-end RedeclareTests.RedeclareTest176;
+end RedeclareTests.General.RedeclareTest176;
 
 ")})));
 end RedeclareTest176;
@@ -2254,12 +2261,12 @@ model RedeclareTest18 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest18",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest18
+fclass RedeclareTests.General.RedeclareTest18
  Real g.f.e.a.x = 5 /*(5)*/;
  Real g.f.e.a.y = 4 /*(4)*/;
  Real g.f.e.a.z = 6 /*(6)*/;
  Real g.f.e.a.w = 5 /*(5)*/;
-end RedeclareTests.RedeclareTest18;
+end RedeclareTests.General.RedeclareTest18;
 ")})));
 end RedeclareTest18;
 
@@ -2313,12 +2320,12 @@ class RedeclareTest19 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest19",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest19
+fclass RedeclareTests.General.RedeclareTest19
  Real g.f.e.a.x = 5 /*(5)*/;
  Real g.f.e.a.y = 4 /*(4)*/;
  Real g.f.e.a.z = 6 /*(6)*/;
  Real g.f.e.a.w = 5 /*(5)*/;
-end RedeclareTests.RedeclareTest19;
+end RedeclareTests.General.RedeclareTest19;
 ")})));
 end RedeclareTest19;
 
@@ -2374,14 +2381,14 @@ class RedeclareTest20 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest20",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest20
+fclass RedeclareTests.General.RedeclareTest20
  Real g.f.e.b.x = 5 /*(5)*/;
  Real g.f.e.b.y = 3 /*(3)*/;
  Real g.f.e.a.x = 5 /*(5)*/;
  Real g.f.e.a.y = 4 /*(4)*/;
  Real g.f.e.a.z = 6 /*(6)*/;
  Real g.f.e.a.w = 5 /*(5)*/;
-end RedeclareTests.RedeclareTest20;
+end RedeclareTests.General.RedeclareTest20;
 	
 ")})));
 end RedeclareTest20;
@@ -2441,7 +2448,7 @@ class RedeclareTest21 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest21",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest21
+fclass RedeclareTests.General.RedeclareTest21
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
  parameter Real g.f.pF = 4 /*(4)*/;
@@ -2452,7 +2459,7 @@ fclass RedeclareTests.RedeclareTest21
  Real g.f.e.a.y = g.f.pF /*(4)*/;
  Real g.f.e.a.z = g.pG /*(6)*/;
  Real g.f.e.a.w = p0 /*(5)*/;
-end RedeclareTests.RedeclareTest21;	
+end RedeclareTests.General.RedeclareTest21;	
 ")})));
 end RedeclareTest21;
 
@@ -2508,7 +2515,7 @@ class RedeclareTest22 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest22",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest22
+fclass RedeclareTests.General.RedeclareTest22
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
  parameter Real g.f.pF = 4 /*(4)*/;
@@ -2517,7 +2524,7 @@ fclass RedeclareTests.RedeclareTest22
  Real g.f.e.b.y = 3 /*(3)*/;
  Real g.f.e.b.z = 4 /*(4)*/;
  Real g.f.e.b.w = p0 /*(5)*/;
-end RedeclareTests.RedeclareTest22;
+end RedeclareTests.General.RedeclareTest22;
 ")})));
 end RedeclareTest22;
 
@@ -2565,14 +2572,14 @@ class RedeclareTest225 "Test of merging of modifications in parametrized classes
 			name="RedeclareTest225",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest225
+fclass RedeclareTests.General.RedeclareTest225
  parameter Real p0 = 5 /*(5)*/;
  parameter Real f.e.pE = 3 /*(3)*/;
  Real f.e.b.x = f.e.pE /*(3)*/;
  Real f.e.b.y = 3 /*(3)*/;
  Real f.e.b.z = 4 /*(4)*/;
  Real f.e.b.w = p0 /*(5)*/;
-end RedeclareTests.RedeclareTest225;	
+end RedeclareTests.General.RedeclareTest225;	
 ")})));
 end RedeclareTest225;
 
@@ -2612,14 +2619,14 @@ model RedeclareTest23
 			name="RedeclareTest23",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest23
+fclass RedeclareTests.General.RedeclareTest23
  Real d1.b.x = 4 /*(4)*/;
  Real d1.b.y = 3 /*(3)*/;
  Real d1.b.z = 10 /*(10)*/;
  Real d2.b.x = 4 /*(4)*/;
  Real d2.b.y = 3 /*(3)*/;
  Real d2.b.z = 10 /*(10)*/;
-end RedeclareTests.RedeclareTest23;
+end RedeclareTests.General.RedeclareTest23;
 
 ")})));
 end RedeclareTest23;
@@ -2676,7 +2683,7 @@ class RedeclareTest24 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest24",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest24
+fclass RedeclareTests.General.RedeclareTest24
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
  parameter Real g.f.pF = 4 /*(4)*/;
@@ -2685,7 +2692,7 @@ fclass RedeclareTests.RedeclareTest24
  Real g.f.e.b.y = 3 /*(3)*/;
  Real g.f.e.b.z = 4 /*(4)*/;
  Real g.f.e.b.w = p0 /*(5)*/;
-end RedeclareTests.RedeclareTest24;
+end RedeclareTests.General.RedeclareTest24;
 ")})));
 end RedeclareTest24;
 
@@ -2741,7 +2748,7 @@ class RedeclareTest25 "Test of merging of modifications in parametrized classes"
 			name="RedeclareTest25",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest25
+fclass RedeclareTests.General.RedeclareTest25
  parameter Real p0 = 5 /*(5)*/;
  parameter Real g.pG = 6 /*(6)*/;
  parameter Real g.f.pF = 4 /*(4)*/;
@@ -2750,7 +2757,7 @@ fclass RedeclareTests.RedeclareTest25
  Real g.f.e.b.y = 8 /*(8)*/;
  Real g.f.e.b.z = 9 /*(9)*/;
  Real g.f.e.b.w = p0 /*(5)*/;
-end RedeclareTests.RedeclareTest25;
+end RedeclareTests.General.RedeclareTest25;
 ")})));
 end RedeclareTest25;
 
@@ -2784,10 +2791,10 @@ model RedeclareTest26
 			name="RedeclareTest26",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest26
+fclass RedeclareTests.General.RedeclareTest26
  Real m.x;
  Real m.y;
-end RedeclareTests.RedeclareTest26;
+end RedeclareTests.General.RedeclareTest26;
 ")})));
 end RedeclareTest26;
 
@@ -2823,9 +2830,9 @@ model RedeclareTest27
 			name="RedeclareTest27",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest27
+fclass RedeclareTests.General.RedeclareTest27
  Real b.y = 3;
-end RedeclareTests.RedeclareTest27;
+end RedeclareTests.General.RedeclareTest27;
 ")})));
 end RedeclareTest27;
 
@@ -2857,12 +2864,12 @@ model RedeclareTest28
 			name="RedeclareTest28",
 			description="Test of parametrized classes.",
 			flatModel="
-fclass RedeclareTests.RedeclareTest28
+fclass RedeclareTests.General.RedeclareTest28
  parameter Real p2 = 3 /* 3.0 */;
  parameter Real p3 = 1 /* 1.0 */;
  parameter Real m1.p2 = p2;
  parameter Real m1.p1 = p3;
-end RedeclareTests.RedeclareTest28;
+end RedeclareTests.General.RedeclareTest28;
 ")})));
 end RedeclareTest28;
 
@@ -2888,9 +2895,9 @@ model RedeclareTest29
 			name="RedeclareTest29",
 			description="Modifying parameter that is used as size of array",
 			flatModel="
-fclass RedeclareTests.RedeclareTest29
+fclass RedeclareTests.General.RedeclareTest29
  Real y[2] = {1.0,2.0};
-end RedeclareTests.RedeclareTest29;
+end RedeclareTests.General.RedeclareTest29;
 ")})));
 end RedeclareTest29;
 
@@ -2914,12 +2921,12 @@ model RedeclareTest30
 			name="RedeclareTest30",
 			description="Test that constrainedby does not prevent accesses within same class",
 			flatModel="
-fclass RedeclareTests.RedeclareTest30
+fclass RedeclareTests.General.RedeclareTest30
  parameter Real a.y = 2 /* 2 */;
  Real a.x;
 equation
  a.x = a.y;
-end RedeclareTests.RedeclareTest30;
+end RedeclareTests.General.RedeclareTest30;
 ")})));
 end RedeclareTest30;
 
@@ -2980,10 +2987,10 @@ model RedeclareTest32
 			description="Lookup of extends with redeclare modification in array",
             eliminate_alias_variables=false,
 			flatModel="
-fclass RedeclareTests.RedeclareTest32
+fclass RedeclareTests.General.RedeclareTest32
  constant Real d[1].y = 3.0;
  constant Real d[2].y = 3.0;
-end RedeclareTests.RedeclareTest32;
+end RedeclareTests.General.RedeclareTest32;
 ")})));
 end RedeclareTest32;
 
@@ -3001,10 +3008,10 @@ model RedeclareTest33
 			name="RedeclareTest33",
 			description="Replacing primitive variable",
 			flatModel="
-fclass RedeclareTests.RedeclareTest33
+fclass RedeclareTests.General.RedeclareTest33
  discrete Boolean a.a = time < 3;
  Real a.x = if a.a then time else - time;
-end RedeclareTests.RedeclareTest33;
+end RedeclareTests.General.RedeclareTest33;
 ")})));
 end RedeclareTest33;
 
@@ -3072,9 +3079,9 @@ model RedeclareTest35
 			name="RedeclareTest35",
 			description="Redeclare class in constrainedby",
 			flatModel="
-fclass RedeclareTests.RedeclareTest35
+fclass RedeclareTests.General.RedeclareTest35
  Real w.x.z = 1.0;
-end RedeclareTests.RedeclareTest35;
+end RedeclareTests.General.RedeclareTest35;
 ")})));
 end RedeclareTest35;
 
@@ -3111,10 +3118,10 @@ model RedeclareTest36
 			name="RedeclareTest36",
 			description="Class lookup from replacing component",
 			flatModel="
-fclass RedeclareTests.RedeclareTest36
+fclass RedeclareTests.General.RedeclareTest36
  parameter Real a.c.x = 1 /* 1 */;
  parameter Real a.c.e.y = a.c.x;
-end RedeclareTests.RedeclareTest36;
+end RedeclareTests.General.RedeclareTest36;
 ")})));
 end RedeclareTest36;
 
@@ -3151,24 +3158,24 @@ model RedeclareTest37
 			name="RedeclareTest37",
 			description="Class lookup from replacing record",
 			flatModel="
-fclass RedeclareTests.RedeclareTest37
- parameter RedeclareTests.RedeclareTest37.A a(c(x = 1,e(y = a.c.x)));
+fclass RedeclareTests.General.RedeclareTest37
+ parameter RedeclareTests.General.RedeclareTest37.A a(c(x = 1,e(y = a.c.x)));
 
 public
- record RedeclareTests.RedeclareTest37.G.E
+ record RedeclareTests.General.RedeclareTest37.G.E
   parameter Real y;
- end RedeclareTests.RedeclareTest37.G.E;
+ end RedeclareTests.General.RedeclareTest37.G.E;
 
- record RedeclareTests.RedeclareTest37.G.D
+ record RedeclareTests.General.RedeclareTest37.G.D
   parameter Real x;
-  parameter RedeclareTests.RedeclareTest37.G.E e;
- end RedeclareTests.RedeclareTest37.G.D;
+  parameter RedeclareTests.General.RedeclareTest37.G.E e;
+ end RedeclareTests.General.RedeclareTest37.G.D;
 
- record RedeclareTests.RedeclareTest37.A
-  parameter RedeclareTests.RedeclareTest37.G.D c;
- end RedeclareTests.RedeclareTest37.A;
+ record RedeclareTests.General.RedeclareTest37.A
+  parameter RedeclareTests.General.RedeclareTest37.G.D c;
+ end RedeclareTests.General.RedeclareTest37.A;
 
-end RedeclareTests.RedeclareTest37;
+end RedeclareTests.General.RedeclareTest37;
 ")})));
 end RedeclareTest37;
 
@@ -3193,9 +3200,9 @@ model RedeclareTest38
 			name="RedeclareTest38",
 			description="Constrainedby with model containing array of models",
 			flatModel="
-fclass RedeclareTests.RedeclareTest38
+fclass RedeclareTests.General.RedeclareTest38
  Real a.b.c[1].x;
-end RedeclareTests.RedeclareTest38;
+end RedeclareTests.General.RedeclareTest38;
 ")})));
 end RedeclareTest38;
 
@@ -3234,21 +3241,21 @@ model RedeclareTest39
 			name="RedeclareTest39",
 			description="Error check of redeclare that needs the modifications from the constrainedby clause to be valid",
 			flatModel="
-fclass RedeclareTests.RedeclareTest39
+fclass RedeclareTests.General.RedeclareTest39
  Real c.b.a.x;
 equation
- c.b.a.x = RedeclareTests.RedeclareTest39.f2(time);
+ c.b.a.x = RedeclareTests.General.RedeclareTest39.f2(time);
 
 public
- function RedeclareTests.RedeclareTest39.f2
+ function RedeclareTests.General.RedeclareTest39.f2
   input Real x;
   output Real y;
  algorithm
   y := x + 1;
   return;
- end RedeclareTests.RedeclareTest39.f2;
+ end RedeclareTests.General.RedeclareTest39.f2;
 
-end RedeclareTests.RedeclareTest39;
+end RedeclareTests.General.RedeclareTest39;
 ")})));
 end RedeclareTest39;
 
@@ -3285,19 +3292,19 @@ model RedeclareTest40
             name="RedeclareTest40",
             description="Check that only final redeclared are error checked",
             flatModel="
-fclass RedeclareTests.RedeclareTest40
- Real c.b.a.x = RedeclareTests.RedeclareTest40.f2(time);
+fclass RedeclareTests.General.RedeclareTest40
+ Real c.b.a.x = RedeclareTests.General.RedeclareTest40.f2(time);
 
 public
- function RedeclareTests.RedeclareTest40.f2
+ function RedeclareTests.General.RedeclareTest40.f2
   input Real x;
   output Real y;
  algorithm
   y := x + 1;
   return;
- end RedeclareTests.RedeclareTest40.f2;
+ end RedeclareTests.General.RedeclareTest40.f2;
 
-end RedeclareTests.RedeclareTest40;
+end RedeclareTests.General.RedeclareTest40;
 ")})));
 end RedeclareTest40;
 
@@ -3327,10 +3334,10 @@ model RedeclareTest41
             name="RedeclareTest41",
             description="",
             flatModel="
-fclass RedeclareTests.RedeclareTest41
+fclass RedeclareTests.General.RedeclareTest41
  Real b.y = 2;
  Real b.x = 1;
-end RedeclareTests.RedeclareTest41;
+end RedeclareTests.General.RedeclareTest41;
 ")})));
 end RedeclareTest41;
 
@@ -3358,12 +3365,12 @@ model RedeclareTest42
             name="RedeclareTest42",
             description="Redeclare that changes size of array of models",
             flatModel="
-fclass RedeclareTests.RedeclareTest42
+fclass RedeclareTests.General.RedeclareTest42
  structural parameter Integer c.a.n = 3 /* 3 */;
  Real c.a.d[1].x = 1;
  Real c.a.d[2].x = 2;
  Real c.a.d[3].x = 3;
-end RedeclareTests.RedeclareTest42;
+end RedeclareTests.General.RedeclareTest42;
 ")})));
 end RedeclareTest42;
 
@@ -3398,9 +3405,9 @@ model RedeclareTest43
             name="RedeclareTest43",
             description="Class lookup from inside redeclare class extends referring to class in surrounding package",
             flatModel="
-fclass RedeclareTests.RedeclareTest43
+fclass RedeclareTests.General.RedeclareTest43
  Real b.x = 1.0;
-end RedeclareTests.RedeclareTest43;
+end RedeclareTests.General.RedeclareTest43;
 ")})));
 end RedeclareTest43;
 
@@ -3443,7 +3450,7 @@ model RedeclareTest44
             name="RedeclareTest44",
             description="Redeclares before and after short class decl",
             flatModel="
-fclass RedeclareTests.RedeclareTest44
+fclass RedeclareTests.General.RedeclareTest44
  Real b.z;
  Real b.y;
  Real b.x;
@@ -3451,7 +3458,7 @@ equation
  b.z = time;
  b.y = time;
  b.x = time;
-end RedeclareTests.RedeclareTest44;
+end RedeclareTests.General.RedeclareTest44;
 ")})));
 end RedeclareTest44;
 
@@ -3531,10 +3538,10 @@ model RedeclareTest46
             name="RedeclareTest46",
             description="When checking constraining type, use constraining type for replaceable components/classes within the constraining type",
             flatModel="
-fclass RedeclareTests.RedeclareTest46
+fclass RedeclareTests.General.RedeclareTest46
  Real i.f.b.w = 4 * time;
  Real i.f.b.x = time;
-end RedeclareTests.RedeclareTest46;
+end RedeclareTests.General.RedeclareTest46;
 ")})));
 end RedeclareTest46;
 
@@ -3686,20 +3693,20 @@ model RedeclareTest50
             name="RedeclareTest50",
             description="Check that modifications on constraining type of functions are retained",
             flatModel="
-fclass RedeclareTests.RedeclareTest50
- Real b.x = RedeclareTests.RedeclareTest50.b.f2(time, 2);
+fclass RedeclareTests.General.RedeclareTest50
+ Real b.x = RedeclareTests.General.RedeclareTest50.b.f2(time, 2);
 
 public
- function RedeclareTests.RedeclareTest50.b.f2
+ function RedeclareTests.General.RedeclareTest50.b.f2
   input Real a;
   input Real b;
   output Real c;
  algorithm
   c := a + b;
   return;
- end RedeclareTests.RedeclareTest50.b.f2;
+ end RedeclareTests.General.RedeclareTest50.b.f2;
 
-end RedeclareTests.RedeclareTest50;
+end RedeclareTests.General.RedeclareTest50;
 ")})));
 end RedeclareTest50;
 
@@ -3752,9 +3759,9 @@ model RedeclareTest52
             name="RedeclareTest52",
             description="Check that arrays of unknown size are correctly error checked",
             flatModel="
-fclass RedeclareTests.RedeclareTest52
+fclass RedeclareTests.General.RedeclareTest52
  structural parameter Integer k = 0 /* 0 */;
-end RedeclareTests.RedeclareTest52;
+end RedeclareTests.General.RedeclareTest52;
 ")})));
 end RedeclareTest52;
 
@@ -3782,7 +3789,8 @@ model RedeclareTest53
 1 errors found:
 
 Error at line 14, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare B a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable A a'
+  In the declaration 'redeclare B a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable A a',
+    because their instances of x have incompatible number of dimensions
 ")})));
 end RedeclareTest53;
 
@@ -3835,10 +3843,10 @@ model RedeclareTest54
             name="RedeclareTest54",
             description="Redeclare with constraining type that contains a component of a replaceable class.",
             flatModel="
-fclass RedeclareTests.RedeclareTest54
+fclass RedeclareTests.General.RedeclareTest54
  Real i.g.f.z;
  Real i.g.f.x;
-end RedeclareTests.RedeclareTest54;
+end RedeclareTests.General.RedeclareTest54;
 ")})));
 end RedeclareTest54;
 
@@ -3855,10 +3863,10 @@ model RedeclareTest55
             name="RedeclareTest55",
             description="Redeclare with each in constraining type",
             flatModel="
-fclass RedeclareTests.RedeclareTest55
+fclass RedeclareTests.General.RedeclareTest55
  Real r1[1].x = time;
  Real r1[2].x = time;
-end RedeclareTests.RedeclareTest55;
+end RedeclareTests.General.RedeclareTest55;
 ")})));
 end RedeclareTest55;
 
@@ -3903,10 +3911,10 @@ model RedeclareTest57
             name="RedeclareTest57",
             description="Test that modifications from constraining class are considered when error checking redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest57
+fclass RedeclareTests.General.RedeclareTest57
  structural parameter Integer c.a.n = 2 /* 2 */;
  parameter Real c.a.x[2] = 1:2 /* { 1, 2 } */;
-end RedeclareTests.RedeclareTest57;
+end RedeclareTests.General.RedeclareTest57;
 ")})));
 end RedeclareTest57;
 
@@ -3933,10 +3941,10 @@ model RedeclareTest58
             name="RedeclareTest58",
             description="Test that modifications from constraining class are considered when error checking redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest58
+fclass RedeclareTests.General.RedeclareTest58
  structural parameter Integer c.d.n = 2 /* 2 */;
  parameter Real c.d.x[2] = 1:2 /* { 1, 2 } */;
-end RedeclareTests.RedeclareTest58;
+end RedeclareTests.General.RedeclareTest58;
 ")})));
 end RedeclareTest58;
 
@@ -3962,10 +3970,10 @@ model RedeclareTest59
             name="RedeclareTest59",
             description="Test that modifications from constraining class are considered when error checking redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest59
+fclass RedeclareTests.General.RedeclareTest59
  structural parameter Integer c.a.n = 2 /* 2 */;
  parameter Real c.a.x[2] = 1:2 /* { 1, 2 } */;
-end RedeclareTests.RedeclareTest59;
+end RedeclareTests.General.RedeclareTest59;
 ")})));
 end RedeclareTest59;
 
@@ -3992,10 +4000,10 @@ model RedeclareTest60
             name="RedeclareTest60",
             description="Test that modifications from constraining class are considered when error checking redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest60
+fclass RedeclareTests.General.RedeclareTest60
  structural parameter Integer c.d.n = 2 /* 2 */;
  parameter Real c.d.x[2] = 1:2 /* { 1, 2 } */;
-end RedeclareTests.RedeclareTest60;
+end RedeclareTests.General.RedeclareTest60;
 ")})));
 end RedeclareTest60;
 
@@ -4020,9 +4028,9 @@ model RedeclareTest61
             name="RedeclareTest61",
             description="Test that modifications from constraining class are considered when error checking redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest61
+fclass RedeclareTests.General.RedeclareTest61
  parameter Real c.a.x[2] = 1:2 /* { 1, 2 } */;
-end RedeclareTests.RedeclareTest61;
+end RedeclareTests.General.RedeclareTest61;
 ")})));
 end RedeclareTest61;
 
@@ -4048,9 +4056,9 @@ model RedeclareTest62
             name="RedeclareTest62",
             description="Test that modifications from constraining class are considered when error checking redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest62
+fclass RedeclareTests.General.RedeclareTest62
  parameter Real c.d.x[2] = 1:2 /* { 1, 2 } */;
-end RedeclareTests.RedeclareTest62;
+end RedeclareTests.General.RedeclareTest62;
 ")})));
 end RedeclareTest62;
 
@@ -4104,10 +4112,10 @@ model RedeclareTest63
             name="RedeclareTest63",
             description="Redeclare with constraining type that contains a component of a short class decl that points to a replaceable class",
             flatModel="
-fclass RedeclareTests.RedeclareTest63
+fclass RedeclareTests.General.RedeclareTest63
  Real j.h.g.z;
  Real j.h.g.x;
-end RedeclareTests.RedeclareTest63;
+end RedeclareTests.General.RedeclareTest63;
 ")})));
 end RedeclareTest63;
 
@@ -4160,12 +4168,12 @@ model RedeclareTest64
             name="RedeclareTest64",
             description="Redeclare with constraining type that contains an array component of a replaceable class.",
             flatModel="
-fclass RedeclareTests.RedeclareTest64
+fclass RedeclareTests.General.RedeclareTest64
  Real i.g.f[1].z;
  Real i.g.f[1].x;
  Real i.g.f[2].z;
  Real i.g.f[2].x;
-end RedeclareTests.RedeclareTest64;
+end RedeclareTests.General.RedeclareTest64;
 ")})));
 end RedeclareTest64;
 
@@ -4184,9 +4192,9 @@ model RedeclareTest65
             name="RedeclareTest65",
             description="Modifications on constraining type of class for component",
             flatModel="
-fclass RedeclareTests.RedeclareTest65
+fclass RedeclareTests.General.RedeclareTest65
  Real b.x = 2;
-end RedeclareTests.RedeclareTest65;
+end RedeclareTests.General.RedeclareTest65;
 ")})));
 end RedeclareTest65;
 
@@ -4207,9 +4215,9 @@ model RedeclareTest66
             name="RedeclareTest66",
             description="Modifications on constraining type of class for short class decl",
             flatModel="
-fclass RedeclareTests.RedeclareTest66
+fclass RedeclareTests.General.RedeclareTest66
  Real c.x = 2;
-end RedeclareTests.RedeclareTest66;
+end RedeclareTests.General.RedeclareTest66;
 ")})));
 end RedeclareTest66;
 
@@ -4232,9 +4240,9 @@ model RedeclareTest67
             name="RedeclareTest67",
             description="Modifications on constraining type of class for extends",
             flatModel="
-fclass RedeclareTests.RedeclareTest67
+fclass RedeclareTests.General.RedeclareTest67
  Real c.x = 2;
-end RedeclareTests.RedeclareTest67;
+end RedeclareTests.General.RedeclareTest67;
 ")})));
 end RedeclareTest67;
 
@@ -4266,9 +4274,9 @@ model RedeclareTest68
             name="RedeclareTest68",
             description="Modifications on constraining type of class for component with two levels of redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareTest68
+fclass RedeclareTests.General.RedeclareTest68
  parameter Real e.d.x = 3 /* 3 */;
-end RedeclareTests.RedeclareTest68;
+end RedeclareTests.General.RedeclareTest68;
 ")})));
 end RedeclareTest68;
 
@@ -4303,9 +4311,9 @@ model RedeclareTest69
             name="RedeclareTest69",
             description="Replaceable package in constraining type",
             flatModel="
-fclass RedeclareTests.RedeclareTest69
+fclass RedeclareTests.General.RedeclareTest69
  Real b.f.x = 3;
-end RedeclareTests.RedeclareTest69;
+end RedeclareTests.General.RedeclareTest69;
 ")})));
 end RedeclareTest69;
 
@@ -4333,14 +4341,14 @@ model RedeclareTest70
             name="RedeclareTest70",
             description="Replaceable array class binding expression",
             flatModel="
-fclass RedeclareTests.RedeclareTest70
+fclass RedeclareTests.General.RedeclareTest70
  Real c.b1.a[1].x[1,2] = {{3, 4}};
  Real c.b1.a[2].x[1,2] = {{3, 4}};
  Real c.b2.a[1].x[1,2] = {{1, 2}};
  Real c.b2.a[2].x[1,2] = {{1, 2}};
  Real c.b3.a[1].x[1,2] = {{5, 6}};
  Real c.b3.a[2].x[1,2] = {{5, 6}};
-end RedeclareTests.RedeclareTest70;
+end RedeclareTests.General.RedeclareTest70;
 ")})));
 end RedeclareTest70;
 
@@ -4367,7 +4375,7 @@ model RedeclareTest71
             name="RedeclareTest71",
             description="Replaceable array class binding expression",
             flatModel="
-fclass RedeclareTests.RedeclareTest71
+fclass RedeclareTests.General.RedeclareTest71
  Real c.b1.a[1,1].x[1,2] = {{3, 4}};
  Real c.b1.a[1,2].x[1,2] = {{5, 6}};
  Real c.b1.a[2,1].x[1,2] = {{3, 4}};
@@ -4376,7 +4384,7 @@ fclass RedeclareTests.RedeclareTest71
  Real c.b3.a[1,2].x[1,2] = {{9, 0}};
  Real c.b3.a[2,1].x[1,2] = {{7, 8}};
  Real c.b3.a[2,2].x[1,2] = {{9, 0}};
-end RedeclareTests.RedeclareTest71;
+end RedeclareTests.General.RedeclareTest71;
 ")})));
 end RedeclareTest71;
 
@@ -4653,24 +4661,24 @@ model RedeclareTest76
             name="RedeclareTest76",
             description="Check that environment is correctly calculated for extends in record constructors (see #5044)",
             flatModel="
-fclass RedeclareTests.RedeclareTest76
- RedeclareTests.RedeclareTest76.R1 b.r = RedeclareTests.RedeclareTest76.R(RedeclareTests.RedeclareTest76.R2(time));
+fclass RedeclareTests.General.RedeclareTest76
+ RedeclareTests.General.RedeclareTest76.R1 b.r = RedeclareTests.General.RedeclareTest76.R(RedeclareTests.General.RedeclareTest76.R2(time));
  Real b.x.y = time + 3;
 
 public
- record RedeclareTests.RedeclareTest76.R2
+ record RedeclareTests.General.RedeclareTest76.R2
   Real w;
- end RedeclareTests.RedeclareTest76.R2;
+ end RedeclareTests.General.RedeclareTest76.R2;
 
- record RedeclareTests.RedeclareTest76.R1
-  RedeclareTests.RedeclareTest76.R2 x;
- end RedeclareTests.RedeclareTest76.R1;
+ record RedeclareTests.General.RedeclareTest76.R1
+  RedeclareTests.General.RedeclareTest76.R2 x;
+ end RedeclareTests.General.RedeclareTest76.R1;
 
- record RedeclareTests.RedeclareTest76.R
-  RedeclareTests.RedeclareTest76.R2 x;
- end RedeclareTests.RedeclareTest76.R;
+ record RedeclareTests.General.RedeclareTest76.R
+  RedeclareTests.General.RedeclareTest76.R2 x;
+ end RedeclareTests.General.RedeclareTest76.R;
 
-end RedeclareTests.RedeclareTest76;
+end RedeclareTests.General.RedeclareTest76;
 ")})));
 end RedeclareTest76;
 
@@ -4697,16 +4705,16 @@ model RedeclareTest77
             name="RedeclareTest77",
             description="Check that automatically generated binding expressions for records of redeclared types use the correct name",
             flatModel="
-fclass RedeclareTests.RedeclareTest77
- constant RedeclareTests.RedeclareTest77.a.R a.r = RedeclareTests.RedeclareTest77.a.R(2, 3);
+fclass RedeclareTests.General.RedeclareTest77
+ constant RedeclareTests.General.RedeclareTest77.a.R a.r = RedeclareTests.General.RedeclareTest77.a.R(2, 3);
 
 public
- record RedeclareTests.RedeclareTest77.a.R
+ record RedeclareTests.General.RedeclareTest77.a.R
   constant Real x;
   constant Real y;
- end RedeclareTests.RedeclareTest77.a.R;
+ end RedeclareTests.General.RedeclareTest77.a.R;
 
-end RedeclareTests.RedeclareTest77;
+end RedeclareTests.General.RedeclareTest77;
 ")})));
 end RedeclareTest77;
 
@@ -4740,19 +4748,22 @@ model RedeclareTest78
             name="RedeclareTest78",
             description="Record constructor of redeclare extend record",
             flatModel="
-fclass RedeclareTests.RedeclareTest78
- RedeclareTests.RedeclareTest78.P2.R2 m.r2 = RedeclareTests.RedeclareTest78.P2.R2(2);
+fclass RedeclareTests.General.RedeclareTest78
+ RedeclareTests.General.RedeclareTest78.P2.R2 m.r2 = RedeclareTests.General.RedeclareTest78.P2.R2(2);
 
 public
- record RedeclareTests.RedeclareTest78.P2.R2
+ record RedeclareTests.General.RedeclareTest78.P2.R2
   Real x;
- end RedeclareTests.RedeclareTest78.P2.R2;
+ end RedeclareTests.General.RedeclareTest78.P2.R2;
 
-end RedeclareTests.RedeclareTest78;
+end RedeclareTests.General.RedeclareTest78;
 ")})));
 end RedeclareTest78;
 
+end general;
 
+
+package Element
 
 model RedeclareElement1
   model A
@@ -4782,13 +4793,13 @@ equation
 			name="RedeclareElement1",
 			description="Redeclare class as element, short replacing declaration, basic test",
 			flatModel="
-fclass RedeclareTests.RedeclareElement1
+fclass RedeclareTests.Element.RedeclareElement1
  Real c.b.y;
  Real c.b.z;
 equation
  c.b.y = 1;
  c.b.z = 2;
-end RedeclareTests.RedeclareElement1;
+end RedeclareTests.Element.RedeclareElement1;
 ")})));
 end RedeclareElement1;
 
@@ -4820,13 +4831,13 @@ equation
 			name="RedeclareElement2",
 			description="Redeclare class as element, long replacing declaration, basic test",
 			flatModel="
-fclass RedeclareTests.RedeclareElement2
+fclass RedeclareTests.Element.RedeclareElement2
  Real c.b.y;
  Real c.b.z;
 equation
  c.b.y = 1;
  c.b.z = 2;
-end RedeclareTests.RedeclareElement2;
+end RedeclareTests.Element.RedeclareElement2;
 ")})));
 end RedeclareElement2;
 
@@ -4857,13 +4868,13 @@ equation
 			name="RedeclareElement3",
 			description="Redeclare class as element, long extending declaration, basic test",
 			flatModel="
-fclass RedeclareTests.RedeclareElement3
+fclass RedeclareTests.Element.RedeclareElement3
  Real c.b.z;
  Real c.b.y;
 equation
  c.b.y = 1;
  c.b.z = 2;
-end RedeclareTests.RedeclareElement3;
+end RedeclareTests.Element.RedeclareElement3;
 ")})));
 end RedeclareElement3;
 
@@ -4894,13 +4905,13 @@ equation
 			name="RedeclareElement4",
 			description="Redeclare class as element, long extending declaration, basic test",
 			flatModel="
-fclass RedeclareTests.RedeclareElement4
+fclass RedeclareTests.Element.RedeclareElement4
  Real c.b.z;
  Real c.b.y;
 equation
  c.b.y = 1;
  c.b.z = 2;
-end RedeclareTests.RedeclareElement4;
+end RedeclareTests.Element.RedeclareElement4;
 ")})));
 end RedeclareElement4;
 
@@ -4935,11 +4946,11 @@ equation
 			name="RedeclareElement5",
 			description="Redeclare class as element, short replacing declaration, with equation and modifications",
 			flatModel="
-fclass RedeclareTests.RedeclareElement5
+fclass RedeclareTests.Element.RedeclareElement5
  constant Real c.b.y(start = 2) = 1;
  constant Real c.b.z(start = 1) = 2;
  constant Real c.b.x(start = 5) = 3;
-end RedeclareTests.RedeclareElement5;
+end RedeclareTests.Element.RedeclareElement5;
 ")})));
 end RedeclareElement5;
 
@@ -4974,11 +4985,11 @@ equation
 			name="RedeclareElement6",
 			description="Redeclare class as element, long replacing declaration, with equation",
 			flatModel="
-fclass RedeclareTests.RedeclareElement6
+fclass RedeclareTests.Element.RedeclareElement6
  constant Real c.b.y = 1;
  constant Real c.b.z = 2;
  constant Real c.b.x = 3;
-end RedeclareTests.RedeclareElement6;
+end RedeclareTests.Element.RedeclareElement6;
 ")})));
 end RedeclareElement6;
 
@@ -5012,12 +5023,12 @@ model RedeclareElement7
 			name="RedeclareElement7",
 			description="Redeclare class as element, long extending declaration, with equation and modifications",
 			flatModel="
-fclass RedeclareTests.RedeclareElement7
+fclass RedeclareTests.Element.RedeclareElement7
  constant Real c.b.z = 1;
  constant Real c.b.y(start = 10) = 2;
  constant Real c.b.x(start = 20) = 3;
  constant Real c.b.w = 4;
-end RedeclareTests.RedeclareElement7;
+end RedeclareTests.Element.RedeclareElement7;
 ")})));
 end RedeclareElement7;
 
@@ -5051,12 +5062,12 @@ model RedeclareElement8
 			name="RedeclareElement8",
 			description="Redeclare class as element, long extending declaration, with equation and modifications",
 			flatModel="
-fclass RedeclareTests.RedeclareElement8
+fclass RedeclareTests.Element.RedeclareElement8
  constant Real c.b.z = 1;
  constant Real c.b.y(start = 10) = 2;
  constant Real c.b.x(start = 20) = 3;
  constant Real c.b.w = 4;
-end RedeclareTests.RedeclareElement8;
+end RedeclareTests.Element.RedeclareElement8;
 ")})));
 end RedeclareElement8;
 
@@ -5086,11 +5097,11 @@ model RedeclareElement9
 			name="RedeclareElement9",
 			description="Redeclare class as element, using modified constant",
 			flatModel="
-fclass RedeclareTests.RedeclareElement9
+fclass RedeclareTests.Element.RedeclareElement9
  constant Integer c.n = 3;
  Real c.b.y = 2;
  Real c.b.x[3] = {1 ^ 2, 2 ^ 2, 3 ^ 2};
-end RedeclareTests.RedeclareElement9;
+end RedeclareTests.Element.RedeclareElement9;
 ")})));
 end RedeclareElement9;
 
@@ -5119,10 +5130,10 @@ model RedeclareElement10
 			name="RedeclareElement10",
 			description="Redeclaring a short class decl with redeclare class extends",
 			flatModel="
-fclass RedeclareTests.RedeclareElement10
+fclass RedeclareTests.Element.RedeclareElement10
  parameter Real c.y = c.x;
  parameter Real c.x = 1 /* 1 */;
-end RedeclareTests.RedeclareElement10;
+end RedeclareTests.Element.RedeclareElement10;
 ")})));
 end RedeclareElement10;
 
@@ -5152,10 +5163,10 @@ model RedeclareElement11
 			name="RedeclareElement11",
 			description="Redeclaring a short class decl with redeclare class extends",
 			flatModel="
-fclass RedeclareTests.RedeclareElement11
+fclass RedeclareTests.Element.RedeclareElement11
  parameter Real b.c.y = b.c.x;
  parameter Real b.c.x = 1 /* 1 */;
-end RedeclareTests.RedeclareElement11;
+end RedeclareTests.Element.RedeclareElement11;
 ")})));
 end RedeclareElement11;
 
@@ -5195,10 +5206,10 @@ model RedeclareElement12
 			name="RedeclareElement12",
 			description="Class modification containing reference to element of the extends it is attached to",
 			flatModel="
-fclass RedeclareTests.RedeclareElement12
+fclass RedeclareTests.Element.RedeclareElement12
  constant Real a = 3;
  parameter Real b = 3.0 /* 3.0 */;
-end RedeclareTests.RedeclareElement12;
+end RedeclareTests.Element.RedeclareElement12;
 ")})));
 end RedeclareElement12;
 
@@ -5232,10 +5243,10 @@ model RedeclareElement13
 			name="RedeclareElement13",
 			description="Class modification containing reference to element of the extends it is attached to",
 			flatModel="
-fclass RedeclareTests.RedeclareElement13
+fclass RedeclareTests.Element.RedeclareElement13
  constant Real a = 1;
  parameter Real c = 1.0 /* 1.0 */;
-end RedeclareTests.RedeclareElement13;
+end RedeclareTests.Element.RedeclareElement13;
 ")})));
 end RedeclareElement13;
 
@@ -5266,10 +5277,10 @@ model RedeclareElement14
 			name="RedeclareElement14",
 			description="Looking up replacing class through extends",
 			flatModel="
-fclass RedeclareTests.RedeclareElement14
+fclass RedeclareTests.Element.RedeclareElement14
  constant Real d.y = 2;
  constant Real d.x = 1;
-end RedeclareTests.RedeclareElement14;
+end RedeclareTests.Element.RedeclareElement14;
 ")})));
 end RedeclareElement14;
 
@@ -5303,10 +5314,10 @@ model RedeclareElement15
 			name="RedeclareElement15",
 			description="Class declared in same scope as replacing class",
 			flatModel="
-fclass RedeclareTests.RedeclareElement15
+fclass RedeclareTests.Element.RedeclareElement15
  constant Real z.y = 2.0;
  constant Real z.x = 1;
-end RedeclareTests.RedeclareElement15;
+end RedeclareTests.Element.RedeclareElement15;
 ")})));
 end RedeclareElement15;
 
@@ -5345,10 +5356,10 @@ model RedeclareElement16
 			name="RedeclareElement16",
 			description="Class declared in same scope as replacing class",
 			flatModel="
-fclass RedeclareTests.RedeclareElement16
+fclass RedeclareTests.Element.RedeclareElement16
  constant Real z.x = 1;
  constant Real z.y = 2.0;
-end RedeclareTests.RedeclareElement16;
+end RedeclareTests.Element.RedeclareElement16;
 ")})));
 end RedeclareElement16;
 
@@ -5385,10 +5396,10 @@ model RedeclareElement17
 			name="RedeclareElement17",
 			description="Class declared in same scope as replacing class",
 			flatModel="
-fclass RedeclareTests.RedeclareElement17
+fclass RedeclareTests.Element.RedeclareElement17
  constant Real z.x = 1;
  constant Real z.y = 2.0;
-end RedeclareTests.RedeclareElement17;
+end RedeclareTests.Element.RedeclareElement17;
 ")})));
 end RedeclareElement17;
 
@@ -5428,12 +5439,12 @@ model RedeclareElement18
 			name="RedeclareElement18",
 			description="Chain of redeclare class extends - packages",
 			flatModel="
-fclass RedeclareTests.RedeclareElement18
+fclass RedeclareTests.Element.RedeclareElement18
  Real f.w = 4;
  Real f.z = 3;
  Real f.y = 2;
  Real f.x = 1;
-end RedeclareTests.RedeclareElement18;
+end RedeclareTests.Element.RedeclareElement18;
 ")})));
 end RedeclareElement18;
 
@@ -5478,11 +5489,11 @@ model RedeclareElement19
 			name="RedeclareElement19",
 			description="Chain of redeclare class extends - packages, with extends in between",
 			flatModel="
-fclass RedeclareTests.RedeclareElement19
+fclass RedeclareTests.Element.RedeclareElement19
  Real h.z = 3;
  Real h.y = 2;
  Real h.x = 1;
-end RedeclareTests.RedeclareElement19;
+end RedeclareTests.Element.RedeclareElement19;
 ")})));
 end RedeclareElement19;
 
@@ -5524,12 +5535,12 @@ model RedeclareElement20
 			name="RedeclareElement20",
 			description="Chain of redeclare class extends - models",
 			flatModel="
-fclass RedeclareTests.RedeclareElement20
+fclass RedeclareTests.Element.RedeclareElement20
  Real f.g.w = 4;
  Real f.g.z = 3;
  Real f.g.y = 2;
  Real f.g.x = 1;
-end RedeclareTests.RedeclareElement20;
+end RedeclareTests.Element.RedeclareElement20;
 ")})));
 end RedeclareElement20;
 
@@ -5576,11 +5587,11 @@ model RedeclareElement21
 			name="RedeclareElement21",
 			description="Chain of redeclare class extends - models, with extends in between",
 			flatModel="
-fclass RedeclareTests.RedeclareElement21
+fclass RedeclareTests.Element.RedeclareElement21
  Real h.i.z = 3;
  Real h.i.y = 2;
  Real h.i.x = 1;
-end RedeclareTests.RedeclareElement21;
+end RedeclareTests.Element.RedeclareElement21;
 ")})));
 end RedeclareElement21;
 
@@ -5619,10 +5630,10 @@ model RedeclareElement22
 			name="RedeclareElement22",
 			description="Redeclare class extends used directly in redeclare",
 			flatModel="
-fclass RedeclareTests.RedeclareElement22
+fclass RedeclareTests.Element.RedeclareElement22
  constant Real f.e.z = 2;
  constant Real f.e.y = 1;
-end RedeclareTests.RedeclareElement22;
+end RedeclareTests.Element.RedeclareElement22;
 ")})));
 end RedeclareElement22;
 
@@ -5652,13 +5663,13 @@ model RedeclareElement23
 			description="Array of redeclare class extends",
             eliminate_alias_variables=false,
 			flatModel="
-fclass RedeclareTests.RedeclareElement23
+fclass RedeclareTests.Element.RedeclareElement23
  constant Real b[1].z = 2;
  constant Real b[1].y = 1;
  constant Real b[2].z = 2;
  constant Real b[2].y = 1;
  constant Real x = 1.0;
-end RedeclareTests.RedeclareElement23;
+end RedeclareTests.Element.RedeclareElement23;
 ")})));
 end RedeclareElement23;
 
@@ -5702,9 +5713,9 @@ model RedeclareElement24
 			name="RedeclareElement24",
 			description="Complex system of redeclares that caused erroneous error message",
 			flatModel="
-fclass RedeclareTests.RedeclareElement24
+fclass RedeclareTests.Element.RedeclareElement24
  Real a.b.x = 1;
-end RedeclareTests.RedeclareElement24;
+end RedeclareTests.Element.RedeclareElement24;
 ")})));
 end RedeclareElement24;
 
@@ -5734,9 +5745,9 @@ model RedeclareElement25
 			name="RedeclareElement25",
 			description="Causes recursive class structure that expands infinitely if classes are expanded",
 			flatModel="
-fclass RedeclareTests.RedeclareElement25
+fclass RedeclareTests.Element.RedeclareElement25
  Real a.x = 1;
-end RedeclareTests.RedeclareElement25;
+end RedeclareTests.Element.RedeclareElement25;
 ")})));
 end RedeclareElement25;
 
@@ -5761,18 +5772,18 @@ model RedeclareElement26
 			name="RedeclareElement26",
 			description="Redeclare of records",
 			flatModel="
-fclass RedeclareTests.RedeclareElement26
- RedeclareTests.RedeclareElement26.b.R b.r(a = 1);
+fclass RedeclareTests.Element.RedeclareElement26
+ RedeclareTests.Element.RedeclareElement26.b.R b.r(a = 1);
  Real b.x;
 equation
  b.x = b.r.a;
 
 public
- record RedeclareTests.RedeclareElement26.b.R
+ record RedeclareTests.Element.RedeclareElement26.b.R
   Real a;
- end RedeclareTests.RedeclareElement26.b.R;
+ end RedeclareTests.Element.RedeclareElement26.b.R;
 
-end RedeclareTests.RedeclareElement26;
+end RedeclareTests.Element.RedeclareElement26;
 ")})));
 end RedeclareElement26;
 
@@ -5798,9 +5809,9 @@ model RedeclareElement27
             name="RedeclareElement27",
             description="Check that class lookup goes the correct path from element redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareElement27
+fclass RedeclareTests.Element.RedeclareElement27
  parameter Real b.x = 1 /* 1 */;
-end RedeclareTests.RedeclareElement27;
+end RedeclareTests.Element.RedeclareElement27;
 ")})));
 end RedeclareElement27;
 
@@ -5830,9 +5841,9 @@ model RedeclareElement28
             name="RedeclareElement28",
             description="Check that class lookup goes the correct path from element redeclares",
             flatModel="
-fclass RedeclareTests.RedeclareElement28
+fclass RedeclareTests.Element.RedeclareElement28
  parameter Real e.x = 1 /* 1 */;
-end RedeclareTests.RedeclareElement28;
+end RedeclareTests.Element.RedeclareElement28;
 ")})));
 end RedeclareElement28;
 
@@ -5869,13 +5880,13 @@ equation
 			name="RedeclareSameLevel10",
 			description="Class used in base class redeclared as element",
 			flatModel="
-fclass RedeclareTests.RedeclareSameLevel10
+fclass RedeclareTests.Element.RedeclareSameLevel10
  Real d.y;
  Real d.c.x;
 equation
  d.c.x = 1;
  d.y = 2;
-end RedeclareTests.RedeclareSameLevel10;
+end RedeclareTests.Element.RedeclareSameLevel10;
 ")})));
 end RedeclareSameLevel10;
 
@@ -5909,13 +5920,13 @@ equation
 			name="RedeclareSameLevel11",
 			description="Class used in base class redeclared as element",
 			flatModel="
-fclass RedeclareTests.RedeclareSameLevel11
+fclass RedeclareTests.Element.RedeclareSameLevel11
  Real d.c.y;
  Real d.c.x;
 equation
  d.c.x = 1;
  d.c.y = 2;
-end RedeclareTests.RedeclareSameLevel11;
+end RedeclareTests.Element.RedeclareSameLevel11;
 ")})));
 end RedeclareSameLevel11;
 
@@ -5952,18 +5963,20 @@ model RedeclareSameLevel12
 			name="RedeclareSameLevel12",
 			description="Two interdependent classes redeclared as elements, with inner equations",
 			flatModel="
-fclass RedeclareTests.RedeclareSameLevel12
+fclass RedeclareTests.Element.RedeclareSameLevel12
  Real d.y;
  Real d.c.x;
 equation
  d.c.x = 1;
  d.y = 2;
-end RedeclareTests.RedeclareSameLevel12;
+end RedeclareTests.Element.RedeclareSameLevel12;
 ")})));
 end RedeclareSameLevel12;
 
-	
-	
+end Element;
+
+package Function
+
 model RedeclareFunction1
 	package A
 		constant Integer n = 1;
@@ -5989,21 +6002,21 @@ model RedeclareFunction1
 			name="RedeclareFunction1",
 			description="Lookup with modifications in extending function",
 			flatModel="
-fclass RedeclareTests.RedeclareFunction1
- Real x[2] = RedeclareTests.RedeclareFunction1.C.B({1,2});
+fclass RedeclareTests.Function.RedeclareFunction1
+ Real x[2] = RedeclareTests.Function.RedeclareFunction1.C.B({1,2});
 
 public
- function RedeclareTests.RedeclareFunction1.C.B
+ function RedeclareTests.Function.RedeclareFunction1.C.B
   input Real[:] i;
   output Real[:] o;
  algorithm
-  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.RedeclareFunction1.C.B', component 'i', dimension '1'\");
+  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.Function.RedeclareFunction1.C.B', component 'i', dimension '1'\");
   init o as Real[2];
   o[1:2] := i[1:2];
   return;
- end RedeclareTests.RedeclareFunction1.C.B;
+ end RedeclareTests.Function.RedeclareFunction1.C.B;
 
-end RedeclareTests.RedeclareFunction1;
+end RedeclareTests.Function.RedeclareFunction1;
 ")})));
 end RedeclareFunction1;
 
@@ -6041,24 +6054,24 @@ model RedeclareFunction2
 			name="RedeclareFunction2",
 			description="Lookup in extending function with redeclared record",
 			flatModel="
-fclass RedeclareTests.RedeclareFunction2
- RedeclareTests.RedeclareFunction2.C.D x(a(size() = {2})) = RedeclareTests.RedeclareFunction2.C.B({1, 2});
+fclass RedeclareTests.Function.RedeclareFunction2
+ RedeclareTests.Function.RedeclareFunction2.C.D x(a(size() = {2})) = RedeclareTests.Function.RedeclareFunction2.C.B({1, 2});
 
 public
- function RedeclareTests.RedeclareFunction2.C.B
+ function RedeclareTests.Function.RedeclareFunction2.C.B
   input Real[:] i;
-  output RedeclareTests.RedeclareFunction2.C.D o;
+  output RedeclareTests.Function.RedeclareFunction2.C.D o;
  algorithm
-  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.RedeclareFunction2.C.B', component 'i', dimension '1'\");
+  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.Function.RedeclareFunction2.C.B', component 'i', dimension '1'\");
   o.a[1:2] := i[1:2];
   return;
- end RedeclareTests.RedeclareFunction2.C.B;
+ end RedeclareTests.Function.RedeclareFunction2.C.B;
 
- record RedeclareTests.RedeclareFunction2.C.D
+ record RedeclareTests.Function.RedeclareFunction2.C.D
   Real a[2];
- end RedeclareTests.RedeclareFunction2.C.D;
+ end RedeclareTests.Function.RedeclareFunction2.C.D;
 
-end RedeclareTests.RedeclareFunction2;
+end RedeclareTests.Function.RedeclareFunction2;
 ")})));
 end RedeclareFunction2;
 
@@ -6101,10 +6114,10 @@ model RedeclareFunction3
 			name="RedeclareFunction3",
 			description="Functions redeclared in replacing package",
 			flatModel="
-fclass RedeclareTests.RedeclareFunction3
+fclass RedeclareTests.Function.RedeclareFunction3
  constant Real z.x = 2.0;
  constant Real z.y = 1;
-end RedeclareTests.RedeclareFunction3;
+end RedeclareTests.Function.RedeclareFunction3;
 ")})));
 end RedeclareFunction3;
 
@@ -6136,10 +6149,10 @@ model RedeclareFunction4
 			name="RedeclareFunction4",
 			description="Redeclared versions of same function",
 			flatModel="
-fclass RedeclareTests.RedeclareFunction4
+fclass RedeclareTests.Function.RedeclareFunction4
  constant Real b.x = 5.0;
  constant Real b.y = 14.0;
-end RedeclareTests.RedeclareFunction4;
+end RedeclareTests.Function.RedeclareFunction4;
 ")})));
 end RedeclareFunction4;
 
@@ -6182,1304 +6195,92 @@ model RedeclareFunction5
             name="RedeclareFunction5",
             description="Flattening of default value of function input from modification on constraining type",
             flatModel="
-fclass RedeclareTests.RedeclareFunction5
- Real a.b.c.y = RedeclareTests.RedeclareFunction5.a.b.f4(a.b.c.x, a.b.p2);
+fclass RedeclareTests.Function.RedeclareFunction5
+ Real a.b.c.y = RedeclareTests.Function.RedeclareFunction5.a.b.f4(a.b.c.x, a.b.p2);
  Real a.b.c.x = time;
  parameter Real a.b.p2 = 2 /* 2 */;
  parameter Real a.p1 = 1 /* 1 */;
 
 public
- function RedeclareTests.RedeclareFunction5.a.b.f4
+ function RedeclareTests.Function.RedeclareFunction5.a.b.f4
   input Real x;
   output Real y;
   input Real z;
  algorithm
   y := x + z;
   return;
- end RedeclareTests.RedeclareFunction5.a.b.f4;
+ end RedeclareTests.Function.RedeclareFunction5.a.b.f4;
 
-end RedeclareTests.RedeclareFunction5;
+end RedeclareTests.Function.RedeclareFunction5;
 ")})));
 end RedeclareFunction5;
 
+end Function;
 
+package EachFinal
 
 model RedeclareEach1
-	model A
-		package B = D;
-		Real a[B.N] = zeros(B.N);
-	end A;
-	
-	package C
-		extends D(N = 1);
-	end C;
-	
-	package D
-		constant Integer N = 2;
-	end D;
-	
-	A a[2](redeclare each package B = C);
+    model A
+        package B = D;
+        Real a[B.N] = zeros(B.N);
+    end A;
+    
+    package C
+        extends D(N = 1);
+    end C;
+    
+    package D
+        constant Integer N = 2;
+    end D;
+    
+    A a[2](redeclare each package B = C);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RedeclareEach1",
-			description="Using redeclare on array",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RedeclareEach1",
+            description="Using redeclare on array",
             eliminate_alias_variables=false,
-			flatModel="
-fclass RedeclareTests.RedeclareEach1
+            flatModel="
+fclass RedeclareTests.EachFinal.RedeclareEach1
  constant Real a[1].a[1] = 0;
  constant Real a[2].a[1] = 0;
-end RedeclareTests.RedeclareEach1;
+end RedeclareTests.EachFinal.RedeclareEach1;
 ")})));
 end RedeclareEach1;
 
 
 model RedeclareEach2
-	model E
-		package B = D;
-	end E;
-	
-	model A
-		extends E;
-		Real a[B.N] = zeros(B.N);
-	end A;
-	
-	package C
-		extends D(N = 1);
-	end C;
-	
-	package D
-		constant Integer N = 2;
-	end D;
-	
-	A a[2](redeclare each package B = C);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="RedeclareEach2",
-			description="Using redeclare on array",
-            eliminate_alias_variables=false,
-			flatModel="
-fclass RedeclareTests.RedeclareEach2
- constant Real a[1].a[1] = 0;
- constant Real a[2].a[1] = 0;
-end RedeclareTests.RedeclareEach2;
-")})));
-end RedeclareEach2;
-
-
-
-// When looking up the class H.D extends (E.D) from the redeclaration in A, 
-// InstReplacingFullClassDecl.doSurroundingSuperLookupInstClass returns B, but should 
-// lookup from H.D instead
-model ShortRedeclare1
-    package A
-        replaceable function B
-            output Real c = 2;
-        end B;
-    end A;
-    
-    package C = A(redeclare function B = F.D);
-    package F = H;
-    
-    package H
-        extends E;
-          redeclare function extends D
-        algorithm
-            c := b;
-        end D;
-    end H;
-    
-    package E
-        replaceable function D
-            input Real b = 1;
-            output Real c;
-        end D;
+    model E
+        package B = D;
     end E;
     
-    Real x = C.B();
-end ShortRedeclare1;
-
-
-model CyclicRedeclare1
-	package A
-		replaceable model B = C;
-	end A;
-	
-	model C
-		Real x = 1;
-	end C;
+    model A
+        extends E;
+        Real a[B.N] = zeros(B.N);
+    end A;
+    
+    package C
+        extends D(N = 1);
+    end C;
     
     package D
-        extends A;
-        redeclare model B = E.B;
+        constant Integer N = 2;
     end D;
     
-    package E
-        extends A;
-        redeclare model B = D.B;
-    end E;
-	
-	E.B b;
-end CyclicRedeclare1;
-
-
-model ModifyClass1
-    package A
-        package B
-            constant Real x = 1;
-        end B;
-    end A;
-    
-    package C = A(B(x = 2));
-    
-    Real y = C.B.x;
-	Real Z = A.B.x;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ModifyClass1",
-			description="Modification of constant in sub-package",
-			flatModel="
-fclass RedeclareTests.ModifyClass1
- Real y = 2.0;
- Real Z = 1.0;
-end RedeclareTests.ModifyClass1;
-")})));
-end ModifyClass1;
-
-
-model ModifyClass2
-    package A
-        type B = Real(max = 1);
-    end A;
-    
-    package C = A(B(max = 2));
-    
-    C.B y = 0;
-	A.B z = 0;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ModifyClass2",
-			description="Modification of attribute of type declared in package being modified",
-			flatModel="
-fclass RedeclareTests.ModifyClass2
- RedeclareTests.ModifyClass2.C.B y(max = 2) = 0;
- RedeclareTests.ModifyClass2.A.B z = 0;
-
-public
- type RedeclareTests.ModifyClass2.C.B = Real(max = 2);
- type RedeclareTests.ModifyClass2.A.B = Real(max = 1);
-end RedeclareTests.ModifyClass2;
-")})));
-end ModifyClass2;
-
-
-model ShortClassDeclEqu1
-    model A
-        Real x;
-    equation
-        x = y;
-    end A;
-    
-    model B = A;
-    
-    B a;
+    A a[2](redeclare each package B = C);
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ShortClassDeclEqu1",
-            description="Make sure equations in instances of short class decls are checked",
-            errorMessage="
-1 errors found:
-
-Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo',
-In component a:
-  Cannot find class or component declaration for y
-")})));
-end ShortClassDeclEqu1;
-
-
-model ShortClassDeclEqu2Extra
-    Real x;
-equation
-    x = y;
-end ShortClassDeclEqu2Extra;
-
-model ShortClassDeclEqu2 = ShortClassDeclEqu2Extra
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ShortClassDeclEqu2",
-            description="Make sure equations in short class decls being instantiated are checked",
-            errorMessage="
-1 errors found:
-
-Error at line 0, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo':
-  Cannot find class or component declaration for y
-")})));
-
-
-model ShortClassDeclClass1
-	model A
-		replaceable function B = C;
-		
-		Real x = B(y);
-		Real y = 1;
-	end A;
-	
-	partial function C
-		input Real z;
-		output Real w;
-	end C;
-	
-	model D
-		replaceable function E = C;
-		
-		A a(redeclare function B = E);
-	end D;
-	
-	model F
-	    replaceable record G
-			replaceable function H = C;
-	    end G;
-		replaceable function I = G.H;
-		
-		D d(redeclare function E = I);
-	end F;
-	
-	function J
-        extends C;
-    algorithm
-        w := z;
-	end J;
-	
-	record K
-		function H = J;
-	end K;
-	
-	F f(redeclare record G = K);
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ShortClassDeclClass1",
-			description="Lookup through short class decl with replacing short class decls above and below",
-			flatModel="
-fclass RedeclareTests.ShortClassDeclClass1
- Real f.d.a.x = RedeclareTests.ShortClassDeclClass1.J(f.d.a.y);
- Real f.d.a.y = 1;
-
-public
- function RedeclareTests.ShortClassDeclClass1.J
-  input Real z;
-  output Real w;
- algorithm
-  w := z;
-  return;
- end RedeclareTests.ShortClassDeclClass1.J;
-
-end RedeclareTests.ShortClassDeclClass1;
-")})));
-end ShortClassDeclClass1;
-
-
-model ReplacableArray1
-    model A
-        replaceable B b[2];
-    end A;
-    
-    model B
-        Real x;
-    end B;
-    
-	model C
-	    extends A;
-	    redeclare D b;
-	end C;
-    
-    model D
-        Real x;
-        Real y;
-    end D;
-    
-    C c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray1",
-			description="Redeclaring array of components as element in subclass, omitting size",
-			flatModel="
-fclass RedeclareTests.ReplacableArray1
- Real c.b[1].x;
- Real c.b[1].y;
- Real c.b[2].x;
- Real c.b[2].y;
-end RedeclareTests.ReplacableArray1;
-")})));
-end ReplacableArray1;
-
-
-model ReplacableArray2
-    model A
-        replaceable B b[2];
-    end A;
-    
-    model B
-        Real x;
-    end B;
-    
-	model C
-	    extends A(redeclare D b);
-	end C;
-    
-    model D
-        Real x;
-        Real y;
-    end D;
-    
-    C c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray2",
-			description="Redeclaring array of components in modification on extends, omitting size",
-			flatModel="
-fclass RedeclareTests.ReplacableArray2
- Real c.b[1].x;
- Real c.b[1].y;
- Real c.b[2].x;
- Real c.b[2].y;
-end RedeclareTests.ReplacableArray2;
-")})));
-end ReplacableArray2;
-
-
-model ReplacableArray3
-    model A
-        replaceable B b[2];
-    end A;
-    
-    model B
-        Real x;
-    end B;
-    
-	model C
-	    extends A(redeclare D b[2]);
-	end C;
-	
-    model D
-        Real x;
-        Real y;
-    end D;
-    
-    C c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray3",
-			description="Redeclaring array of components in modification on extends, including size",
-			flatModel="
-fclass RedeclareTests.ReplacableArray3
- Real c.b[1].x;
- Real c.b[1].y;
- Real c.b[2].x;
- Real c.b[2].y;
-end RedeclareTests.ReplacableArray3;
-")})));
-end ReplacableArray3;
-
-
-model ReplacableArray4
-    model A
-        replaceable Real x[2];
-    end A;
-    
-    model B
-        extends A(redeclare Real x(each start = 1));
-    end B;
-    
-    B b;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray4",
-			description="Redeclare of primitive array ommitting size, with each on modifier on redeclaration",
-			flatModel="
-fclass RedeclareTests.ReplacableArray4
- Real b.x[2](each start = 1);
-end RedeclareTests.ReplacableArray4;
-")})));
-end ReplacableArray4;
-
-
-model ReplacableArray5
-    package A
-        constant Integer n = 2;
-		
-		model B
-            replaceable Real x[n];
-	    end B;
-    end A;
-    
-    model C
-        extends A.B(redeclare Real x(each start = 1));
-    end C;
-    
-    C c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray5",
-			description="Redeclare of array with size depending on constant not reachable from redeclaration",
-			flatModel="
-fclass RedeclareTests.ReplacableArray5
- Real c.x[2](each start = 1);
-end RedeclareTests.ReplacableArray5;
-")})));
-end ReplacableArray5;
-
-
-model ReplacableArray6
-    model A
-        replaceable Real x[2];
-    end A;
-    
-    model B
-        extends A(redeclare Real x(start = 1:2));
-    end B;
-    
-    B b;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray6",
-			description="Redeclare of primitive array ommitting size, with array modifier on redeclaration",
-			flatModel="
-fclass RedeclareTests.ReplacableArray6
- Real b.x[2](start = 1:2);
-end RedeclareTests.ReplacableArray6;
-")})));
-end ReplacableArray6;
-
-
-model ReplacableArray7
-    model A
-        replaceable B b[2];
-    end A;
-	
-	model B
-		Real x;
-	end B;
-    
-    model C
-        extends A(redeclare B b(x(start = 1:2) = 3:4));
-    end C;
-    
-    C c;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ReplacableArray7",
-			description="Redeclare of composite array ommitting size, with array modifier on scalar member on redeclaration",
-			flatModel="
-fclass RedeclareTests.ReplacableArray7
- Real c.b[1].x(start = (1:2)[1]) = (3:4)[1];
- Real c.b[2].x(start = (1:2)[2]) = (3:4)[2];
-end RedeclareTests.ReplacableArray7;
-")})));
-end ReplacableArray7;
-
-
-model RedeclareConditional1
-    model A
-        parameter Boolean use_b;
-        B b if use_b;
-    end A;
-    
-    model B
-        Real x = time;
-    end B;
-    
-    model C
-        extends B;
-        Real y = x + 1;
-    end C;
-    
-    A a(use_b = false, redeclare C b);
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareConditional1",
-			description="Redeclaring inactive conditional as modification",
-			flatModel="
-fclass RedeclareTests.RedeclareConditional1
- parameter Boolean a.use_b = false /* false */;
-end RedeclareTests.RedeclareConditional1;
-")})));
-end RedeclareConditional1;
-
-
-model RedeclareConditional2
-    model A
-        parameter Boolean use_b;
-        B b if use_b;
-    end A;
-    
-    model B
-        Real x = time;
-    end B;
-    
-    model C
-        extends B;
-        Real y = x + 1;
-    end C;
-    
-	model D
-        extends A(use_b = false);
-		redeclare C b;
-	end D;
-	
-	D d;
-
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareConditional2",
-			description="Redeclaring inactive conditional as element",
-			flatModel="
-fclass RedeclareTests.RedeclareConditional2
- parameter Boolean d.use_b = false /* false */;
-end RedeclareTests.RedeclareConditional2;
-")})));
-end RedeclareConditional2;
-
-
-model RedeclarePrimitive1
-    model A
-        replaceable Real x;
-    end A;
-    
-    type B = Real(unit="V");
-    
-    A a(redeclare B x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrimitive1",
-            description="Subtyping of primitive variables",
+        TransformCanonicalTestCase(
+            name="RedeclareEach2",
+            description="Using redeclare on array",
+            eliminate_alias_variables=false,
             flatModel="
-fclass RedeclareTests.RedeclarePrimitive1
- RedeclareTests.RedeclarePrimitive1.B a.x;
-
-public
- type RedeclareTests.RedeclarePrimitive1.B = Real(unit = \"V\");
-end RedeclareTests.RedeclarePrimitive1;
+fclass RedeclareTests.EachFinal.RedeclareEach2
+ constant Real a[1].a[1] = 0;
+ constant Real a[2].a[1] = 0;
+end RedeclareTests.EachFinal.RedeclareEach2;
 ")})));
-end RedeclarePrimitive1;
-
-
-model RedeclarePrefix1
-    model A
-        inner replaceable Real x = 2;
-        B b;
-    end A;
-    
-    model B
-        outer Real x;
-    end B;
-    
-    A a(redeclare Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix1",
-            description="Check that inner/outer is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix1
- Real a.x = 1;
-end RedeclareTests.RedeclarePrefix1;
-")})));
-end RedeclarePrefix1;
-
-
-model RedeclarePrefix2
-    model A
-        inner replaceable Real x;
-        B b;
-    end A;
-    
-    model B
-        outer Real x;
-    equation
-        x = time;
-    end B;
-    
-    model C
-        extends A;
-        redeclare outer Real x;
-    end C;
-    
-    C c;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix2",
-            description="Check that inner/outer can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix2
- Real x;
-equation
- x = time;
-end RedeclareTests.RedeclarePrefix2;
-")})));
-end RedeclarePrefix2;
-
-
-model RedeclarePrefix3
-    model A
-        replaceable discrete Real x = 2;
-    end A;
-    
-    A a(redeclare Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix3",
-            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix3
- discrete Real a.x = 1;
-end RedeclareTests.RedeclarePrefix3;
-")})));
-end RedeclarePrefix3;
-
-
-model RedeclarePrefix4
-    model A
-        replaceable parameter Real x = 2;
-    end A;
-    
-    A a(redeclare Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix4",
-            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix4
- parameter Real a.x = 1 /* 1 */;
-end RedeclareTests.RedeclarePrefix4;
-")})));
-end RedeclarePrefix4;
-
-
-model RedeclarePrefix5
-    model A
-        replaceable constant Real x = 2;
-    end A;
-    
-    A a(redeclare Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix5",
-            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix5
- constant Real a.x = 1;
-end RedeclareTests.RedeclarePrefix5;
-")})));
-end RedeclarePrefix5;
-
-
-model RedeclarePrefix6
-    model A
-        replaceable discrete Real x = 2;
-    end A;
-    
-    A a(redeclare constant Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix6",
-            description="Check that variability prefix can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix6
- constant Real a.x = 1;
-end RedeclareTests.RedeclarePrefix6;
-")})));
-end RedeclarePrefix6;
-
-
-model RedeclarePrefix7
-    model A
-        replaceable parameter Real x = 2;
-    end A;
-    
-    A a(redeclare discrete Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix7",
-            description="Check that variability prefix can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix7
- discrete Real a.x = 1;
-end RedeclareTests.RedeclarePrefix7;
-")})));
-end RedeclarePrefix7;
-
-
-model RedeclarePrefix8
-    model A
-        replaceable constant Real x = 2;
-    end A;
-    
-    A a(redeclare parameter Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix8",
-            description="Check that variability prefix can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix8
- parameter Real a.x = 1 /* 1 */;
-end RedeclareTests.RedeclarePrefix8;
-")})));
-end RedeclarePrefix8;
-
-
-model RedeclarePrefix9
-    connector C
-        replaceable flow Real x;
-    end C;
-    
-    C c(redeclare Real x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix9",
-            description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix9
- input Real c.x;
-end RedeclareTests.RedeclarePrefix9;
-")})));
-end RedeclarePrefix9;
-
-
-model RedeclarePrefix10
-    connector C
-        replaceable stream Real x;
-    end C;
-    
-    C c1(redeclare flow Real x);
-    C c2(redeclare flow Real x);
-equation
-    connect(c1, c2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix10",
-            description="Check that flow/stream can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix10
- input Real c1.x;
- input Real c2.x;
-equation
- - c1.x - c2.x = 0.0;
-end RedeclareTests.RedeclarePrefix10;
-")})));
-end RedeclarePrefix10;
-
-
-model RedeclarePrefix11
-    model A
-        replaceable input Real x;
-    end A;
-    
-    extends A(redeclare Real x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix11",
-            description="Check that input/output is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix11
- input Real x;
-end RedeclareTests.RedeclarePrefix11;
-")})));
-end RedeclarePrefix11;
-
-
-model RedeclarePrefix12
-    model A
-        replaceable input Real x;
-    end A;
-    
-    extends A(redeclare output Real x = 1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix12",
-            description="Check that input/output can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix12
- output Real x = 1;
-end RedeclareTests.RedeclarePrefix12;
-")})));
-end RedeclarePrefix12;
-
-
-model RedeclarePrefix13
-    model A
-        inner replaceable Real x = 2;
-        B b;
-    end A;
-    
-    model B
-        outer Real x;
-    end B;
-    
-    model C = A(replaceable Real x);
-    
-    C c(redeclare Real x=1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix13",
-            description="Check that inner/outer is retained from original declaration in a redeclare if none exist in new declaration",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix13
- Real c.x = 1;
-end RedeclareTests.RedeclarePrefix13;
-")})));
-end RedeclarePrefix13;
-
-
-model RedeclarePrefix14
-    model A
-        inner replaceable Real x = 2;
-        B b;
-    end A;
-    
-    model B
-        outer Real x;
-    equation
-        x = time;
-    end B;
-    
-    model C = A(replaceable Real x);
-    
-    model D
-        extends C;
-        redeclare outer Real x;
-    end D;
-    
-    D d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix14",
-            description="Check that inner/outer can be changed in a redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix14
- Real x;
-equation
- x = time;
-end RedeclareTests.RedeclarePrefix14;
-")})));
-end RedeclarePrefix14;
-
-
-model RedeclarePrefix15
-    model A
-        inner replaceable Real x = 2;
-        B b;
-    end A;
-    
-    model B
-        outer Real x;
-    equation
-        x = time;
-    end B;
-    
-    model C
-        extends A;
-        redeclare outer Real x;
-    end C;
-    
-    C c(redeclare Real x = 1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclarePrefix15",
-            description="Check that inner/outer can be changed in the middle level of a multi-level redeclare",
-            flatModel="
-fclass RedeclareTests.RedeclarePrefix15
- Real x;
-equation
- x = time;
-end RedeclareTests.RedeclarePrefix15;
-")})));
-end RedeclarePrefix15;
-
-model RedeclareInRecord1
-    package P1
-        replaceable partial record R
-        end R;
-        
-        replaceable partial function f
-            input R r;
-            output Real x;
-        end f;
-    end P1;
-    
-    package P2
-        extends P1;
-        redeclare record extends R
-            Real x = time;
-        end R;
-        redeclare function extends f
-        algorithm
-            x := r.x;
-        end f;
-    end P2;
-    
-    record A
-        replaceable package P = P1;
-        P.R pr;
-        Real x = P.f(pr);
-    end A;
-    
-    A a(redeclare package P = P2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord1",
-            description="Redeclare package in record",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord1
- RedeclareTests.RedeclareInRecord1:a a(pr(x = time),x = RedeclareTests.RedeclareInRecord1.P2.f(a.pr));
-
-public
- function RedeclareTests.RedeclareInRecord1.P2.f
-  input RedeclareTests.RedeclareInRecord1.P2.R r;
-  output Real x;
- algorithm
-  x := r.x;
-  return;
- end RedeclareTests.RedeclareInRecord1.P2.f;
-
- record RedeclareTests.RedeclareInRecord1.P2.R
-  Real x;
- end RedeclareTests.RedeclareInRecord1.P2.R;
-
- record RedeclareTests.RedeclareInRecord1:a
-  RedeclareTests.RedeclareInRecord1.P2.R pr;
-  Real x;
- end RedeclareTests.RedeclareInRecord1:a;
-
-end RedeclareTests.RedeclareInRecord1;
-")})));
-end RedeclareInRecord1;
-
-model RedeclareInRecord2
-    partial record R1
-    end R1;
-
-    record R2
-        extends R1;
-        Real x = time;
-    end R2;
-    
-    record A
-        replaceable R1 pr;
-    end A;
-    
-    A a(redeclare R2 pr);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord2",
-            description="Redeclare record in record",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord2
- RedeclareTests.RedeclareInRecord2:a a(pr(x = time));
-
-public
- record RedeclareTests.RedeclareInRecord2.R2
-  Real x;
- end RedeclareTests.RedeclareInRecord2.R2;
-
- record RedeclareTests.RedeclareInRecord2:a
-  RedeclareTests.RedeclareInRecord2.R2 pr;
- end RedeclareTests.RedeclareInRecord2:a;
-
-end RedeclareTests.RedeclareInRecord2;
-")})));
-end RedeclareInRecord2;
-
-model RedeclareInRecord3
-    partial record A1
-    end A1;
-
-    record A2
-        extends A1;
-        replaceable B1 b;
-    end A2;
-    
-    partial record B1
-    end B1;
-    
-    record B2
-        extends B1;
-        Real x = time;
-    end B2;
-    
-    record R
-        replaceable A1 a;
-    end R;
-    
-    R r(redeclare A2 a(redeclare B2 b));
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord3",
-            description="Nested redeclarations in record",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord3
- RedeclareTests.RedeclareInRecord3:r r(a(b(x = time)));
-
-public
- record RedeclareTests.RedeclareInRecord3.B2
-  Real x;
- end RedeclareTests.RedeclareInRecord3.B2;
-
- record RedeclareTests.RedeclareInRecord3:r.a
-  RedeclareTests.RedeclareInRecord3.B2 b;
- end RedeclareTests.RedeclareInRecord3:r.a;
-
- record RedeclareTests.RedeclareInRecord3:r
-  RedeclareTests.RedeclareInRecord3:r.a a;
- end RedeclareTests.RedeclareInRecord3:r;
-
-end RedeclareTests.RedeclareInRecord3;
-")})));
-end RedeclareInRecord3;
-
-model RedeclareInRecord4
-    partial record A1
-    end A1;
-
-    record A2
-        replaceable B1 b;
-    end A2;
-
-    partial record B1
-    end B1;
-    
-    record B2
-        extends B1;
-        Real x = time;
-    end B2;
-    
-    record R1
-        replaceable A1 a;
-    end R1;
-    
-    record R2
-        extends R1(redeclare A2 a(redeclare B2 b));
-    end R2;
-    
-    R2 r;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord4",
-            description="Nested redeclarations in record",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord4
- RedeclareTests.RedeclareInRecord4.R2 r(a(b(x = time)));
-
-public
- record RedeclareTests.RedeclareInRecord4.B2
-  Real x;
- end RedeclareTests.RedeclareInRecord4.B2;
-
- record RedeclareTests.RedeclareInRecord4.R2:a
-  RedeclareTests.RedeclareInRecord4.B2 b;
- end RedeclareTests.RedeclareInRecord4.R2:a;
-
- record RedeclareTests.RedeclareInRecord4.R2
-  RedeclareTests.RedeclareInRecord4.R2:a a;
- end RedeclareTests.RedeclareInRecord4.R2;
-
-end RedeclareTests.RedeclareInRecord4;
-")})));
-end RedeclareInRecord4;
-
-model RedeclareInRecord5
-    record B1
-        Real x = time+1;
-    end B1;
-    
-    record B2
-        extends B1(x=time+2);
-    end B2;
-    
-    record A1
-        replaceable B1 b;
-    end A1;
-    
-    record A2
-        extends A1(redeclare B2 b);
-    end A1;
-    
-    record A3
-        extends A1;
-        redeclare B2 b;
-    end A1;
-    
-    A1 a1(redeclare B2 b);
-    A2 a2;
-    A3 a3;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord5",
-            description="Redeclarations in record",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord5
- RedeclareTests.RedeclareInRecord5:a1 a1(b(x = time + 2));
- RedeclareTests.RedeclareInRecord5.A2 a2(b(x = time + 2));
- RedeclareTests.RedeclareInRecord5.A3 a3(b(x = time + 2));
-
-public
- record RedeclareTests.RedeclareInRecord5.B2
-  Real x;
- end RedeclareTests.RedeclareInRecord5.B2;
-
- record RedeclareTests.RedeclareInRecord5:a1
-  RedeclareTests.RedeclareInRecord5.B2 b;
- end RedeclareTests.RedeclareInRecord5:a1;
-
- record RedeclareTests.RedeclareInRecord5.A2
-  RedeclareTests.RedeclareInRecord5.B2 b;
- end RedeclareTests.RedeclareInRecord5.A2;
-
- record RedeclareTests.RedeclareInRecord5.A3
-  RedeclareTests.RedeclareInRecord5.B2 b;
- end RedeclareTests.RedeclareInRecord5.A3;
-
-end RedeclareTests.RedeclareInRecord5;
-")})));
-end RedeclareInRecord5;
-
-model RedeclareInRecord6
-    type T = Real(min=1);
-
-    record B
-        Real x = time+1;
-    end B;
-    
-    B b(redeclare T x = time + 2);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord6",
-            description="Redeclare primitive in record",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord6
- RedeclareTests.RedeclareInRecord6:b b(x = time + 2);
-
-public
- record RedeclareTests.RedeclareInRecord6:b
-  RedeclareTests.RedeclareInRecord6.T x;
- end RedeclareTests.RedeclareInRecord6:b;
-
- type RedeclareTests.RedeclareInRecord6.T = Real(min = 1);
-end RedeclareTests.RedeclareInRecord6;
-")})));
-end RedeclareInRecord6;
-
-model RedeclareInRecord7
-    type T = Real(min=1);
-
-    record B
-        Real x = time+1;
-    end B;
-    
-    B[2] b(redeclare T x = time + 2);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord7",
-            description="Redeclare primitive in record array",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord7
- RedeclareTests.RedeclareInRecord7:b b[2](x = {time + 2, time + 2});
-
-public
- record RedeclareTests.RedeclareInRecord7:b
-  RedeclareTests.RedeclareInRecord7.T x;
- end RedeclareTests.RedeclareInRecord7:b;
-
- type RedeclareTests.RedeclareInRecord7.T = Real(min = 1);
-end RedeclareTests.RedeclareInRecord7;
-")})));
-end RedeclareInRecord7;
-
-model RedeclareInRecord8
-    record G0
-        Real x = 1;
-    end G0;
-    
-    model A
-        replaceable record G = G0;
-        B b(redeclare replaceable record G = G);
-    end A;
-    
-    model B
-        replaceable record G = G0;
-        G g;
-    end B;
-
-    model C
-        A a(redeclare record G = G0(x=f(time)));
-        function f
-            input Real x;
-            output Real y = x;
-            algorithm
-        end f;
-    end C;
-    
-    C c;
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="RedeclareInRecord8",
-            description="Redeclare record with function call in binding expression",
-            flatModel="
-fclass RedeclareTests.RedeclareInRecord8
- RedeclareTests.RedeclareInRecord8.c.a.b.G c.a.b.g(x = RedeclareTests.RedeclareInRecord8.c.f(time));
-
-public
- function RedeclareTests.RedeclareInRecord8.c.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- end RedeclareTests.RedeclareInRecord8.c.f;
-
- record RedeclareTests.RedeclareInRecord8.c.a.b.G
-  Real x;
- end RedeclareTests.RedeclareInRecord8.c.a.b.G;
-
-end RedeclareTests.RedeclareInRecord8;
-")})));
-end RedeclareInRecord8;
-
+end RedeclareEach2;
 
 model FinalRedeclare1
     model A
@@ -7592,6 +6393,313 @@ model FinalRedeclare3
     F f;
 end FinalRedeclare3;
 
+end EachFinal;
+
+package Misc
+
+
+// When looking up the class H.D extends (E.D) from the redeclaration in A, 
+// InstReplacingFullClassDecl.doSurroundingSuperLookupInstClass returns B, but should 
+// lookup from H.D instead
+model ShortRedeclare1
+    package A
+        replaceable function B
+            output Real c = 2;
+        end B;
+    end A;
+    
+    package C = A(redeclare function B = F.D);
+    package F = H;
+    
+    package H
+        extends E;
+          redeclare function extends D
+        algorithm
+            c := b;
+        end D;
+    end H;
+    
+    package E
+        replaceable function D
+            input Real b = 1;
+            output Real c;
+        end D;
+    end E;
+    
+    Real x = C.B();
+end ShortRedeclare1;
+
+
+model CyclicRedeclare1
+	package A
+		replaceable model B = C;
+	end A;
+	
+	model C
+		Real x = 1;
+	end C;
+    
+    package D
+        extends A;
+        redeclare model B = E.B;
+    end D;
+    
+    package E
+        extends A;
+        redeclare model B = D.B;
+    end E;
+	
+	E.B b;
+end CyclicRedeclare1;
+
+
+model ModifyClass1
+    package A
+        package B
+            constant Real x = 1;
+        end B;
+    end A;
+    
+    package C = A(B(x = 2));
+    
+    Real y = C.B.x;
+	Real Z = A.B.x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModifyClass1",
+			description="Modification of constant in sub-package",
+			flatModel="
+fclass RedeclareTests.Misc.ModifyClass1
+ Real y = 2.0;
+ Real Z = 1.0;
+end RedeclareTests.Misc.ModifyClass1;
+")})));
+end ModifyClass1;
+
+
+model ModifyClass2
+    package A
+        type B = Real(max = 1);
+    end A;
+    
+    package C = A(B(max = 2));
+    
+    C.B y = 0;
+	A.B z = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ModifyClass2",
+			description="Modification of attribute of type declared in package being modified",
+			flatModel="
+fclass RedeclareTests.Misc.ModifyClass2
+ RedeclareTests.Misc.ModifyClass2.C.B y(max = 2) = 0;
+ RedeclareTests.Misc.ModifyClass2.A.B z = 0;
+
+public
+ type RedeclareTests.Misc.ModifyClass2.C.B = Real(max = 2);
+ type RedeclareTests.Misc.ModifyClass2.A.B = Real(max = 1);
+end RedeclareTests.Misc.ModifyClass2;
+")})));
+end ModifyClass2;
+
+
+model ShortClassDeclEqu1
+    model A
+        Real x;
+    equation
+        x = y;
+    end A;
+    
+    model B = A;
+    
+    B a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ShortClassDeclEqu1",
+            description="Make sure equations in instances of short class decls are checked",
+            errorMessage="
+1 errors found:
+
+Error at line 5, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo',
+In component a:
+  Cannot find class or component declaration for y
+")})));
+end ShortClassDeclEqu1;
+
+
+model ShortClassDeclEqu2Extra
+    Real x;
+equation
+    x = y;
+end ShortClassDeclEqu2Extra;
+
+model ShortClassDeclEqu2 = ShortClassDeclEqu2Extra
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ShortClassDeclEqu2",
+            description="Make sure equations in short class decls being instantiated are checked",
+            errorMessage="
+1 errors found:
+
+Error at line 0, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo':
+  Cannot find class or component declaration for y
+")})));
+
+
+model ShortClassDeclClass1
+	model A
+		replaceable function B = C;
+		
+		Real x = B(y);
+		Real y = 1;
+	end A;
+	
+	partial function C
+		input Real z;
+		output Real w;
+	end C;
+	
+	model D
+		replaceable function E = C;
+		
+		A a(redeclare function B = E);
+	end D;
+	
+	model F
+	    replaceable record G
+			replaceable function H = C;
+	    end G;
+		replaceable function I = G.H;
+		
+		D d(redeclare function E = I);
+	end F;
+	
+	function J
+        extends C;
+    algorithm
+        w := z;
+	end J;
+	
+	record K
+		function H = J;
+	end K;
+	
+	F f(redeclare record G = K);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ShortClassDeclClass1",
+			description="Lookup through short class decl with replacing short class decls above and below",
+			flatModel="
+fclass RedeclareTests.Misc.ShortClassDeclClass1
+ Real f.d.a.x = RedeclareTests.Misc.ShortClassDeclClass1.J(f.d.a.y);
+ Real f.d.a.y = 1;
+
+public
+ function RedeclareTests.Misc.ShortClassDeclClass1.J
+  input Real z;
+  output Real w;
+ algorithm
+  w := z;
+  return;
+ end RedeclareTests.Misc.ShortClassDeclClass1.J;
+
+end RedeclareTests.Misc.ShortClassDeclClass1;
+")})));
+end ShortClassDeclClass1;
+
+
+model RedeclareConditional1
+    model A
+        parameter Boolean use_b;
+        B b if use_b;
+    end A;
+    
+    model B
+        Real x = time;
+    end B;
+    
+    model C
+        extends B;
+        Real y = x + 1;
+    end C;
+    
+    A a(use_b = false, redeclare C b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareConditional1",
+            description="Redeclaring inactive conditional as modification",
+            flatModel="
+fclass RedeclareTests.Misc.RedeclareConditional1
+ parameter Boolean a.use_b = false /* false */;
+end RedeclareTests.Misc.RedeclareConditional1;
+")})));
+end RedeclareConditional1;
+
+
+model RedeclareConditional2
+    model A
+        parameter Boolean use_b;
+        B b if use_b;
+    end A;
+    
+    model B
+        Real x = time;
+    end B;
+    
+    model C
+        extends B;
+        Real y = x + 1;
+    end C;
+    
+    model D
+        extends A(use_b = false);
+        redeclare C b;
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareConditional2",
+            description="Redeclaring inactive conditional as element",
+            flatModel="
+fclass RedeclareTests.Misc.RedeclareConditional2
+ parameter Boolean d.use_b = false /* false */;
+end RedeclareTests.Misc.RedeclareConditional2;
+")})));
+end RedeclareConditional2;
+
+
+model RedeclarePrimitive1
+    model A
+        replaceable Real x;
+    end A;
+    
+    type B = Real(unit="V");
+    
+    A a(redeclare B x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrimitive1",
+            description="Subtyping of primitive variables",
+            flatModel="
+fclass RedeclareTests.Misc.RedeclarePrimitive1
+ RedeclareTests.Misc.RedeclarePrimitive1.B a.x;
+
+public
+ type RedeclareTests.Misc.RedeclarePrimitive1.B = Real(unit = \"V\");
+end RedeclareTests.Misc.RedeclarePrimitive1;
+")})));
+end RedeclarePrimitive1;
+
+
 model ExternalObjectInConstrainingType1
         model EO
             extends ExternalObject;
@@ -7623,27 +6731,27 @@ model ExternalObjectInConstrainingType1
             name="ExternalObjectInConstrainingType1",
             description="",
             flatModel="
-fclass RedeclareTests.ExternalObjectInConstrainingType1
+fclass RedeclareTests.Misc.ExternalObjectInConstrainingType1
  Real b.x = time;
- parameter RedeclareTests.ExternalObjectInConstrainingType1.EO b.eo = RedeclareTests.ExternalObjectInConstrainingType1.EO.constructor() /* {} */;
+ parameter RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO b.eo = RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO.constructor() /* {} */;
 
 public
- function RedeclareTests.ExternalObjectInConstrainingType1.EO.destructor
-  input RedeclareTests.ExternalObjectInConstrainingType1.EO eo;
+ function RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO.destructor
+  input RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO eo;
  algorithm
   external \"C\" destructor(eo);
   return;
- end RedeclareTests.ExternalObjectInConstrainingType1.EO.destructor;
+ end RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO.destructor;
 
- function RedeclareTests.ExternalObjectInConstrainingType1.EO.constructor
-  output RedeclareTests.ExternalObjectInConstrainingType1.EO eo;
+ function RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO.constructor
+  output RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO eo;
  algorithm
   external \"C\" eo = constructor();
   return;
- end RedeclareTests.ExternalObjectInConstrainingType1.EO.constructor;
+ end RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO.constructor;
 
- type RedeclareTests.ExternalObjectInConstrainingType1.EO = ExternalObject;
-end RedeclareTests.ExternalObjectInConstrainingType1;
+ type RedeclareTests.Misc.ExternalObjectInConstrainingType1.EO = ExternalObject;
+end RedeclareTests.Misc.ExternalObjectInConstrainingType1;
 ")})));
 end ExternalObjectInConstrainingType1;
 
@@ -7692,27 +6800,27 @@ model ExternalObjectInConstrainingType2
             name="ExternalObjectInConstrainingType2",
             description="",
             flatModel="
-fclass RedeclareTests.ExternalObjectInConstrainingType2
+fclass RedeclareTests.Misc.ExternalObjectInConstrainingType2
  Real b.x = time;
- parameter RedeclareTests.ExternalObjectInConstrainingType2.EO2 b.eo = RedeclareTests.ExternalObjectInConstrainingType2.EO2.constructor() /* {} */;
+ parameter RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2 b.eo = RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2.constructor() /* {} */;
 
 public
- function RedeclareTests.ExternalObjectInConstrainingType2.EO2.destructor
-  input RedeclareTests.ExternalObjectInConstrainingType2.EO2 eo;
+ function RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2.destructor
+  input RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2 eo;
  algorithm
   external \"C\" destructor(eo);
   return;
- end RedeclareTests.ExternalObjectInConstrainingType2.EO2.destructor;
+ end RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2.destructor;
 
- function RedeclareTests.ExternalObjectInConstrainingType2.EO2.constructor
-  output RedeclareTests.ExternalObjectInConstrainingType2.EO2 eo;
+ function RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2.constructor
+  output RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2 eo;
  algorithm
   external \"C\" eo = constructor();
   return;
- end RedeclareTests.ExternalObjectInConstrainingType2.EO2.constructor;
+ end RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2.constructor;
 
- type RedeclareTests.ExternalObjectInConstrainingType2.EO2 = ExternalObject;
-end RedeclareTests.ExternalObjectInConstrainingType2;
+ type RedeclareTests.Misc.ExternalObjectInConstrainingType2.EO2 = ExternalObject;
+end RedeclareTests.Misc.ExternalObjectInConstrainingType2;
 ")})));
 end ExternalObjectInConstrainingType2;
 
@@ -7742,12 +6850,1342 @@ model ConstrainingModifiers1
             name="ConstrainingModifiers1",
             description="",
             flatModel="
-fclass RedeclareTests.ConstrainingModifiers1
+fclass RedeclareTests.Misc.ConstrainingModifiers1
  parameter Real d.a.y[2] = 2:3 /* { 2, 3 } */;
  structural parameter Integer d.a.n = 2 /* 2 */;
-end RedeclareTests.ConstrainingModifiers1;
+end RedeclareTests.Misc.ConstrainingModifiers1;
 ")})));
 end ConstrainingModifiers1;
+
+end Misc;
+
+package Array
+
+model ReplacableArray1
+    model A
+        replaceable B b[2];
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+	model C
+	    extends A;
+	    redeclare D b;
+	end C;
+    
+    model D
+        Real x;
+        Real y;
+    end D;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray1",
+			description="Redeclaring array of components as element in subclass, omitting size",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray1
+ Real c.b[1].x;
+ Real c.b[1].y;
+ Real c.b[2].x;
+ Real c.b[2].y;
+end RedeclareTests.Array.ReplacableArray1;
+")})));
+end ReplacableArray1;
+
+
+model ReplacableArray2
+    model A
+        replaceable B b[2];
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+	model C
+	    extends A(redeclare D b);
+	end C;
+    
+    model D
+        Real x;
+        Real y;
+    end D;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray2",
+			description="Redeclaring array of components in modification on extends, omitting size",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray2
+ Real c.b[1].x;
+ Real c.b[1].y;
+ Real c.b[2].x;
+ Real c.b[2].y;
+end RedeclareTests.Array.ReplacableArray2;
+")})));
+end ReplacableArray2;
+
+
+model ReplacableArray3
+    model A
+        replaceable B b[2];
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+	model C
+	    extends A(redeclare D b[2]);
+	end C;
+	
+    model D
+        Real x;
+        Real y;
+    end D;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray3",
+			description="Redeclaring array of components in modification on extends, including size",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray3
+ Real c.b[1].x;
+ Real c.b[1].y;
+ Real c.b[2].x;
+ Real c.b[2].y;
+end RedeclareTests.Array.ReplacableArray3;
+")})));
+end ReplacableArray3;
+
+
+model ReplacableArray4
+    model A
+        replaceable Real x[2];
+    end A;
+    
+    model B
+        extends A(redeclare Real x(each start = 1));
+    end B;
+    
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray4",
+			description="Redeclare of primitive array ommitting size, with each on modifier on redeclaration",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray4
+ Real b.x[2](each start = 1);
+end RedeclareTests.Array.ReplacableArray4;
+")})));
+end ReplacableArray4;
+
+
+model ReplacableArray5
+    package A
+        constant Integer n = 2;
+		
+		model B
+            replaceable Real x[n];
+	    end B;
+    end A;
+    
+    model C
+        extends A.B(redeclare Real x(each start = 1));
+    end C;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray5",
+			description="Redeclare of array with size depending on constant not reachable from redeclaration",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray5
+ Real c.x[2](each start = 1);
+end RedeclareTests.Array.ReplacableArray5;
+")})));
+end ReplacableArray5;
+
+
+model ReplacableArray6
+    model A
+        replaceable Real x[2];
+    end A;
+    
+    model B
+        extends A(redeclare Real x(start = 1:2));
+    end B;
+    
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray6",
+			description="Redeclare of primitive array ommitting size, with array modifier on redeclaration",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray6
+ Real b.x[2](start = 1:2);
+end RedeclareTests.Array.ReplacableArray6;
+")})));
+end ReplacableArray6;
+
+
+model ReplacableArray7
+    model A
+        replaceable B b[2];
+    end A;
+	
+	model B
+		Real x;
+	end B;
+    
+    model C
+        extends A(redeclare B b(x(start = 1:2) = 3:4));
+    end C;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray7",
+			description="Redeclare of composite array ommitting size, with array modifier on scalar member on redeclaration",
+			flatModel="
+fclass RedeclareTests.Array.ReplacableArray7
+ Real c.b[1].x(start = (1:2)[1]) = (3:4)[1];
+ Real c.b[2].x(start = (1:2)[2]) = (3:4)[2];
+end RedeclareTests.Array.ReplacableArray7;
+")})));
+end ReplacableArray7;
+
+end Array;
+
+package Prefix
+
+model RedeclarePrefix1
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix1",
+            description="Check that inner/outer is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix1
+ Real a.x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix1;
+")})));
+end RedeclarePrefix1;
+
+
+model RedeclarePrefix2
+    model A
+        inner replaceable Real x;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    equation
+        x = time;
+    end B;
+    
+    model C
+        extends A;
+        redeclare outer Real x;
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix2",
+            description="Check that inner/outer can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix2
+ Real x;
+equation
+ x = time;
+end RedeclareTests.Prefix.RedeclarePrefix2;
+")})));
+end RedeclarePrefix2;
+
+
+model RedeclarePrefix3
+    model A
+        replaceable discrete Real x = 2;
+    end A;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix3",
+            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix3
+ discrete Real a.x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix3;
+")})));
+end RedeclarePrefix3;
+
+
+model RedeclarePrefix4
+    model A
+        replaceable parameter Real x = 2;
+    end A;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix4",
+            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix4
+ parameter Real a.x = 1 /* 1 */;
+end RedeclareTests.Prefix.RedeclarePrefix4;
+")})));
+end RedeclarePrefix4;
+
+
+model RedeclarePrefix5
+    model A
+        replaceable constant Real x = 2;
+    end A;
+    
+    A a(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix5",
+            description="Check that variability prefix is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix5
+ constant Real a.x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix5;
+")})));
+end RedeclarePrefix5;
+
+
+model RedeclarePrefix6
+    model A
+        replaceable discrete Real x = 2;
+    end A;
+    
+    A a(redeclare constant Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix6",
+            description="Check that variability prefix can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix6
+ constant Real a.x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix6;
+")})));
+end RedeclarePrefix6;
+
+
+model RedeclarePrefix7
+    model A
+        replaceable parameter Real x = 2;
+    end A;
+    
+    A a(redeclare discrete Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix7",
+            description="Check that variability prefix can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix7
+ discrete Real a.x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix7;
+")})));
+end RedeclarePrefix7;
+
+
+model RedeclarePrefix8
+    model A
+        replaceable constant Real x = 2;
+    end A;
+    
+    A a(redeclare parameter Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix8",
+            description="Check that variability prefix can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix8
+ parameter Real a.x = 1 /* 1 */;
+end RedeclareTests.Prefix.RedeclarePrefix8;
+")})));
+end RedeclarePrefix8;
+
+
+model RedeclarePrefix9
+    connector C
+        replaceable flow Real x;
+    end C;
+    
+    C c(redeclare Real x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix9",
+            description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix9
+ input Real c.x;
+end RedeclareTests.Prefix.RedeclarePrefix9;
+")})));
+end RedeclarePrefix9;
+
+
+model RedeclarePrefix10
+    connector C
+        replaceable stream Real x;
+    end C;
+    
+    C c1(redeclare flow Real x);
+    C c2(redeclare flow Real x);
+equation
+    connect(c1, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix10",
+            description="Check that flow/stream can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix10
+ input Real c1.x;
+ input Real c2.x;
+equation
+ - c1.x - c2.x = 0.0;
+end RedeclareTests.Prefix.RedeclarePrefix10;
+")})));
+end RedeclarePrefix10;
+
+
+model RedeclarePrefix11
+    model A
+        replaceable input Real x;
+    end A;
+    
+    extends A(redeclare Real x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix11",
+            description="Check that input/output is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix11
+ input Real x;
+end RedeclareTests.Prefix.RedeclarePrefix11;
+")})));
+end RedeclarePrefix11;
+
+
+model RedeclarePrefix12
+    model A
+        replaceable input Real x;
+    end A;
+    
+    extends A(redeclare output Real x = 1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix12",
+            description="Check that input/output can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix12
+ output Real x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix12;
+")})));
+end RedeclarePrefix12;
+
+
+model RedeclarePrefix13
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    end B;
+    
+    model C = A(replaceable Real x);
+    
+    C c(redeclare Real x=1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix13",
+            description="Check that inner/outer is retained from original declaration in a redeclare if none exist in new declaration",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix13
+ Real c.x = 1;
+end RedeclareTests.Prefix.RedeclarePrefix13;
+")})));
+end RedeclarePrefix13;
+
+
+model RedeclarePrefix14
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    equation
+        x = time;
+    end B;
+    
+    model C = A(replaceable Real x);
+    
+    model D
+        extends C;
+        redeclare outer Real x;
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix14",
+            description="Check that inner/outer can be changed in a redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix14
+ Real x;
+equation
+ x = time;
+end RedeclareTests.Prefix.RedeclarePrefix14;
+")})));
+end RedeclarePrefix14;
+
+
+model RedeclarePrefix15
+    model A
+        inner replaceable Real x = 2;
+        B b;
+    end A;
+    
+    model B
+        outer Real x;
+    equation
+        x = time;
+    end B;
+    
+    model C
+        extends A;
+        redeclare outer Real x;
+    end C;
+    
+    C c(redeclare Real x = 1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclarePrefix15",
+            description="Check that inner/outer can be changed in the middle level of a multi-level redeclare",
+            flatModel="
+fclass RedeclareTests.Prefix.RedeclarePrefix15
+ Real x;
+equation
+ x = time;
+end RedeclareTests.Prefix.RedeclarePrefix15;
+")})));
+end RedeclarePrefix15;
+
+end Prefix;
+
+package Record
+
+model RedeclareInRecord1
+    package P1
+        replaceable partial record R
+        end R;
+        
+        replaceable partial function f
+            input R r;
+            output Real x;
+        end f;
+    end P1;
+    
+    package P2
+        extends P1;
+        redeclare record extends R
+            Real x = time;
+        end R;
+        redeclare function extends f
+        algorithm
+            x := r.x;
+        end f;
+    end P2;
+    
+    record A
+        replaceable package P = P1;
+        P.R pr;
+        Real x = P.f(pr);
+    end A;
+    
+    A a(redeclare package P = P2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord1",
+            description="Redeclare package in record",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord1
+ RedeclareTests.Record.RedeclareInRecord1:a a(pr(x = time),x = RedeclareTests.Record.RedeclareInRecord1.P2.f(a.pr));
+
+public
+ function RedeclareTests.Record.RedeclareInRecord1.P2.f
+  input RedeclareTests.Record.RedeclareInRecord1.P2.R r;
+  output Real x;
+ algorithm
+  x := r.x;
+  return;
+ end RedeclareTests.Record.RedeclareInRecord1.P2.f;
+
+ record RedeclareTests.Record.RedeclareInRecord1.P2.R
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord1.P2.R;
+
+ record RedeclareTests.Record.RedeclareInRecord1:a
+  RedeclareTests.Record.RedeclareInRecord1.P2.R pr;
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord1:a;
+
+end RedeclareTests.Record.RedeclareInRecord1;
+")})));
+end RedeclareInRecord1;
+
+model RedeclareInRecord2
+    partial record R1
+    end R1;
+
+    record R2
+        extends R1;
+        Real x = time;
+    end R2;
+    
+    record A
+        replaceable R1 pr;
+    end A;
+    
+    A a(redeclare R2 pr);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord2",
+            description="Redeclare record in record",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord2
+ RedeclareTests.Record.RedeclareInRecord2:a a(pr(x = time));
+
+public
+ record RedeclareTests.Record.RedeclareInRecord2.R2
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord2.R2;
+
+ record RedeclareTests.Record.RedeclareInRecord2:a
+  RedeclareTests.Record.RedeclareInRecord2.R2 pr;
+ end RedeclareTests.Record.RedeclareInRecord2:a;
+
+end RedeclareTests.Record.RedeclareInRecord2;
+")})));
+end RedeclareInRecord2;
+
+model RedeclareInRecord3
+    partial record A1
+    end A1;
+
+    record A2
+        extends A1;
+        replaceable B1 b;
+    end A2;
+    
+    partial record B1
+    end B1;
+    
+    record B2
+        extends B1;
+        Real x = time;
+    end B2;
+    
+    record R
+        replaceable A1 a;
+    end R;
+    
+    R r(redeclare A2 a(redeclare B2 b));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord3",
+            description="Nested redeclarations in record",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord3
+ RedeclareTests.Record.RedeclareInRecord3:r r(a(b(x = time)));
+
+public
+ record RedeclareTests.Record.RedeclareInRecord3.B2
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord3.B2;
+
+ record RedeclareTests.Record.RedeclareInRecord3:r.a
+  RedeclareTests.Record.RedeclareInRecord3.B2 b;
+ end RedeclareTests.Record.RedeclareInRecord3:r.a;
+
+ record RedeclareTests.Record.RedeclareInRecord3:r
+  RedeclareTests.Record.RedeclareInRecord3:r.a a;
+ end RedeclareTests.Record.RedeclareInRecord3:r;
+
+end RedeclareTests.Record.RedeclareInRecord3;
+")})));
+end RedeclareInRecord3;
+
+model RedeclareInRecord4
+    partial record A1
+    end A1;
+
+    record A2
+        replaceable B1 b;
+    end A2;
+
+    partial record B1
+    end B1;
+    
+    record B2
+        extends B1;
+        Real x = time;
+    end B2;
+    
+    record R1
+        replaceable A1 a;
+    end R1;
+    
+    record R2
+        extends R1(redeclare A2 a(redeclare B2 b));
+    end R2;
+    
+    R2 r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord4",
+            description="Nested redeclarations in record",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord4
+ RedeclareTests.Record.RedeclareInRecord4.R2 r(a(b(x = time)));
+
+public
+ record RedeclareTests.Record.RedeclareInRecord4.B2
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord4.B2;
+
+ record RedeclareTests.Record.RedeclareInRecord4.R2:a
+  RedeclareTests.Record.RedeclareInRecord4.B2 b;
+ end RedeclareTests.Record.RedeclareInRecord4.R2:a;
+
+ record RedeclareTests.Record.RedeclareInRecord4.R2
+  RedeclareTests.Record.RedeclareInRecord4.R2:a a;
+ end RedeclareTests.Record.RedeclareInRecord4.R2;
+
+end RedeclareTests.Record.RedeclareInRecord4;
+")})));
+end RedeclareInRecord4;
+
+model RedeclareInRecord5
+    record B1
+        Real x = time+1;
+    end B1;
+    
+    record B2
+        extends B1(x=time+2);
+    end B2;
+    
+    record A1
+        replaceable B1 b;
+    end A1;
+    
+    record A2
+        extends A1(redeclare B2 b);
+    end A1;
+    
+    record A3
+        extends A1;
+        redeclare B2 b;
+    end A1;
+    
+    A1 a1(redeclare B2 b);
+    A2 a2;
+    A3 a3;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord5",
+            description="Redeclarations in record",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord5
+ RedeclareTests.Record.RedeclareInRecord5:a1 a1(b(x = time + 2));
+ RedeclareTests.Record.RedeclareInRecord5.A2 a2(b(x = time + 2));
+ RedeclareTests.Record.RedeclareInRecord5.A3 a3(b(x = time + 2));
+
+public
+ record RedeclareTests.Record.RedeclareInRecord5.B2
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord5.B2;
+
+ record RedeclareTests.Record.RedeclareInRecord5:a1
+  RedeclareTests.Record.RedeclareInRecord5.B2 b;
+ end RedeclareTests.Record.RedeclareInRecord5:a1;
+
+ record RedeclareTests.Record.RedeclareInRecord5.A2
+  RedeclareTests.Record.RedeclareInRecord5.B2 b;
+ end RedeclareTests.Record.RedeclareInRecord5.A2;
+
+ record RedeclareTests.Record.RedeclareInRecord5.A3
+  RedeclareTests.Record.RedeclareInRecord5.B2 b;
+ end RedeclareTests.Record.RedeclareInRecord5.A3;
+
+end RedeclareTests.Record.RedeclareInRecord5;
+")})));
+end RedeclareInRecord5;
+
+model RedeclareInRecord6
+    type T = Real(min=1);
+
+    record B
+        Real x = time+1;
+    end B;
+    
+    B b(redeclare T x = time + 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord6",
+            description="Redeclare primitive in record",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord6
+ RedeclareTests.Record.RedeclareInRecord6:b b(x = time + 2);
+
+public
+ record RedeclareTests.Record.RedeclareInRecord6:b
+  RedeclareTests.Record.RedeclareInRecord6.T x;
+ end RedeclareTests.Record.RedeclareInRecord6:b;
+
+ type RedeclareTests.Record.RedeclareInRecord6.T = Real(min = 1);
+end RedeclareTests.Record.RedeclareInRecord6;
+")})));
+end RedeclareInRecord6;
+
+model RedeclareInRecord7
+    type T = Real(min=1);
+
+    record B
+        Real x = time+1;
+    end B;
+    
+    B[2] b(redeclare T x = time + 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord7",
+            description="Redeclare primitive in record array",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord7
+ RedeclareTests.Record.RedeclareInRecord7:b b[2](x = {time + 2, time + 2});
+
+public
+ record RedeclareTests.Record.RedeclareInRecord7:b
+  RedeclareTests.Record.RedeclareInRecord7.T x;
+ end RedeclareTests.Record.RedeclareInRecord7:b;
+
+ type RedeclareTests.Record.RedeclareInRecord7.T = Real(min = 1);
+end RedeclareTests.Record.RedeclareInRecord7;
+")})));
+end RedeclareInRecord7;
+
+model RedeclareInRecord8
+    record G0
+        Real x = 1;
+    end G0;
+    
+    model A
+        replaceable record G = G0;
+        B b(redeclare replaceable record G = G);
+    end A;
+    
+    model B
+        replaceable record G = G0;
+        G g;
+    end B;
+
+    model C
+        A a(redeclare record G = G0(x=f(time)));
+        function f
+            input Real x;
+            output Real y = x;
+            algorithm
+        end f;
+    end C;
+    
+    C c;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord8",
+            description="Redeclare record with function call in binding expression",
+            flatModel="
+fclass RedeclareTests.Record.RedeclareInRecord8
+ RedeclareTests.Record.RedeclareInRecord8.c.a.b.G c.a.b.g(x = RedeclareTests.Record.RedeclareInRecord8.c.f(time));
+
+public
+ function RedeclareTests.Record.RedeclareInRecord8.c.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end RedeclareTests.Record.RedeclareInRecord8.c.f;
+
+ record RedeclareTests.Record.RedeclareInRecord8.c.a.b.G
+  Real x;
+ end RedeclareTests.Record.RedeclareInRecord8.c.a.b.G;
+
+end RedeclareTests.Record.RedeclareInRecord8;
+")})));
+end RedeclareInRecord8;
+
+end Record;
+
+
+package Error
+
+model RedeclareError1
+    model A
+        replaceable Real x;
+    end A;
+    
+    model B
+        Real y;
+    end B;
+    
+    A a(redeclare B x);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError1",
+        description="Redeclare to unrelated kind of class, top level",
+        errorMessage="
+1 errors found:
+
+Error at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare B x', the replacing class is not a subtype of the constraining class from the declaration 'replaceable Real x',
+    because they are of unrelated types
+")})));
+end RedeclareError1;
+
+
+model RedeclareError2
+    model A
+        Real x;
+    end A;
+    
+    model B
+        Real y;
+    end B;
+    
+    model C
+        B x;
+    end C;
+    
+    model D
+        A a[2,2];
+    end D;
+    
+    model E
+        C a[2,2];
+    end E;
+    
+    model F
+        D d[1];
+    end F;
+    
+    model G
+        E d[1];
+    end G;
+    
+    model H
+        replaceable F f;
+    end H;
+    
+    H h(redeclare G f);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError2",
+        description="Redeclare to unrelated kind of class, lower level",
+        errorMessage="
+1 errors found:
+
+Error at line 34, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare G f', the replacing class is not a subtype of the constraining class from the declaration 'replaceable F f',
+    because their instances of d[1].a[1,1].x are of unrelated types
+")})));
+end RedeclareError2;
+
+
+model RedeclareError3
+    type T1 = Real;
+    type T2 = Integer;
+    
+    model A
+        replaceable T1 x;
+    end A;
+    
+    A a(redeclare T2 x);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError3",
+        description="Redeclare to unrelated type, top level",
+        errorMessage="
+1 errors found:
+
+Error at line 9, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare T2 x', the replacing class is not a subtype of the constraining class from the declaration 'replaceable T1 x',
+    because they are of different primitive types
+")})));
+end RedeclareError3;
+
+
+model RedeclareError4
+    type T1 = Real;
+    type T2 = Integer;
+    
+    model A
+        T1 x;
+    end A;
+    
+    model C
+        T2 x;
+    end C;
+    
+    model D
+        A a[2,2];
+    end D;
+    
+    model E
+        C a[2,2];
+    end E;
+    
+    model F
+        D d[1];
+    end F;
+    
+    model G
+        E d[1];
+    end G;
+    
+    model H
+        replaceable F f;
+    end H;
+    
+    H h(redeclare G f);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError4",
+        description="Redeclare to unrelated type, lower level",
+        errorMessage="
+1 errors found:
+
+Error at line 33, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare G f', the replacing class is not a subtype of the constraining class from the declaration 'replaceable F f',
+    because their instances of d[1].a[1,1].x are of different primitive types
+")})));
+end RedeclareError4;
+
+
+model RedeclareError5
+    type T1 = Real;
+    type T2 = Real[2];
+    
+    model A
+        replaceable T1 x;
+    end A;
+    
+    A a(redeclare T2 x);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError5",
+        description="Redeclare to primitive with wrong number of dimensions, top level",
+        errorMessage="
+1 errors found:
+
+Error at line 9, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare T2 x', the replacing class is not a subtype of the constraining class from the declaration 'replaceable T1 x',
+    because they have incompatible number of dimensions
+")})));
+end RedeclareError5;
+
+
+model RedeclareError6
+    type T1 = Real;
+    type T2 = Real[2];
+    
+    model A
+        replaceable T1[2] x;
+    end A;
+    
+    A a(redeclare T2 x);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Error_RedeclareError6",
+        description="Redeclare that moves size from type to component",
+        flatModel="
+fclass RedeclareTests.Error.RedeclareError6
+ RedeclareTests.Error.RedeclareError6.T2 a.x[2,2];
+
+public
+ type RedeclareTests.Error.RedeclareError6.T2 = Real;
+end RedeclareTests.Error.RedeclareError6;
+")})));
+end RedeclareError6;
+
+
+model RedeclareError7
+    type T1 = Real[2];
+    type T2 = Real;
+    
+    model A
+        T1 x;
+    end A;
+    
+    model C
+        T2 x;
+    end C;
+    
+    model D
+        A a[2,2];
+    end D;
+    
+    model E
+        C a[2,2];
+    end E;
+    
+    model F
+        D d[1];
+    end F;
+    
+    model G
+        E d[1];
+    end G;
+    
+    model H
+        replaceable F f;
+    end H;
+    
+    H h(redeclare G f);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError7",
+        description="Redeclare to primitive with wrong number of dimensions, lower level",
+        errorMessage="
+1 errors found:
+
+Error at line 33, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare G f', the replacing class is not a subtype of the constraining class from the declaration 'replaceable F f',
+    because their instances of d[1].a[1,1].x have incompatible number of dimensions
+")})));
+end RedeclareError7;
+
+
+model RedeclareError8
+    model B
+        Real x;
+        Real y;
+    end B;
+    
+    model A
+        replaceable B x;
+    end A;
+    
+    A a(redeclare B x[2]);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError8",
+        description="Redeclare to model with wrong number of dimensions, top level",
+        errorMessage="
+1 errors found:
+
+Error at line 11, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare B x[2]', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B x',
+    because they have incompatible number of dimensions
+")})));
+end RedeclareError8;
+
+
+model RedeclareError9
+    model A
+        B[2] b;
+    end A;
+    
+    model B
+        Real x;
+        Real y;
+    end B;
+    
+    model C
+        B b;
+    end C;
+    
+    model D
+        A a[2,2];
+    end D;
+    
+    model E
+        C a[2,2];
+    end E;
+    
+    model F
+        D d[1];
+    end F;
+    
+    model G
+        E d[1];
+    end G;
+    
+    model H
+        replaceable F f;
+    end H;
+    
+    H h(redeclare G f);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError9",
+        description="Redeclare to model with wrong number of dimensions, lower level",
+        errorMessage="
+1 errors found:
+
+Error at line 35, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare G f', the replacing class is not a subtype of the constraining class from the declaration 'replaceable F f',
+    because their instances of d[1].a[1,1].b have incompatible number of dimensions
+")})));
+end RedeclareError9;
+
+
+model RedeclareError10
+    model A
+        replaceable B x;
+    end A;
+    
+    model B
+        Real x;
+        Real y;
+    end B;
+
+    model C
+        Real x;
+    end C;
+    
+    
+    A a(redeclare C x);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError10",
+        description="Redeclare to class with some elements missing, top level",
+        errorMessage="
+1 errors found:
+
+Error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare C x', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B x',
+    because y from the constraining type is missing
+")})));
+end RedeclareError10;
+
+
+model RedeclareError11
+    model A
+        B b;
+    end A;
+    
+    model B
+        Real x;
+        Real y;
+    end B;
+    
+    model B2
+        Real x;
+    end B2;
+    
+    model C
+        B2 b;
+    end C;
+    
+    model D
+        A a[2,2];
+    end D;
+    
+    model E
+        C a[2,2];
+    end E;
+    
+    model F
+        D d[1];
+    end F;
+    
+    model G
+        E d[1];
+    end G;
+    
+    model H
+        replaceable F f;
+    end H;
+    
+    H h(redeclare G f);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Error_RedeclareError11",
+        description="Redeclare to class with some elements missing, lower level",
+        errorMessage="
+1 errors found:
+
+Error at line 39, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+  In the declaration 'redeclare G f', the replacing class is not a subtype of the constraining class from the declaration 'replaceable F f',
+    because d[1].a[1,1].b.y from the constraining type is missing
+")})));
+end RedeclareError11;
+
+end Error;
 
 
 end RedeclareTests;

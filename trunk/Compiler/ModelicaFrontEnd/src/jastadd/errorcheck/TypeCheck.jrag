@@ -46,13 +46,16 @@ aspect FlatTypeCheck {
 
     public static final SimpleProblemProducer ASTNode.CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', the declared class is not a subtype of the constraining class");
+                    "In the declaration '%s', the declared class is not a subtype of the " + 
+                    "constraining class,\n    because %s");
     public static final SimpleProblemProducer ASTNode.REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'");
+                    "In the declaration '%s', the replacing class is not a subtype of the " + 
+                    "constraining class from the declaration '%s',\n    because %s");
     public static final SimpleProblemProducer ASTNode.PREV_REDECLARE_NOT_REPLACEABLE =
             new SimpleWarningProducer("PREV_REDECLARE_NOT_REPLACEABLE", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', %s can't be redeclared since it has already been redeclared without 'replaceable'");
+                    "In the declaration '%s', %s can't be redeclared since it has already been " + 
+                    "redeclared without 'replaceable'");
 
     public void InstComposite.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
@@ -60,9 +63,12 @@ aspect FlatTypeCheck {
         // are applied to the declaration itself and is therefore also type checked.
         if (hasInstConstrainingComponent()) {
               InstNode superType = getInstConstrainingComponent().getInstNode();
-              InstComponentDecl declaredType = this; 
-              if (!declaredType.subType(superType))
-                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType.getComponentDecl(), declaredType.getComponentDecl());
+              InstComponentDecl declaredType = this;
+              String subTypeMsg = declaredType.subType(superType);
+              if (subTypeMsg != null) {
+                  ComponentDecl cd = declaredType.getComponentDecl();
+                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+              }
         }
     }
 
@@ -87,8 +93,13 @@ aspect FlatTypeCheck {
         
         // Type check the original component
         InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
-        if (declaredType.hasInstConstrainingComponent() && !declaredType.subType(superType))
-            CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(superType.getComponentDecl(), declaredType.getComponentDecl());
+        if (declaredType.hasInstConstrainingComponent()) {
+            String subTypeMsg = declaredType.subType(superType);
+            if (subTypeMsg != null) {
+                ComponentDecl cd = declaredType.getComponentDecl();
+                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+            }
+        }
 
         // The environment should be traversed backwards in order to perform correct
         // subtype tests in redeclaration chains.
@@ -98,15 +109,23 @@ aspect FlatTypeCheck {
             InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
                 
             // Check consistency of the redeclaring component
-            if (declaredSubType.hasInstConstrainingComponent() && !declaredSubType.subType(constrainingSubType))
-                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType.getComponentDecl(), declaredSubType.getComponentDecl());
+            if (declaredSubType.hasInstConstrainingComponent()) {
+                String subTypeMsg = declaredSubType.subType(constrainingSubType);
+                if (subTypeMsg != null) {
+                    ComponentDecl cd = declaredSubType.getComponentDecl();
+                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+                }
+            }
 
             // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
             // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
             // follows that declaredSubType is a subtype of superType by transitivity.
-            if (!constrainingSubType.subType(superType))
-                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType.getComponentDecl(), 
-                        constrainingSubType.getComponentDecl(), superType.getComponentDecl());
+            String subTypeMsg = constrainingSubType.subType(superType);
+            if (subTypeMsg != null) {
+                ComponentDecl cd = constrainingSubType.getComponentDecl();
+                ComponentDecl scd = superType.getComponentDecl();
+                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, scd, subTypeMsg);
+            }
         
             // If the redeclaring declaration has a constraining clause, the constraining
             // type of the redeclaring declaration of should be used in following subtype-test 
