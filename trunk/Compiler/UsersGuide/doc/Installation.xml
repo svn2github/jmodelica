@@ -53,6 +53,14 @@
           which should be self-explanatory.</para>
         </step>
       </procedure>
+      
+      <para>Note that during installation of JModelica.org you will
+      be asked whether to install Graybox OPC Automation Wrapper or not.
+      If you choose <emphasis>yes</emphasis>, the Graybox OPC Automation Wrapper dlls
+      will be added to the windows registry. Uninstalling the OPC server during 
+      uninstallation of this JModelica.org distribution affects other installations
+      of JModelica.org. More information on the OPC capabilities can be found in 
+      <xref linkend="opc-sec"/>.</para>
     </section>
 
     <section>
