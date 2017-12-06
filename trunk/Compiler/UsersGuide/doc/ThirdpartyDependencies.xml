@@ -19,23 +19,32 @@
     <xref linkend="opc-sec"/>.</para>
   </section>
   <section xml:id="opc-sec">
-  <title>OPC server</title>
-  <para>During the installation of JModelica.org you will
+  <title>Open Platform Communication (OPC)</title>
+  <para>OPC, Open Platform Communication, is a series of standards and specifications
+  for communication between different platforms maintained by <link
+  xlink:href="https://opcfoundation.org/">OPC Foundation</link>. It can be used for sending,
+ e.g., measurement data, between control units.</para>
+ <para>In JModelica.org there is support for OPC communication through the bundled Python package OpenOPC.
+ However, it requires additional installations to work. During the installation of JModelica.org you will
       be asked whether to install Graybox OPC Automation Wrapper or not.
-      If it is installed there will be a folder named <literal>OpenOPC</literal>
-      in the installation folder. To start the OPC server, the <literal>INSTALL.bat</literal>
+      If it is installed two dlls will be added to the windows registry and there 
+      will be a folder named <literal>OpenOPC</literal> in the installation folder. 
+      To start the required OPC server, the <literal>INSTALL.bat</literal>
       must be run with administration rights. It takes three optional arguments; ip adress,
       inactivity time, and max clients. For more information on the options, see
       <literal>OpenOPC/README.txt</literal>.
       </para>
       
-
       <para>It is possible to test if the OPC server was setup properly by runnning
       the following in Python (32 and 64 bit):
       <programlisting>from OpenOPC import open_client
 opc = open_client()</programlisting>
        If the server is not up-and-running an exception will be thrown.
       </para>
+      <para>Note that you during uninstallation of JModelica.org will be asked if
+      Graybox OPC Automation Wrapper should be uninstalled. An uninstallation will
+      affect all installations of JModelica.org since the registred dlls will be 
+      deleted from the registry.</para>
   </section>
   <section xml:id="thirdparty_deps_list_sec"><title>Applications, Libraries and Python Packages in JModelica.org</title>  
        <para>The following applications, libraries and Python packages are part of the JModelica.org installation.

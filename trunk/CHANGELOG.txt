@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Documentation; #5517 
+Added information on OPC to Users Guide.
+
 ; Feature; Minor; Compiler ; #5516
 Index added to variables and equations in blocks in HTML diagnostics.
 
