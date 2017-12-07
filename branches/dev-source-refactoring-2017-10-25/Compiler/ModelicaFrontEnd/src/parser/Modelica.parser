@@ -879,7 +879,7 @@ Argument argument
             comment);
         cd.setLocationNoTree(comp_name, comment);
         PN_ComponentClause cc = new PN_ComponentClause(
-            true,   // TODO: Shouldn't this be redeclare_replaceable_header.has_redeclare?
+            redeclare_replaceable_header.has_redeclare,
             false, 
             false, 
             false, 

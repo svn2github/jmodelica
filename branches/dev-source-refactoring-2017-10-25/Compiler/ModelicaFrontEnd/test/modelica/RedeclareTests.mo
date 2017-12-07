@@ -4435,7 +4435,7 @@ model RedeclareTest72
 
 Warning at line 29, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Access to component x not recommended, it is not present in constraining type of declaration 'redeclare replaceable H b constrainedby I'
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable H b constrainedby I'
 ")})));
 end RedeclareTest72;
 
@@ -4489,11 +4489,11 @@ model RedeclareTest73
 
 Warning at line 29, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Access to component x not recommended, it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable E b constrainedby F'
 
 Warning at line 30, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Access to component z not recommended, it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+  Access to component z not recommended, it is not present in constraining type of declaration 'replaceable E b constrainedby F'
 ")})));
 end RedeclareTest73;
 
