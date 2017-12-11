@@ -40,8 +40,6 @@ int model_ode_guards_init(jmi_t* jmi);
 
 $C_variable_aliases$
 
-$C_z_aliases_strings$
-
 #define sf(i) (jmi->variable_scaling_factors[i])
 
 #define _real_ci(i) ((*(jmi->z))[jmi->offs_real_ci+i])
