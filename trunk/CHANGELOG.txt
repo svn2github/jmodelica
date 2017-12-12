@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Change ; Major ; Python ; #5167
+Changed the default FMI version when compiling FMUs from Python to 2.0
+instead of 1.0.
+
 ; Feature ; Minor ; PyFMI ; #5521
 Added the possibility to directly retrieve a Scalar Variable class instance.
 
