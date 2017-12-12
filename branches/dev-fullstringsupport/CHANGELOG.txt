@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Major ; Compiler; #4797 
+Support for string parameters
+
 ; Feature ; Minor ; PyFMI ; #5521
 Added the possibility to directly retrieve a Scalar Variable class instance.
 

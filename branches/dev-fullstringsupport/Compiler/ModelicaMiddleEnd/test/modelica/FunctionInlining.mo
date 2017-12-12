@@ -580,6 +580,36 @@ end FunctionInlining.BasicInline14;
 ")})));
     end BasicInline14;
 
+    model BasicInline15
+        function f
+            input String x;
+            output String y;
+        algorithm
+            y := x + x;
+        end f;
+        
+        parameter String x = "string";
+        parameter String y = f(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline15",
+            description="Inline string input/output",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass FunctionInlining.BasicInline15
+ parameter String x = \"string\" /* \"string\" */;
+ parameter String temp_1;
+ parameter String y;
+parameter equation
+ temp_1 = x;
+ y = temp_1 + temp_1;
+end FunctionInlining.BasicInline15;
+")})));
+    end BasicInline15;
+
 
     model MatrixInline1
         function f
