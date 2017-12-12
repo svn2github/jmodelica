@@ -479,44 +479,22 @@ aspect FlatTypeCheck {
     }
     
     syn boolean FExp.errorCheckUnknownSize() = !inFunction() && !allowUnknownSize();
-
+    
     syn boolean BaseNode.allowUnknownSize()    = false;
     eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
     eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() &&
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() &&
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
+    
     inh boolean BaseNode.inAllowUnknownSize();
     eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
-    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() ||
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() ||
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-
-    class FFunctionDecl {
-        public enum FunctionType {
-            EXTERNAL, LOADRESOURCE;
-            
-            public boolean containsFunction(CommonCallable cc) {
-                if (this == EXTERNAL) {
-                    return cc.isExternalFunction();
-                } else {
-                    return cc.containsFunction(this);
-                }
-            }
-        }
-    }
-
-    interface CommonCallable {
-        public boolean containsFunction(FFunctionDecl.FunctionType ft);
-        public boolean isExternalFunction();
-    }
-
+    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().isExternalFunction();
+    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().isExternalFunction();
+    
+    interface CommonCallable { public boolean isExternalFunction(); }
     syn boolean InstPartialFunction.isExternalFunction() = false;
     syn boolean FFunctionVariable.isExternalFunction()   = false;
-
+    
     syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
     syn boolean FFunctionDecl.isExternalFunction() {
         for (FStatement stmt : getFAlgorithm().getFStatements()) {
@@ -526,49 +504,13 @@ aspect FlatTypeCheck {
         }
         return false;
     }
-
+    
     syn boolean FStatement.isExternalStatement() = false;
     eq FExternalStmt.isExternalStatement()       = true;
-
-    syn boolean ASTNode.containsFunction(FFunctionDecl.FunctionType ft) {
-        for (ASTNode n : this) {
-            if (n.containsFunction(ft)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    syn boolean InstNode.containsFunction(FFunctionDecl.FunctionType ft) =
-        getInstComponentDecls().containsFunction(ft) || getInstExtendss().containsFunction(ft) ||
-        getFAbstractEquations().containsFunction(ft) || super.containsFunction(ft);
-
-    eq InstComponentDecl.containsFunction(FFunctionDecl.FunctionType ft) =
-        (hasInstModification() && getInstModification().containsFunction(ft)) ||  super.containsFunction(ft);
-    eq InstValueModification.containsFunction(FFunctionDecl.FunctionType ft) =
-        getFExp().containsFunction(ft) ||  super.containsFunction(ft);
-    eq InstFunctionCall.containsFunction(FFunctionDecl.FunctionType ft) =
-        ft.containsFunction(myCommonCallable()) || super.containsFunction(ft);
-    eq FFunctionCall.containsFunction(FFunctionDecl.FunctionType ft) =
-        ft.containsFunction(myCommonCallable()) || super.containsFunction(ft);
-    eq FLoadResource.containsFunction(FFunctionDecl.FunctionType ft) =
-        ft == FFunctionDecl.FunctionType.LOADRESOURCE || super.containsFunction(ft);
-
-    syn lazy boolean InstClassDecl.containsFunction(FFunctionDecl.FunctionType ft) circular [false] =
-            super.containsFunction(ft);
-    eq InstSimpleShortClassDecl.containsFunction(FFunctionDecl.FunctionType ft) =
-            actualInstClass().containsFunction(ft);
-
+    
     public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
             new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
                     "Non-parameter expression sizes not supported, '%s', dimension %d in '%s'");
-    
-    @Override
-    public void FLoadResource.typeCheck(ErrorCheckType checkType) {
-        super.complianceCheck(checkType);
-        getFExp().forceVariability(checkType, ASTNode.fStructParameter("loadResource"));
-    }
     
     public class FExp {
         public static class ExpTypeErrorProducer extends AbstractErrorProducerUnlessDisabled<ReporterNode> {
@@ -1377,9 +1319,6 @@ aspect FlatTypeCheck {
             }
         } else {
             size().markAsStructuralParameter(checkType, this);
-        }
-        if (FFunctionDecl.FunctionType.LOADRESOURCE.containsFunction(myCommonCallable())) {
-            getArgs().forceUsesVariability(checkType, ASTNode.fStructParameter("loadResource"));
         }
     }
   

@@ -1234,7 +1234,7 @@ end RecordBinding10;
 
 model RecordBinding11
 	record R
-        parameter String s1 = "" annotation(Evaluate=true);
+		parameter String s1 = "";
 		parameter Boolean b1 = F(s1);
 		Boolean b2 = F(s1);
 	end R;
@@ -1257,7 +1257,7 @@ model RecordBinding11
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding11
- eval parameter String r.s1 = \"foobar\" /* \"foobar\" */;
+ structural parameter String r.s1 = \"foobar\" /* \"foobar\" */;
  structural parameter Boolean r.b1 = true /* true */;
  structural parameter Boolean r.b2 = true /* true */;
 end RecordTests.RecordBinding11;
@@ -1448,8 +1448,8 @@ end RecordBinding18;
 
 model RecordBinding19
     record R1
-        parameter String x = "A" annotation(Evaluate=true);
-        parameter String y = x annotation(Evaluate=true);
+        parameter String x = "A";
+        parameter String y = x;
         Real z = time;
     end R1;
     
@@ -1462,8 +1462,8 @@ model RecordBinding19
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding19
- eval parameter String r1.x = \"A\" /* \"A\" */;
- eval parameter String r1.y = \"A\" /* \"A\" */;
+ structural parameter String r1.x = \"A\" /* \"A\" */;
+ structural parameter String r1.y = \"A\" /* \"A\" */;
  Real r1.z;
 equation
  r1.z = time;
@@ -1473,8 +1473,8 @@ end RecordBinding19;
 
 model RecordBinding20
     record R1
-        parameter String x = "A" annotation(Evaluate=true);
-        parameter String y = x annotation(Evaluate=true);
+        parameter String x = "A";
+        parameter String y = x;
         Real z = time;
     end R1;
     
@@ -1487,8 +1487,8 @@ model RecordBinding20
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding20
- eval parameter String r1.x = \"B\" /* \"B\" */;
- eval parameter String r1.y = \"B\" /* \"B\" */;
+ structural parameter String r1.x = \"B\" /* \"B\" */;
+ structural parameter String r1.y = \"B\" /* \"B\" */;
  Real r1.z;
 equation
  r1.z = time;
@@ -2451,6 +2451,9 @@ model RecordConstructor5
 2 errors found:
 
 Error at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+  Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, )).c'
+
+Error at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: missing argument for required input c
 ")})));
 end RecordConstructor5;
@@ -2472,6 +2475,9 @@ model RecordConstructor6
             variability_propagation=false,
             errorMessage="
 2 errors found:
+
+Error at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+  Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, \"foo\")).c'
 
 Error at line 8, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: too many positional arguments
@@ -8138,7 +8144,7 @@ model ExternalObjectStructural1
         external;
     end f;
     
-    parameter String b = "abc" annotation(Evaluate=true);
+    parameter String b = "abc";
     parameter A a = A(b);
     parameter Real c = f(a);
 
@@ -8148,7 +8154,7 @@ model ExternalObjectStructural1
             description="Check that external objects do not get converted to structural parameters",
             flatModel="
 fclass RecordTests.ExternalObjectStructural1
- eval parameter String b = \"abc\" /* \"abc\" */;
+ structural parameter String b = \"abc\" /* \"abc\" */;
  parameter RecordTests.ExternalObjectStructural1.A a = RecordTests.ExternalObjectStructural1.A.constructor(\"abc\") /* {\"abc\"} */;
  parameter Real c;
 parameter equation

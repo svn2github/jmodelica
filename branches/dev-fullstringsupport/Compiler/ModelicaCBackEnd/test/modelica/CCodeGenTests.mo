@@ -1426,6 +1426,7 @@ $C_z_offsets_strings$
 
 ---
 $C_variable_aliases$
+$C_z_aliases_strings$
 ---
 $C_DAE_initial_dependent_parameter_assignments$
 ---
@@ -1452,13 +1453,13 @@ o->n_ci = 0;
 o->o_cd = 0;
 o->n_cd = 0;
 o->o_pi = 0;
-o->n_pi = 2;
-o->o_ps = 2;
+o->n_pi = 4;
+o->o_ps = 4;
 o->n_ps = 0;
-o->o_pf = 2;
-o->n_pf = 1;
-o->o_pe = 3;
-o->n_pe = 1;
+o->o_pf = 4;
+o->n_pf = 0;
+o->o_pe = 4;
+o->n_pe = 0;
 o->o_pd = 4;
 o->n_pd = 0;
 o->n = 4;
@@ -1486,6 +1487,7 @@ o->n = 4;
 #define _eval4_18 ((*(jmi->z))[18])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
+
 #define _s_pi_reg5_4 jmi->z_t.strings.values[0]
 #define _s_pi_struct5_9 jmi->z_t.strings.values[1]
 #define _s_pi_final5_14 jmi->z_t.strings.values[2]
@@ -1568,36 +1570,33 @@ model CCodeGenParameters3
             description="Code generated for strings",
             eliminate_alias_variables=false,
             template="
-$C_variable_aliases$
+$C_z_aliases_strings$
 $C_z_offsets_strings$
 $C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
 ",
             generatedCode="
-#define _time ((*(jmi->z))[jmi->offs_t])
-#define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define _s_ci_ci_0 jmi->z_t.strings.values[0]
 #define _s_ci_cd_1 jmi->z_t.strings.values[1]
 #define _s_pi_pi_2 jmi->z_t.strings.values[2]
 #define _s_pi_ps_3 jmi->z_t.strings.values[3]
 #define _s_pi_pf_4 jmi->z_t.strings.values[4]
-#define _s_pi_pe_5 jmi->z_t.strings.values[5]
-#define _s_pd_pd_6 jmi->z_t.strings.values[6]
+#define _s_pi_pd_6 jmi->z_t.strings.values[5]
+#define _s_pi_pe_5 jmi->z_t.strings.values[6]
 
 o->o_ci = 0;
 o->n_ci = 2;
 o->o_cd = 2;
 o->n_cd = 0;
 o->o_pi = 2;
-o->n_pi = 2;
-o->o_ps = 4;
+o->n_pi = 5;
+o->o_ps = 7;
 o->n_ps = 0;
-o->o_pf = 4;
-o->n_pf = 1;
-o->o_pe = 5;
-o->n_pe = 1;
-o->o_pd = 6;
-o->n_pd = 1;
+o->o_pf = 7;
+o->n_pf = 0;
+o->o_pe = 7;
+o->n_pe = 0;
+o->o_pd = 7;
+o->n_pd = 0;
 o->n = 7;
 
 int jmi_set_start_values_0_0(jmi_t* jmi) {
@@ -1608,6 +1607,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     JMI_ASG(STR_Z, _s_pi_pi_2, (\"s2\"));
     JMI_ASG(STR_Z, _s_pi_ps_3, (\"s3\"));
     JMI_ASG(STR_Z, _s_pi_pf_4, (\"s4\"));
+    JMI_ASG(STR_Z, _s_pi_pd_6, (\"s2\"));
     JMI_ASG(STR_Z, _s_pi_pe_5, (\"s5\"));
     JMI_DYNAMIC_FREE()
     return ef;
@@ -1621,14 +1621,6 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     ef |= jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    JMI_ASG(STR_Z, _s_pd_pd_6, (_s_pi_pi_2));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1660,6 +1652,7 @@ $C_z_offsets_strings$
 
 ---
 $C_variable_aliases$
+$C_z_aliases_strings$
 ---
 $C_DAE_initial_dependent_parameter_assignments$
 ---

@@ -300,27 +300,9 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 int jmi_set_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    const jmi_string value[]) {
 
-    jmi_z_offsets_t *o;
-    
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set String variables when the model is terminated");
-        return -1;
-    }
-    
-    o  = &jmi->z_t.strings.offsets;
-    
-    if (jmi_cannot_set(jmi, vr, nvr, o->o_ci, o->o_ci + o->n_ci + o->n_cd,
-        "Cannot set String constant <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->o_ps, o->o_ps + o->n_ps,
-        "Cannot set String structural parameter <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->o_pf, o->o_pf + o->n_pf,
-        "Cannot set String final parameter <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->o_pe, o->o_pe + o->n_pe,
-        "Cannot set String evaluated parameter <variable: #r%d#>")
-        || jmi_cannot_set(jmi, vr, nvr, o->o_pd, o->o_pd + o->n_pd,
-        "Cannot set String dependent parameter <variable: #r%d#>")) {
-        
         return -1;
     }
 
