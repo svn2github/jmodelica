@@ -35,7 +35,7 @@
       <literal>OpenOPC/README.txt</literal>.
       </para>
       
-      <para>It is possible to test if the OPC server was setup properly by runnning
+      <para>It is possible to test if the OPC server was setup properly by running
       the following in Python (32 and 64 bit):
       <programlisting>from OpenOPC import open_client
 opc = open_client()</programlisting>
