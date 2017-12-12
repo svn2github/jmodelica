@@ -370,15 +370,13 @@ public class CGenerator extends GenericGenerator {
                     "#define %s ((*(jmi->z))[jmi->offs%s_%s+%d])\n";
             private static final String FMT_DEFAULT_INDEX = 
                     "#define %s ((*(jmi->z))[%d])\n";
-            private static final String FMT_DEFAULT_STRING_INDEX = 
-                    "#define %s jmi->z_t.strings.values[%d]\n";
             private static final String FMT_EXTERNAL      = 
                     "#define %s ((jmi->ext_objs)[%d])\n";
             private static final String FMT_VIRTUAL_FIRST = 
                     "#define _%s ((*(jmi->z))[jmi->offs_%s])\n";
             private static final String FMT_VIRTUAL       = 
                     "#define _%s ((*(jmi->z))[jmi->offs_%s + %d])\n";
-            
+
             private boolean pre;
             private String prefix;
             private CodeStream cs;
@@ -399,7 +397,7 @@ public class CGenerator extends GenericGenerator {
                     }
                     break;
                 case STRING:
-                    cs.format(FMT_DEFAULT_STRING_INDEX, fv.name_C(), entry.getIndexFor(fv));
+                    // TODO: Implement when adding String support.
                     break;
                 case EXTERNAL:
                     cs.format(FMT_EXTERNAL, fv.name_C(), entry.getOffsetIndexFor(fv));
@@ -445,26 +443,61 @@ public class CGenerator extends GenericGenerator {
         }
     }
     
-    public class DAETag_C_z_stringOffsets extends DAETag {
+    public abstract class DAETag_C_z_strings extends DAETag {
+        public DAETag_C_z_strings(String name, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, myGenerator, fclass);
+        }
         
-        public DAETag_C_z_stringOffsets(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_z_offsets_strings", myGenerator, fclass);
+        abstract int genList(CodeStream str, ZOffsets zo, int o, FTypePrefixVariability.VariabilityCausality_C s);
+        void genLast(CodeStream str, int o) {
+            
         }
         
         public void generate(CodeStream str) {
             ZOffsets zo = new ZOffsets(fclass.strings());
             int o = 0;
-            o = genList(str, fclass.numIndependentStringConstants()           , o, FTypePrefixVariability.VariabilityCausality_C.CI);
-            o = genList(str, fclass.numDependentStringConstants()             , o, FTypePrefixVariability.VariabilityCausality_C.CD);
-            o = genList(str, fclass.numRegularIndependentStringParameters()   , o, FTypePrefixVariability.VariabilityCausality_C.PI);
-            o = genList(str, fclass.numStructuralIndependentStringParameters(), o, FTypePrefixVariability.VariabilityCausality_C.PS);
-            o = genList(str, fclass.numFinalIndependentStringParameters()     , o, FTypePrefixVariability.VariabilityCausality_C.PF);
-            o = genList(str, fclass.numEvalIndependentStringParameters()      , o, FTypePrefixVariability.VariabilityCausality_C.PE);
-            o = genList(str, fclass.numDependentStringParameters()            , o, FTypePrefixVariability.VariabilityCausality_C.PD);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.CI);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.CD);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PI);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PS);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PF);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PE);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PD);
             genLast(str, o);
         }
+    }
+    
+    public class DAETag_C_z_stringAliases extends DAETag_C_z_strings {
+        public DAETag_C_z_stringAliases(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_z_aliases_strings", myGenerator, fclass);
+        }
         
-        int genList(CodeStream str, int n, int o, FTypePrefixVariability.VariabilityCausality_C s) {
+        private void genVar(CodeStream str, FVariable fv, int index) {
+            str.print("#define ");
+            str.print(fv.name_C());
+            str.print(" jmi->z_t.strings.values[");
+            str.print(index);
+            str.print("]\n");
+        }
+        
+        @Override
+        int genList(CodeStream str, ZOffsets zo, int o, FTypePrefixVariability.VariabilityCausality_C s) {
+            for (FVariable fv : zo.get(s)) {
+                genVar(str, fv, o++);
+            }
+            return o;
+        }
+    }
+    
+    public class DAETag_C_z_stringOffsets extends DAETag_C_z_strings {
+        
+        public DAETag_C_z_stringOffsets(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_z_offsets_strings", myGenerator, fclass);
+        }
+        
+        @Override
+        int genList(CodeStream str, ZOffsets zo, int o, FTypePrefixVariability.VariabilityCausality_C s) {
+            int n = zo.get(s).size();
             str.print("o->o_");
             str.print(s);
             str.print(" = ");

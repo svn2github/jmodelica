@@ -147,15 +147,12 @@ aspect InstVariability {
     syn FTypePrefixVariability InstComponentDecl.bExpVariability() = fContinuous();
     eq InstAssignable.bExpVariability() {
         if (hasBindingFExp() && !getBindingFExp().type().isUnknown()) {
-            return getBindingFExp().variability().dependentVariability();
+            return getBindingFExp().variability();
         } else {
             return super.bExpVariability();
         }
     }
-
-    syn FTypePrefixVariability FTypePrefixVariability.dependentVariability() = this;
-    eq FStructParameter.dependentVariability() = ASTNode.fStructParameter();
-
+    
     /**
      * Combines variabilities with rules required for propagating variabilities.
      */

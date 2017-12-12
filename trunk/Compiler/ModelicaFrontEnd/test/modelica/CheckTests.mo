@@ -708,13 +708,13 @@ In components:
 end ComponentNameError2;
 
 model FilterWarnings1
-    parameter String s1;
+    parameter String s1 = "42";
     
     annotation(__JModelica(UnitTesting(tests={
         WarningTestCase(
             name="FilterWarnings1",
             description="Check so that filtering of warnings works",
-            filter_warnings="PARAMETER_MISSING_BINDING_EXPRESSION",
+            filter_warnings="PARTIALLY_SUPPORTED_STRING_PARAMETERS",
             errorMessage="
 1 warnings found:
 
@@ -734,13 +734,13 @@ model FilterWarnings2
     end B;
     
     B b;
-    parameter String s1;
+    parameter String s1 = "42";
     
     annotation(__JModelica(UnitTesting(tests={
         WarningTestCase(
             name="FilterWarnings2",
             description="Check so that filtering of multiple types of warnings works",
-            filter_warnings="PARAMETER_MISSING_BINDING_EXPRESSION,UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES",
+            filter_warnings="PARTIALLY_SUPPORTED_STRING_PARAMETERS,UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES",
             errorMessage="
 1 warnings found:
 

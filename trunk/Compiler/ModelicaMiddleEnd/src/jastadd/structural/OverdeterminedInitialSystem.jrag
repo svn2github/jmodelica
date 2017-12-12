@@ -45,7 +45,7 @@ aspect OverdeterminedInitialSystem {
         for (FVariable var : res.visitedParameters) {
             if (!var.isParameter())
                 continue;
-            var.setFTypePrefixVariability(ASTNode.fStructParameter());
+            var.setFTypePrefixVariability(new FStructParameter());
         }
         
         return g;

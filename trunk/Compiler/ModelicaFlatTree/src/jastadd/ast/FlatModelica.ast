@@ -174,7 +174,7 @@ abstract FKnownParameter : FParameter;
 /**
  * Structural parameter variability.
  */
-FStructParameter : FKnownParameter ::= <Reason:String>;
+FStructParameter : FKnownParameter;
 
 /**
  * Used to force variability for if equation tests

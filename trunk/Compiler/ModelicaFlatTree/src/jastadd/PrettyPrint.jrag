@@ -1959,8 +1959,7 @@ aspect FlatPrettyPrint {
     eq FIndexParameter.toString()       = "index parameter";
     eq FEvalTrueParameter.toString()    = "eval parameter ";
     eq FFinalParameter.toString()       = "final parameter ";
-    eq FStructParameter.toString()      =
-            getReason().isEmpty() ? "structural parameter " : "structural (" + getReason() + ") parameter ";
+    eq FStructParameter.toString()      = "structural parameter ";
     eq FDiscrete.toString()             = "discrete ";
     eq FConstant.toString()             = "constant ";
     eq FContinuous.toString()           = "";

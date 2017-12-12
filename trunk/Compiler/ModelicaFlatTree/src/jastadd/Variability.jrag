@@ -647,7 +647,7 @@ aspect VariabilitySingletons {
     public static final FIndexParameter     FIndexParameter.instance     = new FIndexParameter();
     public static final FFinalParameter     FFinalParameter.instance     = new FFinalParameter();
     public static final FEvalTrueParameter  FEvalTrueParameter.instance  = new FEvalTrueParameter();
-    public static final FStructParameter    FStructParameter.instance    = new FStructParameter("");
+    public static final FStructParameter    FStructParameter.instance    = new FStructParameter();
     public static final FTestParameter      FTestParameter.instance      = new FTestParameter();
     public static final FConstant           FConstant.instance           = new FConstant();
 
@@ -693,11 +693,7 @@ aspect VariabilitySingletons {
     public static FStructParameter ASTNode.fStructParameter() {
         return FStructParameter.instance;
     }
-
-    public static FStructParameter ASTNode.fStructParameter(String reason) {
-        return new FStructParameter(reason);
-    }
-
+    
     public static FTestParameter ASTNode.fTestParameter() {
         return FTestParameter.instance;
     }

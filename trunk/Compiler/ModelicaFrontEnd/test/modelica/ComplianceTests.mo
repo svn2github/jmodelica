@@ -525,6 +525,25 @@ end ComplianceTests.HybridFMU2;
 ")})));
 end HybridFMU2;
 
+
+model String2
+    parameter String a = "1";
+    parameter String b = a + "2";
+	parameter String c = b + "3";
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="String2",
+			description="Make sure uses of String parameters are evaluated",
+			flatModel="
+fclass ComplianceTests.String2
+ structural parameter String a = \"1\" /* \"1\" */;
+ structural parameter String b = \"12\" /* \"12\" */;
+ structural parameter String c = \"123\" /* \"123\" */;
+end ComplianceTests.String2;
+")})));
+end String2;
+
 model StringOperator1
     Integer len = if time < 0 then 4 else 3;
     Integer digits = if time < 0 then 5 else 2;
