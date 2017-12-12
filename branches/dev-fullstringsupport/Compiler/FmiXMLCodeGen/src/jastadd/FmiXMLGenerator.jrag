@@ -1688,17 +1688,26 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             abstract boolean isInitialKnown(FVariable var);
             
             public void generateAttributes(CodeStream genPrinter) {
-				
-				generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
-				
-				//Find the dependencies.
-				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
+                
+                generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
+                boolean hasNonScalarDependency = false;
+                //Find the dependencies.
+                TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
                 for (FVariable vv : dependentVariables(variable)) {
                     if (isInitialKnown(vv)) {
                         vv.generateXMLDependencyIndex(dependencyIndex, fclass.xmlVariableIndexMap());
+                        if (vv.numScalars() > 1) {
+                            hasNonScalarDependency = true;
+                        }
                     }
                 }
-                generateListAttribute("dependencies", dependencyIndex , genPrinter);
+                if (!hasNonScalarDependency) {
+                    // If we have depenency on a non-scalar, then we skip the 
+                    // dependencies filed since it can become to verbose!
+                    // According to the FMI specification this means that this
+                    // unknown depends on all knowns!
+                    generateListAttribute("dependencies", dependencyIndex , genPrinter);
+                }
             }
         }
         
