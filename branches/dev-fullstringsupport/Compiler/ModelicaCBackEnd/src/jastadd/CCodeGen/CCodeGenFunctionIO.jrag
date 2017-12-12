@@ -299,7 +299,6 @@ aspect CodeFuncCallInOutArgPrinters {
             Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
             p.printWriteBackAssignment(str, indent, this, forVariables);
-            type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
 
@@ -340,9 +339,6 @@ aspect CodeFuncCallInOutArgPrinters {
         if (hasFExp()) {
             CodePrinter.WriteBackResidualPrinter p = printer_C.new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
             p.print(str, indent, getFExp().type(), name_C(), getFExp());
-        }
-        if (replaceWithTemp()) {
-            type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
 
