@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Major ; Compiler; #4797 
+Support for string parameters
+
 ; Change ; Major ; Python ; #5167
 Changed the default FMI version when compiling FMUs from Python to 2.0
 instead of 1.0.

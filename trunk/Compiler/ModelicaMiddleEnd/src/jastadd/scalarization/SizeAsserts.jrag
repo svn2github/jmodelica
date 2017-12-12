@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Modelon AB
+    Copyright (C) 2016-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,18 +20,16 @@ aspect SizeAsserts {
      * Creates assert statements to check sizes in assignments between known
      * and unknown sizes. 
      */
-    public void FStatement.addSizeAsserts(List clauses) {
-        if (!inFunction())
+    public void FStatement.addSizeAsserts(Scalarizer.Algorithm s) {
+        if (!inFunction()) {
             return;
+        }
         
-        FStatement stmt;
         Set<String> vis = new HashSet<String>();
         for (FAssert a : sizeAssertsColl()) {
-            String s = a.prettyPrint("");
-            if (!vis.contains(s)) {
-                vis.add(s);
-                stmt = new FFunctionCallStmt(new List<FFunctionCallLeft>(), a);
-                clauses.add(stmt);
+            if (vis.add(a.prettyPrint(""))) {
+                a.createArrayTemporaries(s);
+                s.add(new FFunctionCallStmt(new List<FFunctionCallLeft>(), (FAssert)a.scalarize(s)));
             }
         }
     }
@@ -146,8 +144,8 @@ aspect SizeAsserts {
     
     public FAssert FExp.sizeAssert(FExp e, int i) {
         String dim = i < 0 ? "" : String.format("dimension %d of ", i+1);
-        return new FAssert(e, new FStringLitExp(String.format("Mismatching size in %sexpression %s in function %s",
-                dim, prettyPrint(""), containingFFunctionDecl().name())), new Opt<FExp>());
+        return (FAssert)dynamicFExp(new FAssert(e, new FStringLitExp(String.format("Mismatching size in %sexpression %s in function %s",
+                dim, prettyPrint(""), containingFFunctionDecl().name())), new Opt<FExp>()));
     }
     
     /**
@@ -162,7 +160,7 @@ aspect SizeAsserts {
                 FAssert a = new FAssert(
                         context.orNotIfExpConds(new FEqExp(other.createFExp(i), l.createFExp(i))),
                         new FStringLitExp("Mismatching sizes in " + context.containingFFunctionDecl().name()), new Opt<FExp>());
-                asserts.add(a);
+                asserts.add((FAssert)context.dynamicFExp(a));
             }
         }
     }

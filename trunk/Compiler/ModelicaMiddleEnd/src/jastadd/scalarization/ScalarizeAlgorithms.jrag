@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Modelon AB
+    Copyright (C) 2016-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ aspect AlgorithmScalarization {
     
     public static void FStatement.scalarizeStmtList(Scalarizer.Algorithm s, List<FStatement> fromList) {
         for (FStatement stmt : fromList) {
-            stmt.addSizeAsserts(s.getClauses());
+            stmt.addSizeAsserts(s);
             stmt.scalarize(s);
         }
     }

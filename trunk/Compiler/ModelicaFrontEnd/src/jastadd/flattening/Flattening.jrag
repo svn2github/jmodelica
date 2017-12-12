@@ -2703,7 +2703,18 @@ aspect FlatExpressions {
     public void FRecordType.clearFlattened() { flattened = false; super.clearFlattened(); }
     public void FFunctionType.clearFlattened() { flattened = false; super.clearFlattened(); }
 
-    public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
+    public FExp InstFunctionCall.flatten(FQName prefix) {
+        if (callsLoadResource() && !inFunction()) {
+            if (isFunctionCallClause()) {
+                ASTNode.CANNOT_EVALUATE_LOADRESOURCE.invoke(this, this, "");
+            } else {
+                try {
+                    return ceval().buildLiteral();
+                } catch (ConstantEvaluationException e) {
+                    ASTNode.CANNOT_EVALUATE_LOADRESOURCE.invoke(this, this, e.getModelicaStackTrace());
+                }
+            }
+        }
         List args = new List();
         for (InstFunctionArgument e : getArgs()) 
             args.add(e.flatten(prefix));
@@ -2711,6 +2722,10 @@ aspect FlatExpressions {
         FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
         return createFFunctionCall(name, args, getFType().flatten(prefix, null, true));
     }
+
+    public static final SimpleProblemProducer ASTNode.CANNOT_EVALUATE_LOADRESOURCE =
+            new SimpleErrorProducer("CANNOT_EVALUATE_LOADRESOURCE", ProblemKind.SEMANTIC,
+                    "Could not evaluate function call which depends on loadResource during flattening: %s%s");
 
     public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
         return setLocationOf(new FFunctionCall(name, args, type));
