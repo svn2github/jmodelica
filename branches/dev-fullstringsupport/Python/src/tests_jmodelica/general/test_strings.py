@@ -65,15 +65,43 @@ class TestStringParameter1(SimulationTest):
         setString(self.model, "pi", "something")
         setStringAssertFail(self.model, "pd")
     
-class TestStringParameter2(SimulationTest):
+class TestStringParameter2a(SimulationTest):
     """
-    Basic test of string parameter.
+    Basic test of string parameter. FMI1.0.
     """
 
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base('StringTests.mo', 
-            'StringTests.TestStringParameterScalar1')
+            'StringTests.TestStringParameterScalar1', version="1.0")
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        assertString(self.model, "pi", "string")
+        assertString(self.model, "pd", "string1")
+        
+        setString(self.model, "pi", "something")
+        assertString(self.model, "pi", "something")
+        assertString(self.model, "pd", "something1")
+        
+        setString(self.model, "pi", "somethingelse")
+        self.run()
+        assertString(self.model, "pi", "somethingelse")
+        assertString(self.model, "pd", "somethingelse1")
+
+class TestStringParameter2b(SimulationTest):
+    """
+    Basic test of string parameter. FMI2.0.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringParameterScalar1', version="2.0")
 
     @testattr(stddist_full = True)
     def setUp(self):

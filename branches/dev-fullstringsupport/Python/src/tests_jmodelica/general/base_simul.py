@@ -38,7 +38,7 @@ class _BaseSimOptTest:
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, target="me"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, target="me", version=None):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
@@ -49,7 +49,10 @@ class _BaseSimOptTest:
         global _model_name
         cls.mo_path = os.path.join(get_files_path(), 'Modelica', mo_file)
 
-        _model_name = compile_fmu(class_name, cls.mo_path, compiler_options=options,target=target)
+        if version==None:
+            _model_name = compile_fmu(class_name, cls.mo_path, compiler_options=options,target=target)
+        else:
+            _model_name = compile_fmu(class_name, cls.mo_path, compiler_options=options,target=target,version=version)
 
 
     def setup_base(self, rel_tol, abs_tol):
@@ -247,7 +250,7 @@ class SimulationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, target="me"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, target="me", version=None):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
@@ -255,7 +258,7 @@ class SimulationTest(_BaseSimOptTest):
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
         """
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, target)
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, target, version)
 
     def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
         start_time=0.0, final_time=10.0, time_step=0.01, input=(),
