@@ -483,17 +483,13 @@ aspect FlatTypeCheck {
     syn boolean BaseNode.allowUnknownSize()    = false;
     eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
     eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() &&
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() &&
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && callsExternal();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && callsExternal();
 
     inh boolean BaseNode.inAllowUnknownSize();
     eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
-    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() ||
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
-    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() ||
-            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
+    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || callsExternal();
+    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || callsExternal();
 
     class FFunctionDecl {
         public enum FunctionType {
@@ -530,6 +526,11 @@ aspect FlatTypeCheck {
     syn boolean FStatement.isExternalStatement() = false;
     eq FExternalStmt.isExternalStatement()       = true;
 
+    syn boolean FAbstractFunctionCall.callsExternal() =
+            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
+    syn boolean FAbstractFunctionCall.callsLoadResource() =
+            FFunctionDecl.FunctionType.LOADRESOURCE.containsFunction(myCommonCallable());
+    
     syn boolean ASTNode.containsFunction(FFunctionDecl.FunctionType ft) {
         for (ASTNode n : this) {
             if (n.containsFunction(ft)) {
@@ -1378,7 +1379,7 @@ aspect FlatTypeCheck {
         } else {
             size().markAsStructuralParameter(checkType, this);
         }
-        if (FFunctionDecl.FunctionType.LOADRESOURCE.containsFunction(myCommonCallable())) {
+        if (callsLoadResource()) {
             getArgs().forceUsesVariability(checkType, ASTNode.fStructParameter("loadResource"));
         }
     }

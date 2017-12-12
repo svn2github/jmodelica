@@ -1012,6 +1012,52 @@ end VariabilityTests.LoadResource.LoadResource4;
 ")})));
 end LoadResource4;
 
+model LoadResource5
+    function f
+        input String x;
+        String s = Modelica.Utilities.Files.loadResource(x);
+        output Real y1,y2;
+    algorithm
+        y1 := 1;
+        y2 := 2;
+    end f;
+    parameter String p1 = "modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt";
+    Real x,y;
+equation
+    (x,y) = f(p1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="LoadResource5",
+            description="Mark loadResource input as structural, in function call clause",
+            errorMessage="
+Error at line 13, column 13, in file '...', CANNOT_EVALUATE_LOADRESOURCE:
+  Could not evaluate function call which depends on loadResource during flattening: f(p1)
+")})));
+end LoadResource5;
+
+model LoadResource6
+    function f
+        input String x;
+        output String y = Modelica.Utilities.Files.loadResource(x);
+    algorithm
+        assert(false, "nope");
+    end f;
+    parameter String p1 = "modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt";
+    parameter String p2 = f(p1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="LoadResource6",
+            description="Mark loadResource input as structural",
+            errorMessage="
+Error at line 9, column 27, in file '...', CANNOT_EVALUATE_LOADRESOURCE:
+  Could not evaluate function call which depends on loadResource during flattening: f(p1)
+    in function 'VariabilityTests.LoadResource.LoadResource6.f'
+    Assertion failed: nope
+")})));
+end LoadResource6;
+
 end LoadResource;
 
 end VariabilityTests;
