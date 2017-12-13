@@ -21,7 +21,7 @@ from pyfmi.fmi import FMUException
 import nose
 
 def assertString(model, name, value):
-    val = model.get_string(model.get_variable_valueref(name))[0]
+    val = model.get_string(model.get_variable_valueref(name))[-1]
     assert val==value, "Expected '" + str(value) + "' got '" + str(val) + "'"
 
 def setString(model, name, value):
@@ -154,3 +154,43 @@ class TestStringParameter3(SimulationTest):
         assertString(self.model, "pi[2]", "str5")
         assertString(self.model, "pd[1]", "str3str3")
         assertString(self.model, "pd[2]", "str5str5")
+
+class TestString1(SimulationTest):
+    """
+    Test initial parameter string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestString1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s1", "0.5")
+        assertString(self.model, "s2", "0.50.5")
+
+class TestString2(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestString2')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s1", "10")
+        assertString(self.model, "s2", "1010")

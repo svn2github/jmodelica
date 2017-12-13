@@ -1461,6 +1461,10 @@ o->o_pe = 3;
 o->n_pe = 1;
 o->o_pd = 4;
 o->n_pd = 0;
+o->o_w = 4;
+o->n_w = 0;
+o->o_wp = 4;
+o->n_wp = 0;
 o->n = 4;
 
 
@@ -1486,10 +1490,10 @@ o->n = 4;
 #define _eval4_18 ((*(jmi->z))[18])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _s_pi_reg5_4 jmi->z_t.strings.values[0]
-#define _s_pi_struct5_9 jmi->z_t.strings.values[1]
-#define _s_pi_final5_14 jmi->z_t.strings.values[2]
-#define _s_pi_eval5_19 jmi->z_t.strings.values[3]
+#define _s_pi_reg5_4 (jmi->z_t.strings.values[0])
+#define _s_pi_struct5_9 (jmi->z_t.strings.values[1])
+#define _s_pi_final5_14 (jmi->z_t.strings.values[2])
+#define _s_pi_eval5_19 (jmi->z_t.strings.values[3])
 
 ---
 
@@ -1576,13 +1580,13 @@ $C_DAE_initial_dependent_parameter_assignments$
             generatedCode="
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _s_ci_ci_0 jmi->z_t.strings.values[0]
-#define _s_ci_cd_1 jmi->z_t.strings.values[1]
-#define _s_pi_pi_2 jmi->z_t.strings.values[2]
-#define _s_pi_ps_3 jmi->z_t.strings.values[3]
-#define _s_pi_pf_4 jmi->z_t.strings.values[4]
-#define _s_pi_pe_5 jmi->z_t.strings.values[5]
-#define _s_pd_pd_6 jmi->z_t.strings.values[6]
+#define _s_ci_ci_0 (jmi->z_t.strings.values[0])
+#define _s_ci_cd_1 (jmi->z_t.strings.values[1])
+#define _s_pi_pi_2 (jmi->z_t.strings.values[2])
+#define _s_pi_ps_3 (jmi->z_t.strings.values[3])
+#define _s_pi_pf_4 (jmi->z_t.strings.values[4])
+#define _s_pi_pe_5 (jmi->z_t.strings.values[5])
+#define _s_pd_pd_6 (jmi->z_t.strings.values[6])
 
 o->o_ci = 0;
 o->n_ci = 2;
@@ -1598,6 +1602,10 @@ o->o_pe = 5;
 o->n_pe = 1;
 o->o_pd = 6;
 o->n_pd = 1;
+o->o_w = 7;
+o->n_w = 0;
+o->o_wp = 7;
+o->n_wp = 0;
 o->n = 7;
 
 int jmi_set_start_values_0_0(jmi_t* jmi) {
@@ -1643,8 +1651,7 @@ model CCodeGenParameters4
     parameter Integer initial2(fixed = false) = if time < 1 then 1 else 2;
     parameter E       initial3(fixed = false) = if time < 1 then E.A else E.B;
     parameter Boolean initial4(fixed = false) = time < 1;
-    // Strings are not supported:
-//    parameter String  initial5(fixed = false) = if time < 1 then "A" else "B";
+    parameter String  initial5 = if initial1 < 1 then "A" else "B";
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -1683,8 +1690,12 @@ o->n_pf = 0;
 o->o_pe = 0;
 o->n_pe = 0;
 o->o_pd = 0;
-o->n_pd = 0;
-o->n = 0;
+o->n_pd = 1;
+o->o_w = 1;
+o->n_w = 0;
+o->o_wp = 1;
+o->n_wp = 0;
+o->n = 1;
 
 
 ---
@@ -1694,6 +1705,7 @@ o->n = 0;
 #define _initial4_3 ((*(jmi->z))[3])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
+#define _s_pd_initial5_4 (jmi->z_t.strings.values[0])
 
 
 ---
@@ -1713,6 +1725,7 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     _initial2_1 = (0);
     _initial3_2 = (1);
     _initial4_3 = (JMI_FALSE);
+    JMI_ASG(STR_Z, _s_pd_initial5_4, (\"\"));
     JMI_DYNAMIC_FREE()
     return ef;
 }

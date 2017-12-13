@@ -44,13 +44,16 @@ aspect CCodeGenAlgorithms {
             ASTNode dst, ASTNode src) {
         str.print(indent);
         str.print("JMI_ASG(");
-        str.print(macroType());
+        str.print(dst.assignMacroType(this));
         str.print(", ");
         p.print(dst, str, indent);
         str.print(", ");
         p.print(src, str, indent);
         str.print(")\n");
     }
+
+    syn String ASTNode.assignMacroType(FType type) = type.macroType();
+    eq FVariable.assignMacroType(FType type)       = isString() ? "STR_Z" : super.assignMacroType(type);
 
     /*
      * Hook for printing array initialization

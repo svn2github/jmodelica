@@ -192,7 +192,7 @@ aspect CCodeGenBlocks {
                 // Write back of pre variables is only done in the DAE BLT
                 for (FVariable var : allLocalVariables()) {
                     if (var.isDiscrete() && !var.isPreVariable()) {
-                        str.formatln("%s%s = %s;", indent, var.myPreVariable().name_C(), var.name_C());
+                        p.printAssign(var.type(), str, indent, var.myPreVariable(), var);
                     }
                 }
             }

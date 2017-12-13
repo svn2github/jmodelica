@@ -370,8 +370,10 @@ public class CGenerator extends GenericGenerator {
                     "#define %s ((*(jmi->z))[jmi->offs%s_%s+%d])\n";
             private static final String FMT_DEFAULT_INDEX = 
                     "#define %s ((*(jmi->z))[%d])\n";
+            private static final String FMT_DEFAULT_STRING = 
+                    "#define %s (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+%d])\n";
             private static final String FMT_DEFAULT_STRING_INDEX = 
-                    "#define %s jmi->z_t.strings.values[%d]\n";
+                    "#define %s (jmi->z_t.strings.values[%d])\n";
             private static final String FMT_EXTERNAL      = 
                     "#define %s ((jmi->ext_objs)[%d])\n";
             private static final String FMT_VIRTUAL_FIRST = 
@@ -399,7 +401,11 @@ public class CGenerator extends GenericGenerator {
                     }
                     break;
                 case STRING:
-                    cs.format(FMT_DEFAULT_STRING_INDEX, fv.name_C(), entry.getIndexFor(fv));
+                    if (pre) {
+                        cs.format(FMT_DEFAULT_STRING, fv.preName_C(), entry.getOffsetIndexFor(fv));
+                    } else {
+                        cs.format(FMT_DEFAULT_STRING_INDEX, fv.name_C(), entry.getIndexFor(fv));
+                    }
                     break;
                 case EXTERNAL:
                     cs.format(FMT_EXTERNAL, fv.name_C(), entry.getOffsetIndexFor(fv));
@@ -461,6 +467,8 @@ public class CGenerator extends GenericGenerator {
             o = genList(str, fclass.numFinalIndependentStringParameters()     , o, FTypePrefixVariability.VariabilityCausality_C.PF);
             o = genList(str, fclass.numEvalIndependentStringParameters()      , o, FTypePrefixVariability.VariabilityCausality_C.PE);
             o = genList(str, fclass.numDependentStringParameters()            , o, FTypePrefixVariability.VariabilityCausality_C.PD);
+            o = genList(str, fclass.numDiscreteStringVariables()              , o, FTypePrefixVariability.VariabilityCausality_C.W);
+            o = genList(str, fclass.numDiscreteStringVariables()              , o, FTypePrefixVariability.VariabilityCausality_C.WP);
             genLast(str, o);
         }
         

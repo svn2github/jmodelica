@@ -20,4 +20,22 @@ model TestStringParameterArray1
     parameter String[:] pd = pi + pi;
 end TestStringParameterArray1;
 
+model TestString1
+    parameter String s0 = "";
+    parameter Real t(fixed=false);
+    parameter String s1 = String(t);
+    parameter String s2 = s1 + s1;
+initial equation
+    t = time + 0.5;
+end TestString1;
+
+model TestString2
+    parameter String s0 = "";
+    String s1;
+    String s2;
+equation
+    s1 = String(time);
+    s2 = s1 + s1;
+end TestString2;
+
 end StringTests;
