@@ -108,7 +108,7 @@ aspect CCodeGenBlocksResidual {
         }
         Enumerator indexCounter = new Enumerator();
         for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
-            use.genWriteBackResidual_C(str, indent, use.tempName_C(), enumerator, forIndices, indexCounter);
+            p.printWriteBackResidual(str, indent, use.myFV(), this, enumerator, forIndices, indexCounter);
         }
     }
 
@@ -118,19 +118,16 @@ aspect CCodeGenBlocksResidual {
      * and statements which put the new values in temporaries.
      */
     public void FAlgorithm.prettyPrintNoSideEffect_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables) {
-        String switchTemp = this.tempName_C();
         Collection<FIdUseExp> lhs = uniqueFIdUseExpsInLHS();
         for (FIdUseExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
-                FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
+                p.printTempInputAssigns(str, indent, this, use.myFV());
             }
         }
         p.print(this, str, indent);
         for (FIdUseExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
-                FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
-                FStatement.printAssignStmt_C(str, indent, use.myFV().name_C(), use.tempName_C());
-                FStatement.printAssignStmt_C(str, indent, use.tempName_C(), switchTemp);
+                p.printTempSwap(use.myFV(), this, str, indent);
             }
         }
     }

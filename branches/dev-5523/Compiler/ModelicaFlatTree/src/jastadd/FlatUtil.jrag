@@ -1555,11 +1555,11 @@ aspect FlatFunctionUtils {
          return n;
      }
      
-     inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
+     inh lazy CommonVariableDecl FFunctionCallLeft.myOutput();
      eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
      eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
-     syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
-     eq InstFunctionCall.findOutput(int i)                         = 
+     syn CommonVariableDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
+     eq CommonFunctionCall.findOutput(int i)                         = 
          (i >= myCallOutputs().size()) ? unknownInstComponentDecl() : myCallOutputs().get(i);
      
      inh boolean FExp.functionCallIsExp();

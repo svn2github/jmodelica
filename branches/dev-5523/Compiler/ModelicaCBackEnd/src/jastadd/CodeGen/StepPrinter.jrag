@@ -107,6 +107,9 @@ aspect StepPrinter {
                 return v.type_C();
             }
             
+            public String tempName(FAbstractVariable v, TempScope ts) {
+                return ts.tempName_C(v);
+            }
             
             public String residual() {
                 return "res";

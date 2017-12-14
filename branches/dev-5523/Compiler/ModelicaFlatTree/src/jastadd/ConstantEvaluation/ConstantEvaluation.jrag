@@ -3158,6 +3158,10 @@ aspect ConstantEvaluation {
         public boolean isInput();
         public boolean isOutput();
         
+        // Added for type checking
+        public boolean shouldBeDifferentiated();
+        public boolean isUnknown();
+      
         public FAbstractVariable asFAbstractVariable();
     }
     

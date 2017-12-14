@@ -100,16 +100,21 @@ aspect CCodeGenAlgorithms {
         if (first) {
             p.printVarDecls(this, str, indent);
             if (!solved || (forVariables != null && forVariables.size() != uniqueFIdUseExpsInLHS().size())) {
-                fRealScalarType().printDecl_C(printer_C, str, indent, this.tempName_C(), null);
+                String swapTemp = this.tempName_C();
+                fRealScalarType().printDecl_C(printer_C, str, indent, swapTemp, null);
                 for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
                     if (!solved || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
-                        if (!use.inFunctionCallLeftTop()) {
-                            use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
-                        }
+                        p.printTempInputDecl(use.myFV(), this, str, indent);
                     }
                 }
             }
         }
+    }
+
+    public abstract void CodePrinter.printTempInputDecl(FAbstractVariable v, TempScope ts, CodeStream str, String indent);
+    @Override
+    public void CPrettyPrinter.printTempInputDecl(FAbstractVariable v, TempScope ts, CodeStream str, String indent) {
+        v.type().printScalarDecl_C(str, indent, false, ts.tempName_C(v));
     }
 
     @Override
@@ -143,23 +148,39 @@ aspect CCodeGenAlgorithms {
             Set<FVariable> defSet = defSet();
             for (FVariable fv : referencedFVariablesInLHS()) {
                 if (!defSet.contains(fv)) {
-                    FStatement.printAssignStmt_C(str, indent, fv.name_C(), fv.algorithmInit_C());
+                    p.printInputInit(str, indent, fv);
                 }
             }
         }
         // Print the algorithm
         p.print(getFStatements(), str, indent);
     }
+    
+    public abstract void CodePrinter.printInputInit(CodeStream str, String indent, FAbstractVariable v);
+    @Override
+    public void CPrettyPrinter.printInputInit(CodeStream str, String indent, FAbstractVariable v) {
+        v.algorithmInit(ExecStep, str, indent);
+    }
 
-    public String FVariable.algorithmInit_C() {
+    public void FAbstractVariable.algorithmInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
+    }
+    @Override
+    public void FVariable.algorithmInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(indent, p.name(this), " = ");
         if (isDiscrete()) {
-            return myPreVariable().name_C();
+            str.print(p.name(myPreVariable()));
         } else if (isParameter() && hasBindingExp()) {
-            return getBindingExp().prettyPrint_C();
+            p.print(getBindingExp(), str, indent); //TODO correct?
         } else {
             FExp e = startAttributeExp();
-            return (e == null) ? "0.0" : e.prettyPrint_C();
+            if(e == null) {
+                str.print("0.0");
+            } else {
+                p.print(e, str, indent);
+            }
         }
+        str.println(";");
     }
 
     @Override
@@ -458,6 +479,15 @@ aspect CCodeGenAlgorithms {
             frct.getFType().printAssignExt_C(p, str, indent, dst + frct.getName(), src + frct.getName(), wb, false);
         }
     }
+    
+    //TODO move all temp attributes to a new aspect e.g. CCodeGenNameBinding?
+    public interface TempScope {
+        public String tempName_C();
+        public String tempName_C(FAbstractVariable v);
+    }
+    
+    FAlgorithm implements TempScope;
+    syn lazy String FAlgorithm.tempName_C(FAbstractVariable v) = nextTempName_C();
 
     syn lazy String FExp.tempName_C()       = nextTempName_C();
     syn lazy String FAlgorithm.tempName_C() = nextTempName_C();
