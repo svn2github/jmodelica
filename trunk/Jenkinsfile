@@ -26,12 +26,12 @@ node ("716KS42") {
         
         stage("Build install folder") {
             runMSYSWithEnv("""\
+WORKSPACE="$(pwd)"
 JM_CO_DIR="${WORKSPACE}/JModelica/"
 export SRC_HOME="${JM_CO_DIR}"
 export BUILD_HOME="${WORKSPACE}/build"
 export INSTALL_HOME="${WORKSPACE}/install"
-JMODELICA_SDK_HOME=$(unixpath(JMODELICA_SDK_HOME))
-cd "${JMODELICA_SDK_HOME}"
+cd "$(unixpath(JMODELICA_SDK_HOME))"
 echo ==== Run configure
 ./configure.sh
 echo ==== Run make
