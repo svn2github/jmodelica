@@ -3,6 +3,7 @@ def url = scm.getLocations()[0].remote
 library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCMSource', remoteBase: url, credentialsId: ''])
 
 def JM_BRANCH = "trunk"
+def JMODELICA_SDK_HOME="C:\\JModelica.org-SDK-1.13\\"
 
 // Set build name:
 currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.TRIGGER_CAUSE) + ")"
@@ -29,7 +30,7 @@ JM_CO_DIR="${WORKSPACE}/JModelica/"
 export SRC_HOME="${JM_CO_DIR}"
 export BUILD_HOME="${WORKSPACE}/build"
 export INSTALL_HOME="${WORKSPACE}/install"
-JMODELICA_SDK_HOME=$(unixpath "$JMODELICA_SDK_HOME")
+JMODELICA_SDK_HOME=$(unixpath(JMODELICA_SDK_HOME))
 cd "${JMODELICA_SDK_HOME}"
 echo ==== Run configure
 ./configure.sh
@@ -60,7 +61,7 @@ install/jm_tests" -ie -x "${TEST_RES_DIR}")
             }
         }
         stage ("Publish") {
-            jmRevision="unknown"// Should be svnRevision("JModelica")
+            jmRevision=svnRevision("JModelica")
             def zipName="JModelica.org-Chicago-win-r${jmRevision}"
             runMSYSWithEnv("""\
 cd "install"
