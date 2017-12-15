@@ -501,10 +501,12 @@ aspect Flattening {
         if (ie != null) {
             flattenExternal(f, stmts, ie);
         } else {
-            FStatement.flattenFStatementList(f, findFunctionAlgorithm().getFStatements(),
-                stmts, new FQNameEmpty());
+            FAlgorithm fab = findFunctionAlgorithm();
+            if (fab != null) {
+                FStatement.flattenFStatementList(f, fab.getFStatements(), stmts, new FQNameEmpty());
+            }
         }
-
+        
         int num = stmts.getNumChild();
         if (num == 0 || !(stmts.getChild(num - 1) instanceof FReturnStmt)) 
             stmts.addChild(new FReturnStmt());
@@ -695,7 +697,6 @@ aspect Flattening {
                 if (tmp != null) 
                     return tmp;
             }
-            return new FAlgorithm(new List());
         }
         return null;
     }

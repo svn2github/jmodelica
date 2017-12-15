@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler; #5526 
+Fixed null pointer in evaluation of partial function
+
 ; Feature ; Major ; Compiler; #4797 
 Support for string parameters
 

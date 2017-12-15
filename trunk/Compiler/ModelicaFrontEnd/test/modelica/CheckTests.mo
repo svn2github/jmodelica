@@ -1635,5 +1635,23 @@ Error at line 6, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/Che
 ")})));
 end ExternalFunctionAnnotation1;
 
+model NoAlgorithmEvaluation1
+    partial function f
+        input Integer x;
+        output Integer y;
+    end f;
+    
+    parameter Integer n = f(1);
+    Real[n] x = 1:n;
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="NoAlgorithmEvaluation1",
+            description="Test for null pointer in evaluation of partial function",
+            checkType=check,
+            errorMessage="
+Error at line 7, column 27, in file '...':
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+end NoAlgorithmEvaluation1;
 
 end CheckTests;
