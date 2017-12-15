@@ -613,7 +613,9 @@ aspect BlockSetup {
         genEvalModeAttribute_C(p, str, indent,       "JMI_BLOCK_DISCRETE_REAL_NOMINAL", 
                 FAttribute.NOMINAL, createSolverArrayMap(discreteRealVariables_C()));
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE", 
-                nonRealVariables_C());
+                nonRealNonStringVariables_C());
+        genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_SOLVED_STRING_VALUE_REFERENCE", 
+                nonRealStringVariables_C());
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE", 
                 directlyImpactingNonReals_C());
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE", 
@@ -1134,9 +1136,10 @@ aspect BlockSetup {
         str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
         str.print(localSolvedRealVariables().size() + ", ");
         str.print(discreteRealVariables_C().size() + ", ");
-        str.print(nonRealVariables_C().size() + ", ");
+        str.print(nonRealNonStringVariables_C().size() + ", ");
         str.print(directlyImpactingNonReals_C().size() + ", ");
         str.print(nonRealTempVariables_C().size() + ", ");
+        str.print(nonRealStringVariables_C().size() + ", ");
         str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
         str.print(directlyActiveSwitches_C().size() + ", ");
         str.print(variability().genJMIVariabilityConstant_C() + ", ");
@@ -1270,6 +1273,26 @@ aspect BlockSetup {
         Collection<FVariable> l = new ArrayList<FVariable>();
         for (FVariable fv : localNonRealVariables()) {
             if (!fv.isTemporary()) {
+                l.add(fv);
+            }
+        }
+        return l;
+    }
+    
+    public Collection<FVariable> AbstractEquationBlock.nonRealNonStringVariables_C() {
+        Collection<FVariable> l = new ArrayList<FVariable>();
+        for (FVariable fv : localNonRealVariables()) {
+            if (!fv.isTemporary() && !fv.isString()) {
+                l.add(fv);
+            }
+        }
+        return l;
+    }
+    
+    public Collection<FVariable> AbstractEquationBlock.nonRealStringVariables_C() {
+        Collection<FVariable> l = new ArrayList<FVariable>();
+        for (FVariable fv : localNonRealVariables()) {
+            if (!fv.isTemporary() && fv.isString()) {
                 l.add(fv);
             }
         }

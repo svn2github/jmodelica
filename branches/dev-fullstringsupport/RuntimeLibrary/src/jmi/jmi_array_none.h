@@ -31,7 +31,11 @@
 #include <stdlib.h>
 #include "jmi_dyn_mem.h"
 
+/**
+ * Copy src to dest. Use local_block memory allocation if available, otherwise malloc.
+ */
 void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block);
+
 /*
  * Array type declaration macro.
  * Used for primitive types here and record types in generated code.

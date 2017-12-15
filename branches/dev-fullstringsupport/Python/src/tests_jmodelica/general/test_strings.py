@@ -194,3 +194,64 @@ class TestString2(SimulationTest):
         self.run()
         assertString(self.model, "s1", "10")
         assertString(self.model, "s2", "1010")
+
+class TestStringEvent1(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringEvent1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.model.simulate(final_time=0.9)
+        assertString(self.model, "s2", "0.9msg")
+        opts = self.model.simulate_options()
+        opts["initialize"] = False;
+        self.model.simulate(start_time=0.9, final_time=1.0, options=opts)
+        assertString(self.model, "s2", "11")
+
+class TestStringBlockEvent1(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s3", "011")
+
+class TestStringBlockEvent2(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent2')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s2", "s2:0:1")

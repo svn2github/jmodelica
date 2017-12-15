@@ -38,4 +38,42 @@ equation
     s2 = s1 + s1;
 end TestString2;
 
+model TestStringEvent1
+    String s1;
+    String s2;
+equation
+    s1 = String(time);
+    if time > 1 then
+        s2 = s1 + s1;
+    else
+        s2 = s1 + "msg";
+    end if;
+end TestStringEvent1;
+
+model TestStringBlockEvent1
+    String s1,s2,s3;
+equation
+    s1 = String(time);
+    if time > 1 then
+        s2 = s1 + s1;
+    else
+        s2 = s1 + "msg";
+    end if;
+    if not pre(s2) == s2 then
+        s3 = pre(s1) + s2;
+    else
+        s3 = pre(s3);
+    end if;
+end TestStringBlockEvent1;
+
+model TestStringBlockEvent2
+    String s1;
+    String s2(start="s2");
+equation
+    s1 = String(time);
+    when {time > 1, time >= 1} then
+        s2 = pre(s2) + ":" + pre(s1);
+    end when;
+end TestStringBlockEvent2;
+
 end StringTests;
