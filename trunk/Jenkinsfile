@@ -24,14 +24,14 @@ node ("716KS42") {
         }
         
         
-        stage("Build install folder") {
+                stage("Build install folder") {
             runMSYSWithEnv("""\
-WORKSPACE="$(pwd)"
-JM_CO_DIR="${WORKSPACE}/JModelica/"
-export SRC_HOME="${JM_CO_DIR}"
-export BUILD_HOME="${WORKSPACE}/build"
-export INSTALL_HOME="${WORKSPACE}/install"
-cd "$(unixpath(JMODELICA_SDK_HOME))"
+WORKSPACE='pwd'
+JM_CO_DIR=${WORKSPACE}/JModelica/
+export SRC_HOME=${JM_CO_DIR}
+export BUILD_HOME=${WORKSPACE}/build
+export INSTALL_HOME=${WORKSPACE}/install
+cd "${unixpath(JMODELICA_SDK_HOME)}"
 echo ==== Run configure
 ./configure.sh
 echo ==== Run make
@@ -55,7 +55,8 @@ set BUILD_CASADI=1
             runMSYSWithEnv("""\
 TEST_RES_DIR=${WORKSPACE}/testRes
 mkdir -p "${TEST_RES_DIR}"
-install/jm_tests" -ie -x "${TEST_RES_DIR}")
+install/jm_tests" -ie -x "${TEST_RES_DIR}"
+""")
             } finally {
                 junit testResults: 'testRes/*.xml', allowEmptyResults: true
             }
