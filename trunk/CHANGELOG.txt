@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; ThirdParty ; #5474
+Updated the external C code in MSL thirdparty (merged from MSL trunk)
+
 ; Fixed ; Minor ; Compiler; #5526 
 Fixed null pointer in evaluation of partial function
 
