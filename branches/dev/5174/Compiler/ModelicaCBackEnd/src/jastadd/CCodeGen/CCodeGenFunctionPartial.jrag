@@ -28,18 +28,16 @@ aspect CCodeGenFunctionPartial {
         str.println(";");
     }
     
-    //TODO gather all Computation objects and the associated mechanism in CodePrinter in its own aspect
-    // CCodeGenFunctionIOComputation?
-    // Move away from the interleaved layout of Computation objects and pretty-printing code.
-    // This would yield an aspect with high cohesion and increase clarity.
-    // It would also make the code easier to review.
-    //TODO make Computation depend on the FCallable interface instead of directly on FFunctionDecl or FFunctionVariable
-    //TODO make superinterface IOComputation over StructComputation and HeadComputation. CodePrinter then depends on this interface.
-    public class StructComputation extends HeadComputation {
-        public StructComputation() {
-            super(null,""); //TODO clean up, remove inheritance and use interface instead?
-        }
-    }
+    public class StructComputation {}
+
+    public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+            ArrayList<FFunctionVariable> variables, Iterable<FExp> args) {}
+    public void StructComputation.print(FFunctionVariable v, FExp arg, CodePrinter.ExecuteCodePrinter p,
+            CodeStream str, String indent) {}
+    public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+            ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {}
+    public void StructComputation.print(FFunctionVariable v, FFunctionCallLeft arg, 
+            CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {}
 
     /**
      * \brief Generates FP and OUT structs used by partial function calls.
@@ -52,18 +50,17 @@ aspect CCodeGenFunctionPartial {
         beginStruct_C(str, indent, out);
         str.formatln("%sint n;", next);
         new StructComputation()
-        .prettyPrintHead(myOutputs(), p, str, next);
+        .print(myOutputs(), p, str, next);
         endStruct_C(str, indent);  
         
         beginStruct_C(str, indent, fp);
         str.formatln("%s%s (*fpcl)(%s*, %s*, ...);", next, getDeclaredType_C(p), fp, out);
         str.formatln("%s%s* (*fpcr)(%s*, %s*, ...);", next, fp, fp, fp);
         new StructComputation()
-        .prettyPrintHead(myInputs(), p, str, next);
+        .print(myInputs(), p, str, next);
         endStruct_C(str, indent);
     }
 
-    //TODO: this belongs in the CCodeGenFunction aspect, move it there
     public abstract String CodePrinter.funcNameUnderscore(FCallable fc, String suffix);
     
     @Override
@@ -86,15 +83,21 @@ aspect CCodeGenFunctionPartial {
         str.formatln("%s};", indent);
     }
 
-    //TODO rename prettyPrintHead to something else, map() maybe, since we do a straight for-each loop over the variables?
-    public StructComputation StructComputation.prettyPrintHead(ArrayList<FFunctionVariable> variables, CodePrinter p, CodeStream str,
+    public StructComputation StructComputation.print(ArrayList<FFunctionVariable> variables, CodePrinter p, CodeStream str,
             String indent) {
-        p.printArguments(this, str, indent, variables);
+        p.print(this, str, indent, variables);
         return this;
     }
 
+    public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+            ArrayList<FFunctionVariable> variables) {
+        for (FFunctionVariable v : variables) {
+            p.print(v, str, indent, this);
+        }
+    }
+
     @Override
-    public void StructComputation.printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+    public void StructComputation.print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
             str.println(indent, p.type(v)," ", p.name(v), ";");
             if(v.isInput())
@@ -169,25 +172,23 @@ aspect CCodeGenFunctionPartial {
         int i; // iteration index of tempNames.length
         String[] tempNames;
         public TempNameStructComputation() {
-            super(); //TODO clean up, remove inheritance, and use interface instead?
+            super();
         }
     }
 
-    //TODO pull down the super method to this class and keep it void in StructComputation?
-    //TODO introduce parameter object for (list of variables, list of variable names)?
-    public TempNameStructComputation TempNameStructComputation.prettyPrintHead(ArrayList<FFunctionVariable> variables, String[] tempNames, CodePrinter p, CodeStream str,
+    public TempNameStructComputation TempNameStructComputation.print(ArrayList<FFunctionVariable> variables, String[] tempNames, CodePrinter p, CodeStream str,
             String indent) {
         this.tempNames = tempNames;
         i = 0;
-        return (TempNameStructComputation) super.prettyPrintHead(variables, p, str, indent);
+        return (TempNameStructComputation) super.print(variables, p, str, indent);
     }
 
     @Override
-    public void TempNameStructComputation.printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+    public void TempNameStructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             ArrayList<FFunctionVariable> variables) {
         iArg = 0;
         for (FFunctionVariable v: variables) {
-            p.printArgument(v, str, indent, this);
+            p.print(v, str, indent, this);
             i++;
             iArg++;
         }
@@ -210,13 +211,13 @@ int i;
         new TempNameStructComputation() {
             private int tempIndex = 1;// shared state between invocations
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
                 tempNames[i] ="tmp_" + tempIndex++;
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, next)
-        .prettyPrintHead(myOutputs(), outputNames, p, str, next);
+        .print(myInputs(), inputNames, p, str, next)
+        .print(myOutputs(), outputNames, p, str, next);
         
         // FPCL
         prettyPrintHeadFPCL(p, str, indent);
@@ -224,23 +225,23 @@ int i;
         
         new TempNameStructComputation() {
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
                 str.formatln("%s%s %s;", indent, p.type(v), tempNames[i]);
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, next)
-        .prettyPrintHead(myOutputs(), outputNames, p, str, next);
+        .print(myInputs(), inputNames, p, str, next)
+        .print(myOutputs(), outputNames, p, str, next);
 
         if(p.needsOutputVarArgs()) {
             new TempNameStructComputation() {
                 @Override
-                public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+                public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
                         String indent) {
                     str.println(next, p.type(v), " ", "*", p.name(v), ";");  
                 }
             }
-            .prettyPrintHead(myOutputs(), outputNames, p, str, next);
+            .print(myOutputs(), outputNames, p, str, next);
         }
 
         //init input variables from either the input struct or input varargs
@@ -248,7 +249,7 @@ int i;
         genVarArgsOpen(str, next, "out");
         new TempNameStructComputation() {
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
               str.formatln("%sif (fp_in->%s_s) {", next, p.name(v));
               str.formatln("%s%s = fp_in->%s;", next2, tempNames[i], p.name(v));
@@ -257,26 +258,25 @@ int i;
               str.formatln("%s}", next);
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, indent);
+        .print(myInputs(), inputNames, p, str, indent);
         //init output variables from varargs
         if(p.needsOutputVarArgs()) {
             new TempNameStructComputation() {
                 @Override
-                public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+                public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
                         String indent) {
                     genVarArgsRead(str, next, p.name(v), p.type(v)+"*");
                 }
             }
-            .prettyPrintHead(myOutputs(), outputNames, p, str, indent);
+            .print(myOutputs(), outputNames, p, str, indent);
         }
         genVarArgsClose(str, next);
         
-        //print function call
-        //TODO unify with FFunctionDecl.printCall?
-        str.format("%s%s(", next, p.funcNameUnderscore(this, C_SUFFIX_DEF));
+        str.print(next, p.funcNameUnderscore(this, C_SUFFIX_DEF), "(");
         new TempNameStructComputation() {
+            private String sep = "";
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
                 str.print(sep);
                 if(v.isOutput()) {
@@ -286,17 +286,17 @@ int i;
                 sep = ", ";
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, indent)
-        .prettyPrintHead(myOutputs(), outputNames, p, str, indent);
+        .print(myInputs(), inputNames, p, str, indent)
+        .print(myOutputs(), outputNames, p, str, indent);
         str.println(");");
         
         //writeback variables to the output struct and/or output varargs
         str.formatln("%sif (out != NULL) {",next);
         new TempNameStructComputation() {
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
-              str.formatln("%sif (out->n > %d) {", next2, iArg); //TODO pull out if-statement into outer loop or Decorator pattern to avoid duplication.
+              str.formatln("%sif (out->n > %d) {", next2, iArg);
               if(p.codePrinter().needsOutputVarArgs()) {
                   str.formatln("%s%s = %s;", next3, "*"+p.name(v), tempNames[i]);
               }
@@ -304,7 +304,7 @@ int i;
               str.formatln("%s}", next2);
             }
         }
-        .prettyPrintHead(myOutputs(), outputNames, p, str, indent);
+        .print(myOutputs(), outputNames, p, str, indent);
         str.formatln("%s}",next);
         if (myOutputs().size() > 0)
             str.formatln("%sreturn %s;", next, outputNames[0]);
@@ -325,29 +325,29 @@ int i;
         str.formatln("%sif (fp_in == NULL) {", next);
         new TempNameStructComputation() {
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
                 str.formatln("%sfp_out->%s_s = 0;", next2, p.name(v));
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, indent);
+        .print(myInputs(), inputNames, p, str, indent);
         str.formatln("%s} else {", next);
         new TempNameStructComputation() {
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
                 String name = p.name(v);
                 str.formatln("%sfp_out->%s_s = fp_in->%s_s;", next2, name, name);
                 str.formatln("%sfp_out->%s = fp_in->%s;", next2, name, name);
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, indent);
+        .print(myInputs(), inputNames, p, str, indent);
         str.formatln("%s}", next);
         
         genVarArgsOpen(str, next, "fp_out");
         new TempNameStructComputation() {
             @Override
-            public void printArgument(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent) {
                 String name = p.name(v);
                 str.format("%sif (!fp_out->%s_s && ", next, name);
@@ -358,7 +358,7 @@ int i;
                 str.formatln("%s}", next);
             }
         }
-        .prettyPrintHead(myInputs(), inputNames, p, str, indent);
+        .print(myInputs(), inputNames, p, str, indent);
         genVarArgsClose(str, next);
         
         str.formatln("%sreturn fp_out;", next);
@@ -379,8 +379,7 @@ int i;
     
 
     @Override
-    public void FFunctionVariable.prettyPrintCall_C(CodePrinter p, CodeStream str, String indent, final FFunctionCall call) {
-        //TODO remove _C suffix
+    public void FFunctionVariable.prettyPrintCall(CodePrinter p, CodeStream str, String indent, final FFunctionCall call) {
         boolean exp = p.functionCallIsExp(call);
         String out = "NULL";
         if (!exp) {
@@ -389,16 +388,15 @@ int i;
             out = "&" +out;
             str.print(indent);
         }
-        //TODO unify with FFunctionDecl.prettyPrintCall_C, or specifically with FunctionCallParameterComputation.prettyPrintHead
         str.format("%s->fpcl(%s, %s", p.ExecStep.name(this), p.ExecStep.name(this), out);
         for (FExp arg : call.getArgs()) {
             p.printCastArgument(arg, str, indent);
         }
         if (!exp && p.needsOutputVarArgs()) {
-            HeadComputation hc = new FunctionCallParameterComputation(", ", call);
+            IOComputation ioc = new FunctionCallParameterComputation(", ", call);
             ArrayList<FExp> args = new ArrayList<>();
             args.add(call);
-            p.printArguments(hc, str, indent, myOutputs(), args);
+            p.print(ioc, str, indent, myOutputs(), args);
         }
         str.print(")");
         if (!exp) {
@@ -406,24 +404,24 @@ int i;
         }
         if (!exp) {
             //write back
-			StructComputation sc = new StructComputation() { //TODO similar to FunctionCallParameterComputation?
+			StructComputation sc = new StructComputation() {
                 @Override
-                public void printArguments(CodePrinter.ExecuteCodePrinter p, CodeStream str,
+                public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
                         String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {
                     int i = 0;
                     for (FFunctionCallLeft arg : args) {
-                        p.printArgument(variables.get(i), arg, str, indent, this);
+                        p.print(variables.get(i), arg, str, indent, this);
                         i++;
                     }
                 }
 
                 @Override
-                public void printArgument(FFunctionVariable v, FFunctionCallLeft arg, 
+                public void print(FFunctionVariable v, FFunctionCallLeft arg, 
                         CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
                     str.formatln("%s%s = %s.%s;", indent, p.name(arg), p.name(call), p.name(arg));
                 }
 			};
-            p.printArguments(sc, str, indent, myOutputs(), call.myLefts());
+            p.print(sc, str, indent, myOutputs(), call.myLefts());
         }
     }
     
@@ -450,7 +448,6 @@ int i;
     }
 
     public void FPartialFunctionCall.prettyPrint(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-       //TODO Move prettyPrint to the myFCallable, i.e FFunctionVariable.prettyPrintPartialCall, similar FFV.prettyPrintCall_C?
         FCallable fc = myFCallable();
 
         String previous = "NULL";

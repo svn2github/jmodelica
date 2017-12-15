@@ -1343,7 +1343,7 @@ aspect CCodeGenExpressions {
         
         @Override
         public void printCall(FFunctionCall call, CodeStream str, String indent) {
-            call.myFCallable().prettyPrintCall_C(this, str, indent, call);
+            call.myFCallable().prettyPrintCall(this, str, indent, call);
         }
         
         @Override
