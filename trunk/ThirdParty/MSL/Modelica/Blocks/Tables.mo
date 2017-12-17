@@ -49,7 +49,7 @@ package Tables
         "= true: Print info message; = false: No info message";
       output Real readSuccess "Table read success";
       external"C" readSuccess = ModelicaStandardTables_CombiTable1D_read(tableID, forceRead, verboseRead)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
       annotation(__ModelicaAssociation_Impure=true);
     end readTableData;
 
@@ -62,7 +62,7 @@ package Tables
         "Dummy input to ensure correct sorting of function calls";
       output Real y;
       external"C" y = ModelicaStandardTables_CombiTable1D_getValue(tableID, icol, u)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
       annotation (derivative(noDerivative=tableAvailable) = getDerTableValue);
     end getTableValue;
 
@@ -76,7 +76,7 @@ package Tables
         "Dummy input to ensure correct sorting of function calls";
       output Real y;
       external"C" y = ModelicaStandardTables_CombiTable1D_getValue(tableID, icol, u)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
     end getTableValueNoDer;
 
     function getDerTableValue
@@ -90,7 +90,7 @@ package Tables
       input Real der_u;
       output Real der_y;
       external"C" der_y = ModelicaStandardTables_CombiTable1D_getDerValue(tableID, icol, u, der_u)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
     end getDerTableValue;
 
   initial algorithm
@@ -351,7 +351,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
         "= true: Print info message; = false: No info message";
       output Real readSuccess "Table read success";
       external"C" readSuccess = ModelicaStandardTables_CombiTable1D_read(tableID, forceRead, verboseRead)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
       annotation(__ModelicaAssociation_Impure=true);
     end readTableData;
 
@@ -364,7 +364,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
         "Dummy input to ensure correct sorting of function calls";
       output Real y;
       external"C" y = ModelicaStandardTables_CombiTable1D_getValue(tableID, icol, u)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
       annotation (derivative(noDerivative=tableAvailable) = getDerTableValue);
     end getTableValue;
 
@@ -378,7 +378,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
         "Dummy input to ensure correct sorting of function calls";
       output Real y;
       external"C" y = ModelicaStandardTables_CombiTable1D_getValue(tableID, icol, u)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
     end getTableValueNoDer;
 
     function getDerTableValue
@@ -392,7 +392,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
       input Real der_u;
       output Real der_y;
       external"C" der_y = ModelicaStandardTables_CombiTable1D_getDerValue(tableID, icol, u, der_u)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
     end getDerTableValue;
 
   initial algorithm
@@ -648,7 +648,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
         "= true: Print info message; = false: No info message";
       output Real readSuccess "Table read success";
       external"C" readSuccess = ModelicaStandardTables_CombiTable2D_read(tableID, forceRead, verboseRead)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
       annotation(__ModelicaAssociation_Impure=true);
     end readTableData;
 
@@ -661,7 +661,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
         "Dummy input to ensure correct sorting of function calls";
       output Real y;
       external"C" y = ModelicaStandardTables_CombiTable2D_getValue(tableID, u1, u2)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
       annotation (derivative(noDerivative=tableAvailable) = getDerTableValue);
     end getTableValue;
 
@@ -675,7 +675,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
         "Dummy input to ensure correct sorting of function calls";
       output Real y;
       external"C" y = ModelicaStandardTables_CombiTable2D_getValue(tableID, u1, u2)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
     end getTableValueNoDer;
 
     function getDerTableValue
@@ -690,7 +690,7 @@ MATLAB is a registered trademark of The MathWorks, Inc.
       input Real der_u2;
       output Real der_y;
       external"C" der_y = ModelicaStandardTables_CombiTable2D_getDerValue(tableID, u1, u2, der_u1, der_u2)
-        annotation (Library={"ModelicaStandardTables", "ModelicaIO", "ModelicaMatIO", "zlib"});
+        annotation (Library={"ModelicaStandardTables", "ModelicaMatIO", "zlib"});
     end getDerTableValue;
 
   initial algorithm
