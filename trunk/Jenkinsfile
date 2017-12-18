@@ -17,7 +17,7 @@ node ("716KS42") {
             checkout([
                 $class: 'SubversionSCM',
                 locations: [
-                    [local: 'JModelica',          remote: "https://svn.jmodelica.org/{JM_BRANCH}",                         credentialsId: ''],
+                    [local: 'JModelica',          remote: "https://svn.jmodelica.org/${JM_BRANCH}",                         credentialsId: ''],
                 ],
                 workspaceUpdater: [$class: 'UpdateWithCleanUpdater']
             ])
