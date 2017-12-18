@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13916,6 +13916,87 @@ public
 end FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage;
 ")})));
 end FromOtherPackage;
+
+    model WithTemporary
+        function s
+            input Real[:] x;
+            output Integer[:] n = {size(x,1), size(x,1)};
+        algorithm
+        end s;
+        function g
+            input Real[:] x;
+            output Real[s(x)*{2,3}] y = x;
+        algorithm
+        end g;
+        function f
+            input Real[:] x;
+            output Real[2] y;
+        algorithm
+            y := g(x);
+        end f;
+        
+        Real[:] y = f({time});
+        
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_FuncCallInSize_WithTemporary",
+            description="Scalarization of functions: Function call from other package in declaration size",
+            variability_propagation=false,
+            inline_functions="none",
+            common_subexp_elim=false,
+            flatModel="
+fclass FunctionTests.UnknownSize.FuncCallInSize.WithTemporary
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f({time});
+
+public
+ function FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f
+  input Real[:] x;
+  output Real[:] y;
+  Integer[:] temp_1;
+  Integer[:] temp_2;
+ algorithm
+  init y as Real[2];
+  init temp_1 as Integer[2];
+  (temp_1) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
+  init temp_2 as Integer[2];
+  temp_2[1] := 2;
+  temp_2[2] := 3;
+  assert(temp_1[1] * 2 + temp_1[2] * 3 == 2, \"Mismatching sizes in FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f\");
+  (y) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g(x);
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f;
+
+ function FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g
+  input Real[:] x;
+  output Real[:] y;
+  Integer[:] temp_1;
+ algorithm
+  init temp_1 as Integer[2];
+  (temp_1) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
+  init y as Real[temp_1[1] * 2 + temp_1[2] * 3];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g;
+
+ function FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s
+  input Real[:] x;
+  output Integer[:] n;
+ algorithm
+  init n as Integer[2];
+  n[1] := size(x, 1);
+  n[2] := size(x, 1);
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s;
+
+end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary;
+")})));
+end WithTemporary;
+
 end FuncCallInSize;
 
 package Hidden

@@ -55,7 +55,21 @@ class Test_FMUModelBase2:
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
         cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
+    
+    @testattr(stddist_full = True)
+    def test_get_scalar_variable(self):
+        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
+        
+        sc_x = negated_alias.get_scalar_variable("x")
+        
+        assert sc_x.name == "x"
+        assert sc_x.value_reference >= 0
+        assert sc_x.type == fmi.FMI2_REAL
+        assert sc_x.variability == fmi.FMI2_CONTINUOUS
+        assert sc_x.causality == fmi.FMI2_LOCAL
 
+        nose.tools.assert_raises(FMUException, negated_alias.get_scalar_variable, "not_existing")
+    
     @testattr(stddist_full = True)
     def test_declared_enumeration_type(self):
         enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)

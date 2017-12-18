@@ -46,13 +46,16 @@ aspect FlatTypeCheck {
 
     public static final SimpleProblemProducer ASTNode.CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', the declared class is not a subtype of the constraining class");
+                    "In the declaration '%s', the declared class is not a subtype of the " + 
+                    "constraining class,\n    because %s");
     public static final SimpleProblemProducer ASTNode.REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'");
+                    "In the declaration '%s', the replacing class is not a subtype of the " + 
+                    "constraining class from the declaration '%s',\n    because %s");
     public static final SimpleProblemProducer ASTNode.PREV_REDECLARE_NOT_REPLACEABLE =
             new SimpleWarningProducer("PREV_REDECLARE_NOT_REPLACEABLE", ProblemKind.SEMANTIC,
-                    "In the declaration '%s', %s can't be redeclared since it has already been redeclared without 'replaceable'");
+                    "In the declaration '%s', %s can't be redeclared since it has already been " + 
+                    "redeclared without 'replaceable'");
 
     public void InstComposite.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
@@ -60,9 +63,12 @@ aspect FlatTypeCheck {
         // are applied to the declaration itself and is therefore also type checked.
         if (hasInstConstrainingComponent()) {
               InstNode superType = getInstConstrainingComponent().getInstNode();
-              InstComponentDecl declaredType = this; 
-              if (!declaredType.subType(superType))
-                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType.getComponentDecl(), declaredType.getComponentDecl());
+              InstComponentDecl declaredType = this;
+              String subTypeMsg = declaredType.subType(superType);
+              if (subTypeMsg != null) {
+                  ComponentDecl cd = declaredType.getComponentDecl();
+                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+              }
         }
     }
 
@@ -87,8 +93,13 @@ aspect FlatTypeCheck {
         
         // Type check the original component
         InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
-        if (declaredType.hasInstConstrainingComponent() && !declaredType.subType(superType))
-            CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(superType.getComponentDecl(), declaredType.getComponentDecl());
+        if (declaredType.hasInstConstrainingComponent()) {
+            String subTypeMsg = declaredType.subType(superType);
+            if (subTypeMsg != null) {
+                ComponentDecl cd = declaredType.getComponentDecl();
+                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+            }
+        }
 
         // The environment should be traversed backwards in order to perform correct
         // subtype tests in redeclaration chains.
@@ -98,15 +109,23 @@ aspect FlatTypeCheck {
             InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
                 
             // Check consistency of the redeclaring component
-            if (declaredSubType.hasInstConstrainingComponent() && !declaredSubType.subType(constrainingSubType))
-                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType.getComponentDecl(), declaredSubType.getComponentDecl());
+            if (declaredSubType.hasInstConstrainingComponent()) {
+                String subTypeMsg = declaredSubType.subType(constrainingSubType);
+                if (subTypeMsg != null) {
+                    ComponentDecl cd = declaredSubType.getComponentDecl();
+                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+                }
+            }
 
             // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
             // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
             // follows that declaredSubType is a subtype of superType by transitivity.
-            if (!constrainingSubType.subType(superType))
-                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType.getComponentDecl(), 
-                        constrainingSubType.getComponentDecl(), superType.getComponentDecl());
+            String subTypeMsg = constrainingSubType.subType(superType);
+            if (subTypeMsg != null) {
+                ComponentDecl cd = constrainingSubType.getComponentDecl();
+                ComponentDecl scd = superType.getComponentDecl();
+                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, scd, subTypeMsg);
+            }
         
             // If the redeclaring declaration has a constraining clause, the constraining
             // type of the redeclaring declaration of should be used in following subtype-test 
@@ -460,22 +479,40 @@ aspect FlatTypeCheck {
     }
     
     syn boolean FExp.errorCheckUnknownSize() = !inFunction() && !allowUnknownSize();
-    
+
     syn boolean BaseNode.allowUnknownSize()    = false;
     eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
     eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
-    
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && callsExternal();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && callsExternal();
+
     inh boolean BaseNode.inAllowUnknownSize();
     eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
-    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().isExternalFunction();
-    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().isExternalFunction();
-    
-    interface CommonCallable { public boolean isExternalFunction(); }
+    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || callsExternal();
+    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || callsExternal();
+
+    class FFunctionDecl {
+        public enum FunctionType {
+            EXTERNAL, LOADRESOURCE;
+            
+            public boolean containsFunction(CommonCallable cc) {
+                if (this == EXTERNAL) {
+                    return cc.isExternalFunction();
+                } else {
+                    return cc.containsFunction(this);
+                }
+            }
+        }
+    }
+
+    interface CommonCallable {
+        public boolean containsFunction(FFunctionDecl.FunctionType ft);
+        public boolean isExternalFunction();
+    }
+
     syn boolean InstPartialFunction.isExternalFunction() = false;
     syn boolean FFunctionVariable.isExternalFunction()   = false;
-    
+
     syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
     syn boolean FFunctionDecl.isExternalFunction() {
         for (FStatement stmt : getFAlgorithm().getFStatements()) {
@@ -485,13 +522,54 @@ aspect FlatTypeCheck {
         }
         return false;
     }
-    
+
     syn boolean FStatement.isExternalStatement() = false;
     eq FExternalStmt.isExternalStatement()       = true;
+
+    syn boolean FAbstractFunctionCall.callsExternal() =
+            FFunctionDecl.FunctionType.EXTERNAL.containsFunction(myCommonCallable());
+    syn boolean FAbstractFunctionCall.callsLoadResource() =
+            FFunctionDecl.FunctionType.LOADRESOURCE.containsFunction(myCommonCallable());
     
+    syn boolean ASTNode.containsFunction(FFunctionDecl.FunctionType ft) {
+        for (ASTNode n : this) {
+            if (n.containsFunction(ft)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    syn boolean InstNode.containsFunction(FFunctionDecl.FunctionType ft) =
+        getInstComponentDecls().containsFunction(ft) || getInstExtendss().containsFunction(ft) ||
+        getFAbstractEquations().containsFunction(ft) || super.containsFunction(ft);
+
+    eq InstComponentDecl.containsFunction(FFunctionDecl.FunctionType ft) =
+        (hasInstModification() && getInstModification().containsFunction(ft)) ||  super.containsFunction(ft);
+    eq InstValueModification.containsFunction(FFunctionDecl.FunctionType ft) =
+        getFExp().containsFunction(ft) ||  super.containsFunction(ft);
+    eq InstFunctionCall.containsFunction(FFunctionDecl.FunctionType ft) =
+        ft.containsFunction(myCommonCallable()) || super.containsFunction(ft);
+    eq FFunctionCall.containsFunction(FFunctionDecl.FunctionType ft) =
+        ft.containsFunction(myCommonCallable()) || super.containsFunction(ft);
+    eq FLoadResource.containsFunction(FFunctionDecl.FunctionType ft) =
+        ft == FFunctionDecl.FunctionType.LOADRESOURCE || super.containsFunction(ft);
+
+    syn lazy boolean InstClassDecl.containsFunction(FFunctionDecl.FunctionType ft) circular [false] =
+            super.containsFunction(ft);
+    eq InstSimpleShortClassDecl.containsFunction(FFunctionDecl.FunctionType ft) =
+            actualInstClass().containsFunction(ft);
+
     public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
             new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
                     "Non-parameter expression sizes not supported, '%s', dimension %d in '%s'");
+    
+    @Override
+    public void FLoadResource.typeCheck(ErrorCheckType checkType) {
+        super.complianceCheck(checkType);
+        getFExp().forceVariability(checkType, ASTNode.fStructParameter("loadResource"));
+    }
     
     public class FExp {
         public static class ExpTypeErrorProducer extends AbstractErrorProducerUnlessDisabled<ReporterNode> {
@@ -1300,6 +1378,9 @@ aspect FlatTypeCheck {
             }
         } else {
             size().markAsStructuralParameter(checkType, this);
+        }
+        if (callsLoadResource()) {
+            getArgs().forceUsesVariability(checkType, ASTNode.fStructParameter("loadResource"));
         }
     }
   

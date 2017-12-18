@@ -243,8 +243,8 @@ fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_
     if (retval != 0) {
         return fmiError;
     }
-    /* Strings not yet supported. */
-    return fmiWarning;
+    
+    return fmiOK;
 }
 
 /* Evaluation of the model equations */

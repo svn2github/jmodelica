@@ -408,13 +408,6 @@ aspect CCodeGen {
         str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(p, external), name);
     }
 
-    public void FType.printFree_C(CodeStream str, String indent, boolean external, String name) {
-    }
-
-    @Override
-    public void FStringType.printFree_C(CodeStream str, String indent, boolean external, String name) {
-    }
-
     /**
      * Helper for printing if equations
      */

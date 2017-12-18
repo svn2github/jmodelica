@@ -891,8 +891,8 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.EventIteration1", file_name)
         compile_fmu("NonLinear.NonLinear6", file_name)
         compile_fmu("NonLinear.NonLinear7", file_name)
-        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_init.fmu", compiler_options={"init_nonlinear_solver":"realtime"})
-        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_ode.fmu", compiler_options={"nonlinear_solver":"realtime"})
+        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_init.fmu", version=1.0, compiler_options={"init_nonlinear_solver":"realtime"})
+        compile_fmu("NonLinear.RealTimeSolver1", file_name, compile_to="RT_ode.fmu", version=1.0, compiler_options={"nonlinear_solver":"realtime"})
     
     @testattr(stddist_base= True)
     def test_realtime_solver_init(self):
@@ -1439,6 +1439,16 @@ class Test_FMI_ODE_2:
         #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=2.0)
         #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+        
+    @testattr(stddist_base = True)
+    def test_cc_with_radau(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "Radau5ODE"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
     
     @testattr(stddist_base = True)
     def test_cc_with_sparse(self):

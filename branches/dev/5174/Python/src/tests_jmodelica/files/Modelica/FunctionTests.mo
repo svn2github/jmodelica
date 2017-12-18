@@ -284,12 +284,12 @@ model TestUnkRecArray
 end TestUnkRecArray;
 
 model LoadResource1
-    parameter String s1 = Modelica.Utilities.Files.loadResource("C:\\a\\b\\file.txt");
-    parameter String s2 = Modelica.Utilities.Files.loadResource("a\\b\\file.txt");
-    parameter String s3 = Modelica.Utilities.Files.loadResource("/C:/a/b/file.txt");
-    parameter String s4 = Modelica.Utilities.Files.loadResource("a/b/file.txt");
-    parameter String s5 = Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt");
-    parameter String s6 = Modelica.Utilities.Files.loadResource("file:///C:/a/b/file.txt");
+    parameter String s1 = Modelica.Utilities.Files.loadResource("C:\\a\\b\\file.txt") annotation(Evaluate=true);
+    parameter String s2 = Modelica.Utilities.Files.loadResource("a\\b\\file.txt") annotation(Evaluate=true);
+    parameter String s3 = Modelica.Utilities.Files.loadResource("/C:/a/b/file.txt") annotation(Evaluate=true);
+    parameter String s4 = Modelica.Utilities.Files.loadResource("a/b/file.txt") annotation(Evaluate=true);
+    parameter String s5 = Modelica.Utilities.Files.loadResource("modelica://Modelica/Resources/Data/Utilities/Examples_readRealParameters.txt") annotation(Evaluate=true);
+    parameter String s6 = Modelica.Utilities.Files.loadResource("file:///C:/a/b/file.txt") annotation(Evaluate=true);
   equation
     assert(time < 2, s1);
     assert(time < 2, s2);

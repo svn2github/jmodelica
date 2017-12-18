@@ -1520,7 +1520,7 @@ model ConstantAliasBase
     parameter Real x2 = 1;
     constant String s1 = "string";
     constant String s2 = s1;
-    parameter String s3 = "string";
+    parameter String s3 = "string" annotation(Evaluate=true);
     
     type E = enumeration(A,B,C);
     
@@ -1657,7 +1657,7 @@ model StringStartValueIllegalChars1
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"a\" valueReference=\"805306368\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <String start=\"Carbon steel (%C &lt;= 0.30)\" />
     </ScalarVariable>
 </ModelVariables>
@@ -1675,7 +1675,7 @@ model StringStartValueIllegalChars2
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+    <ScalarVariable name=\"a\" valueReference=\"805306368\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <String start=\"Carbon steel (%C &lt;= 0.30)\" />
     </ScalarVariable>
 </ModelVariables>
