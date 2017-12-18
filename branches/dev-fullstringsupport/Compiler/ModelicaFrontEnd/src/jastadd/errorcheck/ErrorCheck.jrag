@@ -1241,14 +1241,18 @@ aspect InstanceErrorCheck {
 	    	errorChecked = true;
 	    	if (!inFunction()) {
                 if (!hasBindingExp()) {
-                    error("Missing binding expression for external object");
+                    ASTNode.EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION.invoke(this, name());
                 }
 	    		getDestructorCall().collectErrors(checkType);
 	    		myInstClass().collectErrors(checkType);
 	    	}
 	    }
 	}
-	  
+
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION =
+            new SimpleErrorProducer("EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC,
+                    "The external object '%s' does not have a binding expression");
+
 	public void InstForClauseE.collectErrors(ErrorCheckType checkType) {
 	    collectErrorsInFor(getFAbstractEquationList(), getInstForIndexList(), checkType);
 	}

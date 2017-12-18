@@ -827,8 +827,8 @@ model ExtObjConstructor2
             errorMessage="
 1 errors found:
 
-Error at line 17, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
-  Missing binding expression for external object
+Error at line 17, column 11, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
+  The external object 'x' does not have a binding expression
 ")})));
 end ExtObjConstructor2;
 
