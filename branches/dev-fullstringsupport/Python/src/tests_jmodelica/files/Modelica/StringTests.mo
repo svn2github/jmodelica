@@ -76,4 +76,22 @@ equation
     end when;
 end TestStringBlockEvent2;
 
+model TestStringBlockEvent3
+    function f
+        input Real x;
+        input String s1;
+        output Real y = x;
+        output String s2 = String(x) + s1;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real x;
+    String s;
+equation
+    when time > 1 then
+        (x,s) = f(pre(x),pre(s));
+    end when;
+end TestStringBlockEvent3;
+
 end StringTests;

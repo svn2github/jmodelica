@@ -716,7 +716,7 @@ char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size));
 
 /**
  * Create a string vector with initialized empty strings. Using malloc.
- * When assigning a new pointer the old element must be freed. Can use jmi_set_str(dest, src, NULL);
+ * When assigning a new pointer the old element must be freed. Please use JMI_ASG_STR_Z(dest, src);
  */
 jmi_string_t* jmi_create_strings(size_t n);
 

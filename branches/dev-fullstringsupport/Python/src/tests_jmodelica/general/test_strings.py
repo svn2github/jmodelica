@@ -255,3 +255,21 @@ class TestStringBlockEvent2(SimulationTest):
     def test_trajectories(self):
         self.run()
         assertString(self.model, "s2", "s2:0:1")
+        
+class TestStringBlockEvent3(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent3')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()

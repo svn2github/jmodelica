@@ -296,7 +296,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
             }
         }
 
-        for (i = 0; i < block->n_nr; i++) {
+        for (i = 0; i < block->n_str; i++) {
             if (strcmp(pre_strings[i], strings[i]) != 0) {
                 jmi_log_node(jmi->log, logInfo, "Info", " <string: #s%d#> <from: %s> <to: %s> ", block->str_vref[i], pre_strings[i], strings[i]);
             }
@@ -418,7 +418,7 @@ int jmi_block_update_pre(jmi_block_residual_t* block) {
         
         if (strcmp(current_str, previous_str) != 0) {
             changed_pre_values = TRUE;
-            jmi_set_str(&z_str[block->str_pre_index[i]], z_str[block->str_index[i]], NULL);
+            JMI_ASG_STR_Z(z_str[block->str_pre_index[i]], z_str[block->str_index[i]]);
             jmi_log_node(jmi->log, logInfo, "Info", " <string: #s%d#> <from: %s> <to: %s> ", block->str_vref[i],
                             (jmi_string_t)previous_str, (jmi_string_t)current_str);
         }
@@ -441,7 +441,7 @@ int jmi_block_get_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jm
         non_reals[i] = (*(jmi->z))[block->nr_index[i]];
     }
     for (i = 0; i < block->n_str; i++) {
-        jmi_set_str(&strings[i], jmi->z_t.strings.values[block->str_index[i]], NULL);
+        JMI_ASG_STR_Z(strings[i], jmi->z_t.strings.values[block->str_index[i]]);
     }
     for (i=0; i<block->n_dr; i++) {
         discrete_reals[i] = (*(jmi->z))[block->dr_index[i]];
@@ -461,7 +461,7 @@ int jmi_block_set_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jm
         (*(jmi->z))[block->nr_index[i]] = non_reals[i];
     }
     for (i = 0; i < block->n_str; i++) {
-        jmi_set_str(&jmi->z_t.strings.values[block->str_index[i]], strings[i], NULL);
+        JMI_ASG_STR_Z(jmi->z_t.strings.values[block->str_index[i]], strings[i]);
     }
     for (i = 0; i < block->n_dr; i++) {
         (*(jmi->z))[block->dr_index[i]] = discrete_reals[i];

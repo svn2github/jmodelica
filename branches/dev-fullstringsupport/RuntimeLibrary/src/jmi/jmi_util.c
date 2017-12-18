@@ -70,7 +70,7 @@ int jmi_copy_pre_values(jmi_t *jmi) {
     start     = jmi->z_t.strings.offsets.o_w;
     pre_start = jmi->z_t.strings.offsets.o_wp;
     for (i = 0; i < pre_start - start; i++) {
-        jmi_set_str(&z_str[pre_start + i], z_str[start + i], NULL);
+        JMI_ASG_STR_Z(z_str[pre_start + i], z_str[start + i]);
     }
     
     return 0;
