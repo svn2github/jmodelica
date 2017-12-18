@@ -391,6 +391,68 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end CCodeGenString4;
 
+model TestStringBlockInitial1
+    parameter Real t(fixed=false);
+    parameter String s1 = String(t);
+initial equation
+    t = Modelica.Utilities.Strings.scanReal(s1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestStringBlockInitial1",
+            description="Code generated for strings. Add in solved equation.",
+            template="
+$C_dae_init_add_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_initialization$
+",
+            generatedCode="
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 1, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Init block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF_STR_STAT(tmp_1, 13)
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_STRING_VALUE_REFERENCE) {
+        x[0] = 805306368;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _t_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        memset(residual, 0, 1 * sizeof(jmi_real_t));
+        residual[0] = 1.0;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+            if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+                _t_0 = x[0];
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                JMI_INI_STR_STAT(tmp_1)
+                snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, _t_0);
+                JMI_ASG(STR_Z, _s_pd_s1_1, tmp_1)
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+                (*res)[0] = func_Modelica_Utilities_Strings_scanReal_exp0(_s_pd_s1_1, AD_WRAP_LITERAL(1), JMI_FALSE, \"\") - (_t_0);
+            }
+        }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end TestStringBlockInitial1;
+
 model TestStringBlockEvent1
     String s1,s2,s3;
 equation

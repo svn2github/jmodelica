@@ -1635,5 +1635,17 @@ Error at line 6, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/Che
 ")})));
 end ExternalFunctionAnnotation1;
 
+model FixedFalseString1
+    parameter String s(fixed=false);
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FixedFalseString1",
+            description="",
+            checkType=check,
+            errorMessage="
+Error at line 2, column 24, in file '...':
+  Cannot find component declaration for fixed
+")})));
+end FixedFalseString1;
 
 end CheckTests;
