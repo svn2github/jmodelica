@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; compiler ; #5530
+Fixed crash bug in FMI XML generator where alias eliminated high order
+temporary derivatives which were orphan caused problems.
+
 ; Fixed ; Minor ; Compiler ; #5529
 Fixed bug in FMI XML generation where derivative attribute for second order
 derivatives (or higher) pointed to the wrong variable.

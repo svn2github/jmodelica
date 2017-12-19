@@ -1305,6 +1305,111 @@ $modelVariables$",
 ")})));
 end SecondOrderDerivatives;
 
+model HigherOrderOrphanTempDerivatives
+        function F
+            input Real i;
+            output Real o1[2];
+        algorithm
+            o1[1] := i;
+            o1[2] := -i;
+            annotation(Inline=false,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i;
+            input Real i_der;
+            output Real o1_der[2];
+        algorithm
+            o1_der := F(i_der);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x[2];
+        Real vx[2];
+        Real a[2];
+        constant Real p[2] = {1.2, 0};
+    equation
+        der(x) = vx;
+        der(vx) = a.*x;
+        x = p + F(sin(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="HigherOrderOrphanTempDerivatives",
+            description="Check so that we skip generating derivative for temporaries of higher order which are orphan",
+            expose_temp_vars_in_fmu=true,
+            fmi_version="2.0",
+            template="
+$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a[1]\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"a[2]\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"p[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"p[2]\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_1[1]\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_4\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_5\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"vx[1]\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(vx[1])\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"8\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"vx[2]\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(vx[2])\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"10\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[1]\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x[1])\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"12\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x[1],2)\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"13\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x[2]\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x[2])\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"15\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x[2],2)\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"16\" />
+    </ScalarVariable>
+</ModelVariables>
+"),
+        FClassMethodTestCase(
+            name="HigherOrderOrphanTempDerivatives_alias",
+            methodName="aliasDiagnostics",
+            description="Ensure that the temporary is in the set of alias variables",
+            expose_temp_vars_in_fmu=true,
+            fmi_version="2.0",
+            methodResult="
+Alias sets:
+{_der_vx[2], _der_der_x[2], temp_9}
+{_der_vx[1], _der_der_x[1], _der_der_temp_1[1], temp_8}
+5 variables can be eliminated
+")})));
+end HigherOrderOrphanTempDerivatives;
+
 model StructuralStartValueBase
     parameter Integer n = 3;
     Real[n] x = 1:n;
