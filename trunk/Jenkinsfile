@@ -54,9 +54,9 @@ set BUILD_CASADI=1
         stage("Run jm_tests") {
             try {
             runMSYSWithEnv("""\
-TEST_RES_DIR=${WORKSPACE}/testRes
-mkdir -p "${TEST_RES_DIR}"
-install/jm_tests" -ie -x "${TEST_RES_DIR}"
+TEST_RES_DIR=\${WORKSPACE}/testRes
+mkdir -p "\${TEST_RES_DIR}"
+install/jm_tests -ie -x "\${TEST_RES_DIR}"
 """)
             } finally {
                 junit testResults: 'testRes/*.xml', allowEmptyResults: true
@@ -68,7 +68,7 @@ install/jm_tests" -ie -x "${TEST_RES_DIR}"
             runMSYSWithEnv("""\
 cd "install"
 zip -r "${zipName}"
-mv "${zipName}" "${WORKSPACE}\${zipName}"
+mv "${zipName}" "\${WORKSPACE}\${zipName}"
 """)
            archive "${zipName}"           
         }
