@@ -9,6 +9,30 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
+  <!--section>
+    <title>Release notes for JModelica.org version 2.2</title>
+    <section><title>Highlights</title>
+    <itemizedlist>
+		<listitem>Support for 64-bit Python has been added together with
+        new and updated Python packages, see <xref linkend="Release22Python"/>.
+        This enables simulation of 64-bit FMUs with PyFMI.</listitem>
+        <listitem>There is now support for OPC communication through the
+        bundled Python package OpenOPC together with <emphasis>Graybox OPC
+        Automation Wrapper</emphasis>.</listitem>
+        <listitem>The bundled gcc C-compiler is now updated to gcc-tdm 5.1.0 which
+        enables compilation of 64 bit FMUs.</listitem>
+    </itemizedlist>
+    </section>
+    <section xml:id="Release22Python">
+    <title>Python distributions</title>
+    <para>With this release there are now two bundled Python interpreters, one
+    for 32 bit mode and one for 64 bit mode. In addition, there are now many
+    more Python packages included and previously bundled packages are updated
+    to newer versions. Among the new packages we have: <emphasis>XLwings, openpyxl, 
+    freeopcua, jupyter, SALib, natsort, pyserial, pyro</emphasis> and 
+    <emphasis>coverage.</emphasis> </para>
+    </section>
+  </section-->
   <section>
     <title>Release notes for JModelica.org version 2.1</title>
 	<section><title>Highlights</title>

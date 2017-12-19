@@ -320,11 +320,7 @@ aspect ComplianceCheck {
         if (isString()) {
             if (inFunction()) {
                 PARTIALLY_SUPPORTED_STRING_ARGUMENTS.invoke(this);
-            } else if (variability().parameterOrLess()) {
-                PARTIALLY_SUPPORTED_STRING_PARAMETERS.invoke(this);
-                if (isParameter())
-                    forceVariability(checkType, fStructParameter());
-            } else {
+            } else if (!variability().parameterOrLess()) {
                 UNSUPPORTED_STRING_VARIABLES.invoke(this);
             }
         }

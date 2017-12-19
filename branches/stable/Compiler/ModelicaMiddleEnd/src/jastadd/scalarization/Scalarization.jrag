@@ -58,7 +58,7 @@ aspect Scalarization {
         }
         
         public void createForLoops(List<FStatement> inner, FExp exp) {
-            forNames.createForLoops(clauses, inner, exp);
+            forNames.createForLoops(this, clauses, inner, exp);
         }
         
         public void createForLoops(FAssignableExp left, FExp right, FExp exp) {

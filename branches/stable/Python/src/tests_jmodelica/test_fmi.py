@@ -159,6 +159,21 @@ class Test_FMUModelBase:
         nose.tools.assert_almost_equal(y,-3.0)
         
     @testattr(stddist_full = True)
+    def test_get_scalar_variable(self):
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        
+        sc_x = negated_alias.get_scalar_variable("x")
+        
+        assert sc_x.name == "x"
+        assert sc_x.value_reference >= 0
+        assert sc_x.type == fmi.FMI_REAL
+        assert sc_x.variability == fmi.FMI_CONTINUOUS
+        assert sc_x.causality == fmi.FMI_INTERNAL
+        assert sc_x.alias == fmi.FMI_NO_ALIAS
+
+        nose.tools.assert_raises(FMUException, negated_alias.get_scalar_variable, "not_existing")
+        
+    @testattr(stddist_full = True)
     def test_set_get_enumeration(self):
         tables = load_fmu(Test_FMUModelBase.enumFMU)
         assert tables.get("e") == 1 #Test that it works

@@ -417,10 +417,7 @@ model AbsType5
             name="AbsType5",
             description="abs() operator: String arg",
             errorMessage="
-2 errors found:
-
-Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  Could not evaluate binding expression for structural parameter 'x': 'abs(\"-1\")'
+1 errors found:
 
 Error at line 2, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
   Calling function abs(): types of positional argument 1 and input v are not compatible
@@ -1945,19 +1942,12 @@ model StringExpType1
             name="StringExpType1",
             description="",
             errorMessage="
-4 errors found:
-
-Error at line 2, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  Could not evaluate binding expression for structural parameter 'a': 'String({1, 2})'
-    Cannot get int value of CValueArray ({ 1, 2 })
+2 errors found:
 
 Error at line 2, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is scalar Real, Integer, Boolean or enumeration
-
-Error at line 3, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
-  Could not evaluate binding expression for structural parameter 'b': 'String(\"a\")'
 
 Error at line 3, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible

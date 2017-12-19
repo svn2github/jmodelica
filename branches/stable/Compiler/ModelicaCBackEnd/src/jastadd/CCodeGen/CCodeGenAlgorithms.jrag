@@ -125,14 +125,14 @@ aspect CCodeGenAlgorithms {
                 printDecl_C(p, str, indent, name, src, external);
             } else {
                 str.format("%sJMI_ARR(STAT, %s, %s, %s, ", indent,
-                        nameScalar_C(external), nameArray_C(external), name);
+                        nameScalar_C(p, external), nameArray_C(p, external), name);
                 size().printNumElements_C(p, str, indent, src);
                 str.print(", ");
                 str.print(ndims());
                 str.println(")");
             }
         } else {
-            printScalarDecl_C(str, indent, external, name);
+            printScalarDecl_C(p, str, indent, external, name);
         }
     }
 
@@ -439,7 +439,7 @@ aspect CCodeGenAlgorithms {
         if (wb) {
             str.formatln("%s%s = %s;", indent, src, dst);
         } else {
-            str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(false), src);
+            str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(p, false), src);
         }
     }
 

@@ -1,3 +1,26 @@
+================= Stable-2017-12-19 ==================
+; Fixed ; Minor ; Compiler; #5526 
+Fixed null pointer in evaluation of partial function
+
+; Feature ; Major ; Compiler; #4797 
+Support for string parameters
+
+; Change ; Major ; Python ; #5167
+Changed the default FMI version when compiling FMUs from Python to 2.0
+instead of 1.0.
+
+; Feature ; Minor ; PyFMI ; #5521
+Added the possibility to directly retrieve a Scalar Variable class instance.
+
+; Feature ; Minor ; Documentation; #5517 
+Added information on OPC to Users Guide.
+
+; Feature; Minor; Compiler ; #5516
+Index added to variables and equations in blocks in HTML diagnostics.
+
+; Fixed ; Minor ; Compiler ; #5514
+Fixed problem with temporary generation for for-loop ranges
+
 ================= Stable-2017-11-29 ==================
 ; Change ; Minor ; Compiler ; #5513
 Changed code generation to use hard coded values in the z-vector for 

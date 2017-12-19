@@ -708,13 +708,13 @@ In components:
 end ComponentNameError2;
 
 model FilterWarnings1
-    parameter String s1 = "42";
+    parameter String s1;
     
     annotation(__JModelica(UnitTesting(tests={
         WarningTestCase(
             name="FilterWarnings1",
             description="Check so that filtering of warnings works",
-            filter_warnings="PARTIALLY_SUPPORTED_STRING_PARAMETERS",
+            filter_warnings="PARAMETER_MISSING_BINDING_EXPRESSION",
             errorMessage="
 1 warnings found:
 
@@ -734,13 +734,13 @@ model FilterWarnings2
     end B;
     
     B b;
-    parameter String s1 = "42";
+    parameter String s1;
     
     annotation(__JModelica(UnitTesting(tests={
         WarningTestCase(
             name="FilterWarnings2",
             description="Check so that filtering of multiple types of warnings works",
-            filter_warnings="PARTIALLY_SUPPORTED_STRING_PARAMETERS,UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES",
+            filter_warnings="PARAMETER_MISSING_BINDING_EXPRESSION,UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES",
             errorMessage="
 1 warnings found:
 
@@ -1635,5 +1635,23 @@ Error at line 6, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/Che
 ")})));
 end ExternalFunctionAnnotation1;
 
+model NoAlgorithmEvaluation1
+    partial function f
+        input Integer x;
+        output Integer y;
+    end f;
+    
+    parameter Integer n = f(1);
+    Real[n] x = 1:n;
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="NoAlgorithmEvaluation1",
+            description="Test for null pointer in evaluation of partial function",
+            checkType=check,
+            errorMessage="
+Error at line 7, column 27, in file '...':
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+end NoAlgorithmEvaluation1;
 
 end CheckTests;

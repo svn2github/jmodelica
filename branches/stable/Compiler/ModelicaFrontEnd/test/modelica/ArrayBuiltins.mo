@@ -469,7 +469,9 @@ end MinExp2;
 
 model MinExp3
  constant String x = min("foo", "bar");
- parameter String y = x;
+ parameter String y1 = x;
+ parameter String y2 = x;
+ parameter String y3 = min(y1, y2);
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -479,7 +481,11 @@ model MinExp3
             flatModel="
 fclass ArrayBuiltins.Min.MinExp3
  constant String x = \"bar\";
- structural parameter String y = \"bar\" /* \"bar\" */;
+ parameter String y1 = \"bar\" /* \"bar\" */;
+ parameter String y2 = \"bar\" /* \"bar\" */;
+ parameter String y3;
+parameter equation
+ y3 = min(y1, y2);
 end ArrayBuiltins.Min.MinExp3;
 ")})));
 end MinExp3;
@@ -687,7 +693,9 @@ end MaxExp2;
 
 model MaxExp3
  constant String x = max("foo", "bar");
- parameter String y = x;
+ parameter String y1 = x;
+ parameter String y2 = x;
+ parameter String y3 = max(y1, y2);
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -697,7 +705,11 @@ model MaxExp3
             flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
  constant String x = \"foo\";
- structural parameter String y = \"foo\" /* \"foo\" */;
+ parameter String y1 = \"foo\" /* \"foo\" */;
+ parameter String y2 = \"foo\" /* \"foo\" */;
+ parameter String y3;
+parameter equation
+ y3 = max(y1, y2);
 end ArrayBuiltins.Max.MaxExp3;
 ")})));
 end MaxExp3;
