@@ -5,7 +5,7 @@ def call(path, sdk_home="C:\\JModelica.org-SDK-1.13\\") {
     def infoStr = bat returnStdout: true, script: """\
 @echo off
 SDK_HOME=${sdk_home}
-%$SDK_HOME%\\Subversion\\bin\\svn.exe info --xml "${path}"
+%SDK_HOME%\\Subversion\\bin\\svn.exe info --xml "${path}"
 """;
     def revPattern = new Pattern(/^\s+revision="([0-9]+)">$/, Pattern.MULTILINE);
     def m = revPattern.matcher(infoStr);
