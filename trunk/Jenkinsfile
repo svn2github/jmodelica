@@ -49,6 +49,15 @@ set BUILD_CASADI=1
         }
         stage("Archive") {
             archive 'install/**'
+            
+            // Prepare the ZIP for future upload
+            jmRevision=svnRevision("JModelica")
+            def zipName="JModelica.org-Chicago-win-r${jmRevision}"
+            writeFile file: 'README.TXT', text: libraryResource 'installZip_README.TXT'
+            runMSYSWithEnv("""\
+zip -r "${zipName}" install README.TXT
+""")
+           stash includes: '${zipName}', name: 'installZip'
         }
         
         stage("Run jm_tests") {
@@ -62,15 +71,16 @@ install/jm_tests -ie -x "\${TEST_RES_DIR}"
                 junit testResults: 'testRes/*.xml', allowEmptyResults: true
             }
         }
-        stage ("Publish") {
-            jmRevision=svnRevision("JModelica")
-            def zipName="JModelica.org-Chicago-win-r${jmRevision}"
-            runMSYSWithEnv("""\
-cd "install"
-zip -r "${zipName}"
-mv "${zipName}" "\${WORKSPACE}\${zipName}"
-""")
-           archive "${zipName}"           
+    }
+}
+// We need to run on master since we need a linux server with ssh-agent support
+node ('master') {
+    stage ('Upload') {
+        deleteDir()
+        sshagent(['jmodelica.org']) {
+            unstash 'installZip'
+            sh 'scp *.zip jenkins@jmodelica.org:/srv/www/htdocs/downloads/nightly-builds'
         }
+        deleteDir()
     }
 }
