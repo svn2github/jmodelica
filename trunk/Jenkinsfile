@@ -34,7 +34,8 @@ export INSTALL_HOME=\${WORKSPACE}/install
 cd "${unixpath(JMODELICA_SDK_HOME)}"
 echo ==== Run configure
 ./configure.sh
-echo ==== Run make
+echo ==== Go to build and run make
+cd "\${BUILD_HOME}"
 make
 make install
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
