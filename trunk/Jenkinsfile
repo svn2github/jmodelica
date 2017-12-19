@@ -26,7 +26,7 @@ node ("716KS42") {
         
                 stage("Build install folder") {
             runMSYSWithEnv("""\
-WORKSPACE='pwd'
+WORKSPACE="\$(pwd)"
 JM_CO_DIR=\${WORKSPACE}/JModelica/
 export SRC_HOME=\${JM_CO_DIR}
 export BUILD_HOME=\${WORKSPACE}/build
