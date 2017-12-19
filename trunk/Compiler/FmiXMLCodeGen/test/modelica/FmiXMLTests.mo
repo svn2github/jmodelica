@@ -1246,6 +1246,65 @@ $modelStructure$",
 ")})));
 end SortingStates;
 
+model SecondOrderDerivatives
+    Real x(stateSelect=StateSelect.always);
+    Real y;
+    Real vx(stateSelect=StateSelect.always);
+    Real vy;
+    Real lambda;
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - 2;
+    x^2 + y^2 = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="SecondOrderDerivatives",
+            description="Check so that second order derivatives point at the correct lower order variables",
+            fmi_version="2.0",
+            template="
+$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"lambda\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"vx\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(vx)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"vy\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(vy)\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"4\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x,2)\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"8\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"6\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"y\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y)\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"9\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y,2)\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"10\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end SecondOrderDerivatives;
+
 model StructuralStartValueBase
     parameter Integer n = 3;
     Real[n] x = 1:n;

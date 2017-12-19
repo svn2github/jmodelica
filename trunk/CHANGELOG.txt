@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5529
+Fixed bug in FMI XML generation where derivative attribute for second order
+derivatives (or higher) pointed to the wrong variable.
+
 ; Fixed ; Minor ; Compiler; #5526 
 Fixed null pointer in evaluation of partial function
 

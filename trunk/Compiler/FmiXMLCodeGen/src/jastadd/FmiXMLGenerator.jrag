@@ -1466,7 +1466,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			}
             
             private int getDerivativeIdx(FVariable var) {
-                return fclass.xmlVariableIndexMap().get(((FAbstractDerivativeVariable)var).myDifferentiatedVariable().generateXMLName());
+                return fclass.xmlVariableIndexMap().get(var.myDifferentiatedVariable().asFVariable().generateXMLName());
             }
 
 			public void generateAttributes(CodeStream genPrinter) {
