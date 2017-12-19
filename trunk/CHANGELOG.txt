@@ -7,6 +7,7 @@ temporary derivatives which were orphan caused problems.
 Fixed bug in FMI XML generation where derivative attribute for second order
 derivatives (or higher) pointed to the wrong variable.
 
+================= Stable-2017-12-19 ==================
 ; Fixed ; Minor ; Compiler; #5526 
 Fixed null pointer in evaluation of partial function
 
