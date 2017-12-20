@@ -94,4 +94,19 @@ equation
     end when;
 end TestStringBlockEvent3;
 
+model TestStringBlockEvent4
+    String s1,s2;
+    Real x,y;
+equation
+    y = x/2;
+    when time > 1 then
+        s2 = String(time);
+    end when;
+algorithm
+    x := time + y;
+    when time > 1 then
+        s1 := s2 + s2;
+    end when;
+end TestStringBlockEvent4;
+
 end StringTests;

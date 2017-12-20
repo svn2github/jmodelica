@@ -273,3 +273,22 @@ class TestStringBlockEvent3(SimulationTest):
     @testattr(stddist_full = True)
     def test_trajectories(self):
         self.run()
+        
+class TestStringBlockEvent4(SimulationTest):
+    """
+    Test JMI_SWAP macro for strings
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent4')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s1", "11")

@@ -364,6 +364,17 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
       }\
     }
     
+/* Swap values between scalars. DEST is in z vector, SRC is not */
+#define JMI_SWAP(TYPE,DEST,SRC) \
+    JMI_SWAP_##TYPE(DEST,SRC)
+#define JMI_SWAP_GEN(DEST,SRC) \
+    jmi_swap_real(&(DEST), &(SRC));
+#define JMI_SWAP_STR(DEST,SRC) \
+    jmi_swap_string(&(DEST), &(SRC));
+
+void jmi_swap_real(jmi_real_t *dest, jmi_real_t *src);
+void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src);
+
 /* Handle return value */
 #define JMI_RET(TYPE, DEST, SRC) \
     if (DEST != NULL) { JMI_RET_##TYPE(DEST, SRC) }
