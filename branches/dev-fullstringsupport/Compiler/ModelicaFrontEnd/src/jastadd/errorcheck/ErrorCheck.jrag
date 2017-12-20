@@ -1240,7 +1240,7 @@ aspect InstanceErrorCheck {
 			super.collectErrors(checkType);
 	    	errorChecked = true;
 	    	if (!inFunction()) {
-                if (!hasBindingExp()) {
+                if (!hasBindingExp() && !checkType.allowExternalObjectMissingBindingExpression()) {
                     ASTNode.EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION.invoke(this, name());
                 }
 	    		getDestructorCall().collectErrors(checkType);

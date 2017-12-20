@@ -27,4 +27,8 @@ public class PackingFailedException extends ModelicaException {
         super(msg);
     }
 
+    public PackingFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

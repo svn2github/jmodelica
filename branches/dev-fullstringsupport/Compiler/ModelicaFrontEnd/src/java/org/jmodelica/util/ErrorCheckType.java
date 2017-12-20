@@ -41,6 +41,10 @@ public enum ErrorCheckType {
         return this == CHECK;
     }
     
+    public boolean allowExternalObjectMissingBindingExpression() {
+        return this == CHECK;
+    }
+    
     public boolean checkInactiveComponents() {
         return this == CHECK;
     }

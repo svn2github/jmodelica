@@ -749,6 +749,8 @@ Warning in flattened model:
 ")})));
 end FilterWarnings2;
 
+package ExtObj
+
 model ExtObjConstructor
   model EO
     extends ExternalObject;
@@ -789,6 +791,7 @@ model ExtObjConstructor
         ErrorTestCase(
             name="ExtObjConstructor",
             description="Check that external object constructor is only allowed as binding expression",
+            checkType="check",
             errorMessage="
 2 errors found:
 
@@ -832,7 +835,33 @@ Error at line 17, column 11, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPR
 ")})));
 end ExtObjConstructor2;
 
+model ExtObjConstructor3
+    model X
+        extends ExternalObject;
+        function constructor
+            output X x;
+            external "C";
+        end constructor;
+        function destructor
+            input X x;
+            external "C";
+        end destructor;
+    end X;
+    
+    parameter X x;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ExtObjConstructor3",
+            description="No external object binding expression, no error with check target",
+            checkType="check",
+            errorMessage="
+Warning at line 12, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+")})));
+end ExtObjConstructor3;
 
+end ExtObj;
 
 package Functional
 
@@ -1634,6 +1663,25 @@ Error at line 6, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/Che
 
 ")})));
 end ExternalFunctionAnnotation1;
+
+model NoAlgorithmEvaluation1
+    partial function f
+        input Integer x;
+        output Integer y;
+    end f;
+    
+    parameter Integer n = f(1);
+    Real[n] x = 1:n;
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="NoAlgorithmEvaluation1",
+            description="Test for null pointer in evaluation of partial function",
+            checkType=check,
+            errorMessage="
+Error at line 7, column 27, in file '...':
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+end NoAlgorithmEvaluation1;
 
 model FixedFalseString1
     parameter String s(fixed=false);
