@@ -52,12 +52,14 @@ set BUILD_CASADI=1
             
             // Prepare the ZIP for future upload
             jmRevision=svnRevision("JModelica")
-            def zipName="JModelica.org-Chicago-win-r${jmRevision}"
-            writeFile file: 'README.TXT', text: libraryResource 'installZip_README.TXT'
+            def zipName="JModelica.org-Chicago-win-r${jmRevision}.zip"
+            def readMeContents = libraryResource 'installZip_README.TXT'
+            writeFile file: 'README.TXT', text: readMeContents
             runMSYSWithEnv("""\
+rm -f *.zip
 zip -r "${zipName}" install README.TXT
 """)
-           stash includes: '${zipName}', name: 'installZip'
+           stash includes: '*.zip', name: 'installZip'
         }
         
         stage("Run jm_tests") {
