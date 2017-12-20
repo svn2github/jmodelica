@@ -1777,7 +1777,17 @@ aspect Scalarization {
     
     public FType FType.scalarize(Scalarizer s, FExp context) {
         FType res = treeCopy();
+        res.parent = this.parent; //TODO dynamicFExp(res) instead of setting parent attribute
         res.scalarizeTypeSizes(s, context);
+        return res;
+    }
+    
+    @Override
+    public FType FArrayType.scalarize(Scalarizer s, FExp context) {
+        FArrayType res = treeCopy();
+        for (int i = 0; i < getFExps().numChildren(); i++) {
+            getFExps().setChild(getFExp(i).scalarize(s), i);
+        }
         return res;
     }
     

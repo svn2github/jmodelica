@@ -572,32 +572,36 @@ algorithm
     x := x + 1;
  end while;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm6",
-            description="C code generation of algorithm with while loops",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm6",
+        description="C code generation of algorithm with while loops",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
+
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
+
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
     _x_0 = 0.5;
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, (floor(_x_0)), 1, (floor(_x_0)))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, ((floor(_x_0))), 1, ((floor(_x_0))))
     func_CCodeGenAlgorithmTests_Algorithm6_g_def1(_x_0, (floor(_x_0)), tmp_1);
     while (func_CCodeGenAlgorithmTests_Algorithm6_f_exp0(tmp_1)) {
         _x_0 = _x_0 + 1;
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, (floor(_x_0)), 1, (floor(_x_0)))
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, ((floor(_x_0))), 1, ((floor(_x_0))))
         func_CCodeGenAlgorithmTests_Algorithm6_g_def1(_x_0, (floor(_x_0)), tmp_1);
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm6;
 

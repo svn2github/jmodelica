@@ -1029,6 +1029,33 @@ aspect Flattening {
         return res;
     }
     
+    @Override
+    public FType FPrimitiveType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        FType res;
+        if(keepSizeExpressions && ia == null && !getSize().variability().knownParameterOrLess() && !inFunction()) {
+            MutableSize mutableSize = (MutableSize) getSize();
+            List<FExp> l = mutableSize.flattenExps(prefix);
+            FPrimitiveType copy = fullCopy();
+            copy.setSize(Size.SCALAR);
+            res = new FArrayType(copy , l);
+        } else {
+            res = fullCopy();
+            res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
+        }
+        return res;
+    }
+    
+    public List<FExp> MutableSize.flattenExps(FQName prefix) {
+        List<FExp> l = new List<FExp>();
+        for (int i = 0; i < exps.length; i++) { //TODO un-duplicate condition in if-statement with MutableSize.flatten
+            if (exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
+                    (size[i] == Size.UNKNOWN || !exps[i].inFunction())) {
+                l.add(exps[i].flatten(prefix));
+            }
+        }
+        return l;
+    }
+
     public FRecordComponentType FRecordComponentType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
         return new FRecordComponentType(getName(), getFType().flatten(prefix, ia, keepSizeExpressions));
     }
