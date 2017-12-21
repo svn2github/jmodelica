@@ -1047,13 +1047,17 @@ aspect Flattening {
     
     public List<FExp> MutableSize.flattenExps(FQName prefix) {
         List<FExp> l = new List<FExp>();
-        for (int i = 0; i < exps.length; i++) { //TODO un-duplicate condition in if-statement with MutableSize.flatten
-            if (exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
-                    (size[i] == Size.UNKNOWN || !exps[i].inFunction())) {
+        for (int i = 0; i < exps.length; i++) {
+            if (shouldFlattenChild(i)) {
                 l.add(exps[i].flatten(prefix));
             }
         }
         return l;
+    }
+
+    public boolean MutableSize.shouldFlattenChild(int i) {
+        return exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
+                (size[i] == Size.UNKNOWN || !exps[i].inFunction());
     }
 
     public FRecordComponentType FRecordComponentType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
@@ -1122,8 +1126,7 @@ aspect Flattening {
         System.arraycopy(size, 0, res.size, 0, size.length);
         if (keepSizeExpressions) {
             for (int i = 0; i < exps.length; i++) {
-                if (exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
-                        (size[i] == Size.UNKNOWN || !exps[i].inFunction())) {
+                if (shouldFlattenChild(i)) {
                     res.exps[i] = context.affixExpression(exps[i].flatten(prefix));
                 }
             }
