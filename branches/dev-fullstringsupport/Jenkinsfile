@@ -2,8 +2,12 @@
 def url = scm.getLocations()[0].remote
 library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCMSource', remoteBase: url, credentialsId: ''])
 
-def JM_BRANCH = "trunk"
+// Extract branch info from url variable (this assumes that this Jenkinsfile
+// has been checked out directly by Jenkins as part of pipeline build).
+(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
+
 def JMODELICA_SDK_HOME="C:\\JModelica.org-SDK-1.13\\"
+boolean SHOULD_UPLOAD_INSTALL = JM_SVN_PATH.equals("trunk")
 
 // Set build name:
 currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.TRIGGER_CAUSE) + ")"
@@ -12,28 +16,30 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
 
 node ("716KS42") {
-    dir ('Build') {
-        stage("Checkout JModelica.org") {
-            checkout([
-                $class: 'SubversionSCM',
-                locations: [
-                    [local: 'JModelica',          remote: "https://svn.jmodelica.org/${JM_BRANCH}",                         credentialsId: ''],
-                ],
-                workspaceUpdater: [$class: 'UpdateWithCleanUpdater']
-            ])
-        }
-        
-        
-                stage("Build install folder") {
-            runMSYSWithEnv("""\
-WORKSPACE="\$(pwd)"
-JM_CO_DIR=\${WORKSPACE}/JModelica/
-export SRC_HOME=\${JM_CO_DIR}
-export BUILD_HOME=\${WORKSPACE}/build
-export INSTALL_HOME=\${WORKSPACE}/install
+    stage("Checkout JModelica.org") {
+        checkout([
+            $class: 'SubversionSCM',
+            locations: [
+                [local: 'JModelica', remote: "https://svn.jmodelica.org/${JM_SVN_PATH}"],
+            ],
+            workspaceUpdater: [$class: 'UpdateWithCleanUpdater'],
+            quietOperation: true,
+        ])
+    }
+    
+    stage("Build install folder") {
+        runMSYSWithEnv("""\
+BUILD_CASADI=1
+export IN_HEADLESS=1
+
+export SRC_HOME="\$(pwd)/JModelica/"
+export BUILD_HOME="\$(pwd)/build"
+export INSTALL_HOME="\$(pwd)/install"
+
 cd "${unixpath(JMODELICA_SDK_HOME)}"
 echo ==== Run configure
 ./configure.sh
+
 echo ==== Go to build and run make
 cd "\${BUILD_HOME}"
 make
@@ -41,15 +47,12 @@ make install
 if [ "\${BUILD_CASADI:-1}" == "1" ]; then
     make casadi_interface
 fi
-""","""\
-set WORKSPACE=${pwd()}
-set IN_HEADLESS=1
-set BUILD_CASADI=1
 """)
-        }
-        stage("Archive") {
-            archive 'install/**'
-            
+    }
+    stage("Archive") {
+        archive 'install/**'
+        
+        if (SHOULD_UPLOAD_INSTALL) {
             // Prepare the ZIP for future upload
             jmRevision=svnRevision("JModelica")
             def zipName="JModelica.org-Chicago-win-r${jmRevision}.zip"
@@ -57,32 +60,34 @@ set BUILD_CASADI=1
             writeFile file: 'README.TXT', text: readMeContents
             runMSYSWithEnv("""\
 rm -f *.zip
-zip -r "${zipName}" install README.TXT
+zip -r -q "${zipName}" install README.TXT
 """)
-           stash includes: '*.zip', name: 'installZip'
+            stash includes: '*.zip', name: 'installZip'
         }
-        
-        stage("Run jm_tests") {
-            try {
+    }
+    
+    stage("Run jm_tests") {
+        try {
             runMSYSWithEnv("""\
 TEST_RES_DIR=\${WORKSPACE}/testRes
 mkdir -p "\${TEST_RES_DIR}"
 install/jm_tests -ie -x "\${TEST_RES_DIR}"
 """)
-            } finally {
-                junit testResults: 'testRes/*.xml', allowEmptyResults: true
-            }
+        } finally {
+            junit testResults: 'testRes/*.xml', allowEmptyResults: true
         }
     }
 }
-// We need to run on master since we need a linux server with ssh-agent support
-node ('master') {
-    stage ('Upload') {
-        deleteDir()
-        sshagent(['jmodelica.org']) {
-            unstash 'installZip'
-            sh 'scp *.zip jenkins@jmodelica.org:/srv/www/htdocs/downloads/nightly-builds'
+if (SHOULD_UPLOAD_INSTALL) {
+    // We need to run on master since we need a linux server with ssh-agent support
+    node ('master') {
+        stage ('Upload') {
+            deleteDir()
+            sshagent(['jmodelica.org']) {
+                unstash 'installZip'
+                sh 'scp *.zip jenkins@jmodelica.org:/srv/www/htdocs/downloads/nightly-builds'
+            }
+            deleteDir()
         }
-        deleteDir()
     }
 }
