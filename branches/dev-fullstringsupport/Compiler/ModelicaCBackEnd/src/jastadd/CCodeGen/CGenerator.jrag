@@ -371,7 +371,7 @@ public class CGenerator extends GenericGenerator {
             private static final String FMT_DEFAULT_INDEX = 
                     "#define %s ((*(jmi->z))[%d])\n";
             private static final String FMT_DEFAULT_STRING = 
-                    "#define %s (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+%d])\n";
+                    "#define %s (jmi->z_t.strings.values[jmi->z_t.strings.offs.wp+%d])\n";
             private static final String FMT_DEFAULT_STRING_INDEX = 
                     "#define %s (jmi->z_t.strings.values[%d])\n";
             private static final String FMT_EXTERNAL      = 
@@ -470,12 +470,12 @@ public class CGenerator extends GenericGenerator {
             int nStringVariables = fclass.numDiscreteStringVariables() + fclass.numStringInputs();
             o = genList(str, nStringVariables                                 , o, FTypePrefixVariability.VariabilityCausality_C.W);
             o = genList(str, nStringVariables                                 , o, FTypePrefixVariability.VariabilityCausality_C.WP);
-            str.print("o->n = ", o, ";\n");
+            str.print("z->n = ", o, ";\n");
         }
         
         int genList(CodeStream str, int n, int o, FTypePrefixVariability.VariabilityCausality_C s) {
-            str.print("o->o_", s, " = ", o, ";\n");
-            str.print("o->n_", s, " = ", n, ";\n");
+            str.print("z->offs.", s, " = ", o, ";\n");
+            str.print("z->nums.", s, " = ", n, ";\n");
             return o + n;
         }
     }

@@ -67,8 +67,8 @@ int jmi_copy_pre_values(jmi_t *jmi) {
     }
     
     z_str     = jmi->z_t.strings.values;
-    start     = jmi->z_t.strings.offsets.o_w;
-    pre_start = jmi->z_t.strings.offsets.o_wp;
+    start     = jmi->z_t.strings.offs.w;
+    pre_start = jmi->z_t.strings.offs.wp;
     for (i = 0; i < pre_start - start; i++) {
         JMI_ASG_STR_Z(z_str[pre_start + i], z_str[start + i]);
     }

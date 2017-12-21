@@ -665,7 +665,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         for (i = 0; i < block->n_str; i++) {
             block->str_vref[i]      = (jmi_int_t)str_vref_tmp[i];
             block->str_index[i]     = jmi_get_index_from_value_ref(block->str_vref[i]);
-            block->str_pre_index[i] = block->str_index[i] - jmi->z_t.strings.offsets.o_w + jmi->z_t.strings.offsets.o_wp;
+            block->str_pre_index[i] = block->str_index[i] - jmi->z_t.strings.offs.w + jmi->z_t.strings.offs.wp;
         }
 
         for (i = 0; i < block->n_dr; i++) {

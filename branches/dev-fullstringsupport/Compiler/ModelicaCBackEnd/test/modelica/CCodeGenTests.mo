@@ -1447,25 +1447,25 @@ N_boolean_pi_s = 1;
 N_boolean_pi_f = 1;
 N_boolean_pi_e = 1;
 
-o->o_ci = 0;
-o->n_ci = 0;
-o->o_cd = 0;
-o->n_cd = 0;
-o->o_pi = 0;
-o->n_pi = 2;
-o->o_ps = 2;
-o->n_ps = 0;
-o->o_pf = 2;
-o->n_pf = 1;
-o->o_pe = 3;
-o->n_pe = 1;
-o->o_pd = 4;
-o->n_pd = 0;
-o->o_w = 4;
-o->n_w = 0;
-o->o_wp = 4;
-o->n_wp = 0;
-o->n = 4;
+z->offs.ci = 0;
+z->nums.ci = 0;
+z->offs.cd = 0;
+z->nums.cd = 0;
+z->offs.pi = 0;
+z->nums.pi = 2;
+z->offs.ps = 2;
+z->nums.ps = 0;
+z->offs.pf = 2;
+z->nums.pf = 1;
+z->offs.pe = 3;
+z->nums.pe = 1;
+z->offs.pd = 4;
+z->nums.pd = 0;
+z->offs.w = 4;
+z->nums.w = 0;
+z->offs.wp = 4;
+z->nums.wp = 0;
+z->n = 4;
 
 
 ---
@@ -1588,25 +1588,25 @@ $C_DAE_initial_dependent_parameter_assignments$
 #define _s_pi_pe_5 (jmi->z_t.strings.values[5])
 #define _s_pd_pd_6 (jmi->z_t.strings.values[6])
 
-o->o_ci = 0;
-o->n_ci = 2;
-o->o_cd = 2;
-o->n_cd = 0;
-o->o_pi = 2;
-o->n_pi = 2;
-o->o_ps = 4;
-o->n_ps = 0;
-o->o_pf = 4;
-o->n_pf = 1;
-o->o_pe = 5;
-o->n_pe = 1;
-o->o_pd = 6;
-o->n_pd = 1;
-o->o_w = 7;
-o->n_w = 0;
-o->o_wp = 7;
-o->n_wp = 0;
-o->n = 7;
+z->offs.ci = 0;
+z->nums.ci = 2;
+z->offs.cd = 2;
+z->nums.cd = 0;
+z->offs.pi = 2;
+z->nums.pi = 2;
+z->offs.ps = 4;
+z->nums.ps = 0;
+z->offs.pf = 4;
+z->nums.pf = 1;
+z->offs.pe = 5;
+z->nums.pe = 1;
+z->offs.pd = 6;
+z->nums.pd = 1;
+z->offs.w = 7;
+z->nums.w = 0;
+z->offs.wp = 7;
+z->nums.wp = 0;
+z->n = 7;
 
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
@@ -1677,25 +1677,25 @@ N_real_pd = 1;
 N_integer_pd = 1 + 1;
 N_boolean_pd = 1;
 
-o->o_ci = 0;
-o->n_ci = 0;
-o->o_cd = 0;
-o->n_cd = 0;
-o->o_pi = 0;
-o->n_pi = 0;
-o->o_ps = 0;
-o->n_ps = 0;
-o->o_pf = 0;
-o->n_pf = 0;
-o->o_pe = 0;
-o->n_pe = 0;
-o->o_pd = 0;
-o->n_pd = 1;
-o->o_w = 1;
-o->n_w = 0;
-o->o_wp = 1;
-o->n_wp = 0;
-o->n = 1;
+z->offs.ci = 0;
+z->nums.ci = 0;
+z->offs.cd = 0;
+z->nums.cd = 0;
+z->offs.pi = 0;
+z->nums.pi = 0;
+z->offs.ps = 0;
+z->nums.ps = 0;
+z->offs.pf = 0;
+z->nums.pf = 0;
+z->offs.pe = 0;
+z->nums.pe = 0;
+z->offs.pd = 0;
+z->nums.pd = 1;
+z->offs.w = 1;
+z->nums.w = 0;
+z->offs.wp = 1;
+z->nums.wp = 0;
+z->n = 1;
 
 
 ---

@@ -32,11 +32,11 @@
 #include "module_include/jmi_get_set.h"
 
 void jmi_z_init(jmi_z_t* z) {
-    z->strings.values = jmi_create_strings(z->strings.offsets.n);
+    z->strings.values = jmi_create_strings(z->strings.n);
 }
 
 void jmi_z_delete(jmi_z_t* z) {
-    jmi_free_strings(z->strings.values, z->strings.offsets.n);
+    jmi_free_strings(z->strings.values, z->strings.n);
 }
 
 void jmi_model_init(jmi_t* jmi,

@@ -50,25 +50,25 @@ $C_ode_derivatives$
 #define _s_pd_s1_2 (jmi->z_t.strings.values[1])
 #define _s_pd_s2_3 (jmi->z_t.strings.values[2])
 
-o->o_ci = 0;
-o->n_ci = 0;
-o->o_cd = 0;
-o->n_cd = 0;
-o->o_pi = 0;
-o->n_pi = 1;
-o->o_ps = 1;
-o->n_ps = 0;
-o->o_pf = 1;
-o->n_pf = 0;
-o->o_pe = 1;
-o->n_pe = 0;
-o->o_pd = 1;
-o->n_pd = 2;
-o->o_w = 3;
-o->n_w = 0;
-o->o_wp = 3;
-o->n_wp = 0;
-o->n = 3;
+z->offs.ci = 0;
+z->nums.ci = 0;
+z->offs.cd = 0;
+z->nums.cd = 0;
+z->offs.pi = 0;
+z->nums.pi = 1;
+z->offs.ps = 1;
+z->nums.ps = 0;
+z->offs.pf = 1;
+z->nums.pf = 0;
+z->offs.pe = 1;
+z->nums.pe = 0;
+z->offs.pd = 1;
+z->nums.pd = 2;
+z->offs.w = 3;
+z->nums.w = 0;
+z->offs.wp = 3;
+z->nums.wp = 0;
+z->n = 3;
 
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
@@ -152,28 +152,28 @@ $C_ode_derivatives$
 #define _s_pi_s0_0 (jmi->z_t.strings.values[0])
 #define _s_w_s1_1 (jmi->z_t.strings.values[1])
 #define _s_w_s2_2 (jmi->z_t.strings.values[2])
-#define pre_s1_1 (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+0])
-#define pre_s2_2 (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+1])
+#define pre_s1_1 (jmi->z_t.strings.values[jmi->z_t.strings.offs.wp+0])
+#define pre_s2_2 (jmi->z_t.strings.values[jmi->z_t.strings.offs.wp+1])
 
-o->o_ci = 0;
-o->n_ci = 0;
-o->o_cd = 0;
-o->n_cd = 0;
-o->o_pi = 0;
-o->n_pi = 1;
-o->o_ps = 1;
-o->n_ps = 0;
-o->o_pf = 1;
-o->n_pf = 0;
-o->o_pe = 1;
-o->n_pe = 0;
-o->o_pd = 1;
-o->n_pd = 0;
-o->o_w  = 1;
-o->n_w  = 2;
-o->o_wp = 3;
-o->n_wp = 2;
-o->n = 5;
+z->offs.ci = 0;
+z->nums.ci = 0;
+z->offs.cd = 0;
+z->nums.cd = 0;
+z->offs.pi = 0;
+z->nums.pi = 1;
+z->offs.ps = 1;
+z->nums.ps = 0;
+z->offs.pf = 1;
+z->nums.pf = 0;
+z->offs.pe = 1;
+z->nums.pe = 0;
+z->offs.pd = 1;
+z->nums.pd = 0;
+z->offs.w  = 1;
+z->nums.w  = 2;
+z->offs.wp = 3;
+z->nums.wp = 2;
+z->n = 5;
 
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
@@ -414,28 +414,28 @@ $C_ode_derivatives$
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define _s_w_y_1 (jmi->z_t.strings.values[0])
 #define _s_w_x_0 (jmi->z_t.strings.values[1])
-#define pre_y_1 (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+0])
-#define pre_x_0 (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+0])
+#define pre_y_1 (jmi->z_t.strings.values[jmi->z_t.strings.offs.wp+0])
+#define pre_x_0 (jmi->z_t.strings.values[jmi->z_t.strings.offs.wp+0])
 
-o->o_ci = 0;
-o->n_ci = 0;
-o->o_cd = 0;
-o->n_cd = 0;
-o->o_pi = 0;
-o->n_pi = 0;
-o->o_ps = 0;
-o->n_ps = 0;
-o->o_pf = 0;
-o->n_pf = 0;
-o->o_pe = 0;
-o->n_pe = 0;
-o->o_pd = 0;
-o->n_pd = 0;
-o->o_w = 0;
-o->n_w = 2;
-o->o_wp = 2;
-o->n_wp = 2;
-o->n = 4;
+z->offs.ci = 0;
+z->nums.ci = 0;
+z->offs.cd = 0;
+z->nums.cd = 0;
+z->offs.pi = 0;
+z->nums.pi = 0;
+z->offs.ps = 0;
+z->nums.ps = 0;
+z->offs.pf = 0;
+z->nums.pf = 0;
+z->offs.pe = 0;
+z->nums.pe = 0;
+z->offs.pd = 0;
+z->nums.pd = 0;
+z->offs.w = 0;
+z->nums.w = 2;
+z->offs.wp = 2;
+z->nums.wp = 2;
+z->n = 4;
 
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
