@@ -467,29 +467,16 @@ public class CGenerator extends GenericGenerator {
             o = genList(str, fclass.numFinalIndependentStringParameters()     , o, FTypePrefixVariability.VariabilityCausality_C.PF);
             o = genList(str, fclass.numEvalIndependentStringParameters()      , o, FTypePrefixVariability.VariabilityCausality_C.PE);
             o = genList(str, fclass.numDependentStringParameters()            , o, FTypePrefixVariability.VariabilityCausality_C.PD);
-            o = genList(str, fclass.numDiscreteStringVariables()              , o, FTypePrefixVariability.VariabilityCausality_C.W);
-            o = genList(str, fclass.numDiscreteStringVariables()              , o, FTypePrefixVariability.VariabilityCausality_C.WP);
-            genLast(str, o);
+            int nStringVariables = fclass.numDiscreteStringVariables() + fclass.numStringInputs();
+            o = genList(str, nStringVariables                                 , o, FTypePrefixVariability.VariabilityCausality_C.W);
+            o = genList(str, nStringVariables                                 , o, FTypePrefixVariability.VariabilityCausality_C.WP);
+            str.print("o->n = ", o, ";\n");
         }
         
         int genList(CodeStream str, int n, int o, FTypePrefixVariability.VariabilityCausality_C s) {
-            str.print("o->o_");
-            str.print(s);
-            str.print(" = ");
-            str.print(o);
-            str.print(";\n");
-            str.print("o->n_");
-            str.print(s);
-            str.print(" = ");
-            str.print(n);
-            str.print(";\n");
+            str.print("o->o_", s, " = ", o, ";\n");
+            str.print("o->n_", s, " = ", n, ";\n");
             return o + n;
-        }
-        
-        void genLast(CodeStream str, int o) {
-            str.print("o->n = ");
-            str.print(o);
-            str.print(";\n");
         }
     }
     

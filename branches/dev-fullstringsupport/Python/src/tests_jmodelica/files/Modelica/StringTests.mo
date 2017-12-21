@@ -38,6 +38,11 @@ equation
     s2 = s1 + s1;
 end TestString2;
 
+model TestStringInput1
+    input String x;
+    output String y = x + x;
+end TestStringInput1;
+
 model TestStringEvent1
     String s1;
     String s2;

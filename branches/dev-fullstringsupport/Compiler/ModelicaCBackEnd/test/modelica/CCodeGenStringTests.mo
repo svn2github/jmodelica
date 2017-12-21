@@ -391,6 +391,81 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end CCodeGenString4;
 
+model CCodeGenStringInput1
+    input String x;
+    output String y = x + x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenStringInput1",
+            description="Code generated for strings. Input.",
+            template="
+$C_variable_aliases$
+$C_z_offsets_strings$
+$C_dae_init_add_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_initialization$
+$C_dae_add_blocks_residual_functions$
+$C_dae_blocks_residual_functions$
+$C_ode_derivatives$
+",
+            generatedCode="
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
+#define _s_w_y_1 (jmi->z_t.strings.values[0])
+#define _s_w_x_0 (jmi->z_t.strings.values[1])
+#define pre_y_1 (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+0])
+#define pre_x_0 (jmi->z_t.strings.values[jmi->z_t.strings.offsets.o_wp+0])
+
+o->o_ci = 0;
+o->n_ci = 0;
+o->o_cd = 0;
+o->n_cd = 0;
+o->o_pi = 0;
+o->n_pi = 0;
+o->o_ps = 0;
+o->n_ps = 0;
+o->o_pf = 0;
+o->n_pf = 0;
+o->o_pe = 0;
+o->n_pe = 0;
+o->o_pd = 0;
+o->n_pd = 0;
+o->o_w = 0;
+o->n_w = 2;
+o->o_wp = 2;
+o->n_wp = 2;
+o->n = 4;
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF_STR_DYNA(tmp_1)
+    JMI_INI_STR_DYNA(tmp_1, JMI_LEN(_s_w_x_0) + JMI_LEN(_s_w_x_0))
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", _s_w_x_0);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", _s_w_x_0);
+    JMI_ASG(STR_Z, _s_w_y_1, tmp_1)
+    JMI_ASG(STR_Z, pre_y_1, \"\")
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF_STR_DYNA(tmp_1)
+    JMI_INI_STR_DYNA(tmp_1, JMI_LEN(_s_w_x_0) + JMI_LEN(_s_w_x_0))
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", _s_w_x_0);
+    snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", _s_w_x_0);
+    JMI_ASG(STR_Z, _s_w_y_1, tmp_1)
+    JMI_ASG(STR_Z, pre_y_1, _s_w_y_1)
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end CCodeGenStringInput1;
+
 model TestStringBlockInitial1
     parameter Real t(fixed=false);
     parameter String s1 = String(t);

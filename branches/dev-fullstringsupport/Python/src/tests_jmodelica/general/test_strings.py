@@ -195,6 +195,27 @@ class TestString2(SimulationTest):
         assertString(self.model, "s1", "10")
         assertString(self.model, "s2", "1010")
 
+class TestStringInput1(SimulationTest):
+    """
+    Test input string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringInput1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        setString(self.model, "x", "a")
+        self.run()
+        assertString(self.model, "x", "a")
+        assertString(self.model, "y", "aa")
+
 class TestStringEvent1(SimulationTest):
     """
     Test discrete string
