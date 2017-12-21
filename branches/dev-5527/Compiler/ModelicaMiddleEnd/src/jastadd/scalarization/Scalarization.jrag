@@ -1775,22 +1775,56 @@ aspect Scalarization {
         return res;
     }
     
-    public FType FType.scalarize(Scalarizer s, FExp context) {
+    public abstract FType FType.scalarize(Scalarizer s, FExp context);
+
+    @Override
+    public FType FCellType.scalarize(Scalarizer s, FExp context) {
         FType res = treeCopy();
-        res.parent = this.parent; //TODO implement bottom-up scalarization of FType
         res.scalarizeTypeSizes(s, context);
         return res;
     }
-    
+
     @Override
     public FType FArrayType.scalarize(Scalarizer s, FExp context) {
         FArrayType res = treeCopy();
         for (int i = 0; i < getFExps().numChildren(); i++) {
-            getFExps().setChild(getFExp(i).scalarize(s), i);
+            res.setFExp(getFExp(i).scalarize(s), i);
         }
         return res;
     }
     
+    @Override
+    public FType FFunctionType.scalarize(Scalarizer s, FExp context) {
+        List<FRecordComponentType> inputs = new List<FRecordComponentType>();
+        for (FRecordComponentType frct : getInputs()) {
+            inputs.add(frct.scalarize(s, context));
+        }
+        List<FRecordComponentType> outputs = new List<FRecordComponentType>();
+        for (FRecordComponentType frct : getOutputs()) {
+            outputs.add(frct.scalarize(s, context));
+        }
+        FFunctionType res = new FFunctionType(getSize(), getName(), inputs, outputs, getFClass());
+        res.setSize(getSize().scalarize(s, context));
+        return res;
+    }
+    
+    @Override
+    public FType FRecordType.scalarize(Scalarizer s, FExp context) {
+        List<FRecordComponentType> comps = new List<FRecordComponentType>();
+        for (FRecordComponentType frct : getComponents()) {
+            comps.add(frct.scalarize(s, context));
+        }
+        FRecordType res = new FRecordType(getSize(), getName(), comps, getFClass());
+        res.setSize(getSize().scalarize(s, context));
+        return res;
+    }
+
+    public FRecordComponentType FRecordComponentType.scalarize(Scalarizer s, FExp context) {
+        FRecordComponentType res = treeCopy();
+        res.setFType(getFType().scalarize(s, context));
+        return res;
+    }
+
     public void ASTNode.scalarizeTypeSizes(Scalarizer s, FExp context) {
         for (ASTNode n : this) {
             n.scalarizeTypeSizes(s, context);

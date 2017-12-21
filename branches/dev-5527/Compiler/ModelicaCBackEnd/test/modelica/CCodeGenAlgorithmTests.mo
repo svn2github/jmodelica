@@ -605,6 +605,79 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end Algorithm6;
 
+model Algorithm6b
+        function f
+            input Real[:] x;
+            output Boolean y;
+            external;
+        end f;
+        
+        function g
+            input Real x;
+            input Real n;
+            output Real[integer(n)] y;
+            external;
+        end g;
+    
+        function k
+            input Real x;
+            input Integer n;
+            output Real[n] y = 1:n .+ x;
+            algorithm
+        end k;
+    
+        Real x(start=0.5);
+    algorithm
+        while f(g(x, sum(k(time, 3)))) loop
+            x := x + 1;
+        end while;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Algorithm6b",
+            description="C code generation of algorithm with while loops",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1)
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_3, -1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 3, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 3, 1)
+    _x_0 = 0.5;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_1);
+    memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_1, 1), 3 * sizeof(jmi_real_t));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1, 3)
+    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_2);
+    memcpy(&_temp_2_1_4, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)), 1, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)))
+    func_CCodeGenAlgorithmTests_Algorithm6b_g_def1(_x_0, _temp_1_1_1 + _temp_1_2_2 + _temp_1_3_3, tmp_3);
+    while (func_CCodeGenAlgorithmTests_Algorithm6b_f_exp0(tmp_3)) {
+        _x_0 = _x_0 + 1;
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 3, 1, 3)
+        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_4);
+        memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_4, 1), 3 * sizeof(jmi_real_t));
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 3, 1, 3)
+        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_5);
+        memcpy(&_temp_2_1_4, &jmi_array_val_1(tmp_5, 1), 3 * sizeof(jmi_real_t));
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)), 1, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)))
+        func_CCodeGenAlgorithmTests_Algorithm6b_g_def1(_x_0, _temp_1_1_1 + _temp_1_2_2 + _temp_1_3_3, tmp_3);
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end Algorithm6b;
+
 model Algorithm7
 	Real x,y,z,a;
 algorithm
