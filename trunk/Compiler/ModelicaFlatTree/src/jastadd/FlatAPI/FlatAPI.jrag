@@ -576,6 +576,9 @@ aspect FlatAPI {
 
                     ZOrdinaryCategory.DISCRETE_BOOLEAN,
                     ZOrdinaryCategory.BOOLEAN_INPUT,
+                    
+                    ZOrdinaryCategory.DISCRETE_STRING,
+                    ZOrdinaryCategory.STRING_INPUT,
             };
 
             private final Map<ZCategory, ZCategoryEntry> categoryMap;
