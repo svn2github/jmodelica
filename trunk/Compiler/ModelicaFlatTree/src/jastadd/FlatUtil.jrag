@@ -1029,6 +1029,7 @@ aspect FlatNames {
     
 
     syn String FType.name();
+    eq FArrayType.name()            = getFPrimitiveType().name();
     eq FRealType.name()             = "Real";
     eq FIntegerType.name()          = "Integer";
     eq FBooleanType.name()          = "Boolean";
@@ -1763,6 +1764,12 @@ aspect FlatFunctionUtils {
     public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
             FTypePrefixVariability variability) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FVariable FArrayType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return getFPrimitiveType().createFVariable(fvt, name, variability);
     }
         
     public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 

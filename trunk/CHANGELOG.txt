@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5527
+Fixed representation of size expressions in function call types
+
 ; Feature ; Major ; Compiler; #4797 
 Full string support
 
