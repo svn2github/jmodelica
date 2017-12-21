@@ -170,6 +170,10 @@ class TestString1(SimulationTest):
         self.setup_base()
 
     @testattr(stddist_full = True)
+    def test_set_wrong_type(self):
+        setStringAssertFail(self.model, "t")
+
+    @testattr(stddist_full = True)
     def test_trajectories(self):
         self.run()
         assertString(self.model, "s1", "0.5")
