@@ -136,14 +136,14 @@ $C_delay_sample$
     return 0;
 }
 
-static int jmi_z_offset_strings(jmi_z_offsets_t* o) {
+static int jmi_z_offset_strings(jmi_z_strings_t* z) {
 $C_z_offsets_strings$
     return 0;
 }
 
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
 
-    jmi_z_offset_strings(&(*jmi)->z_t.strings.offsets);
+    jmi_z_offset_strings(&(*jmi)->z_t.strings);
 
     jmi_init(jmi, N_real_ci,      N_real_cd,      N_real_pi,      N_real_pi_s,
                   N_real_pi_f,    N_real_pi_e,    N_real_pd,      N_integer_ci,

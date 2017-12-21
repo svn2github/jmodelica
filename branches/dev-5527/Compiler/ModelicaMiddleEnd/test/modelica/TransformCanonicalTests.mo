@@ -6625,6 +6625,32 @@ end TransformCanonicalTests.String2;
 
 end String2;
 
+model String3
+    String s(start="start");
+equation
+    when time > 1 then
+        s = "val";
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="String3",
+            description="Test that string parameters and string parameters goes through front-end.",
+            flatModel="
+fclass TransformCanonicalTests.String3
+ discrete String s(start = \"start\");
+ discrete Boolean temp_1;
+initial equation
+ pre(temp_1) = false;
+ pre(s) = \"start\";
+equation
+ temp_1 = time > 1;
+ s = if temp_1 and not pre(temp_1) then \"val\" else pre(s);
+end TransformCanonicalTests.String3;
+")})));
+
+end String3;
+
 class MyExternalObject
  extends ExternalObject;
  

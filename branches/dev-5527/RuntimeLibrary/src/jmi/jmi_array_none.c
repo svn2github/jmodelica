@@ -19,6 +19,22 @@
 
 #include "jmi_util.h"
 
+void jmi_swap_real(jmi_real_t *dest, jmi_real_t *src) {
+    jmi_real_t tmp;
+    tmp = *dest;
+    *dest = *src;
+    *src = tmp;
+}
+
+void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src) {
+    JMI_DYNAMIC_INIT()
+    jmi_string_t tmp;
+    JMI_ASG_STR(tmp, *dest);
+    JMI_ASG_STR_Z(*dest, *src);
+    *src = tmp;
+    /* JMI_DYNAMIC_FREE() Is called in surrounding context, src will be used there */
+}
+
 void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory_t* local_block) {
     size_t len = JMI_MIN(JMI_LEN(src), JMI_STR_MAX) + 1;
     if (local_block == NULL) {

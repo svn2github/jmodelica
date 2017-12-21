@@ -225,9 +225,9 @@ aspect FlatAPIAttributes {
     syn CValue  FVariable.nominalAttributeCValue() = attributeCValueReal(FAttribute.NOMINAL, 1.0);
     syn double  FVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
 
-    syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().nominalAttributeSet();
-    syn FExp    FDerivativeVariable.nominalAttributeExp()    = myDifferentiatedVariable().nominalAttributeExp();
-    syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
+    syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().asFVariable().nominalAttributeSet();
+    syn FExp    FDerivativeVariable.nominalAttributeExp()    = myDifferentiatedVariable().asFVariable().nominalAttributeExp();
+    syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().asFVariable().nominalAttributeCValue();
 
     // State Select attribute
     syn boolean FVariable.stateSelectAttributeSet()        = attributeSet(FAttribute.STATE_SELECT);
