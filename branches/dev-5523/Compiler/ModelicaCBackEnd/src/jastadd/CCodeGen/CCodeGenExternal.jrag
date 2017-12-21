@@ -97,7 +97,7 @@ aspect CCodeGenExternal {
         str.print(indent);
         str.print("extern ");
         if (stmt.hasReturnVar()) {
-            str.print(stmt.getReturnVar().type().argType_C(false));
+            str.print(stmt.getReturnVar().type().argType_C(p, false));
         } else {
             str.print("void");
         }
@@ -110,7 +110,7 @@ aspect CCodeGenExternal {
         String prefix = "";
         for (FExp arg : stmt.getArgs()) {
             str.print(prefix);
-            str.print(arg.argType_C(arg.isExternalArgumentRef(fortran)));
+            str.print(arg.argType_C(p, arg.isExternalArgumentRef(fortran)));
             prefix = ", ";
         }
         str.print(");\n");

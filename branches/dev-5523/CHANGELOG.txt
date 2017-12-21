@@ -1,5 +1,20 @@
 ================= Unreleased ==================
 ; Feature ; Major ; Compiler; #4797 
+Full string support
+
+; Fixed ; Minor ; compiler ; #5530
+Fixed crash bug in FMI XML generator where alias eliminated high order
+temporary derivatives which were orphan caused problems.
+
+; Fixed ; Minor ; Compiler ; #5529
+Fixed bug in FMI XML generation where derivative attribute for second order
+derivatives (or higher) pointed to the wrong variable.
+
+================= Stable-2017-12-19 ==================
+; Fixed ; Minor ; Compiler; #5526 
+Fixed null pointer in evaluation of partial function
+
+; Feature ; Major ; Compiler; #4797 
 Support for string parameters
 
 ; Change ; Major ; Python ; #5167

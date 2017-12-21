@@ -21,7 +21,7 @@ from pyfmi.fmi import FMUException
 import nose
 
 def assertString(model, name, value):
-    val = model.get_string(model.get_variable_valueref(name))[0]
+    val = model.get_string(model.get_variable_valueref(name))[-1]
     assert val==value, "Expected '" + str(value) + "' got '" + str(val) + "'"
 
 def setString(model, name, value):
@@ -154,3 +154,166 @@ class TestStringParameter3(SimulationTest):
         assertString(self.model, "pi[2]", "str5")
         assertString(self.model, "pd[1]", "str3str3")
         assertString(self.model, "pd[2]", "str5str5")
+
+class TestString1(SimulationTest):
+    """
+    Test initial parameter string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestString1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_set_wrong_type(self):
+        setStringAssertFail(self.model, "t")
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s1", "0.5")
+        assertString(self.model, "s2", "0.50.5")
+
+class TestString2(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestString2')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s1", "10")
+        assertString(self.model, "s2", "1010")
+
+class TestStringInput1(SimulationTest):
+    """
+    Test input string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringInput1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        setString(self.model, "x", "a")
+        self.run()
+        assertString(self.model, "x", "a")
+        assertString(self.model, "y", "aa")
+
+class TestStringEvent1(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringEvent1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.model.simulate(final_time=0.9)
+        assertString(self.model, "s2", "0.9msg")
+        opts = self.model.simulate_options()
+        opts["initialize"] = False;
+        self.model.simulate(start_time=0.9, final_time=1.0, options=opts)
+        assertString(self.model, "s2", "11")
+
+class TestStringBlockEvent1(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s3", "011")
+
+class TestStringBlockEvent2(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent2')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s2", "s2:0:1")
+        
+class TestStringBlockEvent3(SimulationTest):
+    """
+    Test discrete string
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent3')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        
+class TestStringBlockEvent4(SimulationTest):
+    """
+    Test JMI_SWAP macro for strings
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('StringTests.mo', 
+            'StringTests.TestStringBlockEvent4')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        self.run()
+        assertString(self.model, "s1", "11")

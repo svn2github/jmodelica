@@ -44,13 +44,17 @@ aspect CCodeGenAlgorithms {
             ASTNode dst, ASTNode src) {
         str.print(indent);
         str.print("JMI_ASG(");
-        str.print(macroType());
+        str.print(dst.assignMacroType(this));
         str.print(", ");
         p.print(dst, str, indent);
         str.print(", ");
         p.print(src, str, indent);
         str.print(")\n");
     }
+
+    syn String ASTNode.assignMacroType(FType type) = type.macroType();
+    eq FIdUseExp.assignMacroType(FType type)       = myFV().assignMacroType(type);
+    eq FVariable.assignMacroType(FType type)       = isString() ? "STR_Z" : super.assignMacroType(type);
 
     /*
      * Hook for printing array initialization
@@ -100,8 +104,6 @@ aspect CCodeGenAlgorithms {
         if (first) {
             p.printVarDecls(this, str, indent);
             if (!solved || (forVariables != null && forVariables.size() != uniqueFIdUseExpsInLHS().size())) {
-                String swapTemp = this.tempName_C();
-                fRealScalarType().printDecl_C(printer_C, str, indent, swapTemp, null);
                 for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
                     if (!solved || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
                         p.printTempInputDecl(use.myFV(), this, str, indent);
@@ -114,7 +116,7 @@ aspect CCodeGenAlgorithms {
     public abstract void CodePrinter.printTempInputDecl(FAbstractVariable v, TempScope ts, CodeStream str, String indent);
     @Override
     public void CPrettyPrinter.printTempInputDecl(FAbstractVariable v, TempScope ts, CodeStream str, String indent) {
-        v.type().printScalarDecl_C(str, indent, false, ts.tempName_C(v));
+        v.type().printScalarDecl_C(this, str, indent, false, ts.tempName_C(v));
     }
 
     @Override
@@ -130,14 +132,14 @@ aspect CCodeGenAlgorithms {
                 printDecl_C(p, str, indent, name, src, external);
             } else {
                 str.format("%sJMI_ARR(STAT, %s, %s, %s, ", indent,
-                        nameScalar_C(external), nameArray_C(external), name);
+                        nameScalar_C(p, external), nameArray_C(p, external), name);
                 size().printNumElements_C(p, str, indent, src);
                 str.print(", ");
                 str.print(ndims());
                 str.println(")");
             }
         } else {
-            printScalarDecl_C(str, indent, external, name);
+            printScalarDecl_C(p, str, indent, external, name);
         }
     }
 
@@ -167,7 +169,12 @@ aspect CCodeGenAlgorithms {
     }
     @Override
     public void FVariable.algorithmInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        str.print(indent, p.name(this), " = ");
+        if (isString()) {
+            str.print(indent, "JMI_ASG(", assignMacroType(type()), ", ", p.name(this), ", ");
+        } else {
+            str.print(indent, p.name(this), " = ");
+        }
+        
         if (isDiscrete()) {
             str.print(p.name(myPreVariable()));
         } else if (isParameter() && hasBindingExp()) {
@@ -180,7 +187,12 @@ aspect CCodeGenAlgorithms {
                 p.print(e, str, indent);
             }
         }
-        str.println(";");
+        
+        if (isString()) {
+            str.print(")\n");
+        } else {
+            str.println(";");
+        }
     }
 
     @Override
@@ -460,7 +472,7 @@ aspect CCodeGenAlgorithms {
         if (wb) {
             str.formatln("%s%s = %s;", indent, src, dst);
         } else {
-            str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(false), src);
+            str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(p, false), src);
         }
     }
 

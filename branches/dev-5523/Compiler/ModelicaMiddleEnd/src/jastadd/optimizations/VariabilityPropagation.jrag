@@ -641,9 +641,9 @@ aspect VariabilityPropagation {
         
         // Derivative
         if (isDifferentiatedVariable()) {
-            FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
-            fDerivativeVariable.taggedByVProp = true;
-            fDerivativeVariable.variabilityPropagation(propagator, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));
+            FAbstractVariable derVar = myDerivativeVariable();
+            derVar.taggedByVProp = true;
+            derVar.variabilityPropagation(propagator, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));
         }
         
         // Alias variables
