@@ -2481,6 +2481,39 @@ Error at line 3, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
 ")})));
 end FunctionType8;
 
+model FunctionType9
+ String x = TestFunctionString("test");
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionType9",
+            description="Function type checks: String literal arg, String input (error for now)",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Compliance error at line 1, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
+  String variables are not supported
+")})));
+end FunctionType9;
+
+model FunctionType10
+ parameter String a = "test";
+ String x = TestFunctionString(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionType10",
+            description="Function type checks: String component arg, String input (error for now)",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Compliance error at line 2, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
+  String variables are not supported
+")})));
+end FunctionType10;
+
 model FunctionType11
  String x = TestFunctionString(1);
 
@@ -2490,7 +2523,10 @@ model FunctionType11
             description="Function type checks: Integer literal arg, String input",
             variability_propagation=false,
             errorMessage="
-1 errors found:
+2 errors found:
+
+Compliance error at line 1, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
+  String variables are not supported
 
 Error at line 2, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible

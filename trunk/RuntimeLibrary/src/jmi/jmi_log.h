@@ -130,9 +130,6 @@ void jmi_log_reals(jmi_log_t *log,  jmi_log_node_t node,
 void jmi_log_ints( jmi_log_t *log, jmi_log_node_t node,
                    jmi_log_category_t c, const char *name, const int *data, int n);
 
-void jmi_log_strings(jmi_log_t *log,  jmi_log_node_t node,
-                   jmi_log_category_t c, const char *name, const jmi_string_t *data, int n);
-
 /** \brief Log a vector of `n` variable references of type `t`, which should be one of `ribs`. */
 void jmi_log_vrefs(jmi_log_t *log, jmi_log_node_t node,
                    jmi_log_category_t c, const char *name, char t, const int *vrefs, int n);
