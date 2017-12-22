@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Major ; Compiler; #4797
+Full string support
+
 ; Fixed ; Minor ; compiler ; #5530
 Fixed crash bug in FMI XML generator where alias eliminated high order
 temporary derivatives which were orphan caused problems.

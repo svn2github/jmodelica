@@ -54,7 +54,7 @@ aspect CCodeGenAlgorithms {
 
     syn String ASTNode.assignMacroType(FType type) = type.macroType();
     eq FIdUseExp.assignMacroType(FType type)       = myFV().assignMacroType(type);
-    eq FVariable.assignMacroType(FType type)       = isString() ? "STR_Z" : super.assignMacroType(type);
+    eq FVariable.assignMacroType(FType type)       = isString() && !inRecord() ? "STR_Z" : super.assignMacroType(type);
 
     /*
      * Hook for printing array initialization

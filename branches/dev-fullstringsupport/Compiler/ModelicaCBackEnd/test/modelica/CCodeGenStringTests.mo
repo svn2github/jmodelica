@@ -773,4 +773,51 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end TestStringBlockEvent2;
 
+package Functions
+
+model TestStringRecord1
+    record R
+        String s = "str";
+    end R;
+
+    function f
+        input Real x;
+        output Real y = x;
+        R r;
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestStringRecord1",
+            description="Code generated for strings. Add in solved equation.",
+            template="
+$C_functions$
+",
+            generatedCode="
+void func_CCodeGenStringTests_Functions_TestStringRecord1_f_def0(jmi_real_t x_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_RECORD_STATIC(R_0_r, r_v)
+    JMI_INI(STR, r_v->s)
+    y_v = x_v;
+    JMI_ASG(STR, r_v->s, \"str\")
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenStringTests_Functions_TestStringRecord1_f_exp0(jmi_real_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenStringTests_Functions_TestStringRecord1_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end TestStringRecord1;
+
+end Functions;
+
 end CCodeGenStringTests;
