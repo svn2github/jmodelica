@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module containing the tests for the FMI interface.
+Module containing the tests for the FMI interface. 
 """
 
 import nose
