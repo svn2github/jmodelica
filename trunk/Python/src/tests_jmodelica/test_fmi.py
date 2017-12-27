@@ -48,7 +48,7 @@ CS1 = 'bouncingBall.fmu'
 CoupledME2 = 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME2.fmu'
 CoupledCS2 = 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS2.fmu'
 
-class Test_load_fmu:
+class Test_load_fmu: 
     """
     This test the functionality of load_fmu method.
     """
