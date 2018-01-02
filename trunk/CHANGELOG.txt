@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-; Fixed ; Minor ; Compiler ; #5527
-Fixed representation of size expressions in function call types
-
 ; Fixed ; Minor ; compiler ; #5530
 Fixed crash bug in FMI XML generator where alias eliminated high order
 temporary derivatives which were orphan caused problems.

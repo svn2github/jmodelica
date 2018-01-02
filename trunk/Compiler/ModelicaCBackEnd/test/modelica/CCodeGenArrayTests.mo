@@ -32,24 +32,24 @@ model UnknownSizeInEquation1
     
     Real y = mysum(f(time));
     
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="UnknownSizeInEquation1",
-        description="",
-        inline_functions="none",
-        template="$C_ode_derivatives$",
-        generatedCode="
-
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="UnknownSizeInEquation1",
+            description="",
+            inline_functions="none",
+            template="$C_ode_derivatives$",
+            generatedCode="
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, (floor(_time)), 1, (floor(_time)))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
     func_CCodeGenArrayTests_UnknownSizeInEquation1_f_def1(_time, tmp_1);
     _y_0 = func_CCodeGenArrayTests_UnknownSizeInEquation1_mysum_exp0(tmp_1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end UnknownSizeInEquation1;
 
@@ -68,14 +68,13 @@ model UnknownSizeInEquation2
     
     Real y = mysum(if time > 2 then f(time) else f(time+1));
     
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="UnknownSizeInEquation2",
-        description="",
-        inline_functions="none",
-        template="$C_ode_derivatives$",
-        generatedCode="
-
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="UnknownSizeInEquation2",
+            description="",
+            inline_functions="none",
+            template="$C_ode_derivatives$",
+            generatedCode="
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -85,16 +84,17 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(2)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (_sw(0)) {
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, (floor(_time)), 1, (floor(_time)))
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, floor(_time), 1, floor(_time))
         func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time, tmp_1);
     } else {
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, (floor(_time + AD_WRAP_LITERAL(1))), 1, (floor(_time + AD_WRAP_LITERAL(1))))
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, floor(_time + AD_WRAP_LITERAL(1)), 1, floor(_time + AD_WRAP_LITERAL(1)))
         func_CCodeGenArrayTests_UnknownSizeInEquation2_f_def1(_time + AD_WRAP_LITERAL(1), tmp_2);
     }
     _y_0 = func_CCodeGenArrayTests_UnknownSizeInEquation2_mysum_exp0(COND_EXP_EQ(_sw(0), JMI_TRUE, tmp_1, tmp_2));
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end UnknownSizeInEquation2;
 
@@ -118,25 +118,25 @@ model UnknownSizeInEquation3
     
     M m;
     
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="UnknownSizeInEquation3",
-        description="Flattening and scalarization of function call sizes",
-        inline_functions="none",
-        template="$C_ode_derivatives$",
-        generatedCode="
-
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="UnknownSizeInEquation3",
+            description="Flattening and scalarization of function call sizes",
+            inline_functions="none",
+            template="$C_ode_derivatives$",
+            generatedCode="
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
     _m_t_0 = _time;
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, (floor(_m_t_0)), 1, (floor(_m_t_0)))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, floor(_m_t_0), 1, floor(_m_t_0))
     func_CCodeGenArrayTests_UnknownSizeInEquation3_m_f_def1(_m_t_0, tmp_1);
     _m_y_1 = func_CCodeGenArrayTests_UnknownSizeInEquation3_m_mysum_exp0(tmp_1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end UnknownSizeInEquation3;
 
@@ -156,24 +156,24 @@ model UnknownSizeInEquation4
     parameter Real p = 1;
     Real y = mysum(f(p));
     
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="UnknownSizeInEquation4",
-        description="",
-        inline_functions="none",
-        template="$C_DAE_initial_dependent_parameter_assignments$",
-        generatedCode="
-
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="UnknownSizeInEquation4",
+            description="",
+            inline_functions="none",
+            template="$C_DAE_initial_dependent_parameter_assignments$",
+            generatedCode="
 int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, (floor(_p_0)), 1, (floor(_p_0)))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, floor(_p_0), 1, floor(_p_0))
     func_CCodeGenArrayTests_UnknownSizeInEquation4_f_def1(_p_0, tmp_1);
     _y_1 = (func_CCodeGenArrayTests_UnknownSizeInEquation4_mysum_exp0(tmp_1));
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end UnknownSizeInEquation4;
 

@@ -249,20 +249,6 @@ aspect AccessSizes {
 
 aspect FunctionCallSizes {
     
-    public abstract Size FType.getSize();
-    public abstract void FType.setSize(Size size);
-    
-    @Override
-    public Size FArrayType.getSize() {
-        MutableSize newSize = new MutableSize(1);
-        for (FExp e : getFExps()) {
-            newSize.append(e);
-        }
-        return newSize;
-    }
-    @Override
-    public void FArrayType.setSize(Size size) {}
-    
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
     eq CommonFunctionCall.sizeOfOutput(int i)          = typeOfOutput(i).size();
     
@@ -307,11 +293,7 @@ aspect FunctionCallSizes {
         FExp.FunctionSizeContextReplacer crp = new FExp.FunctionSizeContextReplacer(call.inputArgMap());
         for (int j = 0; j < ndims(); j++) {
             try {
-                FExp exp = copyReplaceAccess(j, crp);
-                if(!call.inFunction()) {
-                    exp = new FNoEventExp(exp);
-                }
-                ms.append(call.dynamicFExp(exp));
+                ms.append(call.dynamicFExp(copyReplaceAccess(j, crp)));
             } catch (ConstantEvaluationException e) {
                 ms.append(Size.UNKNOWN);
             }

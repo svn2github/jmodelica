@@ -353,18 +353,7 @@ FRuntimeOptionVisibilityType : FPublicVisibilityType;
 /**
  * Base class for all type nodes.
  */
-abstract FType : BaseNode;
-
-/**
- *
- * An array type.
- */
-FArrayType : FType ::= FPrimitiveType FExp*;
-
-/**
- * Base class for all cell types.
- */
-abstract FCellType : FType ::= <Size:Size>;
+abstract FType : BaseNode ::= <Size:Size>;
 
 /**
  * A record type.
@@ -372,17 +361,17 @@ abstract FCellType : FType ::= <Size:Size>;
  * In the instance tree, the components are stored alphabetically, 
  * but in the flat tree they are in the order declared. 
  */
-FRecordType : FCellType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
+FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 
 /**
  * Class representing the external object type.
  */
-FExternalObjectType : FCellType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
+FExternalObjectType : FType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
 
 /**
  * Partial function call type
  */
-FFunctionType : FCellType ::= <Name> Input:FRecordComponentType* Output:FRecordComponentType* <FClass:FClass>;
+FFunctionType : FType ::= <Name> Input:FRecordComponentType* Output:FRecordComponentType* <FClass:FClass>;
 
 /**
  * An operator record type. 
@@ -403,12 +392,12 @@ FRecordComponentType : BaseNode ::= <Name> FType;
  * types Real, Integer, Boolean and String, where each type corresponds to
  * an AST node. FPrimitiveType serves as base class for these AST nodes.
  */
-abstract FPrimitiveType : FCellType;
+abstract FPrimitiveType : FType;
 
 /**
  * Type representing no value at all, equivalent to the void type in C-like languages.
  */
-FNoType : FCellType;
+FNoType : FType;
 
 /**
  * Base class for the numeric types Real and Integer.
@@ -447,7 +436,7 @@ FEnumLiteralType : FPrimitiveType ::= <Name>;
  *
  * Used to represent type errors. 
  */
-FUnknownType : FCellType;
+FUnknownType : FType;
 
 /**
  * A qualified name supporting array subscripts.
