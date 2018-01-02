@@ -131,4 +131,15 @@ aspect CCodeGenBlocksResidual {
             }
         }
     }
+
+    public abstract void CodePrinter.printTempSwap(FAbstractVariable v, TempScope ts, CodeStream str, String indent);
+    @Override
+    public void CPrettyPrinter.printTempSwap(FAbstractVariable v, TempScope ts, CodeStream str, String indent)  {
+        v.genTempSwap(ExecStep, ts, str, indent);
+    }
+
+    public void FAbstractVariable.genTempSwap(CodePrinter.ExecuteCodePrinter p, TempScope ts, CodeStream str, String indent)  {
+        str.print(indent, "JMI_SWAP(", type().macroType(), ", ", p.name(this), ", ", p.tempName(this, ts), ")\n");
+    }
+    
 }

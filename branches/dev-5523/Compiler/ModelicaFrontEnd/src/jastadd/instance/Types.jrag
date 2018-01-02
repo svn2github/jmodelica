@@ -291,7 +291,7 @@ aspect DerivativeFunctions {
     eq FLitExp.shouldBeDifferentiated()           = false;
     eq FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
     eq FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
-    eq FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? myOutput().shouldBeDifferentiated() : false; //TODO is the test of hasFExp() needed?
+    eq FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() && myOutput().shouldBeDifferentiated();
 
 
     /**

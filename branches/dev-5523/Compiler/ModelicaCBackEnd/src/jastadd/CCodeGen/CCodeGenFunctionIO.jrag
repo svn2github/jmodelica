@@ -169,9 +169,6 @@ aspect CodeFuncCallInOutArgPrinters {
         public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
             printCellExp(str, indent, name, use);
         }
-        public void printCellUse(CodeStream str, String indent, String name, FAbstractVariable v) {
-            throw new UnsupportedOperationException("printCellMemcpyUse() is not implemented for the subtype " + getClass().getSimpleName() + ". This is required if useMemcpy=true");
-        }
         protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
             throw new UnsupportedOperationException("printCellMemcpyUse() is not implemented for the subtype " + getClass().getSimpleName() + ". This is required if useMemcpy=true");
         }
@@ -221,10 +218,6 @@ aspect CodeFuncCallInOutArgPrinters {
             
             prevUse = use;
             n++;
-        }
-
-        public final void printUse(CodeStream str, String indent, String name, FAbstractVariable v) {
-            printCellUse(str, indent, name, v);
         }
 
         private void init(FIdUseExp use, String name) {
@@ -288,16 +281,6 @@ aspect CodeFuncCallInOutArgPrinters {
     }
     
     
-    public abstract void CodePrinter.printTempSwap(FAbstractVariable v, TempScope ts, CodeStream str, String indent);
-    @Override
-    public void CPrettyPrinter.printTempSwap(FAbstractVariable v, TempScope ts, CodeStream str, String indent)  {
-        v.genTempSwap(ExecStep, ts, str, indent);
-    }
-
-    public void FAbstractVariable.genTempSwap(CodePrinter.ExecuteCodePrinter p, TempScope ts, CodeStream str, String indent)  {
-        str.print(indent, "JMI_SWAP(", type().macroType(), ", ", p.name(this), ", ", p.tempName(this, ts), ")\n");
-    }
-    
     
     public abstract class CodePrinter {
         public abstract class FuncCallOutArgPrinter extends CodeFuncCallInOutArgPrinter {
@@ -341,24 +324,10 @@ aspect CodeFuncCallInOutArgPrinters {
                 this.indexCounter = indexCounter;
             }
 
-            public void print(CodeStream str, String indent, String name, FType type, FAbstractVariable v) {
-                printCellUse(str, indent, name, v);
-            }
-
-            public final void print(CodeStream str, String indent, FType type, String name, FAbstractVariable v) {
-                type.genFuncCallInOutArg_C(this, str, indent, name, v);
-            }
-
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
             }
-
-            @Override
-            public void printCellUse(CodeStream str, String indent, String name, FAbstractVariable v) {
-                v.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
-            }
-
             
         }
 
@@ -406,10 +375,6 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
 
-    public void FAbstractVariable.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        genWriteBackResidual(printer_C.ExecStep, str, indent, name, enumerator, forIndices, indexCounter); 
-    }
-
     public void FAbstractVariable.genWriteBackResidual(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices == null || forIndices.contains(index)) {
@@ -417,10 +382,7 @@ aspect CodeFuncCallInOutArgPrinters {
                 throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + name());
 
             // This variable is in the set of variables to generate code for.
-            str.print(indent);
-            str.print("(*res)[");
-            str.print(enumerator.next());
-            str.print("] = ");
+            str.print(indent, "(*", p.residual(), ")[", enumerator.next(), "] = ");
             str.print(name);
             str.print(" - (");
             str.print(p.name(this));
@@ -503,10 +465,6 @@ aspect CodeFuncCallInOutArg {
         }
         p.endComponent(str, indent);
     }
-
-    public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FAbstractVariable v) {
-        genFuncCallCellInOutArg_C(p, str, indent, name, v);
-    }
     
     syn boolean FExp.genAssignMacro() = false;
     eq FIdUseExp.genAssignMacro()     = true;
@@ -518,10 +476,6 @@ aspect CodeFuncCallInOutArg {
 
     public void FType.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
         exp.genFuncCallCellInOutArg_C(p, str, indent, name);
-    }
-
-    public void FType.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FAbstractVariable v) {
-        v.genFuncCallCellInOutArg_C(p, str, indent, name);
     }
     
     @Override
@@ -548,10 +502,6 @@ aspect CodeFuncCallInOutArg {
 
     @Override
     public void FIdUseExp.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
-        p.printUse(str, indent, name, this);
-    }
-    
-    public void FAbstractVariable.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
         p.printUse(str, indent, name, this);
     }
     
