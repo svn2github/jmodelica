@@ -254,7 +254,7 @@ aspect FunctionCallSizes {
     
     @Override
     public Size FArrayType.getSize() {
-        MutableSize newSize = new MutableSize(1);
+        MutableSize newSize = new MutableSize(getNumFExp());
         for (FExp e : getFExps()) {
             newSize.append(e);
         }
