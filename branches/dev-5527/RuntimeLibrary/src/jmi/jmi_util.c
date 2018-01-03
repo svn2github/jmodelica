@@ -54,10 +54,6 @@ void jmi_flag_termination(jmi_t *jmi, const char* msg) {
 int jmi_copy_pre_values(jmi_t *jmi) {
     int i;
     jmi_real_t* z;
-    jmi_string_t *z_str;
-    size_t start;
-    size_t pre_start;
-    
     z = jmi_get_z(jmi);
     for (i=jmi->offs_real_dx;i<jmi->offs_t;i++) {
         z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] = z[i];
@@ -65,14 +61,6 @@ int jmi_copy_pre_values(jmi_t *jmi) {
     for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i++) {
         z[i - jmi->offs_real_d + jmi->offs_pre_real_d] = z[i];
     }
-    
-    z_str     = jmi->z_t.strings.values;
-    start     = jmi->z_t.strings.offs.w;
-    pre_start = jmi->z_t.strings.offs.wp;
-    for (i = 0; i < pre_start - start; i++) {
-        JMI_ASG_STR_Z(z_str[pre_start + i], z_str[start + i]);
-    }
-    
     return 0;
 }
 
@@ -256,18 +244,6 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
         }
     }
     return all_switches_equal;
-}
-
-int jmi_compare_strings(jmi_string_t* str_pre, jmi_string_t* str_post, jmi_int_t size) {
-    int i, all_strings_equal = 1;
-    
-    for (i = 0; i < size; i++){
-        if (strcmp(str_pre[i], str_post[i]) != 0) {
-            all_strings_equal = 0;
-            break;
-        }
-    }
-    return all_strings_equal;
 }
 
 int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real_t* nominals, jmi_int_t size) {
@@ -483,25 +459,4 @@ char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size)) {
     strcpy(res, resolved);
     return res;
 #endif
-}
-
-jmi_string_t* jmi_create_strings(size_t n) {
-    jmi_string_t* res;
-    int i;
-    char *empty = "";
-    size_t defaultLen = strlen(empty) + 1;
-    res = calloc(sizeof(jmi_string_t), n);
-    for (i = 0; i < n; i++) {
-        res[i] = calloc(sizeof(char), defaultLen);
-        strcpy(res[i], empty);
-    }
-    return res;
-}
-
-void jmi_free_strings(jmi_string_t* s, size_t n) {
-    int i;
-    for (i = 0; i < n; i++) {
-        free(s[i]);
-    }
-    free(s);
 }

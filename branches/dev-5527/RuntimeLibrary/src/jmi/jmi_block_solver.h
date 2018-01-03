@@ -38,27 +38,26 @@
 #endif
 
 /** \brief Evaluation modes for the residual function.*/
-#define JMI_BLOCK_INITIALIZE                                    1 << 0
-#define JMI_BLOCK_EVALUATE                                      1 << 1
-#define JMI_BLOCK_WRITE_BACK                                    1 << 2
-#define JMI_BLOCK_EVALUATE_INACTIVE                             1 << 3
-#define JMI_BLOCK_EVALUATE_NON_REALS                            1 << 4
-#define JMI_BLOCK_MIN                                           1 << 5
-#define JMI_BLOCK_MAX                                           1 << 6
-#define JMI_BLOCK_NOMINAL                                       1 << 7
-#define JMI_BLOCK_EVALUATE_JACOBIAN                             1 << 8
-#define JMI_BLOCK_EQUATION_NOMINAL                              1 << 9
-#define JMI_BLOCK_VALUE_REFERENCE                               1 << 10
-#define JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE               1 << 11
-#define JMI_BLOCK_SOLVED_STRING_VALUE_REFERENCE                 1 << 12
-#define JMI_BLOCK_ACTIVE_SWITCH_INDEX                           1 << 13
-#define JMI_BLOCK_START                                         1 << 14
-#define JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE   1 << 15
-#define JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX                  1 << 16
-#define JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE                   1 << 17
-#define JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE                 1 << 18
-#define JMI_BLOCK_START_SET                                     1 << 19
-#define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         1 << 20
+#define JMI_BLOCK_INITIALIZE                                    0
+#define JMI_BLOCK_EVALUATE                                      1
+#define JMI_BLOCK_WRITE_BACK                                    2
+#define JMI_BLOCK_EVALUATE_INACTIVE                             4
+#define JMI_BLOCK_EVALUATE_NON_REALS                            8
+#define JMI_BLOCK_MIN                                           16
+#define JMI_BLOCK_MAX                                           32
+#define JMI_BLOCK_NOMINAL                                       64
+#define JMI_BLOCK_EVALUATE_JACOBIAN                             128
+#define JMI_BLOCK_EQUATION_NOMINAL                              256
+#define JMI_BLOCK_VALUE_REFERENCE                               512
+#define JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE               1024
+#define JMI_BLOCK_ACTIVE_SWITCH_INDEX                           2048
+#define JMI_BLOCK_START                                         4096
+#define JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE   8192
+#define JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX                  16384
+#define JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE                   32768
+#define JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE                 65536
+#define JMI_BLOCK_START_SET                                     131072
+#define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
 #define JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE                 1 << 21
 #define JMI_BLOCK_DISCRETE_REAL_NOMINAL                         1 << 22
 

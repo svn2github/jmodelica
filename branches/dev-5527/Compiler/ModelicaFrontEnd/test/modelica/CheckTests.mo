@@ -1683,17 +1683,4 @@ Error at line 7, column 27, in file '...':
 ")})));
 end NoAlgorithmEvaluation1;
 
-model FixedFalseString1
-    parameter String s(fixed=false);
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FixedFalseString1",
-            description="",
-            checkType=check,
-            errorMessage="
-Error at line 2, column 24, in file '...':
-  Cannot find component declaration for fixed
-")})));
-end FixedFalseString1;
-
 end CheckTests;

@@ -632,19 +632,6 @@ jmi_value_reference jmi_get_value_ref_from_index(int index, jmi_type_t type);
 int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size);
 
 /**
- * \brief Compares two sets of strings.
- * 
- * Compares two sets of strings and returns (1) if they are equal and
- * (0) if not.
- * 
- * @param str_pre The first set of strings
- * @param str_post The second set of strings
- * @param size The size of the strings
- * @return 1 if equal, 0 if not
- */
-int jmi_compare_strings(jmi_string_t* str_pre, jmi_string_t* str_post, jmi_int_t size);
-
-/**
  * \brief Compares two sets of discrete reals.
  * 
  * Compares two sets of discrete reals and returns (1) if they are equal and
@@ -712,17 +699,5 @@ int jmi_dir_exists(const char* dir);
 void jmi_load_resource(jmi_t *jmi, jmi_string_t res, const jmi_string_t file);
 
 char* jmi_locate_resources(void* (*allocateMemory)(size_t nobj, size_t size));
-
-
-/**
- * Create a string vector with initialized empty strings. Using malloc.
- * When assigning a new pointer the old element must be freed. Please use JMI_ASG_STR_Z(dest, src);
- */
-jmi_string_t* jmi_create_strings(size_t n);
-
-/**
- * Free a string vector created by jmi_create_strings. Will also free each element.
- */
-void jmi_free_strings(jmi_string_t* s, size_t n);
 
 #endif

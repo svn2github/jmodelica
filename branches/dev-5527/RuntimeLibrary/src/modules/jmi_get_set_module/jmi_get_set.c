@@ -34,6 +34,9 @@ struct jmi_get_set_module_t {
 #define RECOMPUTE_VARIABLES_SET(j) (RECOMPUTE_VARIABLES(j) = 1)
 #define RECOMPUTE_VARIABLES_CLR(j) (RECOMPUTE_VARIABLES(j) = 0)
 
+static int
+jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr);
+
 int jmi_get_set_module_init(jmi_t *jmi) {
     jmi_get_set_module_t *module;
     int result = JMI_ERROR;
@@ -148,52 +151,15 @@ int jmi_set_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     size_t len;
 
     for (i = 0; i < nvr; i = i + 1) {
-        if (jmi_get_type_from_value_ref(vr[i]) != JMI_STRING) {
-            jmi_log_node(jmi->log, logError, "SetValueFailed", "Error setting string, value reference points to non-string.");
-            return -1;
-        }
-    }
-
-    for (i = 0; i < nvr; i = i + 1) {
         index = jmi_get_index_from_value_ref(vr[i]);
         len = strlen(z[index]);
         if(len != strlen(value[i]) || strncmp(z[index], value[i], len) != 0) {
             JMI_ASG_STR_Z(z[index], value[i]);
             needRecomputeVars = 1;
-            if (index < jmi->z_t.strings.offs.w) {
-                needParameterUpdate = 1;
-            }
+            needParameterUpdate = 1;
         }
     }
     return jmi_set_update(jmi, needParameterUpdate, needRecomputeVars);
-}
-
-/* Local helper for checking if variables are parameters or constants */
-static int jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, size_t offset) {
-    jmi_value_reference i;
-    for (i = 0; i < nvr; i++) {
-        if (jmi_get_index_from_value_ref(vr[i]) >= offset) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-/* Local helper for updating variables before one is retrieved */
-int jmi_get_update(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, size_t offset) {
-    int retval;
-    int eval_required = jmi_evaluation_required(jmi, vr, nvr, offset);
-    
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
-        retval = jmi_ode_derivatives(jmi);
-        if(retval != 0) {
-            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
-            jmi_reset_internal_variables(jmi);
-            return -1;
-        }
-        RECOMPUTE_VARIABLES_CLR(jmi);
-    }
-    return 0;
 }
 
 int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
@@ -203,16 +169,32 @@ int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+    int eval_required;
 
-    retval = jmi_get_update(jmi, vr, nvr, jmi->offs_real_dx);
-    if (retval != 0) {
-        return retval;
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
+
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
+
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+
+            return -1;
+        }
+
+        RECOMPUTE_VARIABLES_CLR(jmi);
     }
 
+    /* Get the z vector*/
     z = jmi_get_z(jmi);
 
     for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
         index = jmi_get_index_from_value_ref(vr[i]);
+
+        /* Set value from z vector to return value array*/
         value[i] = (jmi_real_t)z[index];
     }
 
@@ -226,16 +208,32 @@ int jmi_get_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_real_t* z;
     jmi_value_reference i;
     jmi_value_reference index;
+    int eval_required;
 
-    retval = jmi_get_update(jmi, vr, nvr, jmi->offs_real_dx);
-    if (retval != 0) {
-        return retval;
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
+
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
+
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+
+            return -1;
+        }
+
+        RECOMPUTE_VARIABLES_CLR(jmi);
     }
 
+    /* Get the z vector*/
     z = jmi_get_z(jmi);
 
     for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
         index = jmi_get_index_from_value_ref(vr[i]);
+
+        /* Set value from z vector to return value array*/
         value[i] = (jmi_int_t)z[index];
     }
     return 0;
@@ -248,16 +246,31 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_real_t* z;
     jmi_value_reference i;
     jmi_value_reference index;
+    int eval_required;
 
-    retval = jmi_get_update(jmi, vr, nvr, jmi->offs_real_dx);
-    if (retval != 0) {
-        return retval;
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
+
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
+
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+            return -1;
+        }
+
+        RECOMPUTE_VARIABLES_CLR(jmi);
     }
 
+    /* Get the z vector*/
     z = jmi_get_z(jmi);
 
     for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */
         index = jmi_get_index_from_value_ref(vr[i]);
+
+        /* Set value from z vector to return value array*/
         value[i] = z[index];
     }
     return 0;
@@ -265,18 +278,13 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
 int jmi_get_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    jmi_string  value[]) {
-
-    int retval;
+    /* Currently we only need to consider constant/structural parameter strings */
     int i;
     jmi_string_t* z;
     jmi_value_reference index;
 
-    retval = jmi_get_update(jmi, vr, nvr, jmi->z_t.strings.offs.w);
-    if (retval != 0) {
-        return retval;
-    }
-
     z = jmi_get_string_z(jmi);
+
 
     for (i = 0; i < nvr; i++) {
         index = jmi_get_index_from_value_ref(vr[i]);
@@ -486,4 +494,21 @@ int jmi_reset_internal_variables(jmi_t* jmi) {
     }
 
     return 0;
+}
+
+static int
+jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr)
+{
+	jmi_value_reference i;
+
+    /* If all variables that are inquired are parameters or constants,
+     * then the solver should not be invoked.
+     */
+    for (i = 0; i < nvr; i++) {
+        if (jmi_get_index_from_value_ref(vr[i]) >= jmi->offs_real_dx) {
+			return 1;
+		}
+	}
+
+	return 0;
 }

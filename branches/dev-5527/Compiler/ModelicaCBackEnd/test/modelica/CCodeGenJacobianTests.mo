@@ -65,7 +65,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
 ")})));
     end NonlinearBlock;
 
@@ -262,7 +262,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
     end Simple1;
     
@@ -540,7 +540,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end Simple3;
 
@@ -737,7 +737,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end Simple4;
     
@@ -818,7 +818,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
     end SwitchDense1;
 
@@ -845,10 +845,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_DEF(BOO, tmp_1)
-    JMI_DEF(INT, tmp_2)
-    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(BOO, tmp_2)
+    JMI_DEF(INT, tmp_3)
     JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
     if (evaluation_mode == JMI_BLOCK_START) {
         x[0] = 5;
     } else if (evaluation_mode == JMI_BLOCK_START_SET) {
@@ -903,10 +904,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             check_lbound(x[0], 0, \"Out of bounds for variable x\");
             _x_0 = x[0];
         }
-        tmp_1 = _temp_1_4;
-        tmp_2 = __sampleItr_1_6;
-        tmp_3 = _y_1;
-        tmp_4 = _a_3;
+        tmp_2 = _temp_1_4;
+        tmp_3 = __sampleItr_1_6;
+        tmp_4 = _y_1;
+        tmp_5 = _a_3;
         __sampleItr_1_6 = pre__sampleItr_1_6;
         _y_1 = pre_y_1;
         _a_3 = pre_a_3;
@@ -927,16 +928,24 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _y_1 = _x_0;
             _a_3 = _time;
         }
-        JMI_SWAP(GEN, _temp_1_4, tmp_1)
-        JMI_SWAP(GEN, __sampleItr_1_6, tmp_2)
-        JMI_SWAP(GEN, _y_1, tmp_3)
-        JMI_SWAP(GEN, _a_3, tmp_4)
+        tmp_1 = _temp_1_4;
+        _temp_1_4 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = __sampleItr_1_6;
+        __sampleItr_1_6 = tmp_3;
+        tmp_3 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_4;
+        tmp_4 = tmp_1;
+        tmp_1 = _a_3;
+        _a_3 = tmp_5;
+        tmp_5 = tmp_1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _temp_1_4 = (tmp_1);
-            __sampleItr_1_6 = (tmp_2);
+            _temp_1_4 = (tmp_2);
+            __sampleItr_1_6 = (tmp_3);
         }
-        _y_1 = (tmp_3);
-        _a_3 = (tmp_4);
+        _y_1 = (tmp_4);
+        _a_3 = (tmp_5);
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 _sw(2) = jmi_turn_switch_time(jmi, _time - (pre_temp_2_5), _sw(2), JMI_REL_LT);
@@ -954,6 +963,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end MultipleSolvedRealInAlgorithm;
 
@@ -982,10 +992,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_DEF(BOO, tmp_1)
-    JMI_DEF(INT, tmp_2)
-    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(BOO, tmp_2)
+    JMI_DEF(INT, tmp_3)
     JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
     if (evaluation_mode == JMI_BLOCK_START) {
         x[0] = 5;
     } else if (evaluation_mode == JMI_BLOCK_START_SET) {
@@ -1021,10 +1032,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             check_lbound(x[0], 0, \"Out of bounds for variable x\");
             _x_0 = x[0];
         }
-        tmp_1 = _temp_1_4;
-        tmp_2 = __sampleItr_1_6;
-        tmp_3 = _y_1;
-        tmp_4 = _a_3;
+        tmp_2 = _temp_1_4;
+        tmp_3 = __sampleItr_1_6;
+        tmp_4 = _y_1;
+        tmp_5 = _a_3;
         __sampleItr_1_6 = pre__sampleItr_1_6;
         _y_1 = pre_y_1;
         _a_3 = pre_a_3;
@@ -1045,16 +1056,24 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _y_1 = _x_0;
             _a_3 = _time;
         }
-        JMI_SWAP(GEN, _temp_1_4, tmp_1)
-        JMI_SWAP(GEN, __sampleItr_1_6, tmp_2)
-        JMI_SWAP(GEN, _y_1, tmp_3)
-        JMI_SWAP(GEN, _a_3, tmp_4)
+        tmp_1 = _temp_1_4;
+        _temp_1_4 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = __sampleItr_1_6;
+        __sampleItr_1_6 = tmp_3;
+        tmp_3 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_4;
+        tmp_4 = tmp_1;
+        tmp_1 = _a_3;
+        _a_3 = tmp_5;
+        tmp_5 = tmp_1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _temp_1_4 = (tmp_1);
-            __sampleItr_1_6 = (tmp_2);
+            _temp_1_4 = (tmp_2);
+            __sampleItr_1_6 = (tmp_3);
         }
-        _y_1 = (tmp_3);
-        _a_3 = (tmp_4);
+        _y_1 = (tmp_4);
+        _a_3 = (tmp_5);
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 _sw(2) = jmi_turn_switch_time(jmi, _time - (pre_temp_2_5), _sw(2), JMI_REL_LT);
