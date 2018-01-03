@@ -6,7 +6,6 @@ library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCM
 // has been checked out directly by Jenkins as part of pipeline build).
 (JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
 
-def JMODELICA_SDK_HOME="C:\\JModelica.org-SDK-1.13\\"
 boolean SHOULD_UPLOAD_INSTALL = JM_SVN_PATH.equals("trunk")
 
 // Set build name:
@@ -36,7 +35,7 @@ export SRC_HOME="\$(pwd)/JModelica/"
 export BUILD_HOME="\$(pwd)/build"
 export INSTALL_HOME="\$(pwd)/install"
 
-cd "${unixpath(JMODELICA_SDK_HOME)}"
+cd "${unixpath(resolveSDK())}"
 echo ==== Run configure
 ./configure.sh
 
