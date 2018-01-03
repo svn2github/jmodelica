@@ -763,16 +763,19 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     char trans;
     int INFO;
     int n_x;
-    /* int nrhs = 1; */
-    int ef;
+    int ef = 0;
 
     INFO = 0;
     n_x = current_block->n;
     
+    /* If there are no iteration variables, quick return. */
+    if (n_x == 0) {
+        return ef;
+    }
+    
     /* We now assume that the block is solved, so first we retrieve the
-           solution of the equation system - put it into current_block->x 
+       solution of the equation system - put it into current_block->x 
     */
-
     for (i=0;i<n_x;i++) {
         current_block->dx[i] = 0;
     }
