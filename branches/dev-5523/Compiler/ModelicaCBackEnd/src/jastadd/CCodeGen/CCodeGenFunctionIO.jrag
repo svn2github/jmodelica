@@ -326,7 +326,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
-                use.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
+                use.myFV().genWriteBackResidual(ASTNode.printer_C.ExecStep, str, indent, use, name, enumerator, forIndices, indexCounter);
             }
             
         }
@@ -346,7 +346,7 @@ aspect CodeFuncCallInOutArgPrinters {
         @Override
         public void printWriteBackResidual(CodeStream str, String indent, FAbstractVariable v, FAlgorithm alg,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-            v.genWriteBackResidual(ExecStep, str, indent, ExecStep.tempName(v, alg), enumerator, forIndices, indexCounter);
+            v.genWriteBackResidual(ExecStep, str, indent, alg, ExecStep.tempName(v, alg), enumerator, forIndices, indexCounter);
         }
     }
 
@@ -357,25 +357,7 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
 
-    public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        int index = indexCounter.next();
-        if (forIndices == null || forIndices.contains(index)) {
-            if (!myFV().isReal()) 
-                throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + myFV().name());
-
-            // This variable is in the set of variables to generate code for.
-            str.print(indent);
-            str.print("(*res)[");
-            str.print(enumerator.next());
-            str.print("] = ");
-            str.print(name);
-            str.print(" - (");
-            prettyPrint_C(printer_C, str, "");
-            str.print(");\n");
-        }
-    }
-
-    public void FAbstractVariable.genWriteBackResidual(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+    public void FAbstractVariable.genWriteBackResidual(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, WriteBackContext ctx, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices == null || forIndices.contains(index)) {
             if (!isReal()) 
@@ -385,7 +367,7 @@ aspect CodeFuncCallInOutArgPrinters {
             str.print(indent, "(*", p.residual(), ")[", enumerator.next(), "] = ");
             str.print(name);
             str.print(" - (");
-            str.print(p.name(this));
+            ctx.genScaledAssignedRef(this, p, str, indent);
             str.print(");\n");
         }
     }
@@ -401,7 +383,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
-                use.genWriteBackAssignment_C(CodePrinter.this, str, indent, name, forVariables);
+                use.myFV().genWriteBackAssignment(ASTNode.printer_C.ExecStep, str, indent, use, name, forVariables);
             }
 
             @Override
@@ -516,7 +498,7 @@ aspect CodeFuncCallInOutArg {
         str.print("memcpy(&");
         str.print(name);
         str.print(", &");
-        genAssignedRef_C(ASTNode.printer_C, str, indent);
+        genAssignedRef(ASTNode.printer_C.ExecStep, str, indent);
         str.print(", ");
         str.print(n);
         str.print(" * sizeof(");
@@ -551,40 +533,10 @@ aspect CodeFuncCallInOutArg {
         return getFExp().tempName_C();
     }
     
-    public void FIdUseExp.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name,
-            Collection<FVariable> forVariables) {
-        if (forVariables != null && !forVariables.contains(myFV()))
-            return; // This variable is not in the set of variables to generate code for.
-        if (type().isString()) {
-            str.print(indent);
-            str.print("JMI_ASG(STR");
-            if (!inFunction()) {
-                str.print("_Z");
-            }
-            str.print(", ");
-            genAssignedRef_C(p, str, indent);
-            str.print(", ");
-            str.print(name);
-            str.println(")");
-            return;
-        }
-        str.print(indent);
-        genAssignedRef_C(p, str, indent);
-        str.print(" = (");
-        str.print(name);
-        str.print(")");
-        if (myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
-            str.print("/sf(");
-            str.print(myFV().valueReference());
-            str.print(")");
-        }
-        str.print(";\n");
-    }
-    
     public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
         str.print(indent);
         str.print("memcpy(&");
-        genAssignedRef_C(p, str, indent);
+        genAssignedRef(p.ExecStep, str, indent);
         str.print(", &");
         str.print(name);
         str.print(", ");
@@ -592,7 +544,15 @@ aspect CodeFuncCallInOutArg {
         str.print(" * sizeof(jmi_real_t));\n");
     }
     
-    public void FAbstractVariable.genWriteBackAssignment(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ASTNode ctx, String name,
+    public interface WriteBackContext {
+        public boolean inFunction();
+        public void genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
+        public void genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
+    }
+    FIdUseExp implements WriteBackContext;
+    FAlgorithm implements WriteBackContext;
+    
+    public void FAbstractVariable.genWriteBackAssignment(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, WriteBackContext ctx, String name,
             Collection<FVariable> forVariables) {
         if (forVariables != null && !forVariables.contains(this))
             return; // This variable is not in the set of variables to generate code for.
@@ -603,18 +563,18 @@ aspect CodeFuncCallInOutArg {
                 str.print("_Z");
             }
             str.print(", ");
-            str.print(p.name(this));
+            ctx.genAssignedRef(this, p, str, indent);
             str.print(", ");
             str.print(name);
             str.println(")");
             return;
         }
         str.print(indent);
-        str.print(p.name(this));
+        ctx.genAssignedRef(this, p, str, indent);
         str.print(" = (");
         str.print(name);
         str.print(")");
-        if (isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction()) {
+        if (needsScaling(ctx)) {
             str.print("/sf(");
             str.print(valueReference());
             str.print(")");
