@@ -579,11 +579,26 @@ aspect CCodeGenExpressions {
             for (FVariable var : combination)
                 str.format(", %d", var.valueReference());
             str.println(")) {");
-            str.format("%s%s = ", innerIndent, tempName_C());
-            p.print(getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1), str, indent);
-            str.println(";");
+            FExp valueExp = getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1);
+            p.printVarDecls(valueExp, str, indent);
+            p.printPreSteps(valueExp, str, indent);
+            p.genDynamicState_derivativeWriteBack(this, valueExp, str, innerIndent);
+            p.printPostSteps(valueExp, str, indent);
         }
         str.formatln("%s}", indent);
+    }
+
+    public abstract class CodePrinter {
+        public abstract void genDynamicState_derivativeWriteBack(FDSDerExp derExp, FExp use, CodeStream str, String indent);
+    }
+
+    public class CPrettyPrinter {
+        @Override
+        public void genDynamicState_derivativeWriteBack(FDSDerExp derExp, FExp use, CodeStream str, String indent) {
+            str.format("%s%s = ", indent, derExp.tempName_C());
+            print(use, str, indent);
+            str.println(";");
+        }
     }
 
     @Override
