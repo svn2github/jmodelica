@@ -925,15 +925,6 @@ void jmi_log_ints(log_t *log, node_t parent, category_t c, const char *name, con
     jmi_log_leave(log, node);
 }
 
-void jmi_log_strings(log_t *log, node_t parent, category_t c, const char *name, const jmi_string_t *data, int n) {
-    int k;
-    node_t node;
-    if (!emitted_category(log, c)) return;
-    node = jmi_log_enter_vector_(log, parent, c, name);
-    for (k=0; k < n; k++) jmi_log_string_(log, data[k]);
-    jmi_log_leave(log, node);
-}
-
 void jmi_log_vrefs(log_t *log, node_t parent, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n) {
     int k;
     node_t node;

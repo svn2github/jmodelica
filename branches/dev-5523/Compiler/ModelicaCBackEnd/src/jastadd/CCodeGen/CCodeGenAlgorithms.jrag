@@ -44,17 +44,13 @@ aspect CCodeGenAlgorithms {
             ASTNode dst, ASTNode src) {
         str.print(indent);
         str.print("JMI_ASG(");
-        str.print(dst.assignMacroType(this));
+        str.print(macroType());
         str.print(", ");
         p.print(dst, str, indent);
         str.print(", ");
         p.print(src, str, indent);
         str.print(")\n");
     }
-
-    syn String ASTNode.assignMacroType(FType type) = type.macroType();
-    eq FIdUseExp.assignMacroType(FType type)       = myFV().assignMacroType(type);
-    eq FVariable.assignMacroType(FType type)       = isString() ? "STR_Z" : super.assignMacroType(type);
 
     /*
      * Hook for printing array initialization
@@ -166,7 +162,7 @@ aspect CCodeGenAlgorithms {
 
     public void FVariable.algorithmInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         if (isString()) {
-            str.print(indent, "JMI_ASG(", assignMacroType(type()), ", ", p.name(this), ", ");
+            str.print(indent, "JMI_ASG(", type().macroType(), ", ", p.name(this), ", ");
         } else {
             str.print(indent, p.name(this), " = ");
         }

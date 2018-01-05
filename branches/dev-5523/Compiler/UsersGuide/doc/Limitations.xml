@@ -17,6 +17,10 @@
     features are currently not supported:</para>
 
     <itemizedlist>
+      <listitem>
+        <para>The support for String variables and parameters is
+        limited.</para>
+      </listitem>
 
       <listitem>
           <para>Support for partial function calls is limited.
@@ -177,6 +181,9 @@
     JModelica.org:</para>
 
     <itemizedlist>
+      <listitem>
+        <para>Setting string parameters and inputs is not supported.</para>
+      </listitem>
 
       <listitem>
         <para>The dependenciesKind attribute in the XML file for FMU 2.0 is

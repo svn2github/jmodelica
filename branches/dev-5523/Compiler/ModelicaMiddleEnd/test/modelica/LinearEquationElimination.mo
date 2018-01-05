@@ -451,25 +451,5 @@ equation
 end LinearEquationElimination.CommonSubExpression3;
 ")})));
     end CommonSubExpression3;
-    
-model String1
-    String s1,s2;
-equation
-    s2 = s1 + s2;
-    s2 = String(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="String1",
-            description="Don't eliminate strings",
-            errorMessage="
-Error in flattened model:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
-     s1
-
-  The following equation(s) could not be matched to any variable:
-    s2 = s1 + s2
-")})));
-end String1;
 
 end LinearEquationElimination;

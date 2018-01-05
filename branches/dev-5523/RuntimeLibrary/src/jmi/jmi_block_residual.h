@@ -123,7 +123,6 @@ struct jmi_block_residual_t {
     int n_dr;                      /**< \brief The number of discrete real unknowns in the equation system */
     int n_nr;                      /**< \brief The number of non-real unknowns in the equation system */
     int n_nrt;                     /**< \brief The number of non-real temporaries in the equation system */
-    int n_str;                     /**< \brief The number of string unknowns in the equation system */
     int n_sr;                      /**< \brief The number of solved reals in the equation system */
     int n_direct_nr;               /**< \brief The number of non-real unknowns that directly impacts the equation system */
     int n_direct_bool;             /**< \brief The number of booleans unknowns that directly impacts the equation system */
@@ -133,9 +132,8 @@ struct jmi_block_residual_t {
     int event_iter;                 /**< \brief Current iteration for the switches. Used to index the saved switches/booleans in sw_old/bool_old */
     jmi_real_t* sw_old;             /**< \brief  Saved states of the switches during passed event iterations. Used for infinite loop detection. */
     jmi_real_t* nr_old;             /**< \brief  Saved states of the booleans during passed event iterations. Used for infinite loop detection. */
-    jmi_string_t* str_old;          /**< \brief  Saved states of the strings during passed event iterations. Used for infinite loop detection. */
     jmi_real_t* x_old;              /**< \brief  Saved states of the interation variables during passed event iterations. Used for infinite loop detection. */
-    jmi_real_t* dr_old;             /**< \brief  Saved states of the discrete reals during passed event iterations. Used for infinite loop detection. */
+	jmi_real_t* dr_old;				/**< \brief  Saved states of the discrete reals during passed event iterations. Used for infinite loop detection. */
     jmi_int_t* sw_index;            /**< \brief  Index of the active switches for this block. */
     jmi_int_t* sr_vref;             /**< \brief  Value reference of the solved reals for this block. */
     jmi_int_t* sw_direct_index;     /**< \brief  Index of the direct switches for this block. */
@@ -143,18 +141,14 @@ struct jmi_block_residual_t {
     jmi_int_t* nr_pre_index;        /**< \brief  Index of the pre non-reals in this block. */
     jmi_int_t* nr_direct_index;     /**< \brief  Index of the direct non-reals in this block. */
     jmi_int_t* bool_direct_index;   /**< \brief  Index of the direct booleans in this block. */
-    jmi_int_t* str_index;           /**< \brief  Index of the strings in this block. */
-    jmi_int_t* str_pre_index;       /**< \brief  Index of the pre strings in this block. */
     jmi_int_t* nr_vref;             /**< \brief  Valuereference of the non-reals in this block. */
-    jmi_int_t* str_vref;            /**< \brief  Valuereference of the string in this block. */
-	jmi_int_t* dr_index;            /**< \brief  Index of the discrete reals for this block. */
+	jmi_int_t* dr_index;			/**< \brief  Index of the discrete reals for this block. */
 	jmi_int_t* dr_pre_index;        /**< \brief  Index of the pre discrete-reals in this block. */
 	jmi_int_t* dr_vref;             /**< \brief  Valuereference of the discrete-reals in this block. */
     
     /* Work vectors */
     jmi_real_t* work_switches;      /**< \brief Work vector for the switches */
     jmi_real_t* work_non_reals;     /**< \brief Work vector for the non-reals */
-    jmi_string_t* work_strings;     /**< \brief Work vector for the strings */
 	jmi_real_t* work_discrete_reals;     /**< \brief Work vector for the discrete-reals */
     jmi_real_t* work_ivs;           /**< \brief Work vector for the iteration variables */
 
@@ -230,11 +224,7 @@ struct jmi_block_residual_t {
  * @param parent_index Index of parent block.
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF,
-                                jmi_block_jacobian_func_t J, jmi_block_jacobian_structure_func_t J_structure,
-                                int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_str,
-                                int n_sw, int n_disw, int jacobian_variability, int attribute_variability,
-                                jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_jacobian_func_t jacobian_func, jmi_block_jacobian_structure_func_t jacobian_struct, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -259,11 +249,7 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param parent_index Index of parent block.
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF,
-                                jmi_block_jacobian_func_t J, jmi_block_jacobian_structure_func_t J_structure,
-                                int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_str,
-                                int n_sw, int n_disw, int jacobian_variability, int attribute_variability,
-                                jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_jacobian_func_t jacobian_func, jmi_block_jacobian_structure_func_t jacobian_struct, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
 
 
 /**
@@ -282,11 +268,11 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
  * @param label Block string label, used for external representation of the block
  * @return Error code.
  */
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver,
-                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF,
-                           jmi_block_jacobian_func_t J, jmi_block_jacobian_structure_func_t J_structure,
-                           int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_str,
-                           int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label);
+int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_solver_kind_t solver,
+                           jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, 
+                           jmi_block_jacobian_func_t jacobian_func, jmi_block_jacobian_structure_func_t jacobian_struct,
+                           int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_disw, int jacobian_variability, int index, jmi_string_t label);
+                           
 int jmi_solve_block_residual(jmi_block_residual_t * block);
 
 /**
@@ -376,10 +362,8 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
  * @param switches Holder for the switch values
  * @param non_reals Holder for the non-real values
  * @param discrete_reals Holder for the discrete-real values
- * @param strings Holder for the string values
  */
-int jmi_block_get_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals,
-                            jmi_real_t* discrete_reals, jmi_string_t *strings);
+int jmi_block_get_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals, jmi_real_t* discrete_reals);
 
 /**
  * \brief Sets the switches and non-reals that belong to the block.
@@ -388,10 +372,8 @@ int jmi_block_get_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jm
  * @param switches The switch values
  * @param non_reals The non-real values
  * @param discrete_reals The discrete-real values
- * @param strings The the string values
  */
-int jmi_block_set_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals,
-                            jmi_real_t* discrete_reals, jmi_string_t *strings);
+int jmi_block_set_sw_nr_dr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_real_t* non_reals, jmi_real_t* discrete_reals);
 
 
 int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);

@@ -65,7 +65,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
 ")})));
     end NonlinearBlock;
 
@@ -262,7 +262,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
     end Simple1;
     
@@ -540,7 +540,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end Simple3;
 
@@ -737,7 +737,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end Simple4;
     
@@ -818,7 +818,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
     end SwitchDense1;
 
@@ -834,12 +834,12 @@ equation
     der(z) = integer(time);
     der(z) = x;
         
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="MultipleSolvedRealInAlgorithm",
-            description="Test bug in #5252",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="MultipleSolvedRealInAlgorithm",
+        description="Test bug in #5252",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -954,6 +954,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end MultipleSolvedRealInAlgorithm;
 
@@ -970,13 +971,13 @@ equation
     der(z) = integer(time);
     der(z) = x;
         
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="MultipleSolvedRealInAlgorithm2",
-            description="",
-            generate_sparse_block_jacobian_threshold=0,
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="MultipleSolvedRealInAlgorithm2",
+        description="",
+        generate_sparse_block_jacobian_threshold=0,
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;

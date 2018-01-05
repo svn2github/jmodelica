@@ -226,9 +226,7 @@ aspect CCodeGen {
             PS("ps"),
             PF("pf"),
             PE("pe"),
-            PD("pd"),
-            W("w"),
-            WP("wp");
+            PD("pd");
             
             private String s;
             
@@ -252,8 +250,7 @@ aspect CCodeGen {
     eq FStructParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
     eq FFinalParameter.variabilityCausality_C(FVariable fv)    = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
     eq FEvalTrueParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
-    eq FDiscrete.variabilityCausality_C(FVariable fv)          = VariabilityCausality_C.W;
-
+    
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
     

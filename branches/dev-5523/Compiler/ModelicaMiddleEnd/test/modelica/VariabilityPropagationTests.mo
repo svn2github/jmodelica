@@ -2566,21 +2566,5 @@ end VariabilityPropagationTests.SmallConstant1;
 ")})));
 end SmallConstant1;
 
-model StringVariable1
-    String s1,s2;
-equation
-    s1 = "1";
-    s2 = s1 + "2";
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="StringVariable1",
-            description="",
-            flatModel="
-fclass VariabilityPropagationTests.StringVariable1
- constant String s1 = \"1\";
- constant String s2 = \"12\";
-end VariabilityPropagationTests.StringVariable1;
-")})));
-end StringVariable1;
 
 end VariabilityPropagationTests;
