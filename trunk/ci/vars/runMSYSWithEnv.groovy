@@ -16,7 +16,7 @@ call %SDK_HOME%\\setenv.bat
     if (returnStdout) {
         // Need to split due to output of "Welcome to MSYS shell..."
         String[] outputSplit = output.trim().split("\\r?\\n", 2)
-        if (outputSplit.lenght >= 2) {
+        if (outputSplit.length >= 2) {
             output = outputSplit[1]
         }
     }
