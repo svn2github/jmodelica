@@ -100,16 +100,19 @@ aspect CCodeGenAlgorithms {
         if (first) {
             p.printVarDecls(this, str, indent);
             if (!solved || (forVariables != null && forVariables.size() != uniqueFIdUseExpsInLHS().size())) {
-                fRealScalarType().printDecl_C(printer_C, str, indent, this.tempName_C(), null);
                 for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
                     if (!solved || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
-                        if (!use.inFunctionCallLeftTop()) {
-                            use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
-                        }
+                        p.printTempInputDecl(use.myFV(), this, str, indent);
                     }
                 }
             }
         }
+    }
+
+    public abstract void CodePrinter.printTempInputDecl(FAbstractVariable v, TempScope ts, CodeStream str, String indent);
+    @Override
+    public void CPrettyPrinter.printTempInputDecl(FAbstractVariable v, TempScope ts, CodeStream str, String indent) {
+        v.type().printScalarDecl_C(this, str, indent, false, ts.tempName_C(v));
     }
 
     @Override
@@ -143,22 +146,44 @@ aspect CCodeGenAlgorithms {
             Set<FVariable> defSet = defSet();
             for (FVariable fv : referencedFVariablesInLHS()) {
                 if (!defSet.contains(fv)) {
-                    FStatement.printAssignStmt_C(str, indent, fv.name_C(), fv.algorithmInit_C());
+                    p.printInputInit(str, indent, fv);
                 }
             }
         }
         // Print the algorithm
         p.print(getFStatements(), str, indent);
     }
+    
+    public abstract void CodePrinter.printInputInit(CodeStream str, String indent, FVariable v);
+    @Override
+    public void CPrettyPrinter.printInputInit(CodeStream str, String indent, FVariable v) {
+        v.algorithmInit(ExecStep, str, indent);
+    }
 
-    public String FVariable.algorithmInit_C() {
+    public void FVariable.algorithmInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (isString()) {
+            str.print(indent, "JMI_ASG(", type().macroType(), ", ", p.name(this), ", ");
+        } else {
+            str.print(indent, p.name(this), " = ");
+        }
+        
         if (isDiscrete()) {
-            return myPreVariable().name_C();
+            str.print(p.name(myPreVariable()));
         } else if (isParameter() && hasBindingExp()) {
-            return getBindingExp().prettyPrint_C();
+            p.print(getBindingExp(), str, indent);
         } else {
             FExp e = startAttributeExp();
-            return (e == null) ? "0.0" : e.prettyPrint_C();
+            if(e == null) {
+                str.print("0.0");
+            } else {
+                p.print(e, str, indent);
+            }
+        }
+        
+        if (isString()) {
+            str.print(")\n");
+        } else {
+            str.println(";");
         }
     }
 
@@ -458,58 +483,5 @@ aspect CCodeGenAlgorithms {
             frct.getFType().printAssignExt_C(p, str, indent, dst + frct.getName(), src + frct.getName(), wb, false);
         }
     }
-
-    syn lazy String FExp.tempName_C()       = nextTempName_C();
-    syn lazy String FAlgorithm.tempName_C() = nextTempName_C();
-
-    syn String FExp.nextTempName_C()       = myCodeGenContext().nextTempName_C();
-    syn String FAlgorithm.nextTempName_C() = myCodeGenContext().nextTempName_C();
-
-    public class CodeGenContext {
-        private int nextTempNbr_C = 1;
-        
-        public String nextTempName_C() {
-            return "tmp_" + nextTempNbr_C++;
-        }
-        public void setAlias(String key, String val) {
-            throw new UnsupportedOperationException();
-        }
-        public String alias(String key) {
-            return key;
-        }
-        public CodeGenContext createProxy() {
-            return new CodeGenContextProxy(this);
-        }
-        private class CodeGenContextProxy extends CodeGenContext {
-            private CodeGenContext redirect;
-            private Map<String,String> aliases = new HashMap<String,String>();
-            public CodeGenContextProxy(CodeGenContext redirect) {
-                this.redirect = redirect;
-            }
-            public String nextTempName_C() {
-                return redirect.nextTempName_C();
-            }
-            public void setAlias(String key, String val) {
-                aliases.put(key,val);
-            }
-            public String alias(String key) {
-                return aliases.get(key);
-            }
-        }
-    }
-
-    private CodeGenContext FClass.codeGenContext = new CodeGenContext();
-    private CodeGenContext FFunctionDecl.codeGenContext = new CodeGenContext();
-    private CodeGenContext FExternalStmt.codeGenContext = null;
-    public void FExternalStmt.setCodeGenContext(CodeGenContext cgc) { codeGenContext = cgc; }
-    public CodeGenContext FExternalStmt.getCodeGenContext() { return codeGenContext == null ? myCodeGenContext() : codeGenContext; }
-
-    inh CodeGenContext FExp.myCodeGenContext();
-    inh CodeGenContext FAlgorithm.myCodeGenContext();
-    inh CodeGenContext FExternalStmt.myCodeGenContext();
-    eq Root.getChild().myCodeGenContext() = null;
-    eq FClass.getChild().myCodeGenContext() = codeGenContext;
-    eq FFunctionDecl.getChild().myCodeGenContext() = codeGenContext;
-    eq FExternalStmt.getChild().myCodeGenContext() = getCodeGenContext();
-
+    
 }
