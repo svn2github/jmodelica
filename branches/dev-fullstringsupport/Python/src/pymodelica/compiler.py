@@ -83,7 +83,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             
         version --
             The FMI version. Valid options are '1.0' and '2.0'.
-            Default: '1.0'
+            Default: '2.0'
             
         platform --
             Set platform, controls whether a 32 or 64 bit FMU is generated. This 

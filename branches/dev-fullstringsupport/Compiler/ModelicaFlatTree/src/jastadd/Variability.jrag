@@ -408,6 +408,10 @@ aspect Variability {
     eq FTimeExp.expVariability()        = fContinuous();
     eq FRelExp.expVariability()         = inNoEventExp() ? super.expVariability() : super.expVariability().combineDown(fDiscrete());
     eq FInStreamEpsExp.expVariability() = fContinuous();
+    // Should be safe, FDSDerExp are introduced by index reduction and represent
+    // derivatives which always are continuous and real typed.
+    eq FDSDerExp.expVariability()       = fContinuous();
+
 
     eq FSizeExp.expVariability() {
         FTypePrefixVariability res = ASTNode.fConstant();
