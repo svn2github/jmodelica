@@ -11690,21 +11690,22 @@ model BlockTest14
   equation
     x = y + 1;
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="BlockTest14",
-        description="Mixed algorithm in block",
-        inline_functions="none",
-        variability_propagation=false,
-        template="$C_dae_blocks_residual_functions$",
-        generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest14",
+            description="Mixed algorithm in block",
+            inline_functions="none",
+            variability_propagation=false,
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_DEF(INT, tmp_1)
-    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(INT, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -11721,16 +11722,20 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_2 = x[0];
         }
-        tmp_1 = _t_0;
-        tmp_2 = _y_1;
+        tmp_2 = _t_0;
+        tmp_3 = _y_1;
         _t_0 = 1;
         _y_1 = _x_2;
-        JMI_SWAP(GEN, _t_0, tmp_1)
-        JMI_SWAP(GEN, _y_1, tmp_2)
+        tmp_1 = _t_0;
+        _t_0 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_3;
+        tmp_3 = tmp_1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _t_0 = (tmp_1);
+            _t_0 = (tmp_2);
         }
-        _y_1 = (tmp_2);
+        _y_1 = (tmp_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _y_1 + 1 - (_x_2);
         }
@@ -11751,20 +11756,21 @@ model BlockTest15
   equation
     y = 1;
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="BlockTest15",
-        description="Mixed algorithm in block",
-        inline_functions="none",
-        template="$C_dae_blocks_residual_functions$",
-        generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest15",
+            description="Mixed algorithm in block",
+            inline_functions="none",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_DEF(INT, tmp_1)
-    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(INT, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
@@ -11779,17 +11785,21 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_2 = x[0];
         }
-        tmp_1 = _t_0;
-        tmp_2 = _y_1;
+        tmp_2 = _t_0;
+        tmp_3 = _y_1;
         _t_0 = 1;
         _y_1 = _x_2;
-        JMI_SWAP(GEN, _t_0, tmp_1)
-        JMI_SWAP(GEN, _y_1, tmp_2)
+        tmp_1 = _t_0;
+        _t_0 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_3;
+        tmp_3 = tmp_1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _t_0 = (tmp_1);
+            _t_0 = (tmp_2);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = tmp_2 - (_y_1);
+            (*res)[0] = tmp_3 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -14382,18 +14392,19 @@ model VariableArrayIndex3
 algorithm
     y := x[i];
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="VariableArrayIndex3",
-        description="Test of variable array index access in block",
-        template="$C_dae_blocks_residual_functions$",
-        generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex3",
+            description="Test of variable array index access in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 3;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
@@ -14425,10 +14436,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _i_4 = _temp_1_5 + 1;
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            tmp_1 = _y_3;
+            tmp_2 = _y_3;
             _y_3 = (&_x_1_0)[(int)(_i_4 - 1)];
-            JMI_SWAP(GEN, _y_3, tmp_1)
-            (*res)[0] = tmp_1 - (_y_3);
+            tmp_1 = _y_3;
+            _y_3 = tmp_2;
+            tmp_2 = tmp_1;
+            (*res)[0] = tmp_2 - (_y_3);
         }
     }
     JMI_DYNAMIC_FREE()

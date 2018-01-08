@@ -269,18 +269,6 @@ aspect CodeFuncCallInOutArgPrinters {
             }
         }
     }
-
-    public abstract void CodePrinter.printTempInputAssigns(CodeStream str, String indent, TempScope ts, FAbstractVariable v);
-    @Override
-    public void CPrettyPrinter.printTempInputAssigns(CodeStream str, String indent, TempScope ts, FAbstractVariable v) {
-        if (v.isString()) {
-            str.print(indent, "JMI_ASG(", v.type().macroType(), ", ", ts.tempName_C(v), ", ", v.name_C(), ")\n");
-        } else {
-            FStatement.printAssignStmt_C(str, indent, ts.tempName_C(v), v.name_C());
-        }
-    }
-    
-    
     
     public abstract class CodePrinter {
         public abstract class FuncCallOutArgPrinter extends CodeFuncCallInOutArgPrinter {
@@ -326,14 +314,12 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
-                use.myFV().genWriteBackResidual(ASTNode.printer_C.ExecStep, str, indent, use, name, enumerator, forIndices, indexCounter);
+                use.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
             }
             
         }
 
         public abstract void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
-                Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter);
-        public abstract void printWriteBackResidual(CodeStream str, String indent, FAbstractVariable v, FAlgorithm alg,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter);
     }
     
@@ -343,11 +329,7 @@ aspect CodeFuncCallInOutArgPrinters {
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
             left.genWriteBackResidual_C(str, indent, enumerator, forIndices, indexCounter);
         }
-        @Override
-        public void printWriteBackResidual(CodeStream str, String indent, FAbstractVariable v, FAlgorithm alg,
-                Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-            v.genWriteBackResidual(ExecStep, str, indent, alg, ExecStep.tempName(v, alg), enumerator, forIndices, indexCounter);
-        }
+        //TODO printWriteBackResidual function with fiduseexp instead of ffunctioncallleft, se falgorithm.genResidual_C
     }
 
     public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
@@ -357,17 +339,20 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
 
-    public void FAbstractVariable.genWriteBackResidual(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, WriteBackContext ctx, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+    public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices == null || forIndices.contains(index)) {
-            if (!isReal()) 
-                throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + name());
+            if (!myFV().isReal()) 
+                throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + myFV().name());
 
             // This variable is in the set of variables to generate code for.
-            str.print(indent, "(*", p.residual(), ")[", enumerator.next(), "] = ");
+            str.print(indent);
+            str.print("(*res)[");
+            str.print(enumerator.next());
+            str.print("] = ");
             str.print(name);
             str.print(" - (");
-            ctx.genScaledAssignedRef(this, p, str, indent);
+            prettyPrint_C(printer_C, str, "");
             str.print(");\n");
         }
     }
@@ -383,7 +368,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
-                use.myFV().genWriteBackAssignment(ASTNode.printer_C.ExecStep, str, indent, use, name, forVariables);
+                use.genWriteBackAssignment_C(CodePrinter.this, str, indent, name, forVariables);
             }
 
             @Override
@@ -399,9 +384,6 @@ aspect CodeFuncCallInOutArgPrinters {
 
         public abstract void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node,
                 Collection<FVariable> forVariables);
-
-        public abstract void printWriteBackAssignment(CodeStream str, String indent, FAbstractVariable v, FAlgorithm alg,
-                Collection<FVariable> forVariables);
     }
     
     public class CPrettyPrinter {
@@ -411,12 +393,6 @@ aspect CodeFuncCallInOutArgPrinters {
             FType t = e.type();
             WriteBackAssignmentPrinter p = new WriteBackAssignmentPrinter(t.isComposite() && !e.inFunction(), forVariables);
             p.print(str, indent, t, node.writeBackName_C(), e);
-        }
-
-        @Override
-        public void printWriteBackAssignment(CodeStream str, String indent, FAbstractVariable v, FAlgorithm alg,
-                Collection<FVariable> forVariables) {
-            v.genWriteBackAssignment(ExecStep, str, indent, alg, alg.tempName_C(v), forVariables);
         }
     }
     
@@ -498,7 +474,7 @@ aspect CodeFuncCallInOutArg {
         str.print("memcpy(&");
         str.print(name);
         str.print(", &");
-        genAssignedRef(ASTNode.printer_C.ExecStep, str, indent);
+        genAssignedRef_C(ASTNode.printer_C, str, indent);
         str.print(", ");
         str.print(n);
         str.print(" * sizeof(");
@@ -533,52 +509,44 @@ aspect CodeFuncCallInOutArg {
         return getFExp().tempName_C();
     }
     
-    public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
-        str.print(indent);
-        str.print("memcpy(&");
-        genAssignedRef(p.ExecStep, str, indent);
-        str.print(", &");
-        str.print(name);
-        str.print(", ");
-        str.print(n);
-        str.print(" * sizeof(jmi_real_t));\n");
-    }
-    
-    public interface WriteBackContext {
-        public boolean inFunction();
-        public void genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
-        public void genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
-    }
-    FIdUseExp implements WriteBackContext;
-    FAlgorithm implements WriteBackContext;
-    
-    public void FAbstractVariable.genWriteBackAssignment(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, WriteBackContext ctx, String name,
+    public void FIdUseExp.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name,
             Collection<FVariable> forVariables) {
-        if (forVariables != null && !forVariables.contains(this))
+        if (forVariables != null && !forVariables.contains(myFV()))
             return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
             str.print(indent);
             str.print("JMI_ASG(STR");
-            if (!ctx.inFunction()) {
+            if (!inFunction()) {
                 str.print("_Z");
             }
             str.print(", ");
-            ctx.genAssignedRef(this, p, str, indent);
+            genAssignedRef_C(p, str, indent);
             str.print(", ");
             str.print(name);
             str.println(")");
             return;
         }
         str.print(indent);
-        ctx.genAssignedRef(this, p, str, indent);
+        genAssignedRef_C(p, str, indent);
         str.print(" = (");
         str.print(name);
         str.print(")");
-        if (needsScaling(ctx)) {
+        if (myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
             str.print("/sf(");
-            str.print(valueReference());
+            str.print(myFV().valueReference());
             str.print(")");
         }
         str.print(";\n");
+    }
+    
+    public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
+        str.print(indent);
+        str.print("memcpy(&");
+        genAssignedRef_C(p, str, indent);
+        str.print(", &");
+        str.print(name);
+        str.print(", ");
+        str.print(n);
+        str.print(" * sizeof(jmi_real_t));\n");
     }
 }

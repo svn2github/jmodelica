@@ -631,7 +631,7 @@ aspect BlockSetup {
         
         p = p.evalPrinter();
         
-        genEvalModeEvalOrWriteBack(p, str, indent, solverArrayMap);
+        genEvalModeEvalOrWriteBack(p, str, nextIndent, solverArrayMap);
 	}
 
     public void AbstractEquationBlock.genBlockResidualFunctionSignature(CodePrinter p, CodeStream str, String outerIndent) {

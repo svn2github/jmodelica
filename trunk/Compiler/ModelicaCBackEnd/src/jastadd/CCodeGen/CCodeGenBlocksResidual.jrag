@@ -108,7 +108,7 @@ aspect CCodeGenBlocksResidual {
         }
         Enumerator indexCounter = new Enumerator();
         for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
-            p.printWriteBackResidual(str, indent, use.myFV(), this, enumerator, forIndices, indexCounter);
+            use.genWriteBackResidual_C(str, indent, use.tempName_C(), enumerator, forIndices, indexCounter);
         }
     }
 
@@ -118,28 +118,20 @@ aspect CCodeGenBlocksResidual {
      * and statements which put the new values in temporaries.
      */
     public void FAlgorithm.prettyPrintNoSideEffect_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables) {
+        String switchTemp = this.tempName_C();
         Collection<FIdUseExp> lhs = uniqueFIdUseExpsInLHS();
         for (FIdUseExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
-                p.printTempInputAssigns(str, indent, this, use.myFV());
+                FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
             }
         }
         p.print(this, str, indent);
         for (FIdUseExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
-                p.printTempSwap(use.myFV(), this, str, indent);
+                FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
+                FStatement.printAssignStmt_C(str, indent, use.myFV().name_C(), use.tempName_C());
+                FStatement.printAssignStmt_C(str, indent, use.tempName_C(), switchTemp);
             }
         }
     }
-
-    public abstract void CodePrinter.printTempSwap(FAbstractVariable v, TempScope ts, CodeStream str, String indent);
-    @Override
-    public void CPrettyPrinter.printTempSwap(FAbstractVariable v, TempScope ts, CodeStream str, String indent)  {
-        v.genTempSwap(ExecStep, ts, str, indent);
-    }
-
-    public void FAbstractVariable.genTempSwap(CodePrinter.ExecuteCodePrinter p, TempScope ts, CodeStream str, String indent)  {
-        str.print(indent, "JMI_SWAP(", type().macroType(), ", ", p.name(this), ", ", p.tempName(this, ts), ")\n");
-    }
-    
 }
