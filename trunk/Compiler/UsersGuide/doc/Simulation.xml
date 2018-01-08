@@ -1256,12 +1256,12 @@ while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
         eInfo.newDiscreteStatesNeeded = True
                 
         # Event iteration
-        while eInfo.newDiscreteStatesNeeded == True:
+        while eInfo.newDiscreteStatesNeeded:
             bouncing_fmu.event_update('0')       # Stops at each event iteration
             eInfo = bouncing_fmu.get_event_info()
 
             # Retrieve solutions (if needed)
-            if eInfo.newDiscreteStatesNeeded == True:
+            if eInfo.newDiscreteStatesNeeded:
                 # bouncing_fmu.get_real,get_integer,get_boolean,get_string(valueref)
                 pass
                 
