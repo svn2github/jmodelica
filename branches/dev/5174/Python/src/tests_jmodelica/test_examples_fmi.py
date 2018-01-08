@@ -53,9 +53,15 @@ def test_fmi_bouncing_ball_raw():
     fmi_bouncing_ball_native.run_demo(False)
 
 @testattr(stddist_base = True)
+def test_fmi20_bouncing_ball_raw():
+    """ Test that the FMI bouncing ball example works """  
+    fmi20_bouncing_ball_native.run_demo(False)
+    
+@testattr(stddist_base = True)
 def test_bouncingball_cs_sim():
-    """ Test the FMI Bouncing Ball CS 1.0 example. """    
-    fmi_bouncing_ball_cs.run_demo(False)
+    """ Test the FMI Bouncing Ball CS example. """    
+    fmi_bouncing_ball_cs.run_demo(False, version="1.0")
+    fmi_bouncing_ball_cs.run_demo(False, version="2.0")
     
 @testattr(stddist_base = True)
 def test_crane():
@@ -85,7 +91,8 @@ def test_distillation4_fmu():
 @testattr(stddist_base = True)
 def test_fmi_bouncing_ball():
     """ Test that the FMI bouncing ball using the high-level simulate works. """
-    fmi_bouncing_ball.run_demo(False) 
+    fmi_bouncing_ball.run_demo(False, version="1.0") 
+    fmi_bouncing_ball.run_demo(False, version="2.0")
     
 @testattr(windows_base = True)
 def test_fmu_with_input():

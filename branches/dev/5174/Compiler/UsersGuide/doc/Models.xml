@@ -41,7 +41,7 @@
       or any other tool supporting FMU export. JModelica.org supports both
       export and import of FMUs for Model Exchange (FMU-ME) and FMUs for
       Co-Simulation (FMU-CS), version 1.0 and 2.0. Generated FMUs can be
-      loaded in an <literal>FMUModel(ME/CS)1</literal> object in Python and
+      loaded in an <literal>FMUModel(ME/CS) (1/2)</literal> object in Python and
       then be used for simulation purposes. Optimica models can not be
       compiled into FMUs.</para>
 
@@ -50,7 +50,7 @@
       transferred directly from the JModelica.org compiler, based on Modelica
       and Optimica models. They contain a symbolic representation of the
       optimization problem, which is used with the automatic differentiation
-      tool CasADi for optimization purposes. Read more about CasADi and how a
+      tool CasADi for optimization purposes. Read more about CasADi and how an
       <literal>OptimizationProblem</literal> object can be used for
       optimization in <xref linkend="opt-sec-dae-casadi"/> in <xref
       linkend="ch_optimization"/>.</para>
@@ -73,7 +73,7 @@
       <title>Simple FMU-ME compilation example</title>
 
       <para>The following steps compile a model to an FMU-ME version
-      1.0:<procedure>
+      2.0:<procedure>
           <step>
             <para>Import the JModelica.org compiler function
             <literal>compile_fmu</literal> from the package
@@ -106,12 +106,12 @@ my_fmu = compile_fmu(model_name, mo_file)
       default is to compile an FMU-ME, so <literal>target</literal> does not
       need to be set in this example. The compiler argument
       <literal>version</literal> specifies if the model should be exported as
-      an FMU 1.0 or 2.0. As the default is to compile an FMU 1.0,
+      an FMU 1.0 or 2.0. As the default is to compile an FMU 2.0,
       <literal>version</literal> does not need to be set either in this
-      example. To compile an FMU 2.0, <literal>version</literal> should be set
-      to <literal>'2.0'</literal>.</para>
+      example. To compile an FMU 1.0, <literal>version</literal> should be set
+      to <literal>'1.0'</literal>.</para>
 
-      <para>Once compilation has completed successfully, an FMU-ME 1.0 will
+      <para>Once compilation has completed successfully, an FMU-ME 2.0 will
       have been created on the file system. The FMU is essentially a
       compressed file archive containing the files created during compilation
       that are needed when instantiating a model object. Return argument for
@@ -132,7 +132,7 @@ my_fmu = compile_fmu(model_name, mo_file)
       <title>Simple FMU-CS compilation example</title>
 
       <para>The following steps compiles a model to an FMU-CS version
-      1.0:</para>
+      2.0:</para>
 
       <procedure>
         <step>
@@ -189,7 +189,7 @@ my_fmu = compile_fmu(model_name, mo_file, target='cs')
         <listitem>
           <para>Adding the directory containing the library directory to the
           environment variable <code>MODELICAPATH</code>. The compiler will
-          search for classes in all libraries found in any on the directories
+          search for classes in all libraries found in any of the directories
           in <code>MODELICAPATH</code>. In this case the
           <code>file_name</code> argument of the compilation function can be
           omitted, assuming no additional Modelica files are needed.</para>
@@ -243,7 +243,7 @@ from pymodelica import compile_fmu
 help(compile_fmu)
 Help on function compile_fmu in module pymodelica.compiler:
 
-compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
+compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='2.0', 
             compiler_options={}, compile_to='.', compiler_log_level='warning', 
             separate_process=True, jvm_args='')
 Compile a Modelica model to an FMU.
@@ -290,7 +290,7 @@ Parameters::
 
     version --
         The FMI version. Valid options are '1.0' and '2.0'.
-        Default: '1.0'
+        Default: '2.0'
 
     compiler_options --
         Options for the compiler.
@@ -432,7 +432,7 @@ myModel = transfer_optimization_problem(model_name, mo_file)
     <section xml:id="models_sec_setting_and_getting_params">
       <title>Setting and getting parameters</title>
 
-      <para>The model parameters can be accessed with via the model class
+      <para>The model parameters can be accessed via the model class
       interfaces. It is possible to set and get one specific parameter at a
       time or a whole list of parameters.</para>
 

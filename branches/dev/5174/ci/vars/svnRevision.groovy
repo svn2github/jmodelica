@@ -1,14 +1,10 @@
-import java.util.regex.Pattern;
-
-def call(path, sdk_home="C:\\JModelica.org-SDK-1.13\\") {
+def call(path) {
     print "Getting svn revision for path ${path}";
     def infoStr = bat returnStdout: true, script: """\
 @echo off
-SDK_HOME=${sdk_home}
-%$SDK_HOME%\\Subversion\\bin\\svn.exe info --xml "${path}"
+"${resolveSDK()}\\Subversion\\bin\\svn.exe" info --xml "${path}"
 """;
-    def revPattern = new Pattern(/^\s+revision="([0-9]+)">$/, Pattern.MULTILINE);
-    def m = revPattern.matcher(infoStr);
+    def m = infoStr =~ /(?m)^\s+revision="([0-9]+)">$/;
     m.find(); // Fail fast :D
     try {
         return Integer.parseInt(m.group(1));

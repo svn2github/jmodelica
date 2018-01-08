@@ -41,7 +41,7 @@ def run_demo(with_plots=True):
     file_paths = (os.path.join(get_files_path(), "Fourbar1.mo"),
                   os.path.join(get_files_path(), "Fourbar1.mop"))
     comp_opts = {'inline_functions': 'all', 'dynamic_states': False, 'expose_temp_vars_in_fmu': True}
-    model = load_fmu(compile_fmu('Fourbar1.Fourbar1Sim', file_paths, compiler_options=comp_opts, version=1.0))
+    model = load_fmu(compile_fmu('Fourbar1.Fourbar1Sim', file_paths, compiler_options=comp_opts))
     
     # Load trajectories that are optimal subject to a smaller torque constraint and use to generate initial guess
     init_path = os.path.join(get_files_path(), "fourbar1_init.txt")
