@@ -245,13 +245,14 @@ struct jmi_modules_t {
 };
 
 typedef struct jmi_z_offsets {
-    int o_ci, o_cd, o_pi, o_pd, o_ps, o_pf, o_pe;
-    int n_ci, n_cd, n_pi, n_pd, n_ps, n_pf, n_pe, n;
+    size_t ci, cd, pi, pd, ps, pf, pe, w, wp;
 } jmi_z_offsets_t;
 
 typedef struct jmi_z_strings {
     char** values;
-    jmi_z_offsets_t offsets;
+    jmi_z_offsets_t offs;
+    jmi_z_offsets_t nums;
+    size_t n;
 } jmi_z_strings_t;
 
 typedef struct jmi_z {

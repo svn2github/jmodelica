@@ -1175,8 +1175,9 @@ aspect TransformCanonical {
                     else if (!myOptions().getBooleanOption("state_initial_equations") &&
                             fv.isAlgebraicContinousRealVariable() && fv.isFixed())
                         generate = true;
-                    else if (fv.isDiscrete() && !fv.isString() && fv.isFixed())
+                    else if (fv.isDiscrete() && fv.isFixed()) {
                         generate = true;
+                    }
                     
                     if (generate) {
                         FExp lhs = fv.setLocationOf(fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp());

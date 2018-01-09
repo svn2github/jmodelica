@@ -246,6 +246,12 @@ aspect EquationSolve {
         return t;
     }
 
+    eq FStringAddExp.terms() {
+        ArrayList<FExp> t = new ArrayList<FExp>();
+        t.add(this);
+        return t;
+    }
+
     eq FDotSubExp.terms() {
         ArrayList<FExp> t = new ArrayList<FExp>();
         t.addAll(getLeft().terms());
