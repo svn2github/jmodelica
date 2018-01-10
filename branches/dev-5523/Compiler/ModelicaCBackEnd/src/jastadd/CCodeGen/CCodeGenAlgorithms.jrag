@@ -446,7 +446,7 @@ aspect CCodeGenAlgorithms {
 
     public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         String tempName = tempName_C();
-        String src = myCodeGenContext().alias(prettyPrint_C());
+        String src = alias();
         useTempVar = true;
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);
