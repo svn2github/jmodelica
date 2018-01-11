@@ -101,7 +101,7 @@ aspect CCodeGenExternalCeval {
             String name = acquireTemp(name());
             stmt.getCodeGenContext().setAlias(out.name_C(), name());
             for (FExp arg : args)
-                stmt.getCodeGenContext().setAlias(arg.alias(), name + "_arg" + i++);
+                stmt.getCodeGenContext().setAlias(arg.prettyPrint_C(), name + "_arg" + i++);
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
@@ -145,7 +145,7 @@ aspect CCodeGenExternalCeval {
             FExternalStmt stmt = type.myDestructorStmt();
             ArrayList<FExp> args = stmt.myConstructorArgs();
             stmt.setCodeGenContext(cgc.createProxy());
-            stmt.getCodeGenContext().setAlias(args.get(0).alias(), name());
+            stmt.getCodeGenContext().setAlias(args.get(0).prettyPrint_C(), name());
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }

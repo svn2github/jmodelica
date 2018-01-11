@@ -16,7 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 aspect CCodeGenExternal {
     
     syn String FExp.alias() = myCodeGenContext().alias(prettyPrint_C());
-    syn String FIdUseExp.alias() = myCodeGenContext().alias(getFIdUse().toString_C(ASTNode.printer_C));
 
     /**
      * Generates temporaries for an argument to an external function when necessary.

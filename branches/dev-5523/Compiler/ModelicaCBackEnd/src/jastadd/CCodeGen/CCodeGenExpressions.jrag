@@ -524,9 +524,10 @@ aspect CCodeGenExpressions {
     }
 
     syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
+    syn boolean FExp.needsScaling() = type().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction();
 
     public void FIdUseExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        if (v.needsScaling(this)) {
+        if (needsScaling()) {
             str.print("(");
             genAssignedRef(v, p, str, indent);
             str.print("*sf(");

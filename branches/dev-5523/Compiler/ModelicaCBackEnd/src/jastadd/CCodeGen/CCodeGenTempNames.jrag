@@ -57,7 +57,7 @@ aspect CCodeGenTempNames {
                 aliases.put(key,val);
             }
             public String alias(String key) {
-                return aliases.getOrDefault(key, key);
+                return aliases.get(key);
             }
         }
     }
