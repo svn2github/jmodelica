@@ -531,7 +531,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDSDerExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sjmi_real_t %s;", indent, tempName_C());
+        p.print(this, indent, type(), p.createDeclPrinter(str));
     }
 
     @Override
@@ -551,23 +551,10 @@ aspect CCodeGenExpressions {
             FExp valueExp = getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1);
             p.printVarDecls(valueExp, str, indent);
             p.printPreSteps(valueExp, str, indent);
-            p.genDynamicState_derivativeWriteBack(this, valueExp, str, innerIndent);
+            p.printAssign(type(), str, innerIndent, this, valueExp);
             p.printPostSteps(valueExp, str, indent);
         }
         str.formatln("%s}", indent);
-    }
-
-    public abstract class CodePrinter {
-        public abstract void genDynamicState_derivativeWriteBack(FDSDerExp derExp, FExp use, CodeStream str, String indent);
-    }
-
-    public class CPrettyPrinter {
-        @Override
-        public void genDynamicState_derivativeWriteBack(FDSDerExp derExp, FExp use, CodeStream str, String indent) {
-            str.format("%s%s = ", indent, derExp.tempName_C());
-            print(use, str, indent);
-            str.println(";");
-        }
     }
 
     @Override
@@ -1357,6 +1344,7 @@ aspect CCodeGenExpressions {
     }
 
     syn boolean FExp.needsTemp(CodePrinter p) = isComposite();
+    eq     FDSDerExp.needsTemp(CodePrinter p) = true;
     syn boolean FFunctionCall.needsTemp_C(CodePrinter p) =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());

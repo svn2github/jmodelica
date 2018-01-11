@@ -19968,8 +19968,8 @@ static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    jmi_real_t tmp_1;
-    jmi_real_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
@@ -20128,7 +20128,7 @@ static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    jmi_real_t tmp_1;
+    JMI_DEF(REA, tmp_1)
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
@@ -20374,8 +20374,8 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    jmi_real_t tmp_1;
-    jmi_real_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 1);
     }
@@ -20617,8 +20617,8 @@ static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    jmi_real_t tmp_1;
-    jmi_real_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     _a7_6 = _time;
     _a5_4 = - _a7_6 + 1;
     if (jmi->atInitial || jmi->atEvent) {
