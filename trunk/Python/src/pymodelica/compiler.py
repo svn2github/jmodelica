@@ -133,6 +133,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         created and a list of warnings that was raised.
     
     """
+    #Remove in JModelica.org version 2.3
+    if compiler_options.has_key("extra_lib_dirs"):
+        print "Warning: The option 'extra_lib_dirs' has been deprecated and will be removed. Please use the 'file_name' to pass additional libraries."
     
     if (target != "me" and target != "cs" and target != "me+cs"):
         raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")
