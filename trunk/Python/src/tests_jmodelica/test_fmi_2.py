@@ -567,10 +567,32 @@ class Test_FMUModelME2:
     
     @testattr(stddist_full = True)
     def test_get_string(self):
-		model = load_fmu(self.string1)
-		
-		for i in range(100): #Test so that memory issues are detected
-			assert model.get("str")[0] == "hej"
+        model = load_fmu(self.string1)
+        
+        for i in range(100): #Test so that memory issues are detected
+            assert model.get("str")[0] == "hej"
+            
+    @testattr(stddist_full = True)
+    def test_units(self):
+        
+        model = load_fmu(self.coupled_name)
+        model_bb = load_fmu(self.bouncing_name)
+        
+        assert model.get_variable_unit("J1.w") == "rad/s"
+        assert model.get_variable_unit("J1.phi") == "rad"
+        
+        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.useHeatPort")
+        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
+        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
+        nose.tools.assert_raises(FMUException, model_bb.get_variable_unit, "h")
+    
+    @testattr(stddist_full = True)
+    def test_display_units(self):
+        
+        model = load_fmu(self.coupled_name)
+        
+        assert model.get_variable_display_unit("J1.phi") == "deg"
+        nose.tools.assert_raises(FMUException, model.get_variable_display_unit, "J1.w")
     
     @testattr(stddist_full = True)
     def test_get_enum(self):
