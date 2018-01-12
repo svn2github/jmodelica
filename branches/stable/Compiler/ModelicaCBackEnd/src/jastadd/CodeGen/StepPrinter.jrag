@@ -56,6 +56,11 @@ aspect StepPrinter {
         }
         
         class ExecuteCodePrinter extends StepPrinter {
+            
+            public boolean isDer() { //Hook to facilitate extensions
+                return false;
+            }
+
             @Override
             public void print(ASTNode n, CodeStream str, String indent) {
                 codePrinter().print(n, str, indent);

@@ -226,7 +226,9 @@ aspect CCodeGen {
             PS("ps"),
             PF("pf"),
             PE("pe"),
-            PD("pd");
+            PD("pd"),
+            W("w"),
+            WP("wp");
             
             private String s;
             
@@ -250,7 +252,8 @@ aspect CCodeGen {
     eq FStructParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
     eq FFinalParameter.variabilityCausality_C(FVariable fv)    = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
     eq FEvalTrueParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
-    
+    eq FDiscrete.variabilityCausality_C(FVariable fv)          = VariabilityCausality_C.W;
+
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
     
@@ -1002,7 +1005,7 @@ aspect CCodeGen {
             } else {
                 i++;
             }
-            str.formatln("%s%s = %s;", indent, state.name_C(), set.getStateVars()[i].name_C());
+            p.genDynamicState_stateInit(state, set.getStateVars()[i], str, indent);
         }
         super.genOdeDerivativeBlocks(p, str, indent);
         lastSet = null;
@@ -1015,10 +1018,27 @@ aspect CCodeGen {
             } else {
                 i++;
             }
-            str.formatln("%s%s = %s;", indent, set.getAlgebraicVars()[i].name_C(), algebraic.name_C());
+            p.genDynamicState_algebraicWriteBack(algebraic, set.getAlgebraicVars()[i], str, indent);
         }
     }
 	
+    public abstract class CodePrinter {
+        public abstract void genDynamicState_stateInit(FVariable state, FVariable dynamicState, CodeStream str, String indent);
+
+        public abstract void genDynamicState_algebraicWriteBack(FVariable algebraic, FVariable dynamicAlgebraic, CodeStream str, String indent);
+    }
+
+    public class CPrettyPrinter {
+        @Override
+        public void genDynamicState_stateInit(FVariable state, FVariable dynamicState, CodeStream str, String indent) {
+            str.formatln("%s%s = %s;", indent, state.name_C(), dynamicState.name_C());
+        }
+
+        @Override
+        public void genDynamicState_algebraicWriteBack(FVariable algebraic, FVariable dynamicAlgebraic, CodeStream str, String indent) {
+            str.formatln("%s%s = %s;", indent, dynamicAlgebraic.name_C(), algebraic.name_C());
+        }
+    }
 
     syn int DynamicStateSet.id_C() = id() - 1;
 

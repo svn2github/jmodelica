@@ -272,6 +272,10 @@ aspect FlatTypeAnalysis {
     eq FHomotopyExp.type()    = getActual().type();
     eq FSemiLinearExp.type()  = fRealType(size());
 
+    // Should be safe, FDSDerExp are introduced by index reduction and represent
+    // derivatives which always are continuous and real typed.
+    eq FDSDerExp.type()       = FRealType.SCALAR;
+
     syn FType FEventGenExp.argType() = getX().type();
     eq FBinEventGenExp.argType() = 
             getX().type().scalarType().numericPromotion(getY().type().scalarType()).sizedType(size());

@@ -1,3 +1,18 @@
+================= Stable-2018-01-12 ==================
+; Feature ; Major ; Compiler; #4797 
+Full string support
+
+; Fixed ; Minor ; Compiler ; #5527
+Fixed representation of size expressions in function call types
+
+; Fixed ; Minor ; compiler ; #5530
+Fixed crash bug in FMI XML generator where alias eliminated high order
+temporary derivatives which were orphan caused problems.
+
+; Fixed ; Minor ; Compiler ; #5529
+Fixed bug in FMI XML generation where derivative attribute for second order
+derivatives (or higher) pointed to the wrong variable.
+
 ================= Stable-2017-12-19 ==================
 ; Fixed ; Minor ; Compiler; #5526 
 Fixed null pointer in evaluation of partial function
