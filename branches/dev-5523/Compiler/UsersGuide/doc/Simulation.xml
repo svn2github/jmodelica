@@ -1135,7 +1135,7 @@ bouncing_fmu.exit_initialization_mode()
 
         <para>The first line loads the FMU and connects the C-functions of the
         model to Python together with loading the information from the
-        XML-file. The start time also needs to be specified by giving the
+        XML-file. The start time also needs to be specified by providing the
         argument <literal>start_time</literal> to setup_experiment. The model is also initialized, which
         must be done before the simulation is started.</para>
 
@@ -1253,15 +1253,15 @@ while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
     if step_event or time_event or state_event:
         bouncing_fmu.enter_event_mode()
         eInfo = bouncing_fmu.get_event_info()
-        eInfo.newDiscreteStatesNeeded = False
+        eInfo.newDiscreteStatesNeeded = True
                 
         # Event iteration
-        while eInfo.newDiscreteStatesNeeded == True:
+        while eInfo.newDiscreteStatesNeeded:
             bouncing_fmu.event_update('0')       # Stops at each event iteration
             eInfo = bouncing_fmu.get_event_info()
 
             # Retrieve solutions (if needed)
-            if eInfo.newDiscreteStatesNeeded == True:
+            if eInfo.newDiscreteStatesNeeded:
                 # bouncing_fmu.get_real,get_integer,get_boolean,get_string(valueref)
                 pass
                 

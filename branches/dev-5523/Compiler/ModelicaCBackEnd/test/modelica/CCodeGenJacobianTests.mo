@@ -65,7 +65,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
 ")})));
     end NonlinearBlock;
 
@@ -262,7 +262,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
     end Simple1;
     
@@ -540,7 +540,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end Simple3;
 
@@ -737,7 +737,7 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end Simple4;
     
@@ -818,7 +818,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 ------
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
     end SwitchDense1;
 
@@ -954,7 +954,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end MultipleSolvedRealInAlgorithm;
 

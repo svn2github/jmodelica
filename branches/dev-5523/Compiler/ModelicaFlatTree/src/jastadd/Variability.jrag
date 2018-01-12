@@ -550,6 +550,7 @@ aspect Variability {
     eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
     eq FLoadResource.expVariability() = fParameter();
     eq FSampleExp.expVariability() = fDiscrete();
+    eq FStringExp.expVariability() = super.expVariability().combineDown(fDiscrete());
 
     eq FSimulationStateBuiltIn.expVariability() = fParameter();
     eq FInitialExp.expVariability()             = fDiscrete();
