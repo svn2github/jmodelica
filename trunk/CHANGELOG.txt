@@ -1,6 +1,7 @@
 ================= Unreleased ==================
 ; Feature ; Minor ; PyFMI ; #5537
-Added the possibility to retrieve unit and display unit name for FMI2.
+Added the possibility to retrieve unit and display unit name for FMI2 
+and also its value in the display unit.
 
 ================= Stable-2018-01-12 ==================
 ; Feature ; Major ; Compiler; #4797 

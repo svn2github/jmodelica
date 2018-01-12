@@ -593,6 +593,24 @@ class Test_FMUModelME2:
         
         assert model.get_variable_display_unit("J1.phi") == "deg"
         nose.tools.assert_raises(FMUException, model.get_variable_display_unit, "J1.w")
+        
+    @testattr(stddist_full = True)
+    def test_display_values(self):
+        model = load_fmu(self.coupled_name)
+        
+        import scipy
+        
+        val = model.get_variable_display_value("J1.phi")
+        val_ref = scipy.rad2deg(model.get("J1.phi"))
+        
+        nose.tools.assert_almost_equal(val, val_ref)
+        
+        model.simulate()
+        
+        val = model.get_variable_display_value("J1.phi")
+        val_ref = scipy.rad2deg(model.get("J1.phi"))
+        
+        nose.tools.assert_almost_equal(val, val_ref)
     
     @testattr(stddist_full = True)
     def test_get_enum(self):
