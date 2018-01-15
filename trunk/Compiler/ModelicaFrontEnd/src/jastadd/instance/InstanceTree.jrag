@@ -1870,13 +1870,20 @@ aspect InstanceAST_API {
 
     syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
-    eq InstComponentDecl.qualifiedName()    = getFQName().name();
-    eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
-    eq InstBaseClassDecl.qualifiedName()    = getInstRestriction().qualifiedClassName();
-    eq InstLibNode.qualifiedName()          = resolveLib().qualifiedName();
-    eq BadInstClassDecl.qualifiedName()     = buildQualifiedName();
-    eq InstBuiltInClassDecl.qualifiedName() = name();
-    eq InstProgramRoot.qualifiedName()      = "";
+    eq InstComponentDecl.qualifiedName()     = getFQName().name();
+    eq InstExtends.qualifiedName()           = myInstClass().qualifiedName();
+    eq InstBaseClassDecl.qualifiedName()     = getInstRestriction().qualifiedClassName();
+    eq InstLibNode.qualifiedName()           = resolveLib().qualifiedName();
+    eq BadInstClassDecl.qualifiedName()      = buildQualifiedName();
+    eq InstBuiltInClassDecl.qualifiedName()  = name();
+    eq InstProgramRoot.qualifiedName()       = "";
+    
+    eq InstArrayComponentDecl.qualifiedName(){
+           if (isArrayChild())
+               return getFQName().name()+
+                   myIndex().partIndex(0, myDimension()+1).toString();
+           return getFQName().name();
+    } 
 
     syn String InstRestriction.qualifiedClassName() = myInstClassDecl().buildQualifiedName();
     eq InstOperator.qualifiedClassName()            = myInstClassDecl().buildQualifiedOperatorName();
