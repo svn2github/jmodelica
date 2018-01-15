@@ -11703,14 +11703,14 @@ model BlockTest14
   equation
     x = y + 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="BlockTest14",
-            description="Mixed algorithm in block",
-            inline_functions="none",
-            variability_propagation=false,
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="BlockTest14",
+        description="Mixed algorithm in block",
+        inline_functions="none",
+        variability_propagation=false,
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -11764,13 +11764,13 @@ model BlockTest15
   equation
     y = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="BlockTest15",
-            description="Mixed algorithm in block",
-            inline_functions="none",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="BlockTest15",
+        description="Mixed algorithm in block",
+        inline_functions="none",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -14395,12 +14395,12 @@ model VariableArrayIndex3
 algorithm
     y := x[i];
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="VariableArrayIndex3",
-            description="Test of variable array index access in block",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="VariableArrayIndex3",
+        description="Test of variable array index access in block",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;

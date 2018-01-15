@@ -502,27 +502,59 @@ aspect CCodeGenExpressions {
     /**
      * Helper method that prints the variable reference for assignment (LHS).
      */
-    public void FIdUseExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genAssignedRef(myFV(), p, str, indent);
+    }
+
+    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         p.print(getFIdUse(), str, "");
     }
 
     @Override
-    public void FAbstractDerExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(myFV().name_C());
+    public void FAbstractDerExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(p.name(myFV()));
+    }
+
+    public void FAlgorithm.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(p.name(v));
+    }
+
+    public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genScaledAssignedRef(myFV(), p, str, indent);
+    }
+
+    syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
+    syn boolean FExp.needsScaling() = type().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction();
+
+    public void FIdUseExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (needsScaling()) {
+            str.print("(");
+            genAssignedRef(v, p, str, indent);
+            str.print("*sf(");
+            str.print(v.valueReference());
+            str.print("))");
+        } else {
+            genAssignedRef(v, p, str, indent);
+        }
+    }
+
+    public void FAlgorithm.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (v.needsScaling(this)) {
+            str.print("(");
+            genAssignedRef(v, p, str, indent);
+            str.print("*sf(");
+            str.print(v.valueReference());
+            str.print("))");
+        } else {
+            genAssignedRef(v, p, str, indent);
+        }
     }
 
     @Override
     public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (type().isReal() && !inFunction() && myOptions().getBooleanOption("enable_variable_scaling")) {
-            str.print("(");
-            genAssignedRef_C(p, str, indent);
-            str.print("*sf(");
-            str.print(myFV().valueReference());
-            str.print("))");
-        } else {
-            genAssignedRef_C(p, str, indent);
-        }
+        genScaledAssignedRef(p.ExecStep, str, indent);
     }
+
 
     @Override
     public void FDSRefExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
