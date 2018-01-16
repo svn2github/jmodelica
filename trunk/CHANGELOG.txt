@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler ; #5542
+Changed license for code generation templates to CPL
+
 ; Fixed ; Minor ; Compiler ; #5539
 Changed how qualifiedname works for multidimensional arrays by adding 
  special case for InstArrayComponentDecl. 
