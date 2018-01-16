@@ -801,7 +801,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->label);
     free(b->sw_old);
     free(b->nr_old);
-    jmi_free_strings(b->str_old, b->n_str);
+    jmi_free_strings(b->str_old, (nbr_allocated_iterations +2)*b->n_str);
     free(b->x_old);
     free(b->dr_old);
     free(b->sw_index);
