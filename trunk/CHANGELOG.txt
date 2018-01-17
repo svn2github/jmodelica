@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler ; #5544
+Moved logic for runtimeparameter encoding.
+
 ; Change ; Minor ; Compiler ; #5542
 Changed license for code generation templates to CPL
 
