@@ -76,13 +76,12 @@ Program : SourceBaseNode ::=
             /AnonymousClass:BaseClassDecl*/
             /InstProgramRoot/;
 
-StoredDefinition : SourceBaseNode ::= [Within] Element*;
+StoredDefinition : SourceBaseNode ::= [Within] ClassDecl*;
 
 Within : SourceBaseNode ::= [PackageName:Access];
 
 abstract ClassDecl : Element       ::= Name:IdDecl;
-abstract BaseClassDecl : ClassDecl ::= VisibilityType 
-                                       <Encapsulated:boolean>
+abstract BaseClassDecl : ClassDecl ::= <Encapsulated:boolean>
                                        <Partial:boolean>
                                        Restriction 
                                        <Redeclare:boolean>
@@ -95,21 +94,10 @@ abstract BaseClassDecl : ClassDecl ::= VisibilityType
 
 UnknownClassDecl : FullClassDecl;
 
-PN_FullClassDecl : BaseClassDecl ::= [StringComment] 
-                                     Composition 
-                                     [Annotation]
-                                     EndDecl;
-
-FullClassDecl : BaseClassDecl ::= [StringComment]  
-                                  Equation:AbstractEquation* 
-                                  Algorithm*
-                                  Super:ExtendsClause*  
-                                  Import:ImportClause* 
-                                  ClassDecl* 
-                                  ComponentDecl*
-                                  ElementModification:Modification* 
+FullClassDecl : BaseClassDecl ::= [StringComment] 
+                                  Clause*
                                   [ExternalClause] 
-                                  [Annotation] 
+                                  [Annotation]
                                   EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
@@ -135,23 +123,14 @@ ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow]
                                             [ArraySubscripts] 
                                             Comment; 
                             
-PN_ExtendClassDecl : PN_FullClassDecl ::= [ClassModification];
-                                
-ExtendClassDecl : FullClassDecl;
+ExtendClassDecl : FullClassDecl ::= InlineExtendsClause;
                                    
 PrimitiveClassDecl : FullClassDecl;
 RealClassDecl      : PrimitiveClassDecl;
 IntegerClassDecl   : PrimitiveClassDecl;
 BooleanClassDecl   : PrimitiveClassDecl;
 StringClassDecl    : PrimitiveClassDecl;
-EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Sumbol> is necessary to achieve formatted pretty print.
-//EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol> EnumSpecification; // <Symbol> is necessary to achieve formatted pretty print.
-
-PN_EnumDecl : BaseClassDecl ::= <Symbol:Symbol> EnumSpecification Comment;  // <Sumbol> is necessary to achieve formatted pretty print.
-abstract EnumSpecification : SourceBaseNode;
-EnumLiteralList : EnumSpecification ::= EnumLiteral*;
-EnumUnspecified : EnumSpecification;
-EnumLiteral : SourceBaseNode ::= IdDecl Comment;
+EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Symbol> is necessary to achieve formatted pretty print.
 
 EnumLiteralDecl : ComponentDecl;
 
@@ -178,9 +157,6 @@ PublicVisibilityType    : VisibilityType;
 ProtectedVisibilityType : VisibilityType;
 UnknownVisibilityType   : VisibilityType;
 
-// Delete Composition?
-Composition : SourceBaseNode ::= Clause* [ExternalClause];
-
 ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
                               [ExternalFunctionCall] 
                               [Annotation];
@@ -193,15 +169,15 @@ abstract Clause : SourceBaseNode;
 
 abstract ElementList  : Clause ::= Element*;
 PublicElementList     : ElementList;
+DefaultElementList    : PublicElementList;
 ProtectedElementList  : ElementList;
 EquationClause        : Clause ::= AbstractEquation*;
 InitialEquationClause : EquationClause;
-Algorithm             : Clause ::= [Initial] Statement*;
+Algorithm             : Clause ::= Statement*;
+InitialAlgorithm      : Algorithm;
 
-abstract Element : Clause;
-PN_ExtendsClause        : Element ::= Super:Access [ClassModification] [Annotation];
-ExtendsClause           : Element ::= VisibilityType Super:Access [ClassModification] [Annotation];
-//ExtendsClause           : Element ::= Super:Access [ClassModification] [Annotation];
+abstract Element : SourceBaseNode;
+ExtendsClause           : Element ::= Super:Access [ClassModification] [Annotation];
 InlineExtendsClause     : ExtendsClause;
 abstract ImportClause   : Element ::= PackageName:Access Comment;
 ImportClauseQualified   : ImportClause;
@@ -294,9 +270,7 @@ ParseAnnotation : Annotation ::= ClassModification;
 abstract AbstractExp : SourceBaseNode;
 abstract Exp : AbstractExp;
 
-abstract AbstractEquationModifier : SourceBaseNode;
-abstract AbstractEquation         : SourceBaseNode ::= [AbstractEquationModifier] Comment;
-Initial              : AbstractEquationModifier;
+abstract AbstractEquation         : SourceBaseNode ::= Comment;
 Equation             : AbstractEquation ::= Left:Exp Right:Exp;
 ConnectClause        : AbstractEquation ::= Comment Connector1:Access Connector2:Access;
 abstract IfWhenElseEquation       : AbstractEquation ::= AbstractEquation*;
@@ -404,6 +378,3 @@ TimeExp : Exp;
 EndExp  : Exp;
 
 EndDecl : SourceBaseNode ::= <EndID:String>;
-
-// Dummy node used in the compilation
-PN_DummyClause : Clause;

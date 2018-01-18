@@ -2806,7 +2806,7 @@ aspect InstantiatedExpressions {
     }
 
     public FEquationType Algorithm.equationType() {
-        return hasInitial() ? new FInitialEquation() : new FNormalEquation();
+        return isInitial() ? new FInitialEquation() : new FNormalEquation();
     }
 
     public <T extends FAbstractEquation> T AbstractEquation.copyStringComment(T eqn) {

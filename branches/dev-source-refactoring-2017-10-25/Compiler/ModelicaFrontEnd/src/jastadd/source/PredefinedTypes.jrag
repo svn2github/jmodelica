@@ -204,35 +204,11 @@ aspect PredefinedTypes {
         primitives.add("String");
         primitives.add("ExternalObject");
         
-        for (Element elem : p.getUnstructuredEntity(0).getElements()) {
-            if (primitives.contains(elem.name())) {
-                FullClassDecl cd = (FullClassDecl) elem;
-                pcd = new PrimitiveClassDecl(cd.getName(),
-                        new PublicVisibilityType(),
-                        false,
-                        false,
-                        cd.getRestriction(),
-                        false,
-                        false,
-                        false,
-                        false,
-                        false,
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        cd.getEquationList(),
-                        cd.getAlgorithmList(),
-                        cd.getSuperList(),
-                        cd.getImportList(),
-                        cd.getClassDeclList(),
-                        cd.getComponentDeclList(),
-                        cd.getElementModificationList(),
-                        new Opt(),
-                        cd.getAnnotationOpt(),
-                        cd.getEndDecl());
-                l.add(pcd); 
+        for (ClassDecl cd : p.getUnstructuredEntity(0).getClassDecls()) {
+            if (primitives.contains(cd.name())) {
+                l.add(PrimitiveClassDecl.create((FullClassDecl) cd)); 
             } else {
-                l.add(elem);
+                l.add(cd);
             }
         }
         
@@ -265,41 +241,102 @@ aspect PredefinedTypes {
             SourceRoot sr = util.getParserHandler().parseString(util, builtInDef,"");
             Program p = sr.getProgram();
 
-            FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));   
+            FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getClassDecl(0));
             
-            ecd = new EnumClassDecl(cd.getName(),
-                                    new PublicVisibilityType(),
-                                    false,
-                                    false,
-                                    cd.getRestriction(),
-                                    false,
-                                    false,
-                                    false,
-                                    false,
-                                    false,
-                                    new Opt(),
-                                    new Opt(),
-                                    new Opt(),
-                                    cd.getEquationList(),
-                                    cd.getAlgorithmList(),
-                                    cd.getSuperList(),
-                                    cd.getImportList(),
-                                    cd.getClassDeclList(),
-                                    cd.getComponentDeclList(),
-                                    cd.getElementModificationList(),
-                                    new Opt(),
-                                    cd.getAnnotationOpt(),
-                                    cd.getEndDecl(),
-                                    new Symbol("enumeration"));
-            ecd.originalComposition = cd.originalComposition;
+            ecd = new EnumClassDecl(cd);
         
         } catch(Exception e){e.printStackTrace();}
             
         //log.debug("Program.getPredefinedTypeList(): "+l.getNumChild());
         
         return ecd;
-        
     }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public FullClassDecl.FullClassDecl(FullClassDecl fcd) {
+        this(fcd.getName(),
+             fcd.getEncapsulated(),
+             fcd.getPartial(),
+             fcd.getRestriction(),
+             fcd.getRedeclare(),
+             fcd.getFinal(),
+             fcd.getInner(),
+             fcd.getOuter(),
+             fcd.getReplaceable(),
+             fcd.getConstrainingClauseOpt(),
+             fcd.getConstrainingClauseCommentOpt(),
+             fcd.getStringCommentOpt(),
+             fcd.getClauseList(),
+             fcd.getExternalClauseOpt(),
+             fcd.getAnnotationOpt(),
+             fcd.getEndDecl());
+        setLocation(fcd);
+    }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public EnumClassDecl.EnumClassDecl(FullClassDecl fcd) {
+        super(fcd);
+        setSymbol(new Symbol("enumeration"));
+    }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public PrimitiveClassDecl.PrimitiveClassDecl(FullClassDecl fcd) {
+        super(fcd);
+    }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public RealClassDecl.RealClassDecl(FullClassDecl fcd) {
+        super(fcd);
+    }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public IntegerClassDecl.IntegerClassDecl(FullClassDecl fcd) {
+        super(fcd);
+    }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public BooleanClassDecl.BooleanClassDecl(FullClassDecl fcd) {
+        super(fcd);
+    }
+
+    /**
+     * Create from a FullClassDecl - will destroy that node!
+     */
+    public StringClassDecl.StringClassDecl(FullClassDecl fcd) {
+        super(fcd);
+    }
+
+    /**
+     * Create instance of correct subclass from a FullClassDecl - 
+     * will destroy that node!
+     */
+    static public PrimitiveClassDecl PrimitiveClassDecl.create(FullClassDecl fcd) {
+        String name = fcd.name();
+        if (name.equals("Real")) {
+            return new RealClassDecl(fcd);
+        } else if (name.equals("Integer")) {
+            return new IntegerClassDecl(fcd);
+        } else if (name.equals("Boolean")) {
+            return new BooleanClassDecl(fcd);
+        } else if (name.equals("String")) {
+            return new StringClassDecl(fcd);
+        } else {
+            return new PrimitiveClassDecl(fcd);
+        }
+    }
+
 
     private static final String Program.BUILTIN_FUNCS = 
               "function initial end initial;\n"
@@ -623,35 +660,47 @@ aspect PredefinedTypes {
             Program p = sr.getProgram();
             
             ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt());
-            for (Element e : p.getUnstructuredEntity(0).getElements()) 
-            	e.addBuiltinFunctions(l, builtin);
+            for (ClassDecl cd : p.getUnstructuredEntity(0).getClassDecls()) 
+                cd.addBuiltinFunctions(l, builtin);
         } catch (Exception e) {}
         
         return l;
     }
 
     public void Element.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
-    	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
+    }
+
+    public void Clause.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void ElementList.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
+        for (Element e : getElements()) {
+            e.addBuiltinFunctions(list, builtin);
+        }
     }
 
     public void FullClassDecl.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
-    	if (isPackage()) {
-    		List<ClassDecl> subList = new List<ClassDecl>();
-    		for (ClassDecl cd : getClassDecls())
-    			cd.addBuiltinFunctions(subList, builtin);
-    		setClassDeclList(subList);
-    	} else {
-	    	String name = getName().getID();
-	    	if (name.equals("Integer") || name.equals("String")) {
-	    		// Add character that isn't allowed in identifiers to prevent collision with user class or the primitive class
-	    		name = "!" + name;
-	    		getName().setID(name);
-	    		getEndDecl().setEndID(name);
-	    	}
-	    	if (getNumAlgorithm() == 0)
-	    	    setExternalClause(builtin.fullCopy());
-    	}
-    	list.add(this);
+        if (isPackage()) {
+            List<Element> subList = new List<Element>();
+            for (Clause cd : getClauses()) {
+                cd.addBuiltinFunctions(subList, builtin);
+            }
+            setClauseList(new List<Clause>().add(new DefaultElementList(subList)));
+        } else {
+            String name = getName().getID();
+            if (name.equals("Integer") || name.equals("String")) {
+                // Add character that isn't allowed in identifiers to prevent collision with user class or the primitive class
+                name = "!" + name;
+                getName().setID(name);
+                getEndDecl().setEndID(name);
+            }
+            if (!algorithms().iterator().hasNext()) {
+                setExternalClause(builtin.fullCopy());
+            }
+        }
+        list.add(this);
     }
 
     /**
@@ -687,136 +736,6 @@ aspect PredefinedTypes {
     }
     
     syn nta Restriction Root.getBuiltInClassRestriction() = new MType();
-
-
-    boolean PrimitiveClassDecl.rewritten = false;
-    rewrite PrimitiveClassDecl {
-        when (getName().getID().equals("Real") && !rewritten)
-            to RealClassDecl {
-                RealClassDecl rcd = new RealClassDecl(
-                        getName(),
-                        getVisibilityType(),
-                        getEncapsulated(),
-                        getPartial(),
-                        getRestriction(),
-                        getRedeclare(),
-                        getFinal(),
-                        getInner(),
-                        getOuter(),
-                        getReplaceable(),
-                        getConstrainingClauseOpt(),
-                        getConstrainingClauseCommentOpt(),
-                        getStringCommentOpt(),
-                        getEquationList(),
-                        getAlgorithmList(),
-                        getSuperList(),
-                        getImportList(),
-                        getClassDeclList(),
-                        getComponentDeclList(),
-                        getElementModificationList(),
-                        getExternalClauseOpt(),
-                        getAnnotationOpt(),
-                        getEndDecl());
-                rcd.rewritten = true;
-                return rcd;
-            }
-    }
-    
-    rewrite PrimitiveClassDecl {
-        when (getName().getID().equals("Integer") && !rewritten)
-            to IntegerClassDecl {
-                IntegerClassDecl rcd = new IntegerClassDecl(
-                        getName(),
-                        getVisibilityType(),
-                        getEncapsulated(),
-                        getPartial(),
-                        getRestriction(),
-                        getRedeclare(),
-                        getFinal(),
-                        getInner(),
-                        getOuter(),
-                        getReplaceable(),
-                        getConstrainingClauseOpt(),
-                        getConstrainingClauseCommentOpt(),
-                        getStringCommentOpt(),
-                        getEquationList(),
-                        getAlgorithmList(),
-                        getSuperList(),
-                        getImportList(),
-                        getClassDeclList(),
-                        getComponentDeclList(),
-                        getElementModificationList(),
-                        getExternalClauseOpt(),
-                        getAnnotationOpt(),
-                        getEndDecl());
-                rcd.rewritten = true;
-                return rcd;
-            }
-    }
-    
-    rewrite PrimitiveClassDecl {
-        when (getName().getID().equals("Boolean") && !rewritten)
-            to BooleanClassDecl {
-                BooleanClassDecl rcd = new BooleanClassDecl(
-                        getName(),
-                        getVisibilityType(),
-                        getEncapsulated(),
-                        getPartial(),
-                        getRestriction(),
-                        getRedeclare(),
-                        getFinal(),
-                        getInner(),
-                        getOuter(),
-                        getReplaceable(),
-                        getConstrainingClauseOpt(),
-                        getConstrainingClauseCommentOpt(),
-                        getStringCommentOpt(),
-                        getEquationList(),
-                        getAlgorithmList(),
-                        getSuperList(),
-                        getImportList(),
-                        getClassDeclList(),
-                        getComponentDeclList(),
-                        getElementModificationList(),
-                        getExternalClauseOpt(),
-                        getAnnotationOpt(),
-                        getEndDecl());
-                rcd.rewritten = true;
-                return rcd;
-            }
-    }
-    
-        rewrite PrimitiveClassDecl {
-        when (getName().getID().equals("String") && !rewritten)
-            to StringClassDecl {
-                StringClassDecl rcd = new StringClassDecl(
-                        getName(),
-                        getVisibilityType(),
-                        getEncapsulated(),
-                        getPartial(),
-                        getRestriction(),
-                        getRedeclare(),
-                        getFinal(),
-                        getInner(),
-                        getOuter(),
-                        getReplaceable(),
-                        getConstrainingClauseOpt(),
-                        getConstrainingClauseCommentOpt(),
-                        getStringCommentOpt(),
-                        getEquationList(),
-                        getAlgorithmList(),
-                        getSuperList(),
-                        getImportList(),
-                        getClassDeclList(),
-                        getComponentDeclList(),
-                        getElementModificationList(),
-                        getExternalClauseOpt(),
-                        getAnnotationOpt(),
-                        getEndDecl());
-                rcd.rewritten = true;
-                return rcd;
-            }
-    }
 }
 
 aspect InstPredefinedTypes {

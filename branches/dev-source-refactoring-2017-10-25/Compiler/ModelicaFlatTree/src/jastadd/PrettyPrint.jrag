@@ -103,24 +103,6 @@ aspect PrettyPrint {
  		}
 	}
 
-    /**
-     * Static printer instance.
-     */
-    static DumpTreePrinter ASTNode.printer_dumpTree = new DumpTreePrinter();
-
-    /**
-     * Select second variant.
-     */
-    public class DumpTreePrinter extends Printer {
-		public DumpTreePrinter() {
-			super(" ");
-		}
-		
-		public void print(ASTNode node, CodeStream str, String indent) { 
- 			node._dumpTree(this, str, indent); 
- 		}
-	}
-	
 	/**
 	 * Wraps a prettyPrint() call to be deferred until the sting is needed.
 	 */
@@ -140,17 +122,6 @@ aspect PrettyPrint {
 		public String toString() {
 			return n.prettyPrint(i);
 		}
-	}
-
-    public void ASTNode._dumpTree(CodeStream str, String indent) {
-        _dumpTree(printer_dumpTree, str, indent);
-    }
-
-	// dump node names
-	public void ASTNode._dumpTree(Printer p, CodeStream str, String indent) {
- 		str.println(indent + getClass().getSimpleName());
- 		for(int i = 0; i < getNumChild(); i++)
-   			p.print(getChild(i),str,p.indent(indent)); // distpatch through Printer
 	}
 
     public String ASTNode.prettyPrint(String indent) {
@@ -292,25 +263,22 @@ aspect PrettyPrint {
 			p.print(sd,str,indent);
 		}
 	}
- 	
- 	public void StoredDefinition.prettyPrint(Printer p, CodeStream str, String indent) {
- 		if (hasWithin()) {
- 			str.print(indent + "within");
- 			if (getWithin().hasPackageName()) {
- 				str.print(" ");
- 				p.print(getWithin().getPackageName(),str,indent);
- 			}
- 			str.println(";");
- 		}
- 		for (Element el : getElements()) {
-	 		p.print(el,str,indent);
- 			str.println(";");
-		}
-	}
-	
-	// specialize behavior for A
-	
-	
+
+    public void StoredDefinition.prettyPrint(Printer p, CodeStream str, String indent) {
+        if (hasWithin()) {
+            str.print(indent + "within");
+            if (getWithin().hasPackageName()) {
+                str.print(" ");
+                p.print(getWithin().getPackageName(),str,indent);
+            }
+            str.println(";");
+        }
+        for (ClassDecl cd : getClassDecls()) {
+            p.print(cd, str, indent);
+        }
+    }
+
+
     public void ShortClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent);
         indent = p.indent(indent);
@@ -336,7 +304,9 @@ aspect PrettyPrint {
             str.print("replaceable ");
         }
         
-        str.print(getRestriction() + " " + getName().getID() + " = ");
+        str.print(getRestriction() + " ");
+        p.print(getName(), str, indent);
+        str.print(" = ");
         str.print(getExtendsClauseShortClass().getSuper().name());
         if (getExtendsClauseShortClass().hasArraySubscripts()) {
             p.print(getExtendsClauseShortClass().getArraySubscripts(), str, indent);
@@ -373,84 +343,79 @@ aspect PrettyPrint {
             str.print("replaceable ");
         }
         
-        str.println(getRestriction() + " " + getName().getID());
+        str.print(getRestriction() + " ");
+        prettyPrintClassName(p, str, indent);
+        str.println();
 
-        // Print all local classes
-        int numPubClass = 0;
-        for (ClassDecl cl : getClassDecls()) {
-            if (cl.isPublic()) {
-                numPubClass++;
-                if (!cl.isLibNode()) {
-                    p.print(cl, str, p.indent(indent));
-                    str.println(";\n");
-                }
-            }
+        for (Clause cl : getClauses()) {
+            p.print(cl, str, indent);
         }
-        
-        if (getNumClassDecl() > numPubClass) {
-            str.println(indent + "protected");
-            for (ClassDecl cl : getClassDecls()) {
-                if (cl.isProtected() && !cl.isLibNode()) {
-                    p.print(cl, str, p.indent(indent));
-                    str.println(";\n");
-                }
-            }
-            str.println(indent + "public");
-        }
-            
-        // Print all extends clauses
-        for (ExtendsClause sup : getSupers()) {
-            p.print(sup, str, p.indent(indent));
-            str.println(";");
-        }
-            
-        // Print all components
-        int numPubComp = 0;
-        for (ComponentDecl comp : getComponentDecls()) {
-            if (comp.isPublic()) {
-                numPubComp++;
-                p.print(comp, str, p.indent(indent));
-                str.println(";");
-            }
-        }
-        
-        if (getNumComponentDecl() > numPubComp) {
-            str.println(indent + "protected");
-            for (ComponentDecl comp : getComponentDecls()) {
-                if (comp.isProtected()) {
-                    p.print(comp, str, p.indent(indent));
-                    str.println(";");
-                }
-            }
-        }
-        
-        if (getNumEquation() > 0) {
-            str.println(indent + "equation");
-            for (AbstractEquation e : getEquations()) {
-                str.print(p.indent(indent));
-                p.print(e, str, indent);
-                str.println(";");
-            }
-        }
-        
-        for (Algorithm a : getAlgorithms()) {
-            p.print(a, str, indent);
-        }
-        
-        str.print(indent + "end " + getName().getID());
+        p.print(getEndDecl(), str, indent);
     }
 
-	public void Algorithm.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.print(indent);
-		if (hasInitial())
-			str.print("initial ");
-		str.println("algorithm");
-		
-		for (Statement s : getStatements()) {
-			p.print(s, str, p.indent(indent));
-		}
-	}
-	
+    public void FullClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
+        p.print(getName(), str, indent);
+    }
+
+    public void Clause.prettyPrint(Printer p, CodeStream str, String indent) {
+        String header = clauseHeader();
+        if (header != null) {
+            str.println(indent + header);
+        }
+        prettyPrintClauseBody(p, str, p.indent(indent));
+    }
+
+    syn String Clause.clauseHeader();
+    eq PublicElementList.clauseHeader()     = "public";
+    eq DefaultElementList.clauseHeader()    = null;
+    eq ProtectedElementList.clauseHeader()  = "protected";
+    eq EquationClause.clauseHeader()        = "equation";
+    eq InitialEquationClause.clauseHeader() = "initial equation";
+    eq Algorithm.clauseHeader()             = "algorithm";
+    eq InitialAlgorithm.clauseHeader()      = "initial algorithm";
+
+    public abstract void Clause.prettyPrintClauseBody(Printer p, CodeStream str, String indent);
+
+    public void ElementList.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+        boolean prevWantsBlankLine = false;
+        boolean first = true;
+        for (Element e : getElements()) {
+            boolean wantsBlankLine = e.prettyPrintWantsBlankLine();
+            if (!first && (wantsBlankLine || prevWantsBlankLine)) {
+                str.println();
+            }
+            p.print(e, str, indent);
+            if (!e.prettyPrintHasLineEnd()) {
+                str.println(";");
+            }
+            prevWantsBlankLine = wantsBlankLine;
+            first = false;
+        }
+    }
+
+    syn boolean Element.prettyPrintHasLineEnd();
+    eq ImportClause.prettyPrintHasLineEnd()          = true;
+    eq ExtendsClause.prettyPrintHasLineEnd()         = false;
+    eq AbstractComponentDecl.prettyPrintHasLineEnd() = false;
+    eq ClassDecl.prettyPrintHasLineEnd()             = true;
+    eq BadElement.prettyPrintHasLineEnd()            = true;
+
+    syn boolean Element.prettyPrintWantsBlankLine() = false;
+    eq ClassDecl.prettyPrintWantsBlankLine()        = true;
+
+    public void EquationClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+        for (AbstractEquation e : getAbstractEquations()) {
+            p.print(e, str, indent);
+            str.println(";");
+        }
+    }
+
+    public void Algorithm.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+        for (Statement s : getStatements()) {
+            p.print(s, str, indent);
+        }
+    }
+
 	public void AssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		p.print(getLeft(), str, indent);
@@ -583,7 +548,7 @@ aspect PrettyPrint {
 	}
 
     public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(indent);//+getVisibilityType().toString()+" ";
+        str.print(indent);
         
         if (getRedeclare()) {
             str.print("redeclare ");
@@ -671,6 +636,28 @@ aspect PrettyPrint {
 				str.print(":");
 		}
 	}
+
+    public void ImportClause.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent + "import ");
+        prettyPrintPreName(p, str, indent);
+        p.print(getPackageName(), str, indent);
+        prettyPrintPostName(p, str, indent);
+        p.print(getComment(), str, indent);
+        str.println(";");
+    }
+
+    public void ImportClause.prettyPrintPreName(Printer p, CodeStream str, String indent) {}
+
+    public void ImportClauseRename.prettyPrintPreName(Printer p, CodeStream str, String indent) {
+        p.print(getIdDecl(), str, indent);
+        str.print(" = ");
+    }
+
+    public void ImportClause.prettyPrintPostName(Printer p, CodeStream str, String indent) {}
+
+    public void ImportClauseUnqualified.prettyPrintPostName(Printer p, CodeStream str, String indent) {
+        str.print(".*");
+    }
 
 	public void ExtendsClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent + "extends ");
@@ -875,6 +862,14 @@ aspect PrettyPrint {
 				str.print(",");
 		}
 	}
+
+    public void IdDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getID());
+    }
+
+    public void EndDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.println(indent + "end " + getEndID() + ";");
+    }
 
     public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getID());

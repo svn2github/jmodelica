@@ -19,7 +19,6 @@ aspect UnknownDeclarations {
 
     syn lazy UnknownClassDecl Program.getUnknownClassDecl() =
         new UnknownClassDecl(new IdDecl("Unknown"),
-                             new PublicVisibilityType(),
                              false,
                              false,
                              new MClass(),
@@ -28,18 +27,12 @@ aspect UnknownDeclarations {
                              false,
                              false,
                              false,
-                             new Opt(),
-                             new Opt(),
-                             new Opt(),
-                             new List(),
-                             new List(),
-                             new List(),
-                             new List(),
-                             new List(),
-                             new List(),
-                             new List(),
-                             new Opt(),
-                             new Opt(),
+                             new Opt<ConstrainingClause>(),
+                             new Opt<Comment>(),
+                             new Opt<StringComment>(),
+                             new List<Clause>(),
+                             new Opt<ExternalClause>(),
+                             new Opt<Annotation>(),
                              new EndDecl("Unknown"));
 
     syn lazy UnknownComponentDecl Program.getUnknownComponentDecl() =

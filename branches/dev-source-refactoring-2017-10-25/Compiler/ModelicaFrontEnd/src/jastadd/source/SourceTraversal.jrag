@@ -1,0 +1,249 @@
+/*
+    Copyright (C) 2017 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import org.jmodelica.util.collections.SubClassIterator;
+import org.jmodelica.util.collections.SingleIterable;
+import org.jmodelica.util.collections.ChainedIterable;
+import org.jmodelica.util.collections.FilteredIterator;
+import org.jmodelica.util.Criteria;
+
+aspect SourceTraversal {
+
+
+    syn Iterable<AbstractEquation> ClassDecl.equations();
+    eq ClassDecl.equations()     = Collections.<AbstractEquation>emptyList();
+    eq LibNode.equations()       = myClass().equations();
+    eq FullClassDecl.equations() = new Iterable<AbstractEquation>() {
+        public Iterator<AbstractEquation> iterator() {
+            return new ClauseElementIterator<AbstractEquation>() {
+                protected Iterator<AbstractEquation> subIterator(Clause c) {
+                    return c.equationIterator();
+                }
+            };
+        }
+    };
+
+    syn Iterable<Algorithm> ClassDecl.algorithms();
+    eq ClassDecl.algorithms()     = Collections.<Algorithm>emptyList();
+    eq LibNode.algorithms()       = myClass().algorithms();
+    eq FullClassDecl.algorithms() = new Iterable<Algorithm>() {
+        public Iterator<Algorithm> iterator() {
+            return new ClauseElementIterator<Algorithm>() {
+                protected Iterator<Algorithm> subIterator(Clause c) {
+                    return c.algorithmIterator();
+                }
+            };
+        }
+    };
+    
+    syn Iterable<ExtendsClause> ClassDecl.superClasses();
+    eq ClassDecl.superClasses()       = Collections.<ExtendsClause>emptyList();
+    eq ShortClassDecl.superClasses()  = 
+        Collections.<ExtendsClause>singletonList(getExtendsClauseShortClass());
+    eq LibNode.superClasses()         = myClass().superClasses();
+    eq ExtendClassDecl.superClasses() = new ChainedIterable(
+            new SingleIterable(getInlineExtendsClause()), super.superClasses());
+    eq FullClassDecl.superClasses()   = new Iterable<ExtendsClause>() {
+        public Iterator<ExtendsClause> iterator() {
+            return new ClauseElementIterator<ExtendsClause>() {
+                protected Iterator<ExtendsClause> subIterator(Clause c) {
+                    return c.extendsIterator();
+                }
+            };
+        }
+    };
+    
+    syn Iterable<ComponentDecl> ClassDecl.components();
+    eq ClassDecl.components()     = Collections.<ComponentDecl>emptyList();
+    eq LibNode.components()       = myClass().components();
+    eq EnumClassDecl.components() = 
+        new ChainedIterable(componentsIterable(), enumBase().componentsIterable());
+    eq FullClassDecl.components() = new Iterable<ComponentDecl>() {
+        public Iterator<ComponentDecl> iterator() {
+            return new ClauseElementIterator<ComponentDecl>() {
+                protected Iterator<ComponentDecl> subIterator(Clause c) {
+                    return c.componentIterator();
+                }
+            };
+        }
+    };
+    
+    syn Iterable<ComponentDecl> EnumClassDecl.componentsIterable() = super.components();
+    syn EnumClassDecl EnumClassDecl.enumBase() = 
+        ((SourceRoot) root()).getProgram().getEnumBaseDecl();
+    
+    syn Iterable<SrcModificationOrRedeclareElement> ClassDecl.elementModifications();
+    eq ClassDecl.elementModifications()     = 
+        Collections.<SrcModificationOrRedeclareElement>emptyList();
+    eq LibNode.elementModifications()       = myClass().elementModifications();
+    eq FullClassDecl.elementModifications() = new Iterable<SrcModificationOrRedeclareElement>() {
+        public Iterator<SrcModificationOrRedeclareElement> iterator() {
+            return new ClauseElementIterator<SrcModificationOrRedeclareElement>() {
+                protected Iterator<SrcModificationOrRedeclareElement> subIterator(Clause c) {
+                    return c.elementModificationIterator();
+                }
+            };
+        }
+    };
+
+    syn Iterable<ImportClause> ClassDecl.imports();
+    eq ClassDecl.imports()     = Collections.<ImportClause>emptyList();
+    eq FullClassDecl.imports() = new Iterable<ImportClause>() {
+        public Iterator<ImportClause> iterator() {
+            return new ClauseElementIterator<ImportClause>() {
+                protected Iterator<ImportClause> subIterator(Clause c) {
+                    return c.importIterator();
+                }
+            };
+        }
+    };
+
+    syn Iterable<ClassDecl> ClassDecl.classes();
+    eq ClassDecl.classes()     = Collections.<ClassDecl>emptyList();
+    eq LibNode.classes()       = myClass().classes();
+    eq FullClassDecl.classes() = new Iterable<ClassDecl>() {
+        public Iterator<ClassDecl> iterator() {
+            return new ClauseElementIterator<ClassDecl>() {
+                protected Iterator<ClassDecl> subIterator(Clause c) {
+                    return c.classIterator();
+                }
+            };
+        }
+    };
+    syn lazy Iterable<ClassDecl> LibClassDecl.classes() {
+        // Imposes ordering specified in LibClassDecl.order
+        Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
+        for (ClassDecl cd : super.classes())
+            map.put(cd.name(), cd);
+        for (LibNode ln : getLibNodes()) {
+            map.put(ln.name(), ln);
+        }
+        
+        ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
+        for (String name : order) {
+            ClassDecl cd = map.get(name);
+            if (cd != null) {
+                l.add(cd);
+                map.remove(name);
+            }
+        }
+        for (ClassDecl cd : map.values())
+            l.add(cd);
+
+        return l;
+    }
+    syn Iterable<ClassDecl> Program.classes() {
+        ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
+        for (StoredDefinition sd : getUnstructuredEntitys()) {
+            for (ClassDecl cd : sd.getClassDecls()) {
+                if (!cd.isError()) {
+                    l.add(cd);
+                }
+            }
+        }
+        // Libraries are loaded when needed in instance lookup instead
+        return l;
+    } 
+
+    public class FullClassDecl {
+
+        protected abstract class ClauseElementIterator<T> implements Iterator<T> {
+            private Iterator<T> subIter = null;
+            private Iterator<Clause> clauseIter = getClauses().iterator();
+            
+            /**
+             * Return an iterator that returns the elements of the correct type in c, or null 
+             * if there can't be any.
+             */
+            protected abstract Iterator<T> subIterator(Clause c);
+            
+            public boolean hasNext() {
+                update();
+                return subIter != null;
+            }
+            
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return subIter.next();
+            }
+            
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            
+            private void update() {
+                while ((subIter == null || !subIter.hasNext()) && clauseIter.hasNext()) {
+                    subIter = subIterator(clauseIter.next());
+                }
+                if (subIter != null && !subIter.hasNext()) {
+                    subIter = null;
+                }
+            }
+        }
+
+    }
+
+    syn Iterator<AbstractEquation> Clause.equationIterator() = null;
+    eq EquationClause.equationIterator()                     = getAbstractEquations().iterator();
+
+    syn Iterator<Algorithm> Clause.algorithmIterator() = null;
+    eq Algorithm.algorithmIterator()                   = new SingleIterator(this);
+
+    syn Iterator<ExtendsClause> Clause.extendsIterator() = null;
+    eq ElementList.extendsIterator()                     = 
+        new SubClassIterator(ExtendsClause.class, getElements().iterator());
+
+    syn Iterator<ComponentDecl> Clause.componentIterator() = null;
+    eq ElementList.componentIterator()                     = 
+        new SubClassIterator(ComponentDecl.class, getElements().iterator());
+
+    syn Iterator<SrcModificationOrRedeclareElement> Clause.elementModificationIterator() = null;
+    eq ElementList.elementModificationIterator() = 
+            new FilteredIterator(
+                    new SubClassIterator(SrcModificationOrRedeclareElement.class, getElements().iterator()), 
+                    new Criteria<SrcModificationOrRedeclareElement>() {
+                        public boolean test(SrcModificationOrRedeclareElement elem) {
+                            return elem.isRedeclare();
+                        }
+                    });
+
+    syn Iterator<ImportClause> Clause.importIterator() = null;
+    eq ElementList.importIterator()                     = 
+        new SubClassIterator(ImportClause.class, getElements().iterator());
+
+    syn Iterator<ClassDecl> Clause.classIterator() = null;
+    eq ElementList.classIterator()                     = 
+            new FilteredIterator(
+                    new SubClassIterator(ClassDecl.class, getElements().iterator()), 
+                    NOT_ERROR_NODE_CRITERIA);
+
+
+    public interface SrcModificationOrRedeclareElement {
+        public InstModification newInstModification();
+        public boolean isRedeclare();
+    }
+
+    Modification  implements SrcModificationOrRedeclareElement;
+    ComponentDecl implements SrcModificationOrRedeclareElement;
+// TODO: Handle class redeclares through this interface as well
+//    BaseClassDecl implements SrcModificationOrRedeclareElement;
+
+    syn boolean Modification.isRedeclare() = false;
+    eq ElementRedeclare.isRedeclare()      = true;
+
+}

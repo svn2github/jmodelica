@@ -34,7 +34,19 @@ aspect TestFramework {
     public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
         if (super.collectTestCases(ts, className)) 
             return true;
-        return getClassDeclList().collectTestCases(ts, className);
+        return getClauseList().collectTestCases(ts, className);
+    }
+
+    public boolean Clause.collectTestCases(TestSuite ts, String className) {
+        return false;
+    }
+
+    public boolean ElementList.collectTestCases(TestSuite ts, String className) {
+        return getElementList().collectTestCases(ts, className);
+    }
+
+    public boolean Element.collectTestCases(TestSuite ts, String className) {
+        return false;
     }
 
     public void ASTNode.collectTestCases(TestSuite ts) {
@@ -59,9 +71,19 @@ aspect TestFramework {
             for (AnnotationNode a2 : a1) 
                 generateTestCase(ts, a2);
         } else {
-            getClassDeclList().collectTestCases(ts);
+            getClauseList().collectTestCases(ts);
         }
         ts.exitClass();
+    }
+
+    public void Clause.collectTestCases(TestSuite ts) {
+    }
+
+    public void ElementList.collectTestCases(TestSuite ts) {
+        getElementList().collectTestCases(ts);
+    }
+
+    public void Element.collectTestCases(TestSuite ts) {
     }
 
     public void ClassDecl.generateTestCase(TestSuite ts, AnnotationNode a) {

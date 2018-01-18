@@ -31,271 +31,23 @@
      */
     inh VisibilityType ClassDecl.visibility(); 
     inh VisibilityType PN_ComponentClause.visibility();
-    inh VisibilityType PN_ExtendsClause.visibility();
     
     // Added for proxy solution in JModelica IDE
     public VisibilityType SourceRoot.computeVisibility() {
         return new PublicVisibilityType();
     }
-    
+
     /**
      *  Equations defining public or protected visibility of elements 
      */
-    eq PublicElementList.getElement().visibility() = new PublicVisibilityType();
+    eq PublicElementList.getElement().visibility()    = new PublicVisibilityType();
     eq ProtectedElementList.getElement().visibility() = new ProtectedVisibilityType();
-    eq SourceRoot.getProgram().visibility() = computeVisibility(); 
-    eq Root.getChild().visibility() = new PublicVisibilityType(); 
+    eq SourceRoot.getProgram().visibility()           = computeVisibility(); 
+    eq Root.getChild().visibility()                   = new PublicVisibilityType(); 
     
     eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
     eq ComponentRedeclare.getComponentDecl().visibility() = new PublicVisibilityType();
-    
-    /**
-     * Rewrite the PN_FullClassDecl to a FullClassDecl including visibility info.
-     */
-    rewrite PN_FullClassDecl {
-        to FullClassDecl { 
-            FullClassDecl fc = new FullClassDecl(
-                    getName(),
-                    visibility(),
-                    getEncapsulated(),
-                    getPartial(),
-                    getRestriction(),
-                    getRedeclare(),
-                    getFinal(),
-                    getInner(),
-                    getOuter(),
-                    getReplaceable(),
-                    getConstrainingClauseOpt(),
-                    getConstrainingClauseCommentOpt(),
-                    getStringCommentOpt(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new Opt(),
-                    new Opt(),
-                    getEndDecl());
-            
-            if (hasAnnotation())
-            	fc.setAnnotation(getAnnotation());
-            getComposition().extractElementsTo(fc);
-            
-            fc.setLocationNoTree(this);
-            return fc;
-        }
-    }
-    
-    /**
-     * Rewrite the PN_ExtendClassDecl to a ExtendClassDecl including visibility info.
-     */
-    rewrite PN_ExtendClassDecl {
-        to ExtendClassDecl { 
-            ExtendClassDecl ec = new ExtendClassDecl(
-                    getName(),
-                    visibility(),
-                    getEncapsulated(),
-                    getPartial(),
-                    getRestriction(),
-                    getRedeclare(),
-                    getFinal(),
-                    getInner(),
-                    getOuter(),
-                    getReplaceable(),
-                    getConstrainingClauseOpt(),
-                    getConstrainingClauseCommentOpt(),
-                    getStringCommentOpt(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new List(),
-                    new Opt(),
-                    new Opt(),
-                    getEndDecl());
-            
-            ClassAccess ca = new ClassAccess(getName().getID());
-            InlineExtendsClause iec = new InlineExtendsClause(
-            		new PublicVisibilityType(), ca, getClassModificationOpt(), new Opt());
-            ec.addSuper(iec);
-            if (hasAnnotation())
-            	ec.setAnnotation(getAnnotation());
-            getComposition().extractElementsTo(ec);
 
-            ca.setLocationNoTree(getName());
-            // TODO: iec should probably include "extends" token as well, but that needs parser change
-            iec.setLocationNoTree(getName());
-            ec.setLocationNoTree(this);
-            return ec;
-        }
-    }
-    
-    /**
-     * Rewrite the PN_EnumDecl to a EnumClassDecl including visibility info.
-     */
-    rewrite PN_EnumDecl {
-        to EnumClassDecl {
-        	EnumClassDecl ecd = (EnumClassDecl)((SourceRoot)root()).getProgram().getEnumBaseDecl().fullCopy();
-        	
-        	// Copy fields
-        	ecd.setVisibilityType(visibility());
-        	ecd.setEncapsulated(getEncapsulated());
-        	ecd.setPartial(getPartial());
-        	ecd.setRestriction(getRestriction());
-        	ecd.setName(getName());
-        	ecd.setRedeclare(getRedeclare());
-        	ecd.setFinal(getFinal());
-        	ecd.setInner(getInner());
-        	ecd.setOuter(getOuter());
-        	ecd.setReplaceable(getReplaceable());
-        	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
-        	if (getComment().hasAnnotation())
-        		ecd.setAnnotation(getComment().getAnnotation());
-        	ecd.setEndDecl(new EndDecl(getName().getID()));
-        	ecd.setSymbol(getSymbol());
-        	
-        	// TODO: Copy min, max and start
-        	
-        	// TODO: Add components for the enumeration literals - todo? isn't this done?
-        	for (ComponentDecl d : getEnumSpecification().enumComponents()) {
-        		ecd.addComponentDecl(d);
-        	}
-        	
-            ecd.setLocationNoTree(this);
-            return ecd;
-        }
-    }
-    
-    public ArrayList<ComponentDecl> EnumSpecification.enumComponents() {
-    	return new ArrayList<ComponentDecl>();
-    }
-
-    public ArrayList<ComponentDecl> EnumLiteralList.enumComponents() {
-    	ArrayList<ComponentDecl> l = new ArrayList<ComponentDecl>();
-    	for (EnumLiteral el : getEnumLiterals()) {
-    		l.add(el.copyLocationTo(new EnumLiteralDecl(el.getIdDecl(),el.getComment())));
-    	}
-    	return l;
-    }
-
-    // For preserved formatting.
-    Composition FullClassDecl.originalComposition;
-
-    /**
-     * Extract elements from Composition and add to a FullClassDecl.
-     */
-    public void Composition.extractElementsTo(FullClassDecl fcd) {
-        fcd.originalComposition = this;
-
-        for (Clause cl : getClauses()) {
-            cl.addToFullClassDecl(fcd);
-        }
-
-        if (hasExternalClause()) { 
-            fcd.setExternalClause(getExternalClause());
-        }
-    }
-
-    /**
-     * Adds a clause element to a full class declaration.
-     * <p>
-     * This translates parsed elements to source elements.
-     * 
-     * @param fcd
-     *          The {@link FullClassDecl} instance in which to put the source elements.
-     */
-
-    public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
-
-    public void ComponentDecl.addToFullClassDecl(FullClassDecl fcd) {
-        if (getRedeclare()) {
-            ComponentAccess ca = new ComponentAccess(getName().getID(), getVarArraySubscriptsOpt().fullCopy());
-            fcd.addElementModification(new ComponentRedeclare(false, false, ca, this));
-        } else {
-            fcd.addComponentDecl(this);
-        }
-    }
-
-    public void Algorithm.addToFullClassDecl(FullClassDecl fcd) {
-        Algorithm algo = new Algorithm(getInitialOpt(), new List());
-        for (Statement stmt : getStatements())
-            stmt.addToFullClassDecl(fcd, algo);
-        fcd.addAlgorithm(algo);
-    }
-
-    public void Statement.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
-        algo.addStatement(this);
-    }
-
-    public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
-        getAnnotation().setLocationNoTree(getAnnotation(), this);
-        fcd.setAnnotation(getAnnotation());
-    }
-
-    public void ExtendsClause.addToFullClassDecl(FullClassDecl fcd) {
-        fcd.addSuper(this);
-    }
-
-    public void ClassDecl.addToFullClassDecl(FullClassDecl fcd) {
-        // TODO: add redeclared to ElementModifications instead of class list
-        fcd.addClassDecl(this);
-    }
-
-    public void ImportClause.addToFullClassDecl(FullClassDecl fcd) {
-        fcd.addImport(this);
-    }
-
-    public void EquationClause.addToFullClassDecl(FullClassDecl fcd) {
-        for (AbstractEquation equ : getAbstractEquations()) 
-            equ.addToFullClassDecl(fcd);
-    }
-
-    public void AbstractEquation.addToFullClassDecl(FullClassDecl fcd) {
-        fcd.addEquation(this);
-    }
-
-    public void PublicElementList.addToFullClassDecl(FullClassDecl fcd) {
-        for (Element elem : getElements()) {
-            elem.addToFullClassDecl(fcd);
-        }
-    }
-
-    public void ProtectedElementList.addToFullClassDecl(FullClassDecl fcd) {
-        for (Element elem : getElements()) {
-            elem.addToFullClassDecl(fcd);
-        }
-    }
-
-    public void ComponentClause.addToFullClassDecl(FullClassDecl fcd) {
-        java.util.List<SiblingComponentDecl> siblings = getNumName() > 1 ? new ArrayList<SiblingComponentDecl>() : null;
-
-        for (int i = 0; i < getNumName(); ++i) {
-            PN_ComponentDecl name = getName(i);
-            ComponentDecl decl = asComponentDecl(name, siblings);
-            decl.setLocationNoTree(i == 0 ? this : name);
-            decl.addToFullClassDecl(fcd);
-        }
-    }
-
-    /**
-     * Rewrite the {@link PN_ExtendsClause} to an {@link ExtendsClause}, including visibility info.
-     */
-    rewrite PN_ExtendsClause {
-        to ExtendsClause {     
-            ExtendsClause e =  new ExtendsClause(visibility(),
-                                     getSuper(),
-                                     getClassModificationOpt(),
-                                     getAnnotationOpt());
-
-            e.setLocationNoTree(this);
-            return e;
-        }
-    }
- 
     /**
      * Rewrite the {@link PN_ComponentClause} to a {@link ComponentClause} including visibility information. 
      */
@@ -338,6 +90,26 @@
                      return cd;
              }
      }
+
+    /**
+     * Transform ComponentClauses to ComponentDecls
+     */
+    rewrite ComponentClause in ElementList.getElement() {
+        when (getNumName() > 1) 
+        to List {
+            List l = new List();
+            java.util.List<SiblingComponentDecl> siblings = new ArrayList();
+            for (PN_ComponentDecl name : getNames()) {
+                ComponentDecl c = asComponentDecl(name, siblings);
+                if (l.getNumChild() == 0)
+                    c.setLocationNoTree(this);
+                else
+                    c.setLocationNoTree(name);
+                l.add(c);
+            }
+            return l;
+        }
+    }
 
     /**
      * Rewrite a parsed component redeclaration to a source component redeclaration.
@@ -439,8 +211,7 @@
     rewrite PN_ShortClassDecl {
         to ShortClassDecl {
             ExtendsClauseShortClass ecsc = 
-               new ExtendsClauseShortClass(visibility(),
-                                      getClassName(),
+               new ExtendsClauseShortClass(getClassName(),
                                       getClassModificationOpt(),
                                       new Opt<Annotation>(),
                                       getTypePrefixFlowOpt(),
@@ -451,7 +222,6 @@
             ecsc.setLocationNoTree(this);
             ShortClassDecl scd = new ShortClassDecl(
                     getName(),
-                    (VisibilityType) ecsc.getVisibilityType().fullCopy(),
                     getEncapsulated(),
                     getPartial(),
                     getRestriction(),

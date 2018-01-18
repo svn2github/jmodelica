@@ -33,8 +33,8 @@ aspect ClassAttributes {
             UtilInterface util = root().getUtilInterface();
             SourceRoot sr = util.getParserHandler().parseString(util, builtInDef, "");
             Program p = sr.getProgram();
-            FullClassDecl cd = (FullClassDecl) (p.getUnstructuredEntity(0).getElement(0));
-            for (ComponentDecl comp : cd.getComponentDecls()) 
+            FullClassDecl cd = (FullClassDecl) (p.getUnstructuredEntity(0).getClassDecl(0));
+            for (ComponentDecl comp : cd.components()) 
                 l.add(comp);
         } catch(Exception e) {
             // TODO: Do something constuctive here, and change catch from Exception to only the ones we have to

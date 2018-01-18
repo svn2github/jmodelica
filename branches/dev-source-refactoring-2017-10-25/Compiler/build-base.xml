@@ -981,7 +981,10 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     </target>
 
     <!-- cleans all files -->
-    <target name="clean" depends="clean-gen" description="Deletes all generated files.">
+    <target name="clean" depends="clean-gen,clean-bin" description="Deletes all generated files."/>
+
+    <!-- cleans all files -->
+    <target name="clean-bin" description="Deletes all binary files.">
         <delete dir="${class_output}" />
         <delete dir="${test_class_output}" />
         <delete dir="${jar_output}" />

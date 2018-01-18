@@ -14,46 +14,76 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-BaseClassDecl base_class_decl =               
-  has_encapsulated 
-  has_partial 
-  optimization_restriction
-  id_decl.start 
-  class_modification?
-  string_comment? 
-  composition 
-  annotation_sc?
-  end_decl   {: return new PN_OptClassDecl(
-                    start,
-                    new UnknownVisibilityType(),
-                    has_encapsulated.value,
-                    has_partial.value,
-                    optimization_restriction,
-                    false, false, false, false, false,
-                    new Opt(), new Opt(),
-                    string_comment,
-                    composition,
-                    annotation_sc,
-                    end_decl,
-                    class_modification); :}
-;
+BaseClassDecl base_class_decl
+    = has_encapsulated
+      has_partial 
+      optimization_restriction
+      id_decl.start 
+      class_modification?
+      string_comment? 
+      clause_star
+      class_annotation?
+      end_decl
+    {:
+        adjustStart(has_encapsulated, has_partial, optimization_restriction);
+        return new OptClassDecl(
+                start,
+                has_encapsulated.value,
+                has_partial.value,
+                optimization_restriction,
+                false, false, false, false, false,
+                new Opt(), new Opt(),
+                string_comment,
+                clause_star,
+                new Opt(),
+                class_annotation,
+                end_decl,
+                class_modification);
+    :}
+    ;
 
-Clause composition_clause = constraint_clause;
+Clause clause
+    = CONSTRAINT
+      oconstraint*
+    {:
+        return new ConstraintClause(oconstraint);
+    :}
+    ;
 
-OptimizationClass optimization_restriction =
-  OPTIMIZATION   {: return new OptimizationClass(); :}
-  ;
+OptimizationClass optimization_restriction
+    = OPTIMIZATION   {: return new OptimizationClass(); :}
+    ;
 
-ConstraintClause constraint_clause = 
-  CONSTRAINT oconstraint*  {: return new ConstraintClause(oconstraint); :}
-  ;
-  
-Constraint oconstraint =
-    artm_exp.a EQUALS artm_exp.b SEMICOLON   {: return new ConstraintEq(a,b); :}
-  | artm_exp.a LEQ artm_exp.b SEMICOLON      {: return new ConstraintLeq(a,b); :}
-  | artm_exp.a GEQ artm_exp.b SEMICOLON      {: return new ConstraintGeq(a,b); :}
-  | FOR for_indices LOOP oconstraint* END_FOR SEMICOLON   
-                                             {: return new ForClauseC(for_indices, oconstraint); :}
-  ;
+Constraint oconstraint
+    = artm_exp.a
+      EQUALS
+      artm_exp.b
+      SEMICOLON
+    {:
+        return new ConstraintEq(a, b);
+    :}
+    | artm_exp.a
+      LEQ
+      artm_exp.b
+      SEMICOLON
+    {:
+        return new ConstraintLeq(a,b);
+    :}
+    | artm_exp.a
+      GEQ
+      artm_exp.b
+      SEMICOLON
+    {:
+        return new ConstraintGeq(a, b);
+    :}
+    | FOR
+      for_indices
+      LOOP
+      oconstraint*
+      END_FOR SEMICOLON
+    {:
+        return new ForClauseC(for_indices, oconstraint);
+    :}
+    ;
 
   

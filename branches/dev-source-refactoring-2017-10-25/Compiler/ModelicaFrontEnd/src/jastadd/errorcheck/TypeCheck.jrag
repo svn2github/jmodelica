@@ -129,13 +129,13 @@ aspect FlatTypeCheck {
     }
     
     public Iterable<InstComponentRedeclare> Environment.reverseComponentRedeclares(String name) {
-        Set<Modification> seen = new HashSet<Modification>();
-        ArrayList<InstComponentRedeclare> list = new ArrayList<InstComponentRedeclare>();
+        Set<SrcModificationOrRedeclareElement> seen = new HashSet<>();
+        ArrayList<InstComponentRedeclare> list = new ArrayList<>();
         
         for (InstModification im : this) {
             InstComponentRedeclare red = im.matchInstComponentRedeclare(name);
             if (red != null) {
-                Modification mod = red.getModification();
+                SrcModificationOrRedeclareElement mod = red.getModification();
                 if (!seen.contains(mod)) {
                     seen.add(mod);
                     list.add(red);

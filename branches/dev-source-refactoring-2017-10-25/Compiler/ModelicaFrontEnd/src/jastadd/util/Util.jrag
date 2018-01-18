@@ -334,26 +334,6 @@ aspect NodeMethods {
     public int ASTNode.endLine()     { return getLine(getEnd()); }
     public int ASTNode.endColumn()   { return getColumn(getEnd()); }
 
-    public String ASTNode.getNodeName() {
-        return dump();
-    }
-    
-    public String IdDecl.getNodeName() {
-        return dump() + ": '" + getID() + "'";
-    }
-
-    public String NamedAccess.getNodeName() {
-        return dump() + ": '" + getID() + "'";
-    }
-    
-    public String RealLitExp.getNodeName() {
-        return dump() + ": " + getUNSIGNED_NUMBER();
-    }
-    
-    public String InstComponentDecl.getNodeName() {
-        return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + name() + "'";
-    }
-
     public class List {
 
 	    /**
@@ -927,12 +907,7 @@ aspect Names {
     inh BaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;
 
-    eq FullClassDecl.getEquation().enclosingClassDecl()       = this;
-    eq FullClassDecl.getAlgorithm().enclosingClassDecl()      = this;
-    eq FullClassDecl.getSuper().enclosingClassDecl()          = this;
-    eq FullClassDecl.getImport().enclosingClassDecl()         = this;
-    eq FullClassDecl.getClassDecl().enclosingClassDecl()      = this;
-    eq FullClassDecl.getComponentDecl().enclosingClassDecl()  = this;
+    eq FullClassDecl.getClause().enclosingClassDecl()         = this;
     eq FullClassDecl.getAnnotation().enclosingClassDecl()     = this; 
     eq FullClassDecl.getExternalClause().enclosingClassDecl() = this;
 
@@ -1209,14 +1184,17 @@ aspect DebugHelpers {
 
 aspect Visibility {
 
-    syn boolean ClassDecl.isPublic()         = true;
-    eq BaseClassDecl.isPublic()              = getVisibilityType().isPublic();
+    inh boolean ClassDecl.isPublic();
+    eq PublicElementList.getElement().isPublic()    = true;
+    eq ProtectedElementList.getElement().isPublic() = false;
+    eq SourceRoot.getProgram().isPublic()           = true; 
+    eq Root.getChild().isPublic()                   = true; 
+
     syn boolean ComponentDecl.isPublic()     = getVisibilityType().isPublic();
     syn boolean InstClassDecl.isPublic()     = getClassDecl().isPublic();
     syn boolean InstComponentDecl.isPublic() = getComponentDecl().isPublic();
 
-    syn boolean ClassDecl.isProtected()         = false;
-    eq BaseClassDecl.isProtected()              = getVisibilityType().isProtected();
+    syn boolean ClassDecl.isProtected()         = !isPublic();
     syn boolean ComponentDecl.isProtected()     = getVisibilityType().isProtected();
     syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
@@ -1430,14 +1408,16 @@ aspect ComponentDeclMethods {
     /**
      * Check if this equation is declared initial.
      */
-    syn boolean AbstractEquation.isInitial() = hasAbstractEquationModifier() && getAbstractEquationModifier().isInitial();
-    
+    inh boolean AbstractEquation.isInitial();
+    eq EquationClause.getAbstractEquation().isInitial()        = false;
+    eq InitialEquationClause.getAbstractEquation().isInitial() = true;
+
     /**
-     * Check if this equation modifier is "initial".
+     * Check if this equation is declared initial.
      */
-    syn boolean AbstractEquationModifier.isInitial() = false;
-    eq Initial.isInitial()                           = true;
-    
+    syn boolean Algorithm.isInitial() = false;
+    eq InitialAlgorithm.isInitial()   = true;
+
     /**
      * Check if this component is a flow component.
      */

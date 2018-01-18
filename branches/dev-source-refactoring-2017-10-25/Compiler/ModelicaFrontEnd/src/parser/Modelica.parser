@@ -296,18 +296,17 @@ List base_class_decl_list
 
 BaseClassDecl anonymous_short_class 
     = class_access class_modification?
-    {: 
+    {:
         return new PN_ShortClassDecl(
-        new IdDecl("'Anonymous Class'"),
-        new UnknownVisibilityType(),
-        false, false, 
-        new MClass(), 
-        false, false, false, false, false, 
-        new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
-        class_access,
-        new Opt(), 
-        class_modification, 
-        new Comment()); 
+            new IdDecl("'Anonymous Class'"),
+            false, false, 
+            new MClass(), 
+            false, false, false, false, false, 
+            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
+            class_access,
+            new Opt(), 
+            class_modification, 
+            new Comment()); 
     :};
 
 BaseClassDecl base_class_decl 
@@ -316,22 +315,23 @@ BaseClassDecl base_class_decl
       restriction  
       id_decl.start 
       string_comment? 
-      composition 
-      annotation_sc?
+      clause_star
+      external_clause?
+      class_annotation?
       end_decl
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new PN_FullClassDecl(
+        return new FullClassDecl(
             start,
-            new UnknownVisibilityType(),
             has_encapsulated.value,
             has_partial.value,
             restriction,
             false, false, false, false, false, 
             new Opt(), new Opt(),
             string_comment,
-            composition,
-            annotation_sc,
+            clause_star,
+            external_clause,
+            class_annotation,
             end_decl); 
     :}
     | has_encapsulated 
@@ -347,7 +347,6 @@ BaseClassDecl base_class_decl
         adjustStart(has_encapsulated, has_partial, restriction);
         return new PN_ShortClassDecl(
             class_name, 
-            new UnknownVisibilityType(),
             has_encapsulated.value, 
             has_partial.value, 
             restriction, 
@@ -368,79 +367,116 @@ BaseClassDecl base_class_decl
       id_decl.start 
       class_modification?
       string_comment? 
-      composition 
-      annotation_sc?
+      clause_star
+      external_clause?
+      class_annotation?
       end_decl 
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new PN_ExtendClassDecl(
+        InlineExtendsClause ext = new InlineExtendsClause(
+            new ClassAccess(start.getID()),
+            class_modification,
+            new Opt());
+        return new ExtendClassDecl(
             start,
-            new UnknownVisibilityType(),
             has_encapsulated.value,
             has_partial.value,
             restriction,
             false, false, false, false, false, 
             new Opt(), new Opt(),
             string_comment,
-            composition,
-            annotation_sc,
+            clause_star,
+            external_clause,
+            class_annotation,
             end_decl, 
-            class_modification); 
+            ext); 
     :}
-    | has_encapsulated 
-      has_partial 
-      restriction  
-      id_decl.enum_name EQUALS
-      ENUMERATION LPAREN enum_specification RPAREN
-      comment 
+    | has_encapsulated
+      has_partial
+      restriction
+      id_decl.enum_name
+      EQUALS
+      ENUMERATION
+      LPAREN
+      enum_specification
+      RPAREN
+      comment
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new PN_EnumDecl(
+        return new EnumClassDecl(
             enum_name,
-            new UnknownVisibilityType(),
             has_encapsulated.value,
             has_partial.value,
             restriction,
             false, false, false, false, false, 
             new Opt(), new Opt(),
-            ENUMERATION,
-            enum_specification,
-            comment); 
+            comment.getStringCommentOpt(),
+            new List(new DefaultElementList(enum_specification)),
+            new Opt(),
+            comment.getAnnotationOpt(),
+            new EndDecl(enum_name.getID()),
+            ENUMERATION);
     :}
     | error 
     {: 
       return new BadClassDecl();
     :};
 
-EnumSpecification enum_specification =
-  COLON {: return new EnumUnspecified(); :}
-  | enum_literal_list {: return new EnumLiteralList(enum_literal_list); :}
-  ;
+List enum_specification
+    = COLON                {: return new List(); :}
+    | enum_literal_list    {: return enum_literal_list; :}
+    ;
   
-List enum_literal_list =
-  enum_literal                          {: return new List().add(enum_literal); :}
-  | enum_literal_list COMMA enum_literal    {: enum_literal_list.add(enum_literal); 
-                                       return enum_literal_list; :}
-  ;
+List enum_literal_list
+    = enum_literal
+    {:
+        return new List().add(enum_literal);
+    :}
+    | enum_literal_list
+      COMMA
+      enum_literal
+    {:
+        enum_literal_list.add(enum_literal); 
+        return enum_literal_list;
+    :}
+    ;
 
-EnumLiteral enum_literal = 
-  id_decl comment {: return new EnumLiteral(id_decl,comment); :}
-  ;
+EnumLiteralDecl enum_literal
+    = id_decl
+      comment
+    {:
+        return new EnumLiteralDecl(
+                false, false, false, false, false,
+                new Opt(),
+                new Opt(new Constant()),
+                new Opt(),
+                new ClassAccess("EnumType"),
+                new Opt(),
+                new PublicVisibilityType(),
+                id_decl,
+                new Opt(),
+                new Opt(),
+                new Opt(),
+                comment,
+                new Opt(),
+                new Comment());
+    :}
+    ;
 
 TypePrefixFlow type_prefix_flow 
-    = FLOW     {: return new Flow(); :}
-    | STREAM   {: return new Stream(); :}
+    = FLOW      {: return new Flow();   :}
+    | STREAM    {: return new Stream(); :}
     ;
 
 TypePrefixVariability type_prefix_variability 
-    = DISCRETE        {: return new Discrete(); :}
-    | PARAMETER       {: return new Parameter(); :}
-    | CONSTANT        {: return new Constant(); :}
+    = DISCRETE    {: return new Discrete();  :}
+    | PARAMETER   {: return new Parameter(); :}
+    | CONSTANT    {: return new Constant();  :}
     ;
 
-TypePrefixInputOutput type_prefix_input_output 
-    = INPUT           {: return new Input(); :}
-    | OUTPUT          {: return new Output(); :}
+TypePrefixInputOutput type_prefix_input_output
+    = INPUT     {: return new Input();  :}
+    | OUTPUT    {: return new Output(); :}
     ;
 
 TypePrefixes type_prefixes 
@@ -454,20 +490,20 @@ TypePrefixes type_prefixes
     ;
 
 
-Restriction restriction = 
-  CLASS                    {: return new MClass(); :}
-  | MODEL                  {: return new Model(); :}
-  | BLOCK                  {: return new Block(); :}
-  | CONNECTOR              {: return new Connector(); :}
-  | EXPANDABLE CONNECTOR   {: return new ExpandableConnector(); :}
-  | TYPE                   {: return new MType(); :}
-  | PACKAGE                {: return new MPackage(); :}
-  | FUNCTION               {: return new Function(); :}
-  | RECORD                 {: return new Record(); :}  
-  | OPERATOR RECORD        {: return new OperatorRecord(); :}  
-  | OPERATOR FUNCTION      {: return new OperatorFunction(); :}
-  | OPERATOR               {: return new Operator(); :}
-  ;
+Restriction restriction
+    = CLASS                   {: return new MClass();              :}
+    | MODEL                   {: return new Model();               :}
+    | BLOCK                   {: return new Block();               :}
+    | CONNECTOR               {: return new Connector();           :}
+    | EXPANDABLE CONNECTOR    {: return new ExpandableConnector(); :}
+    | TYPE                    {: return new MType();               :}
+    | PACKAGE                 {: return new MPackage();            :}
+    | FUNCTION                {: return new Function();            :}
+    | RECORD                  {: return new Record();              :}
+    | OPERATOR RECORD         {: return new OperatorRecord();      :}
+    | OPERATOR FUNCTION       {: return new OperatorFunction();    :}
+    | OPERATOR                {: return new Operator();            :}
+    ;
 
 Bool has_partial
     = PARTIAL     {: return newTrue();  :}
@@ -522,66 +558,120 @@ RedeclareReplaceableHeader redeclare_replaceable_header
     ;
 
 
-Composition composition = 
-  composition_clauses  external_clause?
-               {: return new Composition(composition_clauses,external_clause); :}
-  | elements composition_clauses external_clause?
-               {: composition_clauses.insertChild(new PublicElementList(elements), 0);
-                  return new Composition(composition_clauses, external_clause); :}                             
-  ;
-
-
-List composition_clauses = 
-             {: return new List(); :}
-  | composition_clause {: return new List().add(composition_clause); :}
-  | composition_clauses composition_clause {: return composition_clauses.add(composition_clause); :}
-  ;
-
-
-List elements
-    = element {:
-        return new List().add(element); 
-    :} 
-    | elements element {: 
-        return elements.add(element);
-    :};
-
-Clause composition_clause =  
-   PUBLIC                    {: return new PublicElementList(new List()); :}
-   | PROTECTED               {: return new ProtectedElementList(new List()); :}
-   | PUBLIC elements         {: return new PublicElementList(elements); :}
-   | PROTECTED elements      {: return new ProtectedElementList(elements); :}
-   | equation_clause         {: return equation_clause; :}
-   | algorithm               {: return algorithm; :}
-   ;
-   
-ExternalClause external_clause =
-	EXTERNAL
-	external_language?
-	external_function_call?
-	annotation.a1?
-	SEMICOLON   {:  return new ExternalClause(external_language, external_function_call, a1); :}
-	;
-
-	
-ExternalLanguage external_language =
-	STRING.s {: return new ExternalLanguage(s); :}
-	;	
-	
-Annotation annotation_sc =
-    annotation SEMICOLON {: formattingRecorder.addItem(FormattingType.VISIBILITY_INFO, ";", SEMICOLON);
-                            return annotation; :}
+List clause_star
+    = default_element_list
+    {:
+        return new List(default_element_list);
+    :}
+    | /* blank */
+    {: 
+        return new List();
+    :}
+    | clause_star
+      clause
+    {:
+        return clause_star.add(clause);
+    :}
     ;
 
-ExternalFunctionCall external_function_call =
-	parse_access EQUALS id_decl LPAREN arg_list RPAREN  
-	            {: return new ExternalFunctionCall(new Opt(parse_access), id_decl, arg_list); :}
-  | id_decl LPAREN arg_list RPAREN  
-                {: return new ExternalFunctionCall(new Opt(), id_decl, arg_list); :}
-  ;   	 	
-   	  	
+DefaultElementList default_element_list
+    = element_plus
+    {:
+        return new DefaultElementList(element_plus);
+    :}
+    ;
 
-	
+List element_plus
+    = element
+    {:
+        return new List(element); 
+    :} 
+    | element_plus 
+      element
+    {: 
+        return element_plus.add(element);
+    :}
+    ;
+
+
+Clause clause
+    = PUBLIC
+      element*
+    {:
+        return new PublicElementList(element);
+    :}
+    | PROTECTED
+      element*
+    {:
+        return new ProtectedElementList(element);
+    :}
+    | EQUATION
+      abstract_equation*
+    {:
+        return new EquationClause(abstract_equation);
+    :}
+    | INITIAL_EQUATION
+      abstract_equation*
+    {:
+        return new InitialEquationClause(abstract_equation);
+    :}
+    | ALGORITHM
+      statement*
+    {:
+        return new Algorithm(statement);
+    :}
+    | INITIAL_ALGORITHM
+      statement*
+    {:
+        return new InitialAlgorithm(statement);
+    :}
+    ;
+
+
+ExternalClause external_clause 
+    = EXTERNAL
+      external_language?
+      external_function_call?
+      annotation?
+      SEMICOLON
+    {:
+        return new ExternalClause(external_language, external_function_call, annotation);
+    :}
+    ;
+
+ExternalLanguage external_language
+    = STRING.s    {: return new ExternalLanguage(s); :}
+    ;
+
+Annotation class_annotation 
+    = annotation 
+      SEMICOLON 
+    {:
+        formattingRecorder.addItem(FormattingType.VISIBILITY_INFO, ";", SEMICOLON);
+        return annotation;
+    :}
+    ;
+
+ExternalFunctionCall external_function_call
+    = parse_access
+      EQUALS
+      id_decl
+      LPAREN
+      arg_list
+      RPAREN
+    {:
+        return new ExternalFunctionCall(new Opt(parse_access), id_decl, arg_list);
+    :}
+    | id_decl
+      LPAREN
+      arg_list
+      RPAREN
+    {:
+        return new ExternalFunctionCall(new Opt(), id_decl, arg_list);
+    :}
+    ;
+
+
 Element element 
     = has_redeclare
       has_final 
@@ -694,125 +784,161 @@ ConstrainingClause constraining_clause
     :}
     ;
 
-PN_ExtendsClause extends_clause 
+ExtendsClause extends_clause 
     = EXTENDS 
       class_access 
       class_modification? 
       annotation?
     {: 
-        return new PN_ExtendsClause(class_access, class_modification, annotation);
+        return new ExtendsClause(class_access, class_modification, annotation);
     :}
   ;
 
-ImportClause import_clause = 
-  IMPORT 
-  qualified_import_access 
-  comment {: return new ImportClauseQualified(qualified_import_access,comment); :}
-  | IMPORT 
-  unqualified_import_access
-  comment {: return new ImportClauseUnqualified(unqualified_import_access,comment); :}
-  | IMPORT 
-  id_decl.alias 
-  EQUALS 
-  qualified_import_access 
-  comment {: return new ImportClauseRename(qualified_import_access,comment,alias); :}
-  ;
+ImportClause import_clause
+    = IMPORT
+      qualified_import_access
+      comment
+    {:
+        return new ImportClauseQualified(qualified_import_access, comment);
+    :}
+    | IMPORT
+      unqualified_import_access
+      comment
+    {:
+        return new ImportClauseUnqualified(unqualified_import_access, comment);
+    :}
+    | IMPORT
+      id_decl.alias
+      EQUALS
+      qualified_import_access
+      comment
+    {:
+        return new ImportClauseRename(qualified_import_access, comment, alias);
+    :}
+    ;
 
 
+ArraySubscripts array_subscripts
+    = LBRACK
+      subscript_list
+      RBRACK
+    {:
+        return new ArraySubscripts(subscript_list);
+    :}
+    ;
+
+List subscript_list
+    = subscript
+    {:
+        return new List().add(subscript);
+    :}
+    | subscript_list
+      COMMA
+      subscript
+    {:
+        subscript_list.add(subscript);
+        return subscript_list;
+    :}
+    ;
+
+Subscript subscript 
+    = COLON   {: return new ColonSubscript();  :}
+    | exp     {: return new ExpSubscript(exp); :}                                                                           
+    ;
 
 
-ArraySubscripts array_subscripts = 
-  LBRACK subscript_list RBRACK {: return new ArraySubscripts(subscript_list); :}
-  ;
+List component_list
+    = pn_component_decl
+    {:
+        return new List().add(pn_component_decl);
+    :}
+    | component_list
+      COMMA
+      pn_component_decl
+    {:
+        component_list.add(pn_component_decl);
+        return component_list;
+    :}
+    ;
+
+PN_ComponentDecl pn_component_decl
+    = id_decl.comp_name
+      array_subscripts?
+      modification?
+      conditional_attribute?
+      comment
+    {:
+        return new PN_ComponentDecl(comp_name, 
+                                    array_subscripts, 
+                                    modification, 
+                                    conditional_attribute, 
+                                    comment);
+    :}
+    ;
+
+ConditionalAttribute conditional_attribute
+    = IF exp    {: return new ConditionalAttribute(exp); :}
+    ;
+
+Modification modification 
+    = complete_modification   {: return complete_modification; :}
+    | value_modification      {: return value_modification;    :}
+// Assign modification for binding equations in functions - enable after figuring out 
+// a good way to make it an error outside of functions. Preferably parse error, but that 
+// likely requires much more code duplication then we want to accept.
+//  | assign_modification     {: return assign_modification;   :}
+    ;
+
+
+CompleteModification complete_modification
+    = class_modification
+      value_modification?
+    {:
+        return new CompleteModification(class_modification, value_modification);
+    :}
+    ;
   
-List subscript_list =
-  subscript               {: return new List().add(subscript); :}
-  | subscript_list COMMA subscript {: subscript_list.add(subscript);
-                                      return subscript_list; :}
-  ;
-  
-Subscript subscript =
-  COLON                 {: return new ColonSubscript(); :}
-  | exp                 {: return new ExpSubscript(exp); :}                                                                           
-  ;
-
-
-List component_list = 
-  pn_component_decl                    {: return new List().add(pn_component_decl); :}
-  | component_list COMMA pn_component_decl           {: component_list.add(pn_component_decl);
-                                                      return component_list; :}
-  ;
-  
-PN_ComponentDecl pn_component_decl = 
-  id_decl.comp_name array_subscripts? modification? conditional_attribute? comment                   {: return new PN_ComponentDecl(comp_name,array_subscripts,modification,conditional_attribute,comment); :} 
-  ;
-  
-ConditionalAttribute conditional_attribute = 
-  IF exp {: return new ConditionalAttribute(exp); :}
-  ;  
-  
-EquationClause equation_clause =
-  EQUATION abstract_equation*  {:  return new EquationClause(abstract_equation); :}
-  | INITIAL_EQUATION abstract_equation*  {:  //System.out.println("equation_clause"); 
-  					     for (int i=0;i<abstract_equation.getNumChild();i++)
-  					     	((AbstractEquation)abstract_equation.getChild(i)).setAbstractEquationModifier(new Initial()); 
-  					     return new InitialEquationClause(abstract_equation); :}
-  ;  
-
-Algorithm algorithm =
-  ALGORITHM statement_list            {: return new Algorithm(new Opt(), statement_list); :}
-  | INITIAL_ALGORITHM statement_list  {: return new Algorithm(new Opt(new Initial()), 
-                                                              statement_list); :}
-  ;  
-
-/*
-List abstract_equation_list =
-                                  {: return new List(); :}
-  |abstract_equation                           {: return new List().add(abstract_equation); :}
-  | abstract_equation_list abstract_equation  {: abstract_equation_list.add(abstract_equation); 
-                                                 return abstract_equation_list; :}
-  ;  
-*/
-
-List statement_list =
-                              {: return new List(); :}
-  | statement                 {: return new List().add(statement); :}
-  | statement_list statement  {: statement_list.add(statement); 
-                                 return statement_list; :}
-  ;  
-
-Modification modification =
-  complete_modification               {: return complete_modification; :}
-  |value_modification               {: return value_modification; :}
-//  |assign_modification                 {: return assign_modification; :}  
-  ;
-  
-
-CompleteModification complete_modification =
-  class_modification value_modification?  {: return new CompleteModification(class_modification,value_modification); :}
-  ;
-  
-ValueModification value_modification =
-  EQUALS exp  {: return new ValueModification(exp); :}
-  | COLON EQUALS exp  {: return new ValueModification(exp); :}
-  ;
+ValueModification value_modification
+    = EQUALS exp          {: return new ValueModification(exp); :}
+    | COLON EQUALS exp    {: return new ValueModification(exp); :}
+    ;
 
 /*  
-AssignModification assign_modification =
-  COLON EQUALS exp  {: return new AssignModification(exp); :}
-  ;  
-  */
-  
-ClassModification class_modification = 
-    LPAREN RPAREN {: return new ClassModification(); :}
-  | LPAREN argument_list RPAREN {: return new ClassModification(argument_list); :}
-  ;
+// Assign modification for binding equations in functions - enable after figuring out 
+// a good way to make it an error outside of functions. Preferably parse error, but that 
+// likely requires much more code duplication then we want to accept.
+AssignModification assign_modification
+    = COLON EQUALS exp    {: return new AssignModification(exp); :}
+    ;
+*/
 
-List argument_list =
-    argument                          {: return new List().add(argument); :}
-  | argument_list COMMA argument    {: argument_list.add(argument); 
-                                       return argument_list; :}
-  ;
+ClassModification class_modification
+    = LPAREN
+      RPAREN
+    {:
+        return new ClassModification();
+    :}
+    | LPAREN
+      argument_list
+      RPAREN
+    {:
+        return new ClassModification(argument_list);
+    :}
+    ;
+
+List argument_list
+    = argument
+    {:
+        return new List().add(argument);
+    :}
+    | argument_list
+      COMMA
+      argument
+    {:
+        argument_list.add(argument);
+        return argument_list;
+    :}
+    ;
 
 Argument argument
     = has_each 
@@ -943,57 +1069,128 @@ Argument argument
     :}
     ;
 
-Annotation annotation = 
-  annotation_tok class_modification {: annotationTok = null; return new ParseAnnotation(class_modification); :}
-  ;  
-Symbol annotation_tok =
-  ANNOTATION {:
-    if (annotationTok != null) {
-        getReport().syntaxError(ANNOTATION);
-    }
-    annotationTok = ANNOTATION;
-    return new Symbol(ANNOTATION);
+Annotation annotation
+    = annotation_tok
+      class_modification
+    {:
+        annotationTok = null;
+        return new ParseAnnotation(class_modification);
     :}
-  ;
-   
-AbstractEquation abstract_equation =
-  exp.left EQUALS exp.right comment SEMICOLON
-                                      {: return new Equation(new Opt(),comment,left,right); :}
-  | if_equation SEMICOLON             {: return if_equation; :}
-  | for_clause_e SEMICOLON            {: return for_clause_e; :}
-  | when_equation SEMICOLON           {: return when_equation; :}
-  | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON
-                                      {: return new ConnectClause(new Opt(), comment,a,b); :}
-  | LPAREN function_call_left_list RPAREN EQUALS function_call comment SEMICOLON
-                                      {: return new FunctionCallEquation(new Opt(),comment,function_call_left_list,function_call); :}
-  | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
-  ;
+    ;
 
-List function_call_left_list =
-    function_call_left.a COMMA function_call_left.b   {: return new List().add(a).add(b); :}
-  | function_call_left_list COMMA function_call_left  {: return function_call_left_list.add(function_call_left); :}
-  ;
+Symbol annotation_tok
+    = ANNOTATION
+    {:
+        if (annotationTok != null) {
+            getReport().syntaxError(ANNOTATION);
+        }
+        annotationTok = ANNOTATION;
+        return new Symbol(ANNOTATION);
+    :}
+    ;
 
-FunctionCallLeft function_call_left =
-                   {: return new FunctionCallLeft(new Opt()); :}
-  | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
-  ;
+AbstractEquation abstract_equation
+    = exp.left
+      EQUALS 
+      exp.right 
+      comment 
+      SEMICOLON
+    {: 
+        return new Equation(comment, left, right);
+    :}
+    | if_equation 
+      SEMICOLON
+    {:
+        return if_equation;
+    :}
+    | for_clause_e 
+      SEMICOLON
+    {:
+        return for_clause_e;
+    :}
+    | when_equation 
+      SEMICOLON
+    {:
+        return when_equation;
+    :}
+    | CONNECT
+      LPAREN
+      parse_access.a
+      COMMA
+      parse_access.b
+      RPAREN
+      comment
+      SEMICOLON
+    {:
+        return new ConnectClause(comment, a, b);
+    :}
+    | LPAREN 
+      function_call_left_list
+      RPAREN
+      EQUALS
+      function_call
+      comment
+      SEMICOLON
+    {:
+        return new FunctionCallEquation(comment, function_call_left_list, function_call);
+    :}
+    | function_call
+      comment
+      SEMICOLON
+    {:
+        return new FunctionCallEquation(comment, new List(), function_call);
+    :}
+    ;
 
-ForClauseE for_clause_e =
-  FOR for_indices LOOP
-  abstract_equation*
-  END_FOR comment   {: return new ForClauseE(new Opt(), comment, for_indices,abstract_equation); :}
-  ;
+List function_call_left_list
+    = function_call_left.a
+      COMMA
+      function_call_left.b
+    {: 
+        return new List().add(a).add(b);
+    :}
+    | function_call_left_list
+      COMMA
+      function_call_left
+    {:
+        return function_call_left_list.add(function_call_left);
+    :}
+    ;
+
+FunctionCallLeft function_call_left
+    = /* blank */    {: return new FunctionCallLeft(); :}
+    | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
+    ;
+
+ForClauseE for_clause_e
+    = FOR
+      for_indices
+      LOOP
+      abstract_equation*
+      END_FOR
+      comment
+    {:
+        return new ForClauseE(comment, for_indices,abstract_equation);
+    :}
+    ;
 
 
-List for_indices = 
-  for_index        {: return new List().add(for_index); :}
-  | for_indices COMMA for_index {: for_indices.add(for_index);
-                                     return for_indices; :}
-  ;
-  
-ForIndex for_index 
-    = id_decl for_in_exp? 
+List for_indices
+    = for_index
+    {:
+        return new List().add(for_index);
+    :}
+    | for_indices
+      COMMA
+      for_index
+    {:
+        for_indices.add(for_index);
+        return for_indices;
+    :}
+    ;
+
+ForIndex for_index
+    = id_decl for_in_exp?
     {: 
         ForIndex f = new ForIndex(
             new ForIndexDecl(
@@ -1021,74 +1218,90 @@ ForIndex for_index
     :}
     ;
 
-Exp for_in_exp =
-  IN exp.e {: return e; :}
+Exp for_in_exp
+    = IN exp.e    {: return e; :}
+    ;
+
+WhenEquation when_equation
+    = WHEN
+      exp.test
+      THEN
+      abstract_equation*
+      else_when_equation?
+      END_WHEN
+      comment
+    {: 
+        return new WhenEquation(comment,
+                                abstract_equation,
+                                test, 
+                                else_when_equation); 
+    :}
+    ;
+
+WhenEquation else_when_equation
+    = ELSEWHEN
+      exp.test
+      THEN
+      abstract_equation*
+      else_when_equation?
+    {: 
+        return new WhenEquation(new Comment(),
+                                abstract_equation, 
+                                test, 
+                                else_when_equation); 
+    :}
   ;
 
-WhenEquation when_equation =
-  WHEN exp.test THEN
-  abstract_equation*
-  else_when_equation?
-  END_WHEN comment     {: return new WhenEquation(new Opt(), 
-                                                  comment, 
-                                                  abstract_equation,
-                                                  test, 
-                                                  else_when_equation); 
-                       :}
-  ;  
+IfEquation if_equation
+    = IF
+      exp.test
+      THEN
+      abstract_equation*
+      else_if_equation?
+      END_IF
+      comment
+    {:
+        return new IfEquation(comment, 
+                              abstract_equation, 
+                              test, 
+                              else_if_equation);
+    :}
+    ;
 
-WhenEquation else_when_equation =
-  ELSEWHEN exp.test THEN
-  abstract_equation* 
-  else_when_equation?     {: return new WhenEquation(new Opt(), 
-                                                     new Comment(), 
-                                                     abstract_equation, 
-                                                     test, 
-                                                     else_when_equation); 
-                          :}
-  ;
-
-IfEquation if_equation =
-  IF exp.test THEN
-  abstract_equation*
-  else_if_equation?
-  END_IF comment      {: return new IfEquation(new Opt(), 
-                                               comment, 
-                                               abstract_equation, 
-                                               test, 
-                                               else_if_equation); 
-                      :}
-  ;  
-
-IfWhenElseEquation else_if_equation =
-    ELSEIF exp.test THEN
-    abstract_equation* 
-    else_if_equation?        {: return new IfEquation(new Opt(), 
-                                                      new Comment(), 
-                                                      abstract_equation, 
-                                                      test, 
-                                                      else_if_equation); 
-                             :}
-  | ELSE abstract_equation*  {: return new ElseEquation(new Opt(), 
-                                                        new Comment(), 
-                                                        abstract_equation); 
-                             :}
-  ;
+IfWhenElseEquation else_if_equation
+    = ELSEIF
+      exp.test
+      THEN
+      abstract_equation*
+      else_if_equation?
+    {:
+        return new IfEquation(new Comment(),
+                              abstract_equation, 
+                              test, 
+                              else_if_equation);
+    :}
+    | ELSE
+      abstract_equation*
+    {:
+        return new ElseEquation(new Comment(), 
+                                abstract_equation); 
+    :}
+    ;
 
 
-Statement statement =
-  parse_access.left ASSIGN exp.right comment SEMICOLON                  
-                                     {: return new AssignStmt(comment, left, right); :}
-  | function_call_stmt SEMICOLON     {: return function_call_stmt; :}
-  | BREAK comment SEMICOLON          {: return new BreakStmt(comment); :} 
-  | RETURN comment SEMICOLON         {: return new ReturnStmt(comment); :}
-  | if_stmt SEMICOLON                {: return if_stmt; :}
-  | when_stmt SEMICOLON              {: return when_stmt; :}
-  | for_stmt SEMICOLON               {: return for_stmt; :}
-  | while_stmt SEMICOLON             {: return while_stmt; :}
-  | error                            {: return new BadStatement(); :}
-  ;
-  
+Statement statement
+    = parse_access.left ASSIGN exp.right comment SEMICOLON
+                                      {: return new AssignStmt(comment, left, right); :}
+    | function_call_stmt SEMICOLON    {: return function_call_stmt; :}
+    | BREAK comment SEMICOLON         {: return new BreakStmt(comment); :} 
+    | RETURN comment SEMICOLON        {: return new ReturnStmt(comment); :}
+    | if_stmt SEMICOLON               {: return if_stmt; :}
+    | when_stmt SEMICOLON             {: return when_stmt; :}
+    | for_stmt SEMICOLON              {: return for_stmt; :}
+    | while_stmt SEMICOLON            {: return while_stmt; :}
+    | error                           {: return new BadStatement(); :}
+    ;
+
 FunctionCallStmt function_call_stmt =
     LPAREN function_call_stmt_left_list RPAREN ASSIGN function_call comment  
                            {: return new FunctionCallStmt(comment, function_call_stmt_left_list, function_call); :}
@@ -1116,11 +1329,11 @@ List if_clause_list =
   ;
 
 IfClause if_clause =
-  exp THEN statement_list  {: return new IfClause(exp, statement_list); :}
+  exp THEN statement*  {: return new IfClause(exp, statement); :}
   ;
 
 ElseClause else_stmts =
-  ELSE statement_list  {: return new ElseClause(statement_list); :}
+  ELSE statement*  {: return new ElseClause(statement); :}
   ;
 
 WhenStmt when_stmt =
@@ -1133,7 +1346,7 @@ List when_clause_list =
   ;
 
 WhenClause when_clause =
-  exp THEN statement_list  {: return new WhenClause(exp, statement_list); :}
+  exp THEN statement*  {: return new WhenClause(exp, statement); :}
   ;
 
 ForStmt for_stmt =
@@ -1142,11 +1355,11 @@ ForStmt for_stmt =
   ;
   
 ForStmtList for_stmt_list =
-  statement_list {: return new ForStmtList(statement_list); :}
+  statement* {: return new ForStmtList(statement); :}
   ;
 
 WhileStmt while_stmt = 
-  WHILE exp LOOP statement_list END_WHILE comment  {: return new WhileStmt(comment, exp, statement_list); :}
+  WHILE exp LOOP statement* END_WHILE comment  {: return new WhileStmt(comment, exp, statement); :}
   ;
   
 Exp exp =
