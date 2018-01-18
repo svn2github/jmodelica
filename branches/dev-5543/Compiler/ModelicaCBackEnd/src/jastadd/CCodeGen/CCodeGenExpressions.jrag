@@ -413,7 +413,6 @@ aspect CCodeGenExpressions {
         str.print(func ? "_function(" : "_equation(");
         str.print(func ? "\"" + ctx.containingFFunctionDecl().name() + "\", ": "jmi, ");
         p.codePrinter().print(this, str, indent, Direction.INPUT, Arrays.asList(inputs));
-        p.codePrinter().print(this, str, indent, Direction.OUTPUT, Arrays.asList(outputs));
         str.print(",");
         str.print('"');
         CStringCodeStream tstr = new CStringCodeStream(str);
