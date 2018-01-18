@@ -403,16 +403,16 @@ aspect CCodeGenExpressions {
      * Helper, prints jmi guard around an operator
      */
     protected void FExp.prettyPrintGuarded(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ... exps) {
-        new RuntimeCallComputation(p, "").prettyPrintHead(p, str, indent, this, exps, new FExp[]{});
+        new RuntimeCallComputation(p, "").prettyPrintHead(p, str, indent, this, exps);
     }
 
-    protected void RuntimeCallComputation.prettyPrintHead(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ctx, FExp[] inputs, FExp[] outputs) {
+    protected void RuntimeCallComputation.prettyPrintHead(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ctx, FExp[] inputs) {
         boolean func = ctx.inFunction();
         str.print("jmi_");
         str.print(p.guardedFunctionName(ctx));
         str.print(func ? "_function(" : "_equation(");
         str.print(func ? "\"" + ctx.containingFFunctionDecl().name() + "\", ": "jmi, ");
-        p.codePrinter().print(this, str, indent, Direction.INPUT, Arrays.asList(inputs));
+        p.codePrinter().print(this, str, indent, Arrays.asList(inputs));
         str.print(",");
         str.print('"');
         CStringCodeStream tstr = new CStringCodeStream(str);
@@ -421,11 +421,6 @@ aspect CCodeGenExpressions {
         str.print("\")");
     }
     
-    public enum Direction {
-        INPUT,
-        OUTPUT
-    }
-
 /**
  * Computes the parameters to use when calling a function defined in the runtime
  * Unlike a normal ParameterComputation, the number of parameters also depend on
@@ -448,27 +443,24 @@ aspect CCodeGenExpressions {
     eq FBuiltInFunctionCall.guardedFunctionName_C() = builtInName();
 
     public abstract void CodePrinter.print(IOComputation ioc, CodeStream str, String indent,
-            Direction direction, Iterable<FExp> args);
+            Iterable<FExp> args);
     
     @Override
     public void CPrettyPrinter.print(IOComputation ioc, CodeStream str, String indent,
-            Direction direction, Iterable<FExp> args) {
-        ioc.print(ExecStep, str, indent, direction, args);
+            Iterable<FExp> args) {
+        ioc.print(ExecStep, str, indent, args);
     }
 
     public void HeadComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
-            String indent, Direction direction, Iterable<FExp> args) {}
+            String indent, Iterable<FExp> args) {}
 
     @Override
     public void RuntimeCallComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
-            String indent, Direction direction, Iterable<FExp> args) {
+            String indent, Iterable<FExp> args) {
         if(!p.isDer() || p.isDer() && exp_p.isDer()) {
             int i = 0;
             for (FExp arg : args) {
                 str.print(sep);
-                if(direction == Direction.OUTPUT) {
-                    str.print("&");
-                }
                 p.print(arg, str, indent);
                 sep = ",";
                 i++;
