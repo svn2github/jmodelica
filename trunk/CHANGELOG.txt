@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Minor ; PyFMI ; #5545
+Implemented support for injecting custom logging functionality
+
 ; Change ; Minor ; Compiler ; #5544
 Moved logic for runtimeparameter encoding.
 
