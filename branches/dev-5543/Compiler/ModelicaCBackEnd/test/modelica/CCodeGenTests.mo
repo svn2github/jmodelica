@@ -16521,7 +16521,9 @@ void func_CCodeGenTests_StringOperations11_f1_def1(jmi_string_array_t* s_a, jmi_
 ")})));
 end StringOperations11;
 
-model TestTerminate1 // Test C code generation for terminate()
+package TestTerminate
+
+model TestTerminate1
         Real x(start = 0);
     equation
         der(x) = time;
@@ -16582,9 +16584,90 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end TestTerminate1;
 
-/* TODO: Once there is support for if equations containing functions without return values, 
-         add tests of terminate() in if equations. */ 
+model TestTerminate2
+    parameter String p = "str";
+    Real x(start = 0);
+equation
+    der(x) = time;
+    when x >= 2 then
+        terminate("X is high enough." + p);
+    end when;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestTerminate2",
+            description="",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF_STR_DYNA(tmp_1)
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+            if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                    _sw(0) = jmi_turn_switch(jmi, _x_1 - (2), _sw(0), JMI_REL_GEQ);
+                }
+                _temp_1_2 = _sw(0);
+            }
+            if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
+                JMI_INI_STR_DYNA(tmp_1, 17 + JMI_LEN(_s_pi_p_0))
+                snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"X is high enough.\");
+                snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", _s_pi_p_0);
+                jmi_flag_termination(jmi, tmp_1);
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            }
+        }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end TestTerminate2;
 
+model TestTerminate3
+    Real x(start = 0);
+equation
+    der(x) = time;
+    if x >= 2 then
+        terminate("X is high enough.");
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestTerminate3",
+            description="",
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _der_x_1 = _time;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_0 - (2), _sw(0), JMI_REL_GEQ);
+    }
+    if (_sw(0)) {
+        jmi_flag_termination(jmi, \"X is high enough.\");
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end TestTerminate3;
+
+end TestTerminate;
 
 model TestAssert1
     function f

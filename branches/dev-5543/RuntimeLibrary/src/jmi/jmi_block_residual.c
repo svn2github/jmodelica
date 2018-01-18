@@ -340,8 +340,8 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
                     jmi_compare_switches(&block->nr_old[block->n_nr*(iter-2)], non_reals, block->n_nr) &&
                     jmi_compare_switches(&block->nr_old[block->n_nr*(iter-3)], pre_non_reals, block->n_nr) &&
                     /* Strings */
-                    (block->n_str == 0 || jmi_compare_strings(&block->str_old[block->n_str*(iter-2)], strings, block->n_str)) &&
-                    (block->n_str == 0 || jmi_compare_strings(&block->str_old[block->n_str*(iter-3)], pre_strings, block->n_str)) &&
+                    jmi_compare_strings(&block->str_old[block->n_str*(iter-2)], strings, block->n_str) &&
+                    jmi_compare_strings(&block->str_old[block->n_str*(iter-3)], pre_strings, block->n_str) &&
                     /* Reals */
                     jmi_compare_discrete_reals(&block->dr_old[block->n_dr*(iter-2)], discrete_reals, block->discrete_nominals, block->n_dr) &&
                     jmi_compare_discrete_reals(&block->dr_old[block->n_dr*(iter-3)], pre_discrete_reals, block->discrete_nominals, block->n_dr) &&
@@ -801,7 +801,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->label);
     free(b->sw_old);
     free(b->nr_old);
-    jmi_free_strings(b->str_old, b->n_str);
+    jmi_free_strings(b->str_old, (nbr_allocated_iterations +2)*b->n_str);
     free(b->x_old);
     free(b->dr_old);
     free(b->sw_index);

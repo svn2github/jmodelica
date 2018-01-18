@@ -340,6 +340,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FTerminate.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempVars_C(p, str, indent);
         p.print(this, str, indent);
     }
 

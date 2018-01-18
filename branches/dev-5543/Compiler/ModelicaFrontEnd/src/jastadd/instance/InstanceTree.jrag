@@ -1879,10 +1879,11 @@ aspect InstanceAST_API {
     eq InstProgramRoot.qualifiedName()       = "";
     
     eq InstArrayComponentDecl.qualifiedName(){
-           if (isArrayChild())
-               return getFQName().name()+
-                   myIndex().partIndex(0, myDimension()+1).toString();
-           return getFQName().name();
+           if (isArrayChild()){
+               return super.qualifiedName() + 
+                   myIndex().partIndex(0, myDimension() + 1).toString();
+           }
+           return super.qualifiedName();
     } 
 
     syn String InstRestriction.qualifiedClassName() = myInstClassDecl().buildQualifiedName();

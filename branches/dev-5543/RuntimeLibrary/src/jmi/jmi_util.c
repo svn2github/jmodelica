@@ -490,9 +490,9 @@ jmi_string_t* jmi_create_strings(size_t n) {
     int i;
     char *empty = "";
     size_t defaultLen = strlen(empty) + 1;
-    res = calloc(sizeof(jmi_string_t), n);
+    res = calloc(n, sizeof(jmi_string_t));
     for (i = 0; i < n; i++) {
-        res[i] = calloc(sizeof(char), defaultLen);
+        res[i] = calloc(defaultLen, sizeof(char));
         strcpy(res[i], empty);
     }
     return res;
