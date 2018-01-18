@@ -35,7 +35,7 @@ aspect FmiXML {
                 isDifferentiatedVariable() ||
                 isDerivativeVariable() ||
                 isInput() ||
-                myOptions().getBooleanOption("expose_temp_vars_in_fmu"));
+                myOptions().getBooleanOption("expose_temp_vars_in_fmu") && uses().size() > 0);
     }
 
     public void FVariable.generateXMLVariable(CodeStream str, FmiXMLGenerator.Variable gv) {
@@ -1403,47 +1403,46 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         return "fixed";
     }
 
-	/**
-	 * Internal class used to generate a ModelVariables tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_modelVariables extends ModelVariablesBase {
-		
+    /**
+     * Internal class used to generate a ModelVariables tag.
+     * 
+     * @see XMLTag
+     */
+    public class XMLTag_modelVariables extends ModelVariablesBase {
+
         protected String startValue;
 
         public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
             super(myGenerator, fclass);
         }
 
-		public class XMLTag_variables extends XMLTag {
+        public class XMLTag_variables extends XMLTag {
 
-			public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
-				super("variables", "ScalarVariable", myGenerator, fclass);
-			}
+            public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
+                super("variables", "ScalarVariable", myGenerator, fclass);
+            }
 
-			public String[] children() {
-				return new String[] {"real", "integer", "boolean", "string", "variableEnumeration"};
-			}
-			
-			public void generateAttributes(CodeStream genPrinter) {
-				
-				//Modify the negated bit of the valuReference if the variable is a negated alias.
+            public String[] children() {
+                return new String[] {"real", "integer", "boolean", "string", "variableEnumeration"};
+            }
+
+            public void generateAttributes(CodeStream genPrinter) {
+                //Modify the negated bit of the valuReference if the variable is a negated alias.
                 int valueReference = variable.generateXMLValueReference();
                 if (variable.isAlias() && variable.isNegated())
-					valueReference = valueReference ^ 0x08000000;
-				
+                    valueReference = valueReference ^ 0x08000000;
+                
                 generateAttribute("name",           variable.generateXMLName(), genPrinter);
-				generateAttribute("valueReference", valueReference,  genPrinter);
+                generateAttribute("valueReference", valueReference,  genPrinter);
                 if (variable.hasFStringComment())
                     generateAttribute("description", variable.getFStringComment().getComment(), genPrinter);
-				
-				//Find the attribute for initial, is generated later.
+                
+                //Find the attribute for initial, is generated later.
                 InitialType initialType = getInitialType(variable);
                 
                 //Generate the causality attribute.
                 generateAttribute("causality", getCausality(variable), genPrinter);
-
+                
                 //Generate the variability attribute. No tunable parameters as for now.
                 generateAttribute("variability", getVariability(variable), genPrinter);
                 
@@ -1453,23 +1452,30 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
         }
 
-		public class XMLTag_real extends XMLTag {
-            
-			public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
-				super("real", "Real", myGenerator, fclass);
-			}
-            
-            public String[] attributes() { return new String[] {"reinit"}; }
-			
-			public void generate(CodeStream genPrinter) {
-                if (variable.isReal()) super.generate(genPrinter);
-			}
-            
-            private int getDerivativeIdx(FVariable var) {
-                return fclass.xmlVariableIndexMap().get(((FAbstractDerivativeVariable)var).myDifferentiatedVariable().generateXMLName());
+        public class XMLTag_real extends XMLTag {
+
+            public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
+                super("real", "Real", myGenerator, fclass);
             }
 
-			public void generateAttributes(CodeStream genPrinter) {
+            public String[] attributes() { return new String[] {"reinit"}; }
+
+            public void generate(CodeStream genPrinter) {
+                if (variable.isReal()) {
+                    super.generate(genPrinter);
+                }
+            }
+
+            private int getDerivativeIdx(FVariable var) {
+                FAbstractVariable lowerOrderVar = var.myDifferentiatedVariable();
+                if (lowerOrderVar.isFVariable()) {
+                    return fclass.xmlVariableIndexMap().get(lowerOrderVar.asFVariable().generateXMLName());
+                } else {
+                    throw new InternalCompilerError("Unable to find lower order variable for derivative variable " + var.displayName());
+                }
+            }
+
+            public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
                 generateAttribute("relativeQuantity", false, genPrinter);
@@ -1481,7 +1487,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                     generateAttribute("derivative", getDerivativeIdx(variable), genPrinter);
                 }
                 super.generateAttributes(genPrinter);
-			}
+            }
+
             public class XMLTag_reinit extends METag {
                 
                 public XMLTag_reinit(AbstractGenerator myGenerator, FClass fclass) {
@@ -1688,17 +1695,26 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             abstract boolean isInitialKnown(FVariable var);
             
             public void generateAttributes(CodeStream genPrinter) {
-				
-				generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
-				
-				//Find the dependencies.
-				TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
+                
+                generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
+                boolean hasNonScalarDependency = false;
+                //Find the dependencies.
+                TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
                 for (FVariable vv : dependentVariables(variable)) {
                     if (isInitialKnown(vv)) {
                         vv.generateXMLDependencyIndex(dependencyIndex, fclass.xmlVariableIndexMap());
+                        if (vv.numScalars() > 1) {
+                            hasNonScalarDependency = true;
+                        }
                     }
                 }
-                generateListAttribute("dependencies", dependencyIndex , genPrinter);
+                if (!hasNonScalarDependency) {
+                    // If we have depenency on a non-scalar, then we skip the 
+                    // dependencies filed since it can become to verbose!
+                    // According to the FMI specification this means that this
+                    // unknown depends on all knowns!
+                    generateListAttribute("dependencies", dependencyIndex , genPrinter);
+                }
             }
         }
         

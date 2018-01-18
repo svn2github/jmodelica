@@ -1904,13 +1904,21 @@ aspect InstanceAST_API {
 
     syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
-    eq InstComponentDecl.qualifiedName()    = getFQName().name();
-    eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
-    eq InstBaseClassDecl.qualifiedName()    = getInstRestriction().qualifiedClassName();
-    eq InstLibNode.qualifiedName()          = resolveLib().qualifiedName();
-    eq BadInstClassDecl.qualifiedName()     = buildQualifiedName();
-    eq InstBuiltInClassDecl.qualifiedName() = name();
-    eq InstProgramRoot.qualifiedName()      = "";
+    eq InstComponentDecl.qualifiedName()     = getFQName().name();
+    eq InstExtends.qualifiedName()           = myInstClass().qualifiedName();
+    eq InstBaseClassDecl.qualifiedName()     = getInstRestriction().qualifiedClassName();
+    eq InstLibNode.qualifiedName()           = resolveLib().qualifiedName();
+    eq BadInstClassDecl.qualifiedName()      = buildQualifiedName();
+    eq InstBuiltInClassDecl.qualifiedName()  = name();
+    eq InstProgramRoot.qualifiedName()       = "";
+    
+    eq InstArrayComponentDecl.qualifiedName(){
+           if (isArrayChild()){
+               return super.qualifiedName() + 
+                   myIndex().partIndex(0, myDimension() + 1).toString();
+           }
+           return super.qualifiedName();
+    } 
 
     syn String InstRestriction.qualifiedClassName() = myInstClassDecl().buildQualifiedName();
     eq InstOperator.qualifiedClassName()            = myInstClassDecl().buildQualifiedOperatorName();
@@ -2444,6 +2452,16 @@ aspect InstArrays {
     eq InstNode.getChild().myDimension()               = 0;
     eq InstRecordConstructor.getChild().myDimension()  = 0;
     eq InstArrayComponentDecl.getChild().myDimension() = myDimension() + 1;
+
+    /**
+     * Check if this InstArrayComponentDecl is in the bottom dimension of the array.
+     */
+    syn boolean InstArrayComponentDecl.isBottomDimension() = isBottomDimHelper(1);
+
+    inh boolean InstArrayComponentDecl.isBottomDimHelper(int i);
+    eq InstNode.getChild().isBottomDimHelper(int i)               = i == ndims();
+    eq InstRecordConstructor.getChild().isBottomDimHelper(int i)  = i == ndims();
+    eq InstArrayComponentDecl.getChild().isBottomDimHelper(int i) = isBottomDimHelper(i + 1);
 
     /**
      * Efficiently check if this InstArrayComponentDecl is in the top dimension of the array.

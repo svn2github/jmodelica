@@ -338,6 +338,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FTerminate.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempVars_C(p, str, indent);
         p.print(this, str, indent);
     }
 
@@ -502,27 +503,59 @@ aspect CCodeGenExpressions {
     /**
      * Helper method that prints the variable reference for assignment (LHS).
      */
-    public void FIdUseExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genAssignedRef(myFV(), p, str, indent);
+    }
+
+    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         p.print(getFIdUse(), str, "");
     }
 
     @Override
-    public void FAbstractDerExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(myFV().name_C());
+    public void FAbstractDerExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(p.name(myFV()));
+    }
+
+    public void FAlgorithm.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(p.name(v));
+    }
+
+    public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genScaledAssignedRef(myFV(), p, str, indent);
+    }
+
+    syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
+    syn boolean FExp.needsScaling() = type().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction();
+
+    public void FIdUseExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (needsScaling()) {
+            str.print("(");
+            genAssignedRef(v, p, str, indent);
+            str.print("*sf(");
+            str.print(v.valueReference());
+            str.print("))");
+        } else {
+            genAssignedRef(v, p, str, indent);
+        }
+    }
+
+    public void FAlgorithm.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (v.needsScaling(this)) {
+            str.print("(");
+            genAssignedRef(v, p, str, indent);
+            str.print("*sf(");
+            str.print(v.valueReference());
+            str.print("))");
+        } else {
+            genAssignedRef(v, p, str, indent);
+        }
     }
 
     @Override
     public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (type().isReal() && !inFunction() && myOptions().getBooleanOption("enable_variable_scaling")) {
-            str.print("(");
-            genAssignedRef_C(p, str, indent);
-            str.print("*sf(");
-            str.print(myFV().valueReference());
-            str.print("))");
-        } else {
-            genAssignedRef_C(p, str, indent);
-        }
+        genScaledAssignedRef(p.ExecStep, str, indent);
     }
+
 
     @Override
     public void FDSRefExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -531,7 +564,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDSDerExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sjmi_real_t %s;", indent, tempName_C());
+        p.print(this, indent, type(), p.createDeclPrinter(str));
     }
 
     @Override
@@ -548,9 +581,11 @@ aspect CCodeGenExpressions {
             for (FVariable var : combination)
                 str.format(", %d", var.valueReference());
             str.println(")) {");
-            str.format("%s%s = ", innerIndent, tempName_C());
-            p.print(getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1), str, indent);
-            str.println(";");
+            FExp valueExp = getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1);
+            p.printVarDecls(valueExp, str, indent);
+            p.printPreSteps(valueExp, str, indent);
+            p.printAssign(type(), str, innerIndent, this, valueExp);
+            p.printPostSteps(valueExp, str, indent);
         }
         str.formatln("%s}", indent);
     }
@@ -892,7 +927,6 @@ aspect CCodeGenExpressions {
     @Override
     public void FStringAddExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempFree_C(p, str, indent);
-        genTopStringFree(p, str, indent);
     }
 
     @Override
@@ -928,7 +962,6 @@ aspect CCodeGenExpressions {
     @Override
     public void FStringExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempFree_C(p, str, indent);
-        genTopStringFree(p, str, indent);
     }
 
     @Override
@@ -998,16 +1031,6 @@ aspect CCodeGenExpressions {
             genStringExpWrite_C(p, str, indent, tempName_C());
         }
     }
-
-    /**
-     * Helper?
-     */
-    public void FExp.genTopStringFree(CodePrinter p, CodeStream str, String indent) {
-        if (isTopStringOp() && !isKnownStringLength()) {
-            type().printFree_C(str, indent, false, tempName_C());
-        }
-    }
-
 
     @Override
     public void FStringExp.genStringFormat_C(CodePrinter p, CodeStream str, String indent) {
@@ -1310,7 +1333,7 @@ aspect CCodeGenExpressions {
     public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent);
         str.print("static ");
-        type().printScalarDecl_C(str, indent, false, tempName_C());
+        type().printScalarDecl_C(p, str, indent, false, tempName_C());
         str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
     }
 
@@ -1319,6 +1342,7 @@ aspect CCodeGenExpressions {
     }
 
     class CodePrinter {
+        public abstract boolean needsTemp(FExp exp);
         public abstract boolean needsTemp(FFunctionCall call);
         public abstract boolean needsStatement(FFunctionCall call);
         public abstract void printCall(FFunctionCall call, CodeStream str, String indent);
@@ -1326,6 +1350,10 @@ aspect CCodeGenExpressions {
     }
 
     class CPrettyPrinter {
+        @Override
+        public boolean needsTemp(FExp exp) {
+            return exp.needsTemp(this);
+        }
         @Override
         public boolean needsTemp(FFunctionCall call) {
             return call.needsTemp_C(this);
@@ -1338,7 +1366,7 @@ aspect CCodeGenExpressions {
         
         @Override
         public void printCall(FFunctionCall call, CodeStream str, String indent) {
-            call.myFCallable().prettyPrintCall_C(this, str, indent, call);
+            call.myFCallable().prettyPrintCall(this, str, indent, call);
         }
         
         @Override
@@ -1348,6 +1376,8 @@ aspect CCodeGenExpressions {
         
     }
 
+    syn boolean FExp.needsTemp(CodePrinter p) = isComposite();
+    eq     FDSDerExp.needsTemp(CodePrinter p) = true;
     syn boolean FFunctionCall.needsTemp_C(CodePrinter p) =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
@@ -1360,7 +1390,10 @@ aspect CCodeGenExpressions {
         getArgs().genTempArg(p.DeclStep, str, indent);
         if (p.needsTemp(this)) {
             if (myFCallable().isPartialFunction()) {
-                str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
+                str.formatln("%s%s %s;", indent, p.funcNameUnderscore(myFCallable().actualFFunctionDecl(), C_SUFFIX_FPOUT), tempName_C());
+                if (p.needsOutputVarArgs()) {
+                    p.print(this, indent, type(), p.createDeclPrinter(str));
+                }
             } else {
                 p.print(this, indent, type(), p.createDeclPrinter(str));
             }
@@ -1396,9 +1429,6 @@ aspect CCodeGenExpressions {
     public void FFunctionCall.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         if (!p.needsStatement(this)) {
             getArgs().genTempArg(p.PostStep, str, indent);
-        }
-        if (isStringExp()) {
-            type().printFree_C(str, indent, false, tempName_C());
         }
     }
 

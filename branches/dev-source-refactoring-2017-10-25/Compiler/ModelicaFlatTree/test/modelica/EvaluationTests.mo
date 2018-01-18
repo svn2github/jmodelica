@@ -1936,8 +1936,8 @@ model EvalNoBinding5
             errorMessage="
 3 errors found:
 
-Error at line 23, column 5, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
-  Missing binding expression for external object
+Error at line 23, column 5, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
+  The external object 'a' does not have a binding expression
 
 Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for structural parameter 'n': 'f(a)'

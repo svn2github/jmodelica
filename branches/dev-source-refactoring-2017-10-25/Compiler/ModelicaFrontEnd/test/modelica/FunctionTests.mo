@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009-2017 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2481,39 +2481,6 @@ Error at line 3, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
 ")})));
 end FunctionType8;
 
-model FunctionType9
- String x = TestFunctionString("test");
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="FunctionType9",
-            description="Function type checks: String literal arg, String input (error for now)",
-            variability_propagation=false,
-            errorMessage="
-1 errors found:
-
-Compliance error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
-  String variables are not supported
-")})));
-end FunctionType9;
-
-model FunctionType10
- parameter String a = "test";
- String x = TestFunctionString(a);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="FunctionType10",
-            description="Function type checks: String component arg, String input (error for now)",
-            variability_propagation=false,
-            errorMessage="
-1 errors found:
-
-Compliance error at line 3, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
-  String variables are not supported
-")})));
-end FunctionType10;
-
 model FunctionType11
  String x = TestFunctionString(1);
 
@@ -2523,10 +2490,7 @@ model FunctionType11
             description="Function type checks: Integer literal arg, String input",
             variability_propagation=false,
             errorMessage="
-2 errors found:
-
-Compliance error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
-  String variables are not supported
+1 errors found:
 
 Error at line 2, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
@@ -13916,6 +13880,87 @@ public
 end FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage;
 ")})));
 end FromOtherPackage;
+
+    model WithTemporary
+        function s
+            input Real[:] x;
+            output Integer[:] n = {size(x,1), size(x,1)};
+        algorithm
+        end s;
+        function g
+            input Real[:] x;
+            output Real[s(x)*{2,3}] y = x;
+        algorithm
+        end g;
+        function f
+            input Real[:] x;
+            output Real[2] y;
+        algorithm
+            y := g(x);
+        end f;
+        
+        Real[:] y = f({time});
+        
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_FuncCallInSize_WithTemporary",
+            description="Scalarization of functions: Function call from other package in declaration size",
+            variability_propagation=false,
+            inline_functions="none",
+            common_subexp_elim=false,
+            flatModel="
+fclass FunctionTests.UnknownSize.FuncCallInSize.WithTemporary
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f({time});
+
+public
+ function FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f
+  input Real[:] x;
+  output Real[:] y;
+  Integer[:] temp_1;
+  Integer[:] temp_2;
+ algorithm
+  init y as Real[2];
+  init temp_1 as Integer[2];
+  (temp_1) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
+  init temp_2 as Integer[2];
+  temp_2[1] := 2;
+  temp_2[2] := 3;
+  assert(temp_1[1] * 2 + temp_1[2] * 3 == 2, \"Mismatching sizes in FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f\");
+  (y) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g(x);
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f;
+
+ function FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g
+  input Real[:] x;
+  output Real[:] y;
+  Integer[:] temp_1;
+ algorithm
+  init temp_1 as Integer[2];
+  (temp_1) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
+  init y as Real[temp_1[1] * 2 + temp_1[2] * 3];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g;
+
+ function FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s
+  input Real[:] x;
+  output Integer[:] n;
+ algorithm
+  init n as Integer[2];
+  n[1] := size(x, 1);
+  n[2] := size(x, 1);
+  return;
+ end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s;
+
+end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary;
+")})));
+end WithTemporary;
+
 end FuncCallInSize;
 
 package Hidden

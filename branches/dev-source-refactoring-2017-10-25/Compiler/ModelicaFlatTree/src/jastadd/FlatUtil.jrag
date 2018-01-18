@@ -1029,6 +1029,7 @@ aspect FlatNames {
     
 
     syn String FType.name();
+    eq FArrayType.name()            = getFPrimitiveType().name();
     eq FRealType.name()             = "Real";
     eq FIntegerType.name()          = "Integer";
     eq FBooleanType.name()          = "Boolean";
@@ -1555,11 +1556,11 @@ aspect FlatFunctionUtils {
          return n;
      }
      
-     inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
+     inh lazy CommonVariableDecl FFunctionCallLeft.myOutput();
      eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);
      eq FFunctionCallStmt.getLeft(int i).myOutput()     = getCall().findOutput(i);
-     syn InstComponentDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
-     eq InstFunctionCall.findOutput(int i)                         = 
+     syn CommonVariableDecl FAbstractFunctionCall.findOutput(int i) = unknownInstComponentDecl();
+     eq CommonFunctionCall.findOutput(int i)                         = 
          (i >= myCallOutputs().size()) ? unknownInstComponentDecl() : myCallOutputs().get(i);
      
      inh boolean FExp.functionCallIsExp();
@@ -1763,6 +1764,12 @@ aspect FlatFunctionUtils {
     public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
             FTypePrefixVariability variability) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FVariable FArrayType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return getFPrimitiveType().createFVariable(fvt, name, variability);
     }
         
     public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 

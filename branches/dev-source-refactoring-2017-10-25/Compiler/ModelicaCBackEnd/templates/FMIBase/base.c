@@ -1,17 +1,16 @@
 /*
-    Copyright (C) 2015 Modelon AB
+    Copyright (C) 2015-2018 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
+    it under the terms of the Common Public License as published by
+    IBM, version 1.0 of the License.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the Common Public License
+    along with this program. If not, see
+    <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 */
 
 static const int N_real_ci = $n_real_ci$;
@@ -136,14 +135,14 @@ $C_delay_sample$
     return 0;
 }
 
-static int jmi_z_offset_strings(jmi_z_offsets_t* o) {
+static int jmi_z_offset_strings(jmi_z_strings_t* z) {
 $C_z_offsets_strings$
     return 0;
 }
 
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
 
-    jmi_z_offset_strings(&(*jmi)->z_t.strings.offsets);
+    jmi_z_offset_strings(&(*jmi)->z_t.strings);
 
     jmi_init(jmi, N_real_ci,      N_real_cd,      N_real_pi,      N_real_pi_s,
                   N_real_pi_f,    N_real_pi_e,    N_real_pd,      N_integer_ci,

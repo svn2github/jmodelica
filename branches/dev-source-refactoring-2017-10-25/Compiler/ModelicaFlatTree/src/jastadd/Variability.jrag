@@ -408,6 +408,10 @@ aspect Variability {
     eq FTimeExp.expVariability()        = fContinuous();
     eq FRelExp.expVariability()         = inNoEventExp() ? super.expVariability() : super.expVariability().combineDown(fDiscrete());
     eq FInStreamEpsExp.expVariability() = fContinuous();
+    // Should be safe, FDSDerExp are introduced by index reduction and represent
+    // derivatives which always are continuous and real typed.
+    eq FDSDerExp.expVariability()       = fContinuous();
+
 
     eq FSizeExp.expVariability() {
         FTypePrefixVariability res = ASTNode.fConstant();
@@ -546,6 +550,7 @@ aspect Variability {
     eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
     eq FLoadResource.expVariability() = fParameter();
     eq FSampleExp.expVariability() = fDiscrete();
+    eq FStringExp.expVariability() = super.expVariability().combineDown(fDiscrete());
 
     eq FSimulationStateBuiltIn.expVariability() = fParameter();
     eq FInitialExp.expVariability()             = fDiscrete();
@@ -647,7 +652,7 @@ aspect VariabilitySingletons {
     public static final FIndexParameter     FIndexParameter.instance     = new FIndexParameter();
     public static final FFinalParameter     FFinalParameter.instance     = new FFinalParameter();
     public static final FEvalTrueParameter  FEvalTrueParameter.instance  = new FEvalTrueParameter();
-    public static final FStructParameter    FStructParameter.instance    = new FStructParameter();
+    public static final FStructParameter    FStructParameter.instance    = new FStructParameter("");
     public static final FTestParameter      FTestParameter.instance      = new FTestParameter();
     public static final FConstant           FConstant.instance           = new FConstant();
 
@@ -693,7 +698,11 @@ aspect VariabilitySingletons {
     public static FStructParameter ASTNode.fStructParameter() {
         return FStructParameter.instance;
     }
-    
+
+    public static FStructParameter ASTNode.fStructParameter(String reason) {
+        return new FStructParameter(reason);
+    }
+
     public static FTestParameter ASTNode.fTestParameter() {
         return FTestParameter.instance;
     }

@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module containing the tests for the FMI interface.
+Module containing the tests for the FMI interface. 
 """
 
 import nose
@@ -48,7 +48,7 @@ CS1 = 'bouncingBall.fmu'
 CoupledME2 = 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME2.fmu'
 CoupledCS2 = 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS2.fmu'
 
-class Test_load_fmu:
+class Test_load_fmu: 
     """
     This test the functionality of load_fmu method.
     """
@@ -157,6 +157,21 @@ class Test_FMUModelBase:
         x,y = negated_alias.get("ix"), negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
+        
+    @testattr(stddist_full = True)
+    def test_get_scalar_variable(self):
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        
+        sc_x = negated_alias.get_scalar_variable("x")
+        
+        assert sc_x.name == "x"
+        assert sc_x.value_reference >= 0
+        assert sc_x.type == fmi.FMI_REAL
+        assert sc_x.variability == fmi.FMI_CONTINUOUS
+        assert sc_x.causality == fmi.FMI_INTERNAL
+        assert sc_x.alias == fmi.FMI_NO_ALIAS
+
+        nose.tools.assert_raises(FMUException, negated_alias.get_scalar_variable, "not_existing")
         
     @testattr(stddist_full = True)
     def test_set_get_enumeration(self):

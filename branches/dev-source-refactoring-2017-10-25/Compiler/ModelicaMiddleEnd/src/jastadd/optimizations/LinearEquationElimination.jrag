@@ -471,7 +471,7 @@ aspect eliminateLinearEquations {
      * ==================================================== */
 
     syn boolean FAbstractEquation.isSimpleLinear() = false;
-    eq FEquation.isSimpleLinear() = !containsActiveAnnotations() && !isSimpleAlias() &&
+    eq FEquation.isSimpleLinear() = !containsActiveAnnotations() && !isSimpleAlias() && type().isNumeric() &&
             getLeft().isSimpleLinearExp() && getRight().isSimpleLinearExp();
 
     syn boolean FExp.isSimpleLinearExp()    = false;

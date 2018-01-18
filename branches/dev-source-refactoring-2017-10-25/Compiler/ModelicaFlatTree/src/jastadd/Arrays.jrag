@@ -1860,11 +1860,14 @@ aspect Arrays {
             return super.getArray();
         if (variability().knownParameterOrLess()) {
             Array arr = new Array(indices());
-            CValueArray carr = (CValueArray) cevalArray(Index.NULL);
-            for (Index i : arr.indices()) {
-                arr.set(i, carr.getCell(i).buildInstLiteral());
+            CValue val = cevalArray(Index.NULL);
+            if (val.isArray()) {
+                CValueArray carr = val.array();
+                for (Index i : arr.indices()) {
+                    arr.set(i, carr.getCell(i).buildInstLiteral());
+                }
+                return arr;
             }
-            return arr;
         }
         return super.getArray();
     }

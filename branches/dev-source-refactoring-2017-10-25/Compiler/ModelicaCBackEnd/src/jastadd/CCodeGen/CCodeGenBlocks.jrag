@@ -192,7 +192,7 @@ aspect CCodeGenBlocks {
                 // Write back of pre variables is only done in the DAE BLT
                 for (FVariable var : allLocalVariables()) {
                     if (var.isDiscrete() && !var.isPreVariable()) {
-                        str.formatln("%s%s = %s;", indent, var.myPreVariable().name_C(), var.name_C());
+                        p.printAssign(var.type(), str, indent, var.myPreVariable(), var);
                     }
                 }
             }
@@ -613,11 +613,13 @@ aspect BlockSetup {
         genEvalModeAttribute_C(p, str, indent,       "JMI_BLOCK_DISCRETE_REAL_NOMINAL", 
                 FAttribute.NOMINAL, createSolverArrayMap(discreteRealVariables_C()));
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE", 
-                nonRealVariables_C());
+                nonRealNonStringVariables_C());
+        genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_SOLVED_STRING_VALUE_REFERENCE", 
+                nonRealStringVariables_C());
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE", 
                 directlyImpactingNonReals_C());
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE", 
-                nonRealTempVariables_C());
+                nonRealNonStringTempVariables_C());
 
         genEvalModeSwitchIndex_C(p, str, indent, "JMI_BLOCK_ACTIVE_SWITCH_INDEX",
                 activeSwitches_C(), activeInitialSwitches_C());
@@ -631,7 +633,7 @@ aspect BlockSetup {
         
         p = p.evalPrinter();
         
-        genEvalModeEvalOrWriteBack(p, str, nextIndent, solverArrayMap);
+        genEvalModeEvalOrWriteBack(p, str, indent, solverArrayMap);
 	}
 
     public void AbstractEquationBlock.genBlockResidualFunctionSignature(CodePrinter p, CodeStream str, String outerIndent) {
@@ -1134,9 +1136,10 @@ aspect BlockSetup {
         str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
         str.print(localSolvedRealVariables().size() + ", ");
         str.print(discreteRealVariables_C().size() + ", ");
-        str.print(nonRealVariables_C().size() + ", ");
+        str.print(nonRealNonStringVariables_C().size() + ", ");
         str.print(directlyImpactingNonReals_C().size() + ", ");
-        str.print(nonRealTempVariables_C().size() + ", ");
+        str.print(nonRealNonStringTempVariables_C().size() + ", ");
+        str.print(nonRealStringVariables_C().size() + ", ");
         str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
         str.print(directlyActiveSwitches_C().size() + ", ");
         str.print(variability().genJMIVariabilityConstant_C() + ", ");
@@ -1264,22 +1267,35 @@ aspect BlockSetup {
     }
     
     /**
-     * Returns all non real non temporary variables in the block.
+     * Returns all non real, non string, non temporary variables in the block.
      */
-    public Collection<FVariable> AbstractEquationBlock.nonRealVariables_C() {
+    public Collection<FVariable> AbstractEquationBlock.nonRealNonStringVariables_C() {
         Collection<FVariable> l = new ArrayList<FVariable>();
         for (FVariable fv : localNonRealVariables()) {
-            if (!fv.isTemporary()) {
+            if (!fv.isTemporary() && !fv.isString()) {
                 l.add(fv);
             }
         }
         return l;
     }
     
-    public Collection<FVariable> AbstractEquationBlock.nonRealTempVariables_C() {
+    /**
+     * Returns all non real, string, non temporary variables in the block.
+     */
+    public Collection<FVariable> AbstractEquationBlock.nonRealStringVariables_C() {
         Collection<FVariable> l = new ArrayList<FVariable>();
         for (FVariable fv : localNonRealVariables()) {
-            if (fv.isTemporary()) {
+            if (!fv.isTemporary() && fv.isString()) {
+                l.add(fv);
+            }
+        }
+        return l;
+    }
+    
+    public Collection<FVariable> AbstractEquationBlock.nonRealNonStringTempVariables_C() {
+        Collection<FVariable> l = new ArrayList<FVariable>();
+        for (FVariable fv : localNonRealVariables()) {
+            if (fv.isTemporary() && !fv.isString()) {
                 l.add(fv);
             }
         }
@@ -1308,7 +1324,7 @@ aspect BlockSetup {
         directlyImpactingNonReals_C = new LinkedHashSet<FVariable>();
         
         Set<FAbstractEquation> realEqns = new HashSet<FAbstractEquation>(localRealEquations());
-        Set<FVariable> nonRealVars = new HashSet<FVariable>(nonRealVariables_C());
+        Set<FVariable> nonRealVars = new HashSet<FVariable>(nonRealNonStringVariables_C());
         Set<FVariable> allVariables = new HashSet<FVariable>(allLocalVariables());
         for (FAbstractEquation equation : allLocalEquations()) {
             boolean realEqn = realEqns.contains(equation);

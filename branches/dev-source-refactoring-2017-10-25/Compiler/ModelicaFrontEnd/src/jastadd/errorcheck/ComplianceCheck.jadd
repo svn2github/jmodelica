@@ -304,12 +304,6 @@ aspect ComplianceCheck {
        }
     }
 
-    public static final SimpleProblemProducer ASTNode.PARTIALLY_SUPPORTED_STRING_ARGUMENTS =
-            new SimpleWarningProducer("PARTIALLY_SUPPORTED_STRING_ARGUMENTS", ProblemKind.COMPLIANCE, "String arguments in functions are only partially supported");
-    public static final SimpleProblemProducer ASTNode.PARTIALLY_SUPPORTED_STRING_PARAMETERS =
-            new SimpleWarningProducer("PARTIALLY_SUPPORTED_STRING_PARAMETERS", ProblemKind.COMPLIANCE, "String parameters are only partially supported");
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_STRING_VARIABLES =
-            new SimpleErrorProducer("UNSUPPORTED_STRING_VARIABLES", ProblemKind.COMPLIANCE, "String variables are not supported");
     public static final SimpleProblemProducer ASTNode.ONLY_FMU_INTEGER_VARIABLES =
             new ComplianceFMUOnlyProducer("ONLY_FMU_INTEGER_VARIABLES", "Integer variables of discrete variability is");
     public static final SimpleProblemProducer ASTNode.ONLY_FMU_BOOLEAN_VARIABLES =
@@ -317,17 +311,6 @@ aspect ComplianceCheck {
 
     public void InstPrimitive.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (isString()) {
-            if (inFunction()) {
-                PARTIALLY_SUPPORTED_STRING_ARGUMENTS.invoke(this);
-            } else if (variability().parameterOrLess()) {
-                PARTIALLY_SUPPORTED_STRING_PARAMETERS.invoke(this);
-                if (isParameter())
-                    forceVariability(checkType, fStructParameter());
-            } else {
-                UNSUPPORTED_STRING_VARIABLES.invoke(this);
-            }
-        }
         if (!myOptions().getBooleanOption("generate_ode")) {
             if (isInteger() && !variability().parameterOrLess() && !inFunction())
                 ONLY_FMU_INTEGER_VARIABLES.invoke(this);

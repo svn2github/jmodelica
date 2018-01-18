@@ -576,6 +576,9 @@ aspect FlatAPI {
 
                     ZOrdinaryCategory.DISCRETE_BOOLEAN,
                     ZOrdinaryCategory.BOOLEAN_INPUT,
+                    
+                    ZOrdinaryCategory.DISCRETE_STRING,
+                    ZOrdinaryCategory.STRING_INPUT,
             };
 
             private final Map<ZCategory, ZCategoryEntry> categoryMap;
@@ -1050,7 +1053,7 @@ aspect FlatAPI {
         [new LinkedHashSet<FVariable>()] with add root FClass;
     FDerExp contributes getFIdUse().myFV().asFVariable() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
         to FClass.differentiatedByFDerExp() for myFClass();
-    FDerivativeVariable contributes myDifferentiatedVariable() when (shouldContribute())
+    FDerivativeVariable contributes myDifferentiatedVariable().asFVariable() when (shouldContribute())
         to FClass.differentiatedByFDerExp() for myFClass();
 
     syn boolean FVariable.differentiatedByFDerExp() = myFClass().differentiatedByFDerExp().contains(this);
@@ -1137,7 +1140,7 @@ aspect FlatAPI {
     syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
     
     // TODO: Remove?!?
-    syn boolean FDerivativeVariable.shouldContributeFiltered() = shouldContribute() && (myDifferentiatedVariable().stateSelectAttributeSet() || uses().size() > 0);
+    syn boolean FDerivativeVariable.shouldContributeFiltered() = shouldContribute() && (myDifferentiatedVariable().asFVariable().stateSelectAttributeSet() || uses().size() > 0);
     
     public class FClass {
         public static <T1, T2 extends T1> Collection<T2> filterCollection(Collection<T1> input, Criteria<T1> filter) {
@@ -1507,7 +1510,7 @@ aspect FlatAPI {
     FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDerivativeVariable contributes
-        myDifferentiatedVariable() when (shouldContributeFiltered())
+        myDifferentiatedVariable().asFRealVariable() when (shouldContributeFiltered())
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDynamicStateVariable contributes this
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
@@ -2754,50 +2757,80 @@ aspect FlatAPI {
         return guid;
     }
 
-    private FAbstractEquation FAbstractEquation.meDifferentiated = null;
-    private FAbstractEquation FAbstractEquation.meIntegrated = null;
+    // TODO: This should be handled with a local map when needed, e.g. during
+    // index reduction!
+    @Deprecated
     private FVariable FVariable.meDifferentiated = null;
+    @Deprecated
     private FVariable FVariable.meIntegrated = null;
-    
-    public void FAbstractEquation.setMeDifferentiated(FAbstractEquation e) {
-        this.meDifferentiated = e;
-    }
-    
-    public FAbstractEquation FAbstractEquation.getMeDifferentiated() {
-        return this.meDifferentiated;
-    }
-    
+
+    @Deprecated
     public void FVariable.setMeDifferentiated(FVariable var) {
         this.meDifferentiated = var;
     }
-    
+
+    /**
+     * This method should only be used during index reduction where we can't
+     * use variable lookup to resolve higher and lower order variables!
+     * Instead, please use {@link #myDerivativeVariable()} instead!
+     */
+    @Deprecated
     public FVariable FVariable.getMeDifferentiated() {
         return this.meDifferentiated;
     }
-    
-    public void FAbstractEquation.setMeIntegrated(FAbstractEquation e) {
-        this.meIntegrated = e;
-    }
-    
-    public FAbstractEquation FAbstractEquation.getMeIntegrated() {
-        return this.meIntegrated;
-    }
-    
+
+    @Deprecated
     public void FVariable.setMeIntegrated(FVariable var) {
         this.meIntegrated = var;
     }
-    
+
+    /**
+     * This method should only be used during index reduction where we can't
+     * use variable lookup to resolve higher and lower order variables!
+     * Instead, please use {@link #myDifferentiatedVariable()} instead!
+     */
+    @Deprecated
     public FVariable FVariable.getMeIntegrated() {
         return this.meIntegrated;
     }
-    
+
+    @Deprecated
     public FVariable FVariable.getTopIntegrated() {
         FVariable fv = this;
         while (fv.meIntegrated != null)
             fv = fv.meIntegrated;
         return fv;
     }
-    
+
+    // TODO: Unlike higher and lower order function on variables, this one
+    // actually doesn't have any corresponding constructions, so we might
+    // actually wan't to keep this functionality. However we should probably
+    // move it to tokens or similar.
+    @Deprecated
+    private FAbstractEquation FAbstractEquation.meDifferentiated = null;
+
+    @Deprecated
+    private FAbstractEquation FAbstractEquation.meIntegrated = null;
+
+    @Deprecated
+    public void FAbstractEquation.setMeDifferentiated(FAbstractEquation e) {
+        this.meDifferentiated = e;
+    }
+
+    @Deprecated
+    public FAbstractEquation FAbstractEquation.getMeDifferentiated() {
+        return this.meDifferentiated;
+    }
+
+    @Deprecated
+    public void FAbstractEquation.setMeIntegrated(FAbstractEquation e) {
+        this.meIntegrated = e;
+    }
+
+    @Deprecated
+    public FAbstractEquation FAbstractEquation.getMeIntegrated() {
+        return this.meIntegrated;
+    }
 }
 
 aspect ReferencedVariables {
@@ -3297,12 +3330,6 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCallLeft()            = false;
     eq InstRoot.getChild().inFunctionCallLeft()          = false;
     
-    inh boolean FExp.inFunctionCallLeftTop();
-    eq FFunctionCallLeft.getChild().inFunctionCallLeftTop() = true;
-    eq FExp.getChild().inFunctionCallLeftTop()              = false;
-    eq FClass.getChild().inFunctionCallLeftTop()            = false;
-    eq InstRoot.getChild().inFunctionCallLeftTop()          = false;
-    
     /**
      * Checks if this expression is used in a function call
      */
@@ -3587,19 +3614,23 @@ aspect FVariableUses {
     /**
      * Get the differenetiated variabel (FVariable) corresponding to 
      * a derivative variable (FDerivativeVariable)
-     * TODO: this is incorrect what if order=2!
      */
-    syn FRealVariable FAbstractDerivativeVariable.myDifferentiatedVariable() =
-        (FRealVariable) getFQName().myFV();
+    syn FAbstractVariable FVariable.myDifferentiatedVariable() {
+        if (order() <= 0) {
+            return unknownFVariable();
+        } else if (order() == 1) {
+            return getFQName().myFV();
+        } else {
+            return getFQName().myDerFV(order() - 1);
+        }
+    }
 
     /**
      * Get the derivative variabel (FDerivativeVariable) corresponding to 
      * a differentiated variable (FVariable)
-     * TODO: this is sort of the same as meDifferentiated()
      */
-    syn FDerivativeVariable FVariable.myDerivativeVariable() =
-            (FDerivativeVariable) getFQName().myDerFV(order() + 1);
-    
+    syn FAbstractVariable FVariable.myDerivativeVariable() = getFQName().myDerFV(order() + 1);
+
     /**
      * Get the pre variable connected to a normal variable, if any.
      */

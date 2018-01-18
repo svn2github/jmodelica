@@ -55,7 +55,21 @@ class Test_FMUModelBase2:
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
         cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
+    
+    @testattr(stddist_full = True)
+    def test_get_scalar_variable(self):
+        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
+        
+        sc_x = negated_alias.get_scalar_variable("x")
+        
+        assert sc_x.name == "x"
+        assert sc_x.value_reference >= 0
+        assert sc_x.type == fmi.FMI2_REAL
+        assert sc_x.variability == fmi.FMI2_CONTINUOUS
+        assert sc_x.causality == fmi.FMI2_LOCAL
 
+        nose.tools.assert_raises(FMUException, negated_alias.get_scalar_variable, "not_existing")
+    
     @testattr(stddist_full = True)
     def test_declared_enumeration_type(self):
         enumeration_model = load_fmu(Test_FMUModelBase2.enumeration3)
@@ -139,6 +153,18 @@ class Test_FMUModelBase2:
         x,y = negated_alias.get("ix"), negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
+
+    @testattr(stddist_full = True)
+    def test_set_additional_logger(self):
+        messages = []
+        def my_custom_logger(module, log_level, message):
+            messages.append(message)
+        log_level = 4
+        model = load_fmu(Test_FMUModelBase2.negAliasFmu, log_level=log_level)
+        model.set("_log_level", log_level)
+        model.set_additional_logger(my_custom_logger)
+        model.simulate()
+        assert(len(messages) > 0)
 
 class Test_FMUModelCS2:
     """
@@ -553,10 +579,50 @@ class Test_FMUModelME2:
     
     @testattr(stddist_full = True)
     def test_get_string(self):
-		model = load_fmu(self.string1)
-		
-		for i in range(100): #Test so that memory issues are detected
-			assert model.get("str")[0] == "hej"
+        model = load_fmu(self.string1)
+        
+        for i in range(100): #Test so that memory issues are detected
+            assert model.get("str")[0] == "hej"
+            
+    @testattr(stddist_full = True)
+    def test_units(self):
+        
+        model = load_fmu(self.coupled_name)
+        model_bb = load_fmu(self.bouncing_name)
+        
+        assert model.get_variable_unit("J1.w") == "rad/s"
+        assert model.get_variable_unit("J1.phi") == "rad"
+        
+        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.useHeatPort")
+        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
+        nose.tools.assert_raises(FMUException, model.get_variable_unit, "clutch1.sss")
+        nose.tools.assert_raises(FMUException, model_bb.get_variable_unit, "h")
+    
+    @testattr(stddist_full = True)
+    def test_display_units(self):
+        
+        model = load_fmu(self.coupled_name)
+        
+        assert model.get_variable_display_unit("J1.phi") == "deg"
+        nose.tools.assert_raises(FMUException, model.get_variable_display_unit, "J1.w")
+        
+    @testattr(stddist_full = True)
+    def test_display_values(self):
+        model = load_fmu(self.coupled_name)
+        
+        import scipy
+        
+        val = model.get_variable_display_value("J1.phi")
+        val_ref = scipy.rad2deg(model.get("J1.phi"))
+        
+        nose.tools.assert_almost_equal(val, val_ref)
+        
+        model.simulate()
+        
+        val = model.get_variable_display_value("J1.phi")
+        val_ref = scipy.rad2deg(model.get("J1.phi"))
+        
+        nose.tools.assert_almost_equal(val, val_ref)
     
     @testattr(stddist_full = True)
     def test_get_enum(self):

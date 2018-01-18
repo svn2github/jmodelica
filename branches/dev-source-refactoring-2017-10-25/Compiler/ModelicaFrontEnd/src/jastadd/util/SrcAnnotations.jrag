@@ -46,6 +46,10 @@ aspect SrcAnnotations {
         return getExtendsClause().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
     }
 
+    public SrcAnnotation ImportClause.srcAnnotation(String ... path) {
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+
     public SrcAnnotation AbstractEquation.srcAnnotation(String ... path) {
         return getComment().srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
     }
@@ -71,6 +75,9 @@ aspect SrcAnnotations {
     }
     public SrcAnnotation ExtendsClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
         return SrcAnnotation.createFor(this, evaluator, path);
+    }
+    public SrcAnnotation ImportClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
+        return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ExternalClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
         return SrcAnnotation.createFor(this, evaluator, path);
@@ -204,6 +211,12 @@ aspect SrcAnnotations {
             }
         };
     }
+    eq ComponentRedeclare.annotationSubNodes() {
+        return getComponentDecl().createModifierProvider().annotationSubNodes();
+    }
+    eq ClassRedeclare.annotationSubNodes() {
+    	return getBaseClassDecl().asShortClassDecl().createModifierProvider().annotationSubNodes();
+    }
 
     @Override
     public void Modification.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
@@ -251,6 +264,14 @@ aspect SrcAnnotations {
         }
         return getModification().addAnnotationSubNode(name);
     }
+    @Override
+    public SrcAnnotationProvider ComponentRedeclare.addAnnotationSubNode(String name) {
+        return getComponentDecl().createModifierProvider().addAnnotationSubNode(name);
+    }
+    @Override
+    public SrcAnnotationProvider ClassRedeclare.addAnnotationSubNode(String name) {
+        return getBaseClassDecl().asShortClassDecl().createModifierProvider().addAnnotationSubNode(name);
+    }
 
     syn boolean Modification.isEach() = false;
     eq Argument.isEach()              = getEach();
@@ -285,6 +306,11 @@ aspect SrcAnnotations {
     }
     syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getComponentDecl().srcAnnotationProvider();
     eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
+    
+    /**
+     * Import clause
+     */
+    syn SrcAnnotationProvider ImportClause.srcAnnotationProvider() = SrcAnnotation.createProviderFor(getComment());
 
     /*******************
      *  AST Annotation  
@@ -381,6 +407,45 @@ aspect SrcAnnotations {
             return owningNode.resolveURI(str);
         }
 
+    }
+    
+     public RootAnnotationProviderProxy<ShortClassDecl, Modification> ShortClassDecl.createModifierProvider(){
+            return new RootAnnotationProviderProxy<ShortClassDecl, Modification>(this) {
+            
+            @Override
+            protected boolean hasProvider() {
+                return owningNode.getExtendsClauseShortClass().hasClassModification();
+            }
+
+            @Override
+            protected void createProvider() {
+                owningNode.getExtendsClauseShortClass().setClassModification(new ClassModification());
+            }
+
+            @Override
+            protected Modification getProvider() {
+                return owningNode.getExtendsClauseShortClass().getClassModification();
+            }
+        };
+    }
+    
+    public RootAnnotationProviderProxy<ComponentDecl, Modification> ComponentDecl.createModifierProvider() {
+        return new RootAnnotationProviderProxy<ComponentDecl, Modification>(this) {
+            @Override
+            protected boolean hasProvider() {
+                return owningNode.hasModification();
+            }
+
+            @Override
+            protected void createProvider() {
+                owningNode.setModification(new CompleteModification(new ClassModification()));
+            }
+
+            @Override
+            protected Modification getProvider() {
+                return owningNode.getModification();
+            }
+        };
     }
 
     class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> extends RootAnnotationProviderProxy<T, Annotation> {

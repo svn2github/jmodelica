@@ -174,7 +174,7 @@ abstract FKnownParameter : FParameter;
 /**
  * Structural parameter variability.
  */
-FStructParameter : FKnownParameter;
+FStructParameter : FKnownParameter ::= <Reason:String>;
 
 /**
  * Used to force variability for if equation tests
@@ -353,7 +353,18 @@ FRuntimeOptionVisibilityType : FPublicVisibilityType;
 /**
  * Base class for all type nodes.
  */
-abstract FType : BaseNode ::= <Size:Size>;
+abstract FType : BaseNode;
+
+/**
+ *
+ * An array type.
+ */
+FArrayType : FType ::= FPrimitiveType FExp*;
+
+/**
+ * Base class for all cell types.
+ */
+abstract FCellType : FType ::= <Size:Size>;
 
 /**
  * A record type.
@@ -361,17 +372,17 @@ abstract FType : BaseNode ::= <Size:Size>;
  * In the instance tree, the components are stored alphabetically, 
  * but in the flat tree they are in the order declared. 
  */
-FRecordType : FType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
+FRecordType : FCellType ::= <Name> Component:FRecordComponentType* <FClass:FClass>;
 
 /**
  * Class representing the external object type.
  */
-FExternalObjectType : FType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
+FExternalObjectType : FCellType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
 
 /**
  * Partial function call type
  */
-FFunctionType : FType ::= <Name> Input:FRecordComponentType* Output:FRecordComponentType* <FClass:FClass>;
+FFunctionType : FCellType ::= <Name> Input:FRecordComponentType* Output:FRecordComponentType* <FClass:FClass>;
 
 /**
  * An operator record type. 
@@ -392,12 +403,12 @@ FRecordComponentType : BaseNode ::= <Name> FType;
  * types Real, Integer, Boolean and String, where each type corresponds to
  * an AST node. FPrimitiveType serves as base class for these AST nodes.
  */
-abstract FPrimitiveType : FType;
+abstract FPrimitiveType : FCellType;
 
 /**
  * Type representing no value at all, equivalent to the void type in C-like languages.
  */
-FNoType : FType;
+FNoType : FCellType;
 
 /**
  * Base class for the numeric types Real and Integer.
@@ -436,7 +447,7 @@ FEnumLiteralType : FPrimitiveType ::= <Name>;
  *
  * Used to represent type errors. 
  */
-FUnknownType : FType;
+FUnknownType : FCellType;
 
 /**
  * A qualified name supporting array subscripts.

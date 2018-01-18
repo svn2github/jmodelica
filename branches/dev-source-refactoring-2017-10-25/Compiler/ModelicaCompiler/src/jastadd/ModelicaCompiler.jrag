@@ -2299,7 +2299,7 @@ public class ModelicaCompiler {
         } catch (CompilationAbortedException e) {
             throw e;
         } catch (Exception e) {
-            throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile));
+            throw new PackingFailedException(String.format("Could not write to '%s'.", unitFile), e);
         }
 
         hookFmuPacked(fClass, unitFile.getAbsoluteFile());

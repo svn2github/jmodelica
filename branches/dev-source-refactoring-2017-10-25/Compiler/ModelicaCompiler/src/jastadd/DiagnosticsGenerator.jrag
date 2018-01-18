@@ -1069,7 +1069,14 @@ aspect HTMLMarkupPrinter {
         public boolean isLocalObject(Object o) {
             return localObjects.contains(o);
         }
+                
+        public void prePrettyPrint(CodeStream str, int indexCounter, String indent) {
+    		str.print(indent+"<font color=\"grey\">" + String.format("%-4s", indexCounter).replaceAll(" ", "&nbsp;") + "</font>");
+    	}
 
+    }
+    
+    public void Printer.prePrettyPrint(CodeStream str, int indexCounter, String indent) {
     }
 
     public void ASTNode.htmlPrint(HTMLPrinter p, CodeStream str, String indent) {

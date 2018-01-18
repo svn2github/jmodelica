@@ -1382,6 +1382,25 @@ Alias sets:
 ")})));
     end AliasTest35;
 
+    model AliasTest36
+        parameter String s1 = "string";
+        parameter String s2 = s1;
+        parameter String s3 = "string" annotation(Evaluate=true);
+        parameter String s4 = "string" annotation(Evaluate=true);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AliasTest36",
+            methodName="aliasDiagnostics",
+            description="String aliases",
+            eliminate_alias_parameters=true,
+            methodResult="
+Alias sets:
+{s1, s2}
+{s3, s4}
+2 variables can be eliminated
+")})));
+    end AliasTest36;
 
 model AliasFuncTest1
     function f
@@ -6545,31 +6564,92 @@ Algebraic real variables:
 ")})));
 end VarDependencyTest2;
 
-model StringFuncTest
-  function f
-    input String s;
-    output String t;
-  algorithm
-   t := s;
-  end f;
+model String1
+    parameter String a = "1";
+    parameter String b = a + "2";
+    parameter String c = b + "3";
 
-  parameter String p1 = f("a");
-  parameter String p2 = "a";
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="String1",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.String1
+ parameter String a = \"1\" /* \"1\" */;
+ parameter String b;
+ parameter String c;
+parameter equation
+ b = a + \"2\";
+ c = b + \"3\";
+end TransformCanonicalTests.String1;
+")})));
+end String1;
+
+model String2
+    function f
+        input String s;
+        output String t;
+    algorithm
+        t := s;
+        annotation(Inline=false);
+    end f;
+    
+    parameter String p1 = "a";
+    parameter String p2 = f("a");
+    parameter String p3 = f(p1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="StringFuncTest",
+            name="String2",
 			description="Test that string parameters and string parameters goes through front-end.",
-            eliminate_alias_variables=false,
 			flatModel="
-fclass TransformCanonicalTests.StringFuncTest
- structural parameter String p1 = \"a\" /* \"a\" */;
- structural parameter String p2 = \"a\" /* \"a\" */;
-end TransformCanonicalTests.StringFuncTest;
+fclass TransformCanonicalTests.String2
+ parameter String p1 = \"a\" /* \"a\" */;
+ parameter String p2 = \"a\" /* \"a\" */;
+ parameter String p3;
+parameter equation
+ p3 = TransformCanonicalTests.String2.f(p1);
+
+public
+ function TransformCanonicalTests.String2.f
+  input String s;
+  output String t;
+ algorithm
+  t := s;
+  return;
+ annotation(Inline = false);
+ end TransformCanonicalTests.String2.f;
+
+end TransformCanonicalTests.String2;
 ")})));
 
-end StringFuncTest;
+end String2;
 
+model String3
+    String s(start="start");
+equation
+    when time > 1 then
+        s = "val";
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="String3",
+            description="Test that string parameters and string parameters goes through front-end.",
+            flatModel="
+fclass TransformCanonicalTests.String3
+ discrete String s(start = \"start\");
+ discrete Boolean temp_1;
+initial equation
+ pre(temp_1) = false;
+ pre(s) = \"start\";
+equation
+ temp_1 = time > 1;
+ s = if temp_1 and not pre(temp_1) then \"val\" else pre(s);
+end TransformCanonicalTests.String3;
+")})));
+
+end String3;
 
 class MyExternalObject
  extends ExternalObject;
@@ -8231,6 +8311,78 @@ end TransformCanonicalTests.ForOfUnknownSize5;
 ")})));
 end ForOfUnknownSize5;
 
+package RangeBugTests
+model RangeInSumInSum
+	function F
+		input Integer p_i;
+		input Integer nrows_p[:];
+		input Real nrow[:];
+		input Real vf[:];
+		output Real n;
+		algorithm
+		 n := sum({vf[i]*nrow[i] for i in (sum(nrows_p[1:(p_i-1)])+1):sum(nrows_p[1:p_i])});
+	end F;
+	Real n;
+	equation
+	n = F(2, {0,3}, {1,2,time}, {1,2,time});
+	
+	
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RangeInSumInSum",
+            description="Scalarization of range exp in a Sum",
+            flatModel="
+fclass TransformCanonicalTests.RangeBugTests.RangeInSumInSum
+ Real n;
+equation
+ n = TransformCanonicalTests.RangeBugTests.RangeInSumInSum.F(2, {0, 3}, {1, 2, time}, {1, 2, time});
+
+public
+ function TransformCanonicalTests.RangeBugTests.RangeInSumInSum.F
+  input Integer p_i;
+  input Integer[:] nrows_p;
+  input Real[:] nrow;
+  input Real[:] vf;
+  output Real n;
+  Real temp_1;
+  Integer temp_3;
+  Integer temp_4;
+  Real[:] temp_2;
+  Integer temp_5;
+  Integer temp_6;
+ algorithm
+  init temp_2 as Real[max(integer(temp_3 - (temp_4 + 1)) + 1, 0)];
+  temp_3 := 0;
+  for i2 in 1:max(p_i, 0) loop
+   temp_3 := temp_3 + nrows_p[i2];
+  end for;
+  temp_4 := 0;
+  for i2 in 1:max(p_i - 1, 0) loop
+   temp_4 := temp_4 + nrows_p[i2];
+  end for;
+  for i2 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop
+   temp_5 := 0;
+   for i3 in 1:max(p_i - 1, 0) loop
+    temp_5 := temp_5 + nrows_p[i3];
+   end for;
+   temp_6 := 0;
+   for i3 in 1:max(p_i, 0) loop
+    temp_6 := temp_6 + nrows_p[i3];
+   end for;
+   temp_2[i2] := vf[i2] * nrow[i2];
+  end for;
+  temp_1 := 0.0;
+  for i1 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop
+   temp_1 := temp_1 + temp_2[i1];
+  end for;
+  n := temp_1;
+  return;
+ end TransformCanonicalTests.RangeBugTests.RangeInSumInSum.F;
+
+end TransformCanonicalTests.RangeBugTests.RangeInSumInSum;
+")})));
+end RangeInSumInSum;
+end RangeBugTests;
 
 model FunctionWithZeroSizeOutput1
     function f

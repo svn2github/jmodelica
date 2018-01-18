@@ -35,7 +35,7 @@ from pymodelica.common import xmlparser
 from pymodelica.common.core import get_unit_name, list_to_string
 
 
-def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
+def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='2.0', 
                 platform='auto', compiler_options={}, compile_to='.', 
                 compiler_log_level='warning', separate_process=True, jvm_args=''):
     """ 
@@ -83,7 +83,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             
         version --
             The FMI version. Valid options are '1.0' and '2.0'.
-            Default: '1.0'
+            Default: '2.0'
             
         platform --
             Set platform, controls whether a 32 or 64 bit FMU is generated. This 
@@ -133,6 +133,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         created and a list of warnings that was raised.
     
     """
+    #Remove in JModelica.org version 2.3
+    if compiler_options.has_key("extra_lib_dirs"):
+        print "Warning: The option 'extra_lib_dirs' has been deprecated and will be removed. Please use the 'file_name' to pass additional libraries."
     
     if (target != "me" and target != "cs" and target != "me+cs"):
         raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")

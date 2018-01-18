@@ -501,10 +501,12 @@ aspect Flattening {
         if (ie != null) {
             flattenExternal(f, stmts, ie);
         } else {
-            FStatement.flattenFStatementList(f, findFunctionAlgorithm().getFStatements(),
-                stmts, new FQNameEmpty());
+            FAlgorithm fab = findFunctionAlgorithm();
+            if (fab != null) {
+                FStatement.flattenFStatementList(f, fab.getFStatements(), stmts, new FQNameEmpty());
+            }
         }
-
+        
         int num = stmts.getNumChild();
         if (num == 0 || !(stmts.getChild(num - 1) instanceof FReturnStmt)) 
             stmts.addChild(new FReturnStmt());
@@ -695,7 +697,6 @@ aspect Flattening {
                 if (tmp != null) 
                     return tmp;
             }
-            return new FAlgorithm(new List());
         }
         return null;
     }
@@ -1028,6 +1029,37 @@ aspect Flattening {
         return res;
     }
     
+    @Override
+    public FType FPrimitiveType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        FType res;
+        if(keepSizeExpressions && ia == null && !getSize().variability().knownParameterOrLess() && !inFunction()) {
+            MutableSize mutableSize = (MutableSize) getSize();
+            List<FExp> l = mutableSize.flattenExps(prefix);
+            FPrimitiveType copy = fullCopy();
+            copy.setSize(Size.SCALAR);
+            res = new FArrayType(copy , l);
+        } else {
+            res = fullCopy();
+            res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
+        }
+        return res;
+    }
+    
+    public List<FExp> MutableSize.flattenExps(FQName prefix) {
+        List<FExp> l = new List<FExp>();
+        for (int i = 0; i < exps.length; i++) {
+            if (shouldFlattenChild(i)) {
+                l.add(exps[i].flatten(prefix));
+            }
+        }
+        return l;
+    }
+
+    public boolean MutableSize.shouldFlattenChild(int i) {
+        return exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
+                (size[i] == Size.UNKNOWN || !exps[i].inFunction());
+    }
+
     public FRecordComponentType FRecordComponentType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
         return new FRecordComponentType(getName(), getFType().flatten(prefix, ia, keepSizeExpressions));
     }
@@ -1094,8 +1126,7 @@ aspect Flattening {
         System.arraycopy(size, 0, res.size, 0, size.length);
         if (keepSizeExpressions) {
             for (int i = 0; i < exps.length; i++) {
-                if (exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
-                        (size[i] == Size.UNKNOWN || !exps[i].inFunction())) {
+                if (shouldFlattenChild(i)) {
                     res.exps[i] = context.affixExpression(exps[i].flatten(prefix));
                 }
             }
@@ -1343,6 +1374,15 @@ aspect Flattening {
     }
 
     syn String InstNode.qualifiedTypeName() = qualifiedName();
+   
+    eq InstArrayComponentDecl.qualifiedTypeName(){
+        if (flattenRedeclaredType()) {
+            return surroundingInstClass().qualifiedName() + ":" + getFQName().name();
+        } else {
+            return myInstClass().qualifiedName();
+        }
+    }
+    
     eq InstComponentDecl.qualifiedTypeName() {
         if (flattenRedeclaredType()) {
             return surroundingInstClass().qualifiedName() + ":" + qualifiedName();
@@ -2703,7 +2743,18 @@ aspect FlatExpressions {
     public void FRecordType.clearFlattened() { flattened = false; super.clearFlattened(); }
     public void FFunctionType.clearFlattened() { flattened = false; super.clearFlattened(); }
 
-    public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
+    public FExp InstFunctionCall.flatten(FQName prefix) {
+        if (callsLoadResource() && !inFunction()) {
+            if (isFunctionCallClause()) {
+                ASTNode.CANNOT_EVALUATE_LOADRESOURCE.invoke(this, this, "");
+            } else {
+                try {
+                    return ceval().buildLiteral();
+                } catch (ConstantEvaluationException e) {
+                    ASTNode.CANNOT_EVALUATE_LOADRESOURCE.invoke(this, this, e.getModelicaStackTrace());
+                }
+            }
+        }
         List args = new List();
         for (InstFunctionArgument e : getArgs()) 
             args.add(e.flatten(prefix));
@@ -2711,6 +2762,10 @@ aspect FlatExpressions {
         FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
         return createFFunctionCall(name, args, getFType().flatten(prefix, null, true));
     }
+
+    public static final SimpleProblemProducer ASTNode.CANNOT_EVALUATE_LOADRESOURCE =
+            new SimpleErrorProducer("CANNOT_EVALUATE_LOADRESOURCE", ProblemKind.SEMANTIC,
+                    "Could not evaluate function call which depends on loadResource during flattening: %s%s");
 
     public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
         return setLocationOf(new FFunctionCall(name, args, type));
