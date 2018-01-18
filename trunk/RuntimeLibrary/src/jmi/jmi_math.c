@@ -104,8 +104,27 @@ jmi_real_t jmi_atan2_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char
 }
 
 jmi_real_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
+
     jmi_real_t to_return = pow(x, y);
-	check_pow(jmi, func_name, x, y, msg, to_return);
+    
+    if ((to_return - to_return) != 0) {
+        /* The returned value is not a number */
+        if (jmi == NULL) jmi = jmi_get_current();
+    
+        /* Check that the inputs are in the domain of the function*/
+        if (x > 0 || (x == 0 && y > 0) || (x < 0 && (int)y == y)) {
+            /* Range problem, will return JMI_INF or -JMI_INF */
+            char val[64];
+            sprintf(val, "%.14E, %.14E", x, y);
+            jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
+        } else if (x == 0 && y < 0) {
+            /* Pole error */
+            char val[64];
+            sprintf(val, "%.14E, %.14E", x, y);
+            jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg, val);
+        }
+    }
+    /* jmi_inf_log(jmi, func_name, msg, to_return); */
     return to_return;
 }
 
@@ -115,50 +134,6 @@ jmi_real_t jmi_pow_function(const char func_name[], jmi_real_t x, jmi_real_t y, 
 
 jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char msg[]) {
     return jmi_pow(jmi, NULL, x, y, msg);
-}
-
-void check_pow(jmi_t* jmi, const char func_name[], jmi_real_t x, jmi_real_t y,
-		const char msg[], jmi_real_t to_return) {
-	if ((to_return - to_return) != 0) {
-		/* The returned value is not a number */
-		if (jmi == NULL)
-			jmi = jmi_get_current();
-
-		/* Check that the inputs are in the domain of the function*/
-		if (x > 0 || (x == 0 && y > 0) || (x < 0 && (int) y == y)) {
-			/* Range problem, will return JMI_INF or -JMI_INF */
-			char val[64];
-			sprintf(val, "%.14E, %.14E", x, y);
-			jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
-		} else if (x == 0 && y < 0) {
-			/* Pole error */
-			char val[64];
-			sprintf(val, "%.14E, %.14E", x, y);
-			jmi_log_func_or_eq(jmi, "DivideByZero", func_name, msg, val);
-		}
-	}
-    /* jmi_inf_log(jmi, func_name, msg, to_return); */
-}
-
-void static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
-	*x_pow_y = jmi_pow(jmi, func_name, x, y, msg);
-    if (x == 0 || y > 1) {
-    	*x_pow_der_y = 0;
-    } else if (y == 1) {
-    	*x_pow_der_y = x_der;
-    } else if (y < 1) {
-    	*x_pow_der_y = sign(x_der*y)*JMI_INF
-    } else {
-    	*x_pow_der_y = (*x_pow_y) * (x_der*y/x + y_der*log(jmi_abs(r)));
-    }
-}
-
-void jmi_pow_der_function(const char func_name[], jmi_real_t x_pow_y, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    jmi_pow_der(NULL, func_name, x_pow_y, x, y, x_der, y_der, msg);
-}
-
-void jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x_pow_y, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    jmi_pow_der(jmi, NULL, x_pow_y, x, y, x_der, y_der, msg);
 }
 
 jmi_real_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
