@@ -77,6 +77,16 @@ jmi_real_t jmi_pow_function(const char* name, jmi_real_t x, jmi_real_t y, const 
 jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char* msg);
 
 /**
+ * Function to wrap the derivative of the pow function and report errors to the log, for use in functions.
+ */
+void jmi_pow_der_function(const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]);
+
+/**
+ * Function to wrap the derivative of the pow function and report errors to the log, for use in equations.
+ */
+void jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]);
+
+/**
  * Function to wrap the C exp function and report errors to the log, for use in functions.
  */
 jmi_real_t jmi_exp_function(const char* name, jmi_real_t x, const char* msg);

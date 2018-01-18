@@ -105,20 +105,7 @@ jmi_real_t jmi_atan2_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char
 
 jmi_real_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
     jmi_real_t to_return = pow(x, y);
-	check_pow(jmi, func_name, x, y, msg, to_return);
-    return to_return;
-}
 
-jmi_real_t jmi_pow_function(const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
-    return jmi_pow(NULL, func_name, x, y, msg);
-}
-
-jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char msg[]) {
-    return jmi_pow(jmi, NULL, x, y, msg);
-}
-
-void check_pow(jmi_t* jmi, const char func_name[], jmi_real_t x, jmi_real_t y,
-		const char msg[], jmi_real_t to_return) {
 	if ((to_return - to_return) != 0) {
 		/* The returned value is not a number */
 		if (jmi == NULL)
@@ -138,6 +125,15 @@ void check_pow(jmi_t* jmi, const char func_name[], jmi_real_t x, jmi_real_t y,
 		}
 	}
     /* jmi_inf_log(jmi, func_name, msg, to_return); */
+    return to_return;
+}
+
+jmi_real_t jmi_pow_function(const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
+    return jmi_pow(NULL, func_name, x, y, msg);
+}
+
+jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char msg[]) {
+    return jmi_pow(jmi, NULL, x, y, msg);
 }
 
 void static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
@@ -147,18 +143,18 @@ void static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_re
     } else if (y == 1) {
     	*x_pow_der_y = x_der;
     } else if (y < 1) {
-    	*x_pow_der_y = sign(x_der*y)*JMI_INF
+    	*x_pow_der_y = jmi_sign(x_der*y)*JMI_INF;
     } else {
-    	*x_pow_der_y = (*x_pow_y) * (x_der*y/x + y_der*log(jmi_abs(r)));
+    	*x_pow_der_y = (*x_pow_y) * (x_der*y/x + y_der*log(jmi_abs(x)));
     }
 }
 
-void jmi_pow_der_function(const char func_name[], jmi_real_t x_pow_y, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    jmi_pow_der(NULL, func_name, x_pow_y, x, y, x_der, y_der, msg);
+void jmi_pow_der_function(const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
+    jmi_pow_der(NULL, func_name, x, y, x_der, y_der, x_pow_y, x_pow_der_y, msg);
 }
 
-void jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x_pow_y, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    jmi_pow_der(jmi, NULL, x_pow_y, x, y, x_der, y_der, msg);
+void jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
+    jmi_pow_der(jmi, NULL, x, y, x_der, y_der, x_pow_y, x_pow_der_y, msg);
 }
 
 jmi_real_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
