@@ -154,6 +154,18 @@ class Test_FMUModelBase2:
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
 
+    @testattr(stddist_full = True)
+    def test_set_additional_logger(self):
+        messages = []
+        def my_custom_logger(module, log_level, message):
+            messages.append(message)
+        log_level = 4
+        model = load_fmu(Test_FMUModelBase2.negAliasFmu, log_level=log_level)
+        model.set("_log_level", log_level)
+        model.set_additional_logger(my_custom_logger)
+        model.simulate()
+        assert(len(messages) > 0)
+
 class Test_FMUModelCS2:
     """
     This class tests pyfmi.fmi.FMUModelCS2
