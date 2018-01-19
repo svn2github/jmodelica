@@ -140,7 +140,7 @@ jmi_real_t static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, 
 	jmi_real_t x_pow_y = jmi_pow(jmi, func_name, x, y, msg);
     jmi_real_t to_return;
 	if (x == 0 && y_der == 0 ) {
-		if (x == 0 || y > 1) {
+		if (y > 1) {
 			to_return = 0;
 		} else if (y == 1) {
 			to_return = x_der;
