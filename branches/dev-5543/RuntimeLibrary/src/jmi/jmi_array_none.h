@@ -372,7 +372,19 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 #define JMI_SWAP_STR(DEST,SRC) \
     jmi_swap_string(&(DEST), &(SRC));
 
+/*
+ * Swap the values of the reals.
+ */
 void jmi_swap_real(jmi_real_t *dest, jmi_real_t *src);
+
+/*
+ * Swap the values of the strings.
+ * We don't swap the pointers because they were allocated using different
+ * schemes. dest is in the z-vector and was allocated using plain malloc
+ * and we need to free it explicitly.
+ * src uses the dynamic memory handling and will be deallocated
+ * automatically upon JMI_DYNAMIC_FREE
+ */
 void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src);
 
 /* Handle return value */
