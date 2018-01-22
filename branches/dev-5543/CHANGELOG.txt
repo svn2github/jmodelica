@@ -1,9 +1,9 @@
 ================= Unreleased ==================
+; Change ; Minor ; MSL ; #5546
+Patched MSL resources to take into account the NO_MUTEX define.
+
 ; Feature ; Minor ; PyFMI ; #5545
 Implemented support for injecting custom logging functionality
-
-; Change ; Minor ; Compiler ; #5544
-Moved logic for runtimeparameter encoding.
 
 ; Change ; Minor ; Compiler ; #5542
 Changed license for code generation templates to CPL
