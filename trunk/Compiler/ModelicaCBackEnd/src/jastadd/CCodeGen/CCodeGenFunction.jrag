@@ -21,6 +21,9 @@ aspect CCodeGenFunctionDecl {
     public interface  IOComputation {
         public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, ArrayList<FFunctionVariable> variables);
         public void print(FFunctionVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
+
+        public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
+                String indent, Iterable<FExp> args);
         
         // Added for computation over relation between variables and (expressions or FFunctionCallLeft)
         public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
