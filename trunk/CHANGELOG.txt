@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; PyFMI ; #5548
+Deprecated get_log_file_name in favour of get_log_filename
+
 ; Change ; Minor ; MSL ; #5546
 Patched MSL resources to take into account the NO_MUTEX define.
 
