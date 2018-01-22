@@ -1857,10 +1857,21 @@ aspect InstanceAST_API {
 	eq InstArrayComponentDecl.nameScope() = false;
     eq InstBaseClassDecl.nameScope() = true;
 
-    syn String InstNode.name()  = "";
-    eq InstComponentDecl.name() = getName();
-    eq InstClassDecl.name()     = getClassDecl().name();
-    eq InstExtends.name()       = getClassName().name();
+    syn String InstNode.name()           = "";
+    eq InstComponentDecl.name()          = getName();
+    eq InstClassDecl.name()              = getClassDecl().name();
+    eq InstExtends.name()                = getClassName().name();
+    eq InstArrayComponentDecl.name() {
+        if (isArrayChild() ) {
+            if (ndims() != 0 )  {
+                return getFQName().scalarName(false, true) + myIndex().partIndex(0, myDimension() + 1).toString();
+            }
+            return getFQName().scalarName(false, true);
+        } else {
+            return name();
+        }
+    }
+
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
 
     syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
@@ -1879,11 +1890,11 @@ aspect InstanceAST_API {
     eq InstProgramRoot.qualifiedName()       = "";
     
     eq InstArrayComponentDecl.qualifiedName(){
-           if (isArrayChild()){
-               return super.qualifiedName() + 
-                   myIndex().partIndex(0, myDimension() + 1).toString();
-           }
-           return super.qualifiedName();
+        if (isArrayChild() && ndims()!=0 ){
+            return super.qualifiedName() + 
+                myIndex().partIndex(0, myDimension() + 1).toString();
+        }
+        return super.qualifiedName();
     } 
 
     syn String InstRestriction.qualifiedClassName() = myInstClassDecl().buildQualifiedName();
