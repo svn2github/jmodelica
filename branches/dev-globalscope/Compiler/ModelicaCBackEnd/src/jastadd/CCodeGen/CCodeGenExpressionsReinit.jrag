@@ -32,15 +32,59 @@ aspect CCodeGenExpressionsReinit {
         super.genTempVars_C(p, str, indent);
         p.print(this, str, indent);
     }
+    
+    /*=========================================================================
+     * Reinit Expression Globals
+     ========================================================================*/
+
+    class CGenerator {
+        /**
+         * Generates temporary variables for reinit writebacks
+         */
+        /**
+         * C: C temporary variables for reinit writebacks
+         */
+        public class DAETag_C_reinit_writeback_temps extends DAETag {
+            
+            public DAETag_C_reinit_writeback_temps(AbstractGenerator myGenerator, FClass fclass) {
+                super("C_reinit_temp_decls", myGenerator, fclass);
+                addOptions("generate_ode");
+            }
+    
+            public void generate(CodeStream genPrinter) {
+                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+                    block.genReinitTempDecls_C(ASTNode.printer_C, genPrinter, "");
+            }
+        }
+    
+        /**
+         * Generates temporary variables for reinit writebacks in the initial system
+         */
+        /**
+         * C: C temporary variables for reinit writebacks in the initial system
+         */
+        public class DAETag_C_reinit_writeback_temps_initial extends DAETag {
+            
+            public DAETag_C_reinit_writeback_temps_initial(AbstractGenerator myGenerator, FClass fclass) {
+                super("C_reinit_temp_decls_initial", myGenerator, fclass);
+                addOptions("generate_ode");
+            }
+            
+            public void generate(CodeStream genPrinter) {
+                for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks())
+                    block.genReinitTempDecls_C(ASTNode.printer_C.initialSystemPrinter(), genPrinter, "");
+            }
+        }
+    
+    }
 
     /**
-     * Helper, used for writing temp decl for reinits
+     * Generates temporary variable declarations for storing reinit values.
      */
-    public void FAbstractFunctionCall.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FReinit.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sstatic jmi_real_t %s;", indent, tempName_C());
+    public void AbstractEquationBlock.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
+        for (FAbstractEquation eqn : allEquations()) {
+            eqn.genReinitTempDecls_C(p, str, indent);
+        }
     }
 
     /**
@@ -71,25 +115,25 @@ aspect CCodeGenExpressionsReinit {
     }
 
     /**
-     * Generates temporary variable declarations for storing reinit values.
+     * Helper, used for writing temp decl for reinits
      */
-    public void AbstractEquationBlock.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempDecls_C(p, str, indent);
-        }
-    }
+    public void FAbstractFunctionCall.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
 
     @Override
-    public void FReinit.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, tempName_C());
-        p.print(getVar(), str, indent);
-        str.println(";");
+    public void FReinit.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
+        str.formatln("%sstatic jmi_real_t %s;", indent, tempName_C());
     }
 
     /**
-     * Helper, used for writing temp init for reinits
+     * Generates temporary variable initializaions for storing reinit values.
+     * This should be done in the begining of ode-derivatives and sets the
+     * value to current value.
      */
-    public void FAbstractFunctionCall.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {}
+    public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
+        for (FAbstractEquation eqn : allEquations()) {
+            eqn.genReinitTempInits_C(p, str, indent);
+        }
+    }
 
     /**
      * Helper, used for writing temp init for reinits
@@ -119,16 +163,35 @@ aspect CCodeGenExpressionsReinit {
     }
 
     /**
-     * Generates temporary variable initializaions for storing reinit values.
-     * This should be done in the begining of ode-derivatives and sets the
-     * value to current value.
+     * Helper, used for writing temp init for reinits
      */
-    public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempInits_C(p, str, indent);
-        }
+    public void FAbstractFunctionCall.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
+        
     }
 
+    @Override
+    public void FReinit.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
+        str.format("%s%s = ", indent, tempName_C());
+        p.print(getVar(), str, indent);
+        str.println(";");
+    }
+
+    /**
+     * Generates code that writes back the reinit values to the state. There is
+     * no if guard here, that is controlled from the actual reinit statement.
+     */
+    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
+        Map<String, ArrayList<FReinit>> map = new LinkedHashMap<String, ArrayList<FReinit>>();
+        for (FAbstractEquation eqn : allEquations()) {
+            eqn.collectReinits_C(map, p.inInitialSystem());
+        }
+        for (ArrayList<FReinit> list : map.values()) {
+            for (int i = 0, n = list.size(); i < n; i++) {
+                list.get(i).genReinitWritebacks_C(p, str, indent, i == 0, i == n - 1);
+            }
+        }
+    }
+    
     public void FReinit.genReinitWritebacks_C(
             CodePrinter p, CodeStream str, String indent, boolean first, boolean last) {
         //TODO: This is TEMPORARY, will need a better solution later!
@@ -142,22 +205,6 @@ aspect CCodeGenExpressionsReinit {
         str.format("%s}", indent);
         if (last)
             str.println();
-    }
-
-    /**
-     * Helper, used for finding reinits
-     */
-    public void FAbstractFunctionCall.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
-
-    @Override
-    public void FReinit.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        String key = getVar().toString();
-        ArrayList<FReinit> list = map.get(key);
-        if (list == null) {
-            list = new ArrayList<FReinit>();
-            map.put(key, list);
-        }
-        list.add(this);
     }
 
     /**
@@ -188,19 +235,18 @@ aspect CCodeGenExpressionsReinit {
     }
 
     /**
-     * Generates code that writes back the reinit values to the state. There is
-     * no if guard here, that is controlled from the actual reinit statement.
+     * Helper, used for finding reinits
      */
-    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
-        Map<String, ArrayList<FReinit>> map = new LinkedHashMap<String, ArrayList<FReinit>>();
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.collectReinits_C(map, p.inInitialSystem());
+    public void FAbstractFunctionCall.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
+
+    @Override
+    public void FReinit.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
+        String key = getVar().toString();
+        ArrayList<FReinit> list = map.get(key);
+        if (list == null) {
+            list = new ArrayList<FReinit>();
+            map.put(key, list);
         }
-        for (ArrayList<FReinit> list : map.values()) {
-            for (int i = 0, n = list.size(); i < n; i++) {
-                list.get(i).genReinitWritebacks_C(p, str, indent, i == 0, i == n - 1);
-            }
-        }
+        list.add(this);
     }
-    
 }
