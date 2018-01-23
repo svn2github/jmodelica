@@ -138,7 +138,7 @@ aspect Library {
                     }
                 } else if (name.equalsIgnoreCase(cd.name())) {
                     if (wrongCase == null) {
-                        wrongCase = (ClassDecl) cd;
+                        wrongCase = cd;
                     }
                 }
             }
