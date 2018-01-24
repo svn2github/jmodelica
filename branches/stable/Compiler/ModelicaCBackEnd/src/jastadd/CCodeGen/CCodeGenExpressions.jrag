@@ -14,6 +14,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Arrays;
+
 aspect CCodeGenExpressions {
     /*=========================================================================
      * Simple Expressions
@@ -338,6 +340,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FTerminate.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempVars_C(p, str, indent);
         p.print(this, str, indent);
     }
 
@@ -399,21 +402,36 @@ aspect CCodeGenExpressions {
     /**
      * Helper, prints jmi guard around an operator
      */
-    protected void FExp.prettyPrintGuarded_C(CodePrinter p, CodeStream str, String indent, FExp ... exps) {
-        boolean func = inFunction();
+    protected void FExp.prettyPrintGuarded(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ... exps) {
+        new RuntimeCallComputation(p, "").prettyPrintHead(p, str, indent, this, exps);
+    }
+
+    protected void RuntimeCallComputation.prettyPrintHead(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ctx, FExp[] inputs) {
+        boolean func = ctx.inFunction();
         str.print("jmi_");
-        str.print(guardedFunctionName_C());
+        str.print(p.guardedFunctionName(ctx));
         str.print(func ? "_function(" : "_equation(");
-        str.print(func ? "\"" + containingFFunctionDecl().name() + "\", ": "jmi, ");
-        for (FExp exp : exps) {
-            p.print(exp, str, indent);
-            str.print(",");
-        }
+        str.print(func ? "\"" + ctx.containingFFunctionDecl().name() + "\", ": "jmi, ");
+        p.codePrinter().print(this, str, indent, Arrays.asList(inputs));
+        str.print(",");
         str.print('"');
         CStringCodeStream tstr = new CStringCodeStream(str);
-        prettyPrint(tstr, "");
+        ctx.prettyPrint(tstr, "");
         tstr.close();
         str.print("\")");
+    }
+    
+/**
+ * Computes the parameters to use when calling a function defined in the runtime
+ * Unlike a normal ParameterComputation, the number of parameters also depend on
+ * the ExecuteStep of the surrounding context.
+ */
+    public class RuntimeCallComputation extends ParameterComputation {
+            protected CodePrinter.ExecuteCodePrinter exp_p;
+        public RuntimeCallComputation(CodePrinter.ExecuteCodePrinter exp_p, String sep) {
+            super(null, sep);
+            this.exp_p = exp_p;
+        }
     }
 
     /**
@@ -423,6 +441,32 @@ aspect CCodeGenExpressions {
     eq FDotDivExp.guardedFunctionName_C()           = "divide";
     eq FDotPowExp.guardedFunctionName_C()           = "pow";
     eq FBuiltInFunctionCall.guardedFunctionName_C() = builtInName();
+
+    public abstract void CodePrinter.print(IOComputation ioc, CodeStream str, String indent,
+            Iterable<FExp> args);
+    
+    @Override
+    public void CPrettyPrinter.print(IOComputation ioc, CodeStream str, String indent,
+            Iterable<FExp> args) {
+        ioc.print(ExecStep, str, indent, args);
+    }
+
+    public void HeadComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            String indent, Iterable<FExp> args) {}
+
+    @Override
+    public void RuntimeCallComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            String indent, Iterable<FExp> args) {
+        if(!p.isDer() || p.isDer() && exp_p.isDer()) {
+            int i = 0;
+            for (FExp arg : args) {
+                str.print(sep);
+                p.print(arg, str, indent);
+                sep = ",";
+                i++;
+            }
+        }
+    }
 
     @Override
     public void FDotPowExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -442,43 +486,43 @@ aspect CCodeGenExpressions {
             }
             str.print(")");
         } else {
-            prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+            prettyPrintGuarded(p.ExecStep, str, indent, getLeft(), getRight());
         }
     }
 
     @Override
     public void FExpExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
 
     @Override
     public void  FLogExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
 
     @Override
     public void  FLog10Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
 
     @Override
     public void  FSinhExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
 
     @Override
     public void  FCoshExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
 
     @Override
     public void  FTanExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp());
     }
 
     @Override
     public void FAtan2Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getFExp(), getY());
+        prettyPrintGuarded(p.ExecStep, str, indent, getFExp(), getY());
     }
 
     /**
@@ -492,7 +536,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDotDivExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        prettyPrintGuarded_C(p, str, indent, getLeft(), getRight());
+        prettyPrintGuarded(p.ExecStep, str, indent, getLeft(), getRight());
     }
 
     /*=========================================================================
@@ -502,27 +546,59 @@ aspect CCodeGenExpressions {
     /**
      * Helper method that prints the variable reference for assignment (LHS).
      */
-    public void FIdUseExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
+    public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genAssignedRef(myFV(), p, str, indent);
+    }
+
+    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         p.print(getFIdUse(), str, "");
     }
 
     @Override
-    public void FAbstractDerExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(myFV().name_C());
+    public void FAbstractDerExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(p.name(myFV()));
+    }
+
+    public void FAlgorithm.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        str.print(p.name(v));
+    }
+
+    public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genScaledAssignedRef(myFV(), p, str, indent);
+    }
+
+    syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
+    syn boolean FExp.needsScaling() = type().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction();
+
+    public void FIdUseExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (needsScaling()) {
+            str.print("(");
+            genAssignedRef(v, p, str, indent);
+            str.print("*sf(");
+            str.print(v.valueReference());
+            str.print("))");
+        } else {
+            genAssignedRef(v, p, str, indent);
+        }
+    }
+
+    public void FAlgorithm.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        if (v.needsScaling(this)) {
+            str.print("(");
+            genAssignedRef(v, p, str, indent);
+            str.print("*sf(");
+            str.print(v.valueReference());
+            str.print("))");
+        } else {
+            genAssignedRef(v, p, str, indent);
+        }
     }
 
     @Override
     public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (type().isReal() && !inFunction() && myOptions().getBooleanOption("enable_variable_scaling")) {
-            str.print("(");
-            genAssignedRef_C(p, str, indent);
-            str.print("*sf(");
-            str.print(myFV().valueReference());
-            str.print("))");
-        } else {
-            genAssignedRef_C(p, str, indent);
-        }
+        genScaledAssignedRef(p.ExecStep, str, indent);
     }
+
 
     @Override
     public void FDSRefExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -531,7 +607,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDSDerExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sjmi_real_t %s;", indent, tempName_C());
+        p.print(this, indent, type(), p.createDeclPrinter(str));
     }
 
     @Override
@@ -551,23 +627,10 @@ aspect CCodeGenExpressions {
             FExp valueExp = getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1);
             p.printVarDecls(valueExp, str, indent);
             p.printPreSteps(valueExp, str, indent);
-            p.genDynamicState_derivativeWriteBack(this, valueExp, str, innerIndent);
+            p.printAssign(type(), str, innerIndent, this, valueExp);
             p.printPostSteps(valueExp, str, indent);
         }
         str.formatln("%s}", indent);
-    }
-
-    public abstract class CodePrinter {
-        public abstract void genDynamicState_derivativeWriteBack(FDSDerExp derExp, FExp use, CodeStream str, String indent);
-    }
-
-    public class CPrettyPrinter {
-        @Override
-        public void genDynamicState_derivativeWriteBack(FDSDerExp derExp, FExp use, CodeStream str, String indent) {
-            str.format("%s%s = ", indent, derExp.tempName_C());
-            print(use, str, indent);
-            str.println(";");
-        }
     }
 
     @Override
@@ -1357,6 +1420,7 @@ aspect CCodeGenExpressions {
     }
 
     syn boolean FExp.needsTemp(CodePrinter p) = isComposite();
+    eq     FDSDerExp.needsTemp(CodePrinter p) = true;
     syn boolean FFunctionCall.needsTemp_C(CodePrinter p) =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());

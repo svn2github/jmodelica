@@ -49,7 +49,7 @@ aspect RuntimeOptions {
                 OptionRegistry opt = myOptions();
                 for (String key : opt.getRuntimeOptionKeys()) {
                     FVariable v = null;
-                    String name = "_" + key;
+                    String name = OptionRegistry.getFMUXMLName(key);
                     if (opt.isBooleanOption(key))
                         v = createBooleanRuntimeOptionParameter(name, opt.getBooleanOption(key));
                     else if (opt.isStringOption(key))

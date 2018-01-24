@@ -3330,12 +3330,6 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCallLeft()            = false;
     eq InstRoot.getChild().inFunctionCallLeft()          = false;
     
-    inh boolean FExp.inFunctionCallLeftTop();
-    eq FFunctionCallLeft.getChild().inFunctionCallLeftTop() = true;
-    eq FExp.getChild().inFunctionCallLeftTop()              = false;
-    eq FClass.getChild().inFunctionCallLeftTop()            = false;
-    eq InstRoot.getChild().inFunctionCallLeftTop()          = false;
-    
     /**
      * Checks if this expression is used in a function call
      */

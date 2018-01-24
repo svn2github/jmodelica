@@ -112,7 +112,14 @@ aspect StepPrinter {
                 return v.type_C(codePrinter());
             }
             
+            public String tempName(FAbstractVariable v, TempScope ts) {
+                return ts.tempName_C(v);
+            }
             
+            public String guardedFunctionName(FExp exp) {
+                return exp.guardedFunctionName_C();
+            }
+
             public String residual() {
                 return "res";
             }

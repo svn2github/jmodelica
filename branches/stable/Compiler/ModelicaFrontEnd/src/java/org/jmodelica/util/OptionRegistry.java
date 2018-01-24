@@ -1428,7 +1428,7 @@ abstract public class OptionRegistry {
         }
         return o.getOptionType();
     }
-
+    
     public Category getCategory(String key){
         Option<?> o = optionsMap.get(key);
         if(o == null) {
@@ -1836,6 +1836,20 @@ abstract public class OptionRegistry {
      */
     public static String capitalize(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+    
+    /**
+     * Give the exact name of a runtime option when encoded in FMU XML.
+     * 
+     * @param key
+     *         The key to (name of) the runtime option.  
+     * @return
+     *         The exact name for {@code key} when encoded in
+     *         the FMU XML.
+     *          
+     */
+    public static String getFMUXMLName(String key) {
+        return "_" + key;
     }
 
     /**

@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect CCodeGenExternal {
     
+    syn String FExp.alias() = myCodeGenContext().alias(prettyPrint_C());
+
     /**
      * Generates temporaries for an argument to an external function when necessary.
      */
@@ -126,7 +128,7 @@ aspect CCodeGenExternal {
         if (useTempVar) {
             str.print(tempName_C());
         } else {
-            str.print(myCodeGenContext().alias(prettyPrint_C()));
+            str.print(alias());
         }
         if (isArray()) {
             str.print("->var");
@@ -144,7 +146,7 @@ aspect CCodeGenExternal {
         if (useTempVar) {
             str.print(tempName_C());
         } else {
-            str.print(myCodeGenContext().alias(prettyPrint_C()));
+            str.print(alias());
         }
         if (isArray()) {
             str.print("->var");
@@ -153,7 +155,7 @@ aspect CCodeGenExternal {
 
     @Override
     public void FSizeExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
-        str.print(myCodeGenContext().alias(prettyPrint_C()));
+        str.print(alias());
     }
     
 }

@@ -834,12 +834,12 @@ equation
     der(z) = integer(time);
     der(z) = x;
         
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="MultipleSolvedRealInAlgorithm",
-            description="Test bug in #5252",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="MultipleSolvedRealInAlgorithm",
+        description="Test bug in #5252",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -970,13 +970,13 @@ equation
     der(z) = integer(time);
     der(z) = x;
         
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="MultipleSolvedRealInAlgorithm2",
-            description="",
-            generate_sparse_block_jacobian_threshold=0,
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="MultipleSolvedRealInAlgorithm2",
+        description="",
+        generate_sparse_block_jacobian_threshold=0,
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;

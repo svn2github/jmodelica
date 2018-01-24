@@ -1374,6 +1374,15 @@ aspect Flattening {
     }
 
     syn String InstNode.qualifiedTypeName() = qualifiedName();
+   
+    eq InstArrayComponentDecl.qualifiedTypeName(){
+        if (flattenRedeclaredType()) {
+            return surroundingInstClass().qualifiedName() + ":" + getFQName().name();
+        } else {
+            return myInstClass().qualifiedName();
+        }
+    }
+    
     eq InstComponentDecl.qualifiedTypeName() {
         if (flattenRedeclaredType()) {
             return surroundingInstClass().qualifiedName() + ":" + qualifiedName();

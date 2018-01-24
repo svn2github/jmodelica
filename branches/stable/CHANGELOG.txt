@@ -1,3 +1,24 @@
+================= Stable-2018-01-24 ==================
+; Change ; Minor ; PyFMI ; #5548
+Deprecated get_log_file_name in favour of get_log_filename
+
+; Change ; Minor ; MSL ; #5546
+Patched MSL resources to take into account the NO_MUTEX define.
+
+; Feature ; Minor ; PyFMI ; #5545
+Implemented support for injecting custom logging functionality
+
+; Change ; Minor ; Compiler ; #5542
+Changed license for code generation templates to CPL
+
+; Fixed ; Minor ; Compiler ; #5539
+Changed how qualifiedname works for multidimensional arrays by adding 
+ special case for InstArrayComponentDecl. 
+
+; Feature ; Minor ; PyFMI ; #5537
+Added the possibility to retrieve unit and display unit name for FMI2 
+and also its value in the display unit.
+
 ================= Stable-2018-01-12 ==================
 ; Feature ; Major ; Compiler; #4797 
 Full string support

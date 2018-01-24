@@ -332,14 +332,14 @@ aspect CCodeGenTypes {
         }
         protected void printNumElements(FType type) {
             if (external && dynamic())
-                type.size().printNumElements_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C()));
+                type.size().printNumElements_C(p, str, indent(), src.alias());
             else
                 type.size().printNumElements_C(p, str, indent(), src);
         }
         protected void printDimensions(FType type) {
             str.print(", ");
             if (external && dynamic())
-                type.size().printDimensions_C(p, str, indent(), src.myCodeGenContext().alias(src.prettyPrint_C()));
+                type.size().printDimensions_C(p, str, indent(), src.alias());
             else
                 type.size().printDimensions_C(p, str, indent(), src);
         }
