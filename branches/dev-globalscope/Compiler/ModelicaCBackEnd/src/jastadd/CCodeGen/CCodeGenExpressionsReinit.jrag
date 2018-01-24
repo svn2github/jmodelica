@@ -75,53 +75,15 @@ aspect CCodeGenExpressionsReinit {
                     block.genReinitTempDecls_C(ASTNode.printer_C.initialSystemPrinter(), genPrinter, "");
             }
         }
-    
     }
 
     /**
      * Generates temporary variable declarations for storing reinit values.
      */
     public void AbstractEquationBlock.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempDecls_C(p, str, indent);
+        for (FReinit r : collectReinits_C(p)) {
+            str.print(indent, "static jmi_real_t ", r.tempName_C(), ";\n");
         }
-    }
-
-    /**
-     * Helper, used for writing temp decl for reinits
-     */
-    public void FAbstractEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FFunctionCallEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitTempDecls_C(p, str, indent);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!isWhen() || !p.inInitialSystem() || getTest().isInitialGuard()) {
-            super.genReinitTempDecls_C(p, str, indent);
-        }
-        if (hasElse()) {
-            getElse().genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    /**
-     * Helper, used for writing temp decl for reinits
-     */
-    public void FAbstractFunctionCall.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FReinit.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sstatic jmi_real_t %s;", indent, tempName_C());
     }
 
     /**
@@ -130,50 +92,11 @@ aspect CCodeGenExpressionsReinit {
      * value to current value.
      */
     public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempInits_C(p, str, indent);
+        for (FReinit r : collectReinits_C(p)) {
+            str.print(indent, r.tempName_C(), " = ");
+            p.print(r.getVar(), str, indent);
+            str.print(";\n");
         }
-    }
-
-    /**
-     * Helper, used for writing temp init for reinits
-     */
-    public void FAbstractEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FFunctionCallEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitTempInits_C(p, str, indent);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
-            super.genReinitTempInits_C(p, str, indent);
-        }
-        if (hasElse()) {
-            getElse().genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    /**
-     * Helper, used for writing temp init for reinits
-     */
-    public void FAbstractFunctionCall.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        
-    }
-
-    @Override
-    public void FReinit.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, tempName_C());
-        p.print(getVar(), str, indent);
-        str.println(";");
     }
 
     /**
@@ -181,9 +104,15 @@ aspect CCodeGenExpressionsReinit {
      * no if guard here, that is controlled from the actual reinit statement.
      */
     public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
-        Map<String, ArrayList<FReinit>> map = new LinkedHashMap<String, ArrayList<FReinit>>();
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.collectReinits_C(map, p.inInitialSystem());
+        Map<String, ArrayList<FReinit>> map = new LinkedHashMap<>();
+        for (FReinit r : collectReinits_C(p)) {
+            String key = r.getVar().toString();
+            ArrayList<FReinit> list = map.get(key);
+            if (list == null) {
+                list = new ArrayList<>();
+                map.put(key, list);
+            }
+            list.add(r);
         }
         for (ArrayList<FReinit> list : map.values()) {
             for (int i = 0, n = list.size(); i < n; i++) {
@@ -210,43 +139,50 @@ aspect CCodeGenExpressionsReinit {
     /**
      * Helper, used for finding reinits
      */
-    public void FAbstractEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
+    public Iterable<FReinit> AbstractEquationBlock.collectReinits_C(CodePrinter p) {
+        ArrayList<FReinit> res = new ArrayList<>();
+        for (FAbstractEquation eqn : allEquations()) {
+            eqn.collectReinits_C(p, res);
+        }
+        return res;
+    }
+    
+    /**
+     * Helper, used for finding reinits
+     */
+    public void FAbstractEquation.collectReinits_C(CodePrinter p, Collection<FReinit> res) {}
 
     @Override
-    public void FFunctionCallEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        getCall().collectReinits_C(map, initial);
+    public void FFunctionCallEquation.collectReinits_C(CodePrinter p, Collection<FReinit> res) {
+        getCall().collectReinits_C(p, res);
     }
 
     @Override
-    public void FIfWhenElseEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
+    public void FIfWhenElseEquation.collectReinits_C(CodePrinter p, Collection<FReinit> res) {
         for (FAbstractEquation e : getFAbstractEquations()) {
-            e.collectReinits_C(map, initial);
+            e.collectReinits_C(p, res);
         }
     }
 
     @Override
-    public void FIfWhenEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        if (!initial || getTest().isInitialGuard()) {
-            super.collectReinits_C(map, initial);
+    public void FIfWhenEquation.collectReinits_C(CodePrinter p, Collection<FReinit> res) {
+        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
+            super.collectReinits_C(p, res);
         }
         if (hasElse()) {
-            getElse().collectReinits_C(map, initial);
+            getElse().collectReinits_C(p, res);
         }
     }
 
     /**
      * Helper, used for finding reinits
      */
-    public void FAbstractFunctionCall.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
+    public void FAbstractFunctionCall.collectReinits_C(CodePrinter p, Collection<FReinit> res) {
+        
+    }
 
     @Override
-    public void FReinit.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        String key = getVar().toString();
-        ArrayList<FReinit> list = map.get(key);
-        if (list == null) {
-            list = new ArrayList<FReinit>();
-            map.put(key, list);
-        }
-        list.add(this);
+    public void FReinit.collectReinits_C(CodePrinter p, Collection<FReinit> res) {
+        res.add(this);
     }
 }
