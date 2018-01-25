@@ -8443,7 +8443,6 @@ equation
             name="WhenTest14",
             description="Ensure that no temporaries for non-initial when inside if clause isn't generated'",
             template="
-$C_reinit_temp_decls_initial$
 $C_ode_initialization$
 ",
             generatedCode="
@@ -12963,7 +12962,7 @@ $C_dae_blocks_residual_functions$
             generatedCode="
     jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 2, 1, 0, 2, 2, 0, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
-static jmi_real_t tmp_1;
+    jmi_real_t tmp_1;
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -13026,7 +13025,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_5 = LOG_EXP_AND(_b_4, LOG_EXP_NOT(pre_b_4));
         }
         if (LOG_EXP_AND(_temp_1_5, LOG_EXP_NOT(pre_temp_1_5))) {
-            tmp_1 = AD_WRAP_LITERAL(1);
+            JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
         }
         _zz_3 = - _y_1 + 0.1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {

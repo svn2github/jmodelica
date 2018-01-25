@@ -22,7 +22,7 @@ aspect CCodeGenExpressionsReinit {
 
     @Override
     public void FReinit.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, tempName_C());
+        str.format("%s%s = ", indent, globalTemp_C());
         p.print(getFExp(), str, indent);
         str.println(";");
     }
@@ -37,6 +37,10 @@ aspect CCodeGenExpressionsReinit {
      * Reinit Expression Globals
      ========================================================================*/
 
+    public String FReinit.globalTemp_C() {
+        return "JMI_GLOBAL(" + tempName_C() + ")";
+    }
+    
     class CGenerator {
         /**
          * Generates temporary variables for reinit writebacks
@@ -50,29 +54,17 @@ aspect CCodeGenExpressionsReinit {
                 super("C_reinit_temp_decls", myGenerator, fclass);
                 addOptions("generate_ode");
             }
-    
-            public void generate(CodeStream genPrinter) {
-                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genReinitTempDecls_C(ASTNode.printer_C, genPrinter, "");
-            }
-        }
-    
-        /**
-         * Generates temporary variables for reinit writebacks in the initial system
-         */
-        /**
-         * C: C temporary variables for reinit writebacks in the initial system
-         */
-        public class DAETag_C_reinit_writeback_temps_initial extends DAETag {
             
-            public DAETag_C_reinit_writeback_temps_initial(AbstractGenerator myGenerator, FClass fclass) {
-                super("C_reinit_temp_decls_initial", myGenerator, fclass);
-                addOptions("generate_ode");
-            }
-            
-            public void generate(CodeStream genPrinter) {
-                for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks())
-                    block.genReinitTempDecls_C(ASTNode.printer_C.initialSystemPrinter(), genPrinter, "");
+            public void generate(CodeStream str) {
+                CodePrinter p = ASTNode.printer_C;
+                String indent = "";
+                String next = p.indent(indent);
+                for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks()) {
+                    block.genReinitTempDecls_C(p, str, next);
+                }
+                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
+                    block.genReinitTempDecls_C(p, str, next);
+                }
             }
         }
     }
@@ -82,7 +74,7 @@ aspect CCodeGenExpressionsReinit {
      */
     public void AbstractEquationBlock.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
         for (FReinit r : collectReinits_C(p)) {
-            str.print(indent, "static jmi_real_t ", r.tempName_C(), ";\n");
+            str.print(indent, "jmi_real_t ", r.tempName_C(), ";\n");
         }
     }
 
@@ -93,7 +85,7 @@ aspect CCodeGenExpressionsReinit {
      */
     public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
         for (FReinit r : collectReinits_C(p)) {
-            str.print(indent, r.tempName_C(), " = ");
+            str.print(indent, r.globalTemp_C(), " = ");
             p.print(r.getVar(), str, indent);
             str.print(";\n");
         }
@@ -124,12 +116,12 @@ aspect CCodeGenExpressionsReinit {
     public void FReinit.genReinitWritebacks_C(
             CodePrinter p, CodeStream str, String indent, boolean first, boolean last) {
         //TODO: This is TEMPORARY, will need a better solution later!
-        str.format("%sif (%s != ", (first ? indent : " else "), tempName_C());
+        str.format("%sif (%s != ", (first ? indent : " else "), globalTemp_C());
         p.print(getVar(), str, indent);
         str.println(") {");
         str.print(p.indent(indent));
         p.print(getVar(), str, indent);
-        str.formatln(" = %s;", tempName_C());
+        str.formatln(" = %s;", globalTemp_C());
         str.formatln("%sjmi->reinit_triggered = 1;", p.indent(indent));
         str.format("%s}", indent);
         if (last)
