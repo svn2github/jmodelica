@@ -494,6 +494,7 @@ aspect CCodeGenFunctionCall {
         if (!p.shouldPrintFuncDecl(this)) {
             return;
         }
+        str.print(indent);
         new ParameterComputation(derivativeAnnotationUnrestricted(), "") {
             @Override
             public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
