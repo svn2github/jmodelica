@@ -1,4 +1,6 @@
 ================= Unreleased ==================
+
+================= Stable-2018-01-24 ==================
 ; Change ; Minor ; PyFMI ; #5548
 Deprecated get_log_file_name in favour of get_log_filename
 
