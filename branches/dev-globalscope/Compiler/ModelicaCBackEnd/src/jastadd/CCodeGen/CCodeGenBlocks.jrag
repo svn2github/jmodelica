@@ -408,62 +408,8 @@ aspect CCodeGenBlocks {
                 assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
     }
 
-}
-
-aspect BlockSetup {
-
     public String AbstractEquationBlock.genBlockResidualFunctionName_C(CodePrinter p) {
         return "dae_" + (p.inInitialSystem() ? "init_": "") + "block_" + getSequenceNumber();
-    }
-
-    public String AbstractEquationBlock.genBlockResidualSetUpFunctionName_C(CodePrinter p) {
-        return genBlockResidualFunctionName_C(p) + "_set_up";
-    }
-
-    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String outerIndent) {
-        if (setupNodes().size() > 0) {
-            str.formatln("%s%s(jmi);", outerIndent, genBlockResidualSetUpFunctionName_C(p));
-        }
-    }
-    
-    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String outerIndent) {
-        if (setupNodes().size() > 0) {
-            String indent = p.indent(outerIndent);
-            for (FFunctionCall call : setupNodes()) {
-                call.genStaticVarDecls_C(p, str, outerIndent);
-            }
-            str.format("%sstatic void %s(jmi_t* jmi) {\n", outerIndent, genBlockResidualSetUpFunctionName_C(p));
-            for (FFunctionCall call : setupNodes()) {
-                call.genStaticTempVars_C(p, str, indent);
-            }
-            str.format("%s}\n\n", outerIndent);
-        }
-    }
-    
-    private Collection<FFunctionCall> AbstractEquationBlock.setupNodes = null;
-    public Collection<FFunctionCall> AbstractEquationBlock.setupNodes() {
-        if (setupNodes == null) {
-            setupNodes = new LinkedHashSet<FFunctionCall>();
-            for (AbstractEquationBlock b : blockResidualBlocks()) {
-                for (ASTNode n : b.blockResidualNodes()) {
-                    n.gatherBlockSetupNodes(blockPrinter(), setupNodes);
-                }
-            }
-        }
-        return setupNodes;
-    }
-    
-    public void ASTNode.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
-        for (ASTNode n : this) {
-            n.gatherBlockSetupNodes(p, res);
-        }
-    }
-
-    public void FFunctionCall.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
-        super.gatherBlockSetupNodes(p, res);
-        if (impureCodeGen(p)) {
-            res.add(this);
-        }
     }
 
     public void AbstractEquationBlock.genEvalModeValueReferences_C(CodePrinter p, CodeStream str, String indent, 
@@ -544,8 +490,6 @@ aspect BlockSetup {
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
             subBlock.genBlockResidualFunction(p, str, outerIndent, generateSparseThreshold);
 
-        p.genBlockResidualSetUpFunctionDecl(this, p, str, outerIndent);
-
         genBlockResidualFunctionSignature(p, str, outerIndent);
 
         String indent = p.indent(outerIndent);
@@ -565,7 +509,6 @@ aspect BlockSetup {
 	}
 
     public abstract class CodePrinter {
-        public abstract void genBlockResidualSetUpFunctionDecl(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent);
         public abstract void genBlockResidualFunctionName(AbstractEquationBlock block, CodePrinter p, CodeStream str);
         public abstract void genBlockResidualFunctionArgumentList(AbstractEquationBlock block, CodePrinter p, CodeStream str);
         public abstract void genBlockResidualFunctionVectorDecls(AbstractEquationBlock block, CodePrinter p, CodeStream str, String indent);
@@ -573,10 +516,6 @@ aspect BlockSetup {
     }
 
     public class CPrettyPrinter {
-        @Override
-        public void genBlockResidualSetUpFunctionDecl(AbstractEquationBlock block, CodePrinter p, CodeStream str, String outerIndent) {
-            block.genBlockResidualSetUpFunctionDecl_C(p, str, outerIndent);
-        }
         @Override
         public void genBlockResidualFunctionVectorDecls(AbstractEquationBlock block, CodePrinter p, CodeStream str, String indent) {
             block.genBlockResidualFunctionVectorDecls_C(p, str, indent);
