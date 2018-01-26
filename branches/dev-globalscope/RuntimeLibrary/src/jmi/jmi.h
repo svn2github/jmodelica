@@ -464,7 +464,7 @@ struct jmi_t {
 
     jmi_dynamic_function_memory_t* dyn_fcn_mem;
     
-    void*                                /**< \brief Global temporaries used in generated code */
+    void* globals;                       /**< \brief Global temporaries used in generated code */
 };
 
 /**

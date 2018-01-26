@@ -86,6 +86,6 @@ $C_function_headers$
 $CAD_function_headers$
 
 typedef struct jmi_globals {
-$C_reinit_temp_decls$
+$C_global_temps$
 } jmi_globals_t;
 #define JMI_GLOBAL(v) (((jmi_globals_t)jmi->globals)->v)

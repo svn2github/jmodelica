@@ -15,7 +15,9 @@
 */
 
 
-package CCodeGenExpressionsReinitTests
+package CCodeGenGlobalsTests
+
+package Reinit
 
 model ReinitCTest1
     Real x;
@@ -32,7 +34,7 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 -----
@@ -132,7 +134,7 @@ equation
             description="",
             variability_propagation=false,
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 -----
@@ -278,7 +280,7 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 -----
@@ -411,7 +413,7 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 -----
@@ -423,17 +425,18 @@ $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
     jmi_real_t tmp_1;
-
+    JMI_DEF(REA, tmp_2)
+    int tmp_2_computed = 0;
 -----
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
     JMI_GLOBAL(tmp_1) = _x_0;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
-    jmi_array_ref_1(tmp_2, 1) = _time;
-    _der_x_3 = func_CCodeGenExpressionsReinitTests_ReinitCTest4_f_exp0(tmp_2);
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    jmi_array_ref_1(tmp_3, 1) = _time;
+    _der_x_3 = func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_3);
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (2), _sw(0), JMI_REL_GT);
     }
@@ -452,10 +455,10 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
-    jmi_array_ref_1(tmp_2, 1) = _time;
-    _der_x_3 = func_CCodeGenExpressionsReinitTests_ReinitCTest4_f_exp0(tmp_2);
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 1, 1, 1)
+    jmi_array_ref_1(tmp_3, 1) = _time;
+    _der_x_3 = func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_3);
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (2), _sw(0), JMI_REL_GT);
     }
@@ -467,10 +470,8 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 -----
-static JMI_DEF(REA, tmp_3)
-static int tmp_3_computed = 0;
 static void dae_block_0_set_up(jmi_t* jmi) {
-    tmp_3_computed = 0;
+    JMI_GLOBAL(tmp_2_computed) = 0;
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -495,7 +496,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
             jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1);
-            JMI_GLOBAL(tmp_1) = JMI_CACHED(tmp_3, func_CCodeGenExpressionsReinitTests_ReinitCTest4_f_exp0(tmp_4));
+            JMI_GLOBAL(tmp_1) = JMI_CACHED(JMI_GLOBAL(tmp_2), func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_4));
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
@@ -525,7 +526,7 @@ equation
             name="ReinitCTest5",
             description="Test the reinit operator in the initial system",
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 -----
@@ -593,7 +594,7 @@ equation
             name="ReinitCTest6",
             description="Test the reinit operator in the initial system",
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 -----
@@ -698,7 +699,7 @@ equation
             name="ReinitCTest7",
             description="Reinit of same var in different elsewhen branches",
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 ",
@@ -760,7 +761,7 @@ equation
             name="ReinitCTest8",
             description="Reinit of same var in different elsewhen branches, check grouping of several sets of reinits",
             template="
-$C_reinit_temp_decls$
+$C_global_temps$
 -----
 $C_ode_derivatives$
 ",
@@ -828,4 +829,165 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end ReinitCTest8;
 
-end CCodeGenExpressionsReinitTests;
+end Reinit;
+
+package WhenTestCache
+
+model WhenTestCache1
+    function f
+        input Real x;
+        output Real y = x;
+        algorithm
+        annotation(Inline=false);
+    end f;
+    
+    discrete Real y;
+initial equation
+    y = 0;
+equation
+    when time > 1 then
+        y = f(time);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTestCache1",
+            description="",
+            template="
+$C_global_temps$
+$C_ode_derivatives$
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+    JMI_DEF(REA, tmp_1)
+    int tmp_1_computed = 0;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    dae_block_0_set_up(jmi);
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+static void dae_block_0_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_1_computed) = 0;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _temp_1_1 = _sw(0);
+        }
+        _y_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)), JMI_TRUE, JMI_CACHED(JMI_GLOBAL(tmp_1), func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache1_f_exp0(_time)), pre_y_0);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end WhenTestCache1;
+
+model WhenTestCache2
+    function f
+        input Real x;
+        output Real y = x;
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y, x;
+equation
+    when time > 1 then
+        y = f(time + x);
+        x = f(time + y);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTestCache2",
+            description="",
+            template="
+$C_global_temps$
+$C_ode_derivatives$
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 3;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 3;
+        x[1] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_0;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_0 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _temp_1_2 = _sw(0);
+        }
+        _x_1 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache2_f_exp0(_time + _y_0), pre_x_1);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache2_f_exp0(_time + _x_1), pre_y_0) - (_y_0);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end WhenTestCache2;
+
+end WhenTestCache;
+
+end CCodeGenGlobalsTests;

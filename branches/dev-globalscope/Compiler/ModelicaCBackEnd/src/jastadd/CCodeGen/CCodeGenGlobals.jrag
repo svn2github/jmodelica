@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2016-2018 Modelon AB
-
+Copyright (C) 2009-2017 Modelon AB
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3 of the License.
@@ -14,58 +13,108 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect CCodeGenExpressionsReinit {
-
-    /*=========================================================================
-     * Reinit Expression
-     ========================================================================*/
-
-    @Override
-    public void FReinit.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, globalTemp_C());
-        p.print(getFExp(), str, indent);
-        str.println(";");
-    }
-
-    @Override
-    public void FReinit.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        super.genTempVars_C(p, str, indent);
-        p.print(this, str, indent);
-    }
-    
-    /*=========================================================================
-     * Reinit Expression Globals
-     ========================================================================*/
-
-    public String FReinit.globalTemp_C() {
-        return "JMI_GLOBAL(" + tempName_C() + ")";
-    }
-    
+aspect CCodeGenGlobals {
     class CGenerator {
         /**
-         * Generates temporary variables for reinit writebacks
+         * Generates global temporary variables
          */
-        /**
-         * C: C temporary variables for reinit writebacks
-         */
-        public class DAETag_C_reinit_writeback_temps extends DAETag {
+        public class DAETag_C_global_temps extends DAETag {
             
-            public DAETag_C_reinit_writeback_temps(AbstractGenerator myGenerator, FClass fclass) {
-                super("C_reinit_temp_decls", myGenerator, fclass);
+            public DAETag_C_global_temps(AbstractGenerator myGenerator, FClass fclass) {
+                super("C_global_temps", myGenerator, fclass);
                 addOptions("generate_ode");
             }
             
             public void generate(CodeStream str) {
                 CodePrinter p = ASTNode.printer_C;
-                String indent = "";
-                String next = p.indent(indent);
+                String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks()) {
-                    block.genReinitTempDecls_C(p, str, next);
+                    block.genReinitTempDecls_C(p, str, indent);
                 }
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-                    block.genReinitTempDecls_C(p, str, next);
+                    block.genReinitTempDecls_C(p, str, indent);
+                }
+                for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
+                    block.genSetupNodeDecls_C(p, str, indent);
+                    
                 }
             }
+        }
+    }
+
+    public static String FExp.global_C(String name) {
+        return "JMI_GLOBAL(" + name + ")";
+    }
+}
+
+aspect CCodeGenGlobalsCached {
+
+    syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
+            inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
+    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
+
+    public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        type().printScalarDecl_C(p, str, indent, false, tempName_C());
+        str.print(indent, "int ", tempNameComputed_C(), " = 0;\n");
+    }
+
+    public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, FExp.global_C(tempNameComputed_C()), " = 0;\n");
+    }
+
+    public String AbstractEquationBlock.genBlockResidualSetUpFunctionName_C(CodePrinter p) {
+        return genBlockResidualFunctionName_C(p) + "_set_up";
+    }
+
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String outerIndent) {
+        if (setupNodes().size() > 0) {
+            str.formatln("%s%s(jmi);", outerIndent, genBlockResidualSetUpFunctionName_C(p));
+        }
+    }
+    
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String outerIndent) {
+        if (setupNodes().size() > 0) {
+            String indent = p.indent(outerIndent);
+            str.format("%sstatic void %s(jmi_t* jmi) {\n", outerIndent, genBlockResidualSetUpFunctionName_C(p));
+            for (FFunctionCall call : setupNodes()) {
+                call.genStaticTempVars_C(p, str, indent);
+            }
+            str.format("%s}\n\n", outerIndent);
+        }
+    }
+    
+    private Collection<FFunctionCall> AbstractEquationBlock.setupNodes = null;
+    public Collection<FFunctionCall> AbstractEquationBlock.setupNodes() {
+        if (setupNodes == null) {
+            setupNodes = new LinkedHashSet<FFunctionCall>();
+            for (AbstractEquationBlock b : blockResidualBlocks()) {
+                for (ASTNode n : b.blockResidualNodes()) {
+                    n.gatherBlockSetupNodes(blockPrinter(), setupNodes);
+                }
+            }
+        }
+        return setupNodes;
+    }
+    
+    public void ASTNode.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
+        for (ASTNode n : this) {
+            n.gatherBlockSetupNodes(p, res);
+        }
+    }
+
+    public void FFunctionCall.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
+        super.gatherBlockSetupNodes(p, res);
+        if (impureCodeGen(p)) {
+            res.add(this);
+        }
+    }
+}
+
+aspect CCodeGenGlobalsReinit {
+
+    public void AbstractEquationBlock.genSetupNodeDecls_C(CodePrinter p, CodeStream str, String indent) {
+        for (FFunctionCall call : setupNodes()) {
+            call.genStaticVarDecls_C(p, str, indent);
         }
     }
 
@@ -85,7 +134,7 @@ aspect CCodeGenExpressionsReinit {
      */
     public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
         for (FReinit r : collectReinits_C(p)) {
-            str.print(indent, r.globalTemp_C(), " = ");
+            str.print(indent, FExp.global_C(r.tempName_C()), " = ");
             p.print(r.getVar(), str, indent);
             str.print(";\n");
         }
@@ -112,16 +161,16 @@ aspect CCodeGenExpressionsReinit {
             }
         }
     }
-    
+
     public void FReinit.genReinitWritebacks_C(
             CodePrinter p, CodeStream str, String indent, boolean first, boolean last) {
         //TODO: This is TEMPORARY, will need a better solution later!
-        str.format("%sif (%s != ", (first ? indent : " else "), globalTemp_C());
+        str.format("%sif (%s != ", (first ? indent : " else "), FExp.global_C(tempName_C()));
         p.print(getVar(), str, indent);
         str.println(") {");
         str.print(p.indent(indent));
         p.print(getVar(), str, indent);
-        str.formatln(" = %s;", globalTemp_C());
+        str.formatln(" = %s;", FExp.global_C(tempName_C()));
         str.formatln("%sjmi->reinit_triggered = 1;", p.indent(indent));
         str.format("%s}", indent);
         if (last)
@@ -138,7 +187,7 @@ aspect CCodeGenExpressionsReinit {
         }
         return res;
     }
-    
+
     /**
      * Helper, used for finding reinits
      */

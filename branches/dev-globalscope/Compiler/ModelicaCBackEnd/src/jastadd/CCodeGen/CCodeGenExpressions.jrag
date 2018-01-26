@@ -723,7 +723,24 @@ aspect CCodeGenExpressions {
         }
         return res;
     }
-    
+
+    /*=========================================================================
+     * Reinit Expression
+     ========================================================================*/
+
+    @Override
+    public void FReinit.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.format("%s%s = ", indent, FExp.global_C(tempName_C()));
+        p.print(getFExp(), str, indent);
+        str.println(";");
+    }
+
+    @Override
+    public void FReinit.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempVars_C(p, str, indent);
+        p.print(this, str, indent);
+    }
+
     /*=========================================================================
      * String Expressions
      ========================================================================*/
@@ -1182,21 +1199,6 @@ aspect CCodeGenExpressions {
      * Function calls
      ========================================================================*/
 
-    syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
-            inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
-    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
-
-    public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(indent);
-        str.print("static ");
-        type().printScalarDecl_C(p, str, indent, false, tempName_C());
-        str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
-    }
-
-    public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = 0;\n", indent, tempNameComputed_C());
-    }
-
     class CodePrinter {
         public abstract boolean needsTemp(FExp exp);
         public abstract boolean needsTemp(FFunctionCall call);
@@ -1273,7 +1275,7 @@ aspect CCodeGenExpressions {
         if (p.needsStatement(this)) {
             str.print(tempName_C());
         } else if (impureCodeGen(p)) {
-            str.format("JMI_CACHED(%s, ", tempName_C());
+            str.print("JMI_CACHED(", FExp.global_C(tempName_C()), ", ");
             p.printCall(this, str, indent);
             str.print(")");
         } else {

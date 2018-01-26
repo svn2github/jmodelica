@@ -12801,7 +12801,7 @@ equation
             eliminate_linear_equations=false,
             template="
 $C_dae_add_blocks_residual_functions$
-$C_reinit_temp_decls$
+$C_global_temps$
 $C_dae_blocks_residual_functions$
 ",
             generatedCode="
