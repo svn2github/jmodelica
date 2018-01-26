@@ -1864,7 +1864,10 @@ aspect InstanceAST_API {
     
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
     
-    //Retrieve fully indexed names for array elements
+   /**
+   * Retrieve fully indexed names for array elements
+   *
+   */
     
     syn String InstNode.getElementName() = name();
     eq InstArrayComponentDecl.getElementName() {
