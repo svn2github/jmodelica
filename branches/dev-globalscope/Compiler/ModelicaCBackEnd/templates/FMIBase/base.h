@@ -86,6 +86,7 @@ $C_function_headers$
 $CAD_function_headers$
 
 typedef struct jmi_globals {
+    int dummy; /* Empty struct not allowed */
 $C_global_temps$
 } jmi_globals_t;
 #define JMI_GLOBAL(v) (((jmi_globals_t)jmi->globals)->v)
