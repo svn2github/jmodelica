@@ -730,15 +730,13 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FReinit.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, FExp.global_C(tempName_C()));
-        p.print(getFExp(), str, indent);
-        str.println(";");
+        str.print(FExp.global_C(tempName_C()));
     }
 
     @Override
     public void FReinit.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
-        p.print(this, str, indent);
+        p.printAssign(type(), str, indent, this, getFExp());
     }
 
     /*=========================================================================

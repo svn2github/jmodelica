@@ -36,7 +36,6 @@ aspect CCodeGenGlobals {
                 }
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                     block.genSetupNodeDecls_C(p, str, indent);
-                    
                 }
             }
         }
@@ -49,40 +48,49 @@ aspect CCodeGenGlobals {
 
 aspect CCodeGenGlobalsCached {
 
+    public static String FExp.computed_C(String name) {
+        return name + "_computed";
+    }
+
     syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
             inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
-    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
 
     public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         type().printScalarDecl_C(p, str, indent, false, tempName_C());
-        str.print(indent, "int ", tempNameComputed_C(), " = 0;\n");
+        str.print(indent, "int ", FExp.computed_C(tempName_C()), " = 0;\n");
     }
 
     public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(indent, FExp.global_C(tempNameComputed_C()), " = 0;\n");
+        str.print(indent, FExp.global_C(FExp.computed_C(tempName_C())), " = 0;\n");
     }
 
     public String AbstractEquationBlock.genBlockResidualSetUpFunctionName_C(CodePrinter p) {
         return genBlockResidualFunctionName_C(p) + "_set_up";
     }
 
-    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String outerIndent) {
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String indent) {
         if (setupNodes().size() > 0) {
-            str.formatln("%s%s(jmi);", outerIndent, genBlockResidualSetUpFunctionName_C(p));
+            str.print(indent, genBlockResidualSetUpFunctionName_C(p), "(jmi);\n");
         }
     }
-    
-    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String outerIndent) {
+
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String indent) {
         if (setupNodes().size() > 0) {
-            String indent = p.indent(outerIndent);
-            str.format("%sstatic void %s(jmi_t* jmi) {\n", outerIndent, genBlockResidualSetUpFunctionName_C(p));
+            String next = p.indent(indent);
+            str.print(indent, "static void ", genBlockResidualSetUpFunctionName_C(p), "(jmi_t* jmi) {\n");
             for (FFunctionCall call : setupNodes()) {
-                call.genStaticTempVars_C(p, str, indent);
+                call.genStaticTempVars_C(p, str, next);
             }
-            str.format("%s}\n\n", outerIndent);
+            str.print(indent, "}\n\n");
         }
     }
-    
+
+    public void AbstractEquationBlock.genSetupNodeDecls_C(CodePrinter p, CodeStream str, String indent) {
+        for (FFunctionCall call : setupNodes()) {
+            call.genStaticVarDecls_C(p, str, indent);
+        }
+    }
+
     private Collection<FFunctionCall> AbstractEquationBlock.setupNodes = null;
     public Collection<FFunctionCall> AbstractEquationBlock.setupNodes() {
         if (setupNodes == null) {
@@ -95,7 +103,7 @@ aspect CCodeGenGlobalsCached {
         }
         return setupNodes;
     }
-    
+
     public void ASTNode.gatherBlockSetupNodes(CodePrinter p, Collection<FFunctionCall> res) {
         for (ASTNode n : this) {
             n.gatherBlockSetupNodes(p, res);
@@ -111,12 +119,6 @@ aspect CCodeGenGlobalsCached {
 }
 
 aspect CCodeGenGlobalsReinit {
-
-    public void AbstractEquationBlock.genSetupNodeDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FFunctionCall call : setupNodes()) {
-            call.genStaticVarDecls_C(p, str, indent);
-        }
-    }
 
     /**
      * Generates temporary variable declarations for storing reinit values.
@@ -134,9 +136,7 @@ aspect CCodeGenGlobalsReinit {
      */
     public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
         for (FReinit r : collectReinits_C(p)) {
-            str.print(indent, FExp.global_C(r.tempName_C()), " = ");
-            p.print(r.getVar(), str, indent);
-            str.print(";\n");
+            p.printAssign(r.type(), str, indent, r, r.getVar());
         }
     }
 
