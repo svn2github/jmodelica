@@ -425,8 +425,8 @@ $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
     jmi_real_t tmp_1;
-    JMI_DEF(REA, tmp_2)
-    int tmp_2_computed = 0;
+    jmi_real_t tmp_2;
+    int tmp_2_computed;
 -----
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -496,7 +496,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 1, 1, 1)
             jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(1);
-            JMI_GLOBAL(tmp_1) = JMI_CACHED(JMI_GLOBAL(tmp_2), func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_4));
+            JMI_GLOBAL(tmp_1) = JMI_CACHED(tmp_2, func_CCodeGenGlobalsTests_Reinit_ReinitCTest4_f_exp0(tmp_4));
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
@@ -859,8 +859,8 @@ $C_ode_derivatives$
 $C_dae_blocks_residual_functions$
 ",
             generatedCode="
-    JMI_DEF(REA, tmp_1)
-    int tmp_1_computed = 0;
+    jmi_real_t tmp_1;
+    int tmp_1_computed;
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -901,7 +901,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             }
             _temp_1_1 = _sw(0);
         }
-        _y_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)), JMI_TRUE, JMI_CACHED(JMI_GLOBAL(tmp_1), func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache1_f_exp0(_time)), pre_y_0);
+        _y_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)), JMI_TRUE, JMI_CACHED(tmp_1, func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache1_f_exp0(_time)), pre_y_0);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }

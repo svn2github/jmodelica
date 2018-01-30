@@ -56,8 +56,8 @@ aspect CCodeGenGlobalsCached {
             inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
 
     public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        type().printScalarDecl_C(p, str, indent, false, tempName_C());
-        str.print(indent, "int ", FExp.computed_C(tempName_C()), " = 0;\n");
+        str.print(indent, "jmi_real_t ", tempName_C(), ";\n");
+        str.print(indent, "int ", FExp.computed_C(tempName_C()), ";\n");
     }
 
     public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {

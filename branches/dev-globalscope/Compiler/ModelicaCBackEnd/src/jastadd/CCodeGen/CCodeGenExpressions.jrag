@@ -1273,7 +1273,7 @@ aspect CCodeGenExpressions {
         if (p.needsStatement(this)) {
             str.print(tempName_C());
         } else if (impureCodeGen(p)) {
-            str.print("JMI_CACHED(", FExp.global_C(tempName_C()), ", ");
+            str.print("JMI_CACHED(", tempName_C(), ", ");
             p.printCall(this, str, indent);
             str.print(")");
         } else {
