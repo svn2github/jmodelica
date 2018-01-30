@@ -349,6 +349,8 @@ int jmi_delete(jmi_t* jmi){
     jmi_destroy_delay_if(jmi);
     jmi_dynamic_function_pool_destroy(jmi->dyn_fcn_mem);
 
+    free(jmi->globals);
+
     return 0;
 }
 

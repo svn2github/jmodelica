@@ -85,3 +85,10 @@ $C_function_headers$
 
 $CAD_function_headers$
 
+typedef struct jmi_globals {
+    int dummy; /* Empty struct not allowed */
+$C_global_temps$
+} jmi_globals_t;
+#define JMI_GLOBAL(v)        (((jmi_globals_t*)jmi->globals)->v)
+#define JMI_CACHED(var, exp) ((!JMI_GLOBAL(var##_computed) && (JMI_GLOBAL(var##_computed) = 1)) ? (JMI_GLOBAL(var) = exp) : JMI_GLOBAL(var))
+

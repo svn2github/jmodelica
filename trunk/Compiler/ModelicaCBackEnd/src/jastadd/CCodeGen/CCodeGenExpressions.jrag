@@ -730,187 +730,15 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FReinit.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, tempName_C());
-        p.print(getFExp(), str, indent);
-        str.println(";");
+        str.print(FExp.global_C(tempName_C()));
     }
 
     @Override
     public void FReinit.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
-        p.print(this, str, indent);
+        p.printAssign(type(), str, indent, this, getFExp());
     }
 
-    /**
-     * Helper, used for writing temp decl for reinits
-     */
-    public void FAbstractFunctionCall.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FReinit.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%sstatic jmi_real_t %s;", indent, tempName_C());
-    }
-
-    /**
-     * Helper, used for writing temp decl for reinits
-     */
-    public void FAbstractEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FFunctionCallEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitTempDecls_C(p, str, indent);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!isWhen() || !p.inInitialSystem() || getTest().isInitialGuard()) {
-            super.genReinitTempDecls_C(p, str, indent);
-        }
-        if (hasElse()) {
-            getElse().genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    /**
-     * Generates temporary variable declarations for storing reinit values.
-     */
-    public void AbstractEquationBlock.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempDecls_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FReinit.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = ", indent, tempName_C());
-        p.print(getVar(), str, indent);
-        str.println(";");
-    }
-
-    /**
-     * Helper, used for writing temp init for reinits
-     */
-    public void FAbstractFunctionCall.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {}
-
-    /**
-     * Helper, used for writing temp init for reinits
-     */
-    public void FAbstractEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {}
-
-    @Override
-    public void FFunctionCallEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitTempInits_C(p, str, indent);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
-            super.genReinitTempInits_C(p, str, indent);
-        }
-        if (hasElse()) {
-            getElse().genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    /**
-     * Generates temporary variable initializaions for storing reinit values.
-     * This should be done in the begining of ode-derivatives and sets the
-     * value to current value.
-     */
-    public void AbstractEquationBlock.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitTempInits_C(p, str, indent);
-        }
-    }
-
-    public void FReinit.genReinitWritebacks_C(
-            CodePrinter p, CodeStream str, String indent, boolean first, boolean last) {
-        //TODO: This is TEMPORARY, will need a better solution later!
-        str.format("%sif (%s != ", (first ? indent : " else "), tempName_C());
-        p.print(getVar(), str, indent);
-        str.println(") {");
-        str.print(p.indent(indent));
-        p.print(getVar(), str, indent);
-        str.formatln(" = %s;", tempName_C());
-        str.formatln("%sjmi->reinit_triggered = 1;", p.indent(indent));
-        str.format("%s}", indent);
-        if (last)
-            str.println();
-    }
-
-    /**
-     * Helper, used for finding reinits
-     */
-    public void FAbstractFunctionCall.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
-
-    @Override
-    public void FReinit.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        String key = getVar().toString();
-        ArrayList<FReinit> list = map.get(key);
-        if (list == null) {
-            list = new ArrayList<FReinit>();
-            map.put(key, list);
-        }
-        list.add(this);
-    }
-
-    /**
-     * Helper, used for finding reinits
-     */
-    public void FAbstractEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
-
-    @Override
-    public void FFunctionCallEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        getCall().collectReinits_C(map, initial);
-    }
-
-    @Override
-    public void FIfWhenElseEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        for (FAbstractEquation e : getFAbstractEquations()) {
-            e.collectReinits_C(map, initial);
-        }
-    }
-
-    @Override
-    public void FIfWhenEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
-        if (!initial || getTest().isInitialGuard()) {
-            super.collectReinits_C(map, initial);
-        }
-        if (hasElse()) {
-            getElse().collectReinits_C(map, initial);
-        }
-    }
-
-    /**
-     * Generates code that writes back the reinit values to the state. There is
-     * no if guard here, that is controlled from the actual reinit statement.
-     */
-    public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
-        Map<String, ArrayList<FReinit>> map = new LinkedHashMap<String, ArrayList<FReinit>>();
-        for (FAbstractEquation eqn : allEquations()) {
-            eqn.collectReinits_C(map, p.inInitialSystem());
-        }
-        for (ArrayList<FReinit> list : map.values()) {
-            for (int i = 0, n = list.size(); i < n; i++) {
-                list.get(i).genReinitWritebacks_C(p, str, indent, i == 0, i == n - 1);
-            }
-        }
-    }
-    
     /*=========================================================================
      * String Expressions
      ========================================================================*/
@@ -1369,21 +1197,6 @@ aspect CCodeGenExpressions {
      * Function calls
      ========================================================================*/
 
-    syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
-            inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
-    syn String FFunctionCall.tempNameComputed_C() = tempName_C() + "_computed";
-
-    public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(indent);
-        str.print("static ");
-        type().printScalarDecl_C(p, str, indent, false, tempName_C());
-        str.format("%sstatic int %s = 0;\n", indent, tempNameComputed_C());
-    }
-
-    public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("%s%s = 0;\n", indent, tempNameComputed_C());
-    }
-
     class CodePrinter {
         public abstract boolean needsTemp(FExp exp);
         public abstract boolean needsTemp(FFunctionCall call);
@@ -1460,7 +1273,7 @@ aspect CCodeGenExpressions {
         if (p.needsStatement(this)) {
             str.print(tempName_C());
         } else if (impureCodeGen(p)) {
-            str.format("JMI_CACHED(%s, ", tempName_C());
+            str.print("JMI_CACHED(", tempName_C(), ", ");
             p.printCall(this, str, indent);
             str.print(")");
         } else {

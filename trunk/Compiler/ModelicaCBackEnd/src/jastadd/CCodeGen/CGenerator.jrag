@@ -504,6 +504,7 @@ public class CGenerator extends GenericGenerator {
             int generateSparseThreshold = fclass.myOptions().getIntegerOption("generate_sparse_block_jacobian_threshold");
             for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                 CodePrinter printer = block.blockPrinter();
+                block.genBlockResidualSetUpFunctionDecl_C(printer, genPrinter, indent);
                 block.genBlockResidualFunction(printer, genPrinter, indent, generateSparseThreshold);
                 if (block.isLinear() && generateSparseThreshold < block.localSolvedRealVariables().size()) {
                     block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, false);
@@ -861,44 +862,6 @@ public class CGenerator extends GenericGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-        }
-    }
-    
-    /**
-     * Generates temporary variables for reinit writebacks
-     */
-    /**
-     * C: C temporary variables for reinit writebacks
-     */
-    public class DAETag_C_reinit_writeback_temps extends DAETag {
-        
-        public DAETag_C_reinit_writeback_temps(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_reinit_temp_decls", myGenerator, fclass);
-            addOptions("generate_ode");
-        }
-
-        public void generate(CodeStream genPrinter) {
-            for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                block.genReinitTempDecls_C(ASTNode.printer_C, genPrinter, "");
-        }
-    }
-
-    /**
-     * Generates temporary variables for reinit writebacks in the initial system
-     */
-    /**
-     * C: C temporary variables for reinit writebacks in the initial system
-     */
-    public class DAETag_C_reinit_writeback_temps_initial extends DAETag {
-        
-        public DAETag_C_reinit_writeback_temps_initial(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_reinit_temp_decls_initial", myGenerator, fclass);
-            addOptions("generate_ode");
-        }
-        
-        public void generate(CodeStream genPrinter) {
-            for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks())
-                block.genReinitTempDecls_C(ASTNode.printer_C.initialSystemPrinter(), genPrinter, "");
         }
     }
     
