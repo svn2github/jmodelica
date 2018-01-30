@@ -431,17 +431,17 @@ $(BLAS_BUILD_DIR):
 	cd $(BLAS_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O2 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	*-apple*) \
 	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	*) \
-	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
+	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O2" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
 	esac
 
 @JM_WIN64_TRUE@$(BLAS_BUILD_DIR64):
 @JM_WIN64_TRUE@	mkdir -p $(BLAS_BUILD_DIR64)
 @JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR64) && \
-@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/
+@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O2 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/
 
 @JM_WIN64_TRUE@all-local: $(BLAS_BUILD_DIR) $(BLAS_BUILD_DIR64)
 @JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
