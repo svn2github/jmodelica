@@ -125,14 +125,14 @@ aspect CCodeGenFunctionIO {
     @Override
     public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp()) {
-            type().printDecl_C(p, str, indent, name_C(), getFExp());
+            p.print(this, indent, type(), p.createDeclPrinter(str));
         }
     }
     
     @Override
     public void FFunctionCallLeft.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp()) {
-            type().printInit_C(p, str, indent, getFExp().tempName_C(), getFExp());
+            p.print(this, indent, type(), p.createInitPrinter(str));
         }
     }
     

@@ -463,8 +463,6 @@ struct jmi_t {
     jmi_chattering_t* chattering;        /**< \brief Contains chattering information, used for logging */
 
     jmi_dynamic_function_memory_t* dyn_fcn_mem;
-    
-    void* globals;                       /**< \brief Global temporaries used in generated code */
 };
 
 /**

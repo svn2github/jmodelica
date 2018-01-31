@@ -177,9 +177,6 @@ $C_dynamic_state_add_call$
     jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay,
                       *model_sample_delay, N_delay_sw);
 
-    /* Initialize globals struct */
-    (*jmi)->globals = calloc(1, sizeof(jmi_globals_t));
-
     return 0;
 }
 

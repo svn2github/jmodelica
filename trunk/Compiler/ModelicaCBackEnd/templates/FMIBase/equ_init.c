@@ -15,6 +15,8 @@
 
 $C_enum_strings$
 
+$C_reinit_temp_decls_initial$
+
 $C_dae_init_blocks_residual_functions$
 
 $CAD_dae_init_blocks_residual_functions$
