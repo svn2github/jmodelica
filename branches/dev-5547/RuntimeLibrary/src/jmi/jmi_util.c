@@ -506,15 +506,35 @@ void jmi_free_strings(jmi_string_t* s, size_t n) {
     free(s);
 }
 
-int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t dd_callback, void* args) {
+jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callbacks(size_t n_input, size_t n_output) {
+	jmi_directional_derivative_callbacks_t* res =
+			(jmi_directional_derivative_callbacks_t*)calloc(1, sizeof(jmi_string_t));
+	res->n_input = n_input;
+	res->n_output = n_output;
+	res->input = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
+	res->d_input = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
+	res->output = (jmi_real_t*)calloc(n_output, sizeof(jmi_real_t));
+	res->d_output = (jmi_real_t*)calloc(n_output, sizeof(jmi_real_t));
+    return res;
+}
+
+void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd) {
+	free(dd->input);
+	free(dd->d_input);
+	free(dd->output);
+	free(dd->d_output);
+    free(dd);
+}
+
+int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t* dd_callback, void* args) {
 	int i,j;
 	int ef = 0;
-	int n_input = dd_callback.n_input;
-	int n_output = dd_callback.n_output;
-	jmi_real_t* input = dd_callback.input; 
-	jmi_real_t* d_input = dd_callback.d_input; 
-	jmi_real_t* output = dd_callback.output; 
-	jmi_real_t* d_output = dd_callback.d_output; 
+	int n_input = dd_callback->n_input;
+	int n_output = dd_callback->n_output;
+	jmi_real_t* input = dd_callback->input;
+	jmi_real_t* d_input = dd_callback->d_input;
+	jmi_real_t* output = dd_callback->output;
+	jmi_real_t* d_output = dd_callback->d_output;
 	jmi_real_t input_temp, inc, delta, sign;
 	jmi_real_t* input_max = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
 	jmi_real_t* input_min = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
@@ -522,13 +542,13 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 	jmi_real_t* output_temp = (jmi_real_t*)calloc(n_output, sizeof(jmi_real_t));
 
 	/* Setup max/min/nominal values for the inputs */
-	ef = dd_callback.F_max(jmi, input_max);
-	ef = dd_callback.F_min(jmi, input_min);
-	ef = dd_callback.F_nominal(jmi, input_nominal);
+	ef = dd_callback->F_max(jmi, input_max);
+	ef = dd_callback->F_min(jmi, input_min);
+	ef = dd_callback->F_nominal(jmi, input_nominal);
 
 
 	/* get current output values */
-	ef = dd_callback.F(args, input, output);
+	ef = dd_callback->F(args, input, output);
 	if (ef != 0 ) {
 		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback function for inputs given.");
 	} else {
@@ -554,12 +574,12 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 				inc = -inc;
 				input[j] = input_orig + inc;
 			}
-			ef = dd_callback.F(args, input, output_temp);
+			ef = dd_callback->F(args, input, output_temp);
 			/* If failure, try other direction */
 			if ( ef > 0 ) {
 				jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback function. Trying other direction. ");
 				input[j] = input_orig - inc;
-				ef = dd_callback.F(args, input, output_temp);
+				ef = dd_callback->F(args, input, output_temp);
 			}
 
 			/* Reset input vector */

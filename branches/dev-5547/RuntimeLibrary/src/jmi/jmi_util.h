@@ -732,8 +732,8 @@ typedef int (*jmi_directional_derivative_attributes_func_t)(void* args, jmi_real
 typedef struct jmi_directional_derivative_callbacks_t jmi_directional_derivative_callbacks_t;
 
 struct jmi_directional_derivative_callbacks_t {
-	int n_input; /* Number of input variables */
-	int n_output; /* Number of outputs */
+	size_t n_input; /* Number of input variables */
+	size_t n_output; /* Number of outputs */
 	jmi_real_t* input; /* Input variable values */
 	jmi_real_t* d_input; /* Direction for directional derivative */
 	jmi_real_t* output; /* Output variable values */
@@ -743,7 +743,8 @@ struct jmi_directional_derivative_callbacks_t {
 	jmi_directional_derivative_attributes_func_t F_nominal; /* Callback for nominal values for input variables */
 	jmi_directional_derivative_base_func_t F;	
 };
-
-int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t dd_callback, void* args);
+jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callbacks(size_t n_input, size_t n_output);
+void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd);
+int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t* dd_callback, void* args);
 
 #endif
