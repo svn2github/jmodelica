@@ -132,20 +132,8 @@ aspect CCodeGenTypes {
         print(p.createInitSetPrinter(str), indent, name, src, external);
     }
 
-    interface TypePrintable {
-        public String tempName_C();
-        public FExp asFExpOrNull();
-        public boolean needsTemp(CodePrinter p);
-    }
-
-    class FExp              implements TypePrintable {}
-    class FFunctionCallLeft implements TypePrintable {}
-
-    syn FExp              FExp.asFExpOrNull() = this;
-    syn FExp FFunctionCallLeft.asFExpOrNull() = getFExp();
-
-    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable src, boolean external) {
-        print(tp, indent, ep.name(src), src.asFExpOrNull(), external);
+    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, FExp src, boolean external) {
+        print(tp, indent, ep.name(src), src, external);
     }
 
     public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {

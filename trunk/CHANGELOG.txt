@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler ; #5549
+Moved static variable declarations for generated temporaries to
+generated struct in order to improve multithreading capabilities.
 
 ================= Stable-2018-01-24 ==================
 ; Change ; Minor ; PyFMI ; #5548

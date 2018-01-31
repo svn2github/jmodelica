@@ -96,7 +96,11 @@ aspect StepPrinter {
                 return v.name_C();
             }
 
-            public String name(TypePrintable exp) {
+            public String name(FFunctionCallLeft v) {
+                return v.name_C();
+            }
+
+            public String name(FExp exp) {
                 return exp.tempName_C();
             }
 
