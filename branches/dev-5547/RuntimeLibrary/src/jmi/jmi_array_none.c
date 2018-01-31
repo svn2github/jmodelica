@@ -47,6 +47,23 @@ void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory
     (*dest)[len-1] = '\0';
 }
 
+
+void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset) {
+	size_t i;
+	for(i=offset;i<arr->num_elems;i++) {
+		dest[i] = src;
+	}
+
+}
+
+void jmi_copy_to_arr(jmi_array_t* dest, jmi_real_t* src, size_t offset) {
+	memcpy(dest->var, src+offset, dest->num_elems*sizeof(jmi_real_t));
+}
+
+void jmi_copy_to_ptr(jmi_real_t* dest, jmi_array_t* src, size_t offset) {
+	memcpy(dest+offset, src->var, src->num_elems*sizeof(jmi_real_t));
+}
+
 #define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
     int i, j, tmp1, tmp2, k, n, dim, s; \

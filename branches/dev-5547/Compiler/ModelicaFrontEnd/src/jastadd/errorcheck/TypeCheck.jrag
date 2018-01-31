@@ -514,13 +514,15 @@ aspect FlatTypeCheck {
     syn boolean FFunctionVariable.isExternalFunction()   = false;
 
     syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
-    syn boolean FFunctionDecl.isExternalFunction() {
+    syn boolean FFunctionDecl.isExternalFunction() = getFirstExternalStmt() != null;
+
+    syn FExternalStmt FFunctionDecl.getFirstExternalStmt() {
         for (FStatement stmt : getFAlgorithm().getFStatements()) {
             if (stmt.isExternalStatement()) {
-                return true;
+                return (FExternalStmt) stmt;
             }
         }
-        return false;
+        return null;
     }
 
     syn boolean FStatement.isExternalStatement() = false;
