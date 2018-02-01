@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "jmi_math.h"
+#include "jmi_block_log.h"
+#include "jmi_work_array.h"
 
 void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_real_t time) {
     if (JMI_TRUE == LOG_EXP_OR(
@@ -528,6 +530,7 @@ void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callba
 
 int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_callbacks_t* dd_callback, void* args) {
 	int i,j;
+	int nans_present, infs_present, lim_vals_present;
 	int ef = 0;
 	int n_input = dd_callback->n_input;
 	int n_output = dd_callback->n_output;
@@ -536,69 +539,100 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 	jmi_real_t* output = dd_callback->output;
 	jmi_real_t* d_output = dd_callback->d_output;
 	jmi_real_t input_temp, inc, delta, sign;
-	jmi_real_t* input_max = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
-	jmi_real_t* input_min = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
-	jmi_real_t* input_nominal = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
-	jmi_real_t* output_temp = (jmi_real_t*)calloc(n_output, sizeof(jmi_real_t));
+	jmi_real_t* work_array = jmi_get_real_work_array(jmi->real_work, n_input*3+2*n_output);
+	jmi_real_t* input_max = work_array;
+	jmi_real_t* input_min = work_array + n_input;
+	jmi_real_t* input_nominal = work_array + 2*n_input;
+	jmi_real_t* output_nominal = work_array + 3*n_input;
+	jmi_real_t* output_temp = work_array + 3*n_input+n_output;
+	jmi_int_t* error_indicator = jmi_get_int_work_array(jmi->int_work, JMI_MAX(n_output, n_input));
 
 	/* Setup max/min/nominal values for the inputs */
 	ef = dd_callback->F_max(jmi, input_max);
+	if (ef !=0) {
+		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve max values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
+		return ef;
+	} 
 	ef = dd_callback->F_min(jmi, input_min);
+	if (ef !=0) {
+		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve min values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
+		return ef;
+	} 
 	ef = dd_callback->F_nominal(jmi, input_nominal);
+	if (ef !=0) {
+		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve nominal values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
+		return ef;
+	} 
 
+	/* Check if input values are ok */
+	ef = jmi_check_illegal_values(error_indicator, input_nominal, input, n_input, &nans_present, &infs_present, &lim_vals_present);
+	jmi_log_illegal_input(jmi->log, error_indicator, n_input, nans_present, infs_present, lim_vals_present, input, dd_callback->label, 
+		FALSE, NULL, jmi->jmi_callbacks.log_options.log_level, "function_finite_dir_der");
+	if (ef !=0) {
+		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Cannot evaluate directional derivatives with illegal input in <function_finite_dir_der: %s>.", dd_callback->label);
+		return ef;
+	} 
 
 	/* get current output values */
 	ef = dd_callback->F(args, input, output);
 	if (ef != 0 ) {
-		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback function for inputs given.");
-	} else {
-		/* Make d_output be filled with zeroes from start */
-		for (i = 0; i < n_output; i++) {
-			d_output[i] = 0.0;
+		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback function for inputs given in <function_finite_dir_der: %s>", dd_callback->label);
+		return ef;
+	}
+
+	/* Make d_output be filled with zeroes from start */
+	for (i = 0; i < n_output; i++) {
+		d_output[i] = 0.0;
+		output_nominal[i] = 1.0;
+	}
+
+	delta = sqrt(JMI_EPS);
+	for (j = 0; j < n_input; j++) {
+		jmi_real_t input_orig = input[j];
+		/* No need to evaluate derivative in this direction since it will be multiplied by 0 anyway */
+		if (d_input[j] == 0) {
+			continue;
+		}
+		input_temp = input_orig;
+		sign = (input_orig >= 0) ? 1 : -1;
+		inc = JMI_MAX(JMI_ABS(input_orig), input_nominal[j])*sign*delta;
+		input[j] += inc;
+
+		/* Make sure we're inside the bounds */
+		if( input[j] > input_max[j] || input[j] < input_min[j]) {
+			inc = -inc;
+			input[j] = input_orig + inc;
+		}
+		ef = dd_callback->F(args, input, output_temp);
+		/* If failure, try other direction */
+		if ( ef > 0 ) {
+			jmi_log_node(jmi->log, logWarning, "DirectionalDerivative", "Could not evaluate callback function in <function_finite_dir_der: %s>. Trying other direction. ", dd_callback->label);
+			input[j] = input_orig - inc;
+			ef = dd_callback->F(args, input, output_temp);
 		}
 
-		delta = sqrt(JMI_EPS);
-		for (j = 0; j < n_input; j++) {
-			jmi_real_t input_orig = input[j];
-			/* No need to evaluate derivative in this direction since it will be multiplied by 0 anyway */
-			if (d_input[j] == 0) {
-				continue;
-			}
-			input_temp = input_orig;
-			sign = (input_orig >= 0) ? 1 : -1;
-			inc = JMI_MAX(JMI_ABS(input_orig), input_nominal[j])*sign*delta;
-			input[j] += inc;
-		
-			/* Make sure we're inside the bounds */
-			if( input[j] > input_max[j] || input[j] < input_min[j]) {
-				inc = -inc;
-				input[j] = input_orig + inc;
-			}
-			ef = dd_callback->F(args, input, output_temp);
-			/* If failure, try other direction */
-			if ( ef > 0 ) {
-				jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback function. Trying other direction. ");
-				input[j] = input_orig - inc;
-				ef = dd_callback->F(args, input, output_temp);
-			}
+		if (ef !=0) {
+			jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback in <function_finite_dir_der: %s>.", dd_callback->label);
+			return ef;
+		}
 
-			/* Reset input vector */
-			input[j] = input_orig;
+		/* Check if input values are ok */
+		ef = jmi_check_illegal_values(error_indicator, input_nominal, output_temp, n_output, &nans_present, &infs_present, &lim_vals_present);
+		jmi_log_illegal_output(jmi->log, error_indicator, n_output, n_input, input, output, nans_present, infs_present, lim_vals_present, dd_callback->label, 
+			FALSE, jmi->jmi_callbacks.log_options.log_level, "function_finite_dir_der");
+		if (ef !=0) {
+			jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Illegal output from <function_finite_dir_der: %s>.", dd_callback->label);
+			return ef;
+		} 
 
-			if (ef == 0) {
-				for (i = 0; i < n_output; i++) {
-					d_output[i] += (output[i]-output_temp[i])/inc*d_input[j]; 
-				}
-			} else {
-				jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback function.");
-				break;
-			}
+
+		/* Reset input vector */
+		input[j] = input_orig;
+
+		for (i = 0; i < n_output; i++) {
+			d_output[i] += (output[i]-output_temp[i])/inc*d_input[j]; 
 		}
 	}
 
-	free(input_max);
-	free(input_min);
-	free(input_nominal);
-	free(output_temp);
 	return ef;
 }

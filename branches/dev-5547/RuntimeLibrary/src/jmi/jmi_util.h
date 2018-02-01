@@ -742,6 +742,7 @@ struct jmi_directional_derivative_callbacks_t {
 	jmi_directional_derivative_attributes_func_t F_min; /*  Callback for min values for input variables */
 	jmi_directional_derivative_attributes_func_t F_nominal; /* Callback for nominal values for input variables */
 	jmi_directional_derivative_base_func_t F;	
+	jmi_string_t label; /* Label for origin of directional derivative callback */
 };
 jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callbacks(size_t n_input, size_t n_output);
 void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd);

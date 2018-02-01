@@ -246,7 +246,8 @@ int jmi_init(jmi_t** jmi,
     /* Work arrays */
     jmi_->real_x_work = (jmi_real_t*)calloc(jmi_->n_real_x,sizeof(jmi_real_t));
     jmi_->real_u_work = (jmi_real_t*)calloc(jmi_->n_real_u,sizeof(jmi_real_t));
-    
+	jmi_->int_work = jmi_create_int_work_array(10); /* TODO: set relevant size here */
+	jmi_->real_work = jmi_create_real_work_array(30); /* TODO: set relevant size here */
 
     jmi_->n_initial_relations = n_initial_relations;
     jmi_->n_relations = n_relations;
@@ -335,6 +336,9 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->dz);
     free(jmi->real_x_work);
     free(jmi->real_u_work);
+	jmi_delete_real_work_array(jmi->real_work);
+	jmi_delete_int_work_array(jmi->int_work);
+
     free(jmi->initial_relations);
     free(jmi->relations);
     free(jmi->nominals);
