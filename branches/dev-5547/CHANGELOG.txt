@@ -1,4 +1,12 @@
 ================= Unreleased ==================
+; Change ; Minor ; Compiler ; #5549
+Moved static variable declarations for generated temporaries to
+generated struct in order to improve multithreading capabilities.
+
+================= Stable-2018-01-24 ==================
+; Change ; Minor ; PyFMI ; #5548
+Deprecated get_log_file_name in favour of get_log_filename
+
 ; Change ; Minor ; MSL ; #5546
 Patched MSL resources to take into account the NO_MUTEX define.
 

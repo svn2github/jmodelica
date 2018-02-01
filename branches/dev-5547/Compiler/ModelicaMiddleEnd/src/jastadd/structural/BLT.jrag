@@ -1144,6 +1144,9 @@ aspect BLT{
         }
 
         public final int getSequenceNumber() {
+            if (sequenceNumber < 0) {
+                throw new IllegalStateException("sequenceNumber has not been initialized.");
+            }
             return sequenceNumber;
         }
 
