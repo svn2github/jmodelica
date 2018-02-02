@@ -634,5 +634,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 		}
 	}
 
+	/* reevaluate so that we now that the original values are correct */
+	ef = dd_callback->F(args, input, output);
 	return ef;
 }
