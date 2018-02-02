@@ -183,7 +183,7 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
 }
 
 int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double* f, double* ivs, double* residual_heuristic_nominal, int N) {
-    int i, ret=0;
+    int ret=0;
     jmi_log_t *log = block->log;
     int nans_present = FALSE;
     int infs_present = FALSE;
@@ -198,7 +198,7 @@ int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double*
 
 
 int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t *block, double* ivs, int N) {
-    int i, ret = 0;
+    int ret = 0;
     jmi_log_t *log = block->log;
     int nans_present = FALSE;
     int infs_present = FALSE;
