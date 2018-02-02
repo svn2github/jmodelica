@@ -510,7 +510,7 @@ void jmi_free_strings(jmi_string_t* s, size_t n) {
 
 jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callbacks(size_t n_input, size_t n_output) {
 	jmi_directional_derivative_callbacks_t* res =
-			(jmi_directional_derivative_callbacks_t*)calloc(1, sizeof(jmi_string_t));
+			(jmi_directional_derivative_callbacks_t*)calloc(1, sizeof(jmi_directional_derivative_callbacks_t));
 	res->n_input = n_input;
 	res->n_output = n_output;
 	res->input = (jmi_real_t*)calloc(n_input, sizeof(jmi_real_t));
