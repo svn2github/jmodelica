@@ -53,6 +53,8 @@
 #define JMI_PATH_MAX 256
 #endif
 
+#define JMI_REAL_WORK_ARRAY_SIZE 15
+#define JMI_INT_WORK_ARRAY_SIZE 3
 
 #include <stdio.h>
 #include <stdlib.h>
