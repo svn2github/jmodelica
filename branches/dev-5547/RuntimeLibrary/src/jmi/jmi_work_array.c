@@ -24,6 +24,7 @@ jmi_real_work_array_t* jmi_create_real_work_array(jmi_int_t n) {
 	real_work_array = calloc(1, sizeof(jmi_real_work_array_t));
 	real_work_array->n = n;
 	real_work_array->rwork = calloc(n, sizeof(jmi_real_t));
+	return real_work_array;
 }
 
 jmi_int_work_array_t* jmi_create_int_work_array(jmi_int_t n) {
@@ -31,6 +32,7 @@ jmi_int_work_array_t* jmi_create_int_work_array(jmi_int_t n) {
 	int_work_array = calloc(1, sizeof(jmi_int_work_array_t));
 	int_work_array->n = n;
 	int_work_array->iwork = calloc(n, sizeof(jmi_int_t));
+	return int_work_array;
 }
 
 jmi_real_t* jmi_get_real_work_array(jmi_real_work_array_t* real_work_array, jmi_int_t n) {

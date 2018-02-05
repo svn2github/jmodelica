@@ -60,8 +60,9 @@ int jmi_check_illegal_values(int *error_indicator, jmi_real_t *nominal, jmi_real
 void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans_present, int infs_present, int lim_vals_present, jmi_real_t *inputs,
 	jmi_string_t label, int is_iter_var_flag, int* value_references, int log_level, const char* label_type) {
 	int i;
-	int ret = (nans_present+infs_present+lim_vals_present) > 0 ? TRUE: FALSE;
 	char* warn_input_type;
+	char message[256];
+	int ret = (nans_present+infs_present+lim_vals_present) > 0 ? TRUE: FALSE;
 	if (is_iter_var_flag) {
 		warn_input_type = "IllegalIterationVariableInput";
 	} else {
@@ -70,15 +71,17 @@ void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans
 
 	if(ret && n==1) {
         if (nans_present)
-            jmi_log_node(log, logWarning, warn_input_type, "Not a number as input to <%s: %s>", label_type, label);
+			sprintf(message, "Not a number as input to <%s: %%s>",  label_type);
         if (infs_present)
-            jmi_log_node(log, logWarning, warn_input_type, "INF as input to <%s: %s>", label_type, label);
+			sprintf(message, "INF as input to <%s: %%s>",  label_type);
         if( lim_vals_present)
-            jmi_log_node(log, logWarning, warn_input_type, "Absolute value of input too big in <%s: %s>", label_type, label);
+			sprintf(message, "Absolute value of input too big in <%s: %%s>",  label_type);
+		jmi_log_node(log, logWarning, warn_input_type, message, label_type, label);
     } else if (ret) {
         jmi_log_node_t outer;
         jmi_log_node_t inner;
-        outer = jmi_log_enter_fmt(log, logWarning, warn_input_type, "The iteration variable input is illegal in <%s: %s>", label_type, label);
+		sprintf(message, "The iteration variable input is illegal in <%s: %%s>",  label_type);
+        outer = jmi_log_enter_fmt(log, logWarning, warn_input_type, message, label_type, label);
 
         if (nans_present) {
             inner = jmi_log_enter_vector_(log, outer, logWarning, is_iter_var_flag? "NaNIterationVariableIndices": "NaNVariableIndices");
@@ -127,25 +130,31 @@ void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans
 void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs, int n_inputs, jmi_real_t *inputs, jmi_real_t *outputs, int nans_present, int infs_present, int lim_vals_present, 
 	jmi_string_t label, int is_iter_var_flag, int log_level, const char* label_type) {
 		int i;
-		int ret = (nans_present+infs_present+lim_vals_present) > 0 ? TRUE: FALSE;
 		char* warn_output_type;
+		char message[256];
+		int ret = (nans_present+infs_present+lim_vals_present) > 0 ? TRUE: FALSE;
 		if (is_iter_var_flag) {
 			warn_output_type = "IllegalResidualOutput";
 		} else {
 			warn_output_type = "IllegalOutput";
 		}
 
-		if(ret && n_outputs==1 && n_inputs==1) {
-			if (nans_present)
-				jmi_log_node(log, logWarning, warn_output_type, "Not a number as output from <%s: %s> with <input: %g>", label_type, label, inputs[0]);
-			if (infs_present)
-				jmi_log_node(log, logWarning, warn_output_type, "INF as output from <%s: %s> with <input: %g>", label_type, label, inputs[0]);
-			if( lim_vals_present)
-				jmi_log_node(log, logWarning, warn_output_type, "Absolute value of <output: %g> too big in <%s: %s> with <input: %g>", label_type, label, inputs[0]);
+		if(ret && n_outputs==1 && n_inputs==1) {			
+			if (nans_present) {
+				sprintf(message, "Not a number as output from <%s: %%s> with <input: %%g>",  label_type);
+				jmi_log_node(log, logWarning, warn_output_type, message, label, inputs[0]);
+			} if (infs_present) {
+				sprintf(message, "INF as output from <%s: %%s> with <input: %%g>",  label_type);
+				jmi_log_node(log, logWarning, warn_output_type, message, label, inputs[0]);
+			} if( lim_vals_present) {
+				sprintf(message, "Absolute value of <output: %%g> too big in <%s: %%s> with <input: %%g>",  label_type);
+				jmi_log_node(log, logWarning, warn_output_type, message, outputs[0],  label, inputs[0]);
+			}
 		} else if (ret) {
 			jmi_log_node_t outer;
 			jmi_log_node_t inner;
-			outer = jmi_log_enter_fmt(log, logWarning, warn_output_type, "The output is illegal in <%s: %s>", label_type, label);
+			sprintf(message, "The output is illegal in <%s: %%s>",  label_type);
+			outer = jmi_log_enter_fmt(log, logWarning, warn_output_type, message, label);
 
 			if (nans_present) {
 				inner = jmi_log_enter_vector_(log, outer, logWarning, is_iter_var_flag? "NaNResidualIndices": "NaNOutputIndices");

@@ -538,7 +538,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 	jmi_real_t* d_input = dd_callback->d_input;
 	jmi_real_t* output = dd_callback->output;
 	jmi_real_t* d_output = dd_callback->d_output;
-	jmi_real_t input_temp, inc, delta, sign;
+	jmi_real_t inc, delta, sign;
 	jmi_real_t* work_array = jmi_get_real_work_array(jmi->real_work, n_input*3+2*n_output);
 	jmi_real_t* input_max = work_array;
 	jmi_real_t* input_min = work_array + n_input;
@@ -593,7 +593,6 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 		if (d_input[j] == 0) {
 			continue;
 		}
-		input_temp = input_orig;
 		sign = (input_orig >= 0) ? 1 : -1;
 		inc = JMI_MAX(JMI_ABS(input_orig), input_nominal[j])*sign*delta;
 		input[j] += inc;
