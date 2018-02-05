@@ -829,6 +829,116 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end ReinitCTest8;
 
+model ReinitCTest9
+    Real x;
+    Boolean y,z;
+equation
+    der(x) = 1;
+    y = time > 1;
+    z = y <> pre(y);
+    if z then
+        when z then
+            reinit(x, 1);
+        end when;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ReinitCTest9",
+            description="",
+            template="
+$C_global_temps$
+-----
+$C_ode_derivatives$
+-----
+$C_ode_initialization$
+-----
+$C_dae_blocks_residual_functions$
+-----
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_real_t tmp_1;
+
+-----
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(tmp_1) = _x_0;
+    _der_x_5 = 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    if (JMI_GLOBAL(tmp_1) != _x_0) {
+        _x_0 = JMI_GLOBAL(tmp_1);
+        jmi->reinit_triggered = 1;
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+-----
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _der_x_5 = 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _y_1 = _sw(0);
+    pre_y_1 = JMI_FALSE;
+    _z_2 = COND_EXP_EQ(_y_1, pre_y_1, JMI_FALSE, JMI_TRUE);
+    _x_0 = 0.0;
+    pre_z_2 = JMI_FALSE;
+    if (_z_2) {
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+-----
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+        x[1] = 536870917;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870917;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _y_1 = _sw(0);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _z_2 = COND_EXP_EQ(_y_1, pre_y_1, JMI_FALSE, JMI_TRUE);
+        }
+        if (_z_2) {
+            if (LOG_EXP_AND(_z_2, LOG_EXP_NOT(pre_z_2))) {
+                JMI_GLOBAL(tmp_1) = AD_WRAP_LITERAL(1);
+            }
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+-----
+")})));
+end ReinitCTest9;
+
 end Reinit;
 
 package WhenTestCache
@@ -856,7 +966,9 @@ equation
             template="
 $C_global_temps$
 $C_ode_derivatives$
+$C_ode_initialization$
 $C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
     jmi_real_t tmp_1;
@@ -871,6 +983,20 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     }
     dae_block_0_set_up(jmi);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_1 = _sw(0);
+    _y_0 = 0;
+    pre_y_0 = _y_0;
+    pre_temp_1_1 = JMI_FALSE;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1010,6 +1136,7 @@ algorithm
             template="
 $C_global_temps$
 $C_ode_derivatives$
+$C_dae_blocks_residual_functions$
 ",
             generatedCode="
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -1041,6 +1168,203 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 ")})));
 end WhenTestCache3;
+
+model WhenTestCache4
+    function f
+        input Real x;
+        output Real y = x;
+        algorithm
+        annotation(Inline=false);
+    end f;
+    
+    discrete Real y;
+equation
+    when {time > 1, initial()} then
+        y = f(time);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTestCache4",
+            description="",
+            template="
+$C_global_temps$
+$C_ode_derivatives$
+$C_ode_initialization$
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_real_t tmp_1;
+    int tmp_1_computed;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    dae_block_0_set_up(jmi);
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_1 = _sw(0);
+    _y_0 = func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache4_f_exp0(_time);
+    pre_y_0 = 0.0;
+    pre_temp_1_1 = JMI_FALSE;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+static void dae_block_0_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_1_computed) = 0;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _temp_1_1 = _sw(0);
+        }
+        _y_0 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)), _atInitial), JMI_TRUE, JMI_CACHED(tmp_1, func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache4_f_exp0(_time)), pre_y_0);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end WhenTestCache4;
+
+model WhenTestCache5
+    function f
+        input Real x;
+        output Real y = x;
+        algorithm
+        annotation(Inline=false);
+    end f;
+    
+    discrete Real y;
+equation
+    if time > 1 then
+        when {time > 1} then
+            y = f(time);
+        end when;
+    else
+        y = 0;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTestCache5",
+            description="",
+            template="
+$C_global_temps$
+$C_ode_derivatives$
+$C_ode_initialization$
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+    jmi_real_t tmp_1;
+    int tmp_1_computed;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    dae_block_0_set_up(jmi);
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_1 = _sw(0);
+    pre_temp_1_1 = JMI_FALSE;
+    pre_y_0 = 0.0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _y_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, COND_EXP_EQ(LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)), JMI_TRUE, func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache5_f_exp0(_time), pre_y_0), AD_WRAP_LITERAL(0));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+static void dae_block_0_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_1_computed) = 0;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _temp_1_1 = _sw(0);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        }
+        _y_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, COND_EXP_EQ(LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)), JMI_TRUE, JMI_CACHED(tmp_1, func_CCodeGenGlobalsTests_WhenTestCache_WhenTestCache5_f_exp0(_time)), pre_y_0), AD_WRAP_LITERAL(0));
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end WhenTestCache5;
+
 
 end WhenTestCache;
 
