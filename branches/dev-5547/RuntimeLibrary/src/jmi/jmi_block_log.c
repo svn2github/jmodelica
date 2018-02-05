@@ -54,6 +54,7 @@ int jmi_check_illegal_values(int *error_indicator, jmi_real_t *nominal, jmi_real
 			error_indicator[i] = 0;
 		}
 	}
+	return ret;
 }
 
 void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans_present, int infs_present, int lim_vals_present, jmi_real_t *inputs,
@@ -129,9 +130,9 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
 		int ret = (nans_present+infs_present+lim_vals_present) > 0 ? TRUE: FALSE;
 		char* warn_output_type;
 		if (is_iter_var_flag) {
-			warn_output_type = "IllegalIterationVariableInput";
+			warn_output_type = "IllegalResidualOutput";
 		} else {
-			warn_output_type = "IllegalVariableInput";
+			warn_output_type = "IllegalOutput";
 		}
 
 		if(ret && n_outputs==1 && n_inputs==1) {
