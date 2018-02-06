@@ -27,9 +27,10 @@ aspect CCodeGenGlobals {
             
             public void generate(CodeStream str) {
                 CodePrinter p = ASTNode.printer_C;
+                CodePrinter ip = p.initialSystemPrinter();
                 String indent = p.indent("");
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks()) {
-                    block.genReinitTempDecls_C(p, str, indent);
+                    block.genReinitTempDecls_C(ip, str, indent);
                 }
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                     block.genReinitTempDecls_C(p, str, indent);
