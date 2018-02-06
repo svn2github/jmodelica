@@ -24,7 +24,7 @@ jmi_real_work_array_t* jmi_create_real_work_array(jmi_int_t n) {
 	jmi_real_work_array_t* real_work_array;
 	real_work_array = (jmi_real_work_array_t*)calloc(1, sizeof(jmi_real_work_array_t));
 	real_work_array->n = n;
-	real_work_array->rwork = (jmi_real_t*)(n, sizeof(jmi_real_t));
+	real_work_array->rwork = (jmi_real_t*)calloc(n, sizeof(jmi_real_t));
 	return real_work_array;
 }
 
