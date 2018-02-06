@@ -64,6 +64,21 @@ int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
                                        const void*                  value);
 
 /**
+ * \brief Checks if the user is changing the values of any real inputs.
+ * 
+ * @param jmi The jmi_t struct.
+ * @param vr The value references of values the user is setting.
+ * @param nvr The number of value references.
+ * @param value The new values for variables.
+ * @return True if the input would result in changes of real inputs sent to
+ * a fmiX_set_XXX function.
+ */
+int jmi_cs_check_input_change(jmi_t*                       jmi,
+                                       const jmi_value_reference    vr[],
+                                       size_t                       nvr,
+                                       const jmi_real_t*                  value);
+
+/**
  * \brief Frees all data for struct allocated by the jmi_new_cs_data function.
  * 
  * @param cs_data The jmi_cs_data_t struct.

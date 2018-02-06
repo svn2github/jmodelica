@@ -205,6 +205,21 @@ class Test_FMUModelCS1:
         cls.input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="1.0")
         cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="1.0")
         cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="1.0")
+        cls.initialize_solver = compile_fmu("Inputs.DiscChange",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs", version="1.0")
+    
+    @testattr(stddist_full = True)
+    def test_reinitialize_solver(self):
+        model = load_fmu(Test_FMUModelCS1.initialize_solver)
+        
+        model.initialize()
+
+        model.set("u", 0.0)
+        flag = model.do_step(0.0, 0.1)
+        assert flag == 0
+        model.set("u", 20)
+        flag = model.do_step(0.1, 0.1)
+        assert flag == 0
+        
     
     @testattr(stddist_full = True)
     def test_asseert_fail(self):
