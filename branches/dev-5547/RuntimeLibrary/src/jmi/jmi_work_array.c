@@ -18,27 +18,28 @@
 */
 
 #include "jmi_work_array.h"
+#include <stdlib.h>
 
 jmi_real_work_array_t* jmi_create_real_work_array(jmi_int_t n) {
 	jmi_real_work_array_t* real_work_array;
-	real_work_array = calloc(1, sizeof(jmi_real_work_array_t));
+	real_work_array = (jmi_real_work_array_t*)calloc(1, sizeof(jmi_real_work_array_t));
 	real_work_array->n = n;
-	real_work_array->rwork = calloc(n, sizeof(jmi_real_t));
+	real_work_array->rwork = (jmi_real_t*)(n, sizeof(jmi_real_t));
 	return real_work_array;
 }
 
 jmi_int_work_array_t* jmi_create_int_work_array(jmi_int_t n) {
 	jmi_int_work_array_t* int_work_array;
-	int_work_array = calloc(1, sizeof(jmi_int_work_array_t));
+	int_work_array = (jmi_int_work_array_t*)calloc(1, sizeof(jmi_int_work_array_t));
 	int_work_array->n = n;
-	int_work_array->iwork = calloc(n, sizeof(jmi_int_t));
+	int_work_array->iwork = (jmi_int_t*)calloc(n, sizeof(jmi_int_t));
 	return int_work_array;
 }
 
 jmi_real_t* jmi_get_real_work_array(jmi_real_work_array_t* real_work_array, jmi_int_t n) {
 	if (n > real_work_array->n) { /* Not enough memory allocated */
 		free(real_work_array->rwork);
-		real_work_array->rwork = calloc(n, sizeof(jmi_real_t));
+		real_work_array->rwork = (jmi_real_t*)calloc(n, sizeof(jmi_real_t));
 		real_work_array->n=n;
 	}
 	return real_work_array->rwork;
@@ -46,7 +47,7 @@ jmi_real_t* jmi_get_real_work_array(jmi_real_work_array_t* real_work_array, jmi_
 jmi_int_t* jmi_get_int_work_array(jmi_int_work_array_t* int_work_array, jmi_int_t n) {
 	if (n > int_work_array->n) { /* Not enough memory allocated */
 		free(int_work_array->iwork);
-		int_work_array->iwork = calloc(n, sizeof(jmi_int_t));
+		int_work_array->iwork = (jmi_int_t*)calloc(n, sizeof(jmi_int_t));
 		int_work_array->n=n;
 	}
 	return int_work_array->iwork;
