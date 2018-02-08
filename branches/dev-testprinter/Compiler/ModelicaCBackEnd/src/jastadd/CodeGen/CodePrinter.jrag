@@ -210,7 +210,7 @@ aspect CodePrinter {
         public abstract TypePrinter_C createInitPrinter(CodeStream str);
         public abstract TypePrinter_C createInitSetPrinter(CodeStream str);
         
-        public String getArgSep() {
+        public String sep() {
             return ", ";
         }
         
