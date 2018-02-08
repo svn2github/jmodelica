@@ -132,8 +132,18 @@ aspect CCodeGenTypes {
         print(p.createInitSetPrinter(str), indent, name, src, external);
     }
 
-    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, FExp src, boolean external) {
-        print(tp, indent, ep.name(src), src, external);
+    interface TypePrintable extends Nameable {
+        public FExp myBackingFExp();
+    }
+
+    class FExp              implements TypePrintable {}
+    class FFunctionCallLeft implements TypePrintable {}
+
+    syn FExp              FExp.myBackingFExp() = this;
+    syn FExp FFunctionCallLeft.myBackingFExp() = getFExp();
+
+    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable src, boolean external) {
+        print(tp, indent, ep.name(src), src.myBackingFExp(), external);
     }
 
     public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {
