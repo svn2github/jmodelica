@@ -53,7 +53,8 @@ typedef struct {
 
 /** \brief Experimental features in the solver */
 typedef enum {
-    jmi_cs_experimental_none = 0
+    jmi_cs_experimental_none = 0,
+    jmi_cs_experimental_no_reinit_for_input_change = 1
 } jmi_cs_experimental_mode_t;
 
 /** \brief All solver options */

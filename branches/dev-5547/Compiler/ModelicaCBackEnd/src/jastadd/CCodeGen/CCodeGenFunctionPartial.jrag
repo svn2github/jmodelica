@@ -387,14 +387,14 @@ int i;
     @Override
     public void FFunctionVariable.prettyPrintCall(CodePrinter p, CodeStream str, String indent, final FFunctionCall call) {
         boolean exp = p.functionCallIsExp(call);
-        String out = "NULL";
+        String name = p.ExecStep.name(this);
+        final String out = exp ? "NULL" : p.ExecStep.name(call);
         if (!exp) {
-            out = p.ExecStep.name(call);
-            str.formatln("%s%s.n = %s;", indent, out, call.myLefts().size());
-            out = "&" +out;
+            str.print(indent, out, ".n = ", call.myLefts().size(), ";\n");
             str.print(indent);
         }
-        str.format("%s->fpcl(%s, %s", p.ExecStep.name(this), p.ExecStep.name(this), out);
+        String outRef = exp ? "" : "&";
+        str.print(name, "->fpcl(", name, ", ", outRef, out);
         for (FExp arg : call.getArgs()) {
             p.printCastArgument(arg, str, indent);
         }
@@ -410,7 +410,7 @@ int i;
         }
         if (!exp) {
             //write back
-			StructComputation sc = new StructComputation() {
+            StructComputation sc = new StructComputation() {
                 @Override
                 public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
                         String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {
@@ -424,7 +424,8 @@ int i;
                 @Override
                 public void print(FFunctionVariable v, FFunctionCallLeft arg, 
                         CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-                    str.formatln("%s%s = %s.%s;", indent, p.name(arg), p.name(call), p.name(arg));
+                    String name = p.name(arg);
+                    str.print(indent, name, " = ", out, ".", name, ";\n");
                 }
 			};
             p.print(sc, str, indent, myOutputs(), call.myLefts());

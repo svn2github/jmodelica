@@ -132,8 +132,18 @@ aspect CCodeGenTypes {
         print(p.createInitSetPrinter(str), indent, name, src, external);
     }
 
-    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, FExp src, boolean external) {
-        print(tp, indent, ep.name(src), src, external);
+    interface TypePrintable extends Nameable {
+        public FExp myBackingFExp();
+    }
+
+    class FExp              implements TypePrintable {}
+    class FFunctionCallLeft implements TypePrintable {}
+
+    syn FExp              FExp.myBackingFExp() = this;
+    syn FExp FFunctionCallLeft.myBackingFExp() = getFExp();
+
+    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable src, boolean external) {
+        print(tp, indent, ep.name(src), src.myBackingFExp(), external);
     }
 
     public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {
@@ -538,8 +548,7 @@ aspect CCodeGenTypes {
                 if (exps[i] == null) {
                     str.print(size[i]);
                 } else {
-                    FExp exp = exps[i];
-                    exp.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
+                    exps[i].prettyPrint_C(p, str, indent);
                 }
             }
         } else {
@@ -564,67 +573,27 @@ aspect CCodeGenTypes {
     }
 
     public void Size.printSize_C(CodePrinter p, CodeStream str, String indent, String name, int dim) {
-        str.print("jmi_array_size(");
-        str.print(name);
-        str.print(", ");
-        str.print(dim);
-        str.print(")");
+        str.print("jmi_array_size(", name, p.sep(), dim, ")");
     }
 
     public void Size.printSize_C(CodePrinter p, CodeStream str, String indent, FExp e, int dim) {
         str.print("jmi_array_size(");
         p.print(e, str, indent);
-        str.print(", ");
-        str.print(dim);
-        str.print(")");
+        str.print(p.sep(), dim, ")");
     }
 
-    public void Size.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
+    public void Size.print(CodePrinter.StepPrinter p, CodeStream str, String indent) {}
 
     @Override
-    public void MutableSize.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+    public void MutableSize.print(CodePrinter.StepPrinter p, CodeStream str, String indent) {
         if (isUnknown()) {
             for (int i = 0; i < size.length; i++) {
                 if (size[i] == Size.UNKNOWN) {
-                    FExp exp = src.dynamicFExp(exps[i]);
-                    p.printVarDecls(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
+                    p.print(exps[i], str, indent);
                 }
             }
         } else {
-            super.genVarDecls_C(p, str, indent, src);
-        }
-    }
-
-	
-    public void Size.genTempVars_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
-
-    @Override
-    public void MutableSize.genTempVars_C(CodePrinter p, CodeStream str, String indent, FExp src) {
-        if (isUnknown()) {
-            for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
-                    FExp exp = src.dynamicFExp(exps[i]);
-                    p.printPreSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
-                }
-            }
-        } else {
-            super.genTempVars_C(p, str, indent, src);
-        }
-    }
-
-    public void Size.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {}
-
-    @Override
-    public void MutableSize.genTempFree_C(CodePrinter p, CodeStream str, String indent, FExp src) {
-        if (isUnknown()) {
-            for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
-                    FExp exp = src.dynamicFExp(exps[i]);
-                    p.printPostSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
-                }
-            }
-        } else {
-            super.genTempFree_C(p, str, indent, src);
+            super.print(p, str, indent);
         }
     }
 

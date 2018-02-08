@@ -31,6 +31,10 @@ aspect StepPrinter {
         public ExecuteCodePrinter ExecStep  = new ExecuteCodePrinter();
         public StepPrinter PostStep  = new PostCodePrinter();
         
+        public ExecuteCodePrinter getExecStep() {
+            return ExecStep;
+        }
+        
         class DeclCodePrinter extends StepPrinter {
             @Override
             public void print(ASTNode n, CodeStream str, String indent) {
@@ -95,19 +99,15 @@ aspect StepPrinter {
             public String name(FAbstractVariable v) {
                 return v.name_C();
             }
-
-            public String name(FFunctionCallLeft v) {
-                return v.name_C();
+            
+            public String name(TypePrintable exp) {
+                if (needsTemp(exp)) {
+                    return exp.tempName_C();
+                } else {
+                    return exp.name_C();
+                }
             }
-
-            public String name(FExp exp) {
-                return exp.tempName_C();
-            }
-
-            public String name(FFunctionCall ffc) {
-                return ffc.tempName_C();
-            }
-
+            
             public String type(FAbstractVariable v) {
                 return v.type_C(codePrinter());
             }
