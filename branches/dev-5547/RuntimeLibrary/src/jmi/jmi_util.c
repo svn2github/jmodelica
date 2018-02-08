@@ -629,7 +629,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 		input[j] = input_orig;
 
 		for (i = 0; i < n_output; i++) {
-			d_output[i] += (output[i]-output_temp[i])/inc*d_input[j]; 
+			d_output[i] += (output_temp[i]-output[i])/inc*d_input[j]; 
 		}
 	}
 
