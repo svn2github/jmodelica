@@ -1984,6 +1984,19 @@ aspect BLT{
             return blt.label();
         }
 
+        @Override
+        public Collection<FVariable> independentVariables() {
+            // We need to list all the dynamic state variables here cause they
+            // aren't referenced by any equations or expressions
+            Collection<FVariable> independentVariables = super.independentVariables();
+            for (DynamicStateSet set : sets) {
+                for (FDynamicStateVariable state : set.getStateVars()) {
+                    independentVariables.add(state);
+                }
+            }
+            return independentVariables;
+        }
+
     }
     
     public class HomotopyBlock extends AbstractSubBLTBlock<BLT> {

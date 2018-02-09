@@ -1,4 +1,9 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5557
+Fixed dependency computation for dynamic derivatives, the FMU XML didn't list
+the corresponding dynamic states as dependencies for the dynamic derivatives.
+
+================= Stable-2018-02-09 ==================
 ; Change ; Minor ; Runtime; #5555
 Added so that the internal solver is re-initialized if inputs are
 changed in a co-simulation FMU.
