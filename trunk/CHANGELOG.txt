@@ -1,4 +1,6 @@
 ================= Unreleased ==================
+
+================= Stable-2018-02-09 ==================
 ; Change ; Minor ; Runtime; #5555
 Added so that the internal solver is re-initialized if inputs are
 changed in a co-simulation FMU.
