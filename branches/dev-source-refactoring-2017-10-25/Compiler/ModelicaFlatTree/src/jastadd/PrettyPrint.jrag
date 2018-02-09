@@ -383,21 +383,24 @@ aspect PrettyPrint {
             if (!first && (wantsBlankLine || prevWantsBlankLine)) {
                 str.println();
             }
-            p.print(e, str, indent);
-            if (!e.prettyPrintHasLineEnd()) {
+            if (!e.prettyPrintsAsLine()) {
+                str.print(indent);
+                p.print(e, str, indent);
                 str.println(";");
+            } else {
+                p.print(e, str, indent);
             }
             prevWantsBlankLine = wantsBlankLine;
             first = false;
         }
     }
 
-    syn boolean Element.prettyPrintHasLineEnd();
-    eq ImportClause.prettyPrintHasLineEnd()          = true;
-    eq ExtendsClause.prettyPrintHasLineEnd()         = false;
-    eq AbstractComponentDecl.prettyPrintHasLineEnd() = false;
-    eq ClassDecl.prettyPrintHasLineEnd()             = true;
-    eq BadElement.prettyPrintHasLineEnd()            = true;
+    syn boolean Element.prettyPrintsAsLine();
+    eq ImportClause.prettyPrintsAsLine()     = true;
+    eq ExtendsClause.prettyPrintsAsLine()    = false;
+    eq ComponentClause.prettyPrintsAsLine()  = false;
+    eq ClassDecl.prettyPrintsAsLine()        = true;
+    eq BadElement.prettyPrintsAsLine()       = true;
 
     syn boolean Element.prettyPrintWantsBlankLine() = false;
     eq ClassDecl.prettyPrintWantsBlankLine()        = true;
@@ -535,9 +538,7 @@ aspect PrettyPrint {
 				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
-    public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(indent);
-        
+    public void ComponentClause.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getRedeclare()) {
             str.print("redeclare ");
         }
@@ -564,21 +565,19 @@ aspect PrettyPrint {
         }
         
         p.print(getClassName(), str, indent);
-        if (hasTypeArraySubscripts()) {
-            p.print(getTypeArraySubscripts(), str, indent);
-        }
-        str.print(" ", getName().getID()); 
-        if (hasVarArraySubscripts()) {
-            p.print(getVarArraySubscripts(), str, indent);
-        }
+        p.print(getTypeArraySubscriptsOpt(), str, indent);
+        
+        str.print(" ");
+        getComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+        
+        p.print(getConstrainingClauseOpt(), str, indent);
+    }
+
+    public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(getName().getID());
+        p.print(getVarArraySubscriptsOpt(), str, indent);
         p.print(getModificationOpt(), str, indent);
-         
-        if (hasConditionalAttribute()) {
-            p.print(getConditionalAttribute(), str, indent);
-        }
-        if (hasConstrainingClause()) {
-            p.print(getConstrainingClause(), str, indent);
-        }
+        p.print(getConditionalAttributeOpt(), str, indent);
     }
 
     public void ConditionalAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -696,7 +695,7 @@ aspect PrettyPrint {
         if (getFinal()) {
             str.print("final ");
         }
-        p.print(getComponentDecl(), str, indent);
+        p.print(getComponentClause(), str, indent);
     }
 
     public void ClassRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -862,28 +861,16 @@ aspect PrettyPrint {
 
     public void ArrayAccess.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getID());
-        getArraySubscriptsOpt().prettyPrint(p, str, indent);
+        getArraySubscripts().prettyPrint(p, str, indent);
     }
 
 	public void Dot.prettyPrint(Printer p, CodeStream str, String indent) {
 		getAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
-	
-	public void PN_Dot.prettyPrint(Printer p, CodeStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		str.print(".");
-		p.print(getRight(),str,indent);	
-	}
-		
+
 	public void GlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(".");
 		p.print(getAccess(),str,indent);	
-	}
-	
-	public void ComponentAccess.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.print(getID());
-		if (hasArraySubscripts())
-			p.print(getArraySubscripts(),str,indent);
 	}
 
     public void StringLitExp.prettyPrint(Printer p, CodeStream str, String indent) {

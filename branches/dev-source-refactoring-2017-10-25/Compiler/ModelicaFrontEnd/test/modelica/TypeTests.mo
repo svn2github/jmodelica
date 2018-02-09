@@ -1123,7 +1123,7 @@ model RecursiveStructure4
             errorMessage="
 1 errors found:
 
-Error at line 3, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo',
 In component a:
   Recursive class structure
 ")})));

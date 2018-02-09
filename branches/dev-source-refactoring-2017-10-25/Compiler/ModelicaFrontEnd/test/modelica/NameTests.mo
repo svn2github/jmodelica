@@ -3926,13 +3926,13 @@ model BadEscape2
             errorMessage="
 6 errors found:
 
-Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
 
-Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
 
-Error at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
+Error at line 2, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 
 Error at line 3, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':

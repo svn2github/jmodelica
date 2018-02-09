@@ -87,7 +87,7 @@ aspect AnnotationAPI {
      */
 
     syn AnnotationNode Element.modificationAnnotation() = AnnotationNode.NO_ANNOTATION;
-    eq ComponentDecl.modificationAnnotation() = annotationOfChild(getModificationOpt());
+    syn AnnotationNode ComponentDecl.modificationAnnotation() = annotationOfChild(getModificationOpt());
     eq ExtendsClause.modificationAnnotation() = annotationOfChild(getClassModificationOpt());
 
     syn AnnotationNode ASTNode.createNullAnnotationNode() = AnnotationNode.NO_ANNOTATION;
@@ -894,7 +894,7 @@ aspect AnnotationAPI {
 
         @Override
         public AnnotationNode addNode(String path) {
-            ComponentModification cm = new ComponentModification(new ParseAccess(path), new CompleteModification(new ClassModification()));
+            ComponentModification cm = new ComponentModification(new NamedAccess(path), new CompleteModification(new ClassModification()));
             mod.addArgument(cm);
             return cm.annotationNode();
         }

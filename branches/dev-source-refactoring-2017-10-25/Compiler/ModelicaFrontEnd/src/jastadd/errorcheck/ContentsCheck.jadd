@@ -278,7 +278,7 @@ aspect ContentCheck {
             }
         }
         
-        checkQuotedIdentifier(getClassDecl(), name());
+        checkQuotedIdentifier(getClassDecl().getName(), name());
     }
     
     private static Set<String> AnnotationNode.buildExternalFunctionAnnotations() {

@@ -197,7 +197,7 @@
             aSyms[i] = (AdjustableSymbol) syms[i];
         }
         if (aSyms.length > 0) {
-            aSyms[0].adjustStartOfEmptySymbols(aSyms, 1);
+            aSyms[0].adjustStartOfEmptySymbols(aSyms, 1, 0);
         }
     }
     
@@ -239,9 +239,27 @@
         public TypePrefixes(Opt<TypePrefixFlow> flow, 
                             Opt<TypePrefixVariability> variability, 
                             Opt<TypePrefixInputOutput> input_output) {
+            super(flow, variability, input_output);
             this.flow = flow;
             this.variability = variability;
             this.input_output = input_output;
+        }
+    }
+    
+    private static class ConstrClauseAndComment extends AbstractAdjustableSymbol {
+        public final Opt<ConstrainingClause> constr;
+        public final Comment comment;
+        
+        public ConstrClauseAndComment(ConstrainingClause constr, 
+                                      Comment comment) {
+            super(constr, comment);
+            this.constr = new Opt(constr);
+            this.comment = comment;
+        }
+        
+        public ConstrClauseAndComment() {
+            this.constr = new Opt();
+            this.comment = new Comment();
         }
     }
 :};
@@ -278,9 +296,9 @@ StoredDefinition stored_definition
     :};
 
 Within within
-    = WITHIN parse_access? SEMICOLON 
+    = WITHIN access? SEMICOLON 
     {: 
-        return new Within(parse_access); 
+        return new Within(access); 
     :};
   
 List base_class_decl_list
@@ -295,18 +313,15 @@ List base_class_decl_list
     :};
 
 BaseClassDecl anonymous_short_class 
-    = class_access class_modification?
+    = extends_clause_short_class
     {:
-        return new PN_ShortClassDecl(
+        return new ShortClassDecl(
             new IdDecl("'Anonymous Class'"),
             false, false, 
             new MClass(), 
             false, false, false, false, false, 
-            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), 
-            class_access,
-            new Opt(), 
-            class_modification, 
-            new Comment()); 
+            new Opt(), new Opt(), 
+            extends_clause_short_class); 
     :};
 
 BaseClassDecl base_class_decl 
@@ -338,27 +353,17 @@ BaseClassDecl base_class_decl
       has_partial 
       restriction  
       id_decl.class_name EQUALS
-      type_prefixes
-      class_access
-      array_subscripts?
-      class_modification?
-      comment 
+      extends_clause_short_class 
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new PN_ShortClassDecl(
+        return new ShortClassDecl(
             class_name, 
             has_encapsulated.value, 
             has_partial.value, 
             restriction, 
             false, false, false, false, false, 
             new Opt(), new Opt(),
-            type_prefixes.flow, 
-            type_prefixes.variability, 
-            type_prefixes.input_output, 
-            class_access,
-            array_subscripts, 
-            class_modification, 
-            comment); 
+            extends_clause_short_class);
     :}
     | has_encapsulated 
       has_partial 
@@ -374,7 +379,7 @@ BaseClassDecl base_class_decl
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
         InlineExtendsClause ext = new InlineExtendsClause(
-            new ClassAccess(start.getID()),
+            new NamedAccess(start.getID()),
             class_modification,
             new Opt());
         return new ExtendClassDecl(
@@ -411,7 +416,7 @@ BaseClassDecl base_class_decl
             false, false, false, false, false, 
             new Opt(), new Opt(),
             comment.getStringCommentOpt(),
-            new List(new DefaultElementList(enum_specification)),
+            new List(new DefaultElementList(new List(enum_specification))),
             new Opt(),
             comment.getAnnotationOpt(),
             new EndDecl(enum_name.getID()),
@@ -422,7 +427,43 @@ BaseClassDecl base_class_decl
       return new BadClassDecl();
     :};
 
-List enum_specification
+ExtendsClauseShortClass extends_clause_short_class
+    = type_prefixes
+      access_scalar
+      array_subscripts?
+      class_modification?
+      comment 
+    {:
+        adjustStart(type_prefixes, access_scalar);
+        return new ExtendsClauseShortClass(
+            access_scalar,
+            class_modification, 
+            new Opt<Annotation>(),
+            type_prefixes.flow, 
+            type_prefixes.variability, 
+            type_prefixes.input_output, 
+            array_subscripts, 
+            comment);
+    :}
+    ;
+
+ComponentClause enum_specification
+    = enum_contents
+    {:
+        return new ComponentClause(
+                false, false, false, false, false,
+                new Opt(),
+                new Opt(new Constant()),
+                new Opt(),
+                new NamedAccess("EnumType"),
+                new Opt(),
+                enum_contents,
+                new Opt(),
+                new Comment());
+    :}
+    ;
+
+List enum_contents
     = COLON                {: return new List(); :}
     | enum_literal_list    {: return enum_literal_list; :}
     ;
@@ -430,7 +471,7 @@ List enum_specification
 List enum_literal_list
     = enum_literal
     {:
-        return new List().add(enum_literal);
+        return new List(enum_literal);
     :}
     | enum_literal_list
       COMMA
@@ -446,20 +487,11 @@ EnumLiteralDecl enum_literal
       comment
     {:
         return new EnumLiteralDecl(
-                false, false, false, false, false,
-                new Opt(),
-                new Opt(new Constant()),
-                new Opt(),
-                new ClassAccess("EnumType"),
-                new Opt(),
-                new PublicVisibilityType(),
                 id_decl,
                 new Opt(),
                 new Opt(),
                 new Opt(),
-                comment,
-                new Opt(),
-                new Comment());
+                comment);
     :}
     ;
 
@@ -653,14 +685,14 @@ Annotation class_annotation
     ;
 
 ExternalFunctionCall external_function_call
-    = parse_access
+    = access
       EQUALS
       id_decl
       LPAREN
       arg_list
       RPAREN
     {:
-        return new ExternalFunctionCall(new Opt(parse_access), id_decl, arg_list);
+        return new ExternalFunctionCall(new Opt(access), id_decl, arg_list);
     :}
     | id_decl
       LPAREN
@@ -693,8 +725,7 @@ Element element
       has_outer 
       REPLACEABLE
       base_class_decl
-      constraining_clause? 
-      comment 
+      constraining_clause_and_comment 
       SEMICOLON 
     {: 
         adjustStart(has_redeclare, has_final, has_inner, has_outer, REPLACEABLE);
@@ -703,8 +734,8 @@ Element element
         base_class_decl.setInner(has_inner.value);
         base_class_decl.setOuter(has_outer.value);
         base_class_decl.setReplaceable(true);
-        base_class_decl.setConstrainingClauseOpt(constraining_clause);
-        base_class_decl.setConstrainingClauseComment(comment);
+        base_class_decl.setConstrainingClauseOpt(constraining_clause_and_comment.constr);
+        base_class_decl.setConstrainingClauseComment(constraining_clause_and_comment.comment);
         return base_class_decl;
     :}  
     | extends_clause SEMICOLON 
@@ -720,13 +751,13 @@ Element element
       has_inner 
       has_outer 
       type_prefixes 
-      class_access/*name*/ 
+      access_scalar 
       array_subscripts? 
       component_list 
       SEMICOLON 
     {:
-        adjustStart(has_redeclare, has_final, has_inner, has_outer, type_prefixes, class_access);
-        return new PN_ComponentClause(
+        adjustStart(has_redeclare, has_final, has_inner, has_outer, type_prefixes, access_scalar);
+        return new ComponentClause(
             has_redeclare.value,
             has_final.value,
             has_inner.value,
@@ -735,11 +766,11 @@ Element element
             type_prefixes.flow,
             type_prefixes.variability,
             type_prefixes.input_output,
-            class_access,
+            access_scalar,
             array_subscripts,
             component_list,
             new Opt(),
-            new Comment(new Opt(), new Opt()));
+            new Comment());
     :}
     | has_redeclare 
       has_final 
@@ -747,15 +778,14 @@ Element element
       has_outer 
       REPLACEABLE 
       type_prefixes 
-      class_access 
+      access_scalar 
       array_subscripts? 
       component_list 
-      constraining_clause? 
-      comment 
+      constraining_clause_and_comment 
       SEMICOLON 
     {: 
         adjustStart(has_redeclare, has_final, has_inner, has_outer, REPLACEABLE);
-        return new PN_ComponentClause(
+        return new ComponentClause(
             has_redeclare.value,
             has_final.value,
             has_inner.value,
@@ -764,10 +794,11 @@ Element element
             type_prefixes.flow,
             type_prefixes.variability,
             type_prefixes.input_output,
-            class_access,
+            access_scalar,
             array_subscripts,
             component_list,
-            constraining_clause,comment);
+            constraining_clause_and_comment.constr,
+            constraining_clause_and_comment.comment);
     :}
     | error SEMICOLON
     {: 
@@ -775,45 +806,58 @@ Element element
     :}
     ;
 
+ConstrClauseAndComment constraining_clause_and_comment
+    = constraining_clause
+      comment
+    {:
+        return new ConstrClauseAndComment(constraining_clause, comment);
+    :}
+    | /* blank */
+    {:
+        return new ConstrClauseAndComment();
+    :}
+    ;
+
 ConstrainingClause constraining_clause 
     = CONSTRAINEDBY 
-      class_access 
+      access 
       class_modification?
     {: 
-        return new ConstrainingClause(class_access, class_modification);
+        return new ConstrainingClause(access, class_modification);
     :}
     ;
 
 ExtendsClause extends_clause 
     = EXTENDS 
-      class_access 
+      access 
       class_modification? 
       annotation?
     {: 
-        return new ExtendsClause(class_access, class_modification, annotation);
+        return new ExtendsClause(access, class_modification, annotation);
     :}
   ;
 
 ImportClause import_clause
     = IMPORT
-      qualified_import_access
+      access_scalar
       comment
     {:
-        return new ImportClauseQualified(qualified_import_access, comment);
+        return new ImportClauseQualified(access_scalar, comment);
     :}
     | IMPORT
-      unqualified_import_access
+      access_scalar
+      DOTMULT
       comment
     {:
-        return new ImportClauseUnqualified(unqualified_import_access, comment);
+        return new ImportClauseUnqualified(access_scalar, comment);
     :}
     | IMPORT
       id_decl.alias
       EQUALS
-      qualified_import_access
+      access_scalar
       comment
     {:
-        return new ImportClauseRename(qualified_import_access, comment, alias);
+        return new ImportClauseRename(access_scalar, comment, alias);
     :}
     ;
 
@@ -843,36 +887,50 @@ List subscript_list
 
 Subscript subscript 
     = COLON   {: return new ColonSubscript();  :}
-    | exp     {: return new ExpSubscript(exp); :}                                                                           
+    | exp     {: return new ExpSubscript(exp); :}
     ;
 
 
 List component_list
-    = pn_component_decl
+    = component_decl
     {:
-        return new List().add(pn_component_decl);
+        return new List(component_decl);
     :}
     | component_list
       COMMA
-      pn_component_decl
+      component_decl
     {:
-        component_list.add(pn_component_decl);
+        component_list.add(component_decl);
         return component_list;
     :}
     ;
 
-PN_ComponentDecl pn_component_decl
+ComponentDecl component_decl
     = id_decl.comp_name
       array_subscripts?
       modification?
       conditional_attribute?
       comment
     {:
-        return new PN_ComponentDecl(comp_name, 
-                                    array_subscripts, 
-                                    modification, 
-                                    conditional_attribute, 
-                                    comment);
+        return new ComponentDecl(comp_name, 
+                                 array_subscripts, 
+                                 modification, 
+                                 conditional_attribute, 
+                                 comment);
+    :}
+    ;
+
+ComponentDecl component_decl_no_conditional
+    = id_decl.comp_name
+      array_subscripts?
+      modification?
+      comment
+    {:
+        return new ComponentDecl(comp_name, 
+                                 array_subscripts, 
+                                 modification, 
+                                 new Opt(), 
+                                 comment);
     :}
     ;
 
@@ -943,15 +1001,15 @@ List argument_list
 Argument argument
     = has_each 
       has_final 
-      parse_access 
+      access 
       modification? 
       comment
     {: 
-        adjustStart(has_each, has_final, parse_access);
+        adjustStart(has_each, has_final, access);
         return new ComponentModification(
             has_each.value, 
             has_final.value, 
-            parse_access, 
+            access, 
             modification, 
             comment);
     :}
@@ -960,7 +1018,7 @@ Argument argument
       constraining_clause?
     {:
         adjustStart(redeclare_replaceable_header, base_class_decl);
-        ClassAccess name = new ClassAccess(base_class_decl.getName().getID());
+        NamedAccess name = new NamedAccess(base_class_decl.getName().getID());
         name.setLocationNoTree(base_class_decl.getName());
         base_class_decl.setConstrainingClauseOpt(constraining_clause);
         base_class_decl.setReplaceable(true);
@@ -976,7 +1034,7 @@ Argument argument
       has_final  
       base_class_decl 
     {: 
-        ClassAccess name = new ClassAccess(base_class_decl.getName().getID());
+        NamedAccess name = new NamedAccess(base_class_decl.getName().getID());
         name.setLocationNoTree(base_class_decl.getName());
         base_class_decl.setRedeclare(true);
         return new ClassRedeclare(
@@ -985,87 +1043,59 @@ Argument argument
             name,
             base_class_decl);
     :}
-    | redeclare_replaceable_header 
-      type_prefixes 
-      class_access 
-      id_decl.comp_name 
-      array_subscripts? 
-      modification? 
-      comment
-      constraining_clause? 
+    | redeclare_replaceable_header.header 
+      component_clause_in_argument.cc
+      constraining_clause.constr? 
     {:
-        adjustStart(redeclare_replaceable_header, type_prefixes, class_access);
-        ParseAccess pa = new ParseAccess(comp_name.getID(), array_subscripts);
-        pa.setLocationNoTree(comp_name);
-        PN_ComponentDecl cd = new PN_ComponentDecl(
-            comp_name, 
-            array_subscripts, 
-            modification, 
-            new Opt(), 
-            comment);
-        cd.setLocationNoTree(comp_name, comment);
-        PN_ComponentClause cc = new PN_ComponentClause(
-            redeclare_replaceable_header.has_redeclare,
-            false, 
-            false, 
-            false, 
-            true, 
-            type_prefixes.flow, 
-            type_prefixes.variability, 
-            type_prefixes.input_output, 
-            class_access, 
-            new Opt(), 
-            new List().add(cd), 
-            constraining_clause, 
-            new Comment(new Opt(), new Opt()));
-        return new PN_ComponentRedeclare(
-            redeclare_replaceable_header.has_each, 
-            redeclare_replaceable_header.has_final, 
-            pa,
+        adjustStart(header, cc);
+        cc.setConstrainingClauseOpt(constr);
+        cc.setLocationNoTree(header, (constr.hasChild() ? constr : cc));
+        cc.setRedeclare(header.has_redeclare);
+        return new ComponentRedeclare(
+            header.has_each, 
+            header.has_final, 
+            cc.createAccessForRedeclareNode(),
             cc); 
     :}
-    | REDECLARE
+    | REDECLARE 
       has_each 
       has_final 
-      type_prefixes 
-      class_access 
-      id_decl.comp_name 
-      array_subscripts? 
-      modification? 
-      comment
+      component_clause_in_argument.cc
     {: 
-        ParseAccess pa = new ParseAccess(comp_name.getID(), array_subscripts);
-        pa.setLocationNoTree(comp_name, array_subscripts);
-        PN_ComponentDecl cd = new PN_ComponentDecl(
-            comp_name, 
-            array_subscripts, 
-            modification, 
-            new Opt(), 
-            comment);
-        cd.setLocationNoTree(comp_name, comment);
-        PN_ComponentClause cc = new PN_ComponentClause(
-            true,
-            false,
-            false,
-            false,
-            false,
-            type_prefixes.flow,
-            type_prefixes.variability,
-            type_prefixes.input_output,
-            class_access,
-            new Opt(),
-            new List().add(cd),
-            new Opt(),
-            new Comment(new Opt(), new Opt()));
-        return new PN_ComponentRedeclare(
-            has_each.value,
-            has_final.value,
-            pa,
+        cc.setReplaceable(false);
+        cc.setLocationNoTree(REDECLARE, cc);
+        return new ComponentRedeclare(
+            has_each.value, 
+            has_final.value, 
+            cc.createAccessForRedeclareNode(),
             cc); 
     :}
     | error 
     {: 
         return new BadArgument();
+    :}
+    ;
+
+ComponentClause component_clause_in_argument
+    = type_prefixes 
+      access_scalar 
+      component_decl_no_conditional
+    {:
+        adjustStart(type_prefixes, access_scalar);
+        return new ComponentClause(
+            true,   // Changed in argument rule for case without "redeclare"
+            false, 
+            false, 
+            false, 
+            true,   // Changed in argument rule for case without "replaceable"
+            type_prefixes.flow, 
+            type_prefixes.variability, 
+            type_prefixes.input_output, 
+            access_scalar, 
+            new Opt(), 
+            new List(component_decl_no_conditional), 
+            new Opt(), 
+            new Comment());
     :}
     ;
 
@@ -1115,9 +1145,9 @@ AbstractEquation abstract_equation
     :}
     | CONNECT
       LPAREN
-      parse_access.a
+      access.a
       COMMA
-      parse_access.b
+      access.b
       RPAREN
       comment
       SEMICOLON
@@ -1158,8 +1188,8 @@ List function_call_left_list
     ;
 
 FunctionCallLeft function_call_left
-    = /* blank */    {: return new FunctionCallLeft(); :}
-    | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
+    = /* blank */  {: return new FunctionCallLeft(); :}
+    | access       {: return new FunctionCallLeft(new Opt(access)); :}
     ;
 
 ForClauseE for_clause_e
@@ -1190,31 +1220,36 @@ List for_indices
     ;
 
 ForIndex for_index
-    = id_decl for_in_exp?
+    = for_index_decl for_in_exp?
     {: 
         ForIndex f = new ForIndex(
-            new ForIndexDecl(
-                false,
-                false,
-                false,
-                false,
-                false,
-                new Opt(),
-                new Opt(new IndexParameter()),
-                new Opt(),
-                new ParseAccess("Integer",new Opt()),
-                new Opt(),
-                new PublicVisibilityType(),
-                id_decl,
-                new Opt(),
-                new Opt(),
-                new Opt(),
-                new Comment(new Opt(),new Opt()),
-                new Opt(),
-                new Comment(new Opt(),new Opt())),
+            false,
+            false,
+            false,
+            false,
+            false,
+            new Opt(),
+            new Opt(new IndexParameter()),
+            new Opt(),
+            new NamedAccess("Integer"),
+            new Opt(),
+            new List(for_index_decl),
+            new Opt(),
+            new Comment(),
             for_in_exp); 
-        f.setLocationNoTree(id_decl, for_in_exp); 
         return f; 
+    :}
+    ;
+
+ForIndexDecl for_index_decl
+    = id_decl
+    {:
+        return new ForIndexDecl(
+            id_decl,
+            new Opt(),
+            new Opt(),
+            new Opt(),
+            new Comment());
     :}
     ;
 
@@ -1290,7 +1325,7 @@ IfWhenElseEquation else_if_equation
 
 
 Statement statement
-    = parse_access.left ASSIGN exp.right comment SEMICOLON
+    = access.left ASSIGN exp.right comment SEMICOLON
                                       {: return new AssignStmt(comment, left, right); :}
     | function_call_stmt SEMICOLON    {: return function_call_stmt; :}
     | BREAK comment SEMICOLON         {: return new BreakStmt(comment); :} 
@@ -1308,15 +1343,18 @@ FunctionCallStmt function_call_stmt =
   | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
   ;
 
-List function_call_stmt_left_list =
-    function_call_stmt_left   {: return new List().add(function_call_stmt_left); :}
-  | function_call_stmt_left_list COMMA function_call_stmt_left  {: return function_call_stmt_left_list.add(function_call_stmt_left); :}
-  ;
-
-FunctionCallLeft function_call_stmt_left =
-                   {: return new FunctionCallLeft(new Opt()); :}
-  | parse_access   {: return new FunctionCallLeft(new Opt(parse_access)); :}
-  ;
+List function_call_stmt_left_list
+    = function_call_left
+    {:
+        return new List().add(function_call_left);
+    :}
+    | function_call_stmt_left_list
+      COMMA
+      function_call_left
+    {:
+        return function_call_stmt_left_list.add(function_call_left);
+    :}
+    ;
 
 IfStmt if_stmt =
     IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt(else_stmts)); :}
@@ -1463,19 +1501,33 @@ Exp primary =
   | TIME                {: return new TimeExp(); :}
   | END                 {: return new EndExp(); :} 
   ;
- 
- FunctionCall function_call =
-    parse_access LPAREN function_arguments? RPAREN 
-                                      {: return new FunctionCall(parse_access, function_arguments); :}
-  ;
-  
- PartialFunctionCall partial_function_call =
-    FUNCTION parse_access LPAREN function_arguments_named? RPAREN
-                                      {: return new PartialFunctionCall(parse_access, function_arguments_named); :}
-    | FUNCTION parse_access
-                                      {: return new PartialFunctionCall(parse_access, new Opt()); :}
-  ;
-  
+
+FunctionCall function_call 
+    = access
+      LPAREN
+      function_arguments?
+      RPAREN
+    {:
+        return new FunctionCall(access, function_arguments);
+    :}
+    ;
+
+PartialFunctionCall partial_function_call
+    = FUNCTION
+      access
+      LPAREN
+      function_arguments_named?
+      RPAREN
+    {:
+        return new PartialFunctionCall(access, function_arguments_named);
+    :}
+    | FUNCTION
+      access
+    {:
+        return new PartialFunctionCall(access, new Opt());
+    :}
+    ;
+
 FunctionArguments function_arguments =
     exp FOR for_indices               {: List arg_list_f = new List().add(new IterExp(exp, for_indices));
                                          return new FunctionArguments(arg_list_f, new List()); :} 
@@ -1503,7 +1555,7 @@ NamedArgument named_argument =
   ;
 
 Access named_argument_id = 
-  ID.id {: return new ParseAccess(id, new Opt()); :}
+  ID.id {: return new NamedAccess(id); :}
   ;
 
 Matrix matrix = 
@@ -1545,81 +1597,85 @@ StringComment string_comment =
    ID.id   {: return new IdDecl(id); :}
  ;
 
- AccessExp access_expression =
-   parse_access {: return new AccessExp(parse_access); :}
- ;
+AccessExp access_expression
+    = access {: return new AccessExp(access); :}
+    ;
 
- DerExp der_expression = 
-   DER LPAREN exp RPAREN  {: return new DerExp(exp); :}
- ;
+DerExp der_expression
+    = DER LPAREN exp RPAREN  {: return new DerExp(exp); :}
+    ;
 
- Access parse_access = 
-   parse_access_loc        {: return parse_access_loc; :}
- | DOT first_class_access  {: return new GlobalAccess(first_class_access); :}
- ;
- 
- Access parse_access_loc = 
-   parse_access_single   {: return parse_access_single; :}
- | parse_access_single DOT parse_access_loc 
-   			             {: return new PN_Dot(parse_access_single, parse_access_loc); :}
- ;
- 
- Access first_class_access =
-   class_access_single  {: return class_access_single; :}
- | class_access_single DOT parse_access_loc  
- 						{: return new PN_Dot(class_access_single, parse_access_loc); :}
- ;
- 
- ParseAccess parse_access_single = 
-   ID.id  array_subscripts? {: return new ParseAccess(id, array_subscripts); :}
- ;   
- 
- ParseAccess parse_access_single_simple = 
-   ID.id  {: return new ParseAccess(id, new Opt()); :}
- ;      
+Access access
+    = access_loc      {: return access_loc; :}
+    | DOT access_loc  {: return new GlobalAccess(access_loc); :}
+    ;
 
-   
- Access qualified_import_access = 
-   qualified_import_access_loc      {: return qualified_import_access_loc; :}
- | DOT qualified_import_access_loc  {: return new GlobalAccess(qualified_import_access_loc); :}
- ;
- 
- Access qualified_import_access_loc = 
-   qualified_import_access_rec
-            {: return qualified_import_access_rec; :}
- | class_access_single
-            {: return class_access_single; :}
- ;
- 
- Access qualified_import_access_rec = 
-   class_access_single DOT parse_access_single_simple  
-   			{: return new PN_Dot(class_access_single, parse_access_single_simple); :}
- | class_access_single DOT qualified_import_access_rec 
-   			{: return new PN_Dot(class_access_single, qualified_import_access_rec); :}
- ;
+Access access_loc
+    = access_single
+    | access_dot
+    ;
 
- 
- Access unqualified_import_access =
-   class_access DOTMULT   {: return class_access; :}
- ;
- 
- 
- Access class_access = 
-   class_access_loc      {: return class_access_loc; :}
- | DOT class_access_loc  {: return new GlobalAccess(class_access_loc); :}
- ;
- 
- Access class_access_loc = 
-   class_access_single                      {: return class_access_single; :}
- | class_access_single DOT class_access_loc {: return new PN_Dot(class_access_single, class_access_loc); :}
- ;    
-  
- ClassAccess class_access_single = 
-   ID.id  {: return new ClassAccess(id); :}
- ;
-   
- EndDecl end_decl =
-   END_ID {: String value = (String) END_ID.value;
-             String id = value.substring(3, value.length()).trim();
-             return new EndDecl(id); :}
- ;
+Dot access_dot
+    = access_single.a
+      DOT
+      access_single.b
+    {:
+        return new Dot(new List(a, b));
+    :}
+    | access_dot
+      DOT
+      access_single
+    {:
+        access_dot.addAccess(access_single);
+        return access_dot;
+    :}
+    ;
+
+NamedAccess access_single
+    = access_single_array
+    | access_single_scalar
+    ;
+
+ArrayAccess access_single_array
+    = ID.id array_subscripts  {: return new ArrayAccess(id, array_subscripts); :}
+    ;
+
+NamedAccess access_single_scalar
+    = ID.id  {: return new NamedAccess(id); :}
+    ;
+
+
+Access access_scalar
+    = access_scalar_loc      {: return access_scalar_loc; :}
+    | DOT access_scalar_loc  {: return new GlobalAccess(access_scalar_loc); :}
+    ;
+
+Access access_scalar_loc
+    = access_scalar_dot
+    | access_single_scalar
+    ;
+
+Dot access_scalar_dot
+    = access_single_scalar.a
+      DOT
+      access_single_scalar.b
+    {:
+        return new Dot(new List(a, b));
+    :}
+    | access_scalar_dot
+      DOT
+      access_single_scalar
+    {:
+        access_scalar_dot.addAccess(access_single_scalar);
+        return access_scalar_dot;
+    :}
+    ;
+
+EndDecl end_decl
+    = END_ID
+    {:
+        String value = (String) END_ID.value;
+        String id = value.substring(3, value.length()).trim();
+        return new EndDecl(id);
+    :}
+    ;

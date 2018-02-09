@@ -248,7 +248,7 @@ aspect SrcAnnotations {
     }
     @Override
     public SrcAnnotationProvider ClassModification.addAnnotationSubNode(String name) {
-        ComponentModification cm = new ComponentModification(false, false, new ParseAccess(name),
+        ComponentModification cm = new ComponentModification(false, false, new NamedAccess(name),
                 new Opt<Modification>(), new Comment());
         addArgument(cm);
         return cm;
@@ -299,8 +299,9 @@ aspect SrcAnnotations {
      * Component Decls  
      ******************/
     syn SrcAnnotationProvider ComponentDecl.srcAnnotationProvider() {
-        if (getCCComment().hasAnnotation()) {
-            return SrcAnnotation.createProviderFor(getComment(), getCCComment());
+        Comment ccComment = myComponentClause().getComment();
+        if (ccComment.hasAnnotation()) {
+            return SrcAnnotation.createProviderFor(getComment(), ccComment);
         }
         return SrcAnnotation.createProviderFor(getComment());
     }

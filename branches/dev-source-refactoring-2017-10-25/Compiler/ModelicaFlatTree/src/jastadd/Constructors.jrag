@@ -52,15 +52,7 @@ aspect Constructors {
 	public IntegerLitExp.IntegerLitExp(int val) {
 		this(String.valueOf(val));
 	}
-	
-	/**
-	 * Constructs a parse access from a String.
-	 */
-	public ParseAccess.ParseAccess(String name) {
-		this();
-		setID(name);
-	}
-	
+
 	/**
 	 * Constructs a component modification from an access and modification.
 	 */
@@ -384,21 +376,6 @@ aspect Constructors {
 	/**
 	 * Create an access from a class name.
 	 */
-	public static Access Access.fromClassName(String name) {
-		String[] parts = name.split("\\.");
-		if (parts.length == 1) {
-			return new ClassAccess(parts[0]);
-		} else {
-			List<Access> l = new List<Access>();
-			for (String part : parts)
-				l.add(new ClassAccess(part));
-			return new Dot(l);
-		}
-	}
-	
-	/**
-	 * Create an access from a class name.
-	 */
 	public static InstAccess InstAccess.fromName(String name) {
 		String[] parts = name.split("\\.");
 		if (parts.length == 1) {
@@ -553,29 +530,6 @@ aspect Constructors {
     
     public FRecordConstructor.FRecordConstructor(FIdUse name, List<FExp> args) {
         this(new List<InstFunctionArgument>(), name, args);
-    }
-
-    public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
-        this(false,
-             false,
-             false,
-             false,
-             false,
-             new Opt(),
-             new Opt(new Constant()),
-             new Opt(),
-             new ClassAccess("EnumType"),
-             new Opt(),
-             new PublicVisibilityType(),
-             new IdDecl(name.getID()),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             (Comment)comment.fullCopy(),
-             new Opt(),
-             new Comment(new Opt(),new Opt()));
-        this.setLocation(name);
-        
     }
 
 	/**

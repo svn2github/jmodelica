@@ -1475,27 +1475,28 @@ aspect Flattening {
     }
 
     public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
-        FEnumLiteral e = new FEnumLiteral(new FIdUse(name()),new Opt());
-        if (getComponentDecl().getComment().hasStringComment())
-            e.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
+        FEnumLiteral e = new FEnumLiteral(new FIdUse(name()), new Opt());
+        StringComment comment = myStringComment();
+        if (comment != null) {
+            e.setFStringComment(comment.flatten());
+        }
         return e;
     }
 
-    public void InstClassDecl.flattenEnum(Flattener f) {      
+    public void InstClassDecl.flattenEnum(Flattener f) {
         if (!f.isFlattened(this)) {
             // Flatten all InstEnums corresponding to FEnumLiterals
             FEnumLiteralList l = new FEnumLiteralList();
             for (InstEnumLiteral ie : enumLiterals()) 
                 l.addFEnumLiteral(ie.createFEnumLiteral());
             FIdDecl id = new FIdDecl(new FQNameString(qualifiedName()));
-            ClassDecl classDecl = getClassDecl();
-            Opt comment = null;
-            if (classDecl.hasStringComment()) 
-                comment = new Opt(classDecl.getStringComment().flatten());
-            else 
-                comment = new Opt();
+            FEnumDecl ed = new FEnumDecl(id, l, new Opt());
+            StringComment comment = myStringComment();
+            if (comment != null) {
+                ed.setFStringComment(comment.flatten());
+            }
             addFDerivedType(f);
-            f.addFEnumDecl(new FEnumDecl(id, l, comment)); 
+            f.addFEnumDecl(ed); 
         }
     }
     
@@ -1694,8 +1695,10 @@ aspect Flattening {
                 fv.setBindingExp(e);
         }
         
-        if (getComponentDecl().getComment().hasStringComment())
-            fv.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
+        StringComment comment = myStringComment();
+        if (comment != null) {
+            fv.setFStringComment(comment.flatten());
+        }
         
         fv.setFQName(name);
         fv.setLocation(this);
@@ -2218,15 +2221,6 @@ aspect FlatteningDebug {
         this 
     to FClass.collectInstAccesses() for myFClass();
     inh FClass InstAccess.myFClass();
-
-}
-
-
-aspect InstNodeInterface {
-
-    syn ArraySubscripts InstComponentDecl.arraySubscripts() = 
-        getComponentDecl().arraySubscripts()!=null?
-            getComponentDecl().arraySubscripts(): null;
 
 }
 
@@ -2865,14 +2859,12 @@ aspect InstantiatedExpressions {
     }
 
     public <T extends FAbstractEquation> T AbstractEquation.copyStringComment(T eqn) {
-        if (getComment().hasStringComment()) {
-            eqn.setFStringComment(getComment().getStringComment().flatten());
+        StringComment comment = myStringComment();
+        if (comment != null) {
+            eqn.setFStringComment(comment.flatten());
         }
         return eqn;
     }
-
-    syn String AbstractEquation.stringComment() =
-            getComment().hasStringComment() ? getComment().getStringComment().getComment() : null;
 
     public FAbstractEquation AbstractEquation.instantiate() {
         return contribute(copyLocationTo(new FUnsupportedEquation(equationType())));

@@ -983,7 +983,7 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     <!-- cleans all files -->
     <target name="clean" depends="clean-gen,clean-bin" description="Deletes all generated files."/>
 
-    <!-- cleans all files -->
+    <!-- cleans all binary files -->
     <target name="clean-bin" description="Deletes all binary files.">
         <delete dir="${class_output}" />
         <delete dir="${test_class_output}" />

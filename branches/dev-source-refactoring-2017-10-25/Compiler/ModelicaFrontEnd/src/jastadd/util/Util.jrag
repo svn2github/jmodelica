@@ -175,6 +175,19 @@ aspect NodeMethods {
     
     /**
      * Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other parser symbols, 
+     *        that might not be AST nodes.
+     * 
+     * @param start  the node to copy the <code>start</code> member from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void ASTNode.setLocationNoTree(Symbol start, Symbol end) {
+        this.start = start.getStart();
+        this.end = end.getEnd();
+    }
+    
+    /**
+     * Sets the member variables defining the location of the node within 
      *        the source to values copied from two other nodes, that might not be 
      *        in a proper AST.
      * 
@@ -618,8 +631,6 @@ aspect Names {
   syn String IdDecl.name()            = getID();
   syn String Access.name();
   eq NamedAccess.name()               = getID();
-  eq PN_Dot.name()                    = 
-  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
   syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
   syn lazy String Dot.name() {
 	  StringBuilder buf = new StringBuilder();
@@ -646,21 +657,19 @@ aspect Names {
   }
   
   syn String InstNamedModification.name() = getNameNoTransform().name();
-  
-  syn String Access.qualifiedName();
-  eq NamedAccess.qualifiedName()               = getID();
-  eq PN_Dot.qualifiedName()                    = 
-  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
-  eq GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
-  eq Dot.qualifiedName() {
-	  StringBuilder buf = new StringBuilder();
-	  for (Access a : getAccesss()) {
-		  buf.append(a.qualifiedName());
-		  buf.append('.');
-	  }
-	  return buf.substring(0, buf.length() - 1);
-  }
-  
+
+    syn String Access.qualifiedName();
+    eq NamedAccess.qualifiedName()   = getID();
+    eq GlobalAccess.qualifiedName()  = "." + getAccess().qualifiedName();
+    eq Dot.qualifiedName() {
+        StringBuilder buf = new StringBuilder();
+        for (Access a : getAccesss()) {
+            buf.append(a.qualifiedName());
+            buf.append('.');
+        }
+        return buf.substring(0, buf.length() - 1);
+    }
+
   syn String InstAccess.qualifiedName();
   eq InstNamedAccess.qualifiedName()           = getID();
   eq InstDot.qualifiedName() {
@@ -673,10 +682,10 @@ aspect Names {
   }
   eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
 
-    syn String Element.name() = null;
-    eq ClassDecl.name()       = getNameNoTransform().getID();
-    eq ComponentDecl.name()   = getNameNoTransform().getID();
-    eq ExtendsClause.name()   = getSuperNoTransform().name();
+    syn String Element.name()       = null;
+    syn String ComponentDecl.name() = getNameNoTransform().getID();
+    eq ClassDecl.name()             = getNameNoTransform().getID();
+    eq ExtendsClause.name()         = getSuperNoTransform().name();
 
   syn String FunctionCall.name() = getNameNoTransform().name();
   
@@ -1185,17 +1194,17 @@ aspect DebugHelpers {
 aspect Visibility {
 
     inh boolean ClassDecl.isPublic();
+    inh boolean ComponentDecl.isPublic();
     eq PublicElementList.getElement().isPublic()    = true;
     eq ProtectedElementList.getElement().isPublic() = false;
     eq SourceRoot.getProgram().isPublic()           = true; 
     eq Root.getChild().isPublic()                   = true; 
 
-    syn boolean ComponentDecl.isPublic()     = getVisibilityType().isPublic();
     syn boolean InstClassDecl.isPublic()     = getClassDecl().isPublic();
     syn boolean InstComponentDecl.isPublic() = getComponentDecl().isPublic();
 
     syn boolean ClassDecl.isProtected()         = !isPublic();
-    syn boolean ComponentDecl.isProtected()     = getVisibilityType().isProtected();
+    syn boolean ComponentDecl.isProtected()     = !isPublic();
     syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
 
@@ -1263,17 +1272,17 @@ aspect ComponentDeclMethods {
     /**
      * Check if a ComponentDecl is declared inner.
      */
-    syn boolean ComponentDecl.isInner() = getInner();
+    syn boolean ComponentDecl.isInner() = hasInner();
 
     /**
      * Check if a ComponentDecl is declared outer.
      */
-    syn boolean ComponentDecl.isOuter() = getOuter();
+    syn boolean ComponentDecl.isOuter() = hasOuter();
 
     /**
      * Check if a ComponentDecl is declared inner or outer.
      */
-    syn boolean ComponentDecl.hasInnerOrOuter() = getInner() || getOuter();
+    syn boolean ComponentDecl.hasInnerOrOuter() = hasInner() || hasOuter();
 
     /**
      * Check if a ClassDecl is declared inner.
@@ -1661,7 +1670,7 @@ aspect ShortClassUtil {
     eq InstReplacingSimpleShortClassDecl.isOutput() = 
         (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
 
-    syn boolean BaseComponentDecl.isEnumLiteral() = false;
+    syn boolean ComponentDecl.isEnumLiteral() = false;
     eq EnumLiteralDecl.isEnumLiteral() = true;
     syn boolean InstComponentDecl.isEnumLiteral() = false;
     eq InstEnumLiteral.isEnumLiteral() = true;

@@ -18,6 +18,9 @@ import org.jmodelica.util.collections.SubClassIterator;
 import org.jmodelica.util.collections.SingleIterable;
 import org.jmodelica.util.collections.ChainedIterable;
 import org.jmodelica.util.collections.FilteredIterator;
+import org.jmodelica.util.collections.FilteredIterable;
+import org.jmodelica.util.collections.NestledIterator;
+import org.jmodelica.util.collections.NestledIterable;
 import org.jmodelica.util.Criteria;
 
 aspect SourceTraversal {
@@ -66,20 +69,27 @@ aspect SourceTraversal {
         }
     };
     
-    syn Iterable<ComponentDecl> ClassDecl.components();
-    eq ClassDecl.components()     = Collections.<ComponentDecl>emptyList();
-    eq LibNode.components()       = myClass().components();
-    eq EnumClassDecl.components() = 
-        new ChainedIterable(componentsIterable(), enumBase().componentsIterable());
-    eq FullClassDecl.components() = new Iterable<ComponentDecl>() {
-        public Iterator<ComponentDecl> iterator() {
-            return new ClauseElementIterator<ComponentDecl>() {
-                protected Iterator<ComponentDecl> subIterator(Clause c) {
-                    return c.componentIterator();
+    syn Iterable<ComponentClause> ClassDecl.componentClauses();
+    eq ClassDecl.componentClauses()     = Collections.<ComponentClause>emptyList();
+    eq LibNode.componentClauses()       = myClass().componentClauses();
+    eq FullClassDecl.componentClauses() = new Iterable<ComponentClause>() {
+        public Iterator<ComponentClause> iterator() {
+            return new ClauseElementIterator<ComponentClause>() {
+                protected Iterator<ComponentClause> subIterator(Clause c) {
+                    return c.componentClauseIterator();
                 }
             };
         }
     };
+    
+    syn Iterable<ComponentDecl> ClassDecl.components() = 
+        new NestledIterable<ComponentDecl,ComponentClause>(componentClauses()) {
+            protected Iterable<ComponentDecl> subIterable(ComponentClause c) {
+                return c.getComponentDecls();
+            }
+        };
+    eq EnumClassDecl.components() = 
+        new ChainedIterable(componentsIterable(), enumBase().componentsIterable());
     
     syn Iterable<ComponentDecl> EnumClassDecl.componentsIterable() = super.components();
     syn EnumClassDecl EnumClassDecl.enumBase() = 
@@ -89,15 +99,14 @@ aspect SourceTraversal {
     eq ClassDecl.elementModifications()     = 
         Collections.<SrcModificationOrRedeclareElement>emptyList();
     eq LibNode.elementModifications()       = myClass().elementModifications();
-    eq FullClassDecl.elementModifications() = new Iterable<SrcModificationOrRedeclareElement>() {
-        public Iterator<SrcModificationOrRedeclareElement> iterator() {
-            return new ClauseElementIterator<SrcModificationOrRedeclareElement>() {
-                protected Iterator<SrcModificationOrRedeclareElement> subIterator(Clause c) {
-                    return c.elementModificationIterator();
+    eq FullClassDecl.elementModifications() = 
+        new FilteredIterable(
+            components(),
+            new Criteria<SrcModificationOrRedeclareElement>() {
+                public boolean test(SrcModificationOrRedeclareElement elem) {
+                    return elem.hasRedeclare();
                 }
-            };
-        }
-    };
+            });
 
     syn Iterable<ImportClause> ClassDecl.imports();
     eq ClassDecl.imports()     = Collections.<ImportClause>emptyList();
@@ -160,39 +169,9 @@ aspect SourceTraversal {
 
     public class FullClassDecl {
 
-        protected abstract class ClauseElementIterator<T> implements Iterator<T> {
-            private Iterator<T> subIter = null;
-            private Iterator<Clause> clauseIter = getClauses().iterator();
-            
-            /**
-             * Return an iterator that returns the elements of the correct type in c, or null 
-             * if there can't be any.
-             */
-            protected abstract Iterator<T> subIterator(Clause c);
-            
-            public boolean hasNext() {
-                update();
-                return subIter != null;
-            }
-            
-            public T next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                return subIter.next();
-            }
-            
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-            
-            private void update() {
-                while ((subIter == null || !subIter.hasNext()) && clauseIter.hasNext()) {
-                    subIter = subIterator(clauseIter.next());
-                }
-                if (subIter != null && !subIter.hasNext()) {
-                    subIter = null;
-                }
+        protected abstract class ClauseElementIterator<T> extends NestledIterator<T,Clause> {
+            public ClauseElementIterator() {
+                super(getClauses().iterator());
             }
         }
 
@@ -208,19 +187,9 @@ aspect SourceTraversal {
     eq ElementList.extendsIterator()                     = 
         new SubClassIterator(ExtendsClause.class, getElements().iterator());
 
-    syn Iterator<ComponentDecl> Clause.componentIterator() = null;
-    eq ElementList.componentIterator()                     = 
-        new SubClassIterator(ComponentDecl.class, getElements().iterator());
-
-    syn Iterator<SrcModificationOrRedeclareElement> Clause.elementModificationIterator() = null;
-    eq ElementList.elementModificationIterator() = 
-            new FilteredIterator(
-                    new SubClassIterator(SrcModificationOrRedeclareElement.class, getElements().iterator()), 
-                    new Criteria<SrcModificationOrRedeclareElement>() {
-                        public boolean test(SrcModificationOrRedeclareElement elem) {
-                            return elem.isRedeclare();
-                        }
-                    });
+    syn Iterator<ComponentClause> Clause.componentClauseIterator() = null;
+    eq ElementList.componentClauseIterator()                       = 
+        new SubClassIterator(ComponentClause.class, getElements().iterator());
 
     syn Iterator<ImportClause> Clause.importIterator() = null;
     eq ElementList.importIterator()                     = 
@@ -228,22 +197,89 @@ aspect SourceTraversal {
 
     syn Iterator<ClassDecl> Clause.classIterator() = null;
     eq ElementList.classIterator()                     = 
-            new FilteredIterator(
-                    new SubClassIterator(ClassDecl.class, getElements().iterator()), 
-                    NOT_ERROR_NODE_CRITERIA);
+        new FilteredIterator(
+            new SubClassIterator(ClassDecl.class, getElements().iterator()), 
+            NOT_ERROR_NODE_CRITERIA);
 
 
     public interface SrcModificationOrRedeclareElement {
         public InstModification newInstModification();
-        public boolean isRedeclare();
+        public boolean hasRedeclare();
     }
 
     Modification  implements SrcModificationOrRedeclareElement;
     ComponentDecl implements SrcModificationOrRedeclareElement;
 // TODO: Handle class redeclares through this interface as well
+//       (will need to update FullClassDecl.elementModifications() then)
 //    BaseClassDecl implements SrcModificationOrRedeclareElement;
 
-    syn boolean Modification.isRedeclare() = false;
-    eq ElementRedeclare.isRedeclare()      = true;
+    syn ForIndexDecl ForIndex.getForIndexDecl() = (ForIndexDecl) getComponentDecl(0);
+
+    syn ComponentDecl ComponentRedeclare.getComponentDecl() = 
+        getComponentClause().getComponentDecl(0);
+
+    syn boolean Modification.hasRedeclare() = false;
+    eq ElementRedeclare.hasRedeclare()      = true;
+
+    inh ComponentClause ComponentDecl.myComponentClause();
+    eq ComponentClause.getComponentDecl().myComponentClause() = this;
+
+    syn ComponentClause InstComponentDecl.myComponentClause() = 
+        getComponentDecl().myComponentClause();
+
+    /**
+     * Get the string comment a.k.a. description string that applies to this element, 
+     * or null if there is none.
+     */
+    syn StringComment ClassDecl.myStringComment()               = null;
+    eq BaseClassDecl.myStringComment()                          = 
+        selectStringComment(getConstrainingClauseComment());
+    eq FullClassDecl.myStringComment()                          = 
+        selectStringComment(getConstrainingClauseComment(), this);
+    syn StringComment ExtendsClauseShortClass.myStringComment() = 
+        selectStringComment(getComment());
+    syn StringComment ImportClause.myStringComment()            = 
+        selectStringComment(getComment());
+    syn StringComment ComponentClause.myStringComment()         = 
+        selectStringComment(getComment());
+    syn StringComment ComponentDecl.myStringComment()           = 
+        selectStringComment(myComponentClause().getComment(), getComment());
+    syn StringComment ElementModification.myStringComment()     = 
+        selectStringComment(getComment());
+    syn StringComment AbstractEquation.myStringComment()        = 
+        selectStringComment(getComment());
+    syn StringComment Statement.myStringComment()               = 
+        selectStringComment(getComment());
+
+    syn StringComment InstClassDecl.myStringComment()     = getClassDecl().myStringComment();
+    syn StringComment InstComponentDecl.myStringComment() = getComponentDecl().myStringComment();
+
+    public interface StringCommentSource {
+        public boolean hasStringComment();
+        public StringComment getStringComment();
+    }
+    Comment implements StringCommentSource;
+    FullClassDecl implements StringCommentSource;
+
+    /**
+     * Helper method for myStringComment() methods. 
+     * Selects the first found among the arguments.
+     */
+    protected static StringComment ASTNode.selectStringComment(StringCommentSource... sources) {
+        for (StringCommentSource src : sources) {
+            if (src != null && src.hasStringComment()) {
+                return src.getStringComment();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Iterable over each part of a qualified name.
+     */
+    syn Iterable<Access> Access.nameParts();
+    eq Access.nameParts()       = new SingleIterable(this);
+    eq GlobalAccess.nameParts() = getAccess().nameParts();
+    eq Dot.nameParts()          = getAccesss();
 
 }

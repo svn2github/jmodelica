@@ -16,6 +16,7 @@
 
 
 aspect SrcUtil {
+
     syn boolean Exp.isLiteral()  = false;
     eq BooleanLitExp.isLiteral() = true;
     eq IntegerLitExp.isLiteral() = true;
@@ -48,4 +49,56 @@ aspect SrcUtil {
      */
     syn String ImportClause.renameStringOrNull() = null;
     eq ImportClauseRename.renameStringOrNull() = getIdDecl().name();
+
+}
+
+
+aspect ComponentClauseFields {
+
+    inh boolean ComponentDecl.hasRedeclare();
+    eq ComponentClause.getComponentDecl().hasRedeclare() = getRedeclare();
+
+    inh boolean ComponentDecl.hasFinal();
+    eq ComponentClause.getComponentDecl().hasFinal() = getFinal();
+
+    inh boolean ComponentDecl.hasInner();
+    eq ComponentClause.getComponentDecl().hasInner() = getInner();
+
+    inh boolean ComponentDecl.hasOuter();
+    eq ComponentClause.getComponentDecl().hasOuter() = getOuter();
+
+    inh boolean ComponentDecl.hasReplaceable();
+    eq ComponentClause.getComponentDecl().hasReplaceable() = getReplaceable();
+
+    inh boolean ComponentDecl.hasTypePrefixFlow();
+    eq ComponentClause.getComponentDecl().hasTypePrefixFlow() = hasTypePrefixFlow();
+    inh TypePrefixFlow ComponentDecl.getTypePrefixFlow();
+    eq ComponentClause.getComponentDecl().getTypePrefixFlow() = getTypePrefixFlow();
+
+    inh boolean ComponentDecl.hasTypePrefixVariability();
+    eq ComponentClause.getComponentDecl().hasTypePrefixVariability() = hasTypePrefixVariability();
+    inh TypePrefixVariability ComponentDecl.getTypePrefixVariability();
+    eq ComponentClause.getComponentDecl().getTypePrefixVariability() = getTypePrefixVariability();
+
+    inh boolean ComponentDecl.hasTypePrefixInputOutput();
+    eq ComponentClause.getComponentDecl().hasTypePrefixInputOutput() = hasTypePrefixInputOutput();
+    inh TypePrefixInputOutput ComponentDecl.getTypePrefixInputOutput();
+    eq ComponentClause.getComponentDecl().getTypePrefixInputOutput() = getTypePrefixInputOutput();
+
+    inh Access ComponentDecl.getClassName();
+    eq ComponentClause.getComponentDecl().getClassName() = getClassName();
+
+    inh boolean ComponentDecl.hasTypeArraySubscripts();
+    eq ComponentClause.getComponentDecl().hasTypeArraySubscripts() = hasTypeArraySubscripts();
+    inh ArraySubscripts ComponentDecl.getTypeArraySubscripts();
+    eq ComponentClause.getComponentDecl().getTypeArraySubscripts() = getTypeArraySubscripts();
+
+    inh boolean ComponentDecl.hasConstrainingClause();
+    eq ComponentClause.getComponentDecl().hasConstrainingClause() = hasConstrainingClause();
+    inh ConstrainingClause ComponentDecl.getConstrainingClause();
+    eq ComponentClause.getComponentDecl().getConstrainingClause() = getConstrainingClause();
+
+    syn boolean ComponentDecl.hasArraySubscripts() = 
+        hasVarArraySubscripts() || hasTypeArraySubscripts();
+
 }

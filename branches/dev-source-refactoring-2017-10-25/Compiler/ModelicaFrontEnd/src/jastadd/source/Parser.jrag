@@ -21,12 +21,20 @@ aspect Parsers {
 
     ASTNode implements AdjustableSymbol;
 
-    /* NB: This method is duplicated in:
-     * org.jmodelica.util.AbstractModelicaScanner */
-    public int ASTNode.adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i) {
-        if (start == end && i < syms.length) {
-            start = end = syms[i].adjustStartOfEmptySymbols(syms, i + 1);
+    /* NB: This method is (mostly) duplicated in:
+     * org.jmodelica.util.AbstractAdjustableSymbol */
+    public int ASTNode.adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i, int last) {
+        int value = last;
+        if (i < syms.length) {
+            value = syms[i].adjustStartOfEmptySymbols(syms, i + 1, last);
         }
+        if (start == end && value != 0) {
+            start = end = value;
+        }
+        return start;
+    }
+
+    public int BaseNode.adjustStartOfEmptySymbols(AdjustableSymbol[] syms, int i, int last) {
         return start;
     }
 
@@ -340,6 +348,24 @@ aspect ParserHelpers {
             return getClass().getName() + ":\n" + p;
          }
         
+    }
+
+    /**
+     * Generate Access node for ComponentRedeclare nodes during parsing.
+     */
+    public Access ComponentClause.createAccessForRedeclareNode() {
+        ComponentDecl cd = getComponentDeclNoTransform(0);
+        IdDecl name = cd.getNameNoTransform();
+        Opt<ArraySubscripts> arr = cd.getVarArraySubscriptsOptNoTransform();
+        Access a;
+        if (arr.hasChild()) {
+            a = new ArrayAccess(name.getID(), arr.getChild().treeCopyNoTransform());
+            a.setLocationNoTree(name, arr);
+        } else {
+            a = new NamedAccess(name.getID());
+            a.setLocationNoTree(name);
+        }
+        return a;
     }
 
 }

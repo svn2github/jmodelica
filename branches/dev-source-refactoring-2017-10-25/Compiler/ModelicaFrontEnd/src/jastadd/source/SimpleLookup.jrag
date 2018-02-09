@@ -23,10 +23,11 @@ aspect SimpleClassLookup {
 
 	// TODO: Add javadoc
 
-	syn ClassDecl ExtendsClause.findClassDecl()     = getSuper().findClassDecl();
-	syn ClassDecl BaseComponentDecl.findClassDecl() = getClassName().findClassDecl();
-	syn ClassDecl ImportClause.findClassDecl()      = getPackageName().findClassDecl();
-	
+    syn ClassDecl ExtendsClause.findClassDecl()   = getSuper().findClassDecl();
+    syn ClassDecl ComponentDecl.findClassDecl()   = myComponentClause().findClassDecl();
+    syn ClassDecl ComponentClause.findClassDecl() = getClassName().findClassDecl();
+    syn ClassDecl ImportClause.findClassDecl()    = getPackageName().findClassDecl();
+
 	// Used to prevent circular lookups without the repetitions imposed by declaring attributes circular.
 	protected boolean Access.duringFindClassDecl = false;
 	protected int ClassDecl.duringFindClassDeclRevisits = 0;
@@ -44,7 +45,6 @@ aspect SimpleClassLookup {
 		}
 	}
 	eq Dot.findClassDecl()          = getLastAccess().findClassDecl();
-	eq PN_Dot.findClassDecl()       = unknownClassDecl();
 	eq GlobalAccess.findClassDecl() = getAccess().findClassDecl();
 
 

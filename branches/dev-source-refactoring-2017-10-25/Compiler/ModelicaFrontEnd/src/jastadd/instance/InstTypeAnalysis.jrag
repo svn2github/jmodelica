@@ -719,7 +719,7 @@ aspect InstModificationType {
     inh boolean InstComponentDecl.inheritsFinal();
     inh boolean InstExtends.inheritsFinal();
     eq InstModification.getChild().inheritsFinal()  = isFinal();
-    eq InstComponentDecl.getChild().inheritsFinal() = getComponentDecl().getFinal() || inheritsFinal();
+    eq InstComponentDecl.getChild().inheritsFinal() = getComponentDecl().hasFinal() || inheritsFinal();
     eq InstExtends.getChild().inheritsFinal()       = inheritsFinal();
     eq BaseNode.getChild().inheritsFinal()          = false;
 
