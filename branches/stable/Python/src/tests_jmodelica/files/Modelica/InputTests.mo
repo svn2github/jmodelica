@@ -1,5 +1,14 @@
 package Inputs
 
+    model DiscChange
+        Real x(start=1.0);
+        Real y(start=2.0);
+        input Real u;
+    equation
+        der(x) = -y*x^2*exp(u) + cos(y) + u^0.5;
+        der(y) = -y^3*u + sin(x*y*u^2);
+    end DiscChange;
+
     model SimpleInput
         Real x(start = 0);
         Real y(start = 0);

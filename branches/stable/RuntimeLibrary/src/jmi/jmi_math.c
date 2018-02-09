@@ -139,16 +139,11 @@ jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char m
 jmi_real_t static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
     jmi_real_t x_pow_y = jmi_pow(jmi, func_name, x, y, msg);
     jmi_real_t to_return = 0;
-    if (x == 0 && y_der == 0 ) {
-        if (y > 1) {
-            to_return = 0;
-        } else if (y == 1) {
+    if (x == 0) {
+        if (y == 1.0) {
             to_return = x_der;
-        } else if (y < 1) {
-            char val[64];
-            to_return = jmi_sign(x_der*y)*JMI_INF;
-            sprintf(val, "%.14E, %.14E, %.14E, %.14E", x, y, x_der, y_der);
-            jmi_log_func_or_eq(jmi, "x^y where y < 1", func_name, msg, val);
+        } else {
+            to_return = 0.0;
         }
     } else {
         to_return = x_pow_y * (x_der*y/x + y_der*log(jmi_abs(x)));

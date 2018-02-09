@@ -339,11 +339,15 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public T valueAsAnnotation() {
         if (!valueAnnotation_cacheComputed) {
             valueAnnotation_cacheComputed = true;
-            N annotationNode = valueAsProvider();
-            if (hasValue() && annotationNode == null) {
-                valueAnnotation_cache = null;
+            if (exists()) {
+                N annotationNode = valueAsProvider();
+                if (hasValue() && annotationNode == null) {
+                    valueAnnotation_cache = null;
+                } else {
+                    valueAnnotation_cache = createNode(null, annotationNode);
+                }
             } else {
-                valueAnnotation_cache = createNode(null, annotationNode);
+                valueAnnotation_cache = null;
             }
         }
         return valueAnnotation_cache;

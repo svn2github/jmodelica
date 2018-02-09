@@ -1863,7 +1863,20 @@ aspect InstanceAST_API {
     eq InstExtends.name()                = getClassName().name();
     
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
-
+    
+   /**
+   * Retrieve fully indexed names for array elements
+   *
+   */
+    
+    syn String InstNode.getElementName() = name();
+    eq InstArrayComponentDecl.getElementName() {
+        if (ndims() != 0 )  {
+            return getFQName().scalarName(false, true) + myIndex().partIndex(0, myDimension() + 1).toString();
+        }
+        return getFQName().scalarName(false, true);
+    }
+    
     syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
     syn ShortClassDecl InstAbstractShortClassDecl.getShortClassDecl() = (ShortClassDecl)getClassDecl();
     syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getClassDecl();
