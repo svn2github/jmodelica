@@ -380,11 +380,6 @@ aspect FlatTypeAnalysis {
         else
             return fUnknownType();
     }
-    eq FEqRelExp.type() {
-        if ((getLeft().type().isReal() || getRight().type().isReal()) && !inFunction())
-            return fUnknownType();
-        return super.type();
-    }
     eq FLogBinExp.type() {
         if (shouldUseOverloadedOperator()) 
             return getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
