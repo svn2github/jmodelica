@@ -1148,10 +1148,15 @@ FComponentExp : FExp ::= FExp <Name:String>;
 FIdUseExp : FAssignableExp ::= FIdUse <OriginalVariable:String>;
 
 /**
- * A reference to a dynamic state
+ * A reference to a dynamic state. These are the states that are introduced by
+ * the compiler and exposed as state in the FMU.
  */
 FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FIdUseExp*/ Org:FIdUseExp;
 
+/**
+ * A reference to a dynamic derivative, similar to FDSRefExp but the derivative
+ * of a state. Introduced by the compiler and exposed as derivative in the FMU.
+ */
 FDSDerExp : FVarRefExp ::= <SetId:int> <Number:int> /Use:FExp*/;
 
 /**
@@ -1180,7 +1185,10 @@ FDerExp : FAbstractDerExp;
 FDummyDerExp : FAbstractDerExp; 
 
 /**
- * The built-in function der converted into a dynamic derivative.
+ * Reference to differentiated variable which is a dynamic derivative, i.e. the
+ * original model derivative is part of a dynamic set. Not to confuse with
+ * FDSDerExp which represents the actual derivative in the FMU. This derivative
+ * ins't exposed as an derivative in the FMU.
  */
 FDynamicDerExp : FAbstractDerExp; 
 

@@ -1246,6 +1246,103 @@ $modelStructure$",
 ")})));
 end SortingStates;
 
+model DynamicStateUnknowns
+    Real x;
+    Real y;
+    Real vx;
+    Real vy;
+    Real lambda;
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - 2;
+    x^2 + y^2 = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DynamicStateUnknowns",
+            description="Check so that dynamic states are included correctly in the dependency information for unkowns",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+$modelStructure$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"_der_x\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(_der_x)\" valueReference=\"17\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"_der_y\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(_der_y)\" valueReference=\"18\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"_ds.1.a1\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"_ds.1.s1\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(_ds.1.s1)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"6\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"_ds.2.a1\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"_ds.2.s1\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(_ds.2.s1)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"9\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"lambda\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"vx\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(vx)\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"12\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"vy\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(vy)\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"14\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x)\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"y\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y)\" valueReference=\"16\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+<ModelStructure>
+    <Derivatives>
+        <Unknown index=\"7\" dependencies=\"6 9\" />
+        <Unknown index=\"10\" dependencies=\"6 9\" />
+    </Derivatives>
+    <InitialUnknowns>
+        <Unknown index=\"6\" dependencies=\"\" />
+        <Unknown index=\"7\" dependencies=\"\" />
+        <Unknown index=\"9\" dependencies=\"\" />
+        <Unknown index=\"10\" dependencies=\"\" />
+    </InitialUnknowns>
+</ModelStructure>
+")})));
+end DynamicStateUnknowns;
+
 model SecondOrderDerivatives
     Real x(stateSelect=StateSelect.always);
     Real y;

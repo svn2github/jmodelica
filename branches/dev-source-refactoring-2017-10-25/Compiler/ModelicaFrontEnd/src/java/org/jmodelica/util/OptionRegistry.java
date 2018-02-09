@@ -1839,18 +1839,17 @@ abstract public class OptionRegistry {
     }
     
     /**
-     * \brief Give the name of a runtime option 
-     *  when encoded in FMU XML.
+     * Give the exact name of a runtime option when encoded in FMU XML.
      * 
      * @param key
-     *         The runtime option key.  
+     *         The key to (name of) the runtime option.  
      * @return
-     *         The exact name for {@code key} when encode in
+     *         The exact name for {@code key} when encoded in
      *         the FMU XML.
      *          
      */
     public static String getFMUXMLName(String key) {
-        return "_"+key;
+        return "_" + key;
     }
 
     /**

@@ -1,13 +1,29 @@
 ================= Unreleased ==================
-<<<<<<< .working
 ; Fixed ; Minor ; Compiler ; #5490
 Fixed bug that caused some errors to be reported on the wrong line.
 
+; Fixed ; Minor ; Compiler ; #5557
+Fixed dependency computation for dynamic derivatives, the FMU XML didn't list
+the corresponding dynamic states as dependencies for the dynamic derivatives.
+
+================= Stable-2018-02-09 ==================
+; Change ; Minor ; Runtime; #5555
+Added so that the internal solver is re-initialized if inputs are
+changed in a co-simulation FMU.
+
+; Change ; Minor ; Compiler ; #5549
+Moved static variable declarations for generated temporaries to
+generated struct in order to improve multithreading capabilities.
+
+================= Stable-2018-01-24 ==================
+; Change ; Minor ; PyFMI ; #5548
+Deprecated get_log_file_name in favour of get_log_filename
+
+; Change ; Minor ; MSL ; #5546
+Patched MSL resources to take into account the NO_MUTEX define.
+
 ; Feature ; Minor ; PyFMI ; #5545
 Implemented support for injecting custom logging functionality
-
-; Change ; Minor ; Compiler ; #5544
-Moved logic for runtimeparameter encoding.
 
 ; Change ; Minor ; Compiler ; #5542
 Changed license for code generation templates to CPL

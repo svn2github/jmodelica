@@ -105,7 +105,9 @@ void jmi_ode_solver_external_event(jmi_ode_solver_t* solver) {
 }
 
 void jmi_ode_solver_need_to_initialize(jmi_ode_solver_t* solver) {
-    solver->initialize_solver = TRUE;
+    if (solver->experimental_mode != jmi_cs_experimental_no_reinit_for_input_change) {
+        solver->initialize_solver = TRUE;
+    }
 }
 
 static jmi_real_t jmi_ode_final_integration_time(jmi_ode_problem_t *p, jmi_real_t final_time) {
@@ -141,7 +143,7 @@ jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final
         }
     }
 
-    /* while at event or ok but not finnished */
+    /* while at event or ok but not finished */
     while (s == JMI_ODE_EVENT ||
         (s == JMI_ODE_OK && jmi_ode_not_finished(p->time, final_time)))
     {

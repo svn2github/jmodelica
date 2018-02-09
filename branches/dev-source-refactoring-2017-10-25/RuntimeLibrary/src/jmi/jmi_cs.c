@@ -21,7 +21,7 @@
 #include <string.h>
 #include "jmi_cs.h"
 
-static int is_disc_input_with_diff_value(jmi_t*                     jmi,
+static int jmi_changed_disc_input(jmi_t*                     jmi,
                                          const jmi_value_reference  valueref[],
                                          const void*                value,
                                          size_t                     i) {
@@ -53,12 +53,29 @@ int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
     size_t i;
     
     for (i = 0; i < nvr; i++) {
-        if (is_disc_input_with_diff_value(jmi, vr, value, i)) {
+        if (jmi_changed_disc_input(jmi, vr, value, i)) {
             return 1; /* Detected change */
         }
     }
     
     return 0; /* No changed detected */
+}
+
+int jmi_cs_check_input_change(jmi_t* jmi, const jmi_value_reference vrs[], size_t nvr, const jmi_real_t* values) {
+    size_t i, z_index;
+    int is_real_input;
+    
+    for (i = 0; i < nvr; i++) {
+        z_index = jmi_get_index_from_value_ref(vrs[i]);
+        is_real_input = (z_index >= jmi->offs_real_u && z_index < jmi->offs_real_w);
+        if (is_real_input && (*jmi->z)[z_index] != ((jmi_real_t*)values)[i]) {
+            jmi_log_node(jmi->log, logInfo, "CoSimulationInputs",
+                    "Detected change of inputs, will re-initialize the solver.");
+            return 1; /* Detected change */
+        }
+    }
+    
+    return 0;
 }
 
 int jmi_cs_set_real_input_derivatives(jmi_cs_data_t* cs_data, jmi_log_t* log, 

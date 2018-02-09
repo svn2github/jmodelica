@@ -38,7 +38,7 @@ fmi2Status fmi2_set_real_input_derivatives(fmi2Component c,
     fmi2Integer retval;
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
     
     retval = jmi_cs_set_real_input_derivatives(cs_data, log, vr, nvr, order, value);
@@ -71,14 +71,14 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
 
     
     if (c == NULL) {
-		return fmi2Fatal;
+        return fmi2Fatal;
     }
 
-	if (((fmi2_me_t*)c)->fmu_mode != slaveInitialized) {
-		jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
+    if (((fmi2_me_t*)c)->fmu_mode != slaveInitialized) {
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "FMIState",
             "Can only do a step if the model is an initialized slave.");
         return fmi2Error;
-	}
+    }
 
     if (((fmi2_me_t*)c)->stopTime < time_final-JMI_ALMOST_EPS*time_final) {
         jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "DoStep",
@@ -300,7 +300,7 @@ int fmi2_cs_completed_integrator_step(char* step_event, char* terminate, void* p
     int retval;
     jmi_cs_data_t* cs_data = (jmi_cs_data_t*)problem_data;
 
-	fmi2Boolean tmp_terminate_simulation;
+    fmi2Boolean tmp_terminate_simulation;
     fmi2Boolean tmp_step_event;
     retval = fmi2_completed_integrator_step(cs_data->fmix_me, fmi2False, &tmp_step_event, &tmp_terminate_simulation);
     step_event[0] = (char) tmp_step_event;

@@ -48,9 +48,6 @@ typedef struct jmi_local_dynamic_function_memory_t {
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() jmi_dynamic_function_free(&dyn_mem);
 
-/* Evaluate and assign expression only if computed flag is false. Sets computed flag to true. */
-#define JMI_CACHED(var, exp) ((!var##_computed && (var##_computed = 1)) ? (var = exp) : var)
-
 /**
  * \brief Retrieves the memory pool from the jmi struct
  *
