@@ -94,6 +94,33 @@ aspect CCodeGenAlgorithms {
      * End of hooks
      */
 
+    public void FFunctionVariable.printTempInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String tempName) {
+        //TODO integrate into TypePrinter, consider passing in FFunctionVariable instead of getBindingExp()
+        FType type = type();
+        String name = p.name(this);
+        //TODO tempName to p.tempName(this)
+        boolean external = false;
+        if(isArray() && type.size().isUnknown()) { //TODO This is a variant of InitPrinter_C.printArray to copy size from an already declared input, integrate with it. 
+            str.print(indent, "JMI_ARRAY_INIT_", type.ndims(), "(", 
+                    "DYNA", ", ",
+                    type.nameScalar_C(p.codePrinter(), external), ", ",
+                    type.nameArray_C(p.codePrinter(), external), ", ",
+                    tempName, ", ");
+            type.size().printNumElements_C(p.codePrinter(), str, indent, name);
+            str.print(", ");
+            str.print(type.ndims());
+            str.print(", ");
+            type.size().printDimensions_C(p.codePrinter(), str, indent, name);
+            str.println(")");
+        } else {
+            setDummyExp();
+            TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
+            tp.reset(tempName, getBindingExp(), type.size(), external, indent);
+            type.print(tp);
+            resetDummyExp();
+       }
+    }
+
     public void ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
         throw new UnsupportedOperationException("ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables, boolean solved) not implemented for class '" + getClass().getSimpleName() +"'");
     }

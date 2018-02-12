@@ -588,7 +588,7 @@ aspect CCodeGenTypes {
     public void MutableSize.print(CodePrinter.StepPrinter p, CodeStream str, String indent) {
         if (isUnknown()) {
             for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
+                if (size[i] == Size.UNKNOWN && exps[i] != null) {
                     p.print(exps[i], str, indent);
                 }
             }
