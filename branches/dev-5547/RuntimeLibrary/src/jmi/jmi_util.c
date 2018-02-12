@@ -548,17 +548,17 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 	jmi_int_t* error_indicator = jmi_get_int_work_array(jmi->int_work, JMI_MAX(n_output, n_input));
 
 	/* Setup max/min/nominal values for the inputs */
-	ef = dd_callback->F_max(jmi, input_max);
+	ef = dd_callback->F_max(args, input_max);
 	if (ef !=0) {
 		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve max values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
 		return ef;
 	} 
-	ef = dd_callback->F_min(jmi, input_min);
+	ef = dd_callback->F_min(args, input_min);
 	if (ef !=0) {
 		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve min values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
 		return ef;
 	} 
-	ef = dd_callback->F_nominal(jmi, input_nominal);
+	ef = dd_callback->F_nominal(args, input_nominal);
 	if (ef !=0) {
 		jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve nominal values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
 		return ef;
