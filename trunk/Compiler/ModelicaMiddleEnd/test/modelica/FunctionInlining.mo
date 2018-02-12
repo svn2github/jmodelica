@@ -4895,4 +4895,29 @@ end FunctionInlining.SizeParam1;
 ")})));
 end SizeParam1;
 
+model EqType1
+    function f
+        input Real x;
+        output Real y = if x == 1 then x else x + 1;
+    algorithm
+        annotation(Inline=true);
+    end f;
+    
+    Real y = f(time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EqType1",
+            description="Check that types for real == real comparisons are known after inlining",
+            debug_sanity_check=true,
+            flatModel="
+fclass FunctionInlining.EqType1
+ Real y;
+ Real temp_1;
+equation
+ y = noEvent(if temp_1 == 1 then temp_1 else temp_1 + 1);
+ temp_1 = time;
+end FunctionInlining.EqType1;
+")})));
+end EqType1;
+
 end FunctionInlining;

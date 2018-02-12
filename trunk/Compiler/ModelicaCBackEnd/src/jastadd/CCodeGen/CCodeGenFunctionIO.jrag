@@ -125,14 +125,14 @@ aspect CCodeGenFunctionIO {
     @Override
     public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp()) {
-            type().printDecl_C(p, str, indent, name_C(), getFExp());
+            p.print(this, indent, type(), p.createDeclPrinter(str));
         }
     }
     
     @Override
     public void FFunctionCallLeft.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp()) {
-            type().printInit_C(p, str, indent, getFExp().tempName_C(), getFExp());
+            p.print(this, indent, type(), p.createInitSetPrinter(str));
         }
     }
     
@@ -341,7 +341,7 @@ aspect CodeFuncCallInOutArgPrinters {
         @Override
         public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-            left.genWriteBackResidual_C(str, indent, enumerator, forIndices, indexCounter);
+            left.genWriteBackResidual_C(this, str, indent, enumerator, forIndices, indexCounter);
         }
         @Override
         public void printWriteBackResidual(CodeStream str, String indent, FAbstractVariable v, FAlgorithm alg,
@@ -350,10 +350,10 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
 
-    public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+    public void FFunctionCallLeft.genWriteBackResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         if (hasFExp()) {
-            CodePrinter.WriteBackResidualPrinter p = printer_C.new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
-            p.print(str, indent, getFExp().type(), name_C(), getFExp());
+            CodePrinter.WriteBackResidualPrinter wp = printer_C.new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
+            wp.print(str, indent, getFExp().type(), p.ExecStep.name(this), getFExp());
         }
     }
 
@@ -410,7 +410,7 @@ aspect CodeFuncCallInOutArgPrinters {
             FExp e = node.getFExp();
             FType t = e.type();
             WriteBackAssignmentPrinter p = new WriteBackAssignmentPrinter(t.isComposite() && !e.inFunction(), forVariables);
-            p.print(str, indent, t, node.writeBackName_C(), e);
+            p.print(str, indent, t, ExecStep.name(node), e);
         }
 
         @Override
@@ -516,22 +516,12 @@ aspect CodeFuncCallInOutArg {
      * Helper interface for ASTNodes which handles writebacks to multiple
      * variables even after scalarization.
      */
-    public interface FCompositeWriteBackNode {
+    public interface FCompositeWriteBackNode extends TypePrintable {
         public FExp getFExp();
-        public String writeBackName_C();
     }
     
     FFunctionCallLeft implements FCompositeWriteBackNode;
     FSubscriptedExp implements FCompositeWriteBackNode;
-    
-    @Override
-    public String FFunctionCallLeft.writeBackName_C() {
-        return name_C();
-    }
-    @Override
-    public String FSubscriptedExp.writeBackName_C() {
-        return getFExp().tempName_C();
-    }
     
     public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
         str.print(indent);
