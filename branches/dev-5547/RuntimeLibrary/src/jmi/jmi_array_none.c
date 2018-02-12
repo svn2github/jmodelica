@@ -50,7 +50,7 @@ void jmi_set_str(char **dest, const char* src, jmi_local_dynamic_function_memory
 
 void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset) {
 	size_t i;
-	for(i=offset;i<arr->num_elems;i++) {
+	for(i=offset;i<(offset+arr->num_elems);i++) {
 		dest[i] = src;
 	}
 
