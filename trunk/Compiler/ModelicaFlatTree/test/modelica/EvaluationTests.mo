@@ -1757,14 +1757,14 @@ y1[3]
 end VectorFuncEval4;
 
 model VectorFuncEval5
- function f
+    function f
             input Real x1;
             input Real[:] x2;
             output Real y = x1;
         algorithm
-        end f;
-        Real[:,:] y = f({{time,time}}, {{{time},{time}}});
-        Real[1,2] y1 = f({{1,2}}, {{{3},{4}}});
+    end f;
+    Real[:,:] y = f({{time,time}}, {{{time},{time}}});
+    Real[1,2] y1 = f({{1,2}}, {{{3},{4}}});
     
     annotation(__JModelica(UnitTesting(tests={
         EvalTestCase(
