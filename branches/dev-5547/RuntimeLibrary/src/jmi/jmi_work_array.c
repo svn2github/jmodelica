@@ -1,4 +1,4 @@
- /*
+/*
     Copyright (C) 2018 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
