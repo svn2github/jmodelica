@@ -55,48 +55,40 @@ aspect SrcUtil {
 
 aspect ComponentClauseFields {
 
-    inh boolean ComponentDecl.hasRedeclare();
-    eq ComponentClause.getComponentDecl().hasRedeclare() = getRedeclare();
+    syn boolean ComponentDecl.hasRedeclare() = myComponentClause().getRedeclare();
 
-    inh boolean ComponentDecl.hasFinal();
-    eq ComponentClause.getComponentDecl().hasFinal() = getFinal();
+    syn boolean ComponentDecl.hasFinal() = myComponentClause().getFinal();
 
-    inh boolean ComponentDecl.hasInner();
-    eq ComponentClause.getComponentDecl().hasInner() = getInner();
+    syn boolean ComponentDecl.hasInner() = myComponentClause().getInner();
 
-    inh boolean ComponentDecl.hasOuter();
-    eq ComponentClause.getComponentDecl().hasOuter() = getOuter();
+    syn boolean ComponentDecl.hasOuter() = myComponentClause().getOuter();
 
-    inh boolean ComponentDecl.hasReplaceable();
-    eq ComponentClause.getComponentDecl().hasReplaceable() = getReplaceable();
+    syn boolean ComponentDecl.hasReplaceable() = myComponentClause().getReplaceable();
 
-    inh boolean ComponentDecl.hasTypePrefixFlow();
-    eq ComponentClause.getComponentDecl().hasTypePrefixFlow() = hasTypePrefixFlow();
-    inh TypePrefixFlow ComponentDecl.getTypePrefixFlow();
-    eq ComponentClause.getComponentDecl().getTypePrefixFlow() = getTypePrefixFlow();
+    syn boolean ComponentDecl.hasTypePrefixFlow() = myComponentClause().hasTypePrefixFlow();
+    syn TypePrefixFlow ComponentDecl.getTypePrefixFlow() = myComponentClause().getTypePrefixFlow();
 
-    inh boolean ComponentDecl.hasTypePrefixVariability();
-    eq ComponentClause.getComponentDecl().hasTypePrefixVariability() = hasTypePrefixVariability();
-    inh TypePrefixVariability ComponentDecl.getTypePrefixVariability();
-    eq ComponentClause.getComponentDecl().getTypePrefixVariability() = getTypePrefixVariability();
+    syn boolean ComponentDecl.hasTypePrefixVariability() = 
+        myComponentClause().hasTypePrefixVariability();
+    syn TypePrefixVariability ComponentDecl.getTypePrefixVariability() = 
+        myComponentClause().getTypePrefixVariability();
 
-    inh boolean ComponentDecl.hasTypePrefixInputOutput();
-    eq ComponentClause.getComponentDecl().hasTypePrefixInputOutput() = hasTypePrefixInputOutput();
-    inh TypePrefixInputOutput ComponentDecl.getTypePrefixInputOutput();
-    eq ComponentClause.getComponentDecl().getTypePrefixInputOutput() = getTypePrefixInputOutput();
+    syn boolean ComponentDecl.hasTypePrefixInputOutput() = 
+        myComponentClause().hasTypePrefixInputOutput();
+    syn TypePrefixInputOutput ComponentDecl.getTypePrefixInputOutput() = 
+        myComponentClause().getTypePrefixInputOutput();
 
-    inh Access ComponentDecl.getClassName();
-    eq ComponentClause.getComponentDecl().getClassName() = getClassName();
+    syn Access ComponentDecl.getClassName() = myComponentClause().getClassName();
 
-    inh boolean ComponentDecl.hasTypeArraySubscripts();
-    eq ComponentClause.getComponentDecl().hasTypeArraySubscripts() = hasTypeArraySubscripts();
-    inh ArraySubscripts ComponentDecl.getTypeArraySubscripts();
-    eq ComponentClause.getComponentDecl().getTypeArraySubscripts() = getTypeArraySubscripts();
+    syn boolean ComponentDecl.hasTypeArraySubscripts() = 
+        myComponentClause().hasTypeArraySubscripts();
+    syn ArraySubscripts ComponentDecl.getTypeArraySubscripts() = 
+        myComponentClause().getTypeArraySubscripts();
 
-    inh boolean ComponentDecl.hasConstrainingClause();
-    eq ComponentClause.getComponentDecl().hasConstrainingClause() = hasConstrainingClause();
-    inh ConstrainingClause ComponentDecl.getConstrainingClause();
-    eq ComponentClause.getComponentDecl().getConstrainingClause() = getConstrainingClause();
+    syn boolean ComponentDecl.hasConstrainingClause() = 
+        myComponentClause().hasConstrainingClause();
+    syn ConstrainingClause ComponentDecl.getConstrainingClause() = 
+        myComponentClause().getConstrainingClause();
 
     syn boolean ComponentDecl.hasArraySubscripts() = 
         hasVarArraySubscripts() || hasTypeArraySubscripts();
