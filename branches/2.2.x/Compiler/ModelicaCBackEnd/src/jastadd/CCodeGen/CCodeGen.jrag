@@ -485,14 +485,6 @@ aspect CCodeGen {
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }
 
-    syn String FFunctionCallLeft.name_C() {
-        if (replaceWithTemp()) {
-            return getFExp().tempName_C();
-        } else {
-            return ((FIdUseExp) getFExp()).getFIdUse().name_C();
-        }
-    }
-    
     public void FExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         throw new UnsupportedOperationException("Method not implemented for class " + getClass().getSimpleName() + "!");
     }
