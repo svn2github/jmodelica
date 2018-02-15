@@ -318,33 +318,27 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end SplitCodeTest3;
 
-model SplitCodeTest4
-    function f
-        input Real[:] x;
-        output Real y = sum(x);
-    algorithm
-        annotation(Inline=false);
-    end f;
-    
-    Real y1 = f({time,time});
-    Real y2 = f({time,time});
+model SplitCodeTestFunctionCallAlgorithm1
+    Real[2] y1;
+    Real[2] y2;
+algorithm
+    y1 := 1:2;
+algorithm
+    y2 := 1:2;
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
-            name="SplitCodeTest4",
-            description="Split with temporaries",
-            cc_split_element_limit=4,
+            name="SplitCodeTestFunctionCallAlgorithm1",
+            description="Split with temporaries, algorithms",
+            cc_split_element_limit=2,
             common_subexp_elim=false,
             template="$C_ode_derivatives$",
             generatedCode="
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-    jmi_array_ref_1(tmp_1, 1) = _time;
-    jmi_array_ref_1(tmp_1, 2) = _time;
-    _y1_0 = func_SplitCodeTests_SplitCodeTest4_f_exp0(tmp_1);
+    _y1_1_0 = 1;
+    _y1_2_1 = 2;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -352,11 +346,8 @@ int model_ode_derivatives_0(jmi_t* jmi) {
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = _time;
-    jmi_array_ref_1(tmp_2, 2) = _time;
-    _y2_1 = func_SplitCodeTests_SplitCodeTest4_f_exp0(tmp_2);
+    _y2_1_2 = 1;
+    _y2_2_3 = 2;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -373,6 +364,196 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 }
 ")})));
-end SplitCodeTest4;
+end SplitCodeTestFunctionCallAlgorithm1;
+
+model SplitCodeTestFunctionCallInput1
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real y1 = f({time,time});
+    Real y2 = f({time,time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="SplitCodeTestFunctionCallInput1",
+            description="Split with temporaries, function call input",
+            cc_split_element_limit=4,
+            common_subexp_elim=false,
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _time;
+    jmi_array_ref_1(tmp_1, 2) = _time;
+    _y1_0 = func_SplitCodeTests_SplitCodeTestFunctionCallInput1_f_exp0(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_1(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = _time;
+    jmi_array_ref_1(tmp_2, 2) = _time;
+    _y2_1 = func_SplitCodeTests_SplitCodeTestFunctionCallInput1_f_exp0(tmp_2);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_0(jmi_t* jmi);
+int model_ode_derivatives_1(jmi_t* jmi);
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= model_ode_derivatives_0(jmi);
+    ef |= model_ode_derivatives_1(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end SplitCodeTestFunctionCallInput1;
+
+model SplitCodeTestFunctionCallLeft1
+    function f
+        input Real[:] x;
+        output Real[:] y = x;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real[:] y1 = f({time, time});
+    Real[:] y2 = f({time, time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="SplitCodeTestFunctionCallLeft1",
+            description="Split with temporaries, function call left",
+            cc_split_element_limit=11,
+            common_subexp_elim=false,
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = _time;
+    jmi_array_ref_1(tmp_2, 2) = _time;
+    func_SplitCodeTests_SplitCodeTestFunctionCallLeft1_f_def0(tmp_2, tmp_1);
+    memcpy(&_y1_1_0, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_1(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    jmi_array_ref_1(tmp_4, 1) = _time;
+    jmi_array_ref_1(tmp_4, 2) = _time;
+    func_SplitCodeTests_SplitCodeTestFunctionCallLeft1_f_def0(tmp_4, tmp_3);
+    memcpy(&_y2_1_2, &jmi_array_val_1(tmp_3, 1), 2 * sizeof(jmi_real_t));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_0(jmi_t* jmi);
+int model_ode_derivatives_1(jmi_t* jmi);
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= model_ode_derivatives_0(jmi);
+    ef |= model_ode_derivatives_1(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end SplitCodeTestFunctionCallLeft1;
+
+
+model SplitCodeTestSubscriptedExp1
+    Integer i = integer(time);
+    Real[:] x = 1:2;
+    Real y1 = x[i];
+    Real y2 = x[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="SplitCodeTestSubscriptedExp1",
+            description="Split with temporaries, subscripted exp",
+            cc_split_element_limit=2,
+            common_subexp_elim=false,
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (pre_i_0), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (pre_i_0 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
+    }
+    _i_0 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_0);
+    pre_i_0 = _i_0;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_1(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = 1.0;
+    jmi_array_ref_1(tmp_1, 2) = 2.0;
+    _y1_3 = jmi_array_val_1(tmp_1, _i_0);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_2(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = 1.0;
+    jmi_array_ref_1(tmp_2, 2) = 2.0;
+    _y2_4 = jmi_array_val_1(tmp_2, _i_0);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_ode_derivatives_0(jmi_t* jmi);
+int model_ode_derivatives_1(jmi_t* jmi);
+int model_ode_derivatives_2(jmi_t* jmi);
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= model_ode_derivatives_0(jmi);
+    ef |= model_ode_derivatives_1(jmi);
+    ef |= model_ode_derivatives_2(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end SplitCodeTestSubscriptedExp1;
 
 end SplitCodeTests;
