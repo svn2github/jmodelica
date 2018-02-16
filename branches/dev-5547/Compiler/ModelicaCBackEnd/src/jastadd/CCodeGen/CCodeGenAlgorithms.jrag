@@ -95,7 +95,7 @@ aspect CCodeGenAlgorithms {
      */
 
     public void FFunctionVariable.printTempInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String tempName) {
-        //TODO integrate into TypePrinter, consider passing in FFunctionVariable instead of getBindingExp()
+        //TODO integrate into TypePrinter, consider passing in TypePrintable instead of getBindingExp()
         FType type = type();
         String name = p.name(this);
         //TODO tempName to p.tempName(this)
@@ -119,6 +119,18 @@ aspect CCodeGenAlgorithms {
             type.print(tp);
             resetDummyExp();
        }
+    }
+
+    public void FFunctionVariable.printTempDecl(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String tempName) {
+        //TODO integrate into TypePrinter, consider passing in TypePrintable instead of getBindingExp()
+        // and using the printDecl function on CodePrinter (expects FExp, needs refactoring).
+        FType type = type();
+        boolean external = false;
+        setDummyExp();
+        TypePrinter_C tp = p.codePrinter().createDeclPrinter(str);
+        tp.reset(tempName, getBindingExp(), type.size(), external, indent);
+        type.print(tp);
+        resetDummyExp();
     }
 
     public void ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
