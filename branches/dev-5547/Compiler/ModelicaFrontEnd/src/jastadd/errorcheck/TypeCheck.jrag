@@ -443,7 +443,7 @@ aspect FlatTypeCheck {
 
     // Generic typeCheck(checkType) that calls typeError() if type is unknown and no FExp child has unknown type
     public void FExp.typeCheck(ErrorCheckType checkType) {
-        if (type().isUnknown()) {
+        if (generateTypeError()) {
             for (FExp exp : childFExps())
                 if (exp.type().isUnknown())
                     return;
@@ -453,8 +453,12 @@ aspect FlatTypeCheck {
         }
     }
 
+    syn boolean FExp.generateTypeError() = type().isUnknown();
+    eq FEqRelExp.generateTypeError()     = super.generateTypeError() ||
+            (getLeft().type().isReal() || getRight().type().isReal()) && !inFunction();
+
     public void FIfExp.typeCheck(ErrorCheckType checkType) {
-        if (!type().isUnknown()) {
+        if (!generateTypeError()) {
             if (!getThenExp().size().equivalent(getElseExp().size(), false)) {
                 getIfExp().markAsStructuralParameter(checkType);
             }

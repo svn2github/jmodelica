@@ -325,14 +325,6 @@ public class CGenerator extends GenericGenerator {
             CodeSplitter<FAbstractEquation> cs = new CodeSplitter<FAbstractEquation>(p, str, next, 
                     true, "model_init_eval_parameters_", fclass.myOptions(), fclass.getFParameterEquations().toArrayList()) {
                 @Override
-                public int numScalarElements(FAbstractEquation element) {
-                    return element.numScalarEquations();
-                }
-                @Override
-                public int numScalarTemporaries(FAbstractEquation element) {
-                    return element.numScalarTemporaries();
-                }
-                @Override
                 public void genDecl(FAbstractEquation element) {
                     p.printVarDecls(element, str, indent);
                 }
@@ -741,14 +733,6 @@ public class CGenerator extends GenericGenerator {
             CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, true,
                     "model_ode_derivatives_", fclass.myOptions()) {
                 @Override
-                public int numScalarElements(AbstractEquationBlock element) {
-                    return element.allLocalVariables().size();
-                }
-                @Override
-                public int numScalarTemporaries(AbstractEquationBlock element) {
-                    return element.numScalarTemporaries();
-                }
-                @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls(p, str, indent);
                 }
@@ -806,14 +790,6 @@ public class CGenerator extends GenericGenerator {
             
             CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, true,
                     "model_ode_initialize_", fclass.myOptions()) {
-                @Override
-                public int numScalarElements(AbstractEquationBlock element) {
-                    return element.allLocalVariables().size();
-                }
-                @Override
-                public int numScalarTemporaries(AbstractEquationBlock element) {
-                    return element.numScalarTemporaries();
-                }
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls(p, str, indent);

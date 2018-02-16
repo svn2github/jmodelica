@@ -3669,15 +3669,13 @@ aspect ArrayHelpers {
 	     * If <code>i</code> has fewer dimensions than this, an FArray is created.
 	     * Otherwise a copy of a specific cell is returned. 
 	     */
-	    public FExp subArrayFExp(Index i) {
-	    	if (i.ndims() >= ndims())
-	    		return get(i).fullCopy();
-	    	
-	    	Index j = i.promote(ndims());
-	    	int start = j.internal(indices);
-	    	Iterator<FExp> it = new AIterator(start, 1, length - start);
-	    	return buildFArray(it, new IdentityBuilder(), ndims() - i.ndims());
-	    }
+        public FExp subArrayFExp(Index i) {
+            if (i.ndims() >= ndims())
+                return get(i).fullCopy();
+            int start = i.internal(indices);
+            Iterator<FExp> it = new AIterator(start, 1, length - start);
+            return buildFArray(it, new IdentityBuilder(), i.ndims());
+        }
 	    
         public FExp subArrayFExp(Index i, NonConsecutiveIndices indices) {
             if (i.ndims() >= ndims())

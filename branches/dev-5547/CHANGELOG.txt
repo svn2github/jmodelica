@@ -1,4 +1,11 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5560
+Improved temporary counting leading to smaller generated c-functions
+
+; Fixed ; Minor ; Compiler ; #5559
+Fixed a problem with vectorized functions where the 
+sizes of the dimensions where incorrectly handled.
+
 ; Fixed ; Minor ; Compiler ; #5557
 Fixed dependency computation for dynamic derivatives, the FMU XML didn't list
 the corresponding dynamic states as dependencies for the dynamic derivatives.
