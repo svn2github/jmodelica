@@ -90,3 +90,11 @@ if (SHOULD_UPLOAD_INSTALL) {
         }
     }
 }
+
+// Run library tests, Ideally the configuration should be here in source as well, but we are not there right now!
+for (jobName in ['JM-2.2.x_Buildings-trunk_verify', 'JM-2.2.x_IBPSA-trunk_verify', 'JM-2.2.x_MSL-bundled_verify']) {
+    build job: jobName, parameters: [
+        string(name: 'BUILD_SELECTOR', value: "<SpecificBuildSelector><buildNumber>${env.BUILD_NUMBER}</buildNumber></SpecificBuildSelector>"),
+        string(name: 'TRIGGER_CAUSE', value: "${env.TRIGGER_CAUSE}")
+    ], wait: false
+}
