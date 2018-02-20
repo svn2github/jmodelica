@@ -1236,9 +1236,11 @@ aspect CCodeGenExpressions {
     eq FFunctionCall.needsTemp_C() =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
-    syn boolean FFunctionCallLeft.needsTemp_C() = replaceWithTemp();
+    eq FIdUseExp    .needsTemp_C() = isSlice() || (isFunctionCallLeft() && (!inFunction() || alsoInRHS() || type().isString()));
+
+    syn boolean FFunctionCallLeft.needsTemp_C() = hasFExp() && getFExp().needsTemp_C();
     syn boolean FAbstractVariable.needsTemp_C() { return false; }
-    
+
     syn boolean FFunctionCall.needsStatement_C(CodePrinter p) = 
             (functionCallIsExp() && isComposite()) || isStringExp() || !functionCallIsExp();
 

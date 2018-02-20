@@ -136,12 +136,8 @@ aspect CCodeGenTypes {
         }
         return recordChildTempNameMap;
     }
-    private Map<String,String> FFunctionCallLeft.recordChildTempNameMap = null;
     public Map<String,String> FFunctionCallLeft.recordChildTempNames() {
-        if (recordChildTempNameMap == null) {
-            recordChildTempNameMap = new HashMap<String,String>();
-        }
-        return recordChildTempNameMap;
+        return getFExp().recordChildTempNames();
     }
     private Map<String,String> FAbstractVariable.recordChildTempNameMap = null;
     public Map<String,String> FAbstractVariable.recordChildTempNames() {
@@ -152,11 +148,11 @@ aspect CCodeGenTypes {
     }
 
     syn boolean FExp.useAlias_C()              = false;
-    syn boolean FFunctionCallLeft.useAlias_C() = false;
+    syn boolean FFunctionCallLeft.useAlias_C() = getFExp().useAlias_C();
     syn boolean FAbstractVariable.useAlias_C() = true;
 
     syn String FExp             .alias_C(CodePrinter p) = myCodeGenContext().alias(prettyPrint_C());
-    syn String FFunctionCallLeft.alias_C(CodePrinter p) { throw new UnsupportedOperationException(); }
+    syn String FFunctionCallLeft.alias_C(CodePrinter p) = getFExp().alias_C(p);
     syn String FAbstractVariable.alias_C(CodePrinter p) = p.getExecStep().name(this);
 
     public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable src, boolean external) {

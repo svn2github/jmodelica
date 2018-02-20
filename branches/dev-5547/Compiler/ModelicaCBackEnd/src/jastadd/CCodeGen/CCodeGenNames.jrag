@@ -24,9 +24,9 @@ aspect CCodeGenNames {
     class FFunctionCallLeft implements Nameable {}
     class FAbstractVariable implements Nameable {}
 
-    syn String FExp.name_C()              = tempName_C();
-    eq FSubscriptedExp.name_C()           = getFExp().name_C();
-    eq FIdUseExp.name_C()                 = getFIdUse().name_C();
+    syn String FExp             .name_C() = tempName_C();
+    eq FSubscriptedExp          .name_C() = getFExp().name_C();
+    eq FIdUseExp                .name_C() = getFIdUse().name_C();
     syn String FFunctionCallLeft.name_C() = getFExp().name_C();
 
     syn String FFunctionCallLeft.tempName_C() = getFExp().tempName_C();
