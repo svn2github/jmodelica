@@ -73,65 +73,25 @@ aspect CCodeGenAlgorithms {
 
     public void FFunctionVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
         String name = p.name(this);
-        setDummyExp();
         TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
         if (isComposite() && isOutput() && !isString()) {
             String next = p.codePrinter().indent(indent);
             String iniName = name + C_SUFFIX_NULL;
             str.print(indent + "if (" + name + " == NULL) {\n");
-            tp.reset(iniName, getBindingExp(), type.size(), false, next);
+            tp.reset(iniName, this, type.size(), false, next);
             type.print(tp);
             str.print(next + name + " = " + iniName + ";\n");
             str.print(indent + "}\n");
         } else {
-            tp.reset(name, getBindingExp(), type.size(), false, indent);
+            tp.reset(name, this, type.size(), false, indent);
             type.print(tp);
         }
-        resetDummyExp();
     }
 
     /*
      * End of hooks
      */
 
-    public void FFunctionVariable.printTempInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String tempName) {
-        //TODO integrate into TypePrinter, consider passing in TypePrintable instead of getBindingExp()
-        FType type = type();
-        String name = p.name(this);
-        //TODO tempName to p.tempName(this)
-        boolean external = false;
-        if(isArray() && type.size().isUnknown()) { //TODO This is a variant of InitPrinter_C.printArray to copy size from an already declared input, integrate with it. 
-            str.print(indent, "JMI_ARRAY_INIT_", type.ndims(), "(", 
-                    "DYNA", ", ",
-                    type.nameScalar_C(p.codePrinter(), external), ", ",
-                    type.nameArray_C(p.codePrinter(), external), ", ",
-                    tempName, ", ");
-            type.size().printNumElements_C(p.codePrinter(), str, indent, name);
-            str.print(", ");
-            str.print(type.ndims());
-            str.print(", ");
-            type.size().printDimensions_C(p.codePrinter(), str, indent, name);
-            str.println(")");
-        } else {
-            setDummyExp();
-            TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
-            tp.reset(tempName, getBindingExp(), type.size(), external, indent);
-            type.print(tp);
-            resetDummyExp();
-       }
-    }
-
-    public void FFunctionVariable.printTempDecl(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, String tempName) {
-        //TODO integrate into TypePrinter, consider passing in TypePrintable instead of getBindingExp()
-        // and using the printDecl function on CodePrinter (expects FExp, needs refactoring).
-        FType type = type();
-        boolean external = false;
-        setDummyExp();
-        TypePrinter_C tp = p.codePrinter().createDeclPrinter(str);
-        tp.reset(tempName, getBindingExp(), type.size(), external, indent);
-        type.print(tp);
-        resetDummyExp();
-    }
 
     public void ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
         throw new UnsupportedOperationException("ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables, boolean solved) not implemented for class '" + getClass().getSimpleName() +"'");
@@ -489,7 +449,7 @@ aspect CCodeGenAlgorithms {
 
     public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         String tempName = tempName_C();
-        String src = alias();
+        String src = alias_C(p);
         useTempVar = true;
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);

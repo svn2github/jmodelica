@@ -96,11 +96,7 @@ aspect StepPrinter {
                 return v.nameReturn_C();
             }
             
-            public String name(FAbstractVariable v) {
-                return v.name_C();
-            }
-            
-            public String name(TypePrintable exp) {
+            public String name(Nameable exp) {
                 if (needsTemp(exp)) {
                     return exp.tempName_C();
                 } else {

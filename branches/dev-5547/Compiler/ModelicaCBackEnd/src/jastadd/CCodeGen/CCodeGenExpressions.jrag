@@ -1198,7 +1198,7 @@ aspect CCodeGenExpressions {
      ========================================================================*/
 
     class CodePrinter {
-        public abstract boolean needsTemp(TypePrintable exp);
+        public abstract boolean needsTemp(Nameable exp);
         public abstract boolean needsStatement(FFunctionCall call);
         public abstract void printCall(FFunctionCall call, CodeStream str, String indent);
         public abstract void print(TypePrintable n, String indent, FType type, TypePrinter_C tp);
@@ -1206,7 +1206,7 @@ aspect CCodeGenExpressions {
 
     class CPrettyPrinter {
         @Override
-        public boolean needsTemp(TypePrintable exp) {
+        public boolean needsTemp(Nameable exp) {
             return exp.needsTemp_C();
         }
         
@@ -1227,13 +1227,17 @@ aspect CCodeGenExpressions {
         
     }
 
+    interface Nameable {
+        public boolean needsTemp_C();
+    }
+    
     syn boolean FExp.needsTemp_C() = isComposite();
     eq     FDSDerExp.needsTemp_C() = true;
     eq FFunctionCall.needsTemp_C() =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
-
     syn boolean FFunctionCallLeft.needsTemp_C() = replaceWithTemp();
+    syn boolean FAbstractVariable.needsTemp_C() { return false; }
     
     syn boolean FFunctionCall.needsStatement_C(CodePrinter p) = 
             (functionCallIsExp() && isComposite()) || isStringExp() || !functionCallIsExp();
