@@ -1933,6 +1933,54 @@ end ArrayTests.Subscripts.SubscriptExpression11;
 end SubscriptExpression11;
 
 
+model SubscriptExpression12
+    function f
+        input Real x[2];
+        output Real y;
+    algorithm
+        y := sin(x[0]);
+    end f;
+    
+    Real x[2] = (1:2) * time;
+    Real y = f(x);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Subscripts_SubscriptExpression12",
+        description="Index out of bounds in function",
+        errorMessage="
+1 errors found:
+
+Error at line 6, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
+  Array index out of bounds: 0, index expression: 0
+")})));
+end SubscriptExpression12;
+
+
+model SubscriptExpression13
+    function f
+        input Real x[2];
+        output Real y;
+        external "C" y = f(x[0]);
+    end f;
+    
+    Real x[2] = (1:2) * time;
+    Real y = f(x);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="Subscripts_SubscriptExpression13",
+        description="Index out of bounds in function",
+        errorMessage="
+1 errors found:
+
+Error at line 5, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
+  Array index out of bounds: 0, index expression: 0
+")})));
+end SubscriptExpression13;
+
+
+
 model NumSubscripts1
  Real x = 1;
  Real y = x[1];

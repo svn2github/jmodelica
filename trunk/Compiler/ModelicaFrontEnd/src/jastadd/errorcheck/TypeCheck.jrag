@@ -906,6 +906,7 @@ aspect FlatTypeCheck {
     // TODO: handle other index types than integer (see #3597)
     syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
         Size size = null;
+        boolean ok = false;
         for (FExpSubscript use : mySubscriptUses()) {
             Size useSize = use.mySize();
             if (!use.myIndexType().isInteger()) {
@@ -913,15 +914,19 @@ aspect FlatTypeCheck {
             }
             if (size == null) {
                 size = useSize;
+                ok = true;
             } else if (!size.equivalent(useSize, true)) {
                 IMPLICIT_FOR_RANGE_INCONSISTENT.invoke(use, useSize, size);
+                ok = false;
             }
         }
         if (size == null) {
             IMPLICIT_FOR_RANGE_NOT_USED.invoke(this);
-            return new Opt();
-        } else {
+        }
+        if (ok) {
             return new Opt(size.createRangeExp(0));
+        } else {
+            return new Opt();
         }
     }
 
@@ -978,8 +983,9 @@ aspect FlatTypeCheck {
             error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
         } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
             error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
-        } else if (!inFunction()) { 
-              if (!getFExp().variability().fixedParameterOrLess()) {
+        } else {
+            boolean func = inFunction();
+              if (!getFExp().variability().fixedParameterOrLess() && !func) {
                 warning("Variable array index in equation can result in slow simulation time");
               } else if (!reportedOutOfBound && !inUnknownAccess() && !mySize().isUnknown()) {
                 // Check array bounds
@@ -991,7 +997,7 @@ aspect FlatTypeCheck {
                         if (cval.hasIntValue()) {
                             int i = cval.intValue();
                             if (i < 1 || i > max) {
-                                if (!lockBranch(checkType))
+                                if (func || !lockBranch(checkType))
                                     errorUnlessDisabled("Array index out of bounds: " + i + 
                                                         ", index expression: " + getFExp());
                                 reportedOutOfBound = true;
