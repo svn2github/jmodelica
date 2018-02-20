@@ -1216,12 +1216,6 @@ aspect Visibility {
 
     syn boolean InstAssignable.isPublicVar() = isPublic() && !inProtectedComponent();
 
-    syn boolean VisibilityType.isPublic() = false;
-    eq PublicVisibilityType.isPublic()    = true;
-
-    syn boolean VisibilityType.isProtected() = false;
-    eq ProtectedVisibilityType.isProtected() = true;
-
 
     syn boolean FVisibilityType.isPublic() = false;
     eq FPublicVisibilityType.isPublic()    = true;

@@ -144,11 +144,6 @@ OperatorRecord      : Record;
 Operator            : Restriction;
 OperatorFunction    : Function;
 
-abstract VisibilityType : SourceBaseNode;
-PublicVisibilityType    : VisibilityType;
-ProtectedVisibilityType : VisibilityType;
-UnknownVisibilityType   : VisibilityType;
-
 ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
                                     [ExternalFunctionCall] 
                                     [Annotation];
