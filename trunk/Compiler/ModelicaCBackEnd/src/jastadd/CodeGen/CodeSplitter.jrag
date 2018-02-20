@@ -150,8 +150,8 @@ aspect CodeSplitter {
         public void genPost(T element) {}
     }
 
-    public abstract class AbstractEquationBlock implements CodeSplitter.Item {}
-                    class ASTNode               implements CodeSplitter.Item {}
+    AbstractEquationBlock implements CodeSplitter.Item;
+    ASTNode               implements CodeSplitter.Item;
 
     public int AbstractEquationBlock.numScalars_C() {
         int n = 0;
@@ -188,11 +188,11 @@ aspect CodeSplitter {
         int n = super.numScalars_C();
         for (FExp exp : getArgs()) { 
             if (exp.replaceWithTemp(false)) {
-                n = n + exp.type().numScalarElements();
+                n += exp.type().numScalarElements();
             }
         }
         return n;
     }
-    
+
     eq FSubscriptedExp.numScalars_C() = super.numScalars_C() + getFExp().type().numScalarElements();
 }
