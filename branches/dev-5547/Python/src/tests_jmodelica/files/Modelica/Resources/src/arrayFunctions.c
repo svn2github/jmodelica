@@ -1,3 +1,4 @@
+#include <math.h>
 #include "arrayFunctions.h"
 
 double sumArrayElements(double* a, size_t len)
