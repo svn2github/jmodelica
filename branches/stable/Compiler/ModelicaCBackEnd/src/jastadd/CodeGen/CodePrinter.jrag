@@ -148,10 +148,6 @@ aspect CodePrinter {
             return this;
         }
 
-        public CodePrinter testPrinter() {
-            return this; // Hook to facilitate extensions
-        }
-
         public boolean inInitialSystem() {
             return inInitialSystem;
         }
@@ -213,6 +209,10 @@ aspect CodePrinter {
         public abstract TypePrinter_C createDeclPrinter(CodeStream str);
         public abstract TypePrinter_C createInitPrinter(CodeStream str);
         public abstract TypePrinter_C createInitSetPrinter(CodeStream str);
+        
+        public String sep() {
+            return ", ";
+        }
         
     }
 

@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 aspect CCodeGenGlobals {
     class CGenerator {
         /**
-         * Generates global temporary variables
+         * Generates temporary variables in the global struct
          */
         public class DAETag_C_global_temps extends DAETag {
             
@@ -42,6 +42,13 @@ aspect CCodeGenGlobals {
         }
     }
 
+    /**
+     * Wraps the name in the JMI_GLOBAL macro which accesses the variable in the global struct rather than the local 
+     * namespace.
+     * 
+     * @param  name Variable name to wrap. It should be declared as a field in the global struct.
+     * @return The name wrapped in the JMI_GLOBAL macro
+     */
     public static String FExp.global_C(String name) {
         return "JMI_GLOBAL(" + name + ")";
     }
@@ -49,18 +56,59 @@ aspect CCodeGenGlobals {
 
 aspect CCodeGenGlobalsCached {
 
+    /**
+     * Generates the name for the computed flag that accompanies cached values
+     * @param name The name of the variable that is cached
+     * @return Name of the cache flag
+     */
     public static String FExp.computed_C(String name) {
         return name + "_computed";
     }
 
+    /**
+     * Check if this needs to cache its value
+     * @return true if the value should be cached, else false
+     */
     syn boolean FFunctionCall.impureCodeGen(CodePrinter p) = !type().isComposite() && !type().isString() &&
             inWhen() && !isFunctionCallClause() && p.inBlock() && !dependsOnBlock(p.getBlock());
+
+    /**
+     * Generate declarations for setup nodes in this block
+     */
+    public void AbstractEquationBlock.genSetupNodeDecls_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasResidualFunction()) {
+            for (FFunctionCall call : getSetupNodes()) {
+                call.genStaticVarDecls_C(p, str, indent);
+            }
+        }
+    }
 
     public void FFunctionCall.genStaticVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent, "jmi_real_t ", tempName_C(), ";\n");
         str.print(indent, "int ", FExp.computed_C(tempName_C()), ";\n");
     }
 
+    /**
+     * Generate initialization for the setup nodes
+     */
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String indent) {
+        if (getSetupNodes().size() > 0) {
+            str.print(indent, genBlockResidualSetUpFunctionName_C(p), "(jmi);\n");
+        }
+    }
+
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String indent) {
+        if (getSetupNodes().size() > 0) {
+            String next = p.indent(indent);
+            str.print(indent, "static void ", genBlockResidualSetUpFunctionName_C(p), "(jmi_t* jmi) {\n");
+            for (FFunctionCall call : getSetupNodes()) {
+                call.genStaticTempVars_C(p, str, next);
+            }
+            str.print(indent, "}\n\n");
+        }
+    }
+    
+    
     public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent, FExp.global_C(FExp.computed_C(tempName_C())), " = 0;\n");
     }
@@ -69,33 +117,11 @@ aspect CCodeGenGlobalsCached {
         return genBlockResidualFunctionName_C(p) + "_set_up";
     }
 
-    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCall_C(CodePrinter p, CodeStream str, String indent) {
-        if (setupNodes().size() > 0) {
-            str.print(indent, genBlockResidualSetUpFunctionName_C(p), "(jmi);\n");
-        }
-    }
-
-    public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String indent) {
-        if (setupNodes().size() > 0) {
-            String next = p.indent(indent);
-            str.print(indent, "static void ", genBlockResidualSetUpFunctionName_C(p), "(jmi_t* jmi) {\n");
-            for (FFunctionCall call : setupNodes()) {
-                call.genStaticTempVars_C(p, str, next);
-            }
-            str.print(indent, "}\n\n");
-        }
-    }
-
-    public void AbstractEquationBlock.genSetupNodeDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (hasResidualFunction()) {
-            for (FFunctionCall call : setupNodes()) {
-                call.genStaticVarDecls_C(p, str, indent);
-            }
-        }
-    }
-
+    /**
+     * Gather and cache setup nodes for this block
+     */
     private Collection<FFunctionCall> AbstractEquationBlock.setupNodes = null;
-    public Collection<FFunctionCall> AbstractEquationBlock.setupNodes() {
+    public Collection<FFunctionCall> AbstractEquationBlock.getSetupNodes() {
         if (setupNodes == null) {
             setupNodes = new LinkedHashSet<FFunctionCall>();
             for (AbstractEquationBlock b : blockResidualBlocks()) {

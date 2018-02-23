@@ -13,7 +13,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect CCodeGenTempNames {
+aspect CCodeGenNames {
+    interface Nameable {
+        public String name_C();
+        public String tempName_C();
+        public boolean needsTemp_C();
+    }
+    
+    class FExp              implements Nameable {}
+    class FFunctionCallLeft implements Nameable {}
+    
+    syn String FExp.name_C()              = tempName_C();
+    eq FSubscriptedExp.name_C()           = getFExp().name_C();
+    eq FIdUseExp.name_C()                 = getFIdUse().name_C();
+    syn String FFunctionCallLeft.name_C() = getFExp().name_C();
+    
+    syn String FFunctionCallLeft.tempName_C() = getFExp().tempName_C();
 
     public interface TempScope {
         public String tempName_C();

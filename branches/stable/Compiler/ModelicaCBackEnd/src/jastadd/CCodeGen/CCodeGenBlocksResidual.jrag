@@ -73,7 +73,7 @@ aspect CCodeGenBlocksResidual {
 
     @Override
     public void FIfWhenElseEquation.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
-        genIfStart_C(p.testPrinter(), str, indent);
+        genIfStart_C(p, str, indent);
         Iterator<Integer> fiIt = forIndices.iterator();
         int i = 0;
         int n = fiIt.hasNext() ? fiIt.next() : -1;
@@ -96,7 +96,7 @@ aspect CCodeGenBlocksResidual {
         super.genResidual_C(p, str, indent, enumerator, visited, forIndices);
         if (hasElse())
             getElse().genResidual_C(p, str, indent, enumCopy, visited, forIndices);
-        genIfEnd_C(p.testPrinter(), str, indent);
+        genIfEnd_C(p, str, indent);
     }
 
     @Override

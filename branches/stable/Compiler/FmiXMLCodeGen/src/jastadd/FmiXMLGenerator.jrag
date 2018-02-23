@@ -1750,7 +1750,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
             
             protected boolean isInitialKnown(FVariable var) {
-                return var.isDifferentiatedVariable() || var.isInput();
+                return var.isDifferentiatedVariable() || var.isFDynamicStateVariable() || var.isInput();
             }
         }
     }

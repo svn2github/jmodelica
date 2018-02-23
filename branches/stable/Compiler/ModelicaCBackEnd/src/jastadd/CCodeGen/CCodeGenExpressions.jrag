@@ -413,7 +413,7 @@ aspect CCodeGenExpressions {
         str.print(func ? "_function(" : "_equation(");
         str.print(func ? "\"" + ctx.containingFFunctionDecl().name() + "\", ": "jmi, ");
         p.codePrinter().print(this, str, indent, Arrays.asList(inputs));
-        str.print(",");
+        str.print(p.codePrinter().sep());
         str.print('"');
         CStringCodeStream tstr = new CStringCodeStream(str);
         ctx.prettyPrint(tstr, "");
@@ -462,7 +462,7 @@ aspect CCodeGenExpressions {
             for (FExp arg : args) {
                 str.print(sep);
                 p.print(arg, str, indent);
-                sep = ",";
+                sep = p.codePrinter().sep();
                 i++;
             }
         }
@@ -656,7 +656,7 @@ aspect CCodeGenExpressions {
 
     syn String FIdUse.name_C() = toString_C(printer_C);
 
-    syn String FIdUse.toString_C(CodePrinter p) = toString_C(p.ExecStep);
+    syn String FIdUse.toString_C(CodePrinter p) = toString_C(p.getExecStep());
     syn String FIdUse.toString_C(CodePrinter.ExecuteCodePrinter p) {
         String type = myFV().funcArrayType(isAssignUse());
         if (myFV().inRecord() && inFunction()) {
@@ -1198,21 +1198,16 @@ aspect CCodeGenExpressions {
      ========================================================================*/
 
     class CodePrinter {
-        public abstract boolean needsTemp(FExp exp);
-        public abstract boolean needsTemp(FFunctionCall call);
+        public abstract boolean needsTemp(TypePrintable exp);
         public abstract boolean needsStatement(FFunctionCall call);
         public abstract void printCall(FFunctionCall call, CodeStream str, String indent);
-        public abstract void print(FExp n, String indent, FType type, TypePrinter_C tp);
+        public abstract void print(TypePrintable n, String indent, FType type, TypePrinter_C tp);
     }
 
     class CPrettyPrinter {
         @Override
-        public boolean needsTemp(FExp exp) {
-            return exp.needsTemp(this);
-        }
-        @Override
-        public boolean needsTemp(FFunctionCall call) {
-            return call.needsTemp_C(this);
+        public boolean needsTemp(TypePrintable exp) {
+            return exp.needsTemp_C();
         }
         
         @Override
@@ -1226,18 +1221,20 @@ aspect CCodeGenExpressions {
         }
         
         @Override
-        public void print(FExp n, String indent, FType type, TypePrinter_C tp) {
+        public void print(TypePrintable n, String indent, FType type, TypePrinter_C tp) {
             type.print(tp, indent, ExecStep, n, false);
         }
         
     }
 
-    syn boolean FExp.needsTemp(CodePrinter p) = isComposite();
-    eq     FDSDerExp.needsTemp(CodePrinter p) = true;
-    syn boolean FFunctionCall.needsTemp_C(CodePrinter p) =
+    syn boolean FExp.needsTemp_C() = isComposite();
+    eq     FDSDerExp.needsTemp_C() = true;
+    eq FFunctionCall.needsTemp_C() =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
 
+    syn boolean FFunctionCallLeft.needsTemp_C() = replaceWithTemp();
+    
     syn boolean FFunctionCall.needsStatement_C(CodePrinter p) = 
             (functionCallIsExp() && isComposite()) || isStringExp() || !functionCallIsExp();
 
