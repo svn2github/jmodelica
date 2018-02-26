@@ -14,15 +14,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 aspect CCodeGenNames {
-    interface Nameable {
+    interface Named_C {
         public String name_C();
         public String tempName_C();
         public String nextTempName_C();
     }
 
-    class FExp              implements Nameable {}
-    class FFunctionCallLeft implements Nameable {}
-    class FAbstractVariable implements Nameable {}
+    FExp              implements Named_C;
+    FFunctionCallLeft implements Named_C;
+    FAbstractVariable implements Named_C;
 
     syn String FExp             .name_C() = tempName_C();
     eq FSubscriptedExp          .name_C() = getFExp().name_C();
@@ -59,6 +59,7 @@ aspect CCodeGenNames {
 
     public class CodeGenContext {
         private int nextTempNbr_C = 1;
+        private Map<String,String> recordChildTempNames = new HashMap<>();
         
         public String nextTempName_C() {
             return "tmp_" + nextTempNbr_C++;
@@ -71,6 +72,9 @@ aspect CCodeGenNames {
         }
         public CodeGenContext createProxy() {
             return new CodeGenContextProxy(this);
+        }
+        public Map<String,String> recordChildTempNames() {
+            return recordChildTempNames;
         }
         private class CodeGenContextProxy extends CodeGenContext {
             private CodeGenContext redirect;
@@ -86,6 +90,9 @@ aspect CCodeGenNames {
             }
             public String alias(String key) {
                 return aliases.get(key);
+            }
+            public Map<String,String> recordChildTempNames() {
+                return redirect.recordChildTempNames();
             }
         }
     }

@@ -1198,15 +1198,15 @@ aspect CCodeGenExpressions {
      ========================================================================*/
 
     class CodePrinter {
-        public abstract boolean needsTemp(Nameable exp);
+        public abstract boolean needsTemp(Named_C exp);
         public abstract boolean needsStatement(FFunctionCall call);
         public abstract void printCall(FFunctionCall call, CodeStream str, String indent);
-        public abstract void print(TypePrintable n, String indent, FType type, TypePrinter_C tp);
+        public abstract void print(TypePrintable_C n, String indent, FType type, TypePrinter_C tp);
     }
 
     class CPrettyPrinter {
         @Override
-        public boolean needsTemp(Nameable exp) {
+        public boolean needsTemp(Named_C exp) {
             return exp.needsTemp_C();
         }
         
@@ -1221,13 +1221,13 @@ aspect CCodeGenExpressions {
         }
         
         @Override
-        public void print(TypePrintable n, String indent, FType type, TypePrinter_C tp) {
+        public void print(TypePrintable_C n, String indent, FType type, TypePrinter_C tp) {
             type.print(tp, indent, ExecStep, n, false);
         }
         
     }
 
-    interface Nameable {
+    interface Named_C {
         public boolean needsTemp_C();
     }
     

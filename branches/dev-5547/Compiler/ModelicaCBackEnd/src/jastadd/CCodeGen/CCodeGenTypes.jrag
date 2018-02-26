@@ -114,38 +114,20 @@ aspect CCodeGenTypes {
         print(p.createInitSetPrinter(str), indent, name, src, external);
     }
 
-    interface TypePrintable extends Nameable {
+    interface TypePrintable_C extends Named_C {
         public FExp myBackingFExp();
-        public Map<String,String> recordChildTempNames();
+        public CodeGenContext myCodeGenContext();
         public boolean useAlias_C();
         public String alias_C(CodePrinter p);
     }
 
-    class FExp              implements TypePrintable {}
-    class FFunctionCallLeft implements TypePrintable {}
-    class FAbstractVariable implements TypePrintable {}
+    FExp              implements TypePrintable_C;
+    FFunctionCallLeft implements TypePrintable_C;
+    FAbstractVariable implements TypePrintable_C;
 
     syn FExp FExp             .myBackingFExp() = this;
     syn FExp FFunctionCallLeft.myBackingFExp() = getFExp();
     syn FExp FAbstractVariable.myBackingFExp() = null;
-
-    private Map<String,String> FExp.recordChildTempNameMap = null;
-    public Map<String,String> FExp.recordChildTempNames() {
-        if (recordChildTempNameMap == null) {
-            recordChildTempNameMap = new HashMap<String,String>();
-        }
-        return recordChildTempNameMap;
-    }
-    public Map<String,String> FFunctionCallLeft.recordChildTempNames() {
-        return getFExp().recordChildTempNames();
-    }
-    private Map<String,String> FAbstractVariable.recordChildTempNameMap = null;
-    public Map<String,String> FAbstractVariable.recordChildTempNames() {
-        if (recordChildTempNameMap == null) {
-            recordChildTempNameMap = new HashMap<String,String>();
-        }
-        return recordChildTempNameMap;
-    }
 
     syn boolean FExp.useAlias_C()              = false;
     syn boolean FFunctionCallLeft.useAlias_C() = getFExp().useAlias_C();
@@ -155,11 +137,11 @@ aspect CCodeGenTypes {
     syn String FFunctionCallLeft.alias_C(CodePrinter p) = getFExp().alias_C(p);
     syn String FAbstractVariable.alias_C(CodePrinter p) = p.getExecStep().name(this);
 
-    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable src, boolean external) {
+    public void FType.print(TypePrinter_C tp, String indent, CodePrinter.ExecuteCodePrinter ep, TypePrintable_C src, boolean external) {
         print(tp, indent, ep.name(src), src, external);
     }
 
-    public void FType.print(TypePrinter_C tp, String indent, String name, TypePrintable src, boolean external) {
+    public void FType.print(TypePrinter_C tp, String indent, String name, TypePrintable_C src, boolean external) {
         tp.reset(name, src, size(), external, indent);
         print(tp);
     }
@@ -171,7 +153,7 @@ aspect CCodeGenTypes {
     public abstract class TypePrinter_C {
         protected CodePrinter p;
         protected CodeStream str;
-        protected TypePrintable src;
+        protected TypePrintable_C src;
         protected boolean external = false;
         protected boolean subDecls = false; // Used in CAD
         
@@ -182,12 +164,12 @@ aspect CCodeGenTypes {
             this.str = str;
         }
         
-        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, TypePrintable src, Size s, boolean external) {
+        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, TypePrintable_C src, Size s, boolean external) {
             this(p, str);
             reset(name, src, s, external, indent);
         }
         
-        public void reset(String name, TypePrintable src, Size s, boolean external, String indent) {
+        public void reset(String name, TypePrintable_C src, Size s, boolean external, String indent) {
             this.src = src;
             levels = new Stack<Level>();
             levels.push(new Level(name, indent, !s.variability().knownParameterOrLess() || external, src));
@@ -211,8 +193,8 @@ aspect CCodeGenTypes {
             String name;
             String indent;
             boolean dynamic;
-            TypePrintable src;
-            public Level(String name, String indent, boolean dynamic, TypePrintable src) {
+            TypePrintable_C src;
+            public Level(String name, String indent, boolean dynamic, TypePrintable_C src) {
                 this.name    = name;
                 this.indent  = indent;
                 this.dynamic = dynamic;
@@ -220,7 +202,7 @@ aspect CCodeGenTypes {
             }
         }
         
-        protected void pushLevel(String name, boolean indent, Size s, TypePrintable src) {
+        protected void pushLevel(String name, boolean indent, Size s, TypePrintable_C src) {
             levels.push(new Level(name, indent ? p.indent(indent()) : indent(), !s.variability().knownParameterOrLess() || dynamic(), src));
         }
         
@@ -254,7 +236,7 @@ aspect CCodeGenTypes {
         }
         
         FExp levelSrc(Index i) {
-            TypePrintable levelSrc = levels.peek().src;
+            TypePrintable_C levelSrc = levels.peek().src;
             if (levelSrc != null) {
                 FExp exp = levelSrc.myBackingFExp();
                 if (exp != null && exp instanceof FArray && exp.type().isRecord()) {
@@ -265,7 +247,7 @@ aspect CCodeGenTypes {
         }
         
         FExp levelSrc(String name) {
-            TypePrintable levelSrc = levels.peek().src;
+            TypePrintable_C levelSrc = levels.peek().src;
             if (levelSrc != null) {
                 FExp exp = levelSrc.myBackingFExp();
                 if (exp != null && exp instanceof FRecordConstructor) {
@@ -385,7 +367,7 @@ aspect CCodeGenTypes {
         @Override
         protected String acquireTemp(String key) {
             String tmp = src.nextTempName_C();
-            src.recordChildTempNames().put(key, tmp);
+            src.myCodeGenContext().recordChildTempNames().put(key, tmp);
             return tmp;
         }
 
@@ -448,7 +430,7 @@ aspect CCodeGenTypes {
 
         @Override
         protected String acquireTemp(String key) {
-            return src.recordChildTempNames().get(key);
+            return src.myCodeGenContext().recordChildTempNames().get(key);
         }
 
         @Override
@@ -516,12 +498,12 @@ aspect CCodeGenTypes {
         str.print(")\n");
     }
 
-    public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, TypePrintable src) {
+    public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
         str.print(numElements());
     }
 
     @Override
-    public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, TypePrintable src) {
+    public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
         if (!variability().knownParameterOrLess()) {
             for (int i = 0; i < size.length; i++) {
                 FExp exp = exps[i];
@@ -548,12 +530,12 @@ aspect CCodeGenTypes {
         }
     }
 
-    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, TypePrintable src) {
+    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
         str.print(toUnclosedString());
     }
 
     @Override
-    public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, TypePrintable src) {
+    public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, TypePrintable_C src) {
         if (!variability().knownParameterOrLess()) {
             for (int i = 0; i < size.length; i++) {
                 if (i > 0) {

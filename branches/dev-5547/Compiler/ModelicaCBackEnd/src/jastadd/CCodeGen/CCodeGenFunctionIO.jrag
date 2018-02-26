@@ -509,7 +509,7 @@ aspect CodeFuncCallInOutArg {
      * Helper interface for ASTNodes which handles writebacks to multiple
      * variables even after scalarization.
      */
-    public interface FCompositeWriteBackNode extends TypePrintable {
+    public interface FCompositeWriteBackNode extends TypePrintable_C {
         public FExp getFExp();
     }
     

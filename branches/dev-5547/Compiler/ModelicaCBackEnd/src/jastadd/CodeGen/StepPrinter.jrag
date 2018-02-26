@@ -96,7 +96,7 @@ aspect StepPrinter {
                 return v.nameReturn_C();
             }
             
-            public String name(Nameable exp) {
+            public String name(Named_C exp) {
                 if (needsTemp(exp)) {
                     return exp.tempName_C();
                 } else {
