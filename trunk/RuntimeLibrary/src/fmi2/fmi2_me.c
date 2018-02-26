@@ -489,7 +489,7 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
         ((fmi2_cs_t *)c)->ode_problem->ode_solver != NULL &&
         jmi_cs_check_input_change(&fmi2_me->jmi, vr, nvr, fmi2_me->work_real_array))
     {
-        jmi_ode_solver_need_to_initialize(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+        jmi_ode_solver_external_event(((fmi2_cs_t *)c)->ode_problem->ode_solver);
     } 
     
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);
