@@ -804,7 +804,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
-                generateAttribute("relativeQuantity", false, genPrinter);
+                generateAttribute("relativeQuantity", !variable.isAbsoluteValue(), genPrinter);
                 generateAttributeIfSet(FAttribute.MIN,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);
@@ -1481,7 +1481,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             public void generateAttributes(CodeStream genPrinter) {
                 generateAttributeIfSet(FAttribute.QUANTITY, variable, genPrinter);
                 generateUnitAndDisplayUnitAttribute(genPrinter, variable);
-                generateAttribute("relativeQuantity", false, genPrinter);
+                generateAttribute("relativeQuantity", !variable.isAbsoluteValue(), genPrinter);
                 generateAttributeIfSet(FAttribute.MIN,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.MAX,     variable, genPrinter);
                 generateAttributeIfSet(FAttribute.NOMINAL, variable, genPrinter);

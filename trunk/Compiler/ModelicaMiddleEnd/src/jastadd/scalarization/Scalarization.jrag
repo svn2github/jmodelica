@@ -715,6 +715,9 @@ aspect Scalarization {
             }
             fv.setFAttributeList(attrs);
             fv.addArrayAttributesFromType(s, cell, comp.myFDerivedType());
+            if (!comp.isAbsoluteValue()) {
+                fv.annotation("absoluteValue").setValue(new FBooleanLitExpFalse());
+            }
             se.add(fv);
         }
     }
