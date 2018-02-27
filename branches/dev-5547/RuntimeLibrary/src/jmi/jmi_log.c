@@ -315,13 +315,8 @@ static void emit(log_t *log) {
     force_commas(log);
     if (!isempty(buf)) {
         jmi_callbacks_t* cb = log->jmi_callbacks;
-		
-        const unsigned int MAX_LOG_MSG_COUNT = 100000;
-		static unsigned int log_msg_count = 0;
-        if (log_msg_count > MAX_LOG_MSG_COUNT) exit(EXIT_FAILURE);
-        log_msg_count++;
-        
-	    if (!emitted_category(log, log->c)) return;
+
+        if (!emitted_category(log, log->c)) return;
 
         /* Clamp the category before we emit it since we currently don't pass
            categories beyond logInfo to the outside. */
