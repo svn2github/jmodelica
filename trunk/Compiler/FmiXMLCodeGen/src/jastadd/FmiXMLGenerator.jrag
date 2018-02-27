@@ -405,16 +405,16 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      */
     protected boolean generateStartAttribute(FVariable var) {
         FExp startExp = var.generateXMLStartExp();
-        return startExp != null && startExp.isConstantExp() || 
-                (!var.variability().parameterOrLess() && var.fixedAttribute());
+        return (startExp != null && startExp.isConstantExp() || 
+                (!var.variability().parameterOrLess() && var.fixedAttribute()))
+                && (generateAsConstant(var) || !var.isAlias());
     }
 
     protected void generateStartAttributeIfSet(FVariable var, CodeStream genPrinter) {
         if (generateStartAttribute(var)) {
             FExp startExp = var.generateXMLStartExp();
-            CValue val = startExp != null ?
-                    var.type().convert(startExp.ceval()) :
-                    var.startAttributeCValue();
+            CValue val = startExp != null ? startExp.ceval() : var.startAttributeCValue();
+            val = var.type().convert(val);
             generateAttribute(FAttribute.START, val.xmlValue(), genPrinter);
         }
     }
