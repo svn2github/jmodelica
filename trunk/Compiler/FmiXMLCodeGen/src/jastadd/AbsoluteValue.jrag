@@ -20,16 +20,15 @@ aspect AbsoluteValue {
     /*
      * Calculation
      */
-    
-    syn      boolean FVariable                 .isAbsoluteValue() = annotation().isAbsoluteValue(null);
-    syn      boolean InstAssignable            .isAbsoluteValue() = true;
-    eq               InstPrimitive             .isAbsoluteValue() = annotation().isAbsoluteValue(myInstClass());
-    syn      boolean InstClassDecl             .isAbsoluteValue() = true;
-    syn lazy boolean InstAbstractShortClassDecl.isAbsoluteValue() =
-            annotation().isAbsoluteValue(myTargetInstClassDecl());
 
-    public boolean AnnotationNode.isAbsoluteValue(InstClassDecl superClass) {
-        AnnotationNode an = forPath("absoluteValue");
+    syn      boolean FVariable                 .isAbsoluteValue() = isAbsoluteValue(null);
+    syn      boolean InstAssignable            .isAbsoluteValue() = true;
+    eq               InstPrimitive             .isAbsoluteValue() = isAbsoluteValue(myInstClass());
+    syn      boolean InstClassDecl             .isAbsoluteValue() = true;
+    syn lazy boolean InstAbstractShortClassDecl.isAbsoluteValue() = isAbsoluteValue(myTargetInstClassDecl());
+
+    syn boolean ASTNode.isAbsoluteValue(InstClassDecl superClass) {
+        AnnotationNode an = annotation("absoluteValue");
         if (an.exists()) {
             return !an.isBoolValue() || an.bool();
         } else {
@@ -41,10 +40,10 @@ aspect AbsoluteValue {
      * Error check
      */
     
-    public void AnnotationNode.checkAbsoluteValue(InstNode src) {
-        AnnotationNode an = forPath("absoluteValue");
+    public void InstNode.checkAbsoluteValue() {
+        AnnotationNode an = annotation("absoluteValue");
         if (an.exists()) {
-            if (!src.isPrimitiveType()) {
+            if (!isPrimitiveType()) {
                 ASTNode.ABSOLUTE_VALUE_LOCATION.invoke(an.ast());
             }
             if (!an.isBoolValue()) {
