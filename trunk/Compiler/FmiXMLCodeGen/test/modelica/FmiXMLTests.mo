@@ -2217,4 +2217,33 @@ $modelVariables$
 ")})));
 end Start4;
 
+model Start5
+    parameter Real p = 1;
+    Real x(start=p, fixed=true);
+equation
+    der(x) = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Start5",
+            description="Start value with fixed, parameter start",
+            fmi_version="1.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"p\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x)\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Start5;
+
 end FmiXMLTests;
