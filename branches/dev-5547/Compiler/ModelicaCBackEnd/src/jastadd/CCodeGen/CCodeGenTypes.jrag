@@ -88,7 +88,7 @@ aspect CCodeGenTypes {
     eq FStringType.macroTypeDeclScalar()         = "STR";
     eq FExternalObjectType.macroTypeDeclScalar() = "EXO";
 
-    public void FFunctionVariable.print(TypePrinter_C tp, String name, String indent) {
+    public void FAbstractVariable.print(TypePrinter_C tp, String name, String indent) {
         tp.reset(name, this, size(), false, indent);
         type().print(tp);
     }
