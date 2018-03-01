@@ -366,7 +366,7 @@ fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     if (fmi1_cs->ode_problem->ode_solver != NULL &&
         jmi_cs_check_input_change(jmi, vr, nvr, value))
     {
-        jmi_ode_solver_external_event(fmi1_cs->ode_problem->ode_solver);
+        jmi_ode_solver_need_to_initialize(fmi1_cs->ode_problem->ode_solver);
     }
     
         

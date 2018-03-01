@@ -129,10 +129,38 @@ static int jmi_ode_at_time_event(jmi_ode_status_t s, jmi_real_t integrate_stop_t
     return (s == JMI_ODE_OK && integrate_stop_time != final_time);
 }
 
+static int jmi_ode_check_event_indicators(jmi_real_t* event_indicators, jmi_real_t* event_indicators_previous, size_t dim) {
+    size_t i;
+    
+    for (i = 0; i < dim; i++) {
+        if ((event_indicators[i] >= 0.0 && event_indicators_previous[i] < 0.0) ||
+            (event_indicators[i] < 0.0  && event_indicators_previous[i] >= 0.0)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final_time) {
     jmi_ode_problem_t *p = solver->ode_problem;
     jmi_ode_status_t s = JMI_ODE_OK;
     jmi_real_t integrate_stop_time;
+    
+    if (solver->initialize_solver && !(solver->need_event_update)) {
+        if (p->ode_callbacks.root_func(p->time, p->states, 
+                                    solver->event_indicators, 
+                                    p->sizes, p->problem_data) == -1) {
+            jmi_log_node(p->log, logError, "Error", "Failed to compute the event indicators at the beginning of the solve function.");
+            return JMI_ODE_ERROR;
+        }
+        
+        if (jmi_ode_check_event_indicators(solver->event_indicators,
+                                           solver->event_indicators_previous,
+                                           p->sizes.event_indicators) == 0) {
+            jmi_log_node(p->log, logInfo, "EventUpdate", "Detected changes in the event indicators between invocations of the solve method. Will perform an event update.");
+            solver->need_event_update = TRUE;
+        }
+    }
     
     if (solver->need_event_update) {
         s = p->ode_callbacks.event_update_func(p);
@@ -168,6 +196,19 @@ jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final
                 return JMI_ODE_ERROR;
             }
         }
+    }
+    
+    if (p->event_info.exists_time_event && final_time == p->event_info.next_time_event) {
+        solver->initialize_solver = TRUE;
+        solver->need_event_update = TRUE;
+        jmi_log_node(p->log, logInfo, "EventUpdate", "Detected time event at the final time. Will perform an event update in the beginning of the next invocation of the solve function.");
+    }
+    
+    if (p->ode_callbacks.root_func(p->time, p->states, 
+                                    solver->event_indicators_previous, 
+                                    p->sizes, p->problem_data) == -1) {
+        jmi_log_node(p->log, logError, "Error", "Failed to compute the event indicators at the end of the solve function.");
+        return JMI_ODE_ERROR;
     }
     
     return s;

@@ -796,7 +796,7 @@ class TestWhenInLoop4(SimulationTest):
         self.assert_end_value('z', 2)
 
 
-class TestSetRealOnEvent(SimulationTest):
+class TestEventOnFinalDoStep(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
@@ -816,3 +816,24 @@ class TestSetRealOnEvent(SimulationTest):
     @testattr(stddist_full = True)
     def test_trajectories(self):
         assert self.model.get('y') == 1.0
+        
+class TestSetRealOnEvent(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo',
+            'HybridTests.IfTest1',
+            target='cs')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+        self.model.initialize()
+        self.model.set("u", 0.0)
+        self.model.do_step(0.0, 1.0)
+        self.model.set("u", 2.0)
+        self.model.do_step(1.0, 2.0)
+
+    @testattr(stddist_full = True)
+    def test_trajectories(self):
+        assert self.model.get('der(x)') == 1.0
