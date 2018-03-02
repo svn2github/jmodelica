@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5563
+Fixed bugs for start attribute generation in xml
+
 ; Fixed ; Minor ; Compiler ; #5560
 Improved temporary counting leading to smaller generated c-functions
 
