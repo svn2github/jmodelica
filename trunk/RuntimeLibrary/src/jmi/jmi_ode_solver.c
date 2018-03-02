@@ -150,7 +150,7 @@ jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final
         if (p->ode_callbacks.root_func(p->time, p->states, 
                                     solver->event_indicators, 
                                     p->sizes, p->problem_data) == -1) {
-            jmi_log_node(p->log, logError, "Error", "Failed to compute the event indicators at the beginning of the solve function.");
+            jmi_log_node(p->log, logError, "StateEventEvaluationFailure", "Failed to compute the event indicators at the beginning of the solve function.");
             return JMI_ODE_ERROR;
         }
         
@@ -207,7 +207,7 @@ jmi_ode_status_t jmi_ode_solver_solve(jmi_ode_solver_t* solver, jmi_real_t final
     if (p->ode_callbacks.root_func(p->time, p->states, 
                                     solver->event_indicators_previous, 
                                     p->sizes, p->problem_data) == -1) {
-        jmi_log_node(p->log, logError, "Error", "Failed to compute the event indicators at the end of the solve function.");
+        jmi_log_node(p->log, logError, "StateEventEvaluationFailure", "Failed to compute the event indicators at the end of the solve function.");
         return JMI_ODE_ERROR;
     }
     
