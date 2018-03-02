@@ -57,4 +57,13 @@ package WhenTests
       
     end WhenTest5;
 
+    model WhenTest6
+        input Real x;
+        Real y;
+    equation
+        when time > 1 then
+            y = time;
+        end when;
+    end WhenTest6;
+  
 end WhenTests;
