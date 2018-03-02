@@ -742,7 +742,8 @@ struct jmi_directional_derivative_callbacks_t {
 	jmi_real_t* d_output; /* Directional derivatives for each output, to be calculated by runtime */
 	jmi_directional_derivative_attributes_func_t F_max; /* Callback for max values for input variables */
 	jmi_directional_derivative_attributes_func_t F_min; /*  Callback for min values for input variables */
-	jmi_directional_derivative_attributes_func_t F_nominal; /* Callback for nominal values for input variables */
+	jmi_directional_derivative_attributes_func_t F_input_nominal; /* Callback for nominal values for input variables */
+	jmi_directional_derivative_attributes_func_t F_output_nominal; /* Callback for nominal values for output variables */
 	jmi_directional_derivative_base_func_t F;	
 	jmi_string_t label; /* Label for origin of directional derivative callback */
 };

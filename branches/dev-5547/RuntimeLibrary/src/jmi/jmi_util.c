@@ -558,7 +558,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
         jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve min values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
         return ef;
     } 
-    ef = dd_callback->F_nominal(args, input_nominal);
+    ef = dd_callback->F_input_nominal(args, input_nominal);
     if (ef !=0) {
         jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve nominal values for inputs in <function_finite_dir_der: %s>.", dd_callback->label);
         return ef;
@@ -580,10 +580,16 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
         return ef;
     }
 
+	/* Setup nominal values for the outputs */
+	ef = dd_callback->F_output_nominal(args, output_nominal);
+    if (ef !=0) {
+        jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not retrieve nominal values for outputs in <function_finite_dir_der: %s>.", dd_callback->label);
+        return ef;
+    }
+
     /* Make d_output be filled with zeroes from start */
     for (i = 0; i < n_output; i++) {
         d_output[i] = 0.0;
-        output_nominal[i] = 1.0;
     }
 
     delta = sqrt(JMI_EPS);
@@ -615,8 +621,8 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
             return ef;
         }
 
-        /* Check if input values are ok */
-        ef = jmi_check_illegal_values(error_indicator, input_nominal, output_temp, n_output, &nans_present, &infs_present, &lim_vals_present);
+        /* Check if output values are ok */
+        ef = jmi_check_illegal_values(error_indicator, output_nominal, output_temp, n_output, &nans_present, &infs_present, &lim_vals_present);
         jmi_log_illegal_output(jmi->log, error_indicator, n_output, n_input, input, output, nans_present, infs_present, lim_vals_present, dd_callback->label, 
             FALSE, jmi->jmi_callbacks.log_options.log_level, "function_finite_dir_der");
         if (ef !=0) {
