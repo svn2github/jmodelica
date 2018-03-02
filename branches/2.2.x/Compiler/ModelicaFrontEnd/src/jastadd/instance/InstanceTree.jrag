@@ -1625,8 +1625,9 @@ aspect InstanceTreeConstruction {
     syn lazy InstAccess InstSimpleShortClassDecl.getTarget() = 
         getBaseClassDecl().superClasses().iterator().next().getSuper().newInstAccess();
 
-    syn InstClassDecl InstSimpleShortClassDecl.myTargetInstClassDecl() = getTarget().myInstClassDecl();
-    syn InstClassDecl InstShortClassDecl.myTargetInstClassDecl()       = getInstExtends(0).myInstClass();
+    syn InstClassDecl InstAbstractShortClassDecl.myTargetInstClassDecl();
+    eq  InstSimpleShortClassDecl                .myTargetInstClassDecl() = getTarget().myInstClassDecl();
+    eq  InstShortClassDecl                      .myTargetInstClassDecl() = getInstExtends(0).myInstClass();
 
     syn boolean InstRestriction.equals(Object o) = getClass().equals(o.getClass());
 

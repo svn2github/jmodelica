@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5564
+Using absoluteValue annotation to generate relativeQuantity attribute
+
 ; Fixed ; Minor ; Compiler ; #5563
 Fixed bugs for start attribute generation in xml
 

@@ -229,6 +229,7 @@ aspect ContentCheck {
         if (!inFunction()) // Array sizes outside functions should be structural parameters
             size().forceVariability(checkType, fStructParameter());
         checkQuotedIdentifier(getComponentDecl(), name());
+        checkAbsoluteValue();
     }
 
     public void InstAssignable.contentCheck(ErrorCheckType checkType) {
@@ -279,6 +280,7 @@ aspect ContentCheck {
         }
         
         checkQuotedIdentifier(getClassDecl(), name());
+        checkAbsoluteValue();
     }
     
     private static Set<String> AnnotationNode.buildExternalFunctionAnnotations() {
