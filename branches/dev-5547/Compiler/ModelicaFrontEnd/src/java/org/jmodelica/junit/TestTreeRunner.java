@@ -42,14 +42,17 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
     private TestSpecification spec;
     private File testFile;
 
-    public TestTreeRunner(TestSpecification spec, File testFile, String parentName) throws InitializationError {
-        this(spec, null, parentName, testFile);
+    public TestTreeRunner(
+            TestSpecification spec, UniqueNameCreator nc, File testFile, String parentName, String packageName) 
+                    throws InitializationError {
+        this(spec, nc, null, parentName, packageName, testFile);
     }
 
-    public TestTreeRunner(TestSpecification spec, TestTree tree, String parentName, File testFile) throws InitializationError {
+    public TestTreeRunner(
+            TestSpecification spec, UniqueNameCreator nc, TestTree tree, String parentName, String packageName, File testFile) 
+                    throws InitializationError {
         super(spec.getClass());
         String name;
-        char sep;
         if (tree == null) {
             name = testFile.getName();
             tree = spec.createTestSuite(testFile).getTree();
@@ -57,7 +60,7 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
             name = tree.getName();
         }
         String fullName = String.format("%s.%s", parentName, name);
-        desc = Description.createSuiteDescription(name);
+        desc = Description.createSuiteDescription(nc.makeUnique(name));
         this.spec = spec;
         this.testFile = testFile;
         caseDesc = new HashMap<String,Description>();
@@ -80,14 +83,14 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 if (subTest != null && !(subTest instanceof TestTree)) {
                     test = subTest;
                 } else {
-                    TestTreeRunner runner = new TestTreeRunner(spec, subTree, fullName, testFile);
+                    TestTreeRunner runner = new TestTreeRunner(spec, nc, subTree, fullName, packageName, testFile);
                     runners.put(subTree.getName(), runner);
                     chDesc = runner.getDescription();
                 }
             } 
             if (!(test instanceof TestTree)) {
                 // TODO: Upgrade JUnit version, then use createTestDescription(String, String) instead
-                String descStr = String.format("%s(%s)", testName, fullName);
+                String descStr = String.format("%s(%s)", nc.makeUnique(testName), packageName);
                 chDesc = Description.createSuiteDescription(descStr);
                 caseDesc.put(test.getName(), chDesc);
             }

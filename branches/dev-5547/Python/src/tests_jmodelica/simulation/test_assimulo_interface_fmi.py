@@ -1542,6 +1542,19 @@ class Test_FMI_ODE:
         self._dqSim     = FMIODE(self._dq)
         
     @testattr(stddist_full = True)
+    def test_max_log_file_size(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu", log_level=5)
+        model.set("_log_level", 5)
+        model.set_max_log_size(10)
+        
+        model.simulate()
+        
+        with open("Modelica_Mechanics_Rotational_Examples_CoupledClutches_log.txt") as f:
+            for line in f:
+                pass
+            assert "The log file has reached its maximum size" in line
+        
+    @testattr(stddist_full = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
         opts = model.simulate_options()

@@ -1,4 +1,13 @@
 ================= Unreleased ==================
+; Feature ; Minor ; PyFMI ; #5089
+Added option to limit the maximum size of the log file.
+
+; Fixed ; Minor ; Compiler ; #5564
+Using absoluteValue annotation to generate relativeQuantity attribute
+
+; Fixed ; Minor ; Compiler ; #5563
+Fixed bugs for start attribute generation in xml
+
 ; Fixed ; Minor ; Compiler ; #5560
 Improved temporary counting leading to smaller generated c-functions
 
