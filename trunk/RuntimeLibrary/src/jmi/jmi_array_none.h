@@ -412,14 +412,6 @@ void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src);
 /* Number of empty bytes at end of string */
 #define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
 
-/**
- * Set dest to value. Assumes dimension of dest is equal to dimension of arr.
- */
-void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset);
-
-void jmi_copy_to_arr(jmi_array_t* dest, jmi_real_t* src, size_t offset);
-void jmi_copy_to_ptr(jmi_real_t* dest, jmi_array_t* src, size_t offset);
-
 void jmi_transpose_matrix(jmi_array_t* arr, jmi_real_t* src, jmi_real_t* dest);
 void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);
 void jmi_transpose_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_real_t* dest);
