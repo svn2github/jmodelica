@@ -9,7 +9,7 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
-  <!--section>
+  <section>
     <title>Release notes for JModelica.org version 2.2</title>
     <section><title>Highlights</title>
     <itemizedlist>
@@ -21,6 +21,13 @@
         Automation Wrapper</emphasis>.</listitem>
         <listitem>The bundled gcc C-compiler is now updated to gcc-tdm 5.1.0 which
         enables compilation of 64 bit FMUs.</listitem>
+        <listitem>Full string support</listitem>
+        <listitem>Added a memory pool to be used for dynamic allocations during evaluation of the equations (significant speedup in cases with lots of dynamic allocations).</listitem>
+        <listitem>Changed the default FMI version when compiling FMUs from Python to 2.0 instead of 1.0.</listitem>
+        <listitem>Removed CAD generation</listitem>
+        <listitem>Changed default file storing method to binary format.</listitem>
+        <listitem>Added support for building Assimulo, PyFMI, PyJMI, pymodelica  in both 32 and 64 bit modes on windows when corresponding Python distributions are available.</listitem>
+        <listitem>Added option for disabling external evaluation during variability propagation</listitem>
     </itemizedlist>
     </section>
     <section xml:id="Release22Python">
@@ -32,7 +39,7 @@
     freeopcua, jupyter, SALib, natsort, pyserial, pyro</emphasis> and 
     <emphasis>coverage.</emphasis> </para>
     </section>
-  </section-->
+  </section>
   <section>
     <title>Release notes for JModelica.org version 2.1</title>
 	<section><title>Highlights</title>
