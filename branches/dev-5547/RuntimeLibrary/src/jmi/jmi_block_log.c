@@ -199,7 +199,7 @@ int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double*
     int infs_present = FALSE;
     int lim_vals_present = FALSE;
 
-    ret = jmi_check_illegal_values(block->residual_error_indicator, block->residual_heuristic_nominal, f, N, &nans_present, &infs_present, &lim_vals_present);
+    ret = jmi_check_illegal_values(block->residual_error_indicator, residual_heuristic_nominal, f, N, &nans_present, &infs_present, &lim_vals_present);
     jmi_log_illegal_output(log, block->residual_error_indicator, N, N, ivs, f, nans_present, infs_present, lim_vals_present, block->label, TRUE, block->callbacks->log_options.log_level, "block");
 
     return ret;
