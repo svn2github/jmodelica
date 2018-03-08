@@ -23,7 +23,7 @@
         enables compilation of 64 bit FMUs.</listitem>
         <listitem>Full string support</listitem>
         <listitem>Changed the default FMI version when compiling FMUs from Python to 2.0 instead of 1.0.</listitem>
-        <listitem>Changed default file storing method to binary format when compiling FMUs from Python.</listitem>
+        <listitem>Changed default file storing method to binary format when simulating FMUs with PyFMI in Python.</listitem>
         <listitem>Achieved significant speedup in some models by adding a new memory allocation algorithm.</listitem>
     </itemizedlist>
     </section>
@@ -32,7 +32,7 @@
     <section><title>Compiler Changes</title>
     <para>Important changes to the compiler:</para>
     <itemizedlist>
-        <listitem>Removed CAD generation</listitem>
+        <listitem>Removed the experimental directional derivative generation feature.</listitem>
         <listitem>Added option for disabling external evaluation during variability propagation</listitem>
     </itemizedlist>
     </section>
