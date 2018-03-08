@@ -65,6 +65,7 @@ import org.jmodelica.util.MemorySpider;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.exceptions.IllegalCompilerArgumentException;
 import org.jmodelica.util.exceptions.ModelicaClassNotFoundException;
+import org.jmodelica.util.exceptions.JModelicaHomeNotFoundException;
 import org.jmodelica.util.exceptions.PackingFailedException;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.problemHandling.ProblemProducer;
@@ -2597,14 +2598,6 @@ public abstract class CompilationHooksImpl implements CompilationHooks {
     public void codeGenerated(ModelicaCompiler instance, File dir) {}
     @Override
     public void codeCompiled(ModelicaCompiler instance) {}
-}
-
-public class JModelicaHomeNotFoundException extends ModelicaException {
-    public JModelicaHomeNotFoundException() {
-    }
-    public JModelicaHomeNotFoundException(String msg) {
-        super(msg);
-    }
 }
 
 /**

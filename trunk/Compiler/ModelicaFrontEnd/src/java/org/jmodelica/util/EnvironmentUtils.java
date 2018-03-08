@@ -2,7 +2,7 @@ package org.jmodelica.util;
 
 import java.io.File;
 
-import org.jmodelica.modelica.compiler.JModelicaHomeNotFoundException;
+import org.jmodelica.util.exceptions.JModelicaHomeNotFoundException;
 
 /**
  * Utility class which contains methods for retrieving information about the
