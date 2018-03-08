@@ -434,7 +434,7 @@ aspect ExternalConstantEvaluationCaching {
                 pb.redirectErrorStream(true);
                 if (ext.libraryDirectory() != null) {
                     // Update environment in case of shared library
-                    String platform = CCompilerDelegator.reduceBits(ModelicaCompiler.getPlatform(),
+                    String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),
                             mc.getCCompiler().getTargetPlatforms());
                     File f = new File(ext.libraryDirectory(), platform);
                     String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();

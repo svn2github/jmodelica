@@ -40,14 +40,7 @@ import org.jmodelica.util.logging.ModelicaLogger;
  * aspect to add a static field in this class that gets its value from addDelegator().
  */
 public abstract class CCompilerDelegator {
-    
-    private static Map<String,Creator> CREATORS = creators();
-    
-    private static Map<String,Creator> creators() {
-        if (CREATORS == null)
-            CREATORS = new HashMap<String,Creator>();
-        return CREATORS;
-    }
+    private static final Map<String, Creator> creators = new HashMap<String, Creator>();
     
     public static final String OPTION = "c_compiler";
     public static final String OPTION_DESC = "The C compiler to use to compile generated C code.";
@@ -79,10 +72,11 @@ public abstract class CCompilerDelegator {
      * @param creator  the creator for the delegator class
      */
     public static Creator addDelegator(String name, Creator creator) {
-        if (creators().containsKey(name))
+        if (creators.containsKey(name)) {
             throw new IllegalArgumentException("Compiler delegator name " + name + 
-                    " is already used by " + CREATORS.get(name).create().getClass().getSimpleName());
-        creators().put(name, creator);
+                    " is already used by " + creators.get(name).create().getClass().getSimpleName());
+        }
+        creators.put(name, creator);
         return creator;
     }
     
@@ -90,11 +84,11 @@ public abstract class CCompilerDelegator {
      * Create a C compiler delegator for the given set of options.
      */
     public static CCompilerDelegator delegatorFor(String c_compiler) {
-        return creators().get(c_compiler).create();
+        return creators.get(c_compiler).create();
     }
     
     public static void addCompilerOptionValues(OptionRegistry opt) {
-        for (String name : creators().keySet())
+        for (String name : creators.keySet())
             opt.addStringOptionAllowed(OPTION, name);
     }
     
@@ -330,25 +324,15 @@ public abstract class CCompilerDelegator {
         }
 
     }
-    
-    
+
     protected static void copyFile(File sourceFile, File destFile) throws IOException {
-        FileChannel source = null;
-        FileChannel destination = null;
-        try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
+        // TODO: There must be a util for this somewhere?!?!
+        try (FileInputStream fis = new FileInputStream(sourceFile); FileOutputStream fos = new FileOutputStream(destFile)) {
+            FileChannel source = fis.getChannel();
+            FileChannel destination = fis.getChannel();
             long count = 0;
             long size = source.size();
-            while( (count += destination.transferFrom(source, 0, size-count)) < size);
-        }
-        
-        finally {
-            if(source != null) 
-                source.close();
-            
-            if(destination != null)
-                destination.close();
+            while ((count += destination.transferFrom(source, 0, size-count)) < size);
         }
     }
     

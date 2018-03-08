@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jmodelica.util.EnvironmentUtils;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.streams.NullStream;
@@ -33,7 +34,13 @@ import org.jmodelica.util.streams.NullStream;
  * Compiles DLL(s) from generated C code using make.
  */
 public class GccCompilerDelegator extends CCompilerDelegator {
-    
+
+    public static final Creator CREATOR = CCompilerDelegator.addDelegator(GccCompilerDelegator.NAME, new Creator() {
+        public CCompilerDelegator create() {
+            return new GccCompilerDelegator(EnvironmentUtils.getJModelicaHome(), EnvironmentUtils.getJavaPlatform());
+        }
+    });
+
     public static final String NAME = "gcc";
 
     public GccCompilerDelegator(File jmHome, String buildPlatform) {
