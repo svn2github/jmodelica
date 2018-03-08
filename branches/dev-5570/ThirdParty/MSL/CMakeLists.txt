@@ -7,7 +7,14 @@ add_definitions(-DTOP_SRC)
 add_definitions(-DMSL_DIR)
 option(WITH_TDM "WITH_TDM" OFF)
 
-
+# Get the JModelica install directory
+if(CMAKE_INSTALL_DIR)
+    set(JMODELICA_INSTALL_DIR ${CMAKE_INSTALL_DIR})
+else()
+    set(JMODELICA_INSTALL_DIR ${TOP_SRC}/../install)
+    message(STATUS "Install dir not defined, using ${JMODELICA_INSTALL_DIR}")
+endif() 
+set(RTLIB_INCLUDE_DIR ${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary)
 set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
 set(MSLRESOURCES ${MSL_DIR}/Modelica/Resources/Library)
 
@@ -176,6 +183,6 @@ message(STATUS MSLResourcesDestination="${MSLRESOURCES}/${FMI_PLATFORM}/${SUB_DI
 install(TARGETS ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
     DESTINATION "${MSLRESOURCES}/${FMI_PLATFORM}/${SUB_DIR}")
 
-# install(DIRECTORY "${MSLCSOURCES}/"
-    # DESTINATION "${RTLIB_INCLUDE_DIR}"
-    # FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${MSLCSOURCES}/"
+    DESTINATION "${RTLIB_INCLUDE_DIR}"
+    FILES_MATCHING PATTERN "*.h")
