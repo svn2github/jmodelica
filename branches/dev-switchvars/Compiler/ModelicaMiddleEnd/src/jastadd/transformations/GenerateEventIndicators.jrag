@@ -59,7 +59,7 @@ aspect GenerateEventIndicators {
          */
         public Transformer(OptionRegistry options) {
             this.options = options;
-            this.eventOutputVars = true; //options.getBooleanOption("event_output_vars");
+            this.eventOutputVars = options.getBooleanOption("event_output_vars");
         }
 
         /**
@@ -487,7 +487,9 @@ aspect GenerateEventIndicators {
 
                     if (exp.needsIndicatorInit()) {
                         addStatement(exp.indicatorInitStmt());
-                        addStatement(exp.switchInitStmt());
+                        if (eventOutputVars) {
+                            addStatement(exp.switchInitStmt());
+                        }
                     }
                 } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
                     //CR: REFACTOR
@@ -511,7 +513,9 @@ aspect GenerateEventIndicators {
             for (FRelExp exp : stmt.relExpInStmt()) {
                 if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
                     addStatement(exp.indicatorStmt());
-                    addStatement(exp.switchStmt());
+                    if (eventOutputVars) {
+                        addStatement(exp.switchStmt());
+                    }
                 }
             }
             addStatement(stmt);
@@ -629,19 +633,21 @@ aspect GenerateEventIndicators {
     public void FRelExp.genIndicator(boolean output) {
         FVariable indicatorVar = new FRealVariable(new FPublicVisibilityType(), fContinuous(),
                 new FQNameFull(calcIndicatorVarName()));
-        FVariable switchVar = new FBooleanVariable(new FPublicVisibilityType(), ASTNode.fDiscrete(),
-                new FQNameFull(calcSwitchVarName()));
-
         if (output) {
             indicatorVar.setFTypePrefixInputOutput(new FOutput());
-            switchVar.setFTypePrefixInputOutput(new FOutput());
         }
-
         myFClass().addFVariable(indicatorVar);
-        myFClass().addFVariable(switchVar);
-
         setIndicator(indicatorVar.createUseExp());
-        setSwitch(switchVar.createUseExp());
+        
+        if (output) {
+            FVariable switchVar = new FBooleanVariable(new FPublicVisibilityType(), ASTNode.fDiscrete(),
+                    new FQNameFull(calcSwitchVarName()));
+            if (output) {
+                switchVar.setFTypePrefixInputOutput(new FOutput());
+            }
+            myFClass().addFVariable(switchVar);
+            setSwitch(switchVar.createUseExp());
+        }
     }
 
     /**
