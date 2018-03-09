@@ -34,20 +34,32 @@ fclass EventGeneration.Nested
  discrete Real temp_1;
  discrete Integer temp_2;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
  output Real _eventIndicator_3;
+ discrete output Boolean _switch_3;
  output Real _eventIndicator_4;
+ discrete output Boolean _switch_4;
 initial equation
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
+ pre(_switch_3) = false;
+ pre(_switch_4) = false;
 equation
  1 + x = temp_2;
- temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
- _eventIndicator_1 = time * 0.3 + 4.2 - pre(temp_1);
- _eventIndicator_2 = time * 0.3 + 4.2 - (pre(temp_1) + 1);
- _eventIndicator_3 = 3 + temp_1 * 4 - pre(temp_2);
- _eventIndicator_4 = _eventIndicator_3 + -1;
+ temp_1 = if _switch_1 or _switch_2 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_2 = if _switch_3 or _switch_4 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ _eventIndicator_1 = if not initial() then pre(temp_1) - (time * 0.3 + 4.2) else 1.0;
+ _switch_1 = _eventIndicator_1 > 0;
+ _eventIndicator_2 = if not initial() and not _switch_1 then time * 0.3 + 4.2 - (pre(temp_1) + 1) else 1.0;
+ _switch_2 = _eventIndicator_2 >= 0;
+ _eventIndicator_3 = if not initial() then pre(temp_2) - (3 + temp_1 * 4) else 1.0;
+ _switch_3 = _eventIndicator_3 > 0;
+ _eventIndicator_4 = if not initial() and not _switch_3 then 3 + temp_1 * 4 - (pre(temp_2) + 1) else 1.0;
+ _switch_4 = _eventIndicator_4 >= 0;
 end EventGeneration.Nested;
 ")})));
 end Nested;
@@ -68,21 +80,33 @@ fclass EventGeneration.InAlgorithm
  discrete Real temp_1;
  discrete Integer temp_2;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
  output Real _eventIndicator_3;
+ discrete output Boolean _switch_3;
  output Real _eventIndicator_4;
+ discrete output Boolean _switch_4;
 initial equation
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
+ pre(_switch_3) = false;
+ pre(_switch_4) = false;
 algorithm
- temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- _eventIndicator_3 := 3 + temp_1 * 4 - pre(temp_2);
- _eventIndicator_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ temp_1 := if _switch_1 or _switch_2 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ _eventIndicator_3 := if not initial() then pre(temp_2) - (3 + temp_1 * 4) else 1.0;
+ _switch_3 := _eventIndicator_3 > 0;
+ _eventIndicator_4 := if not initial() and not 3 + temp_1 * 4 < pre(temp_2) then 3 + temp_1 * 4 - (pre(temp_2) + 1) else 1.0;
+ _switch_4 := _eventIndicator_4 >= 0;
  temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 equation
- _eventIndicator_1 = time * 0.3 + 4.2 - pre(temp_1);
- _eventIndicator_2 = time * 0.3 + 4.2 - (pre(temp_1) + 1);
+ _eventIndicator_1 = if not initial() then pre(temp_1) - (time * 0.3 + 4.2) else 1.0;
+ _switch_1 = _eventIndicator_1 > 0;
+ _eventIndicator_2 = if not initial() and not _switch_1 then time * 0.3 + 4.2 - (pre(temp_1) + 1) else 1.0;
+ _switch_2 = _eventIndicator_2 >= 0;
 end EventGeneration.InAlgorithm;
 ")})));
 end InAlgorithm;
@@ -111,16 +135,22 @@ fclass EventGeneration.InFunctionCall
  Real x;
  discrete Integer temp_1;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
  discrete Real temp_2;
 initial equation
  pre(temp_1) = 0;
  pre(temp_2) = 0.0;
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
 equation
  x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
- temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
- _eventIndicator_1 = 0.9 + time / 10 - pre(temp_1);
- _eventIndicator_2 = 0.9 + time / 10 - (pre(temp_1) + 1);
+ temp_1 = if _switch_1 or _switch_2 or initial() then integer(0.9 + time / 10) else pre(temp_1);
+ _eventIndicator_1 = if not initial() then pre(temp_1) - (0.9 + time / 10) else 1.0;
+ _switch_1 = _eventIndicator_1 > 0;
+ _eventIndicator_2 = if not initial() and not _switch_1 then 0.9 + time / 10 - (pre(temp_1) + 1) else 1.0;
+ _switch_2 = _eventIndicator_2 >= 0;
  temp_2 = temp_1 * 3.14;
 end EventGeneration.InFunctionCall;
 ")})));
@@ -145,24 +175,36 @@ fclass EventGeneration.InWhenClauses1
  discrete Integer temp_1;
  discrete Real temp_2;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
  output Real _eventIndicator_3;
+ discrete output Boolean _switch_3;
  output Real _eventIndicator_4;
+ discrete output Boolean _switch_4;
  discrete Boolean temp_3;
 initial equation
  pre(temp_1) = 0;
  pre(temp_2) = 0.0;
  pre(x) = 0.0;
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
+ pre(_switch_3) = false;
+ pre(_switch_4) = false;
  pre(temp_3) = false;
 equation
  temp_3 = temp_1 + noEvent(integer(time * 3)) > 1;
  x = if temp_3 and not pre(temp_3) then temp_2 else pre(x);
- temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
- temp_2 = if time * 0.3 + 4.2 < pre(temp_2) or time * 0.3 + 4.2 >= pre(temp_2) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
- _eventIndicator_1 = time * 3 - pre(temp_1);
- _eventIndicator_2 = time * 3 - (pre(temp_1) + 1);
- _eventIndicator_3 = time * 0.3 + 4.2 - pre(temp_2);
- _eventIndicator_4 = time * 0.3 + 4.2 - (pre(temp_2) + 1);
+ temp_1 = if _switch_1 or _switch_2 or initial() then integer(time * 3) else pre(temp_1);
+ temp_2 = if _switch_3 or _switch_4 or initial() then floor(time * 0.3 + 4.2) else pre(temp_2);
+ _eventIndicator_1 = if not initial() then pre(temp_1) - time * 3 else 1.0;
+ _switch_1 = _eventIndicator_1 > 0;
+ _eventIndicator_2 = if not initial() and not _switch_1 then time * 3 - (pre(temp_1) + 1) else 1.0;
+ _switch_2 = _eventIndicator_2 >= 0;
+ _eventIndicator_3 = if not initial() then pre(temp_2) - (time * 0.3 + 4.2) else 1.0;
+ _switch_3 = _eventIndicator_3 > 0;
+ _eventIndicator_4 = if not initial() and not _switch_3 then time * 0.3 + 4.2 - (pre(temp_2) + 1) else 1.0;
+ _switch_4 = _eventIndicator_4 >= 0;
 end EventGeneration.InWhenClauses1;
 ")})));
 end InWhenClauses1;
@@ -185,27 +227,39 @@ fclass EventGeneration.InWhenClauses2
  discrete Real temp_1;
  discrete Integer temp_2;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
  output Real _eventIndicator_3;
+ discrete output Boolean _switch_3;
  output Real _eventIndicator_4;
+ discrete output Boolean _switch_4;
  discrete Boolean temp_3;
 initial equation
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
  pre(x) = 0.0;
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
+ pre(_switch_3) = false;
+ pre(_switch_4) = false;
  pre(temp_3) = false;
 algorithm
- temp_2 := if time * 3 < pre(temp_2) or time * 3 >= pre(temp_2) + 1 or initial() then integer(time * 3) else pre(temp_2);
+ temp_2 := if _switch_1 or _switch_2 or initial() then integer(time * 3) else pre(temp_2);
  temp_3 := temp_2 + noEvent(integer(time * 3)) > 1;
  if temp_3 and not pre(temp_3) then
-  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+  temp_1 := if _switch_3 or _switch_4 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
   x := temp_1;
  end if;
 equation
- _eventIndicator_1 = time * 3 - pre(temp_2);
- _eventIndicator_2 = time * 3 - (pre(temp_2) + 1);
- _eventIndicator_3 = time * 0.3 + 4.2 - pre(temp_1);
- _eventIndicator_4 = time * 0.3 + 4.2 - (pre(temp_1) + 1);
+ _eventIndicator_1 = if not initial() then pre(temp_2) - time * 3 else 1.0;
+ _switch_1 = _eventIndicator_1 > 0;
+ _eventIndicator_2 = if not initial() and not _switch_1 then time * 3 - (pre(temp_2) + 1) else 1.0;
+ _switch_2 = _eventIndicator_2 >= 0;
+ _eventIndicator_3 = if not initial() then pre(temp_1) - (time * 0.3 + 4.2) else 1.0;
+ _switch_3 = _eventIndicator_3 > 0;
+ _eventIndicator_4 = if not initial() and not _switch_3 then time * 0.3 + 4.2 - (pre(temp_1) + 1) else 1.0;
+ _switch_4 = _eventIndicator_4 >= 0;
 end EventGeneration.InWhenClauses2;
 ")})));
 end InWhenClauses2;
@@ -318,12 +372,15 @@ model OutputVarsTime2
 fclass EventGeneration.OutputVarsTime2
  discrete Real t;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  discrete Boolean temp_1;
 initial equation
  pre(t) = 0.0;
+ pre(_switch_1) = false;
  pre(temp_1) = false;
 algorithm
  _eventIndicator_1 := time - t;
+ _switch_1 := _eventIndicator_1 > 0;
  temp_1 := time > t;
  if temp_1 and not pre(temp_1) then
   t := 1;
@@ -350,18 +407,17 @@ fclass EventGeneration.OutputVarsState1
  discrete input Integer i;
  discrete Real t;
  output Real _eventIndicator_1;
- discrete Boolean temp_1;
+ discrete output Boolean _switch_1;
 initial equation
  pre(t) = 0.0;
- pre(temp_1) = false;
-equation
- temp_1 = sin(i) > 1;
+ pre(_switch_1) = false;
 algorithm
- if temp_1 and not pre(temp_1) then
+ if _switch_1 and not pre(_switch_1) then
   t := 1;
  end if;
 equation
  _eventIndicator_1 = sin(i) - 1;
+ _switch_1 = _eventIndicator_1 > 0;
 end EventGeneration.OutputVarsState1;
 ")})));
 end OutputVarsState1;
@@ -385,12 +441,15 @@ fclass EventGeneration.OutputVarsState2
  discrete input Integer i;
  discrete Real t;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  discrete Boolean temp_1;
 initial equation
  pre(t) = 0.0;
+ pre(_switch_1) = false;
  pre(temp_1) = false;
 algorithm
  _eventIndicator_1 := sin(i) - t;
+ _switch_1 := _eventIndicator_1 > 0;
  temp_1 := sin(i) > t;
  if temp_1 and not pre(temp_1) then
   t := 1;
@@ -426,13 +485,21 @@ fclass EventGeneration.AliasIndicator
  Real a;
  Real b;
  output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
  output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
+initial equation
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
 equation
- a = if a > 0 then 1 else 2;
- b = if a > 1 then 1 else 2;
+ a = if _switch_1 then 1 else 2;
+ b = if _switch_2 then 1 else 2;
  _eventIndicator_1 = a;
+ _switch_1 = _eventIndicator_1 > 0;
  _eventIndicator_2 = a - 1;
+ _switch_2 = _eventIndicator_2 > 0;
 end EventGeneration.AliasIndicator;
+
 ")})));
 end AliasIndicator;
 

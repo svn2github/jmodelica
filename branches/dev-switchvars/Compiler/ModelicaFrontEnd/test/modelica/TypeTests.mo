@@ -1985,7 +1985,7 @@ initial equation
 algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
- _eventIndicator_1 := r - pre(temp_1);
+ _eventIndicator_1 := pre(temp_1) - r;
  _eventIndicator_2 := r - (pre(temp_1) + 1);
  temp_1 := if r < pre(temp_1) or r >= pre(temp_1) + 1 or initial() then integer(r) else pre(temp_1);
  i := temp_1;

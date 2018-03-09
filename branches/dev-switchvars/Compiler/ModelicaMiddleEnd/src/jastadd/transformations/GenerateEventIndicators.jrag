@@ -494,7 +494,7 @@ aspect GenerateEventIndicators {
                 } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
                     //CR: REFACTOR
                     exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation());
+                    generateEquation(exp.indicatorEquation(eventOutputVars));
                     generateEquation(exp.switchEquation());
                     exp.replaceMe(exp.getSwitch().treeCopy());
                 }
@@ -512,7 +512,7 @@ aspect GenerateEventIndicators {
         public void transform(FStatement stmt) {
             for (FRelExp exp : stmt.relExpInStmt()) {
                 if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
-                    addStatement(exp.indicatorStmt());
+                    addStatement(exp.indicatorStmt(eventOutputVars));
                     if (eventOutputVars) {
                         addStatement(exp.switchStmt());
                     }
@@ -558,7 +558,7 @@ aspect GenerateEventIndicators {
                 if (exp.shouldGenerateIndicator() && eventOutputVars) {
                     //CR: REFACTOR
                     exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation());
+                    generateEquation(exp.indicatorEquation(eventOutputVars));
                     generateEquation(exp.switchEquation());
                     exp.replaceMe(exp.getSwitch().treeCopy());
                 }
@@ -597,13 +597,15 @@ aspect GenerateEventIndicators {
     /**
      * Creates an assign equation for the indicator.
      */
-    syn FAbstractEquation FRelExp.indicatorEquation() = new FEquation(getIndicator().fullCopy(), indicatorExp());
+    syn FAbstractEquation FRelExp.indicatorEquation(boolean output) =
+            new FEquation(getIndicator().fullCopy(), indicatorExp(output));
     syn FAbstractEquation FRelExp.switchEquation()    = new FEquation(getSwitch().treeCopy(), switchExp());
 
     /**
      * Creates an assign statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), indicatorExp());
+    syn FStatement FRelExp.indicatorStmt(boolean output) =
+            new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), indicatorExp(output));
     syn FStatement FRelExp.switchStmt()    = new FAssignStmt(getSwitch().asFIdUseExp().treeCopy(), switchExp());
 
     /**
@@ -653,17 +655,26 @@ aspect GenerateEventIndicators {
     /**
      * Generates an expression for the event indicator.
      */
-    syn FExp FRelExp.indicatorExp() {
-        FExp res = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
+    syn FExp FRelExp.indicatorExp(boolean output) {
+        FExp res = negateIndicator() ? // TODO: check for unit tests
+                        new FSubExp(getRight().fullCopy(), getLeft().fullCopy()) :
+                        new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
         if (myOptions().getBooleanOption("event_indicator_scaling")) {
             res = new FDivExp(res, nominal());
         }
-        FExp guard = printIndicatorGuard();
-        if (guard != null) {
-            res = new FIfExp(guard, res, new FRealLitExp(1));
+        if (output) {
+            FExp guard = printIndicatorGuard();
+            if (guard != null) {
+                res = new FIfExp(guard, res, new FRealLitExp(1));
+            }
         }
         return res;
     }
+    
+    syn boolean FRelExp.negateIndicator();
+    eq FRelExp.negateIndicator()  = false;
+    eq FLtExp.negateIndicator()   = true;
+    eq FLeqExp.negateIndicator()  = true;
     
     public FExp FExp.printIndicatorGuard() {
         FExp par = parentFExp();

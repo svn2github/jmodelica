@@ -727,6 +727,7 @@ abstract public class OptionRegistry {
             ("event_output_vars",
              OptionType.compiler,
              Category.user,
+             true,
              false,
              "If enabled, output variables are generated for each generated event."),
         DISABLE_SMOOTH_EVENTS

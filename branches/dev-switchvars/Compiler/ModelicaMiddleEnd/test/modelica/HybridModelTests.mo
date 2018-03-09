@@ -708,10 +708,13 @@ Jacobian:
             FClassMethodTestCase(
                 name="EventPreMerge.DiscreteRealMerge2",
                 description="Ensures that we merge discrete reals into the pre block and not nested",
+                event_output_vars=true,
                 methodName="printDAEBLT",
                 methodResult="
---- Torn mixed system (Block 1) of 1 iteration variables and 3 solved variables ---
+--- Torn mixed system (Block 1) of 1 iteration variables and 5 solved variables ---
 Torn variables:
+  _eventIndicator_1
+  _eventIndicator_2
   d
   c
   a
@@ -720,10 +723,14 @@ Iteration variables:
   b (start=1.0)
 
 Solved discrete variables:
+  _switch_1
+  _switch_2
   temp_1
 
 Torn equations:
-  d := if b > 2.0 then 2.0 elseif b < 1.0 then 1.0 else b
+  _eventIndicator_1 := b + -2.0
+  _eventIndicator_2 := if not _switch_1 then 1.0 - b else 1.0
+  d := if _switch_1 then 2.0 elseif _switch_2 then 1.0 else b
   c := if temp_1 and not pre(temp_1) then pre(a) + b else pre(c)
   a := if temp_1 and not pre(temp_1) then time + 0.5 else pre(a)
 
@@ -732,6 +739,8 @@ Continuous residual equations:
     Iteration variables: b
 
 Discrete equations:
+  _switch_1 := _eventIndicator_1 > 0
+  _switch_2 := _eventIndicator_2 > 0
   temp_1 := time > 0.5
 -------------------------------
 ")})));
@@ -755,12 +764,22 @@ Discrete equations:
             FClassMethodTestCase(
                 name="EventPreMerge.DiscreteRealMerge3",
                 description="Ensures that we merge discrete reals into the pre block and not nested",
+                event_output_vars=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Solved equation ---
 e := time
 
+--- Solved equation ---
+_eventIndicator_1 := e + -2.0
+
 --- Pre propagation block (Block 1) ---
+  --- Solved equation ---
+  _switch_1 := _eventIndicator_1 > 0
+  --- Solved equation ---
+  _eventIndicator_2 := if not _switch_1 then 1.0 - e else 1.0
+  --- Solved equation ---
+  _switch_2 := _eventIndicator_2 > 0
   --- Solved equation ---
   temp_1 := time > 0.5
   --- Solved equation ---
@@ -773,7 +792,7 @@ e := time
     b (start=1.0)
 
   Torn equations:
-    d := if e > 2.0 then 2.0 elseif e < 1.0 then 1.0 else b
+    d := if _switch_1 then 2.0 elseif _switch_2 then 1.0 else b
 
   Residual equations:
     - b = a + d ^ 2 - 2
@@ -781,61 +800,8 @@ e := time
   --- Solved equation ---
   c := if temp_1 and not pre(temp_1) then pre(a) + b else pre(c)
 -------------------------------
-
 ")})));
         end DiscreteRealMerge3;
-        
-                        model DiscreteRealMerge3c
-        Real a;
-        Real b(start=1.0);
-        Real c;
-        Real d;
-        Real e = time;
-    equation
-        when time > 0.5 then
-            a = time+0.5;
-            c = pre(a) + b;
-        end when;
-        -b = a + d^2-2;
-        d=if e > 2.0 then 2.0 else if e < 1.0 then 1.0 else b;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            CCodeGenTestCase(
-                name="EventPreMerge.DiscreteRealMerge3c",
-                description="Ensures that we merge discrete reals into the pre block and not nested",
-        template="
-$C_ode_derivatives$
-$C_dae_blocks_residual_functions$
-",
-        generatedCode="
---- Solved equation ---
-e := time
-
---- Pre propagation block (Block 1) ---
-  --- Solved equation ---
-  temp_1 := time > 0.5
-  --- Solved equation ---
-  a := if temp_1 and not pre(temp_1) then time + 0.5 else pre(a)
-  --- Torn system (Block 1.1) of 1 iteration variables and 1 solved variables ---
-  Torn variables:
-    d
-
-  Iteration variables:
-    b (start=1.0)
-
-  Torn equations:
-    d := if e > 2.0 then 2.0 elseif e < 1.0 then 1.0 else b
-
-  Residual equations:
-    - b = a + d ^ 2 - 2
-      Iteration variables: b
-  --- Solved equation ---
-  c := if temp_1 and not pre(temp_1) then pre(a) + b else pre(c)
--------------------------------
-
-")})));
-        end DiscreteRealMerge3c;
-        
         
         model Big1
             Boolean d1; 
