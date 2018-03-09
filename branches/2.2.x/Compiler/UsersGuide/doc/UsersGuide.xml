@@ -11,7 +11,7 @@
   <info>
     <title><productname>JModelica.org</productname> User Guide</title>
 
-    <subtitle>Version <productnumber>2.1</productnumber></subtitle>
+    <subtitle>Version <productnumber>2.2</productnumber></subtitle>
 
     <pubdate><?dbtimestamp format="Y-m-d"?></pubdate>
 

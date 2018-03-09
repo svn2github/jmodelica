@@ -83,19 +83,18 @@ abstract public class TestCase implements GenericTestCase {
         return cls;
     }
 
-	/**
-	 * Create the OptionRegistry to be used during compilation.
-	 * 
-	 * Options may be further changed by test annotation.
-	 */
-	protected OptionRegistry createOptionRegistry() {
-		OptionRegistry or = new TestOptions();
-		String modelica_path = ModelicaCompiler.getJModelicaHome().getPath() + File.separator + 
-				"ThirdParty" + File.separator + "MSL";
-		or.setStringOption("MODELICAPATH", modelica_path);
-		return or;
-	}
-    
+    /**
+     * Create the OptionRegistry to be used during compilation.
+     * 
+     * Options may be further changed by test annotation.
+     */
+    protected OptionRegistry createOptionRegistry() {
+        OptionRegistry or = new TestOptions();
+        File modelicapath = EnvironmentUtils.getThirdPartyMSL();
+        or.setStringOption("MODELICAPATH", modelicapath.getPath());
+        return or;
+    }
+
     public String filterTestResult(String str, Map<Pattern, String> resultFilters) {
         for (Pattern p : resultFilters.keySet()) {
             str = p.matcher(str).replaceAll(resultFilters.get(p));

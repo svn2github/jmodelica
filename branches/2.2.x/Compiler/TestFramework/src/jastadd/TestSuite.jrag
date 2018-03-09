@@ -38,10 +38,9 @@ public class TestSuite implements GenericTestSuite {
         name = className;
         l = new ArrayList<TestCase>();
         SourceRoot sr = null;
-        String modelica_path = ModelicaCompiler.getJModelicaHome() + File.separator + 
-                "ThirdParty" + File.separator + "MSL";
+        File modelicapath = EnvironmentUtils.getThirdPartyMSL();
         OptionRegistry options = new TestOptions();
-        options.setStringOption("MODELICAPATH", modelica_path);
+        options.setStringOption("MODELICAPATH", modelicapath.getPath());
         ASTNode.log = new SysErrLogger();
         try {
             sr = TestCase.PARSER_HANDLER.parseFile(UtilInterface.create(options), fileName);

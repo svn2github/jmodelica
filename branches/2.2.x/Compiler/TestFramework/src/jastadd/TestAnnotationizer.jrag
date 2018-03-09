@@ -382,7 +382,7 @@ abstract public class TestAnnotationizerHelper {
      * Parse a set of files.
      */
     private static SourceRoot parse(String[] files, String className, OptionRegistry opts) throws Exception {
-        File modelicapath = new File(ModelicaCompiler.getJModelicaHome(), "/ThirdParty/MSL");
+        File modelicapath = EnvironmentUtils.getThirdPartyMSL();
         opts.setStringOption("MODELICAPATH", modelicapath.getPath());
         SourceRoot root;
         

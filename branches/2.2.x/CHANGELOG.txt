@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Minor ; PyFMI ; #5089
+Added option to limit the maximum size of the log file.
+
 ; Fixed ; Minor ; Compiler ; #5564
 Using absoluteValue annotation to generate relativeQuantity attribute
 
