@@ -24,6 +24,8 @@ if(NOT TOP_SRC)
     set(TOP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../../)
     message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
 endif()
+set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
+message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
 set(JMICommonSources
     # Types
@@ -113,7 +115,38 @@ set(JMISources
     ${JMIODESolverSourcesPartial}
 )
 
+# Source files for ModelicaExternalC
+set(MODELICAEXTERNALCSources
+    jmi_global.h
+    ModelicaUtilities.h
+    
+    jmi_global.c
+    ModelicaUtilities.c
+    
+    ${MSLCSOURCES}/ModelicaInternal.c
+    ${MSLCSOURCES}/ModelicaStrings.c
+    ${MSLCSOURCES}/ModelicaRandom.c
+    ${MSLCSOURCES}/ModelicaFFT.c
+)
 
+# Source files for Zlib
+set(ZLIB_SOURCES
+    ${MSLCSOURCES}/zlib/adler32.c
+    ${MSLCSOURCES}/zlib/compress.c
+    ${MSLCSOURCES}/zlib/crc32.c
+    ${MSLCSOURCES}/zlib/deflate.c
+    ${MSLCSOURCES}/zlib/gzclose.c
+    ${MSLCSOURCES}/zlib/gzlib.c
+    ${MSLCSOURCES}/zlib/gzread.c
+    ${MSLCSOURCES}/zlib/gzwrite.c
+    ${MSLCSOURCES}/zlib/infback.c
+    ${MSLCSOURCES}/zlib/inffast.c
+    ${MSLCSOURCES}/zlib/inflate.c
+    ${MSLCSOURCES}/zlib/inftrees.c
+    ${MSLCSOURCES}/zlib/trees.c
+    ${MSLCSOURCES}/zlib/uncompr.c
+    ${MSLCSOURCES}/zlib/zutil.c
+)
 
 include_directories(module_include)
 
@@ -172,4 +205,47 @@ if (${BUILD_JMI_LIB})
         FILES_MATCHING PATTERN "*.h")
 endif()
 
+OPTION(BUILD_MSL_EXTERNAL_LIBS "Build the MSL external libraries" ON)
+if (${BUILD_MSL_EXTERNAL_LIBS})
+    #Build ModelicaExternalC library
+    include_directories(${MSLCSOURCES})
+    include_directories(${MSLCSOURCES}/zlib)
+    add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
+    if(NOT MSVC)
+        set_target_properties(ModelicaExternalC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic")
+    endif()
+
+    #Build ModelicaStandardTables library
+    add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
+    add_library(ModelicaStandardTables STATIC ${MSLCSOURCES}/ModelicaStandardTables.c)
+    if(NOT MSVC)
+        set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
+    endif()
+
+    #Build ModelicaIO library
+    add_library(ModelicaIO STATIC ${MSLCSOURCES}/ModelicaIO.c)
+    if(NOT MSVC)
+        set_target_properties(ModelicaIO PROPERTIES COMPILE_FLAGS "-Wall -g")
+    endif()
+
+    #Build ModelicaMatIO library
+    add_library(ModelicaMatIO STATIC ${MSLCSOURCES}/ModelicaMatIO.c)
+    if(NOT MSVC)
+        set_target_properties(ModelicaMatIO PROPERTIES COMPILE_FLAGS "-Wall -g")
+    endif()
+
+    #Build Zlib library
+    add_library(zlib STATIC ${ZLIB_SOURCES})
+    if(NOT MSVC)
+        set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
+    endif()
+
+    #Install the libraries
+    install(TARGETS ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
+        DESTINATION "${RTLIB_LIB_DIR}")
+
+    install(DIRECTORY "${MSLCSOURCES}/"
+        DESTINATION "${RTLIB_INCLUDE_DIR}"
+        FILES_MATCHING PATTERN "*.h")
+endif()
 
