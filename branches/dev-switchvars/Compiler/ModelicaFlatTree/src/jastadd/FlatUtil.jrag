@@ -1609,6 +1609,7 @@ aspect FlatFunctionUtils {
      syn String FAssignStmt.calcTempVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      
      syn String FRelExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
+     syn String FRelExp.calcSwitchVarName()     = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.SWITCH);
      
      syn String FSampleExp.calcIndexVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.SAMPLE);
      
@@ -1672,6 +1673,7 @@ aspect FlatFunctionUtils {
          public enum GeneratedVarType {
              TEMP("temp_"),
              INDICATOR("_eventIndicator_"),
+             SWITCH("_switch_"),
              SAMPLE("_sampleItr_"),
              STREAM_S("_stream_s_"),
              STREAM_ALPHA("_stream_alpha_"),

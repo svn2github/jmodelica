@@ -59,7 +59,7 @@ aspect GenerateEventIndicators {
          */
         public Transformer(OptionRegistry options) {
             this.options = options;
-            this.eventOutputVars = options.getBooleanOption("event_output_vars");
+            this.eventOutputVars = true; //options.getBooleanOption("event_output_vars");
         }
 
         /**
@@ -487,9 +487,14 @@ aspect GenerateEventIndicators {
 
                     if (exp.needsIndicatorInit()) {
                         addStatement(exp.indicatorInitStmt());
+                        addStatement(exp.switchInitStmt());
                     }
                 } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                    //CR: REFACTOR
                     exp.genIndicator(eventOutputVars);
+                    generateEquation(exp.indicatorEquation());
+                    generateEquation(exp.switchEquation());
+                    exp.replaceMe(exp.getSwitch().treeCopy());
                 }
             }
             return true;
@@ -503,12 +508,10 @@ aspect GenerateEventIndicators {
          */
         @Override
         public void transform(FStatement stmt) {
-
             for (FRelExp exp : stmt.relExpInStmt()) {
                 if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
                     addStatement(exp.indicatorStmt());
-                } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
-                    generateEquation(exp.indicatorEquation());
+                    addStatement(exp.switchStmt());
                 }
             }
             addStatement(stmt);
@@ -549,8 +552,11 @@ aspect GenerateEventIndicators {
         public void transform(FAbstractEquation eqn) {
             for (FRelExp exp : eqn.relExpInEquation()) {
                 if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                    //CR: REFACTOR
                     exp.genIndicator(eventOutputVars);
                     generateEquation(exp.indicatorEquation());
+                    generateEquation(exp.switchEquation());
+                    exp.replaceMe(exp.getSwitch().treeCopy());
                 }
             }
             addEquation(eqn);
@@ -588,16 +594,19 @@ aspect GenerateEventIndicators {
      * Creates an assign equation for the indicator.
      */
     syn FAbstractEquation FRelExp.indicatorEquation() = new FEquation(getIndicator().fullCopy(), indicatorExp());
+    syn FAbstractEquation FRelExp.switchEquation()    = new FEquation(getSwitch().treeCopy(), switchExp());
 
     /**
      * Creates an assign statement for the indicator.
      */
     syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), indicatorExp());
+    syn FStatement FRelExp.switchStmt()    = new FAssignStmt(getSwitch().asFIdUseExp().treeCopy(), switchExp());
 
     /**
      * Creates an initialization statement for the indicator.
      */
     syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), new FIntegerLitExp(1));
+    syn FStatement FRelExp.switchInitStmt()    = new FAssignStmt(getSwitch().asFIdUseExp().treeCopy(), new FBooleanLitExpFalse());
 
     /**
      * Checks whether or not an expression depends on any variable in a collection of them.
@@ -618,15 +627,21 @@ aspect GenerateEventIndicators {
      * Creates an indicator for this FRelExp.
      */
     public void FRelExp.genIndicator(boolean output) {
-        FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(),
+        FVariable indicatorVar = new FRealVariable(new FPublicVisibilityType(), fContinuous(),
                 new FQNameFull(calcIndicatorVarName()));
+        FVariable switchVar = new FBooleanVariable(new FPublicVisibilityType(), ASTNode.fDiscrete(),
+                new FQNameFull(calcSwitchVarName()));
 
         if (output) {
-            v.setFTypePrefixInputOutput(new FOutput());
+            indicatorVar.setFTypePrefixInputOutput(new FOutput());
+            switchVar.setFTypePrefixInputOutput(new FOutput());
         }
 
-        myFClass().addFVariable(v);
-        setIndicator(v.createUseExp());
+        myFClass().addFVariable(indicatorVar);
+        myFClass().addFVariable(switchVar);
+
+        setIndicator(indicatorVar.createUseExp());
+        setSwitch(switchVar.createUseExp());
     }
 
     /**
@@ -634,12 +649,48 @@ aspect GenerateEventIndicators {
      */
     syn FExp FRelExp.indicatorExp() {
         FExp res = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
-
         if (myOptions().getBooleanOption("event_indicator_scaling")) {
             res = new FDivExp(res, nominal());
         }
+        FExp guard = printIndicatorGuard();
+        if (guard != null) {
+            res = new FIfExp(guard, res, new FRealLitExp(1));
+        }
         return res;
     }
+    
+    public FExp FExp.printIndicatorGuard() {
+        FExp par = parentFExp();
+        if (par != null) {
+            par = par.printIndicatorGuard(this);
+        }
+        return par;
+    }
+    
+    public FExp FExp.printIndicatorGuard(FExp e) {
+        if (isIndicatorGuard(e)) {
+            return printIndicatorGuard(myIndicatorGuardExp(e), negateIndicatorGuard(e));
+        } else {
+            return printIndicatorGuard();
+        }
+    }
+    
+    public FExp FExp.printIndicatorGuard(FExp e, boolean not) {
+        FExp res = e.treeCopy();
+        if (not) {
+            res = new FNotExp(res);
+        }
+        FExp guard = printIndicatorGuard();
+        if (guard != null) {
+            res = new FAndExp(guard, res);
+        }
+        return res;
+    }
+
+    syn FExp FRelExp.switchExp();
+    eq FRelExp.switchExp() = new FGtExp( getIndicator().treeCopy(), new FIntegerLitExp(0));
+    eq FGeqExp.switchExp() = new FGeqExp(getIndicator().treeCopy(), new FIntegerLitExp(0));
+    eq FLeqExp.switchExp() = new FGeqExp(getIndicator().treeCopy(), new FIntegerLitExp(0));
 
     /* ====================== *
      *  Transform equations.  *
