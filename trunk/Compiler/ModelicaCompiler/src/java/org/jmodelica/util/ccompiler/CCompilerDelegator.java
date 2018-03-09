@@ -329,7 +329,7 @@ public abstract class CCompilerDelegator {
         // TODO: There must be a util for this somewhere?!?!
         try (FileInputStream fis = new FileInputStream(sourceFile); FileOutputStream fos = new FileOutputStream(destFile)) {
             FileChannel source = fis.getChannel();
-            FileChannel destination = fis.getChannel();
+            FileChannel destination = fos.getChannel();
             long count = 0;
             long size = source.size();
             while ((count += destination.transferFrom(source, 0, size-count)) < size);
