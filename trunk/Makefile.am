@@ -16,7 +16,7 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python
+SUBDIRS = ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary Python
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
