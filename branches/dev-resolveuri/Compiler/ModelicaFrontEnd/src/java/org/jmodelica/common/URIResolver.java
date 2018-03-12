@@ -6,7 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class URIResolver {
-    
+
     public interface PackageNode {
         String fileName();
 
@@ -17,12 +17,17 @@ public class URIResolver {
         void error(String format, Object... args);
     }
 
-    public static final URIResolver DEFAULT = new URIResolver();
-    
-    URIResolver() {
-        
+    public class URIException extends Exception {
+        private static final long serialVersionUID = -2945381968691052204L;
+
     }
-    
+
+    public static final URIResolver DEFAULT = new URIResolver();
+
+    URIResolver() {
+
+    }
+
     /**
      * Convert file to a canonical path, if possible.
      * 
@@ -62,16 +67,17 @@ public class URIResolver {
     public String resolveURI(PackageNode n, String str, boolean error) {
         try {
             URI uri = new URI(str);
-            if (scheme(uri) != null) {
-                if (uri.getScheme().equalsIgnoreCase("file")) {
+            String scheme = scheme(uri);
+            if (scheme != null) {
+                if (scheme.equalsIgnoreCase("file")) {
                     return uri.getPath();
-                } else if (uri.getScheme().equalsIgnoreCase("modelica")) {
+                } else if (scheme.equalsIgnoreCase("modelica")) {
                     String pack = n.packagePath(uri.getAuthority());
                     if (pack != null) {
                         return canonicalPath(new File(pack + uri.getPath()));
                     }
                 } else if (error) {
-                    n.error("Unsupported URI scheme '%s'.", uri.getScheme().toLowerCase());
+                    n.error("Unsupported URI scheme '%s'.", scheme.toLowerCase());
                 }
             }
         } catch (URISyntaxException e) {
@@ -122,6 +128,14 @@ public class URIResolver {
         return null;
     }
 
+    public String resolveURIChecked(PackageNode n, String str) throws URIException {
+        String res = resolveURI(n, str, false);
+        if (res == null) {
+            throw new URIException();
+        }
+        return res;
+    }
+
     /*
      * Utils to improve testability
      */
@@ -133,7 +147,7 @@ public class URIResolver {
     char separatorChar() {
         return File.separatorChar;
     }
-    
+
     String scheme(URI uri) {
         return uri.getScheme();
     }

@@ -3,12 +3,14 @@ package org.jmodelica.test.common;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.jmodelica.common.URIResolver;
 import org.jmodelica.common.URIResolver.PackageNode;
+import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.common.URIResolverMock;
 import org.jmodelica.common.URIResolverPackageNodeMock;
 import org.junit.Test;
@@ -90,6 +92,13 @@ public class URIResolverTest {
         assertEquals("/pack/subpath/missing", res);
     }
 
+    @Test
+    public void testResolveURIModelicaIncorrectSyntax() {
+        URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
+        String res = URIResolver.DEFAULT.resolveURI(n, "]");
+        assertNull(res);
+    }
+
     /*
      * Test resolve()
      */
@@ -153,5 +162,32 @@ public class URIResolverTest {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String res = new URIResolverMock().resolveInPackage(n, "modelica://pack2/subpath");
         assertEquals("C:\\toppath\\modelica:\\pack2\\subpath", res);
+    }
+
+    /*
+     * Test resolveURIChecked()
+     */
+
+    @Test
+    public void testResolveURICheckedCorrect() {
+        URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
+        String res = "";
+        try {
+            res = URIResolver.DEFAULT.resolveURIChecked(n, "modelica://pack/subpath");
+        } catch (URIException e) {
+            fail();
+        }
+        assertEquals("C:/packpath/subpath", res);
+    }
+
+    @Test
+    public void testResolveURICheckedIncorrect() {
+        URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
+        try {
+            new URIResolverMock().resolveURIChecked(n, "modelica://pack2/subpath");
+            fail();
+        } catch (URIException e) {
+
+        }
     }
 }
