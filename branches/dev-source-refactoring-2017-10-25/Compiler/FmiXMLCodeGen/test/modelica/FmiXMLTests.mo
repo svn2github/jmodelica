@@ -2091,4 +2091,159 @@ $modelStructure$
 ")})));
 end DummyDerivative2;
 
+model Start1
+    Real x(fixed=true);
+    Real y(start=0, fixed=true);
+equation
+    der(x) = 1;
+    der(y) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Start1",
+            description="Start value with fixed",
+            fmi_version="1.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x)\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"y\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y)\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Start1;
+
+model Start2
+    Real x(fixed=true);
+    Real y(start=0, fixed=true);
+equation
+    der(x) = 1;
+    der(y) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Start2",
+            description="Start value with fixed",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"1\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"y\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"3\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Start2;
+
+model Start3
+    Real x(start=0, fixed=true);
+    Real y(start=0, fixed=true);
+equation
+    der(x) = time;
+    y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Start3",
+            description="Start value with fixed, aliases",
+            fmi_version="1.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"alias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"y\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y)\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Start3;
+
+model Start4
+    Real x(start=0, fixed=true);
+    Real y(start=0, fixed=true);
+equation
+    der(x) = time;
+    y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Start4",
+            description="Start value with fixed, aliases",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"y\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"0.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(y)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"2\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Start4;
+
+model Start5
+    parameter Real p = 1;
+    Real x(start=p, fixed=true);
+equation
+    der(x) = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="Start5",
+            description="Start value with fixed, parameter start",
+            fmi_version="1.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"p\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"der(x)\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end Start5;
+
 end FmiXMLTests;

@@ -27,7 +27,7 @@ aspect Sanity {
             for (FAbstractEquation eqn : getFParameterEquations()) {
                 eqn.sanityCheckParameterEquations(this);
             }
-            
+            sanityCheckType(this);
             // Break execution and print any errors 
             breakOnErrors();
         }
@@ -128,4 +128,23 @@ aspect Sanity {
         fc.sanityProblem(this, "Literal in left-hand side of parameter equation: %s", eqn);
     }
 
+    /**
+     * Check that all types are known
+     */
+    public void ASTNode.sanityCheckType(FClass fc) {
+        sanityCheckTypeInChildren(fc);
+    }
+
+    public void ASTNode.sanityCheckTypeInChildren(FClass fc) {
+        for (ASTNode n : this) {
+            n.sanityCheckType(fc);
+        }
+    }
+
+    public void FExp.sanityCheckType(FClass fc) {
+        sanityCheckTypeInChildren(fc);
+        if (type().isUnknown()) {
+            fc.sanityProblem(this, "Unknown type in expression: %s", this);
+        }
+    }
 }
