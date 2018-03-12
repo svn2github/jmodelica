@@ -86,21 +86,21 @@
           </informaltable></para>
       </listitem>
 
-      <listitem xml:id="lim_5">
+      <listitem>
         <para>The following annotations are not supported:
         <informaltable border="1" frame="void" width="100%">
             <tr>
-              <td><code>version</code></td>
-              <td><code>arrayLayout</code></td>
-              <td><code>obsolete</code></td>
+              <td><code xml:id="lim_24">version</code></td>
+              <td><code xml:id="lim_25">arrayLayout</code></td>
+              <td><code xml:id="lim_26">obsolete</code></td>
             </tr>
             <tr>
-              <td><code>uses</code></td>
-              <td><code>HideResult</code></td>
-              <td><code>unassignedMessage</code></td>
+              <td><code xml:id="lim_5">uses</code></td>
+              <td><code xml:id="lim_27">HideResult</code></td>
+              <td><code xml:id="lim_28">unassignedMessage</code></td>
             </tr>
             <tr>
-              <td><code>inverse</code></td>
+              <td><code xml:id="lim_29">inverse</code></td>
               <td></td>
               <td></td>
             </tr>
