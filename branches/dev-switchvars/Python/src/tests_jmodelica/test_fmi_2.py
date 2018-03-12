@@ -583,7 +583,7 @@ class Test_FMUModelME2:
         """
         Sets up the test class.
         """
-        cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
+        cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'eliminate_alias_constants':False, 'event_output_vars':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
@@ -794,10 +794,10 @@ class Test_FMUModelME2:
         assert len(coupled.get_event_indicators()) == 33
 
         event_ind = bounce.get_event_indicators()
-        nose.tools.assert_almost_equal(event_ind[0],10.000000)
+        nose.tools.assert_almost_equal(event_ind[0],-10.000000)
         bounce.continuous_states = N.array([5.]*2)
         event_ind = bounce.get_event_indicators()
-        nose.tools.assert_almost_equal(event_ind[0],5.000000)
+        nose.tools.assert_almost_equal(event_ind[0],-5.000000)
 
     @testattr(stddist_full = True)
     def test_get_tolerances(self):
