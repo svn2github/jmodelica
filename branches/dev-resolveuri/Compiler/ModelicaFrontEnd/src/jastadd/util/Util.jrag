@@ -1099,7 +1099,7 @@ aspect Names {
     ASTNode implements URIResolver.PackageNode;
 
     public String ASTNode.resolveURI(String str) {
-        return URIResolver.resolveURI(this, str);
+        return URIResolver.DEFAULT.resolveURI(this, str);
     }
 
     inh InstClassDecl ASTNode.enclosingInstClassDecl();

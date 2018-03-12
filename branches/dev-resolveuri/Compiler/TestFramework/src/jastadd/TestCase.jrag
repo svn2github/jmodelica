@@ -347,7 +347,7 @@ abstract public class TestCase implements GenericTestCase {
      */
     protected String testFileDirectory() {
         File file = new File(getSourceFileName());
-        return URIResolver.canonicalPath(file.getParentFile());
+        return URIResolver.DEFAULT.canonicalPath(file.getParentFile());
     }
 
 	/**

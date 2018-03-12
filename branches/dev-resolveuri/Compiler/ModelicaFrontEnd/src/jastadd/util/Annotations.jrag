@@ -297,7 +297,7 @@ aspect AnnotationAPI {
          * that does not exist, relative to the directory containing the current file.
          */
         public String path() {
-            return URIResolver.resolveInPackage(ast(), string());
+            return URIResolver.DEFAULT.resolveInPackage(ast(), string());
         }
 
         /**

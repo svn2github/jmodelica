@@ -9,73 +9,60 @@ public class URIResolver {
     
     public interface PackageNode {
         String fileName();
+
         String packagePath(String authority);
+
         String topPackagePath();
+
         void error(String format, Object... args);
+    }
+
+    public static final URIResolver DEFAULT = new URIResolver();
+    
+    URIResolver() {
+        
     }
     
     /**
-     * Converts an URI to a file-system path.
+     * Convert file to a canonical path, if possible.
      * 
-     * Only modelica:// and file:// URIs are supported. 
-     * If the string is a simple path, then it is interpreted as relative to the 
-     * top level package this node is in, or if that path does not exist, relative 
-     * to the parent directory the file this node is in.
-     * 
-     * @param str  the string to interpret as an URI
+     * On Windows, backslash is converted to forward slash, to make testing
+     * easier.
      */
-    public static String resolveInPackage(PackageNode n, String str) {
-        String path = resolveURI(n, str, true);
-        if (path != null) {
-            return path;
-        } else {
-            String pack = n.topPackagePath();
-            if (pack != null) {
-                File f = new File(pack, str);
-                if (f.exists())
-                    return canonicalPath(f);
-                File dir = new File(n.fileName()).getParentFile();
-                return canonicalPath(new File(dir, str));
-            }
+    public String canonicalPath(File path) {
+        String res;
+        try {
+            res = path.getCanonicalPath();
+        } catch (IOException e) {
+            res = path.getAbsolutePath();
         }
-        return null;
-    }
-
-    /**
-     * Resolves <code>str</code> to an absolute file path.
-     * Supports file URI, modelica URI, absolute file path and 
-     * relative file path (w.r.t. current working directory)
-     */
-    public static String resolve(PackageNode n, String str) {
-        String path = resolveURI(n, str, true);
-        if (path != null) {
-            return path;
-        } else {
-            return canonicalPath(new File(str));
+        if (separatorChar() == '\\') {
+            res = res.replace('\\', '/');
         }
+        return res;
     }
 
     /**
      * Resolves <code>str</code> to an absolute file path.
      * 
-     * Supports file URI and modelica URI only.
-     * Returns null for unsupported schemes and malformed URIs.
+     * Supports file URI and modelica URI only. Returns null for unsupported
+     * schemes and malformed URIs.
      */
-    public static String resolveURI(PackageNode n, String str) {
+    public String resolveURI(PackageNode n, String str) {
         return resolveURI(n, str, false);
     }
 
     /**
      * Resolves <code>str</code> to an absolute file path.
      * 
-     * Supports file URI and modelica URI only.
-     * Returns null for unsupported schemes and malformed URIs.
-     * If error is true, also generate an error for unsupported schemes.
+     * Supports file URI and modelica URI only. Returns null for unsupported
+     * schemes and malformed URIs. If error is true, also generate an error for
+     * unsupported schemes.
      */
-    public static String resolveURI(PackageNode n, String str, boolean error) {
+    public String resolveURI(PackageNode n, String str, boolean error) {
         try {
             URI uri = new URI(str);
-            if (uri.getScheme() != null) {
+            if (scheme(uri) != null) {
                 if (uri.getScheme().equalsIgnoreCase("file")) {
                     return uri.getPath();
                 } else if (uri.getScheme().equalsIgnoreCase("modelica")) {
@@ -93,20 +80,61 @@ public class URIResolver {
     }
 
     /**
-     * Convert file to a canonical path, if possible.
-     * 
-     * On Windows, backslash is converted to forward slash, to make testing easier.
+     * Resolves <code>str</code> to an absolute file path. Supports file URI,
+     * modelica URI, absolute file path and relative file path (w.r.t. current
+     * working directory)
      */
-    public static String canonicalPath(File path) {
-        String res;
-        try {
-            res = path.getCanonicalPath();
-        } catch (IOException e) {
-            res = path.getAbsolutePath();
+    public String resolve(PackageNode n, String str) {
+        String path = resolveURI(n, str, true);
+        if (path != null) {
+            return path;
+        } else {
+            return canonicalPath(new File(str));
         }
-        if (File.separatorChar == '\\') {
-            res = res.replace('\\', '/');
+    }
+
+    /**
+     * Converts an URI to a file-system path.
+     * 
+     * Only modelica:// and file:// URIs are supported. If the string is a
+     * simple path, then it is interpreted as relative to the top level package
+     * this node is in, or if that path does not exist, relative to the parent
+     * directory the file this node is in.
+     * 
+     * @param str
+     *            the string to interpret as an URI
+     */
+    public String resolveInPackage(PackageNode n, String str) {
+        String path = resolveURI(n, str, true);
+        if (path != null) {
+            return path;
+        } else {
+            String pack = n.topPackagePath();
+            if (pack != null) {
+                File f = new File(pack, str);
+                if (exists(f)) {
+                    return canonicalPath(f);
+                }
+                File dir = new File(n.fileName()).getParentFile();
+                return canonicalPath(new File(dir, str));
+            }
         }
-        return res;
+        return null;
+    }
+
+    /*
+     * Utils to improve testability
+     */
+
+    boolean exists(File f) {
+        return f.exists();
+    }
+
+    char separatorChar() {
+        return File.separatorChar;
+    }
+    
+    String scheme(URI uri) {
+        return uri.getScheme();
     }
 }
