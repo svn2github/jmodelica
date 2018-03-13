@@ -520,6 +520,21 @@ jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callba
     return res;
 }
 
+void jmi_init_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd, jmi_directional_derivative_attributes_func_t F_max,
+	jmi_directional_derivative_attributes_func_t F_min,
+	jmi_directional_derivative_attributes_func_t F_input_nominal,
+	jmi_directional_derivative_attributes_func_t F_output_nominal,
+	jmi_directional_derivative_base_func_t F,	
+	jmi_string_t label) {
+    dd->F_max = F_max;
+    dd->F_min = F_min;
+    dd->F_input_nominal = F_input_nominal;
+    dd->F_output_nominal = F_output_nominal;
+    dd->F = F;
+	dd->label = label;
+
+}
+
 void jmi_free_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd) {
 	free(dd->input);
 	free(dd->d_input);
