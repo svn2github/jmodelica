@@ -26,6 +26,7 @@ equation
     TransformCanonicalTestCase(
       name="EventGeneration_Nested",
       event_output_vars=true,
+      event_vars=true,
       description="Tests extraction of nested event generating expressions
       into when equations.",
       flatModel="
@@ -73,6 +74,7 @@ algorithm
     TransformCanonicalTestCase(
       name="EventGeneration_InAlgorithm",
       event_output_vars=true,
+      event_vars=true,
       description="Tests extraction of event generating expressions in algorithms.",
       flatModel="
 fclass EventGeneration.InAlgorithm
@@ -129,6 +131,7 @@ equation
     TransformCanonicalTestCase(
       name="EventGeneration_InFunctionCall",
       event_output_vars=true,
+      event_vars=true,
       description="Tests event generating expressions in function calls.",
       flatModel="
 fclass EventGeneration.InFunctionCall
@@ -168,6 +171,7 @@ equation
     TransformCanonicalTestCase(
       name="EventGeneration_InWhenClauses1",
       event_output_vars=true,
+      event_vars=true,
       description="Tests event generating expressions in a when equation.",
       flatModel="
 fclass EventGeneration.InWhenClauses1
@@ -220,6 +224,7 @@ algorithm
     TransformCanonicalTestCase(
       name="EventGeneration_InWhenClauses2",
       event_output_vars=true,
+      event_vars=true,
       description="Tests event generating expressions in a when statement.",
       flatModel="
 fclass EventGeneration.InWhenClauses2
@@ -337,6 +342,7 @@ model OutputVarsTime1
       TransformCanonicalTestCase(
           name="EventGeneration_OutputVarsTime1",
           event_output_vars=true,
+          event_vars=true,
           description="Time event generating expressions should not generate event indicator equations.",
           flatModel="
 fclass EventGeneration.OutputVarsTime1
@@ -366,6 +372,7 @@ model OutputVarsTime2
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsTime2",
             event_output_vars=true,
+            event_vars=true,
             description="Time event generating expressions should generate event indicator statements when they have
                 a variable referenced in the LHS.",
             flatModel="
@@ -401,6 +408,7 @@ model OutputVarsState1
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsState1",
             event_output_vars=true,
+            event_vars=true,
             description="State event generating expressions should generate indicator equations.",
             flatModel="
 fclass EventGeneration.OutputVarsState1
@@ -434,6 +442,7 @@ model OutputVarsState2
         TransformCanonicalTestCase(
             name="EventGeneration_OutputVarsState2",
             event_output_vars=true,
+            event_vars=true,
             description="State event generating expressions should generate indicator statements when they have a
                 variable referenced in the LHS.",
             flatModel="
@@ -479,6 +488,7 @@ equation
         TransformCanonicalTestCase(
             name="EventGeneration_AliasIndicator",
             event_output_vars=true,
+            event_vars=true,
             description="Checks that event indicator equations are alias eliminated.",
             flatModel="
 fclass EventGeneration.AliasIndicator

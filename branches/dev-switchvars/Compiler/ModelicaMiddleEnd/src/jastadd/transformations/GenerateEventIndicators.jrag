@@ -49,7 +49,12 @@ aspect GenerateEventIndicators {
      */
     public abstract class Transformer<T extends ASTNode<?>> {
         protected OptionRegistry options;
-        protected boolean eventOutputVars;
+        protected boolean eventOutputVars; // TODO: This option should only control if the created vars are outputs or not.
+                                           //       Dont know if switches should also be outputs (but i think so)
+        protected boolean eventVars;       // TODO: This should not be an option, it should always happen.
+                                           //       Needed for casadi (set to false in compileModelNoCodeGen target)
+                                           //       When set in TARGET_DEFAULT_BASE_CONTRIBUTOR it has no effect.
+                                           //       Seems like casadi doesnt handle discrete variables at all
 
         /**
          * Constructs an {@code Transformer} with a reference to an {@link OptionRegistry}.
@@ -60,6 +65,7 @@ aspect GenerateEventIndicators {
         public Transformer(OptionRegistry options) {
             this.options = options;
             this.eventOutputVars = options.getBooleanOption("event_output_vars");
+            this.eventVars = options.getBooleanOption("event_vars");
         }
 
         /**
@@ -483,18 +489,18 @@ aspect GenerateEventIndicators {
             for (FRelExp exp : alg.relExpInEquation()) {
 
                 if (exp.dependsOn(alg.referencedFVariablesInLHS())) {
-                    exp.genIndicator(eventOutputVars);
+                    exp.genIndicator(eventOutputVars, eventVars);
 
                     if (exp.needsIndicatorInit()) {
                         addStatement(exp.indicatorInitStmt());
-                        if (eventOutputVars) {
+                        if (eventVars) {
                             addStatement(exp.switchInitStmt());
                         }
                     }
-                } else if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                } else if (exp.shouldGenerateIndicator() && eventVars) {
                     //CR: REFACTOR
-                    exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation(eventOutputVars));
+                    exp.genIndicator(eventOutputVars, eventVars);
+                    generateEquation(exp.indicatorEquation(eventVars));
                     generateEquation(exp.switchEquation());
                     exp.replaceMe(exp.getSwitch().treeCopy());
                 }
@@ -512,8 +518,8 @@ aspect GenerateEventIndicators {
         public void transform(FStatement stmt) {
             for (FRelExp exp : stmt.relExpInStmt()) {
                 if (exp.dependsOn(stmt.myFAlgorithm().referencedFVariablesInLHS())) {
-                    addStatement(exp.indicatorStmt(eventOutputVars));
-                    if (eventOutputVars) {
+                    addStatement(exp.indicatorStmt(eventVars));
+                    if (eventVars) {
                         addStatement(exp.switchStmt());
                     }
                 }
@@ -555,10 +561,10 @@ aspect GenerateEventIndicators {
         @Override
         public void transform(FAbstractEquation eqn) {
             for (FRelExp exp : eqn.relExpInEquation()) {
-                if (exp.shouldGenerateIndicator() && eventOutputVars) {
+                if (exp.shouldGenerateIndicator() && eventVars) {
                     //CR: REFACTOR
-                    exp.genIndicator(eventOutputVars);
-                    generateEquation(exp.indicatorEquation(eventOutputVars));
+                    exp.genIndicator(eventOutputVars, eventVars);
+                    generateEquation(exp.indicatorEquation(eventVars));
                     generateEquation(exp.switchEquation());
                     exp.replaceMe(exp.getSwitch().treeCopy());
                 }
@@ -632,7 +638,7 @@ aspect GenerateEventIndicators {
     /**
      * Creates an indicator for this FRelExp.
      */
-    public void FRelExp.genIndicator(boolean output) {
+    public void FRelExp.genIndicator(boolean output, boolean vars) {
         FVariable indicatorVar = new FRealVariable(new FPublicVisibilityType(), fContinuous(),
                 new FQNameFull(calcIndicatorVarName()));
         if (output) {
@@ -641,7 +647,7 @@ aspect GenerateEventIndicators {
         myFClass().addFVariable(indicatorVar);
         setIndicator(indicatorVar.createUseExp());
         
-        if (output) {
+        if (vars) {
             FVariable switchVar = new FBooleanVariable(new FPublicVisibilityType(), ASTNode.fDiscrete(),
                     new FQNameFull(calcSwitchVarName()));
             if (output) {
@@ -656,7 +662,7 @@ aspect GenerateEventIndicators {
      * Generates an expression for the event indicator.
      */
     syn FExp FRelExp.indicatorExp(boolean output) {
-        FExp res = negateIndicator() ? // TODO: check for unit tests
+        FExp res = negateIndicator() ? // TODO: Normalize relexp during flattening
                         new FSubExp(getRight().fullCopy(), getLeft().fullCopy()) :
                         new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
         if (myOptions().getBooleanOption("event_indicator_scaling")) {
@@ -675,6 +681,12 @@ aspect GenerateEventIndicators {
     eq FRelExp.negateIndicator()  = false;
     eq FLtExp.negateIndicator()   = true;
     eq FLeqExp.negateIndicator()  = true;
+    
+    /*
+     *  TODO: Rename + move methods from ccodegen used here + clean up ccodegen
+     *  We now build (astnode) if expressions for the indicator guards rather
+     *  than during ccodegen.
+     */
     
     public FExp FExp.printIndicatorGuard() {
         FExp par = parentFExp();
@@ -704,7 +716,7 @@ aspect GenerateEventIndicators {
         return res;
     }
 
-    syn FExp FRelExp.switchExp();
+    syn FExp FRelExp.switchExp(); // TODO: Normalize relexp during flattening
     eq FRelExp.switchExp() = new FGtExp( getIndicator().treeCopy(), new FIntegerLitExp(0));
     eq FGeqExp.switchExp() = new FGeqExp(getIndicator().treeCopy(), new FIntegerLitExp(0));
     eq FLeqExp.switchExp() = new FGeqExp(getIndicator().treeCopy(), new FIntegerLitExp(0));

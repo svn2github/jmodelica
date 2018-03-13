@@ -709,6 +709,7 @@ Jacobian:
                 name="EventPreMerge.DiscreteRealMerge2",
                 description="Ensures that we merge discrete reals into the pre block and not nested",
                 event_output_vars=true,
+                event_vars=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Torn mixed system (Block 1) of 1 iteration variables and 5 solved variables ---
@@ -765,6 +766,7 @@ Discrete equations:
                 name="EventPreMerge.DiscreteRealMerge3",
                 description="Ensures that we merge discrete reals into the pre block and not nested",
                 event_output_vars=true,
+                event_vars=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Solved equation ---

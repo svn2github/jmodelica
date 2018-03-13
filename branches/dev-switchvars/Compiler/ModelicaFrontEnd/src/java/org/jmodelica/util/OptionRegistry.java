@@ -727,6 +727,12 @@ abstract public class OptionRegistry {
             ("event_output_vars",
              OptionType.compiler,
              Category.user,
+             false,
+             "If enabled, output variables are generated for each generated event."),
+        EVENT_VARS
+            ("event_vars",
+             OptionType.compiler,
+             Category.experimental,
              true,
              false,
              "If enabled, output variables are generated for each generated event."),
