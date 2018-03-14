@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="Compiler/ModelicaFrontEnd/src/java"/>
+	<classpathentry kind="src" path="Compiler/ModelicaFrontEnd/test/junit"/>
 	<classpathentry kind="src" path="Compiler/ModelicaCompiler/src/java-generated"/>
 	<classpathentry kind="src" path="Compiler/OptimicaCompiler/src/junit-generated"/>
 	<classpathentry kind="src" path="Compiler/ModelicaCompiler/src/junit-generated"/>
