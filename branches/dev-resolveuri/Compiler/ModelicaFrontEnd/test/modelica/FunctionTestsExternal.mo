@@ -547,25 +547,51 @@ model ExternalFuncLibs8
  )})));
 end ExternalFuncLibs8;
 
-/*
-model NonExistentPackage1
+model InvalidAnnotation1
  function f
   input Real x;
   output Real y;
- external annotation(Library="foo", LibraryDirectory="modelica://NoSuchPackage/");
+ external annotation(IncludeDirectory=true, LibraryDirectory={"string"});
  end f;
  
  Real x = f(1);
 
     annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="NonExistentPackage1",
-            description="External function annotations, compiler args",
-            variability_propagation=false,
-            methodName="externalCompilerArgs",
-            filter=true,
-            methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
- )})));
-end NonExistentPackage1;
-*/
+        ErrorTestCase(
+            name="InvalidAnnotation1",
+            description="External function annotations, invalid annotation",
+            errorMessage="
+Error at line 5, column 2, in file '...', EXTERNAL_DIRECTORY_ANNOTATION_TYPE:
+  IncludeDirectory annotation only allows scalar string values
+
+Error at line 5, column 2, in file '...', EXTERNAL_DIRECTORY_ANNOTATION_TYPE:
+  LibraryDirectory annotation only allows scalar string values
+")})));
+end InvalidAnnotation1;
+
+model InvalidURI1
+ function f
+  input Real x;
+  output Real y;
+ external annotation(IncludeDirectory="]modelica://NoSuchPackage/",
+                     LibraryDirectory="]modelica://NoSuchPackage/");
+ end f;
+ 
+ Real x = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InvalidURI1",
+            description="External function annotations, missing modelica package",
+            errorMessage="
+Error at line 5, column 2, in file '...', EXTERNAL_DIRECTORY_ANNOTATION:
+  IncludeDirectory annotation could not be resolved
+  Illegal character in scheme name at index 0: ]modelica://NoSuchPackage/
+
+Error at line 5, column 2, in file '...', EXTERNAL_DIRECTORY_ANNOTATION:
+  LibraryDirectory annotation could not be resolved
+  Illegal character in scheme name at index 0: ]modelica://NoSuchPackage/
+")})));
+end InvalidURI1;
+
 end FunctionTestsExternal;

@@ -563,7 +563,7 @@ model ExtObj4
         input  Os.Obj1 o1;
         output Real x;
         external annotation(Library="extObjectsUse", Include="#include \"extObjectsUse.h\"",
-            LibraryDirectory="Library2", IncludeDirectory="Include2");
+            LibraryDirectory="modelica://Library2", IncludeDirectory="Include2");
     end use1;
 
     Os.Obj1 o1 = Os.Obj1(3.13, 3, true, "A message");
