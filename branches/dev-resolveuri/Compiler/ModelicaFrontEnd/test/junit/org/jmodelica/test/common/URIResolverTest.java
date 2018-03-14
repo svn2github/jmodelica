@@ -40,66 +40,6 @@ public class URIResolverTest {
     }
 
     /*
-     * Test resolveURI()
-     */
-
-    @Test
-    public void testResolveURIPath() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "C:/pack/subpath");
-        assertNull(res);
-    }
-
-    @Test
-    public void testResolveURIModelicaCorrect() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "modelica://pack/subpath");
-        assertEquals("C:/packpath/subpath", res);
-    }
-
-    @Test
-    public void testResolveURIModelicaMissing() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "modelica://pack/subpath/missing");
-        assertEquals("C:/packpath/subpath/missing", res);
-    }
-
-    @Test
-    public void testResolveURIModelicaMissingPack() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "modelica://missing/subpath");
-        assertNull(res);
-    }
-
-    @Test
-    public void testResolveURIFileCorrect() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "file:///pack/subpath");
-        assertEquals("/pack/subpath", res);
-    }
-
-    @Test
-    public void testResolveURIFileIncorrect() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "file://pack/subpath");
-        assertEquals("/subpath", res);
-    }
-
-    @Test
-    public void testResolveURIFileMissing() {
-        PackageNode n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "file:///pack/subpath/missing");
-        assertEquals("/pack/subpath/missing", res);
-    }
-
-    @Test
-    public void testResolveURIModelicaIncorrectSyntax() {
-        URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveURI(n, "]");
-        assertNull(res);
-    }
-
-    /*
      * Test resolve()
      */
 
@@ -188,6 +128,38 @@ public class URIResolverTest {
             fail();
         } catch (URIException e) {
 
+        }
+    }
+    
+    @Test
+    public void testResolveURICheckedFileCorrect() {
+        PackageNode n = new URIResolverPackageNodeMock();
+        try {
+            String res = URIResolver.DEFAULT.resolveURIChecked(n, "file:///pack/subpath");
+            assertEquals("/pack/subpath", res);
+        } catch (URIException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testResolveURICheckedFileIncorrect() {
+        PackageNode n = new URIResolverPackageNodeMock();
+        try {
+            String res = URIResolver.DEFAULT.resolveURIChecked(n, "file://pack/subpath");
+            assertEquals("/subpath", res);
+        } catch (URIException e) {
+            fail();
+        }
+    }
+    
+    @Test
+    public void testResolveURICheckedModelicaIncorrectSyntax() {
+        URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
+        try {
+            URIResolver.DEFAULT.resolveURIChecked(n, "]");
+            fail();
+        } catch (URIException e) {
         }
     }
 }

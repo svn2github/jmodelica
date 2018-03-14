@@ -54,20 +54,6 @@ public class URIResolver {
      * Resolves <code>str</code> to an absolute file path.
      * 
      * Supports file URI and modelica URI only. Returns null for unsupported
-     * schemes and malformed URIs.
-     */
-    public String resolveURI(PackageNode n, String str) {
-        try {
-            return resolveURI(n, str, false);
-        } catch (URIException e) {
-        }
-        return null;
-    }
-
-    /**
-     * Resolves <code>str</code> to an absolute file path.
-     * 
-     * Supports file URI and modelica URI only. Returns null for unsupported
      * schemes and malformed URIs. If error is true, also generate an error for
      * unsupported schemes.
      * @throws URIException 

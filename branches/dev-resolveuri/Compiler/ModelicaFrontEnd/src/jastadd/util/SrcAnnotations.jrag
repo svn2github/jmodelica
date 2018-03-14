@@ -403,7 +403,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public final String resolveURI(String str) {
+        public final String resolveURI(String str) throws URIException {
             return owningNode.resolveURI(str);
         }
 
@@ -678,7 +678,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String resolveURI(String str) {
+        public String resolveURI(String str) throws URIException {
             return provider.resolveURI(str);
         }
     }
@@ -730,7 +730,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String resolveURI(String str) {
+        public String resolveURI(String str) throws URIException {
             return null;
         }
 
@@ -781,7 +781,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String resolveURI(String str) {
+        public String resolveURI(String str) throws URIException {
             return exp.resolveURI(str);
         }
 
