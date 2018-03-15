@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5490
+Fixed bug that caused some errors to be reported on the wrong line.
+
 ; Feature ; Minor ; PyFMI ; #5089
 Added option to limit the maximum size of the log file.
 

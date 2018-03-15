@@ -420,14 +420,14 @@ aspect ClassRestriction {
      * Is this class partial?
      */
     syn boolean ClassDecl.isPartial() = false;
-    eq BaseClassDecl.isPartial()      = hasPartial();
+    eq BaseClassDecl.isPartial()      = getPartial();
     eq LibNode.isPartial()            = myClass().isPartial();
 
     /**
      * Is this class encapsulated?
      */
     syn boolean ClassDecl.isEncapsulated() = false;
-    eq BaseClassDecl.isEncapsulated()      = hasEncapsulated();
+    eq BaseClassDecl.isEncapsulated()      = getEncapsulated();
     eq LibNode.isEncapsulated()            = myClass().isEncapsulated();
 
     /**

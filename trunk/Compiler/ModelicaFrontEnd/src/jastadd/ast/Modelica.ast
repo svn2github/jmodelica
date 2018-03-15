@@ -65,9 +65,9 @@ SourceRoot : Root ::= Program;
  
 
 Program : SourceBaseNode ::= 
-	        UnstructuredEntity:StoredDefinition* 
+            UnstructuredEntity:StoredDefinition* 
             /UnknownClassDecl/
-            /UnknownComponentDecl/
+            /UnknownComponent:ComponentClause/
             /EnumBaseDecl:EnumClassDecl/
             /PredefinedType:BaseClassDecl*/ 
             /BuiltInType:ClassDecl*/   
@@ -76,40 +76,28 @@ Program : SourceBaseNode ::=
             /AnonymousClass:BaseClassDecl*/
             /InstProgramRoot/;
 
-StoredDefinition : SourceBaseNode ::= [Within] Element*;
+StoredDefinition : SourceBaseNode ::= [Within] ClassDecl*;
 
 Within : SourceBaseNode ::= [PackageName:Access];
 
 abstract ClassDecl : Element       ::= Name:IdDecl;
-abstract BaseClassDecl : ClassDecl ::= VisibilityType 
-                                       [Encapsulated] 
-                                       [Partial] 
+abstract BaseClassDecl : ClassDecl ::= <Encapsulated:boolean>
+                                       <Partial:boolean>
                                        Restriction 
-                                       [Redeclare]
-                                       [Final]
-                                       [Inner]
-                                       [Outer]
-                                       [Replaceable]
+                                       <Redeclare:boolean>
+                                       <Final:boolean>
+                                       <Inner:boolean>
+                                       <Outer:boolean>
+                                       <Replaceable:boolean>
                                        [ConstrainingClause]
                                        [ConstrainingClauseComment:Comment];
 
 UnknownClassDecl : FullClassDecl;
 
-PN_FullClassDecl : BaseClassDecl ::= [StringComment] 
-                                     Composition 
-                                     [Annotation]
-                                     EndDecl;
-
-FullClassDecl : BaseClassDecl ::= [StringComment]  
-                                  Equation:AbstractEquation* 
-                                  Algorithm*
-                                  Super:ExtendsClause*  
-                                  Import:ImportClause* 
-                                  ClassDecl* 
-                                  ComponentDecl*
-                                  ElementModification:Modification* 
+FullClassDecl : BaseClassDecl ::= [StringComment] 
+                                  Clause*
                                   [ExternalClause] 
-                                  [Annotation] 
+                                  [Annotation]
                                   EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
@@ -119,14 +107,6 @@ LibNode : ClassDecl ::= <FileName:String>
                         <Reason:LibNode.LoadReason> 
                         /StoredDefinition/;
 
-PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
-                                      [TypePrefixVariability]
-                                      [TypePrefixInputOutput] 
-                                      ClassName:Access  
-                                      [ArraySubscripts] 
-                                      [ClassModification] 
-                                      Comment; 
-
 ShortClassDecl : BaseClassDecl ::= ExtendsClauseShortClass;
 
 ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow] 
@@ -135,22 +115,14 @@ ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow]
                                             [ArraySubscripts] 
                                             Comment; 
                             
-PN_ExtendClassDecl : PN_FullClassDecl ::= [ClassModification];
-                                
-ExtendClassDecl : FullClassDecl;
+ExtendClassDecl : FullClassDecl ::= InlineExtendsClause;
                                    
 PrimitiveClassDecl : FullClassDecl;
 RealClassDecl      : PrimitiveClassDecl;
 IntegerClassDecl   : PrimitiveClassDecl;
 BooleanClassDecl   : PrimitiveClassDecl;
 StringClassDecl    : PrimitiveClassDecl;
-EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Sumbol> is necessary to achieve formatted pretty print.
-
-PN_EnumDecl : BaseClassDecl ::= <Symbol:Symbol> EnumSpecification Comment;  // <Sumbol> is necessary to achieve formatted pretty print.
-abstract EnumSpecification : SourceBaseNode;
-EnumLiteralList : EnumSpecification ::= EnumLiteral*;
-EnumUnspecified : EnumSpecification;
-EnumLiteral : SourceBaseNode ::= IdDecl Comment;
+EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Symbol> is necessary to achieve formatted pretty print.
 
 EnumLiteralDecl : ComponentDecl;
 
@@ -172,23 +144,9 @@ OperatorRecord      : Record;
 Operator            : Restriction;
 OperatorFunction    : Function;
 
-Replaceable  : SourceBaseNode;
-Redeclare    : SourceBaseNode;
-Encapsulated : SourceBaseNode;
-Partial      : SourceBaseNode;
-Inner        : SourceBaseNode;
-Outer        : SourceBaseNode;
-
-abstract VisibilityType : SourceBaseNode;
-PublicVisibilityType    : VisibilityType;
-ProtectedVisibilityType : VisibilityType;
-UnknownVisibilityType   : VisibilityType;
-
-Composition : SourceBaseNode ::= Clause* [ExternalClause];
-
 ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
-                              [ExternalFunctionCall] 
-                              [Annotation];
+                                    [ExternalFunctionCall] 
+                                    [Annotation];
                    
 ExternalFunctionCall : SourceBaseNode ::= [ReturnVar:Access] FunctionName:IdDecl Arg:Exp*;
 
@@ -198,60 +156,42 @@ abstract Clause : SourceBaseNode;
 
 abstract ElementList  : Clause ::= Element*;
 PublicElementList     : ElementList;
+DefaultElementList    : PublicElementList;
 ProtectedElementList  : ElementList;
 EquationClause        : Clause ::= AbstractEquation*;
 InitialEquationClause : EquationClause;
-Algorithm             : Clause ::= [Initial] Statement*;
+Algorithm             : Clause ::= Statement*;
+InitialAlgorithm      : Algorithm;
 
-abstract Element : Clause;
-PN_ExtendsClause        : Element ::= Super:Access [ClassModification] [Annotation];
-ExtendsClause           : Element ::= VisibilityType Super:Access [ClassModification] [Annotation];
+abstract Element : SourceBaseNode;
+ExtendsClause           : Element ::= Super:Access [ClassModification] [Annotation];
 InlineExtendsClause     : ExtendsClause;
 abstract ImportClause   : Element ::= PackageName:Access Comment;
 ImportClauseQualified   : ImportClause;
-//ImportClauseSingleDefinition : ImportClause;
 ImportClauseUnqualified : ImportClause;
 ImportClauseRename      : ImportClause ::= IdDecl;
 
-abstract AbstractComponentDecl : Element;
+ComponentClause : Element ::= <Redeclare:boolean> 
+                              <Final:boolean> 
+                              <Inner:boolean> 
+                              <Outer:boolean> 
+                              <Replaceable:boolean> 
+                              [TypePrefixFlow] 
+                              [TypePrefixVariability] 
+                              [TypePrefixInputOutput] 
+                              ClassName:Access 
+                              [TypeArraySubscripts:ArraySubscripts]
+                              ComponentDecl*
+                              [ConstrainingClause] 
+                              Comment;
+
+ComponentDecl : SourceBaseNode ::= Name:IdDecl 
+                                   [VarArraySubscripts:ArraySubscripts] 
+                                   [Modification] 
+                                   [ConditionalAttribute]
+                                   Comment;
+
 UnknownComponentDecl : ComponentDecl;
-abstract BaseComponentDecl : AbstractComponentDecl ::= 
-	                       [Redeclare] 
-                           [Final] 
-                           [Inner] 
-                           [Outer] 
-                           [Replaceable] 
-                           [TypePrefixFlow] 
-                           [TypePrefixVariability] 
-                           [TypePrefixInputOutput] 
-                           ClassName:Access 
-                           [TypeArraySubscripts:ArraySubscripts];
-
-ComponentClause : BaseComponentDecl ::=  VisibilityType 
-                                         Name:PN_ComponentDecl* 
-                                         [ConstrainingClause] 
-                                         Comment;
-
-ComponentDecl : BaseComponentDecl ::= VisibilityType 
-                                      Name:IdDecl 
-                                      [VarArraySubscripts:ArraySubscripts] 
-                                      [Modification] 
-                                      [ConditionalAttribute]
-                                      Comment 
-                                      [ConstrainingClause] 
-                                      CCComment:Comment;
-
-SiblingComponentDecl : ComponentDecl ::= <Siblings:java.util.List<SiblingComponentDecl>>;
-
-PN_ComponentClause : BaseComponentDecl ::=  Name:PN_ComponentDecl* 
-                                            [ConstrainingClause] 
-                                            Comment;
-                                            
-PN_ComponentDecl : SourceBaseNode ::= Name:IdDecl 
-                                [VarArraySubscripts:ArraySubscripts] 
-                                [Modification] 
-                                [ConditionalAttribute]
-                                Comment;
 
 abstract TypePrefix     : SourceBaseNode;
 abstract TypePrefixFlow : TypePrefix;
@@ -271,9 +211,6 @@ Comment       : SourceBaseNode ::= [StringComment] [Annotation];
 StringComment : SourceBaseNode ::= <Comment:String>;
 
 // Annotations and modifications
-Each  : SourceBaseNode;
-Final : SourceBaseNode;
-
 ConditionalAttribute : SourceBaseNode ::= Exp;
 
 abstract Modification : SourceBaseNode;
@@ -283,16 +220,14 @@ ValueModification     : Modification ::= Exp;
 DummyModification     : ValueModification;
 
 ClassModification : Modification ::= Argument*;
-abstract Argument : Modification ::= [Each] [Final];
+abstract Argument : Modification ::= <Each:boolean> <Final:boolean>;
 
 abstract NamedModification   : Argument ::= Name:Access;
 abstract ElementModification : NamedModification ::= [Modification] Comment;
-// ClassModification : ElementModification; // is a(M.x=3) valid if M is a class?
 ComponentModification : ElementModification; 
 abstract ElementRedeclare    : NamedModification;
 ClassRedeclare        : ElementRedeclare ::= BaseClassDecl;
-PN_ComponentRedeclare : ElementRedeclare ::= BaseComponentDecl;
-ComponentRedeclare    : ElementRedeclare ::= ComponentDecl;
+ComponentRedeclare    : ElementRedeclare ::= ComponentClause;
 
 abstract Annotation : SourceBaseNode;
 
@@ -301,11 +236,9 @@ ParseAnnotation : Annotation ::= ClassModification;
 abstract AbstractExp : SourceBaseNode;
 abstract Exp : AbstractExp;
 
-abstract AbstractEquationModifier : SourceBaseNode;
-abstract AbstractEquation         : SourceBaseNode ::= [AbstractEquationModifier] Comment;
-Initial              : AbstractEquationModifier;
+abstract AbstractEquation         : SourceBaseNode ::= Comment;
 Equation             : AbstractEquation ::= Left:Exp Right:Exp;
-ConnectClause        : AbstractEquation ::= Comment Connector1:Access Connector2:Access;
+ConnectClause        : AbstractEquation ::= Connector1:Access Connector2:Access;
 abstract IfWhenElseEquation       : AbstractEquation ::= AbstractEquation*;
 abstract IfWhenEquation           : IfWhenElseEquation ::= Test:Exp [Else:IfWhenElseEquation];
 IfEquation           : IfWhenEquation;
@@ -315,10 +248,8 @@ ForClauseE           : AbstractEquation ::= ForIndex* AbstractEquation*;
 FunctionCallEquation : AbstractEquation ::= Left:FunctionCallLeft* Call:FunctionCall;
 
 FunctionCallLeft : SourceBaseNode ::= [Access];
-ForIndex : SourceBaseNode ::= ForIndexDecl [Exp];
-// ForIndexDecl is introduced basically to make the name-analysis simpler:
-// lookupDecl is supposed to return a ComponentDecls.
-ForIndexDecl : ComponentDecl; // Is this really ok: FIXME! 
+ForIndex : ComponentClause ::= [Exp];
+ForIndexDecl : ComponentDecl;
          
 abstract Statement    : SourceBaseNode  ::= Comment;
 AssignStmt          : Statement ::= Left:Access Right:Exp;
@@ -388,15 +319,10 @@ DerExp : Exp ::= Exp;
 AccessExp : Exp ::= Access;
 
 abstract Access : SourceBaseNode;
-abstract NamedAccess : Access ::= <ID>;
 Dot             : Access      ::= Access*;
-PN_Dot          : Access      ::= Left:Access Right:Access;
 GlobalAccess    : Access      ::= Access;
-ArrayAccess     : NamedAccess ::= [ArraySubscripts];
-ParseAccess     : ArrayAccess;
-ClassAccess     : NamedAccess;
-AmbiguousAccess : ArrayAccess;
-ComponentAccess : ArrayAccess;
+NamedAccess     : Access      ::= <ID>;
+ArrayAccess     : NamedAccess ::= ArraySubscripts;
 
 ArrayConstructor : Exp ::= FunctionArguments;
 Matrix           : Exp ::= Row:MatrixRow*;
@@ -411,6 +337,3 @@ TimeExp : Exp;
 EndExp  : Exp;
 
 EndDecl : SourceBaseNode ::= <EndID:String>;
-
-// Dummy node used in the compilation
-PN_DummyClause : Clause;

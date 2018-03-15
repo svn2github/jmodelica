@@ -2055,6 +2055,19 @@ aspect AttributeUtil {
 
 }
 
+
+aspect JastAddUtils {
+
+    public boolean Opt.hasChild() {
+        return getNumChild() > 0;
+    }
+
+    public T Opt.getChild() {
+        return getChild(0);
+    }
+
+}
+
 /**
 * This aspect contains JastAdd hacks, and should be avoided, however this is
 * necessary evil in order to reduce memory consumption. If used correctly, it

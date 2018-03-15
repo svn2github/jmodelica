@@ -1189,7 +1189,6 @@ public class ModelicaCompiler {
         hookModelFlattened(fc);
         hookCheckAbort();
         
-        //fc.dumpTree("");
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
         if (fc.myOptions().getBooleanOption("generate_mof_files")) {

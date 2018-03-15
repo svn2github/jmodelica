@@ -279,7 +279,7 @@ aspect ContentCheck {
             }
         }
         
-        checkQuotedIdentifier(getClassDecl(), name());
+        checkQuotedIdentifier(getClassDecl().getName(), name());
         checkAbsoluteValue();
     }
     

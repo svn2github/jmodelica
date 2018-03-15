@@ -53,7 +53,7 @@ Integer i=1;
             errorMessage="
 1 errors found:
 
-Compliance error at line 1, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_INTEGER_VARIABLES:
+Compliance error at line 3, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_INTEGER_VARIABLES:
   Integer variables of discrete variability is currently only supported when compiling FMUs
 ")})));
 end IntegerVariable_ComplErr;
@@ -71,7 +71,7 @@ model BooleanVariable_ComplErr
             errorMessage="
 1 errors found:
 
-Compliance error at line 1, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
+Compliance error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
   Boolean variables of discrete variability is currently only supported when compiling FMUs
 ")})));
 end BooleanVariable_ComplErr;
@@ -90,7 +90,7 @@ model EnumVariable_ComplErr
             errorMessage="
 1 errors found:
 
-Compliance error at line 2, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_ENUMERATION_VARIABLES:
+Compliance error at line 3, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_ENUMERATION_VARIABLES:
   Enumeration variables of discrete variability is currently only supported when compiling FMUs
 ")})));
 end EnumVariable_ComplErr;
@@ -257,10 +257,10 @@ model ArrayCellMod_ComplErr
             errorMessage="
 2 errors found:
 
-Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
+Error at line 6, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
   Modifiers of specific array elements are not allowed
 
-Error at line 6, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
+Error at line 6, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
   Modifiers of specific array elements are not allowed
 ")})));
 end ArrayCellMod_ComplErr;
@@ -285,7 +285,7 @@ model DuplicateVariables_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 7, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES:
+Warning at line 8, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES:
   The component x is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.
 ")})));
 end DuplicateVariables_Warn;
@@ -323,13 +323,13 @@ end when;
             errorMessage="
 11 errors found:
 
-Compliance error at line 4, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
+Compliance error at line 5, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
   Boolean variables of discrete variability is currently only supported when compiling FMUs
 
-Compliance error at line 5, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
+Compliance error at line 6, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
   Boolean variables of discrete variability is currently only supported when compiling FMUs
 
-Compliance error at line 6, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
+Compliance error at line 7, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
   Boolean variables of discrete variability is currently only supported when compiling FMUs
 
 Compliance error at line 10, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_WHEN_EQUATIONS:
@@ -700,7 +700,7 @@ model FunctionalArgument
             errorMessage="
 1 errors found:
 
-Compliance error at line 2, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_FUNCTIONAL_INPUT:
+Compliance error at line 3, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', ONLY_FMU_FUNCTIONAL_INPUT:
   Using functional input arguments is currently only supported when compiling FMUs
 ")})));
 end FunctionalArgument;

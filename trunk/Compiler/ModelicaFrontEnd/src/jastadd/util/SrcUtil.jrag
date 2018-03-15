@@ -16,6 +16,7 @@
 
 
 aspect SrcUtil {
+
     syn boolean Exp.isLiteral()  = false;
     eq BooleanLitExp.isLiteral() = true;
     eq IntegerLitExp.isLiteral() = true;
@@ -48,4 +49,48 @@ aspect SrcUtil {
      */
     syn String ImportClause.renameStringOrNull() = null;
     eq ImportClauseRename.renameStringOrNull() = getIdDecl().name();
+
+}
+
+
+aspect ComponentClauseFields {
+
+    syn boolean ComponentDecl.hasRedeclare() = myComponentClause().getRedeclare();
+
+    syn boolean ComponentDecl.hasFinal() = myComponentClause().getFinal();
+
+    syn boolean ComponentDecl.hasInner() = myComponentClause().getInner();
+
+    syn boolean ComponentDecl.hasOuter() = myComponentClause().getOuter();
+
+    syn boolean ComponentDecl.hasReplaceable() = myComponentClause().getReplaceable();
+
+    syn boolean ComponentDecl.hasTypePrefixFlow() = myComponentClause().hasTypePrefixFlow();
+    syn TypePrefixFlow ComponentDecl.getTypePrefixFlow() = myComponentClause().getTypePrefixFlow();
+
+    syn boolean ComponentDecl.hasTypePrefixVariability() = 
+        myComponentClause().hasTypePrefixVariability();
+    syn TypePrefixVariability ComponentDecl.getTypePrefixVariability() = 
+        myComponentClause().getTypePrefixVariability();
+
+    syn boolean ComponentDecl.hasTypePrefixInputOutput() = 
+        myComponentClause().hasTypePrefixInputOutput();
+    syn TypePrefixInputOutput ComponentDecl.getTypePrefixInputOutput() = 
+        myComponentClause().getTypePrefixInputOutput();
+
+    syn Access ComponentDecl.getClassName() = myComponentClause().getClassName();
+
+    syn boolean ComponentDecl.hasTypeArraySubscripts() = 
+        myComponentClause().hasTypeArraySubscripts();
+    syn ArraySubscripts ComponentDecl.getTypeArraySubscripts() = 
+        myComponentClause().getTypeArraySubscripts();
+
+    syn boolean ComponentDecl.hasConstrainingClause() = 
+        myComponentClause().hasConstrainingClause();
+    syn ConstrainingClause ComponentDecl.getConstrainingClause() = 
+        myComponentClause().getConstrainingClause();
+
+    syn boolean ComponentDecl.hasArraySubscripts() = 
+        hasVarArraySubscripts() || hasTypeArraySubscripts();
+
 }

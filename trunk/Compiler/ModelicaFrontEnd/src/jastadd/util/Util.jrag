@@ -71,285 +71,6 @@ aspect RootAccess {
 
 }
 
-aspect Parsers {
-
-    public final class ParserHandler {
-        public static final FormattingRecorder<ASTNode<?>> DEFAULT_FORMATTING_RECORDER =
-                new DefaultFormattingRecorder<ASTNode<?>>();
-        
-        private final FormattingRecorder<ASTNode<?>> formattingRecorder;
-
-        public ParserHandler() {
-            this(DEFAULT_FORMATTING_RECORDER);
-        }
-
-        public ParserHandler(FormattingRecorder<ASTNode<?>> formattingRecorder) {
-            this.formattingRecorder = formattingRecorder;
-        }
-    }
-
-    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String name) 
-      throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        ModelicaCompiler.log.info("Parsing " + name + "...");
-        SourceRoot sr;
-        try {
-            sr = parseFile(uif, name);
-        } catch (ParserException e) {
-            CompilerException ce = new CompilerException();
-            ce.addProblem(e.getProblem());
-            throw ce;
-        }
-        //loadOptions(sr);
-        for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-            sd.setFileName(name);
-        }
-        return sr;
-    }
-    
-    public SourceRoot ParserHandler.parseModel(UtilInterface uif, String[] names) 
-            throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-        SourceRoot sr = new SourceRoot(new Program());
-        uif.transferRoot(sr);
-        for (String name : names) {
-            File f = new File(name);
-            String name_tmp = name;
-            if (f.isDirectory()) 
-                name_tmp = LibNode.packageFile(f);
-            SourceRoot sr_tmp = (name_tmp != null) ? parseModel(uif, name_tmp) : null;
-            if (!uif.getOptionRegistry().getBooleanOption("ignore_within")) {
-                String lib = null;
-                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
-                    lib = sr_tmp.findOutermostLibraryDir();
-                else if (LibNode.isPackageFile(f))
-                    lib = f.getParent();
-                if (lib != null) {
-                    String type = f.isDirectory() ? "Directory" : "File";
-                    ModelicaCompiler.log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
-                    name = lib;
-                    f = new File(name);
-                }
-            }
-            if (f.isDirectory()) {
-                if (!sr.getProgram().getLibraryList().addLibrary(name, LibNode.LoadReason.COMMANDLINE)) 
-                    ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
-            } else {
-                for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
-                    sr.getProgram().addUnstructuredEntity(sd);
-            }
-        }
-        return sr;
-    }
-
-
-    /*
-     * These five methods are the only with references to the package containing 
-     * the parser. Refine when needed.
-     */
-    public beaver.Parser ParserHandler.createModelicaParser(AbstractModelicaScanner<ASTNode<?>> scanner, String fileName) {
-        org.jmodelica.modelica.parser.ModelicaParser parser = 
-            new org.jmodelica.modelica.parser.ModelicaParser();
-        parser.setLineBreakMap(scanner.getLineBreakMap());
-        parser.setFormattingRecorder(scanner.getFormattingRecorder());
-        parser.setFileName(fileName);
-        return parser;
-    }
-
-    public AbstractModelicaScanner<ASTNode<?>> ParserHandler.createModelicaScanner(Reader in) {
-        AbstractModelicaScanner<ASTNode<?>> scanner = new org.jmodelica.modelica.parser.ModelicaScanner(in);
-        scanner.setFormattingRecorder(formattingRecorder);
-        return scanner;
-    }
-
-    public AbstractFlatModelicaScanner ParserHandler.createModelicaFlatScanner(Reader in) {
-        return new org.jmodelica.modelica.parser.FlatModelicaScanner(in);
-    }
-
-    public short ParserHandler.expModelicaGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.exp;
-    }
-
-    public short ParserHandler.anonymousClassModelicaGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.anonymous_short_class;
-    }
-
-    public short ParserHandler.elementGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.element;
-    }
-
-    public short ParserHandler.abstractEquationGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.abstract_equation;
-    }
-
-    public short ParserHandler.modifierGoal() {
-        return org.jmodelica.modelica.parser.ModelicaParser.AltGoals.argument;
-    }
-    
-    public SourceRoot ParserHandler.parseFile(UtilInterface uif, String fileName) 
-            throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        return parseModelicaFile(uif, fileName);
-    }
-
-    public SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName) 
-            throws CompilerException, beaver.Parser.Exception, IOException {
-        try {
-            return parseStringNoCatch(uif, str, fileName);
-        } catch (ParserException e) {
-            CompilerException ce = new CompilerException();
-            ce.addProblem(e.getProblem());
-            throw ce;
-        }
-    }
-
-    public SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, String fileName) 
-            throws CompilerException, beaver.Parser.Exception, IOException {
-        return parseModelicaString(uif, str, fileName);
-    }
-
-    public Exp ParserHandler.parseExpString(String str)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModelicaExpString(str);
-    }
-
-    public BaseClassDecl ParserHandler.parseAnonymousClassString(String code, Restriction restriction, String targetName)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModelicaAnonymousClassString(code, restriction, targetName);
-    }
-
-    public SourceRoot ParserHandler.parseModelicaFile(UtilInterface uif, String fileName) 
-            throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
-        Reader reader = fileReader(uif, fileName);
-        try {
-            return parseModelicaResource(uif, reader, fileName);
-        } finally {
-            reader.close();
-        }
-    }
-
-    public SourceRoot ParserHandler.parseModelicaString(UtilInterface uif, String str, String fileName) 
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModelicaResource(uif, new StringReader(str), fileName);
-    }
-
-    public SourceRoot ParserHandler.parseModelicaResource(UtilInterface uif, Reader resource, String fileName) 
-            throws ParserException, beaver.Parser.Exception, IOException {
-        AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(resource);
-        beaver.Parser parser = createModelicaParser(scanner, fileName);
-        SourceRoot sr = (SourceRoot) parser.parse(scanner);
-        sr.setUtilInterface(uif);
-        sr.setFileName(fileName);
-        return sr;
-    }
-    
-    public static final String ParserHandler.EXP_FILENAME = "<predefined string>";
-
-    public Exp ParserHandler.parseModelicaExpString(String str)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModelicaExpString(str, false);
-    }
-
-    public Exp ParserHandler.parseModelicaExpString(String str, boolean preservFormatting)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(str));
-        beaver.Parser parser = createModelicaParser(scanner, EXP_FILENAME);
-        Exp exp = (Exp) parser.parse(scanner, expModelicaGoal());
-        if (preservFormatting) {
-            scanner.getFormattingRecorder().postParsing(exp);
-        }
-        return exp;
-    }
-
-    public static final String ParserHandler.ANONYMOUS_CLASS_FILENAME = "<command line argument>";
-
-    public BaseClassDecl ParserHandler.parseModelicaAnonymousClassString(String code, Restriction restriction, String targetName)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, ANONYMOUS_CLASS_FILENAME);
-        BaseClassDecl cl = (BaseClassDecl) parser.parse(scanner, anonymousClassModelicaGoal());
-        cl.setRestriction(restriction);
-        cl.setName(new IdDecl(targetName));
-        return cl;
-    }
-
-    public Element ParserHandler.parseElemet(String code, String parentSourceFile)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseElemet(code, parentSourceFile, false);
-    }
-
-    public Element ParserHandler.parseElemet(String code, String parentSourceFile, boolean preservFormatting)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        Element elem = (Element) parser.parse(scanner, elementGoal());
-        if (preservFormatting) {
-            scanner.getFormattingRecorder().postParsing(elem);
-        }
-        return elem;
-    }
-
-    public AbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseAbstractEquation(code, parentSourceFile, false);
-    }
-    public AbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile,
-            boolean preservFormatting) throws ParserException, beaver.Parser.Exception, IOException {
-        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        AbstractEquation eqn = (AbstractEquation) parser.parse(scanner, abstractEquationGoal());
-        if (preservFormatting) {
-            scanner.getFormattingRecorder().postParsing(eqn);
-        }
-        return eqn;
-    }
-
-    public Argument ParserHandler.parseModifier(String code, String parentSourceFile)
-            throws ParserException, beaver.Parser.Exception, IOException {
-        return parseModifier(code, parentSourceFile, false);
-    }
-    public Argument ParserHandler.parseModifier(String code, String parentSourceFile,
-            boolean preservFormatting) throws ParserException, beaver.Parser.Exception, IOException {
-        AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
-        beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        Argument eqn = (Argument) parser.parse(scanner, modifierGoal());
-        if (preservFormatting) {
-            scanner.getFormattingRecorder().postParsing(eqn);
-        }
-        return eqn;
-    }
-    
-    public Reader ParserHandler.fileReader(UtilInterface uif, File file) throws FileNotFoundException {
-        return new InputStreamReader(new FileInputStream(file), ASTNode.UTF8);
-    }
-
-    public Reader ParserHandler.fileReader(UtilInterface uif, String path) throws FileNotFoundException {
-        return fileReader(uif, new File(path));
-    }
-
-    public static final Charset ASTNode.UTF8 = Charset.forName("UTF-8");
-
-    /**
-     * This one is used in the cases where mc is null, e.g. unit testing.
-     */
-    private static final ParserHandler UtilInterface.FALLBACK_PARSER_HANDLER = new ParserHandler();
-
-    public ParserHandler UtilInterface.getParserHandler() {
-        if (mc == null) {
-            return FALLBACK_PARSER_HANDLER;
-        } else {
-            return mc.getParserHandler();
-        }
-    }
-
-    private ParserHandler ModelicaCompiler.parserHandler = new ParserHandler();
-
-    public ParserHandler ModelicaCompiler.getParserHandler() {
-        return parserHandler;
-    }
-
-    public void ModelicaCompiler.setParserHandler(ParserHandler parserHandler) {
-        this.parserHandler = parserHandler;
-    }
-}
-
 aspect SourceUtil {
 	syn boolean Exp.isAccess() = false;
 	eq AccessExp.isAccess() = true;
@@ -452,6 +173,19 @@ aspect NodeMethods {
      */
     public void ASTNode.setLocationNoTree(ASTNode start, ASTNode end) {
         setLocation(start, end);
+    }
+    
+    /**
+     * Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other parser symbols, 
+     *        that might not be AST nodes.
+     * 
+     * @param start  the node to copy the <code>start</code> member from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void ASTNode.setLocationNoTree(Symbol start, Symbol end) {
+        this.start = start.getStart();
+        this.end = end.getEnd();
     }
     
     /**
@@ -614,26 +348,6 @@ aspect NodeMethods {
     public int ASTNode.beginColumn() { return getColumn(getStart()); }
     public int ASTNode.endLine()     { return getLine(getEnd()); }
     public int ASTNode.endColumn()   { return getColumn(getEnd()); }
-
-    public String ASTNode.getNodeName() {
-        return dump();
-    }
-    
-    public String IdDecl.getNodeName() {
-        return dump() + ": '" + getID() + "'";
-    }
-
-    public String NamedAccess.getNodeName() {
-        return dump() + ": '" + getID() + "'";
-    }
-    
-    public String RealLitExp.getNodeName() {
-        return dump() + ": " + getUNSIGNED_NUMBER();
-    }
-    
-    public String InstComponentDecl.getNodeName() {
-        return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + name() + "'";
-    }
 
     public class List {
 
@@ -919,8 +633,6 @@ aspect Names {
   syn String IdDecl.name()            = getID();
   syn String Access.name();
   eq NamedAccess.name()               = getID();
-  eq PN_Dot.name()                    = 
-  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
   syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
   syn lazy String Dot.name() {
 	  StringBuilder buf = new StringBuilder();
@@ -947,21 +659,19 @@ aspect Names {
   }
   
   syn String InstNamedModification.name() = getNameNoTransform().name();
-  
-  syn String Access.qualifiedName();
-  eq NamedAccess.qualifiedName()               = getID();
-  eq PN_Dot.qualifiedName()                    = 
-  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
-  eq GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
-  eq Dot.qualifiedName() {
-	  StringBuilder buf = new StringBuilder();
-	  for (Access a : getAccesss()) {
-		  buf.append(a.qualifiedName());
-		  buf.append('.');
-	  }
-	  return buf.substring(0, buf.length() - 1);
-  }
-  
+
+    syn String Access.qualifiedName();
+    eq NamedAccess.qualifiedName()   = getID();
+    eq GlobalAccess.qualifiedName()  = "." + getAccess().qualifiedName();
+    eq Dot.qualifiedName() {
+        StringBuilder buf = new StringBuilder();
+        for (Access a : getAccesss()) {
+            buf.append(a.qualifiedName());
+            buf.append('.');
+        }
+        return buf.substring(0, buf.length() - 1);
+    }
+
   syn String InstAccess.qualifiedName();
   eq InstNamedAccess.qualifiedName()           = getID();
   eq InstDot.qualifiedName() {
@@ -974,10 +684,10 @@ aspect Names {
   }
   eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
 
-    syn String Element.name() = null;
-    eq ClassDecl.name()       = getNameNoTransform().getID();
-    eq ComponentDecl.name()   = getNameNoTransform().getID();
-    eq ExtendsClause.name()   = getSuperNoTransform().name();
+    syn String Element.name()       = null;
+    syn String ComponentDecl.name() = getNameNoTransform().getID();
+    eq ClassDecl.name()             = getNameNoTransform().getID();
+    eq ExtendsClause.name()         = getSuperNoTransform().name();
 
   syn String FunctionCall.name() = getNameNoTransform().name();
   
@@ -1118,12 +828,7 @@ aspect Names {
     inh BaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;
 
-    eq FullClassDecl.getEquation().enclosingClassDecl()       = this;
-    eq FullClassDecl.getAlgorithm().enclosingClassDecl()      = this;
-    eq FullClassDecl.getSuper().enclosingClassDecl()          = this;
-    eq FullClassDecl.getImport().enclosingClassDecl()         = this;
-    eq FullClassDecl.getClassDecl().enclosingClassDecl()      = this;
-    eq FullClassDecl.getComponentDecl().enclosingClassDecl()  = this;
+    eq FullClassDecl.getClause().enclosingClassDecl()         = this;
     eq FullClassDecl.getAnnotation().enclosingClassDecl()     = this; 
     eq FullClassDecl.getExternalClause().enclosingClassDecl() = this;
 
@@ -1400,15 +1105,18 @@ aspect DebugHelpers {
 
 aspect Visibility {
 
-    syn boolean ClassDecl.isPublic()         = true;
-    eq BaseClassDecl.isPublic()              = getVisibilityType().isPublic();
-    syn boolean ComponentDecl.isPublic()     = getVisibilityType().isPublic();
+    inh boolean ClassDecl.isPublic();
+    inh boolean ComponentDecl.isPublic();
+    eq PublicElementList.getElement().isPublic()    = true;
+    eq ProtectedElementList.getElement().isPublic() = false;
+    eq SourceRoot.getProgram().isPublic()           = true; 
+    eq Root.getChild().isPublic()                   = true; 
+
     syn boolean InstClassDecl.isPublic()     = getClassDecl().isPublic();
     syn boolean InstComponentDecl.isPublic() = getComponentDecl().isPublic();
 
-    syn boolean ClassDecl.isProtected()         = false;
-    eq BaseClassDecl.isProtected()              = getVisibilityType().isProtected();
-    syn boolean ComponentDecl.isProtected()     = getVisibilityType().isProtected();
+    syn boolean ClassDecl.isProtected()         = !isPublic();
+    syn boolean ComponentDecl.isProtected()     = !isPublic();
     syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
 
@@ -1419,12 +1127,6 @@ aspect Visibility {
     eq InstRecordConstructor.getChild().inProtectedComponent() = false;
 
     syn boolean InstAssignable.isPublicVar() = isPublic() && !inProtectedComponent();
-
-    syn boolean VisibilityType.isPublic() = false;
-    eq PublicVisibilityType.isPublic()    = true;
-
-    syn boolean VisibilityType.isProtected() = false;
-    eq ProtectedVisibilityType.isProtected() = true;
 
 
     syn boolean FVisibilityType.isPublic() = false;
@@ -1492,19 +1194,19 @@ aspect ComponentDeclMethods {
      * Check if a ClassDecl is declared inner.
      */
     syn boolean ClassDecl.isInner() = false;
-    eq BaseClassDecl.isInner() = hasInner();
+    eq BaseClassDecl.isInner() = getInner();
 
     /**
      * Check if a ClassDecl is declared outer.
      */
     syn boolean ClassDecl.isOuter() = false;
-    eq BaseClassDecl.isOuter() = hasOuter();
+    eq BaseClassDecl.isOuter() = getOuter();
 
     /**
      * Check if a ClassDecl is declared inner or outer.
      */
     syn boolean ClassDecl.hasInnerOrOuter() = false;
-    eq BaseClassDecl.hasInnerOrOuter()      = hasInner() || hasOuter();
+    eq BaseClassDecl.hasInnerOrOuter()      = getInner() || getOuter();
     
 
     /**
@@ -1621,14 +1323,16 @@ aspect ComponentDeclMethods {
     /**
      * Check if this equation is declared initial.
      */
-    syn boolean AbstractEquation.isInitial() = hasAbstractEquationModifier() && getAbstractEquationModifier().isInitial();
-    
+    inh boolean AbstractEquation.isInitial();
+    eq EquationClause.getAbstractEquation().isInitial()        = false;
+    eq InitialEquationClause.getAbstractEquation().isInitial() = true;
+
     /**
-     * Check if this equation modifier is "initial".
+     * Check if this equation is declared initial.
      */
-    syn boolean AbstractEquationModifier.isInitial() = false;
-    eq Initial.isInitial()                           = true;
-    
+    syn boolean Algorithm.isInitial() = false;
+    eq InitialAlgorithm.isInitial()   = true;
+
     /**
      * Check if this component is a flow component.
      */
@@ -1872,7 +1576,7 @@ aspect ShortClassUtil {
     eq InstReplacingSimpleShortClassDecl.isOutput() = 
         (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
 
-    syn boolean BaseComponentDecl.isEnumLiteral() = false;
+    syn boolean ComponentDecl.isEnumLiteral() = false;
     eq EnumLiteralDecl.isEnumLiteral() = true;
     syn boolean InstComponentDecl.isEnumLiteral() = false;
     eq InstEnumLiteral.isEnumLiteral() = true;
@@ -1886,40 +1590,6 @@ aspect LineOffsets {
     public void StoredDefinition.setLineBreakMap(int[] map) {
         lineBreakMap = map;
     }
-}
-
-
-aspect ParserHelpers {
-
-    /**
-     * An exception for parser errors.
-     */
-    public class ParserException extends java.lang.RuntimeException {
-        private Problem p;
-        
-        /**
-         * Default constructor.
-         */
-        public ParserException(Problem p) {
-            this.p = p;
-        }
-        
-        /**
-         * Getter for problem.
-         */
-         public Problem getProblem() {
-             return p;
-         }
-         
-         /**
-          * Return String representation.
-          */
-         public String toString() {
-         	return getClass().getName() + ":\n" + p;
-         }
-        
-    }
-    
 }
 
 
