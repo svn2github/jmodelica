@@ -498,7 +498,7 @@ aspect GenerateEventIndicators {
                         }
                     }
                 } else if (exp.shouldGenerateIndicator() && eventVars) {
-                    //CR: REFACTOR
+                    //TODO: Duplicated
                     exp.genIndicator(eventOutputVars, eventVars);
                     generateEquation(exp.indicatorEquation(eventVars));
                     generateEquation(exp.switchEquation());
@@ -521,6 +521,7 @@ aspect GenerateEventIndicators {
                     addStatement(exp.indicatorStmt(eventVars));
                     if (eventVars) {
                         addStatement(exp.switchStmt());
+                        exp.replaceMe(exp.getSwitch().treeCopy());
                     }
                 }
             }
@@ -562,7 +563,7 @@ aspect GenerateEventIndicators {
         public void transform(FAbstractEquation eqn) {
             for (FRelExp exp : eqn.relExpInEquation()) {
                 if (exp.shouldGenerateIndicator() && eventVars) {
-                    //CR: REFACTOR
+                    //TODO: Duplicated
                     exp.genIndicator(eventOutputVars, eventVars);
                     generateEquation(exp.indicatorEquation(eventVars));
                     generateEquation(exp.switchEquation());

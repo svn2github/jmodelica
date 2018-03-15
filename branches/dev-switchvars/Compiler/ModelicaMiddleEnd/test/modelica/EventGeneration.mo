@@ -65,19 +65,19 @@ end EventGeneration.Nested;
 ")})));
 end Nested;
 
-model InAlgorithm
+model InAlgorithm1
   Real x;
 algorithm
   x := integer(3 + floor((time * 0.3) + 4.2) * 4);
 
   annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
-      name="EventGeneration_InAlgorithm",
+      name="EventGeneration_InAlgorithm1",
       event_output_vars=true,
       event_vars=true,
       description="Tests extraction of event generating expressions in algorithms.",
       flatModel="
-fclass EventGeneration.InAlgorithm
+fclass EventGeneration.InAlgorithm1
  Real x;
  discrete Real temp_1;
  discrete Integer temp_2;
@@ -100,18 +100,54 @@ algorithm
  temp_1 := if _switch_1 or _switch_2 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
  _eventIndicator_3 := if not initial() then pre(temp_2) - (3 + temp_1 * 4) else 1.0;
  _switch_3 := _eventIndicator_3 > 0;
- _eventIndicator_4 := if not initial() and not 3 + temp_1 * 4 < pre(temp_2) then 3 + temp_1 * 4 - (pre(temp_2) + 1) else 1.0;
+ _eventIndicator_4 := if not initial() and not _switch_3 then 3 + temp_1 * 4 - (pre(temp_2) + 1) else 1.0;
  _switch_4 := _eventIndicator_4 >= 0;
- temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ temp_2 := if _switch_3 or _switch_4 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 equation
  _eventIndicator_1 = if not initial() then pre(temp_1) - (time * 0.3 + 4.2) else 1.0;
  _switch_1 = _eventIndicator_1 > 0;
  _eventIndicator_2 = if not initial() and not _switch_1 then time * 0.3 + 4.2 - (pre(temp_1) + 1) else 1.0;
  _switch_2 = _eventIndicator_2 >= 0;
-end EventGeneration.InAlgorithm;
+end EventGeneration.InAlgorithm1;
 ")})));
-end InAlgorithm;
+end InAlgorithm1;
+
+model InAlgorithm2
+  Real x;
+algorithm
+  x := time;
+  x := integer(x + time * 4);
+
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="EventGeneration_InAlgorithm2",
+      event_output_vars=true,
+      event_vars=true,
+      description="Tests extraction of event generating expressions in algorithms.",
+      flatModel="
+fclass EventGeneration.InAlgorithm2
+ Real x;
+ discrete Integer temp_1;
+ output Real _eventIndicator_1;
+ discrete output Boolean _switch_1;
+ output Real _eventIndicator_2;
+ discrete output Boolean _switch_2;
+initial equation
+ pre(temp_1) = 0;
+ pre(_switch_1) = false;
+ pre(_switch_2) = false;
+algorithm
+ x := time;
+ _eventIndicator_1 := if not initial() then pre(temp_1) - (x + time * 4) else 1.0;
+ _switch_1 := _eventIndicator_1 > 0;
+ _eventIndicator_2 := if not initial() and not _switch_1 then x + time * 4 - (pre(temp_1) + 1) else 1.0;
+ _switch_2 := _eventIndicator_2 >= 0;
+ temp_1 := if _switch_1 or _switch_2 or initial() then integer(x + time * 4) else pre(temp_1);
+ x := temp_1;
+end EventGeneration.InAlgorithm2;
+")})));
+end InAlgorithm2;
 
 model InFunctionCall
 
@@ -380,16 +416,13 @@ fclass EventGeneration.OutputVarsTime2
  discrete Real t;
  output Real _eventIndicator_1;
  discrete output Boolean _switch_1;
- discrete Boolean temp_1;
 initial equation
  pre(t) = 0.0;
  pre(_switch_1) = false;
- pre(temp_1) = false;
 algorithm
  _eventIndicator_1 := time - t;
  _switch_1 := _eventIndicator_1 > 0;
- temp_1 := time > t;
- if temp_1 and not pre(temp_1) then
+ if _switch_1 and not pre(_switch_1) then
   t := 1;
  end if;
 end EventGeneration.OutputVarsTime2;
@@ -451,16 +484,13 @@ fclass EventGeneration.OutputVarsState2
  discrete Real t;
  output Real _eventIndicator_1;
  discrete output Boolean _switch_1;
- discrete Boolean temp_1;
 initial equation
  pre(t) = 0.0;
  pre(_switch_1) = false;
- pre(temp_1) = false;
 algorithm
  _eventIndicator_1 := sin(i) - t;
  _switch_1 := _eventIndicator_1 > 0;
- temp_1 := sin(i) > t;
- if temp_1 and not pre(temp_1) then
+ if _switch_1 and not pre(_switch_1) then
   t := 1;
  end if;
 end EventGeneration.OutputVarsState2;
