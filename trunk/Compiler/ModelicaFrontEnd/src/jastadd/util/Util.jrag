@@ -792,7 +792,7 @@ aspect Names {
     }
     eq FullClassDecl.getChild().packagePath(String name) {
         ClassDecl cd = simpleLookupClassDottedGlobal(name);
-        return (cd == null) ? null : cd.dirName();
+        return (cd == null || cd.isUnknown()) ? null : cd.dirName();
     }
 
   inh String ASTNode.topPackagePath();
@@ -808,8 +808,8 @@ aspect Names {
 
     ASTNode implements URIResolver.PackageNode;
 
-    public String ASTNode.resolveURI(String str) {
-        return URIResolver.DEFAULT.resolveURI(this, str);
+    public String ASTNode.resolveURI(String str) throws URIException {
+        return URIResolver.DEFAULT.resolveURIChecked(this, str);
     }
 
     inh InstClassDecl ASTNode.enclosingInstClassDecl();

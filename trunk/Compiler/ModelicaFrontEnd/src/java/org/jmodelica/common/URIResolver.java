@@ -19,7 +19,10 @@ public class URIResolver {
 
     public class URIException extends Exception {
         private static final long serialVersionUID = -2945381968691052204L;
-
+        
+        URIException(String message) {
+            super(message);
+        }
     }
 
     public static final URIResolver DEFAULT = new URIResolver();
@@ -51,20 +54,11 @@ public class URIResolver {
      * Resolves <code>str</code> to an absolute file path.
      * 
      * Supports file URI and modelica URI only. Returns null for unsupported
-     * schemes and malformed URIs.
-     */
-    public String resolveURI(PackageNode n, String str) {
-        return resolveURI(n, str, false);
-    }
-
-    /**
-     * Resolves <code>str</code> to an absolute file path.
-     * 
-     * Supports file URI and modelica URI only. Returns null for unsupported
      * schemes and malformed URIs. If error is true, also generate an error for
      * unsupported schemes.
+     * @throws URIException 
      */
-    public String resolveURI(PackageNode n, String str, boolean error) {
+    private String resolveURI(PackageNode n, String str, boolean error) throws URIException {
         try {
             URI uri = new URI(str);
             String scheme = scheme(uri);
@@ -81,6 +75,7 @@ public class URIResolver {
                 }
             }
         } catch (URISyntaxException e) {
+            throw new URIException( e.getMessage());
         }
         return null;
     }
@@ -91,10 +86,9 @@ public class URIResolver {
      * working directory)
      */
     public String resolve(PackageNode n, String str) {
-        String path = resolveURI(n, str, true);
-        if (path != null) {
-            return path;
-        } else {
+        try {
+            return resolveChecked(n, str);
+        } catch (URIException e) {
             return canonicalPath(new File(str));
         }
     }
@@ -111,7 +105,11 @@ public class URIResolver {
      *            the string to interpret as an URI
      */
     public String resolveInPackage(PackageNode n, String str) {
-        String path = resolveURI(n, str, true);
+        String path = null;
+        try {
+            path = resolveURI(n, str, true);
+        } catch (URIException e) {
+        }
         if (path != null) {
             return path;
         } else {
@@ -131,8 +129,20 @@ public class URIResolver {
     public String resolveURIChecked(PackageNode n, String str) throws URIException {
         String res = resolveURI(n, str, false);
         if (res == null) {
-            throw new URIException();
+            throw new URIException("Could not resolve URI: '" + str + "'");
         }
+        return res;
+    }
+
+    public String resolveChecked(PackageNode n, String str) throws URIException {
+        String res = resolveURI(n, str, true);
+        if (res == null) {
+            res = canonicalPath(new File(str));
+        }
+        //TODO: Fix unit tests broken by this
+//        if (!new File(res).exists()) {
+//            throw new URIException("Could not resolve URI or path: '" + str + "'");
+//        }
         return res;
     }
 

@@ -152,8 +152,8 @@ aspect FlatAnnotations {
             }
 
             @Override
-            public String resolveURI(String str) {
-                return URIResolver.DEFAULT.resolveURI(attributes.getFAttributeList(), str);
+            public String resolveURI(String str) throws URIException {
+                return URIResolver.DEFAULT.resolveURIChecked(attributes.getFAttributeList(), str);
             }
 
         }
