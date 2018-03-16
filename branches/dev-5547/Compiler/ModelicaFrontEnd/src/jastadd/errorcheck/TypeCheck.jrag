@@ -66,8 +66,8 @@ aspect FlatTypeCheck {
               InstComponentDecl declaredType = this;
               String subTypeMsg = declaredType.subType(superType);
               if (subTypeMsg != null) {
-                  ComponentDecl cd = declaredType.getComponentDecl();
-                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+                  ComponentClause cc = declaredType.myComponentClause();
+                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType, cc, subTypeMsg);
               }
         }
     }
@@ -96,8 +96,8 @@ aspect FlatTypeCheck {
         if (declaredType.hasInstConstrainingComponent()) {
             String subTypeMsg = declaredType.subType(superType);
             if (subTypeMsg != null) {
-                ComponentDecl cd = declaredType.getComponentDecl();
-                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+                ComponentClause cc = declaredType.myComponentClause();
+                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType, cc, subTypeMsg);
             }
         }
 
@@ -112,8 +112,8 @@ aspect FlatTypeCheck {
             if (declaredSubType.hasInstConstrainingComponent()) {
                 String subTypeMsg = declaredSubType.subType(constrainingSubType);
                 if (subTypeMsg != null) {
-                    ComponentDecl cd = declaredSubType.getComponentDecl();
-                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
+                    ComponentClause cc = declaredSubType.myComponentClause();
+                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType, cc, subTypeMsg);
                 }
             }
 
@@ -122,9 +122,10 @@ aspect FlatTypeCheck {
             // follows that declaredSubType is a subtype of superType by transitivity.
             String subTypeMsg = constrainingSubType.subType(superType);
             if (subTypeMsg != null) {
-                ComponentDecl cd = constrainingSubType.getComponentDecl();
-                ComponentDecl scd = superType.getComponentDecl();
-                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, scd, subTypeMsg);
+                ComponentClause cc = constrainingSubType.myComponentClause();
+                ComponentClause scc = superType.myComponentClause();
+                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType, 
+                        cc, scc, subTypeMsg);
             }
         
             // If the redeclaring declaration has a constraining clause, the constraining
@@ -140,7 +141,7 @@ aspect FlatTypeCheck {
             if (prevRedeclare != null && !prevRedeclare.getInstComponentDecl().isReplaceable() && 
                     prevRedeclare.myInstNode().commonAncestor(containingNode) == containingNode) {
                 PREV_REDECLARE_NOT_REPLACEABLE.invoke(declaredSubType, 
-                        declaredSubType.getComponentDecl(), declaredSubType.name());
+                        declaredSubType.myComponentClause(), declaredSubType.name());
             }
             
             prevRedeclare = redeclare;
@@ -148,13 +149,13 @@ aspect FlatTypeCheck {
     }
     
     public Iterable<InstComponentRedeclare> Environment.reverseComponentRedeclares(String name) {
-        Set<Modification> seen = new HashSet<Modification>();
-        ArrayList<InstComponentRedeclare> list = new ArrayList<InstComponentRedeclare>();
+        Set<SrcModificationOrRedeclareElement> seen = new HashSet<>();
+        ArrayList<InstComponentRedeclare> list = new ArrayList<>();
         
         for (InstModification im : this) {
             InstComponentRedeclare red = im.matchInstComponentRedeclare(name);
             if (red != null) {
-                Modification mod = red.getModification();
+                SrcModificationOrRedeclareElement mod = red.getModification();
                 if (!seen.contains(mod)) {
                     seen.add(mod);
                     list.add(red);

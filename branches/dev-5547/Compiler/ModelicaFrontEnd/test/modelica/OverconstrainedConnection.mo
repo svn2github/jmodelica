@@ -529,7 +529,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c3.t
     c4.t
@@ -569,13 +569,13 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c1.t
     c2.t
     c3.t
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c4.t
     c5.t
@@ -617,7 +617,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple definite roots in unbreakable subgraph in overconstrained connection graph
     Selected root: c1.t
     Other root: c2.t
@@ -662,7 +662,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple definite roots in unbreakable subgraph in overconstrained connection graph
     Selected root: c1.t
     Other root: c3.t
@@ -703,7 +703,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Unbreakable loop in overconstrained connection graph
     Selected root: c1.t
 ")})));
@@ -746,7 +746,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Unbreakable loop in overconstrained connection graph
     Selected root: c4.t
 ")})));
@@ -788,11 +788,11 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple root definitions for single connector in overconstrained connection graph
     Connector: c1.t
 
-Error at line 16, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
+Error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple root definitions for single connector in overconstrained connection graph
     Connector: c2.t
 ")})));

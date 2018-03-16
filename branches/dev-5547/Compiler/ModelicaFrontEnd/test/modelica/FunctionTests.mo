@@ -16136,7 +16136,7 @@ package DerivativeAnnotation
             errorMessage="
 1 errors found:
 
-Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Function name is missing in derivative annotation declaration
 ")})));
     end MissingReference1;
@@ -16158,7 +16158,7 @@ Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Cannot find function declaration for notAFunction
 ")})));
     end MissingDecl1;
@@ -16180,7 +16180,7 @@ Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Invalid derivative function reference
 ")})));
     end InvalidDecl1;
@@ -16205,7 +16205,7 @@ Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   The class B is not a function
 ")})));
     end InvalidDecl2;
@@ -16237,7 +16237,7 @@ Error at line 7, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 58, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple declarations of the order attribute
 ")})));
     end MultipleOrder1;
@@ -16269,7 +16269,7 @@ Error at line 7, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Expecting integer typed expression for order attribute
 ")})));
     end InvalidOrder1;
@@ -16301,7 +16301,7 @@ Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Order attribute must be greater or equal to one
 ")})));
     end InvalidOrder2;
@@ -16334,7 +16334,7 @@ Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 8, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 8, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions1;
@@ -16367,7 +16367,7 @@ Error at line 8, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 8, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 8, column 68, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions2;
@@ -16400,7 +16400,7 @@ Error at line 8, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 8, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 8, column 66, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions3;
@@ -16432,7 +16432,7 @@ Error at line 8, column 64, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Expecting variable reference for noDerivative annotation
 ")})));
     end InvalidVariable1;
@@ -16464,7 +16464,7 @@ Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Expecting variable reference for zeroDerivative annotation
 ")})));
     end InvalidVariable2;
@@ -16496,7 +16496,7 @@ Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Unable to find notAVar
 ")})));
     end InvalidVariable3;
@@ -16528,7 +16528,7 @@ Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   Unable to find notAVar
 ")})));
     end InvalidVariable4;
@@ -16560,7 +16560,7 @@ Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/Fun
             errorMessage="
 1 errors found:
 
-Error at line 7, column 48, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
+Error at line 7, column 49, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
   noDerivative annotation may only reference input variables
 ")})));
     end NonInputVariable1;
@@ -16812,7 +16812,7 @@ model ConstantInFunction1
             errorMessage="
 1 errors found:
 
-Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CONSTANT_INPUT:
+Error at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', CONSTANT_INPUT:
   Function input may not be constant
 
 ")})));

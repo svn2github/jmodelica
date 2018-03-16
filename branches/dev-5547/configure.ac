@@ -337,6 +337,7 @@ AS_IF([test "$with_mingw" != no],
 
 AM_CONDITIONAL([COPY_PTHREADS_LIB],[test "$with_mingw" != no -a "$with_tdm" = no])
 AM_CONDITIONAL([NUMPY_NO_MSVCR],[test "$with_mingw" != no -a "$with_tdm" = yes])
+AM_CONDITIONAL([USE_TDM_GCC], [test "$with_tdm" = yes])
 
 
 # Set output variables to be exported to the Makefiles
@@ -480,6 +481,7 @@ AC_CONFIG_FILES([
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile
+ ThirdParty/MSL/Makefile
  external/FMILibrary/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
