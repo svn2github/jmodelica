@@ -30,12 +30,15 @@ model Fmi1AbsoluteValue1
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"c\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"true\" />
     </ScalarVariable>
@@ -57,12 +60,15 @@ model Fmi2AbsoluteValue1
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"c\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"true\" />
     </ScalarVariable>

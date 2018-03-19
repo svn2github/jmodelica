@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Compiler ; #5584
+Added variable index comment before each variable in the FMI ModelVariables
+XML.
+
 ; Fixed ; Minor ; Compiler ; #5490
 Fixed bug that caused some errors to be reported on the wrong line.
 
