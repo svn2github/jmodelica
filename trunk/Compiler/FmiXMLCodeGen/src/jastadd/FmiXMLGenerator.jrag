@@ -46,18 +46,30 @@ aspect FmiXML {
         variableIndexMap.put(generateXMLName(), enumerator.next());
     }
 
-    public void FVariable.generateXMLDependencyIndex(Set<Integer> dependencyIndex, Map<String,Integer> variableIndexMap) {
-        dependencyIndex.add(variableIndexMap.get(generateXMLName()));
+    /**
+     * Returns the variable index in the xml for this variable! Only use this
+     * method if you're sure that it is generated in the XML, exception is
+     * given if the variable doesn't have any index!
+     */
+    syn int FVariable.fmiXMLVariableIndex() {
+        if (!generateXMLVariable()) {
+            throw new InternalCompilerError("Trying to get xml variable index for variable " + name() + ", this variable is not exposed in xml and does not have an index!");
+        }
+        Integer index = myFClass().xmlVariableIndexMap().get(generateXMLName());
+        if (index == null) {
+            throw new InternalCompilerError("Got null when retrieving xml variable index for variable " + name() + "!");
+        }
+        return index;
     }
 
-    public String FVariable.generateXMLName() {
-        return name();
+    public void FVariable.generateXMLDependencyIndex(Set<Integer> dependencyIndex) {
+        dependencyIndex.add(fmiXMLVariableIndex());
     }
 
-    public int FVariable.generateXMLValueReference() {
-        return valueReference();
-    }
-    
+    syn String FVariable.generateXMLName() = name();
+
+    syn int FVariable.generateXMLValueReference() = valueReference();
+
     public FExp FVariable.generateXMLStartExp() {
         if (useBindingExpAsStart()) 
             return getBindingExp();
@@ -356,6 +368,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 
         public void generateVariableChildren(CodeStream genPrinter, FVariable var) {
             variable = var;
+            generateComment("Variable with index #" + var.fmiXMLVariableIndex(), genPrinter);
             super.generateChildren(genPrinter);
         }
     }
@@ -1706,7 +1719,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
                 for (FVariable vv : dependentVariables(variable)) {
                     if (isInitialKnown(vv)) {
-                        vv.generateXMLDependencyIndex(dependencyIndex, fclass.xmlVariableIndexMap());
+                        vv.generateXMLDependencyIndex(dependencyIndex);
                         if (vv.numScalars() > 1) {
                             hasNonScalarDependency = true;
                         }
