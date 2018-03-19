@@ -1386,24 +1386,6 @@ aspect FlatFunctionUtils {
     
     syn boolean FFunctionDecl.derivativeEqualsZero() = !containsRealInputs() || !containsRealOutputs();
     
-    /**
-     * Determines if the compiler is able to differentiate this function declaration
-     */
-    syn boolean FFunctionDecl.canDifferentiate() {
-        if (derivativeFunctionUnrestricted() != null)
-            return true;
-        if (derivativeEqualsZero())
-            return true;
-        for (FStatement statement : getFAlgorithm().getFStatements())
-            if (!statement.canDifferentiate())
-                return false;
-        return true;
-    }
-    
-    syn boolean FStatement.canDifferentiate() = true;
-    eq FExternalStmt.canDifferentiate()       = false;
-    
-     
      /**
       * Returns a string (tersely) describing the signature of the function.
       * 
