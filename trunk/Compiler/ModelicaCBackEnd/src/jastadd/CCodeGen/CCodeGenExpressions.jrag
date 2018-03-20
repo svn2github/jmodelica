@@ -385,6 +385,8 @@ aspect CCodeGenExpressions {
     eq FClass.getChild().inGeneratedFunctionCall()        = false;
     eq InstRoot.getChild().inGeneratedFunctionCall()      = false;
     eq FExp.getChild().inGeneratedFunctionCall() = true;
+    eq FForIndex.getFExp().inGeneratedFunctionCall() = false;
+    eq FRangeExp.getChild().inGeneratedFunctionCall() = inGeneratedFunctionCall();
 
     public static final String FLitExp.macro_C = "AD_WRAP_LITERAL";
 

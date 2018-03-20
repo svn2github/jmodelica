@@ -751,10 +751,10 @@ void func_CCodeGenArrayTests_RecordArray10_f_def1(R_0_ra* r_a, jmi_real_t* y_o) 
     jmi_real_t i1_1i;
     jmi_real_t i1_1ie;
     i_0ie = jmi_array_size(r_a, 0) + 1 / 2.0;
-    for (i_0i = 1.0; i_0i < i_0ie; i_0i += 1) {
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
         temp_1_v = 0.0;
         i1_1ie = jmi_array_size(jmi_array_rec_1(r_a, i_0i)->x, 0) + 1 / 2.0;
-        for (i1_1i = 1.0; i1_1i < i1_1ie; i1_1i += 1) {
+        for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
             temp_1_v = temp_1_v + jmi_array_val_1(jmi_array_rec_1(r_a, i_0i)->x, i1_1i);
         }
         y_v = y_v + temp_1_v;
