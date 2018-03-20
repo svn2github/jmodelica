@@ -33,8 +33,8 @@
     <property name="jars" value="OptimicaCompiler,util,separateProcess"/>
     <property name="OptimicaCompiler.jar.packages" value="${base_package}"/>
     <property name="OptimicaCompiler.jar.include_resources" value="true"/>
-    <property name="util.jar.packages" value="org.jmodelica.util,org.jmodelica.common,org.jmodelica.api"/>
-    <property name="separateProcess.jar.packages" value="org.jmodelica.util,org.jmodelica.common,org.jmodelica.api,org.jmodelica.separateProcess"/>
+    <property name="util.jar.packages" value="org.jmodelica.util,org.jmodelica.api"/>
+    <property name="separateProcess.jar.packages" value="org.jmodelica.util,org.jmodelica.api,org.jmodelica.separateProcess"/>
     
     <import file="../build-base.xml"/>
 </project>

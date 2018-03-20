@@ -14,19 +14,56 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.jmodelica.util.ArrayUtil;
-
 aspect OptimicaPredefinedTypes {
 
-    refine PredefinedTypes eq Program.realAttributeDefs()    = 
-        ArrayUtil.append(
-                PredefinedTypes.Program.realAttributeDefs(), 
-                makeAttributeDef("initialGuess", "Real", "0.0"), 
-                makeAttributeDef("free", "Boolean", "false"));
-    refine PredefinedTypes eq Program.integerAttributeDefs() = 
-        ArrayUtil.append(
-                PredefinedTypes.Program.integerAttributeDefs(), 
-                makeAttributeDef("initialGuess", "Integer", "0"), 
-                makeAttributeDef("free", "Boolean", "false"));
+	/**
+	 * This attribute defines the NTA for predefined types
+	 * which contains a list of predefined PrimitiveClassDef:s.
+	 */
+	refine PredefinedTypes eq Program.getPredefinedTypeList() {
+        log.debug("Optimica: Program.getPredefinedTypeList()");
+		List l = PredefinedTypes.Program.getPredefinedTypeList();
+		for (int i=0;i<l.getNumChild();i++) {
+            if (!(l.getChild(i) instanceof PrimitiveClassDecl)) {
+                continue;
+            }
+			PrimitiveClassDecl cd = (PrimitiveClassDecl)l.getChild(i);
+            ParserHandler parserHandler = root().getUtilInterface().getParserHandler();
+			if (cd.name().equals("Real")) {
+			    ComponentDecl compDecl = new ComponentDecl(true,
+				                                      "RealType",
+				                                      "initialGuess",
+				                                      "0.0",
+				                                      parserHandler); 
+				cd.addComponentDecl(compDecl);
+				compDecl = new ComponentDecl(true,
+				                                      "BooleanType",
+				                                      "free",
+				                                      "false",
+				                                      parserHandler); 
+				cd.addComponentDecl(compDecl);
+			}
+			if (cd.name().equals("Integer")) {
+			    ComponentDecl compDecl = new ComponentDecl(true,
+				                                      "IntegerType",
+				                                      "initialGuess",
+				                                      "0",
+				                                      parserHandler); 
+				cd.addComponentDecl(compDecl);
+				compDecl = new ComponentDecl(true,
+				                                      "BooleanType",
+				                                      "free",
+				                                      "false",
+				                                      parserHandler); 
+				cd.addComponentDecl(compDecl);
+			}
+
+		
+		}		
+		return l;
+	}
+	
+	
+
 
 }

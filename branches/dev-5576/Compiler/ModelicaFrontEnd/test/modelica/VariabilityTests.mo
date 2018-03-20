@@ -113,7 +113,7 @@ initial equation
             errorMessage="
 1 warnings found:
 
-Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
+Warning at line 1, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/VariabilityTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 ")})));
 end EvaluateAnnotation2_Warn;

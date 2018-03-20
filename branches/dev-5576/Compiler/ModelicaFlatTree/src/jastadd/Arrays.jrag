@@ -26,20 +26,37 @@ import java.util.NoSuchElementException;
 aspect Arrays {
 
 	/**
+	 * Get the array subscripts of a ComponentDecl.
+	 * 
+	 * @return If the ComponentDecl has subscripts, then return these, otherwise
+	 * null.
+	 */
+	syn lazy ArraySubscripts ComponentDecl.arraySubscripts() =
+		hasVarArraySubscripts() ? getVarArraySubscripts() : null;
+
+	/**
 	 * Check if an expression is inside array subscripts.
 	 */
 	inh boolean FExp.inArraySubscripts();
 	eq FArraySubscripts.getChild().inArraySubscripts() = true;
 	eq FAbstractEquation.getChild().inArraySubscripts() = false;
 	eq Root.getChild().inArraySubscripts() = false;
-
-    /**
-     * Check if an access is an array access.
-     * 
-     * @return True if the access has array subscripts, otherwise false.
-     */
-    syn boolean Access.isArrayAccess() = false;
-    eq ArrayAccess.isArrayAccess()     = true;
+	
+	/**
+	 * Check if an access is an array access.
+	 * 
+	 * @return True if the access has array subscripts, otherwise false.
+	 */
+	syn boolean Access.isArrayAccess() = false;
+	eq ArrayAccess.isArrayAccess() = hasArraySubscripts();
+	
+	/**
+	 * Get the array subscripts of an access, if any.
+	 * 
+	 * @return The array subscripts of the access, if any, otherwise null.
+	 */
+	syn ArraySubscripts Access.arraySubscripts() = null;
+	eq ArrayAccess.arraySubscripts() = hasArraySubscripts()? getArraySubscripts(): null;
 
 	/**
 	 * Return an Index with these array subscripts.
@@ -2381,17 +2398,16 @@ aspect ArrayHelpers {
 		private Size() {
 			size = new int[0];
 		}
-
-        /**
-         * Constructs a Size with the given lengths.
-         */
-        public Size(int... size) {
-            if (size.length == 0)
-                throw new IllegalArgumentException(
-                        "Can't create 0-dimensional Size object, use Size.SCALAR instead.");
-            this.size = size;
-        }
-
+		
+		/**
+		 * Constructs a Size with the given lengths.
+		 */
+		public Size(int... size) {
+			if (size.length == 0)
+				throw new IllegalArgumentException();
+			this.size = size;
+		}
+		
 		/**
 		 * Get the number of dimensions.
 		 */

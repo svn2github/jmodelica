@@ -2006,10 +2006,10 @@ Error at line 13, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/Op
             errorMessage="
 2 errors found:
 
-Error at line 7, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
+Error at line 6, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Output of operator record constructor must be of the type of the operator record the constructor belongs to
 
-Error at line 13, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
+Error at line 12, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Output of operator record constructor must be of the type of the operator record the constructor belongs to
 ")})));
     end OperatorLimitations7;
@@ -2165,7 +2165,7 @@ end OperatorRecordTests.OperatorLimitations10;
             errorMessage="
 3 errors found:
 
-Error at line 6, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
+Error at line 5, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
   Components are not allowed in packages in operator records
 
 Error at line 8, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo':
@@ -2211,7 +2211,7 @@ Error at line 3, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/Ope
             errorMessage="
 1 errors found:
 
-Error at line 2, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
+Error at line 2, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
@@ -2411,7 +2411,7 @@ end OperatorRecordTests.OperatorLimitations15b;
             errorMessage="
 1 errors found:
 
-Error at line 2, column 47, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
+Error at line 2, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/OperatorRecordTests.mo',
 In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));

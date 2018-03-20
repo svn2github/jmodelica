@@ -16,9 +16,6 @@
 package org.jmodelica.junit;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,7 +41,6 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
     private Description desc;
     private TestSpecification spec;
     private File testFile;
-    private Map<String,String> modelNames;
 
     public TestTreeRunner(
             TestSpecification spec, UniqueNameCreator nc, File testFile, String parentName, String packageName) 
@@ -70,7 +66,6 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
         caseDesc = new HashMap<String,Description>();
         runners = new HashMap<String,TestTreeRunner>();
         children = new ArrayList<GenericTestTreeNode>();
-        modelNames = new HashMap<String,String>();
         int i = 0;
         for (GenericTestTreeNode test : tree) {
             i++;
@@ -94,16 +89,10 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 }
             } 
             if (!(test instanceof TestTree)) {
-                String maybeSubTestName = test.getName();
                 // TODO: Upgrade JUnit version, then use createTestDescription(String, String) instead
                 String descStr = String.format("%s(%s)", nc.makeUnique(testName), packageName);
                 chDesc = Description.createSuiteDescription(descStr);
-                caseDesc.put(maybeSubTestName, chDesc);
-                if(name.equals(testFile.getName())) { //Top-level test
-                    modelNames.put(maybeSubTestName, testName);
-                } else {
-                    modelNames.put(maybeSubTestName, String.format("%s.%s", name, testName));
-                }
+                caseDesc.put(test.getName(), chDesc);
             }
             desc.addChild(chDesc);
             children.add(test);
@@ -132,11 +121,6 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 ((GenericTestCase) test).testMe(spec.asserter());
             } catch (Throwable e) {
                 note.fireTestFailure(new Failure(d, e));
-                try(PrintWriter pw = new PrintWriter(new FileOutputStream(new File("failing-tests.csv"), true))) {
-                    pw.println(testFile.getAbsolutePath()+","+modelNames.get(test.getName()));
-                } catch (FileNotFoundException e1) {
-                    e1.printStackTrace();
-                }
             }
             note.fireTestFinished(d);
         }

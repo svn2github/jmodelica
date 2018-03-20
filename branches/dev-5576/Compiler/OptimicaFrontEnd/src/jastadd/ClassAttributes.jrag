@@ -17,59 +17,49 @@
 aspect ClassAttributes {
 
     syn lazy List OptClassDecl.getClassAttributeList() {
-        List<ComponentClause> l = new List<>();
+        List l = new List();
         
-        // Build a string with a Modelica class that has the class attributes as components
-        String builtInDef = 
-                "model ClassAttributes\n" + 
-                "    Real objective = 1;\n" + 
-                "    Real objectiveIntegrand = 1;\n" + 
-                "    parameter Real startTime = 0;\n" + 
-                "    parameter Real finalTime(initialGuess = 1) = 1;\n" + 
-                "    parameter Boolean static = false;\n" + 
-                "end ClassAttributes;\n";
+        // Build a string with a Modelica class corresponding to Real
+        String builtInDef = "model ClassAttributes\n";
+        builtInDef += "Real objective = 1;\n"; 
+        builtInDef += "Real objectiveIntegrand = 1;\n"; 
+        builtInDef += "parameter Real startTime=0;\n";
+        builtInDef += "parameter Real finalTime(initialGuess=1)=1;\n";
+        builtInDef += "parameter Boolean static=false;\n";
+        builtInDef += "end ClassAttributes;\n";
         
         PrimitiveClassDecl pcd = null;
         try {
             UtilInterface util = root().getUtilInterface();
             SourceRoot sr = util.getParserHandler().parseString(util, builtInDef, "");
             Program p = sr.getProgram();
-            FullClassDecl cd = p.getUnstructuredEntity(0).getClassDecl(0).asFullClassDecl();
-            for (ComponentClause comp : cd.componentClauses()) {
+            FullClassDecl cd = (FullClassDecl) (p.getUnstructuredEntity(0).getElement(0));
+            for (ComponentDecl comp : cd.getComponentDecls()) 
                 l.add(comp);
-            }
         } catch(Exception e) {
             // TODO: Do something constuctive here, and change catch from Exception to only the ones we have to
         }
         return l;
     }
 
-    syn Iterable<ComponentDecl> OptClassDecl.classAttributes() = 
-        new NestledIterable<ComponentDecl,ComponentClause>(getClassAttributes()) {
-            protected Iterable<ComponentDecl> subIterable(ComponentClause c) {
-                return c.getComponentDecls();
-            }
-        };
+	eq InstTimedVariable.getName().kind() = Kind.COMPONENT_ACCESS;
+	
+	syn lazy List InstOptClassDecl.getInstClassAttributeList() {
+		List l = new List();
+		for (ComponentDecl cd : ((OptClassDecl)getClassDecl()).getClassAttributes()) {
+    		InstAccess name = cd.getClassName().newInstAccess();
+			l.add(new InstCreateComponentDecl(cd, this));
+		}
+		return l;
+	}
 
-    syn OptClassDecl InstOptClassDecl.getOptClassDecl() = (OptClassDecl) getClassDecl();
-
-    syn lazy List InstOptClassDecl.getInstClassAttributeList() {
-        List l = new List();
-        for (ComponentDecl cd : getOptClassDecl().classAttributes()) {
-            InstAccess name = cd.getClassName().newInstAccess();
-            l.add(new InstCreateComponentDecl(cd, this));
-        }
-        return l;
-    }
-
-    eq InstOptClassDecl.localInstModifications() {
-        ArrayList<InstModification> l = new ArrayList<InstModification>();
-        // Add modifications from the class modification list
-        if (hasInstClassModification()) {
-            l.add(getInstClassModification());
-        }
-        return l;
-    }
+ 	eq InstOptClassDecl.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		// Add modifications from the class modification list
+		if (hasInstClassModification())
+			l.add(getInstClassModification());			
+		return l;
+	}
 
     eq InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) {
         for (InstComponentDecl ica : getInstClassAttributes()) {

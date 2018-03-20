@@ -66,8 +66,8 @@ aspect FlatTypeCheck {
               InstComponentDecl declaredType = this;
               String subTypeMsg = declaredType.subType(superType);
               if (subTypeMsg != null) {
-                  ComponentClause cc = declaredType.myComponentClause();
-                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType, cc, subTypeMsg);
+                  ComponentDecl cd = declaredType.getComponentDecl();
+                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
               }
         }
     }
@@ -96,8 +96,8 @@ aspect FlatTypeCheck {
         if (declaredType.hasInstConstrainingComponent()) {
             String subTypeMsg = declaredType.subType(superType);
             if (subTypeMsg != null) {
-                ComponentClause cc = declaredType.myComponentClause();
-                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType, cc, subTypeMsg);
+                ComponentDecl cd = declaredType.getComponentDecl();
+                CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
             }
         }
 
@@ -112,8 +112,8 @@ aspect FlatTypeCheck {
             if (declaredSubType.hasInstConstrainingComponent()) {
                 String subTypeMsg = declaredSubType.subType(constrainingSubType);
                 if (subTypeMsg != null) {
-                    ComponentClause cc = declaredSubType.myComponentClause();
-                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType, cc, subTypeMsg);
+                    ComponentDecl cd = declaredSubType.getComponentDecl();
+                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, subTypeMsg);
                 }
             }
 
@@ -122,10 +122,9 @@ aspect FlatTypeCheck {
             // follows that declaredSubType is a subtype of superType by transitivity.
             String subTypeMsg = constrainingSubType.subType(superType);
             if (subTypeMsg != null) {
-                ComponentClause cc = constrainingSubType.myComponentClause();
-                ComponentClause scc = superType.myComponentClause();
-                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType, 
-                        cc, scc, subTypeMsg);
+                ComponentDecl cd = constrainingSubType.getComponentDecl();
+                ComponentDecl scd = superType.getComponentDecl();
+                REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(cd, cd, scd, subTypeMsg);
             }
         
             // If the redeclaring declaration has a constraining clause, the constraining
@@ -141,7 +140,7 @@ aspect FlatTypeCheck {
             if (prevRedeclare != null && !prevRedeclare.getInstComponentDecl().isReplaceable() && 
                     prevRedeclare.myInstNode().commonAncestor(containingNode) == containingNode) {
                 PREV_REDECLARE_NOT_REPLACEABLE.invoke(declaredSubType, 
-                        declaredSubType.myComponentClause(), declaredSubType.name());
+                        declaredSubType.getComponentDecl(), declaredSubType.name());
             }
             
             prevRedeclare = redeclare;
@@ -149,13 +148,13 @@ aspect FlatTypeCheck {
     }
     
     public Iterable<InstComponentRedeclare> Environment.reverseComponentRedeclares(String name) {
-        Set<SrcModificationOrRedeclareElement> seen = new HashSet<>();
-        ArrayList<InstComponentRedeclare> list = new ArrayList<>();
+        Set<Modification> seen = new HashSet<Modification>();
+        ArrayList<InstComponentRedeclare> list = new ArrayList<InstComponentRedeclare>();
         
         for (InstModification im : this) {
             InstComponentRedeclare red = im.matchInstComponentRedeclare(name);
             if (red != null) {
-                SrcModificationOrRedeclareElement mod = red.getModification();
+                Modification mod = red.getModification();
                 if (!seen.contains(mod)) {
                     seen.add(mod);
                     list.add(red);
@@ -519,15 +518,13 @@ aspect FlatTypeCheck {
     syn boolean FFunctionVariable.isExternalFunction()   = false;
 
     syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
-    syn boolean FFunctionDecl.isExternalFunction() = getFirstExternalStmt() != null;
-
-    syn FExternalStmt FFunctionDecl.getFirstExternalStmt() {
+    syn boolean FFunctionDecl.isExternalFunction() {
         for (FStatement stmt : getFAlgorithm().getFStatements()) {
             if (stmt.isExternalStatement()) {
-                return (FExternalStmt) stmt;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     syn boolean FStatement.isExternalStatement() = false;

@@ -31,6 +31,13 @@ aspect CCodeGenFunctionIO {
         }
     }
     
+    
+    syn boolean FFunctionCallLeft.replaceWithTemp()         = hasFExp() && getFExp().replaceWithTemp(true);
+    syn boolean FExp.replaceWithTemp(boolean output)        = isComposite() || (output && type().isString());
+    eq FLitExp.replaceWithTemp(boolean output)              = output;
+    eq FIdUseExp.replaceWithTemp(boolean output)            = isSlice() || (output && (!inFunction() || alsoInRHS() || type().isString()));
+    eq FPartialFunctionCall.replaceWithTemp(boolean output) = true;
+    
     syn boolean FIdUseExp.alsoInRHS() {
         FAbstractFunctionCall call = myFunctionCall();
         FAbstractVariable var = myFV();
@@ -45,7 +52,7 @@ aspect CCodeGenFunctionIO {
     
     
     public void FExp.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.needsTemp(this)) {
+        if (replaceWithTemp(false)) {
             p.print(this, indent, type(), p.createDeclPrinter(str));
         }
     }
@@ -65,7 +72,7 @@ aspect CCodeGenFunctionIO {
     }
     
     public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.needsTemp(this)) {
+        if (replaceWithTemp(false)) {
             p.print(this, indent, type(), p.createInitPrinter(str));
             p.printTempInputAssigns(str, indent, this);
         }
@@ -85,7 +92,7 @@ aspect CCodeGenFunctionIO {
     }
     
     public void FExp.genArgument(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        if (p.codePrinter().needsTemp(this)) {
+        if (replaceWithTemp(false)) {
             str.print(p.name(this));
         } else {
             p.print(this, str, indent);
@@ -117,14 +124,14 @@ aspect CCodeGenFunctionIO {
     
     @Override
     public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.needsTemp(this)) {
+        if (replaceWithTemp()) {
             p.print(this, indent, type(), p.createDeclPrinter(str));
         }
     }
     
     @Override
     public void FFunctionCallLeft.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        if (p.needsTemp(this)) {
+        if (replaceWithTemp()) {
             p.print(this, indent, type(), p.createInitSetPrinter(str));
         }
     }
@@ -299,7 +306,7 @@ aspect CodeFuncCallInOutArgPrinters {
 
     public void FFunctionCallLeft.genWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent,
             Collection<FVariable> forVariables) {
-        if (p.needsTemp(this)) {
+        if (replaceWithTemp()) {
             p.printWriteBackAssignment(str, indent, this, forVariables);
         }
     }
@@ -509,7 +516,7 @@ aspect CodeFuncCallInOutArg {
      * Helper interface for ASTNodes which handles writebacks to multiple
      * variables even after scalarization.
      */
-    public interface FCompositeWriteBackNode extends TypePrintable_C {
+    public interface FCompositeWriteBackNode extends TypePrintable {
         public FExp getFExp();
     }
     

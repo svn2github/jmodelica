@@ -28,9 +28,7 @@ aspect CCodeGenFunctionPartial {
         str.println(";");
     }
     
-    public class StructComputation {
-        int iArg; //iteration index over arguments.length
-    }
+    public class StructComputation {}
 
     public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent, Direction direction, Iterable<FExp> args) {}
@@ -96,10 +94,8 @@ aspect CCodeGenFunctionPartial {
 
     public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             ArrayList<FFunctionVariable> variables) {
-        iArg = 0;
         for (FFunctionVariable v : variables) {
             p.print(v, str, indent, this);
-            iArg++;
         }
     }
 
@@ -175,6 +171,7 @@ aspect CCodeGenFunctionPartial {
     }
 
     public class TempNameStructComputation extends StructComputation {
+        int iArg; //iteration index over arguments.length
         int i; // iteration index of tempNames.length
         String[] tempNames;
         public TempNameStructComputation() {

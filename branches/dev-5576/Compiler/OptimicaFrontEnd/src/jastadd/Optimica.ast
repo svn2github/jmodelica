@@ -14,7 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-OptClassDecl : FullClassDecl ::= [ClassModification] /ClassAttribute:ComponentClause*/;
+OptClassDecl : FullClassDecl ::= [ClassModification] Constraint* /ClassAttribute:ComponentDecl*/;
+PN_OptClassDecl : PN_FullClassDecl ::= [ClassModification];
 
 ConstraintClause : Clause ::= Constraint*;
 

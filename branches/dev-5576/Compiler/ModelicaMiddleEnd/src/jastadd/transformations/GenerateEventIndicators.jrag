@@ -618,9 +618,8 @@ aspect GenerateEventIndicators {
      * Creates an indicator for this FRelExp.
      */
     public void FRelExp.genIndicator(boolean output) {
-        String variableName = calcIndicatorVarName();
         FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(),
-                new FQNameFull(variableName));
+                new FQNameFull(calcIndicatorVarName()));
 
         if (output) {
             v.setFTypePrefixInputOutput(new FOutput());
@@ -628,13 +627,12 @@ aspect GenerateEventIndicators {
 
         myFClass().addFVariable(v);
         setIndicator(v.createUseExp());
-        setIndicatorVarName(variableName);
     }
 
     /**
-     * Creates an expression for the event indicator.
+     * Generates an expression for the event indicator.
      */
-    public FExp FRelExp.indicatorExp() {
+    syn FExp FRelExp.indicatorExp() {
         FExp res = new FSubExp(getLeft().fullCopy(), getRight().fullCopy());
 
         if (myOptions().getBooleanOption("event_indicator_scaling")) {

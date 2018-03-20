@@ -1188,10 +1188,9 @@ model Comment1
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
-    <!-- Variable with index #1 -->
-    <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A comment    without backslashes.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-        <Real relativeQuantity=\"false\" />
-    </ScalarVariable>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A comment    without backslashes.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
 </ModelVariables>
 ")})));
 end Comment1;
@@ -1205,10 +1204,9 @@ model Comment2
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
-    <!-- Variable with index #1 -->
-    <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-        <Real relativeQuantity=\"false\" />
-    </ScalarVariable>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
 </ModelVariables>
 ")})));
 end Comment2;
@@ -1222,10 +1220,9 @@ model Comment3
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
-    <!-- Variable with index #1 -->
-    <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A comment.&quot;\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
-        <Real relativeQuantity=\"false\" />
-    </ScalarVariable>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A comment.&quot;\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
 </ModelVariables>
 ")})));
 end Comment3;
@@ -1240,10 +1237,9 @@ model Comment4
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
-    <!-- Variable with index #1 -->
-    <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.&quot;\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
-        <Real relativeQuantity=\"false\" />
-    </ScalarVariable>
+  <ScalarVariable name=\"x\" valueReference=\"0\" description=\"&quot;A &amp;comment&quot; &apos;with &lt;escaped &gt;characters.&quot;\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+    <Real relativeQuantity=\"false\" />
+  </ScalarVariable>
 </ModelVariables>
 ")})));
 end Comment4;

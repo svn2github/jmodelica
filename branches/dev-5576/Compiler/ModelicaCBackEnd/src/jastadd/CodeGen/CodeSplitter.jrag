@@ -182,12 +182,12 @@ aspect CodeSplitter {
         return n;
     }
 
-    eq FFunctionCallLeft.numScalars_C() = needsTemp_C() ? type().numScalarElements() : 0;
+    eq FFunctionCallLeft.numScalars_C() = replaceWithTemp() ? type().numScalarElements() : 0;
 
     eq FFunctionCall.numScalars_C() {
         int n = super.numScalars_C();
         for (FExp exp : getArgs()) { 
-            if (exp.needsTemp_C()) {
+            if (exp.replaceWithTemp(false)) {
                 n += exp.type().numScalarElements();
             }
         }

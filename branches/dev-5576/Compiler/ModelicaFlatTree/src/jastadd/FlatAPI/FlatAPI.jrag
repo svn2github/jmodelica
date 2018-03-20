@@ -3289,12 +3289,6 @@ aspect FVariableUses {
     eq FClass.getChild().inFunctionCallLeft()            = false;
     eq InstRoot.getChild().inFunctionCallLeft()          = false;
     
-    inh boolean FExp.isFunctionCallLeft();
-    eq FFunctionCallLeft.getChild().isFunctionCallLeft() = true;
-    eq FExp.getChild().isFunctionCallLeft()              = false;
-    eq FClass.getChild().isFunctionCallLeft()            = false;
-    eq InstRoot.getChild().isFunctionCallLeft()          = false;
-    
     /**
      * Checks if this expression is used in a function call
      */
@@ -4395,9 +4389,9 @@ aspect FlatExternalFunctionAPI {
         }
         
         if (includeDir != null) 
-            includeDir = URIResolver.DEFAULT.resolve(n, includeDir);
+            includeDir = n.resolve(includeDir);
         if (libraryDir != null) {
-            libraryDir = URIResolver.DEFAULT.resolve(n, libraryDir);
+            libraryDir = n.resolve(libraryDir);
         }
     }
 
