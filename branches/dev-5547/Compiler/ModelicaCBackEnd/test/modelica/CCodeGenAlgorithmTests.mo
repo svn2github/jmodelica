@@ -25,19 +25,19 @@ equation
 algorithm
  x := 5;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm1",
-            description="C code generation of algorithms",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm1",
+        description="C code generation of algorithms",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 
 
 
@@ -45,7 +45,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = 5;
-    _y_1 = _x_0 + 2;
+    _y_1 = _x_0 + 2.0;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -62,19 +62,19 @@ algorithm
  x := 5;
  x := x + 2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm2",
-            description="C code generation of algorithms",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm2",
+        description="C code generation of algorithms",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 
 
 
@@ -82,8 +82,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = 5;
-    _x_0 = _x_0 + 2;
-    _y_1 = _x_0 + 2;
+    _x_0 = _x_0 + 2.0;
+    _y_1 = _x_0 + 2.0;
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -100,20 +100,20 @@ algorithm
  x := y;
  x := x * 2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm3a",
-            description="C code generation of algorithms - in block",
-            generate_ode=true,
-            equation_sorting=true,
-            automatic_tearing=false,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm3a",
+        description="C code generation of algorithms - in block",
+        generate_ode=true,
+        equation_sorting=true,
+        automatic_tearing=false,
+        variability_propagation=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -125,7 +125,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
-        (*res)[1] = 2;
+        (*res)[1] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
         x[1] = _y_1;
@@ -137,10 +137,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             tmp_1 = _x_0;
             _x_0 = _y_1;
-            _x_0 = _x_0 * 2;
+            _x_0 = _x_0 * 2.0;
             JMI_SWAP(GEN, _x_0, tmp_1)
             (*res)[0] = tmp_1 - (_x_0);
-            (*res)[1] = _x_0 + 2 - (_y_1);
+            (*res)[1] = _x_0 + 2.0 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -159,7 +159,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
-        (*res)[1] = 2;
+        (*res)[1] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
         x[1] = _y_1;
@@ -171,10 +171,10 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             tmp_1 = _x_0;
             _x_0 = _y_1;
-            _x_0 = _x_0 * 2;
+            _x_0 = _x_0 * 2.0;
             JMI_SWAP(GEN, _x_0, tmp_1)
             (*res)[0] = tmp_1 - (_x_0);
-            (*res)[1] = _x_0 + 2 - (_y_1);
+            (*res)[1] = _x_0 + 2.0 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -202,19 +202,19 @@ algorithm
  x := y;
  x := x * 2;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm3b",
-            description="C code generation of algorithms - in torn block",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm3b",
+        description="C code generation of algorithms - in torn block",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -225,7 +225,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
         x[0] = 0;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 2;
+        (*res)[0] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_1;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -233,9 +233,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _y_1 = x[0];
         }
         _x_0 = _y_1;
-        _x_0 = _x_0 * 2;
+        _x_0 = _x_0 * 2.0;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_0 + 2 - (_y_1);
+            (*res)[0] = _x_0 + 2.0 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -253,7 +253,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
         x[0] = 0;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 2;
+        (*res)[0] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_1;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -261,9 +261,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _y_1 = x[0];
         }
         _x_0 = _y_1;
-        _x_0 = _x_0 * 2;
+        _x_0 = _x_0 * 2.0;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_0 + 2 - (_y_1);
+            (*res)[0] = _x_0 + 2.0 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -291,20 +291,20 @@ algorithm
     y:= x*2 + 2;
     z:= y + x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm4a",
-            description="C code generation of algorithms - in block",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            automatic_tearing=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm4a",
+        description="C code generation of algorithms - in block",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        automatic_tearing=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -319,7 +319,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
         (*res)[1] = (*res)[0];
-        (*res)[2] = 3;
+        (*res)[2] = 3.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
         x[1] = _y_1;
@@ -333,7 +333,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             tmp_1 = _y_1;
             tmp_2 = _z_2;
-            _y_1 = _x_0 * 2 + 2;
+            _y_1 = _x_0 * 2.0 + 2.0;
             _z_2 = _y_1 + _x_0;
             JMI_SWAP(GEN, _y_1, tmp_1)
             JMI_SWAP(GEN, _z_2, tmp_2)
@@ -361,7 +361,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
         (*res)[1] = (*res)[0];
-        (*res)[2] = 3;
+        (*res)[2] = 3.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
         x[1] = _y_1;
@@ -375,7 +375,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             tmp_1 = _y_1;
             tmp_2 = _z_2;
-            _y_1 = _x_0 * 2 + 2;
+            _y_1 = _x_0 * 2.0 + 2.0;
             _z_2 = _y_1 + _x_0;
             JMI_SWAP(GEN, _y_1, tmp_1)
             JMI_SWAP(GEN, _z_2, tmp_2)
@@ -408,19 +408,19 @@ algorithm
     y:= x*2 + 2;
     z:= y + x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm4b",
-            description="C code generation of algorithms - in torn block",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm4b",
+        description="C code generation of algorithms - in torn block",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -432,14 +432,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = 2;
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 3;
+        (*res)[0] = 3.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
-        _y_1 = _x_0 * 2 + 2;
+        _y_1 = _x_0 * 2.0 + 2.0;
         _z_2 = _y_1 + _x_0;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = 3 - (_y_1 + _x_0 + _z_2);
@@ -461,14 +461,14 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = 2;
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 3;
+        (*res)[0] = 3.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
-        _y_1 = _x_0 * 2 + 2;
+        _y_1 = _x_0 * 2.0 + 2.0;
         _z_2 = _y_1 + _x_0;
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = 3 - (_y_1 + _x_0 + _z_2);
@@ -502,19 +502,19 @@ algorithm
   end while;
  end while;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm5",
-            description="C code generation of algorithm with while loops",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm5",
+        description="C code generation of algorithm with while loops",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 
 
 
@@ -522,10 +522,10 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = 0.5;
-    while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE))) {
-        while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE))) {
-            while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE))) {
-                _x_0 = _x_0 + 1;
+    while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(1.0), JMI_TRUE, JMI_FALSE))) {
+        while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(2.0), JMI_TRUE, JMI_FALSE))) {
+            while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(3.0), JMI_TRUE, JMI_FALSE))) {
+                _x_0 = _x_0 + 1.0;
             }
         }
     }
@@ -556,17 +556,16 @@ algorithm
     x := x + 1;
  end while;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm6",
-            description="C code generation of algorithm with while loops",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
-$C_ode_derivatives$
-",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm6",
+        description="C code generation of algorithm with while loops",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -575,7 +574,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, ((floor(_x_0))), 1, ((floor(_x_0))))
     func_CCodeGenAlgorithmTests_Algorithm6_g_def1(_x_0, (floor(_x_0)), tmp_1);
     while (func_CCodeGenAlgorithmTests_Algorithm6_f_exp0(tmp_1)) {
-        _x_0 = _x_0 + 1;
+        _x_0 = _x_0 + 1.0;
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, ((floor(_x_0))), 1, ((floor(_x_0))))
         func_CCodeGenAlgorithmTests_Algorithm6_g_def1(_x_0, (floor(_x_0)), tmp_1);
     }
@@ -612,17 +611,16 @@ model Algorithm6b
             x := x + 1;
         end while;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm6b",
-            description="C code generation of algorithm with while loops",
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
-$C_ode_derivatives$
-",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm6b",
+        description="C code generation of algorithm with while loops",
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -633,20 +631,20 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 3, 1)
     _x_0 = 0.5;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
-    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_1);
+    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3.0), tmp_1);
     memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_1, 1), 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1, 3)
-    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_2);
+    func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3.0), tmp_2);
     memcpy(&_temp_2_1_4, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)), 1, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)))
     func_CCodeGenAlgorithmTests_Algorithm6b_g_def1(_x_0, _temp_1_1_1 + _temp_1_2_2 + _temp_1_3_3, tmp_3);
     while (func_CCodeGenAlgorithmTests_Algorithm6b_f_exp0(tmp_3)) {
-        _x_0 = _x_0 + 1;
+        _x_0 = _x_0 + 1.0;
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_4, 3, 1, 3)
-        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_4);
+        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3.0), tmp_4);
         memcpy(&_temp_1_1_1, &jmi_array_val_1(tmp_4, 1), 3 * sizeof(jmi_real_t));
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 3, 1, 3)
-        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3), tmp_5);
+        func_CCodeGenAlgorithmTests_Algorithm6b_k_def2(_time, AD_WRAP_LITERAL(3.0), tmp_5);
         memcpy(&_temp_2_1_4, &jmi_array_val_1(tmp_5, 1), 3 * sizeof(jmi_real_t));
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_3, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)), 1, (floor(_temp_2_1_4 + _temp_2_2_5 + _temp_2_3_6)))
         func_CCodeGenAlgorithmTests_Algorithm6b_g_def1(_x_0, _temp_1_1_1 + _temp_1_2_2 + _temp_1_3_3, tmp_3);
@@ -654,7 +652,6 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end Algorithm6b;
 
@@ -668,20 +665,20 @@ equation
 	y = x * 2;
 	z = time + a;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm7",
-            description="C code generation of algorithm.",
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            automatic_tearing=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm7",
+        description="C code generation of algorithm.",
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        automatic_tearing=false,
+        template="
 $C_dae_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -693,7 +690,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
-        (*res)[1] = 2;
+        (*res)[1] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
         x[1] = _y_1;
@@ -707,7 +704,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_0 = _y_1;
             JMI_SWAP(GEN, _x_0, tmp_1)
             (*res)[0] = tmp_1 - (_x_0);
-            (*res)[1] = _x_0 * 2 - (_y_1);
+            (*res)[1] = _x_0 * 2.0 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -725,7 +722,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 2;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _a_3;
         x[1] = _z_2;
@@ -773,22 +770,22 @@ equation
 		x = 2;
 	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm8",
-            description="C code generation of initial algorithm.",
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            relational_time_events=false,
-            automatic_tearing=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm8",
+        description="C code generation of initial algorithm.",
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        relational_time_events=false,
+        automatic_tearing=false,
+        template="
 $C_dae_init_blocks_residual_functions$
 $C_dae_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Init block: 1 *****/
     jmi_real_t** res = &residual;
@@ -805,9 +802,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = 5;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = 1.0;
         (*res)[2] = 1;
-        (*res)[3] = 2;
+        (*res)[3] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _a_3;
         x[1] = _z_2;
@@ -830,7 +827,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _x_0 = _y_1 + _z_2;
             JMI_SWAP(GEN, _x_0, tmp_2)
             (*res)[2] = tmp_2 - (_x_0);
-            (*res)[3] = _x_0 * 2 - (_y_1);
+            (*res)[3] = _x_0 * 2.0 - (_y_1);
         }
     }
     JMI_DYNAMIC_FREE()
@@ -856,11 +853,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+                _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
             }
             _temp_1_4 = _sw(0);
         }
-        _x_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)), JMI_TRUE, AD_WRAP_LITERAL(2), pre_x_0);
+        _x_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)), JMI_TRUE, AD_WRAP_LITERAL(2.0), pre_x_0);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }
@@ -879,7 +876,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _a_3;
         x[1] = _z_2;
@@ -906,10 +903,10 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-    _y_1 = _x_0 * 2;
+    _y_1 = _x_0 * 2.0;
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
     JMI_DYNAMIC_FREE()
     return ef;
@@ -947,20 +944,20 @@ equation
 	re.a[1] = 1;
 	(re.a[2:3]) = f();
 	
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm9",
-            description="C code generation of assignment statements scalarized into function call statements",
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            eliminate_alias_variables=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm9",
+        description="C code generation of assignment statements scalarized into function call statements",
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        eliminate_alias_variables=false,
+        template="
 $C_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenAlgorithmTests_Algorithm9_f_def0(jmi_array_t* o_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, o_an, 2, 1)
@@ -968,8 +965,8 @@ void func_CCodeGenAlgorithmTests_Algorithm9_f_def0(jmi_array_t* o_a) {
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, o_an, 2, 1, 2)
         o_a = o_an;
     }
-    jmi_array_ref_1(o_a, 1) = 1;
-    jmi_array_ref_1(o_a, 2) = 1;
+    jmi_array_ref_1(o_a, 1.0) = 1;
+    jmi_array_ref_1(o_a, 2.0) = 1;
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -991,12 +988,12 @@ void func_CCodeGenAlgorithmTests_Algorithm9_fw_def1(R_0_r* r_v) {
     }
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1, 2)
     func_CCodeGenAlgorithmTests_Algorithm9_f_def0(temp_1_a);
-    jmi_array_ref_1(r_v->a, 1) = 2 * jmi_array_val_1(temp_1_a, 1);
-    jmi_array_ref_1(r_v->a, 2) = 2 * jmi_array_val_1(temp_1_a, 2);
+    jmi_array_ref_1(r_v->a, 1.0) = 2.0 * jmi_array_val_1(temp_1_a, 1);
+    jmi_array_ref_1(r_v->a, 2.0) = 2.0 * jmi_array_val_1(temp_1_a, 2);
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_2_a, 2, 1, 2)
     func_CCodeGenAlgorithmTests_Algorithm9_f_def0(temp_2_a);
-    jmi_array_ref_1(r_v->a, 2) = jmi_array_val_1(temp_2_a, 1);
-    jmi_array_ref_1(r_v->a, 3) = jmi_array_val_1(temp_2_a, 2);
+    jmi_array_ref_1(r_v->a, 2.0) = jmi_array_val_1(temp_2_a, 1);
+    jmi_array_ref_1(r_v->a, 3.0) = jmi_array_val_1(temp_2_a, 2);
     jmi_array_ref_1(r__v->a, 1) = jmi_array_val_1(r_v->a, 1);
     jmi_array_ref_1(r__v->a, 2) = jmi_array_val_1(r_v->a, 2);
     jmi_array_ref_1(r__v->a, 3) = jmi_array_val_1(r_v->a, 3);
@@ -1017,8 +1014,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenAlgorithmTests_Algorithm9_f_def0(tmp_1);
     memcpy(&_temp_2_1_6, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
-    _r_a_1_0 = 2 * _temp_2_1_6;
-    _r_a_2_1 = 2 * _temp_2_2_7;
+    _r_a_1_0 = 2.0 * _temp_2_1_6;
+    _r_a_2_1 = 2.0 * _temp_2_2_7;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
     func_CCodeGenAlgorithmTests_Algorithm9_f_def0(tmp_2);
     memcpy(&_temp_3_1_8, &jmi_array_val_1(tmp_2, 1), 2 * sizeof(jmi_real_t));
@@ -1066,21 +1063,21 @@ algorithm
 equation
 	(ae[{5,4,3,2,1}],) = fw();
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm10",
-            description="C code generation of slices in function call assignments",
-            algorithms_as_functions=false,
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            eliminate_alias_variables=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm10",
+        description="C code generation of slices in function call assignments",
+        algorithms_as_functions=false,
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        eliminate_alias_variables=false,
+        template="
 $C_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 void func_CCodeGenAlgorithmTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_real_t* dummy_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, o_an, 5, 1)
@@ -1092,16 +1089,16 @@ void func_CCodeGenAlgorithmTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_real_
         o_a = o_an;
     }
     dummy_v = 1;
-    jmi_array_ref_1(o_a, 1) = 1;
-    jmi_array_ref_1(o_a, 3) = 1;
-    jmi_array_ref_1(o_a, 5) = 1;
+    jmi_array_ref_1(o_a, 1.0) = 1;
+    jmi_array_ref_1(o_a, 3.0) = 1;
+    jmi_array_ref_1(o_a, 5.0) = 1;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = jmi_array_val_1(o_a, 3);
-    jmi_array_ref_1(tmp_2, 2) = jmi_array_val_1(o_a, 5);
+    jmi_array_ref_1(tmp_2, 1) = jmi_array_val_1(o_a, 3.0);
+    jmi_array_ref_1(tmp_2, 2) = jmi_array_val_1(o_a, 5.0);
     func_CCodeGenAlgorithmTests_Algorithm10_f_def1(tmp_2, tmp_1, NULL);
-    jmi_array_ref_1(o_a, 2) = (jmi_array_val_1(tmp_1, 1));
-    jmi_array_ref_1(o_a, 4) = (jmi_array_val_1(tmp_1, 2));
+    jmi_array_ref_1(o_a, 2.0) = (jmi_array_val_1(tmp_1, 1));
+    jmi_array_ref_1(o_a, 4.0) = (jmi_array_val_1(tmp_1, 2));
     JMI_RET(GEN, dummy_o, dummy_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1116,8 +1113,8 @@ void func_CCodeGenAlgorithmTests_Algorithm10_f_def1(jmi_array_t* i_a, jmi_array_
         o_a = o_an;
     }
     dummy_v = 1;
-    jmi_array_ref_1(o_a, 1) = jmi_array_val_1(i_a, 1);
-    jmi_array_ref_1(o_a, 2) = jmi_array_val_1(i_a, 2);
+    jmi_array_ref_1(o_a, 1.0) = jmi_array_val_1(i_a, 1.0);
+    jmi_array_ref_1(o_a, 2.0) = jmi_array_val_1(i_a, 2.0);
     JMI_RET(GEN, dummy_o, dummy_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1134,8 +1131,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_4, 5, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
-    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1.0);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(1.0);
     func_CCodeGenAlgorithmTests_Algorithm10_f_def1(tmp_2, tmp_1, NULL);
     _a_2_1 = (jmi_array_val_1(tmp_1, 1));
     _a_4_3 = (jmi_array_val_1(tmp_1, 2));
@@ -1275,27 +1272,27 @@ algorithm
  x := 1;
  b := y >= x * 3 or y - 1 < x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm12",
-            description="C code generation of relational expressions in algorithms, assign",
-            algorithms_as_functions=false,
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm12",
+        description="C code generation of relational expressions in algorithms, assign",
+        algorithms_as_functions=false,
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        template="
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
 ",
-            generatedCode="
+        generatedCode="
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _y_1 = _time;
     _x_0 = 1;
-    __eventIndicator_1_3 = _y_1 - _x_0 * 3;
-    __eventIndicator_2_4 = _y_1 - 1 - _x_0;
+    __eventIndicator_1_3 = _y_1 - _x_0 * 3.0;
+    __eventIndicator_2_4 = _y_1 - 1.0 - _x_0;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_3, _sw(0), JMI_REL_GEQ);
     }
@@ -1334,20 +1331,21 @@ algorithm
 		end if;
 	end if;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm13",
-            description="C code generation of relational expressions in algorithms, if",
-            algorithms_as_functions=false,
-            generate_ode=true,
-            equation_sorting=true,
-            variability_propagation=false,
-            relational_time_events=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm13",
+        description="C code generation of relational expressions in algorithms, if",
+        algorithms_as_functions=false,
+        generate_ode=true,
+        equation_sorting=true,
+        variability_propagation=false,
+        relational_time_events=false,
+        template="
 $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
 ",
-            generatedCode="
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -1356,7 +1354,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         _sw(0) = jmi_turn_switch(jmi, _time - (0.5), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _time - (1), _sw(1), JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(jmi, _time - (1.0), _sw(1), JMI_REL_GT);
     }
     if (_sw(0)) {
         _r1_0 = 1;
@@ -1384,7 +1382,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (0.5);
-    (*res)[1] = _time - (1);
+    (*res)[1] = _time - (1.0);
     (*res)[2] = _time - (0.7);
     (*res)[3] = _time - (1.5);
     JMI_DYNAMIC_FREE()
@@ -1399,28 +1397,29 @@ algorithm
 		x := 2;
 	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm14",
-            description="C code generation of when statement",
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            relational_time_events=false,
-            automatic_tearing=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm14",
+        description="C code generation of when statement",
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        relational_time_events=false,
+        automatic_tearing=false,
+        template="
 $C_ode_derivatives$
 $C_ode_initialization$
 $C_DAE_event_indicator_residuals$
 $C_dae_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     JMI_DYNAMIC_FREE()
@@ -1432,7 +1431,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
     }
     _temp_1_1 = _sw(0);
     pre_x_0 = 0.0;
@@ -1444,7 +1443,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = _time - (1);
+    (*res)[0] = _time - (1.0);
     JMI_DYNAMIC_FREE()
     return ef;
 
@@ -1466,7 +1465,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+                _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
             }
             _temp_1_1 = _sw(0);
         }
@@ -1480,6 +1479,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm14;
 
@@ -1492,28 +1492,29 @@ algorithm
 		x := 2;
 	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm15",
-            description="C code generation of when statement and initial equation",
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            relational_time_events=false,
-            automatic_tearing=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm15",
+        description="C code generation of when statement and initial equation",
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        relational_time_events=false,
+        automatic_tearing=false,
+        template="
 $C_ode_derivatives$
 $C_ode_initialization$
 $C_DAE_event_indicator_residuals$
 $C_dae_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     JMI_DYNAMIC_FREE()
@@ -1525,7 +1526,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
     }
     _temp_1_1 = _sw(0);
     _x_0 = 1;
@@ -1537,7 +1538,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    (*res)[0] = _time - (1);
+    (*res)[0] = _time - (1.0);
     JMI_DYNAMIC_FREE()
     return ef;
 
@@ -1559,7 +1560,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
+                _sw(0) = jmi_turn_switch(jmi, _time - (1.0), _sw(0), JMI_REL_GT);
             }
             _temp_1_1 = _sw(0);
         }
@@ -1573,6 +1574,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm15;
 
@@ -1590,26 +1592,27 @@ algorithm
     b := b + 1;
   end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm16",
-            description="C code generation of elsewhen statement",
-            generate_ode=true,
-            equation_sorting=true,
-            inline_functions="none",
-            variability_propagation=false,
-            automatic_tearing=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm16",
+        description="C code generation of elsewhen statement",
+        generate_ode=true,
+        equation_sorting=true,
+        inline_functions="none",
+        variability_propagation=false,
+        automatic_tearing=false,
+        template="
 $C_ode_derivatives$
 $C_ode_initialization$
 $C_DAE_event_indicator_residuals$
 $C_dae_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * AD_WRAP_LITERAL(10));
+    _x_0 = sin(_time * AD_WRAP_LITERAL(10.0));
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(1), JMI_REL_LT);
     }
@@ -1631,7 +1634,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = sin(_time * AD_WRAP_LITERAL(10));
+    _x_0 = sin(_time * AD_WRAP_LITERAL(10.0));
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (0.7), _sw(0), JMI_REL_GEQ);
     }
@@ -1658,7 +1661,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     _temp_6_8 = _sw(1);
     pre_a_1 = 0.0;
     _a_1 = pre_a_1;
-    _a_1 = _a_1 - 1;
+    _a_1 = _a_1 - 1.0;
     pre_b_2 = 0.0;
     _b_2 = pre_b_2;
     pre_temp_1_3 = JMI_FALSE;
@@ -1760,11 +1763,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _a_1 = pre_a_1;
             _b_2 = pre_b_2;
             if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
-                _a_1 = _a_1 + 1;
+                _a_1 = _a_1 + 1.0;
             } else if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_4, LOG_EXP_NOT(pre_temp_2_4)))) {
-                _a_1 = _a_1 - 1;
+                _a_1 = _a_1 - 1.0;
             } else if (LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5)), LOG_EXP_AND(_temp_4_6, LOG_EXP_NOT(pre_temp_4_6))), LOG_EXP_AND(_temp_5_7, LOG_EXP_NOT(pre_temp_5_7))), LOG_EXP_AND(_temp_6_8, LOG_EXP_NOT(pre_temp_6_8)))) {
-                _b_2 = _b_2 + 1;
+                _b_2 = _b_2 + 1.0;
             }
             JMI_SWAP(GEN, _a_1, tmp_1)
             JMI_SWAP(GEN, _b_2, tmp_2)
@@ -1775,6 +1778,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm16;
 
@@ -1827,12 +1831,12 @@ equation
 algorithm
     (a, b) := F({-c,time});
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm18",
-            description="C code generation function call statement inside a block",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm18",
+        description="C code generation function call statement inside a block",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -1847,7 +1851,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = 1;
         x[1] = 0;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 1;
+        (*res)[0] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _c_2;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -1881,12 +1885,12 @@ model Algorithm19
   equation
     x = sum(y) + 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm19",
-            description="Mixed algorithm in block",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm19",
+        description="Mixed algorithm in block",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -1907,7 +1911,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
         x[0] = 268435464;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 1;
+        (*res)[0] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_1;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -1929,12 +1933,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         _y_1_2 = (tmp_1);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _y_1_2 + _y_2_3 + _y_3_4 + (_y_4_5 + _y_5_6) + 1 - (_x_1);
+            (*res)[0] = _y_1_2 + _y_2_3 + _y_3_4 + (_y_4_5 + _y_5_6) + 1.0 - (_x_1);
         }
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm19;
 
@@ -1955,12 +1960,12 @@ equation
 algorithm
     i := f(x) .- 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm20",
-            description="",
-            template="$C_dae_blocks_residual_functions$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm20",
+        description="",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -1981,7 +1986,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = 268435462;
         x[1] = 268435463;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 1;
+        (*res)[0] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_3;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -1993,8 +1998,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
             func_CCodeGenAlgorithmTests_Algorithm20_f_def0(_x_2, tmp_1);
             memcpy(&_temp_1_1_6, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
-            _i_1_0 = _temp_1_1_6 - 1;
-            _i_2_1 = _temp_1_2_7 - 1;
+            _i_1_0 = _temp_1_1_6 - 1.0;
+            _i_2_1 = _temp_1_2_7 - 1.0;
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _i_1_0 + _i_2_1 - (_y_3 * _x_2);
@@ -2017,29 +2022,30 @@ algorithm
     if a < 1 then
         a := a + 1;
     end if;
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm21",
-            description="",
-            template="$C_ode_derivatives$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm21",
+        description="",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _a_0 = _time;
-    __eventIndicator_1_1 = _a_0 - 1;
+    __eventIndicator_1_1 = _a_0 - 1.0;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_1, _sw(0), JMI_REL_LT);
     }
     if (_sw(0)) {
-        _a_0 = _a_0 + 1;
+        _a_0 = _a_0 + 1.0;
     }
-    __eventIndicator_2_2 = _a_0 - 1;
+    __eventIndicator_2_2 = _a_0 - 1.0;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, __eventIndicator_2_2, _sw(1), JMI_REL_LT);
     }
     if (_sw(1)) {
-        _a_0 = _a_0 + 1;
+        _a_0 = _a_0 + 1.0;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -2057,28 +2063,29 @@ algorithm
     if b < 1 then
         a := a + 1;
     end if;
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm22",
-            description="",
-            template="$C_ode_derivatives$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm22",
+        description="",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _b_1 = _time;
     _a_0 = 0.0;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _b_1 - (1), _sw(0), JMI_REL_LT);
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (1.0), _sw(0), JMI_REL_LT);
     }
     if (_sw(0)) {
-        _a_0 = _a_0 + 1;
+        _a_0 = _a_0 + 1.0;
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _b_1 - (1), _sw(0), JMI_REL_LT);
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (1.0), _sw(0), JMI_REL_LT);
     }
     if (_sw(0)) {
-        _a_0 = _a_0 + 1;
+        _a_0 = _a_0 + 1.0;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -2093,24 +2100,25 @@ algorithm
     if time > 1 then
         x := x + 1;
     end if;
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm23",
-            description="Check for bug in #5415",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm23",
+        description="Check for bug in #5415",
+        template="
 $C_ode_initialization$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
+
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_1 = _x_start_0;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1.0), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (_sw(0)) {
-        _x_1 = _x_1 + 1;
+        _x_1 = _x_1 + 1.0;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -2122,10 +2130,10 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     _x_1 = _x_start_0;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (1.0), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (_sw(0)) {
-        _x_1 = _x_1 + 1;
+        _x_1 = _x_1 + 1.0;
     }
     JMI_DYNAMIC_FREE()
     return ef;
@@ -2158,15 +2166,15 @@ algorithm
 equation
     a^2 - b^2 = -1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm24",
-            description="Check for bug in #5445",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm24",
+        description="Check for bug in #5445",
+        template="
 $C_dae_blocks_residual_functions$
 $C_ode_derivatives$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -2202,7 +2210,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = jmi->offs_sw + 0;
         x[1] = jmi->offs_sw + 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 1;
+        (*res)[0] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _b_1;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -2216,7 +2224,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _xVar_2 = pre_xVar_2;
         _cVar_3 = pre_cVar_3;
         _a_0 = pre_a_0;
-        __eventIndicator_1_5 = _time - _a_0 - 1;
+        __eventIndicator_1_5 = _time - _a_0 - 1.0;
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             _sw(0) = jmi_turn_switch(jmi, __eventIndicator_1_5, _sw(0), JMI_REL_GT);
         }
@@ -2225,16 +2233,16 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
                 _sw(1) = jmi_turn_switch(jmi, _b_1 - (0.5), _sw(1), JMI_REL_GT);
             }
             if (_sw(1)) {
-                _xVar_2 = _xVar_2 + 1;
+                _xVar_2 = _xVar_2 + 1.0;
             } else {
                 _xVar_2 = 0;
             }
         } else {
             _xVar_2 = 0;
         }
-        _shift_4 = COND_EXP_EQ(_xVar_2, 0, JMI_FALSE, JMI_TRUE);
+        _shift_4 = COND_EXP_EQ(_xVar_2, 0.0, JMI_FALSE, JMI_TRUE);
         if (LOG_EXP_AND(_shift_4, LOG_EXP_NOT(pre_shift_4))) {
-            _cVar_3 = pre_cVar_3 + 1;
+            _cVar_3 = pre_cVar_3 + 1.0;
             _a_0 = _time;
         }
         JMI_SWAP(GEN, _xVar_2, tmp_1)
@@ -2254,6 +2262,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
+
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
@@ -2278,14 +2288,12 @@ algorithm
     when time > 1 then
         s1 := s2 + s2;
     end when;
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="Algorithm25",
-            description="String variables in algorithm block",
-            template="
-$C_dae_blocks_residual_functions$
-",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Algorithm25",
+        description="String variables in algorithm block",
+        template="$C_dae_blocks_residual_functions$",
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -2308,7 +2316,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
         x[0] = 536870917;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 1;
+        (*res)[0] = 1.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_3;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -2317,13 +2325,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1.0), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
             }
             _temp_2_5 = _sw(0);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-                _sw(0) = jmi_turn_switch_time(jmi, _time - (1), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (1.0), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
             }
             _temp_1_4 = _sw(0);
         }
@@ -2352,12 +2360,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         _x_2 = (tmp_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = jmi_divide_equation(jmi, _x_2,2,\"x / 2\") - (_y_3);
+            (*res)[0] = jmi_divide_equation(jmi, _x_2, 2.0, \"x / 2\") - (_y_3);
         }
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm25;
 
