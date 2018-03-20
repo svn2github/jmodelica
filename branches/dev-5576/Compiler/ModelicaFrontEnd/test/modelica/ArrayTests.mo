@@ -741,7 +741,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 2, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
@@ -1548,7 +1548,7 @@ model UnknownSize4
             errorMessage="
 2 errors found:
 
-Error at line 1, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
 Error at line 2, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
@@ -1585,7 +1585,7 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
 Error at line 4, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_EQUATION:
@@ -7210,7 +7210,7 @@ model ForNoRange12
             errorMessage="
 2 errors found:
 
-Error at line 5, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
+Error at line 6, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':
   Duplicate component in same class: Real y[:] = {x[i]+y[i]i}
 
 Error at line 6, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', IMPLICIT_FOR_RANGE_INCONSISTENT:
@@ -8929,13 +8929,13 @@ model CircularFunctionArg1
             errorMessage="
 4 errors found:
 
-Error at line 6, column 7, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 8, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable c
 
 Error at line 8, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 
-Error at line 8, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 9, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable d
 
 Error at line 9, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
@@ -9035,7 +9035,7 @@ model ArraySize2
             errorMessage="
 2 errors found:
 
-Error at line 1, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 2, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
 Error at line 2, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo':

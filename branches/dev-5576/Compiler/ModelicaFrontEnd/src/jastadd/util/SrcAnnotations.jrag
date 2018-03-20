@@ -248,7 +248,7 @@ aspect SrcAnnotations {
     }
     @Override
     public SrcAnnotationProvider ClassModification.addAnnotationSubNode(String name) {
-        ComponentModification cm = new ComponentModification(new Opt<Each>(), new Opt<Final>(), new ParseAccess(name),
+        ComponentModification cm = new ComponentModification(false, false, new NamedAccess(name),
                 new Opt<Modification>(), new Comment());
         addArgument(cm);
         return cm;
@@ -274,10 +274,10 @@ aspect SrcAnnotations {
     }
 
     syn boolean Modification.isEach() = false;
-    eq Argument.isEach()              = hasEach();
+    eq Argument.isEach()              = getEach();
 
     syn boolean Modification.isFinal() = false;
-    eq Argument.isFinal()              = hasFinal();
+    eq Argument.isFinal()              = getFinal();
 
     /*******************
      *   Class Decls    
@@ -299,8 +299,9 @@ aspect SrcAnnotations {
      * Component Decls  
      ******************/
     syn SrcAnnotationProvider ComponentDecl.srcAnnotationProvider() {
-        if (getCCComment().hasAnnotation()) {
-            return SrcAnnotation.createProviderFor(getComment(), getCCComment());
+        Comment ccComment = myComponentClause().getComment();
+        if (ccComment.hasAnnotation()) {
+            return SrcAnnotation.createProviderFor(getComment(), ccComment);
         }
         return SrcAnnotation.createProviderFor(getComment());
     }
@@ -403,7 +404,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public final String resolveURI(String str) {
+        public final String resolveURI(String str) throws URIException {
             return owningNode.resolveURI(str);
         }
 
@@ -678,7 +679,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String resolveURI(String str) {
+        public String resolveURI(String str) throws URIException {
             return provider.resolveURI(str);
         }
     }
@@ -730,7 +731,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String resolveURI(String str) {
+        public String resolveURI(String str) throws URIException {
             return null;
         }
 
@@ -781,7 +782,7 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String resolveURI(String str) {
+        public String resolveURI(String str) throws URIException {
             return exp.resolveURI(str);
         }
 

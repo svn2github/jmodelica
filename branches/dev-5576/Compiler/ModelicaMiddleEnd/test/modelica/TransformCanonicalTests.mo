@@ -1516,13 +1516,13 @@ equation
             errorMessage="
 3 errors found:
 
-Error at line 2, column 41, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 3, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable x2 is part of alias set that results in min/max combination with no possible values, min = 2.6, max = 2.5
 
-Error at line 3, column 39, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 4, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable y1 is part of alias set that results in min/max combination with no possible values, min = 3, max = 2
 
-Error at line 6, column 40, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 7, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
 ")})));
 end AliasPropMinMax2;
@@ -1724,7 +1724,7 @@ equation
  der(x3) = (- x3) * time;
  
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
  
 end TransformCanonicalTests.AliasPropFixed1;
 ")})));
@@ -1813,7 +1813,7 @@ equation
  b[7]._der_x1 = 1.0;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.AliasStateSelect1;
 ")})));
@@ -1837,7 +1837,7 @@ equation
             errorMessage="
 1 warnings found:
 
-Warning at line 2, column 56, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Warning at line 3, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   a_s2 has stateSelect=always, but could not be selected as state
 ")})));
 end AliasStateSelect2;
@@ -1857,7 +1857,7 @@ equation
  x = time;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.AliasStateSelect3;
 ")})));
@@ -1879,7 +1879,7 @@ equation
  x = time;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
  type TransformCanonicalTests.AliasStateSelect4.T = Real(stateSelect = StateSelect.avoid);
 end TransformCanonicalTests.AliasStateSelect4;
@@ -1902,7 +1902,7 @@ equation
  x = time;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
  type TransformCanonicalTests.AliasStateSelect5.T = Real(stateSelect = StateSelect.prefer);
 end TransformCanonicalTests.AliasStateSelect5;
@@ -1935,7 +1935,7 @@ equation
  der(x) = time - 3;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.AliasPropNegSecondRound1;
 ")})));
@@ -1953,7 +1953,7 @@ model ParameterBindingExpTest3_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 1, column 35, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 3, column 3, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
@@ -5436,7 +5436,7 @@ equation
  der(y) = - y;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end TransformCanonicalTests.StateInitialPars8;
 ")})));
@@ -6758,7 +6758,7 @@ model TestExternalObj4
             errorMessage="
 1 errors found:
 
-Error at line 9, column 21, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 11, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   Cannot find function declaration for NoDestructor.destructor()
 ")})));
 end TestExternalObj4;
@@ -6822,7 +6822,7 @@ model TestExternalObj6
 Error at line 10, column 9, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
 
-Error at line 13, column 23, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
+Error at line 15, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TransformCanonicalTests.mo':
   The class BadDestructor.destructor is not a function
 ")})));
 end TestExternalObj6;

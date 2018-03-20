@@ -338,6 +338,8 @@ JMI_ARRAY_TYPE(jmi_extobj_t, jmi_extobj_array_t)
 /* Assign (copy) SRC to DEST */
 #define JMI_ASG(TYPE, DEST, SRC) \
     JMI_ASG_##TYPE(DEST, SRC)
+#define JMI_ASG_GEN(DEST, SRC) \
+	DEST = SRC;
 #define JMI_ASG_GEN_ARR(DEST, SRC) \
     { \
       int i; \
@@ -411,6 +413,36 @@ void jmi_swap_string(jmi_string_t *dest, jmi_string_t *src);
     
 /* Number of empty bytes at end of string */
 #define JMI_STR_LEFT(DEST) DEST##_len - JMI_LEN(DEST)
+
+/**
+ * Set dest to value. Assumes dimension of dest is equal to dimension of arr.
+ */
+#define JMI_SET(TYPE,DEST,SRC,ARR,OFFSET) \
+    JMI_SET_##TYPE(DEST,SRC,ARR,OFFSET)
+#define JMI_SET_GEN(DEST,SRC,ARR,OFFSET) \
+    DEST[OFFSET] = SRC;
+#define JMI_SET_GEN_ARR(DEST,SRC,ARR,OFFSET) \
+    jmi_set(DEST, SRC, ARR, OFFSET);
+
+void jmi_set(jmi_real_t* dest, jmi_real_t src, jmi_array_t* arr, size_t offset);
+
+#define JMI_COPY(TYPE,DIR,PTR,ARR,OFFSET) \
+    JMI_COPY_##TYPE(DIR,PTR,ARR,OFFSET)
+#define JMI_COPY_GEN(DIR,PTR,ARR,OFFSET) \
+	JMI_COPY_GEN_##DIR(PTR,ARR,OFFSET)
+#define JMI_COPY_GEN_L(PTR,ARR,OFFSET) \
+    PTR[OFFSET] = ARR;
+#define JMI_COPY_GEN_R(PTR,ARR,OFFSET) \
+    ARR = PTR[OFFSET];
+#define JMI_COPY_GEN_ARR(DIR,PTR,ARR,OFFSET) \
+	JMI_COPY_GEN_ARR_##DIR(PTR,ARR,OFFSET)
+#define JMI_COPY_GEN_ARR_L(PTR,ARR,OFFSET) \
+    jmi_copy_to_ptr(PTR, ARR, OFFSET);
+#define JMI_COPY_GEN_ARR_R(PTR,ARR,OFFSET) \
+    jmi_copy_to_arr(ARR, PTR, OFFSET);
+
+void jmi_copy_to_arr(jmi_array_t* dest, jmi_real_t* src, size_t offset);
+void jmi_copy_to_ptr(jmi_real_t* dest, jmi_array_t* src, size_t offset);
 
 void jmi_transpose_matrix(jmi_array_t* arr, jmi_real_t* src, jmi_real_t* dest);
 void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_real_t* src, jmi_int_t* dest);
