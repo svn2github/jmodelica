@@ -158,7 +158,7 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
 
             if (nans_present) {
                 if (is_iter_var_flag) {
-                    inner = jmi_log_enter_index_vector_(log, outer, logWarning,  "NaNResidualIndices", "R");
+                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "NaNResidualIndices", 'R');
                 } else {
                     inner = jmi_log_enter_vector_(log, outer, logWarning, "NaNOutputIndices");
                 }
@@ -171,7 +171,7 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
             }
             if (infs_present) {
                 if (is_iter_var_flag) {
-                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "INFResidualIndices", "R");
+                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "INFResidualIndices", 'R');
                 } else {
                     inner = jmi_log_enter_vector_(log, outer, logWarning, "INFOutputIndices");
                 }
@@ -184,7 +184,7 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
             }
             if( lim_vals_present) {
                 if (is_iter_var_flag) {
-                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "LimitingValueIndices", "R");
+                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "LimitingValueIndices", 'R');
                 } else {
                     inner = jmi_log_enter_vector_(log, outer, logWarning, "LimitingValueIndicess");
                 }
