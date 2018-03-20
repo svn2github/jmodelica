@@ -18,6 +18,7 @@ package $PARSER_PACKAGE$;
 
 import $PARSER_PACKAGE$.OptimicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
+import org.jmodelica.util.AbstractAdjustableSymbol;
 import org.jmodelica.util.formatting.FormattingType;
 import org.jmodelica.optimica.compiler.ASTNode;
 import beaver.Scanner;
@@ -42,86 +43,87 @@ import beaver.Scanner;
 %char
 
 %{
-  /**
-   * Subclass of Symbol that carries extra information. 
-   * Used to give error reporting class for parser access to offset & length 
-   * of tokens. Start, end, offset and length are extracted from scanner variables
-   * in constructors.
-   */
-  public class Symbol extends beaver.Symbol {
-  
-    private int offset;
-    private int length;
-    
-    public Symbol(short id) {
-      this(id, yytext());
-    }
-    
-    public Symbol(short id, Object value) {
-      super(id, yyline + 1, yycolumn + 1, yylength(), value);
-      offset = yychar;
-      length = yylength();
-    }
-    
-    public int getOffset() {
-      return offset;
-    }
-    
-    public int getEndOffset() {
-      return offset + length - 1;
-    }
-    
-    public int getLength() {
-      return length;
-    }
-    
-  }
-  
-  /**
-   * Subclass of Scanner.Exception that carries extra information. 
-   * Used to give error reporting class for parser access to offset of error. 
-   * Offset is extracted from scanner variables in constructors.
-   */
-  public class Exception extends Scanner.Exception {
-    
-    public final int offset;
-    
-    public Exception(String msg) {
-      this(yyline + 1, yycolumn + 1, msg);
-    }
-    
-    public Exception(int line, int column, String msg) {
-      super(line, column, msg);
-      offset = yychar;
-    }
-    
-  }
+    /**
+     * Subclass of Symbol that carries extra information. 
+     * Used to give error reporting class for parser access to offset & length 
+     * of tokens. Start, end, offset and length are extracted from scanner variables
+     * in constructors.
+     */
+    public class Symbol extends AbstractAdjustableSymbol {
 
-  private Symbol newSymbol(short id) {
-    return new Symbol(id);
-  }
+        private int offset;
+        private int length;
 
-  private Symbol newSymbol(short id, Object value) {
-    return new Symbol(id, value);
-  }
-  
-  public void reset(java.io.Reader reader) {
-    yyreset(reader);
-    resetFormatting();
-  }
+        public Symbol(short id) {
+            this(id, yytext());
+        }
 
-  protected int matchLine()   { return yyline; }
-  protected int matchColumn() { return yycolumn; }
-  protected int matchOffset() { return yychar; }
-  protected int matchLength() { return yylength(); }
-  
-  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
-    Symbol res = null;
-    while (res == null)
-      res = nextTokenInner();
-    return res;
-  }
-  
+        public Symbol(short id, Object value) {
+            super(id, yyline + 1, yycolumn + 1, yylength(), value);
+            offset = yychar;
+            length = yylength();
+        }
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public int getEndOffset() {
+            return offset + length - 1;
+        }
+
+        public int getLength() {
+            return length;
+        }
+
+    }
+
+
+    /**
+     * Subclass of Scanner.Exception that carries extra information. 
+     * Used to give error reporting class for parser access to offset of error. 
+     * Offset is extracted from scanner variables in constructors.
+     */
+    public class Exception extends Scanner.Exception {
+        
+        public final int offset;
+        
+        public Exception(String msg) {
+            this(yyline + 1, yycolumn + 1, msg);
+        }
+        
+        public Exception(int line, int column, String msg) {
+            super(line, column, msg);
+            offset = yychar;
+        }
+        
+    }
+
+    private Symbol newSymbol(short id) {
+        return new Symbol(id);
+    }
+
+    private Symbol newSymbol(short id, Object value) {
+        return new Symbol(id, value);
+    }
+    
+    public void reset(java.io.Reader reader) {
+        yyreset(reader);
+        resetFormatting();
+    }
+
+    protected int matchLine()     { return yyline; }
+    protected int matchColumn() { return yycolumn; }
+    protected int matchOffset() { return yychar; }
+    protected int matchLength() { return yylength(); }
+    
+    public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
+        Symbol res = null;
+        while (res == null)
+            res = nextTokenInner();
+        return res;
+    }
+
 %}
 
 

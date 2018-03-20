@@ -1189,7 +1189,6 @@ public class ModelicaCompiler {
         hookModelFlattened(fc);
         hookCheckAbort();
         
-        //fc.dumpTree("");
         // Output the untransformed flattened model
         ASTNode.beginStep("prettyPrintRawFlat()");
         if (fc.myOptions().getBooleanOption("generate_mof_files")) {
@@ -2024,7 +2023,7 @@ public class ModelicaCompiler {
     }
     protected void ModelicaCompiler.setUp(IErrorHandler eh) {
         if (isSetUp) {
-            throw new InternalCompilerError("Compiler setup can only be performed once", null);
+            throw new InternalCompilerError("Compiler setup can only be performed once");
         }
         if (eh == null) {
             eh = new DefaultErrorHandler(options.getBooleanOption("halt_on_warning"));
@@ -2038,7 +2037,7 @@ public class ModelicaCompiler {
     
     public void ModelicaCompiler.checkSetUp() {
         if (!isSetUp) {
-            throw new InternalCompilerError("Compiler setup not performed. Use ModelicaCompiler.setUp()", null);
+            throw new InternalCompilerError("Compiler setup not performed. Use ModelicaCompiler.setUp()");
         }
     }
     

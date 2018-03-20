@@ -15,6 +15,7 @@
 */
 package org.jmodelica.util.annotations;
 
+import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.util.values.Evaluable;
 
 /**
@@ -31,7 +32,7 @@ public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extend
     public N addAnnotationSubNode(String name) throws AnnotationEditException;
     public boolean isEach();
     public boolean isFinal();
-    public String resolveURI(String str);
+    public String resolveURI(String str) throws URIException;
 
     public class SubNodePair<N> {
         public final String name;

@@ -294,6 +294,7 @@ model DisplayUnit11
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -312,6 +313,7 @@ model DisplayUnit12
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -366,69 +368,91 @@ model Fmi1StartAttribute
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"dependent1\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"dependent2\" valueReference=\"3\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"dependent3\" valueReference=\"5\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"dependent4\" valueReference=\"11\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"dependent5\" valueReference=\"9\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"dependent6\" valueReference=\"10\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"independent1\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"independent2\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"independent3\" valueReference=\"4\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"independent4\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"independent5\" valueReference=\"7\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"independent6\" valueReference=\"8\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"x1\" valueReference=\"17\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"der(x1)\" valueReference=\"12\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #15 -->
     <ScalarVariable name=\"x2\" valueReference=\"18\" description=\"start=0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #16 -->
     <ScalarVariable name=\"der(x2)\" valueReference=\"13\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #17 -->
     <ScalarVariable name=\"x3\" valueReference=\"19\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #18 -->
     <ScalarVariable name=\"der(x3)\" valueReference=\"14\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #19 -->
     <ScalarVariable name=\"x4\" valueReference=\"20\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #20 -->
     <ScalarVariable name=\"der(x4)\" valueReference=\"15\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #21 -->
     <ScalarVariable name=\"x5\" valueReference=\"21\" description=\"fixed=true\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #22 -->
     <ScalarVariable name=\"der(x5)\" valueReference=\"16\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -483,69 +507,91 @@ model Fmi2StartAttribute
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"dependent1\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"dependent2\" valueReference=\"3\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"dependent3\" valueReference=\"5\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"dependent4\" valueReference=\"11\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"dependent5\" valueReference=\"9\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"dependent6\" valueReference=\"10\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"independent1\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"independent2\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"independent3\" valueReference=\"4\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"independent4\" valueReference=\"6\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"independent5\" valueReference=\"7\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"independent6\" valueReference=\"8\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"x1\" valueReference=\"17\" causality=\"local\" variability=\"continuous\" initial=\"approx\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"der(x1)\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"13\" />
     </ScalarVariable>
+    <!-- Variable with index #15 -->
     <ScalarVariable name=\"x2\" valueReference=\"18\" description=\"start=0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #16 -->
     <ScalarVariable name=\"der(x2)\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"15\" />
     </ScalarVariable>
+    <!-- Variable with index #17 -->
     <ScalarVariable name=\"x3\" valueReference=\"19\" causality=\"local\" variability=\"continuous\" initial=\"approx\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #18 -->
     <ScalarVariable name=\"der(x3)\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"17\" />
     </ScalarVariable>
+    <!-- Variable with index #19 -->
     <ScalarVariable name=\"x4\" valueReference=\"20\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #20 -->
     <ScalarVariable name=\"der(x4)\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"19\" />
     </ScalarVariable>
+    <!-- Variable with index #21 -->
     <ScalarVariable name=\"x5\" valueReference=\"21\" description=\"fixed=true\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #22 -->
     <ScalarVariable name=\"der(x5)\" valueReference=\"16\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"21\" />
     </ScalarVariable>
@@ -584,12 +630,15 @@ $modelVariables$",
     </Type>
 </TypeDefinitions>
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"one\" valueReference=\"268435456\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Enumeration declaredType=\"FmiXMLTests.Fmi1Enumerations.E\" start=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"three\" valueReference=\"268435458\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Enumeration declaredType=\"FmiXMLTests.Fmi1Enumerations.E\" start=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"two\" valueReference=\"268435457\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Enumeration declaredType=\"FmiXMLTests.Fmi1Enumerations.E\" start=\"2\" />
     </ScalarVariable>
@@ -628,12 +677,15 @@ $modelVariables$",
     </SimpleType>
 </TypeDefinitions>
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"one\" valueReference=\"268435456\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.Fmi2Enumerations.E\" start=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"three\" valueReference=\"268435458\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.Fmi2Enumerations.E\" start=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"two\" valueReference=\"268435457\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.Fmi2Enumerations.E\" start=\"2\" />
     </ScalarVariable>
@@ -656,12 +708,15 @@ model Fmi1Aliases1
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"alias\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"negatedAlias\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"original\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
@@ -689,15 +744,19 @@ model Fmi1Aliases2
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"alias\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"negatedAlias\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"negatedAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"original\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" fixed=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(original)\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -721,12 +780,15 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"alias\" valueReference=\"1\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"negatedAlias\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"original\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
@@ -761,15 +823,19 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"alias\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"negatedAlias\" valueReference=\"134217729\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"original\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"approx\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(original)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"3\" />
     </ScalarVariable>
@@ -804,9 +870,11 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"fixed1\" valueReference=\"1\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"independent\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"4.0\" />
     </ScalarVariable>
@@ -837,15 +905,19 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"fixed1\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"fixed2\" valueReference=\"3\" description=\"fixed=true is default\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"independent1\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"independent2\" valueReference=\"1\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
@@ -898,36 +970,47 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"dependentParameter\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"independentParameter1\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"independentParameter2\" valueReference=\"1\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"x1\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"der(x1)\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"4\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"x2\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"der(x2)\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"6\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"x3\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"der(x3)\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"8\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"x4\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"der(x4)\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"10\" />
     </ScalarVariable>
@@ -986,42 +1069,55 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"dependentParameter1\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"dependentParameter2\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"dependentParameter3\" valueReference=\"5\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"dependentParameter4\" valueReference=\"6\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"dependentParameter5\" valueReference=\"2\" description=\"parameter equation\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"independentParameter1\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"independentParameter2\" valueReference=\"1\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"x1\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"der(x1)\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"8\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"x2\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"der(x2)\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"10\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"x3\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"der(x3)\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"12\" />
     </ScalarVariable>
@@ -1118,42 +1214,55 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"p\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"t1\" valueReference=\"1\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"t2\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"u1\" valueReference=\"9\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"u2\" valueReference=\"10\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"u3\" valueReference=\"11\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"x1\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"der(x1)\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"7\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"x2\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"der(x2)\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"9\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"x3\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"der(x3)\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"11\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"y\" valueReference=\"12\" causality=\"output\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -1200,27 +1309,35 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"der(a)\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"b\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(b)\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"x\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"der(x)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"5\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"y\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"7\" />
     </ScalarVariable>
@@ -1269,60 +1386,79 @@ $modelVariables$
 $modelStructure$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"_der_x\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"der(_der_x)\" valueReference=\"17\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"_der_y\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(_der_y)\" valueReference=\"18\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"_ds.1.a1\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"_ds.1.s1\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"der(_ds.1.s1)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"6\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"_ds.2.a1\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"_ds.2.s1\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"der(_ds.2.s1)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"9\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"lambda\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"vx\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"der(vx)\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"12\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"vy\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #15 -->
     <ScalarVariable name=\"der(vy)\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"14\" />
     </ScalarVariable>
+    <!-- Variable with index #16 -->
     <ScalarVariable name=\"x\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #17 -->
     <ScalarVariable name=\"der(x)\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #18 -->
     <ScalarVariable name=\"y\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #19 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"16\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -1365,36 +1501,47 @@ model SecondOrderDerivatives
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"lambda\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"vx\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"der(vx)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"vy\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"der(vy)\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"4\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"x\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"der(x,2)\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"8\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"der(x)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"6\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"y\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"9\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"der(y,2)\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"10\" />
     </ScalarVariable>
@@ -1440,54 +1587,71 @@ model HigherOrderOrphanTempDerivatives
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a[1]\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"a[2]\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"p[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.2\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"p[2]\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"temp_1[1]\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"temp_4\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"temp_5\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"vx[1]\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"der(vx[1])\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"8\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"vx[2]\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"der(vx[2])\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"10\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"x[1]\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"der(x[1])\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"12\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"der(x[1],2)\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"13\" />
     </ScalarVariable>
+    <!-- Variable with index #15 -->
     <ScalarVariable name=\"x[2]\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #16 -->
     <ScalarVariable name=\"der(x[2])\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"15\" />
     </ScalarVariable>
+    <!-- Variable with index #17 -->
     <ScalarVariable name=\"der(x[2],2)\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"16\" />
     </ScalarVariable>
@@ -1526,21 +1690,27 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"n\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Integer start=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"2.0\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
@@ -1560,21 +1730,27 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"n\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Integer start=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"x[2]\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"2.0\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"x[3]\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
@@ -1595,6 +1771,7 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"myInput\" valueReference=\"0\" causality=\"input\" variability=\"continuous\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
@@ -1624,6 +1801,7 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -1655,12 +1833,15 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"temp_1[1]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"temp_1[2]\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -1707,51 +1888,67 @@ $modelStructure$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"A[1,1]\" valueReference=\"0\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"A[1,2]\" valueReference=\"1\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"2.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"A[2,1]\" valueReference=\"2\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"A[2,2]\" valueReference=\"3\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"4.0\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"temp_6\" valueReference=\"6\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"der(temp_6)\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"5\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"temp_7\" valueReference=\"7\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"der(temp_7)\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"7\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"x1[1]\" valueReference=\"8\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"der(x1[1])\" valueReference=\"12\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"9\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"x1[2]\" valueReference=\"9\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"der(x1[2])\" valueReference=\"14\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"11\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"x2[1]\" valueReference=\"10\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"der(x2[1])\" valueReference=\"13\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"13\" />
     </ScalarVariable>
+    <!-- Variable with index #15 -->
     <ScalarVariable name=\"x2[2]\" valueReference=\"11\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #16 -->
     <ScalarVariable name=\"der(x2[2])\" valueReference=\"15\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"15\" />
     </ScalarVariable>
@@ -1803,45 +2000,59 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"c[1]\" valueReference=\"268435457\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Integer start=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"c[2]\" valueReference=\"268435458\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Integer start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"e1\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"e2\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"e3\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"e4\" valueReference=\"268435460\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"n\" valueReference=\"268435458\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Integer start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"s1\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <String start=\"string\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"s2\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <String start=\"string\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"s3\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <String start=\"string\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"x1\" valueReference=\"268435457\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Integer start=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"x2\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
@@ -1861,45 +2072,59 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"c[1]\" valueReference=\"268435457\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Integer start=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"c[2]\" valueReference=\"268435458\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Integer start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #5 -->
     <ScalarVariable name=\"e1\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #6 -->
     <ScalarVariable name=\"e2\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #7 -->
     <ScalarVariable name=\"e3\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #8 -->
     <ScalarVariable name=\"e4\" valueReference=\"268435460\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"3\" />
     </ScalarVariable>
+    <!-- Variable with index #9 -->
     <ScalarVariable name=\"n\" valueReference=\"268435458\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Integer start=\"2\" />
     </ScalarVariable>
+    <!-- Variable with index #10 -->
     <ScalarVariable name=\"s1\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <String start=\"string\" />
     </ScalarVariable>
+    <!-- Variable with index #11 -->
     <ScalarVariable name=\"s2\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <String start=\"string\" />
     </ScalarVariable>
+    <!-- Variable with index #12 -->
     <ScalarVariable name=\"s3\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <String start=\"string\" />
     </ScalarVariable>
+    <!-- Variable with index #13 -->
     <ScalarVariable name=\"x1\" valueReference=\"268435457\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Integer start=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #14 -->
     <ScalarVariable name=\"x2\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
@@ -1918,6 +2143,7 @@ model StringStartValueIllegalChars1
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"805306368\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <String start=\"Carbon steel (%C &lt;= 0.30)\" />
     </ScalarVariable>
@@ -1936,6 +2162,7 @@ model StringStartValueIllegalChars2
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"805306368\" causality=\"parameter\" variability=\"fixed\" initial=\"exact\">
         <String start=\"Carbon steel (%C &lt;= 0.30)\" />
     </ScalarVariable>
@@ -1953,6 +2180,7 @@ model Quantity1
             template="$modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"x\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real quantity=\"Time\" relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -2025,15 +2253,19 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"m.x1\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"der(m.x1)\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"m.x2\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(m.x2)\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -2065,15 +2297,19 @@ $modelStructure$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"m.x1\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"der(m.x1)\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"m.x2\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(m.x2)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"3\" />
     </ScalarVariable>
@@ -2108,15 +2344,19 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"x\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"der(x)\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"y\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -2141,15 +2381,19 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"x\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"der(x)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"1\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"y\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #4 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"3\" />
     </ScalarVariable>
@@ -2174,12 +2418,15 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"x\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"y\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
@@ -2204,12 +2451,15 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"x\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"y\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"0.0\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"der(y)\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" derivative=\"2\" />
     </ScalarVariable>
@@ -2233,12 +2483,15 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"p\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"x\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"der(x)\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
