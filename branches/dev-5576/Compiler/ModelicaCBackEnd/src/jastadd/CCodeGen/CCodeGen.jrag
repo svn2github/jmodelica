@@ -394,7 +394,7 @@ aspect CCodeGen {
     }
 
     public static void FStatement.printAssignStmt_C(CodeStream str, String indent, String dst, String src) {
-        str.println(indent, dst, " = ", src, ";");
+        str.print(indent + dst + " = " + src + ";\n");
     }
 
     public void FType.printScalarDecl_C(CodePrinter p, CodeStream str, String indent, boolean external, String name) {

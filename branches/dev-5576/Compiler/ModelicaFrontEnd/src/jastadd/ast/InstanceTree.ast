@@ -179,8 +179,8 @@ FDeferExp : FExp ::= <FExp:FExp>;
 
 
 // These nodes are used to create instance copies of modification trees intended for
-// error checking.
-abstract InstModification : BaseNode ::= <Modification:SrcModificationOrRedeclareElement>;
+// error checking.	
+abstract InstModification : BaseNode ::= <Modification:Modification>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
 InstValueModification    : InstModification ::= /FExp/
                                                 /InstArrayModification*/;

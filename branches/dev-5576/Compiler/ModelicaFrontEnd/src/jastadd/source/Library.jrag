@@ -93,10 +93,11 @@ aspect Library {
             entity.setFileName(fileName);
             if (isStructured) {
                 FullClassDecl fcd = (FullClassDecl) cd;
+                LibClassDecl lcd = new LibClassDecl(fcd);
+                
                 LibraryList ll = new LibraryList();
                 ll.addLibraryDirectory(dirName, getReason());
-
-                LibClassDecl lcd = new LibClassDecl(fcd, ll.createLibNodeList());
+                ll.createLibNodes(lcd);
                 
                 File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
                 if (orderFile.isFile()) {
@@ -108,7 +109,7 @@ aspect Library {
                     lcd.setOrder(order);
                 }
                 
-                entity.setClassDecl(lcd, 0);
+                entity.setElement(lcd, 0);
             }
             return entity;
         } catch (ParserException e) {
@@ -131,14 +132,14 @@ aspect Library {
         } else {
             ClassDecl match = null;
             ClassDecl wrongCase = null;
-            for (ClassDecl cd : entity.getClassDecls()) {
-                if (name.equals(cd.name())) {
+            for (Element e : entity.getElements()) {
+                if (name.equals(e.name())) {
                     if (match == null) {
-                        match = cd;
+                        match = (ClassDecl) e;
                     }
-                } else if (name.equalsIgnoreCase(cd.name())) {
+                } else if (name.equalsIgnoreCase(e.name())) {
                     if (wrongCase == null) {
-                        wrongCase = cd;
+                        wrongCase = (ClassDecl) e;
                     }
                 }
             }
@@ -147,8 +148,8 @@ aspect Library {
     }
 
     private boolean LibNode.shouldProduceProblem(StoredDefinition entity, String name) {
-        return entity == null || entity.getNumClassDecl() != 1 || 
-                !entity.getClassDecl(0).name().equals(name);
+        return entity == null || entity.getNumElement() != 1 || 
+                !entity.getElement(0).name().equals(name);
     }
 
     public static final LibraryContentErrorProducer ASTNode.LIBRARY_FILE_CONTENTS = 
@@ -174,8 +175,8 @@ aspect Library {
                 } else {
                     int correct = 0;
                     ArrayList<String> wrong = new ArrayList<String>();
-                    for (ClassDecl cd : sd.getClassDecls()) {
-                        String n = cd.name();
+                    for (Element e : sd.getElements()) {
+                        String n = e.name();
                         if (n.equals(name)) {
                             correct++;
                         } else {
@@ -213,8 +214,8 @@ aspect Library {
 
             public ProblemSeverity severity(StoredDefinition sd, String name) {
                 // If the class simply has the wrong case, give a warning instead
-                boolean warn = sd != null && sd.getNumClassDecl() == 1 && 
-                        sd.getClassDecl(0).name().equalsIgnoreCase(name);
+                boolean warn = sd != null && sd.getNumElement() == 1 && 
+                        sd.getElement(0).name().equalsIgnoreCase(name);
                 return warn ? ProblemSeverity.WARNING : ProblemSeverity.ERROR;
             }
 
@@ -267,9 +268,7 @@ aspect Library {
     }
 
     syn ClassDecl LibNode.classDecl() = 
-        (getStoredDefinition().getNumClassDecl() > 0) 
-            ? getStoredDefinition().getClassDecl(0) 
-            : createErrorClass();
+        (getStoredDefinition().getNumElement() > 0) ? (ClassDecl) getStoredDefinition().getElement(0) : createErrorClass();
 
     private java.util.List<String> LibClassDecl.order = Collections.emptyList();
     
@@ -289,15 +288,45 @@ aspect Library {
         this(new IdDecl(name), file.getPath(), structured, "", reason);
     }
 
-    public LibClassDecl.LibClassDecl(FullClassDecl fcd, List<LibNode> lib) {
-        super(fcd);
-        setLibNodeList(lib);
+    public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
+        assignFields(fcd);
+        originalComposition = fcd.originalComposition;
     }
-
+    
+    public void LibClassDecl.assignFields(FullClassDecl fcd) {
+        setVisibilityType(fcd.getVisibilityType());
+        setEncapsulatedOpt(fcd.getEncapsulatedOpt());
+        setPartialOpt(fcd.getPartialOpt());
+        setRestriction(fcd.getRestriction());
+        setName(fcd.getName());
+        setRedeclareOpt(fcd.getRedeclareOpt());
+        setFinalOpt(fcd.getFinalOpt());
+        setInnerOpt(fcd.getInnerOpt());
+        setOuterOpt(fcd.getOuterOpt());
+        setReplaceableOpt(fcd.getReplaceableOpt());
+        setConstrainingClauseOpt(fcd.getConstrainingClauseOpt());
+        setConstrainingClauseCommentOpt(fcd.getConstrainingClauseCommentOpt());
+        setStringCommentOpt(fcd.getStringCommentOpt());
+        setEquationList(fcd.getEquationList());
+        setAlgorithmList(fcd.getAlgorithmList());
+        setSuperList(fcd.getSuperList());
+        setImportList(fcd.getImportList());
+        setClassDeclList(fcd.getClassDeclList());
+        setComponentDeclList(fcd.getComponentDeclList());
+        setAnnotationOpt(fcd.getAnnotationOpt());
+        setExternalClauseOpt(fcd.getExternalClauseOpt());
+        setEndDecl(fcd.getEndDecl());
+        setLocation(fcd);
+    }
+    
     eq LibClassDecl.getLibNode().enclosingClassDecl() = this;   
     eq LibClassDecl.getLibNode().classNamePrefix() = classNamePrefix().equals("")?
                                                       name(): classNamePrefix() + "." + name();
-
+                                                      
+    public LibClassDecl FullClassDecl.createLibClassDecl() {
+        return new LibClassDecl(this);
+    }
+    
     private LibraryList Program.libraryList;
     
     public LibraryList Program.getLibraryList() {
@@ -333,6 +362,11 @@ aspect Library {
             for (LibraryDef def : availableLibraries())
                 res.add(def.createLibNode());
             return res;
+        }
+        
+        public void createLibNodes(FullClassDecl parent) {
+            for (LibraryDef def : availableLibraries())
+                parent.addClassDecl(def.createLibNode());
         }
         
         /**

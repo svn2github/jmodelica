@@ -112,7 +112,16 @@ aspect OptimicaFlattening {
 		getInstExtendsList().buildConnectionSets(prefix, csm, connect);
 	}
 
-	syn Iterable<Constraint> InstNode.constraints() = Collections.emptyList();
+	syn lazy ArrayList<Constraint> ClassDecl.constraints() = new ArrayList<Constraint>();
+	eq OptClassDecl.constraints() {
+	    ArrayList<Constraint> l = new ArrayList<Constraint>();
+		for (Constraint c : getConstraints())
+			l.add(c);
+		return l;
+	}
+	//eq ShortClassDecl.constraints() = getExtendsClauseShortClass().getSuper().myClassDecl().constraints();
+	
+	syn ArrayList<Constraint> InstNode.constraints() = new ArrayList<Constraint>();
 	eq InstOptClassDecl.constraints() = getClassDecl().constraints();
 	eq InstComponentDecl.constraints() = myInstClass().constraints();
 	eq InstExtends.constraints() = myInstClass().constraints();

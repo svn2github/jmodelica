@@ -567,7 +567,7 @@ model ArrayModifications3
             errorMessage="
 1 errors found:
 
-Error at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable b, expected size is [3] and size of start expression is [4]
 ")})));
 end ArrayModifications3;
@@ -1087,7 +1087,7 @@ model ArrayModifications21
             errorMessage="
 1 errors found:
 
-Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 10, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable z, expected size is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications21;
@@ -1137,7 +1137,7 @@ model ArrayModifications23
             errorMessage="
 1 errors found:
 
-Error at line 10, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 10, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable zc, expected size is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications23;
@@ -1294,7 +1294,7 @@ model ArrayModifications29
             errorMessage="
 1 errors found:
 
-Error at line 6, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 6, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable yb, expected size is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications29;
@@ -1316,7 +1316,7 @@ model ArrayModifications30
             errorMessage="
 1 errors found:
 
-Error at line 6, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
+Error at line 6, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable yb, expected size is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications30;
@@ -1607,7 +1607,7 @@ model ArrayModifications40
             errorMessage="
 1 errors found:
 
-Error at line 3, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
 In components:
     x[1].y[1]
     x[1].y[2]
@@ -1636,7 +1636,7 @@ model ArrayModifications41
             errorMessage="
 1 errors found:
 
-Error at line 3, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
+Error at line 3, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
 In components:
     x[1].y[1]
     x[1].y[2]
@@ -1665,7 +1665,7 @@ model ArrayModifications42
             errorMessage="
 1 errors found:
 
-Warning at line 7, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH,
+Warning at line 7, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH,
 In components:
     x[1]
     x[2]
@@ -1692,7 +1692,7 @@ model ArrayModifications43
             errorMessage="
 1 errors found:
 
-Error at line 7, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
+Error at line 7, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
 In components:
     x[1]
     x[2]
@@ -1719,7 +1719,7 @@ model ArrayModifications44
             errorMessage="
 1 errors found:
 
-Error at line 7, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
+Error at line 7, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
 In components:
     x[1]
     x[2]
@@ -1738,7 +1738,7 @@ model ArrayModifications45
             errorMessage="
 1 errors found:
 
-Warning at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
+Warning at line 2, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'start = 0'
 ")})));
 end ArrayModifications45;
@@ -1758,7 +1758,7 @@ model ArrayModifications46
             errorMessage="
 1 errors found:
 
-Warning at line 6, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
+Warning at line 6, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'x = {1,2}'
 ")})));
 end ArrayModifications46;
@@ -1811,7 +1811,7 @@ initial equation
 			flatModel="
 fclass ModificationTests.ArrayModifications48
  initial parameter Real a.b[1].x(fixed = false);
-initial equation
+initial equation 
  a.b[1].x = 1;
 end ModificationTests.ArrayModifications48;
 ")})));
@@ -1833,7 +1833,7 @@ model ArrayModifications49
             errorMessage="
 1 errors found:
 
-Warning at line 7, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 6, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications49;
@@ -1881,10 +1881,10 @@ model ArrayModifications51
 Warning at line 10, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each b(c = 1)
 
-Warning at line 10, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
+Warning at line 10, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'c = 1'
 
-Warning at line 11, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 10, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications51;
@@ -1909,7 +1909,7 @@ model ArrayModifications52
             errorMessage="
 1 errors found:
 
-Warning at line 11, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 10, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications52;
@@ -1934,7 +1934,7 @@ model ArrayModifications53
             errorMessage="
 1 errors found:
 
-Warning at line 11, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 10, column 33, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications53;
@@ -1963,7 +1963,7 @@ model ArrayModifications54
             errorMessage="
 1 errors found:
 
-Warning at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications54;
@@ -1992,7 +1992,7 @@ model ArrayModifications55
             errorMessage="
 1 errors found:
 
-Warning at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications55;
@@ -2021,7 +2021,7 @@ model ArrayModifications56
             errorMessage="
 1 errors found:
 
-Warning at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications56;
@@ -2049,7 +2049,7 @@ model ArrayModifications57
             errorMessage="
 1 errors found:
 
-Warning at line 11, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH,
+Warning at line 11, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH,
 In components:
     c[1]
     c[2]
@@ -2080,7 +2080,7 @@ model ArrayModifications58
             errorMessage="
 1 errors found:
 
-Warning at line 11, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH,
+Warning at line 11, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH,
 In components:
     c[1]
     c[2]
@@ -2112,7 +2112,7 @@ model ArrayModifications59
             errorMessage="
 1 errors found:
 
-Warning at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications59;
@@ -2141,7 +2141,7 @@ model ArrayModifications60
             errorMessage="
 1 errors found:
 
-Warning at line 15, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications60;
@@ -2169,7 +2169,7 @@ model ArrayModifications61
             errorMessage="
 1 errors found:
 
-Warning at line 14, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
+Warning at line 14, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'b(a(x = {1:3,4:6}))'
 ")})));
 end ArrayModifications61;
@@ -2285,7 +2285,7 @@ model ArrayModifications65
             errorMessage="
 2 errors found:
 
-Error at line 11, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
+Error at line 11, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION,
 In components:
     c[1]
     c[2]
@@ -2324,7 +2324,7 @@ model ArrayModifications66
             errorMessage="
 1 errors found:
 
-Warning at line 16, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 15, column 41, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications66;
@@ -2353,7 +2353,7 @@ model ArrayModifications67
             errorMessage="
 1 warnings found:
 
-Warning at line 15, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+Warning at line 15, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
   Ignoring erroneous 'each' for the modification 'y = {1,2}'
 ")})));
 end ArrayModifications67;
@@ -2413,7 +2413,7 @@ model ArrayModifications69
             errorMessage="
 1 errors found:
 
-Warning at line 17, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 16, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications69;
@@ -2442,7 +2442,7 @@ model ArrayModifications70
             errorMessage="
 1 errors found:
 
-Warning at line 15, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
+Warning at line 15, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'r(x = {1,2}, y = 1)'
 ")})));
 end ArrayModifications70;
@@ -2645,7 +2645,7 @@ model ArrayModifications78
             errorMessage="
 1 warnings found:
 
-Warning at line 11, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+Warning at line 11, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
   Ignoring erroneous 'each' for the modification 'y = {3,4}'
 ")})));
 end ArrayModifications78;
@@ -2753,7 +2753,7 @@ model ArrayModifications83
             errorMessage="
 1 warnings found:
 
-Warning at line 6, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+Warning at line 6, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
   Ignoring erroneous 'each' for the modification 'start = {1,2}'
 ")})));
 end ArrayModifications83;
@@ -3257,7 +3257,7 @@ equation
  der(y) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end ModificationTests.StartPropagation1;
 ")})));
@@ -3284,7 +3284,7 @@ equation
  der(y) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end ModificationTests.StartPropagation2;
 ")})));
@@ -3315,7 +3315,7 @@ equation
  der(a2.x) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end ModificationTests.StartPropagation3;
 ")})));
@@ -3344,7 +3344,7 @@ equation
  der(x) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end ModificationTests.StartPropagation4;
 ")})));
@@ -3377,7 +3377,7 @@ equation
  der(b) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
  type ModificationTests.StartPropagation5.B = Real(start = 2);
 end ModificationTests.StartPropagation5;
@@ -3407,7 +3407,7 @@ equation
  der(x) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
  type ModificationTests.StartPropagation6.A = Real(start = 1);
 end ModificationTests.StartPropagation6;
@@ -3438,7 +3438,7 @@ equation
  der(a) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
  type ModificationTests.StartPropagation7.A = Real(start = 1);
  type ModificationTests.StartPropagation7.B = Real(start = 2);
@@ -3473,7 +3473,7 @@ equation
  der(b) = 1;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
  type ModificationTests.StartPropagation8.B = Real(start = 2);
 end ModificationTests.StartPropagation8;

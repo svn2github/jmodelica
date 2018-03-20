@@ -1475,28 +1475,27 @@ aspect Flattening {
     }
 
     public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
-        FEnumLiteral e = new FEnumLiteral(new FIdUse(name()), new Opt());
-        StringComment comment = myStringComment();
-        if (comment != null) {
-            e.setFStringComment(comment.flatten());
-        }
+        FEnumLiteral e = new FEnumLiteral(new FIdUse(name()),new Opt());
+        if (getComponentDecl().getComment().hasStringComment())
+            e.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
         return e;
     }
 
-    public void InstClassDecl.flattenEnum(Flattener f) {
+    public void InstClassDecl.flattenEnum(Flattener f) {      
         if (!f.isFlattened(this)) {
             // Flatten all InstEnums corresponding to FEnumLiterals
             FEnumLiteralList l = new FEnumLiteralList();
             for (InstEnumLiteral ie : enumLiterals()) 
                 l.addFEnumLiteral(ie.createFEnumLiteral());
             FIdDecl id = new FIdDecl(new FQNameString(qualifiedName()));
-            FEnumDecl ed = new FEnumDecl(id, l, new Opt());
-            StringComment comment = myStringComment();
-            if (comment != null) {
-                ed.setFStringComment(comment.flatten());
-            }
+            ClassDecl classDecl = getClassDecl();
+            Opt comment = null;
+            if (classDecl.hasStringComment()) 
+                comment = new Opt(classDecl.getStringComment().flatten());
+            else 
+                comment = new Opt();
             addFDerivedType(f);
-            f.addFEnumDecl(ed); 
+            f.addFEnumDecl(new FEnumDecl(id, l, comment)); 
         }
     }
     
@@ -1695,10 +1694,8 @@ aspect Flattening {
                 fv.setBindingExp(e);
         }
         
-        StringComment comment = myStringComment();
-        if (comment != null) {
-            fv.setFStringComment(comment.flatten());
-        }
+        if (getComponentDecl().getComment().hasStringComment())
+            fv.setFStringComment(getComponentDecl().getComment().getStringComment().flatten());
         
         fv.setFQName(name);
         fv.setLocation(this);
@@ -2112,9 +2109,9 @@ aspect Flattening {
                     InstValueModification ivm = im.getInstValueMod();
                     a.setValue(aer.retrieve(ivm, ivm.hasEach()).flatten(prefix));
                 }
-                if (getComponentModification().getEach())
+                if (getComponentModification().hasEach())
                     a.setFEach(new FEach());
-                if (getComponentModification().getFinal())
+                if (getComponentModification().hasFinal())
                     a.setFFinal(new FFinal());
                 List<FAttribute> l = new List<FAttribute>();
                 l.addAll(a.getFAttributes());
@@ -2221,6 +2218,15 @@ aspect FlatteningDebug {
         this 
     to FClass.collectInstAccesses() for myFClass();
     inh FClass InstAccess.myFClass();
+
+}
+
+
+aspect InstNodeInterface {
+
+    syn ArraySubscripts InstComponentDecl.arraySubscripts() = 
+        getComponentDecl().arraySubscripts()!=null?
+            getComponentDecl().arraySubscripts(): null;
 
 }
 
@@ -2855,16 +2861,18 @@ aspect InstantiatedExpressions {
     }
 
     public FEquationType Algorithm.equationType() {
-        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+        return hasInitial() ? new FInitialEquation() : new FNormalEquation();
     }
 
     public <T extends FAbstractEquation> T AbstractEquation.copyStringComment(T eqn) {
-        StringComment comment = myStringComment();
-        if (comment != null) {
-            eqn.setFStringComment(comment.flatten());
+        if (getComment().hasStringComment()) {
+            eqn.setFStringComment(getComment().getStringComment().flatten());
         }
         return eqn;
     }
+
+    syn String AbstractEquation.stringComment() =
+            getComment().hasStringComment() ? getComment().getStringComment().getComment() : null;
 
     public FAbstractEquation AbstractEquation.instantiate() {
         return contribute(copyLocationTo(new FUnsupportedEquation(equationType())));

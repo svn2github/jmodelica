@@ -1824,7 +1824,7 @@ Error at line 13, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/Exp
             errorMessage="
 1 errors found:
 
-Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 9, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Type of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
 ")})));
     end ExpandableErr16;
@@ -1860,7 +1860,7 @@ Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/Ex
             errorMessage="
 1 errors found:
 
-Error at line 10, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
+Error at line 9, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/ExpandableConnectors.mo':
   Size of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
 ")})));
     end ExpandableErr17;

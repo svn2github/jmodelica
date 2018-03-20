@@ -41,9 +41,6 @@ aspect OptimicaExpressions {
 		}
 	}
 	*/
-
-    eq InstTimedVariable.getName().kind() = Kind.COMPONENT_ACCESS;
-
 	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	
 	eq FStartTimeExp.cevalCalc(VariableEvaluator evaluator) {

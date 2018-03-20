@@ -190,7 +190,7 @@ equation
             errorMessage="
 1 errors found:
 
-Compliance error at line 3, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
+Compliance error at line 2, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/ForbiddenOperationsTests.mo', ONLY_FMU_BOOLEAN_VARIABLES:
   Boolean variables of discrete variability is currently only supported when compiling FMUs
 ")})));
 end IfEquTest_ComplErr;

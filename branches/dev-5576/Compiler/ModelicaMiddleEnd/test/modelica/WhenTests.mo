@@ -117,7 +117,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
+Error at line 1, column 16, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   The variable x is assigned in reinit() clauses in more than one when clause:
     reinit(x, 1);
     reinit(x, 2);
@@ -273,7 +273,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2, column 5, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
+Error at line 1, column 17, in file 'Compiler/ModelicaMiddleEnd/test/modelica/WhenTests.mo':
   The variable x[2] is assigned in reinit() clauses in more than one when clause:
     reinit(x[2], 1);
     reinit(x[2], 1);
@@ -352,7 +352,7 @@ equation
  end if;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end WhenTests.ReinitTest1;
 ")})));
@@ -390,7 +390,7 @@ equation
  end if;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
  end WhenTests.ReinitTest2;
 ")})));
@@ -479,7 +479,7 @@ equation
  end if;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end WhenTests.InsideIfEquation1;
 ")})));

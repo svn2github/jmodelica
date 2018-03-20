@@ -2298,7 +2298,7 @@ aspect ConstantEvaluation {
     eq FLoadResource.cevalCalc(VariableEvaluator evaluator) {
         String arg = getFExp().ceval(evaluator).stringValue();
         if (!new File(arg).isAbsolute())
-            arg = URIResolver.DEFAULT.resolve(this, arg).replace("\\", "\\\\");
+            arg = resolve(arg).replace("\\", "\\\\");
         return new CValueString(arg);
     }
 
