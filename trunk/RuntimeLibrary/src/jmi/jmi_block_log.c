@@ -158,9 +158,9 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
 
             if (nans_present) {
                 if (is_iter_var_flag) {
-                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, is_iter_var_flag? "NaNResidualIndices", "R");
+                    inner = jmi_log_enter_index_vector_(log, outer, logWarning,  "NaNResidualIndices", "R");
                 } else {
-                    inner = jmi_log_enter_vector_(log, outer, logWarning, is_iter_var_flag? "NaNOutputIndices");
+                    inner = jmi_log_enter_vector_(log, outer, logWarning, "NaNOutputIndices");
                 }
                 for(i=0; i<n_outputs; i++) {
                     if(error_indicator[i] == 1) {
@@ -171,9 +171,9 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
             }
             if (infs_present) {
                 if (is_iter_var_flag) {
-                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, is_iter_var_flag? "INFResidualIndices", "R");
+                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "INFResidualIndices", "R");
                 } else {
-                    inner = jmi_log_enter_vector_(log, outer, logWarning, is_iter_var_flag? "INFOutputIndices");
+                    inner = jmi_log_enter_vector_(log, outer, logWarning, "INFOutputIndices");
                 }
                 for(i=0; i<n_outputs; i++) {
                     if(error_indicator[i] == 2) {
@@ -184,9 +184,9 @@ void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs,
             }
             if( lim_vals_present) {
                 if (is_iter_var_flag) {
-                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, is_iter_var_flag? "LimitingValueIndices", "R");
+                    inner = jmi_log_enter_index_vector_(log, outer, logWarning, "LimitingValueIndices", "R");
                 } else {
-                    inner = jmi_log_enter_vector_(log, outer, logWarning, is_iter_var_flag? "LimitingValueIndicess");
+                    inner = jmi_log_enter_vector_(log, outer, logWarning, "LimitingValueIndicess");
                 }
                 for(i=0; i<n_outputs; i++) {
                     if(error_indicator[i] == 3) {
