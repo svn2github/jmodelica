@@ -237,7 +237,19 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         }
         printer.print("\"");
     }
-    
+
+    /**
+     * Generates an XML comment with the provided contents. Special characters
+     * are escaped in the provided content before printing.
+     * 
+     * @param contents Contents of the comment
+     * @param printer the print stream to use
+     */
+    protected void generateComment(String contents, CodeStream printer) {
+        indent(printer);
+        printer.print("<!-- " + XMLUtil.escape(contents) + " -->\n");
+    }
+
     /**
      * Print the current indentation to printer.
      */

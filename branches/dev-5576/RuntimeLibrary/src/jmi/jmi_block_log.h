@@ -27,6 +27,17 @@
 
 #include "jmi_block_solver.h"
 
+/** \brief Check illegal inputs or outputs */
+int jmi_check_illegal_values(int *error_indicator, jmi_real_t *nominal, jmi_real_t *inputs, int n, int* nans_present, int *infs_present, int *lim_vals_present);
+
+/** \brief Log illegal input values detected by checl_illegal_values */
+void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans_present, int infs_present, int lim_vals_present, jmi_real_t *inputs,
+	jmi_string_t label, int is_iter_var_flag, int* value_references, int log_level, const char* label_type);
+
+/** \brief Log illegal otput values detected by checl_illegal_values */
+void jmi_log_illegal_output(jmi_log_t *log, int *error_indicator, int n_outputs, int n_inputs, jmi_real_t *inputs, jmi_real_t *outputs, int nans_present, int infs_present, int lim_vals_present, 
+	jmi_string_t label, int is_iter_var_flag, int log_level, const char* label_type);
+
 /** \brief Check and log illegal iv inputs */
 int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);
 

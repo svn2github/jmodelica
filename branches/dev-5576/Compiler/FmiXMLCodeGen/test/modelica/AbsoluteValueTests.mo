@@ -30,12 +30,15 @@ model Fmi1AbsoluteValue1
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"c\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"true\" />
     </ScalarVariable>
@@ -57,12 +60,15 @@ model Fmi2AbsoluteValue1
 $modelVariables$",
             generatedCode="
 <ModelVariables>
+    <!-- Variable with index #1 -->
     <ScalarVariable name=\"a\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #2 -->
     <ScalarVariable name=\"b\" valueReference=\"1\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
+    <!-- Variable with index #3 -->
     <ScalarVariable name=\"c\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
         <Real relativeQuantity=\"true\" />
     </ScalarVariable>
@@ -240,10 +246,10 @@ model AbsoluteValueError1
             name="AbsoluteValueError1",
             description="",
             errorMessage="
-Error at line 3, column 15, in file '...', ABSOLUTE_VALUE:
+Error at line 3, column 16, in file '...', ABSOLUTE_VALUE:
   absoluteValue annotation only allows scalar boolean literal values 'true' or 'false'
 
-Error at line 3, column 15, in file '...', ABSOLUTE_VALUE_LOCATION:
+Error at line 3, column 16, in file '...', ABSOLUTE_VALUE_LOCATION:
   absoluteValue annotation only allowed on simple types or components of simple types
 ")})));
 end AbsoluteValueError1;
@@ -259,10 +265,10 @@ model AbsoluteValueError2
             name="AbsoluteValueError2",
             description="",
             errorMessage="
-Error at line 3, column 31, in file '...', ABSOLUTE_VALUE:
+Error at line 3, column 32, in file '...', ABSOLUTE_VALUE:
   absoluteValue annotation only allows scalar boolean literal values 'true' or 'false'
 
-Error at line 4, column 31, in file '...', ABSOLUTE_VALUE:
+Error at line 4, column 32, in file '...', ABSOLUTE_VALUE:
   absoluteValue annotation only allows scalar boolean literal values 'true' or 'false'
 ")})));
 end AbsoluteValueError2;

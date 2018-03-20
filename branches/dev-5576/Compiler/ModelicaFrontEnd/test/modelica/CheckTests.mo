@@ -135,7 +135,7 @@ model InnerOuter5
             errorMessage="
 1 errors found:
 
-Warning at line 8, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 9, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter w does not have a binding expression
 ")})));
 end InnerOuter5;
@@ -571,7 +571,7 @@ equation
  end if;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end CheckTests.IfEquationElse1;
 ")})));
@@ -613,7 +613,7 @@ equation
  end if;
 
 public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated).\", always \"Do use it as a state.\");
 
 end CheckTests.IfEquationElse2;
 ")})));
@@ -830,7 +830,7 @@ model ExtObjConstructor2
             errorMessage="
 1 errors found:
 
-Error at line 17, column 11, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
+Error at line 19, column 5, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRESSION:
   The external object 'x' does not have a binding expression
 ")})));
 end ExtObjConstructor2;
@@ -856,7 +856,7 @@ model ExtObjConstructor3
             description="No external object binding expression, no error with check target",
             checkType="check",
             errorMessage="
-Warning at line 12, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 14, column 5, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter x does not have a binding expression
 ")})));
 end ExtObjConstructor3;
@@ -1019,7 +1019,7 @@ model Array1
             errorMessage="
 1 errors found:
 
-Compliance error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_ARRAY_INPUT:
+Compliance error at line 15, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_ARRAY_INPUT:
   Arrays of functional input arguments is currently not supported
 ")})));
 end Array1;
@@ -1054,7 +1054,7 @@ model Bind1
             errorMessage="
 1 errors found:
 
-Compliance error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_FROM_FUNCTION_DEFAULT:
+Compliance error at line 15, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_FROM_FUNCTION_DEFAULT:
   Creating functional input arguments from functions with default input arguments is currently not supported
 ")})));
 end Bind1;
@@ -1091,19 +1091,19 @@ model Bind2
             errorMessage="
 6 errors found:
 
-Compliance error at line 14, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
+Compliance error at line 15, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
 Error at line 15, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable pf1 does not match the declared type of the variable
 
-Compliance error at line 15, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
+Compliance error at line 16, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
 Error at line 16, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Illegal access to class in expression: fullFunc
 
-Compliance error at line 16, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
+Compliance error at line 17, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
 Error at line 17, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
@@ -1155,10 +1155,10 @@ model Bind3
             errorMessage="
 2 errors found:
 
-Compliance error at line 28, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+Compliance error at line 29, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 
-Compliance error at line 29, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+Compliance error at line 30, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 ")})));
 end Bind3;
@@ -1192,7 +1192,7 @@ model Duplicate1
             errorMessage="
 2 errors found:
 
-Error at line 8, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
+Error at line 9, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
   Duplicate component in same class: input Real x1
 
 Error at line 21, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo':
@@ -1354,7 +1354,7 @@ model SizeInDisabled1
             errorMessage="
 2 errors found:
 
-Warning at line 1, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 
 Warning at line 3, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
@@ -1379,7 +1379,7 @@ model SizeInDisabled2
 Error at line 3, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of z, size of declaration is [0] and size of binding expression is [2, 2]
 
-Warning at line 1, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled2;
@@ -1412,7 +1412,7 @@ In component a:
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of 'x' is Real[0]
 
-Warning at line 8, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 10, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled3;
@@ -1444,7 +1444,7 @@ In component a:
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of '{x, x}' is Real[2, 0]
 
-Warning at line 8, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 10, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled4;
@@ -1609,7 +1609,7 @@ equation
             errorMessage="
 1 warnings found:
 
-Warning at line 7, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 8, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter x does not have a binding expression
 
 ")})));
@@ -1626,7 +1626,7 @@ model UnknownSizeArrayIndexBounds1
             errorMessage="
 1 warnings found:
 
-Warning at line 1, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 2, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter x does not have a binding expression
 
 ")})));
@@ -1649,16 +1649,16 @@ model ExternalFunctionAnnotation1
             errorMessage="
 4 errors found:
 
-Error at line 6, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
-Error at line 6, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 32, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
-Error at line 6, column 51, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 53, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
-Error at line 6, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
+Error at line 6, column 65, in file 'Compiler/ModelicaFrontEnd/test/modelica/CheckTests.mo', EXTERNAL_FUNCTION_ANNOTATION:
   External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
 
 ")})));
