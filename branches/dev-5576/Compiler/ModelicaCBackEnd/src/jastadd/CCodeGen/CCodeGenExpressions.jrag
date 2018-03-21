@@ -408,8 +408,13 @@ aspect CCodeGenExpressions {
     /**
      * Helper, prints jmi guard around an operator
      */
+    protected void FExp.prettyPrintGuardedStmt(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ... exps) {
+        str.print(indent);
+        prettyPrintGuarded(p, str, indent, exps);
+        str.println(";");
+    }
     protected void FExp.prettyPrintGuarded(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ... exps) {
-        new RuntimeCallComputation(p, "").prettyPrintHead(p, str, indent, this, exps, new FExp[]{});
+        new RuntimeCallComputation(p, "").prettyPrintHead(p, str, indent, this, exps, p.codePrinter().returnArguments(this));
     }
 
     protected void RuntimeCallComputation.prettyPrintHead(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FExp ctx, FExp[] inputs, FExp[] outputs) {
@@ -476,12 +481,24 @@ aspect CCodeGenExpressions {
                 if(direction == Direction.OUTPUT) {
                     str.print('&');
                 }
-                p.print(arg, str, indent);
+                arg.genArgument(p, str, indent);
                 sep = p.codePrinter().sep();
                 i++;
             }
         }
     }
+    
+    public abstract FExp[] CodePrinter.returnArguments(FExp exp);
+    
+    @Override
+    public FExp[] CPrettyPrinter.returnArguments(FExp exp) {
+        return exp.returnArguments_C();
+    }
+
+    public FExp[] FExp.returnArguments_C() {
+        return new FExp[] {};
+    }
+    
 
     @Override
     public void FDotPowExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
