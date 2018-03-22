@@ -25,12 +25,15 @@ aspect OptimicaPrettyPrint {
         }
     }
 
-    eq ConstraintClause.clauseHeader() = "constraint";
+    eq ConstraintClause.clauseHeader(String separator) = "constraint";
 
-    public void ConstraintClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+    @Override
+    public void ConstraintClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
         for (Constraint c : getConstraints()) {
             p.print(c, str, indent);
-            str.println(";");
+            if (doFormatting) {
+                str.println(";");
+            }
         }
     }
 

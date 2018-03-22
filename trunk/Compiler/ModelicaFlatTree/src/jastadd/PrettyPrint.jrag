@@ -361,29 +361,30 @@ aspect PrettyPrint {
         if (header != null) {
             str.println(indent, header);
         }
-        prettyPrintClauseBody(p, str, p.indent(indent));
+        prettyPrintClauseBody(p, str, p.indent(indent), true);
     }
 
-    syn String Clause.clauseHeader();
-    eq PublicElementList.clauseHeader()     = "public";
-    eq DefaultElementList.clauseHeader()    = null;
-    eq ProtectedElementList.clauseHeader()  = "protected";
-    eq EquationClause.clauseHeader()        = "equation";
-    eq InitialEquationClause.clauseHeader() = "initial equation";
-    eq Algorithm.clauseHeader()             = "algorithm";
-    eq InitialAlgorithm.clauseHeader()      = "initial algorithm";
+    syn String Clause.clauseHeader() = clauseHeader(" ");
+    syn String Clause.clauseHeader(String separator);
+    eq PublicElementList.clauseHeader(String separator)     = "public";
+    eq DefaultElementList.clauseHeader(String separator)    = null;
+    eq ProtectedElementList.clauseHeader(String separator)  = "protected";
+    eq EquationClause.clauseHeader(String separator)        = "equation";
+    eq InitialEquationClause.clauseHeader(String separator) = "initial" + separator + "equation";
+    eq Algorithm.clauseHeader(String separator)             = "algorithm";
+    eq InitialAlgorithm.clauseHeader(String separator)      = "initial" + separator + "algorithm";
 
-    public abstract void Clause.prettyPrintClauseBody(Printer p, CodeStream str, String indent);
+    public abstract void Clause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormating);
 
-    public void ElementList.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+    public void ElementList.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
         boolean prevWantsBlankLine = false;
         boolean first = true;
         for (Element e : getElements()) {
             boolean wantsBlankLine = e.prettyPrintWantsBlankLine();
-            if (!first && (wantsBlankLine || prevWantsBlankLine)) {
+            if (doFormatting && !first && (wantsBlankLine || prevWantsBlankLine)) {
                 str.println();
             }
-            if (!e.prettyPrintsAsLine()) {
+            if (doFormatting && !e.prettyPrintsAsLine()) {
                 str.print(indent);
                 p.print(e, str, indent);
                 str.println(";");
@@ -405,14 +406,16 @@ aspect PrettyPrint {
     syn boolean Element.prettyPrintWantsBlankLine() = false;
     eq ClassDecl.prettyPrintWantsBlankLine()        = true;
 
-    public void EquationClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+    public void EquationClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
         for (AbstractEquation e : getAbstractEquations()) {
             p.print(e, str, indent);
-            str.println(";");
+            if (doFormatting) {
+                str.println(";");
+            }
         }
     }
 
-    public void Algorithm.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+    public void Algorithm.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
         for (Statement s : getStatements()) {
             p.print(s, str, indent);
         }
