@@ -136,26 +136,27 @@ jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char m
     return jmi_pow(jmi, NULL, x, y, msg);
 }
 
-void static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
-    *x_pow_y = jmi_pow(jmi, func_name, x, y, msg);
-    *x_pow_der_y = 0;
+jmi_real_t static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
+    jmi_real_t x_pow_y = jmi_pow(jmi, func_name, x, y, msg);
+    jmi_real_t to_return = 0;
     if (x == 0) {
         if (y == 1.0) {
-            *x_pow_der_y = x_der;
+            to_return = x_der;
         } else {
-            *x_pow_der_y = 0.0;
+            to_return = 0.0;
         }
     } else {
-        *x_pow_der_y = *x_pow_y * (x_der*y/x + y_der*log(jmi_abs(x)));
+        to_return = x_pow_y * (x_der*y/x + y_der*log(jmi_abs(x)));
     }
+    return to_return;
 }
 
-void jmi_pow_der_function(const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
-    jmi_pow_der(NULL, func_name, x, y, x_der, y_der, x_pow_y, x_pow_der_y, msg);
+jmi_real_t jmi_pow_der_function(const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
+    return jmi_pow_der(NULL, func_name, x, y, x_der, y_der, msg);
 }
 
-void jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, jmi_real_t* x_pow_y, jmi_real_t* x_pow_der_y, const char msg[]) {
-    jmi_pow_der(jmi, NULL, x, y, x_der, y_der, x_pow_y, x_pow_der_y, msg);
+jmi_real_t jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
+    return jmi_pow_der(jmi, NULL, x, y, x_der, y_der, msg);
 }
 
 jmi_real_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {

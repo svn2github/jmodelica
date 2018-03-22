@@ -2294,16 +2294,16 @@ end IntegerExternalFortran4;
 model StringExternalFortran1
     Real[1] a = Modelica.Math.Matrices.LAPACK.dgeev({{1}});
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="StringExternalFortran1",
-        description="External Fortran function, scalar string input",
-        variability_propagation=false,
-        template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="StringExternalFortran1",
+            description="External Fortran function, scalar string input",
+            variability_propagation=false,
+            template="
 $C_function_headers$
 $C_functions$
 ",
-        generatedCode="
+            generatedCode="
 void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t* eigenReal_a, jmi_array_t* eigenImag_a, jmi_array_t* eigenVectors_a, jmi_real_t* info_o);
 
 void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t* eigenReal_a, jmi_array_t* eigenImag_a, jmi_array_t* eigenVectors_a, jmi_real_t* info_o) {
@@ -2346,7 +2346,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     }
     JMI_ARRAY_INIT_2(STAT, jmi_real_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
     n_v = jmi_array_size(A_a, 0);
-    lwork_v = 12.0 * n_v;
+    lwork_v = 12 * n_v;
     JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
@@ -2355,7 +2355,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, work_a, 12.0 * jmi_array_size(A_a, 0), 1, 12.0 * jmi_array_size(A_a, 0))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
     JMI_ASG(STR, tmp_1, \"N\")
     JMI_ASG(STR, tmp_2, \"V\")
     tmp_3 = (int)n_v;
@@ -2376,6 +2376,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_DYNAMIC_FREE()
     return;
 }
+
 
 ")})));
 end StringExternalFortran1;
@@ -3346,16 +3347,16 @@ model TestExtObjectArray1
 equation
     z = get_y(myEOs);    
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="TestExtObjectArray1",
-        description="",
-        template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestExtObjectArray1",
+            description="",
+            template="
 $C_variable_aliases$
 $C_DAE_initial_dependent_parameter_assignments$
 $C_functions$
 ",
-        generatedCode="
+            generatedCode="
 #define _z_2 ((*(jmi->z))[0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
@@ -3401,7 +3402,7 @@ jmi_extobj_t func_CCodeGenExternalTests_ExtObject_constructor_exp1() {
 void func_CCodeGenExternalTests_TestExtObjectArray1_get_y_def2(jmi_extobj_array_t* eos_a, jmi_real_t* y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
-    y_v = func_CCodeGenExternalTests_useMyEO_exp3(jmi_array_val_1(eos_a, 1.0));
+    y_v = func_CCodeGenExternalTests_useMyEO_exp3(jmi_array_val_1(eos_a, 1));
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -3428,6 +3429,7 @@ jmi_real_t func_CCodeGenExternalTests_useMyEO_exp3(jmi_extobj_t eo_v) {
     func_CCodeGenExternalTests_useMyEO_def3(eo_v, &r_v);
     return r_v;
 }
+
 
 ")})));
 end TestExtObjectArray1;
