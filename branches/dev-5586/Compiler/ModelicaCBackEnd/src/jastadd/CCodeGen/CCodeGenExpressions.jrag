@@ -359,28 +359,34 @@ aspect CCodeGenExpressions {
      ========================================================================*/
 
     @Override
-    public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        boolean wrap = inIfCondition() || inFunctionArg();
-        if (wrap) {
+    public void FNumericLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (shouldWrap()) {
             str.print(FLitExp.macro_C);
             str.print("(");
         }
-        str.print(getValue());
-        if (wrap) 
+        String value = toString();
+        str.print(value);
+        if (shouldAppend(value)) {
+            str.print(".0");
+        }
+        if (shouldWrap()) {
             str.print(")");
+        }
     }
 
-    @Override
-    public void FRealLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        boolean wrap = inIfCondition();
-        if (wrap) {
-            str.print(FLitExp.macro_C);
-            str.print("(");
-        }
-        str.print(getValue());
-        if (wrap) 
-            str.print(")");
-    }
+    public abstract boolean FNumericLitExp.shouldWrap();
+    syn boolean FIntegerLitExp.shouldWrap() = inIfCondition() || inFunctionArg();
+    syn boolean FRealLitExp.shouldWrap() = inIfCondition();
+
+    syn boolean FNumericLitExp.shouldAppend(String value) = 
+            (inIfCondition() || inGeneratedFunctionCall()) && !value.contains("."); //TODO what about contexts where integers need to be treated as integers, such as integer division?
+
+    inh boolean FExp.inGeneratedFunctionCall(); 
+    eq FClass.getChild().inGeneratedFunctionCall()        = false;
+    eq InstRoot.getChild().inGeneratedFunctionCall()      = false;
+    eq FExp.getChild().inGeneratedFunctionCall() = true;
+    eq FForIndex.getFExp().inGeneratedFunctionCall() = false;
+    eq FRangeExp.getChild().inGeneratedFunctionCall() = inGeneratedFunctionCall();
 
     public static final String FLitExp.macro_C = "AD_WRAP_LITERAL";
 
