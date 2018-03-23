@@ -50,6 +50,131 @@ aspect SrcUtil {
     syn String ImportClause.renameStringOrNull() = null;
     eq ImportClauseRename.renameStringOrNull() = getIdDecl().name();
 
+    syn boolean Exp.isAccess() = false;
+    eq AccessExp.isAccess() = true;
+    
+    syn Access Exp.asAccess() {
+        throw new UnsupportedOperationException();
+    }
+    eq AccessExp.asAccess() = getAccess();
+    
+    syn boolean Access.isNamed() = false;
+    eq NamedAccess.isNamed() = true;
+    
+    syn String Access.asID() {
+        throw new UnsupportedOperationException();
+    }
+    eq NamedAccess.asID() = getID();
+
+    /**************************************************************************
+     *    Is and as methods for Clauses
+     **************************************************************************/
+    /**
+     * Is this clause an element list?
+     */
+    syn boolean Clause.isElementList() = false;
+    eq ElementList    .isElementList() = true;
+    /**
+     * Is this clause an public element list?
+     */
+    syn boolean Clause  .isPublicElementList() = false;
+    eq PublicElementList.isPublicElementList() = true;
+    /**
+     * Is this clause an default element list?
+     */
+    syn boolean Clause   .isDefaultElementList() = false;
+    eq DefaultElementList.isDefaultElementList() = true;
+    /**
+     * Is this clause an protected element list?
+     */
+    syn boolean Clause     .isProtectedElementList() = false;
+    eq ProtectedElementList.isProtectedElementList() = true;
+    /**
+     * Upcasts this clause to an element list, or class cast exception if of
+     * different type!
+     */
+    syn ElementList Clause.asElementList() = (ElementList) this;
+
+    /**
+     * Is this clause an equation clause?
+     */
+    syn boolean Clause.isEquationClause() = false;
+    eq EquationClause .isEquationClause() = true;
+    /**
+     * Is this clause an initial equation clause?
+     */
+    syn boolean Clause      .isInitialEquationClause() = false;
+    eq InitialEquationClause.isInitialEquationClause() = true;
+    /**
+     * Upcasts this clause to an equation clause, or class cast exception if of
+     * different type!
+     */
+    syn EquationClause Clause.asEquationClause() = (EquationClause) this;
+
+    /**
+     * Is this clause an algorithm?
+     */
+    syn boolean Clause.isAlgorithm() = false;
+    eq Algorithm      .isAlgorithm() = true;
+    /**
+     * Is this clause an initial algorithm?
+     */
+    syn boolean Clause .isInitialAlgorithm() = false;
+    eq InitialAlgorithm.isInitialAlgorithm() = true;
+    /**
+     * Upcasts this clause to an algorithm, or class cast exception if of
+     * different type!
+     */
+    syn Algorithm Clause.asAlgorithm() = (Algorithm) this;
+
+    /**************************************************************************
+     *    Is and as methods for Elements
+     **************************************************************************/
+    /**
+     * Is this element a class declaration?
+     */
+    syn boolean Element.isClassDecl() = false;
+    eq ClassDecl       .isClassDecl() = true;
+    /**
+     * Upcasts this element to an class decl, or class cast exception if of
+     * different type!
+     */
+    syn ClassDecl Element.asClassDecl() = (ClassDecl) this;
+
+    /**
+     * Is this element a component clause declaration?
+     */
+    syn boolean Element.isComponentClause() = false;
+    eq ComponentClause .isComponentClause() = true;
+    /**
+     * Upcasts this element to an component clause, or class cast exception if
+     * of different type!
+     */
+    syn ComponentClause Element.asComponentClause() = (ComponentClause) this;
+
+    /**
+     * Is this element an extends caluse declaration?
+     */
+    syn boolean Element.isExtendsClause() = false;
+    eq ExtendsClause   .isExtendsClause() = true;
+    /**
+     * Upcasts this element to an extends clause, or class cast exception if of
+     * different type!
+     */
+    syn ExtendsClause Element.asExtendsClause() = (ExtendsClause) this;
+
+    /**
+     * Is this element an import caluse declaration?
+     */
+    syn boolean Element.isImportClause() = false;
+    eq ImportClause    .isImportClause() = true;
+    /**
+     * Upcasts this element to an import clause, or class cast exception if of
+     * different type!
+     */
+    syn ImportClause Element.asImportClause() = (ImportClause) this;
+
+    
 }
 
 
