@@ -1625,7 +1625,7 @@ end DynamicStates.Examples.Pendulum;
                 output Real y;
             algorithm
                 y := x1 * x2_der + x1_der * x2;
-                annotation(Inline=false, derivative=F_dd);
+                annotation(Inline=false, derivative(order=2)=F_dd);
             end F_d;
             
             function F_dd
@@ -1692,7 +1692,7 @@ public
  algorithm
   y := x1 * x2_der + x1_der * x2;
   return;
- annotation(derivative = DynamicStates.Special.FunctionDerivative1.F_dd,Inline = false);
+  annotation(derivative(order = 2) = DynamicStates.Special.FunctionDerivative1.F_dd,Inline = false);
  end DynamicStates.Special.FunctionDerivative1.F_d;
 
  function DynamicStates.Special.FunctionDerivative1.F_dd
@@ -1732,7 +1732,7 @@ end DynamicStates.Special.FunctionDerivative1;
                 output Real y;
             algorithm
                 y := r.x + r.y + x_der;
-                annotation(Inline=false, derivative(noDerivative=r)=F1_dd);
+                annotation(Inline=false, derivative(noDerivative=r,order=2)=F1_dd);
             end F1_d;
             
             function F1_dd

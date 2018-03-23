@@ -531,6 +531,156 @@ aspect Derivatives {
         return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
     }
     
+
+    // Test DerivativeAnnotation
+    public String FClass.checkDerivativeAnnotations(){
+        //Check for all methods if it's derivative is correct based on available information
+        for (FFunctionDecl ffunc: getFFunctionDecls()){
+            ffunc.checkDerivative(ffunc.derivativeAnnotationUnrestricted(),0); 
+        }
+        
+        //Check for all FFunctionCall based on available information
+        for (FAbstractEquation fae : getFAbstractEquations()) {
+            for (ASTNode ast: fae.astChildren()) {
+                if (ast instanceof FEquation) {
+                    FExp fexp = ((FEquation)ast).getRight();
+                    fexp.checkDerivative();
+                }
+                if (ast instanceof FFunctionCall) {
+                    ((FFunctionCall) ast).checkDerivative();
+                }
+            }
+        }
+        try{
+            return collectWarnings().toString();
+        }catch (CompilerException e) {
+          return e.getMessage(true).toString();
+        }
+    }
+    
+    //Helpers allowing checking of FunctionCalls.
+    public Object[] FExp.checkDerivative(){
+        return null;
+    }
+    
+    /**
+    * Called during FFunctionCall differentiation. 
+    * Check consistency between the declaration and this 
+    **/
+    public Object[] FFunctionCall.checkDerivative(){
+        FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
+        // 1. Exist
+        if (myDecl == null)
+            throw new FunctionDifferentiationException(this);    
+        
+        /** 2. Correct amount of arguments inputs arguments check. 
+        * Needed for generated derivatives in order to make 
+        * the derivativeAnnotation() work.
+        **/ 
+        
+        if (getNumArg() > myDecl.myInputs().size()) {
+            ASTNode.DERIVATIVE_ANNOTATION_PROBLEM.invoke(this, name(),
+            "The derivative functions inputs must contain all the underived functions inputs.");
+            breakOnErrors();
+        }
+        
+        AnnotationNode derNode = derivativeAnnotation();
+        myDecl.checkDerivative(derNode, derivands);
+        return new Object[]{myDecl, derNode};
+    }
+
+    /** Check specified derivative of first order for signature compatability. 
+    /* the derivands argument provide the needed information from upstream regarding 
+    /* the input which are to be derivated. 
+    **/
+    public void FFunctionDecl.checkDerivative(AnnotationNode derNode, int derivands) {
+        FFunctionDecl func = derivativeFunction(derNode);
+        if (func == null)
+            return;
+        Set<String> exclude = new HashSet<String>();
+        int myInputs = myInputs().size();
+        exclude.addAll(zeroDerivative(derNode));
+        exclude.addAll(noDerivative(derNode));
+        int noDerVars = noDerivative(derNode).size() + zeroDerivative(derNode).size();
+        if (derivands != 0) {
+            noDerVars = 0;
+            for (int j = myInputs - 1; j >= myInputs - derivands; j--) {
+                if (exclude.contains(myInput(j).name())) {
+                    noDerVars++;
+                }
+            }
+        }
+        int myInputDer = derivands;
+        if (derivands == 0) {
+            for (FFunctionVariable v : myInputs()) {
+                if (v.isReal() || v.type().containsReal()) {
+                    myInputDer++;
+                }
+            }
+            derivands = myInputDer;
+        }
+
+        if (myInputs().size() > func.myInputs().size()) {
+            ASTNode.DERIVATIVE_ANNOTATION_PROBLEM.invoke(this, getFQName().name(),
+                    "The derivative functions inputs must contain all the underived functions inputs.");
+            return;
+        }
+
+        func.checkDerivativeInputs(myInputs());
+        if (myInputs + myInputDer - noDerVars != func.myInputs().size()) {
+            String my_s = myInputs + myInputDer - noDerVars != 1 ? "inputs" : "input";
+            String der_s = func.myInputs().size() != 1 ? "inputs" : "input";
+            ASTNode.DERIVATIVE_FUNCTION_MISSMATCH.invoke(this, func.getFQName().name(), getFQName().name(),
+                    myInputs + myInputDer - noDerVars, my_s, func.myInputs().size(), der_s);
+        }
+
+        int myOutputDer = myOutputs().size();
+        if (derivativeOrder(derNode) < 2) {
+            myOutputDer = 0;
+            for (FFunctionVariable v : myOutputs()) {
+                if (v.isReal() || v.type().containsReal()) {
+                    myOutputDer++;
+                }
+            }
+        }
+
+        if (myOutputDer != func.myOutputs().size()) {
+            String my_s = myOutputDer != 1 ? "outputs" : "output";
+            String der_s = func.myOutputs().size() != 1 ? "outputs" : "output";
+            ASTNode.DERIVATIVE_FUNCTION_MISSMATCH.invoke(this, func.getFQName().name(), getFQName().name(), myOutputDer,
+                    my_s, func.myOutputs().size(), der_s);
+        }
+    }
+
+    //Determine how many inputs should be derivated in multi-level derivations
+    public int FFunctionCall.derivands=0;
+    
+    public void FFunctionDecl.checkDerivativeInputs(ArrayList<FFunctionVariable> inputs) {
+        Iterator<FFunctionVariable> myInputs = myInputs().iterator();
+        for (FFunctionVariable fv : inputs) {
+            if (!fv.type().typeCompatible(myInputs.next().type())) {
+                ASTNode.DERIVATIVE_ANNOTATION_PROBLEM.invoke(this, getFQName().name(),
+                        "The inputs must be ordered in the same way in the derivative function.");
+            }
+        }
+        while (myInputs.hasNext()) {
+            FType type = myInputs.next().type();
+            if (!type.isReal() && !type.containsReal())
+                ASTNode.DERIVATIVE_ANNOTATION_PROBLEM.invoke(this, getFQName().name(),
+                        "The derivative inputs must be reals or contain reals.");
+        }
+
+        Iterator<FFunctionVariable> myOutputs = myOutputs().iterator();
+        while (myOutputs.hasNext()) {
+            FType type = myOutputs.next().type();
+            if (!type.isReal() && !type.containsReal())
+                ASTNode.DERIVATIVE_ANNOTATION_PROBLEM.invoke(this, getFQName().name(),
+                        "The derivative outputs must be reals or contain reals.");
+        }
+    }
+    
+
+    
     public FExp FRecordConstructor.diff(String name) {
         FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
         for (FExp arg : getArgs())
@@ -575,12 +725,9 @@ aspect Derivatives {
                 }
             }
         }
-        
-        FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
-        if (myDecl == null)
-            throw new FunctionDifferentiationException(this);
-        AnnotationNode derNode = derivativeAnnotation();
-        
+        Object[] derUtils = checkDerivative();
+        FFunctionDecl myDecl = (FFunctionDecl) derUtils[0];
+        AnnotationNode derNode = (AnnotationNode) derUtils[1];
         FCallable myDiffDecl = myDecl.diff(derNode, inFunction());
         if (myDiffDecl == null)
             throw new FunctionDifferentiationException(this);
@@ -589,14 +736,18 @@ aspect Derivatives {
             args.add(e.copySymbolic());
         }
         int i = 0;
+        int derivands=0;
         for (FExp e : getArgs()) {
             FFunctionVariable fv = myDecl.myInput(i);
-            if (fv.shouldBeDifferentiated(derNode))
+            if (fv.shouldBeDifferentiated(derNode)) {
                 args.add(e.diff(name));
+                derivands++;
+            }
             i++;
         }
         FFunctionCall der_f = new FFunctionCall(new FIdUse(myDiffDecl.name()), args, getFType().treeCopy());
         der_f.order = order + 1;
+        der_f.derivands = derivands;
         return dynamicFExp(der_f);
     }
 

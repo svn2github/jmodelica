@@ -2254,9 +2254,588 @@ Error in flattened model:
    x1 + Differentiation.DerivativeAnnotation.Functional1.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 1
 ")})));
         end Functional1;
+    model DerivativeFunctionMissmatch1
+     function f
+        input Real x;
+        input Real y;
+        input Real z;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z) = fd);
+      end f;
+      function fd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=y_d , order=2) = fdd);
+      end fd;
 
-    end DerivativeAnnotation;
+      function fdd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real x_dd;
+        input Real y_dd;
+        output Real o_dd;
+      algorithm
+        o_dd := z*(x_d+x)-x_dd*x_d;
+      annotation (Inline=false);
+      end fdd;  
+      Real a, b, c;
+      equation
+        a = f(time,time,time);
+        b = der(a);
+        c = der(b);
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionMissmatch1",
+            description="Test detection of input which should be excluded (y_dd) in 2 order derivative",
+            errorMessage="
+Error in flattened model, DERIVATIVE_FUNCTION_MISSMATCH:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionMissmatch1.fdd's signature doesn't match the expected signature for a derivative to Differentiation.DerivativeAnnotation.DerivativeFunctionMissmatch1.fd.
+  Expected 6 inputs but signature have 7 inputs.
+")})));
+    end DerivativeFunctionMissmatch1;
 
+    model DerivativeFunctionMissmatch2
+     function f
+        input Real x;
+        input Real y;
+        input Real z;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z) = fd);
+      end f;
+      function fd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z , order=2) = fdd);
+      end fd;
+
+      function fdd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real x_dd;
+        output Real o_dd;
+      algorithm
+        o_dd := z*(x_d+x)-x_dd*x_d;
+      annotation (Inline=false);
+      end fdd;  
+      Real a, b, c;
+      equation
+        a = f(time,time,time);
+        b = der(a);
+        c = der(b);
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionMissmatch2",
+            description="Test detection of extra input (y_dd) in 2 order derivative",
+            errorMessage="
+Error in flattened model, DERIVATIVE_FUNCTION_MISSMATCH:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionMissmatch2.fdd's signature doesn't match the expected signature for a derivative to Differentiation.DerivativeAnnotation.DerivativeFunctionMissmatch2.fd.
+  Expected 7 inputs but signature have 6 inputs.
+")})));
+    end DerivativeFunctionMissmatch2;
+ 
+  model DerivativeFunctionMissmatch3
+      function fd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z) = fdd);
+      end fd;
+
+      function fdd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real x_dd;
+        input Real y_dd;
+        output Real o_dd;
+      algorithm
+        o_dd := z*(x_d+x)-x_dd*x_d;
+      annotation (Inline=false, derivative(noDerivative=z, order=2) = fddd);
+      end fdd;
+      
+      function fddd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real x_dd;
+        input Real y_dd;
+        input Real x_ddd;
+        input Real y_ddd;
+        output Real o_dd;
+      algorithm
+        o_dd := y_dd+z*(x_d+x)-x_ddd*x_dd;
+      end fddd;
+      Real m , n;
+      equation
+        der(m)=fd(time,time,time,time,time);
+        der(n)=fdd(time,time,time,time,time,time,time);
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+            name="DerivativeFunctionMissmatch3",
+            description="Test missing order missing",
+            eliminate_linear_equations=false,
+            methodName="checkDerivativeAnnotations",
+            methodResult="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_FUNCTION_MISSMATCH:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionMissmatch3.fdd's signature doesn't match the expected signature for a derivative to Differentiation.DerivativeAnnotation.DerivativeFunctionMissmatch3.fd.
+  Expected 9 inputs but signature have 7 inputs.
+")})));
+    end DerivativeFunctionMissmatch3; 
+
+  model DerivativeFunctionThirdOrder
+      function f
+        input Real x;
+        input Real y;
+        input Real z;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z) = fd);
+      end f;
+      function fd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z, order=2) = fdd);
+      end fd;
+
+      function fdd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real x_dd;
+        input Real y_dd;
+        output Real o_dd;
+      algorithm
+        o_dd := z*(x_d+x)-x_dd*x_d;
+      annotation (Inline=false, derivative(noDerivative=z, order=3) = fddd);
+      end fdd;
+      
+      function fddd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real x_dd;
+        input Real y_dd;
+        input Real x_ddd;
+        input Real y_ddde;
+        input Real x_ddde;
+        input Real y_ddd;
+        output Real o_ddd;
+      algorithm
+        o_ddd := y_dd+z*(x_d+x)-x_ddd*x_dd;  
+        annotation (Inline=false);
+      end fddd;
+      Real a, b, c, d;
+      equation
+        a = f(time, time, time);
+        b = der(a);
+        c = der(b);
+        d = der(c);
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionThirdOrder",
+            description="Test detection of extra arguments (_ddde) in high order derivative",
+            errorMessage="
+Error in flattened model, DERIVATIVE_FUNCTION_MISSMATCH:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionThirdOrder.fddd's signature doesn't match the expected signature for a derivative to Differentiation.DerivativeAnnotation.DerivativeFunctionThirdOrder.fdd.
+  Expected 9 inputs but signature have 11 inputs.
+")})));
+    end DerivativeFunctionThirdOrder; 
+    
+  model DerivativeFunctionThirdOrderCorrect
+      function f
+        input Real x;
+        input Real y;
+        input Real z;
+        output Real o;
+      algorithm
+          o :=z*x;
+        annotation (Inline=false, derivative(noDerivative=z) = fd);
+      end f;
+      function fd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        output Real o_d;
+      algorithm
+          o_d :=z*x;
+        annotation (Inline=false, derivative(noDerivative=x_d, order=2) = fdd);
+      end fd;
+
+      function fdd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real y_dd;
+        output Real o_dd;
+      algorithm
+        o_dd := z*(x_d+x)-x_d*y_d;
+      annotation (Inline=false, derivative(noDerivative=z, order=3) = fddd);
+      end fdd;
+      
+      function fddd
+        input Real x;
+        input Real y;
+        input Real z;
+        input Real x_d;
+        input Real y_d;
+        input Real y_dd;
+        input Real y_ddd;
+        output Real o_ddd;
+      algorithm
+        o_ddd := y_ddd*y_dd*x_d;  
+        annotation (Inline=false);
+      end fddd;
+      Real a, b, c, d;
+      equation
+        a = f(time, time, time);
+        b = der(a);
+        c = der(b);
+        d = der(c);
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+            name="DerivativeFunctionThirdOrderCorrect",
+            description="Test that the derivative",
+            methodName="checkDerivativeAnnotations",
+            methodResult="[]")})));
+    end DerivativeFunctionThirdOrderCorrect; 
+    
+    model DerivativeFunctionMissingInputs
+      function f
+      input Real r;
+      input Boolean b;
+      input Integer i;
+      output Real q;
+      algorithm
+        q := r;
+      annotation (Inline=false, derivative = fd);
+      end f;
+      function fd
+        input Real a; 
+        output Real b;
+      algorithm      
+        b := a;
+      annotation (Inline=false);  
+      end fd;
+      Real r,g;
+      equation
+      r=f(time,true,1);
+      der(g)=fd(time);
+      annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+            name="DerivativeFunctionMissingInputs",
+            description="Test derivative function specifying with missing input arguments",
+            eliminate_linear_equations=false,
+            methodName="checkDerivativeAnnotations",
+            methodResult="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionMissingInputs.f and it's specified derivatives doesn't have compatible signatures.
+The derivative functions inputs must contain all the underived functions inputs.
+")})));
+    end DerivativeFunctionMissingInputs;
+    
+    model DerivativeFunctionMissingInputs2
+     function f
+      input Real r;
+      input Boolean b;
+      input Integer i;
+      output Real q;
+      algorithm
+        q := r;
+      annotation (Inline=false, derivative = fd);
+      end f;
+      function fd
+        input Real a; 
+        output Real b;
+      algorithm      
+        b := a;
+      annotation (Inline=false, derivative(order=2) = fdd);  
+      end fd;
+      function fdd
+        input Real a; 
+        input Real ader;
+        output Real b;
+      algorithm      
+        b := a;
+      annotation (Inline=false);  
+      end fdd;
+      Real r,g,q;
+      equation
+      r=f(time,true,1);
+      g=der(r);
+      q=der(g);
+          annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionMissingInputs2",
+            description="Test derivative function specifying a function with missing input arguments",
+            errorMessage="
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionMissingInputs2.f and it's specified derivatives doesn't have compatible signatures.
+The derivative functions inputs must contain all the underived functions inputs.
+
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionMissingInputs2.fd and it's specified derivatives doesn't have compatible signatures.
+The derivative functions inputs must contain all the underived functions inputs.")})));
+    end DerivativeFunctionMissingInputs2;
+    
+    model DerivativeFunctionWrongInputTypes
+       function f
+      input Real a;
+      input Integer b;
+      output Real o;
+      algorithm
+        o := a;
+      annotation (Inline=false, derivative = fd);
+      end f;
+      function fd
+        input Integer a; 
+        input Boolean b; 
+        input Real a_der; 
+        output Real o;
+      algorithm      
+        o := a_der+a*1.5;
+      annotation (Inline=false);  
+      end fd;
+      Real r,g;
+      equation
+      r=f(time,1);
+      g=der(r);
+      annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionWrongInputTypes",
+            description="Test failing differentiation of functional input arguments",
+            errorMessage="
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionWrongInputTypes.fd and it's specified derivatives doesn't have compatible signatures.
+  The inputs must be ordered in the same way in the derivative function.")})));    
+    end DerivativeFunctionWrongInputTypes;
+    
+    model DerivativeFunctionDerivandsNoReal
+        function f
+            input Real x;
+            output Real o;
+            algorithm
+                o := x;
+            annotation (Inline=false, derivative = fd);
+        end f;
+        function fd
+            input Real x;
+            input Integer xder;
+            output Real o;
+            algorithm
+                o := x;
+            annotation (Inline=false);
+        end fd;
+        Real r,g;
+        equation
+            r=f(time);
+            der(g)=der(r);
+          annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionDerivandsNoReal",
+            description="Test derivative function with no real input arguments",
+            errorMessage="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionDerivandsNoReal.fd and it's specified derivatives doesn't have compatible signatures.
+The derivative inputs must be reals or contain reals.
+")})));    
+    end DerivativeFunctionDerivandsNoReal;
+    
+   model DerivativeFunctionDerivandsNoRealOutput
+        function f
+            input Real x;
+            output Real o;
+            algorithm
+                o := x;
+            annotation (Inline=false, derivative = fd);
+        end f;
+        function fd
+            input Real x;
+            input Real xder;
+            output Boolean o;
+            algorithm
+                o := x == 0;
+            annotation (Inline=false);
+        end fd;
+        Real r,g;
+        equation
+            r=f(time);
+            der(g)=der(r);
+          annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+            name="DerivativeFunctionDerivandsNoRealOutput",
+            description="Test derivative function with no real output arguments",
+            errorMessage="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionDerivandsNoRealOutput.fd and it's specified derivatives doesn't have compatible signatures.
+The derivative outputs must be reals or contain reals.
+")})));    
+    end DerivativeFunctionDerivandsNoRealOutput;
+    
+   model DerivativeFunctionDerivandsNoReal2
+        function f
+            input Real x;
+            output Real o;
+            algorithm
+                o := x;
+            annotation (Inline=false, derivative = fd);
+        end f;
+        function fd
+            input Real x;
+            input Boolean xder;
+            output Real o;
+            algorithm
+                o := x;
+            annotation (Inline=false);
+        end fd;
+        Real r,g;
+        equation
+            r=f(time);
+            der(g)=fd(time,true);
+          annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+            name="DerivativeFunctionDerivandsNoReal2",
+            description="Test derivative function with no real outputs/Input arguments",
+            eliminate_linear_equations=false,
+            methodName="checkDerivativeAnnotations",
+            methodResult="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_ANNOTATION_PROBLEM:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionDerivandsNoReal2.fd and it's specified derivatives doesn't have compatible signatures.
+The derivative inputs must be reals or contain reals.
+")})));    
+    end DerivativeFunctionDerivandsNoReal2;
+
+    model DerivativeFunctionTooManyInputs
+      function f
+        input Real a;
+        output Real o;
+        algorithm
+          o := a;
+        annotation (Inline=false, derivative = fd);
+      end f;
+      function fd
+        input Real a; 
+        input Real b; 
+        input Real c; 
+        output Real o;
+        algorithm      
+          o := a+b;
+        annotation (Inline=false);  
+      end fd;
+      Real r,g,h;
+      equation
+      r=f(time);
+      der(h)=f(time);
+      der(g)=fd(time, 1.0, 1.0);
+      annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+            name="DerivativeFunctionTooManyInputs",
+            description="Test derivative function specifying a function with too many input arguments",
+            eliminate_linear_equations=false,
+            methodName="checkDerivativeAnnotations",
+            methodResult="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_FUNCTION_MISSMATCH:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionTooManyInputs.fd's signature doesn't match the expected signature for a derivative to Differentiation.DerivativeAnnotation.DerivativeFunctionTooManyInputs.f.
+  Expected 2 inputs but signature have 3 inputs.
+")})));    
+    end DerivativeFunctionTooManyInputs;
+    
+    model DerivativeFunctionTooManyOutputs
+      function f
+        input Real a;
+        output Real o;
+        algorithm
+          o := a;
+        annotation (Inline=false, derivative = fd);
+      end f;
+      function fd
+        input Real a; 
+        input Real ader;
+        output Real o;
+        output Real extra;
+        algorithm      
+          o := ader*2+a;
+        annotation (Inline=false);  
+      end fd;
+      Real r,g;
+      equation
+      der(g)=fd(time,1);
+      r=f(time);
+      annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+            name="DerivativeFunctionTooManyOutputs",
+            description="Test derivative function specifying a function with too many output arguments",
+            eliminate_linear_equations=false,
+            methodName="checkDerivativeAnnotations",
+            methodResult="
+1 errors found:
+
+Error in flattened model, DERIVATIVE_FUNCTION_MISSMATCH:
+  The function Differentiation.DerivativeAnnotation.DerivativeFunctionTooManyOutputs.fd's signature doesn't match the expected signature for a derivative to Differentiation.DerivativeAnnotation.DerivativeFunctionTooManyOutputs.f.
+  Expected 1 output but signature have 2 outputs.
+
+")})));    
+    end DerivativeFunctionTooManyOutputs;
+    
+end DerivativeAnnotation;
+    
     package AlgorithmDifferentiation
 
         model Simple
@@ -3586,7 +4165,6 @@ end Differentiation.MultipleDerivativeAnnotation1;
 ")})));
 end MultipleDerivativeAnnotation1;
 
-
 model MultipleDerivativeAnnotation2
     function f
         input Real x;
@@ -3768,6 +4346,5 @@ public
 end Differentiation.MultipleDerivativeAnnotation2;
 ")})));
 end MultipleDerivativeAnnotation2;
-
 
 end Differentiation;

@@ -44,6 +44,14 @@ aspect FlatTypeCheck {
 
     private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
 
+
+    public static final SimpleProblemProducer ASTNode.DERIVATIVE_ANNOTATION_PROBLEM = 
+            new SimpleErrorProducer("DERIVATIVE_ANNOTATION_PROBLEM", ProblemKind.SEMANTIC,
+                    "The function %s and it's specified derivatives doesn't have compatible signatures.\n%s");
+    public static final SimpleProblemProducer ASTNode.DERIVATIVE_FUNCTION_MISSMATCH = 
+            new SimpleErrorProducer("DERIVATIVE_FUNCTION_MISSMATCH", ProblemKind.SEMANTIC,"The function %s" + 
+                    "'s signature doesn't match the expected signature for a derivative to %s.\n" +
+                    "  Expected %d %s but signature have %d %s.");
     public static final SimpleProblemProducer ASTNode.CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
                     "In the declaration '%s', the declared class is not a subtype of the " + 
