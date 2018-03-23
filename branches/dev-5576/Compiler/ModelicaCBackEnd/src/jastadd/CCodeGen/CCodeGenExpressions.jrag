@@ -379,7 +379,8 @@ aspect CCodeGenExpressions {
     syn boolean FRealLitExp.shouldWrap() = inIfCondition();
 
     syn boolean FNumericLitExp.shouldAppend(String value) = 
-            (inIfCondition() || inGeneratedFunctionCall()) && !value.contains("."); //TODO what about contexts where integers need to be treated as integers, such as integer division?
+             (getParent() instanceof FDotPowExp) && !value.contains(".");
+ //TODO use condition such as (inIfCondition() || inGeneratedFunctionCall()) instead of (getParent() instanceof FDotPowExp)
 
     inh boolean FExp.inGeneratedFunctionCall(); 
     eq FClass.getChild().inGeneratedFunctionCall()        = false;
