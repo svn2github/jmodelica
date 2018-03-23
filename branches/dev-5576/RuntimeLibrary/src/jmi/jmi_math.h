@@ -61,6 +61,43 @@ jmi_real_t jmi_divide_function(const char* name, jmi_real_t num, jmi_real_t den,
  */
 jmi_real_t jmi_divide_equation(jmi_t *jmi, jmi_real_t num, jmi_real_t den, const char* msg);
 
+
+jmi_real_t jmi_sqrt(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C sqrt function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_sqrt_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C sqrt function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_sqrt_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
+jmi_real_t jmi_asin(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C asin function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_asin_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C asin function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_asin_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
+jmi_real_t jmi_acos(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C acos function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_acos_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C acos function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_acos_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
 jmi_real_t jmi_atan2(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]);
 
 /**
@@ -157,6 +194,54 @@ jmi_real_t jmi_tan_function(const char* name, jmi_real_t x, const char* msg);
  * Function to wrap the C tan function and report errors to the log, for use in equations.
  */
 jmi_real_t jmi_tan_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
+jmi_real_t jmi_sin(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C sin function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_sin_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C sin function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_sin_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
+jmi_real_t jmi_cos(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C cos function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_cos_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C cos function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_cos_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
+jmi_real_t jmi_atan(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C atan function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_atan_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C atan function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_atan_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
+
+jmi_real_t jmi_tanh(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]);
+
+/**
+ * Function to wrap the C tanh function and report errors to the log, for use in functions.
+ */
+jmi_real_t jmi_tanh_function(const char* name, jmi_real_t x, const char* msg);
+
+/**
+ * Function to wrap the C tanh function and report errors to the log, for use in equations.
+ */
+jmi_real_t jmi_tanh_equation(jmi_t *jmi, jmi_real_t x, const char* msg);
 
 /**
  * Function to get the absolute value.
