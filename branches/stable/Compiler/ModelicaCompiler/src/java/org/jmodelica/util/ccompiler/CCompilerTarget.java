@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2018 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,10 +14,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect OptimicaDumpTree {
-  public void Constraint.dumpTree(String indent) {
-  	log.debug("** Constraint.dumpTree");
-  	super.dumpTree(indent);
-  }
+package org.jmodelica.util.ccompiler;
+
+import org.jmodelica.util.OptionRegistry;
+
+public interface CCompilerTarget {
+
+    String createExtraCFlagsString(OptionRegistry options, String fileName);
+
+    String getMakeFileFlag();
 
 }

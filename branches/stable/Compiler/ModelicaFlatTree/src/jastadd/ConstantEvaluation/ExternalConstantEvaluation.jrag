@@ -205,9 +205,9 @@ aspect ExternalConstantEvaluation {
         CCompilerDelegator ccompiler = getCCompiler();
         ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
         
-        CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(source, options, target,
+        CCompilerArguments ccArgs = new CCompilerArguments(source, options, target,
                 libs, libDirs, incDirs);
-        executable = ccompiler.compileCCodeLocal(ccArgs, outDir);
+        executable = ccompiler.compileCCodeLocal(ModelicaCompiler.log, ccArgs, outDir);
         new File(sourceDir, source + ".c").delete();
         return executable;
     }
@@ -434,7 +434,7 @@ aspect ExternalConstantEvaluationCaching {
                 pb.redirectErrorStream(true);
                 if (ext.libraryDirectory() != null) {
                     // Update environment in case of shared library
-                    String platform = ModelicaCompiler.reduceBits(ModelicaCompiler.getPlatform(), 
+                    String platform = CCompilerDelegator.reduceBits(EnvironmentUtils.getJavaPlatform(),
                             mc.getCCompiler().getTargetPlatforms());
                     File f = new File(ext.libraryDirectory(), platform);
                     String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();

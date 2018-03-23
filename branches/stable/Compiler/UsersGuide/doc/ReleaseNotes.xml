@@ -9,20 +9,34 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
-  <!--section>
+  <section>
     <title>Release notes for JModelica.org version 2.2</title>
     <section><title>Highlights</title>
     <itemizedlist>
 		<listitem>Support for 64-bit Python has been added together with
         new and updated Python packages, see <xref linkend="Release22Python"/>.
         This enables simulation of 64-bit FMUs with PyFMI.</listitem>
+        <listitem>The bundled gcc C-compiler is now updated to gcc-tdm 5.1.0 which
+        enables compilation of 64 bit FMUs.</listitem>
+        <listitem>Full string support</listitem>
+        <listitem>Changed the default FMI version when compiling FMUs from Python to FMI 2.0 instead of FMI 1.0.</listitem>
+        <listitem>Changed default file storing method to binary format when simulating FMUs with PyFMI in Python.</listitem>
+        <listitem>Achieved significant speedup in some models by adding a new memory allocation algorithm.</listitem>
         <listitem>There is now support for OPC communication through the
         bundled Python package OpenOPC together with <emphasis>Graybox OPC
         Automation Wrapper</emphasis>.</listitem>
-        <listitem>The bundled gcc C-compiler is now updated to gcc-tdm 5.1.0 which
-        enables compilation of 64 bit FMUs.</listitem>
     </itemizedlist>
     </section>
+    
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Removed the experimental directional derivative generation feature.</listitem>
+        <listitem>Added option for disabling external evaluation during variability propagation</listitem>
+    </itemizedlist>
+    </section>
+    
     <section xml:id="Release22Python">
     <title>Python distributions</title>
     <para>With this release there are now two bundled Python interpreters, one
@@ -32,7 +46,7 @@
     freeopcua, jupyter, SALib, natsort, pyserial, pyro</emphasis> and 
     <emphasis>coverage.</emphasis> </para>
     </section>
-  </section-->
+  </section>
   <section>
     <title>Release notes for JModelica.org version 2.1</title>
 	<section><title>Highlights</title>

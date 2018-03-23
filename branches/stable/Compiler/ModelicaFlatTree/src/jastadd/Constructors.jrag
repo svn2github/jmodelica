@@ -52,15 +52,7 @@ aspect Constructors {
 	public IntegerLitExp.IntegerLitExp(int val) {
 		this(String.valueOf(val));
 	}
-	
-	/**
-	 * Constructs a parse access from a String.
-	 */
-	public ParseAccess.ParseAccess(String name) {
-		this();
-		setID(name);
-	}
-	
+
 	/**
 	 * Constructs a component modification from an access and modification.
 	 */
@@ -384,21 +376,6 @@ aspect Constructors {
 	/**
 	 * Create an access from a class name.
 	 */
-	public static Access Access.fromClassName(String name) {
-		String[] parts = name.split("\\.");
-		if (parts.length == 1) {
-			return new ClassAccess(parts[0]);
-		} else {
-			List<Access> l = new List<Access>();
-			for (String part : parts)
-				l.add(new ClassAccess(part));
-			return new Dot(l);
-		}
-	}
-	
-	/**
-	 * Create an access from a class name.
-	 */
 	public static InstAccess InstAccess.fromName(String name) {
 		String[] parts = name.split("\\.");
 		if (parts.length == 1) {
@@ -553,70 +530,6 @@ aspect Constructors {
     
     public FRecordConstructor.FRecordConstructor(FIdUse name, List<FExp> args) {
         this(new List<InstFunctionArgument>(), name, args);
-    }
-
-    public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
-        this(new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(new Constant()),
-             new Opt(),
-             new ClassAccess("EnumType"),
-             new Opt(),
-             new PublicVisibilityType(),
-             new IdDecl(name.getID()),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             (Comment)comment.fullCopy(),
-             new Opt(),
-             new Comment(new Opt(),new Opt()));
-        this.setLocation(name);
-        
-    }
-
-    /**
-     * Don't use this one, or improve it before using it! The parser error
-     * needs to be handled better!
-     * TODO: Remove uses of this constructor or refactor!
-     */
-    public ComponentDecl.ComponentDecl(boolean isParameter,
-                                       String type,
-                                       String name,
-                                       String bexp,
-                                       ParserHandler parserHandler) {
-        this(new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             isParameter? new Opt(new Parameter()): new Opt(),
-             new Opt(),
-             new ClassAccess(type),
-             new Opt(),
-             new PublicVisibilityType(),
-             new IdDecl(name),
-             new Opt(),
-             new Opt(),
-             new Opt(),
-             new Comment(new Opt(),new Opt()),
-             new Opt(),
-             new Comment(new Opt(),new Opt()));
-        
-        Exp bexp_ast=null;
-        
-        if (!bexp.equals("")) {
-            try {
-                bexp_ast = parserHandler.parseExpString(bexp);
-            } catch (Exception e) { 
-                throw new InternalCompilerError("Error when parsing string" + bexp, e);
-            }
-            this.setModification(new ValueModification(bexp_ast));
-        }
     }
 
 	/**
@@ -1512,11 +1425,11 @@ aspect InheritedFactoryMethods {
     }
     public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
-    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>()); }
-    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>()); }
-    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>()); }
-    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>()); }
-    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>()); }
-    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>()); }
+    public FLtExp.FLtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FLeqExp.FLeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FGtExp.FGtExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FGeqExp.FGeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FEqExp.FEqExp(FExp e1, FExp e2)   { this(e1, e2, new Opt<FExp>(), (String) null); }
+    public FNeqExp.FNeqExp(FExp e1, FExp e2) { this(e1, e2, new Opt<FExp>(), (String) null); }
 
 }

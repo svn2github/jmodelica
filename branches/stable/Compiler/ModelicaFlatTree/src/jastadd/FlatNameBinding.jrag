@@ -38,6 +38,26 @@ aspect FlatNameBinding {
     syn CommonVariableDecl FIdUse.myCommonVarDecl()    = myFV();
     eq  FIdUseInstAccess.myCommonVarDecl()             = getInstAccess().myInstComponentDecl();
 
+    syn FVariable FRelExp.myIndicatorVariableOrException() {
+        FVariable variable = myIndicatorVariableOrNull();
+        if (variable == null) {
+            if (myOptions().getBooleanOption("event_output_vars")) {
+                throw new InternalCompilerError("The relational expression '%s' doesn't have any indicator variable name set!", this);
+            } else {
+                throw new InternalCompilerError("Trying to get indicator variable name for '%s', but option 'event_output_vars' is disabled!", this);
+            }
+        }
+        return variable;
+    }
+
+    syn FVariable FRelExp.myIndicatorVariableOrNull() {
+        String name = getIndicatorVarName();
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
+        return lookupFV(name).asFVariable();
+    }
+
     inh FAbstractVariable FQName.lookupFV(String name);
     eq Root.getChild().lookupFV(String name)          = null;
     eq FClass.getChild().lookupFV(String name)        = lookupFV(name);

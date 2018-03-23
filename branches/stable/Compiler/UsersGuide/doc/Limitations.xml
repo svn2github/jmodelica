@@ -18,12 +18,12 @@
 
     <itemizedlist>
 
-      <listitem>
+      <listitem xml:id="lim_1">
           <para>Support for partial function calls is limited.
           </para>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_2">
         <para>The following built-in functions are not
         supported:<informaltable border="1" frame="void" width="25%">
             <tr>
@@ -32,7 +32,7 @@
           </informaltable></para>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_3">
         <para>The following built-in functions are only supported in
         FMUs:<informaltable border="1" frame="void" width="100%">
             <tr>
@@ -77,7 +77,7 @@
           </informaltable></para>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_4">
         <para>The following operators are only partially supported:
         <informaltable border="1" frame="void" width="100%">
             <tr>
@@ -90,18 +90,18 @@
         <para>The following annotations are not supported:
         <informaltable border="1" frame="void" width="100%">
             <tr>
-              <td><code>version</code></td>
-              <td><code>arrayLayout</code></td>
-              <td><code>obsolete</code></td>
+              <td><code xml:id="lim_24">version</code></td>
+              <td><code xml:id="lim_25">arrayLayout</code></td>
+              <td><code xml:id="lim_26">obsolete</code></td>
             </tr>
             <tr>
-              <td><code>uses</code></td>
-              <td><code>HideResult</code></td>
-              <td><code>unassignedMessage</code></td>
+              <td><code xml:id="lim_5">uses</code></td>
+              <td><code xml:id="lim_27">HideResult</code></td>
+              <td><code xml:id="lim_28">unassignedMessage</code></td>
             </tr>
             <tr>
-              <td><code>inverse</code></td>
-              <td><code>absoluteValue</code></td>
+              <td><code xml:id="lim_29">inverse</code></td>
+              <td></td>
               <td></td>
             </tr>
           </informaltable></para>
@@ -109,7 +109,7 @@
       </itemizedlist>
 
       <itemizedlist>
-      <listitem>
+      <listitem xml:id="lim_6">
         <para>The following annotations are limited:</para>
         <itemizedlist>
            <listitem>
@@ -119,21 +119,21 @@
         </itemizedlist>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_7">
            <para>There is limited support for using arrays in record arrays.
            </para>
        </listitem>
-       <listitem>
+       <listitem xml:id="lim_8">
       <para>There is limited support for Q-identifiers (e.g. component names
       starting with a single quote) </para>
     </listitem>
-       <listitem>
+       <listitem xml:id="lim_9">
            <para>No support for non-parameter array size declarations. This means that all array size
                  declarations must be of constant or parameter variability.
            </para>
        </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_10">
             <para>Index reduction fails in some complex cases. It is possible to work around this by
                   setting the <code>stateSelect</code> attribute manually.</para>
       </listitem>
@@ -144,30 +144,30 @@
     supported:</para>
 
     <itemizedlist>
-      <listitem>
+      <listitem xml:id="lim_11">
         <para>Annotations for transcription information.</para>
       </listitem>
     </itemizedlist>
 
     <para>The following limitations apply to optimization using CasADi-based
     collocation with JModelica.org:<itemizedlist>
-        <listitem>
+        <listitem xml:id="lim_12">
           <para>Incomplete support for the <literal>Integer</literal> and
           <literal>Boolean</literal> types: To the extent that they are
           supported, they are treated more or less like reals.</para>
         </listitem>
 
-        <listitem>
+        <listitem xml:id="lim_13">
           <para>No support for <literal>String</literal> and
           <literal>enumeration</literal> types.</para>
         </listitem>
 
-        <listitem>
+        <listitem xml:id="lim_14">
           <para>Attributes with any name can be set on any type of
           variable.</para>
         </listitem>
 
-        <listitem>
+        <listitem xml:id="lim_15">
           <para>The property of whether an optimization problem has free or
           fixed time horizon cannot be changed after compilation.</para>
         </listitem>
@@ -178,21 +178,21 @@
 
     <itemizedlist>
 
-      <listitem>
+      <listitem xml:id="lim_16">
         <para>The dependenciesKind attribute in the XML file for FMU 2.0 is
         not generated.</para>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_17">
         <para>Directional derivatives are known to have limitations in some
         cases.</para>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_18">
         <para>Asynchronous simulation is not supported.</para>
       </listitem>
 
-      <listitem>
+      <listitem xml:id="lim_19">
         <para>FMU states (<code>set, get</code> and <code>serialize</code>) are not supported.</para>
       </listitem>
     </itemizedlist>

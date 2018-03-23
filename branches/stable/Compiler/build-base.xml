@@ -864,6 +864,8 @@
 
     <!-- Generate JUnit test class. -->
     <target name="gen-test" description="Generate JUnit test class.">
+        <!-- This property allows us to insert extra code into the test class -->
+        <property name="test_class_extra_defs" value="" />
         <mkdir dir="${test_package_output}" />
         <echo file="${test_file}">package ${test_package};
 
@@ -871,6 +873,8 @@ import org.junit.runner.RunWith;
 
 @RunWith(org.jmodelica.junit.TreeJModelicaRunner.class)
 public class ${test_class_name} extends ${ast_package}.TestSpecification {
+
+${test_class_extra_defs}
 
     public ${test_class_name}() { 
         super(${module_dirs});
@@ -981,7 +985,10 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     </target>
 
     <!-- cleans all files -->
-    <target name="clean" depends="clean-gen" description="Deletes all generated files.">
+    <target name="clean" depends="clean-gen,clean-bin" description="Deletes all generated files."/>
+
+    <!-- cleans all binary files -->
+    <target name="clean-bin" description="Deletes all binary files.">
         <delete dir="${class_output}" />
         <delete dir="${test_class_output}" />
         <delete dir="${jar_output}" />

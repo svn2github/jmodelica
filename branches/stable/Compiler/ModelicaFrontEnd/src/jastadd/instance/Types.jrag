@@ -280,12 +280,12 @@ aspect ConnectorTypes {
 aspect DerivativeFunctions {
 
     syn boolean ASTNode.shouldBeDifferentiated()  = false;
-    eq FType.shouldBeDifferentiated()             = isReal() || isComposite();
+    eq FType.shouldBeDifferentiated()             = isReal() || isRecord();
     eq FFunctionVariable.shouldBeDifferentiated() = delegateShouldBeDifferentiated();
     eq FVariable.shouldBeDifferentiated()         = variability().continuousVariability();
     eq FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
     eq FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && 
-            (inFunction() && !isConstantExp() || isContinuousExp());
+            (inFunction() || isContinuousExp());
     eq FEventGenExp.shouldBeDifferentiated()      = false;
     eq FSignExp.shouldBeDifferentiated()          = false;
     eq FLitExp.shouldBeDifferentiated()           = false;

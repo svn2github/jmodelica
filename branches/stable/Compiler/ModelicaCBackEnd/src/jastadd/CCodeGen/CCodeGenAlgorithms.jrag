@@ -73,26 +73,25 @@ aspect CCodeGenAlgorithms {
 
     public void FFunctionVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
         String name = p.name(this);
-        setDummyExp();
         TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
         if (isComposite() && isOutput() && !isString()) {
             String next = p.codePrinter().indent(indent);
             String iniName = name + C_SUFFIX_NULL;
             str.print(indent + "if (" + name + " == NULL) {\n");
-            tp.reset(iniName, getBindingExp(), type.size(), false, next);
+            tp.reset(iniName, this, type.size(), false, next);
             type.print(tp);
             str.print(next + name + " = " + iniName + ";\n");
             str.print(indent + "}\n");
         } else {
-            tp.reset(name, getBindingExp(), type.size(), false, indent);
+            tp.reset(name, this, type.size(), false, indent);
             type.print(tp);
         }
-        resetDummyExp();
     }
 
     /*
      * End of hooks
      */
+
 
     public void ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
         throw new UnsupportedOperationException("ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables, boolean solved) not implemented for class '" + getClass().getSimpleName() +"'");
@@ -450,7 +449,7 @@ aspect CCodeGenAlgorithms {
 
     public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         String tempName = tempName_C();
-        String src = alias();
+        String src = alias_C(p);
         useTempVar = true;
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);

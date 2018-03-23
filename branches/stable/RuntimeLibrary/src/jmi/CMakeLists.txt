@@ -92,6 +92,7 @@ set(JMISources
     jmi_delay_impl.h
     jmi_dynamic_state.h
     jmi_chattering.h
+    jmi_work_array.h
     jmi_math.h
     jmi_types.h
     
@@ -108,6 +109,7 @@ set(JMISources
     jmi_delay.c
     jmi_dynamic_state.c
     jmi_chattering.c
+    jmi_work_array.c
     jmi_math.c
     
     ${JMICommonSources}

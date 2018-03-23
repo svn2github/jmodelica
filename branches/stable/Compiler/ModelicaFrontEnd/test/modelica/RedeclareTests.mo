@@ -51,18 +51,6 @@ end RedeclareTests.Basic.RedeclareTestOx1;
 end RedeclareTestOx1;
  
 model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
- 
-/*
-  Should give an error message like
-  Error in redeclaration in component:
-    C c(redeclare A b)
-   component 'A b' is not a subtype of component 'B a'.
-   
-   
-   
- 
-*/
- 
   model A
     Real x=1;
   end A;
@@ -86,7 +74,7 @@ model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
             errorMessage="
 1 errors found:
 
-Error at line 27, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 15, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b',
     because y from the constraining type is missing
 ")})));
@@ -293,7 +281,8 @@ model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redecl
             errorMessage="
 1 errors found:
 
-Error at line 22, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 22, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e:
   In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a',
     because y from the constraining type is missing
 ")})));
@@ -446,7 +435,7 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
             errorMessage="
 1 errors found:
 
-Error at line 17, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 18, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class,
     because z from the constraining type is missing
 ")})));
@@ -531,7 +520,8 @@ model RedeclareTestOx11_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 23, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 23, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e.d:
   In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c',
     because y from the constraining type is missing
 ")})));
@@ -571,7 +561,8 @@ model RedeclareTestOx115_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 22, column 81, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 22, column 81, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class,
     because z from the constraining type is missing
 ")})));
@@ -612,7 +603,8 @@ model RedeclareTestOx116_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 23, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 23, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e:
   In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c',
     because y from the constraining type is missing
 ")})));
@@ -755,7 +747,8 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 23, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 23, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class,
     because z from the constraining type is missing
 ")})));
@@ -796,7 +789,8 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 23, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 23, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class,
     because z from the constraining type is missing
 ")})));
@@ -924,11 +918,12 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 21, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 24, column 6, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class,
     because c.z from the constraining type is missing
 
-Error at line 24, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 24, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS,
+In component e:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C',
     because z from the constraining type is missing
 ")})));
@@ -3727,7 +3722,7 @@ model RedeclareTest51
             errorMessage="
 3 warnings found:
 
-Warning at line 2, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION,
+Warning at line 3, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION,
 In component a:
   The parameter a.b does not have a binding expression
 ")})));
@@ -4436,7 +4431,7 @@ model RedeclareTest72
 
 Warning at line 29, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Access to component x not recommended, it is not present in constraining type of declaration 'redeclare replaceable H b constrainedby I'
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable H b constrainedby I'
 ")})));
 end RedeclareTest72;
 
@@ -4490,11 +4485,11 @@ model RedeclareTest73
 
 Warning at line 29, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Access to component x not recommended, it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable E b constrainedby F'
 
 Warning at line 30, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Access to component z not recommended, it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+  Access to component z not recommended, it is not present in constraining type of declaration 'replaceable E b constrainedby F'
 ")})));
 end RedeclareTest73;
 
@@ -6538,7 +6533,7 @@ model ShortClassDeclEqu2 = ShortClassDeclEqu2Extra
             errorMessage="
 1 errors found:
 
-Error at line 0, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo':
+Error at line -2, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo':
   Cannot find class or component declaration for y
 ")})));
 

@@ -231,10 +231,10 @@ equation
             errorMessage="
 2 errors found:
 
-Warning at line 3, column 13, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TearingTests.mo':
+Warning at line 3, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TearingTests.mo':
   Iteration variable \"i2\" is missing start value!
 
-Warning at line 3, column 16, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TearingTests.mo':
+Warning at line 3, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TearingTests.mo':
   Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest1;
@@ -267,7 +267,7 @@ equation
             errorMessage="
 1 errors found:
 
-Warning at line 3, column 25, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TearingTests.mo':
+Warning at line 3, column 2, in file 'Compiler/ModelicaMiddleEnd/test/modelica/TearingTests.mo':
   Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest2;

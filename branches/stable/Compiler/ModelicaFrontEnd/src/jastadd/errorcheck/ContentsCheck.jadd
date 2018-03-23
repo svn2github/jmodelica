@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 
 import org.jmodelica.util.ErrorCheckType;
 
+import org.jmodelica.common.URIResolver;
+import org.jmodelica.common.URIResolver.URIException;
+
 aspect ContentCheck {
 
     /**
@@ -74,10 +77,35 @@ aspect ContentCheck {
     }
 	
 	public void InstExternal.contentCheck(ErrorCheckType checkType) {
-		if (!inFunction())
+        if (!inFunction()) {
 			error("External function declarations are only allowed in functions");
-	}
-	
+        }
+        contentCheckDirectoryAnnotation(checkType, "IncludeDirectory");
+        contentCheckDirectoryAnnotation(checkType, "LibraryDirectory");
+    }
+
+    public void InstExternal.contentCheckDirectoryAnnotation(ErrorCheckType checkType, String name) {
+        AnnotationNode libDir = annotation(name);
+        if (libDir.exists()) {
+            if (libDir.isStringValue()) {
+                try {
+                    URIResolver.DEFAULT.resolveChecked(this, libDir.string());
+                } catch (URIException e) {
+                    ASTNode.EXTERNAL_DIRECTORY_ANNOTATION.invoke(this, name, e.getMessage());
+                }
+            } else {
+                ASTNode.EXTERNAL_DIRECTORY_ANNOTATION_TYPE.invoke(this, name);
+            }
+        }
+    }
+
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_DIRECTORY_ANNOTATION =
+            new SimpleErrorProducer("EXTERNAL_DIRECTORY_ANNOTATION", ProblemKind.SEMANTIC,
+                    "%s annotation could not be resolved\n  %s");
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_DIRECTORY_ANNOTATION_TYPE =
+            new SimpleErrorProducer("EXTERNAL_DIRECTORY_ANNOTATION_TYPE", ProblemKind.SEMANTIC,
+                    "%s annotation only allows scalar string values");
+
 	public void FReturnStmt.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction())
 			error("Return statements are only allowed in functions");
@@ -229,6 +257,7 @@ aspect ContentCheck {
         if (!inFunction()) // Array sizes outside functions should be structural parameters
             size().forceVariability(checkType, fStructParameter());
         checkQuotedIdentifier(getComponentDecl(), name());
+        checkAbsoluteValue();
     }
 
     public void InstAssignable.contentCheck(ErrorCheckType checkType) {
@@ -278,7 +307,8 @@ aspect ContentCheck {
             }
         }
         
-        checkQuotedIdentifier(getClassDecl(), name());
+        checkQuotedIdentifier(getClassDecl().getName(), name());
+        checkAbsoluteValue();
     }
     
     private static Set<String> AnnotationNode.buildExternalFunctionAnnotations() {
