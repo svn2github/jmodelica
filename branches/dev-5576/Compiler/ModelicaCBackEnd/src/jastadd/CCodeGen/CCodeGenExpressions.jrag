@@ -366,7 +366,7 @@ aspect CCodeGenExpressions {
         }
         String value = toString();
         str.print(value);
-        if (shouldAppend(value)) {
+        if (shouldAppendZeroFractionalPart(p, value)) {
             str.print(".0");
         }
         if (shouldWrap()) {
@@ -378,14 +378,21 @@ aspect CCodeGenExpressions {
     syn boolean FIntegerLitExp.shouldWrap() = inIfCondition() || inFunctionArg();
     syn boolean FRealLitExp.shouldWrap() = inIfCondition();
 
-    syn boolean FNumericLitExp.shouldAppend(String value) = 
-             (getParent() instanceof FDotPowExp) && !value.contains(".");
- //TODO use condition such as (inIfCondition() || inGeneratedFunctionCall()) instead of (getParent() instanceof FDotPowExp)
+    syn boolean FNumericLitExp.shouldAppendZeroFractionalPart(CodePrinter p, String value) = 
+             p.inGeneratedFunctionCall(this) && !value.contains(".");
+ //TODO provide general condition on FExp such as (inIfCondition() || inGeneratedFunctionCall()) instead of restricting to 
+ // special cases via the (temporary) hook CodePrinter.inGeneratedFunctionCall()
+    
+    public abstract boolean CodePrinter.inGeneratedFunctionCall(FExp exp);
+    public boolean CPrettyPrinter.inGeneratedFunctionCall(FExp exp) {
+        return false;
+    }
 
+    //TODO use this attribute instead of the hook CodePrinter.inGeneratedFunctionCall()
     inh boolean FExp.inGeneratedFunctionCall(); 
     eq FClass.getChild().inGeneratedFunctionCall()        = false;
     eq InstRoot.getChild().inGeneratedFunctionCall()      = false;
-    eq FExp.getChild().inGeneratedFunctionCall() = true;
+    eq FExp.getChild().inGeneratedFunctionCall() = true; // assuming that most FExp generate a function call
     eq FForIndex.getFExp().inGeneratedFunctionCall() = false;
     eq FRangeExp.getChild().inGeneratedFunctionCall() = inGeneratedFunctionCall();
 

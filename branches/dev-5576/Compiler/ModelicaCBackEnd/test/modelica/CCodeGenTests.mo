@@ -6658,7 +6658,7 @@ annotation(__JModelica(UnitTesting(tests={
         generate_dae=true,
         template="$C_DAE_equation_residuals$",
         generatedCode="
-    (*res)[0] = (1.0 * (10.0) * (10.0) * (10.0) * (10.0)) - (_x_0);
+    (*res)[0] = (1.0 * (10) * (10) * (10) * (10)) - (_x_0);
 ")})));
 end CIntegerExp1;
 
@@ -6675,7 +6675,7 @@ annotation(__JModelica(UnitTesting(tests={
         generate_dae=true,
         template="$C_DAE_equation_residuals$",
         generatedCode="
-    (*res)[0] = (1.0 / (10.0) / (10.0) / (10.0) / (10.0)) - (_x_0);
+    (*res)[0] = (1.0 / (10) / (10) / (10) / (10)) - (_x_0);
 ")})));
 end CIntegerExp2;
 
@@ -6709,7 +6709,7 @@ annotation(__JModelica(UnitTesting(tests={
         generate_dae=true,
         template="$C_DAE_equation_residuals$",
         generatedCode="
-    (*res)[0] = jmi_pow_equation(jmi, 10.0, 10.0, \"10 ^ 10\") - (_x_0);
+    (*res)[0] = jmi_pow_equation(jmi, 10, 10, \"10 ^ 10\") - (_x_0);
 ")})));
 end CIntegerExp4;
 
@@ -6726,7 +6726,7 @@ annotation(__JModelica(UnitTesting(tests={
         generate_dae=true,
         template="$C_DAE_equation_residuals$",
         generatedCode="
-    (*res)[0] = jmi_pow_equation(jmi, 10.0, -10.0, \"10 ^ -10\") - (_x_0);
+    (*res)[0] = jmi_pow_equation(jmi, 10, -10, \"10 ^ -10\") - (_x_0);
 ")})));
 end CIntegerExp5;
 

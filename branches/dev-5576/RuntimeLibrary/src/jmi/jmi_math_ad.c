@@ -53,7 +53,7 @@ void jmi_ad_sqrt(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx
     if (x <= 0.0) {
         *d = 0.0;
     } else {
-        *d = dx / ( 2 * *v);
+        *d = dx / ( 2 * (*v));
     }
 }
 
@@ -145,7 +145,7 @@ void jmi_ad_exp_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v,
 
 void jmi_ad_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_exp(jmi, func_name, x, msg);
-    *d = dx * x;
+    *d = dx * (*v);
 }
 
 void jmi_ad_log_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -171,7 +171,7 @@ void jmi_ad_log10_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* 
 
 void jmi_ad_log10(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_log10(jmi, func_name, x, msg);
-    *d = dx * log10(exp(1)) / x;
+    *d = dx * log10(exp(1.0)) / x;
 }
 
 void jmi_ad_sinh_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -262,5 +262,5 @@ void jmi_ad_tanh_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_tanh(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_tanh(jmi, func_name, x, msg);
-    *d = dx * (1 - x*x);
+    *d = 1 - (*v) * (*v);
 }
