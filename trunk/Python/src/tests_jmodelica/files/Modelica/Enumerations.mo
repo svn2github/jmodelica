@@ -49,4 +49,10 @@ model Enumeration3
 
 end Enumeration3;
 
+model Enumeration4
+    type Size = enumeration(small, medium, large, xlarge); 
+    parameter Size tsize = Size.medium;
+end Enumeration4;
+
+
 end Enumerations;

@@ -1464,6 +1464,43 @@ class Test_FMI_ODE_2:
         
         assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
     
+    @testattr(stddist_base = True)
+    def test_with_jacobian(self):
+
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-7
+        assert opts["with_jacobian"] == "Default"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] > 0
+        
+        opts["with_jacobian"] = True
+        model.reset()
+    
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] == 0
+        
+        opts["CVode_options"]["usejac"] = False
+        model.reset()
+    
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] > 0
+        
+        opts["with_jacobian"] = False
+        model.reset()
+    
+        res = model.simulate(final_time=1.5,options=opts)
+        print res.final("J1.w")
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
+        assert res.solver.statistics["nfcnjacs"] > 0
+
     @testattr(stddist_full = True)
     def test_no_state1(self):
         """
