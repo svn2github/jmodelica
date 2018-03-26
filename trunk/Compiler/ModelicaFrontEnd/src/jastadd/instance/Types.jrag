@@ -323,11 +323,7 @@ aspect DerivativeFunctions {
         FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
         if (myDecl == null)
             return null;
-        if (getNumArg() > myDecl.myInputs().size()) {
-            ASTNode.DERIVATIVE_ANNOTATION_PROBLEM.invoke(this, name(),
-            "The derivative functions inputs must contain all the underived functions inputs.");
-            breakOnErrors();
-        }
+        
         Set<String> zeroDer = new HashSet<String>();
         for (int i = 0, n = getNumArg(); i < n; i++) {
             if (getArg(i).variability().parameterOrLess()) {

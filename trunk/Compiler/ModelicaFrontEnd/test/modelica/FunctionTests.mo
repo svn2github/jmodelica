@@ -13379,7 +13379,6 @@ model Interpolate
 
     function interpDer
         input Real u;
-        input Real u_der;
         output Real value;
     algorithm
         value := u*3;
