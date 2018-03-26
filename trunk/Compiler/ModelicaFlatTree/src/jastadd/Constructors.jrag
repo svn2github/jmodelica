@@ -21,7 +21,7 @@ aspect Constructors {
 
 	/*
 	public InstComposite.InstComposite(InstAccess a,
-			                                   ComponentDecl cd,
+			                                   SrcComponentDecl cd,
 			                                   Opt<InstModification> inst_mod_opt,
 			                                   Opt<InstConstraining> inst_constr_opt) {
 		this(a,new Opt<FArraySubscripts>(),cd,inst_mod_opt,inst_constr_opt);
@@ -42,38 +42,38 @@ aspect Constructors {
 	/**
 	 * Constructs a real literal expression from a double.
 	 */
-	public RealLitExp.RealLitExp(double val) {
+	public SrcRealLitExp.SrcRealLitExp(double val) {
 		this(String.valueOf(val));
 	}
 	
 	/**
 	 * Constructs an integer literal expression from an integer.
 	 */
-	public IntegerLitExp.IntegerLitExp(int val) {
+	public SrcIntegerLitExp.SrcIntegerLitExp(int val) {
 		this(String.valueOf(val));
 	}
 
 	/**
 	 * Constructs a component modification from an access and modification.
 	 */
-	public ComponentModification.ComponentModification(Access name, Modification mod) {
+	public SrcComponentModification.SrcComponentModification(SrcAccess name, SrcModification mod) {
 		this();
 		setName(name);
-		setModification(mod);
+		setSrcModification(mod);
 	}
 	
 	/**
 	 * Constructs a complete modification from a class modification.
 	 */
-	public CompleteModification.CompleteModification(ClassModification cm) {
+	public SrcCompleteModification.SrcCompleteModification(SrcClassModification cm) {
 		this();
-		setClassModification(cm);
+		setSrcClassModification(cm);
 	}
 
     /**
      * Construcs a connect clause without any residual.
      */
-    public FConnectClause.FConnectClause(FEquationType type, ConnectClause connectClause,
+    public FConnectClause.FConnectClause(FEquationType type, SrcConnectClause connectClause,
             FIdUseInstAccess left, FIdUseInstAccess right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), connectClause, left, right);
     }
@@ -145,14 +145,14 @@ aspect Constructors {
     /**
      * Constructor with only necessary args. 
      */
-    public InstCreateComponentDecl.InstCreateComponentDecl(ComponentDecl cd, InstLookupRedirectNode ln) {
+    public InstCreateComponentDecl.InstCreateComponentDecl(SrcComponentDecl cd, InstLookupRedirectNode ln) {
         this(cd.name(), cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), ln);
     }
 
     /**
      * Constructor with only necessary args. 
      */
-    public InstCreateForIndexPrimitive.InstCreateForIndexPrimitive(ComponentDecl cd) {
+    public InstCreateForIndexPrimitive.InstCreateForIndexPrimitive(SrcComponentDecl cd) {
         // This maneuver is pretty ugly, but we need to find an InstClassDecl
         // in the instance tree from the source tree...
         this(cd.name(), cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), 
@@ -163,7 +163,7 @@ aspect Constructors {
      * Constructor with only necessary args. 
      */
     public InstCreateReplacingComponentDecl.InstCreateReplacingComponentDecl(
-            ComponentDecl cd, InstLookupRedirectNode ln, ComponentDecl ocd, 
+            SrcComponentDecl cd, InstLookupRedirectNode ln, SrcComponentDecl ocd, 
             InstComponentRedeclare icr, InstComponentRedeclare cicr) {
         this(cd.name(), cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), 
                 new Opt(), new Opt(), ln, ocd, icr, cicr);

@@ -42,7 +42,7 @@ abstract public class TestAnnotationizerHelper {
             super(filePath, className, description, opts, data);
         }
 
-        public FmiXMLCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+        public FmiXMLCodeGenTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
             super(cd, filePath, className);
         }
 

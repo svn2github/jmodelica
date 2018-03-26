@@ -38,8 +38,8 @@ aspect Arrays {
      * 
      * @return True if the access has array subscripts, otherwise false.
      */
-    syn boolean Access.isArrayAccess() = false;
-    eq ArrayAccess.isArrayAccess()     = true;
+    syn boolean SrcAccess.isArrayAccess() = false;
+    eq SrcArrayAccess.isArrayAccess()     = true;
 
 	/**
 	 * Return an Index with these array subscripts.

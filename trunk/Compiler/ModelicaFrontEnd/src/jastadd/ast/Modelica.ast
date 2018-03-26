@@ -56,7 +56,7 @@
  * \package org.jmodelica.ast Package containing all AST classes.
  */
 
-abstract SourceBaseNode : BaseNode;
+abstract SrcBaseNode : BaseNode;
 
 /**
  * A class representing the root node of a source AST.
@@ -64,276 +64,276 @@ abstract SourceBaseNode : BaseNode;
 SourceRoot : Root ::= Program;
  
 
-Program : SourceBaseNode ::= 
-            UnstructuredEntity:StoredDefinition* 
-            /UnknownClassDecl/
-            /UnknownComponent:ComponentClause/
-            /EnumBaseDecl:EnumClassDecl/
-            /PredefinedType:BaseClassDecl*/ 
-            /BuiltInType:ClassDecl*/   
-            /BuiltInFunction:BaseClassDecl*/
-            /LibNode*/
-            /AnonymousClass:BaseClassDecl*/
+Program : SrcBaseNode ::= 
+            UnstructuredEntity:SrcStoredDefinition* 
+            /SrcUnknownClassDecl/
+            /UnknownComponent:SrcComponentClause/
+            /EnumBaseDecl:SrcEnumClassDecl/
+            /PredefinedType:SrcBaseClassDecl*/ 
+            /BuiltInType:SrcClassDecl*/   
+            /BuiltInFunction:SrcBaseClassDecl*/
+            /SrcLibNode*/
+            /AnonymousClass:SrcBaseClassDecl*/
             /InstProgramRoot/;
 
-StoredDefinition : SourceBaseNode ::= [Within] ClassDecl*;
+SrcStoredDefinition : SrcBaseNode ::= [SrcWithin] SrcClassDecl*;
 
-Within : SourceBaseNode ::= [PackageName:Access];
+SrcWithin : SrcBaseNode ::= [PackageName:SrcAccess];
 
-abstract ClassDecl : Element       ::= Name:IdDecl;
-abstract BaseClassDecl : ClassDecl ::= <Encapsulated:boolean>
+abstract SrcClassDecl : SrcElement       ::= Name:SrcIdDecl;
+abstract SrcBaseClassDecl : SrcClassDecl ::= <Encapsulated:boolean>
                                        <Partial:boolean>
-                                       Restriction 
+                                       SrcRestriction 
                                        <Redeclare:boolean>
                                        <Final:boolean>
                                        <Inner:boolean>
                                        <Outer:boolean>
                                        <Replaceable:boolean>
-                                       [ConstrainingClause]
-                                       [ConstrainingClauseComment:Comment];
+                                       [SrcConstrainingClause]
+                                       [ConstrainingClauseComment:SrcComment];
 
-UnknownClassDecl : FullClassDecl;
+SrcUnknownClassDecl : SrcFullClassDecl;
 
-FullClassDecl : BaseClassDecl ::= [StringComment] 
-                                  Clause*
-                                  [ExternalClause] 
-                                  [Annotation]
-                                  EndDecl;
+SrcFullClassDecl : SrcBaseClassDecl ::= [SrcStringComment] 
+                                  SrcClause*
+                                  [SrcExternalClause] 
+                                  [SrcAnnotation]
+                                  SrcEndDecl;
 
-LibClassDecl : FullClassDecl ::= LibNode*;
-LibNode : ClassDecl ::= <FileName:String>
+SrcLibClassDecl : SrcFullClassDecl ::= SrcLibNode*;
+SrcLibNode : SrcClassDecl ::= <FileName:String>
                         <Structured:boolean> 
                         <Version:String> 
-                        <Reason:LibNode.LoadReason> 
-                        /StoredDefinition/;
+                        <Reason:SrcLibNode.LoadReason> 
+                        /SrcStoredDefinition/;
 
-ShortClassDecl : BaseClassDecl ::= ExtendsClauseShortClass;
+SrcShortClassDecl : SrcBaseClassDecl ::= SrcExtendsClauseShortClass;
 
-ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow] 
-                                            [TypePrefixVariability]
-                                            [TypePrefixInputOutput] 
-                                            [ArraySubscripts] 
-                                            Comment; 
+SrcExtendsClauseShortClass : SrcExtendsClause ::= [SrcTypePrefixFlow] 
+                                            [SrcTypePrefixVariability]
+                                            [SrcTypePrefixInputOutput] 
+                                            [SrcArraySubscripts] 
+                                            SrcComment; 
                             
-ExtendClassDecl : FullClassDecl ::= InlineExtendsClause;
+SrcExtendClassDecl : SrcFullClassDecl ::= SrcInlineExtendsClause;
                                    
-PrimitiveClassDecl : FullClassDecl;
-RealClassDecl      : PrimitiveClassDecl;
-IntegerClassDecl   : PrimitiveClassDecl;
-BooleanClassDecl   : PrimitiveClassDecl;
-StringClassDecl    : PrimitiveClassDecl;
-EnumClassDecl      : PrimitiveClassDecl ::= <Symbol:Symbol>; // <Symbol> is necessary to achieve formatted pretty print.
+SrcPrimitiveClassDecl : SrcFullClassDecl;
+SrcRealClassDecl      : SrcPrimitiveClassDecl;
+SrcIntegerClassDecl   : SrcPrimitiveClassDecl;
+SrcBooleanClassDecl   : SrcPrimitiveClassDecl;
+SrcStringClassDecl    : SrcPrimitiveClassDecl;
+SrcEnumClassDecl      : SrcPrimitiveClassDecl ::= <Symbol:Symbol>; // <Symbol> is necessary to achieve formatted pretty print.
 
-EnumLiteralDecl : ComponentDecl;
+SrcEnumLiteralDecl : SrcComponentDecl;
 
-BuiltInClassDecl : ClassDecl;
+SrcBuiltInClassDecl : SrcClassDecl;
 
-ConstrainingClause : SourceBaseNode ::= Access [ClassModification];
+SrcConstrainingClause : SrcBaseNode ::= SrcAccess [SrcClassModification];
 
-abstract Restriction : SourceBaseNode;
-Model               : Restriction;
-Block               : Restriction;
-MClass              : Restriction;
-Connector           : Restriction;
-ExpandableConnector : Connector;
-MType               : Restriction;
-MPackage            : Restriction;
-Function            : Restriction;
-Record              : Restriction;
-OperatorRecord      : Record;
-Operator            : Restriction;
-OperatorFunction    : Function;
+abstract SrcRestriction : SrcBaseNode;
+SrcModel               : SrcRestriction;
+SrcBlock               : SrcRestriction;
+SrcClass              : SrcRestriction;
+SrcConnector           : SrcRestriction;
+SrcExpandableConnector : SrcConnector;
+SrcType               : SrcRestriction;
+SrcPackage            : SrcRestriction;
+SrcFunction            : SrcRestriction;
+SrcRecord              : SrcRestriction;
+SrcOperatorRecord      : SrcRecord;
+SrcOperator            : SrcRestriction;
+SrcOperatorFunction    : SrcFunction;
 
-ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
-                                    [ExternalFunctionCall] 
-                                    [Annotation];
+SrcExternalClause : SrcBaseNode ::= [SrcExternalLanguage] 
+                                    [SrcExternalFunctionCall] 
+                                    [SrcAnnotation];
                    
-ExternalFunctionCall : SourceBaseNode ::= [ReturnVar:Access] FunctionName:IdDecl Arg:Exp*;
+SrcExternalFunctionCall : SrcBaseNode ::= [ReturnVar:SrcAccess] FunctionName:SrcIdDecl Arg:SrcExp*;
 
-ExternalLanguage : SourceBaseNode ::= <Language>;
+SrcExternalLanguage : SrcBaseNode ::= <Language>;
 
-abstract Clause : SourceBaseNode;
+abstract SrcClause : SrcBaseNode;
 
-abstract ElementList  : Clause ::= Element*;
-PublicElementList     : ElementList;
-DefaultElementList    : PublicElementList;
-ProtectedElementList  : ElementList;
-EquationClause        : Clause ::= AbstractEquation*;
-InitialEquationClause : EquationClause;
-Algorithm             : Clause ::= Statement*;
-InitialAlgorithm      : Algorithm;
+abstract SrcElementList  : SrcClause ::= SrcElement*;
+SrcPublicElementList     : SrcElementList;
+SrcDefaultElementList    : SrcPublicElementList;
+SrcProtectedElementList  : SrcElementList;
+SrcEquationClause        : SrcClause ::= SrcAbstractEquation*;
+SrcInitialEquationClause : SrcEquationClause;
+SrcAlgorithm             : SrcClause ::= SrcStatement*;
+SrcInitialAlgorithm      : SrcAlgorithm;
 
-abstract Element : SourceBaseNode;
-ExtendsClause           : Element ::= Super:Access [ClassModification] [Annotation];
-InlineExtendsClause     : ExtendsClause;
-abstract ImportClause   : Element ::= PackageName:Access Comment;
-ImportClauseQualified   : ImportClause;
-ImportClauseUnqualified : ImportClause;
-ImportClauseRename      : ImportClause ::= IdDecl;
+abstract SrcElement : SrcBaseNode;
+SrcExtendsClause           : SrcElement ::= Super:SrcAccess [SrcClassModification] [SrcAnnotation];
+SrcInlineExtendsClause     : SrcExtendsClause;
+abstract SrcImportClause   : SrcElement ::= PackageName:SrcAccess SrcComment;
+SrcImportClauseQualified   : SrcImportClause;
+SrcImportClauseUnqualified : SrcImportClause;
+SrcImportClauseRename      : SrcImportClause ::= SrcIdDecl;
 
-ComponentClause : Element ::= <Redeclare:boolean> 
+SrcComponentClause : SrcElement ::= <Redeclare:boolean> 
                               <Final:boolean> 
                               <Inner:boolean> 
                               <Outer:boolean> 
                               <Replaceable:boolean> 
-                              [TypePrefixFlow] 
-                              [TypePrefixVariability] 
-                              [TypePrefixInputOutput] 
-                              ClassName:Access 
-                              [TypeArraySubscripts:ArraySubscripts]
-                              ComponentDecl*
-                              [ConstrainingClause] 
-                              Comment;
+                              [SrcTypePrefixFlow] 
+                              [SrcTypePrefixVariability] 
+                              [SrcTypePrefixInputOutput] 
+                              ClassName:SrcAccess 
+                              [TypeArraySubscripts:SrcArraySubscripts]
+                              SrcComponentDecl*
+                              [SrcConstrainingClause] 
+                              SrcComment;
 
-ComponentDecl : SourceBaseNode ::= Name:IdDecl 
-                                   [VarArraySubscripts:ArraySubscripts] 
-                                   [Modification] 
-                                   [ConditionalAttribute]
-                                   Comment;
+SrcComponentDecl : SrcBaseNode ::= Name:SrcIdDecl 
+                                   [VarArraySubscripts:SrcArraySubscripts] 
+                                   [SrcModification] 
+                                   [SrcConditionalAttribute]
+                                   SrcComment;
 
-UnknownComponentDecl : ComponentDecl;
+SrcUnknownComponentDecl : SrcComponentDecl;
 
-abstract TypePrefix     : SourceBaseNode;
-abstract TypePrefixFlow : TypePrefix;
-Flow       : TypePrefixFlow;
-Stream     : TypePrefixFlow;
-abstract TypePrefixVariability : TypePrefix;
-Continuous : TypePrefixVariability;
-Discrete   : TypePrefixVariability;
-Parameter  : TypePrefixVariability;
-IndexParameter : Parameter;
-Constant   : TypePrefixVariability;
-abstract TypePrefixInputOutput : TypePrefix;
-Input      : TypePrefixInputOutput;
-Output     : TypePrefixInputOutput;
+abstract SrcTypePrefix     : SrcBaseNode;
+abstract SrcTypePrefixFlow : SrcTypePrefix;
+SrcFlow       : SrcTypePrefixFlow;
+SrcStream     : SrcTypePrefixFlow;
+abstract SrcTypePrefixVariability : SrcTypePrefix;
+SrcContinuous : SrcTypePrefixVariability;
+SrcDiscrete   : SrcTypePrefixVariability;
+SrcParameter  : SrcTypePrefixVariability;
+SrcIndexParameter : SrcParameter;
+SrcConstant   : SrcTypePrefixVariability;
+abstract SrcTypePrefixInputOutput : SrcTypePrefix;
+SrcInput      : SrcTypePrefixInputOutput;
+SrcOutput     : SrcTypePrefixInputOutput;
 
-Comment       : SourceBaseNode ::= [StringComment] [Annotation];
-StringComment : SourceBaseNode ::= <Comment:String>;
+SrcComment       : SrcBaseNode ::= [SrcStringComment] [SrcAnnotation];
+SrcStringComment : SrcBaseNode ::= <SrcComment:String>;
 
-// Annotations and modifications
-ConditionalAttribute : SourceBaseNode ::= Exp;
+// SrcAnnotations and modifications
+SrcConditionalAttribute : SrcBaseNode ::= SrcExp;
 
-abstract Modification : SourceBaseNode;
-CompleteModification  : Modification ::= ClassModification [ValueModification];
-ValueModification     : Modification ::= Exp;
-//AssignModification    : Modification ::= Exp;
-DummyModification     : ValueModification;
+abstract SrcModification : SrcBaseNode;
+SrcCompleteModification  : SrcModification ::= SrcClassModification [SrcValueModification];
+SrcValueModification     : SrcModification ::= SrcExp;
+//AssignModification    : SrcModification ::= SrcExp;
+SrcDummyModification     : SrcValueModification;
 
-ClassModification : Modification ::= Argument*;
-abstract Argument : Modification ::= <Each:boolean> <Final:boolean>;
+SrcClassModification : SrcModification ::= SrcArgument*;
+abstract SrcArgument : SrcModification ::= <Each:boolean> <Final:boolean>;
 
-abstract NamedModification   : Argument ::= Name:Access;
-abstract ElementModification : NamedModification ::= [Modification] Comment;
-ComponentModification : ElementModification; 
-abstract ElementRedeclare    : NamedModification;
-ClassRedeclare        : ElementRedeclare ::= BaseClassDecl;
-ComponentRedeclare    : ElementRedeclare ::= ComponentClause;
+abstract SrcNamedModification   : SrcArgument ::= Name:SrcAccess;
+abstract SrcElementModification : SrcNamedModification ::= [SrcModification] SrcComment;
+SrcComponentModification : SrcElementModification; 
+abstract SrcElementRedeclare    : SrcNamedModification;
+SrcClassRedeclare        : SrcElementRedeclare ::= SrcBaseClassDecl;
+SrcComponentRedeclare    : SrcElementRedeclare ::= SrcComponentClause;
 
-abstract Annotation : SourceBaseNode;
+abstract SrcAnnotation : SrcBaseNode;
 
-ParseAnnotation : Annotation ::= ClassModification;
+SrcParseAnnotation : SrcAnnotation ::= SrcClassModification;
 
-abstract AbstractExp : SourceBaseNode;
-abstract Exp : AbstractExp;
+abstract SrcAbstractExp : SrcBaseNode;
+abstract SrcExp : SrcAbstractExp;
 
-abstract AbstractEquation         : SourceBaseNode ::= Comment;
-Equation             : AbstractEquation ::= Left:Exp Right:Exp;
-ConnectClause        : AbstractEquation ::= Connector1:Access Connector2:Access;
-abstract IfWhenElseEquation       : AbstractEquation ::= AbstractEquation*;
-abstract IfWhenEquation           : IfWhenElseEquation ::= Test:Exp [Else:IfWhenElseEquation];
-IfEquation           : IfWhenEquation;
-WhenEquation         : IfWhenEquation; 
-ElseEquation         : IfWhenElseEquation;
-ForClauseE           : AbstractEquation ::= ForIndex* AbstractEquation*;
-FunctionCallEquation : AbstractEquation ::= Left:FunctionCallLeft* Call:FunctionCall;
+abstract SrcAbstractEquation         : SrcBaseNode ::= SrcComment;
+SrcEquation             : SrcAbstractEquation ::= Left:SrcExp Right:SrcExp;
+SrcConnectClause        : SrcAbstractEquation ::= Connector1:SrcAccess Connector2:SrcAccess;
+abstract SrcIfWhenElseEquation       : SrcAbstractEquation ::= SrcAbstractEquation*;
+abstract SrcIfWhenEquation           : SrcIfWhenElseEquation ::= Test:SrcExp [Else:SrcIfWhenElseEquation];
+SrcIfEquation           : SrcIfWhenEquation;
+SrcWhenEquation         : SrcIfWhenEquation; 
+SrcElseEquation         : SrcIfWhenElseEquation;
+SrcForClauseE           : SrcAbstractEquation ::= SrcForIndex* SrcAbstractEquation*;
+SrcFunctionCallEquation : SrcAbstractEquation ::= Left:SrcFunctionCallLeft* Call:SrcFunctionCall;
 
-FunctionCallLeft : SourceBaseNode ::= [Access];
-ForIndex : ComponentClause ::= [Exp];
-ForIndexDecl : ComponentDecl;
+SrcFunctionCallLeft : SrcBaseNode ::= [SrcAccess];
+SrcForIndex : SrcComponentClause ::= [SrcExp];
+SrcForIndexDecl : SrcComponentDecl;
          
-abstract Statement    : SourceBaseNode  ::= Comment;
-AssignStmt          : Statement ::= Left:Access Right:Exp;
-FunctionCallStmt    : Statement ::= Left:FunctionCallLeft* FunctionCall;
-BreakStmt           : Statement;
-ReturnStmt          : Statement;
-abstract IfWhenStmt   : Statement ::= IfWhenClause*;
-IfStmt              : IfWhenStmt ::= [ElseClause];
-WhenStmt            : IfWhenStmt;
-ElseClause          : SourceBaseNode ::= Stmt:Statement*;
-abstract IfWhenClause : SourceBaseNode  ::= Test:Exp Statement*;
-IfClause            : IfWhenClause;
-WhenClause          : IfWhenClause;
-ForStmt             : Statement ::= ForIndex* ForStmtList;
-ForStmtList         : SourceBaseNode ::= Stmt:Statement*;
-WhileStmt           : Statement ::= Test:Exp WhileStmt:Statement*;
-AlgorithmAnnotation : Statement ::= Annotation;
+abstract SrcStatement    : SrcBaseNode  ::= SrcComment;
+SrcAssignStmt          : SrcStatement ::= Left:SrcAccess Right:SrcExp;
+SrcFunctionCallStmt    : SrcStatement ::= Left:SrcFunctionCallLeft* SrcFunctionCall;
+SrcBreakStmt           : SrcStatement;
+SrcReturnStmt          : SrcStatement;
+abstract SrcIfWhenStmt   : SrcStatement ::= SrcIfWhenClause*;
+SrcIfStmt              : SrcIfWhenStmt ::= [SrcElseClause];
+SrcWhenStmt            : SrcIfWhenStmt;
+SrcElseClause          : SrcBaseNode ::= Stmt:SrcStatement*;
+abstract SrcIfWhenClause : SrcBaseNode  ::= Test:SrcExp SrcStatement*;
+SrcIfClause            : SrcIfWhenClause;
+SrcWhenClause          : SrcIfWhenClause;
+SrcForStmt             : SrcStatement ::= SrcForIndex* SrcForStmtList;
+SrcForStmtList         : SrcBaseNode ::= Stmt:SrcStatement*;
+SrcWhileStmt           : SrcStatement ::= Test:SrcExp SrcWhileStmt:SrcStatement*;
+SrcAlgorithmAnnotation : SrcStatement ::= SrcAnnotation;
 
-IfExp     : Exp ::= IfExp:Exp ThenExp:Exp ElseExp:Exp;
+SrcIfExp     : SrcExp ::= SrcIfExp:SrcExp ThenExp:SrcExp ElseExp:SrcExp;
 
-abstract BinExp : Exp ::= Left:Exp Right:Exp;
+abstract SrcBinExp : SrcExp ::= Left:SrcExp Right:SrcExp;
 
-abstract ArtmBinExp : BinExp;
-DotAddExp : ArtmBinExp;
-DotSubExp : ArtmBinExp;
-DotMulExp : ArtmBinExp;
-DotDivExp : ArtmBinExp;
-DotPowExp : ArtmBinExp; // Easy to make parser take care of this: should be a Primary
-AddExp : DotAddExp;
-SubExp : DotSubExp;
-MulExp : DotMulExp;
-DivExp : DotDivExp;
-PowExp : DotPowExp; // Easy to make parser take care of this: should be a Primary
-NegExp : Exp ::= Exp;
+abstract SrcArtmBinExp : SrcBinExp;
+SrcDotAddExp : SrcArtmBinExp;
+SrcDotSubExp : SrcArtmBinExp;
+SrcDotMulExp : SrcArtmBinExp;
+SrcDotDivExp : SrcArtmBinExp;
+SrcDotPowExp : SrcArtmBinExp; // Easy to make parser take care of this: should be a Primary
+SrcAddExp : SrcDotAddExp;
+SrcSubExp : SrcDotSubExp;
+SrcMulExp : SrcDotMulExp;
+SrcDivExp : SrcDotDivExp;
+SrcPowExp : SrcDotPowExp; // Easy to make parser take care of this: should be a Primary
+SrcNegExp : SrcExp ::= SrcExp;
 
-RealLitExp    : Exp ::= <UNSIGNED_NUMBER>;
-IntegerLitExp : Exp ::= <UNSIGNED_INTEGER>;
-StringLitExp  : Exp ::= <STRING>;
-abstract BooleanLitExp : Exp;
-BooleanLitExpTrue  : BooleanLitExp;
-BooleanLitExpFalse : BooleanLitExp;
+SrcRealLitExp    : SrcExp ::= <UNSIGNED_NUMBER>;
+SrcIntegerLitExp : SrcExp ::= <UNSIGNED_INTEGER>;
+SrcStringLitExp  : SrcExp ::= <STRING>;
+abstract SrcBooleanLitExp : SrcExp;
+SrcBooleanLitExpTrue  : SrcBooleanLitExp;
+SrcBooleanLitExpFalse : SrcBooleanLitExp;
 
-FunctionCall : Exp ::= Name:Access [FunctionArguments];
-PartialFunctionCall : FunctionCall;
+SrcFunctionCall : SrcExp ::= Name:SrcAccess [SrcFunctionArguments];
+SrcPartialFunctionCall : SrcFunctionCall;
 
-FunctionArguments : SourceBaseNode::= Exp* NamedArgument*;
-NamedArgument     : SourceBaseNode::= Name:Access Exp;
+SrcFunctionArguments : SrcBaseNode::= SrcExp* SrcNamedArgument*;
+SrcNamedArgument     : SrcBaseNode::= Name:SrcAccess SrcExp;
 
-IterExp  : Exp ::= Exp ForIndex*;
-RangeExp : Exp ::= Exp*;
+SrcIterExp  : SrcExp ::= SrcExp SrcForIndex*;
+SrcRangeExp : SrcExp ::= SrcExp*;
 
-abstract LogBinExp : BinExp;
-LtExp  : LogBinExp;
-LeqExp : LogBinExp;
-GtExp  : LogBinExp;
-GeqExp : LogBinExp;
-EqExp  : LogBinExp;
-NeqExp : LogBinExp;
-NotExp : Exp ::= Exp;
-OrExp  : LogBinExp;
-AndExp : LogBinExp;
+abstract SrcLogBinExp : SrcBinExp;
+SrcLtExp  : SrcLogBinExp;
+SrcLeqExp : SrcLogBinExp;
+SrcGtExp  : SrcLogBinExp;
+SrcGeqExp : SrcLogBinExp;
+SrcEqExp  : SrcLogBinExp;
+SrcNeqExp : SrcLogBinExp;
+SrcNotExp : SrcExp ::= SrcExp;
+SrcOrExp  : SrcLogBinExp;
+SrcAndExp : SrcLogBinExp;
 
-IdDecl : SourceBaseNode ::= <ID>;
+SrcIdDecl : SrcBaseNode ::= <ID>;
 
-DerExp : Exp ::= Exp;
+SrcDerExp : SrcExp ::= SrcExp;
 
-AccessExp : Exp ::= Access;
+SrcAccessExp : SrcExp ::= SrcAccess;
 
-abstract Access : SourceBaseNode;
-Dot             : Access      ::= Access*;
-GlobalAccess    : Access      ::= Access;
-NamedAccess     : Access      ::= <ID>;
-ArrayAccess     : NamedAccess ::= ArraySubscripts;
+abstract SrcAccess : SrcBaseNode;
+SrcDot             : SrcAccess      ::= SrcAccess*;
+SrcGlobalAccess    : SrcAccess      ::= SrcAccess;
+SrcNamedAccess     : SrcAccess      ::= <ID>;
+SrcArrayAccess     : SrcNamedAccess ::= SrcArraySubscripts;
 
-ArrayConstructor : Exp ::= FunctionArguments;
-Matrix           : Exp ::= Row:MatrixRow*;
-MatrixRow        : Exp ::= Exp*;
+SrcArrayConstructor : SrcExp ::= SrcFunctionArguments;
+SrcMatrix           : SrcExp ::= Row:SrcMatrixRow*;
+SrcMatrixRow        : SrcExp ::= SrcExp*;
 
-ArraySubscripts : SourceBaseNode ::= Subscript*;
-abstract Subscript : SourceBaseNode;
-ColonSubscript : Subscript::=;
-ExpSubscript   : Subscript ::= Exp;
+SrcArraySubscripts : SrcBaseNode ::= SrcSubscript*;
+abstract SrcSubscript : SrcBaseNode;
+SrcColonSubscript : SrcSubscript::=;
+SrcExpSubscript   : SrcSubscript ::= SrcExp;
 
-TimeExp : Exp;
-EndExp  : Exp;
+SrcTimeExp : SrcExp;
+SrcEndExp  : SrcExp;
 
-EndDecl : SourceBaseNode ::= <EndID:String>;
+SrcEndDecl : SrcBaseNode ::= <EndID:String>;

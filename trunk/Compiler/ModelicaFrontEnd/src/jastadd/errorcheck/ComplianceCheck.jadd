@@ -101,7 +101,7 @@ aspect ComplianceCheck {
                 !getFArraySubscripts().variability().parameterOrLess()) {
             ONLY_FMU_NON_FIXED_RECORD_ARRAY_INDEX.invoke(this);
         }
-        if (decl.isExternalObject() && !decl.inFunction() && decl.getComponentDecl().isConstant() && inFunction()) {
+        if (decl.isExternalObject() && !decl.inFunction() && decl.getSrcComponentDecl().isConstant() && inFunction()) {
             EXTERNAL_OBJECT_CONSTANT_FROM_FUNCTION.invoke(this);
         }
     }

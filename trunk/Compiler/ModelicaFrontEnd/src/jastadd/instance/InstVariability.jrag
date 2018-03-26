@@ -24,8 +24,8 @@ aspect InstVariability {
     syn lazy FTypePrefixVariability InstComponentDecl.definedVariability() = localDefinedVariability().combineDown(overrideVariability());
 
     syn lazy FTypePrefixVariability InstComponentDecl.localDefinedVariability() {
-        ComponentDecl cd = getComponentDecl();
-        return cd.hasTypePrefixVariability() ? cd.getTypePrefixVariability().flatten() : noDefinedVariability();
+        SrcComponentDecl cd = getSrcComponentDecl();
+        return cd.hasSrcTypePrefixVariability() ? cd.getSrcTypePrefixVariability().flatten() : noDefinedVariability();
     }
 
     syn FTypePrefixVariability InstComponentDecl.noDefinedVariability() = fContinuous();
@@ -291,13 +291,13 @@ aspect InstExpVariability {
 
 aspect SourceVariability {
 
-    syn boolean TypePrefixVariability.constantVariability() = false;
-    eq Constant.constantVariability() = true;   
-    syn boolean TypePrefixVariability.parameterVariability() = false;
-    eq Parameter.parameterVariability() = true; 
-    syn boolean TypePrefixVariability.discreteVariability() = false;
-    eq Discrete.discreteVariability() = true;   
-    syn boolean TypePrefixVariability.continuousVariability() = false;
-    eq Continuous.continuousVariability() = true;
+    syn boolean SrcTypePrefixVariability.constantVariability() = false;
+    eq SrcConstant.constantVariability() = true;   
+    syn boolean SrcTypePrefixVariability.parameterVariability() = false;
+    eq SrcParameter.parameterVariability() = true; 
+    syn boolean SrcTypePrefixVariability.discreteVariability() = false;
+    eq SrcDiscrete.discreteVariability() = true;   
+    syn boolean SrcTypePrefixVariability.continuousVariability() = false;
+    eq SrcContinuous.continuousVariability() = true;
 
 }

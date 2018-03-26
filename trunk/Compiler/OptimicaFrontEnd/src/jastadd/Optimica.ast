@@ -14,25 +14,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-OptClassDecl : FullClassDecl ::= [ClassModification] /ClassAttribute:ComponentClause*/;
+SrcOptClassDecl : SrcFullClassDecl ::= [SrcClassModification] /ClassAttribute:SrcComponentClause*/;
 
-ConstraintClause : Clause ::= Constraint*;
+SrcConstraintClause : SrcClause ::= SrcConstraint*;
 
-abstract Constraint;
+abstract SrcConstraint;
 
-abstract RelationConstraint : Constraint ::= Left:Exp Right:Exp;
-ConstraintEq : RelationConstraint;
-ConstraintLeq : RelationConstraint;
-ConstraintGeq : RelationConstraint;
+abstract SrcRelationConstraint : SrcConstraint ::= Left:SrcExp Right:SrcExp;
+SrcConstraintEq : SrcRelationConstraint;
+SrcConstraintLeq : SrcRelationConstraint;
+SrcConstraintGeq : SrcRelationConstraint;
 
-ForClauseC : Constraint ::= ForIndex* Constraint*;
+SrcForClauseC : SrcConstraint ::= SrcForIndex* SrcConstraint*;
 
-OptimizationClass : Restriction ::=;
+SrcOptimizationClass : SrcRestriction;
 
-TimedVariable : Exp ::= Name:Access Arg:Exp;
+SrcTimedVariable : SrcExp ::= Name:SrcAccess Arg:SrcExp;
 
-StartTimeExp : Exp;
-FinalTimeExp : Exp;
+SrcStartTimeExp : SrcExp;
+SrcFinalTimeExp : SrcExp;
 
 InstOptClassDecl : InstFullClassDecl ::= [InstClassModification] /InstClassAttribute:InstComponentDecl*/;
 

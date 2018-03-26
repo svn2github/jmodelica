@@ -2194,25 +2194,25 @@ syn lazy String SourceRoot.findOutermostLibraryDir() {
         return getProgram().getUnstructuredEntity(0).findOutermostLibraryDir();
 }
 
-syn String StoredDefinition.findOutermostLibraryDir() {
-    if (!hasWithin() || !getWithin().hasPackageName())
+syn String SrcStoredDefinition.findOutermostLibraryDir() {
+    if (!hasSrcWithin() || !getSrcWithin().hasPackageName())
         return null;
     File me = new File(fileName()).getAbsoluteFile();
-    if (LibNode.isPackageFile(me))
+    if (SrcLibNode.isPackageFile(me))
         me = me.getParentFile();
-    File lib = getWithin().getPackageName().findOutermostLibraryDirForWithin(me);
+    File lib = getSrcWithin().getPackageName().findOutermostLibraryDirForWithin(me);
     return (lib != null) ? lib.getPath() : null;
 }
 
-syn File Access.findOutermostLibraryDirForWithin(File f) = null;
-eq Dot.findOutermostLibraryDirForWithin(File f) {
-    for (int i = getNumAccess() - 1; i >= 0 && f != null; i--)
-        f = getAccess(i).findOutermostLibraryDirForWithin(f);
+syn File SrcAccess.findOutermostLibraryDirForWithin(File f) = null;
+eq SrcDot.findOutermostLibraryDirForWithin(File f) {
+    for (int i = getNumSrcAccess() - 1; i >= 0 && f != null; i--)
+        f = getSrcAccess(i).findOutermostLibraryDirForWithin(f);
     return f;
 }
-eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
+eq SrcNamedAccess.findOutermostLibraryDirForWithin(File f) {
     f = f.getParentFile();
-    if (f != null && f.getName().equals(getID()) && LibNode.isStructuredLib(f))
+    if (f != null && f.getName().equals(getID()) && SrcLibNode.isStructuredLib(f))
         return f;
     else 
         return null;

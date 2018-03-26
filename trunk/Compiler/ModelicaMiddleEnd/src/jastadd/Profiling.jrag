@@ -669,8 +669,8 @@ aspect MemoryUse {
 	syn String ASTNode.extraMemoryUseInfo()   = "";
 	eq InstClassDecl.extraMemoryUseInfo()     = " \"" + name() + "\"";
 	eq InstComponentDecl.extraMemoryUseInfo() = " \"" + name() + "\"";
-	eq ClassDecl.extraMemoryUseInfo()         = " \"" + name() + "\"";
-	eq ComponentDecl.extraMemoryUseInfo()     = " \"" + name() + "\"";
+	eq SrcClassDecl.extraMemoryUseInfo()         = " \"" + name() + "\"";
+	eq SrcComponentDecl.extraMemoryUseInfo()     = " \"" + name() + "\"";
 	eq InstExtends.extraMemoryUseInfo()       = " extending \"" + getClassName().name() + "\"";
 
     /**

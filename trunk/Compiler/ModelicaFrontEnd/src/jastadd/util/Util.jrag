@@ -71,7 +71,6 @@ aspect RootAccess {
 
 }
 
-
 aspect Logging {
 
     public static ModelicaLogger ASTNode.log = ModelicaCompiler.log;
@@ -584,7 +583,7 @@ aspect FileNames {
 		return (String)fName;
     	
     }
-    public String LibNode.fileName() {
+    public String SrcLibNode.fileName() {
         return getStructured() ? myPackageFile().getPath() : getFileName();
     }
     public String InstLibNode.fileName() {
@@ -603,23 +602,23 @@ aspect FileNames {
 
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName()         = fileName();
-    eq LibNode.getChild().retrieveFileName()          = fileName();
-    eq InstLibNode.getChild().retrieveFileName()      = getClassDecl().fileName();
+    eq SrcLibNode.getChild().retrieveFileName()          = fileName();
+    eq InstLibNode.getChild().retrieveFileName()      = getSrcClassDecl().fileName();
     eq Program.getAnonymousClass().retrieveFileName() = ParserHandler.ANONYMOUS_CLASS_FILENAME;
     
     public void Root.setFileName(String fName)             { this.fName = fName; }
-    public void StoredDefinition.setFileName(String fName) { this.fName = fName; }
+    public void SrcStoredDefinition.setFileName(String fName) { this.fName = fName; }
 }
     
 aspect Names {
   // simple names
-  syn String IdDecl.name()            = getID();
-  syn String Access.name();
-  eq NamedAccess.name()               = getID();
-  syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
-  syn lazy String Dot.name() {
+  syn String SrcIdDecl.name()            = getID();
+  syn String SrcAccess.name();
+  eq SrcNamedAccess.name()               = getID();
+  syn lazy String SrcGlobalAccess.name() = "." + getSrcAccessNoTransform().name();
+  syn lazy String SrcDot.name() {
 	  StringBuilder buf = new StringBuilder();
-	  List<Access> l = getAccessListNoTransform();
+	  List<SrcAccess> l = getSrcAccessListNoTransform();
 	  for (int i = 0; i < l.getNumChildNoTransform(); i++) {
 		  buf.append(l.getChildNoTransform(i).name());
 		  buf.append('.');
@@ -643,12 +642,12 @@ aspect Names {
   
   syn String InstNamedModification.name() = getNameNoTransform().name();
 
-    syn String Access.qualifiedName();
-    eq NamedAccess.qualifiedName()   = getID();
-    eq GlobalAccess.qualifiedName()  = "." + getAccess().qualifiedName();
-    eq Dot.qualifiedName() {
+    syn String SrcAccess.qualifiedName();
+    eq SrcNamedAccess.qualifiedName()   = getID();
+    eq SrcGlobalAccess.qualifiedName()  = "." + getSrcAccess().qualifiedName();
+    eq SrcDot.qualifiedName() {
         StringBuilder buf = new StringBuilder();
-        for (Access a : getAccesss()) {
+        for (SrcAccess a : getSrcAccesss()) {
             buf.append(a.qualifiedName());
             buf.append('.');
         }
@@ -667,22 +666,22 @@ aspect Names {
   }
   eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
 
-    syn String Element.name()       = null;
-    syn String ComponentDecl.name() = getNameNoTransform().getID();
-    eq ClassDecl.name()             = getNameNoTransform().getID();
-    eq ExtendsClause.name()         = getSuperNoTransform().name();
+    syn String SrcElement.name()       = null;
+    syn String SrcComponentDecl.name() = getNameNoTransform().getID();
+    eq SrcClassDecl.name()             = getNameNoTransform().getID();
+    eq SrcExtendsClause.name()         = getSuperNoTransform().name();
 
-  syn String FunctionCall.name() = getNameNoTransform().name();
+  syn String SrcFunctionCall.name() = getNameNoTransform().name();
   
   syn String InstImport.name();
   eq InstImportQualified.name()   = getPackageNameNoTransform().lastName();
   eq InstImportRename.name()      = 
-	  ((ImportClauseRename) getImportClause()).getIdDeclNoTransform().getID();
+	  ((SrcImportClauseRename) getSrcImportClause()).getSrcIdDeclNoTransform().getID();
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
-  syn String Access.lastName() = name();
-  eq Dot.lastName()            = getAccessListNoTransform().lastChildNoTransform().lastName();
-  eq GlobalAccess.lastName()   = getAccessNoTransform().lastName();
+  syn String SrcAccess.lastName() = name();
+  eq SrcDot.lastName()            = getSrcAccessListNoTransform().lastChildNoTransform().lastName();
+  eq SrcGlobalAccess.lastName()   = getSrcAccessNoTransform().lastName();
   
   syn String InstAccess.lastName() = name();
   eq InstDot.lastName()            = getInstAccessListNoTransform().lastChildNoTransform().lastName();
@@ -692,11 +691,11 @@ aspect Names {
 	  return getChildNoTransform(getNumChildNoTransform() - 1);
   }
 
-    syn String ClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
-    inh String ClassDecl.classNamePrefix();
-    inh String ComponentDecl.classNamePrefix();
-    eq FullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());
-    eq BuiltInClassDecl.qualifiedName() = getName().getID();
+    syn String SrcClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
+    inh String SrcClassDecl.classNamePrefix();
+    inh String SrcComponentDecl.classNamePrefix();
+    eq SrcFullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());
+    eq SrcBuiltInClassDecl.qualifiedName() = getName().getID();
 
     // For proxy
     public String SourceRoot.computeClassNamePrefix() {
@@ -773,8 +772,8 @@ aspect Names {
         InstLookupResult<InstClassDecl> icd = lookupInstClassQualifiedGlobal(name);
         return icd.successful() ? icd.target().dirName() : null;
     }
-    eq FullClassDecl.getChild().packagePath(String name) {
-        ClassDecl cd = simpleLookupClassDottedGlobal(name);
+    eq SrcFullClassDecl.getChild().packagePath(String name) {
+        SrcClassDecl cd = simpleLookupClassDottedGlobal(name);
         return (cd == null || cd.isUnknown()) ? null : cd.dirName();
     }
 
@@ -784,7 +783,7 @@ aspect Names {
 	  String path = topPackagePath();
 	  return (path == null) ? dirName() : path;
   }
-  eq FullClassDecl.getChild().topPackagePath() {
+  eq SrcFullClassDecl.getChild().topPackagePath() {
 	  String path = topPackagePath();
 	  return (path == null) ? dirName() : path;
   }
@@ -808,14 +807,14 @@ aspect Names {
     eq InstComponentDecl.getChild().enclosingInstComponentDecl() = this;
     
 
-    inh BaseClassDecl ASTNode.enclosingClassDecl();
+    inh SrcBaseClassDecl ASTNode.enclosingClassDecl();
     eq Root.getChild().enclosingClassDecl() = null;
 
-    eq FullClassDecl.getClause().enclosingClassDecl()         = this;
-    eq FullClassDecl.getAnnotation().enclosingClassDecl()     = this; 
-    eq FullClassDecl.getExternalClause().enclosingClassDecl() = this;
+    eq SrcFullClassDecl.getSrcClause().enclosingClassDecl()         = this;
+    eq SrcFullClassDecl.getSrcAnnotation().enclosingClassDecl()     = this; 
+    eq SrcFullClassDecl.getSrcExternalClause().enclosingClassDecl() = this;
 
-    eq ShortClassDecl.getExtendsClauseShortClass().enclosingClassDecl() = this;
+    eq SrcShortClassDecl.getSrcExtendsClauseShortClass().enclosingClassDecl() = this;
 
     inh FStatement FStatement.enclosingLoop();
     eq FAlgorithm.getChild().enclosingLoop()     = null;
@@ -826,37 +825,37 @@ aspect Names {
 
 
     /**
-     * Access method for the last Access of a qualified or
+     * Access method for the last SrcAccess of a qualified or
      * unqualified name.
      */ 
-    syn Access Access.getLastAccess() = this;
-    eq Dot.getLastAccess()            = getAccess(getNumAccess() - 1);
-    eq GlobalAccess.getLastAccess()   = getAccess().getLastAccess();
+    syn SrcAccess SrcAccess.getLastAccess() = this;
+    eq SrcDot.getLastAccess()            = getSrcAccess(getNumSrcAccess() - 1);
+    eq SrcGlobalAccess.getLastAccess()   = getSrcAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
     eq InstDot.getLastInstAccess()                = getInstAccess(getNumInstAccessNoTransform() - 1);
     eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
     
     /**
-     * Access method for the first Access of a qualified or
+     * Access method for the first SrcAccess of a qualified or
      * unqualified name.
      */
-    syn Access Access.getFirstAccess() = this;
-    eq Dot.getFirstAccess()            = getAccess(0);
-    eq GlobalAccess.getFirstAccess()   = getAccess().getFirstAccess();
+    syn SrcAccess SrcAccess.getFirstAccess() = this;
+    eq SrcDot.getFirstAccess()            = getSrcAccess(0);
+    eq SrcGlobalAccess.getFirstAccess()   = getSrcAccess().getFirstAccess();
 
     // For proxy
-    public Access SourceRoot.computeNextAccess() {
+    public SrcAccess SourceRoot.computeNextAccess() {
         return null;
     }
     
-    inh Access Access.getNextAccess();
-    eq Dot.getAccess(int i).getNextAccess()    = (i >= getNumAccess() - 1) ? null : getAccess(i + 1);
+    inh SrcAccess SrcAccess.getNextAccess();
+    eq SrcDot.getSrcAccess(int i).getNextAccess()    = (i >= getNumSrcAccess() - 1) ? null : getSrcAccess(i + 1);
     eq SourceRoot.getProgram().getNextAccess() = computeNextAccess();
     eq Root.getChild().getNextAccess()         = null;
 
     /**
-     * Access method for the first Access of a qualified or
+     * SrcAccess method for the first SrcAccess of a qualified or
      * unqualified name.
      */
     syn InstAccess InstAccess.getFirstInstAccess() = this;
@@ -886,37 +885,37 @@ aspect Names {
      * stripFirstAccess removes the first access in a qualified
      * name. If the name is not qualified, null is returned. 
      */
-    public Access Access.stripFirstAccess() {
+    public SrcAccess SrcAccess.stripFirstAccess() {
         return null;
     }
     
-    public Access Dot.stripFirstAccess() {
-    	int n = getNumAccess();
+    public SrcAccess SrcDot.stripFirstAccess() {
+    	int n = getNumSrcAccess();
     	if (n <= 2)
-    		return getAccess(n - 1);
-    	List<Access> l = new List<Access>();
+    		return getSrcAccess(n - 1);
+    	List<SrcAccess> l = new List<SrcAccess>();
     	for (int i = 1; i < n; i++)
-    		l.add(getAccess(i));
-        return new Dot(l);
+    		l.add(getSrcAccess(i));
+        return new SrcDot(l);
     }
     
-    public Access GlobalAccess.stripFirstAccess() {
-    	return getAccess().stripFirstAccess();
+    public SrcAccess SrcGlobalAccess.stripFirstAccess() {
+    	return getSrcAccess().stripFirstAccess();
     }
     
-    syn boolean Access.isQualified() = false;
-    eq Dot.isQualified()             = true;
-    eq GlobalAccess.isQualified()    = getAccess().isQualified();
+    syn boolean SrcAccess.isQualified() = false;
+    eq SrcDot.isQualified()             = true;
+    eq SrcGlobalAccess.isQualified()    = getSrcAccess().isQualified();
     
     /**
      * Get the top node in an access (possibly qualified).
      */
-    syn Access Access.getTopAccess() = retrieveTopAccess(this);
+    syn SrcAccess SrcAccess.getTopAccess() = retrieveTopAccess(this);
     
-    inh Access Access.retrieveTopAccess(Access pre);
-    eq ASTNode.getChild().retrieveTopAccess(Access pre)      = pre;
-    eq Dot.getChild().retrieveTopAccess(Access pre)          = retrieveTopAccess(this);
-    eq GlobalAccess.getChild().retrieveTopAccess(Access pre) = retrieveTopAccess(this);
+    inh SrcAccess SrcAccess.retrieveTopAccess(SrcAccess pre);
+    eq ASTNode.getChild().retrieveTopAccess(SrcAccess pre)      = pre;
+    eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
+    eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
     
     /**
      * Get the top node in an access (possibly qualified).
@@ -931,9 +930,9 @@ aspect Names {
     /**
      * Check if this access is a name part of a qualified access.
      */
-    inh boolean Access.inQualified();
+    inh boolean SrcAccess.inQualified();
     inh boolean InstAccess.inQualified();
-    eq Dot.getAccess().inQualified()         = true;
+    eq SrcDot.getSrcAccess().inQualified()         = true;
     eq InstDot.getInstAccess().inQualified() = true;
     eq BaseNode.getChild().inQualified()     = false;
 
@@ -1088,20 +1087,20 @@ aspect DebugHelpers {
 
 aspect Visibility {
 
-    inh boolean ClassDecl.isPublic();
-    inh boolean ComponentDecl.isPublic();
-    eq PublicElementList.getElement().isPublic()    = true;
-    eq ProtectedElementList.getElement().isPublic() = false;
+    inh boolean SrcClassDecl.isPublic();
+    inh boolean SrcComponentDecl.isPublic();
+    eq SrcPublicElementList.getSrcElement().isPublic()    = true;
+    eq SrcProtectedElementList.getSrcElement().isPublic() = false;
     eq SourceRoot.getProgram().isPublic()           = true; 
     eq Root.getChild().isPublic()                   = true; 
 
-    syn boolean InstClassDecl.isPublic()     = getClassDecl().isPublic();
-    syn boolean InstComponentDecl.isPublic() = getComponentDecl().isPublic();
+    syn boolean InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
+    syn boolean InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();
 
-    syn boolean ClassDecl.isProtected()         = !isPublic();
-    syn boolean ComponentDecl.isProtected()     = !isPublic();
-    syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
-    syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
+    syn boolean SrcClassDecl.isProtected()         = !isPublic();
+    syn boolean SrcComponentDecl.isProtected()     = !isPublic();
+    syn boolean InstClassDecl.isProtected()     = getSrcClassDecl().isProtected();
+    syn boolean InstComponentDecl.isProtected() = getSrcComponentDecl().isProtected();
 
     inh boolean InstNode.inProtectedComponent();
     eq InstComponentDecl.getChild().inProtectedComponent()     = isProtected() || inProtectedComponent();
@@ -1140,72 +1139,72 @@ aspect Visibility {
 aspect ComponentDeclMethods {
 
     /**
-     * Check if a ComponentDecl is declared flow.
+     * Check if a SrcComponentDecl is declared flow.
      */
-    syn boolean ComponentDecl.isFlow()  = hasTypePrefixFlow() && getTypePrefixFlow().isFlow();
-    syn boolean TypePrefixFlow.isFlow() = false;
-    eq Flow.isFlow()                    = true;
+    syn boolean SrcComponentDecl.isFlow()  = hasSrcTypePrefixFlow() && getSrcTypePrefixFlow().isFlow();
+    syn boolean SrcTypePrefixFlow.isFlow() = false;
+    eq SrcFlow.isFlow()                    = true;
 
     /**
-     * Check if a ComponentDecl is declared stream.
+     * Check if a SrcComponentDecl is declared stream.
      */
-    syn boolean ComponentDecl.isStream()  = hasTypePrefixFlow() && getTypePrefixFlow().isStream();
-    syn boolean TypePrefixFlow.isStream() = false;
-    eq Stream.isStream()                  = true;
+    syn boolean SrcComponentDecl.isStream()  = hasSrcTypePrefixFlow() && getSrcTypePrefixFlow().isStream();
+    syn boolean SrcTypePrefixFlow.isStream() = false;
+    eq SrcStream.isStream()                  = true;
 
     /**
-     * Check if a ComponentDecl is declared flow or stream.
+     * Check if a SrcComponentDecl is declared flow or stream.
      */
-    syn boolean ComponentDecl.hasFlowOrStream() = hasTypePrefixFlow();
+    syn boolean SrcComponentDecl.hasFlowOrStream() = hasSrcTypePrefixFlow();
 
     /**
-     * Check if a ComponentDecl is declared inner.
+     * Check if a SrcComponentDecl is declared inner.
      */
-    syn boolean ComponentDecl.isInner() = hasInner();
+    syn boolean SrcComponentDecl.isInner() = hasInner();
 
     /**
-     * Check if a ComponentDecl is declared outer.
+     * Check if a SrcComponentDecl is declared outer.
      */
-    syn boolean ComponentDecl.isOuter() = hasOuter();
+    syn boolean SrcComponentDecl.isOuter() = hasOuter();
 
     /**
-     * Check if a ComponentDecl is declared inner or outer.
+     * Check if a SrcComponentDecl is declared inner or outer.
      */
-    syn boolean ComponentDecl.hasInnerOrOuter() = hasInner() || hasOuter();
+    syn boolean SrcComponentDecl.hasInnerOrOuter() = hasInner() || hasOuter();
 
     /**
-     * Check if a ClassDecl is declared inner.
+     * Check if a SrcClassDecl is declared inner.
      */
-    syn boolean ClassDecl.isInner() = false;
-    eq BaseClassDecl.isInner() = getInner();
+    syn boolean SrcClassDecl.isInner() = false;
+    eq SrcBaseClassDecl.isInner() = getInner();
 
     /**
-     * Check if a ClassDecl is declared outer.
+     * Check if a SrcClassDecl is declared outer.
      */
-    syn boolean ClassDecl.isOuter() = false;
-    eq BaseClassDecl.isOuter() = getOuter();
+    syn boolean SrcClassDecl.isOuter() = false;
+    eq SrcBaseClassDecl.isOuter() = getOuter();
 
     /**
-     * Check if a ClassDecl is declared inner or outer.
+     * Check if a SrcClassDecl is declared inner or outer.
      */
-    syn boolean ClassDecl.hasInnerOrOuter() = false;
-    eq BaseClassDecl.hasInnerOrOuter()      = getInner() || getOuter();
+    syn boolean SrcClassDecl.hasInnerOrOuter() = false;
+    eq SrcBaseClassDecl.hasInnerOrOuter()      = getInner() || getOuter();
     
 
     /**
      * Check if this component is declared parameter.
      */
-    syn boolean ComponentDecl.isParameter() = hasTypePrefixVariability() && getTypePrefixVariability().parameterVariability();
+    syn boolean SrcComponentDecl.isParameter() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().parameterVariability();
     
      /**
      * Check if this component is declared constant.
      */
-    syn boolean ComponentDecl.isConstant() = hasTypePrefixVariability() && getTypePrefixVariability().constantVariability();
+    syn boolean SrcComponentDecl.isConstant() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().constantVariability();
     
     /**
      * Check if this component is declared discrete.
      */
-    syn boolean ComponentDecl.isDiscrete() = hasTypePrefixVariability() && getTypePrefixVariability().discreteVariability();
+    syn boolean SrcComponentDecl.isDiscrete() = hasSrcTypePrefixVariability() && getSrcTypePrefixVariability().discreteVariability();
 
     /**
      * Check if this component is an input component.
@@ -1229,24 +1228,24 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared input.
      */
-    syn boolean InstComponentDecl.isComponentDeclaredInput() = getComponentDecl().isInput();
+    syn boolean InstComponentDecl.isComponentDeclaredInput() = getSrcComponentDecl().isInput();
     eq InstReplacingComposite.isComponentDeclaredInput()     = 
-        getComponentDecl().hasTypePrefixInputOutput() ? getComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
+        getSrcComponentDecl().hasSrcTypePrefixInputOutput() ? getSrcComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
     eq InstReplacingRecord.isComponentDeclaredInput()        = 
-        getComponentDecl().hasTypePrefixInputOutput() ? getComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
+        getSrcComponentDecl().hasSrcTypePrefixInputOutput() ? getSrcComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
     eq InstReplacingPrimitive.isComponentDeclaredInput()     = 
-        getComponentDecl().hasTypePrefixInputOutput() ? getComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
+        getSrcComponentDecl().hasSrcTypePrefixInputOutput() ? getSrcComponentDecl().isInput() : getOriginalInstComponent().isDeclaredInput();
 
     /**
      * Check if this component is declared input.
      */
-    syn boolean ComponentDecl.isInput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isInput();
+    syn boolean SrcComponentDecl.isInput() = hasSrcTypePrefixInputOutput() && getSrcTypePrefixInputOutput().isInput();
     
     /**
      * Check if this prefix is "input".
      */
-    syn boolean TypePrefixInputOutput.isInput() = false;
-    eq Input.isInput()                          = true;
+    syn boolean SrcTypePrefixInputOutput.isInput() = false;
+    eq SrcInput.isInput()                          = true;
 
     /**
      * Check if this component is an output component.
@@ -1265,18 +1264,18 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared output.
      */
-    syn boolean InstComponentDecl.isDeclaredOutput() = getComponentDecl().isOutput() || myInstClass().isOutput();
+    syn boolean InstComponentDecl.isDeclaredOutput() = getSrcComponentDecl().isOutput() || myInstClass().isOutput();
 
     /**
      * Check if this component is declared output.
      */
-    syn boolean ComponentDecl.isOutput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isOutput();
+    syn boolean SrcComponentDecl.isOutput() = hasSrcTypePrefixInputOutput() && getSrcTypePrefixInputOutput().isOutput();
     
     /**
      * Check if this prefix is "output".
      */
-    syn boolean TypePrefixInputOutput.isOutput() = false;
-    eq Output.isOutput()                         = true;
+    syn boolean SrcTypePrefixInputOutput.isOutput() = false;
+    eq SrcOutput.isOutput()                         = true;
     
     /**
      * Find the component that this component inherits input or output from, if any.
@@ -1306,15 +1305,15 @@ aspect ComponentDeclMethods {
     /**
      * Check if this equation is declared initial.
      */
-    inh boolean AbstractEquation.isInitial();
-    eq EquationClause.getAbstractEquation().isInitial()        = false;
-    eq InitialEquationClause.getAbstractEquation().isInitial() = true;
+    inh boolean SrcAbstractEquation.isInitial();
+    eq SrcEquationClause.getSrcAbstractEquation().isInitial()        = false;
+    eq SrcInitialEquationClause.getSrcAbstractEquation().isInitial() = true;
 
     /**
      * Check if this equation is declared initial.
      */
-    syn boolean Algorithm.isInitial() = false;
-    eq InitialAlgorithm.isInitial()   = true;
+    syn boolean SrcAlgorithm.isInitial() = false;
+    eq SrcInitialAlgorithm.isInitial()   = true;
 
     /**
      * Check if this component is a flow component.
@@ -1338,68 +1337,68 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared flow.
      */
-    syn boolean InstComponentDecl.isDeclaredFlow() = getComponentDecl().isFlow();
+    syn boolean InstComponentDecl.isDeclaredFlow() = getSrcComponentDecl().isFlow();
     eq InstReplacingComposite.isDeclaredFlow()     = 
-        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isFlow() : getOriginalDecl().isFlow();
+        getSrcComponentDecl().hasFlowOrStream() ? getSrcComponentDecl().isFlow() : getOriginalDecl().isFlow();
     eq InstReplacingRecord.isDeclaredFlow()        = 
-        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isFlow() : getOriginalDecl().isFlow();
+        getSrcComponentDecl().hasFlowOrStream() ? getSrcComponentDecl().isFlow() : getOriginalDecl().isFlow();
     eq InstReplacingPrimitive.isDeclaredFlow()     = 
-        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isFlow() : getOriginalDecl().isFlow();
+        getSrcComponentDecl().hasFlowOrStream() ? getSrcComponentDecl().isFlow() : getOriginalDecl().isFlow();
 
     /**
      * Check if this component is declared stream.
      */
-    syn boolean InstComponentDecl.isStream() = getComponentDecl().isStream();
+    syn boolean InstComponentDecl.isStream() = getSrcComponentDecl().isStream();
     eq InstReplacingComposite.isStream()     = 
-        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isStream() : getOriginalDecl().isStream();
+        getSrcComponentDecl().hasFlowOrStream() ? getSrcComponentDecl().isStream() : getOriginalDecl().isStream();
     eq InstReplacingRecord.isStream()        = 
-        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isStream() : getOriginalDecl().isStream();
+        getSrcComponentDecl().hasFlowOrStream() ? getSrcComponentDecl().isStream() : getOriginalDecl().isStream();
     eq InstReplacingPrimitive.isStream()     = 
-        getComponentDecl().hasFlowOrStream() ? getComponentDecl().isStream() : getOriginalDecl().isStream();
+        getSrcComponentDecl().hasFlowOrStream() ? getSrcComponentDecl().isStream() : getOriginalDecl().isStream();
 
     /**
      * Check if this component is declared inner.
      */
-    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner() || isGeneratedInner();
+    syn boolean InstComponentDecl.isInner() = getSrcComponentDecl().isInner() || isGeneratedInner();
     eq InstReplacingComposite.isInner()     = 
-        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
+        getSrcComponentDecl().hasInnerOrOuter() ? getSrcComponentDecl().isInner() : getOriginalDecl().isInner();
     eq InstReplacingRecord.isInner()        = 
-        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
+        getSrcComponentDecl().hasInnerOrOuter() ? getSrcComponentDecl().isInner() : getOriginalDecl().isInner();
     eq InstReplacingPrimitive.isInner()     = 
-        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
+        getSrcComponentDecl().hasInnerOrOuter() ? getSrcComponentDecl().isInner() : getOriginalDecl().isInner();
 
     /**
      * Check if this component is declared outer.
      */
-    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter() && !isGeneratedInner();
+    syn boolean InstComponentDecl.isOuter() = getSrcComponentDecl().isOuter() && !isGeneratedInner();
     eq InstReplacingComposite.isOuter()     = 
-        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
+        getSrcComponentDecl().hasInnerOrOuter() ? getSrcComponentDecl().isOuter() : getOriginalDecl().isOuter();
     eq InstReplacingRecord.isOuter()        = 
-        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
+        getSrcComponentDecl().hasInnerOrOuter() ? getSrcComponentDecl().isOuter() : getOriginalDecl().isOuter();
     eq InstReplacingPrimitive.isOuter()     = 
-        getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
+        getSrcComponentDecl().hasInnerOrOuter() ? getSrcComponentDecl().isOuter() : getOriginalDecl().isOuter();
 
     /**
      * Check if this class is declared inner.
      */
-    syn boolean InstClassDecl.isInner()            = getClassDecl().isInner();
+    syn boolean InstClassDecl.isInner()            = getSrcClassDecl().isInner();
     eq InstReplacingFullClassDecl.isInner()        = 
-        getClassDecl().hasInnerOrOuter() ? getClassDecl().isInner() : getOriginalClassDecl().isInner();
+        getSrcClassDecl().hasInnerOrOuter() ? getSrcClassDecl().isInner() : getOriginalClassDecl().isInner();
     eq InstReplacingShortClassDecl.isInner()       = 
-        getClassDecl().hasInnerOrOuter() ? getClassDecl().isInner() : getOriginalClassDecl().isInner();
+        getSrcClassDecl().hasInnerOrOuter() ? getSrcClassDecl().isInner() : getOriginalClassDecl().isInner();
     eq InstReplacingSimpleShortClassDecl.isInner() = 
-        getClassDecl().hasInnerOrOuter() ? getClassDecl().isInner() : getOriginalClassDecl().isInner();
+        getSrcClassDecl().hasInnerOrOuter() ? getSrcClassDecl().isInner() : getOriginalClassDecl().isInner();
 
     /**
      * Check if this component is declared outer.
      */
-    syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
+    syn boolean InstClassDecl.isOuter() = getSrcClassDecl().isOuter();
     eq InstReplacingFullClassDecl.isOuter()        = 
-        getClassDecl().hasInnerOrOuter() ? getClassDecl().isOuter() : getOriginalClassDecl().isOuter();
+        getSrcClassDecl().hasInnerOrOuter() ? getSrcClassDecl().isOuter() : getOriginalClassDecl().isOuter();
     eq InstReplacingShortClassDecl.isOuter()       = 
-        getClassDecl().hasInnerOrOuter() ? getClassDecl().isOuter() : getOriginalClassDecl().isOuter();
+        getSrcClassDecl().hasInnerOrOuter() ? getSrcClassDecl().isOuter() : getOriginalClassDecl().isOuter();
     eq InstReplacingSimpleShortClassDecl.isOuter() = 
-        getClassDecl().hasInnerOrOuter() ? getClassDecl().isOuter() : getOriginalClassDecl().isOuter();
+        getSrcClassDecl().hasInnerOrOuter() ? getSrcClassDecl().isOuter() : getOriginalClassDecl().isOuter();
 
     /**
      * Check if this component is disabled by a conditional clause
@@ -1448,8 +1447,8 @@ aspect ClassDeclMethods {
         return false;
     }
 
-    syn boolean ClassDecl.isLibNode() = false;
-    eq LibNode.isLibNode()            = true;
+    syn boolean SrcClassDecl.isLibNode() = false;
+    eq SrcLibNode.isLibNode()            = true;
 }
 
 
@@ -1528,20 +1527,20 @@ aspect ShortClassUtil {
     eq InstLibNode.finalClass()                  = actualInstClass().finalClass();
 
 
-    syn boolean ClassDecl.isInput() = false;
-    eq ShortClassDecl.isInput()     = 
-        hasInputOrOutput() && getExtendsClauseShortClass().getTypePrefixInputOutput().isInput();
+    syn boolean SrcClassDecl.isInput() = false;
+    eq SrcShortClassDecl.isInput()     = 
+        hasInputOrOutput() && getSrcExtendsClauseShortClass().getSrcTypePrefixInputOutput().isInput();
 
-    syn boolean ClassDecl.isOutput() = false;
-    eq ShortClassDecl.isOutput()     = 
-        hasInputOrOutput() && getExtendsClauseShortClass().getTypePrefixInputOutput().isOutput();
+    syn boolean SrcClassDecl.isOutput() = false;
+    eq SrcShortClassDecl.isOutput()     = 
+        hasInputOrOutput() && getSrcExtendsClauseShortClass().getSrcTypePrefixInputOutput().isOutput();
 
-    syn boolean ClassDecl.hasInputOrOutput() = false;
-    eq ShortClassDecl.hasInputOrOutput()     = getExtendsClauseShortClass().hasTypePrefixInputOutput();
+    syn boolean SrcClassDecl.hasInputOrOutput() = false;
+    eq SrcShortClassDecl.hasInputOrOutput()     = getSrcExtendsClauseShortClass().hasSrcTypePrefixInputOutput();
 
     syn boolean InstClassDecl.isInput()            = false;
     eq InstShortClassDecl.isInput()                = 
-        getClassDecl().isInput() || myTargetInstClassDecl().isInput();
+        getSrcClassDecl().isInput() || myTargetInstClassDecl().isInput();
     eq InstSimpleShortClassDecl.isInput()          = actualInstClass().isInput();
     eq InstLibNode.isInput()                       = actualInstClass().isInput();
     eq InstReplacingShortClassDecl.isInput()       = 
@@ -1551,7 +1550,7 @@ aspect ShortClassUtil {
 
     syn boolean InstClassDecl.isOutput()            = false;
     eq InstShortClassDecl.isOutput()                =
-        getClassDecl().isOutput() || myTargetInstClassDecl().isOutput();
+        getSrcClassDecl().isOutput() || myTargetInstClassDecl().isOutput();
     eq InstSimpleShortClassDecl.isOutput()          = actualInstClass().isOutput();
     eq InstLibNode.isOutput()                       = actualInstClass().isOutput();
     eq InstReplacingShortClassDecl.isOutput()       = 
@@ -1559,8 +1558,8 @@ aspect ShortClassUtil {
     eq InstReplacingSimpleShortClassDecl.isOutput() = 
         (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
 
-    syn boolean ComponentDecl.isEnumLiteral() = false;
-    eq EnumLiteralDecl.isEnumLiteral() = true;
+    syn boolean SrcComponentDecl.isEnumLiteral() = false;
+    eq SrcEnumLiteralDecl.isEnumLiteral() = true;
     syn boolean InstComponentDecl.isEnumLiteral() = false;
     eq InstEnumLiteral.isEnumLiteral() = true;
 
@@ -1568,9 +1567,9 @@ aspect ShortClassUtil {
 
 
 aspect LineOffsets {
-    private int[] StoredDefinition.lineBreakMap;
+    private int[] SrcStoredDefinition.lineBreakMap;
     
-    public void StoredDefinition.setLineBreakMap(int[] map) {
+    public void SrcStoredDefinition.setLineBreakMap(int[] map) {
         lineBreakMap = map;
     }
 }
@@ -1591,7 +1590,7 @@ aspect NodeSearch {
      *             <code>false</code> otherwise
      */
     syn boolean ASTNode.matches(String str) = false;
-    eq Access.matches(String str)           = name().equals(str);
+    eq SrcAccess.matches(String str)           = name().equals(str);
     eq InstAccess.matches(String str)       = name().equals(str);
     
     
@@ -1623,7 +1622,7 @@ aspect Strings {
 	 * Get the value of this string literal with all escape sequences 
 	 *        replaced with their actual meaning.
 	 */
-	syn String StringLitExp.unEscape() = unEscape(getSTRING());
+	syn String SrcStringLitExp.unEscape() = unEscape(getSTRING());
 	
 	/**
 	 * Replace all escape sequences with their actual meaning.
@@ -1663,13 +1662,13 @@ aspect Strings {
 }
 
 
-aspect StringComments {
+aspect SrcStringComments {
 	
-	syn boolean       ClassDecl.hasStringComment() = false;
-	syn StringComment ClassDecl.getStringComment() = null;
+	syn boolean       SrcClassDecl.hasSrcStringComment() = false;
+	syn SrcStringComment SrcClassDecl.getSrcStringComment() = null;
 	
-	eq ShortClassDecl.hasStringComment() = getExtendsClauseShortClass().getComment().hasStringComment();
-	eq ShortClassDecl.getStringComment() = getExtendsClauseShortClass().getComment().getStringComment();
+	eq SrcShortClassDecl.hasSrcStringComment() = getSrcExtendsClauseShortClass().getSrcComment().hasSrcStringComment();
+	eq SrcShortClassDecl.getSrcStringComment() = getSrcExtendsClauseShortClass().getSrcComment().getSrcStringComment();
 	
 }
 
