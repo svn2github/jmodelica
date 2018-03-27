@@ -1,4 +1,11 @@
 ================= Unreleased ==================
+; Feature ; Minor ; PyFMI ; #5587
+Added functionality to set enumerations with strings
+
+; Fixed ; Minor ; Compiler ; #5579 
+Improved handling of event generating relational expressions
+with nested blocks.
+
 ; Feature ; Minor ; Compiler ; #5584
 Added variable index comment before each variable in the FMI ModelVariables
 XML.

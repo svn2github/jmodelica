@@ -205,8 +205,8 @@ aspect InstLookupClasses {
     /**
      * Get loaded version of library class.
      */
-    syn ClassDecl ClassDecl.resolveLib() = this;
-    eq LibNode.resolveLib()              = myClass();
+    syn SrcClassDecl SrcClassDecl.resolveLib() = this;
+    eq SrcLibNode.resolveLib()              = myClass();
 
     /**
      * Lookup the class being redeclared & extended in the last step of a chain 
@@ -252,10 +252,10 @@ aspect InstLookupClasses {
     }
 
 
-    syn lazy HashMap<String,LibNode> InstProgramRoot.libraryMap() {
+    syn lazy HashMap<String,SrcLibNode> InstProgramRoot.libraryMap() {
         Program prog = ((SourceRoot) root()).getProgram();
-        HashMap<String,LibNode> map = new HashMap<String,LibNode>(prog.getNumLibNode() * 4 / 3 + 1);
-        for (LibNode ln : prog.getLibNodes()) {
+        HashMap<String,SrcLibNode> map = new HashMap<String,SrcLibNode>(prog.getNumSrcLibNode() * 4 / 3 + 1);
+        for (SrcLibNode ln : prog.getSrcLibNodes()) {
             if (!map.containsKey(ln.name())) {
                 map.put(ln.name(), ln);
             }
@@ -264,7 +264,7 @@ aspect InstLookupClasses {
     }
 
     syn lazy InstLookupResult<InstClassDecl> InstProgramRoot.lookupLibrary(String name) {
-        LibNode ln = libraryMap().get(name);
+        SrcLibNode ln = libraryMap().get(name);
         if (ln != null) {
             InstClassDecl icd = createInstClassDecl(ln);
             if (icd instanceof InstFullClassDecl || icd instanceof InstLibNode) {

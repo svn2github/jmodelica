@@ -232,13 +232,13 @@
     }
     
     private static class TypePrefixes extends AbstractAdjustableSymbol {
-        public final Opt<TypePrefixFlow> flow;
-        public final Opt<TypePrefixVariability> variability;
-        public final Opt<TypePrefixInputOutput> input_output;
+        public final Opt<SrcTypePrefixFlow> flow;
+        public final Opt<SrcTypePrefixVariability> variability;
+        public final Opt<SrcTypePrefixInputOutput> input_output;
         
-        public TypePrefixes(Opt<TypePrefixFlow> flow, 
-                            Opt<TypePrefixVariability> variability, 
-                            Opt<TypePrefixInputOutput> input_output) {
+        public TypePrefixes(Opt<SrcTypePrefixFlow> flow, 
+                            Opt<SrcTypePrefixVariability> variability, 
+                            Opt<SrcTypePrefixInputOutput> input_output) {
             super(flow, variability, input_output);
             this.flow = flow;
             this.variability = variability;
@@ -247,11 +247,11 @@
     }
     
     private static class ConstrClauseAndComment extends AbstractAdjustableSymbol {
-        public final Opt<ConstrainingClause> constr;
-        public final Comment comment;
+        public final Opt<SrcConstrainingClause> constr;
+        public final SrcComment comment;
         
-        public ConstrClauseAndComment(ConstrainingClause constr, 
-                                      Comment comment) {
+        public ConstrClauseAndComment(SrcConstrainingClause constr, 
+                                      SrcComment comment) {
             super(constr, comment);
             this.constr = new Opt(constr);
             this.comment = comment;
@@ -259,7 +259,7 @@
         
         public ConstrClauseAndComment() {
             this.constr = new Opt();
-            this.comment = new Comment();
+            this.comment = new SrcComment();
         }
     }
 :};
@@ -282,23 +282,23 @@ Program program
         return new Program(new List().add(stored_definition)); 
     :};
   
-StoredDefinition stored_definition
+SrcStoredDefinition stored_definition
     = within? base_class_decl_list 
     {:
-        StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
+        SrcStoredDefinition def = new SrcStoredDefinition(within, base_class_decl_list);
         def.setLineBreakMap(lineBreakMap);
         formattingRecorder.postParsing(def);
         return def; 
     :}
     | error 
     {: 
-        return new BadDefinition(); 
+        return new SrcBadDefinition(); 
     :};
 
-Within within
+SrcWithin within
     = WITHIN access? SEMICOLON 
     {: 
-        return new Within(access); 
+        return new SrcWithin(access); 
     :};
   
 List base_class_decl_list
@@ -312,19 +312,19 @@ List base_class_decl_list
         return base_class_decl_list; 
     :};
 
-BaseClassDecl anonymous_short_class 
+SrcBaseClassDecl anonymous_short_class 
     = extends_clause_short_class
     {:
-        return new ShortClassDecl(
-            new IdDecl("'Anonymous Class'"),
+        return new SrcShortClassDecl(
+            new SrcIdDecl("'Anonymous Class'"),
             false, false, 
-            new MClass(), 
+            new SrcClass(), 
             false, false, false, false, false, 
             new Opt(), new Opt(), 
             extends_clause_short_class); 
     :};
 
-BaseClassDecl base_class_decl 
+SrcBaseClassDecl base_class_decl 
     = has_encapsulated 
       has_partial 
       restriction  
@@ -336,7 +336,7 @@ BaseClassDecl base_class_decl
       end_decl
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new FullClassDecl(
+        return new SrcFullClassDecl(
             start,
             has_encapsulated.value,
             has_partial.value,
@@ -356,7 +356,7 @@ BaseClassDecl base_class_decl
       extends_clause_short_class 
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new ShortClassDecl(
+        return new SrcShortClassDecl(
             class_name, 
             has_encapsulated.value, 
             has_partial.value, 
@@ -378,11 +378,11 @@ BaseClassDecl base_class_decl
       end_decl 
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        InlineExtendsClause ext = new InlineExtendsClause(
-            new NamedAccess(start.getID()),
+        SrcInlineExtendsClause ext = new SrcInlineExtendsClause(
+            new SrcNamedAccess(start.getID()),
             class_modification,
             new Opt());
-        return new ExtendClassDecl(
+        return new SrcExtendClassDecl(
             start,
             has_encapsulated.value,
             has_partial.value,
@@ -408,26 +408,26 @@ BaseClassDecl base_class_decl
       comment
     {:
         adjustStart(has_encapsulated, has_partial, restriction);
-        return new EnumClassDecl(
+        return new SrcEnumClassDecl(
             enum_name,
             has_encapsulated.value,
             has_partial.value,
             restriction,
             false, false, false, false, false, 
             new Opt(), new Opt(),
-            comment.getStringCommentOpt(),
-            new List(new DefaultElementList(new List(enum_specification))),
+            comment.getSrcStringCommentOpt(),
+            new List(new SrcDefaultElementList(new List(enum_specification))),
             new Opt(),
-            comment.getAnnotationOpt(),
-            new EndDecl(enum_name.getID()),
+            comment.getSrcAnnotationOpt(),
+            new SrcEndDecl(enum_name.getID()),
             ENUMERATION);
     :}
     | error 
     {: 
-      return new BadClassDecl();
+      return new SrcBadClassDecl();
     :};
 
-ExtendsClauseShortClass extends_clause_short_class
+SrcExtendsClauseShortClass extends_clause_short_class
     = type_prefixes
       access_scalar
       array_subscripts?
@@ -435,10 +435,10 @@ ExtendsClauseShortClass extends_clause_short_class
       comment 
     {:
         adjustStart(type_prefixes, access_scalar);
-        return new ExtendsClauseShortClass(
+        return new SrcExtendsClauseShortClass(
             access_scalar,
             class_modification, 
-            new Opt<Annotation>(),
+            new Opt<SrcAnnotation>(),
             type_prefixes.flow, 
             type_prefixes.variability, 
             type_prefixes.input_output, 
@@ -447,19 +447,19 @@ ExtendsClauseShortClass extends_clause_short_class
     :}
     ;
 
-ComponentClause enum_specification
+SrcComponentClause enum_specification
     = enum_contents
     {:
-        return new ComponentClause(
+        return new SrcComponentClause(
                 false, false, false, false, false,
                 new Opt(),
-                new Opt(new Constant()),
+                new Opt(new SrcConstant()),
                 new Opt(),
-                new NamedAccess("EnumType"),
+                new SrcNamedAccess("EnumType"),
                 new Opt(),
                 enum_contents,
                 new Opt(),
-                new Comment());
+                new SrcComment());
     :}
     ;
 
@@ -482,11 +482,11 @@ List enum_literal_list
     :}
     ;
 
-EnumLiteralDecl enum_literal
+SrcEnumLiteralDecl enum_literal
     = id_decl
       comment
     {:
-        return new EnumLiteralDecl(
+        return new SrcEnumLiteralDecl(
                 id_decl,
                 new Opt(),
                 new Opt(),
@@ -495,20 +495,20 @@ EnumLiteralDecl enum_literal
     :}
     ;
 
-TypePrefixFlow type_prefix_flow 
-    = FLOW      {: return new Flow();   :}
-    | STREAM    {: return new Stream(); :}
+SrcTypePrefixFlow type_prefix_flow 
+    = FLOW      {: return new SrcFlow();   :}
+    | STREAM    {: return new SrcStream(); :}
     ;
 
-TypePrefixVariability type_prefix_variability 
-    = DISCRETE    {: return new Discrete();  :}
-    | PARAMETER   {: return new Parameter(); :}
-    | CONSTANT    {: return new Constant();  :}
+SrcTypePrefixVariability type_prefix_variability 
+    = DISCRETE    {: return new SrcDiscrete();  :}
+    | PARAMETER   {: return new SrcParameter(); :}
+    | CONSTANT    {: return new SrcConstant();  :}
     ;
 
-TypePrefixInputOutput type_prefix_input_output
-    = INPUT     {: return new Input();  :}
-    | OUTPUT    {: return new Output(); :}
+SrcTypePrefixInputOutput type_prefix_input_output
+    = INPUT     {: return new SrcInput();  :}
+    | OUTPUT    {: return new SrcOutput(); :}
     ;
 
 TypePrefixes type_prefixes 
@@ -522,19 +522,19 @@ TypePrefixes type_prefixes
     ;
 
 
-Restriction restriction
-    = CLASS                   {: return new MClass();              :}
-    | MODEL                   {: return new Model();               :}
-    | BLOCK                   {: return new Block();               :}
-    | CONNECTOR               {: return new Connector();           :}
-    | EXPANDABLE CONNECTOR    {: return new ExpandableConnector(); :}
-    | TYPE                    {: return new MType();               :}
-    | PACKAGE                 {: return new MPackage();            :}
-    | FUNCTION                {: return new Function();            :}
-    | RECORD                  {: return new Record();              :}
-    | OPERATOR RECORD         {: return new OperatorRecord();      :}
-    | OPERATOR FUNCTION       {: return new OperatorFunction();    :}
-    | OPERATOR                {: return new Operator();            :}
+SrcRestriction restriction
+    = CLASS                   {: return new SrcClass();              :}
+    | MODEL                   {: return new SrcModel();               :}
+    | BLOCK                   {: return new SrcBlock();               :}
+    | CONNECTOR               {: return new SrcConnector();           :}
+    | EXPANDABLE CONNECTOR    {: return new SrcExpandableConnector(); :}
+    | TYPE                    {: return new SrcType();               :}
+    | PACKAGE                 {: return new SrcPackage();            :}
+    | FUNCTION                {: return new SrcFunction();            :}
+    | RECORD                  {: return new SrcRecord();              :}
+    | OPERATOR RECORD         {: return new SrcOperatorRecord();      :}
+    | OPERATOR FUNCTION       {: return new SrcOperatorFunction();    :}
+    | OPERATOR                {: return new SrcOperator();            :}
     ;
 
 Bool has_partial
@@ -606,10 +606,10 @@ List clause_star
     :}
     ;
 
-DefaultElementList default_element_list
+SrcDefaultElementList default_element_list
     = element_plus
     {:
-        return new DefaultElementList(element_plus);
+        return new SrcDefaultElementList(element_plus);
     :}
     ;
 
@@ -626,56 +626,56 @@ List element_plus
     ;
 
 
-Clause clause
+SrcClause clause
     = PUBLIC
       element*
     {:
-        return new PublicElementList(element);
+        return new SrcPublicElementList(element);
     :}
     | PROTECTED
       element*
     {:
-        return new ProtectedElementList(element);
+        return new SrcProtectedElementList(element);
     :}
     | EQUATION
       abstract_equation*
     {:
-        return new EquationClause(abstract_equation);
+        return new SrcEquationClause(abstract_equation);
     :}
     | INITIAL_EQUATION
       abstract_equation*
     {:
-        return new InitialEquationClause(abstract_equation);
+        return new SrcInitialEquationClause(abstract_equation);
     :}
     | ALGORITHM
       statement*
     {:
-        return new Algorithm(statement);
+        return new SrcAlgorithm(statement);
     :}
     | INITIAL_ALGORITHM
       statement*
     {:
-        return new InitialAlgorithm(statement);
+        return new SrcInitialAlgorithm(statement);
     :}
     ;
 
 
-ExternalClause external_clause 
+SrcExternalClause external_clause 
     = EXTERNAL
       external_language?
       external_function_call?
       annotation?
       SEMICOLON
     {:
-        return new ExternalClause(external_language, external_function_call, annotation);
+        return new SrcExternalClause(external_language, external_function_call, annotation);
     :}
     ;
 
-ExternalLanguage external_language
-    = STRING.s    {: return new ExternalLanguage(s); :}
+SrcExternalLanguage external_language
+    = STRING.s    {: return new SrcExternalLanguage(s); :}
     ;
 
-Annotation class_annotation 
+SrcAnnotation class_annotation 
     = annotation 
       SEMICOLON 
     {:
@@ -684,7 +684,7 @@ Annotation class_annotation
     :}
     ;
 
-ExternalFunctionCall external_function_call
+SrcExternalFunctionCall external_function_call
     = access
       EQUALS
       id_decl
@@ -692,19 +692,19 @@ ExternalFunctionCall external_function_call
       arg_list
       RPAREN
     {:
-        return new ExternalFunctionCall(new Opt(access), id_decl, arg_list);
+        return new SrcExternalFunctionCall(new Opt(access), id_decl, arg_list);
     :}
     | id_decl
       LPAREN
       arg_list
       RPAREN
     {:
-        return new ExternalFunctionCall(new Opt(), id_decl, arg_list);
+        return new SrcExternalFunctionCall(new Opt(), id_decl, arg_list);
     :}
     ;
 
 
-Element element 
+SrcElement element 
     = has_redeclare
       has_final 
       has_inner 
@@ -734,7 +734,7 @@ Element element
         base_class_decl.setInner(has_inner.value);
         base_class_decl.setOuter(has_outer.value);
         base_class_decl.setReplaceable(true);
-        base_class_decl.setConstrainingClauseOpt(constraining_clause_and_comment.constr);
+        base_class_decl.setSrcConstrainingClauseOpt(constraining_clause_and_comment.constr);
         base_class_decl.setConstrainingClauseComment(constraining_clause_and_comment.comment);
         return base_class_decl;
     :}  
@@ -757,7 +757,7 @@ Element element
       SEMICOLON 
     {:
         adjustStart(has_redeclare, has_final, has_inner, has_outer, type_prefixes, access_scalar);
-        return new ComponentClause(
+        return new SrcComponentClause(
             has_redeclare.value,
             has_final.value,
             has_inner.value,
@@ -770,7 +770,7 @@ Element element
             array_subscripts,
             component_list,
             new Opt(),
-            new Comment());
+            new SrcComment());
     :}
     | has_redeclare 
       has_final 
@@ -785,7 +785,7 @@ Element element
       SEMICOLON 
     {: 
         adjustStart(has_redeclare, has_final, has_inner, has_outer, REPLACEABLE);
-        return new ComponentClause(
+        return new SrcComponentClause(
             has_redeclare.value,
             has_final.value,
             has_inner.value,
@@ -802,7 +802,7 @@ Element element
     :}
     | error SEMICOLON
     {: 
-        return new BadElement();
+        return new SrcBadElement();
     :}
     ;
 
@@ -818,38 +818,38 @@ ConstrClauseAndComment constraining_clause_and_comment
     :}
     ;
 
-ConstrainingClause constraining_clause 
+SrcConstrainingClause constraining_clause 
     = CONSTRAINEDBY 
       access 
       class_modification?
     {: 
-        return new ConstrainingClause(access, class_modification);
+        return new SrcConstrainingClause(access, class_modification);
     :}
     ;
 
-ExtendsClause extends_clause 
+SrcExtendsClause extends_clause 
     = EXTENDS 
       access 
       class_modification? 
       annotation?
     {: 
-        return new ExtendsClause(access, class_modification, annotation);
+        return new SrcExtendsClause(access, class_modification, annotation);
     :}
   ;
 
-ImportClause import_clause
+SrcImportClause import_clause
     = IMPORT
       access_scalar
       comment
     {:
-        return new ImportClauseQualified(access_scalar, comment);
+        return new SrcImportClauseQualified(access_scalar, comment);
     :}
     | IMPORT
       access_scalar
       DOTMULT
       comment
     {:
-        return new ImportClauseUnqualified(access_scalar, comment);
+        return new SrcImportClauseUnqualified(access_scalar, comment);
     :}
     | IMPORT
       id_decl.alias
@@ -857,17 +857,17 @@ ImportClause import_clause
       access_scalar
       comment
     {:
-        return new ImportClauseRename(access_scalar, comment, alias);
+        return new SrcImportClauseRename(access_scalar, comment, alias);
     :}
     ;
 
 
-ArraySubscripts array_subscripts
+SrcArraySubscripts array_subscripts
     = LBRACK
       subscript_list
       RBRACK
     {:
-        return new ArraySubscripts(subscript_list);
+        return new SrcArraySubscripts(subscript_list);
     :}
     ;
 
@@ -885,9 +885,9 @@ List subscript_list
     :}
     ;
 
-Subscript subscript 
-    = COLON   {: return new ColonSubscript();  :}
-    | exp     {: return new ExpSubscript(exp); :}
+SrcSubscript subscript 
+    = COLON   {: return new SrcColonSubscript();  :}
+    | exp     {: return new SrcExpSubscript(exp); :}
     ;
 
 
@@ -905,14 +905,14 @@ List component_list
     :}
     ;
 
-ComponentDecl component_decl
+SrcComponentDecl component_decl
     = id_decl.comp_name
       array_subscripts?
       modification?
       conditional_attribute?
       comment
     {:
-        return new ComponentDecl(comp_name, 
+        return new SrcComponentDecl(comp_name, 
                                  array_subscripts, 
                                  modification, 
                                  conditional_attribute, 
@@ -920,13 +920,13 @@ ComponentDecl component_decl
     :}
     ;
 
-ComponentDecl component_decl_no_conditional
+SrcComponentDecl component_decl_no_conditional
     = id_decl.comp_name
       array_subscripts?
       modification?
       comment
     {:
-        return new ComponentDecl(comp_name, 
+        return new SrcComponentDecl(comp_name, 
                                  array_subscripts, 
                                  modification, 
                                  new Opt(), 
@@ -934,11 +934,11 @@ ComponentDecl component_decl_no_conditional
     :}
     ;
 
-ConditionalAttribute conditional_attribute
-    = IF exp    {: return new ConditionalAttribute(exp); :}
+SrcConditionalAttribute conditional_attribute
+    = IF exp    {: return new SrcConditionalAttribute(exp); :}
     ;
 
-Modification modification 
+SrcModification modification 
     = complete_modification   {: return complete_modification; :}
     | value_modification      {: return value_modification;    :}
 // Assign modification for binding equations in functions - enable after figuring out 
@@ -948,17 +948,17 @@ Modification modification
     ;
 
 
-CompleteModification complete_modification
+SrcCompleteModification complete_modification
     = class_modification
       value_modification?
     {:
-        return new CompleteModification(class_modification, value_modification);
+        return new SrcCompleteModification(class_modification, value_modification);
     :}
     ;
   
-ValueModification value_modification
-    = EQUALS exp          {: return new ValueModification(exp); :}
-    | COLON EQUALS exp    {: return new ValueModification(exp); :}
+SrcValueModification value_modification
+    = EQUALS exp          {: return new SrcValueModification(exp); :}
+    | COLON EQUALS exp    {: return new SrcValueModification(exp); :}
     ;
 
 /*  
@@ -970,17 +970,17 @@ AssignModification assign_modification
     ;
 */
 
-ClassModification class_modification
+SrcClassModification class_modification
     = LPAREN
       RPAREN
     {:
-        return new ClassModification();
+        return new SrcClassModification();
     :}
     | LPAREN
       argument_list
       RPAREN
     {:
-        return new ClassModification(argument_list);
+        return new SrcClassModification(argument_list);
     :}
     ;
 
@@ -998,7 +998,7 @@ List argument_list
     :}
     ;
 
-Argument argument
+SrcArgument argument
     = has_each 
       has_final 
       access 
@@ -1006,7 +1006,7 @@ Argument argument
       comment
     {: 
         adjustStart(has_each, has_final, access);
-        return new ComponentModification(
+        return new SrcComponentModification(
             has_each.value, 
             has_final.value, 
             access, 
@@ -1018,12 +1018,12 @@ Argument argument
       constraining_clause?
     {:
         adjustStart(redeclare_replaceable_header, base_class_decl);
-        NamedAccess name = new NamedAccess(base_class_decl.getName().getID());
+        SrcNamedAccess name = new SrcNamedAccess(base_class_decl.getName().getID());
         name.setLocationNoTree(base_class_decl.getName());
-        base_class_decl.setConstrainingClauseOpt(constraining_clause);
+        base_class_decl.setSrcConstrainingClauseOpt(constraining_clause);
         base_class_decl.setReplaceable(true);
         base_class_decl.setRedeclare(redeclare_replaceable_header.has_redeclare);
-        return new ClassRedeclare(
+        return new SrcClassRedeclare(
             redeclare_replaceable_header.has_each, 
             redeclare_replaceable_header.has_final, 
             name, 
@@ -1034,10 +1034,10 @@ Argument argument
       has_final  
       base_class_decl 
     {: 
-        NamedAccess name = new NamedAccess(base_class_decl.getName().getID());
+        SrcNamedAccess name = new SrcNamedAccess(base_class_decl.getName().getID());
         name.setLocationNoTree(base_class_decl.getName());
         base_class_decl.setRedeclare(true);
-        return new ClassRedeclare(
+        return new SrcClassRedeclare(
             has_each.value,
             has_final.value,
             name,
@@ -1048,10 +1048,10 @@ Argument argument
       constraining_clause.constr? 
     {:
         adjustStart(header, cc);
-        cc.setConstrainingClauseOpt(constr);
+        cc.setSrcConstrainingClauseOpt(constr);
         cc.setLocationNoTree(header, (constr.hasChild() ? constr : cc));
         cc.setRedeclare(header.has_redeclare);
-        return new ComponentRedeclare(
+        return new SrcComponentRedeclare(
             header.has_each, 
             header.has_final, 
             cc.createAccessForRedeclareNode(),
@@ -1064,7 +1064,7 @@ Argument argument
     {: 
         cc.setReplaceable(false);
         cc.setLocationNoTree(REDECLARE, cc);
-        return new ComponentRedeclare(
+        return new SrcComponentRedeclare(
             has_each.value, 
             has_final.value, 
             cc.createAccessForRedeclareNode(),
@@ -1072,17 +1072,17 @@ Argument argument
     :}
     | error 
     {: 
-        return new BadArgument();
+        return new SrcBadArgument();
     :}
     ;
 
-ComponentClause component_clause_in_argument
+SrcComponentClause component_clause_in_argument
     = type_prefixes 
       access_scalar 
       component_decl_no_conditional
     {:
         adjustStart(type_prefixes, access_scalar);
-        return new ComponentClause(
+        return new SrcComponentClause(
             true,   // Changed in argument rule for case without "redeclare"
             false, 
             false, 
@@ -1095,16 +1095,16 @@ ComponentClause component_clause_in_argument
             new Opt(), 
             new List(component_decl_no_conditional), 
             new Opt(), 
-            new Comment());
+            new SrcComment());
     :}
     ;
 
-Annotation annotation
+SrcAnnotation annotation
     = annotation_tok
       class_modification
     {:
         annotationTok = null;
-        return new ParseAnnotation(class_modification);
+        return new SrcParseAnnotation(class_modification);
     :}
     ;
 
@@ -1119,14 +1119,14 @@ Symbol annotation_tok
     :}
     ;
 
-AbstractEquation abstract_equation
+SrcAbstractEquation abstract_equation
     = exp.left
       EQUALS 
       exp.right 
       comment 
       SEMICOLON
     {: 
-        return new Equation(comment, left, right);
+        return new SrcEquation(comment, left, right);
     :}
     | if_equation 
       SEMICOLON
@@ -1152,7 +1152,7 @@ AbstractEquation abstract_equation
       comment
       SEMICOLON
     {:
-        return new ConnectClause(comment, a, b);
+        return new SrcConnectClause(comment, a, b);
     :}
     | LPAREN 
       function_call_left_list
@@ -1162,13 +1162,13 @@ AbstractEquation abstract_equation
       comment
       SEMICOLON
     {:
-        return new FunctionCallEquation(comment, function_call_left_list, function_call);
+        return new SrcFunctionCallEquation(comment, function_call_left_list, function_call);
     :}
     | function_call
       comment
       SEMICOLON
     {:
-        return new FunctionCallEquation(comment, new List(), function_call);
+        return new SrcFunctionCallEquation(comment, new List(), function_call);
     :}
     ;
 
@@ -1187,12 +1187,12 @@ List function_call_left_list
     :}
     ;
 
-FunctionCallLeft function_call_left
-    = /* blank */  {: return new FunctionCallLeft(); :}
-    | access       {: return new FunctionCallLeft(new Opt(access)); :}
+SrcFunctionCallLeft function_call_left
+    = /* blank */  {: return new SrcFunctionCallLeft(); :}
+    | access       {: return new SrcFunctionCallLeft(new Opt(access)); :}
     ;
 
-ForClauseE for_clause_e
+SrcForClauseE for_clause_e
     = FOR
       for_indices
       LOOP
@@ -1200,7 +1200,7 @@ ForClauseE for_clause_e
       END_FOR
       comment
     {:
-        return new ForClauseE(comment, for_indices,abstract_equation);
+        return new SrcForClauseE(comment, for_indices,abstract_equation);
     :}
     ;
 
@@ -1219,45 +1219,45 @@ List for_indices
     :}
     ;
 
-ForIndex for_index
+SrcForIndex for_index
     = for_index_decl for_in_exp?
     {: 
-        ForIndex f = new ForIndex(
+        SrcForIndex f = new SrcForIndex(
             false,
             false,
             false,
             false,
             false,
             new Opt(),
-            new Opt(new IndexParameter()),
+            new Opt(new SrcIndexParameter()),
             new Opt(),
-            new NamedAccess("Integer"),
+            new SrcNamedAccess("Integer"),
             new Opt(),
             new List(for_index_decl),
             new Opt(),
-            new Comment(),
+            new SrcComment(),
             for_in_exp); 
         return f; 
     :}
     ;
 
-ForIndexDecl for_index_decl
+SrcForIndexDecl for_index_decl
     = id_decl
     {:
-        return new ForIndexDecl(
+        return new SrcForIndexDecl(
             id_decl,
             new Opt(),
             new Opt(),
             new Opt(),
-            new Comment());
+            new SrcComment());
     :}
     ;
 
-Exp for_in_exp
+SrcExp for_in_exp
     = IN exp.e    {: return e; :}
     ;
 
-WhenEquation when_equation
+SrcWhenEquation when_equation
     = WHEN
       exp.test
       THEN
@@ -1266,28 +1266,28 @@ WhenEquation when_equation
       END_WHEN
       comment
     {: 
-        return new WhenEquation(comment,
+        return new SrcWhenEquation(comment,
                                 abstract_equation,
                                 test, 
                                 else_when_equation); 
     :}
     ;
 
-WhenEquation else_when_equation
+SrcWhenEquation else_when_equation
     = ELSEWHEN
       exp.test
       THEN
       abstract_equation*
       else_when_equation?
     {: 
-        return new WhenEquation(new Comment(),
+        return new SrcWhenEquation(new SrcComment(),
                                 abstract_equation, 
                                 test, 
                                 else_when_equation); 
     :}
   ;
 
-IfEquation if_equation
+SrcIfEquation if_equation
     = IF
       exp.test
       THEN
@@ -1296,21 +1296,21 @@ IfEquation if_equation
       END_IF
       comment
     {:
-        return new IfEquation(comment, 
+        return new SrcIfEquation(comment, 
                               abstract_equation, 
                               test, 
                               else_if_equation);
     :}
     ;
 
-IfWhenElseEquation else_if_equation
+SrcIfWhenElseEquation else_if_equation
     = ELSEIF
       exp.test
       THEN
       abstract_equation*
       else_if_equation?
     {:
-        return new IfEquation(new Comment(),
+        return new SrcIfEquation(new SrcComment(),
                               abstract_equation, 
                               test, 
                               else_if_equation);
@@ -1318,29 +1318,29 @@ IfWhenElseEquation else_if_equation
     | ELSE
       abstract_equation*
     {:
-        return new ElseEquation(new Comment(), 
+        return new SrcElseEquation(new SrcComment(), 
                                 abstract_equation); 
     :}
     ;
 
 
-Statement statement
+SrcStatement statement
     = access.left ASSIGN exp.right comment SEMICOLON
-                                      {: return new AssignStmt(comment, left, right); :}
+                                      {: return new SrcAssignStmt(comment, left, right); :}
     | function_call_stmt SEMICOLON    {: return function_call_stmt; :}
-    | BREAK comment SEMICOLON         {: return new BreakStmt(comment); :} 
-    | RETURN comment SEMICOLON        {: return new ReturnStmt(comment); :}
+    | BREAK comment SEMICOLON         {: return new SrcBreakStmt(comment); :} 
+    | RETURN comment SEMICOLON        {: return new SrcReturnStmt(comment); :}
     | if_stmt SEMICOLON               {: return if_stmt; :}
     | when_stmt SEMICOLON             {: return when_stmt; :}
     | for_stmt SEMICOLON              {: return for_stmt; :}
     | while_stmt SEMICOLON            {: return while_stmt; :}
-    | error                           {: return new BadStatement(); :}
+    | error                           {: return new SrcBadStatement(); :}
     ;
 
-FunctionCallStmt function_call_stmt =
+SrcFunctionCallStmt function_call_stmt =
     LPAREN function_call_stmt_left_list RPAREN ASSIGN function_call comment  
-                           {: return new FunctionCallStmt(comment, function_call_stmt_left_list, function_call); :}
-  | function_call comment  {: return new FunctionCallStmt(comment, new List(), function_call); :}
+                           {: return new SrcFunctionCallStmt(comment, function_call_stmt_left_list, function_call); :}
+  | function_call comment  {: return new SrcFunctionCallStmt(comment, new List(), function_call); :}
   ;
 
 List function_call_stmt_left_list
@@ -1356,9 +1356,9 @@ List function_call_stmt_left_list
     :}
     ;
 
-IfStmt if_stmt =
-    IF if_clause_list else_stmts END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt(else_stmts)); :}
-  | IF if_clause_list END_IF comment {: return new IfStmt(comment, if_clause_list, new Opt()); :}
+SrcIfStmt if_stmt =
+    IF if_clause_list else_stmts END_IF comment {: return new SrcIfStmt(comment, if_clause_list, new Opt(else_stmts)); :}
+  | IF if_clause_list END_IF comment {: return new SrcIfStmt(comment, if_clause_list, new Opt()); :}
   ;  
 
 List if_clause_list =
@@ -1366,16 +1366,16 @@ List if_clause_list =
   | if_clause_list ELSEIF if_clause  {: return if_clause_list.add(if_clause); :}
   ;
 
-IfClause if_clause =
-  exp THEN statement*  {: return new IfClause(exp, statement); :}
+SrcIfClause if_clause =
+  exp THEN statement*  {: return new SrcIfClause(exp, statement); :}
   ;
 
-ElseClause else_stmts =
-  ELSE statement*  {: return new ElseClause(statement); :}
+SrcElseClause else_stmts =
+  ELSE statement*  {: return new SrcElseClause(statement); :}
   ;
 
-WhenStmt when_stmt =
-  WHEN when_clause_list END_WHEN comment {: return new WhenStmt(comment, when_clause_list); :}
+SrcWhenStmt when_stmt =
+  WHEN when_clause_list END_WHEN comment {: return new SrcWhenStmt(comment, when_clause_list); :}
   ;  
 
 List when_clause_list =
@@ -1383,113 +1383,113 @@ List when_clause_list =
   | when_clause_list ELSEWHEN when_clause  {: return when_clause_list.add(when_clause); :}
   ;
 
-WhenClause when_clause =
-  exp THEN statement*  {: return new WhenClause(exp, statement); :}
+SrcWhenClause when_clause =
+  exp THEN statement*  {: return new SrcWhenClause(exp, statement); :}
   ;
 
-ForStmt for_stmt =
+SrcForStmt for_stmt =
   FOR for_indices LOOP for_stmt_list END_FOR comment  
-                         {: return new ForStmt(comment, for_indices, for_stmt_list); :}
+                         {: return new SrcForStmt(comment, for_indices, for_stmt_list); :}
   ;
   
-ForStmtList for_stmt_list =
-  statement* {: return new ForStmtList(statement); :}
+SrcForStmtList for_stmt_list =
+  statement* {: return new SrcForStmtList(statement); :}
   ;
 
-WhileStmt while_stmt = 
-  WHILE exp LOOP statement* END_WHILE comment  {: return new WhileStmt(comment, exp, statement); :}
+SrcWhileStmt while_stmt = 
+  WHILE exp LOOP statement* END_WHILE comment  {: return new SrcWhileStmt(comment, exp, statement); :}
   ;
   
-Exp exp =
+SrcExp exp =
   simple_expression {: return simple_expression; :}
   | if_exp           {: return if_exp; :}
   ;
 
-IfExp if_exp =
+SrcIfExp if_exp =
   IF exp.ifexp THEN exp.thenexp else_if_exp 
-  		{: return new IfExp(ifexp, thenexp, else_if_exp); :}
+  		{: return new SrcIfExp(ifexp, thenexp, else_if_exp); :}
   ;  
 
-Exp else_if_exp =
+SrcExp else_if_exp =
    ELSEIF exp.ifexp THEN exp.thenexp else_if_exp 
-		{: return new IfExp(ifexp, thenexp, else_if_exp); :}
+		{: return new SrcIfExp(ifexp, thenexp, else_if_exp); :}
  | ELSE exp   {: return exp; :}
   ;
 
-Exp simple_expression = 
+SrcExp simple_expression = 
     log_exp 
         {: return log_exp; :}
   | log_exp.l1 COLON log_exp.l2
-        {: RangeExp r = new RangeExp();
-           r.addExp(l1);
-           r.addExp(l2);
+        {: SrcRangeExp r = new SrcRangeExp();
+           r.addSrcExp(l1);
+           r.addSrcExp(l2);
            return r; :}
   | log_exp.l1 COLON log_exp.l2 COLON log_exp.l3
-        {: RangeExp r = new RangeExp();
-           r.addExp(l1);
-           r.addExp(l2);
-           r.addExp(l3);
+        {: SrcRangeExp r = new SrcRangeExp();
+           r.addSrcExp(l1);
+           r.addSrcExp(l2);
+           r.addSrcExp(l3);
            return r; :}
   ;
 
-Exp log_exp = 
-  log_exp.a OR log_exp.b {: return new OrExp(a,b); :}  
-  | log_exp.a AND log_exp.b {: return new AndExp(a,b); :}  
-  | NOT relation.a {: return new NotExp(a); :}  
+SrcExp log_exp = 
+  log_exp.a OR log_exp.b {: return new SrcOrExp(a,b); :}  
+  | log_exp.a AND log_exp.b {: return new SrcAndExp(a,b); :}  
+  | NOT relation.a {: return new SrcNotExp(a); :}  
   | relation {: return relation; :}
 ;
 
-Exp relation =
-  artm_exp.a LT artm_exp.b {: return new LtExp(a,b); :}
-  | artm_exp.a LEQ artm_exp.b {: return new LeqExp(a,b); :}
-  | artm_exp.a GT artm_exp.b {: return new GtExp(a,b); :}
-  | artm_exp.a GEQ artm_exp.b {: return new GeqExp(a,b); :}
-  | artm_exp.a EQ artm_exp.b {: return new EqExp(a,b); :}
-  | artm_exp.a NEQ artm_exp.b {: return new NeqExp(a,b); :}
+SrcExp relation =
+  artm_exp.a LT artm_exp.b {: return new SrcLtExp(a,b); :}
+  | artm_exp.a LEQ artm_exp.b {: return new SrcLeqExp(a,b); :}
+  | artm_exp.a GT artm_exp.b {: return new SrcGtExp(a,b); :}
+  | artm_exp.a GEQ artm_exp.b {: return new SrcGeqExp(a,b); :}
+  | artm_exp.a EQ artm_exp.b {: return new SrcEqExp(a,b); :}
+  | artm_exp.a NEQ artm_exp.b {: return new SrcNeqExp(a,b); :}
   | artm_exp.a {: return a; :}	
   ;
   
   
-  Exp artm_exp =
+  SrcExp artm_exp =
    additive_exp {: return additive_exp; :}
    ;
 
-  Exp additive_exp =
+  SrcExp additive_exp =
      multiplicative_exp.e    {: return e; :}
-   | additive_exp.e1 PLUS multiplicative_exp.e2      {: return new AddExp(e1, e2); :}
-   | additive_exp.e1 MINUS multiplicative_exp.e2     {: return new SubExp(e1, e2); :}
-   | additive_exp.e1 DOTPLUS multiplicative_exp.e2   {: return new DotAddExp(e1, e2); :}
-   | additive_exp.e1 DOTMINUS multiplicative_exp.e2  {: return new DotSubExp(e1, e2); :}
+   | additive_exp.e1 PLUS multiplicative_exp.e2      {: return new SrcAddExp(e1, e2); :}
+   | additive_exp.e1 MINUS multiplicative_exp.e2     {: return new SrcSubExp(e1, e2); :}
+   | additive_exp.e1 DOTPLUS multiplicative_exp.e2   {: return new SrcDotAddExp(e1, e2); :}
+   | additive_exp.e1 DOTMINUS multiplicative_exp.e2  {: return new SrcDotSubExp(e1, e2); :}
    ;
 
-  Exp multiplicative_exp =
+  SrcExp multiplicative_exp =
      unary_exp.e                                     {: return e; :}
-   | multiplicative_exp.e1 MULT unary_exp.e2     {: return new MulExp(e1, e2); :}
-   | multiplicative_exp.e1 DIV unary_exp.e2      {: return new DivExp(e1, e2); :}
-   | multiplicative_exp.e1 DOTMULT unary_exp.e2  {: return new DotMulExp(e1, e2); :}
-   | multiplicative_exp.e1 DOTDIV unary_exp.e2   {: return new DotDivExp(e1, e2); :} 
+   | multiplicative_exp.e1 MULT unary_exp.e2     {: return new SrcMulExp(e1, e2); :}
+   | multiplicative_exp.e1 DIV unary_exp.e2      {: return new SrcDivExp(e1, e2); :}
+   | multiplicative_exp.e1 DOTMULT unary_exp.e2  {: return new SrcDotMulExp(e1, e2); :}
+   | multiplicative_exp.e1 DOTDIV unary_exp.e2   {: return new SrcDotDivExp(e1, e2); :} 
    ;
 
 
-Exp unary_exp =
+SrcExp unary_exp =
    pow_exp          {: return pow_exp; :}
-   | MINUS unary_exp       {: return new NegExp(unary_exp); :}
+   | MINUS unary_exp       {: return new SrcNegExp(unary_exp); :}
    | PLUS unary_exp        {: formattingRecorder.addItem(FormattingType.NON_BREAKING_WHITESPACE, "+", PLUS);
                               return unary_exp; :}
    ;
 
-Exp pow_exp =
+SrcExp pow_exp =
     primary {:return primary; :}
-    | primary.a POW primary.e    {: return new PowExp(a,e); :}
-    | primary.a DOTPOW primary.e {: return new DotPowExp(a,e); :}
+    | primary.a POW primary.e    {: return new SrcPowExp(a,e); :}
+    | primary.a DOTPOW primary.e {: return new SrcDotPowExp(a,e); :}
     ;
 
-Exp primary =        
-   UNSIGNED_NUMBER.n    {: return new RealLitExp(n); :}
-  | UNSIGNED_INTEGER.n    {: return new IntegerLitExp(n); :}
-  | TRUE                {: return new BooleanLitExpTrue(); :}
-  | FALSE                {: return new BooleanLitExpFalse(); :}
-  | STRING.s               {: return new StringLitExp(s); :}
+SrcExp primary =        
+   UNSIGNED_NUMBER.n    {: return new SrcRealLitExp(n); :}
+  | UNSIGNED_INTEGER.n    {: return new SrcIntegerLitExp(n); :}
+  | TRUE                {: return new SrcBooleanLitExpTrue(); :}
+  | FALSE                {: return new SrcBooleanLitExpFalse(); :}
+  | STRING.s               {: return new SrcStringLitExp(s); :}
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
   | LPAREN exp.a RPAREN {: formattingRecorder.addItem(FormattingType.PARENTHESIS, "(", LPAREN);
@@ -1497,47 +1497,47 @@ Exp primary =
                            return a; :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}
-  | LBRACE function_arguments RBRACE {: return new ArrayConstructor(function_arguments); :}
-  | TIME                {: return new TimeExp(); :}
-  | END                 {: return new EndExp(); :} 
+  | LBRACE function_arguments RBRACE {: return new SrcArrayConstructor(function_arguments); :}
+  | TIME                {: return new SrcTimeExp(); :}
+  | END                 {: return new SrcEndExp(); :} 
   ;
 
-FunctionCall function_call 
+SrcFunctionCall function_call 
     = access
       LPAREN
       function_arguments?
       RPAREN
     {:
-        return new FunctionCall(access, function_arguments);
+        return new SrcFunctionCall(access, function_arguments);
     :}
     ;
 
-PartialFunctionCall partial_function_call
+SrcPartialFunctionCall partial_function_call
     = FUNCTION
       access
       LPAREN
       function_arguments_named?
       RPAREN
     {:
-        return new PartialFunctionCall(access, function_arguments_named);
+        return new SrcPartialFunctionCall(access, function_arguments_named);
     :}
     | FUNCTION
       access
     {:
-        return new PartialFunctionCall(access, new Opt());
+        return new SrcPartialFunctionCall(access, new Opt());
     :}
     ;
 
-FunctionArguments function_arguments =
-    exp FOR for_indices               {: List arg_list_f = new List().add(new IterExp(exp, for_indices));
-                                         return new FunctionArguments(arg_list_f, new List()); :} 
-  | arg_list_p                        {: return new FunctionArguments(arg_list_p, new List()); :}  
-  | arg_list_p COMMA named_arguments  {: return new FunctionArguments(arg_list_p, named_arguments); :}
+SrcFunctionArguments function_arguments =
+    exp FOR for_indices               {: List arg_list_f = new List().add(new SrcIterExp(exp, for_indices));
+                                         return new SrcFunctionArguments(arg_list_f, new List()); :} 
+  | arg_list_p                        {: return new SrcFunctionArguments(arg_list_p, new List()); :}  
+  | arg_list_p COMMA named_arguments  {: return new SrcFunctionArguments(arg_list_p, named_arguments); :}
   | function_arguments_named
   ;
   
-FunctionArguments function_arguments_named =
-  named_arguments {: return new FunctionArguments(new List(), named_arguments); :}
+SrcFunctionArguments function_arguments_named =
+  named_arguments {: return new SrcFunctionArguments(new List(), named_arguments); :}
   ;
   
 List named_arguments =
@@ -1545,28 +1545,28 @@ List named_arguments =
   | named_arguments COMMA named_argument {: return named_arguments.add(named_argument); :}
   ;
   
-Exp function_argument_exp =
+SrcExp function_argument_exp =
  exp                               {: return exp; :}
  | partial_function_call          {: return partial_function_call; :}  
  ;
   
-NamedArgument named_argument =
-  named_argument_id EQUALS function_argument_exp {: return new NamedArgument(named_argument_id,function_argument_exp); :}
+SrcNamedArgument named_argument =
+  named_argument_id EQUALS function_argument_exp {: return new SrcNamedArgument(named_argument_id,function_argument_exp); :}
   ;
 
-Access named_argument_id = 
-  ID.id {: return new NamedAccess(id); :}
+SrcAccess named_argument_id = 
+  ID.id {: return new SrcNamedAccess(id); :}
   ;
 
-Matrix matrix = 
-    matrix_row                   {: return new Matrix(new List().add(matrix_row)); :}
+SrcMatrix matrix = 
+    matrix_row                   {: return new SrcMatrix(new List().add(matrix_row)); :}
   | matrix SEMICOLON matrix_row  {: matrix.addRow(matrix_row); 
                                     return matrix; :}      
   ;  
   
-MatrixRow matrix_row = 
-    exp                   {: return new MatrixRow(new List().add(exp)); :}
-  | matrix_row COMMA exp  {: matrix_row.addExp(exp); 
+SrcMatrixRow matrix_row = 
+    exp                   {: return new SrcMatrixRow(new List().add(exp)); :}
+  | matrix_row COMMA exp  {: matrix_row.addSrcExp(exp); 
                              return matrix_row; :}
   ; 
   
@@ -1582,100 +1582,100 @@ List arg_list_p =
   | arg_list_p COMMA function_argument_exp  {: return arg_list_p.add(function_argument_exp); :}
   ;
   
-Comment comment = 
-  string_comment?  annotation?     {: return new Comment(string_comment,annotation); :}
+SrcComment comment = 
+  string_comment?  annotation?     {: return new SrcComment(string_comment,annotation); :}
   ;
   
-StringComment string_comment =
-  STRING.s      {: return new StringComment(s); :}
-  | string_comment PLUS STRING.s {: string_comment.setComment(string_comment.getComment().concat(s));
+SrcStringComment string_comment =
+  STRING.s      {: return new SrcStringComment(s); :}
+  | string_comment PLUS STRING.s {: string_comment.setSrcComment(string_comment.getSrcComment().concat(s));
                                     return string_comment; :}
   
   ;
  
- IdDecl id_decl = 
-   ID.id   {: return new IdDecl(id); :}
+ SrcIdDecl id_decl = 
+   ID.id   {: return new SrcIdDecl(id); :}
  ;
 
-AccessExp access_expression
-    = access {: return new AccessExp(access); :}
+SrcAccessExp access_expression
+    = access {: return new SrcAccessExp(access); :}
     ;
 
-DerExp der_expression
-    = DER LPAREN exp RPAREN  {: return new DerExp(exp); :}
+SrcDerExp der_expression
+    = DER LPAREN exp RPAREN  {: return new SrcDerExp(exp); :}
     ;
 
-Access access
+SrcAccess access
     = access_loc      {: return access_loc; :}
-    | DOT access_loc  {: return new GlobalAccess(access_loc); :}
+    | DOT access_loc  {: return new SrcGlobalAccess(access_loc); :}
     ;
 
-Access access_loc
+SrcAccess access_loc
     = access_single
     | access_dot
     ;
 
-Dot access_dot
+SrcDot access_dot
     = access_single.a
       DOT
       access_single.b
     {:
-        return new Dot(new List(a, b));
+        return new SrcDot(new List(a, b));
     :}
     | access_dot
       DOT
       access_single
     {:
-        access_dot.addAccess(access_single);
+        access_dot.addSrcAccess(access_single);
         return access_dot;
     :}
     ;
 
-NamedAccess access_single
+SrcNamedAccess access_single
     = access_single_array
     | access_single_scalar
     ;
 
-ArrayAccess access_single_array
-    = ID.id array_subscripts  {: return new ArrayAccess(id, array_subscripts); :}
+SrcArrayAccess access_single_array
+    = ID.id array_subscripts  {: return new SrcArrayAccess(id, array_subscripts); :}
     ;
 
-NamedAccess access_single_scalar
-    = ID.id  {: return new NamedAccess(id); :}
+SrcNamedAccess access_single_scalar
+    = ID.id  {: return new SrcNamedAccess(id); :}
     ;
 
 
-Access access_scalar
+SrcAccess access_scalar
     = access_scalar_loc      {: return access_scalar_loc; :}
-    | DOT access_scalar_loc  {: return new GlobalAccess(access_scalar_loc); :}
+    | DOT access_scalar_loc  {: return new SrcGlobalAccess(access_scalar_loc); :}
     ;
 
-Access access_scalar_loc
+SrcAccess access_scalar_loc
     = access_scalar_dot
     | access_single_scalar
     ;
 
-Dot access_scalar_dot
+SrcDot access_scalar_dot
     = access_single_scalar.a
       DOT
       access_single_scalar.b
     {:
-        return new Dot(new List(a, b));
+        return new SrcDot(new List(a, b));
     :}
     | access_scalar_dot
       DOT
       access_single_scalar
     {:
-        access_scalar_dot.addAccess(access_single_scalar);
+        access_scalar_dot.addSrcAccess(access_single_scalar);
         return access_scalar_dot;
     :}
     ;
 
-EndDecl end_decl
+SrcEndDecl end_decl
     = END_ID
     {:
         String value = (String) END_ID.value;
         String id = value.substring(3, value.length()).trim();
-        return new EndDecl(id);
+        return new SrcEndDecl(id);
     :}
     ;

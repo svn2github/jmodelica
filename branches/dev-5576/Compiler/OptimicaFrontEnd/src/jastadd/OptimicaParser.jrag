@@ -91,12 +91,12 @@ aspect OptimicaParsers {
         return parseOptimicaString(uif, str, fileName);
     }
 
-    refine Parsers public Exp ParserHandler.parseExpString(String str) 
+    refine Parsers public SrcExp ParserHandler.parseExpString(String str) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseOptimicaExpString(str);
     }
 
-    refine Parsers public BaseClassDecl ParserHandler.parseAnonymousClassString(String code, Restriction restriction, String targetName)
+    refine Parsers public SrcBaseClassDecl ParserHandler.parseAnonymousClassString(String code, SrcRestriction restriction, String targetName)
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseOptimicaAnonymousClassString(code, restriction, targetName);
     }
@@ -123,21 +123,21 @@ aspect OptimicaParsers {
         return sr;
     }
 
-    public Exp ParserHandler.parseOptimicaExpString(String str) 
+    public SrcExp ParserHandler.parseOptimicaExpString(String str) 
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         AbstractModelicaScanner scanner = createOptimicaScanner(new StringReader(str));
         beaver.Parser parser = createOptimicaParser(scanner, EXP_FILENAME);
-        Exp exp = (Exp) parser.parse(scanner, expOptimicaGoal());
+        SrcExp exp = (SrcExp) parser.parse(scanner, expOptimicaGoal());
         return exp;
     }
 
-    public BaseClassDecl ParserHandler.parseOptimicaAnonymousClassString(String code, Restriction restriction, String targetName)
+    public SrcBaseClassDecl ParserHandler.parseOptimicaAnonymousClassString(String code, SrcRestriction restriction, String targetName)
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         AbstractModelicaScanner scanner = createOptimicaScanner(new StringReader(code));
         beaver.Parser parser = createOptimicaParser(scanner, ANONYMOUS_CLASS_FILENAME);
-        BaseClassDecl cl = (BaseClassDecl) parser.parse(scanner, anonymousClassOptimicaGoal());
-        cl.setRestriction(restriction);
-        cl.setName(new IdDecl(targetName));
+        SrcBaseClassDecl cl = (SrcBaseClassDecl) parser.parse(scanner, anonymousClassOptimicaGoal());
+        cl.setSrcRestriction(restriction);
+        cl.setName(new SrcIdDecl(targetName));
         return cl;
     }
 

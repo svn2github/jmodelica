@@ -22,14 +22,14 @@ aspect LocalIteration{
             }
             
             @Override
-            protected void contribute(AbstractEquation src, FAbstractEquation dest) {
+            protected void contribute(SrcAbstractEquation src, FAbstractEquation dest) {
                 AnnotationNode localIterationNode = src.annotation().vendorNode().forPath("LocalIteration");
                 if (!localIterationNode.exists())
                     return;
                 AnnotationNode destNode = dest.annotation().vendorNode().createForPath("LocalIteration");
                 
                 AnnotationNode enabledAnnotation = localIterationNode.forPath("enabled");
-                Exp enabledExp = enabledAnnotation.exp();
+                SrcExp enabledExp = enabledAnnotation.exp();
                 if (enabledExp != null) {
                     destNode.forPath("enabled").setValue(enabledExp.instantiate());
                     destNode.forPath("enabled").setEach(enabledAnnotation.isEach());

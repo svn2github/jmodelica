@@ -39,7 +39,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                [Dummy2:InstGeneratedInner]     // Dummy node to prevent InstGeneratedInner from being classified as root
                                [Dummy3:InstConstraining];      // Dummy node to prevent InstConstraining from being classified as root
 
-abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/ /FunctionType:FType/;
+abstract InstClassDecl: InstBaseNode ::= <SrcClassDecl:SrcClassDecl> /[ClassAnnotation:InstClassModification]/ /FunctionType:FType/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstrainingClass] InstRestriction;
 InstLibNode              : InstClassDecl ::= /ActualInstClass:InstClassDecl/;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
@@ -54,15 +54,15 @@ UnknownInstClassDecl     : InstFullClassDecl;
 BadInstClassDecl         : InstClassDecl;
 
 InstReplacingFullClassDecl        : InstFullClassDecl  ::= 
-                                     <OriginalClassDecl:ClassDecl> 
+                                     <OriginalClassDecl:SrcClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingShortClassDecl       : InstShortClassDecl ::= 
-                                     <OriginalClassDecl:ClassDecl> 
+                                     <OriginalClassDecl:SrcClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingSimpleShortClassDecl : InstSimpleShortClassDecl ::=
-                                     <OriginalClassDecl:ClassDecl> 
+                                     <OriginalClassDecl:SrcClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
                                      <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl;
@@ -81,24 +81,24 @@ InstOperator            : InstRestriction;
 InstOperatorFunction    : InstFunction;
 InstOperatorRecord      : InstMRecord;
 
-InstExternal     : BaseNode ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
+InstExternal     : BaseNode ::= <SrcExternalClause:SrcExternalClause> [FExternalLanguage] [InstExternalCall];
 InstExternalCall : BaseNode ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
 
-abstract InstImport : BaseNode ::= PackageName:InstAccess <ImportClause:ImportClause>;
+abstract InstImport : BaseNode ::= PackageName:InstAccess <SrcImportClause:SrcImportClause>;
 InstImportQualified   : InstImport;
 InstImportUnqualified : InstImport;
 InstImportRename      : InstImport;
 
 abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode:InstBaseNode/;
-InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl> <InstRedeclare:InstRedeclareClassNode>;
-InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> <InstRedeclare:InstComponentRedeclare>;
+InstConstrainingClass     : InstConstraining ::= <SrcBaseClassDecl:SrcBaseClassDecl> <InstRedeclare:InstRedeclareClassNode>;
+InstConstrainingComponent : InstConstraining ::= <SrcComponentDecl:SrcComponentDecl> <InstRedeclare:InstComponentRedeclare>;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
 abstract InstComponentDecl : InstBaseNode ::= <Name:String>
                                               ClassName:InstAccess 
                                               [LocalFArraySubscripts:FArraySubscripts] 
-                                              <ComponentDecl:ComponentDecl> 
+                                              <SrcComponentDecl:SrcComponentDecl> 
                                               [InstModification] 
                                               [InstConstrainingComponent] 
                                               /FArraySubscripts/ 
@@ -119,20 +119,20 @@ InstArrayComponentDecl        : InstComponentDecl ::= <Index:int>;
 InstExpandableConnectorDecl   : InstComposite;
 InstArrayExpandableConnector  : InstArrayComponentDecl;
 
-InstReplacingComposite   : InstComposite ::= <OriginalDecl:ComponentDecl> 
+InstReplacingComposite   : InstComposite ::= <OriginalDecl:SrcComponentDecl> 
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
-InstReplacingRecord      : InstRecord    ::= <OriginalDecl:ComponentDecl>
+InstReplacingRecord      : InstRecord    ::= <OriginalDecl:SrcComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
-InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
+InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:SrcComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
 InstReplacingExpandableConnectorDecl : InstReplacingComposite;
 
 InstCreateComponentDecl : InstComponentDecl ::= <LookupNode:InstLookupRedirectNode>;
 InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNode>;
-InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
+InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:SrcComponentDecl> 
                                                                <InstComponentRedeclare:InstComponentRedeclare> 
                                                                <InstConstrainingRedeclare:InstComponentRedeclare>;
 
@@ -140,7 +140,7 @@ InstGeneratedInner : BaseNode ::= InstComponentDecl
                                   <CopiedOuter:InstComponentDecl> 
                                   <MatchingNonInner:InstComponentDecl>;
 
-InstExtends : InstNode ::=  ClassName:InstAccess <ExtendsClause:ExtendsClause>
+InstExtends : InstNode ::=  ClassName:InstAccess <SrcExtendsClause:SrcExtendsClause>
                             /[ClassAnnotation:InstClassModification]/
                             /[ClassAnnotationExtends:InstClassModification]/;
 InstNormalExtends : InstExtends ::= [InstClassModification];
@@ -180,7 +180,7 @@ FDeferExp : FExp ::= <FExp:FExp>;
 
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.
-abstract InstModification : BaseNode ::= <Modification:SrcModificationOrRedeclareElement>;
+abstract InstModification : BaseNode ::= <SrcModification:SrcModificationOrRedeclareElement>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
 InstValueModification    : InstModification ::= /FExp/
                                                 /InstArrayModification*/;

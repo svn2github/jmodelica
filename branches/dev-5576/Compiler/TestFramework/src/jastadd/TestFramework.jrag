@@ -23,7 +23,7 @@ aspect TestFramework {
         return false;
     }
 
-    public boolean ClassDecl.collectTestCases(TestSuite ts, String className) {
+    public boolean SrcClassDecl.collectTestCases(TestSuite ts, String className) {
         if (qualifiedName().equals(className)) {
             collectTestCases(ts);
             return true;
@@ -31,21 +31,21 @@ aspect TestFramework {
         return false;
     }
 
-    public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
+    public boolean SrcFullClassDecl.collectTestCases(TestSuite ts, String className) {
         if (super.collectTestCases(ts, className)) 
             return true;
-        return getClauseList().collectTestCases(ts, className);
+        return getSrcClauseList().collectTestCases(ts, className);
     }
 
-    public boolean Clause.collectTestCases(TestSuite ts, String className) {
+    public boolean SrcClause.collectTestCases(TestSuite ts, String className) {
         return false;
     }
 
-    public boolean ElementList.collectTestCases(TestSuite ts, String className) {
-        return getElementList().collectTestCases(ts, className);
+    public boolean SrcElementList.collectTestCases(TestSuite ts, String className) {
+        return getSrcElementList().collectTestCases(ts, className);
     }
 
-    public boolean Element.collectTestCases(TestSuite ts, String className) {
+    public boolean SrcElement.collectTestCases(TestSuite ts, String className) {
         return false;
     }
 
@@ -54,7 +54,7 @@ aspect TestFramework {
             n.collectTestCases(ts);
     }
 
-    public void ClassDecl.collectTestCases(TestSuite ts) {
+    public void SrcClassDecl.collectTestCases(TestSuite ts) {
         ts.enterClass(name());
         AnnotationNode a1 = annotation("__JModelica/UnitTesting/tests");
         if (a1.exists()) {
@@ -64,29 +64,29 @@ aspect TestFramework {
         ts.exitClass();
     }
 
-    public void FullClassDecl.collectTestCases(TestSuite ts) {
+    public void SrcFullClassDecl.collectTestCases(TestSuite ts) {
         ts.enterClass(name());
         AnnotationNode a1 = annotation("__JModelica/UnitTesting/tests");
         if (a1.exists()) {
             for (AnnotationNode a2 : a1) 
                 generateTestCase(ts, a2);
         } else {
-            getClauseList().collectTestCases(ts);
+            getSrcClauseList().collectTestCases(ts);
         }
         ts.exitClass();
     }
 
-    public void Clause.collectTestCases(TestSuite ts) {
+    public void SrcClause.collectTestCases(TestSuite ts) {
     }
 
-    public void ElementList.collectTestCases(TestSuite ts) {
-        getElementList().collectTestCases(ts);
+    public void SrcElementList.collectTestCases(TestSuite ts) {
+        getSrcElementList().collectTestCases(ts);
     }
 
-    public void Element.collectTestCases(TestSuite ts) {
+    public void SrcElement.collectTestCases(TestSuite ts) {
     }
 
-    public void ClassDecl.generateTestCase(TestSuite ts, AnnotationNode a) {
+    public void SrcClassDecl.generateTestCase(TestSuite ts, AnnotationNode a) {
         String name = a.name();
         String className = name.substring(name.lastIndexOf('.') + 1);
         String fullName = TestCase.class.getName().replace("TestCase", className);
@@ -142,7 +142,7 @@ aspect TestFramework {
     }
     
     
-    public void ClassDecl.testCaseError(String className, String msg) {
+    public void SrcClassDecl.testCaseError(String className, String msg) {
         String[] fn = fileName().split("[/\\\\]Compiler[/\\\\]");
         log.error("%s:%d: Creating test case '%s' - %s", fn[fn.length - 1], beginLine(), className, msg);
     }

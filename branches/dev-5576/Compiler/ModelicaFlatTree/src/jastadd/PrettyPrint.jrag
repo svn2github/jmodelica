@@ -259,27 +259,27 @@ aspect PrettyPrint {
 	}
 	
 	public void Program.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (StoredDefinition sd : getUnstructuredEntitys()) {
+		for (SrcStoredDefinition sd : getUnstructuredEntitys()) {
 			p.print(sd,str,indent);
 		}
 	}
 
-    public void StoredDefinition.prettyPrint(Printer p, CodeStream str, String indent) {
-        if (hasWithin()) {
+    public void SrcStoredDefinition.prettyPrint(Printer p, CodeStream str, String indent) {
+        if (hasSrcWithin()) {
             str.print(indent, "within");
-            if (getWithin().hasPackageName()) {
+            if (getSrcWithin().hasPackageName()) {
                 str.print(" ");
-                p.print(getWithin().getPackageName(),str,indent);
+                p.print(getSrcWithin().getPackageName(),str,indent);
             }
             str.println(";");
         }
-        for (ClassDecl cd : getClassDecls()) {
+        for (SrcClassDecl cd : getSrcClassDecls()) {
             p.print(cd, str, indent);
         }
     }
 
 
-    public void ShortClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcShortClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent);
         indent = p.indent(indent);
         if (getEncapsulated()) {
@@ -304,21 +304,21 @@ aspect PrettyPrint {
             str.print("replaceable ");
         }
         
-        str.print(getRestriction(), " ");
+        str.print(getSrcRestriction(), " ");
         p.print(getName(), str, indent);
-        str.print(" = ", getExtendsClauseShortClass().getSuper().name());
-        if (getExtendsClauseShortClass().hasArraySubscripts()) {
-            p.print(getExtendsClauseShortClass().getArraySubscripts(), str, indent);
+        str.print(" = ", getSrcExtendsClauseShortClass().getSuper().name());
+        if (getSrcExtendsClauseShortClass().hasSrcArraySubscripts()) {
+            p.print(getSrcExtendsClauseShortClass().getSrcArraySubscripts(), str, indent);
         }
-        if (getExtendsClauseShortClass().hasClassModification()) {
-            p.print(getExtendsClauseShortClass().getClassModification(), str, indent);
+        if (getSrcExtendsClauseShortClass().hasSrcClassModification()) {
+            p.print(getSrcExtendsClauseShortClass().getSrcClassModification(), str, indent);
         }
-        if (hasConstrainingClause()) {
-            p.print(getConstrainingClause(), str, indent);
+        if (hasSrcConstrainingClause()) {
+            p.print(getSrcConstrainingClause(), str, indent);
         }
     }
 
-    public void FullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcFullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent);
         if (getEncapsulated()) {
             str.print("encapsulated ");
@@ -342,48 +342,49 @@ aspect PrettyPrint {
             str.print("replaceable ");
         }
         
-        str.print(getRestriction(), " ");
+        str.print(getSrcRestriction(), " ");
         prettyPrintClassName(p, str, indent);
         str.println();
 
-        for (Clause cl : getClauses()) {
+        for (SrcClause cl : getSrcClauses()) {
             p.print(cl, str, indent);
         }
-        p.print(getEndDecl(), str, indent);
+        p.print(getSrcEndDecl(), str, indent);
     }
 
-    public void FullClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
+    public void SrcFullClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
         p.print(getName(), str, indent);
     }
 
-    public void Clause.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcClause.prettyPrint(Printer p, CodeStream str, String indent) {
         String header = clauseHeader();
         if (header != null) {
             str.println(indent, header);
         }
-        prettyPrintClauseBody(p, str, p.indent(indent));
+        prettyPrintClauseBody(p, str, p.indent(indent), true);
     }
 
-    syn String Clause.clauseHeader();
-    eq PublicElementList.clauseHeader()     = "public";
-    eq DefaultElementList.clauseHeader()    = null;
-    eq ProtectedElementList.clauseHeader()  = "protected";
-    eq EquationClause.clauseHeader()        = "equation";
-    eq InitialEquationClause.clauseHeader() = "initial equation";
-    eq Algorithm.clauseHeader()             = "algorithm";
-    eq InitialAlgorithm.clauseHeader()      = "initial algorithm";
+    syn String SrcClause.clauseHeader() = clauseHeader(" ");
+    syn String SrcClause.clauseHeader(String separator);
+    eq SrcPublicElementList.clauseHeader(String separator)     = "public";
+    eq SrcDefaultElementList.clauseHeader(String separator)    = null;
+    eq SrcProtectedElementList.clauseHeader(String separator)  = "protected";
+    eq SrcEquationClause.clauseHeader(String separator)        = "equation";
+    eq SrcInitialEquationClause.clauseHeader(String separator) = "initial" + separator + "equation";
+    eq SrcAlgorithm.clauseHeader(String separator)             = "algorithm";
+    eq SrcInitialAlgorithm.clauseHeader(String separator)      = "initial" + separator + "algorithm";
 
-    public abstract void Clause.prettyPrintClauseBody(Printer p, CodeStream str, String indent);
+    public abstract void SrcClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormating);
 
-    public void ElementList.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
+    public void SrcElementList.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
         boolean prevWantsBlankLine = false;
         boolean first = true;
-        for (Element e : getElements()) {
+        for (SrcElement e : getSrcElements()) {
             boolean wantsBlankLine = e.prettyPrintWantsBlankLine();
-            if (!first && (wantsBlankLine || prevWantsBlankLine)) {
+            if (doFormatting && !first && (wantsBlankLine || prevWantsBlankLine)) {
                 str.println();
             }
-            if (!e.prettyPrintsAsLine()) {
+            if (doFormatting && !e.prettyPrintsAsLine()) {
                 str.print(indent);
                 p.print(e, str, indent);
                 str.println(";");
@@ -395,30 +396,32 @@ aspect PrettyPrint {
         }
     }
 
-    syn boolean Element.prettyPrintsAsLine();
-    eq ImportClause.prettyPrintsAsLine()     = true;
-    eq ExtendsClause.prettyPrintsAsLine()    = false;
-    eq ComponentClause.prettyPrintsAsLine()  = false;
-    eq ClassDecl.prettyPrintsAsLine()        = true;
-    eq BadElement.prettyPrintsAsLine()       = true;
+    syn boolean SrcElement.prettyPrintsAsLine();
+    eq SrcImportClause.prettyPrintsAsLine()     = true;
+    eq SrcExtendsClause.prettyPrintsAsLine()    = false;
+    eq SrcComponentClause.prettyPrintsAsLine()  = false;
+    eq SrcClassDecl.prettyPrintsAsLine()        = true;
+    eq SrcBadElement.prettyPrintsAsLine()       = true;
 
-    syn boolean Element.prettyPrintWantsBlankLine() = false;
-    eq ClassDecl.prettyPrintWantsBlankLine()        = true;
+    syn boolean SrcElement.prettyPrintWantsBlankLine() = false;
+    eq SrcClassDecl.prettyPrintWantsBlankLine()        = true;
 
-    public void EquationClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
-        for (AbstractEquation e : getAbstractEquations()) {
+    public void SrcEquationClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
+        for (SrcAbstractEquation e : getSrcAbstractEquations()) {
             p.print(e, str, indent);
-            str.println(";");
+            if (doFormatting) {
+                str.println(";");
+            }
         }
     }
 
-    public void Algorithm.prettyPrintClauseBody(Printer p, CodeStream str, String indent) {
-        for (Statement s : getStatements()) {
+    public void SrcAlgorithm.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
+        for (SrcStatement s : getSrcStatements()) {
             p.print(s, str, indent);
         }
     }
 
-	public void AssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcAssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		p.print(getLeft(), str, indent);
 		str.print(":=");
@@ -426,10 +429,10 @@ aspect PrettyPrint {
 		str.println(';');
 	}
 
-    public void FunctionCallStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcFunctionCallStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "(");
         boolean first = true;
-        for (FunctionCallLeft fcl : getLefts()) {
+        for (SrcFunctionCallLeft fcl : getLefts()) {
             if (!first) {
                 str.print(",");
             }
@@ -437,47 +440,47 @@ aspect PrettyPrint {
             p.print(fcl, str, indent);
         }
         str.print(") := ");
-        p.print(getFunctionCall(), str, indent);
+        p.print(getSrcFunctionCall(), str, indent);
         str.println(";");
     }
 
-    public void BreakStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcBreakStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.println(indent, "break;");
     }
 
-    public void ReturnStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcReturnStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.println(indent, "return;");
     }
 
-    public void IfStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcIfStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "if ");
         boolean first = true;
-        for (IfWhenClause iwc : getIfWhenClauses()) {
+        for (SrcIfWhenClause iwc : getSrcIfWhenClauses()) {
             if (!first) {
                 str.print(indent, "elseif ");
             }
             first = false;
             p.print(iwc, str, indent);
         }
-        if (hasElseClause())
-            p.print(getElseClause(), str, indent);
+        if (hasSrcElseClause())
+            p.print(getSrcElseClause(), str, indent);
         str.println(indent, "end if;");
     }
 
-    public void ElseClause.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcElseClause.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getNumStmt() > 0) {
             str.println(indent, "else");
-            for (Statement stmt : getStmts()) {
+            for (SrcStatement stmt : getStmts()) {
                 p.print(stmt, str, p.indent(indent));
             }
         }
     }
 
 
-    public void WhenStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcWhenStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "when ");
         boolean first = true;
-        for (IfWhenClause iwc : getIfWhenClauses()) {
+        for (SrcIfWhenClause iwc : getSrcIfWhenClauses()) {
             if (!first) {
                 str.print(indent, "elsewhen ");
             }
@@ -487,18 +490,18 @@ aspect PrettyPrint {
         str.println(indent, "end when;");
     }
 
-	public void IfWhenClause.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcIfWhenClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getTest(), str, indent);
 		str.println(" then");
-		for (Statement s : getStatements()) {
+		for (SrcStatement s : getSrcStatements()) {
 			p.print(s, str, p.indent(indent));
 		}
 	}
 
-    public void ForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "for ");
         boolean first = true;
-        for (ForIndex fi : getForIndexs()) {
+        for (SrcForIndex fi : getSrcForIndexs()) {
             if (!first) {
                 str.print(",");
             }
@@ -506,39 +509,39 @@ aspect PrettyPrint {
             p.print(fi, str, indent);
         }
         str.println(" loop");
-        p.print(getForStmtList(), str, p.indent(indent));
+        p.print(getSrcForStmtList(), str, p.indent(indent));
         str.println(indent, "end for;");
     }
 
-	public void ForStmtList.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (Statement stmt : getStmts())
+	public void SrcForStmtList.prettyPrint(Printer p, CodeStream str, String indent) {
+		for (SrcStatement stmt : getStmts())
 			p.print(stmt, str, indent);
 	}
 
-    public void WhileStmt.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcWhileStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "while ");
         p.print(getTest(), str, indent);
         str.println(" loop");
-        for (Statement s : getWhileStmts())
+        for (SrcStatement s : getSrcWhileStmts())
             p.print(s, str, p.indent(indent));
         str.println(indent, "end while;");
     }
 
-	public void ForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
-		str.print(getForIndexDecl().name());
-		if (hasExp()) {
+	public void SrcForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
+		str.print(getSrcForIndexDecl().name());
+		if (hasSrcExp()) {
 			str.print(" in ");
-			p.print(getExp(), str, indent);
+			p.print(getSrcExp(), str, indent);
 		}
 	}
 	
 	// For debugging
-	public void LibNode.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcLibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.formatln("%s%structured library '%s' at '%s'", indent, 
 				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
-    public void ComponentClause.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcComponentClause.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getRedeclare()) {
             str.print("redeclare ");
         }
@@ -554,128 +557,128 @@ aspect PrettyPrint {
         if (getReplaceable()) {
             str.print("replaceable ");
         }
-        if (hasTypePrefixFlow()) {
-            str.print(getTypePrefixFlow(), " ");
+        if (hasSrcTypePrefixFlow()) {
+            str.print(getSrcTypePrefixFlow(), " ");
         }
-        if (hasTypePrefixVariability()) {
-            str.print(getTypePrefixVariability(), " ");
+        if (hasSrcTypePrefixVariability()) {
+            str.print(getSrcTypePrefixVariability(), " ");
         }
-        if (hasTypePrefixInputOutput()) {
-            str.print(getTypePrefixInputOutput(), " ");
+        if (hasSrcTypePrefixInputOutput()) {
+            str.print(getSrcTypePrefixInputOutput(), " ");
         }
         
         p.print(getClassName(), str, indent);
         p.print(getTypeArraySubscriptsOpt(), str, indent);
         
         str.print(" ");
-        getComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
+        getSrcComponentDecls().prettyPrintWithSep(p, str, indent, ", ");
         
-        p.print(getConstrainingClauseOpt(), str, indent);
+        p.print(getSrcConstrainingClauseOpt(), str, indent);
     }
 
-    public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getName().getID());
         p.print(getVarArraySubscriptsOpt(), str, indent);
-        p.print(getModificationOpt(), str, indent);
-        p.print(getConditionalAttributeOpt(), str, indent);
+        p.print(getSrcModificationOpt(), str, indent);
+        p.print(getSrcConditionalAttributeOpt(), str, indent);
     }
 
-    public void ConditionalAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcConditionalAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(" if ");
-        p.print(getExp(), str, indent);
+        p.print(getSrcExp(), str, indent);
     }
 
-    public void ConstrainingClause.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(" constrainedby ", getAccess().name());
-        if (hasClassModification()) {
+    public void SrcConstrainingClause.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" constrainedby ", getSrcAccess().name());
+        if (hasSrcClassModification()) {
             str.print(' ');
-            p.print(getClassModification(), str, indent);
+            p.print(getSrcClassModification(), str, indent);
         }
     }
 
-	public void ArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (getNumSubscript()>0) {
+	public void SrcArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
+		if (getNumSrcSubscript()>0) {
 			str.print("[");
-			for (int i=0;i<getNumSubscript();i++) {
-				p.print(getSubscript(i),str,indent);
-				if (i<getNumSubscript()-1)
+			for (int i=0;i<getNumSrcSubscript();i++) {
+				p.print(getSrcSubscript(i),str,indent);
+				if (i<getNumSrcSubscript()-1)
 					str.print(",");
 			}
 			str.print("]");
 		}
 	}
 
-	public void ColonSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcColonSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(":");
 	}
 	
-	public void ExpSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
-		p.print(getExp(),str,indent);
+	public void SrcExpSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
+		p.print(getSrcExp(),str,indent);
 	}
 
-	public void RangeExp.prettyPrint(Printer p, CodeStream str, String indent) { 
-		for (int i=0;i<getNumExp();i++) {
-			p.print(getExp(i),str,indent);
-			if (i<getNumExp()-1)
+	public void SrcRangeExp.prettyPrint(Printer p, CodeStream str, String indent) { 
+		for (int i=0;i<getNumSrcExp();i++) {
+			p.print(getSrcExp(i),str,indent);
+			if (i<getNumSrcExp()-1)
 				str.print(":");
 		}
 	}
 
-    public void ImportClause.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcImportClause.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "import ");
         prettyPrintPreName(p, str, indent);
         p.print(getPackageName(), str, indent);
         prettyPrintPostName(p, str, indent);
-        p.print(getComment(), str, indent);
+        p.print(getSrcComment(), str, indent);
         str.println(";");
     }
 
-    public void ImportClause.prettyPrintPreName(Printer p, CodeStream str, String indent) {}
+    public void SrcImportClause.prettyPrintPreName(Printer p, CodeStream str, String indent) {}
 
-    public void ImportClauseRename.prettyPrintPreName(Printer p, CodeStream str, String indent) {
-        p.print(getIdDecl(), str, indent);
+    public void SrcImportClauseRename.prettyPrintPreName(Printer p, CodeStream str, String indent) {
+        p.print(getSrcIdDecl(), str, indent);
         str.print(" = ");
     }
 
-    public void ImportClause.prettyPrintPostName(Printer p, CodeStream str, String indent) {}
+    public void SrcImportClause.prettyPrintPostName(Printer p, CodeStream str, String indent) {}
 
-    public void ImportClauseUnqualified.prettyPrintPostName(Printer p, CodeStream str, String indent) {
+    public void SrcImportClauseUnqualified.prettyPrintPostName(Printer p, CodeStream str, String indent) {
         str.print(".*");
     }
 
-    public void ExtendsClause.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcExtendsClause.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "extends ");
         p.print(getSuper(), str, indent);
-        p.print(getClassModificationOpt(), str, indent);
+        p.print(getSrcClassModificationOpt(), str, indent);
     }
 
-	public void CompleteModification.prettyPrint(Printer p, CodeStream str, String indent) {
-		p.print(getClassModification(),str,indent);
-		if (hasValueModification())
-		  p.print(getValueModification(),str,indent);
+	public void SrcCompleteModification.prettyPrint(Printer p, CodeStream str, String indent) {
+		p.print(getSrcClassModification(),str,indent);
+		if (hasSrcValueModification())
+		  p.print(getSrcValueModification(),str,indent);
 	}
 	
-	public void ValueModification.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcValueModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(" = ");
-		p.print(getExp(),str,indent);
+		p.print(getSrcExp(),str,indent);
 	}
 	
-    public void DummyModification.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcDummyModification.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(" = ");
         p.print(myFExp(),str,indent);
     }
 	
-	public void ClassModification.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcClassModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("(");
-		for (int i = 0; i < getNumArgument(); i++) {
-			p.print(getArgument(i), str, indent);
-			if (i < getNumArgument() - 1)
+		for (int i = 0; i < getNumSrcArgument(); i++) {
+			p.print(getSrcArgument(i), str, indent);
+			if (i < getNumSrcArgument() - 1)
 				str.print(", ");
 		}
 		str.print(")");
 	}
 
-    public void ElementModification.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcElementModification.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getEach()) {
             str.print("each ");
         }
@@ -683,27 +686,27 @@ aspect PrettyPrint {
             str.print("final ");
         }
         p.print(getName(), str, indent);
-        if (hasModification()) {
-            p.print(getModification(), str, indent);
+        if (hasSrcModification()) {
+            p.print(getSrcModification(), str, indent);
         }
     }
 
-    public void ComponentRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcComponentRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getEach()) {
             str.print("each ");
         }
         if (getFinal()) {
             str.print("final ");
         }
-        p.print(getComponentClause(), str, indent);
+        p.print(getSrcComponentClause(), str, indent);
     }
 
-    public void ClassRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcClassRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
         if (getEach())
             str.print("each ");
         if (getFinal())
             str.print("final ");
-        p.print(getBaseClassDecl(), str, indent);
+        p.print(getSrcBaseClassDecl(), str, indent);
     }
 
 	public void Opt.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -711,13 +714,13 @@ aspect PrettyPrint {
 			p.print(getChild(0),str,indent);
 	}
 
-	public void Equation.prettyPrint(Printer p,CodeStream str, String indent) {
+	public void SrcEquation.prettyPrint(Printer p,CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(" = ");
 		p.print(getRight(),str,indent);
 	}
 
-	public void ConnectClause.prettyPrint(Printer p,CodeStream str, String indent) {
+	public void SrcConnectClause.prettyPrint(Printer p,CodeStream str, String indent) {
 		str.print("connect(");
 		p.print(getConnector1(),str,indent);
 		str.print(",");
@@ -725,14 +728,14 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 	
-	public void DotAddExp.prettyPrint(Printer p,CodeStream str, String indent) {
+	public void SrcDotAddExp.prettyPrint(Printer p,CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
-		if(!(getRight() instanceof NegExp)) 
+		if(!(getRight() instanceof SrcNegExp)) 
 			str.print(op());
 		p.print(getRight(),str,indent);
 	}
 		
-	public void DotSubExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcDotSubExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(op());
 		if (getRight().isAddOrSub()) {
@@ -743,7 +746,7 @@ aspect PrettyPrint {
 			p.print(getRight(),str,indent);
 	}
 		
-	public void DotMulExp.prettyPrint(Printer p,CodeStream str, String indent) {
+	public void SrcDotMulExp.prettyPrint(Printer p,CodeStream str, String indent) {
 		if (getLeft().isAddOrSub()) {
 			str.print("(");
 			p.print(getLeft(),str,indent);
@@ -759,7 +762,7 @@ aspect PrettyPrint {
 			p.print(getRight(),str,indent);
 	}
 		
-	public void DotDivExp.prettyPrint(Printer p, CodeStream str, String indent){
+	public void SrcDotDivExp.prettyPrint(Printer p, CodeStream str, String indent){
 		if (getLeft().isAddOrSub()) {
 			str.print("(");
 			p.print(getLeft(),str,indent);
@@ -772,7 +775,7 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 		
-	public void DotPowExp.prettyPrint(Printer p, CodeStream str, String indent){
+	public void SrcDotPowExp.prettyPrint(Printer p, CodeStream str, String indent){
 		if (!(getLeft().isPrimary())) {
 			str.print("(");
 			p.print(getLeft(),str,indent);
@@ -788,169 +791,169 @@ aspect PrettyPrint {
 			p.print(getRight(),str,indent);
 	}
 		
-	public void NegExp.prettyPrint(Printer p,CodeStream str, String indent){
+	public void SrcNegExp.prettyPrint(Printer p,CodeStream str, String indent){
 		str.print("-");
-		if (getExp().isAddOrSub()) {
+		if (getSrcExp().isAddOrSub()) {
 			str.print("(");
-			p.print(getExp(),str,indent);
+			p.print(getSrcExp(),str,indent);
 			str.print(")");
 		} else
-			p.print(getExp(),str,indent);
+			p.print(getSrcExp(),str,indent);
 	}
 	
-	public void IfExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcIfExp.prettyPrint(Printer p, CodeStream str, String indent) {
         prettyPrintAsElseExp(p, str, indent);
     }
     
-    public void Exp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
+    public void SrcExp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
         str.print(' ');
         p.print(this, str, indent);
     }
     
-    public void IfExp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
+    public void SrcIfExp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
         str.print("if ");
-        p.print(getIfExp(), str, indent);
+        p.print(getSrcIfExp(), str, indent);
         str.print(" then ");
         p.print(getThenExp(), str, indent);
         str.print(" else");
         getElseExp().prettyPrintAsElseExp(p, str, indent);
     }
 	
-	public void RealLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcRealLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getUNSIGNED_NUMBER());
 	}
 
-	public void IntegerLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcIntegerLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getUNSIGNED_INTEGER());
 	}
 	
-	public void TimeExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcTimeExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("time");
 	}
 
-	public void EndExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcEndExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("end");
 	}
 	
-	public void FunctionCall.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcFunctionCall.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getName(),str,indent);
 		str.print("("); 
-		p.print(getFunctionArgumentsOpt(),str,indent);
+		p.print(getSrcFunctionArgumentsOpt(),str,indent);
 		str.print(")");
 	}
 
-	public void FunctionArguments.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (int i=0; i<getNumExp(); i++) {
-			p.print(getExp(i),str,indent);
-			if (i<getNumExp()-1)
+	public void SrcFunctionArguments.prettyPrint(Printer p, CodeStream str, String indent) {
+		for (int i=0; i<getNumSrcExp(); i++) {
+			p.print(getSrcExp(i),str,indent);
+			if (i<getNumSrcExp()-1)
 				str.print(",");
 		}
 	}
 
-    public void IdDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcIdDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getID());
     }
 
-    public void EndDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcEndDecl.prettyPrint(Printer p, CodeStream str, String indent) {
         str.println(indent, "end ", getEndID(), ";");
     }
 
-    public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcNamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getID());
     }
 
-    public void ArrayAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcArrayAccess.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getID());
-        getArraySubscripts().prettyPrint(p, str, indent);
+        getSrcArraySubscripts().prettyPrint(p, str, indent);
     }
 
-	public void Dot.prettyPrint(Printer p, CodeStream str, String indent) {
-		getAccesss().prettyPrintWithSep(p, str, indent, ".");
+	public void SrcDot.prettyPrint(Printer p, CodeStream str, String indent) {
+		getSrcAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
 
-	public void GlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcGlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(".");
-		p.print(getAccess(),str,indent);	
+		p.print(getSrcAccess(),str,indent);	
 	}
 
-    public void StringLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcStringLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print("\"", getSTRING(), "\"");
     }
 
-	public void BooleanLitExpTrue.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcBooleanLitExpTrue.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("true");
 	}
 
-	public void BooleanLitExpFalse.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcBooleanLitExpFalse.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("false");
 	}
 	
-	public void ArrayConstructor.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcArrayConstructor.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("{");
-		p.print(getFunctionArguments(),str,indent);
+		p.print(getSrcFunctionArguments(),str,indent);
 		str.print("}");
 	}
 	
-	public void Matrix.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcMatrix.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("[");
 		getRows().prettyPrintWithSep(p, str, indent, "; ");
 		str.print("]");
 	}
 	
-	public void MatrixRow.prettyPrint(Printer p, CodeStream str, String indent) {
-		getExps().prettyPrintWithSep(p, str, indent, ", ");
+	public void SrcMatrixRow.prettyPrint(Printer p, CodeStream str, String indent) {
+		getSrcExps().prettyPrintWithSep(p, str, indent, ", ");
 	}
 	
-	syn boolean Exp.isAddOrSub() = false;
-	eq DotAddExp.isAddOrSub() = true;
-	eq DotSubExp.isAddOrSub() = true;
-	syn boolean Exp.isPrimary() = false;
-	eq AccessExp.isPrimary() = true;
-	eq RealLitExp.isPrimary() = true;
+	syn boolean SrcExp.isAddOrSub() = false;
+	eq SrcDotAddExp.isAddOrSub() = true;
+	eq SrcDotSubExp.isAddOrSub() = true;
+	syn boolean SrcExp.isPrimary() = false;
+	eq SrcAccessExp.isPrimary() = true;
+	eq SrcRealLitExp.isPrimary() = true;
 
-    public void LogBinExp.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void SrcLogBinExp.prettyPrint(Printer p, CodeStream str, String indent) {
         p.print(getLeft(),str,indent);
         str.print(op());
         p.print(getRight(),str,indent);
     }
 
-	syn String BinExp.op();
-	eq LtExp.op()     = "<";
-	eq LeqExp.op()    = "<=";
-	eq GtExp .op()    = ">";
-	eq GeqExp.op()    = ">=";
-	eq EqExp.op()     = "==";
-	eq NeqExp.op()    = "<>";
-	eq OrExp.op()     = " or ";
-	eq AndExp.op()    = " and ";
-	eq AddExp.op()    = "+";
-	eq SubExp.op()    = "-";
-	eq MulExp.op()    = "*";
-	eq DivExp.op()    = "/";
-	eq PowExp.op()    = "^";
-	eq DotAddExp.op() = ".+";
-	eq DotSubExp.op() = ".-";
-	eq DotMulExp.op() = ".*";
-	eq DotDivExp.op() = "./";
-	eq DotPowExp.op() = ".^";
+	syn String SrcBinExp.op();
+	eq SrcLtExp.op()     = "<";
+	eq SrcLeqExp.op()    = "<=";
+	eq SrcGtExp .op()    = ">";
+	eq SrcGeqExp.op()    = ">=";
+	eq SrcEqExp.op()     = "==";
+	eq SrcNeqExp.op()    = "<>";
+	eq SrcOrExp.op()     = " or ";
+	eq SrcAndExp.op()    = " and ";
+	eq SrcAddExp.op()    = "+";
+	eq SrcSubExp.op()    = "-";
+	eq SrcMulExp.op()    = "*";
+	eq SrcDivExp.op()    = "/";
+	eq SrcPowExp.op()    = "^";
+	eq SrcDotAddExp.op() = ".+";
+	eq SrcDotSubExp.op() = ".-";
+	eq SrcDotMulExp.op() = ".*";
+	eq SrcDotDivExp.op() = "./";
+	eq SrcDotPowExp.op() = ".^";
 	
-	public void NotExp.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcNotExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("not ");
-		p.print(getExp(),str,indent);
+		p.print(getSrcExp(),str,indent);
 	}
 
 
-	syn String TypePrefixFlow.toString();
-	eq Flow.toString()   = "flow";
-	eq Stream.toString() = "stream";
-	syn String TypePrefixInputOutput.toString();
-	eq Input.toString()  = "input";
-	eq Output.toString() = "output";
-	syn String TypePrefixVariability.toString();
-	eq Parameter.toString()  = "parameter";
-	eq Discrete.toString()   = "discrete";
-	eq Constant.toString()   = "constant";
-	eq Continuous.toString() = "";
+	syn String SrcTypePrefixFlow.toString();
+	eq SrcFlow.toString()   = "flow";
+	eq SrcStream.toString() = "stream";
+	syn String SrcTypePrefixInputOutput.toString();
+	eq SrcInput.toString()  = "input";
+	eq SrcOutput.toString() = "output";
+	syn String SrcTypePrefixVariability.toString();
+	eq SrcParameter.toString()  = "parameter";
+	eq SrcDiscrete.toString()   = "discrete";
+	eq SrcConstant.toString()   = "constant";
+	eq SrcContinuous.toString() = "";
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();
 	
@@ -1923,19 +1926,19 @@ aspect FlatPrettyPrint {
     eq FContinuous.toStringLiteral()        = "continuous-time";
     eq FCompositeVariability.toStringLiteral() = combine().toStringLiteral();
 
-    syn String Restriction.toString();
-    eq Model.toString()               = "model";
-    eq Block.toString()               = "block";
-    eq MClass.toString()              = "class";
-    eq Connector.toString()           = "connector";
-    eq ExpandableConnector.toString() = "expandable connector";
-    eq MType.toString()               = "type";
-    eq MPackage.toString()            = "package";
-    eq Function.toString()            = "function";
-    eq Record.toString()              = "record";
-    eq Operator.toString()            = "operator";
-    eq OperatorRecord.toString()      = "operator record";
-    eq OperatorFunction.toString()    = "operator function";
+    syn String SrcRestriction.toString();
+    eq SrcModel.toString()               = "model";
+    eq SrcBlock.toString()               = "block";
+    eq SrcClass.toString()              = "class";
+    eq SrcConnector.toString()           = "connector";
+    eq SrcExpandableConnector.toString() = "expandable connector";
+    eq SrcType.toString()               = "type";
+    eq SrcPackage.toString()            = "package";
+    eq SrcFunction.toString()            = "function";
+    eq SrcRecord.toString()              = "record";
+    eq SrcOperator.toString()            = "operator";
+    eq SrcOperatorRecord.toString()      = "operator record";
+    eq SrcOperatorFunction.toString()    = "operator function";
 
     syn String InstRestriction.toString();
     eq InstModel.toString()               = "model";
@@ -1951,9 +1954,9 @@ aspect FlatPrettyPrint {
     eq InstOperatorRecord.toString()      = "operator record";
     eq InstOperatorFunction.toString()    = "operator function";
 
-    syn String ComponentDecl.toString() = prettyPrint("");
-    syn String Access.toString()        = prettyPrint("");
-    syn String Modification.toString()  = prettyPrint("");
+    syn String SrcComponentDecl.toString() = prettyPrint("");
+    syn String SrcAccess.toString()        = prettyPrint("");
+    syn String SrcModification.toString()  = prettyPrint("");
 }
 
 aspect PrettyPrint_MC {
@@ -2139,8 +2142,8 @@ aspect AnnotationPrettyPrinting {
     syn String InstClassDecl.printClassAnnotations(String prefix) = "";
 
     eq InstFullClassDecl.printClassAnnotations(String prefix) {
-        FullClassDecl myDecl = getFullClassDecl();
-        Opt<Annotation> myAnnotation = myDecl.getAnnotationOpt();
+        SrcFullClassDecl myDecl = getSrcFullClassDecl();
+        Opt<SrcAnnotation> myAnnotation = myDecl.getSrcAnnotationOpt();
         String myNode = (myAnnotation.numChildren() > 0 ? prefix + myAnnotation.getChild(0).toString() + "\n" : "");
         StringBuilder string = new StringBuilder(myNode.contains("__JModelica") ? "" : myNode);
         for (InstClassDecl decl : getInstClassDecls()) {
@@ -2148,7 +2151,7 @@ aspect AnnotationPrettyPrinting {
         }
         return string.toString();
     }
-    eq InstAbstractShortClassDecl.printClassAnnotations(String prefix) = getShortClassDecl().srcAnnotation().toString();
+    eq InstAbstractShortClassDecl.printClassAnnotations(String prefix) = getSrcShortClassDecl().srcAnnotation().toString();
 
     /**
      * Returns a string listing the annotations for components in this class.

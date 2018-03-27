@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-BaseClassDecl base_class_decl
+SrcBaseClassDecl base_class_decl
     = has_encapsulated
       has_partial 
       optimization_restriction
@@ -26,7 +26,7 @@ BaseClassDecl base_class_decl
       end_decl
     {:
         adjustStart(has_encapsulated, has_partial, optimization_restriction);
-        return new OptClassDecl(
+        return new SrcOptClassDecl(
                 start,
                 has_encapsulated.value,
                 has_partial.value,
@@ -42,39 +42,39 @@ BaseClassDecl base_class_decl
     :}
     ;
 
-Clause clause
+SrcClause clause
     = CONSTRAINT
       oconstraint*
     {:
-        return new ConstraintClause(oconstraint);
+        return new SrcConstraintClause(oconstraint);
     :}
     ;
 
-OptimizationClass optimization_restriction
-    = OPTIMIZATION   {: return new OptimizationClass(); :}
+SrcOptimizationClass optimization_restriction
+    = OPTIMIZATION   {: return new SrcOptimizationClass(); :}
     ;
 
-Constraint oconstraint
+SrcConstraint oconstraint
     = artm_exp.a
       EQUALS
       artm_exp.b
       SEMICOLON
     {:
-        return new ConstraintEq(a, b);
+        return new SrcConstraintEq(a, b);
     :}
     | artm_exp.a
       LEQ
       artm_exp.b
       SEMICOLON
     {:
-        return new ConstraintLeq(a,b);
+        return new SrcConstraintLeq(a,b);
     :}
     | artm_exp.a
       GEQ
       artm_exp.b
       SEMICOLON
     {:
-        return new ConstraintGeq(a, b);
+        return new SrcConstraintGeq(a, b);
     :}
     | FOR
       for_indices
@@ -82,7 +82,7 @@ Constraint oconstraint
       oconstraint*
       END_FOR SEMICOLON
     {:
-        return new ForClauseC(for_indices, oconstraint);
+        return new SrcForClauseC(for_indices, oconstraint);
     :}
     ;
 

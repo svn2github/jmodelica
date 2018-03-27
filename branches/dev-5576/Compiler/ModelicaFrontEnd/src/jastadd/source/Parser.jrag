@@ -67,7 +67,7 @@ aspect Parsers {
             throw ce;
         }
         //loadOptions(sr);
-        for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+        for (SrcStoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
             sd.setFileName(name);
         }
         return sr;
@@ -81,13 +81,13 @@ aspect Parsers {
             File f = new File(name);
             String name_tmp = name;
             if (f.isDirectory()) 
-                name_tmp = LibNode.packageFile(f);
+                name_tmp = SrcLibNode.packageFile(f);
             SourceRoot sr_tmp = (name_tmp != null) ? parseModel(uif, name_tmp) : null;
             if (!uif.getOptionRegistry().getBooleanOption("ignore_within")) {
                 String lib = null;
                 if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
                     lib = sr_tmp.findOutermostLibraryDir();
-                else if (LibNode.isPackageFile(f))
+                else if (SrcLibNode.isPackageFile(f))
                     lib = f.getParent();
                 if (lib != null) {
                     String type = f.isDirectory() ? "Directory" : "File";
@@ -97,10 +97,10 @@ aspect Parsers {
                 }
             }
             if (f.isDirectory()) {
-                if (!sr.getProgram().getLibraryList().addLibrary(name, LibNode.LoadReason.COMMANDLINE)) 
+                if (!sr.getProgram().getLibraryList().addLibrary(name, SrcLibNode.LoadReason.COMMANDLINE)) 
                     ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
             } else {
-                for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+                for (SrcStoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
                     sr.getProgram().addUnstructuredEntity(sd);
             }
         }
@@ -172,12 +172,12 @@ aspect Parsers {
         return parseModelicaString(uif, str, fileName);
     }
 
-    public Exp ParserHandler.parseExpString(String str)
+    public SrcExp ParserHandler.parseExpString(String str)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseModelicaExpString(str);
     }
 
-    public BaseClassDecl ParserHandler.parseAnonymousClassString(String code, Restriction restriction, String targetName)
+    public SrcBaseClassDecl ParserHandler.parseAnonymousClassString(String code, SrcRestriction restriction, String targetName)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseModelicaAnonymousClassString(code, restriction, targetName);
     }
@@ -209,16 +209,16 @@ aspect Parsers {
     
     public static final String ParserHandler.EXP_FILENAME = "<predefined string>";
 
-    public Exp ParserHandler.parseModelicaExpString(String str)
+    public SrcExp ParserHandler.parseModelicaExpString(String str)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseModelicaExpString(str, false);
     }
 
-    public Exp ParserHandler.parseModelicaExpString(String str, boolean preservFormatting)
+    public SrcExp ParserHandler.parseModelicaExpString(String str, boolean preservFormatting)
             throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(str));
         beaver.Parser parser = createModelicaParser(scanner, EXP_FILENAME);
-        Exp exp = (Exp) parser.parse(scanner, expModelicaGoal());
+        SrcExp exp = (SrcExp) parser.parse(scanner, expModelicaGoal());
         if (preservFormatting) {
             scanner.getFormattingRecorder().postParsing(exp);
         }
@@ -227,56 +227,56 @@ aspect Parsers {
 
     public static final String ParserHandler.ANONYMOUS_CLASS_FILENAME = "<command line argument>";
 
-    public BaseClassDecl ParserHandler.parseModelicaAnonymousClassString(String code, Restriction restriction, String targetName)
+    public SrcBaseClassDecl ParserHandler.parseModelicaAnonymousClassString(String code, SrcRestriction restriction, String targetName)
             throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
         beaver.Parser parser = createModelicaParser(scanner, ANONYMOUS_CLASS_FILENAME);
-        BaseClassDecl cl = (BaseClassDecl) parser.parse(scanner, anonymousClassModelicaGoal());
-        cl.setRestriction(restriction);
-        cl.setName(new IdDecl(targetName));
+        SrcBaseClassDecl cl = (SrcBaseClassDecl) parser.parse(scanner, anonymousClassModelicaGoal());
+        cl.setSrcRestriction(restriction);
+        cl.setName(new SrcIdDecl(targetName));
         return cl;
     }
 
-    public Element ParserHandler.parseElemet(String code, String parentSourceFile)
+    public SrcElement ParserHandler.parseElemet(String code, String parentSourceFile)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseElemet(code, parentSourceFile, false);
     }
 
-    public Element ParserHandler.parseElemet(String code, String parentSourceFile, boolean preservFormatting)
+    public SrcElement ParserHandler.parseElemet(String code, String parentSourceFile, boolean preservFormatting)
             throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner<ASTNode<?>> scanner = createModelicaScanner(new StringReader(code));
         beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        Element elem = (Element) parser.parse(scanner, elementGoal());
+        SrcElement elem = (SrcElement) parser.parse(scanner, elementGoal());
         if (preservFormatting) {
             scanner.getFormattingRecorder().postParsing(elem);
         }
         return elem;
     }
 
-    public AbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile)
+    public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseAbstractEquation(code, parentSourceFile, false);
     }
-    public AbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile,
+    public SrcAbstractEquation ParserHandler.parseAbstractEquation(String code, String parentSourceFile,
             boolean preservFormatting) throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
         beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        AbstractEquation eqn = (AbstractEquation) parser.parse(scanner, abstractEquationGoal());
+        SrcAbstractEquation eqn = (SrcAbstractEquation) parser.parse(scanner, abstractEquationGoal());
         if (preservFormatting) {
             scanner.getFormattingRecorder().postParsing(eqn);
         }
         return eqn;
     }
 
-    public Argument ParserHandler.parseModifier(String code, String parentSourceFile)
+    public SrcArgument ParserHandler.parseModifier(String code, String parentSourceFile)
             throws ParserException, beaver.Parser.Exception, IOException {
         return parseModifier(code, parentSourceFile, false);
     }
-    public Argument ParserHandler.parseModifier(String code, String parentSourceFile,
+    public SrcArgument ParserHandler.parseModifier(String code, String parentSourceFile,
             boolean preservFormatting) throws ParserException, beaver.Parser.Exception, IOException {
         AbstractModelicaScanner scanner = createModelicaScanner(new StringReader(code));
         beaver.Parser parser = createModelicaParser(scanner, parentSourceFile);
-        Argument eqn = (Argument) parser.parse(scanner, modifierGoal());
+        SrcArgument eqn = (SrcArgument) parser.parse(scanner, modifierGoal());
         if (preservFormatting) {
             scanner.getFormattingRecorder().postParsing(eqn);
         }
@@ -351,18 +351,18 @@ aspect ParserHelpers {
     }
 
     /**
-     * Generate Access node for ComponentRedeclare nodes during parsing.
+     * Generate SrcAccess node for SrcComponentRedeclare nodes during parsing.
      */
-    public Access ComponentClause.createAccessForRedeclareNode() {
-        ComponentDecl cd = getComponentDeclNoTransform(0);
-        IdDecl name = cd.getNameNoTransform();
-        Opt<ArraySubscripts> arr = cd.getVarArraySubscriptsOptNoTransform();
-        Access a;
+    public SrcAccess SrcComponentClause.createAccessForRedeclareNode() {
+        SrcComponentDecl cd = getSrcComponentDeclNoTransform(0);
+        SrcIdDecl name = cd.getNameNoTransform();
+        Opt<SrcArraySubscripts> arr = cd.getVarArraySubscriptsOptNoTransform();
+        SrcAccess a;
         if (arr.hasChild()) {
-            a = new ArrayAccess(name.getID(), arr.getChild().treeCopyNoTransform());
+            a = new SrcArrayAccess(name.getID(), arr.getChild().treeCopyNoTransform());
             a.setLocationNoTree(name, arr);
         } else {
-            a = new NamedAccess(name.getID());
+            a = new SrcNamedAccess(name.getID());
             a.setLocationNoTree(name);
         }
         return a;

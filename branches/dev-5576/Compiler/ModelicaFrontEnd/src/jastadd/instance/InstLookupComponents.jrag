@@ -670,7 +670,7 @@ aspect InstLookupComponents {
 
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstConstant(String name) {
         for (InstComponentDecl ic : getInstComponentDecls()) 
-            if (ic.getComponentDecl().isConstant() && ic.matches(name))
+            if (ic.getSrcComponentDecl().isConstant() && ic.matches(name))
                 return InstLookupResult.found(ic);
         
         return InstLookupResult.notFound();

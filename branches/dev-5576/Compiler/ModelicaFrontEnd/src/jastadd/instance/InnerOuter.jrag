@@ -96,7 +96,7 @@ aspect InnerOuterComponents {
     eq InstGeneratedInner.getChild().myEnvironment(String name) = new Environment();
 
     public InstGeneratedInner.InstGeneratedInner(InstClassDecl parent, InstComponentDecl outer, InstComponentDecl nonInner) {
-        this(parent.createInstComponentDecl(outer.getComponentDecl()), outer, nonInner);
+        this(parent.createInstComponentDecl(outer.getSrcComponentDecl()), outer, nonInner);
         addOuter(outer);
     }
 
