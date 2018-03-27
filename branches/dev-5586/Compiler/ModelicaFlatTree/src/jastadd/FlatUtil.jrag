@@ -1224,7 +1224,7 @@ aspect FlatFunctionUtils {
       */
      syn boolean InstComponentDecl.isModifiable() = 
              !(definedVariability().constantVariability() && hasBindingExp()) &&
-             !(definedVariability().parameterVariability() && getComponentDecl().hasFinal());
+             !(definedVariability().parameterVariability() && getSrcComponentDecl().hasFinal());
      
      /**
       * Returns a list of all FFunctionVariables declared as "input".
@@ -1906,7 +1906,7 @@ aspect DefaultExperiment {
     /**
      * Check if a class has an "experiment" annotation.
      */
-    syn boolean ClassDecl.isExperiment() = annotation("experiment").exists();
+    syn boolean SrcClassDecl.isExperiment() = annotation("experiment").exists();
     
     /**
      * Check if a class has an "experiment" annotation.

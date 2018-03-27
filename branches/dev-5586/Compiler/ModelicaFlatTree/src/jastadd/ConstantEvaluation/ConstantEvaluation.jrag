@@ -4474,17 +4474,17 @@ aspect AritmeticTransformations {
 }
 
 aspect SourceCeval {
-    syn CValue Exp.ceval()        = CValue.UNKNOWN;
-    eq StringLitExp.ceval()       = new CValueString(unEscape());
-    eq AccessExp.ceval()          = new CValueString(getAccess().name());
-    eq BooleanLitExpTrue.ceval()  = CValueBoolean.TRUE;
-    eq BooleanLitExpFalse.ceval() = CValueBoolean.FALSE;
-    eq IntegerLitExp.ceval()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
-    eq RealLitExp.ceval()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
-    eq ArrayConstructor.ceval()   = cevalArray();
-    eq Matrix.ceval()             = cevalArray();
-    eq NegExp.ceval() {
-        CValue value = getExp().ceval();
+    syn CValue SrcExp.ceval()        = CValue.UNKNOWN;
+    eq SrcStringLitExp.ceval()       = new CValueString(unEscape());
+    eq SrcAccessExp.ceval()          = new CValueString(getSrcAccess().name());
+    eq SrcBooleanLitExpTrue.ceval()  = CValueBoolean.TRUE;
+    eq SrcBooleanLitExpFalse.ceval() = CValueBoolean.FALSE;
+    eq SrcIntegerLitExp.ceval()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
+    eq SrcRealLitExp.ceval()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
+    eq SrcArrayConstructor.ceval()   = cevalArray();
+    eq SrcMatrix.ceval()             = cevalArray();
+    eq SrcNegExp.ceval() {
+        CValue value = getSrcExp().ceval();
         if (value.isInteger())
             return new CValueInteger(-value.intValue());
         else if (value.isReal())
@@ -4493,14 +4493,14 @@ aspect SourceCeval {
             return CValue.UNKNOWN;
     }
     
-    syn CValue Exp.cevalArray() = fillArrayCValue(new CValueArray(sizeCeval()));
+    syn CValue SrcExp.cevalArray() = fillArrayCValue(new CValueArray(sizeCeval()));
     
-    public CValue Exp.fillArrayCValue(CValueArray arrayValue) {
-        List<? extends Exp> exps = arrayChildrenForCeval();
+    public CValue SrcExp.fillArrayCValue(CValueArray arrayValue) {
+        List<? extends SrcExp> exps = arrayChildrenForCeval();
         if (exps == null) {
             arrayValue.addCell(ceval());
         } else {
-            for (Exp exp : exps) {
+            for (SrcExp exp : exps) {
                 exp.fillArrayCValue(arrayValue);
             }
         }
@@ -4512,10 +4512,10 @@ aspect SourceCeval {
      * expressions. This implementation simply delegates to ceval() without
      * arguments.
      */
-    syn CValue Exp.ceval(VariableEvaluator evaluator) = ceval();
+    syn CValue SrcExp.ceval(VariableEvaluator evaluator) = ceval();
 
-    syn int Exp.ndimsCeval() {
-        List<? extends Exp> exps = arrayChildrenForCeval();
+    syn int SrcExp.ndimsCeval() {
+        List<? extends SrcExp> exps = arrayChildrenForCeval();
         if (exps == null) {
             return 0;
         } else if (exps.getNumChild() == 0) {
@@ -4525,7 +4525,7 @@ aspect SourceCeval {
         }
     }
 
-    syn Size Exp.sizeCeval() {
+    syn Size SrcExp.sizeCeval() {
         int n = ndimsCeval();
         if (n == 0) {
             return Size.SCALAR;
@@ -4536,25 +4536,25 @@ aspect SourceCeval {
         }
     }
 
-    public void Exp.fillSizeCeval(int[] dims, int i) {
-        List<? extends Exp> exps = arrayChildrenForCeval();
+    public void SrcExp.fillSizeCeval(int[] dims, int i) {
+        List<? extends SrcExp> exps = arrayChildrenForCeval();
         dims[i] = exps.getNumChild();
         if (i + 1 < dims.length && dims[i] > 0) {
             exps.getChild(0).fillSizeCeval(dims, i + 1);
         }
     }
 
-    syn List<? extends Exp> Exp.arrayChildrenForCeval()   = null;
-    eq ArrayConstructor.arrayChildrenForCeval() = getFunctionArguments().getExps();
-    eq Matrix.arrayChildrenForCeval()           = getRows();
-    eq MatrixRow.arrayChildrenForCeval()        = getExps();
+    syn List<? extends SrcExp> SrcExp.arrayChildrenForCeval()   = null;
+    eq SrcArrayConstructor.arrayChildrenForCeval() = getSrcFunctionArguments().getSrcExps();
+    eq SrcMatrix.arrayChildrenForCeval()           = getRows();
+    eq SrcMatrixRow.arrayChildrenForCeval()        = getSrcExps();
 }
 
 aspect ConstantEvaluable {
-    Exp implements Evaluable;
+    SrcExp implements Evaluable;
     FExp implements Evaluable;
     
-    public ConstValue Exp.evaluateValue() {
+    public ConstValue SrcExp.evaluateValue() {
         try {
             return ceval();
         } catch (ConstantEvaluationException e) {

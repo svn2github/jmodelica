@@ -17,19 +17,19 @@
 aspect OptimicaPrettyPrint {
 
 
-    public void OptClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
+    public void SrcOptClassDecl.prettyPrintClassName(Printer p, CodeStream str, String indent) {
         p.print(getName(), str, indent);
-        if (hasClassModification()) {
+        if (hasSrcClassModification()) {
             str.print(" ");
-            p.print(getClassModification(), str, indent);
+            p.print(getSrcClassModification(), str, indent);
         }
     }
 
-    eq ConstraintClause.clauseHeader(String separator) = "constraint";
+    eq SrcConstraintClause.clauseHeader(String separator) = "constraint";
 
     @Override
-    public void ConstraintClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
-        for (Constraint c : getConstraints()) {
+    public void SrcConstraintClause.prettyPrintClauseBody(Printer p, CodeStream str, String indent, boolean doFormatting) {
+        for (SrcConstraint c : getSrcConstraints()) {
             p.print(c, str, indent);
             if (doFormatting) {
                 str.println(";");
@@ -37,21 +37,21 @@ aspect OptimicaPrettyPrint {
         }
     }
 
-	public void RelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcRelationConstraint.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(op());
 		p.print(getRight(),str,indent);
 	}
 
-	syn String RelationConstraint.op();
-	eq ConstraintEq.op()  = " = ";
-	eq ConstraintLeq.op() = " <= ";
-	eq ConstraintGeq.op() = " >= ";
+	syn String SrcRelationConstraint.op();
+	eq SrcConstraintEq.op()  = " = ";
+	eq SrcConstraintLeq.op() = " <= ";
+	eq SrcConstraintGeq.op() = " >= ";
 	
-    eq OptimizationClass.toString()     = "optimization";
+    eq SrcOptimizationClass.toString()  = "optimization";
     eq InstOptimizationClass.toString() = "optimization";
 
-	public void TimedVariable.prettyPrint(Printer p, CodeStream str, String indent) {
+	public void SrcTimedVariable.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		p.print(getArg(), str, indent);

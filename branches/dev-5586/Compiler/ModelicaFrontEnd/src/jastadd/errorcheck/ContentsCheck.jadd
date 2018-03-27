@@ -256,7 +256,7 @@ aspect ContentCheck {
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
         if (!inFunction()) // Array sizes outside functions should be structural parameters
             size().forceVariability(checkType, fStructParameter());
-        checkQuotedIdentifier(getComponentDecl(), name());
+        checkQuotedIdentifier(getSrcComponentDecl(), name());
         checkAbsoluteValue();
     }
 
@@ -307,7 +307,7 @@ aspect ContentCheck {
             }
         }
         
-        checkQuotedIdentifier(getClassDecl().getName(), name());
+        checkQuotedIdentifier(getSrcClassDecl().getName(), name());
         checkAbsoluteValue();
     }
     

@@ -42,7 +42,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public XMLCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public XMLCodeGenTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 		

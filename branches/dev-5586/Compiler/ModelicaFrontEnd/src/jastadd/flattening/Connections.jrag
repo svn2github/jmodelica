@@ -2662,7 +2662,7 @@ aspect ExpandableConnectors {
                         }
                         res = tmpl;
                     } else {
-                        ComponentDecl cd = tmpl.getComponentDecl();
+                        SrcComponentDecl cd = tmpl.getSrcComponentDecl();
                         res = tmpl.myInstClass().newInstComponentDeclCopy(
                                 name, subscripts(), cd, cd.getClassName());
                     }

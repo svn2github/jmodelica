@@ -16,19 +16,19 @@
 
 aspect OptimicaSourceTraversal {
 
-    syn Iterable<Constraint> ClassDecl.constraints();
-    eq ClassDecl.constraints()    = Collections.<Constraint>emptyList();
-    eq OptClassDecl.constraints() = new Iterable<Constraint>() {
-        public Iterator<Constraint> iterator() {
-            return new ClauseElementIterator<Constraint>() {
-                protected Iterator<Constraint> subIterator(Clause c) {
+    syn Iterable<SrcConstraint> SrcClassDecl.constraints();
+    eq SrcClassDecl.constraints()    = Collections.<SrcConstraint>emptyList();
+    eq SrcOptClassDecl.constraints() = new Iterable<SrcConstraint>() {
+        public Iterator<SrcConstraint> iterator() {
+            return new ClauseElementIterator<SrcConstraint>() {
+                protected Iterator<SrcConstraint> subIterator(SrcClause c) {
                     return c.constraintIterator();
                 }
             };
         }
     };
 
-    syn Iterator<Constraint> Clause.constraintIterator() = null;
-    eq ConstraintClause.constraintIterator()             = getConstraints().iterator();
+    syn Iterator<SrcConstraint> SrcClause.constraintIterator() = null;
+    eq SrcConstraintClause.constraintIterator()                = getSrcConstraints().iterator();
 
 }

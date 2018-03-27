@@ -100,7 +100,7 @@ abstract public class TestAnnotationizerHelper {
     public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
         try {
             SourceRoot root = parse(filePath, modelName, createTestOptions());
-            ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
+            SrcClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
             if (cd.isUnknown()) {
                 System.err.println("Class " + modelName + " not found");
                 return;
@@ -120,7 +120,7 @@ abstract public class TestAnnotationizerHelper {
                 return;
             }
             Class cl = getTestCase(test.name());
-            Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
+            Constructor constructor = cl.getConstructor(SrcClassDecl.class, String.class, String.class);
             TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(cd, filePath, modelName);
             ta.createAnnotation(write);
         } catch (Exception e) {
@@ -292,7 +292,7 @@ abstract public class TestAnnotationizerHelper {
      * @param filePath     the path to the Modelica file containing the test model
      * @param className    the name of the test model
      */
-    public TestAnnotationizerHelper(ClassDecl cd, String filePath, String className) throws Exception {
+    public TestAnnotationizerHelper(SrcClassDecl cd, String filePath, String className) throws Exception {
         this.filePath = filePath;
         this.className = className;
         beginLine = cd.beginLine();
@@ -334,7 +334,7 @@ abstract public class TestAnnotationizerHelper {
 			String str = prepare(a.string().trim());
 			return option ? '"' + str + '"' : str;
 		} else {
-			Exp exp = a.exp();
+			SrcExp exp = a.exp();
 			if (exp != null)
 				return exp.toString();
 		}
@@ -356,7 +356,7 @@ abstract public class TestAnnotationizerHelper {
     protected void process() throws Exception {
         testName = className.substring(className.indexOf('.') + 1).replace('.', '_');
         root = parse(filesToParse(filePath, libs), className, optionRegistry());
-        ClassDecl cd = root.getProgram().simpleLookupClassDotted(className);
+        SrcClassDecl cd = root.getProgram().simpleLookupClassDotted(className);
         beginLine = cd.beginLine();
         endLine = cd.endLine();
     }
@@ -397,7 +397,7 @@ abstract public class TestAnnotationizerHelper {
             ce.addProblem(e.getProblem());
             throw ce;
         }
-        for (StoredDefinition sd : root.getProgram().getUnstructuredEntitys()) 
+        for (SrcStoredDefinition sd : root.getProgram().getUnstructuredEntitys()) 
             sd.setFileName(files[0]);
         return root;
     }
@@ -746,7 +746,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public CodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public CodeGenTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 
@@ -811,7 +811,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public GenericCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public GenericCodeGenTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 		
@@ -860,7 +860,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public FlatteningTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public FlatteningTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 		
@@ -907,7 +907,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public TransformCanonicalTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public TransformCanonicalTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 		
@@ -946,7 +946,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public ErrorTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public ErrorTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 
@@ -1011,7 +1011,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public WarningTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public WarningTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 		
@@ -1057,7 +1057,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public ComplianceErrorTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public ComplianceErrorTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 		
@@ -1100,7 +1100,7 @@ abstract public class TestAnnotationizerHelper {
          * @param filePath     the path to the Modelica file containing the test model
          * @param className    the name of the test model
          */
-        public MethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+        public MethodTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
             super(cd, filePath, className);
         }
         
@@ -1163,7 +1163,7 @@ abstract public class TestAnnotationizerHelper {
          * @param filePath     the path to the Modelica file containing the test model
          * @param className    the name of the test model
          */
-        public FClassMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+        public FClassMethodTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
             super(cd, filePath, className);
         }
         
@@ -1199,7 +1199,7 @@ abstract public class TestAnnotationizerHelper {
          * @param filePath     the path to the Modelica file containing the test model
          * @param className    the name of the test model
          */
-        public InstClassMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+        public InstClassMethodTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
             super(cd, filePath, className);
         }
         
@@ -1234,7 +1234,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public SourceMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public SourceMethodTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 
@@ -1273,7 +1273,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public EvalTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public EvalTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 
@@ -1373,7 +1373,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public TimeTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+		public TimeTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 
@@ -1436,7 +1436,7 @@ abstract public class TestAnnotationizerHelper {
          * @param filePath     the path to the Modelica file containing the test model
          * @param className    the name of the test model
          */
-        public OptionTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+        public OptionTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
             super(cd, filePath, className);
         }
 

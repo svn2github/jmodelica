@@ -824,11 +824,11 @@ aspect OptimicaFlatAPI {
     
     syn boolean FAttribute.isObjective() = getName().name().equals("objective");
 	
-	syn boolean Restriction.isOptimizationClass() = false;
-	eq OptimizationClass.isOptimizationClass() = true;
-	syn boolean ClassDecl.isOptimizationClass() = false;
-	eq BaseClassDecl.isOptimizationClass() = getRestriction().isOptimizationClass();
-	syn boolean InstClassDecl.isOptimizationClass() = getClassDecl().isOptimizationClass();
+	syn boolean SrcRestriction.isOptimizationClass() = false;
+	eq SrcOptimizationClass.isOptimizationClass() = true;
+	syn boolean SrcClassDecl.isOptimizationClass() = false;
+	eq SrcBaseClassDecl.isOptimizationClass() = getSrcRestriction().isOptimizationClass();
+	syn boolean InstClassDecl.isOptimizationClass() = getSrcClassDecl().isOptimizationClass();
 	
 	eq FOptClass.getFAttribute().size() = Size.SCALAR;
 	
