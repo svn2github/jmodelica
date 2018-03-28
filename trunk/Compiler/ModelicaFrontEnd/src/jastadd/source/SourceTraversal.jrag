@@ -21,6 +21,7 @@ import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.collections.NestledIterator;
 import org.jmodelica.util.collections.NestledIterable;
+import org.jmodelica.util.collections.SubClassIterable;
 import org.jmodelica.util.Criteria;
 
 aspect SourceTraversal {
@@ -39,19 +40,6 @@ aspect SourceTraversal {
         }
     };
 
-    syn Iterable<SrcAlgorithm> SrcClassDecl.algorithms();
-    eq SrcClassDecl.algorithms()     = Collections.<SrcAlgorithm>emptyList();
-    eq SrcLibNode.algorithms()       = myClass().algorithms();
-    eq SrcFullClassDecl.algorithms() = new Iterable<SrcAlgorithm>() {
-        public Iterator<SrcAlgorithm> iterator() {
-            return new ClauseElementIterator<SrcAlgorithm>() {
-                protected Iterator<SrcAlgorithm> subIterator(SrcClause c) {
-                    return c.algorithmIterator();
-                }
-            };
-        }
-    };
-    
     syn Iterable<SrcExtendsClause> SrcClassDecl.superClasses();
     eq SrcClassDecl.superClasses()       = Collections.<SrcExtendsClause>emptyList();
     eq SrcShortClassDecl.superClasses()  = 
@@ -282,4 +270,26 @@ aspect SourceTraversal {
     eq SrcGlobalAccess.nameParts() = getSrcAccess().nameParts();
     eq SrcDot.nameParts()          = getSrcAccesss();
 
+    public <T extends SrcClause> Iterable<T> SrcClassDecl.clauses(Class<T> type) {
+        return Collections.<T>emptyList();
+    }
+    @Override
+    public <T extends SrcClause> Iterable<T> SrcLibNode.clauses(Class<T> type) {
+        return myClass().clauses(type);
+    }
+    @Override
+    public <T extends SrcClause> Iterable<T> SrcFullClassDecl.clauses(Class<T> type) {
+        return new SubClassIterable<SrcClause, T>(type, getSrcClauses());
+    }
+    syn Iterable<SrcElementList>    SrcClassDecl.elementLists()    = clauses(SrcElementList.class);
+    syn Iterable<SrcEquationClause> SrcClassDecl.equationClauses() = clauses(SrcEquationClause.class);
+    syn Iterable<SrcAlgorithm>      SrcClassDecl.algorithms()      = clauses(SrcAlgorithm.class);
+
+    public <T extends SrcElement> Iterable<T> SrcElementList.elements(Class<T> type) {
+        return new SubClassIterable<SrcElement, T>(type, getSrcElements());
+    }
+    syn Iterable<SrcClassDecl>       SrcElementList.classDecls()       = elements(SrcClassDecl.class);
+    syn Iterable<SrcComponentClause> SrcElementList.componentClauses() = elements(SrcComponentClause.class);
+    syn Iterable<SrcExtendsClause>   SrcElementList.extendsClauses()   = elements(SrcExtendsClause.class);
+    syn Iterable<SrcImportClause>    SrcElementList.importClauses()    = elements(SrcImportClause.class);
 }
