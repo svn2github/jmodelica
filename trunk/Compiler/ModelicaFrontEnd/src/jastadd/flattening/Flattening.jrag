@@ -1306,9 +1306,9 @@ aspect Flattening {
     public String ASTNode.runtimeErrorString(String msg) {
         StringBuilder sb = new StringBuilder();
         sb.append("Error at line ");
-        sb.append(lineNumber());
+        sb.append(beginLineRecursive());
         sb.append(", column ");
-        sb.append(columnNumber());
+        sb.append(beginColumnRecursive());
         sb.append(", in file '");
         sb.append(fileName().replace("\\", "\\\\"));
         sb.append("': ");

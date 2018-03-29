@@ -58,7 +58,7 @@ model LibraryTest3
             errorMessage="
 2 errors found:
 
-Error at line 0, column 0, in file 'Compiler/ModelicaCompiler/test/modelica/EmptyLib/package.mo', LIBRARY_FILE_CONTENTS:
+Error in file 'Compiler/ModelicaCompiler/test/modelica/EmptyLib/package.mo', LIBRARY_FILE_CONTENTS:
   Class 'EmptyLib' must be alone at top level of library file, but the file was empty.
 
 Error at line 2, column 26, in file 'Compiler/ModelicaCompiler/test/modelica/LibraryTests.mo':

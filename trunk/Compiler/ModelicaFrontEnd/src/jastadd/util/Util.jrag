@@ -325,11 +325,60 @@ aspect NodeMethods {
     		collector.addLocation(((FVariable)fv).getBindingExp());
     	}
 	}
-    
-    public int ASTNode.beginLine()   { return getLine(getStart()); }
-    public int ASTNode.beginColumn() { return getColumn(getStart()); }
-    public int ASTNode.endLine()     { return getLine(getEnd()); }
-    public int ASTNode.endColumn()   { return getColumn(getEnd()); }
+
+    /**
+     * Returns the starting line for this node, or zero if positional
+     * information is unavailable.
+     */
+    syn int ASTNode.beginLine()   = getLine(getStart());
+    /**
+     * Returns the starting column for this node, or zero if positional
+     * information is unavailable.
+     */
+    syn int ASTNode.beginColumn() = getColumn(getStart());
+    /**
+     * Returns the ending line for this node, or zero if positional
+     * information is unavailable.
+     */
+    syn int ASTNode.endLine()     = getLine(getEnd());
+    /**
+     * Returns the ending column for this node, or zero if positional
+     * information is unavailable.
+     */
+    syn int ASTNode.endColumn()   = getColumn(getEnd());
+
+    /**
+     * Returns the starting line for this node, or if unavailable, will make a
+     * recursive call to the parent and ask for its starting line. Zero is
+     * returned if positional information is unavailable for this node and its
+     * parents.
+     */
+    syn int ASTNode.beginLineRecursive() = (start != 0 || getParent() == null)
+            ? beginLine() : getParent().beginLineRecursive();
+    /**
+     * Returns the starting column for this node, or if unavailable, will make
+     * a recursive call to the parent and ask for its starting column. Zero is
+     * returned if positional information is unavailable for this node and its
+     * parents.
+     */
+    syn int ASTNode.beginColumnRecursive() = (start != 0 || getParent() == null)
+            ? beginColumn() : getParent().beginColumnRecursive();
+    /**
+     * Returns the ending line for this node, or if unavailable, will make a
+     * recursive call to the parent and ask for its ending line. Zero is
+     * returned if positional information is unavailable for this node and its
+     * parents.
+     */
+    syn int ASTNode.endLineRecursive() = (end != 0 || getParent() == null)
+            ? endLine() : getParent().endLineRecursive();
+    /**
+     * Returns the ending column for this node, or if unavailable, will make a
+     * recursive call to the parent and ask for its ending column. Zero is
+     * returned if positional information is unavailable for this node and its
+     * parents.
+     */
+    syn int ASTNode.endColumnRecursive() = (end != 0 || getParent() == null)
+            ? endColumn() : getParent().endColumnRecursive();
 
     public class List {
 
