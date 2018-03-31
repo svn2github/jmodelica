@@ -232,7 +232,7 @@ class Test_FMUModelCS1:
         model = load_fmu(Test_FMUModelCS1.terminate)
         
         model.initialize()
-        status = model.do_step(0,1) 
+        status = model.do_step(0,1)
         
         assert status == fmi.FMI_DISCARD
         assert abs(model.get_real_status(fmi.FMI1_LAST_SUCCESSFUL_TIME) - 0.5) < 1e-3
