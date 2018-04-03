@@ -27,13 +27,13 @@ equation
         reinit(x, 1);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest1",
-            description="",
-            variability_propagation=false,
-            relational_time_events=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest1",
+        description="",
+        variability_propagation=false,
+        relational_time_events=false,
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -44,7 +44,7 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
 
 -----
@@ -111,6 +111,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     return ef;
 }
 
+
 -----
 ")})));
 end ReinitCTest1;
@@ -128,12 +129,12 @@ equation
         reinit(y, 1);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest2",
-            description="",
-            variability_propagation=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest2",
+        description="",
+        variability_propagation=false,
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -144,7 +145,7 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     jmi_real_t tmp_2;
 
@@ -273,13 +274,13 @@ equation
         reinit(y, 1);
     end when;
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest3",
-            description="",
-            variability_propagation=false,
-            relational_time_events=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest3",
+        description="",
+        variability_propagation=false,
+        relational_time_events=false,
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -290,7 +291,7 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     jmi_real_t tmp_2;
 
@@ -406,13 +407,13 @@ equation
         reinit(x, f({1}));
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest4",
-            description="",
-            variability_propagation=false,
-            relational_time_events=false,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest4",
+        description="",
+        variability_propagation=false,
+        relational_time_events=false,
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -423,10 +424,11 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     jmi_real_t tmp_2;
     int tmp_2_computed;
+
 -----
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -521,11 +523,11 @@ equation
         reinit(x, 1);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest5",
-            description="Test the reinit operator in the initial system",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest5",
+        description="Test the reinit operator in the initial system",
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -536,7 +538,7 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     jmi_real_t tmp_2;
 
@@ -589,11 +591,11 @@ equation
         reinit(x, 1);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest6",
-            description="Test the reinit operator in the initial system",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest6",
+        description="Test the reinit operator in the initial system",
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -604,7 +606,7 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     jmi_real_t tmp_2;
 
@@ -842,11 +844,11 @@ equation
         end when;
     end if;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ReinitCTest9",
-            description="",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="Reinit_ReinitCTest9",
+        description="",
+        template="
 $C_global_temps$
 -----
 $C_ode_derivatives$
@@ -857,7 +859,7 @@ $C_dae_blocks_residual_functions$
 -----
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
 
 -----
@@ -959,18 +961,18 @@ equation
         y = f(time);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="WhenTestCache1",
-            description="",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="WhenTestCache_WhenTestCache1",
+        description="",
+        template="
 $C_global_temps$
 $C_ode_derivatives$
 $C_ode_initialization$
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     int tmp_1_computed;
 
@@ -986,6 +988,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
@@ -1034,6 +1037,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
+
 ")})));
 end WhenTestCache1;
 
@@ -1052,16 +1057,18 @@ equation
         x = f(time + y);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="WhenTestCache2",
-            description="",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="WhenTestCache_WhenTestCache2",
+        description="",
+        template="
 $C_global_temps$
 $C_ode_derivatives$
 $C_dae_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
+
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -1111,6 +1118,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end WhenTestCache2;
 
@@ -1129,16 +1137,18 @@ algorithm
         x := f(time);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="WhenTestCache3",
-            description="",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="WhenTestCache_WhenTestCache3",
+        description="",
+        template="
 $C_global_temps$
 $C_ode_derivatives$
 $C_dae_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
+
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -1166,6 +1176,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end WhenTestCache3;
 
@@ -1183,18 +1194,18 @@ equation
         y = f(time);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="WhenTestCache4",
-            description="",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="WhenTestCache_WhenTestCache4",
+        description="",
+        template="
 $C_global_temps$
 $C_ode_derivatives$
 $C_ode_initialization$
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     int tmp_1_computed;
 
@@ -1259,6 +1270,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
+
 ")})));
 end WhenTestCache4;
 
@@ -1280,18 +1293,18 @@ equation
         y = 0;
     end if;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="WhenTestCache5",
-            description="",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="WhenTestCache_WhenTestCache5",
+        description="",
+        template="
 $C_global_temps$
 $C_ode_derivatives$
 $C_ode_initialization$
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
     jmi_real_t tmp_1;
     int tmp_1_computed;
 
@@ -1362,6 +1375,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
+
 ")})));
 end WhenTestCache5;
 

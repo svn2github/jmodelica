@@ -108,8 +108,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_3_2 = x[0];
         }
-        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2),-2,\"(- b[3] + x[3]) / -2\");
-        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1),-2,\"(- b[1] + x[2]) / -2\");
+        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2), -2, \"(- b[3] + x[3]) / -2\");
+        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1), -2, \"(- b[1] + x[2]) / -2\");
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _x_1_0 + 2 * _x_3_2 - (_b_2_4);
         }
@@ -478,17 +478,17 @@ model Simple3
         b[2] = x[1] + 2 * x[3];
         b[3] = 2 * x[2] + x[3];
         
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="SparseBlockJacobian_Simple3",
-            description="Test generation of sparse block jacobians for linear systems at threshold",
-            generate_sparse_block_jacobian_threshold=2,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SparseBlockJacobian_Simple3",
+        description="Test generation of sparse block jacobians for linear systems at threshold",
+        generate_sparse_block_jacobian_threshold=2,
+        template="
 $C_dae_blocks_residual_functions$
 ------
 $C_dae_add_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -528,8 +528,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_3_2 = x[0];
         }
-        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2),-2,\"(- b[3] + x[3]) / -2\");
-        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1),-2,\"(- b[1] + x[2]) / -2\");
+        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2), -2, \"(- b[3] + x[3]) / -2\");
+        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1), -2, \"(- b[1] + x[2]) / -2\");
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _x_1_0 + 2 * _x_3_2 - (_b_2_4);
         }
@@ -552,17 +552,17 @@ model Simple4
         b[2] = x[1] + 2 * x[3];
         b[3] = 2 * x[2] + x[3];
         
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="SparseBlockJacobian_Simple4",
-            description="Test generation of sparse block jacobians for linear systems with just above threshold",
-            generate_sparse_block_jacobian_threshold=1,
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SparseBlockJacobian_Simple4",
+        description="Test generation of sparse block jacobians for linear systems with just above threshold",
+        generate_sparse_block_jacobian_threshold=1,
+        template="
 $C_dae_blocks_residual_functions$
 ------
 $C_dae_add_blocks_residual_functions$
 ",
-            generatedCode="
+        generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -583,8 +583,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_3_2 = x[0];
         }
-        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2),-2,\"(- b[3] + x[3]) / -2\");
-        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1),-2,\"(- b[1] + x[2]) / -2\");
+        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2), -2, \"(- b[3] + x[3]) / -2\");
+        _x_1_0 = jmi_divide_equation(jmi, (- _b_1_3 + _x_2_1), -2, \"(- b[1] + x[2]) / -2\");
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _x_1_0 + 2 * _x_3_2 - (_b_2_4);
         }
@@ -753,7 +753,7 @@ end SparseBlockJacobian;
         
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
-            name="SparseBlockJacobian_SwitchDense1",
+            name="SwitchDense1",
             description="Test code generation for switch in dense jacobian",
             template="
 $C_dae_blocks_residual_functions$
@@ -780,32 +780,32 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_1_0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
-        jmi_real_t* Q1 = calloc(2, sizeof(jmi_real_t));
-        jmi_real_t* Q2 = calloc(2, sizeof(jmi_real_t));
-        jmi_real_t* Q3 = residual;
-        int i;
-        char trans = 'N';
-        double alpha = -1;
-        double beta = 1;
-        int n1 = 2;
-        int n2 = 1;
-        Q1[0] = -1.0;
-        for (i = 0; i < 2; i += 2) {
-            Q1[i + 0] = (Q1[i + 0]) / (-2);
-            Q1[i + 1] = (Q1[i + 1] - (-1.0) * Q1[i + 0]) / (-2);
-        }
-        Q2[1] = AD_WRAP_LITERAL(-1.0);
-        memset(Q3, 0, 1 * sizeof(jmi_real_t));
-        Q3[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(1.0));
-        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
-        free(Q1);
-        free(Q2);
+            jmi_real_t* Q1 = calloc(2, sizeof(jmi_real_t));
+            jmi_real_t* Q2 = calloc(2, sizeof(jmi_real_t));
+            jmi_real_t* Q3 = residual;
+            int i;
+            char trans = 'N';
+            double alpha = -1;
+            double beta = 1;
+            int n1 = 2;
+            int n2 = 1;
+            Q1[0] = -1.0;
+            for (i = 0; i < 2; i += 2) {
+                Q1[i + 0] = (Q1[i + 0]) / (-2);
+                Q1[i + 1] = (Q1[i + 1] - (-1.0) * Q1[i + 0]) / (-2);
+            }
+            Q2[1] = AD_WRAP_LITERAL(-1.0);
+            memset(Q3, 0, 1 * sizeof(jmi_real_t));
+            Q3[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(1.0));
+            dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+            free(Q1);
+            free(Q2);
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_1_0 = x[0];
         }
-        _x_3_2 = jmi_divide_equation(jmi, (- _b_2_4 + _x_1_0),-2,\"(- b[2] + x[1]) / -2\");
-        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2),-2,\"(- b[3] + x[3]) / -2\");
+        _x_3_2 = jmi_divide_equation(jmi, (- _b_2_4 + _x_1_0), -2, \"(- b[2] + x[1]) / -2\");
+        _x_2_1 = jmi_divide_equation(jmi, (- _b_3_5 + _x_3_2), -2, \"(- b[3] + x[3]) / -2\");
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
                 _sw(0) = jmi_turn_switch(jmi, _x_1_0 - (AD_WRAP_LITERAL(3)), _sw(0), JMI_REL_GT);
@@ -816,6 +816,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 
 ------
     jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
@@ -954,6 +955,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end MultipleSolvedRealInAlgorithm;
 
