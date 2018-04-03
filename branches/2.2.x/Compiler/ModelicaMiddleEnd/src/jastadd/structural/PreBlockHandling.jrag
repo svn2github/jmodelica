@@ -340,6 +340,16 @@ aspect PreBlockHandling {
                 }
                 components.add(newComponent);
             }
+            Set<FVariable> assigned = new HashSet<>();
+            for (TarjanComponent<C> component : components) {
+                for (C subComponent : component) {
+                    for (E eqn : subComponent) {
+                        if (!eqn.isMeta()) {
+                            assigned.add(eqn.getMatching().getVariable());
+                        }
+                    }
+                }
+            }
             Collection<TarjanComponent<C>> newComponents = new ArrayList<TarjanComponent<C>>();
             for (TarjanComponent<C> component : components) {
                 if (component.getMembers().size() > 1) {
@@ -349,7 +359,14 @@ aspect PreBlockHandling {
                             continue;
                         }
                         for (E eqn : subComponent) {
-                            if (!eqn.isMeta() && !eqn.getMatching().getVariable().isContinuous()) {
+                            boolean hasSwitch = false;
+                            for (FRelExp exp : eqn.getEquation().relExpInEquation()) {
+                                if (exp.dependsOn(assigned)) {
+                                    hasSwitch = true;
+                                    break;
+                                }
+                            }
+                            if (!eqn.isMeta() && !eqn.getMatching().getVariable().isContinuous() || hasSwitch) {
                                 // If the matched variable and in effect the
                                 // equation is discrete, then we need to
                                 // extract all sub-blocks into one block.
