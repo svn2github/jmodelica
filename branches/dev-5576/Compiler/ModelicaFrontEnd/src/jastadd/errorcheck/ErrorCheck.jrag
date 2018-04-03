@@ -275,10 +275,6 @@ aspect ErrorCheck {
 	  return getUtilInterface().getErrorHandler();
   }
 
-  syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
-  syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
-  
-  
   ASTNode implements ReporterNode;
   
   public void ASTNode.reportProblem(Problem problem) {

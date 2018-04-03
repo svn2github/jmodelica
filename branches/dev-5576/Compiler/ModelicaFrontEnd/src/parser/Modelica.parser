@@ -67,7 +67,9 @@
                 s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
             else 
                 s.append("  Syntactic error");
-            Problem p = new Problem(fileName, s.toString(), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()));
+            Problem p = new Problem(fileName, s.toString(), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC,
+                    Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()),
+                    Symbol.getLine(token.getEnd()), Symbol.getColumn(token.getEnd()));
             
             report(p);
         }
@@ -85,7 +87,8 @@
             s.append(", column ");
             s.append(e.column);
             */
-            Problem p = new Problem(fileName, e.getMessage(), ProblemSeverity.ERROR, ProblemKind.LEXICAL, e.line, e.column);
+            Problem p = new Problem(fileName, e.getMessage(), ProblemSeverity.ERROR, ProblemKind.LEXICAL,
+                    e.line, e.column, e.line, e.column);
             
             report(p);
         }

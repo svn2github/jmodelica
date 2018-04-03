@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5590
+Fixed solver trace when beta condition failures occur.
+
 ; Feature ; Minor ; PyFMI ; #5587
 Added functionality to set enumerations with strings
 

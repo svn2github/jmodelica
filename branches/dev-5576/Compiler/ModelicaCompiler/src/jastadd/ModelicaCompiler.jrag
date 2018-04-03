@@ -2060,11 +2060,11 @@ public class ModelicaCompiler {
     }
     
     protected void ModelicaCompiler.warning(String message) {
-        errorHandler.problem(new Problem("", message, ProblemSeverity.WARNING));
+        errorHandler.problem(new Problem(message, ProblemSeverity.WARNING));
     }
     
     protected void ModelicaCompiler.error(String message) {
-        errorHandler.problem(new Problem("", message, ProblemSeverity.ERROR));
+        errorHandler.problem(new Problem(message, ProblemSeverity.ERROR));
     }
 
     /**

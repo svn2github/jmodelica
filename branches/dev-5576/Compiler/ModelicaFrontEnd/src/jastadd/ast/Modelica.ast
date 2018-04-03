@@ -210,7 +210,7 @@ SrcOutput     : SrcTypePrefixInputOutput;
 SrcComment       : SrcBaseNode ::= [SrcStringComment] [SrcAnnotation];
 SrcStringComment : SrcBaseNode ::= <SrcComment:String>;
 
-// SrcAnnotations and modifications
+// Annotations and modifications
 SrcConditionalAttribute : SrcBaseNode ::= SrcExp;
 
 abstract SrcModification : SrcBaseNode;
