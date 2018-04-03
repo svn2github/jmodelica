@@ -39,8 +39,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     private final int beginColumn;
     private final int endLine;
     private final int endColumn;
-    // TODO: This should be final, setFileName has one use, in TestAnnotationizerHelper, why do we need to set the file name there?
-    private String fileName;
+    private final String fileName;
     private final String message;
     private final ProblemSeverity severity;
     private final ProblemKind kind;
@@ -206,16 +205,6 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return fileName;
     }
 
-    /** 
-     * Deprecated, do not use!
-     * 
-     * @param fileName the name of the file to set as the problem's source.
-     */
-    @Deprecated
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     /**
      * Provides the raw message for this problem, without any location and
      * positional information.
@@ -279,7 +268,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
      * @return true if the source file of the problem is known, otherwise false
      */
     public boolean hasLocation() {
-        return fileName != null;
+        return fileName() != null;
     }
 
     /**
@@ -473,12 +462,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return p;
     }
 
-    /**
-     * @param o
-     *      The object whose string representation should be capitalized.
-     * @return a capitalized string representation of {@code o}.
-     */
-    public static String capitalize(Object o) {
+    private static String capitalize(Object o) {
         String name = o.toString();
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
