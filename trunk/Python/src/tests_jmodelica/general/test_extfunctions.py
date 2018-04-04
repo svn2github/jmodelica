@@ -314,6 +314,26 @@ class TestExternalObject2:
         else:
             assert False, 'External object destructor not called.'
             
+class TestExternalObject3:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        
+    @testattr(stddist_full = True)
+    def test_ExtObjectDestructor(self):
+        cpath = 'ExtFunctionTests.ExternalObjectTests3'
+        fmu_name = compile_fmu(cpath, TestExternalObject2.fpath)
+        model = load_fmu(fmu_name, log_level=6)
+        model.set("_log_level", 6)
+        model.simulate()
+        model.terminate() #Test that we do not segfault at this point
+        log = model.get_log()[-1]
+        assert "This should not lead to a segfault" in log
+            
 class TestAssertEqu3(SimulationTest):
     '''Test structural verification assert'''
     @classmethod

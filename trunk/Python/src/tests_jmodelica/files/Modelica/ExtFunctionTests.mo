@@ -964,4 +964,34 @@ initial equation
     x = Str1(1.0);
 end TestString;
 
+
+model ExternalObjectTests3
+    class ModelicaMsgOnDelete
+        extends ExternalObject;
+        
+        function constructor
+            input String name;
+            output ModelicaMsgOnDelete out;
+            external "C" out = constructor_modelica_msg(name) 
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end constructor;
+        
+        function destructor
+            input ModelicaMsgOnDelete obj;
+            external "C" destructor_modelica_msg(obj) 
+                annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end destructor; 
+    end ModelicaMsgOnDelete;
+
+    function use_MMOD
+        input ModelicaMsgOnDelete obj;
+        output Real x;
+        external "C" x = constant_extobj_func(obj) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end use_MMOD;
+    
+    ModelicaMsgOnDelete obj = ModelicaMsgOnDelete("test_ext_object.marker");
+    Real x = use_MMOD(obj);
+end ExternalObjectTests3;
+
 end ExtFunctionTests;

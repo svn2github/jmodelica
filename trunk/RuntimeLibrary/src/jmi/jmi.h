@@ -613,6 +613,11 @@ int jmi_destroy_delay_if(jmi_t* jmi);
  * Called after model initalization */
 int jmi_init_delay_blocks(jmi_t* jmi);
 
+/** 
+ * \brief Destroys external objects
+ */
+int jmi_destruct_external_objects(jmi_t* jmi);
+
 /* Sample delay blocks
  * Called after each completed integrator step and event iteration.
  * Expects event mode set with jmi_delay_set_event_mode */

@@ -549,6 +549,10 @@ int jmi_init_eval_parameters(jmi_t* jmi) {
     return jmi_generic_func(jmi, jmi->model->init_eval_parameters);
 }
 
+int jmi_destruct_external_objects(jmi_t* jmi) {
+    return jmi_generic_func(jmi, jmi_destruct_external_objs);
+}
+
 int jmi_init_delay_blocks(jmi_t* jmi) {
     return jmi_generic_func(jmi, jmi->init_delay);
 }
