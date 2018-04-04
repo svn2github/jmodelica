@@ -392,7 +392,6 @@ abstract public class TestAnnotationizerHelper {
         try {
             root = TestCase.PARSER_HANDLER.parseModel(UtilInterface.create(opts), files);
         } catch (ParserException e) {
-            e.getProblem().setFileName(files[0]);
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
             throw ce;
