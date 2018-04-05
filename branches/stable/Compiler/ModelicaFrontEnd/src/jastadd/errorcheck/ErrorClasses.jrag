@@ -21,40 +21,40 @@ aspect ErrorClasses {
 	
 	syn boolean ASTNode.isError() = false;
 
-	eq BadDefinition.isError() = true;
-	eq BadClassDecl.isError() = true;
-	eq BadElement.isError() = true;
-	eq BadArgument.isError() = true;
-	eq BadStatement.isError() = true;
+	eq SrcBadDefinition.isError() = true;
+	eq SrcBadClassDecl.isError() = true;
+	eq SrcBadElement.isError() = true;
+	eq SrcBadArgument.isError() = true;
+	eq SrcBadStatement.isError() = true;
 	
-	public InstModification BadArgument.newInstModification() {
+	public InstModification SrcBadArgument.newInstModification() {
 		return null;
 	}
 	
-	public FStatement BadStatement.instantiateStatement() {
+	public FStatement SrcBadStatement.instantiateStatement() {
 		return null;
 	}
 	
 	
 	// Make iterator empty to prevent traversials from throwing null pointer exceptions.
 	
-	public Iterator<ASTNode> BadDefinition.iterator() {
+	public Iterator<ASTNode> SrcBadDefinition.iterator() {
 		return Collections.<ASTNode>emptyList().iterator();
 	}
 	
-	public Iterator<ASTNode> BadClassDecl.iterator() {
+	public Iterator<ASTNode> SrcBadClassDecl.iterator() {
 		return Collections.<ASTNode>emptyList().iterator();
 	}
 	
-	public Iterator<ASTNode> BadElement.iterator() {
+	public Iterator<ASTNode> SrcBadElement.iterator() {
 		return Collections.<ASTNode>emptyList().iterator();
 	}
 	
-	public Iterator<ASTNode> BadArgument.iterator() {
+	public Iterator<ASTNode> SrcBadArgument.iterator() {
 		return Collections.<ASTNode>emptyList().iterator();
 	}
 	
-	public Iterator<ASTNode> BadStatement.iterator() {
+	public Iterator<ASTNode> SrcBadStatement.iterator() {
 		return Collections.<ASTNode>emptyList().iterator();
 	}
 	
@@ -83,77 +83,77 @@ aspect ErrorClasses {
 
 	}
 	
-	private BadNodeInfo BadDefinition.badNodeInfo = null;
-	private BadNodeInfo BadClassDecl.badNodeInfo = null;
-	private BadNodeInfo BadElement.badNodeInfo = null;
-	private BadNodeInfo BadArgument.badNodeInfo = null;
-	private BadNodeInfo BadStatement.badNodeInfo = null;
+	private BadNodeInfo SrcBadDefinition.badNodeInfo = null;
+	private BadNodeInfo SrcBadClassDecl.badNodeInfo = null;
+	private BadNodeInfo SrcBadElement.badNodeInfo = null;
+	private BadNodeInfo SrcBadArgument.badNodeInfo = null;
+	private BadNodeInfo SrcBadStatement.badNodeInfo = null;
 	
-	public BadNodeInfo BadDefinition.badInfo() {
+	public BadNodeInfo SrcBadDefinition.badInfo() {
 		if (badNodeInfo == null)
 			badNodeInfo = new BadNodeInfo(this);
 		return badNodeInfo;
 	}
 	
-	public BadNodeInfo BadClassDecl.badInfo() {
+	public BadNodeInfo SrcBadClassDecl.badInfo() {
 		if (badNodeInfo == null)
 			badNodeInfo = new BadNodeInfo(this);
 		return badNodeInfo;
 	}
 	
-	public BadNodeInfo BadElement.badInfo() {
+	public BadNodeInfo SrcBadElement.badInfo() {
 		if (badNodeInfo == null)
 			badNodeInfo = new BadNodeInfo(this);
 		return badNodeInfo;
 	}
 	
-	public BadNodeInfo BadArgument.badInfo() {
+	public BadNodeInfo SrcBadArgument.badInfo() {
 		if (badNodeInfo == null)
 			badNodeInfo = new BadNodeInfo(this);
 		return badNodeInfo;
 	}
 	
-	public BadNodeInfo BadStatement.badInfo() {
+	public BadNodeInfo SrcBadStatement.badInfo() {
 		if (badNodeInfo == null)
 			badNodeInfo = new BadNodeInfo(this);
 		return badNodeInfo;
 	}
 	
 	
-	// Delegate error reporting to BadInfoNode
+	// Delegate error reporting to SrcBadInfoNode
 	
-	public void BadDefinition.collectErrors(ErrorCheckType checkType) {
+	public void SrcBadDefinition.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
 			badNodeInfo.collectErrors(checkType);
 		super.collectErrors(checkType);
 	}
 	
-	public void BadClassDecl.collectErrors(ErrorCheckType checkType) {
+	public void SrcBadClassDecl.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
 			badNodeInfo.collectErrors(checkType);
 		super.collectErrors(checkType);
 	}
 	
-	public void BadElement.collectErrors(ErrorCheckType checkType) {
+	public void SrcBadElement.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
 			badNodeInfo.collectErrors(checkType);
 		super.collectErrors(checkType);
 	}
 	
-	public void BadArgument.collectErrors(ErrorCheckType checkType) {
+	public void SrcBadArgument.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
 			badNodeInfo.collectErrors(checkType);
 		super.collectErrors(checkType);
 	}
 	
-	public void BadStatement.collectErrors(ErrorCheckType checkType) {
+	public void SrcBadStatement.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
 			badNodeInfo.collectErrors(checkType);
 		super.collectErrors(checkType);
 	}
 
-    public BadClassDecl.BadClassDecl(String name) {
-        super(new IdDecl(name));
+    public SrcBadClassDecl.SrcBadClassDecl(String name) {
+        super(new SrcIdDecl(name));
     }
 
 }

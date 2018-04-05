@@ -353,7 +353,7 @@ aspect IfEquationRewrite {
     }
 
     /**
-     * Remove empty else equations, i.e., {@link ElseEquation}s with more than one child.
+     * Remove empty else equations, i.e., {@link SrcElseEquation}s with more than one child.
      * 
      * @param equations
      *          The equation list in which to put the resulting equations.
@@ -373,7 +373,7 @@ aspect IfEquationRewrite {
     }
 
     /**
-     * Remove empty else equations, i.e., {@link ElseEquation}s with more than one child.
+     * Remove empty else equations, i.e., {@link SrcElseEquation}s with more than one child.
      * 
      * @param equations
      *          The equation list in which to put the resulting equations.
@@ -393,7 +393,7 @@ aspect IfEquationRewrite {
     }
 
     /**
-     * Remove empty else equations, i.e., {@link ElseEquation}s with more than one child.
+     * Remove empty else equations, i.e., {@link SrcElseEquation}s with more than one child.
      * 
      * @param equations
      *          The equation list in which to put the resulting equations.

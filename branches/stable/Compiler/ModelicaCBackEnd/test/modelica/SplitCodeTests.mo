@@ -231,14 +231,14 @@ end SplitCodeTest2;
 model SplitCodeTest3
   Real[:] x = (1:11) .+ time;
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="SplitCodeTest3",
-            description="Test split options",
-            cc_split_element_limit=2,
-            cc_split_function_limit=2,
-            template="$C_ode_derivatives$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SplitCodeTest3",
+        description="Test split options",
+        cc_split_element_limit=2,
+        cc_split_function_limit=2,
+        template="$C_ode_derivatives$",
+        generatedCode="
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -493,14 +493,14 @@ model SplitCodeTestSubscriptedExp1
     Real y1 = x[i];
     Real y2 = x[i];
 
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="SplitCodeTestSubscriptedExp1",
-            description="Split with temporaries, subscripted exp",
-            cc_split_element_limit=2,
-            common_subexp_elim=false,
-            template="$C_ode_derivatives$",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SplitCodeTestSubscriptedExp1",
+        description="Split with temporaries, subscripted exp",
+        cc_split_element_limit=2,
+        common_subexp_elim=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()

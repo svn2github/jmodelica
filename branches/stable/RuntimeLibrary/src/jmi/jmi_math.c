@@ -21,8 +21,7 @@
 #include "jmi_math.h"
 
 
-/* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
-void static jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[], const char val[]) {
+void jmi_log_func_or_eq(jmi_t *jmi, const char cathegory_name[], const char func_name[], const char msg[], const char val[]) {
     if (func_name != NULL) {
         char buf[64];
         sprintf(buf, "%s%s", cathegory_name, "InFunc");
@@ -62,7 +61,7 @@ void jmi_inf_log(jmi_t *jmi, const char func_name[], const char msg[], jmi_real_
 }
 
 /*Some of these functions return types are a temporary remnant of CppAD*/
-jmi_real_t static jmi_divide(jmi_t *jmi, const char func_name[], jmi_real_t num, jmi_real_t den, const char msg[]) {
+jmi_real_t jmi_divide(jmi_t *jmi, const char func_name[], jmi_real_t num, jmi_real_t den, const char msg[]) {
     if (den == 0) {
         char val[64];
         sprintf(val, "%.14E, %.14E", num, den);
@@ -82,7 +81,71 @@ jmi_real_t jmi_divide_equation(jmi_t *jmi, jmi_real_t num, jmi_real_t den, const
     return jmi_divide(jmi, NULL, num, den, msg);
 }
 
-jmi_real_t static jmi_atan2(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
+jmi_real_t jmi_sqrt(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = sqrt(x);
+
+    if (x < 0.0) {
+        /* Range problem, will return NAN */
+        char val[64];
+        sprintf(val, "%.14E", x);
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
+    }
+
+    return to_return;
+}
+
+jmi_real_t jmi_sqrt_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_sqrt(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_sqrt_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_sqrt(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_asin(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = asin(x);
+
+    if ((to_return - to_return) != 0) {
+        /* The returned value is not a number */
+        char val[64];
+        sprintf(val, "%.14E", x);
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
+    }
+    return to_return;
+}
+
+jmi_real_t jmi_asin_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_asin(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_asin_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_asin(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_acos(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = acos(x);
+
+    if ((to_return - to_return) != 0) {
+        /* The returned value is not a number */
+        char val[64];
+        sprintf(val, "%.14E", x);
+        jmi_log_func_or_eq(jmi, "RangeError", func_name, msg, val);
+    }
+    return to_return;
+}
+
+jmi_real_t jmi_acos_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_acos(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_acos_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_acos(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_atan2(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
     jmi_real_t to_return = atan2(x, y);
     if (x == 0 && y == 0) {
         char val[64];
@@ -103,7 +166,7 @@ jmi_real_t jmi_atan2_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char
     return jmi_atan2(jmi, NULL, x, y, msg);
 }
 
-jmi_real_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
+jmi_real_t jmi_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, const char msg[]) {
     jmi_real_t to_return = pow(x, y);
 
     if ((to_return - to_return) != 0) {
@@ -136,30 +199,7 @@ jmi_real_t jmi_pow_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, const char m
     return jmi_pow(jmi, NULL, x, y, msg);
 }
 
-jmi_real_t static jmi_pow_der(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    jmi_real_t x_pow_y = jmi_pow(jmi, func_name, x, y, msg);
-    jmi_real_t to_return = 0;
-    if (x == 0) {
-        if (y == 1.0) {
-            to_return = x_der;
-        } else {
-            to_return = 0.0;
-        }
-    } else {
-        to_return = x_pow_y * (x_der*y/x + y_der*log(jmi_abs(x)));
-    }
-    return to_return;
-}
-
-jmi_real_t jmi_pow_der_function(const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    return jmi_pow_der(NULL, func_name, x, y, x_der, y_der, msg);
-}
-
-jmi_real_t jmi_pow_der_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t x_der, jmi_real_t y_der, const char msg[]) {
-    return jmi_pow_der(jmi, NULL, x, y, x_der, y_der, msg);
-}
-
-jmi_real_t static jmi_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+jmi_real_t jmi_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
 
     jmi_real_t to_return = exp(x);
     jmi_inf_log(jmi, func_name, msg, to_return, x);
@@ -174,7 +214,7 @@ jmi_real_t jmi_exp_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
     return jmi_exp(jmi, NULL, x, msg);
 }
 
-jmi_real_t static jmi_log(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+jmi_real_t jmi_log(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
 
     jmi_real_t to_return = log(x);
     
@@ -205,7 +245,7 @@ jmi_real_t jmi_log_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
     return jmi_log(jmi, NULL, x, msg);
 }
 
-jmi_real_t static jmi_log10(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+jmi_real_t jmi_log10(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
 
     jmi_real_t to_return = log10(x);
     
@@ -236,7 +276,7 @@ jmi_real_t jmi_log10_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
     return jmi_log10(jmi, NULL, x, msg);
 }
 
-jmi_real_t static jmi_sinh(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+jmi_real_t jmi_sinh(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
 
     jmi_real_t to_return = sinh(x);
     jmi_inf_log(jmi, func_name, msg, to_return, x);
@@ -251,7 +291,7 @@ jmi_real_t jmi_sinh_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
     return jmi_sinh(jmi, NULL, x, msg);
 }
 
-jmi_real_t static jmi_cosh(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+jmi_real_t jmi_cosh(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
 
     jmi_real_t to_return = cosh(x);
     jmi_inf_log(jmi, func_name, msg, to_return, x);
@@ -266,7 +306,7 @@ jmi_real_t jmi_cosh_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
     return jmi_cosh(jmi, NULL, x, msg);
 }
 
-jmi_real_t static jmi_tan(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+jmi_real_t jmi_tan(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
 
     jmi_real_t to_return = tan(x);
     jmi_inf_log(jmi, func_name, msg, to_return, x);
@@ -279,6 +319,66 @@ jmi_real_t jmi_tan_function(const char func_name[], jmi_real_t x, const char msg
 
 jmi_real_t jmi_tan_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
     return jmi_tan(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_sin(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = sin(x);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
+    return to_return;
+}
+
+jmi_real_t jmi_sin_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_sin(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_sin_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_sin(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_cos(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = cos(x);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
+    return to_return;
+}
+
+jmi_real_t jmi_cos_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_cos(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_cos_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_cos(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_atan(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = atan(x);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
+    return to_return;
+}
+
+jmi_real_t jmi_atan_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_atan(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_atan_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_atan(jmi, NULL, x, msg);
+}
+
+jmi_real_t jmi_tanh(jmi_t *jmi, const char func_name[], jmi_real_t x, const char msg[]) {
+
+    jmi_real_t to_return = tanh(x);
+    jmi_inf_log(jmi, func_name, msg, to_return, x);
+    return to_return;
+}
+
+jmi_real_t jmi_tanh_function(const char func_name[], jmi_real_t x, const char msg[]) {
+    return jmi_tanh(NULL, func_name, x, msg);
+}
+
+jmi_real_t jmi_tanh_equation(jmi_t *jmi, jmi_real_t x, const char msg[]) {
+    return jmi_tanh(jmi, NULL, x, msg);
 }
 
 jmi_real_t jmi_abs(jmi_real_t v) {

@@ -243,15 +243,14 @@ model RecordArray2
     
     Real y = f({R({1,2}),R({time})});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray2",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray2",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -295,16 +294,15 @@ model RecordArray3
     
     Real y = f({R(g({1,2})),R(g({time}))});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray3",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            variability_propagation=false,
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray3",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        variability_propagation=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -362,16 +360,15 @@ model RecordArray4
     
     Real y = f({R(g({1,2})),R(g({time}))});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray4",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            variability_propagation=false,
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray4",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        variability_propagation=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -416,16 +413,15 @@ model RecordArray5
     
     Real y = f({R(g({1,2}, {1,2,time})),R(g({time}, {1,2,3,time}))});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray5",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            variability_propagation=false,
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray5",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        variability_propagation=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -483,16 +479,15 @@ model RecordArray6
     
     Real y = f(R2({R1({1,2}),R1({time})}));
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray6",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            variability_propagation=false,
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray6",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        variability_propagation=false,
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -533,15 +528,14 @@ model RecordArray7
     input Boolean b;
     Real y = f(if b then {R({1,2}),R({time})} else {R({1}),R({time, 2})});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray7",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray7",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -594,15 +588,14 @@ model RecordArray8
     parameter Boolean b = false;
     Real y = f({if b then R({1,2}) else R({1}), if b then R({time}) else R({time, 2})});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray8",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray8",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -643,15 +636,14 @@ model RecordArray9
     parameter Boolean b = false;
     Real y = f({if b then {R({1,2}), R({3})} else {R({1})}, if b then {R({time}), R({time})} else {R({time, 2})}});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray9",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray9",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -697,16 +689,16 @@ model RecordArray10
     
     Real y = g(time, "s1");
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray10",
-            description="Test for bug in #5346",
-            inline_functions="none",
-            template="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray10",
+        description="Test for bug in #5346",
+        inline_functions="none",
+        template="
 $C_functions$
 $C_ode_derivatives$
-            ",
-            generatedCode="
+",
+        generatedCode="
 void func_CCodeGenArrayTests_RecordArray10_g_def0(jmi_real_t x_v, jmi_string_t s_v, jmi_real_t* y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
@@ -797,14 +789,13 @@ model RecordArray11
     
     R[1] r2 = {R(time>1)};
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray11",
-            description="Test for bug in #5487",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray11",
+        description="Test for bug in #5487",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -826,14 +817,13 @@ model RecordArray12
     
     R r2 = if time > 1 then R({time>1}) else R({time>2});
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray12",
-            description="Test for bug in #5487",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray12",
+        description="Test for bug in #5487",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -864,14 +854,13 @@ model RecordArray13
     
     R[:] r2 = if time > 1 then {R({time>1})} else {R({time>2})};
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="RecordArray13",
-            description="Test for bug in #5487",
-            template="
-$C_ode_derivatives$
-            ",
-            generatedCode="
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="RecordArray13",
+        description="Test for bug in #5487",
+        template="$C_ode_derivatives$",
+        generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()

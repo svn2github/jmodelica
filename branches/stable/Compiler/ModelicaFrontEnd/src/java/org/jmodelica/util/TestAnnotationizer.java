@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Scanner;
 
 /**
  * \brief Generates a test case annotation for a test model.
@@ -42,6 +43,7 @@ import java.util.Iterator;
  *     -r           regenerate an already present annotation
  *     -e           continue generating until an empty modelname is given
  *     -a           regenerate annotations for all models in test file (implies -r)
+ *     -f=<file>    input file that specifies .mo file path and model name. comma-separated one entry per line
  *     -t=<type>    set type of test, e.g. ErrorTestCase
  *     -c=<class>   set name of class to generate annotation for, if name 
  *                  does not contain a dot, base name of .mo file is prepended
@@ -67,6 +69,8 @@ public class TestAnnotationizer {
         }
         
         String filePath = null;
+        String inputFilePath = null;
+        boolean hasInputFilePath = false;
         String testType = null;
         String modelName = null;
         String description = "";
@@ -74,6 +78,7 @@ public class TestAnnotationizer {
         boolean write = false;
         boolean regenerate = false;
         boolean repeat = false;
+        Lang inputlang = Lang.none;
         Lang lang = Lang.none;
         String opts = null;
         String checkType = null;
@@ -94,6 +99,9 @@ public class TestAnnotationizer {
                 checkType = value;
             } else if (arg.startsWith("-l=")) {
                 libs = value;
+            } else if (arg.startsWith("-f=")) {
+                inputFilePath = value;
+                hasInputFilePath = true;
             } else if (arg.equals("-w")) {
                 write = true;
             } else if (arg.equals("-r")) {
@@ -104,9 +112,9 @@ public class TestAnnotationizer {
                 usageError();
                 return;
             } else if (arg.equals("-o")) {
-                lang = Lang.optimica;
+                inputlang = Lang.optimica;
             } else if (arg.equals("-m")) {
-                lang = Lang.modelica;
+                inputlang = Lang.modelica;
             } else if (arg.equals("-a")) {
                 all_models = true;
                 regenerate = true;
@@ -116,6 +124,7 @@ public class TestAnnotationizer {
                 filePath = arg;
             } else {
                 description += " " + arg;
+                description = description.trim();
             }
         }
         
@@ -125,21 +134,41 @@ public class TestAnnotationizer {
             System.exit(1);
         }
         
-        description = description.trim();
-        String packageName = getPackageName(filePath);
-        modelName = composeModelName(packageName, modelName);
-        if (lang == Lang.none)
-            lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
-        boolean optimica = lang == Lang.optimica;
+        if (filePath == null && !hasInputFilePath) {
+            System.err.println("No input file specified. give path as argument or use -file");
+        }
+
+        if (all_models && hasInputFilePath) {
+            System.err.println("Cannot use -a and -file at the same time");
+        }
         
+        Scanner inputFileScanner = null;
         boolean cont = true;
         Iterator<String> allModelsIterator = null;
         if (all_models) {
             allModelsIterator = collectAllModels(filePath);
             cont = allModelsIterator.hasNext();
         }
+        if (hasInputFilePath) {
+            inputFileScanner = new Scanner(new File(inputFilePath));
+            cont = inputFileScanner.hasNextLine();
+        }
         while (cont) {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            if(hasInputFilePath) {
+                String line = inputFileScanner.nextLine();
+                String[] parts = line.split(",");
+                filePath = parts[0];
+                modelName = parts[1];
+            }
+            String packageName = null;
+            if(!(all_models || hasInputFilePath)) {
+                packageName = getPackageName(filePath);
+                modelName = composeModelName(packageName, modelName);
+            } else if (hasInputFilePath) {
+                packageName = getPackageName(filePath);
+                modelName = packageName + "." + modelName;
+            }
             if (all_models) {
                 modelName = allModelsIterator.next();
             } else if (!modelName.contains(".")) {
@@ -153,6 +182,12 @@ public class TestAnnotationizer {
                 modelName = composeModelName(modelName, given);
             }
             
+            if (inputlang == Lang.none)
+                lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
+            else {
+                lang = inputlang;
+            }
+            boolean optimica = lang == Lang.optimica;
             if (regenerate) {
                 doRegenerate(optimica, filePath, modelName, write);
             } else {
@@ -169,9 +204,15 @@ public class TestAnnotationizer {
                 modelName = packageName;
             } else if (all_models) {
                 cont = allModelsIterator.hasNext();
+            } else if (hasInputFilePath) {
+                cont = inputFileScanner.hasNextLine();
             } else {
                 cont = false;
             }
+        }
+
+        if (hasInputFilePath) {
+            inputFileScanner.close();
         }
     }
 

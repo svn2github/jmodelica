@@ -91,6 +91,9 @@ aspect FmiXML {
      * criteria object. If it isn't possible to compute set, then null is
      * returned. This can occur if the set references an non-scalar variable
      * and the set isn't computed for efficiency reasons.
+     * 
+     * If the provided filter is null, then all dependences will be added to
+     * the list.
      */
     private static Collection<Integer> FVariable.computeIndicesDependencies(Iterable<FVariable> dependencies, Criteria<FVariable> filter) {
         TreeSet<Integer> dependencyIndex = new TreeSet<Integer>();
@@ -1746,7 +1749,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             protected abstract Iterable<Integer> dependencyIndices();
 
             public void generateAttributes(CodeStream genPrinter) {
-                generateAttribute("index", fclass.xmlVariableIndexMap().get(variable.generateXMLName()), genPrinter);
+                generateAttribute("index", variable.fmiXMLVariableIndex(), genPrinter);
                 Iterable<Integer> dependencyIndex = dependencyIndices();
                 if (dependencyIndex != null) {
                     // If we have dependency on a non-scalar, then we skip the 
@@ -1771,7 +1774,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 return variable.initDAEDependencyIndices(new Criteria<FVariable>() {
                     @Override
                     public boolean test(FVariable var) {
-                        return var.generateXMLVariable() && getInitialType(var) == InitialType.EXACT || var.isInput();
+                        return (var.generateXMLVariable() && getInitialType(var) == InitialType.EXACT) || var.isInput();
                     }
                 });
             }

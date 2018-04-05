@@ -94,6 +94,7 @@ set(JMISources
     jmi_chattering.h
     jmi_work_array.h
     jmi_math.h
+    jmi_math_ad.h
     jmi_types.h
     
     jmi_util.c
@@ -111,6 +112,7 @@ set(JMISources
     jmi_chattering.c
     jmi_work_array.c
     jmi_math.c
+    jmi_math_ad.c
     
     ${JMICommonSources}
     ${JMIBlockSourcesPartial}

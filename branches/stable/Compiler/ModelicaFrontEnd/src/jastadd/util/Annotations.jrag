@@ -49,25 +49,25 @@ aspect AnnotationAPI {
     syn AnnotationNode ASTNode.annotationOfChild(Opt n) = 
             (n.getNumChild() > 0) ? n.getChild(0).annotation() : createNullAnnotationNode();
 
-    eq Comment.annotation()         = annotationOfChild(getAnnotationOpt());
-    eq ParseAnnotation.annotation() = getClassModification().annotationNode();
-    eq Modification.annotation()    = annotationNode();
+    eq SrcComment.annotation()         = annotationOfChild(getSrcAnnotationOpt());
+    eq SrcParseAnnotation.annotation() = getSrcClassModification().annotationNode();
+    eq SrcModification.annotation()    = annotationNode();
 
-    eq ExternalClause.annotation() = annotationOfChild(getAnnotationOpt());
-    eq InstExternal.annotation()   = getExternalClause().annotation();
+    eq SrcExternalClause.annotation() = annotationOfChild(getSrcAnnotationOpt());
+    eq InstExternal.annotation()   = getSrcExternalClause().annotation();
 
-    eq FullClassDecl.annotation()            = annotationOfChild(getAnnotationOpt());
-    eq InstClassDecl.annotation()            = getClassDecl().annotation();
-    eq ShortClassDecl.annotation()           = getExtendsClauseShortClass().annotation();
-    eq LibNode.annotation()                  = myClass().annotation();
-    eq ExtendsClauseShortClass.annotation()  = getComment().annotation();
-    eq InstShortClassDecl.annotation()       = getClassDecl().annotation();
-    eq InstSimpleShortClassDecl.annotation() = getClassDecl().annotation();
+    eq SrcFullClassDecl.annotation()            = annotationOfChild(getSrcAnnotationOpt());
+    eq InstClassDecl.annotation()            = getSrcClassDecl().annotation();
+    eq SrcShortClassDecl.annotation()           = getSrcExtendsClauseShortClass().annotation();
+    eq SrcLibNode.annotation()                  = myClass().annotation();
+    eq SrcExtendsClauseShortClass.annotation()  = getSrcComment().annotation();
+    eq InstShortClassDecl.annotation()       = getSrcClassDecl().annotation();
+    eq InstSimpleShortClassDecl.annotation() = getSrcClassDecl().annotation();
 
-    eq AbstractEquation.annotation() = getComment().annotation();
+    eq SrcAbstractEquation.annotation() = getSrcComment().annotation();
 
-    eq ComponentDecl.annotation()     = getComment().annotation();
-    eq InstComponentDecl.annotation() = getComponentDecl().annotation();
+    eq SrcComponentDecl.annotation()     = getSrcComment().annotation();
+    eq InstComponentDecl.annotation() = getSrcComponentDecl().annotation();
 
     public class FFunctionDecl     implements FAttributeListAnnotationNode.FAttributeList {}
     public class FVariable         implements FAttributeListAnnotationNode.FAttributeList {}
@@ -86,27 +86,27 @@ aspect AnnotationAPI {
      * Experimental! Retreives the annotation representing the modifications.
      */
 
-    syn AnnotationNode Element.modificationAnnotation() = AnnotationNode.NO_ANNOTATION;
-    syn AnnotationNode ComponentDecl.modificationAnnotation() = annotationOfChild(getModificationOpt());
-    eq ExtendsClause.modificationAnnotation() = annotationOfChild(getClassModificationOpt());
+    syn AnnotationNode SrcElement.modificationAnnotation() = AnnotationNode.NO_ANNOTATION;
+    syn AnnotationNode SrcComponentDecl.modificationAnnotation() = annotationOfChild(getSrcModificationOpt());
+    eq SrcExtendsClause.modificationAnnotation() = annotationOfChild(getSrcClassModificationOpt());
 
     syn AnnotationNode ASTNode.createNullAnnotationNode() = AnnotationNode.NO_ANNOTATION;
-    eq Comment.createNullAnnotationNode()                 = new CommentAnnotationNode(this);
-    eq FullClassDecl.createNullAnnotationNode()           = new FullClassDeclAnnotationNode(this);
+    eq SrcComment.createNullAnnotationNode()                 = new CommentAnnotationNode(this);
+    eq SrcFullClassDecl.createNullAnnotationNode()           = new FullClassDeclAnnotationNode(this);
 
     /**
      * Get the annotation node that represents this node when used as an annotation, if 
      * applicable.
      */
     syn AnnotationNode ASTNode.annotationNode()            = createNullAnnotationNode();
-    syn lazy AnnotationNode Modification.annotationNode()  = createNullAnnotationNode();
-    eq ClassModification.annotationNode()                  = new ClassModAnnotationNode(this);
-    eq ValueModification.annotationNode()                  = new ValueModAnnotationNode(this);
-    eq CompleteModification.annotationNode()               = new CompleteModAnnotationNode(this);
-    eq ComponentModification.annotationNode()              = new ComponentModAnnotationNode(this);
-    syn lazy AnnotationNode Exp.annotationNode()           = new EAnnotationNode(this);
-    eq FunctionCall.annotationNode()                       = new FCAnnotationNode(this);
-    syn lazy AnnotationNode NamedArgument.annotationNode() = new NAAnnotationNode(this);
+    syn lazy AnnotationNode SrcModification.annotationNode()  = createNullAnnotationNode();
+    eq SrcClassModification.annotationNode()                  = new ClassModAnnotationNode(this);
+    eq SrcValueModification.annotationNode()                  = new ValueModAnnotationNode(this);
+    eq SrcCompleteModification.annotationNode()               = new CompleteModAnnotationNode(this);
+    eq SrcComponentModification.annotationNode()              = new ComponentModAnnotationNode(this);
+    syn lazy AnnotationNode SrcExp.annotationNode()           = new EAnnotationNode(this);
+    eq SrcFunctionCall.annotationNode()                       = new FCAnnotationNode(this);
+    syn lazy AnnotationNode SrcNamedArgument.annotationNode() = new NAAnnotationNode(this);
     eq FAttribute.annotationNode()                         = new FAttributeAnnotationNode(this);
 
     /**
@@ -471,7 +471,7 @@ aspect AnnotationAPI {
         /**
          * Returns the exp node that this annotation node is connected to (if possible).
          */
-        public Exp exp() {
+        public SrcExp exp() {
             return null;
         }
 
@@ -548,7 +548,7 @@ aspect AnnotationAPI {
          * 
          * @param exp Expresion to set.
          */
-        public void setValue(Exp exp) {
+        public void setValue(SrcExp exp) {
             throw new AnnotationEditException("Set value is not supported on this type of annotation node (" + getClass().getSimpleName() + ")");
         }
 
@@ -698,7 +698,7 @@ aspect AnnotationAPI {
         }
 
         @Override
-        public Exp exp() {
+        public SrcExp exp() {
             if (exists())
                 return realNode().exp();
             else
@@ -790,19 +790,19 @@ aspect AnnotationAPI {
      */
     public class CommentAnnotationNode extends RootAnnotationNode {
         
-        private Comment comment;
+        private SrcComment comment;
         
         /**
          * Constructs an instance with the comment <code>comment</code>.
          */
-        public CommentAnnotationNode(Comment comment) {
+        public CommentAnnotationNode(SrcComment comment) {
             this.comment = comment;
         }
         
         @Override
         protected AnnotationNode lookup(String path) {
-            if (comment.hasAnnotation()) {
-                return comment.getAnnotation().annotationNode().lookup(path);
+            if (comment.hasSrcAnnotation()) {
+                return comment.getSrcAnnotation().annotationNode().lookup(path);
             } else {
                 return null;
             }
@@ -810,11 +810,11 @@ aspect AnnotationAPI {
 
         @Override
         public AnnotationNode addNode(String path) {
-            if (!comment.hasAnnotation()) {
-                ClassModification cm = new ClassModification();
-                comment.setAnnotation(new ParseAnnotation(cm));
+            if (!comment.hasSrcAnnotation()) {
+                SrcClassModification cm = new SrcClassModification();
+                comment.setSrcAnnotation(new SrcParseAnnotation(cm));
             }
-            return comment.getAnnotation().annotationNode().addNode(path);
+            return comment.getSrcAnnotation().annotationNode().addNode(path);
         }
 
         @Override
@@ -825,16 +825,16 @@ aspect AnnotationAPI {
     }
     
     /**
-     * A null annotation node for a FullClassDecl, it adds the possibility to add annotation.
+     * A null annotation node for a SrcFullClassDecl, it adds the possibility to add annotation.
      */
     public class FullClassDeclAnnotationNode extends RootAnnotationNode {
  
-        private FullClassDecl fullClassDecl;
+        private SrcFullClassDecl fullClassDecl;
 
         /**
-         * Constructs an instance with the FullClassDecl <code>fullClassDecl</code>.
+         * Constructs an instance with the SrcFullClassDecl <code>fullClassDecl</code>.
          */  
-        public FullClassDeclAnnotationNode(FullClassDecl fullClassDecl) {
+        public FullClassDeclAnnotationNode(SrcFullClassDecl fullClassDecl) {
             this.fullClassDecl = fullClassDecl;
         }
 
@@ -845,8 +845,8 @@ aspect AnnotationAPI {
 
         @Override
         protected AnnotationNode lookup(String path) {
-            if (fullClassDecl.hasAnnotation()) {
-                return fullClassDecl.getAnnotation().annotationNode().lookup(path);
+            if (fullClassDecl.hasSrcAnnotation()) {
+                return fullClassDecl.getSrcAnnotation().annotationNode().lookup(path);
             } else {
                 return null;
             }
@@ -854,39 +854,39 @@ aspect AnnotationAPI {
 
         @Override
         public AnnotationNode addNode(String path) {
-            if (!fullClassDecl.hasAnnotation()) {
-                ClassModification cm = new ClassModification();
-                fullClassDecl.setAnnotation(new ParseAnnotation(cm));
+            if (!fullClassDecl.hasSrcAnnotation()) {
+                SrcClassModification cm = new SrcClassModification();
+                fullClassDecl.setSrcAnnotation(new SrcParseAnnotation(cm));
             }
-            return fullClassDecl.getAnnotation().annotationNode().addNode(path);
+            return fullClassDecl.getSrcAnnotation().annotationNode().addNode(path);
         }
     }
 	/**
-	 * Represents an annotation that is represented in the source tree by a ClassModification.
+	 * Represents an annotation that is represented in the source tree by a SrcClassModification.
 	 */
 	public class ClassModAnnotationNode extends AnnotationNode {
 		
-		private ClassModification mod;
+		private SrcClassModification mod;
 		
-		public ClassModAnnotationNode(ClassModification cm) {
+		public ClassModAnnotationNode(SrcClassModification cm) {
 			mod = cm;
 		}
 
 		public Iterator<AnnotationNode> attributeIterator() {
-			return new AnnotationIterator(mod.getArguments());
+			return new AnnotationIterator(mod.getSrcArguments());
 		}
 		
 		public String name() {
 			return mod.parentAnnotationName();
 		}
 		
-		public ClassModification ast() {
+		public SrcClassModification ast() {
 			return mod;
 		}
 
         @Override
         protected AnnotationNode lookup(String path) {
-            for (Argument arg : mod.getArguments()) 
+            for (SrcArgument arg : mod.getSrcArguments()) 
                 if (arg.matches(path))
                     return arg.annotationNode();
             return null;
@@ -894,28 +894,28 @@ aspect AnnotationAPI {
 
         @Override
         public AnnotationNode addNode(String path) {
-            ComponentModification cm = new ComponentModification(new NamedAccess(path), new CompleteModification(new ClassModification()));
-            mod.addArgument(cm);
+            SrcComponentModification cm = new SrcComponentModification(new SrcNamedAccess(path), new SrcCompleteModification(new SrcClassModification()));
+            mod.addSrcArgument(cm);
             return cm.annotationNode();
         }
 
 	}
 	
 	/**
-	 * Represents an annotation that is represented in the source tree by a FunctionCall.
+	 * Represents an annotation that is represented in the source tree by a SrcFunctionCall.
 	 */
 	public class FCAnnotationNode extends AnnotationNode {
 		
-		private FunctionCall call;
+		private SrcFunctionCall call;
 		
-		public FCAnnotationNode(FunctionCall fc) {
+		public FCAnnotationNode(SrcFunctionCall fc) {
 			call = fc;
 		}
 
         public Iterator<AnnotationNode> attributeIterator() {
             return new AnnotationIterator(new ChainedIterator(
-                    call.getFunctionArguments().getExps().iterator(), 
-                    call.getFunctionArguments().getNamedArguments().iterator()));
+                    call.getSrcFunctionArguments().getSrcExps().iterator(), 
+                    call.getSrcFunctionArguments().getSrcNamedArguments().iterator()));
         }
 		
 		public String name() {
@@ -928,7 +928,7 @@ aspect AnnotationAPI {
 
         @Override
         protected AnnotationNode lookup(String path) {
-            for (NamedArgument arg : call.getFunctionArguments().getNamedArguments()) 
+            for (SrcNamedArgument arg : call.getSrcFunctionArguments().getSrcNamedArguments()) 
                 if (arg.matches(path)) 
                     return arg.annotationNode();
             return null;
@@ -937,8 +937,8 @@ aspect AnnotationAPI {
 	
 	public abstract class ExpAnnotationNode extends AnnotationNode {
 		
-		public abstract Exp exp();
-		protected abstract void setExp(Exp exp);
+		public abstract SrcExp exp();
+		protected abstract void setSrcExp(SrcExp exp);
 
 		public boolean isValue() {
 			if (exp() == null)
@@ -955,8 +955,8 @@ aspect AnnotationAPI {
 		protected abstract ASTNode ast();
 		
 		@Override
-		public void setValue(Exp exp) {
-			setExp(exp);
+		public void setValue(SrcExp exp) {
+			setSrcExp(exp);
 		}
 
         @Override
@@ -978,22 +978,22 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * Represents an annotation that is represented in the source tree by a ValueModification.
+	 * Represents an annotation that is represented in the source tree by a SrcValueModification.
 	 */
 	public class ValueModAnnotationNode extends ExpAnnotationNode {
 		
-		private ValueModification mod;
+		private SrcValueModification mod;
 		
-		public ValueModAnnotationNode(ValueModification vm) {
+		public ValueModAnnotationNode(SrcValueModification vm) {
 			mod = vm;
 		}
 		
-		public Exp exp() {
-			return mod.getExp();
+		public SrcExp exp() {
+			return mod.getSrcExp();
 		}
 		
-		protected void setExp(Exp exp) {
-			mod.setExp(exp);
+		protected void setSrcExp(SrcExp exp) {
+			mod.setSrcExp(exp);
 		}
 		
 		@Override
@@ -1007,28 +1007,28 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * Represents an annotation that is represented in the source tree by a ComponentModification.
+	 * Represents an annotation that is represented in the source tree by a SrcComponentModification.
 	 */
 	public class ComponentModAnnotationNode extends ExpAnnotationNode {
 		
-		private ComponentModification mod;
+		private SrcComponentModification mod;
 		
-		public ComponentModAnnotationNode(ComponentModification mod) {
+		public ComponentModAnnotationNode(SrcComponentModification mod) {
 			this.mod = mod;
 		}
 		
 		@Override
-		public Exp exp() {
-			if (mod.hasModification() && mod.getModification().annotationNode() instanceof ExpAnnotationNode)
-				return ((ExpAnnotationNode) mod.getModification().annotationNode()).exp();
+		public SrcExp exp() {
+			if (mod.hasSrcModification() && mod.getSrcModification().annotationNode() instanceof ExpAnnotationNode)
+				return ((ExpAnnotationNode) mod.getSrcModification().annotationNode()).exp();
 			else
 				return null;
 		}
 		
 		@Override
-		protected void setExp(Exp exp) {
-			if (mod.hasModification())
-				mod.getModification().annotationNode().setValue(exp);
+		protected void setSrcExp(SrcExp exp) {
+			if (mod.hasSrcModification())
+				mod.getSrcModification().annotationNode().setValue(exp);
 			else
 			    throw new UnsupportedOperationException();
 		}
@@ -1045,24 +1045,24 @@ aspect AnnotationAPI {
 		
 		@Override
 		public boolean isValue() {
-			if (mod.hasModification())
-				return mod.getModification().annotationNode().isValue();
+			if (mod.hasSrcModification())
+				return mod.getSrcModification().annotationNode().isValue();
 			else
 				return false;
 		}
 		
 		@Override
 		public Iterator<AnnotationNode> attributeIterator() {
-			if (mod.hasModification())
-				return mod.getModification().annotationNode().attributeIterator();
+			if (mod.hasSrcModification())
+				return mod.getSrcModification().annotationNode().attributeIterator();
 			else
 				return super.attributeIterator();
 		}
 
 		@Override
 		protected AnnotationNode lookup(String path) {
-		    if (mod.hasModification())
-		        return mod.getModification().annotationNode().lookup(path);
+		    if (mod.hasSrcModification())
+		        return mod.getSrcModification().annotationNode().lookup(path);
 		    else
 				return NO_ANNOTATION;
 		}
@@ -1080,30 +1080,30 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * Represents an annotation that is represented in the source tree by a CompleteModification.
+	 * Represents an annotation that is represented in the source tree by a SrcCompleteModification.
 	 */
 	public class CompleteModAnnotationNode extends ExpAnnotationNode {
 		
-		private CompleteModification mod;
+		private SrcCompleteModification mod;
 		
-		public CompleteModAnnotationNode(CompleteModification mod) {
+		public CompleteModAnnotationNode(SrcCompleteModification mod) {
 			this.mod = mod;
 		}
 		
 		@Override
-		public Exp exp() {
-			if (mod.hasValueModification())
-				return mod.getValueModification().getExp();
+		public SrcExp exp() {
+			if (mod.hasSrcValueModification())
+				return mod.getSrcValueModification().getSrcExp();
 			else
 				return null;
 		}
 		
 		@Override
-		protected void setExp(Exp exp) {
-			if (mod.hasValueModification())
-				mod.getValueModification().annotationNode().setValue(exp);
+		protected void setSrcExp(SrcExp exp) {
+			if (mod.hasSrcValueModification())
+				mod.getSrcValueModification().annotationNode().setValue(exp);
 			else
-				mod.setValueModification(new ValueModification(exp));
+				mod.setSrcValueModification(new SrcValueModification(exp));
 		}
 		
 		@Override
@@ -1118,46 +1118,46 @@ aspect AnnotationAPI {
 		
 		@Override
 		public boolean isValue() {
-			if (mod.hasValueModification())
-				return mod.getValueModification().annotationNode().isValue();
+			if (mod.hasSrcValueModification())
+				return mod.getSrcValueModification().annotationNode().isValue();
 			else
 				return false;
 		}
 		
         @Override
         public Iterator<AnnotationNode> attributeIterator() {
-            return mod.getClassModification().annotationNode().iterator();
+            return mod.getSrcClassModification().annotationNode().iterator();
         }
 
         @Override
         protected AnnotationNode lookup(String path) {
-            return mod.getClassModification().annotationNode().lookup(path);
+            return mod.getSrcClassModification().annotationNode().lookup(path);
         }
 
         @Override
         public AnnotationNode addNode(String path) {
-            return mod.getClassModification().annotationNode().addNode(path);
+            return mod.getSrcClassModification().annotationNode().addNode(path);
         }
 		
 	}
 	
 	/**
-	 * Represents an annotation that is represented in the source tree by a NamedArgument.
+	 * Represents an annotation that is represented in the source tree by a SrcNamedArgument.
 	 */
 	public class NAAnnotationNode extends ExpAnnotationNode {
 		
-		private NamedArgument arg;
+		private SrcNamedArgument arg;
 		
-		public NAAnnotationNode(NamedArgument na) {
+		public NAAnnotationNode(SrcNamedArgument na) {
 			arg = na;
 		}
 		
-		public Exp exp() {
-			return arg.getExp();
+		public SrcExp exp() {
+			return arg.getSrcExp();
 		}
 		
-		protected void setExp(Exp exp) {
-			arg.setExp(exp);
+		protected void setSrcExp(SrcExp exp) {
+			arg.setSrcExp(exp);
 		}
 		
 		@Override
@@ -1172,21 +1172,21 @@ aspect AnnotationAPI {
 	}
 	
 	/**
-	 * Represents an annotation that is represented in the source tree by an Exp.
+	 * Represents an annotation that is represented in the source tree by an SrcExp.
 	 */
 	public class EAnnotationNode extends ExpAnnotationNode {
 		
-		private Exp e;
+		private SrcExp e;
 		
-		public EAnnotationNode(Exp exp) {
+		public EAnnotationNode(SrcExp exp) {
 			e = exp;
 		}
 		
-		public Exp exp() {
+		public SrcExp exp() {
 			return e;
 		}
 		
-		protected void setExp(Exp exp) {
+		protected void setSrcExp(SrcExp exp) {
 			e = exp; // TODO: This is probably wrong!
 		}
 		
@@ -1378,40 +1378,40 @@ aspect AnnotationAPI {
 		}
 	}
 	
-	syn boolean Argument.matches(String str) = false;
-	eq NamedModification.matches(String str) = getName().name().equals(str);
+	syn boolean SrcArgument.matches(String str) = false;
+	eq SrcNamedModification.matches(String str) = getName().name().equals(str);
 	
-	syn boolean NamedArgument.matches(String str) = getName().name().equals(str);
+	syn boolean SrcNamedArgument.matches(String str) = getName().name().equals(str);
 	
 	
-	syn boolean Exp.isFunctionCall() = false;
-	eq FunctionCall.isFunctionCall() = true;
+	syn boolean SrcExp.isFunctionCall() = false;
+	eq SrcFunctionCall.isFunctionCall() = true;
 	
-	syn boolean Exp.isAnnotationExp()     = false;
-	eq FunctionCall.isAnnotationExp()     = true;
-	eq ArrayConstructor.isAnnotationExp() = 
-		getFunctionArguments().getNumExp() > 0;
+	syn boolean SrcExp.isAnnotationExp()     = false;
+	eq SrcFunctionCall.isAnnotationExp()     = true;
+	eq SrcArrayConstructor.isAnnotationExp() = 
+		getSrcFunctionArguments().getNumSrcExp() > 0;
 		
     syn boolean FExp.isAnnotationExp() = false;
     eq FFunctionCall.isAnnotationExp() = true;
     eq FArray.isAnnotationExp()        = getNumFExp() > 0;
 
-	syn Iterable<? extends ASTNode> Exp.annotationList() = new ArrayList<ASTNode>(0);
-	eq ArrayConstructor.annotationList()                 = getFunctionArguments().getExps();
-	eq FunctionCall.annotationList()                     = Collections.singletonList(this);
+	syn Iterable<? extends ASTNode> SrcExp.annotationList() = new ArrayList<ASTNode>(0);
+	eq SrcArrayConstructor.annotationList()                 = getSrcFunctionArguments().getSrcExps();
+	eq SrcFunctionCall.annotationList()                     = Collections.singletonList(this);
 	
     syn Iterable<? extends ASTNode> FExp.annotationList() = new ArrayList<ASTNode>(0);
     eq FArray.annotationList()                            = getFExps();
     eq FFunctionCall.annotationList()                     = getArgs();
     
-    syn String Exp.avalueString()  = null;
-	eq StringLitExp.avalueString() = unEscape();
-	eq AccessExp.avalueString()    = getAccess().name();
+    syn String SrcExp.avalueString()  = null;
+	eq SrcStringLitExp.avalueString() = unEscape();
+	eq SrcAccessExp.avalueString()    = getSrcAccess().name();
     
-    syn ArrayList<String> Exp.avalueStringList() = null;
-	eq ArrayConstructor.avalueStringList() {
-		ArrayList<String> l = new ArrayList<String>(getFunctionArguments().getNumExp());
-		for (Exp e : getFunctionArguments().getExps())
+    syn ArrayList<String> SrcExp.avalueStringList() = null;
+	eq SrcArrayConstructor.avalueStringList() {
+		ArrayList<String> l = new ArrayList<String>(getSrcFunctionArguments().getNumSrcExp());
+		for (SrcExp e : getSrcFunctionArguments().getSrcExps())
 			l.add(e.avalueString());
 		return l.contains(null) ? null : l;
 	}

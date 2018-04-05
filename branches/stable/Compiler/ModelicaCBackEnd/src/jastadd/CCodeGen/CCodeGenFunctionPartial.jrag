@@ -33,7 +33,7 @@ aspect CCodeGenFunctionPartial {
     }
 
     public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
-            String indent, Iterable<FExp> args) {}
+            String indent, Direction direction, Iterable<FExp> args) {}
 
     public void StructComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             ArrayList<FFunctionVariable> variables, Iterable<FExp> args) {}

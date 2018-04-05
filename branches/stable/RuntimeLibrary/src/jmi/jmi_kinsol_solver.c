@@ -682,7 +682,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     return ret;
 }
 
-static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * block) {
+static void jmi_kinsol_linesearch_error_message(jmi_block_solver_t * block, const char* msg) {
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_node_t node = jmi_log_enter(block->log, logError, "KinsolError");
     realtype fnorm, snorm;
@@ -691,7 +691,7 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
     
     jmi_log_fmt(block->log, node, logError, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
         "KINSol", block->cur_time, block->label);
-    jmi_log_fmt(block->log, node, logError, "<msg: %s>", "The line search algorithm was unable to find an iterate sufficiently distinct from the current iterate.");
+    jmi_log_fmt(block->log, node, logError, "<msg: %s>", msg);
     jmi_log_fmt(block->log, node, logError, "<functionL2Norm: %g, scaledStepLength: %g, tolerance: %g>",
                 fnorm, snorm, solver->kin_stol);
     jmi_log_leave(block->log, node);
@@ -771,7 +771,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         category = logError;
     }
     
-    if (err_code != KIN_LINESEARCH_NONCONV) /* If the error is LINSEARCH_NONCONV it might not be an error depending 
+    if (err_code != KIN_LINESEARCH_NONCONV && err_code != KIN_LINESEARCH_BCFAIL) /* If the error is LINSEARCH_NONCONV it might not be an error depending 
                                                in on the fnorm, so post-pone this error message in these cases */
     {
         jmi_log_node_t node = jmi_log_enter(block->log, category, "KinsolError");
@@ -810,7 +810,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
     block->logging_time += jmi_block_solver_elapsed_time(block, t);
 }
 
-static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidualOnlyFlag) {
+static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidualOnlyFlag, int convergence_flag) {
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
     jmi_log_t *log = block->log;
     struct KINMemRec* kin_mem = (struct KINMemRec*)solver->kin_mem;
@@ -826,7 +826,7 @@ static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidual
             "iter       res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
             1);
     }
-    if(logResidualOnlyFlag) {
+    if(logResidualOnlyFlag && convergence_flag != KIN_LINESEARCH_BCFAIL) {
         /* last log in the solve trace - use (nniter+1)*/
         nniters = nniters + 1;
     }
@@ -946,7 +946,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 solver->lambda = lambda;
                 solver->lambda_max = lambda_max;
 
-                jmi_kinsol_print_progress(block, 0);
+                jmi_kinsol_print_progress(block, 0, 0);
                 if (nniters > 0) {
                     jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
                     jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
@@ -2627,9 +2627,9 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         kin_mem->kin_fnorm = solver->last_fnorm;
         sprintf(msg, "nni = %4ld   nfe = %6ld   fnorm = %26.16g", nni, nfe, solver->last_fnorm);
         kin_info("", "KINSolInit", msg, kin_mem->kin_ih_data);
-        jmi_kinsol_print_progress(block, 2);
+        jmi_kinsol_print_progress(block, 2, flag);
     } else {
-        jmi_kinsol_print_progress(block, 1);
+        jmi_kinsol_print_progress(block, 1, flag);
     }
     if(flag == KIN_INITIAL_GUESS_OK) {
         flag = KIN_SUCCESS;
@@ -2637,7 +2637,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
              from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
              value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reported
              as a success. Commenting out this code since it causes problems.*/
-    } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
+    } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL || flag == KIN_LINESEARCH_BCFAIL) {
         realtype fnorm;
         N_VProd(block->f_scale, kin_mem->kin_fval, solver->work_vector);
         fnorm =N_VMaxNorm(solver->work_vector);
@@ -2647,9 +2647,10 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
              && flag == KIN_STEP_LT_STPTOL)) {
             flag = KIN_SUCCESS;
         } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
-            jmi_kinsol_linesearch_nonconv_error_message(block);
-        } 
-        else {
+            jmi_kinsol_linesearch_error_message(block, "The line search algorithm was unable to find an iterate sufficiently distinct from the current iterate.");
+        } else if (flag == KIN_LINESEARCH_BCFAIL) {
+            jmi_kinsol_linesearch_error_message(block, "The line search algorithm was unable to to satisfy the beta-condition for nbcfails iterations.");
+        } else {
             jmi_kinsol_small_step_nonconv_info_message(block);
         }
 

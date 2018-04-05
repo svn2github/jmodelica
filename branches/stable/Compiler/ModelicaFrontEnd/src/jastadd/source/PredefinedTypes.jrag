@@ -20,7 +20,7 @@ aspect PredefinedTypes {
         return getProgram().getPredefinedTypeList();
     }
     
-    inh List FullClassDecl.getPredefinedType();
+    inh List SrcFullClassDecl.getPredefinedType();
     eq SourceRoot.getProgram().getPredefinedType() = computePredefinedType();
     eq Root.getChild().getPredefinedType() = null;
 
@@ -187,7 +187,7 @@ aspect PredefinedTypes {
     syn lazy List Program.getPredefinedTypeList() {
         List l = new List();
 
-        PrimitiveClassDecl pcd = null;
+        SrcPrimitiveClassDecl pcd = null;
 
         Program p;
         try {
@@ -204,9 +204,9 @@ aspect PredefinedTypes {
         primitives.add("String");
         primitives.add("ExternalObject");
         
-        for (ClassDecl cd : p.getUnstructuredEntity(0).getClassDecls()) {
+        for (SrcClassDecl cd : p.getUnstructuredEntity(0).getSrcClassDecls()) {
             if (primitives.contains(cd.name())) {
-                l.add(PrimitiveClassDecl.create(cd.asFullClassDecl())); 
+                l.add(SrcPrimitiveClassDecl.create(cd.asFullClassDecl())); 
             } else {
                 l.add(cd);
             }
@@ -220,7 +220,7 @@ aspect PredefinedTypes {
      * declaration, which is used to construct user defined enumeration
      * types.
      */
-    syn lazy EnumClassDecl Program.getEnumBaseDecl() {
+    syn lazy SrcEnumClassDecl Program.getEnumBaseDecl() {
 
         // Build a string with a Modelica class corresponding to a basic
     	// enumeration
@@ -233,7 +233,7 @@ aspect PredefinedTypes {
               + "parameter BooleanType fixed=false;\n"
               + "end BaseEnum;\n";
         
-        EnumClassDecl ecd = null;
+        SrcEnumClassDecl ecd = null;
   
         try {
         
@@ -241,9 +241,9 @@ aspect PredefinedTypes {
             SourceRoot sr = util.getParserHandler().parseString(util, builtInDef,"");
             Program p = sr.getProgram();
 
-            FullClassDecl cd = p.getUnstructuredEntity(0).getClassDecl(0).asFullClassDecl();
+            SrcFullClassDecl cd = p.getUnstructuredEntity(0).getSrcClassDecl(0).asFullClassDecl();
             
-            ecd = new EnumClassDecl(cd);
+            ecd = new SrcEnumClassDecl(cd);
         
         } catch(Exception e){e.printStackTrace();}
             
@@ -253,87 +253,87 @@ aspect PredefinedTypes {
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public FullClassDecl.FullClassDecl(FullClassDecl fcd) {
+    public SrcFullClassDecl.SrcFullClassDecl(SrcFullClassDecl fcd) {
         this(fcd.getName(),
              fcd.getEncapsulated(),
              fcd.getPartial(),
-             fcd.getRestriction(),
+             fcd.getSrcRestriction(),
              fcd.getRedeclare(),
              fcd.getFinal(),
              fcd.getInner(),
              fcd.getOuter(),
              fcd.getReplaceable(),
-             fcd.getConstrainingClauseOpt(),
+             fcd.getSrcConstrainingClauseOpt(),
              fcd.getConstrainingClauseCommentOpt(),
-             fcd.getStringCommentOpt(),
-             fcd.getClauseList(),
-             fcd.getExternalClauseOpt(),
-             fcd.getAnnotationOpt(),
-             fcd.getEndDecl());
+             fcd.getSrcStringCommentOpt(),
+             fcd.getSrcClauseList(),
+             fcd.getSrcExternalClauseOpt(),
+             fcd.getSrcAnnotationOpt(),
+             fcd.getSrcEndDecl());
         setLocation(fcd);
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public EnumClassDecl.EnumClassDecl(FullClassDecl fcd) {
+    public SrcEnumClassDecl.SrcEnumClassDecl(SrcFullClassDecl fcd) {
         super(fcd);
         setSymbol(new Symbol("enumeration"));
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public PrimitiveClassDecl.PrimitiveClassDecl(FullClassDecl fcd) {
+    public SrcPrimitiveClassDecl.SrcPrimitiveClassDecl(SrcFullClassDecl fcd) {
         super(fcd);
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public RealClassDecl.RealClassDecl(FullClassDecl fcd) {
+    public SrcRealClassDecl.SrcRealClassDecl(SrcFullClassDecl fcd) {
         super(fcd);
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public IntegerClassDecl.IntegerClassDecl(FullClassDecl fcd) {
+    public SrcIntegerClassDecl.SrcIntegerClassDecl(SrcFullClassDecl fcd) {
         super(fcd);
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public BooleanClassDecl.BooleanClassDecl(FullClassDecl fcd) {
+    public SrcBooleanClassDecl.SrcBooleanClassDecl(SrcFullClassDecl fcd) {
         super(fcd);
     }
 
     /**
-     * Create from a FullClassDecl - will destroy that node!
+     * Create from a SrcFullClassDecl - will destroy that node!
      */
-    public StringClassDecl.StringClassDecl(FullClassDecl fcd) {
+    public SrcStringClassDecl.SrcStringClassDecl(SrcFullClassDecl fcd) {
         super(fcd);
     }
 
     /**
-     * Create instance of correct subclass from a FullClassDecl - 
+     * Create instance of correct subclass from a SrcFullClassDecl - 
      * will destroy that node!
      */
-    static public PrimitiveClassDecl PrimitiveClassDecl.create(FullClassDecl fcd) {
+    static public SrcPrimitiveClassDecl SrcPrimitiveClassDecl.create(SrcFullClassDecl fcd) {
         String name = fcd.name();
         if (name.equals("Real")) {
-            return new RealClassDecl(fcd);
+            return new SrcRealClassDecl(fcd);
         } else if (name.equals("Integer")) {
-            return new IntegerClassDecl(fcd);
+            return new SrcIntegerClassDecl(fcd);
         } else if (name.equals("Boolean")) {
-            return new BooleanClassDecl(fcd);
+            return new SrcBooleanClassDecl(fcd);
         } else if (name.equals("String")) {
-            return new StringClassDecl(fcd);
+            return new SrcStringClassDecl(fcd);
         } else {
-            return new PrimitiveClassDecl(fcd);
+            return new SrcPrimitiveClassDecl(fcd);
         }
     }
 
@@ -649,57 +649,57 @@ aspect PredefinedTypes {
 
     /**
      * This attribute defines the NTA for predefined types
-     * which contains a list of predefined PrimitiveClassDecl:s.
+     * which contains a list of predefined SrcPrimitiveClassDecl:s.
      */
-    syn lazy List<BaseClassDecl> Program.getBuiltInFunctionList() {
-        List<BaseClassDecl> l = new List<BaseClassDecl>();
+    syn lazy List<SrcBaseClassDecl> Program.getBuiltInFunctionList() {
+        List<SrcBaseClassDecl> l = new List<SrcBaseClassDecl>();
   
         try {
             UtilInterface util = root().getUtilInterface();
             SourceRoot sr = util.getParserHandler().parseString(util, BUILTIN_FUNCS, "");
             Program p = sr.getProgram();
             
-            ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt());
-            for (ClassDecl cd : p.getUnstructuredEntity(0).getClassDecls()) 
+            SrcExternalClause builtin = new SrcExternalClause(new Opt(new SrcExternalLanguage("builtin")), new Opt(), new Opt());
+            for (SrcClassDecl cd : p.getUnstructuredEntity(0).getSrcClassDecls()) 
                 cd.addBuiltinFunctions(l, builtin);
         } catch (Exception e) {}
         
         return l;
     }
 
-    public void Element.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
+    public void SrcElement.addBuiltinFunctions(List<? super SrcBaseClassDecl> list, SrcExternalClause builtin) {
         throw new UnsupportedOperationException("While processing list of built-in function headers, found " +
                 getClass().getSimpleName() + ": \n" + this);
     }
 
-    public void Clause.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
+    public void SrcClause.addBuiltinFunctions(List<? super SrcBaseClassDecl> list, SrcExternalClause builtin) {
         throw new UnsupportedOperationException("While processing list of built-in function headers, found " +
                 getClass().getSimpleName() + ": \n" + this);
     }
 
-    public void ElementList.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
-        for (Element e : getElements()) {
+    public void SrcElementList.addBuiltinFunctions(List<? super SrcBaseClassDecl> list, SrcExternalClause builtin) {
+        for (SrcElement e : getSrcElements()) {
             e.addBuiltinFunctions(list, builtin);
         }
     }
 
-    public void FullClassDecl.addBuiltinFunctions(List<? super BaseClassDecl> list, ExternalClause builtin) {
+    public void SrcFullClassDecl.addBuiltinFunctions(List<? super SrcBaseClassDecl> list, SrcExternalClause builtin) {
         if (isPackage()) {
-            List<Element> subList = new List<Element>();
-            for (Clause cd : getClauses()) {
+            List<SrcElement> subList = new List<SrcElement>();
+            for (SrcClause cd : getSrcClauses()) {
                 cd.addBuiltinFunctions(subList, builtin);
             }
-            setClauseList(new List<Clause>().add(new DefaultElementList(subList)));
+            setSrcClauseList(new List<SrcClause>().add(new SrcDefaultElementList(subList)));
         } else {
             String name = getName().getID();
             if (name.equals("Integer") || name.equals("String")) {
                 // Add character that isn't allowed in identifiers to prevent collision with user class or the primitive class
                 name = "!" + name;
                 getName().setID(name);
-                getEndDecl().setEndID(name);
+                getSrcEndDecl().setEndID(name);
             }
             if (!algorithms().iterator().hasNext()) {
-                setExternalClause(builtin.fullCopy());
+                setSrcExternalClause(builtin.fullCopy());
             }
         }
         list.add(this);
@@ -711,40 +711,40 @@ aspect PredefinedTypes {
      */
     syn lazy List Program.getBuiltInTypeList() {
         List l = new List();
-        l.add(new BuiltInClassDecl(new IdDecl("RealType")));
-        l.add(new BuiltInClassDecl(new IdDecl("IntegerType")));
-        l.add(new BuiltInClassDecl(new IdDecl("BooleanType")));
-        l.add(new BuiltInClassDecl(new IdDecl("StringType")));
-        l.add(new BuiltInClassDecl(new IdDecl("EnumType")));
+        l.add(new SrcBuiltInClassDecl(new SrcIdDecl("RealType")));
+        l.add(new SrcBuiltInClassDecl(new SrcIdDecl("IntegerType")));
+        l.add(new SrcBuiltInClassDecl(new SrcIdDecl("BooleanType")));
+        l.add(new SrcBuiltInClassDecl(new SrcIdDecl("StringType")));
+        l.add(new SrcBuiltInClassDecl(new SrcIdDecl("EnumType")));
         return l;
     }
 
     /**
      * Check if this class has a restriction.
      */
-    syn boolean ClassDecl.hasRestriction() = false;
-    eq BaseClassDecl.hasRestriction()      = true;
-    eq BuiltInClassDecl.hasRestriction()   = true;
+    syn boolean SrcClassDecl.hasSrcRestriction() = false;
+    eq SrcBaseClassDecl.hasSrcRestriction()      = true;
+    eq SrcBuiltInClassDecl.hasSrcRestriction()   = true;
 
     /**
      * Get the restriction of this class.
      */
-    public Restriction ClassDecl.getRestriction() {
+    public SrcRestriction SrcClassDecl.getSrcRestriction() {
         throw new UnsupportedOperationException();
     }
 
-    public Restriction BuiltInClassDecl.getRestriction() {
+    public SrcRestriction SrcBuiltInClassDecl.getSrcRestriction() {
         return root().getBuiltInClassRestriction();
     }
     
-    syn nta Restriction Root.getBuiltInClassRestriction() = new MType();
+    syn nta SrcRestriction Root.getBuiltInClassRestriction() = new SrcType();
 }
 
 aspect InstPredefinedTypes {
 
     syn lazy List InstProgramRoot.getInstPredefinedTypeList() {
         List l = new List();
-        for (BaseClassDecl pcd : getProgram().getPredefinedTypes()) {
+        for (SrcBaseClassDecl pcd : getProgram().getPredefinedTypes()) {
             l.add(pcd.newInstClassDecl());
         }
         return l;
@@ -752,7 +752,7 @@ aspect InstPredefinedTypes {
 
     syn lazy List InstProgramRoot.getInstBuiltInTypeList() {
         List l = new List();
-        for (ClassDecl pcd : getProgram().getBuiltInTypes()) {
+        for (SrcClassDecl pcd : getProgram().getBuiltInTypes()) {
             l.add(pcd.newInstClassDecl());
         }
         return l;
@@ -760,7 +760,7 @@ aspect InstPredefinedTypes {
 
     syn lazy List InstProgramRoot.getInstBuiltInFunctionList() {
         List l = new List();
-        for (BaseClassDecl bcd : getProgram().getBuiltInFunctions()) {
+        for (SrcBaseClassDecl bcd : getProgram().getBuiltInFunctions()) {
             l.add(bcd.newInstClassDecl());
         }
         return l;

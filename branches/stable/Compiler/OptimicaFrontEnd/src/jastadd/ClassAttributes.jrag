@@ -16,8 +16,8 @@
 
 aspect ClassAttributes {
 
-    syn lazy List OptClassDecl.getClassAttributeList() {
-        List<ComponentClause> l = new List<>();
+    syn lazy List SrcOptClassDecl.getClassAttributeList() {
+        List<SrcComponentClause> l = new List<>();
         
         // Build a string with a Modelica class that has the class attributes as components
         String builtInDef = 
@@ -29,13 +29,13 @@ aspect ClassAttributes {
                 "    parameter Boolean static = false;\n" + 
                 "end ClassAttributes;\n";
         
-        PrimitiveClassDecl pcd = null;
+        SrcPrimitiveClassDecl pcd = null;
         try {
             UtilInterface util = root().getUtilInterface();
             SourceRoot sr = util.getParserHandler().parseString(util, builtInDef, "");
             Program p = sr.getProgram();
-            FullClassDecl cd = p.getUnstructuredEntity(0).getClassDecl(0).asFullClassDecl();
-            for (ComponentClause comp : cd.componentClauses()) {
+            SrcFullClassDecl cd = p.getUnstructuredEntity(0).getSrcClassDecl(0).asFullClassDecl();
+            for (SrcComponentClause comp : cd.componentClauses()) {
                 l.add(comp);
             }
         } catch(Exception e) {
@@ -44,18 +44,18 @@ aspect ClassAttributes {
         return l;
     }
 
-    syn Iterable<ComponentDecl> OptClassDecl.classAttributes() = 
-        new NestledIterable<ComponentDecl,ComponentClause>(getClassAttributes()) {
-            protected Iterable<ComponentDecl> subIterable(ComponentClause c) {
-                return c.getComponentDecls();
+    syn Iterable<SrcComponentDecl> SrcOptClassDecl.classAttributes() = 
+        new NestledIterable<SrcComponentDecl,SrcComponentClause>(getClassAttributes()) {
+            protected Iterable<SrcComponentDecl> subIterable(SrcComponentClause c) {
+                return c.getSrcComponentDecls();
             }
         };
 
-    syn OptClassDecl InstOptClassDecl.getOptClassDecl() = (OptClassDecl) getClassDecl();
+    syn SrcOptClassDecl InstOptClassDecl.getSrcOptClassDecl() = (SrcOptClassDecl) getSrcClassDecl();
 
     syn lazy List InstOptClassDecl.getInstClassAttributeList() {
         List l = new List();
-        for (ComponentDecl cd : getOptClassDecl().classAttributes()) {
+        for (SrcComponentDecl cd : getSrcOptClassDecl().classAttributes()) {
             InstAccess name = cd.getClassName().newInstAccess();
             l.add(new InstCreateComponentDecl(cd, this));
         }
@@ -82,7 +82,7 @@ aspect ClassAttributes {
     rewrite InstPrimitive {
         when (!(this instanceof InstClassAttribute) && isClassAttribute()) to InstClassAttribute 
         copyLocationTo(new InstClassAttribute(
-                name(), getClassName(), getLocalFArraySubscriptsOpt(), getComponentDecl(), 
+                name(), getClassName(), getLocalFArraySubscriptsOpt(), getSrcComponentDecl(), 
                 getInstModificationOpt(), getInstConstrainingComponentOpt(), getConditionalAttributeOpt()));
     }
 
