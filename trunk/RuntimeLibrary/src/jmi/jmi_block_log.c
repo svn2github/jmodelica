@@ -76,12 +76,12 @@ void jmi_log_illegal_input(jmi_log_t *log, int *error_indicator, int n, int nans
                 sprintf(message, "INF as input to <%s: %%s>",  label_type);
             if( lim_vals_present)
                 sprintf(message, "Absolute value of input too big in <%s: %%s>",  label_type);
-            jmi_log_node(log, logWarning, warn_input_type, message, label_type, label);
+            jmi_log_node(log, logWarning, warn_input_type, message, label);
         } else if (ret) {
             jmi_log_node_t outer;
             jmi_log_node_t inner;
             sprintf(message, "The iteration variable input is illegal in <%s: %%s>",  label_type);
-            outer = jmi_log_enter_fmt(log, logWarning, warn_input_type, message, label_type, label);
+            outer = jmi_log_enter_fmt(log, logWarning, warn_input_type, message, label);
 
             if (nans_present) {
                 inner = jmi_log_enter_vector_(log, outer, logWarning, is_iter_var_flag? "NaNIterationVariableIndices": "NaNVariableIndices");
