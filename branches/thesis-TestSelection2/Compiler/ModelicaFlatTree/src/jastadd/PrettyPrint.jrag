@@ -1105,15 +1105,6 @@ aspect FlatPrettyPrint {
 		
 		getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
 
-		if (isIndependentParameter() && hasBindingExp()) {
-			str.print(" /* ");
-			try {
-				str.print(getBindingExp().ceval());
-			} catch (ConstantEvaluationException e){
-                str.print("evaluation error");
-			}
-			str.print(" */");
-		}
 	}
 	
 	public void FVariable.printFAttributes(CodeStream str, String ... attributes) {

@@ -1473,7 +1473,10 @@ aspect DebugHelpers {
      * Override simple expressions for performance reasons
      */
 
-    public String FRealLitExp.toString()         { return Double.toString(getValue()); }
+    public String FRealLitExp.toString()         {
+        java.text.DecimalFormat format = new java.text.DecimalFormat("0.00000000E00", java.text.DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        return format.format(new java.math.BigDecimal(Double.toString(getValue())));
+    }
     public String FIntegerLitExp.toString()      { return Integer.toString(getValue()); }
     public String FOverflowIntLitExp.toString()  { return getString(); }
     public String FBooleanLitExpTrue.toString()  { return "true"; }
