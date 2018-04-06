@@ -261,9 +261,8 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
 
     /**
      * Indicates whether the source file of the problem is known or not. I.e.
-     * this method can be used to determine if {@link #fileName()},
-     * {@link #beginLine()}, {@link #beginColumn()}, {@link #endLine()} and
-     * {@link #endColumn()} will provide useful information or not.
+     * this method can be used to determine if {@link #fileName()} will provide
+     * useful information or not.
      * 
      * @return true if the source file of the problem is known, otherwise false
      */
