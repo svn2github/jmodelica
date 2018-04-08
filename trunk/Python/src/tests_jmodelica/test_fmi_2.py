@@ -614,7 +614,54 @@ class Test_FMUModelME2:
         
         for i in range(100): #Test so that memory issues are detected
             assert model.get("str")[0] == "hej"
-            
+    
+    @testattr(stddist_full = True)
+    def test_estimate_directional_derivatives_A(self):
+        
+        model = load_fmu(self.coupled_name)
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        
+        A = model._get_A(use_structure_info=True)
+        B = model._get_A(use_structure_info=True, output_matrix=A)
+        assert A is B #Test that the returned matrix is actually the same as the input
+        N.allclose(A.toarray(),B.toarray())
+        A = model._get_A(use_structure_info=False)
+        B = model._get_A(use_structure_info=False, output_matrix=A)
+        assert A is B
+        N.allclose(A,B)
+        C = model._get_A(use_structure_info=True, output_matrix=A)
+        assert A is not C
+        N.allclose(C.toarray(), A)
+        D = model._get_A(use_structure_info=False, output_matrix=C)
+        assert D is not C
+        N.allclose(D, C.toarray())
+    
+    @testattr(stddist_full = True)
+    def test_estimate_directional_derivatives_BCD(self):
+        
+        model = load_fmu(self.output2_name)
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        
+        for func in [model._get_B, model._get_C, model._get_C]:
+            A = func(use_structure_info=True)
+            B = func(use_structure_info=True, output_matrix=A)
+            assert A is B #Test that the returned matrix is actually the same as the input
+            N.allclose(A.toarray(),B.toarray())
+            A = func(use_structure_info=False)
+            B = func(use_structure_info=False, output_matrix=A)
+            assert A is B
+            N.allclose(A,B)
+            C = func(use_structure_info=True, output_matrix=A)
+            assert A is not C
+            N.allclose(C.toarray(), A)
+            D = func(use_structure_info=False, output_matrix=C)
+            assert D is not C
+            N.allclose(D, C.toarray())
+    
     @testattr(stddist_full = True)
     def test_units(self):
         
