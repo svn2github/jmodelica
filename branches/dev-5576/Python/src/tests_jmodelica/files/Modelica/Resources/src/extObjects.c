@@ -21,6 +21,12 @@ void* constructor_string(const char* str) {
     return res;
 }
 
+void* constructor_modelica_msg(const char* str) {
+    void* res = malloc(strlen(str) + 1);
+    strcpy(res, str);
+    return res;
+}
+
 double constant_extobj_func(void* o) {
     return 1.0;
 }
@@ -31,6 +37,11 @@ void destructor_string_create_file(void* o) {
     fclose(f);
     fprintf(stderr, "Destructing external object for file '%s'.\n", (char*)o);
 
+    free(o);
+}
+
+void destructor_modelica_msg(void* o) {
+    ModelicaFormatMessage("This should not lead to a segfault...\n");
     free(o);
 }
 

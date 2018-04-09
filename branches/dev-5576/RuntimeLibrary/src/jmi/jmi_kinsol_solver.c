@@ -2561,6 +2561,7 @@ const char *jmi_kinsol_flag_to_name(int flag) {
     case KIN_LSOLVE_FAIL: return "KIN_LSOLVE_FAIL";
     case KIN_SYSFUNC_FAIL: return "KIN_SYSFUNC_FAIL";
     case KIN_FIRST_SYSFUNC_ERR: return "KIN_FIRST_SYSFUNC_ERR";
+    case KIN_REPTD_SYSFUNC_ERR: return "KIN_REPTD_SYSFUNC_ERR";
     default: return "UNKNOWN";
     }
 }

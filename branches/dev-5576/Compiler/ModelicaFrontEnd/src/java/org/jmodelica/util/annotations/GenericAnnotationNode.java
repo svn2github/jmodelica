@@ -717,5 +717,19 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     protected ConstValue evaluatedValue() {
         return value().evaluateValue();
     }
+    
+    /**
+     * Removes the reference to node. 
+     * The backing node is not removed and has to be removed separately. 
+     */
+    protected void setNonexistant() {
+        computeSubNodesCache();
+        node = null; 
+        if ( subNodes_cache != null )
+            for (T t: subNodes_cache) {
+                if (t.exists())
+                    t.setNonexistant();
+            }
+    }
 
 }
