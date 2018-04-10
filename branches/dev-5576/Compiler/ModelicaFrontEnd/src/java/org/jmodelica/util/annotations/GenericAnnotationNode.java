@@ -119,7 +119,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 subNodesNameMap.put(subNode.name(), ambiguousNode());
             }
         }
-        subNodes_cache = Collections.unmodifiableList(subNodes);
+        subNodes_cache = subNodes;
         subNodesNameMap_cache = subNodesNameMap;
     }
 
@@ -191,11 +191,17 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
             subNode = createNode(paths[currentIndex], null); 
+            if (subNodesNameMap_cache.isEmpty()) {
+                subNodesNameMap_cache = new HashMap<String, T>();
+            }
+            if (subNodes_cache.isEmpty())
+                subNodes_cache =  new ArrayList<T>();
+                subNodesNameMap_cache.put(name,(T) subNode);
+            subNodes_cache.add((T) subNode);
         }
-       
         return subNode.forPath(paths, currentIndex + 1);
     }
-
+    
     /**
      * Returns reference to it self, but with correct type! This pattern
      * ensures that all nodes have the same type as T.
@@ -734,13 +740,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * Removes the reference to node. 
      * The backing node is not removed and has to be removed separately. 
      */
-    protected void setNonexistant() {
+    protected void disconnectFromNode() {
         computeSubNodesCache();
         node = null; 
-        if ( subNodes_cache != null )
+        if ( subNodes_cache != null)
             for (T t: subNodes_cache) {
-                if (t.exists())
-                    t.setNonexistant();
+                    t.disconnectFromNode();
             }
     }
 
