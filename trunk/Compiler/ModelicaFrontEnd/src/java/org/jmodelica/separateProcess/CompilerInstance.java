@@ -253,7 +253,7 @@ public class CompilerInstance {
     }
 
     private static String join(String delimiter, Collection<String> args) {
-        return StringUtil.join(args, delimiter);
+        return StringUtil.join(delimiter, args);
     }
 
     private static String join(String delimiter, String pairDelimiter, Map<String, String> args) {
