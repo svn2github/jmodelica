@@ -184,7 +184,7 @@ void jmi_ad_sinh_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_sinh(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_sinh(jmi, func_name, x, msg);
-    *d = dx * cosh(x);
+    *d = dx * jmi_cosh(jmi, func_name, x, msg);
 }
 
 void jmi_ad_cosh_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -197,7 +197,7 @@ void jmi_ad_cosh_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_cosh(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_cosh(jmi, func_name, x, msg);
-    *d = dx * sinh(x);
+    *d = dx * jmi_sinh(jmi, func_name, x, msg);
 }
 
 void jmi_ad_tan_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
