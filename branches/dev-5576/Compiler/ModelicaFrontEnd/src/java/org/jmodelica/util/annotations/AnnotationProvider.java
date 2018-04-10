@@ -35,7 +35,7 @@ public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extend
     public String resolveURI(String str) throws URIException;
 
     public class SubNodePair<N> {
-        public final String name;
+        public String name;
         public final N node;
         public SubNodePair(String name, N node) {
             this.name = name;

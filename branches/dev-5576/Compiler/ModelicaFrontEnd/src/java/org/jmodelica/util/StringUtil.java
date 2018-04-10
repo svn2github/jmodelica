@@ -81,7 +81,7 @@ public final class StringUtil {
      * @return          all strings in {@code args}, delimited by {@code delimiter}.
      */
     public static String join(String delimiter, String... args) {
-        return join(Arrays.asList(args), delimiter);
+        return join(delimiter, Arrays.asList(args));
     }
 
     /**
@@ -100,7 +100,7 @@ public final class StringUtil {
                 return entry.getKey() + pairDelimiter + entry.getValue();
             }
         };
-        return join(transformed, delimiter);
+        return join(delimiter, transformed);
     }
 
     /**
@@ -116,45 +116,45 @@ public final class StringUtil {
     }
 
     /**
-     * Same as calling {@link #join(Iterable, String, String, String)} with
+     * Same as calling {@link #join(String, String, String, Iterable)} with
      * ", " as separator, " and " as lastSeparator and "<empty>" as
      * emptyString.
      */
     public static <T> String humanJoin(Iterable<T> iterable) {
-        return join(iterable, ", ", " and ", "<empty>");
+        return join(", ", " and ", "<empty>", iterable);
     }
 
     /**
-     * Same as calling {@link #join(Iterable, String, String, String)} with 
+     * Same as calling {@link #join(String, String, String, Iterable)} with 
      * lastSeparator equal to separator and "" as emptyString.
      */
-    public static <T> String join(Iterable<T> iterable, String separator) {
-        return join(iterable.iterator(), separator, separator, "");
+    public static <T> String join(String separator, Iterable<T> iterable) {
+        return join(separator, separator, "", iterable.iterator());
     }
 
     /**
-     * Similar to {@link #join(Iterator, String, String, String)}, see for more info.
+     * Similar to {@link #join(String, String, String, Iterator)}, see for more info.
      */
-    public static <T> String join(Iterable<T> iterable, String separator, String lastSeparator, String emptyString) {
-        return join(iterable.iterator(), separator, lastSeparator, emptyString);
+    public static <T> String join(String separator, String lastSeparator, String emptyString, Iterable<T> iterable) {
+        return join(separator, lastSeparator, emptyString, iterable.iterator());
     }
 
     /**
      * Utility method for printing a list of elements in a nice way. This 
-     * method takes an iterator with objects, a separator, a separator to use
-     * between the second to last and last object, and a string which
-     * represents an empty string. The return value is then produced by
+     * method takes a separator, a separator to use between the second to last
+     * and last object, a string which represents an empty string, and an
+     * iterator with objects. The return value is then produced by
      * concatenating all the objects in the iterator with the separator in
      * between each object. If there is no objects in the iterator, then
      * the emptyString is written instead.
      * 
-     * @param iterator Iterator with objects
      * @param separator Separator string to use
      * @param lastSeparator The separator to use for the last element
      * @param emptyString String to print if there are no objects
+     * @param iterator Iterator with objects
      * @return A concatenated string
      */
-    public static <T> String join(Iterator<T> iterator, String separator, String lastSeparator, String emptyString) {
+    public static <T> String join(String separator, String lastSeparator, String emptyString, Iterator<T> iterator) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         while (iterator.hasNext()) {

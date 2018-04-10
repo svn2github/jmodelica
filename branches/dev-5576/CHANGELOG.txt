@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5597
+Fixed issue with getting time varying variables (sometimes wrong 
+variables was returned)
+
 ; Fixed ; Minor ; Runtime ; #5590
 Fixed solver trace when beta condition failures occur.
 

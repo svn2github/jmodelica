@@ -609,6 +609,17 @@ class Test_FMUModelME2:
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
     
     @testattr(stddist_full = True)
+    def test_get_time_varying_variables(self):
+        model = load_fmu(self.coupled_name)
+        
+        [r,i,b] = model.get_model_time_varying_value_references()
+        [r_f, i_f, b_f] = model.get_model_time_varying_value_references(filter="*")
+        
+        assert len(r) == len(r_f)
+        assert len(i) == len(i_f)
+        assert len(b) == len(b_f)
+    
+    @testattr(stddist_full = True)
     def test_get_string(self):
         model = load_fmu(self.string1)
         
