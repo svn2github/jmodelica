@@ -2650,7 +2650,11 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
             jmi_kinsol_linesearch_error_message(block, "The line search algorithm was unable to find an iterate sufficiently distinct from the current iterate.");
         } else if (flag == KIN_LINESEARCH_BCFAIL) {
-            jmi_kinsol_linesearch_error_message(block, "The line search algorithm was unable to to satisfy the beta-condition for nbcfails iterations.");
+            long int nbc_fails;
+            char msg[256];
+            KINGetNumBetaCondFails(solver->kin_mem, &nbc_fails);
+            sprintf(msg, "The line search algorithm was unable to to satisfy the beta-condition for %ld iterations.", nbc_fails);            
+            jmi_kinsol_linesearch_error_message(block, msg);
         } else {
             jmi_kinsol_small_step_nonconv_info_message(block);
         }
