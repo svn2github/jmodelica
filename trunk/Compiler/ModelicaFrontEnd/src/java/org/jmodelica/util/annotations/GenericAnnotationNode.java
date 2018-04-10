@@ -51,7 +51,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public static final String VENDOR_NAME = "__Modelon";
 
-    private final String name;
+    private String name;
     private N node;
     private final T parent;
 
@@ -120,7 +120,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             }
         }
         subNodes_cache = Collections.unmodifiableList(subNodes);
-        subNodesNameMap_cache = Collections.unmodifiableMap(subNodesNameMap);
+        subNodesNameMap_cache = subNodesNameMap;
     }
 
     /**
@@ -154,6 +154,13 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return res;
     }
 
+    protected void updateSubNodeName(String oldName, String newName) {
+        if (subNodesNameMap_cache != null) {
+            T subNode = subNodesNameMap_cache.remove(oldName);
+            subNodesNameMap_cache.put(newName, subNode);
+        }
+    }
+
     protected boolean isSubNodesCacheFresh() {
         return subNodesNameMap_cache != null;
     }
@@ -183,8 +190,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         computeSubNodesCache();
         GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
-            subNode = createNode(paths[currentIndex], null);
+            subNode = createNode(paths[currentIndex], null); 
         }
+       
         return subNode.forPath(paths, currentIndex + 1);
     }
 
@@ -293,6 +301,10 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public String name() {
         return name;
+    }
+    
+    protected void updateName(String name) {
+        this.name = name;
     }
 
     /**
