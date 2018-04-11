@@ -618,6 +618,14 @@ class Test_FMUModelME2:
         assert len(r) == len(r_f)
         assert len(i) == len(i_f)
         assert len(b) == len(b_f)
+        
+        vars = model.get_variable_alias("J4.phi")
+        for var in vars:
+            [r,i,b] = model.get_model_time_varying_value_references(filter=var)
+            assert len(r) == 1
+        
+        [r,i,b] = model.get_model_time_varying_value_references(filter=vars.keys())
+        assert len(r) == 1
     
     @testattr(stddist_full = True)
     def test_get_string(self):
