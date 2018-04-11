@@ -131,7 +131,7 @@ void jmi_ad_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, 
             *d = 0.0;
         }
     } else {
-        *d = *v * (dx * jmi_divide(jmi, func_name, y, x, msg) + dy*log(jmi_abs(x)));
+        *d = *v * (dx * jmi_divide(jmi, func_name, y, x, msg) + dy*jmi_log(jmi, func_name, jmi_abs(x), msg));
     }
 }
 
