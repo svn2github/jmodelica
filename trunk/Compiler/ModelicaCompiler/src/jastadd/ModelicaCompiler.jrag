@@ -79,6 +79,7 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
+import org.jmodelica.common.ILogContainer;
 
 import org.xml.sax.SAXException;
 
@@ -134,7 +135,7 @@ aspect ModelicaCompilerMain {
  * level.
  * 
  */
-public class ModelicaCompiler {
+public class ModelicaCompiler implements ILogContainer {
     
     public static final Level DEFAULT_LEVEL = Level.ERROR;
     protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
@@ -1213,7 +1214,7 @@ public class ModelicaCompiler {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
-        getExternalFunctionCache().tearDown(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(fc.myOptions()));
+        getExternalFunctionCache().tearDown(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(fc.myOptions()).externalEvaluation());
         fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
@@ -1354,6 +1355,10 @@ public class ModelicaCompiler {
         log.close();
         log = logger;
         ASTNode.log = log;
+    }
+    
+    public ModelicaLogger log() {
+        return log;
     }
     
     /**
