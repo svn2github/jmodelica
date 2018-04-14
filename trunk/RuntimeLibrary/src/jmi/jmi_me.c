@@ -364,6 +364,17 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     
     jmi_real_t* store_dz = jmi->dz[0];
     int i, ef;
+    jmi_log_node_t node;
+
+    if (jmi->jmi_callbacks.log_options.log_level >= 5) {
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDirectionalDerivatives",
+                                "Call to get directional derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
+        if (jmi->jmi_callbacks.log_options.log_level >= 6){
+            jmi_log_vrefs(jmi->log, node, logInfo, "known", 'r', vKnown_ref, nKnown);
+            jmi_log_vrefs(jmi->log, node, logInfo, "unknown", 'r', vUnknown_ref, nUnknown);
+            jmi_log_reals(jmi->log, node, logInfo, "direction", dvKnown, nKnown);
+        }
+    }
     
     jmi->dz[0]                  = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
@@ -377,12 +388,24 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     }
 
     ef = jmi_ode_derivatives_dir_der(jmi);
+    if (ef != 0) {
+        jmi_log_node(jmi->log, logError, "Error",
+                "Evaluating the directional derivatives failed at <t:%g>.", jmi_get_t(jmi)[0]);
+    }
+
     for (i = 0; i < nUnknown; i++) {
         dvUnknown[i] = jmi->dz_active_variables[0][jmi_get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
     }
 
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
     jmi->dz[0] = store_dz;
+
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        if (jmi->jmi_callbacks.log_options.log_level >= 6){
+            jmi_log_reals(jmi->log, node, logInfo, "derivative", dvUnknown, nUnknown);
+        }
+        jmi_log_leave(jmi->log, node);
+    }
 
     return ef;
 }
