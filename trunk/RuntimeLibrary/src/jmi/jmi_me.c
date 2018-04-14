@@ -370,8 +370,8 @@ int jmi_get_directional_derivative(jmi_t* jmi,
         node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDirectionalDerivatives",
                                 "Call to get directional derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
         if (jmi->jmi_callbacks.log_options.log_level >= 6){
-            jmi_log_vrefs(jmi->log, node, logInfo, "known", 'r', vKnown_ref, nKnown);
-            jmi_log_vrefs(jmi->log, node, logInfo, "unknown", 'r', vUnknown_ref, nUnknown);
+            jmi_log_vrefs(jmi->log, node, logInfo, "known", 'r', (const int*)vKnown_ref, nKnown);
+            jmi_log_vrefs(jmi->log, node, logInfo, "unknown", 'r', (const int*)vUnknown_ref, nUnknown);
             jmi_log_reals(jmi->log, node, logInfo, "direction", dvKnown, nKnown);
         }
     }
