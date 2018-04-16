@@ -1,6 +1,5 @@
-package org.jmodelica.common;
+package org.jmodelica.common.evaluation;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,69 +9,32 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Compiler;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Variable;
 import org.jmodelica.util.EnvironmentUtils;
-import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.values.ConstantEvaluationException;
 
-public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>, V extends ExternalProcessCache.Value,
-                        T extends ExternalProcessCache.Type<V>, E extends ExternalProcessCache.External<K>> {
-
-    public interface Compiler<K, E extends External<K>> extends ILogContainer {
-        public String compileExternal(E ext) throws FileNotFoundException, CcodeCompilationException;
-
-        public CCompilerDelegator getCCompiler();
-    }
-
-    public interface External<K> {
-        public String getName();
-
-        public boolean shouldCacheProcess();
-
-        public OptionRegistry myOptions();
-
-        public String libraryDirectory();
-
-        public K cachedExternalObject();
-
-        public Iterable<K> externalObjectsToSerialize();
-
-        public Iterable<K> functionArgsToSerialize();
-
-        public Iterable<K> varsToDeserialize();
-    }
-
-    public interface Variable<V extends Value, T extends Type<V>> {
-        public V ceval();
-
-        public T type();
-    }
-
-    public interface Value {
-        public String getMarkedExternalObject();
-
-        public void serialize(BufferedWriter out) throws IOException;
-    }
-
-    public interface Type<V extends Value> {
-        public V deserialize(ProcessCommunicator<V, ? extends Type<V>> processCommunicator) throws IOException;
-    }
+public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> implements ExternalProcessCache<K, V, T, E> {
 
     /**
      * Maps external functions names to compiled executables.
      */
-    private Map<String, ExternalFunction> cachedExternals = new HashMap<String, ExternalFunction>();
+    private Map<String, ExternalFunction<K, V>> cachedExternals = new HashMap<String, ExternalFunction<K, V>>();
 
     /**
      * Keeps track of all living processes, least recently used first.
      */
-    private LinkedHashSet<ExternalFunction> livingCachedExternals = new LinkedHashSet<ExternalFunction>();
+    private LinkedHashSet<ExternalFunction<K, V>> livingCachedExternals = new LinkedHashSet<ExternalFunction<K, V>>();
 
     private Compiler<K, E> mc;
 
-    public ExternalProcessCache(Compiler<K, E> mc) {
+    public ExternalProcessCacheImpl(Compiler<K, E> mc) {
         this.mc = mc;
     }
 
@@ -80,11 +42,9 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
         return mc.log();
     }
 
-    /**
-     * If there is no executable corresponding to <code>ext</code>, create one.
-     */
-    public ExternalFunction getExternalFunction(E ext) {
-        ExternalFunction ef = cachedExternals.get(ext.getName());
+    @Override
+    public ExternalFunction<K, V> getExternalFunction(E ext) {
+        ExternalFunction<K, V> ef = cachedExternals.get(ext.getName());
         if (ef == null) {
             if (mc == null) {
                 return failedEval(ext, "Missing ModelicaCompiler", false);
@@ -111,31 +71,29 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
         return ef;
     }
 
-    /**
-     * Remove executables compiled by the constant evaluation framework.
-     */
+    @Override
     public void removeExternalFunctions() {
-        for (ExternalFunction ef : cachedExternals.values()) {
+        for (ExternalFunction<K, V> ef : cachedExternals.values()) {
             ef.remove();
         }
         cachedExternals.clear();
     }
 
-    /**
-     * Kill cached processes
-     */
+    @Override
     public void destroyProcesses(int externalEvaluation) {
-        for (ExternalFunction ef : new ArrayList<ExternalFunction>(livingCachedExternals)) {
+        for (ExternalFunction<K, V> ef : new ArrayList<ExternalFunction<K, V>>(livingCachedExternals)) {
             ef.destroyProcess(externalEvaluation);
         }
     }
 
+    @Override
     public void tearDown(int externalEvaluation) {
         destroyProcesses(externalEvaluation);
         removeExternalFunctions();
     }
 
-    public ExternalFunction failedEval(External<?> ext, String msg, boolean log) {
+    @Override
+    public ExternalFunction<K, V> failedEval(External<?> ext, String msg, boolean log) {
         return new FailedExternalFunction(failedEvalMsg(ext.getName(), msg), log);
     }
 
@@ -143,25 +101,7 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
         return "Failed to evaluate external function '" + name + "', " + msg;
     }
 
-    /**
-     * Represents an external function that can be evaluated using
-     * {@link ExternalFunction.evaluate}.
-     */
-    public abstract class ExternalFunction {
-
-        public ExternalFunction() {
-        }
-
-        public abstract int evaluate(External<K> ext, Map<K, V> values, int timeout) throws IOException;
-
-        public abstract void destroyProcess(int timeout);
-
-        public abstract void remove();
-
-        public abstract String getMessage();
-    }
-
-    private class FailedExternalFunction extends ExternalFunction {
+    private class FailedExternalFunction extends ExternalFunction<K, V> {
         private String msg;
         private boolean log;
 
@@ -184,19 +124,19 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
 
         @Override
         public void destroyProcess(int timeout) {
-            // Do nothing.
+            
         }
 
         @Override
         public void remove() {
-            // Do nothing.
+            
         }
     }
 
     /**
      * Represents an external function that has been compiled successfully.
      */
-    private class CompiledExternalFunction extends ExternalFunction {
+    private class CompiledExternalFunction extends ExternalFunction<K, V> {
         protected String executable;
         protected ProcessBuilder processBuilder;
         private String msg;
@@ -319,7 +259,7 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
      */
     private class MappedExternalFunction extends CompiledExternalFunction {
 
-        private Map<String, ExternalFunction> lives = new HashMap<>();
+        private Map<String, ExternalFunction<K, V>> lives = new HashMap<>();
 
         private final int externalConstantEvaluationMaxProc;
 
@@ -334,10 +274,10 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
          * function. Start a new process if not up already. Failure to set up (call
          * constructor) will cache and return a Failed external function.
          */
-        private ExternalFunction getActual(External<K> ext, Map<K, V> values, int timeout) {
+        private ExternalFunction<K, V> getActual(External<K> ext, Map<K, V> values, int timeout) {
             Variable<V, T> cvd = ext.cachedExternalObject();
             String name = cvd == null ? "" : cvd.ceval().getMarkedExternalObject();
-            ExternalFunction ef = lives.get(name);
+            ExternalFunction<K, V> ef = lives.get(name);
             if (ef == null) {
                 LiveExternalFunction lef = new LiveExternalFunction();
                 try {
@@ -362,7 +302,7 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
 
         @Override
         public void destroyProcess(int timeout) {
-            for (ExternalFunction ef : lives.values()) {
+            for (ExternalFunction<K, V> ef : lives.values()) {
                 ef.destroyProcess(timeout);
             }
             lives.clear();
@@ -371,7 +311,7 @@ public class ExternalProcessCache<K extends ExternalProcessCache.Variable<V, T>,
         /**
          * Represents a (possible) living external function process.
          */
-        private class LiveExternalFunction extends ExternalFunction {
+        private class LiveExternalFunction extends ExternalFunction<K, V> {
 
             protected ProcessCommunicator<V, T> com;
 

@@ -1,4 +1,4 @@
-package org.jmodelica.common;
+package org.jmodelica.common.evaluation;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,8 +8,9 @@ import java.io.OutputStreamWriter;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jmodelica.common.ExternalProcessCache.Value;
-import org.jmodelica.common.ExternalProcessCache.Type;
+import org.jmodelica.common.ILogContainer;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
 import org.jmodelica.util.values.ConstantEvaluationException;
 
 /**

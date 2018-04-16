@@ -25,20 +25,23 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jmodelica.common.ExternalProcessCache;
-import org.jmodelica.common.ProcessCommunicator;
+import org.jmodelica.common.evaluation.ExternalFunction;
+import org.jmodelica.common.evaluation.ExternalProcessCache;
+import org.jmodelica.common.evaluation.ExternalProcessCacheImpl;
+import org.jmodelica.common.evaluation.ExternalProcessMultiCache;
+import org.jmodelica.common.evaluation.ProcessCommunicator;
 
 aspect ExternalConstantEvaluation {
     
     class ModelicaCompiler {}
     
-    ModelicaCompiler   implements ExternalProcessCache.Compiler<CommonVariableDecl, FExternalStmt>;
-    FExternalStmt      implements ExternalProcessCache.External<CommonVariableDecl>;
-    CommonVariableDecl implements ExternalProcessCache.Variable<CValue,FType>;
-    CValue             implements ExternalProcessCache.Value;
-    FType              implements ExternalProcessCache.Type<CValue>;
+    ModelicaCompiler   implements ExternalProcessMultiCache.Compiler<CommonVariableDecl, FExternalStmt>;
+    FExternalStmt      implements ExternalProcessMultiCache.External<CommonVariableDecl>;
+    CommonVariableDecl implements ExternalProcessMultiCache.Variable<CValue,FType>;
+    CValue             implements ExternalProcessMultiCache.Value;
+    FType              implements ExternalProcessMultiCache.Type<CValue>;
     
-    class ExternalFunctionCache extends ExternalProcessCache<CommonVariableDecl, CValue, FType, FExternalStmt> {
+    class ExternalFunctionCache extends ExternalProcessMultiCache<CommonVariableDecl, CValue, FType, FExternalStmt> {
         public ExternalFunctionCache(ModelicaCompiler mc) {
             super(mc);
         }
@@ -154,13 +157,13 @@ aspect ExternalConstantEvaluation {
      * Retrieve {@link ExternalFunction} object which represents the external function
      * this statement refers to.
      */
-    public ExternalFunctionCache.ExternalFunction FExternalStmt.myExternalFunction() {
+    public ExternalFunction<CommonVariableDecl, CValue> FExternalStmt.myExternalFunction() {
         ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
         if (efc == null) {
-            return new ExternalFunctionCache(root().getUtilInterface().getModelicaCompiler())
+            return new ExternalProcessCacheImpl<>(root().getUtilInterface().getModelicaCompiler())
                 .failedEval(this, "external function cache unavailable", false);
         }
-        return efc.getExternalFunction(this);
+        return efc.getExternalProcessCache(getLibName()).getExternalFunction(this);
     }
     
     /**
@@ -176,7 +179,7 @@ aspect ExternalConstantEvaluation {
         
         int res = 0;
         int timeout = evaluator.externalEvaluation();
-        ExternalFunctionCache.ExternalFunction ef = myExternalFunction();
+        ExternalFunction<CommonVariableDecl,CValue> ef = myExternalFunction();
         String error = null;
         try {
             res = ef.evaluate(this, values, timeout);
@@ -188,7 +191,7 @@ aspect ExternalConstantEvaluation {
         }
         
         if (error != null) {
-            throw new ConstantEvaluationException(null, ExternalFunctionCache.failedEvalMsg(getName(), error));
+            throw new ConstantEvaluationException(null, ExternalProcessCacheImpl.failedEvalMsg(getName(), error));
         }
         
         return EVAL_CONT;
