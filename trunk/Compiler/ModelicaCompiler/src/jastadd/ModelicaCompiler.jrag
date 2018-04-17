@@ -1214,7 +1214,7 @@ public class ModelicaCompiler implements ILogContainer {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
-        getExternalFunctionCache().tearDown(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(fc.myOptions()).externalEvaluation());
+        getExternalFunctionCache().tearDown();
         fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);

@@ -38,7 +38,7 @@ public class ExternalProcessCacheTest {
         ExternalProcessCache<VariableMock, ValueMock, TypeMock, ExternalMock> ce1 = epc.getExternalProcessCache(key1);
         ce1.getExternalFunction(ext1);
         assertNull(log.next());
-        epc.tearDown(0);
+        epc.tearDown();
         assertEquals("INFO: Called tearDown()", log.next());
         assertNull(log.next());
     }
@@ -53,21 +53,21 @@ public class ExternalProcessCacheTest {
         assertTrue(ce1 != ce2);
         assertTrue(ce1 == epc.getExternalProcessCache(key1));
         assertTrue(ce2 == epc.getExternalProcessCache(key2));
-        epc.tearDown(key1, 0);
+        epc.tearDown(key1);
         assertEquals("INFO: Called tearDown()", log.next());
         assertNull(log.next());
         assertTrue(ce1 != epc.getExternalProcessCache(key1));
         assertTrue(ce2 == epc.getExternalProcessCache(key2));
-        epc.tearDown(key2, 0);
+        epc.tearDown(key2);
         assertEquals("INFO: Called tearDown()", log.next());
         assertNull(log.next());
         assertTrue(ce1 != epc.getExternalProcessCache(key1));
         assertTrue(ce2 != epc.getExternalProcessCache(key2));
-        epc.tearDown(0);
+        epc.tearDown();
         assertEquals("INFO: Called tearDown()", log.next());
         assertEquals("INFO: Called tearDown()", log.next());
         assertNull(log.next());
-        epc.tearDown(0);
+        epc.tearDown();
         assertNull(log.next());
     }
 
@@ -83,7 +83,7 @@ public class ExternalProcessCacheTest {
         }
     }
     
-    class CachedExternalsMock<K extends Variable<V,T>, V extends Value, T extends Type<V>, E extends External<K>> implements ExternalProcessCache<K,V,T,E> {
+    class CachedExternalsMock<K extends Variable<V,T>, V extends Value, T extends Type<V>, E extends External<K>> extends ExternalProcessCache<K,V,T,E> {
 
         @Override
         public ExternalFunction<K,V> getExternalFunction(E ext) {
@@ -98,12 +98,12 @@ public class ExternalProcessCacheTest {
         }
 
         @Override
-        public void destroyProcesses(int externalEvaluation) {
+        public void destroyProcesses() {
             log.info("Called destroyProcesses()");
         }
 
         @Override
-        public void tearDown(int externalEvaluation) {
+        protected void tearDown() {
             log.info("Called tearDown()");
         }
 

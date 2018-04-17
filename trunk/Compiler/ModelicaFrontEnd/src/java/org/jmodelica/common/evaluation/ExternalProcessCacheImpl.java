@@ -20,7 +20,7 @@ import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.logging.ModelicaLogger;
 import org.jmodelica.util.values.ConstantEvaluationException;
 
-public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> implements ExternalProcessCache<K, V, T, E> {
+public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value, T extends Type<V>, E extends External<K>> extends ExternalProcessCache<K, V, T, E> {
 
     /**
      * Maps external functions names to compiled executables.
@@ -80,15 +80,15 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     }
 
     @Override
-    public void destroyProcesses(int externalEvaluation) {
+    public void destroyProcesses() {
         for (ExternalFunction<K, V> ef : new ArrayList<ExternalFunction<K, V>>(livingCachedExternals)) {
-            ef.destroyProcess(externalEvaluation);
+            ef.destroyProcess();
         }
     }
 
     @Override
-    public void tearDown(int externalEvaluation) {
-        destroyProcesses(externalEvaluation);
+    protected void tearDown() {
+        destroyProcesses();
         removeExternalFunctions();
     }
 
@@ -123,7 +123,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         }
 
         @Override
-        public void destroyProcess(int timeout) {
+        public void destroyProcess() {
             
         }
 
@@ -209,7 +209,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         }
 
         @Override
-        public void destroyProcess(int timeout) {
+        public void destroyProcess() {
 
         }
 
@@ -284,10 +284,10 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                     lef.ready(ext, values, timeout);
                     ef = lef;
                 } catch (IOException e) {
-                    lef.destroyProcess(timeout);
+                    lef.destroyProcess();
                     ef = failedEval(ext, " error starting process '" + e.getMessage() + "'", true);
                 } catch (ConstantEvaluationException e) {
-                    lef.destroyProcess(timeout);
+                    lef.destroyProcess();
                     ef = failedEval(ext, " error starting process '" + e.getMessage() + "'", true);
                 }
                 lives.put(name, ef);
@@ -301,9 +301,9 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         }
 
         @Override
-        public void destroyProcess(int timeout) {
+        public void destroyProcess() {
             for (ExternalFunction<K, V> ef : lives.values()) {
-                ef.destroyProcess(timeout);
+                ef.destroyProcess();
             }
             lives.clear();
         }
@@ -332,10 +332,10 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 } catch (ProcessCommunicator.AbortConstantEvaluationException e) {
 
                 } catch (ConstantEvaluationException e) {
-                    destroyProcess(timeout);
+                    destroyProcess();
                     throw e;
                 } catch (IOException e) {
-                    destroyProcess(timeout);
+                    destroyProcess();
                     throw e;
                 }
                 return 0;
@@ -360,12 +360,12 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 // If we are over the allowed number of cached processes
                 // we kill the least recently used.
                 if (livingCachedExternals.size() > externalConstantEvaluationMaxProc) {
-                    livingCachedExternals.iterator().next().destroyProcess(timeout);
+                    livingCachedExternals.iterator().next().destroyProcess();
                 }
             }
 
             @Override
-            public void destroyProcess(int timeout) {
+            public void destroyProcess() {
                 if (com != null) {
                     livingCachedExternals.remove(this);
                     com.destroy();

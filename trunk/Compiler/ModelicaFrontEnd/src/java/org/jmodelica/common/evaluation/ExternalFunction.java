@@ -16,7 +16,7 @@ public abstract class ExternalFunction<K, V> {
 
     public abstract int evaluate(External<K> ext, Map<K, V> values, int timeout) throws IOException;
 
-    public abstract void destroyProcess(int timeout);
+    public abstract void destroyProcess();
 
     public abstract void remove();
 

@@ -74,23 +74,23 @@ public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Varia
         return new ExternalProcessCacheImpl<K, V, T, E>(mc);
     }
 
-    public void destroyProcesses(int externalEvaluation) {
+    public void destroyProcesses() {
         for (ExternalProcessCache<K, V, T, E> ce : map.values()) {
-            ce.destroyProcesses(externalEvaluation);
+            ce.destroyProcesses();
         }
     }
 
-    public void tearDown(int externalEvaluation) {
+    public void tearDown() {
         for (ExternalProcessCache<K, V, T, E> ce : map.values()) {
-            ce.tearDown(externalEvaluation);
+            ce.tearDown();
         }
         map.clear();
     }
 
-    public void tearDown(String key, int externalEvaluation) {
+    public void tearDown(String key) {
         ExternalProcessCache<K, V, T, E> ce = map.remove(key);
         if (ce != null) {
-            ce.tearDown(externalEvaluation);
+            ce.tearDown();
         }
     }
 

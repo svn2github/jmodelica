@@ -41,7 +41,7 @@ aspect ExternalConstantEvaluation {
     CValue             implements ExternalProcessMultiCache.Value;
     FType              implements ExternalProcessMultiCache.Type<CValue>;
     
-    class ExternalFunctionCache extends ExternalProcessMultiCache<CommonVariableDecl, CValue, FType, FExternalStmt> {
+    public class ExternalFunctionCache extends ExternalProcessMultiCache<CommonVariableDecl, CValue, FType, FExternalStmt> {
         public ExternalFunctionCache(ModelicaCompiler mc) {
             super(mc);
         }

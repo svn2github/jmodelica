@@ -2024,7 +2024,7 @@ aspect UtilInterface {
     public void UtilInterface.clean() {
         ExternalFunctionCache efc = getExternalFunctionCache();
         if (efc != null) {
-            efc.destroyProcesses(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(options).externalEvaluation());
+            efc.destroyProcesses();
         }
     }
     
