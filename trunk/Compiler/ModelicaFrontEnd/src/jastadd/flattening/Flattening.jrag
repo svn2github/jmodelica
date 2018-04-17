@@ -778,7 +778,7 @@ aspect Flattening {
     }
     
     inh SrcClassDecl InstExternal.myTopSrcClassDecl();
-    inh SrcClassDecl SrcStoredDefinition.myTopSrcClassDecl();
+    inh SrcClassDecl SrcBaseNode.myTopSrcClassDecl();
     eq Program.getChild().myTopSrcClassDecl()                         = null;
     eq Program.getSrcLibNode(int i).myTopSrcClassDecl()               = getSrcLibNode(i);
     eq InstClassDecl.getChild().myTopSrcClassDecl()                   = getSrcClassDecl().myTopSrcClassDecl();
@@ -794,7 +794,7 @@ aspect Flattening {
         InstClassDecl func = surroundingInstClass();
         FExternalStmt stmt = new FExternalStmt();
         SrcClassDecl scd = myTopSrcClassDecl();
-        stmt.setLibName(scd == null ? "" : new File(fileName()).getAbsolutePath()); // scd is null for builtins
+        stmt.setLibName(scd == null ? "" : new File(scd.fileName()).getAbsolutePath()); // scd is null for builtins
         stmt.setFExternalLanguage(hasFExternalLanguage() ? 
                 (FExternalLanguage) getFExternalLanguage().fullCopy() : 
                 new FCExternalLanguage());
