@@ -2937,8 +2937,8 @@ aspect ReferencedVariables {
 
     syn lazy Set<FIdUseExp> FAbstractEquation.referencedFIdUseExps() {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-        res.addAll(FIdUseExpsInRHS());
         res.addAll(FIdUseExpsInLHS());
+        res.addAll(FIdUseExpsInRHS());
         return res;
     }
 
@@ -3664,26 +3664,9 @@ aspect LinearFVariables {
     // to include free parameters in the Optimica extension.
     syn boolean FExp.isLinearParameterExp() = isParameterExp();
     
-    coll Set<FIdUseExp> FAbstractEquation.collectUses() 
-        [new LinkedHashSet<FIdUseExp>()] with add root FAbstractEquation;
-
-    FIdUseExp contributes this when 
-        !myFV().isUnknown() to 
-        FAbstractEquation.collectUses() for myFEquation();
-    
-    syn Set<FIdUseExp> FAbstractEquation.collectUses(Set<FVariable> vars) {
-        HashSet<FIdUseExp> set = new HashSet<FIdUseExp>();
-        for (FIdUseExp e : collectUses()) {
-            if (vars.contains(e.myFV())) {
-                set.add(e);         
-            }
-        }
-        return set;
-    }
-    
     syn boolean FAbstractEquation.checkLinearity(Set<FVariable> vars) {
-        for (FIdUseExp e : collectUses(vars)) {
-            if (!e.isLinear(vars)) {
+        for (FIdUseExp e : referencedFIdUseExps()) {
+            if (vars.contains(e.myFV()) && !e.isLinear(vars)) {
                 return false;
             }
         }

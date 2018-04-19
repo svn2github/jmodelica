@@ -405,7 +405,7 @@ aspect eliminateLinearEquations {
     syn java.util.List<FExp> FAbstractEquation.linearTerms() = Collections.<FExp> emptyList();
     eq FEquation.linearTerms() {
         ArrayList<FExp> linearTerms = new ArrayList<FExp>();
-        linearTerms.addAll(collectUses());
+        linearTerms.addAll(referencedFIdUseExps());
         linearTerms.addAll(timeExps());
         for (FExp exp : terms()) {
             if (exp.isLiteralExp()) {
