@@ -155,9 +155,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     protected void updateSubNodeName(String oldName, String newName) {
+        computeSubNodesCache();
         if (subNodesNameMap_cache != null) {
             T subNode = subNodesNameMap_cache.remove(oldName);
-            subNodesNameMap_cache.put(newName, subNode);
+            if (subNodesNameMap_cache.containsKey(newName)) {
+                subNodesNameMap_cache.put(newName, ambiguousNode());
+            }else {
+                subNodesNameMap_cache.put(newName, subNode);
+            }
         }
     }
 
@@ -190,14 +195,17 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         computeSubNodesCache();
         GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
-            subNode = createNode(paths[currentIndex], null); 
+            T newNode = createNode(paths[currentIndex], null); 
+            subNode = newNode;
+            // Defaults to immutable empty collections when empty.
             if (subNodesNameMap_cache.isEmpty()) {
                 subNodesNameMap_cache = new HashMap<String, T>();
             }
-            if (subNodes_cache.isEmpty())
+            if (subNodes_cache.isEmpty()) {
                 subNodes_cache =  new ArrayList<T>();
-                subNodesNameMap_cache.put(name,(T) subNode);
-            subNodes_cache.add((T) subNode);
+            }
+            subNodesNameMap_cache.put(name,newNode);
+            subNodes_cache.add(newNode);
         }
         return subNode.forPath(paths, currentIndex + 1);
     }
@@ -309,8 +317,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return name;
     }
     
-    protected void updateName(String name) {
+    /**
+     * Updates the name and node of this GenericAnnotationNode.
+     * @param name The new name
+     * @param node The new node
+     */
+    protected void updateNode(String name, N node) {
         this.name = name;
+        this.node = node;
     }
 
     /**
