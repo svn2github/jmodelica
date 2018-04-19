@@ -101,7 +101,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         return "Failed to evaluate external function '" + name + "', " + msg;
     }
 
-    private class FailedExternalFunction extends ExternalFunction<K, V> {
+    private class FailedExternalFunction implements ExternalFunction<K, V> {
         private String msg;
         private boolean log;
 
@@ -136,7 +136,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
     /**
      * Represents an external function that has been compiled successfully.
      */
-    private class CompiledExternalFunction extends ExternalFunction<K, V> {
+    private class CompiledExternalFunction implements ExternalFunction<K, V> {
         protected String executable;
         protected ProcessBuilder processBuilder;
         private String msg;
@@ -311,7 +311,7 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
         /**
          * Represents a (possible) living external function process.
          */
-        private class LiveExternalFunction extends ExternalFunction<K, V> {
+        private class LiveExternalFunction implements ExternalFunction<K, V> {
 
             protected ProcessCommunicator<V, T> com;
 

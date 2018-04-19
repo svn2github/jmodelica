@@ -9,16 +9,13 @@ import org.jmodelica.common.evaluation.ExternalProcessMultiCache.External;
  * Represents an external function that can be evaluated using
  * {@link ExternalFunction.evaluate}.
  */
-public abstract class ExternalFunction<K, V> {
+public interface ExternalFunction<K, V> {
 
-    public ExternalFunction() {
-    }
+    public int evaluate(External<K> ext, Map<K, V> values, int timeout) throws IOException;
 
-    public abstract int evaluate(External<K> ext, Map<K, V> values, int timeout) throws IOException;
+    public void destroyProcess();
 
-    public abstract void destroyProcess();
+    public void remove();
 
-    public abstract void remove();
-
-    public abstract String getMessage();
+    public String getMessage();
 }
