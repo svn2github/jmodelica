@@ -1,4 +1,9 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5604
+Fixed bug where using an iterator expression to set the binding 
+expression of a member of a record array member in a record declaration 
+would cause a crash in certain circumstances.
+
 ; Fixed ; Minor ; PyFMI ; #5597
 Fixed issue with getting time varying variables (sometimes wrong 
 variables was returned)
