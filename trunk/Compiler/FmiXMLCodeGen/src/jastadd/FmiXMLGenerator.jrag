@@ -255,7 +255,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     }
 
     /**
-     * Used for registering new tool tag undet the vendor annotation tag. 
+     * Used for registering new tool specific tag under the vendor annotation tag. 
      * Returns the name for conveninence.
      */
     public static String addVendorAnnotationTool(String childName) {

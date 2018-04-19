@@ -7199,6 +7199,41 @@ end RecordTests.RecordWithColonArray5;
 ")})));
 end RecordWithColonArray5;
 
+model RecordWithColonArray6
+    record A
+        parameter Real b;
+    end A;
+    
+    record C
+        parameter Integer n;
+        A a[n](b = {i for i in 1:n});
+    end C;
+    
+    C c(n = 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="RecordWithColonArray6",
+        description="",
+        flatModel="
+fclass RecordTests.RecordWithColonArray6
+ parameter RecordTests.RecordWithColonArray6.C c(n = 2,a(size() = {2},b = {1, 2}));
+
+public
+ record RecordTests.RecordWithColonArray6.A
+  parameter Real b;
+ end RecordTests.RecordWithColonArray6.A;
+
+ record RecordTests.RecordWithColonArray6.C
+  parameter Integer n;
+  parameter RecordTests.RecordWithColonArray6.A a[n];
+ end RecordTests.RecordWithColonArray6.C;
+
+end RecordTests.RecordWithColonArray6;
+")})));
+end RecordWithColonArray6;
+
+
 model RecordDer1
 	record A
 		Real x;

@@ -1687,9 +1687,11 @@ aspect Flattening {
         
         boolean flattenBinding = binding.shouldFlattenExp(this);
         List<FAttribute> attrs = new List<FAttribute>();
-        attrs.addAll(fv.getFAttributes());
-        addAttributesToFV(attrs, new Stack<Integer>(), binding,
-                !flattenBinding || hasBindingFExp() || variability().knownParameterOrLess());
+        if (!inRecordDecl()) {
+            attrs.addAll(fv.getFAttributes());
+            addAttributesToFV(attrs, new Stack<Integer>(), binding,
+                    !flattenBinding || hasBindingFExp() || variability().knownParameterOrLess());
+        }
         fv.setFAttributeList(attrs);
         if (flattenBinding) {
             FExp e = flattenBindingFExp();

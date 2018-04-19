@@ -1886,9 +1886,9 @@ fclass EvaluationTests.EvalNoBinding3
 
 public
  record EvaluationTests.EvalNoBinding3.R
-  parameter Real x(start = 2);
-  Real c[2,2](start = {{3, 4}, {5, 6}});
-  Real d[2,2](each start = 7);
+  parameter Real x;
+  Real c[2,2];
+  Real d[2,2];
  end EvaluationTests.EvalNoBinding3.R;
 
 end EvaluationTests.EvalNoBinding3;
@@ -1918,9 +1918,9 @@ fclass EvaluationTests.EvalNoBinding4
 
 public
  record EvaluationTests.EvalNoBinding4.R
-  parameter Real x(start = 2);
-  Real c[2,2](start = {{3, 4}, {5, 6}});
-  Real d[2,2](each start = 7);
+  parameter Real x;
+  Real c[2,2];
+  Real d[2,2];
  end EvaluationTests.EvalNoBinding4.R;
 
 end EvaluationTests.EvalNoBinding4;
