@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jmodelica.common.ILogContainer;
+import org.jmodelica.common.LogContainer;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 
 public class ExternalProcessMultiCache<K extends ExternalProcessMultiCache.Variable<V, T>, V extends ExternalProcessMultiCache.Value, T extends ExternalProcessMultiCache.Type<V>, E extends ExternalProcessMultiCache.External<K>> {
 
-    public interface Compiler<K, E extends External<K>> extends ILogContainer {
+    public interface Compiler<K, E extends External<K>> extends LogContainer {
         public String compileExternal(E ext) throws FileNotFoundException, CcodeCompilationException;
 
         public CCompilerDelegator getCCompiler();

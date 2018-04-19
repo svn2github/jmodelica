@@ -819,8 +819,10 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 
 /**
  * An external function interface in the flat tree. Implemented as a statement.
+ *
+ * LibTopPackagePath is the file path of the package file of the library that this external statement originated from.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp* <LibName>;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp* <LibTopPackagePath>;
 
 /**
  * A language specification for an external function.

@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jmodelica.common.ILogContainer;
+import org.jmodelica.common.LogContainer;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Type;
 import org.jmodelica.common.evaluation.ExternalProcessMultiCache.Value;
 import org.jmodelica.util.values.ConstantEvaluationException;
@@ -36,9 +36,9 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
     private boolean timeOutHappened = false;
     private int timeOut = 0;
 
-    private ILogContainer mc;
+    private LogContainer mc;
 
-    public ProcessCommunicator(ILogContainer mc, Process proc) {
+    public ProcessCommunicator(LogContainer mc, Process proc) {
         this.mc = mc;
         process = proc;
         in = new BufferedReader(new InputStreamReader(process.getInputStream()));

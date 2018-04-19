@@ -79,7 +79,7 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
-import org.jmodelica.common.ILogContainer;
+import org.jmodelica.common.LogContainer;
 
 import org.xml.sax.SAXException;
 
@@ -135,7 +135,7 @@ aspect ModelicaCompilerMain {
  * level.
  * 
  */
-public class ModelicaCompiler implements ILogContainer {
+public class ModelicaCompiler implements LogContainer {
     
     public static final Level DEFAULT_LEVEL = Level.ERROR;
     protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
