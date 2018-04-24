@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.logging.IllegalLogStringException;
-import org.jmodelica.util.xml.StringUtil;
+import org.jmodelica.util.StringUtil;
 
 /**
  * Class representing a compiler instance to be used when compiling with a separate process.

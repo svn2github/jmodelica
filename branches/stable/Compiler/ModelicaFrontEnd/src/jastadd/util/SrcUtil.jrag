@@ -298,7 +298,31 @@ aspect SrcUtil {
      */
     syn SrcImportClause SrcElement.asImportClause() = (SrcImportClause) this;
 
-    
+
+    inh SrcClassDecl InstExternal.myTopSrcClassDecl();
+    inh SrcClassDecl SrcBaseNode.myTopSrcClassDecl();
+    eq Program.getChild().myTopSrcClassDecl()                         = null;
+    eq Program.getSrcLibNode(int i).myTopSrcClassDecl()               = getSrcLibNode(i);
+    eq InstClassDecl.getChild().myTopSrcClassDecl()                   = getSrcClassDecl().myTopSrcClassDecl();
+    eq SrcStoredDefinition.getSrcClassDecl(int i).myTopSrcClassDecl() {
+        SrcClassDecl res = myTopSrcClassDecl();
+        if (res == null) {
+            res = getSrcClassDecl(i);
+        }
+        return res;
+    }
+
+    /**
+     * Provides the file path to the root of the library for which this source
+     * AST node is part of. The root path for a structured library is the
+     * folder for which the root package.mo is located. The root path for an
+     * unstructured library is the modelica file it self.
+     */
+    syn File SrcBaseNode.myLibRootPath() {
+        SrcClassDecl topClass = myTopSrcClassDecl();
+        File fileRoot = new File(topClass.fileName());
+        return topClass.isLibNode() ?  fileRoot.getParentFile() : fileRoot;
+    }
 }
 
 

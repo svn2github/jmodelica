@@ -51,7 +51,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public static final String VENDOR_NAME = "__Modelon";
 
-    private final String name;
+    private String name;
     private N node;
     private final T parent;
 
@@ -119,8 +119,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 subNodesNameMap.put(subNode.name(), ambiguousNode());
             }
         }
-        subNodes_cache = Collections.unmodifiableList(subNodes);
-        subNodesNameMap_cache = Collections.unmodifiableMap(subNodesNameMap);
+        subNodes_cache = subNodes;
+        subNodesNameMap_cache = subNodesNameMap;
     }
 
     /**
@@ -154,6 +154,18 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return res;
     }
 
+    protected void updateSubNodeName(String oldName, String newName) {
+        computeSubNodesCache();
+        if (subNodesNameMap_cache != null) {
+            T subNode = subNodesNameMap_cache.remove(oldName);
+            if (subNodesNameMap_cache.containsKey(newName)) {
+                subNodesNameMap_cache.put(newName, ambiguousNode());
+            }else {
+                subNodesNameMap_cache.put(newName, subNode);
+            }
+        }
+    }
+
     protected boolean isSubNodesCacheFresh() {
         return subNodesNameMap_cache != null;
     }
@@ -183,11 +195,21 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         computeSubNodesCache();
         GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
-            subNode = createNode(paths[currentIndex], null);
+            T newNode = createNode(paths[currentIndex], null); 
+            subNode = newNode;
+            // Defaults to immutable empty collections when empty.
+            if (subNodesNameMap_cache.isEmpty()) {
+                subNodesNameMap_cache = new HashMap<String, T>();
+            }
+            if (subNodes_cache.isEmpty()) {
+                subNodes_cache =  new ArrayList<T>();
+            }
+            subNodesNameMap_cache.put(name,newNode);
+            subNodes_cache.add(newNode);
         }
         return subNode.forPath(paths, currentIndex + 1);
     }
-
+    
     /**
      * Returns reference to it self, but with correct type! This pattern
      * ensures that all nodes have the same type as T.
@@ -293,6 +315,16 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public String name() {
         return name;
+    }
+    
+    /**
+     * Updates the name and node of this GenericAnnotationNode.
+     * @param name The new name
+     * @param node The new node
+     */
+    protected void updateNode(String name, N node) {
+        this.name = name;
+        this.node = node;
     }
 
     /**
@@ -716,6 +748,19 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     protected ConstValue evaluatedValue() {
         return value().evaluateValue();
+    }
+    
+    /**
+     * Removes the reference to node. 
+     * The backing node is not removed and has to be removed separately. 
+     */
+    protected void disconnectFromNode() {
+        computeSubNodesCache();
+        node = null; 
+        if ( subNodes_cache != null)
+            for (T t: subNodes_cache) {
+                    t.disconnectFromNode();
+            }
     }
 
 }

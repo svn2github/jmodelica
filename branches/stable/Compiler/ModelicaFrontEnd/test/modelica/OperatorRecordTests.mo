@@ -2336,8 +2336,8 @@ public
  end OperatorRecordTests.Cplx;
 
  record OperatorRecordTests.OperatorLimitations15.Cplx2
-  Real re(min = 1);
-  Real im(max = 5,nominal = 2);
+  Real re;
+  Real im;
  end OperatorRecordTests.OperatorLimitations15.Cplx2;
 
 end OperatorRecordTests.OperatorLimitations15;
@@ -3280,8 +3280,8 @@ public
  end OperatorRecordTests.Cplx.'+';
 
  record OperatorRecordTests.OperatorInherit1.A
-  Real re(min = -1);
-  Real im(min = -1);
+  Real re;
+  Real im;
  end OperatorRecordTests.OperatorInherit1.A;
 
  record OperatorRecordTests.Cplx
@@ -3332,8 +3332,8 @@ public
  end OperatorRecordTests.Cplx.'+';
 
  record OperatorRecordTests.OperatorInherit2.A
-  Real re(min = -1,max = 10);
-  Real im(min = -1,max = 10);
+  Real re;
+  Real im;
  end OperatorRecordTests.OperatorInherit2.A;
 
  record OperatorRecordTests.Cplx

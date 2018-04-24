@@ -537,6 +537,9 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
+    b->fac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
+    b->dgelss_iwork = 10*n;
+    b->dgelss_rwork = (jmi_real_t*)calloc(b->dgelss_iwork,sizeof(jmi_real_t));
     b->ipiv = (int*)calloc(2*n+1,sizeof(int));
     b->init = 1;
       
@@ -819,6 +822,8 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->str_pre_index);
     free(b->str_vref);
     free(b->jac);
+    free(b->fac);
+    free(b->dgelss_rwork);
     free(b->ipiv);
     free(b->min);
     free(b->max);
@@ -866,7 +871,7 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     ef = current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_INITIALIZE);
 
     /* Now we evaluate the system matrix of the linear system. */
-    if (!(current_block->jmi->cached_block_jacobians==1)) {
+    if (!(current_block->jmi->cached_block_jacobians == 1)) {
         jmi_real_t* store_dz = jmi->dz[0]; 
         jmi->dz_active_index++;
         jmi->dz[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
@@ -877,11 +882,22 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
         }
         /* Evaluate Jacobian */
         current_block->evaluate_jacobian(current_block, current_block->jac);
+        memcpy(current_block->fac, current_block->jac, n_x*n_x*sizeof(jmi_real_t));
+        
         jmi->dz_active_index--;
         jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
         jmi->dz[0] = store_dz;
         /* Factorize Jacobian */
-        dgetrf_(&n_x, &n_x, current_block->jac, &n_x, current_block->ipiv, &INFO);
+        dgetrf_(&n_x, &n_x, current_block->fac, &n_x, current_block->ipiv, &INFO);
+        
+        if (INFO) {
+            jmi_log_node(jmi->log, logWarning, "SingularJacobian", "Singular Jacobian detected for <dir_block: %s> at <t: %f>", 
+                         current_block->label, jmi_get_t(jmi)[0]);
+                         
+            current_block->singular_jacobian = 1;
+        } else {
+            current_block->singular_jacobian = 0;
+        }
     }
 
     /* Evaluate the right hand side of the linear system we would like to solve. This is
@@ -893,10 +909,23 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
            current_block->dv, where the right hand side is stored. */
     ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
 
-    /* Perform a back-solve */
-    trans = 'N'; /* No transposition */
     i = 1; /* One rhs to solve for */
-    dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+    if (current_block->singular_jacobian == 0) {
+        /* Perform a back-solve */
+        trans = 'N'; /* No transposition */
+        
+        dgetrs_(&trans, &n_x, &i, current_block->fac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+    } else {
+        double rcond = -1.0;
+        int rank = 0;
+
+        memcpy(current_block->fac, current_block->jac, n_x*n_x*sizeof(jmi_real_t));
+        dgelss_(&n_x, &n_x, &i, current_block->fac, &n_x, current_block->dv, &n_x ,current_block->work_ivs, &rcond, &rank, current_block->dgelss_rwork, &(current_block->dgelss_iwork), &INFO);
+        
+        if(INFO) {
+            jmi_log_node(jmi->log, logWarning, "Warning", "DGELSS failed to solve the linear system in <block: %s> with error code <error: %s>", current_block->label, INFO);
+        }
+    }
 
     /* Write back results into the global dz vector. */
     ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);

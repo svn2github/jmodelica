@@ -36,7 +36,7 @@ void jmi_ad_divide_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t d
 
 void jmi_ad_divide(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t dx, jmi_real_t dy, jmi_real_t *v, jmi_real_t *d, const char msg[]) {
     *v = jmi_divide(jmi, func_name, x, y, msg);
-    *d = (dx*y - x*dy) / (y*y);
+    *d = jmi_divide(jmi, func_name, (dx*y - x*dy), (y*y), msg);
 }
 
 void jmi_ad_sqrt_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -53,7 +53,7 @@ void jmi_ad_sqrt(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx
     if (x <= 0.0) {
         *d = 0.0;
     } else {
-        *d = dx / ( 2 * (*v));
+        *d = jmi_divide(jmi, func_name, dx, ( 2 * (*v)), msg);
     }
 }
 
@@ -72,7 +72,7 @@ void jmi_ad_asin(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx
     if (x <= -1.0 || x >= 1.0) {
         *d = 0.0;
     } else {
-        *d = dx/sqrt(1 - x*x);
+        *d = jmi_divide(jmi, func_name, dx, sqrt(1 - x*x), msg);
     }
 }
 
@@ -90,7 +90,7 @@ void jmi_ad_acos(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx
     if (x <= -1.0 || x >= 1.0) {
         *d = 0.0;
     } else {
-        *d = -dx/sqrt(1 - x*x);
+        *d = jmi_divide(jmi, func_name, -dx, sqrt(1 - x*x), msg);
     }
 }
 
@@ -109,7 +109,7 @@ void jmi_ad_atan2(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y
     if (x == 0 && y == 0) {
         *d = 0.0;
     } else {
-        *d = (dx*y - x*dy) / (x*x + y*y);
+        *d = jmi_divide(jmi, func_name, (dx*y - x*dy), (x*x + y*y), msg);
     }
 }
 
@@ -127,11 +127,11 @@ void jmi_ad_pow(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, 
     if (x == 0.0) {
         if (y == 1.0 ) {
             *d = dx;
-		} else {
+        } else {
             *d = 0.0;
         }
     } else {
-        *d = *v * (dx*y/x + dy*log(jmi_abs(x)));
+        *d = *v * (dx * jmi_divide(jmi, func_name, y, x, msg) + dy*jmi_log(jmi, func_name, jmi_abs(x), msg));
     }
 }
 
@@ -158,7 +158,7 @@ void jmi_ad_log_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v,
 
 void jmi_ad_log(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_log(jmi, func_name, x, msg);
-    *d = dx / x;
+    *d = jmi_divide(jmi, func_name, dx, x, msg);
 }
 
 void jmi_ad_log10_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -171,7 +171,7 @@ void jmi_ad_log10_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* 
 
 void jmi_ad_log10(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_log10(jmi, func_name, x, msg);
-    *d = dx * log10(exp(1.0)) / x;
+    *d = jmi_divide(jmi, func_name, dx * jmi_log10(jmi, func_name, exp(1.0), msg), x, msg);
 }
 
 void jmi_ad_sinh_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -184,7 +184,7 @@ void jmi_ad_sinh_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_sinh(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_sinh(jmi, func_name, x, msg);
-    *d = dx * cosh(x);
+    *d = dx * jmi_cosh(jmi, func_name, x, msg);
 }
 
 void jmi_ad_cosh_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -197,7 +197,7 @@ void jmi_ad_cosh_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_cosh(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_cosh(jmi, func_name, x, msg);
-    *d = dx * sinh(x);
+    *d = dx * jmi_sinh(jmi, func_name, x, msg);
 }
 
 void jmi_ad_tan_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -210,7 +210,7 @@ void jmi_ad_tan_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v,
 
 void jmi_ad_tan(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_tan(jmi, func_name, x, msg);
-    *d = dx / (cos(x)*cos(x));
+    *d = jmi_divide(jmi, func_name, dx, (cos(x)*cos(x)), msg);
 }
 
 void jmi_ad_sin_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -249,7 +249,7 @@ void jmi_ad_atan_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_atan(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_atan(jmi, func_name, x, msg);
-    *d = dx / (1 + x*x);
+    *d = jmi_divide(jmi, func_name, dx, (1 + x*x), msg);
 }
 
 void jmi_ad_tanh_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -262,5 +262,5 @@ void jmi_ad_tanh_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v
 
 void jmi_ad_tanh(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_tanh(jmi, func_name, x, msg);
-    *d = 1 - (*v) * (*v);
+    *d = dx * (1 - (*v) * (*v));
 }

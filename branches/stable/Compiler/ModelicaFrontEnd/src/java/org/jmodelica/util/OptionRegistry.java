@@ -30,7 +30,6 @@ import java.util.Set;
 
 import org.jmodelica.util.xml.DocBookColSpec;
 import org.jmodelica.util.xml.DocBookPrinter;
-import org.jmodelica.util.xml.StringUtil;
 import org.jmodelica.util.xml.XMLPrinter;
 
 /**

@@ -3525,7 +3525,7 @@ public
  end ModificationTests.ModificationFlattening1.f;
 
  record ModificationTests.ModificationFlattening1.R
-  ModificationTests.ModificationFlattening1.C.B x(min = ModificationTests.ModificationFlattening1.f(0));
+  ModificationTests.ModificationFlattening1.C.B x;
  end ModificationTests.ModificationFlattening1.R;
 
  type ModificationTests.ModificationFlattening1.C.B = Real(min = ModificationTests.ModificationFlattening1.f(0));

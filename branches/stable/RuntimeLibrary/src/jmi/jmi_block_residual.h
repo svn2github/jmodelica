@@ -147,43 +147,47 @@ struct jmi_block_residual_t {
     jmi_int_t* str_pre_index;       /**< \brief  Index of the pre strings in this block. */
     jmi_int_t* nr_vref;             /**< \brief  Valuereference of the non-reals in this block. */
     jmi_int_t* str_vref;            /**< \brief  Valuereference of the string in this block. */
-	jmi_int_t* dr_index;            /**< \brief  Index of the discrete reals for this block. */
-	jmi_int_t* dr_pre_index;        /**< \brief  Index of the pre discrete-reals in this block. */
-	jmi_int_t* dr_vref;             /**< \brief  Valuereference of the discrete-reals in this block. */
+    jmi_int_t* dr_index;            /**< \brief  Index of the discrete reals for this block. */
+    jmi_int_t* dr_pre_index;        /**< \brief  Index of the pre discrete-reals in this block. */
+    jmi_int_t* dr_vref;             /**< \brief  Valuereference of the discrete-reals in this block. */
     
     /* Work vectors */
     jmi_real_t* work_switches;      /**< \brief Work vector for the switches */
     jmi_real_t* work_non_reals;     /**< \brief Work vector for the non-reals */
     jmi_string_t* work_strings;     /**< \brief Work vector for the strings */
-	jmi_real_t* work_discrete_reals;     /**< \brief Work vector for the discrete-reals */
+    jmi_real_t* work_discrete_reals;     /**< \brief Work vector for the discrete-reals */
     jmi_real_t* work_ivs;           /**< \brief Work vector for the iteration variables */
 
     jmi_real_t* dx;                 /**< \brief Work vector for the seed vector */
     jmi_real_t* dv;                 /**< \brief Work vector for (dF/dv)*dv */
     int index;                      /**< \brief Block integer index, used for internal representation of the block */
 #ifdef JMI_PROFILE_RUNTIME
-	int parent_index; /*Used for profiling*/
-	int is_init_block; /*Used for profiling*/
+    int parent_index; /*Used for profiling*/
+    int is_init_block; /*Used for profiling*/
 #endif
     jmi_string_t label;             /**< \brief Block string label, used for external representation of the block */
 
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
     jmi_real_t* dres;              /**< \brief Work vector for the directional derivative that corresponds to dx */
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
+    jmi_real_t* fac;               /**< \brief Work vector for the factorized block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
+    
+    jmi_real_t* dgelss_rwork;      /**< \brief Work vector for DGELSS */
+    int dgelss_iwork;              /**< \brief Size of the work vector for DGELSS */ 
 
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
     jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
     jmi_real_t* initial;           /**< \brief Initial values for iteration variables */
 
-	jmi_real_t* discrete_nominals;  /**< \brief Nominals values for the discrete reals */
+    jmi_real_t* discrete_nominals;  /**< \brief Nominals values for the discrete reals */
     
     int jacobian_variability;      /**< \brief Variability of Jacobian coefficients: JMI_CONSTANT_VARIABILITY
                                          JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 
     int* value_references; /**< \brief Iteration variable value references. **/
-	
+    
     jmi_block_solver_t* block_solver;
 
     void * solver;
@@ -205,6 +209,7 @@ struct jmi_block_residual_t {
     long int nb_fevals;
     double time_spent;             /**< \brief Total time spent in non-linear solver */
     char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
+    int singular_jacobian;
 };
 
 /**
@@ -403,6 +408,7 @@ int jmi_block_residual_completed_integrator_step(jmi_block_residual_t* block);
 /* Utilized Lapack routines */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+extern void dgelss_(int* M, int* N, int* NRHS, double* A, int* LDA, double* B, int* LDB,double* S,double* RCOND,int* RANK,double* WORK,int* LWORK, int* INFO);
 
 
 #endif /* _JMI_COMMON_H */

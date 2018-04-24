@@ -330,7 +330,7 @@ SrcMatrixRow        : SrcExp ::= SrcExp*;
 
 SrcArraySubscripts : SrcBaseNode ::= SrcSubscript*;
 abstract SrcSubscript : SrcBaseNode;
-SrcColonSubscript : SrcSubscript::=;
+SrcColonSubscript : SrcSubscript;
 SrcExpSubscript   : SrcSubscript ::= SrcExp;
 
 SrcTimeExp : SrcExp;

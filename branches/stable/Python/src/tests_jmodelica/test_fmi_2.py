@@ -609,12 +609,78 @@ class Test_FMUModelME2:
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
     
     @testattr(stddist_full = True)
+    def test_get_time_varying_variables(self):
+        model = load_fmu(self.coupled_name)
+        
+        [r,i,b] = model.get_model_time_varying_value_references()
+        [r_f, i_f, b_f] = model.get_model_time_varying_value_references(filter="*")
+        
+        assert len(r) == len(r_f)
+        assert len(i) == len(i_f)
+        assert len(b) == len(b_f)
+        
+        vars = model.get_variable_alias("J4.phi")
+        for var in vars:
+            [r,i,b] = model.get_model_time_varying_value_references(filter=var)
+            assert len(r) == 1
+        
+        [r,i,b] = model.get_model_time_varying_value_references(filter=vars.keys())
+        assert len(r) == 1
+    
+    @testattr(stddist_full = True)
     def test_get_string(self):
         model = load_fmu(self.string1)
         
         for i in range(100): #Test so that memory issues are detected
             assert model.get("str")[0] == "hej"
-            
+    
+    @testattr(stddist_full = True)
+    def test_estimate_directional_derivatives_A(self):
+        
+        model = load_fmu(self.coupled_name)
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        
+        A = model._get_A(use_structure_info=True)
+        B = model._get_A(use_structure_info=True, output_matrix=A)
+        assert A is B #Test that the returned matrix is actually the same as the input
+        N.allclose(A.toarray(),B.toarray())
+        A = model._get_A(use_structure_info=False)
+        B = model._get_A(use_structure_info=False, output_matrix=A)
+        assert A is B
+        N.allclose(A,B)
+        C = model._get_A(use_structure_info=True, output_matrix=A)
+        assert A is not C
+        N.allclose(C.toarray(), A)
+        D = model._get_A(use_structure_info=False, output_matrix=C)
+        assert D is not C
+        N.allclose(D, C.toarray())
+    
+    @testattr(stddist_full = True)
+    def test_estimate_directional_derivatives_BCD(self):
+        
+        model = load_fmu(self.output2_name)
+        model.initialize()
+        model.event_update()
+        model.enter_continuous_time_mode()
+        
+        for func in [model._get_B, model._get_C, model._get_C]:
+            A = func(use_structure_info=True)
+            B = func(use_structure_info=True, output_matrix=A)
+            assert A is B #Test that the returned matrix is actually the same as the input
+            N.allclose(A.toarray(),B.toarray())
+            A = func(use_structure_info=False)
+            B = func(use_structure_info=False, output_matrix=A)
+            assert A is B
+            N.allclose(A,B)
+            C = func(use_structure_info=True, output_matrix=A)
+            assert A is not C
+            N.allclose(C.toarray(), A)
+            D = func(use_structure_info=False, output_matrix=C)
+            assert D is not C
+            N.allclose(D, C.toarray())
+    
     @testattr(stddist_full = True)
     def test_units(self):
         
