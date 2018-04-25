@@ -204,7 +204,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             if (subNodes_cache.isEmpty()) {
                 subNodes_cache =  new ArrayList<T>();
             }
-            subNodesNameMap_cache.put(name,newNode);
+            subNodesNameMap_cache.put(paths[currentIndex], newNode);
             subNodes_cache.add(newNode);
         }
         return subNode.forPath(paths, currentIndex + 1);
@@ -326,6 +326,34 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         this.name = name;
         this.node = node;
     }
+    
+    /**
+     * Update all accessed sub Modifiers to point to the nodes of the new node.
+     * All subAnnotation nodes not present in the new node are notified of that they don't 
+     * exist any more. 
+     * @param newNode The new node
+     */
+    protected void updateMySubNodes(N newNode) {
+        if (exists()) {
+            computeSubNodesCache();
+            
+            if ( subNodes_cache != null) {
+                for (T t: subNodes_cache) {
+                        t.disconnectFromNode();
+                }
+            }
+            
+            if (subNodesNameMap_cache != null) {
+                for(SubNodePair<N> subNode : newNode.annotationSubNodes()) {
+                    T key = subNodesNameMap_cache.get(subNode.name);
+                    if (key != null && !key.isAmbiguous()){
+                        key.updateNode(subNode.name, subNode.node);
+                        key.updateMySubNodes(subNode.node);
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * 
@@ -412,16 +440,22 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             out.append(name());
         }
         if (hasSubNodes()) {
-            out.append('(');
             boolean first = true;
             for (T subNode : subNodes()) {
-                if (!first) {
-                    out.append(", ");
+                if (subNode.exists()) {
+                    if (first) {
+                        out.append('(');
+                    }
+                    if (!first) {
+                        out.append(", ");
+                    }
+                    first = false;
+                    subNode.toString(out);
                 }
-                first = false;
-                subNode.toString(out);
             }
-            out.append(')');
+            if (!first) {
+                out.append(')');
+            }
         }
         if (hasValue()) {
             out.append('=');
@@ -755,12 +789,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * The backing node is not removed and has to be removed separately. 
      */
     protected void disconnectFromNode() {
-        computeSubNodesCache();
-        node = null; 
-        if ( subNodes_cache != null)
+        if (parent !=null) {
+            node = null; 
+        }
+        if ( subNodes_cache != null) {
             for (T t: subNodes_cache) {
                     t.disconnectFromNode();
             }
+        }
     }
 
 }
