@@ -27,6 +27,11 @@ aspect CCodeGenExpressions {
      =========================================================================*/
 
     @Override
+    public void FNoExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("NULL");
+    }
+
+    @Override
     public void FAbsExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print("jmi_abs(");
         p.print(getFExp(), str, indent);
