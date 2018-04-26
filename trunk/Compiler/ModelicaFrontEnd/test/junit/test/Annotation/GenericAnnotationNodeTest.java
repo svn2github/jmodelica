@@ -69,7 +69,6 @@ public class GenericAnnotationNodeTest extends testUtil {
     @Test
     public void GenericAnnotationNode() {
         GenericAnnotationNode n = createGAN("hello");
-        builder(n,"a(n=3)");
         n.forPath("a");
         n.forPath("else");
         assertEmpty(n.subNodes().iterator());

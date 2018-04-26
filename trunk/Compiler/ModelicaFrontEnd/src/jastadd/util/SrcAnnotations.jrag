@@ -224,6 +224,10 @@ aspect SrcAnnotations {
     }
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+        if (newValue == null) {
+            removeMe(false,false);
+            return;
+        }
         setSrcExp(newValue);
     }
     @Override
@@ -236,7 +240,11 @@ aspect SrcAnnotations {
     @Override
     public void SrcCompleteModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (hasSrcValueModification()) {
-            getSrcValueModification().setAnnotationValue(newValue);
+            if (newValue == null) {
+                this.setSrcValueModification(null);
+            } else {
+                getSrcValueModification().setAnnotationValue(newValue);
+            }
         } else {
             setSrcValueModification(new SrcValueModification(newValue));
         }
@@ -362,12 +370,12 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public final SrcExp annotationValue() {
+        public SrcExp annotationValue() {
             return null;
         }
 
         @Override
-        public final void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+        public void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
             throw new FailedToSetAnnotationValueException();
         }
 
@@ -445,6 +453,22 @@ aspect SrcAnnotations {
             @Override
             protected SrcModification getProvider() {
                 return owningNode.getSrcModification();
+            }
+            
+            @Override
+            public final SrcExp annotationValue() {
+                if (hasProvider())
+                    return getProvider().annotationValue();
+                return null;
+            }
+            
+            @Override
+            public final void setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+                if (hasProvider()) {
+                    getProvider().setAnnotationValue(newValue);
+                } else {
+                    owningNode.setSrcModification(new SrcValueModification(newValue));
+                }
             }
         };
     }
