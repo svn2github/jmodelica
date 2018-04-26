@@ -229,4 +229,94 @@ end MatchingTest3;
 
 end Matching;
 
+model ExternalObjectLoop1
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO eo;
+        output Real y;
+        external;
+    end f;
+    
+    parameter Real x(fixed=false);
+    parameter EO eo = EO(x);
+    parameter Real y = f(eo);
+initial equation
+    x = y;
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExternalObjectLoop1",
+            description="Test error for external object in algebraic loop",
+            errorMessage="
+Error in flattened model, EXTERNAL_OBJECT_IN_BLOCK:
+  The external object eo is computed in a block, this is not allowed!
+Block which produced the error:
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  x
+
+Iteration variables:
+  y
+
+Solved discrete variables:
+  eo
+
+Torn equations:
+  x := y
+
+Continuous residual equations:
+  y = BLTTests.ExternalObjectLoop1.f(eo)
+    Iteration variables: y
+
+Discrete equations:
+  eo := BLTTests.ExternalObjectLoop1.EO.constructor(x)
+
+Jacobian:
+  |1.0, 0.0|
+  |0.0, 1.0|
+")})));
+end ExternalObjectLoop1;
+
+model ExternalObjectLoop2
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            input EO eo1;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    parameter Real x(fixed=false);
+    parameter EO eo = EO(x, eo);
+initial equation
+    x = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExternalObjectLoop2",
+            description="Test error for external object in algebraic loop",
+            errorMessage="
+Error at line 17, column 23, in file '...':
+  Circularity in binding expression of parameter: eo = EO.constructor(x, eo)
+")})));
+end ExternalObjectLoop2;
+
 end BLTTests;

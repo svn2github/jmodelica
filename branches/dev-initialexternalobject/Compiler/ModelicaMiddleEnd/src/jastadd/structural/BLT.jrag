@@ -1701,7 +1701,7 @@ aspect BLT{
 
         @Override
         public void errorCheck(FClass fclass) {
-            for (SimpleEquationBlock seb : unsolvedBlocks)
+            for (SimpleEquationBlock seb : unsolvedBlocks())
                 if (!seb.isReal())
                     seb.equation().error("Non-real equation used as residual:\n" + seb.equation());
             if (!fclass.myOptions().getBooleanOption("allow_non_scalar_nested_blocks")) {
@@ -1711,6 +1711,7 @@ aspect BLT{
                     }
                 }
             }
+            errorCheckExternalObjects(fclass);
             if (isLinear())
                 return;
             for (AbstractEquationBlock seb : solvedBlocks()) {
@@ -3715,5 +3716,16 @@ aspect StartValueDependency {
             }
         }
     }
-    
+
+    public static final AbstractEquationBlock.BlockProblemProducer ASTNode.EXTERNAL_OBJECT_IN_BLOCK =
+            new AbstractEquationBlock.BlockProblemProducer("EXTERNAL_OBJECT_IN_BLOCK",
+                    "The external object %s is computed in a block, this is not allowed!");
+
+    public void EquationBlock.errorCheckExternalObjects(FClass fclass) {
+        for (FVariable var : allVariables()) {
+            if (var.isExternalObject()) {
+                ASTNode.EXTERNAL_OBJECT_IN_BLOCK.invoke(fclass, this, var.displayName());
+            }
+        }
+    }
 }
