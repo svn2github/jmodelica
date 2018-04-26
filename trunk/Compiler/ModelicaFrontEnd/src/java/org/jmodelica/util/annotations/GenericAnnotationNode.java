@@ -135,18 +135,24 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     private T updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
         T previous = subNodesNameMap.put(subNode.name(), subNode);
-        if (previous != null) {
+        if (previous != null) { // subNode goes from not ambiguous to ambiguous
             subNodesNameMap.put(subNode.name(), ambiguousNode());
         }
         return previous;
     }
 
-    private T removeFromSubNodesNameMapCache(String subNodeName, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
-        T previous = subNodesNameMap.remove(subNodeName);
+    private T removeFromSubNodesNameMapCache(T subNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
+        T previous = subNodesNameMap.get(subNode.name());
         if (previous != null) {
             if (previous == ambiguousNode()) {
                 Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes);
-                //TODO handle the case when the subNode goes from ambiguous to not ambiguous
+                List<T> oldNodes = oldNodesMap.get(subNode.name());
+                if(oldNodes.size() == 2) { // subNode goes from ambiguous to not ambiguous
+                    oldNodes.remove(subNode);
+                    subNodesNameMap.put(subNode.name(), oldNodes.get(0));
+                }
+            } else {
+                subNodesNameMap.remove(subNode.name());
             }
         }
         return previous;
@@ -180,12 +186,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return res;
     }
 
-    protected void updateSubNodeName(String oldName, String newName, T subNode) {
-        if(oldName.equals(newName)) {
-            return;
-        }
-        removeFromSubNodesNameMapCache(oldName, subNodes_cache, subNodesNameMap_cache);
-        assert subNode.name().equals(newName);
+    protected void updateSubNode(String newName, N newNode, T subNode) {
+        removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
+        subNode.setNode(newName, newNode);
         updateSubNodesNameMapCache(subNodesNameMap_cache, subNode);
     }
 
@@ -342,14 +345,21 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param newName The new name
      * @param node The new node
      */
-    @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
-        String oldName = this.name;
+        if (parent() != null && !name().equals(newName)) {
+            parent().updateSubNode(newName, node, (T) this);
+        } else {
+            setNode(newName, node);
+        }
+    }
+    /**
+     * Sets the name and node of this GenericAnnotationNode.
+     * @param newName The new name
+     * @param node The new node
+     */
+    protected void setNode(String newName, N node) {
         this.name = newName;
         this.node = node;
-        if (parent != null) {
-            parent.updateSubNodeName(oldName, newName,(T) this);
-        }
         computeSubNodesCache();
     }
 
