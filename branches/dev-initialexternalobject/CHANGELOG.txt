@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Compiler ; #5605
+Support for initial parameter external objects.
+
 ; Fixed ; Minor ; Compiler ; #5604
 Fixed bug where using an iterator expression to set the binding 
 expression of a member of a record array member in a record declaration 
