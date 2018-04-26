@@ -273,8 +273,15 @@ aspect ContentCheck {
             if (inherit != null)
                 inherit.error("Can't declare %s as flow, since it contains a component declared as flow", name());
         }
+        if (isExternalObject() && hasBindingFExp() && !getBindingFExp().variability().lessOrEqual(variability())) {
+            ASTNode.BINDING_EXPRESSION_VARIABILITY.invoke(this, 
+                getBindingFExp().variability().toStringLiteral(), variability().toStringLiteral());
+        }
     }
 
+    public static final SimpleProblemProducer ASTNode.BINDING_EXPRESSION_VARIABILITY =
+        new SimpleErrorProducer("BINDING_EXPRESSION_VARIABILITY", ProblemKind.SEMANTIC, 
+            "Variability of binding expression (%s) must be lower or equal to the variability of the component (%s)");
     
     public static final SimpleProblemProducer ASTNode.CONSTANT_INPUT =
         new SimpleErrorProducer("CONSTANT_INPUT", ProblemKind.SEMANTIC, "Function input may not be constant");
