@@ -16,9 +16,9 @@
 
 aspect FlatEquations {
 
-    public void FAbstractEquation.flatten(Flattener f, FQName prefix) {
+    public void FAbstractEquation.flatten(Flattener f) {
         List<FAbstractEquation> l = getType().equationList(f);
-        flattenEqn(f, l, prefix);
+        flattenEqn(f, l);
     }
 
     abstract public List<FAbstractEquation> FEquationType.equationList(Flattener f);
@@ -29,38 +29,42 @@ aspect FlatEquations {
         return f.getInitialEquations();
     }
 
-
-    public void FAbstractEquation.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {
-        l.add(fullCopy());
+    public static void FAbstractEquation.flattenEqnList(Flattener f, List<FAbstractEquation> l,
+            List<FAbstractEquation> eqs) {
+        for (FAbstractEquation fae : eqs) {
+            fae.flattenEqn(f, l);
+        }
     }
 
-    public void FAbstractEquation.flattenAttrs(FAbstractEquation eqn, FQName prefix) {
+    public void FAbstractEquation.flattenAttrs(Flattener f, FAbstractEquation eqn) {
         List<FAttribute> flatAttrs = new List<FAttribute>();
         for (FAttribute attr : getFAttributes())
-            flatAttrs.add(attr.flatten(prefix));
+            flatAttrs.add(attr.flatten(f));
         eqn.setFAttributeList(flatAttrs);
     }
 
-    public void FEquation.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {
-        FEquation flattened = new FEquation(getLeft().flatten(prefix), getRight().flatten(prefix));
-        flattenAttrs(flattened, prefix);
+    public abstract void FAbstractEquation.flattenEqn(Flattener f, List<FAbstractEquation> l);
+
+    @Override
+    public void FUnsupportedEquation.flattenEqn(Flattener f, List<FAbstractEquation> l) {
+        l.add(treeCopy());
+    }
+
+    @Override
+    public void FEquation.flattenEqn(Flattener f, List<FAbstractEquation> l) {
+        FEquation flattened = new FEquation(getLeft().flatten(f), getRight().flatten(f));
+        flattenAttrs(f, flattened);
         flattened.setLocation(this);
         l.add(flattened);
     }
 
-    public static void FAbstractEquation.flattenEqnList(Flattener f, List<FAbstractEquation> l, FQName prefix,
-            List<FAbstractEquation> eqs) {
-        for (FAbstractEquation fae : eqs) {
-            fae.flattenEqn(f, l, prefix);
-        }
-    }
-
-    public void InstForClauseE.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {
+    @Override
+    public void InstForClauseE.flattenEqn(Flattener f, List<FAbstractEquation> l) {
         Indices ind = Indices.create(getInstForIndexs());
         for (Index i : ind) {
             ind.translate(i).setValues(getInstForIndexs());
             getFAbstractEquations().flushAllRecursive();
-            FAbstractEquation.flattenEqnList(f, l, prefix, getFAbstractEquations());
+            FAbstractEquation.flattenEqnList(f, l, getFAbstractEquations());
         }
         
         for (InstForIndex ifi : getInstForIndexs()) {
@@ -68,61 +72,70 @@ aspect FlatEquations {
         }
     }
 
-    public void FIfWhenElseEquation.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {
+    @Override
+    public void FForClauseE.flattenEqn(Flattener f, List<FAbstractEquation> l) {
+        l.add(treeCopy());
+    }
+
+    @Override
+    public void FIfWhenElseEquation.flattenEqn(Flattener f, List<FAbstractEquation> l) {
         List<FAbstractEquation> toList = new List<FAbstractEquation>();
-        FAbstractEquation.flattenEqnList(f, toList, prefix, getFAbstractEquations());
+        FAbstractEquation.flattenEqnList(f, toList, getFAbstractEquations());
         FIfWhenElseEquation res = createEmptyNode();
         res.setType((FEquationType) getType().fullCopy());
         res.setFAbstractEquationList(toList);
-        flattenIfWhenTo(f, res, prefix);
+        flattenIfWhenTo(f, res);
         if (!res.isEmpty()) {
             l.add(res);
         }
     }
 
-    public void FIfWhenElseEquation.flattenIfWhenTo(Flattener f, FIfWhenElseEquation res, FQName prefix) {}
+    public void FIfWhenElseEquation.flattenIfWhenTo(Flattener f, FIfWhenElseEquation res) {}
 
-    public void FIfWhenEquation.flattenIfWhenTo(Flattener f, FIfWhenElseEquation res, FQName prefix) {
+    public void FIfWhenEquation.flattenIfWhenTo(Flattener f, FIfWhenElseEquation res) {
         FIfWhenEquation ifWhen = (FIfWhenEquation) res;
         if (hasElse()) {
             List<FAbstractEquation> elseRes = new List<FAbstractEquation>();
-            getElse().flattenEqn(f, elseRes, prefix);
+            getElse().flattenEqn(f, elseRes);
             if (elseRes.getNumChildNoTransform() > 0) {
                 ifWhen.setElse((FIfWhenElseEquation)elseRes.getChildNoTransform(0));
             }
         }
-        ifWhen.setTest(getTest().flatten(prefix));
+        ifWhen.setTest(getTest().flatten(f));
     }
 
     syn boolean FIfWhenElseEquation.isEmpty() = getNumFAbstractEquation() == 0;
     eq FIfWhenEquation.isEmpty()              = super.isEmpty() && (!hasElse() || getElse().isEmpty());
 
-    public void FConnectClause.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {}
+    @Override
+    public void FConnectClause.flattenEqn(Flattener f, List<FAbstractEquation> l) {}
 
-    public void FFunctionCallEquation.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {
+    @Override
+    public void FFunctionCallEquation.flattenEqn(Flattener f, List<FAbstractEquation> l) {
         if (ignoreInFlattening()) {
             return;
         }
-        FExp call = getCall().flatten(prefix);
+        FExp call = getCall().flatten(f);
         if (!(call instanceof FAbstractFunctionCall)) {
             return;
         }
         List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
         for (FFunctionCallLeft left : getLefts()) { 
-            lefts.add(left.flatten(prefix));
+            lefts.add(left.flatten(f));
         }
         FFunctionCallEquation flattened =  new FFunctionCallEquation(lefts, (FAbstractFunctionCall) call);
-        flattenAttrs(flattened, prefix);
+        flattenAttrs(f, flattened);
         l.add(flattened);
     }
 
-    public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
-        return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
+    public FFunctionCallLeft FFunctionCallLeft.flatten(Flattener f) {
+        return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(f)) : new Opt());
     }
 
-    public void FAlgorithm.flattenEqn(Flattener f, List<FAbstractEquation> l, FQName prefix) {
+    @Override
+    public void FAlgorithm.flattenEqn(Flattener f, List<FAbstractEquation> l) {
         List l2 = new List();
-        FStatement.flattenFStatementList(f, getFStatements(), l2, prefix);
+        FStatement.flattenFStatementList(f, getFStatements(), l2);
         l.add(new FAlgorithm(l2));
     }
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2018 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -86,20 +86,19 @@ aspect OptimicaFlattening {
                     if (!f.isFlatteningOptimica()) {
                         return;
                     }
-                    FQName empty = new FQNameEmpty();
                     if (icd.hasInstClassModification()) {
                         List attr = new List();
-                        icd.getInstClassModification().collectAttributes(attr, empty, AttributeExpRetriever.DEFAULT, true);
+                        icd.getInstClassModification().collectAttributes(f, attr, AttributeExpRetriever.DEFAULT, true);
                         f.setFAttributeList(attr);
                     }
                 }
             });
 
-	refine Flattening public void InstNode.flattenEquations(Flattener f, FQName name) {
+	refine Flattening public void InstNode.flattenEquations(Flattener f) {
         for (FAbstractEquation ae : getFAbstractEquations()) 
-            ae.flatten(f, name);
+            ae.flatten(f);
         for (FConstraint c : getFConstraints()) 
-            c.flatten(f, name);
+            c.flatten(f);
     }
 
 	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
@@ -148,27 +147,20 @@ aspect OptimicaFlattening {
 	}
 	
 	
-    public void FConstraint.flatten(Flattener f, FQName prefix) {}
-	
-	public void FConstraintEq.flatten(Flattener f, FQName prefix) {
-		f.addFConstraint(new FConstraintEq(getLeft().flatten(prefix),getRight().flatten(prefix)));
-	}
+    public abstract void FConstraint.flatten(Flattener f);
 
-	public void FConstraintLeq.flatten(Flattener f, FQName prefix) {
-		f.addFConstraint(new FConstraintLeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
-	}
+    public void FRelationConstraint.flatten(Flattener f) {
+        f.addFConstraint(createNode(getLeft().flatten(f), getRight().flatten(f)));
+    }
 
-	public void FConstraintGeq.flatten(Flattener f, FQName prefix) {
-		f.addFConstraint(new FConstraintGeq(getLeft().flatten(prefix),getRight().flatten(prefix)));
-	}
-
-	public void InstForClauseC.flatten(Flattener f, FQName prefix) {
+    @Override
+    public void InstForClauseC.flatten(Flattener f) {
         Indices ind = Indices.create(getInstForIndexs());
         for (Index i : ind) {
             ind.translate(i).setValues(getInstForIndexs());
             getFConstraints().flushAllRecursive();
             for (FConstraint c : getFConstraints()) {
-                c.flatten(f, prefix);
+                c.flatten(f);
             }
         }
         for (InstForIndex ifi : getInstForIndexs()) {
@@ -189,8 +181,8 @@ aspect OptimicaFlattening {
 		return getFConstraintList();	
 	}
 
-    public FExp InstTimedVariable.flatten(FQName prefix) {
-        return new FTimedVariable(new FIdUse(getName().flatten()), getArg().flatten(prefix));
+    public FExp InstTimedVariable.flatten(Flattener f) {
+        return new FTimedVariable(new FIdUse(getName().flatten()), getArg().flatten(f));
     }
 
 }

@@ -1448,7 +1448,7 @@ aspect OverconstrainedConnections {
 			right.setName(new FQNameString(func.qualifiedName()).createFIdUse());
             right.addArg(cse1.createFIdUseExp());
             right.addArg(cse2.createFIdUseExp());
-            right.setFType(func.functionType().flatten(prefix, null, true));
+            right.setFType(func.functionType().flatten(Flattener.expressionFlattener(), null, true));
 			FAbstractEquation eqn;
 			if (!s.isUnknown() && s.numElements() == 0) 
 				eqn = new FFunctionCallEquation(new List<FFunctionCallLeft>(), right);

@@ -35,23 +35,23 @@ model Break1
             flatModel="
 fclass AlgorithmTests.For.Break1
  Real x;
- discrete Boolean Break1.temp_1;
+ discrete Boolean temp_1;
 initial equation 
- pre(Break1.temp_1) = false;
+ pre(temp_1) = false;
 algorithm
  x := 1;
- Break1.temp_1 := true;
- if Break1.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   x := x + 1;
-  Break1.temp_1 := false;
-  if Break1.temp_1 then
+  temp_1 := false;
+  if temp_1 then
    x := x + 1;
   end if;
  end if;
- if Break1.temp_1 then
+ if temp_1 then
   x := x + 1;
-  Break1.temp_1 := false;
-  if Break1.temp_1 then
+  temp_1 := false;
+  if temp_1 then
    x := x + 2;
   end if;
  end if;
@@ -80,31 +80,31 @@ model Break2
             flatModel="
 fclass AlgorithmTests.For.Break2
  Real x;
- discrete Boolean Break2.temp_1;
+ discrete Boolean temp_1;
 initial equation 
- pre(Break2.temp_1) = false;
+ pre(temp_1) = false;
 algorithm
  x := 1;
- Break2.temp_1 := true;
- if Break2.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   x := x + 1;
   if noEvent(x > 2) then
-   Break2.temp_1 := false;
+   temp_1 := false;
   else
    x := x + 1;
   end if;
-  if Break2.temp_1 then
+  if temp_1 then
    x := x + 1;
   end if;
  end if;
- if Break2.temp_1 then
+ if temp_1 then
   x := x + 1;
   if noEvent(x > 2) then
-   Break2.temp_1 := false;
+   temp_1 := false;
   else
    x := x + 1;
   end if;
-  if Break2.temp_1 then
+  if temp_1 then
    x := x + 2;
   end if;
  end if;
@@ -139,45 +139,45 @@ model Break3
             flatModel="
 fclass AlgorithmTests.For.Break3
  Real x;
- discrete Boolean Break3.temp_1;
- discrete Boolean Break3.temp_2;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
- pre(Break3.temp_1) = false;
- pre(Break3.temp_2) = false;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 algorithm
  x := 1;
- Break3.temp_1 := true;
- if Break3.temp_1 then
-  Break3.temp_2 := true;
-  if Break3.temp_2 then
+ temp_1 := true;
+ if temp_1 then
+  temp_2 := true;
+  if temp_2 then
    if noEvent(x > 1) then
     x := 2;
    elseif noEvent(x > 2) then
     x := 3;
    else
     if noEvent(x > 3) then
-     Break3.temp_2 := false;
+     temp_2 := false;
     end if;
-    if Break3.temp_2 then
+    if temp_2 then
      x := 4;
     end if;
    end if;
   end if;
-  if Break3.temp_2 then
+  if temp_2 then
    if noEvent(x > 1) then
     x := 2;
    elseif noEvent(x > 2) then
     x := 3;
    else
     if noEvent(x > 3) then
-     Break3.temp_2 := false;
+     temp_2 := false;
     end if;
-    if Break3.temp_2 then
+    if temp_2 then
      x := 4;
     end if;
    end if;
   end if;
-  Break3.temp_1 := false;
+  temp_1 := false;
  end if;
 end AlgorithmTests.For.Break3;
 ")})));
@@ -201,21 +201,21 @@ model BreakNames1
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.For.BreakNames1
- discrete Boolean BreakNames1.temp_1;
+ discrete Boolean temp_1;
  Real a;
 algorithm
  a := 0.0;
- BreakNames1.temp_1 := true;
- if BreakNames1.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   a := a + 1;
   if a > 0.0 then
-   BreakNames1.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
- if BreakNames1.temp_1 then
+ if temp_1 then
   a := a + 2;
   if a > 0.0 then
-   BreakNames1.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames1;
@@ -259,40 +259,40 @@ model BreakNames2
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.For.BreakNames2
- discrete Boolean m1.BreakNames2.temp_1;
+ discrete Boolean temp_1;
  Real m1.a;
  Real m1.b;
- discrete Boolean m2.BreakNames2.temp_2;
+ discrete Boolean temp_2;
  Real m2.a;
  Real m2.b;
 algorithm
  m1.a := 0.0;
- m1.BreakNames2.temp_1 := true;
- if m1.BreakNames2.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   m1.b := m1.a + 1;
   if m1.b < 0.0 then
-   m1.BreakNames2.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
- if m1.BreakNames2.temp_1 then
+ if temp_1 then
   m1.b := m1.a + 2;
   if m1.b < 0.0 then
-   m1.BreakNames2.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
 algorithm
  m2.a := 0.0;
- m2.BreakNames2.temp_2 := true;
- if m2.BreakNames2.temp_2 then
+ temp_2 := true;
+ if temp_2 then
   m2.b := m2.b + m2.a + 1;
   if m2.b > 10.0 then
-   m2.BreakNames2.temp_2 := false;
+   temp_2 := false;
   end if;
  end if;
- if m2.BreakNames2.temp_2 then
+ if temp_2 then
   m2.b := m2.b + m2.a + 2;
   if m2.b > 10.0 then
-   m2.BreakNames2.temp_2 := false;
+   temp_2 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames2;
@@ -319,24 +319,24 @@ model BreakNames3
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.For.BreakNames3
- discrete Boolean BreakNames3.temp_3;
+ discrete Boolean temp_3;
  Real temp_1[2] = {1, 2};
  Real temp_2;
  Real temp_4;
 algorithm
- BreakNames3.temp_3 := true;
- if BreakNames3.temp_3 then
+ temp_3 := true;
+ if temp_3 then
   temp_2 := temp_2 + temp_1[3 - 1];
   temp_4 := temp_4 + temp_1[1];
   if temp_2 > temp_4 then
-   BreakNames3.temp_3 := false;
+   temp_3 := false;
   end if;
  end if;
- if BreakNames3.temp_3 then
+ if temp_3 then
   temp_2 := temp_2 + temp_1[3 - 2];
   temp_4 := temp_4 + temp_1[2];
   if temp_2 > temp_4 then
-   BreakNames3.temp_3 := false;
+   temp_3 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames3;
@@ -834,39 +834,39 @@ algorithm
             variability_propagation=false,
             flatModel="
 fclass AlgorithmTests.UnusedBranch5
- discrete Boolean UnusedBranch5.temp_1;
+ discrete Boolean temp_1;
  Real x;
  discrete input Boolean b;
 algorithm
- UnusedBranch5.temp_1 := true;
- if UnusedBranch5.temp_1 then
+ temp_1 := true;
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 4;
   end if;
  end if;
- if UnusedBranch5.temp_1 then
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 4;
   end if;
  end if;
- if UnusedBranch5.temp_1 then
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 3;
-   UnusedBranch5.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
- if UnusedBranch5.temp_1 then
+ if temp_1 then
   if b then
    x := 1;
   else
    x := 3;
-   UnusedBranch5.temp_1 := false;
+   temp_1 := false;
   end if;
  end if;
 end AlgorithmTests.UnusedBranch5;

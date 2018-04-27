@@ -490,7 +490,7 @@ aspect Constructors {
     }
 
     public FExp FOperatorRecordType.createFNegExp(FExp a) {
-        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(new FQNameEmpty(), arr(a), arr(this));
+        return matchOverloadedOperator(null, FExp.OP_NEG).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a), arr(this));
     }
 
     /**
@@ -501,7 +501,7 @@ aspect Constructors {
     }
 
     public FExp FOperatorRecordType.createFSubExp(FExp a, FExp b) {
-        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(new FQNameEmpty(), arr(a, b), arr(this, this));
+        return matchOverloadedOperator(this, FExp.OP_SUB).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a, b), arr(this, this));
     }
 
     /**
@@ -512,7 +512,7 @@ aspect Constructors {
     }
 
     public FExp FOperatorRecordType.createFAddExp(FExp a, FExp b) {
-        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(new FQNameEmpty(), arr(a, b), arr(this, this));
+        return matchOverloadedOperator(this, FExp.OP_ADD).flattenOverloadedFunctionCall(Flattener.expressionFlattener(), arr(a, b), arr(this, this));
     }
 
     public class ASTNode {

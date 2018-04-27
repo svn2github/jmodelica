@@ -123,7 +123,7 @@ aspect OperatorRecordTypes {
     
     public FExp FOperatorRecordType.flattenZeroLiteral() {
         InstClassDecl func = matchOverloadedZero();
-        return (func != null) ? func.flattenOverloadedFunctionCall(new FQNameEmpty()) : zeroLiteral();
+        return (func != null) ? func.flattenOverloadedFunctionCall(Flattener.expressionFlattener()) : zeroLiteral();
     }
 
 }

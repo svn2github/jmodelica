@@ -557,19 +557,19 @@ aspect Arrays {
     eq InstForClauseE.getChild().parentExpandedSubscripts() {
         FArraySubscripts fas = parentExpandedSubscripts();
         for (InstForIndex i : getInstForIndexs()) {
-            fas.addFSubscript(i.createFSubscript(myInstNode().getFQName()));
+            fas.addFSubscript(i.createFSubscript());
         }
         return fas;
     }
     eq InstRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
     eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
 
-    public FSubscript InstForIndex.createFSubscript(FQName prefix) {
-        return new FExpSubscript(getFExp().flatten(prefix));
+    public FSubscript InstForIndex.createFSubscript() {
+        return new FExpSubscript(getFExp().flatten(Flattener.expressionFlattener()));
     }
     @Override
-    public FSubscript InstForIndexNoExp.createFSubscript(FQName prefix) {
-        return hasFExp() ? super.createFSubscript(prefix) : new FColonSubscript();
+    public FSubscript InstForIndexNoExp.createFSubscript() {
+        return hasFExp() ? super.createFSubscript() : new FColonSubscript();
     }
 
 	/**
