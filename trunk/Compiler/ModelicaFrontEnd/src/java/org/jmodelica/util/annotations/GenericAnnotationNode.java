@@ -137,7 +137,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     private T updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
         T previous = subNodesNameMap.put(subNode.name(), subNode);
-        if (previous != null) { // subNode goes from not ambiguous to ambiguous
+        if (previous != null && previous.exists() && subNode.exists()) { // subNode goes from not ambiguous to ambiguous
             subNodesNameMap.put(subNode.name(), ambiguousNode());
         }
         return previous;
@@ -147,7 +147,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         T previous = subNodesNameMap.get(subNode.name());
         if (previous != null) {
             if (previous == ambiguousNode()) {
-                Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes);
+                Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(filterExists(subNodes));
                 List<T> oldNodes = oldNodesMap.get(subNode.name());
                 if(oldNodes.size() == 2) { // subNode goes from ambiguous to not ambiguous
                     oldNodes.remove(subNode);
@@ -165,20 +165,19 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * there may be multiple nodes with the same name, if that is the case,
      * then they are put in the list in the order that they are found!
      */
-    private static <A extends GenericAnnotationNode<?, ?, ?>>
-    Map<String, List<A>> constructMapIncludingAmbiguous(Collection<A> nodes) {
+    private Map<String, List<T>> constructMapIncludingAmbiguous(Iterable<T> nodes) {
         if (nodes == null) {
             return Collections.emptyMap();
         }
-        Map<String, List<A>> res = new java.util.LinkedHashMap<String, List<A>>();
-        for (A node : nodes) {
+        Map<String, List<T>> res = new java.util.LinkedHashMap<String, List<T>>();
+        for (T node : nodes) {
             String name = node.name();
-            List<A> withSameName = res.get(name);
+            List<T> withSameName = res.get(name);
             if (withSameName == null) {
-                withSameName = new ArrayList<A>(Collections.singletonList(node));
+                withSameName = new ArrayList<T>(Collections.singletonList(node));
                 res.put(name, withSameName);
             } else if (withSameName.size() == 1) {
-                withSameName = new ArrayList<A>(withSameName);
+                withSameName = new ArrayList<T>(withSameName);
                 withSameName.add(node);
                 res.put(name, withSameName);
             } else {
@@ -287,7 +286,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public Iterable<T> subNodes() {
         computeSubNodesCache();
-        return new FilteredIterable<T>(subNodes_cache, new Criteria<T>() {
+        return filterExists(subNodes_cache);
+    }
+
+    private Iterable<T> filterExists(Iterable<T> nodes) {
+        return new FilteredIterable<T>(nodes, new Criteria<T>() {
 
             @Override
             public boolean test(T elem) {
