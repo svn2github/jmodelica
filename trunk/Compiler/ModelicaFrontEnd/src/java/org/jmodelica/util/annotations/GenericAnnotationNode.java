@@ -25,7 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jmodelica.common.URIResolver.URIException;
+import org.jmodelica.util.Criteria;
 import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.Evaluable;
@@ -279,13 +281,20 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
-     * Provides a list of sub nodes for this node.
+     * Provides all sub nodes for this node that {@link #exists()}.
      * 
-     * @return a list with all sub-nodes
+     * @return all sub nodes that {@link #exists()}
      */
     public Iterable<T> subNodes() {
         computeSubNodesCache();
-        return subNodes_cache;
+        return new FilteredIterable<T>(subNodes_cache, new Criteria<T>() {
+
+            @Override
+            public boolean test(T elem) {
+                return elem.exists();
+            }
+            
+        });
     }
 
     /**
@@ -477,7 +486,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (hasSubNodes()) {
             boolean first = true;
             for (T subNode : subNodes()) {
-                if (subNode.exists()) {
                     if (first) {
                         out.append('(');
                     }
@@ -486,7 +494,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 }
                 first = false;
                 subNode.toString(out);
-            }
             }
             if (!first) {
             out.append(')');
