@@ -224,10 +224,6 @@ aspect SrcAnnotations {
     }
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
-        if (newValue == null) {
-            removeMe(false,false);
-            return;
-        }
         setSrcExp(newValue);
     }
     @Override
