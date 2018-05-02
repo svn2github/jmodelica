@@ -217,6 +217,48 @@ aspect SrcAnnotations {
     eq SrcClassRedeclare.annotationSubNodes() {
     	return getSrcBaseClassDecl().asShortClassDecl().createModifierProvider().annotationSubNodes();
     }
+    
+    /**
+     * Remove this ASTNode from the AST and the possible empty list containing it. 
+     *
+     * If the parent is a list then this ASTNode is removed from it.
+     * The list might become empty after the removal in which case the list's parent is returned.
+     * 
+     * The parent is returned without any changes if the parent is not a list. 
+     * The caller is then required to determine if further removals/modifications are needed for the returned node.
+     *  
+     * @returns 
+     *      Either the parent of the caller or the parent of the list containing the caller.
+     */
+
+    public ASTNode ASTNode.removeMe() {
+        ASTNode parent = getParent();
+        if (parent instanceof List || parent instanceof Opt) {
+            parent.removeChild(parent.getIndexOfChild(this));
+            if (parent.numChildren() != 0) {
+                return parent;
+            }
+            return parent.getParent();
+        }
+        return parent;
+    }
+    
+   /**
+    * Remove the ASTNode and possible also parent constructs from the model.
+    * 
+    * @param removeEmptyParents 
+    *       If "Empty/Redundant" parents should be removed
+    * @param hasRemoved 
+    *       If this call should do state cleanup or not for this object (Used Internally) 
+    * @returns 
+    *       parts of the callers parent structure might have be removed and parents might need to be corrected.
+    */
+    public boolean ASTNode.removeMe(boolean removeEmptyParents, boolean hasRemoved) {
+        if (!hasRemoved){
+            removeMe();
+        }
+        return false; 
+    }
 
     @Override
     public void SrcModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
@@ -224,6 +266,10 @@ aspect SrcAnnotations {
     }
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
+        if (newValue == null) {
+            removeMe(false,false);
+            return;
+        }
         setSrcExp(newValue);
     }
     @Override
