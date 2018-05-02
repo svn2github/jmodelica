@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5608
+Removed the -g flag when building FMUs
+
 ; Fixed ; Minor ; Compiler ; #5579 
 Improved handling of event generating relational expressions
 with nested blocks.
