@@ -16,32 +16,32 @@ import annotationMock.DummyAnnotProvider;
 public class GenericAnnotationNodeTest extends testUtil {
     
     public GenericAnnotationNode<DummyAnnotationNode, DummyAnnotProvider, Evaluable> createGAN(String name) {
-        return createGAN(name,new DummyAnnotProvider(name),null);
+        return createGAN(name, new DummyAnnotProvider(name), null);
     }
     
     public GenericAnnotationNode<DummyAnnotationNode, DummyAnnotProvider, Evaluable> createGAN(String name,String value) {
-        return createGAN(name,new DummyAnnotProvider(name,value),null);
+        return createGAN(name, new DummyAnnotProvider(name, value), null);
     }
     
     public GenericAnnotationNode<DummyAnnotationNode, DummyAnnotProvider, Evaluable> 
         createGAN(String name, DummyAnnotProvider p, GenericAnnotationNode parent) {
-            return Builder.createGAN(name,p, parent);
+            return Builder.createGAN(name, p, parent);
     }
     
-    public GenericAnnotationNode builder(GenericAnnotationNode n, String defs){
-        return Builder.buildGAN(n,defs);
+    public GenericAnnotationNode builder(GenericAnnotationNode node, String definition){
+        return Builder.buildGAN(node, definition);
     }
     
-    public void disconnectFromNode(GenericAnnotationNode g) {
-        ((DummyAnnotationNode) g).disconnectFromNode();
+    public void disconnectFromNode(GenericAnnotationNode node) {
+        ((DummyAnnotationNode) node).disconnectFromNode();
     }
 
-    private GenericAnnotationNode buildGAN(GenericAnnotationNode n,
-            GenericAnnotationNode... createGAN) {
-        for (GenericAnnotationNode a: createGAN) {
-            (((DummyAnnotProvider)n.node())).addAnnotationSubNode(((DummyAnnotProvider)a.node())); 
+    private GenericAnnotationNode buildGAN(GenericAnnotationNode node,
+            GenericAnnotationNode... subNodes) {
+        for (GenericAnnotationNode subNode: subNodes) {
+            (((DummyAnnotProvider)node.node())).addAnnotationSubNode(((DummyAnnotProvider)subNode.node())); 
         }
-        return n;
+        return node;
     }
 
     /*

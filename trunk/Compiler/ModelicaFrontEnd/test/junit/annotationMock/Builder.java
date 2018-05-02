@@ -17,21 +17,21 @@ public class Builder {
     }
     
     
-    public static GenericAnnotationNode buildGAN(GenericAnnotationNode n, String defs){
+    public static GenericAnnotationNode buildGAN(GenericAnnotationNode n, String definition){
             DummyAnnotationNode root = (DummyAnnotationNode) n;
-            DummySrcArgument data = parseModifier(defs);
-            if (data.annotationValue()!=null) {
+            DummySrcArgument data = parseModifier(definition);
+            if (data.annotationValue() != null) {
                 root.setValue(data.annotationValue());
             }
-            for(SubNodePair<DummyAnnotProvider> x : data.annotationSubNodes()) {
-                root.node().addAnnotationSubNode(x.name);
-                recursionBuild(root.forPath(x.name),x.node);
+            for(SubNodePair<DummyAnnotProvider> subNode : data.annotationSubNodes()) {
+                root.node().addAnnotationSubNode(subNode.name);
+                recursionBuild(root.forPath(subNode.name),subNode.node);
             }
         return n;
     }
 
-    private static DummySrcArgument parseModifier(String defs) {
-        Scanner scanner = new Scanner(defs);
+    private static DummySrcArgument parseModifier(String definition) {
+        Scanner scanner = new Scanner(definition);
         Pattern word = Pattern.compile("\\w+([=]?\\w+)?");
         Pattern level = Pattern.compile("[(]");
         Pattern lower = Pattern.compile("[)]");
@@ -42,14 +42,14 @@ public class Builder {
         levels.add(arg);
         while (scanner.hasNext()) {
             if (scanner.hasNext(word)) {
-                String item = scanner.findWithinHorizon(word,0);
+                String item = scanner.findWithinHorizon(word, 0);
                 if (item.contains("=")) {
                     int equals= item.indexOf("=");
                     arg = new DummySrcArgument();
                     arg.name = item.substring(0, equals);
                     levels.getFirst().addAnnotationSubNode(arg); 
                     try {
-                        arg.setAnnotationValue(new DummyEvaluator(item.substring(equals+1)));
+                        arg.setAnnotationValue(new DummyEvaluator(item.substring(equals + 1)));
                     } catch (FailedToSetAnnotationValueException e) {
                         e.printStackTrace();
                     }
@@ -62,12 +62,12 @@ public class Builder {
                 scanner.next(comma);
             } else if (scanner.hasNext(level)) {
                 scanner.next(level);
-                if (arg==null) {
+                if (arg == null) {
                     arg = new DummySrcArgument();
                     levels.getFirst().addAnnotationSubNode(arg); 
                 }
                 levels.push(arg);
-                arg=null;
+                arg = null;
             } else if (scanner.hasNext(lower)) {
                 scanner.next(lower);
                 levels.pop();
@@ -80,12 +80,12 @@ public class Builder {
 
     private static void recursionBuild(DummyAnnotationNode root,
             DummyAnnotProvider node) {
-        if (node.annotationValue()!=null) {
+        if (node.annotationValue() != null) {
             root.setValue(node.annotationValue());
         }
         for(SubNodePair<DummyAnnotProvider> subNode : node.annotationSubNodes()) {
             root.node().addAnnotationSubNode(subNode.name);
-            recursionBuild(root.forPath(subNode.name),subNode.node);
+            recursionBuild(root.forPath(subNode.name), subNode.node);
             
         }
     }

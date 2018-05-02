@@ -8,13 +8,11 @@ public class DummyEvaluator implements Evaluator<DummyEvaluator>, Cloneable,Eval
 
     DummyCValueInteger myValue;
     public DummyEvaluator(String value) {
-        // TODO Auto-generated constructor stub
         myValue = new DummyCValueInteger(Integer.parseInt(value));
     }
 
     @Override
     public ConstValue evaluateValue() {
-        // TODO Auto-generated method stub
         return null;
     }
 

@@ -12,10 +12,10 @@ import org.jmodelica.util.values.Evaluable;
 
 public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider,Evaluable>,Iterable<SubNodePair<DummyAnnotProvider>> {
 
-    public String name="noname:node";
-    public Evaluable value=null;
-    public ArrayList<DummyAnnotProvider> subNodes=new ArrayList<>();
-    public ArrayList<SubNodePair<DummyAnnotProvider>> subNodesB=new ArrayList<>();
+    public String name = "noname:node";
+    public Evaluable value = null;
+    public ArrayList<DummyAnnotProvider> subNodes = new ArrayList<>();
+    public ArrayList<SubNodePair<DummyAnnotProvider>> subNodesB = new ArrayList<>();
     public DummyAnnotProvider() {
         
     }
@@ -35,7 +35,7 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
     }
 
     public String toString() {
-        return "MockSrcAnnot:"+name;
+        return "MockSrcAnnot:" + name;
     }
     
     @Override
@@ -45,13 +45,13 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
 
     @Override
     public void setAnnotationValue(Evaluable newValue) throws FailedToSetAnnotationValueException {
-        value=newValue;
+        value = newValue;
     }
 
     @Override
     public DummyAnnotProvider addAnnotationSubNode(String name) throws AnnotationEditException {
        DummyAnnotProvider newNode = new DummyAnnotProvider(name);
-       subNodesB.add(new SubNodePair<DummyAnnotProvider>(name,newNode));
+       subNodesB.add(new SubNodePair<DummyAnnotProvider>(name, newNode));
        subNodes.add(newNode);
        return newNode;
     }
