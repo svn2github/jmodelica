@@ -15,7 +15,6 @@
 */
 package org.jmodelica.util.streams;
 
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 
 public class CStringCodeStream extends CodeStream {
@@ -24,7 +23,6 @@ public class CStringCodeStream extends CodeStream {
     private String beginString = "(truncated) ";
     private String endString = "...";
     private byte[] buffer;
-    private StringBuilder extraBuffer = null;
 
     public static final Charset UTF8 = Charset.forName("UTF-8");
 
