@@ -2,8 +2,16 @@
 <classpath>
 	<classpathentry kind="src" path="Compiler/ModelicaFrontEnd/src/java"/>
 	<classpathentry kind="src" path="Compiler/ModelicaFrontEnd/test/junit"/>
-	<classpathentry kind="src" path="Compiler/ModelicaCompiler/src/java-generated"/>
-	<classpathentry kind="src" path="Compiler/OptimicaCompiler/src/java-generated"/>
+	<classpathentry kind="src" path="Compiler/ModelicaCompiler/src/java-generated">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="Compiler/OptimicaCompiler/src/java-generated">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="Compiler/ModelicaCompiler/src/junit-generated"/>
 	<classpathentry kind="src" path="Compiler/OptimicaCompiler/src/junit-generated"/>
 	<classpathentry kind="src" path="Compiler/ModelicaCompiler/src/resources"/>
