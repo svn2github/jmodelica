@@ -357,6 +357,8 @@ aspect SrcAnnotations {
     }
     syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getSrcComponentDecl().srcAnnotationProvider();
     eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
+    eq InstReplacingRecord.srcAnnotationProvider()    = getOriginalDecl().srcAnnotationProvider();
+    eq InstReplacingPrimitive.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
     
     /**
      * Import clause
