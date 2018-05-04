@@ -12,7 +12,7 @@ public class SingleIterable<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return new SingleIterator(elem);
+        return new SingleIterator<T>(elem);
     }
 
 }

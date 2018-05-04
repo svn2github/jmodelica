@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.logging.Level;
 
 import javax.swing.tree.TreeNode;
 
@@ -126,7 +125,7 @@ public class SizeNode implements TreeNode {
 		return getChildCount() == 0;
 	}
 
-	public Enumeration children() {
+	public Enumeration<SizeNode> children() {
 		return Collections.enumeration(children);
 	}
 	

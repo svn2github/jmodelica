@@ -1,7 +1,5 @@
 package org.jmodelica.util.streams;
 
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class ConditionalCodeStream extends CodeStream {

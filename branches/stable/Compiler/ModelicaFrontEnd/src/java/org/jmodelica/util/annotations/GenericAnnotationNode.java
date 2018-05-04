@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.common.URIResolver.URIException;
+import org.jmodelica.util.Criteria;
 import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.Evaluable;
@@ -78,49 +80,83 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (isSubNodesCacheFresh()) {
             return;
         }
-        if (!exists() || isAmbiguous()) {
+        if (subNodes_cache == null) {
             subNodes_cache = Collections.emptyList();
+        }
+        if (subNodesNameMap_cache == null) {
             subNodesNameMap_cache = Collections.emptyMap();
+        }
+
+        if(!exists() || isAmbiguous()) {
             return;
         }
+
         List<T> subNodes = new ArrayList<T>();
-        // These maps are necessary since if we recompute the cache, then we
-        // wan't to preserve the old nodes as far as possible. Also note that
-        // we may have multiple nodes with the same name. That is why we have
-        // a list in the map
         Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(subNodes_cache);
-        Map<String, Integer> oldNodeListPosMap = new HashMap<String, Integer>();
-        
         Map<String, T> subNodesNameMap = new HashMap<String, T>();
         for (SubNodePair<N> subNodePair : node.annotationSubNodes()) {
-            String name = subNodePair.name;
+            String subNodeName = subNodePair.name;
+            N subNodeNode = subNodePair.node;
             T subNode = null;
             
-            List<T> oldNodes = oldNodesMap.get(name);
-            Integer oldNodesPos = oldNodeListPosMap.get(name);
-            if (oldNodesPos == null) {
-                oldNodesPos = 0;
+            List<T> oldNodes = oldNodesMap.get(subNodeName);
+            if (oldNodes != null && !oldNodes.isEmpty()) {
+                subNode = oldNodes.remove(0);
             }
-            if (oldNodes != null && oldNodesPos < oldNodes.size()) {
-                subNode = oldNodes.get(oldNodesPos);
-                oldNodesPos++;
-                oldNodeListPosMap.put(name, oldNodesPos);
+            if(oldNodes != null && oldNodes.isEmpty()) {
+                oldNodesMap.remove(subNodeName);
             }
-            
-            if (subNode == null) {
-                subNode = createNode(name, subNodePair.node);
-            }
-            if (subNode == null) {
-                continue;
-            }
-            subNodes.add(subNode);
-            T previous = subNodesNameMap.put(subNode.name(), subNode);
-            if (previous != null) {
-                subNodesNameMap.put(subNode.name(), ambiguousNode());
+            createSubNodeIfNullAndAddToCaches(subNode, subNodeName, subNodeNode, subNodes, subNodesNameMap);
+        }
+
+        for(List<T> oldNodes : oldNodesMap.values()) {
+            for(T oldNode: oldNodes) {
+                createSubNodeIfNullAndAddToCaches(oldNode, oldNode.name(), oldNode.peekNode(), subNodes, subNodesNameMap);
             }
         }
         subNodes_cache = subNodes;
         subNodesNameMap_cache = subNodesNameMap;
+    }
+
+    private T createSubNodeIfNullAndAddToCaches(T subNode, String subNodeName, N subNodeNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
+        if (subNode == null) {
+            subNode = createNode(subNodeName, subNodeNode);
+        }
+        if (subNode != null) {
+            addToCaches(subNodes, subNodesNameMap, subNode);
+        }
+        return subNode;
+    }
+
+    private T addToCaches(Collection<T> subNodes, Map<String, T> subNodesNameMap, T subNode) {
+        subNodes.add(subNode);
+        T previous = updateSubNodesNameMapCache(subNodesNameMap, subNode);
+        return previous;
+    }
+
+    private T updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
+        T previous = subNodesNameMap.put(subNode.name(), subNode);
+        if (previous != null && previous.exists() && subNode.exists()) { // subNode goes from not ambiguous to ambiguous
+            subNodesNameMap.put(subNode.name(), ambiguousNode());
+        }
+        return previous;
+    }
+
+    private T removeFromSubNodesNameMapCache(T subNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
+        T previous = subNodesNameMap.get(subNode.name());
+        if (previous != null) {
+            if (previous == ambiguousNode()) {
+                Map<String, List<T>> oldNodesMap = constructMapIncludingAmbiguous(filterExists(subNodes));
+                List<T> oldNodes = oldNodesMap.get(subNode.name());
+                if(oldNodes.size() == 2) { // subNode goes from ambiguous to not ambiguous
+                    oldNodes.remove(subNode);
+                    subNodesNameMap.put(subNode.name(), oldNodes.get(0));
+                }
+            } else {
+                subNodesNameMap.remove(subNode.name());
+            }
+        }
+        return previous;
     }
 
     /**
@@ -128,23 +164,19 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * there may be multiple nodes with the same name, if that is the case,
      * then they are put in the list in the order that they are found!
      */
-    private static <A extends GenericAnnotationNode<?, ?, ?>>
-    Map<String, List<A>> constructMapIncludingAmbiguous(Collection<A> nodes) {
+    private Map<String, List<T>> constructMapIncludingAmbiguous(Iterable<T> nodes) {
         if (nodes == null) {
             return Collections.emptyMap();
         }
-        Map<String, List<A>> res = new HashMap<String, List<A>>();
-        for (A node : nodes) {
+        Map<String, List<T>> res = new java.util.LinkedHashMap<String, List<T>>();
+        for (T node : nodes) {
             String name = node.name();
-            List<A> withSameName = res.get(name);
-            // Using some optimization here, if we only have one child,
-            // which should be most common, then use a singleton list to
-            // save memory!
+            List<T> withSameName = res.get(name);
             if (withSameName == null) {
-                withSameName = Collections.singletonList(node);
+                withSameName = new ArrayList<T>(Collections.singletonList(node));
                 res.put(name, withSameName);
             } else if (withSameName.size() == 1) {
-                withSameName = new ArrayList<A>(withSameName);
+                withSameName = new ArrayList<T>(withSameName);
                 withSameName.add(node);
                 res.put(name, withSameName);
             } else {
@@ -154,24 +186,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return res;
     }
 
-    protected void updateSubNodeName(String oldName, String newName) {
-        computeSubNodesCache();
-        if (subNodesNameMap_cache != null) {
-            T subNode = subNodesNameMap_cache.remove(oldName);
-            if (subNodesNameMap_cache.containsKey(newName)) {
-                subNodesNameMap_cache.put(newName, ambiguousNode());
-            }else {
-                subNodesNameMap_cache.put(newName, subNode);
-            }
-        }
+    protected void updateSubNode(String newName, N newNode, T subNode) {
+        removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
+        subNode.setNode(newName, newNode);
+        updateSubNodesNameMapCache(subNodesNameMap_cache, subNode);
     }
 
     protected boolean isSubNodesCacheFresh() {
-        return subNodesNameMap_cache != null;
-    }
-
-    private void resetSubNodesCache() {
-        subNodesNameMap_cache = null;
+        return false; // TODO implement freshness check
     }
 
     /**
@@ -185,7 +207,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return forPath(path, 0);
     }
 
-    private T forPath(String[] paths, int currentIndex) {
+    T forPath(String[] paths, int currentIndex) {
         if (isAmbiguous()) {
             return ambiguousNode();
         }
@@ -193,21 +215,23 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             return self();
         }
         computeSubNodesCache();
-        GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
+        T subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
-            T newNode = createNode(paths[currentIndex], null); 
-            subNode = newNode;
-            // Defaults to immutable empty collections when empty.
-            if (subNodesNameMap_cache.isEmpty()) {
-                subNodesNameMap_cache = new HashMap<String, T>();
-            }
-            if (subNodes_cache.isEmpty()) {
-                subNodes_cache =  new ArrayList<T>();
-            }
-            subNodesNameMap_cache.put(name,newNode);
-            subNodes_cache.add(newNode);
+            makeEmptySubNodesCacheMutable();
+        }
+        if (subNode == null) {
+            subNode = createSubNodeIfNullAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache, subNodesNameMap_cache);
         }
         return subNode.forPath(paths, currentIndex + 1);
+    }
+
+    private void makeEmptySubNodesCacheMutable() {
+        if (subNodesNameMap_cache.isEmpty()) {
+            subNodesNameMap_cache = new HashMap<String, T>();
+        }
+        if (subNodes_cache.isEmpty()) {
+            subNodes_cache =  new ArrayList<T>();
+        }
     }
     
     /**
@@ -231,16 +255,16 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     protected abstract T createNode(String name, N node);
 
-    private N createChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
+    private N createNodeForChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
         if (child == valueAnnotation_cache) {
             // Trying to set the value annotation child
             throw new AnnotationEditException(this, "Not possible to set assign annotation value as annotation yet");
         }
+        assert child.parent == this && subNodes_cache.contains(child);
         N res = node().addAnnotationSubNode(child.name());
         if (res == null) {
             throw new AnnotationEditException(child, "Unable to create sub node");
         }
-        resetSubNodesCache();
         return res;
     }
 
@@ -255,13 +279,24 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
-     * Provides a list of sub nodes for this node.
+     * Provides all sub nodes for this node that {@link #exists()}.
      * 
-     * @return a list with all sub-nodes
+     * @return all sub nodes that {@link #exists()}
      */
     public Iterable<T> subNodes() {
         computeSubNodesCache();
-        return subNodes_cache;
+        return filterExists(subNodes_cache);
+    }
+
+    private Iterable<T> filterExists(Iterable<T> nodes) {
+        return new FilteredIterable<T>(nodes, new Criteria<T>() {
+
+            @Override
+            public boolean test(T elem) {
+                return elem.exists();
+            }
+            
+        });
     }
 
     /**
@@ -276,8 +311,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 // This is an null pattern node without hope of creating
                 return null;
             }
-            node = ((GenericAnnotationNode<T, N, V>) parent).createChild(this);
-            resetSubNodesCache();
+            node = ((GenericAnnotationNode<T, N, V>) parent).createNodeForChild(this);
         }
         return node;
     }
@@ -319,14 +353,54 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     
     /**
      * Updates the name and node of this GenericAnnotationNode.
-     * @param name The new name
+     * @param newName The new name
      * @param node The new node
      */
-    protected void updateNode(String name, N node) {
-        this.name = name;
+    protected void updateNode(String newName, N node) {
+        if (parent() != null && !name().equals(newName)) {
+            parent().updateSubNode(newName, node, (T) this);
+        } else {
+            setNode(newName, node);
+        }
+    }
+    /**
+     * Sets the name and node of this GenericAnnotationNode.
+     * @param newName The new name
+     * @param node The new node
+     */
+    protected void setNode(String newName, N node) {
+        this.name = newName;
         this.node = node;
+        computeSubNodesCache();
     }
 
+    /**
+     * Update all accessed sub Modifiers to point to the nodes of the new node.
+     * All subAnnotation nodes not present in the new node are notified of that they don't 
+     * exist any more. 
+     * @param newNode The new node
+     */
+    protected void updateMySubNodes(N newNode) {
+        if (exists()) {
+            computeSubNodesCache();
+            
+            if ( subNodes_cache != null) {
+                for (T t: subNodes_cache) {
+                        t.disconnectFromNode();
+                }
+            }
+            
+            if (subNodesNameMap_cache != null) {
+                for(SubNodePair<N> subNode : newNode.annotationSubNodes()) {
+                    T key = subNodesNameMap_cache.get(subNode.name);
+                    if (key != null && !key.isAmbiguous()){
+                        key.updateNode(subNode.name, subNode.node);
+                        key.updateMySubNodes(subNode.node);
+                    }
+                }
+            }
+        }
+    }
     /**
      * 
      * @return true if this node has a value, otherwise false
@@ -412,16 +486,20 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             out.append(name());
         }
         if (hasSubNodes()) {
-            out.append('(');
             boolean first = true;
             for (T subNode : subNodes()) {
+                    if (first) {
+                        out.append('(');
+                    }
                 if (!first) {
                     out.append(", ");
                 }
                 first = false;
                 subNode.toString(out);
             }
+            if (!first) {
             out.append(')');
+        }
         }
         if (hasValue()) {
             out.append('=');
@@ -755,12 +833,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * The backing node is not removed and has to be removed separately. 
      */
     protected void disconnectFromNode() {
-        computeSubNodesCache();
+        if (parent !=null) {
         node = null; 
-        if ( subNodes_cache != null)
+        }
+        if ( subNodes_cache != null) {
             for (T t: subNodes_cache) {
                     t.disconnectFromNode();
             }
+    }
     }
 
 }

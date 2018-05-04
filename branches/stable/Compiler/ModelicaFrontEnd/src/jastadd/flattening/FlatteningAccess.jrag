@@ -16,11 +16,11 @@
 
 aspect FlatteningAccess {
 
-    public FExp FIdUseExp.flatten(FQName prefix) {
-        return setLocationOf(flatten(prefix, 0));
+    public FExp FIdUseExp.flatten(Flattener f) {
+        return setLocationOf(flatten(f, 0));
     }
 
-    public FExp FIdUseExp.flatten(FQName prefix, int order) {
+    public FExp FIdUseExp.flatten(Flattener f, int order) {
         if (!getFIdUse().isInstAccess()) {
             return treeCopy();
         }
@@ -29,16 +29,16 @@ aspect FlatteningAccess {
         InstComponentDecl var = ia.myInstComponentDecl();
         if (!inFunction()) {
             if (ia.isNonAssignableArray()) {
-                return getArray().buildFlattened(prefix, this, order);
+                return getArray().buildFlattened(f, this, order);
             } else if (!ia.indexVariability().indexParameterOrLess()) {
                 FIdUseExp copy = (FIdUseExp) dynamicFExp(treeCopy());
                 List<FSubscript> sub = new List<FSubscript>();
                 copy.asInstAccess().extractNonParameterIndices(sub, ia.myInstComponentDecl().variability());
                 FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
-                return res.flatten(prefix);
+                return res.flatten(f);
             }
         }
-        return var.flattenAccess(prefix, this, order);
+        return var.flattenAccess(f, this, order);
     }
 
     syn boolean InstAccess.isNonAssignableArray() = !myInstComponentDecl().isAssignable() && isArray();
@@ -51,29 +51,29 @@ aspect FlatteningAccess {
         return false;
     }
 
-    public FIdUse FIdUse.flatten(FQName prefix) {
+    public FIdUse FIdUse.flatten(Flattener f) {
         return (FIdUse)fullCopy();
     }
 
-    public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
+    public FIdUse FIdUseInstAccess.flatten(Flattener f) {
         return new FIdUse(getInstAccess().flatten());
     }
 
     /**
      * Flatten an access expression to this component.
      */
-    public FExp InstComponentDecl.flattenAccess(FQName prefix, FIdUseExp exp, int order) {
+    public FExp InstComponentDecl.flattenAccess(Flattener f, FIdUseExp exp, int order) {
         return createFIdUseExp(exp.asInstAccess().flatten(), order);
     }
 
-    public FExp InstAssignable.flattenAccess(FQName prefix, FIdUseExp iae, int order) {
+    public FExp InstAssignable.flattenAccess(Flattener f, FIdUseExp iae, int order) {
         if (variability().indexParameterOrLess()) {
-            FExp res = flattenAccessToConst(prefix, iae);
+            FExp res = flattenAccessToConst(f, iae);
             if (res != null) {
                 return res;
             }
         }
-        return super.flattenAccess(prefix, iae, order);
+        return super.flattenAccess(f, iae, order);
     }
 
     /**
@@ -140,10 +140,10 @@ aspect FlatteningAccess {
     eq InstComponentArrayAccess.getFQName() = myInstComponentDecl().getFQName();
     eq InstClassAccess.getFQName()          = new FQNameString(myInstClassDecl().qualifiedName());
 
-    public FArraySubscripts InstAccess.flattenFAS(FQName prefix) {
+    public FArraySubscripts InstAccess.flattenFAS(Flattener f) {
         boolean arr = isArray();
         if ((!arr && hasFArraySubscripts()) || (arr && flattenFASContext())) {
-            return allFArraySubscripts().get(0).flatten(prefix);
+            return allFArraySubscripts().get(0).flatten(f);
         } else {
             return null;
         }
@@ -221,7 +221,7 @@ aspect FlatteningFQNames {
 
 
 aspect FlatteningFunctionConstant {
-    public FExp InstAssignable.flattenAccessToConst(FQName prefix, FIdUseExp iae) {
+    public FExp InstAssignable.flattenAccessToConst(Flattener f, FIdUseExp iae) {
         // If the FInstAccess refers to a constant or string parameter, then inline expression
         // Checks in the instance tree ensures that constants always
         // have binding expressions, however, array subscripts may need to be 
@@ -240,7 +240,7 @@ aspect FlatteningFunctionConstant {
                         if (!ia.inFunction() && variability().constantVariability()) {
                             // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
                             FExp exp = getBindingFExp().getArray().buildLiteral(isReal());
-                            FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
+                            FArraySubscripts fas = ia.getFArraySubscripts().flatten(f);
                             return new FSubscriptedExp(exp, fas);
                         }
                     } else {
@@ -258,7 +258,7 @@ aspect FlatteningFunctionConstant {
                 }
             }
             if (ia.inFunction() && flattenAsFunctionConstant())
-                return ia.topInstAssignable().flattenAccessToConstInFunction(prefix, ia);
+                return ia.topInstAssignable().flattenAccessToConstInFunction(f, ia);
         }
         return null;
     }
@@ -294,7 +294,7 @@ aspect FlatteningFunctionConstant {
      * 
      * Used when the access can't be constant evaluated. The constant is added to the function.
      */
-    public FExp InstAssignable.flattenAccessToConstInFunction(FQName prefix, InstAccess ia) {
+    public FExp InstAssignable.flattenAccessToConstInFunction(Flattener f, InstAccess ia) {
         ia.functionConstantList().add(this);
         FQName name = getFQName();
         FQName use = ia.flatten();

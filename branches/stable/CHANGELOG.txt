@@ -1,4 +1,14 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5608
+Removed the -g flag when building FMUs
+
+; Fixed ; Minor ; Compiler ; #5606
+Improved ability to obtain annotation value and 
+remove modifications.
+
+; Fixed ; Minor ; Compiler ; #5594
+Added functionality to remove annotations/modifications.
+
 ; Fixed ; Minor ; Compiler ; #5604
 Fixed bug where using an iterator expression to set the binding 
 expression of a member of a record array member in a record declaration 

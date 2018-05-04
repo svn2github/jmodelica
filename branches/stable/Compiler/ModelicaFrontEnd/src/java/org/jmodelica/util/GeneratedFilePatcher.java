@@ -138,7 +138,6 @@ public class GeneratedFilePatcher {
 		}
 
 		private void apply(BufferedReader in, PrintStream out) throws IOException {
-			boolean print = true;
 			String line;
 			while ((line = in.readLine()) != null) {
 				for (Change ch : changes)
