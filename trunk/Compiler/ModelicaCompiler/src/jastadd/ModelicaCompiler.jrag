@@ -1463,9 +1463,8 @@ public class ModelicaCompiler implements LogContainer {
     protected void compileModelFromCommandLine(String[] args, Arguments programarguments) {
         // Get files and class
         // TODO: move this into arguments class
-        int arg = programarguments.size();
-        String[] name = splitFiles(args[arg]);
-        String cl = (args.length > arg+1) ? args[arg+1] : null;
+        String[] files = splitFiles(programarguments.libraryPath());
+        String className = programarguments.className();
         String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
         
         // Compile model
@@ -1478,7 +1477,7 @@ public class ModelicaCompiler implements LogContainer {
             }
             
             //Compile
-            compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
+            compileUnit(className, files, targetType, programarguments.get("version"), compileTo);
             
         } catch (CompilerException ce) {
             if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
