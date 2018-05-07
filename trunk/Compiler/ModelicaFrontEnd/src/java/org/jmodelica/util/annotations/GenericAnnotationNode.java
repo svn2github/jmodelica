@@ -446,7 +446,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public T valueAsAnnotation() {
         if (!valueAnnotation_cacheComputed) {
             valueAnnotation_cacheComputed = true;
-            if (exists()) {
+            if (isAmbiguous()) {
+                valueAnnotation_cache = ambiguousNode();
+            } else if (exists()) {
                 N annotationNode = valueAsProvider();
                 if (hasValue() && annotationNode == null) {
                     valueAnnotation_cache = null;

@@ -1,4 +1,9 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5569
+Fixed bug where generic annotation framework returned wrong value or threw
+exception (depended on underlying implementation) if the node was ambiguous,
+instead it now returns another ambiguous node.
+
 ; Fixed ; Minor ; Runtime ; #5608
 Removed the -g flag when building FMUs
 
