@@ -1,3 +1,4 @@
+#!/bin/sh
 # 
 #    Copyright (C) 2018 Modelon AB
 #
@@ -22,7 +23,7 @@ if [ -f /etc/centos-release ]; then
 elif [-f /etc/redhat-release ]; then 
 	LINUX_DISTRIBUTION=REDHAT
 elif [-f /etc/debian_version ]; then 
-	LINUX_RELEASE=DEBIAN
+	LINUX_DISTRIBUTION=DEBIAN
 else 
 	echo ERROR: current linux distribution not supported yet 
 fi
