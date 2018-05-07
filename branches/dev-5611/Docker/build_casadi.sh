@@ -11,3 +11,6 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+cd JModelica.org/build
+make casadi_interface
+cd ../..
