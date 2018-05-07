@@ -1,0 +1,2 @@
+BUILD_PKGS="gcc make g++ gfortran python ipython swig ant cmake default-jre-headless python-dev python-numpy python-scipy python-lxml python-nose python-jpype zlib1g-dev libboost-dev cython jcc subversion wget patch pkg-config liblapack-dev libblas-dev"
+RUNTIME_PKGS="gcc make python ipython default-jre-headless python-numpy python-scipy python-lxml python-nose python-jpype zlib1g cython python-matplotlib gfortran liblapack3 libblas3"
