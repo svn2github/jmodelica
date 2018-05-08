@@ -1,7 +1,6 @@
 package org.jmodelica.test.common;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import org.jmodelica.util.Arguments;
 import org.jmodelica.util.Arguments.InvalidArgumentException;
@@ -37,7 +36,8 @@ public class ArgumentsTest {
         Arguments args = new Arguments("ModelicaCompiler", new String[] {
             "-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test"
         });
-        assertNull(args.libraryPath());
+        assertEquals("test", args.className());
+        assertEquals("", args.libraryPath());
     }
 
     @Test
