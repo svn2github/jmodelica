@@ -12,8 +12,4 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-apt-get update 
-apt-get -y install subversion 
-svn co https://svn.jmodelica.org/${JMODELICA_BRANCH} JModelica.org
-
-echo $JMODELICA_BRANCH
+echo svn co https://svn.jmodelica.org/${JMODELICA_BRANCH} JModelica.org
