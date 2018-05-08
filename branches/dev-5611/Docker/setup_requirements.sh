@@ -29,7 +29,7 @@ elif [-f /etc/redhat-release ]; then
 elif [-f /etc/debian_version ]; then 
 	LINUX_DISTRIBUTION=DEBIAN
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
-	alias pckinstall="apt-get install"
+	alias pckinstall="apt-get -y install"
 else 
 	echo ERROR: current linux distribution not supported yet 
 fi
