@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 
 #    Copyright (C) 2018 Modelon AB
 #
@@ -22,17 +22,18 @@ if [ -f /etc/centos-release ]; then
 	LINUX_DISTRIBUTION=CENTOS
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	alias pckinstall="yum -y install"
-elif [-f /etc/redhat-release ]; then 
+elif [ -f /etc/redhat-release ]; then 
 	LINUX_DISTRIBUTION=REDHAT
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	alias pckinstall="yum -y install"
-elif [-f /etc/debian_version ]; then 
+elif [ -f /etc/debian_version ]; then 
 	LINUX_DISTRIBUTION=DEBIAN
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
 	alias pckinstall="apt-get -y install"
 else 
 	echo ERROR: current linux distribution not supported yet 
 fi
+# echo Linux Distribution : $LINUX_DISTRIBUTION
 
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
