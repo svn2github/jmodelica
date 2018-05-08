@@ -219,45 +219,41 @@ aspect SrcAnnotations {
     }
     
     /**
-     * Remove this ASTNode from the AST and the possible empty list containing it. 
-     *
-     * If the parent is a list then this ASTNode is removed from it.
-     * The list might become empty after the removal in which case the list's parent is returned.
-     * 
-     * The parent is returned without any changes if the parent is not a list. 
-     * The caller is then required to determine if further removals/modifications are needed for the returned node.
-     *  
-     * @returns 
-     *      Either the parent of the caller or the parent of the list containing the caller.
-     */
-
-    public ASTNode ASTNode.removeMe() {
-        ASTNode parent = getParent();
-        if (parent instanceof List || parent instanceof Opt) {
-            parent.removeChild(parent.getIndexOfChild(this));
-            if (parent.numChildren() != 0) {
-                return parent;
-            }
-            return parent.getParent();
-        }
-        return parent;
+    * A helper method for AST cleanup used by removeMe().
+    * This involves actions like replacing empty lists or optionals and potential rewrites.
+    */
+    public void ASTNode.cleanUpAfterRemove(){
     }
     
-   /**
-    * Remove the ASTNode and possible also parent constructs from the model.
-    * 
-    * @param removeEmptyParents 
-    *       If "Empty/Redundant" parents should be removed
-    * @param hasRemoved 
-    *       If this call should do state cleanup or not for this object (Used Internally) 
-    * @returns 
-    *       parts of the callers parent structure might have be removed and parents might need to be corrected.
-    */
-    public boolean ASTNode.removeMe(boolean removeEmptyParents, boolean hasRemoved) {
-        if (!hasRemoved){
-            removeMe();
+    public void Opt.cleanUpAfterRemove(){
+           ASTNode parent = getParent();
+           replaceMe(Opt.EMPTY);
+           parent.cleanUpAfterRemove();
+    }
+    
+    public void List.cleanUpAfterRemove(){
+       if (numChildren() == 0) {
+           ASTNode parent = getParent();
+           if (parent instanceof Opt) {
+               replaceMe(null);
+           }
+           parent.cleanUpAfterRemove();
+       }
+    }
+    
+    /**
+     * Remove this ASTNode from the AST.
+     * 
+     * The ASTNode is removed and the AST state is then cleaned up using cleanUpAfterRemove.
+     * This means that parents might be rewritten, modified or replaced as needed.
+     *  
+     */
+    public void ASTNode.removeMe() {
+        ASTNode parent = getParent();
+        if (parent != null) {
+            parent.removeChild(parent.getIndexOfChild(this));
+            parent.cleanUpAfterRemove();
         }
-        return false; 
     }
 
     @Override
@@ -267,7 +263,7 @@ aspect SrcAnnotations {
     @Override
     public void SrcValueModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (newValue == null) {
-            removeMe(false,false);
+            removeMe();
             return;
         }
         setSrcExp(newValue);

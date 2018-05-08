@@ -106,21 +106,24 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             if(oldNodes != null && oldNodes.isEmpty()) {
                 oldNodesMap.remove(subNodeName);
             }
-            createSubNodeIfNullAndAddToCaches(subNode, subNodeName, subNodeNode, subNodes, subNodesNameMap);
+            createOrSetSubNodeAndAddToCaches(subNode, subNodeName, subNodeNode, subNodes, subNodesNameMap);
         }
 
         for(List<T> oldNodes : oldNodesMap.values()) {
             for(T oldNode: oldNodes) {
-                createSubNodeIfNullAndAddToCaches(oldNode, oldNode.name(), oldNode.peekNode(), subNodes, subNodesNameMap);
+                //TODO move the setting of the node field in the subnode to null to an explicit step
+                createOrSetSubNodeAndAddToCaches(oldNode, oldNode.name(), null, subNodes, subNodesNameMap);
             }
         }
         subNodes_cache = subNodes;
         subNodesNameMap_cache = subNodesNameMap;
     }
 
-    private T createSubNodeIfNullAndAddToCaches(T subNode, String subNodeName, N subNodeNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
+    private T createOrSetSubNodeAndAddToCaches(T subNode, String subNodeName, N subNodeNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
         if (subNode == null) {
             subNode = createNode(subNodeName, subNodeNode);
+        } else {
+            subNode.setNode(subNodeName, subNodeNode);
         }
         if (subNode != null) {
             addToCaches(subNodes, subNodesNameMap, subNode);
@@ -203,7 +206,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param path List of path elements to resolve
      * @return the resolved node
      */
-    public T forPath(String ... path) {
+    public T forPath(String... path) {
         return forPath(path, 0);
     }
 
@@ -220,7 +223,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             makeEmptySubNodesCacheMutable();
         }
         if (subNode == null) {
-            subNode = createSubNodeIfNullAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache, subNodesNameMap_cache);
+            subNode = createOrSetSubNodeAndAddToCaches(subNode, paths[currentIndex], null, subNodes_cache,
+                    subNodesNameMap_cache);
         }
         return subNode.forPath(paths, currentIndex + 1);
     }
@@ -230,7 +234,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             subNodesNameMap_cache = new HashMap<String, T>();
         }
         if (subNodes_cache.isEmpty()) {
-            subNodes_cache =  new ArrayList<T>();
+            subNodes_cache = new ArrayList<T>();
         }
     }
     
@@ -295,7 +299,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             public boolean test(T elem) {
                 return elem.exists();
             }
-            
+
         });
     }
 
@@ -371,6 +375,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     protected void setNode(String newName, N node) {
         this.name = newName;
         this.node = node;
+        updateMySubNodes(node);
         computeSubNodesCache();
     }
 
@@ -383,17 +388,16 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     protected void updateMySubNodes(N newNode) {
         if (exists()) {
             computeSubNodesCache();
-            
-            if ( subNodes_cache != null) {
-                for (T t: subNodes_cache) {
-                        t.disconnectFromNode();
+            if (subNodes_cache != null) {
+                for (T t : subNodes_cache) {
+                    t.disconnectFromNode();
                 }
             }
-            
+
             if (subNodesNameMap_cache != null) {
-                for(SubNodePair<N> subNode : newNode.annotationSubNodes()) {
+                for (SubNodePair<N> subNode : newNode.annotationSubNodes()) {
                     T key = subNodesNameMap_cache.get(subNode.name);
-                    if (key != null && !key.isAmbiguous()){
+                    if (key != null && !key.isAmbiguous()) {
                         key.updateNode(subNode.name, subNode.node);
                         key.updateMySubNodes(subNode.node);
                     }
@@ -490,9 +494,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (hasSubNodes()) {
             boolean first = true;
             for (T subNode : subNodes()) {
-                    if (first) {
-                        out.append('(');
-                    }
+                if (first) {
+                    out.append('(');
+                }
                 if (!first) {
                     out.append(", ");
                 }
@@ -500,8 +504,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 subNode.toString(out);
             }
             if (!first) {
-            out.append(')');
-        }
+                out.append(')');
+            }
         }
         if (hasValue()) {
             out.append('=');
@@ -725,7 +729,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /*****************************************
-     *  Value checkers and retrieves helpers
+     * Value checkers and retrieves helpers
      ****************************************/
     private static enum ValueType {
         BOOLEAN {
@@ -835,14 +839,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * The backing node is not removed and has to be removed separately. 
      */
     protected void disconnectFromNode() {
-        if (parent !=null) {
-        node = null; 
+        if (parent != null) {
+            node = null;
         }
-        if ( subNodes_cache != null) {
-            for (T t: subNodes_cache) {
-                    t.disconnectFromNode();
+        if (subNodes_cache != null) {
+            for (T t : subNodes_cache) {
+                t.disconnectFromNode();
             }
-    }
+        }
     }
 
 }
