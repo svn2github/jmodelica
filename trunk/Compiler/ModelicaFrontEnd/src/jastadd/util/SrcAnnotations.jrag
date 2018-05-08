@@ -222,21 +222,18 @@ aspect SrcAnnotations {
     * A helper method for AST cleanup used by removeMe().
     * This involves actions like replacing empty lists or optionals and potential rewrites.
     */
-    public void ASTNode.cleanUpAfterRemove(){
+    protected void ASTNode.cleanUpAfterRemove(){
     }
     
-    public void Opt.cleanUpAfterRemove(){
+    protected void Opt.cleanUpAfterRemove(){
            ASTNode parent = getParent();
            replaceMe(Opt.EMPTY);
            parent.cleanUpAfterRemove();
     }
     
-    public void List.cleanUpAfterRemove(){
+    protected void List.cleanUpAfterRemove(){
        if (numChildren() == 0) {
            ASTNode parent = getParent();
-           if (parent instanceof Opt) {
-               replaceMe(null);
-           }
            parent.cleanUpAfterRemove();
        }
     }
