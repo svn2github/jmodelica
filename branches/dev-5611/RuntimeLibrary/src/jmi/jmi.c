@@ -433,9 +433,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 
     int return_status;
     jmi_real_t *t = jmi_get_t(jmi);
-    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
-        jmi_log_node_t node;
-    }
+    jmi_log_node_t node=NULL;
     
 
     if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
@@ -472,9 +470,7 @@ int jmi_ode_initialize(jmi_t* jmi) {
 
     int return_status;
     jmi_real_t* t = jmi_get_t(jmi);
-    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
-        jmi_log_node_t node;
-    }
+    jmi_log_node_t node=NULL;
 
     if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
