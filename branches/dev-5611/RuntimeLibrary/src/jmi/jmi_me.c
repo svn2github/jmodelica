@@ -110,7 +110,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
 
 int jmi_initialize(jmi_t* jmi) {
     int retval;
-    jmi_log_node_t top_node;
+    jmi_log_node_t top_node={0};
     
     if (jmi->is_initialized == 1) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one initialization is allowed");

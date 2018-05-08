@@ -132,7 +132,7 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
     jmi_realtime_solver_t* solver = (jmi_realtime_solver_t*)block->solver;
     jmi_real_t tolerance = block->options->res_tol;
     jmi_int_t ret, i;
-    jmi_log_node_t destnode;
+    jmi_log_node_t destnode={0};
     jmi_int_t broyden_updates = block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode;
     clock_t start_measuring = jmi_block_solver_start_clock(block);
     
