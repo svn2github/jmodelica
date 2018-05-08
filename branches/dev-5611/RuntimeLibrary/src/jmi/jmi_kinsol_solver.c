@@ -1293,8 +1293,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     booleantype rangeLimited = FALSE;
     int i;
     jmi_log_t *log = block->log;
-    jmi_log_node_t outer;
-    jmi_log_node_t inner;
+    jmi_log_node_t outer={0};
+    jmi_log_node_t inner={0};
     clock_t t = jmi_block_solver_start_clock(block);
 
     /* MAX_NEWTON_STEP_RATIO is used just to ensure that full Newton step can 
