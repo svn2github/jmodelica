@@ -7,3 +7,4 @@ For the latest version of Ubunto:
 
 DOCKER_LINUX_DIST=<linux-distribution> 
 DOCKER_DIST_TAG<distribution-release> 
+DOCKER_JMODELICA_BRANCH=<jmodelica-branch> 

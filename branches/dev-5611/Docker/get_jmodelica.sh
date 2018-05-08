@@ -1,3 +1,4 @@
+#!/bin/sh
 #    Copyright (C) 2018 Modelon AB
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -11,12 +12,8 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-
-if [ "$JMODELICA_BRANCH" == "" ] 
-then 
-	JMODELICA_BRANCH=trunk
-else 
-	JMODELICA_BRANCH="/branches/${JMODELICA_BRANCH}"
-fi
-
+apt-get update 
+apt-get -y install subversion 
 svn co https://svn.jmodelica.org/${JMODELICA_BRANCH} JModelica.org
+
+echo $JMODELICA_BRANCH
