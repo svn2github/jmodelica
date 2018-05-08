@@ -1,10 +1,9 @@
-pipeline {
-    agent { dockerfile true }
-    stages {
-        stage('Test') {
-            steps {
-                echo "In stage Test"
-            }
+node {
+    checkout scm
+    
+    stage("Build") {
+        docker.image('centos:6.7').inside {
+            cat /etc/centos-release
         }
     }
 }
