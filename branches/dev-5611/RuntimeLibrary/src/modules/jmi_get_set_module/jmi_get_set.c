@@ -317,7 +317,7 @@ int jmi_set_continuous_states_impl(jmi_t* jmi, const jmi_real_t x[], size_t nx) 
 
 int jmi_get_event_indicators_impl(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
     int retval;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
 
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         node =jmi_log_enter_fmt(jmi->log, logInfo, "GetEventIndicators",
@@ -370,7 +370,7 @@ int jmi_get_event_indicators_impl(jmi_t* jmi, jmi_real_t eventIndicators[], size
 
 int jmi_get_derivatives_impl(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     int retval;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
 
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
         node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDerivatives",
