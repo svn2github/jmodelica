@@ -2033,7 +2033,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     clock_t t;
     realtype*  bd = N_VGetArrayPointer(b); /* - residuals, i.e. -F(x) */
     realtype*  xd = N_VGetArrayPointer(x); /* on input - last successfull step; on output - new step */
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     long int  nniters;           
     int N = block->n;
     int ret = 0, i;
@@ -2847,7 +2847,7 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     int flag = 0;
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_t *log = block->log;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     long int nniters = 0;
     
     flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
@@ -2909,7 +2909,7 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         /* Kinsol specific handling of a completed step */
         int flag;
         jmi_kinsol_solver_t* solver = block->solver;
-        jmi_log_node_t node;
+        jmi_log_node_t node={0};
         long int nniters = 0;
         
         flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);

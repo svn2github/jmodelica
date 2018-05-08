@@ -133,7 +133,7 @@ static int jmi_dynamic_state_perform_update_states(jmi_t* jmi, jmi_dynamic_state
 
 int jmi_dynamic_state_perform_update(jmi_t* jmi, jmi_int_t index_set) {
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index_set];
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "DynamicStatesUpdate", 
@@ -210,7 +210,7 @@ static int jmi_dynamic_state_sort(jmi_t* jmi, int* array, int n) {
 int jmi_dynamic_state_check_for_new_states(jmi_t* jmi, jmi_int_t index_set) {
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index_set];
     jmi_int_t new_states = FALSE;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     /* Update the coefficients */
     set->coefficents(jmi, set->coefficent_matrix);
@@ -376,7 +376,7 @@ int jmi_dynamic_state_update(jmi_t* jmi) {
 int jmi_dynamic_state_verify_choice(jmi_t* jmi) {
     int i = 0;
     jmi_int_t new_states = FALSE;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "DynamicStatesVerifying", 
@@ -403,7 +403,7 @@ int jmi_dynamic_state_check_is_state(jmi_t* jmi, jmi_int_t index, ...) {
     jmi_dynamic_state_set_t *set = &jmi->dynamic_state_sets[index];
     int ret = TRUE;
     int i = 0;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     va_list ap;
     va_start(ap, index);

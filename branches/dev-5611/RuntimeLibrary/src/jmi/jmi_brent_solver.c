@@ -248,7 +248,7 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
     double delta_prev = delta;
     int flag;
     int i = 0;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { 
             node = jmi_log_enter_fmt(block->log, logInfo, "BrentNewton", 
