@@ -1,6 +1,4 @@
-node {
-    checkout scm
-    
+node { 
     stage("Build") {
         docker.image('centos:6.7').inside {
             cat /etc/centos-release
