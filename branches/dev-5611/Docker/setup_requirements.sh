@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # 
 #    Copyright (C) 2018 Modelon AB
 #
@@ -12,8 +12,8 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
-BUILD_PKGS_JM_COMMON="cmake swig ant wget tar which patch"
-BUILD_PKGS_JM_REDHAT="subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
+BUILD_PKGS_JM_COMMON="cmake swig ant wget tar patch"
+BUILD_PKGS_JM_REDHAT="which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
 BUILD_PKGS_JM_DEBIAN="subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
 
 LINUX_DISTRIBUTION=UNKNOWN
@@ -29,10 +29,12 @@ elif [ -f /etc/redhat-release ]; then
 elif [ -f /etc/debian_version ]; then 
 	LINUX_DISTRIBUTION=DEBIAN
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
+	apt-get update 
 	alias pckinstall="apt-get -y install"
 else 
 	echo ERROR: current linux distribution not supported yet 
 fi
+
 # echo Linux Distribution : $LINUX_DISTRIBUTION
 
 pckinstall $BUILD_PKGS_JM_COMMON

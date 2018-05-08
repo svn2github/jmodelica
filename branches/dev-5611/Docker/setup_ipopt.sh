@@ -14,6 +14,8 @@
 
 IPOPT_VERSION=3.12.8
 
+wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
+
 tar xvf Ipopt-${IPOPT_VERSION}.tgz
 cd Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
 ./get.Blas
