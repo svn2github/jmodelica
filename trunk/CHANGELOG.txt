@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5613
+Fixed simulation logging when there are no states.
+
 ; Fixed ; Minor ; Compiler ; #5569
 Fixed bug where generic annotation framework returned wrong value or threw
 exception (depended on underlying implementation) if the node was ambiguous,
