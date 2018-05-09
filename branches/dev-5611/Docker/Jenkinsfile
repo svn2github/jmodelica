@@ -1,0 +1,14 @@
+node('docker') {
+    checkout scm
+    
+    stage ('Build') {
+        def ubuntuImage = docker.build("ubuntu-image", ".")
+        
+        ubuntuImage.inside{
+            sh 'echo "hello"'
+            sh 'which python'
+        }
+    }
+    
+    
+}

@@ -1,4 +1,4 @@
-ARG  DOCKER_LINUX_DIST=centos 
+ARG  DOCKER_LINUX_DIST=ubuntu
 ARG  DOCKER_DIST_TAG=latest 
 
 # TODO Argument checking 
