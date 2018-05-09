@@ -6,6 +6,7 @@ import org.jmodelica.util.values.Evaluable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.jmodelica.test.common.AssertMethods.assertEmpty;
 
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ import annotationMock.DummyAnnotationNode;
 import annotationMock.Builder;
 import annotationMock.DummyAnnotProvider;
 
-public class GenericAnnotationNodeTest extends testUtil {
+public class GenericAnnotationNodeTest {
     
     public GenericAnnotationNode<DummyAnnotationNode, DummyAnnotProvider, Evaluable> createGAN(String name) {
         return createGAN(name, new DummyAnnotProvider(name), null);
