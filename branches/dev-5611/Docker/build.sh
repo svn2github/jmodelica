@@ -11,10 +11,11 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
-svn co https://svn.jmodelica.org/trunk JModelica.org
+
 cd JModelica.org
 mkdir build
 cd build
+
 ../configure --prefix=/build/jm_install --with-ipopt=/build/ipopt-installation
 make install
 cd ../..
