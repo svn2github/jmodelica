@@ -12,10 +12,6 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-svn co https://svn.jmodelica.org/${JMODELICA_BRANCH} JModelica.org
-
-# if Assimula JModelica.org/external/Assimulo does not exist? .. checkout Assimulo 
-
-# Temporarily we do it this way
-svn co https://svn.jmodelica.org/assimulo/trunk/  /JModelica.org/external/Assimulo
-
+if [ ! -d /JModelica.org/external/Assimulo ] then 
+	svn co https://svn.jmodelica.org/assimulo/trunk/  /JModelica.org/external/Assimulo
+fi 
