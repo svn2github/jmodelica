@@ -10,15 +10,15 @@ MAINTAINER Modelon
 ARG ARG_JMODELICA_BRANCH="trunk"
 ENV JMODELICA_BRANCH=$ARG_JMODELICA_BRANCH
 
-COPY Docker/*.sh /build/
+COPY Docker/*.sh Docker/build/
 COPY * /JModelica.org/
 
-RUN ls -la /build
-RUN chmod +x /build/*.sh
-RUN ./build/setup_requirements.sh
-RUN ./build/setup_python_packages.sh
-RUN ./build/setup_ipopt.sh
-RUN ./build/get_jmodelica.sh
-RUN ./build/build.sh
-#RUN ./build/build_casadi.sh
-RUN ./build/cleanup.sh
+RUN ls -la Docker/build
+RUN chmod +x Docker/build/*.sh
+RUN Docker/build/setup_requirements.sh
+RUN Docker/build/setup_python_packages.sh
+RUN Docker/build/setup_ipopt.sh
+RUN Docker/build/get_jmodelica.sh
+RUN Docker/build/build.sh
+#RUN Docker/build/build_casadi.sh
+RUN Docker/build/cleanup.sh
