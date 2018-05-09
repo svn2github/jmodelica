@@ -11,7 +11,8 @@ ARG ARG_JMODELICA_BRANCH="trunk"
 ENV JMODELICA_BRANCH=$ARG_JMODELICA_BRANCH
 
 COPY *.sh /build/
-
+RUN ls -la /build
+RUN chmod +x /build/*.sh
 RUN ./build/setup_requirements.sh
 RUN ./build/setup_python_packages.sh
 RUN ./build/setup_ipopt.sh
