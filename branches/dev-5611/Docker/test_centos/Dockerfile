@@ -1,3 +1,3 @@
-FROM centos:6.7
+FROM ubuntu:latest
 
-RUN cat /etc/centos-release
+RUN apt-get update && apt-get install -y package-bar
