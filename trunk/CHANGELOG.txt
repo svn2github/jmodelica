@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5615
+Improved input handling for FMI2
+
 ; Fixed ; Minor ; PyFMI ; #5613
 Fixed simulation logging when there are no states.
 
