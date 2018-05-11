@@ -16,10 +16,7 @@ cd JModelica.org
 mkdir build
 cd build
 
-#added pwd and ls -l for debugging issues with paths to makefiles
-pwd
-ls -l
-#remove 2 lines above
-../configure --prefix=/build/jm_install --with-ipopt=/build/ipopt-installation
+#TODO we probably need change these PWD later? Or at least investigate if paths are saved in configured docker image
+../configure --prefix="$PWD"/jm_install --with-ipopt="$PWD"/ipopt-installation
 make install
 cd ../..
