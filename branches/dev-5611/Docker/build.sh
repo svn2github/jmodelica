@@ -17,6 +17,6 @@ mkdir build
 cd build
 
 #TODO we probably need change these PWD later? Or at least investigate if paths are saved in configured docker image
-../configure --prefix="$PWD"/jm_install --with-ipopt="$PWD"/ipopt-installation
+../configure --prefix="$PWD"/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION}
 make install
 cd ../..
