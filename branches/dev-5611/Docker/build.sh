@@ -16,6 +16,10 @@ cd JModelica.org
 mkdir build
 cd build
 
+#added pwd and ls -l for debugging issues with paths to makefiles
+pwd
+ls -l
+#remove 2 lines above
 ../configure --prefix=/build/jm_install --with-ipopt=/build/ipopt-installation
 make install
 cd ../..

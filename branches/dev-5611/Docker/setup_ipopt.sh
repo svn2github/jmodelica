@@ -29,6 +29,10 @@ cd ../..
 
 mkdir build
 cd build
-mkdir /build/ipopt-installation
+#adding in case of failure at the moment
+ls -l
+pwd
+#TODO remove 2 lines above
+mkdir ipopt-installation
 ../configure --prefix=/build/ipopt-installation
 make install
