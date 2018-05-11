@@ -29,10 +29,8 @@ cd ../..
 
 mkdir build
 cd build
-#adding in case of failure at the moment
-ls -l
-pwd
-#TODO remove 2 lines above
+#Test with absolute path due to errors
+
 mkdir ipopt-installation
-../configure --prefix=/build/ipopt-installation
+../configure --prefix="$PWD"/ipopt-installation
 make install
