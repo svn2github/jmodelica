@@ -1,6 +1,8 @@
 Building 
 ========
 
+The Dockerfile needs to be copied in the directory above JModelica in order to work. 
+
 For the latest version of Ubunto: 
 
 > docker build -t jmodelica/ubuntu:0.1  --build-arg  DOCKER_LINUX_DIST=ubuntu -f  Dockerfile.dockerfile . 
