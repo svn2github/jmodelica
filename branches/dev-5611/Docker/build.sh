@@ -24,3 +24,4 @@ echo ${IPOPT_INSTALLATION_LOCATION}
 ../configure --prefix="$PWD"/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION}
 make install
 cd ../..
+env 
