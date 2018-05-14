@@ -9,8 +9,8 @@ MAINTAINER Modelon
 ARG ARG_JMODELICA_BRANCH="trunk"
 ENV JMODELICA_BRANCH=$ARG_JMODELICA_BRANCH
 
-COPY JModelica/Docker/*.sh Docker/build/
-COPY JModelica /JModelica.org/
+COPY Docker/*.sh Docker/build/
+COPY . /JModelica.org/
 
 RUN . ./build/setup_requirements.sh
 RUN ./build/setup_python_packages.sh
