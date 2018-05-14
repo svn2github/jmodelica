@@ -2988,10 +2988,6 @@ aspect InstantiatedExpressions {
     
     protected abstract FStatement SrcStatement.instantiateStatement();
     
-    protected FStatement SrcAlgorithmAnnotation.instantiateStatement() {
-        return null;
-    }
-    
     protected FAssignStmt SrcAssignStmt.instantiateStatement() {
         FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
         left.setLocation(this);
