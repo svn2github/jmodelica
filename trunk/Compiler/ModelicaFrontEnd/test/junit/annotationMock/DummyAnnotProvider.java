@@ -8,19 +8,23 @@ import org.jmodelica.util.annotations.AnnotationEditException;
 import org.jmodelica.util.annotations.AnnotationProvider;
 import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
+import org.jmodelica.util.collections.TransformerIterable;
 import org.jmodelica.util.values.Evaluable;
 
 public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider,Evaluable>,Iterable<SubNodePair<DummyAnnotProvider>> {
 
-    public String name = "noname:node";
+    public String name = "";
     public Evaluable value = null;
     public ArrayList<DummyAnnotProvider> subNodes = new ArrayList<>();
-    public ArrayList<SubNodePair<DummyAnnotProvider>> subNodesB = new ArrayList<>();
     public DummyAnnotProvider() {
-        
     }
-    
+
     public DummyAnnotProvider(String name) {
+        this.name=name;
+    }
+
+    public DummyAnnotProvider(String name, int value) {
+        this.value=new DummyEvaluator(value);
         this.name=name;
     }
 
@@ -28,16 +32,21 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
         this.value=new DummyEvaluator(value);
         this.name=name;
     }
-    
+
     @Override
     public Iterable<SubNodePair<DummyAnnotProvider>> annotationSubNodes() {
-        return subNodesB;
+        return new TransformerIterable<DummyAnnotProvider, SubNodePair<DummyAnnotProvider>>(subNodes) {
+            @Override
+            protected SubNodePair<DummyAnnotProvider> transform(DummyAnnotProvider a) throws SkipException {
+                return new SubNodePair<DummyAnnotProvider>(a.name, a);
+            }
+        };
     }
 
     public String toString() {
         return "MockSrcAnnot:" + name;
     }
-    
+
     @Override
     public Evaluable annotationValue() {
         return value;
@@ -51,16 +60,24 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
     @Override
     public DummyAnnotProvider addAnnotationSubNode(String name) throws AnnotationEditException {
        DummyAnnotProvider newNode = new DummyAnnotProvider(name);
-       subNodesB.add(new SubNodePair<DummyAnnotProvider>(name, newNode));
        subNodes.add(newNode);
        return newNode;
     }
-    
-    public DummyAnnotProvider addAnnotationSubNode(DummyAnnotProvider prov) {
-        subNodesB.add(new SubNodePair<DummyAnnotProvider>(prov.name, prov));
-        subNodes.add(prov);
-        return prov;
+
+    /**
+     * Convenience method for adding an existing DummyAnnotProvider directly to this node.
+     * Warning creating cycles could cause problems.
+     */
+    public DummyAnnotProvider addNodes(DummyAnnotProvider... subNodes) {
+        for (DummyAnnotProvider subNode: subNodes) {
+            this.subNodes.add(subNode);
+        }
+        return this;
     }
+
+    public DummyAnnotationNode createAnnotationNode() {
+        return new DummyAnnotationNode(name, this, null);
+    };
 
     @Override
     public boolean isEach() {
@@ -81,6 +98,5 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
     public Iterator<SubNodePair<DummyAnnotProvider>> iterator() {
         return this.iterator();
     }
-
 
 }

@@ -4,11 +4,16 @@ import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.Evaluable;
 import org.jmodelica.util.values.Evaluator;
 
-public class DummyEvaluator implements Evaluator<DummyEvaluator>, Cloneable,Evaluable {
+public class DummyEvaluator implements Evaluator<DummyEvaluator>, Cloneable, Evaluable {
 
-    DummyCValueInteger myValue;
+    ConstValue myValue;
+
+    public DummyEvaluator(int value) {
+        myValue = new DummyCValueInteger(value);
+    }
+
     public DummyEvaluator(String value) {
-        myValue = new DummyCValueInteger(Integer.parseInt(value));
+        myValue = new DummyCValueString(value);
     }
 
     @Override
@@ -18,32 +23,58 @@ public class DummyEvaluator implements Evaluator<DummyEvaluator>, Cloneable,Eval
 
     @Override
     public ConstValue evaluate(DummyEvaluator t) {
-        if (t==null)
-            return null;
+        if (t == null) {
+            return null; 
+        }
         return new DummyCValueInteger(1);
     }
-    
-    public class DummyCValueInteger extends ConstValue{
-        int t;
+
+    public class DummyCValueInteger extends ConstValue {
+        int value;
+
         public DummyCValueInteger(int i) {
-           t=i;
+            value = i;
         }
 
-        public int intValue() { 
-            return t; 
+        @Override
+        public int intValue() {
+            return value;
         }
-        
-        public String stringValue() { 
-            return String.valueOf(t); 
+
+        @Override
+        public String stringValue() {
+            return String.valueOf(value);
         }
-        
+
+        @Override
         public boolean isInteger() {
             return true;
         }
-
-        
     }
-    
+
+    public class DummyCValueString extends ConstValue {
+        String value;
+
+        public DummyCValueString(String s) {
+            this.value = s;
+        }
+
+        @Override
+        public int intValue() {
+            return Integer.parseInt(value);
+        }
+
+        @Override
+        public String stringValue() {
+            return value;
+        }
+
+        @Override
+        public boolean isString() {
+            return true;
+        }
+    }
+
     public String toString() {
         return myValue.stringValue();
     }
