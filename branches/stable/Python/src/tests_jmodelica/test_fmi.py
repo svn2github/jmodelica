@@ -550,6 +550,33 @@ class Test_FMUModelME1:
         cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"), version="1.0")
         cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"), version="1.0")
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), version="1.0")
+        cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), version="1.0")
+        
+    @testattr(stddist_full = True)
+    def test_simulate_with_debug_option(self):
+        coupled = load_fmu(self.rlc_circuit)
+
+        opts=coupled.simulate_options()
+        opts["logging"] = True
+        
+        #Verify that a simulation is successful
+        res=coupled.simulate(options=opts)
+        
+        from pyfmi.debug import CVodeDebugInformation
+        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
+        
+    @testattr(stddist_full = True)
+    def test_simulate_with_debug_option_no_state(self):
+        coupled = load_fmu(self.no_state_name)
+
+        opts=coupled.simulate_options()
+        opts["logging"] = True
+        
+        #Verify that a simulation is successful
+        res=coupled.simulate(options=opts)
+        
+        from pyfmi.debug import CVodeDebugInformation
+        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
     
     @testattr(stddist_full = True)
     def test_get_time_varying_variables(self):
