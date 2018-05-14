@@ -16,6 +16,7 @@ IPOPT_VERSION=3.12.8
 
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
 
+CURRDIR=$PWD 
 tar xvf Ipopt-${IPOPT_VERSION}.tgz
 cd Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
 ./get.Blas
@@ -37,3 +38,5 @@ export IPOPT_INSTALLATION_LOCATION
 
 ../configure --prefix=${IPOPT_INSTALLATION_LOCATION}
 make install
+cd $CURRDIR
+env 
