@@ -10,7 +10,7 @@ COPY JModelica /JModelica.org/
 
 RUN ls -la Docker/build
 RUN chmod +x Docker/build/*.sh
-RUN Docker/build/setup_requirements.sh
+RUN . Docker/build/setup_requirements.sh
 RUN Docker/build/setup_python_packages.sh
 RUN . Docker/build/setup_ipopt.sh
 RUN Docker/build/get_jmodelica.sh
