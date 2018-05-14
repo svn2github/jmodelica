@@ -12,9 +12,9 @@ ENV JMODELICA_BRANCH=$ARG_JMODELICA_BRANCH
 COPY JModelica/Docker/*.sh Docker/build/
 COPY JModelica /JModelica.org/
 
-RUN ./build/setup_requirements.sh
+RUN . ./build/setup_requirements.sh
 RUN ./build/setup_python_packages.sh
-RUN ./build/setup_ipopt.sh
+RUN . ./build/setup_ipopt.sh
 RUN ./build/get_jmodelica.sh
 RUN ./build/build.sh
 RUN ./build/build_casadi.sh
