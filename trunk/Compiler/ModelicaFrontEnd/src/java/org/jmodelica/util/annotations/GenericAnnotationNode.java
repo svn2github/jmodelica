@@ -264,7 +264,6 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             // Trying to set the value annotation child
             throw new AnnotationEditException(this, "Not possible to set assign annotation value as annotation yet");
         }
-        assert child.parent == this && subNodes_cache.contains(child);
         N res = node().addAnnotationSubNode(child.name());
         if (res == null) {
             throw new AnnotationEditException(child, "Unable to create sub node");
