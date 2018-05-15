@@ -12,7 +12,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-. /Docker/build/ipopt_settings.sh 
+. /Docker/build/settings.sh 
 
 cd JModelica.org
 mkdir build

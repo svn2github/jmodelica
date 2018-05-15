@@ -12,22 +12,20 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+/Docker/build/settings.sh
+
 BUILD_PKGS_JM_COMMON="cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
 BUILD_PKGS_JM_DEBIAN="jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
 
-LINUX_DISTRIBUTION=UNKNOWN
-
-if [ -f /etc/centos-release ]; then
-	LINUX_DISTRIBUTION=CENTOS
+if [ "$LINUX_DISTRIBUTION" == "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	alias pckinstall="yum -y install"
-elif [ -f /etc/redhat-release ]; then 
-	LINUX_DISTRIBUTION=REDHAT
+elif [ "$LINUX_DISTRIBUTION" == "REDHAT" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	alias pckinstall="yum -y install"
-elif [ -f /etc/debian_version ]; then 
-	LINUX_DISTRIBUTION=DEBIAN
+elif [ "$LINUX_DISTRIBUTION" == "DEBIAN" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
 	apt-get update 
 	alias pckinstall="apt-get -y install"
@@ -40,7 +38,5 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
-if [ -f /etc/debian_version ]; then 
-	export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/
-fi 
+
 
