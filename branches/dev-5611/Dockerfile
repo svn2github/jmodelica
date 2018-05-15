@@ -6,4 +6,4 @@ MAINTAINER Modelon
 
 COPY Docker/*.sh Docker/build/
 RUN chmod +x Docker/build/*.sh
-RUN Docker/build/run_scripts.sh
+RUN Docker/build/run_base_scripts.sh
