@@ -340,6 +340,7 @@ aspect FlatAPI {
 
             public static final ZOrdinaryCategory INDEPENDENT_EXTERNAL_OBJECT              = create(ParaDependency.INDEPENDENT, ZType.EXTERNAL,ZVariability.REGULAR_PARAMETER);
             public static final ZOrdinaryCategory DEPENDENT_EXTERNAL_OBJECT                = create(ParaDependency.DEPENDENT,   ZType.EXTERNAL,ZVariability.REGULAR_PARAMETER);
+            public static final ZOrdinaryCategory EXTERNAL_OBJECT_INITIAL_PARAMETER        = create(ParaDependency.DEPENDENT,   ZType.EXTERNAL,ZVariability.INITIAL_PARAMETER);
 
             public static final ZOrdinaryCategory REAL_INPUT                               = create(ParaDependency.DEPENDENT,   ZType.REAL,    ZVariability.INPUT);
             public static final ZOrdinaryCategory INTEGER_INPUT                            = create(ParaDependency.DEPENDENT,   ZType.INTEGER, ZVariability.INPUT);
@@ -558,6 +559,7 @@ aspect FlatAPI {
 
                     ZOrdinaryCategory.INDEPENDENT_EXTERNAL_OBJECT,
                     ZOrdinaryCategory.DEPENDENT_EXTERNAL_OBJECT,
+                    ZOrdinaryCategory.EXTERNAL_OBJECT_INITIAL_PARAMETER,
             };
 
             private static final ZCategory[] zIndexOrderPre = new ZCategory[] {

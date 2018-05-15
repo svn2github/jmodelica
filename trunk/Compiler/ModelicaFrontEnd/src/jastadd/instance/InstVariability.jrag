@@ -60,7 +60,9 @@ aspect InstVariability {
     
     eq InstEnumLiteral.calcVariability()                           = fConstant();
     eq UnknownInstComponentDecl.calcVariability()                  = fConstant();
-    eq InstExternalObject.calcVariability()                        = fParameter();
+    eq InstAssignable.calcVariability()                            = calcVariability(super.calcVariability());
+    eq InstExternalObject.calcVariability()                        = calcVariability(ASTNode.fFixedParameter())
+        .combine(ASTNode.fFixedParameter()).combineDown(ASTNode.fInitialParameter());
     
     // Parameters variabilities also depend on binding expressions since its nice
     // to propagate known values, these include: 
@@ -72,14 +74,13 @@ aspect InstVariability {
     // we have to guard agains circularity.
     private boolean InstAssignable.circularVariability = false;
     
-    eq InstAssignable.calcVariability() {
-        FTypePrefixVariability v =  super.calcVariability();
+    public FTypePrefixVariability InstAssignable.calcVariability(FTypePrefixVariability v) {
         if (v.constantVariability() && isInput() && inFunction() && isTopLevelInputOutput()) {
             return fDiscrete();
         }
         if (v.parameterVariability() && !inRecordDecl() && !circularVariability) {
             circularVariability = true;
-            if (!isRecord()) {
+            if (isPrimitive()) {
                 if (isSetAsInitial()) {
                     v = fInitialParameter();
                 } else if (isEvalAnnotated(true)) {
@@ -200,66 +201,6 @@ aspect InstVariability {
     eq InstComponentDecl.getChild().parentDefaultVariability() = variability();
     eq InstClassDecl.getChild().parentDefaultVariability()     = null;
     eq Root.getChild().parentDefaultVariability()              = null;
-    
-    
-    protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
-        Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
-        for (FAbstractEquation eqn : eqns)
-            res.addAll(eqn.assignedSet());
-        return res;
-    }
-
-    /**
-     * Gives the set of components assigned in this equation.
-     * 
-     * Only works in instance tree.
-     * For if and when equations, only the first branch is considered.
-     */
-    syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
-    eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
-    eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
-    eq FEquation.assignedSet()           = getLeft().accessedVarSet();
-    eq FFunctionCallEquation.assignedSet() {
-        LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
-        for (FFunctionCallLeft left : getLefts()) {
-            if (left.hasFExp()) {
-                s.addAll(left.getFExp().accessedVarSet());
-            }
-        }
-        return s;
-    }
-
-    /**
-     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
-     */
-    syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
-    eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
-
-    /**
-     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
-     */
-    syn Set<InstComponentDecl> FIdUse.accessedVarSet() = Collections.emptySet();
-    eq FIdUseInstAccess.accessedVarSet()               = getInstAccess().accessedVarSet();
-
-    /**
-     * Get set containing accessed var.
-     */
-    syn Set<InstComponentDecl> InstAccess.accessedVarSet() = 
-        Collections.singleton(myInstComponentDecl());
-
-
-    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability().combine(indexVariability());
-
-    eq FIdUseInstAccess.indexVariability() = getInstAccess().indexVariability();
-
-    syn FTypePrefixVariability InstAccess.indexVariability() = fConstant();
-    eq InstArrayAccess.indexVariability()                    = getFArraySubscripts().variability();
-    eq InstDot.indexVariability() {
-        FTypePrefixVariability variability = fConstant();
-        for (InstAccess part : getInstAccesss())
-            variability = variability.combine(part.indexVariability());
-        return variability;
-    }
 
 }
 
@@ -286,6 +227,23 @@ aspect InstExpVariability {
     
     syn FTypePrefixVariability InstFunctionArgument.variability() = isOKArg() ? getFExp().variability() : fConstant();
     eq InstDefaultArgument.variability()                          = fConstant();
+
+    /*
+     * Uses
+     */
+
+    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability().combine(indexVariability());
+
+    eq FIdUseInstAccess.indexVariability() = getInstAccess().indexVariability();
+
+    syn FTypePrefixVariability InstAccess.indexVariability() = fConstant();
+    eq InstArrayAccess.indexVariability()                    = getFArraySubscripts().variability();
+    eq InstDot.indexVariability() {
+        FTypePrefixVariability variability = fConstant();
+        for (InstAccess part : getInstAccesss())
+            variability = variability.combine(part.indexVariability());
+        return variability;
+    }
 }
 
 

@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Compiler ; #5605
+Support for initial parameter external objects.
+
 ; Fixed ; Minor ; PyFMI ; #5615
 Improved input handling for FMI2
 
