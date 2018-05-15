@@ -131,18 +131,16 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return subNode;
     }
 
-    private T addToCaches(Collection<T> subNodes, Map<String, T> subNodesNameMap, T subNode) {
+    private void addToCaches(Collection<T> subNodes, Map<String, T> subNodesNameMap, T subNode) {
         subNodes.add(subNode);
-        T previous = updateSubNodesNameMapCache(subNodesNameMap, subNode);
-        return previous;
+        updateSubNodesNameMapCache(subNodesNameMap, subNode);
     }
 
-    private T updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
+    private void updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
         T previous = subNodesNameMap.put(subNode.name(), subNode);
         if (previous != null && previous.exists() && subNode.exists()) { // subNode goes from not ambiguous to ambiguous
             subNodesNameMap.put(subNode.name(), ambiguousNode());
         }
-        return previous;
     }
 
     private T removeFromSubNodesNameMapCache(T subNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
