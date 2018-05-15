@@ -2,11 +2,10 @@ node('docker') {
     checkout scm
     
     stage ('Build') {
-        def ubuntuImage = docker.build("ubuntu-image", ".")
+        def ubuntuImage = docker.build("ubuntu-image", "--build-arg DOCKER_LINUX_DIST=ubuntu --build-arg DOCKER_DIST_TAG=latest .")
         
         ubuntuImage.inside{
-            sh 'echo "hello"'
-            sh 'which python'
+            sh 'Finished building"'
         }
     }
     
