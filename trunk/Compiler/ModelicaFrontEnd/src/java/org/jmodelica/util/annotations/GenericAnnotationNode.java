@@ -100,11 +100,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             T subNode = null;
             
             List<T> oldNodes = oldNodesMap.get(subNodeName);
-            if (oldNodes != null && !oldNodes.isEmpty()) {
+            if (oldNodes != null) {
                 subNode = oldNodes.remove(0);
-            }
-            if(oldNodes != null && oldNodes.isEmpty()) {
-                oldNodesMap.remove(subNodeName);
+                if(oldNodes.isEmpty()) {
+                    oldNodesMap.remove(subNodeName);
+                }
             }
             createOrSetSubNodeAndAddToCaches(subNode, subNodeName, subNodeNode, subNodes, subNodesNameMap);
         }
