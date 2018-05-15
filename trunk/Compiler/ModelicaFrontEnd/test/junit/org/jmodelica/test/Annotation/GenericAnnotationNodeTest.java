@@ -16,7 +16,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
      * Create a standard construction top(a(ab=4,ab=5)=1, b(ba=1,bb=2)=2, c=3)
      * 
      */
-    public DummyAnnotationNode CreateDefault() {
+    public DummyAnnotationNode createDefault() {
         DummyAnnotProvider n = newProvider("top");
         DummyAnnotProvider a = newProvider("a", 1);
         DummyAnnotProvider b = newProvider("b", 2);
@@ -31,7 +31,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
      */
     @Test
     public void testValueAsAnnotationForAmbiguous() {
-        DummyAnnotationNode n = CreateDefault();
+        DummyAnnotationNode n = createDefault();
         assertTrue(n.forPath("a", "ab").valueAsAnnotation().isAmbiguous());
     }
 
@@ -85,14 +85,14 @@ public class GenericAnnotationNodeTest extends AssertMethods {
 
     @Test
     public void updateNode() {
-        DummyAnnotationNode n = CreateDefault();
+        DummyAnnotationNode n = createDefault();
         n.updateNode("newTop", n.node());
         assertEquals("newTop(a(ab=4, ab=5)=1, b(ba=1, bb=2)=2, c=3)", n.toString());
     }
 
     @Test
     public void existingFilteredIterator() {
-        DummyAnnotationNode n = CreateDefault();
+        DummyAnnotationNode n = createDefault();
         n.testSrcRemoveAll();
         n.disconnectFromNode();
         assertEmpty(n.forPath("a").subNodes().iterator());
@@ -101,7 +101,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
 
     @Test
     public void existingFilteredIterator2() {
-        DummyAnnotationNode n = CreateDefault();
+        DummyAnnotationNode n = createDefault();
         n.forPath("a").testSrcRemoveAll();
         n.forPath("a").disconnectFromNode();
         assertEmpty(n.forPath("a").subNodes().iterator());
@@ -110,7 +110,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
 
     @Test
     public void recalculatedFromSource() {
-        DummyAnnotationNode n = CreateDefault();
+        DummyAnnotationNode n = createDefault();
         n.forPath("b").disconnectFromNode(); // Source untouched.
         assertEquals("top(a(ab=4, ab=5)=1, b(ba=1, bb=2)=2, c=3)", n.toString());
     }
@@ -125,7 +125,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
 
     @Test
     public void disconnectNonExistentNode() {
-        DummyAnnotationNode n = CreateDefault();
+        DummyAnnotationNode n = createDefault();
         String orginal = n.toString();
         n.forPath("n").disconnectFromNode();
         assertEquals(orginal, n.toString());
