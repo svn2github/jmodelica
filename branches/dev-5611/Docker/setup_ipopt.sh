@@ -31,10 +31,8 @@ cd ../..
 mkdir build
 cd build
 #Test with absolute path due to errors
-mkdir ipopt-installation
+mkdir installation
 
-IPOPT_INSTALLATION_LOCATION="$PWD"/ipopt-installation
-export IPOPT_INSTALLATION_LOCATION
 
 ../configure --prefix=${IPOPT_INSTALLATION_LOCATION}
 make install
