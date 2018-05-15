@@ -12,25 +12,17 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-find_os() { 
+# OS 
 
-	if [ -f /etc/centos-release ]; then
-		return CENTOS
-	elif [ -f /etc/redhat-release ]; then 
-		return REDHAT
-	elif [ -f /etc/debian_version ]; then 
-		return DEBIAN
-	else 
-		return UNKNOWN 
-	fi
-
-} 
-
-find_os
-export LINUX_DISTRIBUTION=$?
-if [ "$LINUX_DISTRIBUTION" == "DEBIAN" ]; then 
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/
-fi 
+if [ -f /etc/centos-release ]; then
+	export LINUX_DISTRIBUTION=CENTOS
+elif [ -f /etc/redhat-release ]; then 
+	export LINUX_DISTRIBUTION=REDHAT
+elif [ -f /etc/debian_version ]; then 
+	export LINUX_DISTRIBUTION=DEBIAN
+else 
+	export LINUX_DISTRIBUTION=UNKNOWN 
+fi
 
 # IPOPT 
 

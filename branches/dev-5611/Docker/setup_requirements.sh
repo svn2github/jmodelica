@@ -13,7 +13,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-/Docker/build/settings.sh
+. /Docker/build/settings.sh
 
 BUILD_PKGS_JM_COMMON="cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
@@ -29,6 +29,7 @@ elif [ "$LINUX_DISTRIBUTION" == "DEBIAN" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
 	apt-get update 
 	alias pckinstall="apt-get -y install"
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/
 else 
 	echo ERROR: current linux distribution not supported yet 
 fi
