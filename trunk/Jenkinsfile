@@ -6,7 +6,8 @@ library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCM
 // has been checked out directly by Jenkins as part of pipeline build).
 (JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
 
-boolean SHOULD_UPLOAD_INSTALL = JM_SVN_PATH.equals("trunk")
+// Temporarily cannot upload to server 
+boolean SHOULD_UPLOAD_INSTALL = false // JM_SVN_PATH.equals("trunk")
 
 // Set build name:
 currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.TRIGGER_CAUSE) + ")"
