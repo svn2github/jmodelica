@@ -1,0 +1,13 @@
+node('docker') {
+    checkout scm
+    def dockerfile = 'Dockerfile_full_image'
+    stage ('Build') {
+        def jm_image = docker.build("ubuntu-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=ubuntu --build-arg DOCKER_DIST_TAG=latest")
+        
+        ubuntuImage.inside{
+            sh 'echo "Finished building"'
+        }
+    }
+    
+    
+}
