@@ -12,6 +12,8 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+. /Docker/build/ipopt_settings.sh 
+
 cd JModelica.org
 mkdir build
 cd build
@@ -21,7 +23,7 @@ cd build
 echo "IPOPT VAR BELOW"
 echo ${IPOPT_INSTALLATION_LOCATION}
 
-../configure --prefix="$PWD"/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION}
+../configure --prefix=/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION}
 make install
 cd ../..
 env 

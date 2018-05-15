@@ -12,7 +12,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-IPOPT_VERSION=3.12.8
+. /Docker/build/ipopt_settings.sh 
 
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
 
