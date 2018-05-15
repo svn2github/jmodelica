@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -169,7 +170,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (nodes == null) {
             return Collections.emptyMap();
         }
-        Map<String, List<T>> res = new java.util.LinkedHashMap<String, List<T>>();
+        Map<String, List<T>> res = new LinkedHashMap<String, List<T>>();
         for (T node : nodes) {
             String name = node.name();
             List<T> withSameName = res.get(name);
@@ -357,6 +358,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param newName The new name
      * @param node The new node
      */
+    @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
         if (parent() != null && !name().equals(newName)) {
             parent().updateSubNode(newName, node, (T) this);
