@@ -1,5 +1,5 @@
 ARG DOCKER_LINUX_DIST=jmodelica/ubuntu_base
-ARG DOCKER_DIST_TAG=18.04
+ARG DOCKER_DIST_TAG=latest
 # TODO Argument checking user need to create images only of tested distributions ...
 
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
@@ -8,7 +8,7 @@ MAINTAINER Modelon
 RUN apt list --installed
 COPY Docker/*.sh Docker/build/
 COPY Docker/*.py Docker/build/
-COPY . /JModelica.org/
+COPY / /JModelica.org/
 RUN chmod +x Docker/build/*.sh
 RUN ls -la Docker/build
 RUN ls -la /JModelica.org
