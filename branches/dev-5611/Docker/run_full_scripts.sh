@@ -12,12 +12,17 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-echo "STAGE 1/4: SETUP BASE IMAGE"
-echo "STAGE 2/4: ADDING JMODELICA"
+echo "$PWD"
+for entry in "$search_dir"/*
+do
+  echo "$entry"
+done
+
+echo "STAGE 1/3: ADDING JMODELICA"
 . Docker/build/get_jmodelica.sh
-echo "Stage 3/4: BUILDING"
+echo "Stage 2/3: BUILDING"
 . Docker/build/build.sh
-echo "STAGE 4/4: BUILDING CASADI"
+echo "STAGE 3/3: BUILDING CASADI"
 . Docker/build/build_casadi.sh 
 
 echo "STAGE TESTING"
