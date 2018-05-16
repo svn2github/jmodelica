@@ -1,8 +1,20 @@
+
 node('docker') {
-    checkout scm
-    def dockerfile = 'Dockerfile_full_image'
+    def jm_image
+    stage("Checkout JModelica.org") {
+        checkout([
+            $class: 'SubversionSCM',
+            locations: [
+            [local: 'JModelica', remote: scm.getLocations()[0].remote],
+        ],
+            workspaceUpdater: [$class: 'UpdateWithCleanUpdater'],
+            quietOperation: true,
+        ])
+    }
+
     stage ('Build') {
-        def jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=ubuntu --build-arg DOCKER_DIST_TAG=latest")
+        def dockerfile = 'Dockerfile_full_image'
+        jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=18.04")
         
         jm_image.inside{
             sh 'echo "Finished building"'
