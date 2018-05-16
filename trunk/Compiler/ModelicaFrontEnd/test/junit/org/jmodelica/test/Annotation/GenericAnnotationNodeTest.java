@@ -84,10 +84,27 @@ public class GenericAnnotationNodeTest extends AssertMethods {
     }
 
     @Test
-    public void updateNode() {
+    public void updateTopNode() {
         DummyAnnotationNode n = createDefault();
         n.updateNode("newTop", n.node());
         assertEquals("newTop(a(ab=4, ab=5)=1, b(ba=1, bb=2)=2, c=3)", n.toString());
+    }
+    
+    @Test
+    public void updateSubNode() {
+        DummyAnnotationNode n = createDefault();
+        DummyAnnotationNode subNode = n.subNodes().iterator().next();
+        subNode.node().name = "newa";
+        subNode.updateNode("newa", subNode.node());
+        assertEquals("top(newa(ab=4, ab=5)=1, b(ba=1, bb=2)=2, c=3)", n.toString());
+    }
+
+    @Test
+    public void testNode() {
+        DummyAnnotationNode n = createDefault();
+        DummyAnnotationNode newNode = n.forPath("newNode");
+        newNode.node();
+        assertTrue(newNode.exists()); 
     }
 
     @Test
