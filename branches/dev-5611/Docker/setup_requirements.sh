@@ -19,13 +19,13 @@ BUILD_PKGS_JM_COMMON="cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="bc make lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
 BUILD_PKGS_JM_DEBIAN="dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
 
-if [ "$LINUX_DISTRIBUTION" == "CENTOS" ]; then
+if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	alias pckinstall="yum -y install"
-elif [ "$LINUX_DISTRIBUTION" == "REDHAT" ]; then 
+elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	alias pckinstall="yum -y install"
-elif [ "$LINUX_DISTRIBUTION" == "DEBIAN" ]; then 
+elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
 	apt-get update 
 	alias pckinstall="apt-get -y install"
