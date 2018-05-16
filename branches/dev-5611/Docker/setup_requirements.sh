@@ -16,7 +16,7 @@
 . /Docker/build/settings.sh
 
 BUILD_PKGS_JM_COMMON="cmake swig ant wget tar patch"
-BUILD_PKGS_JM_REDHAT="lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
+BUILD_PKGS_JM_REDHAT="make lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
 BUILD_PKGS_JM_DEBIAN="jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
 
 if [ "$LINUX_DISTRIBUTION" == "CENTOS" ]; then
