@@ -1,3 +1,4 @@
+#!/bin/sh
 # 
 #    Copyright (C) 2018 Modelon AB
 #
