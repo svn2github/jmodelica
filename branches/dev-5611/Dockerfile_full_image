@@ -13,6 +13,7 @@ RUN chmod +x Docker/build/*.sh
 RUN ls -la Docker/build
 RUN ls -la /JModelica.org
 RUN ls -la /JModelica.org/external
-
+RUN ls -la /JModelica.org/external/FMILibrary
+RUN ls -la /JModelica.org/ThirdParty/CasADi
 RUN Docker/build/run_full_scripts.sh
 #RUN Docker/build/cleanup.sh

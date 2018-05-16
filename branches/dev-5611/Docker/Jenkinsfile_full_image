@@ -11,7 +11,9 @@ node('docker') {
             quietOperation: true,
         ])
     }
-
+    stage ("Checkout SCM") {
+        checkout scm
+    }
     stage ('Build') {
         def dockerfile = 'Dockerfile_full_image'
         jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=18.04")

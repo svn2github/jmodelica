@@ -34,7 +34,7 @@ else
 	echo ERROR: current linux distribution not supported yet 
 fi
 
-echo Linux Distribution : $LINUX_DISTRIBUTION
+#echo Linux Distribution : $LINUX_DISTRIBUTION
 
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM

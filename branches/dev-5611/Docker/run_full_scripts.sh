@@ -25,5 +25,5 @@ echo "Stage 2/3: BUILDING"
 echo "STAGE 3/3: BUILDING CASADI"
 . Docker/build/build_casadi.sh 
 
-echo "STAGE TESTING"
-. /Docker/build/run_demo.sh 
+#echo "STAGE TESTING"
+#. /Docker/build/run_demo.sh 
