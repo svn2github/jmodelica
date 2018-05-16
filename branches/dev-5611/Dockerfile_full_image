@@ -15,5 +15,6 @@ RUN ls -la /JModelica.org
 RUN ls -la /JModelica.org/external
 RUN ls -la /JModelica.org/external/FMILibrary
 RUN ls -la /JModelica.org/ThirdParty/CasADi
+RUN mkdir JModelica.org/ThirdParty/CasADi/CasADi && mkdir JModelica.org/external/FMILibrary/FMILibrary
 RUN Docker/build/run_full_scripts.sh
 #RUN Docker/build/cleanup.sh
