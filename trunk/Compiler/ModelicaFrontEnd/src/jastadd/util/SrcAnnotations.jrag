@@ -219,38 +219,43 @@ aspect SrcAnnotations {
     }
     
     /**
-    * A helper method for AST cleanup used by removeMe().
-    * This involves actions like replacing empty lists or optionals and potential rewrites.
+    * A helper method for AST cleanup used by removeMe(). Should not be used independent of removeMe().
+    * Replaces empty list or optional with singleton and returns the parent or simply return the caller.
     */
-    protected void ASTNode.cleanUpAfterRemove(){
+    protected ASTNode ASTNode.cleanUpAfterRemove() {
+        return this;
     }
     
-    protected void Opt.cleanUpAfterRemove(){
-           ASTNode parent = getParent();
-           replaceMe(Opt.EMPTY);
-           parent.cleanUpAfterRemove();
+    protected ASTNode Opt.cleanUpAfterRemove() {
+        ASTNode parent = getParent();
+        replaceMe(Opt.EMPTY);
+        return parent.cleanUpAfterRemove();
     }
     
-    protected void List.cleanUpAfterRemove(){
-       if (numChildren() == 0) {
-           ASTNode parent = getParent();
-           parent.cleanUpAfterRemove();
-       }
+    protected ASTNode List.cleanUpAfterRemove() {
+        if (numChildren() == 0) {
+            ASTNode parent = getParent();
+            replaceMe(List.EMPTY);
+            return parent.cleanUpAfterRemove();
+        }
+        return this;
     }
-    
+
     /**
      * Remove this ASTNode from the AST.
-     * 
+     *
      * The ASTNode is removed and the AST state is then cleaned up using cleanUpAfterRemove.
-     * This means that parents might be rewritten, modified or replaced as needed.
-     *  
+     * This means that a parent empty list or optional will be replaced with a singleton.
+     *
+     * @return The closest parent which is not a empty list node or optional node. 
      */
-    public void ASTNode.removeMe() {
+    public ASTNode ASTNode.removeMe() {
         ASTNode parent = getParent();
         if (parent != null) {
             parent.removeChild(parent.getIndexOfChild(this));
-            parent.cleanUpAfterRemove();
+            return parent.cleanUpAfterRemove();
         }
+        return this;
     }
 
     @Override
