@@ -5,10 +5,14 @@ ARG DOCKER_DIST_TAG=18.04
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
 MAINTAINER Modelon
 
+RUN apt list --installed
 COPY Docker/*.sh Docker/build/
 COPY Docker/*.py Docker/build/
 COPY . /JModelica.org/
 RUN chmod +x Docker/build/*.sh
 RUN ls -la Docker/build
+RUN ls -la /JModelica.org
+RUN ls -la /JModelica.org/external
+
 RUN Docker/build/run_full_scripts.sh
 #RUN Docker/build/cleanup.sh
