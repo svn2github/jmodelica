@@ -18,8 +18,8 @@ matplotlib.use('Agg')
 from pyfmi.examples import fmi_bouncing_ball
 fmi_bouncing_ball.run_demo()
 
-from pyjmi.examples import cstr_casadi
-cstr_casadi.run_demo() 
+#from pyjmi.examples import cstr_casadi
+#cstr_casadi.run_demo() 
 
 
 

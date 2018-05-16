@@ -22,8 +22,8 @@ echo "STAGE 4/6: ADDING JMODELICA"
 . Docker/build/get_jmodelica.sh
 echo "Stage 5/6: BUILDING"
 . Docker/build/build.sh
-echo "STAGE 6/6: BUILDING CASADI"
-. Docker/build/build_casadi.sh 
+#echo "STAGE 6/6: BUILDING CASADI"
+#. Docker/build/build_casadi.sh 
 
 echo "STAGE TESTING"
 . /Docker/build/run_demo.sh 
