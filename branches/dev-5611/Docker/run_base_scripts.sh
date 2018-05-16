@@ -12,6 +12,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+echo "STAGE 0/3: PREVENTING CACHE"
 echo "STAGE 1/3: SETTING UP REQUIREMENTS"
 . Docker/build/setup_requirements.sh
 echo "STAGE 2/3: SETTING UP PYTHON PACKAGES"
