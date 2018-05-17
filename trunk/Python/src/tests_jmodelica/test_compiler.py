@@ -32,6 +32,7 @@ from pymodelica.compiler_wrappers import ModelicaCompiler
 from pymodelica.compiler_wrappers import OptimicaCompiler
 from pymodelica import compile_fmu
 import pymodelica as pym
+from pyfmi import load_fmu
 
 
 class Test_Compiler:
@@ -289,6 +290,18 @@ class Test_Compiler_functions:
         cls.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack.mop')
         cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
+    
+    @testattr(stddist_full = True)
+    def test_compile_to_argument(self):
+        
+        name = pym.compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", compile_to="Coupled.fmu")
+        
+        assert name.endswith("Coupled.fmu")
+        
+        model = load_fmu(name)
+        
+        assert model.get_name() == "Coupled"
+        assert model.get_identifier() == "Coupled"
    
     @testattr(stddist_full = True)
     def test_compile_fmu_illegal_target_error(self):
