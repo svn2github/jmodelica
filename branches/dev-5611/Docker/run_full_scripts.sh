@@ -12,12 +12,9 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-echo "STAGE 1/3: ADDING JMODELICA"
-. Docker/build/get_jmodelica.sh
+echo "STAGE 1/3: ADDING ASSIMULO"
+. Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"
 . Docker/build/build.sh
-echo "STAGE 4/4: SKIPPED BUILDING CASADI"
+echo "STAGE 3/3: SKIPPED BUILDING CASADI"
 # . Docker/build/build_casadi.sh 
-
-echo "STAGE TESTING"
-. /Docker/build/run_demo.sh 
