@@ -1,4 +1,4 @@
-package annotationMock;
+package org.jmodelica.util.annotations.mock;
 
 import org.jmodelica.util.annotations.GenericAnnotationNode;
 import org.jmodelica.util.values.Evaluable;

@@ -1,14 +1,15 @@
-package org.jmodelica.test.Annotation;
+package org.jmodelica.util.annotations;
 
 import org.jmodelica.test.common.AssertMethods;
+import org.jmodelica.util.annotations.mock.DummyAnnotProvider;
+import org.jmodelica.util.annotations.mock.DummyAnnotationNode;
+
+import static org.jmodelica.util.annotations.mock.DummyAnnotProvider.newProvider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static annotationMock.Builder.newProvider;
-import org.junit.Test;
 
-import annotationMock.DummyAnnotationNode;
-import annotationMock.DummyAnnotProvider;
+import org.junit.Test;
 
 public class GenericAnnotationNodeTest extends AssertMethods {
 
@@ -16,13 +17,16 @@ public class GenericAnnotationNodeTest extends AssertMethods {
      * Create a standard construction top(a(ab=4,ab=5)=1, b(ba=1,bb=2)=2, c=3)
      * 
      */
-    public DummyAnnotationNode createDefault() {
-        DummyAnnotProvider n = newProvider("top");
-        DummyAnnotProvider a = newProvider("a", 1);
-        DummyAnnotProvider b = newProvider("b", 2);
-        a.addNodes(newProvider("ab", 4), newProvider("ab", 5));
-        b.addNodes(newProvider("ba", 1), newProvider("bb", 2));
-        n.addNodes(a, b, newProvider("c", 3));
+    public static DummyAnnotationNode createDefault() {
+        DummyAnnotProvider n = newProvider("top").addNodes(
+                newProvider("a", 1).addNodes(
+                        newProvider("ab", 4),
+                        newProvider("ab", 5)),
+                newProvider("b", 2).addNodes(
+                        newProvider("ba", 1),
+                        newProvider("bb", 2)),
+                newProvider("c", 3)
+        );
         return n.createAnnotationNode();
     }
 
@@ -64,7 +68,8 @@ public class GenericAnnotationNodeTest extends AssertMethods {
 
     @Test
     public void testExistAfterReplaced() {
-        DummyAnnotationNode top = newProvider("top").addNodes(newProvider("test")).createAnnotationNode();
+        DummyAnnotationNode top = newProvider("top").addNodes(
+                newProvider("test")).createAnnotationNode();
         DummyAnnotationNode replaced = top.forPath("test");
         top.disconnectFromNode();
         top.testSrcRemoveAll();
@@ -74,13 +79,17 @@ public class GenericAnnotationNodeTest extends AssertMethods {
 
     @Test
     public void testConstructionOfComplexNode () {
-        DummyAnnotProvider n = newProvider("top");
-        n.addNodes(newProvider("a").addNodes(
-                newProvider("n", "3").addNodes(newProvider("u").addNodes(newProvider("v", "4")), newProvider("k", "3")),
-                newProvider("v", "4"), newProvider("q", "5")));
-        DummyAnnotationNode testNode = n.createAnnotationNode();
-
-        assertEquals("top(a(n(u(v=4), k=3)=3, v=4, q=5))", testNode.toString());
+        DummyAnnotProvider n = newProvider("top").addNodes(
+                newProvider("a").addNodes(
+                        newProvider("n", "3").addNodes(
+                                newProvider("u").addNodes(
+                                        newProvider("v", "4")),
+                                newProvider("k", "3")),
+                        newProvider("v", "4"),
+                        newProvider("q", "5")
+                )
+        );
+        assertEquals("top(a(n(u(v=4), k=3)=3, v=4, q=5))", n.createAnnotationNode().toString());
     }
 
     @Test
@@ -151,7 +160,11 @@ public class GenericAnnotationNodeTest extends AssertMethods {
     @Test
     public void testReplaceWithSubNodes() {
         DummyAnnotProvider n = newProvider("top");
-        n.addNodes(newProvider("a").addNodes(newProvider("n", 3)));
+        n.addNodes(
+                newProvider("a").addNodes(
+                        newProvider("n", 3)
+                )
+        );
         DummyAnnotProvider replacement = new DummyAnnotProvider("newNode");
         replacement.addAnnotationSubNode("a").addNodes(new DummyAnnotProvider("aa", 1));
         DummyAnnotationNode testNode = n.createAnnotationNode();

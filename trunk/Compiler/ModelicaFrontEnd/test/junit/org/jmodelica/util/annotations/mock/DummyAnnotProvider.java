@@ -1,17 +1,14 @@
-package annotationMock;
+package org.jmodelica.util.annotations.mock;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.jmodelica.common.URIResolver.URIException;
 import org.jmodelica.util.annotations.AnnotationEditException;
 import org.jmodelica.util.annotations.AnnotationProvider;
-import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
 import org.jmodelica.util.collections.TransformerIterable;
 import org.jmodelica.util.values.Evaluable;
 
-public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider,Evaluable>,Iterable<SubNodePair<DummyAnnotProvider>> {
+public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider,Evaluable> {
 
     public String name = "";
     public Evaluable value = null;
@@ -32,7 +29,23 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
         this.value=new DummyEvaluator(value);
         this.name=name;
     }
-
+    
+    /**
+     * Convenient constructors for DummyAnnotProvider
+     */
+    
+    public static DummyAnnotProvider newProvider(String name) {
+        return new DummyAnnotProvider(name);
+    }
+    
+    public static DummyAnnotProvider newProvider(String name, int value) {
+        return new DummyAnnotProvider(name, value);
+    }
+    
+    public static DummyAnnotProvider newProvider(String name, String value) {
+        return new DummyAnnotProvider(name, value);
+    }
+    
     @Override
     public Iterable<SubNodePair<DummyAnnotProvider>> annotationSubNodes() {
         return new TransformerIterable<DummyAnnotProvider, SubNodePair<DummyAnnotProvider>>(subNodes) {
@@ -92,11 +105,6 @@ public class DummyAnnotProvider implements AnnotationProvider<DummyAnnotProvider
     @Override
     public String resolveURI(String str) throws URIException {
         return null;
-    }
-
-    @Override
-    public Iterator<SubNodePair<DummyAnnotProvider>> iterator() {
-        return this.iterator();
     }
 
 }
