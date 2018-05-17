@@ -21,5 +21,15 @@ fmi_bouncing_ball.run_demo()
 #from pyjmi.examples import cstr_casadi
 #cstr_casadi.run_demo() 
 
+# Compilation example 
+from pymodelica import compile_fmu
+name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches") 
+
+from pyfmi import load_fmu
+model = load_fmu(name)
+model.simulate()
+
+
+
 
 
