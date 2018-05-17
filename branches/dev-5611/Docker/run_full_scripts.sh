@@ -12,18 +12,12 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-echo "$PWD"
-for entry in "$search_dir"/*
-do
-  echo "$entry"
-done
-
 echo "STAGE 1/3: ADDING JMODELICA"
 . Docker/build/get_jmodelica.sh
 echo "Stage 2/3: BUILDING"
 . Docker/build/build.sh
-echo "STAGE 4/4: BUILDING CASADI"
+echo "STAGE 4/4: SKIPPED BUILDING CASADI"
 # . Docker/build/build_casadi.sh 
 
-#echo "STAGE TESTING"
+echo "STAGE TESTING"
 . /Docker/build/run_demo.sh 

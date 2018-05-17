@@ -12,7 +12,5 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-/jm_install/bin/jm_ipython.sh /Docker/build/run_demo.py 
-
-/jm_install/jm_tests -im 
+/jm_install/jm_tests -i 
 

@@ -1,5 +1,5 @@
 ARG DOCKER_LINUX_DIST=jmodelica/ubuntu_base
-ARG DOCKER_DIST_TAG=latest
+ARG DOCKER_DIST_TAG=18.04
 # TODO Argument checking user need to create images only of tested distributions ...
 
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
@@ -10,10 +10,5 @@ COPY Docker/*.sh Docker/build/
 COPY Docker/*.py Docker/build/
 COPY / /JModelica.org/
 RUN chmod +x Docker/build/*.sh
-RUN ls -la Docker/build
-RUN ls -la /JModelica.org
-RUN ls -la /JModelica.org/external
-RUN ls -la /JModelica.org/external/FMILibrary
-RUN ls -la /JModelica.org/ThirdParty/CasADi
 RUN Docker/build/run_full_scripts.sh
 #RUN Docker/build/cleanup.sh
