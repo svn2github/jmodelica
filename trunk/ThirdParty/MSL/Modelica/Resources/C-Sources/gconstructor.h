@@ -16,9 +16,6 @@
 
 */
 
-#ifndef G_CONSTRUCTOR_H_
-#define G_CONSTRUCTOR_H_
-
 #if  __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 
 #define G_HAS_CONSTRUCTORS 1
@@ -31,30 +28,17 @@
 
 #define G_HAS_CONSTRUCTORS 1
 
-#ifdef _WIN64
-#define G_MSVC_SYMBOL_PREFIX ""
-#else
-#define G_MSVC_SYMBOL_PREFIX "_"
-#endif
-
-#define G_DEFINE_CONSTRUCTOR(_func) G_MSVC_CTOR (_func, G_MSVC_SYMBOL_PREFIX)
-#define G_DEFINE_DESTRUCTOR(_func) G_MSVC_DTOR (_func, G_MSVC_SYMBOL_PREFIX)
-
-#define G_MSVC_CTOR(_func,_sym_prefix) \
+#define G_DEFINE_CONSTRUCTOR(_func) \
   static void _func(void); \
-  extern int (* _array ## _func)(void); \
-  int _func ## _wrapper(void) { _func(); return _array ## _func == NULL; } \
-  __pragma(comment(linker,"/include:" _sym_prefix # _func "_wrapper")) \
+  static int _func ## _wrapper(void) { _func(); return 0; } \
   __pragma(section(".CRT$XCU",read)) \
-  __declspec(allocate(".CRT$XCU")) int (* _array ## _func)(void) = _func ## _wrapper;
+  __declspec(allocate(".CRT$XCU")) static int (* _array ## _func)(void) = _func ## _wrapper;
 
-#define G_MSVC_DTOR(_func,_sym_prefix) \
+#define G_DEFINE_DESTRUCTOR(_func) \
   static void _func(void); \
-  extern int (* _array ## _func)(void); \
-  int _func ## _constructor(void) { atexit (_func); return _array ## _func == NULL; } \
-   __pragma(comment(linker,"/include:" _sym_prefix # _func "_constructor")) \
+  static int _func ## _constructor(void) { atexit (_func); return 0; } \
   __pragma(section(".CRT$XCU",read)) \
-  __declspec(allocate(".CRT$XCU")) int (* _array ## _func)(void) = _func ## _constructor;
+  __declspec(allocate(".CRT$XCU")) static int (* _array ## _func)(void) = _func ## _constructor;
 
 #elif defined (_MSC_VER) && (_MSC_VER >= 1400)
 
@@ -102,7 +86,5 @@
 #else
 
 /* constructors not supported for this compiler */
-
-#endif
 
 #endif
