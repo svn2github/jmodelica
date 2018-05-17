@@ -14,25 +14,25 @@
 
 . /Docker/build/settings.sh 
 
-wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
+wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz || exit $?
 
 CURRDIR=$PWD 
-tar xvf Ipopt-${IPOPT_VERSION}.tgz
+tar xvf Ipopt-${IPOPT_VERSION}.tgz || exit $?
 cd Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
-./get.Blas
+./get.Blas || exit $?
 cd ../Lapack
-./get.Lapack
+./get.Lapack || exit $?
 cd ../Mumps
-./get.Mumps
+./get.Mumps || exit $?
 cd ../Metis
-./get.Metis
+./get.Metis || exit $?
 cd ../..
 
 mkdir build
 cd build
 mkdir -p ${IPOPT_INSTALLATION_LOCATION}
 
-../configure --prefix=${IPOPT_INSTALLATION_LOCATION}
-make install
+../configure --prefix=${IPOPT_INSTALLATION_LOCATION} || exit $?
+make install || exit $?
 cd $CURRDIR
 env 

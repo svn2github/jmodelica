@@ -33,13 +33,14 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
 	alias pckinstall="apt-get -y install"
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/
 else 
-	echo ERROR: current linux distribution not supported yet 
+	echo ERROR: current linux distribution not supported yet
+    exit 1
 fi
 
 #echo Linux Distribution : $LINUX_DISTRIBUTION
 
-pckinstall $BUILD_PKGS_JM_COMMON
-pckinstall $BUILD_PKGS_JM
+pckinstall $BUILD_PKGS_JM_COMMON || exit $?
+pckinstall $BUILD_PKGS_JM || exit $?
 
 
 
