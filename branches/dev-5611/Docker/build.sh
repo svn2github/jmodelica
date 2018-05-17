@@ -24,6 +24,8 @@ echo "IPOPT VAR BELOW"
 echo ${IPOPT_INSTALLATION_LOCATION}
 
 ../configure --prefix=/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION}
-make install
+mkdir tmp
+cd tmp
+make install || exit $?
 cd ../..
 env 
