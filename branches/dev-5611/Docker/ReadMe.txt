@@ -28,4 +28,4 @@ A JModelica tagged version can be also choosen by using --build-arg DOCKER_JMODE
 to instantiate a container of the resulting image, try
 
 > docker image ls 
-> docker run -v C:/path/to/shared/folder/:/shared -it <image-id>
+> docker run -v C:/path/to/shared/folder/:/shared -it  --name jm-<os>-<tag> <image-id>
