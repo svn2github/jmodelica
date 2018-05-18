@@ -22,16 +22,14 @@ node('docker') {
     }
     stage ('Testing') {
         dir ("JModelica") {
-            try {
-                jm_image.inside {
-                    sh 'pwd && ls -la && cd /home/jenkins/jm_install && ls -la'
-                    sh './jm_tests -ie -x "/home/jenkins/jm_install/test_results"'
+            
+            jm_image.inside {
+                try {
+                    sh 'pwd && ls -la && cd /home/jenkins/jm_install && ls -la && ./jm_tests -ie -x "/home/jenkins/jm_install/test_results"'
+                } finally {
+                    junit testResults: 'test_results/*.xml', allowEmptyResults: true
                 }
-            } finally {
-                junit testResults: 'test_results/*.xml', allowEmptyResults: true
             }
         }
     }
-    
-    
 }
