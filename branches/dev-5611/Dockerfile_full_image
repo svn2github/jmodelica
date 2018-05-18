@@ -1,5 +1,7 @@
 ARG DOCKER_LINUX_DIST=jmodelica/ubuntu_base
 ARG DOCKER_DIST_TAG=latest
+ARG JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2
+
 # TODO Argument checking user need to create images only of tested distributions ...
 
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
@@ -11,5 +13,5 @@ COPY Docker/*.py Docker/build/
 COPY / /JModelica.org/
 RUN chmod +x Docker/build/*.sh
 RUN Docker/build/run_full_scripts.sh
-RUN mkdir -p /home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2 && chmod 777 /home/jenkins/jm_install && chmod 777 /home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2
+RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 /home/jenkins/jm_install && chmod 777 $JM_TESTS_WS/test_results
 #RUN Docker/build/cleanup.sh
