@@ -25,9 +25,10 @@ node('docker') {
             
             jm_image.inside {
                 try {
-                    sh 'pwd && ls -la && cd /home/jenkins/jm_install && ls -la && ./jm_tests -ie -x "/home/jenkins/jm_install/test_results"'
+                    sh 'pwd && ls -la && cd /home/jenkins/jm_install && ls -la && ./jm_tests -ie -x "/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2/test_results" && ls -la && pwd'
                 } finally {
-                    junit testResults: 'test_results/*.xml', allowEmptyResults: true
+                    junit testResults: '/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2/test_results/*.xml', allowEmptyResults: true
+                    sh 'echo ${WORKSPACE}'
                 }
             }
         }

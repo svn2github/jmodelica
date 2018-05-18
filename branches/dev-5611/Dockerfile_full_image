@@ -11,5 +11,5 @@ COPY Docker/*.py Docker/build/
 COPY / /JModelica.org/
 RUN chmod +x Docker/build/*.sh
 RUN Docker/build/run_full_scripts.sh
-RUN mkdir /home/jenkins/jm_install/test_results && chmod 777 /home/jenkins/jm_install && chmod 777 /home/jenkins/jm_install/test_results
+RUN mkdir -p /home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2 && chmod 777 /home/jenkins/jm_install && chmod 777 /home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2
 #RUN Docker/build/cleanup.sh
