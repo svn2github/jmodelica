@@ -112,6 +112,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
     public void testNode() {
         DummyAnnotationNode n = createDefault();
         DummyAnnotationNode newNode = n.forPath("newNode");
+        assertFalse(newNode.exists());
         newNode.node();
         assertTrue(newNode.exists()); 
     }
