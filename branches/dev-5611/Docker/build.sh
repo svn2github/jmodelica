@@ -21,7 +21,7 @@ cd build
 #TODO we probably need change these PWD later? Or at least investigate if paths are saved in configured docker image
 
 
-../configure --prefix=${HOME}/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
+../configure --prefix=/home/jenkins/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
 make install || exit $?
 cd ../..
 env 
