@@ -24,7 +24,7 @@ node('docker') {
         dir ("JModelica") {
             jm_image.inside {
                 sh 'pwd && ls -la'
-                sh 'cd ~/jm_install && ls -la && ./jm_tests -i'
+                sh 'cd /usr/local/jm_install && ls -la && ./jm_tests -i'
             }
         }
     }
