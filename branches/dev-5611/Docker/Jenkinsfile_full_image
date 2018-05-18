@@ -16,13 +16,16 @@ node('docker') {
             def dockerfile = '../Dockerfile_full_image'
             jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --no-cache --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=latest")   
             jm_image.inside{
-                sh 'echo "Finished building"'
+                sh 'pwd && echo "Finished building"'
             }
         }
     }
     stage ('Testing') {
         dir ("JModelica") {
-            
+            jm_image.inside {
+                sh 'pwd && ls -la'
+                sh 'cd ~/jm_install && ls -la && ./jm_tests -i'
+            }
         }
     }
     
