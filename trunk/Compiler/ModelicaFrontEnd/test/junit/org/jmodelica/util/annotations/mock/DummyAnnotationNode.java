@@ -39,13 +39,6 @@ public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNo
     /**
      * Expose protected method for testing
      */
-    public void updateMySubNodes(DummyAnnotProvider newNode) {
-        super.updateMySubNodes(newNode);
-    }
-
-    /**
-     * Expose protected method for testing
-     */
     public void setNode(String name, DummyAnnotProvider newNode) {
         super.setNode(name, newNode);
     }

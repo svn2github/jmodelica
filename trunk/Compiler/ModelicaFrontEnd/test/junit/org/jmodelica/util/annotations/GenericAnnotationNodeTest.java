@@ -170,12 +170,11 @@ public class GenericAnnotationNodeTest extends AssertMethods {
         DummyAnnotationNode testNode = n.createAnnotationNode();
 
         DummyAnnotationNode replacementNode = testNode.forPath("a", "n");
-        replacementNode.setNode("newName", replacement);
+        replacementNode.setNode("newNode", replacement);
 
         testNode.forPath("a").node().subNodes.clear();
         testNode.forPath("a").node().addNodes(replacement);
 
-        assertFalse(replacementNode.exists());
         assertEquals("top(a(newNode(a(aa=1))))", testNode.toString());
     }
 }

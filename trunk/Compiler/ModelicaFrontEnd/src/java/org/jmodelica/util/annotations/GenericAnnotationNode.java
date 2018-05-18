@@ -195,7 +195,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     protected boolean isSubNodesCacheFresh() {
-        return false; // TODO implement freshness check
+        return false;
+    }
+
+    protected boolean hasSubNodesCache() {
+        return subNodes_cache != null;
     }
 
     /**
@@ -372,38 +376,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param node The new node
      */
     protected void setNode(String newName, N node) {
+        disconnectFromNode();
         this.name = newName;
         this.node = node;
-        updateMySubNodes(node);
         computeSubNodesCache();
     }
 
-    /**
-     * Update all accessed sub Modifiers to point to the nodes of the new node.
-     * All subAnnotation nodes not present in the new node are notified of that they don't 
-     * exist any more. 
-     * @param newNode The new node
-     */
-    protected void updateMySubNodes(N newNode) {
-        if (exists()) {
-            computeSubNodesCache();
-            if (subNodes_cache != null) {
-                for (T t : subNodes_cache) {
-                    t.disconnectFromNode();
-                }
-            }
-
-            if (subNodesNameMap_cache != null) {
-                for (SubNodePair<N> subNode : newNode.annotationSubNodes()) {
-                    T key = subNodesNameMap_cache.get(subNode.name);
-                    if (key != null && !key.isAmbiguous()) {
-                        key.updateNode(subNode.name, subNode.node);
-                        key.updateMySubNodes(subNode.node);
-                    }
-                }
-            }
-        }
-    }
     /**
      * 
      * @return true if this node has a value, otherwise false
