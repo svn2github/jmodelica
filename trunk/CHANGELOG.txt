@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; MSL ; #5619
+Patched MSL resources to work with VS2015.
+
 ; Feature ; Minor ; Compiler ; #5605
 Support for initial parameter external objects.
 
