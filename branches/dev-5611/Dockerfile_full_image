@@ -3,20 +3,18 @@ ARG DOCKER_DIST_TAG=latest
 ARG JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2
 ARG DOCKER_USR_PATH=/home/jenkins
 
-ENV USR_PATH=$DOCKER_USR_PATH
-
 # TODO Argument checking user need to create images only of tested distributions ...
 
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
 MAINTAINER Modelon
 
 RUN apt list --installed
-COPY Docker/*.sh $USR_PATH/Docker/build/
-COPY Docker/*.py $USR_PATH/Docker/build/
+COPY Docker/*.sh /home/jenkins/Docker/build/
+COPY Docker/*.py /home/jenkins/Docker/build/
 RUN ls -la && pwd
-COPY / $USR_PATH/JModelica.org/
-RUN chmod +x $USR_PATH/Docker/build/*.sh
-RUN ls -la $USR_PATH/Docker/build
-RUN $USR_PATH/Docker/build/run_full_scripts.sh $USR_PATH
-RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 -R $USR_PATH && chmod 777 $JM_TESTS_WS/test_results
-#RUN $USR_PATH/Docker/build/cleanup.sh
+COPY / /home/jenkins/JModelica.org/
+RUN chmod +x /home/jenkins/Docker/build/*.sh
+RUN ls -la /home/jenkins/Docker/build
+RUN /home/jenkins/Docker/build/run_full_scripts.sh /home/jenkins
+RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 -R /home/jenkins && chmod 777 $JM_TESTS_WS/test_results
+#RUN /home/jenkins/Docker/build/cleanup.sh
