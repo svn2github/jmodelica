@@ -12,5 +12,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+CURRDIR=$PWD
+cd $USR_PATH
 /jm_install/jm_tests -i 
-
+cd $CURRDIR
