@@ -11,7 +11,7 @@ MAINTAINER Modelon
 RUN apt list --installed
 COPY Docker/*.sh $USR_PATH/Docker/build/
 COPY Docker/*.py $USR_PATH/Docker/build/
-RUN ls -la
+RUN ls -la && pwd
 COPY / $USR_PATH/JModelica.org/
 RUN chmod +x $USR_PATH/Docker/build/*.sh
 RUN ls -la $USR_PATH/Docker/build
