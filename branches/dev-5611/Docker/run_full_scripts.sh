@@ -21,10 +21,10 @@ ls -la
 cd jenkins
 ls -la
 echo "STAGE 0/3: FILES IN BUILD FOLDER"
-ls -la ${USR_PATH}/Docker/build
+. Docker/build
 echo "STAGE 1/3: ADDING ASSIMULO"
-. /home/jenkins/Docker/build/get_assimulo.sh
+. Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"
-. ${USR_PATH}Docker/build/build.sh
+. Docker/build/build.sh
 echo "STAGE 3/3: SKIPPED BUILDING CASADI"
-# . ${USR_PATH}Docker/build/build_casadi.sh 
+# . Docker/build/build_casadi.sh 
