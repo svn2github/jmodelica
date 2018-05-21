@@ -16,7 +16,9 @@
 
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz || exit $?
 
-CURRDIR=$PWD 
+CURRDIR=$PWD
+#line below for debugging
+cd /home && ls -la && cd ${PWD}
 tar xvf Ipopt-${IPOPT_VERSION}.tgz -C ${USR_PATH} || exit $?
 cd ${USR_PATH}/Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
 ./get.Blas || exit $?
