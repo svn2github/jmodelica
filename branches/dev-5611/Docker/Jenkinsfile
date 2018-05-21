@@ -10,6 +10,7 @@ node('docker') {
     stage ('Push') {
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
             ubuntuImage.push("18.04")
+            ubuntuImage.push("latest")
         }
     }
 }

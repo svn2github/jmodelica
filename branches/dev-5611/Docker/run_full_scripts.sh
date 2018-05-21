@@ -11,10 +11,11 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+. $1/Docker/build/settings.sh
 
 echo "STAGE 1/3: ADDING ASSIMULO"
-. Docker/build/get_assimulo.sh
+. ${USR_PATH}/Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"
-. Docker/build/build.sh
+. ${USR_PATH}Docker/build/build.sh
 echo "STAGE 3/3: SKIPPED BUILDING CASADI"
-# . Docker/build/build_casadi.sh 
+# . ${USR_PATH}Docker/build/build_casadi.sh 

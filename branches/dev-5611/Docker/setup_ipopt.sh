@@ -17,8 +17,8 @@
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz || exit $?
 
 CURRDIR=$PWD 
-tar xvf Ipopt-${IPOPT_VERSION}.tgz || exit $?
-cd Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
+tar xvf Ipopt-${IPOPT_VERSION}.tgz -C ${USR_PATH} || exit $?
+cd ${USR_PATH}/Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
 ./get.Blas || exit $?
 cd ../Lapack
 ./get.Lapack || exit $?

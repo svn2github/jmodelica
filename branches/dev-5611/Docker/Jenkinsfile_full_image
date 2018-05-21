@@ -1,4 +1,3 @@
-
 node('docker') {
     def jm_image
     stage("Checkout JModelica.org") {

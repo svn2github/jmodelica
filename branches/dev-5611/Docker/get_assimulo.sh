@@ -13,5 +13,5 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
 if [ ! -d /JModelica.org/external/Assimulo ]; then 
-	svn co https://svn.jmodelica.org/assimulo/trunk/  /JModelica.org/external/Assimulo
+	svn co https://svn.jmodelica.org/assimulo/trunk/  ${USR_PATH}/JModelica.org/external/Assimulo
 fi 
