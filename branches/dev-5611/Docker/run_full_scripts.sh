@@ -12,12 +12,12 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 . $1/Docker/build/settings.sh
-echo "ECHO OF SHELL SCRIPT ARGS"
-echo $1
+echo "ECHO OF USR_PATH"
+echo ${USR_PATH}
 echo "STAGE 0/3: FILES IN BUILD FOLDER"
 ls -la ${USR_PATH}/Docker/build
 echo "STAGE 1/3: ADDING ASSIMULO"
-. ${USR_PATH}/Docker/build/get_assimulo.sh
+. home/jenkins/Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"
 . ${USR_PATH}Docker/build/build.sh
 echo "STAGE 3/3: SKIPPED BUILDING CASADI"
