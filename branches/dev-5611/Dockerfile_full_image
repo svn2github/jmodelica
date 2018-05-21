@@ -16,5 +16,5 @@ COPY / /home/jenkins/JModelica.org/
 RUN chmod +x /home/jenkins/Docker/build/*.sh
 RUN ls -la /home/jenkins/Docker/build
 RUN /home/jenkins/Docker/build/run_full_scripts.sh /home/jenkins
-RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 -R /home/jenkins && chmod 777 -R $JM_TESTS_WS/
+RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 /home/jenkins && chmod 777 -R $JM_TESTS_WS/test_results
 #RUN /home/jenkins/Docker/build/cleanup.sh
