@@ -26,7 +26,7 @@ fi
 
 # IPOPT 
 
-export USR_PATH=/home/jenkins
+export USR_PATH=/usr/local
 export IPOPT_VERSION=3.12.8
 export IPOPT_LOCATION=/usr/local/Ipopt-${IPOPT_VERSION}
 export IPOPT_INSTALLATION_LOCATION=${IPOPT_LOCATION}/install

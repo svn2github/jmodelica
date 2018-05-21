@@ -1,7 +1,7 @@
 ARG DOCKER_LINUX_DIST=jmodelica/ubuntu_base
 ARG DOCKER_DIST_TAG=latest
 ARG JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build__2
-ARG USR_PATH=/home/jenkins
+ARG USR_PATH=/usr/local
 
 # TODO Argument checking user need to create images only of tested distributions ...
 
