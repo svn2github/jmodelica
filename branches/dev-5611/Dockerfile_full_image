@@ -14,6 +14,7 @@ COPY Docker/*.py $USR_PATH/Docker/build/
 RUN ls -la
 COPY / $USR_PATH/JModelica.org/
 RUN chmod +x $USR_PATH/Docker/build/*.sh
+RUN ls -la $USR_PATH/Docker/build
 RUN $USR_PATH/Docker/build/run_full_scripts.sh $USR_PATH
 RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 $USR_PATH && chmod 777 $JM_TESTS_WS/test_results
 #RUN $USR_PATH/Docker/build/cleanup.sh
