@@ -12,7 +12,7 @@ RUN apt list --installed
 COPY Docker/*.sh $USR_PATH/Docker/build/
 COPY Docker/*.py $USR_PATH/Docker/build/
 RUN ls -la && pwd
-#COPY / $USR_PATH/JModelica.org/
+COPY / $USR_PATH/JModelica.org/
 RUN chmod +x $USR_PATH/Docker/build/*.sh
 RUN ls -la $USR_PATH/Docker/build
 RUN $USR_PATH/Docker/build/run_full_scripts.sh $USR_PATH
