@@ -11,7 +11,8 @@ MAINTAINER Modelon
 RUN apt list --installed
 COPY Docker/*.sh $USR_PATH/Docker/build/
 COPY Docker/*.py $USR_PATH/Docker/build/
-COPY ls -la && / $USR_PATH/JModelica.org/
+RUN ls -la
+COPY / $USR_PATH/JModelica.org/
 RUN chmod +x $USR_PATH/Docker/build/*.sh
 RUN $USR_PATH/Docker/build/run_full_scripts.sh $USR_PATH
 RUN mkdir -p $JM_TESTS_WS/test_results && chmod 777 $USR_PATH && chmod 777 $JM_TESTS_WS/test_results
