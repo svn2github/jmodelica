@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Change ; Minor ; MSL ; #5619
+Patched MSL resources to work with VS2015.
+
 ; Fixed ; Minor ; Runtime ; #5608
 Removed the -g flag when building FMUs
 
