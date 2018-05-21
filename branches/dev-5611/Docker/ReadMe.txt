@@ -24,12 +24,16 @@ Available dockerfiles are
 - Dockerfile : build a base image for JModelica 
 - Dockerfile : build JModelica image based on a base image 
 
+Available environment variables: 
 
 DOCKER_LINUX_DIST=<linux-distribution> 
-DOCKER_DIST_TAG<distribution-release> 
+DOCKER_DIST_TAG=<distribution-release> 
 DOCKER_JMODELICA_BRANCH=<jmodelica-branch> 
 
 A JModelica tagged version can be also choosen by using --build-arg DOCKER_JMODELICA_BRANCH=</tags/tag-version>
+
+Example of a build command: 
+> docker build -t jmodelica/centos7.3:0.1  --build-arg  DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.3 -f  Dockerfile.all .
 
 to instantiate a container of the resulting image, try
 
