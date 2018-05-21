@@ -12,7 +12,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-. /Docker/build/settings.sh 
+. ${USR_PATH}/Docker/build/settings.sh 
 
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz || exit $?
 

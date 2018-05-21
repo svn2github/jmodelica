@@ -13,7 +13,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-. /Docker/build/settings.sh
+. ${USR_PATH}/Docker/build/settings.sh
 
 BUILD_PKGS_JM_COMMON="sudo cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="epel-release python-pip bc make lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy python-matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
