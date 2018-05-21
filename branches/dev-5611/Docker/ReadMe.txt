@@ -17,7 +17,13 @@ Building
 
 For the latest version of Ubunto: 
 
-> docker build -t jmodelica/ubuntu:0.1  --build-arg  DOCKER_LINUX_DIST=ubuntu -f  Dockerfile.dockerfile . 
+> docker build -t jmodelica/ubuntu:0.1  --build-arg  DOCKER_LINUX_DIST=ubuntu -f  <dockerfile-name> . 
+
+Available dockerfiles are 
+- Dockerfile.all : build a JModelica image from scratch 
+- Dockerfile : build a base image for JModelica 
+- Dockerfile : build JModelica image based on a base image 
+
 
 DOCKER_LINUX_DIST=<linux-distribution> 
 DOCKER_DIST_TAG<distribution-release> 
