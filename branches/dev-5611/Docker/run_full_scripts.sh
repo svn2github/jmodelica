@@ -14,6 +14,8 @@
 . $1/Docker/build/settings.sh
 echo "ECHO OF USR_PATH"
 echo ${USR_PATH}
+echo "PWD is here"
+echo $PWD
 echo "STAGE 0/3: FILES IN BUILD FOLDER"
 ls -la ${USR_PATH}/Docker/build
 echo "STAGE 1/3: ADDING ASSIMULO"
