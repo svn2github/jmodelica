@@ -1,7 +1,7 @@
-Index: Resources/C-Sources/gconstructor.h
+Index: Modelica/Resources/C-Sources/gconstructor.h
 ===================================================================
---- Resources/C-Sources/gconstructor.h	(revision 10917)
-+++ Resources/C-Sources/gconstructor.h	(working copy)
+--- Modelica/Resources/C-Sources/gconstructor.h	(revision 10917)
++++ Modelica/Resources/C-Sources/gconstructor.h	(working copy)
 @@ -16,6 +16,9 @@
  
  */
@@ -55,10 +55,10 @@ Index: Resources/C-Sources/gconstructor.h
  #endif
 +
 +#endif
-Index: Resources/C-Sources/ModelicaInternal.c
+Index: Modelica/Resources/C-Sources/ModelicaInternal.c
 ===================================================================
---- Resources/C-Sources/ModelicaInternal.c	(revision 11058)
-+++ Resources/C-Sources/ModelicaInternal.c	(working copy)
+--- Modelica/Resources/C-Sources/ModelicaInternal.c	(revision 11058)
++++ Modelica/Resources/C-Sources/ModelicaInternal.c	(working copy)
 @@ -705,17 +705,17 @@
  #include <Windows.h>
  static CRITICAL_SECTION cs;
@@ -83,10 +83,10 @@ Index: Resources/C-Sources/ModelicaInternal.c
      DeleteCriticalSection(&cs);
  }
  #define MUTEX_LOCK() EnterCriticalSection(&cs)
-Index: Resources/C-Sources/ModelicaRandom.c
+Index: Modelica/Resources/C-Sources/ModelicaRandom.c
 ===================================================================
---- Resources/C-Sources/ModelicaRandom.c	(revision 11058)
-+++ Resources/C-Sources/ModelicaRandom.c	(working copy)
+--- Modelica/Resources/C-Sources/ModelicaRandom.c	(revision 11058)
++++ Modelica/Resources/C-Sources/ModelicaRandom.c	(working copy)
 @@ -132,17 +132,17 @@
  #include <Windows.h>
  static CRITICAL_SECTION cs;
@@ -111,10 +111,10 @@ Index: Resources/C-Sources/ModelicaRandom.c
      DeleteCriticalSection(&cs);
  }
  #define MUTEX_LOCK() EnterCriticalSection(&cs)
-Index: Resources/C-Sources/ModelicaStandardTables.c
+Index: Modelica/Resources/C-Sources/ModelicaStandardTables.c
 ===================================================================
---- Resources/C-Sources/ModelicaStandardTables.c	(revision 11058)
-+++ Resources/C-Sources/ModelicaStandardTables.c	(working copy)
+--- Modelica/Resources/C-Sources/ModelicaStandardTables.c	(revision 11058)
++++ Modelica/Resources/C-Sources/ModelicaStandardTables.c	(working copy)
 @@ -316,17 +316,17 @@
  #include <Windows.h>
  static CRITICAL_SECTION cs;
