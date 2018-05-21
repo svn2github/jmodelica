@@ -13,8 +13,7 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 . $1/Docker/build/settings.sh
 
-echo "STAGE 0/3: FILES IN BUILD FOLDER"
-. Docker/build
+
 echo "STAGE 1/3: ADDING ASSIMULO"
 . Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"

@@ -12,7 +12,7 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-cd ${USR_PATH}/JModelica.org
+cd ${USR_PATH}/JModelica.org || exit $?
 mkdir build
 cd build
 
