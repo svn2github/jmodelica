@@ -17,26 +17,122 @@
 package org.jmodelica.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class representing command line arguments.
+ */
 public class Arguments {
     String compilerName;
     private String[] args;
-    private Hashtable<String, String> programargs;
-    private List<String> noOption = new ArrayList<String>();
+    private Hashtable<String, String> namedArgs;
+    private List<String> unnamedArgs = new ArrayList<String>();
     private String className = "";
     private String libraryPath = "";
 
+    /**
+     * @param compilerName  the name of the compiler (Modelica/Optimica).
+     * @param args          the list of arguments given through command line.
+     * @throws InvalidArgumentException if there was any error in the arguments. 
+     */
     public Arguments(String compilerName, String[] args) throws InvalidArgumentException {
         this.compilerName = compilerName;
         this.args = args;
-        this.programargs = new Hashtable<String, String>();
+        this.namedArgs = new Hashtable<String, String>();
+
         setDefaultArgs();
         extractProgramArguments();
         checkArgs();
+    }
+
+    private List<String> commandLineOptions() {
+        return Arrays.asList(new String[] {
+            "log",
+            "modelicapath",
+            "opt",
+            "optfile",
+            "target",
+            "version",
+            "dumpmemuse",
+            "findflatinst",
+            "platform",
+            "out",
+            "debugSrcIsHome",
+        });
+    }
+    
+    private void setDefaultArgs() {
+        namedArgs.put("target", "jmu");
+    }
+
+    private void extractProgramArguments() throws InvalidArgumentException {
+        for (String arg : args) {
+            if (argumentIsOption(arg)) {
+                addOptionToMap(arg);
+            } else {
+                unnamedArgs.add(arg);
+            }
+        }
+
+        int numberOfUnnamed = unnamedArgs.size();
+        if (numberOfUnnamed == 0) {
+            argError("Too few unnamed arguments.");
+        }
+        if (numberOfUnnamed > 2) {
+            argError("Too many unnamed arguments.");
+        }
+
+
+        if (numberOfUnnamed == 1) {
+            if (namedArgs.get("target").equals("parse")) {
+                libraryPath = unnamedArgs.get(0);
+            } else if (namedArgs.containsKey("modelicapath")) {
+                className = unnamedArgs.get(0);
+            } else {
+                argError();
+            }
+        } else {
+            libraryPath = unnamedArgs.get(0);
+            className = unnamedArgs.get(1);
+        }
+    }
+
+    private boolean argumentIsOption(String arg) {
+        return arg.trim().startsWith("-");
+    }
+
+    private void addOptionToMap(String arg) {
+        String[] parts = arg.trim().substring(1).split("=", 2);
+        namedArgs.put(parts[0], (parts.length > 1) ? parts[1] : "");
+    }
+
+    private void checkArgs() throws InvalidArgumentException {
+        if (unnamedArgs.isEmpty()) {
+            argError();
+        }
+
+        Set<String> options = new HashSet<String>();
+        options.addAll(commandLineOptions());
+
+        for (String given : namedArgs.keySet()) {
+            if (!options.contains(given)) {
+                argError(String.format("Invalid argument '%s'\n", given));
+            }
+        }
+
+        if (unnamedArgs.size() == 1) {
+            if (!isParseTarget() && !hasModelicaPath()) {
+                throw new InvalidArgumentException(compilerName
+                        + " expects a file name and a path. If -modelicapath is set, the path can be omitted.");
+            }
+        } else if (isParseTarget()) {
+            throw new InvalidArgumentException(compilerName + " -parse expects a list of filenames.");
+        }
+
     }
 
     public String className() {
@@ -47,15 +143,17 @@ public class Arguments {
         return libraryPath;
     }
 
-    private void addOptionToMap(String arg) {
-        String[] parts = arg.trim().substring(1).split("=", 2);
-        programargs.put(parts[0], (parts.length > 1) ? parts[1] : "");
+    public boolean isParseTarget() {
+        return namedArgs.get("target").equals("parse");
     }
-    
-    private boolean argumentIsOption(String arg) {
-        return arg.trim().startsWith("-");
+
+    /**
+     * @return  {@code true} if the modelica path was set.
+     */
+    public boolean hasModelicaPath() {
+        return namedArgs.get("modelicapath") != null;
     }
-    
+
     public String line() {
         StringBuilder buf = new StringBuilder();
         for (String arg : args) {
@@ -64,19 +162,27 @@ public class Arguments {
         }
         return buf.toString();
     }
-    
+
     public boolean containsKey(String arg) {
-        return programargs.containsKey(arg);
+        return namedArgs.containsKey(arg);
     }
     
     public String get(String arg) {
-        return programargs.get(arg);
+        return namedArgs.get(arg);
     }
     
     public int size() {
-        return programargs.size();
+        return namedArgs.size();
     }
-    
+
+    private String argError() throws InvalidArgumentException {
+        return argError("");
+    }
+
+    private String argError(String pref) throws InvalidArgumentException {
+        throw new InvalidArgumentException(pref + tooltip());
+    }
+
     private String tooltip() {
         return compilerName + " expects the command line arguments: \n" +
                 "[<options>] <file name> <class name> [<target>] [<version>]\n" +
@@ -92,87 +198,9 @@ public class Arguments {
                 " If no version is given in case of targets 'me' or 'cs', -1.0 is assumed";
     }
 
-    private String argError() throws InvalidArgumentException {
-        return argError("");
-    }
-
-    private String argError(String pref) throws InvalidArgumentException {
-        throw new InvalidArgumentException(pref + tooltip());
-    }
-
-    private void setDefaultArgs() {
-        programargs.put("target", "jmu");
-    }
-
-    private void extractProgramArguments() throws InvalidArgumentException {
-        for (String arg : args) {
-            if (argumentIsOption(arg)) {
-                addOptionToMap(arg);
-            } else {
-                noOption.add(arg);
-            }
-        }
-        
-        
-        if (noOption.isEmpty()) {
-            argError();
-        }
-
-        if (noOption.size() == 1) {
-            if (programargs.get("target").equals("parse")) {
-                libraryPath = noOption.get(0);
-            } else if (programargs.containsKey("modelicapath")) {
-                className = noOption.get(0);
-            } else {
-                argError();
-            }
-        } else {
-            libraryPath = noOption.get(0);
-            className = noOption.get(1);
-        }
-    }
-
-    private void checkArgs() throws InvalidArgumentException {
-        if (noOption.isEmpty()) {
-            argError();
-        }
-
-        Set<String> options = new HashSet<String>();
-        options.add("log");
-        options.add("modelicapath");
-        options.add("opt");
-        options.add("optfile");
-        options.add("target");
-        options.add("version");
-        options.add("dumpmemuse");
-        options.add("findflatinst");
-        options.add("platform");
-        options.add("out");
-        options.add("debugSrcIsHome");
-
-        for (String given : programargs.keySet()) {
-            if (!options.contains(given)) {
-                argError(String.format("Invalid argument '%s'\n", given));
-            }
-        }
-
-        boolean oneArgument = noOption.size() == 1;
-        boolean hasModelicaPath = programargs.get("modelicapath") != null;
-        boolean shouldParse = programargs.get("target").equals("parse");
-
-        if (oneArgument) {
-            if (!shouldParse && !hasModelicaPath) {
-                throw new InvalidArgumentException(compilerName
-                        + " expects a file name and a path. If -modelicapath is set, the path can be omitted.");
-            }
-        } else if (shouldParse) {
-            throw new InvalidArgumentException(compilerName + " -parse expects a list of filenames.");
-        }
-
-    }
-    
     public class InvalidArgumentException extends Exception{
         private static final long serialVersionUID = 8291101686361405225L;
+
         public InvalidArgumentException(String msg) {
             super(msg);
         }
