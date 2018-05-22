@@ -1,7 +1,6 @@
 ARG DOCKER_LINUX_DIST=jmodelica/ubuntu_base
 ARG DOCKER_DIST_TAG=latest
 
-
 # TODO Argument checking user need to create images only of tested distributions ...
 
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG

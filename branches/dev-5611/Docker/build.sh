@@ -12,14 +12,14 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-cd ${USR_PATH}/JModelica.org || exit $?
+cd $1/JModelica.org || exit $?
 mkdir build
 cd build
 
 #TODO we probably need change these PWD later? Or at least investigate if paths are saved in configured docker image
 
 
-../configure --prefix=${USR_PATH}/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
+../configure --prefix=$1/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
 make install || exit $?
 cd ../..
 env 

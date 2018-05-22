@@ -17,6 +17,6 @@
 echo "STAGE 1/3: ADDING ASSIMULO"
 . Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"
-. Docker/build/build.sh
+. Docker/build/build.sh $1
 echo "STAGE 3/3: SKIPPED BUILDING CASADI"
 # . Docker/build/build_casadi.sh 
