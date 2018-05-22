@@ -14,5 +14,5 @@
 
 CURRDIR=$PWD
 cd $USR_PATH
-/jm_install/jm_tests -i 
+jm_install/jm_tests -i 
 cd $CURRDIR
