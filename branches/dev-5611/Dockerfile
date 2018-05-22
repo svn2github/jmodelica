@@ -5,6 +5,6 @@ FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
 MAINTAINER Modelon
 
 
-COPY Docker/*.sh Docker/build/
-RUN chmod +x Docker/build/*.sh
-RUN Docker/build/run_base_scripts.sh
+COPY Docker/*.sh ${USR_PATH}/Docker/build/
+RUN chmod +x ${USR_PATH}/Docker/build/*.sh
+RUN ${USR_PATH}/Docker/build/run_base_scripts.sh

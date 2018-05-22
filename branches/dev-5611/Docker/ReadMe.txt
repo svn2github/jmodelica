@@ -22,7 +22,7 @@ For the latest version of Ubunto:
 Available dockerfiles are 
 - Dockerfile.all : build a JModelica image from scratch 
 - Dockerfile : build a base image for JModelica 
-- Dockerfile : build JModelica image based on a base image 
+- Dockerfile_full_image : build a JModelica full image  
 
 Available environment variables: 
 
