@@ -11,8 +11,8 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
-. $1/Docker/build/settings.sh
 
+. $1/Docker/build/settings.sh
 
 echo "STAGE 1/3: ADDING ASSIMULO"
 . Docker/build/get_assimulo.sh
