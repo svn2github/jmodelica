@@ -12,14 +12,17 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-cd $1/JModelica.org || exit $?
+#cd $1/JModelica.org || exit $?
+cd ${USR_PATH}/JModelica.org || exit $?
+
 mkdir build
 echo "Current directory is " $PWD
 ls -la
 cd build
 
 
-../configure --prefix=$1/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
+#../configure --prefix=$1/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
+../configure --prefix=${USR_PATH}/jm_install --with-ipopt=${IPOPT_INSTALLATION_LOCATION} || exit $?
 make install || exit $?
 cd ../..
 env 

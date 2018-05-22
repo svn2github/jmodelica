@@ -12,6 +12,10 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-if [ ! -d /JModelica.org/external/Assimulo ]; then 
-	svn co https://svn.jmodelica.org/assimulo/trunk/  $1/JModelica.org/external/Assimulo
-fi 
+#if [ ! -d /JModelica.org/external/Assimulo ]; then 
+#	svn co https://svn.jmodelica.org/assimulo/trunk/  $1/JModelica.org/external/Assimulo
+#fi
+
+if [ ! -d ${USR_PATH}/JModelica.org/external/Assimulo ]; then 
+	svn co https://svn.jmodelica.org/assimulo/trunk/  ${USR_PATH}/JModelica.org/external/Assimulo
+fi  

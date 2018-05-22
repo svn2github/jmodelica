@@ -12,12 +12,22 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-. $1/Docker/build/settings.sh
+#. $1/Docker/build/settings.sh
+#echo "RUNNING FULL SCRIPT"
+#echo "STAGE 1/3: ADDING ASSIMULO"
+#. $1/Docker/build/get_assimulo.sh $1
+#echo "Stage 2/3: BUILDING"
+#. $1/Docker/build/build.sh $1
+#echo "STAGE 3/3: SKIPPED BUILDING CASADI"
+# . Docker/build/build_casadi.sh 
 
+
+. ${USR_PATH}/Docker/build/settings.sh
 echo "RUNNING FULL SCRIPT"
 echo "STAGE 1/3: ADDING ASSIMULO"
-. $1/Docker/build/get_assimulo.sh $1
+. ${USR_PATH}/Docker/build/get_assimulo.sh
 echo "Stage 2/3: BUILDING"
-. $1/Docker/build/build.sh $1
+. ${USR_PATH}/Docker/build/build.sh
 echo "STAGE 3/3: SKIPPED BUILDING CASADI"
 # . Docker/build/build_casadi.sh 
+
