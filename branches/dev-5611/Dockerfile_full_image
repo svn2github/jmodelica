@@ -36,5 +36,5 @@ RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 #RUN chmod -R 777 /home/jenkins
 RUN chmod -R 777 ${USR_PATH}
 #RUN cd /home/jenkins/jm_install && mkdir -p $JM_TESTS_WS/test_results && ls -la && ./jm_tests -ie -x "$JM_TESTS_WS/test_results"
-RUN cd ${USR_PATH}/jm_install && mkdir -p $JM_TESTS_WS/test_results && ls -la && ./jm_tests -ie -x "$JM_TESTS_WS/test_results"
+RUN cd ${USR_PATH}/jm_install && mkdir -p $JM_TESTS_WS/test_results && ls -la && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
 #RUN ${USR_PATH}/Docker/build/cleanup.sh
