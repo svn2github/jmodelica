@@ -9,8 +9,6 @@ ARG DOCKER_USR_PATH=/home/jenkins
 MAINTAINER Modelon
 
 RUN apt list --installed
-RUN whoami
-RUN sudo groupadd docker && sudo usermod -aG docker "$(whoami)"
 COPY Docker/*.sh /home/jenkins/Docker/build/
 COPY Docker/*.py /home/jenkins/Docker/build/
 RUN ls -la && pwd
@@ -19,4 +17,5 @@ RUN chmod +x /home/jenkins/Docker/build/*.sh
 RUN ls -la /home/jenkins/Docker/build
 RUN /home/jenkins/Docker/build/run_full_scripts.sh /home/jenkins
 RUN chmod -R 777 /home/jenkins
+RUN cd /home/jenkins/jm_install && mkdir -p $JM_TESTS_WS/test_results && ls -la && ./jm_tests -ie -x "$JM_TESTS_WS/test_results"
 #RUN /home/jenkins/Docker/build/cleanup.sh
