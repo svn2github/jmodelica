@@ -10,7 +10,7 @@ MAINTAINER Modelon
 ARG DOCKER_LINUX_DIST
 ARG DOCKER_DIST_TAG
 
-ARG DOCKER_JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build
+ARG DOCKER_JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica
 ARG DOCKER_USR_PATH=/home/jenkins
 
 ENV USR_PATH=${DOCKER_USR_PATH}
