@@ -1,16 +1,12 @@
 node('docker') {
     checkout scm
-    def ubuntuImage
+    def baseImage
     stage ('Build') {
-        ubuntuImage = docker.build("jmodelica/ubuntu_base", "--build-arg DOCKER_LINUX_DIST=ubuntu --build-arg DOCKER_DIST_TAG=18.04 .")
-        ubuntuImage.inside {
-            sh 'echo "Finished building"'
-        }
+        baseImage = docker.build("jmodelica/centos_base", "--build-arg DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.3.1611 .")
     }
     stage ('Push') {
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage.push("18.04")
-            ubuntuImage.push("latest")
+            baseImage.push("7.3")
         }
     }
 }
