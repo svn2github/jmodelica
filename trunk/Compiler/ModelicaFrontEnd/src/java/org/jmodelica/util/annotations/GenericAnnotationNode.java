@@ -82,7 +82,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     /** 
      * This is an internal method, do not call it.
      */
-    protected void computeSubNodesCache() {
+    private void computeSubNodesCache() {
         if (isSubNodesCacheFresh()) {
             return;
         }
@@ -130,7 +130,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (subNode == null) {
             subNode = createNode(subNodeName, subNodeNode);
         } else {
-            subNode.setNode(subNodeName, subNodeNode);
+            ((GenericAnnotationNode<T,N,V>) subNode).setNode(subNodeName, subNodeNode);
         }
         if (subNode != null) {
             addToCaches(subNodes, subNodesNameMap, subNode);
@@ -201,9 +201,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param newNode the new node
      * @param subNode the subNode to associate the node with
      */
-    protected void updateSubNode(String newName, N newNode, T subNode) {
+    private void updateSubNode(String newName, N newNode, T subNode) {
         removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
-        subNode.setNode(newName, newNode);
+        ((GenericAnnotationNode<T,N,V>) subNode).setNode(newName, newNode);
         updateSubNodesNameMapCache(subNodesNameMap_cache, subNode);
     }
 
@@ -379,7 +379,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
         if (parent() != null && !name().equals(newName)) {
-            parent().updateSubNode(newName, node, (T) this);
+            ((GenericAnnotationNode<T,N,V>) parent()).updateSubNode(newName, node, (T) this);
         } else {
             setNode(newName, node);
         }
@@ -390,7 +390,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param newName The new name
      * @param node The new node
      */
-    protected void setNode(String newName, N node) {
+    private void setNode(String newName, N node) {
         // This is an internal method because it does not update the caches in the parent node.
         // it needs to be protected to be accessible from the parent node.
         disconnectFromNode();
@@ -529,7 +529,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public boolean exists() {
         if(parent() != null) {
-            parent().computeSubNodesCache();
+            ((GenericAnnotationNode<T,N,V>) parent()).computeSubNodesCache();
         }
         return hasNode();
     }
