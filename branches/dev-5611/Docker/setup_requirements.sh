@@ -22,6 +22,7 @@ BUILD_PKGS_JM_DEBIAN="dc jcc python-lucene subversion g++ gfortran ipython openj
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	yum -y update 
+	yum -y install epel-release  # for some python packages 
 	alias pckinstall="yum -y install"
 elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
