@@ -858,11 +858,11 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     private void setNodeWasSetFlags() {
         nodeWasSet = true;
         if (parent() != null) {
-            parent().setSubNodeNodeWasSet();
+            ((GenericAnnotationNode<T,N,V>) parent()).setSubNodeNodeWasSet();
         }
     }
 
-    protected void setSubNodeNodeWasSet() {
+    private void setSubNodeNodeWasSet() {
         subNodeNodeWasSet = true;
     }
 
