@@ -67,14 +67,23 @@ public class GenericAnnotationNodeTest extends AssertMethods {
     }
 
     @Test
-    public void testExistAfterReplaced() {
+    public void testNotExistAfterReplaced() {
         DummyAnnotationNode top = newProvider("top").addNodes(
                 newProvider("test")).createAnnotationNode();
         DummyAnnotationNode replaced = top.forPath("test");
         top.disconnectFromNode();
         top.testSrcRemoveAll();
-        top.setNode("top", newProvider("p"));
+        top.updateNode("top", newProvider("p"));
         assertFalse(replaced.exists());
+    }
+
+    @Test
+    public void testNoSyncAfterSet() {
+        DummyAnnotProvider n1 = newProvider("top").addNodes(newProvider("test"));
+        DummyAnnotProvider n2 = newProvider("top").addNodes(newProvider("test"));
+        DummyAnnotationNode top = n1.createAnnotationNode(); 
+        top.updateNode("top", n2);
+        assertFalse(top.hasSubNodesCache());
     }
 
     @Test
@@ -171,7 +180,7 @@ public class GenericAnnotationNodeTest extends AssertMethods {
         DummyAnnotationNode testNode = n.createAnnotationNode();
 
         DummyAnnotationNode replacementNode = testNode.forPath("a", "n");
-        replacementNode.setNode("newNode", replacement);
+        replacementNode.updateNode("newNode", replacement);
 
         testNode.forPath("a").node().subNodes.clear();
         testNode.forPath("a").node().addNodes(replacement);

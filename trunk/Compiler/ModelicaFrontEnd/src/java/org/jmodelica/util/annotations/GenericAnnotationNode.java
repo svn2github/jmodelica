@@ -60,6 +60,8 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     private volatile Collection<T> subNodes_cache;
     private volatile Map<String, T> subNodesNameMap_cache;
+    private volatile boolean nodeWasSet = false;
+    private volatile boolean subNodeNodeWasSet = false;
     private volatile T valueAnnotation_cache;
     private volatile boolean valueAnnotation_cacheComputed = false;
 
@@ -72,12 +74,15 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param node The node that this annotation node represent.
      */
     protected GenericAnnotationNode(String name, N node, T parent) {
-        this.name = name;
-        this.node = node;
         this.parent = parent;
+        setNode(name, node);
     }
 
-    private void computeSubNodesCache() {
+   
+    /** 
+     * This is an internal method, do not call it.
+     */
+    protected void computeSubNodesCache() {
         if (isSubNodesCacheFresh()) {
             return;
         }
@@ -118,6 +123,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         }
         subNodes_cache = subNodes;
         subNodesNameMap_cache = subNodesNameMap;
+        clearNodeWasSetFlags();
     }
 
     private T createOrSetSubNodeAndAddToCaches(T subNode, String subNodeName, N subNodeNode, Collection<T> subNodes, Map<String, T> subNodesNameMap) {
@@ -139,7 +145,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     private void updateSubNodesNameMapCache(Map<String, T> subNodesNameMap, T subNode) {
         T previous = subNodesNameMap.put(subNode.name(), subNode);
-        if (previous != null && previous.exists() && subNode.exists()) { // subNode goes from not ambiguous to ambiguous
+        if (previous != null && previous.hasNode() && subNode.hasNode()) { // subNode goes from not ambiguous to ambiguous
             subNodesNameMap.put(subNode.name(), ambiguousNode());
         }
     }
@@ -188,6 +194,13 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return res;
     }
 
+    /**
+     * This is an internal method. Call {{@link #updateNode(String, AnnotationProvider)}
+     * instead.
+     * @param newName the new name
+     * @param newNode the new node
+     * @param subNode the subNode to associate the node with
+     */
     protected void updateSubNode(String newName, N newNode, T subNode) {
         removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
         subNode.setNode(newName, newNode);
@@ -195,7 +208,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     protected boolean isSubNodesCacheFresh() {
-        return false;
+        return !nodeWasSet && !subNodeNodeWasSet;
     }
 
     protected boolean hasSubNodesCache() {
@@ -312,12 +325,13 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      *          and it wasn't possible to create.
      */
     public N node() throws AnnotationEditException {
-        if (!exists()) {
+        if (!hasNode()) {
             if (parent == null) {
                 // This is an null pattern node without hope of creating
                 return null;
             }
-            node = ((GenericAnnotationNode<T, N, V>) parent).createNodeForChild(this);
+            N node = ((GenericAnnotationNode<T, N, V>) parent).createNodeForChild(this);
+            updateNode(name(), node);
         }
         return node;
     }
@@ -371,15 +385,18 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         }
     }
     /**
-     * Sets the name and node of this GenericAnnotationNode.
+     * Sets the name and node of this GenericAnnotationNode. This is an internal method,
+     * call {{@link #updateNode(String, AnnotationProvider)} instead.
      * @param newName The new name
      * @param node The new node
      */
     protected void setNode(String newName, N node) {
+        // This is an internal method because it does not update the caches in the parent node.
+        // it needs to be protected to be accessible from the parent node.
         disconnectFromNode();
         this.name = newName;
         this.node = node;
-        computeSubNodesCache();
+        setNodeWasSetFlags();
     }
 
     /**
@@ -499,11 +516,22 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
+     * This is an internal method, call {{@link #exists()} instead.
+     * @return true if this node is available.
+     */
+    protected boolean hasNode() {
+        return isAmbiguous() || node != null;
+    }
+
+    /**
      * 
      * @return true if this node does exist.
      */
     public boolean exists() {
-        return node != null || isAmbiguous();
+        if(parent() != null) {
+            parent().computeSubNodesCache();
+        }
+        return hasNode();
     }
 
     /**
@@ -818,12 +846,29 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     protected void disconnectFromNode() {
         if (parent != null) {
             node = null;
+            setNodeWasSetFlags();
         }
         if (subNodes_cache != null) {
             for (T t : subNodes_cache) {
                 t.disconnectFromNode();
             }
         }
+    }
+
+    private void setNodeWasSetFlags() {
+        nodeWasSet = true;
+        if (parent() != null) {
+            parent().setSubNodeNodeWasSet();
+        }
+    }
+
+    protected void setSubNodeNodeWasSet() {
+        subNodeNodeWasSet = true;
+    }
+
+    private void clearNodeWasSetFlags() {
+        nodeWasSet = false;
+        subNodeNodeWasSet = false;
     }
 
 }

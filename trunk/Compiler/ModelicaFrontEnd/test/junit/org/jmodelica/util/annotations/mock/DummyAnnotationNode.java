@@ -29,19 +29,8 @@ public class DummyAnnotationNode extends GenericAnnotationNode<DummyAnnotationNo
         super.updateNode(newName, node);
     }
 
-    /**
-     * Expose protected method for testing
-     */
-    public void updateSubNode(String newName, DummyAnnotProvider newNode, DummyAnnotationNode subNode) {
-        super.updateSubNode(newName, newNode, subNode);
-    }
-
-    /**
-     * Expose protected method for testing
-     */
-    public void setNode(String name, DummyAnnotProvider newNode) {
-        super.setNode(name, newNode);
-    }
+    //TODO updateSubNode() should be protected from testing because it is an internal method
+    //TODO setNode() should be protected from testing because it is an internal method
 
     @Override
     protected DummyAnnotationNode createNode(String name, DummyAnnotProvider node) {
