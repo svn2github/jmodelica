@@ -74,7 +74,7 @@ aspect SrcAnnotations {
         return SrcAnnotationNode.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotationNode SrcExtendsClause.srcAnnotation(Evaluator<SrcExp> evaluator, String ... path) {
-        return SrcAnnotationNode.createFor(this, evaluator, path);
+        return SrcAnnotationNode.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotationNode SrcImportClause.srcAnnotation(Evaluator<SrcExp> evaluator, String ... path) {
         return SrcAnnotationNode.createFor(srcAnnotationProvider(), evaluator, path);
@@ -358,9 +358,14 @@ aspect SrcAnnotations {
     eq InstReplacingRecord.srcAnnotationProvider()    = getOriginalDecl().srcAnnotationProvider();
     eq InstReplacingPrimitive.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
     
-    /**
+    /******************
+     * Extends clause
+     *****************/
+    syn SrcAnnotationProvider SrcExtendsClause.srcAnnotationProvider() = SrcAnnotationNode.createProviderFor(this);
+
+    /*****************
      * Import clause
-     */
+     ****************/
     syn SrcAnnotationProvider SrcImportClause.srcAnnotationProvider() = SrcAnnotationNode.createProviderFor(getSrcComment());
 
     /*******************
@@ -514,6 +519,26 @@ aspect SrcAnnotations {
             }
         };
     }
+
+    public RootAnnotationProviderProxy<SrcExtendsClause, SrcModification> SrcExtendsClause.createModifierProvider(){
+        return new RootAnnotationProviderProxy<SrcExtendsClause, SrcModification>(this) {
+        
+        @Override
+        protected boolean hasProvider() {
+            return owningNode.hasSrcClassModification();
+        }
+
+        @Override
+        protected void createProvider() {
+            owningNode.setSrcClassModification(new SrcClassModification());
+        }
+
+        @Override
+        protected SrcModification getProvider() {
+            return owningNode.getSrcClassModification();
+        }
+    };
+}
 
     class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> extends RootAnnotationProviderProxy<T, SrcAnnotation> {
 
