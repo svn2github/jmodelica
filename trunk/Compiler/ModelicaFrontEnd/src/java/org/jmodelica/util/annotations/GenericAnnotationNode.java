@@ -378,7 +378,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
-        if (parent() != null && !name().equals(newName)) {
+        if (parent() != null) {
             ((GenericAnnotationNode<T,N,V>) parent()).updateSubNode(newName, node, (T) this);
         } else {
             setNode(newName, node);
