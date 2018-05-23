@@ -14,7 +14,7 @@ node('docker') {
         stage ('Build') {
             dir ("JModelica") {
                 def dockerfile = 'Dockerfile_full_image'
-                jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --no-cache --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=latest --build-arg DOCKER_JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica")
+                jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=latest --build-arg DOCKER_JM_TESTS_WS=/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica")
             }
         }
     } finally {
@@ -22,6 +22,7 @@ node('docker') {
             dir ("JModelica") {
                 jm_image.inside {
                     echo pwd()
+                    sh 'pwd && whoami'
                     archiveArtifacts artifacts: '**/*.xml', fingerprint: false
                     junit testResults: '/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica/test_results/*.xml', allowEmptyResults: true
                 }
