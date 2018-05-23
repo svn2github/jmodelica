@@ -31,6 +31,6 @@ RUN chmod +x ${USR_PATH}/Docker/build/*.sh
 RUN ls -la ${USR_PATH}/Docker/build
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 RUN chmod -R 777 ${USR_PATH}
-RUN cd ${USR_PATH}/jm_install && mkdir -p test_results && ls -la && ./jm_tests -i -x "/home/jenkins/test_results" -f "test_examples_jmi.py"
+RUN mkdir -p $JM_TESTS_WS/test_results && cd ${USR_PATH}/jm_install && ls -la && ./jm_tests -i -x "$JM_TESTS_WS/test_results" -f "test_examples_jmi.py"
 
 #RUN ${USR_PATH}/Docker/build/cleanup.sh

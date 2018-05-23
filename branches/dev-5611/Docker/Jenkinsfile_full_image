@@ -22,9 +22,9 @@ node('docker') {
             dir ("JModelica") {
                 jm_image.inside {
                     echo pwd()
-                    sh 'pwd && whoami'
+                    sh 'pwd && ls -la'
                     archiveArtifacts artifacts: '**/*.xml', fingerprint: false
-                    junit testResults: '/home/jenkins/jm_install/test_results/*.xml', allowEmptyResults: true
+                    junit testResults: '/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica/test_results/*.xml', allowEmptyResults: true
                 }
             }
         }
