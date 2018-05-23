@@ -2,7 +2,7 @@ node('docker') {
     checkout scm
     def baseImage
     stage ('Build') {
-        baseImage = docker.build("jmodelica/centos_base", "--build-arg DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.3.1611 .")
+        baseImage = docker.build("jmodelica/centos_base", "--no-cache --build-arg DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.3.1611 .")
     }
     stage ('Push') {
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
