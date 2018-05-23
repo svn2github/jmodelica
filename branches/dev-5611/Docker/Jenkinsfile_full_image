@@ -10,19 +10,20 @@ node('docker') {
             quietOperation: true,
         ])
     }
-    stage ('Build') {
-        dir ("JModelica") {
-            def dockerfile = 'Dockerfile_full_image'
-            jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --no-cache --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=latest --build-arg JM_TESTS_WS=${WORKSPACE}")
-            jm_image.inside{
-                sh 'pwd && echo "Finished building"'
+    try {
+        stage ('Build') {
+            dir ("JModelica") {
+                def dockerfile = 'Dockerfile_full_image'
+                jm_image = docker.build("jmodelica-image", "-f ${dockerfile} . --no-cache --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=latest --build-arg DOCKER_JM_TESTS_WS=${WORKSPACE}")
             }
         }
-    }
-    stage ('Testing') {
-        dir ("JModelica") {
-            jm_image.inside {
-                junit testResults: 'test_results/*.xml', allowEmptyResults: true
+    } finally {
+        stage ('Testing') {
+            dir ("JModelica") {
+                jm_image.inside {
+                    sh 'echo ${WORKSPACE} && ls -la ${WORKSPACE}/test_results'
+                    junit testResults: 'test_results/*.xml', allowEmptyResults: true
+                }
             }
         }
     }
