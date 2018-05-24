@@ -19,7 +19,11 @@ node('docker') {
         }
     } finally {
         stage ('Testing') {
+            echo "CONTAINER INFO"
+            echo pwd()
+            echo jm_image.id
             dir ("JModelica") {
+            
                 jm_image.inside {
                     echo pwd()
                     sh 'pwd && ls -la'
