@@ -19,18 +19,13 @@ node('docker') {
         }
     } finally {
         stage ('Testing') {
-            echo "CONTAINER INFO"
-            echo pwd()
-            echo jm_image.id
             dir ("JModelica") {
+            //We copy test results from usr/local to the host machine because home/jenkins/... exists in host AND docker
                 jm_image.inside {
-                    echo pwd()
-                    sh 'echo $JM_TESTS_WS'
-                    sh 'pwd && ls -la'
                     sh 'mkdir test_results'
                     sh 'cp /usr/local/test_results/* test_results/'
                     archiveArtifacts artifacts: '**/*.xml', fingerprint: false
-                    junit testResults: '/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica/test_results/*.xml', allowEmptyResults: true
+                    junit testResults: 'test_results/*.xml', allowEmptyResults: false
                 }
             }
         }
