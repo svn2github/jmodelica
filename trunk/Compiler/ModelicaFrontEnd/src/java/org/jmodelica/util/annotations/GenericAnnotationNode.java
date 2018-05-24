@@ -130,7 +130,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         if (subNode == null) {
             subNode = createNode(subNodeName, subNodeNode);
         } else {
-            ((GenericAnnotationNode<T,N,V>) subNode).setNode(subNodeName, subNodeNode);
+            asGeneric(subNode).setNode(subNodeName, subNodeNode);
         }
         if (subNode != null) {
             addToCaches(subNodes, subNodesNameMap, subNode);
@@ -203,7 +203,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     private void updateSubNode(String newName, N newNode, T subNode) {
         removeFromSubNodesNameMapCache(subNode, subNodes_cache, subNodesNameMap_cache);
-        ((GenericAnnotationNode<T,N,V>) subNode).setNode(newName, newNode);
+        asGeneric(subNode).setNode(newName, newNode);
         updateSubNodesNameMapCache(subNodesNameMap_cache, subNode);
     }
 
@@ -330,7 +330,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 // This is an null pattern node without hope of creating
                 return null;
             }
-            N node = ((GenericAnnotationNode<T, N, V>) parent).createNodeForChild(this);
+            N node = asGeneric(parent()).createNodeForChild(this);
             updateNode(name(), node);
         }
         return node;
@@ -379,7 +379,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     @SuppressWarnings("unchecked")
     protected void updateNode(String newName, N node) {
         if (parent() != null && !name().equals(newName)) {
-            ((GenericAnnotationNode<T,N,V>) parent()).updateSubNode(newName, node, (T) this);
+            asGeneric(parent()).updateSubNode(newName, node, (T) this);
         } else {
             setNode(newName, node);
         }
@@ -529,7 +529,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     public boolean exists() {
         if(parent() != null) {
-            ((GenericAnnotationNode<T,N,V>) parent()).computeSubNodesCache();
+            asGeneric(parent()).computeSubNodesCache();
         }
         return hasNode();
     }
@@ -567,6 +567,17 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     protected T parent() {
         return parent;
+    }
+
+    /**
+     * Convenience method which downcast from the generic type {@code T} to the less
+     * specific type {@code GenericAnnotationNode<T, N, V>}
+     * 
+     * @param node node to downcast
+     * @return downcasted node
+     */
+    private GenericAnnotationNode<T, N, V> asGeneric(T node) {
+        return node;
     }
 
     /**********************************
@@ -858,7 +869,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     private void setNodeWasSetFlags() {
         nodeWasSet = true;
         if (parent() != null) {
-            ((GenericAnnotationNode<T,N,V>) parent()).setSubNodeNodeWasSet();
+            asGeneric(parent()).setSubNodeNodeWasSet();
         }
     }
 
