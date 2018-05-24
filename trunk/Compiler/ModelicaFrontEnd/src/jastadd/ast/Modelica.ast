@@ -263,8 +263,7 @@ SrcElseClause          : SrcBaseNode ::= Stmt:SrcStatement*;
 abstract SrcIfWhenClause : SrcBaseNode  ::= Test:SrcExp SrcStatement*;
 SrcIfClause            : SrcIfWhenClause;
 SrcWhenClause          : SrcIfWhenClause;
-SrcForStmt             : SrcStatement ::= SrcForIndex* SrcForStmtList;
-SrcForStmtList         : SrcBaseNode ::= Stmt:SrcStatement*;
+SrcForStmt             : SrcStatement ::= SrcForIndex* SrcStatement*;
 SrcWhileStmt           : SrcStatement ::= Test:SrcExp SrcWhileStmt:SrcStatement*;
 
 SrcIfExp     : SrcExp ::= SrcIfExp:SrcExp ThenExp:SrcExp ElseExp:SrcExp;

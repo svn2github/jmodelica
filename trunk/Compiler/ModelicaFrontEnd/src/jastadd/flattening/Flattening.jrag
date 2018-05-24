@@ -3053,7 +3053,7 @@ aspect InstantiatedExpressions {
         List il = new List();
         for (SrcForIndex i : getSrcForIndexList()) 
             il.add(i.instantiate());
-        List sl = SrcStatement.instantiateStatementList(getSrcForStmtList().getStmts());
+        List sl = SrcStatement.instantiateStatementList(getSrcStatementList());
         return new InstForStmt(il, sl);
     }
     

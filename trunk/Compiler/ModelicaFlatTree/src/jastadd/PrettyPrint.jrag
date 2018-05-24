@@ -509,14 +509,9 @@ aspect PrettyPrint {
             p.print(fi, str, indent);
         }
         str.println(" loop");
-        p.print(getSrcForStmtList(), str, p.indent(indent));
+        p.print(getSrcStatementList(), str, p.indent(indent));
         str.println(indent, "end for;");
     }
-
-	public void SrcForStmtList.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (SrcStatement stmt : getStmts())
-			p.print(stmt, str, indent);
-	}
 
     public void SrcWhileStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent, "while ");

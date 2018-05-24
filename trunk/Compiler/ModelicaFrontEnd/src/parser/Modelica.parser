@@ -1391,12 +1391,8 @@ SrcWhenClause when_clause =
   ;
 
 SrcForStmt for_stmt =
-  FOR for_indices LOOP for_stmt_list END_FOR comment  
-                         {: return new SrcForStmt(comment, for_indices, for_stmt_list); :}
-  ;
-  
-SrcForStmtList for_stmt_list =
-  statement* {: return new SrcForStmtList(statement); :}
+  FOR for_indices LOOP statement* END_FOR comment  
+                         {: return new SrcForStmt(comment, for_indices, statement); :}
   ;
 
 SrcWhileStmt while_stmt = 
