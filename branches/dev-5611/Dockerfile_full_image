@@ -32,5 +32,6 @@ RUN ls -la ${USR_PATH}/Docker/build
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 RUN chmod -R 777 ${USR_PATH}
 RUN mkdir -p /home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica/test_results && cd ${USR_PATH}/jm_install && ls -la && ./jm_tests -i -x "/home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica/test_results" -f "test_examples_jmi.py"
-
+RUN ls -la $JM_TESTS_WS
+RUN ls -la /home/jenkins/internal/workspace/OCTTeam/JM_Ubuntu-Build/JModelica
 #RUN ${USR_PATH}/Docker/build/cleanup.sh
