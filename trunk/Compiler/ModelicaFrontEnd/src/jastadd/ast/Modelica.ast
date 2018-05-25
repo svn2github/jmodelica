@@ -122,7 +122,7 @@ SrcRealClassDecl      : SrcPrimitiveClassDecl;
 SrcIntegerClassDecl   : SrcPrimitiveClassDecl;
 SrcBooleanClassDecl   : SrcPrimitiveClassDecl;
 SrcStringClassDecl    : SrcPrimitiveClassDecl;
-SrcEnumClassDecl      : SrcPrimitiveClassDecl ::= <Symbol:Symbol>; // <Symbol> is necessary to achieve formatted pretty print.
+SrcEnumClassDecl      : SrcPrimitiveClassDecl;
 
 SrcEnumLiteralDecl : SrcComponentDecl;
 

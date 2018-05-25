@@ -422,8 +422,7 @@ SrcBaseClassDecl base_class_decl
             new List(new SrcDefaultElementList(new List(enum_specification))),
             new Opt(),
             comment.getSrcAnnotationOpt(),
-            new SrcEndDecl(enum_name.getID()),
-            ENUMERATION);
+            new SrcEndDecl(enum_name.getID()));
     :}
     | error 
     {: 
