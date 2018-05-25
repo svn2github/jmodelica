@@ -184,6 +184,7 @@ SrcComponentClause : SrcElement ::= <Redeclare:boolean>
                               SrcComponentDecl*
                               [SrcConstrainingClause] 
                               SrcComment;
+SrcEnumComponentClause : SrcComponentClause;
 
 SrcComponentDecl : SrcBaseNode ::= Name:SrcIdDecl 
                                    [VarArraySubscripts:SrcArraySubscripts] 

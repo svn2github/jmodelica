@@ -450,10 +450,10 @@ SrcExtendsClauseShortClass extends_clause_short_class
     :}
     ;
 
-SrcComponentClause enum_specification
+SrcEnumComponentClause enum_specification
     = enum_contents
     {:
-        return new SrcComponentClause(
+        return new SrcEnumComponentClause(
                 false, false, false, false, false,
                 new Opt(),
                 new Opt(new SrcConstant()),
