@@ -74,7 +74,7 @@ aspect SrcAnnotations {
         return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ExtendsClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
-        return SrcAnnotation.createFor(this, evaluator, path);
+        return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
     }
     public SrcAnnotation ImportClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
         return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
@@ -307,9 +307,14 @@ aspect SrcAnnotations {
     syn SrcAnnotationProvider InstComponentDecl.srcAnnotationProvider() = getComponentDecl().srcAnnotationProvider();
     eq InstReplacingComposite.srcAnnotationProvider() = getOriginalDecl().srcAnnotationProvider();
     
-    /**
+    /******************
+     * Extends clause
+     *****************/
+    syn SrcAnnotationProvider ExtendsClause.srcAnnotationProvider() = SrcAnnotation.createProviderFor(this);
+
+    /*****************
      * Import clause
-     */
+     ****************/
     syn SrcAnnotationProvider ImportClause.srcAnnotationProvider() = SrcAnnotation.createProviderFor(getComment());
 
     /*******************
@@ -447,6 +452,26 @@ aspect SrcAnnotations {
             }
         };
     }
+
+    public RootAnnotationProviderProxy<ExtendsClause, Modification> ExtendsClause.createModifierProvider(){
+        return new RootAnnotationProviderProxy<ExtendsClause, Modification>(this) {
+        
+        @Override
+        protected boolean hasProvider() {
+            return owningNode.hasClassModification();
+        }
+
+        @Override
+        protected void createProvider() {
+            owningNode.setClassModification(new ClassModification());
+        }
+
+        @Override
+        protected Modification getProvider() {
+            return owningNode.getClassModification();
+        }
+    };
+}
 
     class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> extends RootAnnotationProviderProxy<T, Annotation> {
 
