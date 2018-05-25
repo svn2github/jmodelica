@@ -16,7 +16,7 @@ ARG DOCKER_USR_PATH=/home/jenkins
 ENV USR_PATH=${DOCKER_USR_PATH}
 ENV JM_TESTS_WS=${DOCKER_JM_TESTS_WS}
 
-RUN apt list --installed
+#RUN apt list --installed
 #RUN if [ "$DOCKER_LINUX_DIST"=="ubuntu" ] ; then apt list --installed ; else yum list installed ; fi
 
 COPY Docker/*.sh ${USR_PATH}/Docker/build/
