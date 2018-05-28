@@ -28,13 +28,13 @@ stage ('Building') {
     CentOS7_3: {
         node('docker') {
             checkout scm
-            centosImage = buildBaseImage("centos_base", "centos", "7.3.1611")
+            centosImage7_3 = buildBaseImage("centos_base", "centos", "7.3.1611")
         }
     },
     CentOS7_4: {
         node('docker') {
             checkout scm
-            centosImage = buildBaseImage("centos_base", "centos", "7.4.1708")
+            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708")
         }
     }
 }
