@@ -1585,12 +1585,18 @@ SrcComment comment =
   ;
   
 SrcStringComment string_comment =
-  STRING.s      {: return new SrcStringComment(s); :}
-  | string_comment PLUS STRING.s {: string_comment.setSrcComment(string_comment.getSrcComment().concat(s));
-                                    return string_comment; :}
-  
+  string_comment_exp    {: return new SrcStringComment(string_comment_exp); :}
   ;
- 
+
+SrcExp string_comment_exp
+  = string      
+  | string_comment_exp PLUS string {: return new SrcAddExp(string_comment_exp, string); :}
+  ;
+
+ SrcStringLitExp string =
+  STRING.s  {: return new SrcStringLitExp(s); :}
+  ;
+
  SrcIdDecl id_decl = 
    ID.id   {: return new SrcIdDecl(id); :}
  ;
