@@ -12,27 +12,29 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+set -e
+
 . ${USR_PATH}/Docker/build/settings.sh 
 
-wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz || exit $?
+wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
 
 CURRDIR=$PWD
-tar xvf Ipopt-${IPOPT_VERSION}.tgz || exit $?
+tar xvf Ipopt-${IPOPT_VERSION}.tgz
 cd Ipopt-${IPOPT_VERSION}/ThirdParty/Blas
-./get.Blas || exit $?
+./get.Blas
 cd ../Lapack
-./get.Lapack || exit $?
+./get.Lapack
 cd ../Mumps
-./get.Mumps || exit $?
+./get.Mumps
 cd ../Metis
-./get.Metis || exit $?
+./get.Metis
 cd ../..
 
 mkdir build
 cd build
 mkdir -p ${IPOPT_INSTALLATION_LOCATION}
 
-../configure --prefix=${IPOPT_INSTALLATION_LOCATION} || exit $?
-make install || exit $?
+../configure --prefix=${IPOPT_INSTALLATION_LOCATION}
+make install
 cd $CURRDIR
 env 

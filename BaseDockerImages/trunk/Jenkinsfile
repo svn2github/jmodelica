@@ -12,28 +12,38 @@
 //    along with this program.  If not, see
 //     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-def ubuntuImage
-def centosImage
+def ubuntuImage18_04
+def centosImage7_3
+def centosImage7_4
+def buildBaseImage(targetName, linuxDist, distTag) {
+    return docker.build("jmodelica/$targetName", "--no-cache --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag .")
+}
 stage ('Building') {
     parallel Ubuntu: {
         node('docker') {
             checkout scm
-            ubuntuImage = docker.build("jmodelica/ubuntu_base", "--no-cache --build-arg DOCKER_LINUX_DIST=ubuntu --build-arg DOCKER_DIST_TAG=18.04 .")
+            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04")
         }
     },
-    CentOS: {
+    CentOS7_3: {
         node('docker') {
             checkout scm
-            centosImage = docker.build("jmodelica/centos_base", "--no-cache --build-arg DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.3.1611 --build-arg DOCKER_USR_PATH=/opt .")
+            centosImage = buildBaseImage("centos_base", "centos", "7.3.1611")
+        }
+    },
+    CentOS7_4: {
+        node('docker') {
+            checkout scm
+            centosImage = buildBaseImage("centos_base", "centos", "7.4.1708")
         }
     }
 }
 node('docker'){
     stage ('Push') {
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage.push("18.04")
-            ubuntuImage.push("latest")
-            centosImage.push("7.3")
+            ubuntuImage18_04.push("18.04")
+            centosImage7_3.push("7.3")
+            centosImage7_4.push("7.4")
         }
     }
 }

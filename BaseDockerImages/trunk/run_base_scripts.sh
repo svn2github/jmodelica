@@ -13,6 +13,8 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+set -e
+
 echo "STAGE 1/2: SETTING UP REQUIREMENTS"
 . ${USR_PATH}/Docker/build/setup_requirements.sh
 echo "STAGE 2/2: SETTING UP IPOPT"

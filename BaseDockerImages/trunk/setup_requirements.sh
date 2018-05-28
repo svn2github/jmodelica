@@ -13,11 +13,13 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+set -e
+
 . ${USR_PATH}/Docker/build/settings.sh
 
 BUILD_PKGS_JM_COMMON="sudo cmake swig ant wget tar patch"
-BUILD_PKGS_JM_REDHAT="dos2unix python-pip bc make lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy python-matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
-BUILD_PKGS_JM_DEBIAN="dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
+BUILD_PKGS_JM_REDHAT="ant-junit dos2unix python-pip bc make lucene which subversion-devel gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy python-matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
+BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
@@ -38,8 +40,8 @@ else
     exit 1
 fi
 
-pckinstall $BUILD_PKGS_JM_COMMON || exit $?
-pckinstall $BUILD_PKGS_JM || exit $?
+pckinstall $BUILD_PKGS_JM_COMMON
+pckinstall $BUILD_PKGS_JM
 
 
 
