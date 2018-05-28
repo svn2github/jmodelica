@@ -15,25 +15,21 @@
 Building 
 ========
 
-For the latest version of Ubunto: 
+For the latest version of Ubuntu, navigate to the folder with the Dockerfile, and run:
 
-> docker build -t jmodelica/ubuntu:0.1  --build-arg  DOCKER_LINUX_DIST=ubuntu -f  <dockerfile-name> . 
+docker build -f ./Dockerfile_full_image . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=18.04 .
 
-Available dockerfiles are 
-- Dockerfile.all : build a JModelica image from scratch 
-- Dockerfile : build a base image for JModelica 
-- Dockerfile_full_image : build a JModelica full image  
+For the CentOS version 7.3, run:
+
+docker build -f ./Dockerfile_full_image . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.3 .
 
 Available environment variables: 
 
 DOCKER_LINUX_DIST=<linux-distribution> 
 DOCKER_DIST_TAG=<distribution-release> 
-DOCKER_JMODELICA_BRANCH=<jmodelica-branch> 
 
-A JModelica tagged version can be also choosen by using --build-arg DOCKER_JMODELICA_BRANCH=</tags/tag-version>
-
-Example of a build command: 
-> docker build -t local/jmodelica/jmodelica/centos_base:7.3.1 --build-arg  DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.3.1611 -f  Dockerfile.all .
+After building, you can for example list all the installed packages (for the ubuntu image) with the following command: 
+docker run -it jmodelica/ubuntu_base:18.04 apt list --installed
 
 to instantiate a container of the resulting image, try
 
