@@ -5,6 +5,10 @@ Patched MSL resources to work with VS2015.
 ; Feature ; Minor ; Compiler ; #5605
 Support for initial parameter external objects.
 
+; Change ; Minor ; Compiler ; #5612 
+Changed error check of arguments when compiling from command line to allow empty library argument if a
+modelica path is supplied.
+
 ; Fixed ; Minor ; PyFMI ; #5615
 Improved input handling for FMI2
 
