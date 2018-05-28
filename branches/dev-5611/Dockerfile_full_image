@@ -31,4 +31,4 @@ RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 #Need to set the matplotlib backend due to no display (IMPORTANT)
 ENV MPLBACKEND=Agg
 #Run the tests
-RUN chmod -R 777 ${USR_PATH} && mkdir -p $JM_TESTS_WS/test_results && cd ${USR_PATH}/jm_install && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
+RUN chmod -R 777 ${USR_PATH} && mkdir -p $JM_TESTS_WS/test_results && cd ${USR_PATH}/jm_install && printenv && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
