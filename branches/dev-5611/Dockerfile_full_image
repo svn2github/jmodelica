@@ -26,5 +26,9 @@ COPY / ${USR_PATH}/JModelica.org/
 
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
+
+###Tests
+#Need to set the matplotlib backend due to no display (IMPORTANT)
+ENV MPLBACKEND=Agg
+#Run the tests
 RUN chmod -R 777 ${USR_PATH} && mkdir -p $JM_TESTS_WS/test_results && cd ${USR_PATH}/jm_install && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
-#RUN ${USR_PATH}/Docker/build/cleanup.sh
