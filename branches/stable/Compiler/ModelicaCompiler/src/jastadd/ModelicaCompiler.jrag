@@ -685,7 +685,8 @@ public class ModelicaCompiler implements LogContainer {
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
      * @param target    the compiler target. Valid options are 'me' or 'cs'.
-     * @param compileTo specify location of the compiled FMU. A directory will be created if it does not exist.
+     * @param compileTo specify location of the compiled FMU. If a file is specified, the model will be renamed to this
+     *                  name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
     public CompiledUnit compileFMU(String className, String fileName[], String target, String compileTo) 
@@ -702,7 +703,8 @@ public class ModelicaCompiler implements LogContainer {
      * 
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
-     * @param compileTo specify location of the compiled FMUX. Directory will be created if it does not exist.
+     * @param compileTo specify location of the compiled FMUX. If a file is specified, the model will be renamed to this
+     *                  name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
     public CompiledUnit compileFMUX(String className, String fileName[], String compileTo) 
@@ -721,7 +723,8 @@ public class ModelicaCompiler implements LogContainer {
      * @param fileName  array of model file or library paths.
      * @param target    the compiler target. Valid options are 'me' or 'cs'.
      * @param version   the FMI version. Valid options are '1.0' or '2.0'.
-     * @param compileTo specify location of the compiled FMU. Directory will be created if it does not exist.
+     * @param compileTo specify location of the compiled FMU/FMUX. If a file is specified, the model will be renamed to
+     *                  this name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
     public CompiledUnit compileUnit(String className, String fileName[], String target, String version, String compileTo) 
@@ -737,7 +740,8 @@ public class ModelicaCompiler implements LogContainer {
      * @param className name of model class in the model file to compile.
      * @param fileName  array of model file or library paths.
      * @param target    target object, contains information about the target, its unit suffix for example.
-     * @param compileTo specify location of the compiled unit. Directory will be created if it does not exist.
+     * @param compileTo specify location of the compiled FMU/FMUX. If a file is specified, the model will be renamed to
+     *                  this name during the compilation. If directory, the  model will keep its original name.
      * @return          a {@link CompiledUnit} result object.
      */
     protected CompiledUnit compileUnit(String className, String fileName[], TargetObject target, String compileTo) 

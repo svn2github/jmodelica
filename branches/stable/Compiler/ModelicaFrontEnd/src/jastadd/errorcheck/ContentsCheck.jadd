@@ -273,8 +273,15 @@ aspect ContentCheck {
             if (inherit != null)
                 inherit.error("Can't declare %s as flow, since it contains a component declared as flow", name());
         }
+        if (isExternalObject() && hasBindingFExp() && !getBindingFExp().variability().lessOrEqual(variability())) {
+            ASTNode.BINDING_EXPRESSION_VARIABILITY.invoke(this, 
+                getBindingFExp().variability().toStringLiteral(), variability().toStringLiteral());
+        }
     }
 
+    public static final SimpleProblemProducer ASTNode.BINDING_EXPRESSION_VARIABILITY =
+        new SimpleErrorProducer("BINDING_EXPRESSION_VARIABILITY", ProblemKind.SEMANTIC, 
+            "Variability of binding expression (%s) must be lower or equal to the variability of the component (%s)");
     
     public static final SimpleProblemProducer ASTNode.CONSTANT_INPUT =
         new SimpleErrorProducer("CONSTANT_INPUT", ProblemKind.SEMANTIC, "Function input may not be constant");
@@ -518,6 +525,53 @@ aspect ContentCheck {
 	
 	syn boolean FIfWhenEquation.elseIsBalancedAssignments() = 
 		assignedSet().equals(getElse().assignedSet()) && getElse().isBalancedAssignments();
+
+
+    protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
+        Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+        for (FAbstractEquation eqn : eqns)
+            res.addAll(eqn.assignedSet());
+        return res;
+    }
+
+    /**
+     * Gives the set of components assigned in this equation.
+     * 
+     * Only works in instance tree.
+     * For if and when equations, only the first branch is considered.
+     */
+    syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
+    eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
+    eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
+    eq FEquation.assignedSet()           = getLeft().accessedVarSet();
+    eq FFunctionCallEquation.assignedSet() {
+        LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
+        for (FFunctionCallLeft left : getLefts()) {
+            if (left.hasFExp()) {
+                s.addAll(left.getFExp().accessedVarSet());
+            }
+        }
+        return s;
+    }
+
+    /**
+     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+     */
+    syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
+    eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
+
+    /**
+     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+     */
+    syn Set<InstComponentDecl> FIdUse.accessedVarSet() = Collections.emptySet();
+    eq FIdUseInstAccess.accessedVarSet()               = getInstAccess().accessedVarSet();
+
+    /**
+     * Get set containing accessed var.
+     */
+    syn Set<InstComponentDecl> InstAccess.accessedVarSet() = 
+        Collections.singleton(myInstComponentDecl());
+
 
     inh boolean FIfEquation.isTopWhenIfEquation();
     eq FClass.getChild().isTopWhenIfEquation()              = true;

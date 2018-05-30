@@ -48,6 +48,8 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     /**
      * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
      * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     * 
+     * @param message Human readable message describing the problem
      */
     @Deprecated
     public Problem(String message) {
@@ -57,6 +59,9 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     /**
      * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
      * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     * 
+     * @param message Human readable message describing the problem
+     * @param severity The severity of the problem
      */
     @Deprecated
     public Problem(String message, ProblemSeverity severity) {
@@ -66,6 +71,10 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     /**
      * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
      * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     * 
+     * @param message Human readable message describing the problem
+     * @param severity The severity of the problem
+     * @param kind The type of the problem
      */
     @Deprecated
     public Problem(String message, ProblemSeverity severity, ProblemKind kind) {
@@ -75,6 +84,16 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     /**
      * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
      * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     * 
+     * @param fileName Name or path to the source file where the problem is
+     *          located
+     * @param message Human readable message describing the problem
+     * @param severity The severity of the problem
+     * @param kind The type of the problem
+     * @param beginLine Problem start line in the source file
+     * @param beginColumn Problem start column in the source file
+     * @param endLine Problem end line in the source file
+     * @param endColumn Problem end column in the source file
      */
     @Deprecated
     public Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn, int endLine, int endColumn) {
@@ -84,6 +103,17 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     /**
      * Deprecated in favor of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
      * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     * 
+     * @param identifier An unique identifier for this category of problem
+     * @param fileName Name or path to the source file where the problem is
+     *          located
+     * @param message Human readable message describing the problem
+     * @param severity The severity of the problem
+     * @param kind The type of the problem
+     * @param beginLine Problem start line in the source file
+     * @param beginColumn Problem start column in the source file
+     * @param endLine Problem end line in the source file
+     * @param endColumn Problem end column in the source file
      */
     @Deprecated
     protected Problem(String identifier, String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn, int endLine, int endColumn) {

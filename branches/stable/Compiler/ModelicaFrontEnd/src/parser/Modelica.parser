@@ -422,8 +422,7 @@ SrcBaseClassDecl base_class_decl
             new List(new SrcDefaultElementList(new List(enum_specification))),
             new Opt(),
             comment.getSrcAnnotationOpt(),
-            new SrcEndDecl(enum_name.getID()),
-            ENUMERATION);
+            new SrcEndDecl(enum_name.getID()));
     :}
     | error 
     {: 
@@ -450,10 +449,10 @@ SrcExtendsClauseShortClass extends_clause_short_class
     :}
     ;
 
-SrcComponentClause enum_specification
+SrcEnumComponentClause enum_specification
     = enum_contents
     {:
-        return new SrcComponentClause(
+        return new SrcEnumComponentClause(
                 false, false, false, false, false,
                 new Opt(),
                 new Opt(new SrcConstant()),
@@ -1391,12 +1390,8 @@ SrcWhenClause when_clause =
   ;
 
 SrcForStmt for_stmt =
-  FOR for_indices LOOP for_stmt_list END_FOR comment  
-                         {: return new SrcForStmt(comment, for_indices, for_stmt_list); :}
-  ;
-  
-SrcForStmtList for_stmt_list =
-  statement* {: return new SrcForStmtList(statement); :}
+  FOR for_indices LOOP statement* END_FOR comment  
+                         {: return new SrcForStmt(comment, for_indices, statement); :}
   ;
 
 SrcWhileStmt while_stmt = 
@@ -1590,12 +1585,18 @@ SrcComment comment =
   ;
   
 SrcStringComment string_comment =
-  STRING.s      {: return new SrcStringComment(s); :}
-  | string_comment PLUS STRING.s {: string_comment.setSrcComment(string_comment.getSrcComment().concat(s));
-                                    return string_comment; :}
-  
+  string_comment_exp    {: return new SrcStringComment(string_comment_exp); :}
   ;
- 
+
+SrcExp string_comment_exp
+  = string      
+  | string_comment_exp PLUS string {: return new SrcAddExp(string_comment_exp, string); :}
+  ;
+
+ SrcStringLitExp string =
+  STRING.s  {: return new SrcStringLitExp(s); :}
+  ;
+
  SrcIdDecl id_decl = 
    ID.id   {: return new SrcIdDecl(id); :}
  ;

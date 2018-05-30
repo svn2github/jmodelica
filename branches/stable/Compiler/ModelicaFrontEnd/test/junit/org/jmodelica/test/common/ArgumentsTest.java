@@ -8,43 +8,52 @@ import org.junit.Test;
 
 public class ArgumentsTest {
 
-    @Test(expected = InvalidArgumentException.class)
-    public void onlyOptionArguments() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-modelicapath=X", "-log=w|os|stderr"
-        });
+    private static Arguments construct(String... args) throws InvalidArgumentException {
+        return new Arguments("ModelicaCompiler", args);
     }
 
-    @Test()
+    @Test(expected = InvalidArgumentException.class)
+    public void manyInputs() throws InvalidArgumentException {
+        construct("a", "b", "c", "d");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void unknownOption() throws InvalidArgumentException {
+        construct("-target=cs", "-log=w|os|stderr", "test", "libPath", "-unknownOption=value");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void noInput() throws InvalidArgumentException {
+        construct();
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void onlyOptionArguments() throws InvalidArgumentException {
+        construct("-target=cs", "-modelicapath=X", "-log=w|os|stderr");
+    }
+
+    @Test
     public void parseOneNoOptionArgument() throws InvalidArgumentException {
-        Arguments args = new Arguments("ModelicaCompiler", new String[] {
-            "-target=parse", "-modelicapath=X", "-log=w|os|stderr", "libraryPath"
-        });
+        Arguments args = construct("-target=parse", "-modelicapath=X", "-log=w|os|stderr", "libraryPath");
         assertEquals("libraryPath", args.libraryPath());
     }
 
     @Test
     public void classNameOneNoOptionArgument() throws InvalidArgumentException {
-        Arguments args = new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test"
-        });
+        Arguments args = construct("-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test");
         assertEquals("test", args.className());
     }
 
     @Test
     public void libraryPathOneNoOptionArgument() throws InvalidArgumentException {
-        Arguments args = new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test"
-        });
+        Arguments args = construct("-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test");
         assertEquals("test", args.className());
         assertEquals("", args.libraryPath());
     }
 
     @Test
     public void twoNonOptionArguments() throws InvalidArgumentException {
-        Arguments args = new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-modelicapath=X", "-log=w|os|stderr", "libraryPath", "test"
-        });
+        Arguments args = construct("-target=cs", "-modelicapath=X", "-log=w|os|stderr", "libraryPath", "test");
         assertEquals("test", args.className());
         assertEquals("libraryPath", args.libraryPath());
     }
@@ -55,57 +64,42 @@ public class ArgumentsTest {
 
     @Test
     public void oneArgumentModelicaPathAndParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=parse", "-modelicapath=X", "-log=w|os|stderr", "test"
-        });
+        construct("-target=parse", "-modelicapath=X", "-log=w|os|stderr", "test");
     }
 
     @Test
     public void oneArgumentModelicaPathNoParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test"
-        });
+        construct("-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test");
     }
 
     @Test
     public void oneArgumentNoModelicaPathAndParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=parse", "-log=w|os|stderr", "test"
-        });
+        construct("-target=parse", "-log=w|os|stderr", "test");
     }
 
     @Test(expected = InvalidArgumentException.class)
     public void oneArgumentNoModelicaPathNoParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-log=w|os|stderr", "test"
-        });
+        construct("-target=cs", "-log=w|os|stderr", "test");
     }
 
     @Test(expected = InvalidArgumentException.class)
     public void twoArgumentsModelicaPathAndParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=parse", "-modelicapath=X", "-log=w|os|stderr", "test", "libPath"
-        });
+        construct("-target=parse", "-modelicapath=X", "-log=w|os|stderr", "test", "libPath");
     }
 
     @Test
     public void twoArgumentsModelicaPathNoParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test", "libPath"
-        });
+        construct("-target=cs", "-modelicapath=X", "-log=w|os|stderr", "test", "libPath");
     }
 
     @Test(expected = InvalidArgumentException.class)
     public void twoArgumentsNoModelicaPathAndParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=parse", "-log=w|os|stderr", "test", "libPath"
-        });
+        construct("-target=parse", "-log=w|os|stderr", "test", "libPath");
     }
 
     @Test
     public void twoArgumentsNoModelicaPathNoParse() throws InvalidArgumentException {
-        new Arguments("ModelicaCompiler", new String[] {
-            "-target=cs", "-log=w|os|stderr", "test", "libPath"
-        });
+        construct("-target=cs", "-log=w|os|stderr", "test", "libPath");
     }
+
 }

@@ -230,21 +230,31 @@ public final class FileUtil {
     }
 
     /**
-     * Deletes a directory, any of its sub-directories, and all files within the
-     * directories.
+     * Deletes a file or directory recursively.
+     * <p>
+     * If a file is provided, that file is deleted, if a directory is provided,
+     * then all child files and directories are deleted recursively first.
+     * <p>
+     * The return argument of this method indicates whether the delete was
+     * successful, basically an aggregate of the return value for
+     * {@link File#delete()}.
      * 
-     * @param directory
-     *            The directory to delete.
+     * @param file The file or directory to delete.
+     * @return True if the file doesn't exist, or if, file or entire directory
+     *              structure was deleted, otherwise false.
      */
-    public static void recursiveDelete(File directory) {
-        for (File file : directory.listFiles()) {
-            if (file.isDirectory()) {
-                recursiveDelete(file);
-            } else {
-                file.delete();
+    public static boolean recursiveDelete(File file) {
+        if (!file.exists()) {
+            return true;
+        }
+        boolean res = true;
+        if (file.isDirectory()) {
+            for (File subFile : file.listFiles()) {
+                res &= recursiveDelete(subFile);
             }
         }
-        directory.delete();
+        res &= file.delete();
+        return res;
     }
 
     /**

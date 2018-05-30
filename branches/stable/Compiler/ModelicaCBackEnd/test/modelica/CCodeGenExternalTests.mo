@@ -3332,6 +3332,87 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 ")})));
 end TestExtObject8;
 
+model TestExtObject9
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO eo;
+        output Real y;
+        external;
+    end f;
+    
+    parameter Real x(fixed=false);
+    parameter EO eo = EO(x);
+    parameter Real y = f(eo);
+    
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestExtObject9",
+            description="",
+            template="
+$C_set_start_values$
+$C_DAE_initial_dependent_parameter_assignments$
+$C_ode_initialization$
+$C_dae_init_blocks_residual_functions$
+$C_destruct_external_object$
+",
+            generatedCode="
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x_0 = (0.0);
+    _y_2 = (0.0);
+    _eo_1 = (NULL);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _x_0 = 0.0;
+    _eo_1 = func_CCodeGenExternalTests_TestExtObject9_EO_constructor_exp1(_x_0);
+    _y_2 = func_CCodeGenExternalTests_TestExtObject9_f_exp2(_eo_1);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end TestExtObject9;
+
 model TestExtObjectArray1
     ExtObject myEOs[2] = { ExtObject(), ExtObject() };
     Real z;
