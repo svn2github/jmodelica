@@ -1,10 +1,10 @@
 def buildFullImage() {
     def dockerfile = 'Dockerfile_full_image'
     
-    if ("${JOB_NAME}".toLowerCase.contains("ubuntu")) {
+    if ("${JOB_NAME}".toLowerCase().contains("ubuntu")) {
         echo "BUILDING UBUNTU FULL IMAGE"
         return docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=18.04 --build-arg DOCKER_JM_TESTS_WS=/usr/local/")
-    } else if ("${JOB_NAME}".toLowerCase.contains("centos")) {
+    } else if ("${JOB_NAME}".toLowerCase().contains("centos")) {
         echo "BUILDING CENTOS FULL IMAGE"
         return docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.3 --build-arg DOCKER_JM_TESTS_WS=/usr/local/")
     } else {
