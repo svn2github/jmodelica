@@ -23,15 +23,15 @@ For the CentOS version 7.3, run:
 
 docker build -f ./Dockerfile_full_image . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.3 .
 
-Available environment variables: 
+After build a docker image you can list all your local images by typing "docker images". By using the "IMAGE ID" visible
+when typing "docker images", you can attach to them by
 
-DOCKER_LINUX_DIST=<linux-distribution> 
-DOCKER_DIST_TAG=<distribution-release> 
+docker attach <IMAGE ID>
 
-After building, you can for example list all the installed packages (for the ubuntu image) with the following command: 
+You can also run a simple command by
+
+docker run -it <IMAGE ID> echo "hello"
+
+Or also directly refer to the base image from its repository:
+
 docker run -it jmodelica/ubuntu_base:18.04 apt list --installed
-
-to instantiate a container of the resulting image, try
-
-> docker image ls 
-> docker run -v C:/path/to/shared/folder/:/shared -it  --name jm-<os>-<tag> <image-id>
