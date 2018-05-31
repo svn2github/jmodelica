@@ -1032,6 +1032,22 @@ class Test_FMUModelME2:
         #Verify that a simulation is successful
         res=coupled.simulate(options=opts)
         
+        from pyfmi.debug import CVodeDebugInformation
+        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
+        
+    @testattr(stddist_full = True)
+    def test_simulate_with_debug_option_no_state(self):
+        coupled = load_fmu(self.no_state_name)
+
+        opts=coupled.simulate_options()
+        opts["logging"] = True
+        
+        #Verify that a simulation is successful
+        res=coupled.simulate(options=opts)
+        
+        from pyfmi.debug import CVodeDebugInformation
+        debug = CVodeDebugInformation(coupled.get_identifier()+"_debug.txt")
+        
     @testattr(stddist_full = True)
     def test_simulate_options(self):
         """

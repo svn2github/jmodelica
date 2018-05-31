@@ -1060,4 +1060,31 @@ end LoadResource6;
 
 end LoadResource;
 
+model BindingExpVariability1
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    Real x;
+    parameter EO eo = EO(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BindingExpVariability1",
+            description="",
+            errorMessage="
+Error at line 16, column 5, in file '...', BINDING_EXPRESSION_VARIABILITY:
+  Variability of binding expression (continuous-time) must be lower or equal to the variability of the component (parameter)
+")})));
+end BindingExpVariability1;
+
 end VariabilityTests;

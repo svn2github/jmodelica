@@ -122,7 +122,7 @@ SrcRealClassDecl      : SrcPrimitiveClassDecl;
 SrcIntegerClassDecl   : SrcPrimitiveClassDecl;
 SrcBooleanClassDecl   : SrcPrimitiveClassDecl;
 SrcStringClassDecl    : SrcPrimitiveClassDecl;
-SrcEnumClassDecl      : SrcPrimitiveClassDecl ::= <Symbol:Symbol>; // <Symbol> is necessary to achieve formatted pretty print.
+SrcEnumClassDecl      : SrcPrimitiveClassDecl;
 
 SrcEnumLiteralDecl : SrcComponentDecl;
 
@@ -184,6 +184,7 @@ SrcComponentClause : SrcElement ::= <Redeclare:boolean>
                               SrcComponentDecl*
                               [SrcConstrainingClause] 
                               SrcComment;
+SrcEnumComponentClause : SrcComponentClause;
 
 SrcComponentDecl : SrcBaseNode ::= Name:SrcIdDecl 
                                    [VarArraySubscripts:SrcArraySubscripts] 
@@ -208,7 +209,7 @@ SrcInput      : SrcTypePrefixInputOutput;
 SrcOutput     : SrcTypePrefixInputOutput;
 
 SrcComment       : SrcBaseNode ::= [SrcStringComment] [SrcAnnotation];
-SrcStringComment : SrcBaseNode ::= <SrcComment:String>;
+SrcStringComment : SrcBaseNode ::= SrcExp;
 
 // Annotations and modifications
 SrcConditionalAttribute : SrcBaseNode ::= SrcExp;
@@ -263,10 +264,8 @@ SrcElseClause          : SrcBaseNode ::= Stmt:SrcStatement*;
 abstract SrcIfWhenClause : SrcBaseNode  ::= Test:SrcExp SrcStatement*;
 SrcIfClause            : SrcIfWhenClause;
 SrcWhenClause          : SrcIfWhenClause;
-SrcForStmt             : SrcStatement ::= SrcForIndex* SrcForStmtList;
-SrcForStmtList         : SrcBaseNode ::= Stmt:SrcStatement*;
+SrcForStmt             : SrcStatement ::= SrcForIndex* SrcStatement*;
 SrcWhileStmt           : SrcStatement ::= Test:SrcExp SrcWhileStmt:SrcStatement*;
-SrcAlgorithmAnnotation : SrcStatement ::= SrcAnnotation;
 
 SrcIfExp     : SrcExp ::= SrcIfExp:SrcExp ThenExp:SrcExp ElseExp:SrcExp;
 

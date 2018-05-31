@@ -331,6 +331,19 @@ Error at line 7, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/Typ
 ")})));
 end TypeRel6;
 
+model SplitStringComment
+ Real x "a"+"b"+"c";
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SplitStringComment",
+            description="tests flattening of split string comments",
+            flatModel="
+fclass TypeTests.SplitStringComment
+ Real x \"abc\";
+end TypeTests.SplitStringComment;
+")})));
+end SplitStringComment;
 
 
 model AbsType1

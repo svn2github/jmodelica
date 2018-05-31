@@ -1435,11 +1435,56 @@ class Test_FMI_ODE_2:
 
         _ex1_name = compile_fmu("NoState.Example1", file_name, version=2.0)
         _ex2_name = compile_fmu("NoState.Example2", file_name, version=2.0)
-        #_in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
-        #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
+        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in, version=2.0)
+        _in_disc_name = compile_fmu("Inputs.PlantDiscreteInputs", file_name_in, version=2.0)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=2.0)
         #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+    
+    @testattr(stddist_full = True)
+    def test_discrete_input(self):
+        model = load_fmu("Inputs_PlantDiscreteInputs.fmu")
         
+        input_object = (["Tenv","onSwitch"], N.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]))
+        
+        res = model.simulate(input=input_object)
+        
+        nose.tools.assert_almost_equal(res.final('onSwitch') ,1.000000000)  
+        
+        model.reset()
+        
+        input_object = (["Tenv","onSwitch"], N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        nose.tools.assert_raises(FMUException, model.simulate, input=input_object)
+    
+    
+    @testattr(stddist_full = True)
+    def test_simple_input(self):
+        model = load_fmu("Inputs_SimpleInput.fmu")
+        
+        input_object = ("u", N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        res = model.simulate(input=input_object)
+        
+        nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('u') ,1.000000000)
+        
+        model.reset()
+        
+        input_object = ("u", N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        res = model.simulate(input=input_object)
+        
+        nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('u') ,1.000000000)
+    
+    @testattr(stddist_full = True)
+    def test_input_values_not_input(self):
+        model = load_fmu("Inputs_SimpleInput.fmu")
+        
+        input_object = ("y", N.array([[0.0, 0.0], [1.0, 1.0]]))
+        
+        nose.tools.assert_raises(FMUException, model.simulate, input=input_object)
+    
     @testattr(stddist_base = True)
     def test_cc_with_radau(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")

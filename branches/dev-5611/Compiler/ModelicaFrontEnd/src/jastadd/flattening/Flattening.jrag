@@ -1460,7 +1460,7 @@ aspect Flattening {
      *          a {@link FStringComment} instance (a comment node in the flat tree).
      */
     public FStringComment SrcStringComment.flatten() {
-        String comment = getSrcComment();
+        String comment = getComment();
         StringBuilder escapedComment = new StringBuilder();
         int length = comment.length();
 
@@ -1482,6 +1482,27 @@ aspect Flattening {
             }
         }
         return new FStringComment(escapedComment.toString().replaceAll("\\\\", ""));
+    }
+
+    public String SrcStringComment.getComment() {
+        return getSrcExp().concatStringLit();
+    }
+
+    public String ASTNode.concatStringLit() {
+        StringBuilder sb = new StringBuilder();
+        concatStringLit(sb);
+        return sb.toString();
+    }
+
+    public void ASTNode.concatStringLit(StringBuilder sb) {
+        for(ASTNode child : children) {
+            child.concatStringLit(sb);
+        }
+    }
+
+    @Override
+    public void SrcStringLitExp.concatStringLit(StringBuilder sb) {
+        sb.append(getSTRING());
     }
 
     public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
@@ -2988,10 +3009,6 @@ aspect InstantiatedExpressions {
     
     protected abstract FStatement SrcStatement.instantiateStatement();
     
-    protected FStatement SrcAlgorithmAnnotation.instantiateStatement() {
-        return null;
-    }
-    
     protected FAssignStmt SrcAssignStmt.instantiateStatement() {
         FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
         left.setLocation(this);
@@ -3057,7 +3074,7 @@ aspect InstantiatedExpressions {
         List il = new List();
         for (SrcForIndex i : getSrcForIndexList()) 
             il.add(i.instantiate());
-        List sl = SrcStatement.instantiateStatementList(getSrcForStmtList().getStmts());
+        List sl = SrcStatement.instantiateStatementList(getSrcStatementList());
         return new InstForStmt(il, sl);
     }
     

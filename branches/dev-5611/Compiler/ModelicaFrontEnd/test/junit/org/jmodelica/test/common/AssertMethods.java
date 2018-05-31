@@ -1,16 +1,17 @@
-package test.Annotation;
+package org.jmodelica.test.common;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jmodelica.util.collections.ListUtil;
 import org.junit.Assert;
 
 /**
- * Test utility methods 
+ * Test assert utility methods 
  */
-public class testUtil {
+public class AssertMethods {
     /* ============= *
      *  Assertions.  *
      * ============= */
@@ -27,10 +28,10 @@ public class testUtil {
      * @param actual
      *            Iterable of the actual elements.
      */
-    protected final <T extends Comparable<T>> void assertIdenticalSets(String baseMessage, Iterable<T> expected,
+    public static final <T extends Comparable<T>> void assertIdenticalSets(String baseMessage, Iterable<T> expected,
             Iterable<T> actual) {
 
-        List<T> actualList = list(actual);
+        List<T> actualList = ListUtil.list(actual);
 
         List<T> missing = new ArrayList<T>();
 
@@ -48,24 +49,6 @@ public class testUtil {
         String add = additional.size() > 0 ? "\n    Should not be found: " + additional.toString() : "";
         String miss = missing.size() > 0 ? "\n    Should be found:    " + missing.toString() : "";
         Assert.fail(baseMessage + add + miss);
-    }
-
-    /**
-     * Converts an {@link Iterable} to a {@link List}.
-     * 
-     * @param <T>
-     *            The type of element in the iterable.
-     * @param iterable
-     *            The iterable which elements to put in the list.
-     * @return
-     *         a list containing all the elements in {@code iterable}.
-     */
-    protected <T> List<T> list(Iterable<T> iterable) {
-        List<T> list = new ArrayList<T>();
-        for (T element : iterable) {
-            list.add(element);
-        }
-        return list;
     }
 
     /**

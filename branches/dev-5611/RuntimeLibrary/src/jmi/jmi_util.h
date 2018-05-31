@@ -750,7 +750,7 @@ struct jmi_directional_derivative_callbacks_t {
 jmi_directional_derivative_callbacks_t* jmi_create_directional_derivative_callbacks(size_t n_input, size_t n_output);
 
 #define JMI_INIT_DIRECTIONAL_DERIVATIVE_CALLBACKS(DD, FMAX, FMIN, FNOM, FNOMOUT, F, LABEL) \
-    jmi_init_directional_derivative_callbacks(DD, &FMAX, &FMIN, &FNOM, &FNOMOUT, &F, "LABEL");
+    jmi_init_directional_derivative_callbacks(DD, &FMAX, &FMIN, &FNOM, &FNOMOUT, &F, #LABEL);
 void jmi_init_directional_derivative_callbacks(jmi_directional_derivative_callbacks_t* dd, jmi_directional_derivative_attributes_func_t F_max,
 	jmi_directional_derivative_attributes_func_t F_min,
 	jmi_directional_derivative_attributes_func_t F_input_nominal,

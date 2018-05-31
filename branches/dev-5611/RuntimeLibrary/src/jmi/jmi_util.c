@@ -561,6 +561,8 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
     jmi_real_t* output_nominal = work_array + 3*n_input;
     jmi_real_t* output_temp = work_array + 3*n_input+n_output;
     jmi_int_t* error_indicator = jmi_get_int_work_array(jmi->int_work, JMI_MAX(n_output, n_input));
+    jmi_log_node_t log_node;
+    int log_level_limit = 5;
 
     /* Setup max/min/nominal values for the inputs */
     ef = dd_callback->F_max(args, input_max);
@@ -602,9 +604,21 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
         return ef;
     }
 
+    if (jmi->jmi_callbacks.log_options.log_level >= log_level_limit){
+        log_node = jmi_log_enter_fmt(jmi->log, logInfo, "FiniteDifferenceFunction", 
+                                     "Finite difference invoked for <function_finite_dir_der: %s>", dd_callback->label);
+        jmi_log_reals(jmi->log, log_node, logInfo, "d_input", d_input, n_input);
+        jmi_log_reals(jmi->log, log_node, logInfo, "input", input, n_input);
+        jmi_log_reals(jmi->log, log_node, logInfo, "output", output, n_output);
+        jmi_log_reals(jmi->log, log_node, logInfo, "max", input_max, n_input);
+        jmi_log_reals(jmi->log, log_node, logInfo, "min", input_min, n_input);
+        jmi_log_reals(jmi->log, log_node, logInfo, "nominal", input_nominal, n_input);
+    }
+
     /* Make d_output be filled with zeroes from start */
     for (i = 0; i < n_output; i++) {
-        d_output[i] = 0.0;
+        d_output[i]    = 0.0;
+        output_temp[i] = 0.0;
     }
 
     delta = sqrt(JMI_EPS);
@@ -619,9 +633,15 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
         input[j] += inc;
 
         /* Make sure we're inside the bounds */
-        if( input[j] > input_max[j] || input[j] < input_min[j]) {
+        if (input[j] > input_max[j]) {
             inc = -inc;
             input[j] = input_orig + inc;
+            if (input[j] < input_min[j]) {
+                jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not find a perturbation for <input: %I> that is within its bounds, <value: %d>, <max: %d>, <min: %d> in <function_finite_dir_der: %s>."
+                    , j, input_orig, input_max[j], input_min[j], dd_callback->label);
+                if (jmi->jmi_callbacks.log_options.log_level >= log_level_limit) jmi_log_leave(jmi->log, log_node);
+                return -1;
+            }
         }
         ef = dd_callback->F(args, input, output_temp);
         /* If failure, try other direction */
@@ -633,6 +653,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
 
         if (ef !=0) {
             jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Could not evaluate callback in <function_finite_dir_der: %s>.", dd_callback->label);
+            if (jmi->jmi_callbacks.log_options.log_level >= log_level_limit) jmi_log_leave(jmi->log, log_node);
             return ef;
         }
 
@@ -642,9 +663,9 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
             FALSE, jmi->jmi_callbacks.log_options.log_level, "function_finite_dir_der");
         if (ef !=0) {
             jmi_log_node(jmi->log, logError, "DirectionalDerivative", "Illegal output from <function_finite_dir_der: %s>.", dd_callback->label);
+            if (jmi->jmi_callbacks.log_options.log_level >= log_level_limit) jmi_log_leave(jmi->log, log_node);
             return ef;
-        } 
-
+        }
 
         /* Reset input vector */
         input[j] = input_orig;
@@ -652,6 +673,11 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
         for (i = 0; i < n_output; i++) {
             d_output[i] += (output_temp[i]-output[i])/inc*d_input[j]; 
         }
+    }
+
+    if (jmi->jmi_callbacks.log_options.log_level >= log_level_limit) {
+        jmi_log_reals(jmi->log, log_node, logInfo, "d_output", d_output, n_output);
+        jmi_log_leave(jmi->log, log_node);
     }
 
     /* reevaluate so that we now that the original values are correct */

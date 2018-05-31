@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016-2017 Modelon AB
+Copyright (C) 2016-2018 Modelon AB
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,6 +25,11 @@ aspect CCodeGenExpressions {
      * Class.genTempVars_C(), Class.prettyPrint_C() and finaly
      * Class.genTempFree_C().
      =========================================================================*/
+
+    @Override
+    public void FNoExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("NULL");
+    }
 
     @Override
     public void FAbsExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
