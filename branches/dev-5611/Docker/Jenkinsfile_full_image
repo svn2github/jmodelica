@@ -6,7 +6,7 @@ def buildFullImage() {
         return docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=18.04 --build-arg DOCKER_JM_TESTS_WS=/usr/local/")
     } else if ("${JOB_NAME}".toLowerCase().contains("centos")) {
         echo "BUILDING CENTOS FULL IMAGE"
-        return docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.3 --build-arg DOCKER_JM_TESTS_WS=/usr/local/")
+        return docker.build("jmodelica-image", "-f ${dockerfile} . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.4 --build-arg DOCKER_JM_TESTS_WS=/usr/local/")
     } else {
         echo "NO OS AVAILABLE FOR CURRENT JOB"
     }
