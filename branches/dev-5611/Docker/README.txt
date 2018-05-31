@@ -19,9 +19,9 @@ For the latest version of Ubuntu, navigate to the folder with the Dockerfile, an
 
 docker build -f ./Dockerfile_full_image . --build-arg DOCKER_LINUX_DIST=jmodelica/ubuntu_base --build-arg DOCKER_DIST_TAG=18.04 .
 
-For the CentOS version 7.3, run:
+For the CentOS version 7.4, run:
 
-docker build -f ./Dockerfile_full_image . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.3 .
+docker build -f ./Dockerfile_full_image . --build-arg DOCKER_LINUX_DIST=jmodelica/centos_base --build-arg DOCKER_DIST_TAG=7.4 .
 
 After build a docker image you can list all your local images by typing "docker images". By using the "IMAGE ID" visible
 when typing "docker images", you can attach to them by
