@@ -14,7 +14,7 @@
 By running the Dockerfile, a base image for JModelica is built, i.e. an 
 image containing necessities to make a full installation of JModelica.
 
-Currently this build only supports Ubuntu 7.3 and CentOS 7.3.
+Currently this build only supports Ubuntu 18.04 and CentOS 7.4 (7.4.1708).
 
 To run the Dockerfile you need to install Docker, then, by navigating to 
 the folder with the Dockerfile, the image is built by writing in a console window
