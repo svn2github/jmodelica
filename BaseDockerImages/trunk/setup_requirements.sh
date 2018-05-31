@@ -23,14 +23,10 @@ BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran ipyt
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
-    #Avoid packages below since they update the OS to the latest version
-    echo exclude=initscript*,centos-releas*,cyrus*,openldap-dev*,apr-util-dev*,subversion-dev* >> /etc/yum.conf
-    yum -y update
 	yum -y install epel-release  # for some python packages 
 	alias pckinstall="yum -y install"
 elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
-	yum -y update
 	yum -y install epel-release  # for some python packages 
 	alias pckinstall="yum -y install"
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then 

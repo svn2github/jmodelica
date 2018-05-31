@@ -18,8 +18,15 @@ Currently this build only supports Ubuntu 18.04 and CentOS 7.4 (7.4.1708).
 
 To run the Dockerfile you need to install Docker, then, by navigating to 
 the folder with the Dockerfile, the image is built by writing in a console window
+the following:
 
-docker build -f ./Dockerfile .
+For Ubuntu 18.04
+
+docker build -f ./Dockerfile --pull --no-cache --build-arg DOCKER_LINUX_DIST=ubuntu --build-arg DOCKER_DIST_TAG=18.04 .
+
+For CentOS 7.4
+
+docker build -f ./Dockerfile --pull --no-cache --build-arg DOCKER_LINUX_DIST=centos --build-arg DOCKER_DIST_TAG=7.4.1708 .
 
 The image can also be built on Jenkins using a host machine that 
 has the Docker plugin installed by using the Jenkinsfile. Note that 

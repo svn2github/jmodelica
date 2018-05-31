@@ -15,7 +15,7 @@
 def ubuntuImage18_04
 def centosImage7_4
 def buildBaseImage(targetName, linuxDist, distTag) {
-    return docker.build("jmodelica/$targetName", "--no-cache --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag .")
+    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag .")
 }
 stage ('Building') {
     parallel Ubuntu: {
