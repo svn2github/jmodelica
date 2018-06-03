@@ -1364,12 +1364,16 @@ SrcIfStmt if_stmt =
   ;  
 
 List if_clause_list =
-    if_clause                        {: return new List().add(if_clause); :}
-  | if_clause_list ELSEIF if_clause  {: return if_clause_list.add(if_clause); :}
+    if_clause                      {: return new List().add(if_clause); :}
+  | if_clause_list else_if_clause  {: return if_clause_list.add(else_if_clause); :}
   ;
 
 SrcIfClause if_clause =
   exp THEN statement*  {: return new SrcIfClause(exp, statement); :}
+  ;
+
+SrcIfClause else_if_clause =
+  ELSEIF if_clause  {: return if_clause; :}
   ;
 
 SrcElseClause else_stmts =
@@ -1381,12 +1385,16 @@ SrcWhenStmt when_stmt =
   ;  
 
 List when_clause_list =
-    when_clause                            {: return new List().add(when_clause); :}
-  | when_clause_list ELSEWHEN when_clause  {: return when_clause_list.add(when_clause); :}
+    when_clause                        {: return new List().add(when_clause); :}
+  | when_clause_list else_when_clause  {: return when_clause_list.add(else_when_clause); :}
   ;
 
 SrcWhenClause when_clause =
   exp THEN statement*  {: return new SrcWhenClause(exp, statement); :}
+  ;
+
+SrcWhenClause else_when_clause =
+  ELSEWHEN exp THEN statement*  {: return new SrcWhenClause(exp, statement); :}
   ;
 
 SrcForStmt for_stmt =
