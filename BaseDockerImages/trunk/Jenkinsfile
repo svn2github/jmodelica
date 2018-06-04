@@ -30,9 +30,6 @@ stage ('Building') {
             centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
-                sh 'cat /etc/passwd'
-                sh 'whoami'
-                sh 'sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")'
             }
         }
     }
@@ -40,8 +37,8 @@ stage ('Building') {
 node('docker'){
     stage ('Push') {
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage18_04.push("ubuntu-dev")
-            centosImage7_4.push("centos-dev")
+            ubuntuImage18_04.push("18.04)
+            centosImage7_4.push("7.4")
         }
     }
 }
