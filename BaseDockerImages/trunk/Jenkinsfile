@@ -30,6 +30,9 @@ stage ('Building') {
             centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
+                sh 'cat /etc/passwd'
+                sh 'whoami'
+                sh 'sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")'
             }
         }
     }
