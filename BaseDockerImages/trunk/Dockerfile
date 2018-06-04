@@ -23,4 +23,7 @@ ENV USR_PATH=${DOCKER_USR_PATH}
 
 COPY *.sh ${USR_PATH}/Docker/build/
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
+RUN useradd baseuser && groupadd docker && usermod -aG docker baseuser
+RUN chown -R baseuser ~baseuser && chgrp -R $(id -gn baseuser) ~baseuser
+USER baseuser
 RUN ${USR_PATH}/Docker/build/setup.sh
