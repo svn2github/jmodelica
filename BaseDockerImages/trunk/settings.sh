@@ -16,6 +16,8 @@
 
 if [ -f /etc/centos-release ]; then
 	export LINUX_DISTRIBUTION=CENTOS
+    #For CI users
+    chmod 644 /etc/passwd && chmod 644 /etc/group
 elif [ -f /etc/redhat-release ]; then 
 	export LINUX_DISTRIBUTION=REDHAT
 elif [ -f /etc/debian_version ]; then 
