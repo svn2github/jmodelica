@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5623
+Fixed issue with using the result filter together with FMI1
+
 ; Change ; Minor ; MSL ; #5619
 Patched MSL resources to work with VS2015.
 
