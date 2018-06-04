@@ -74,7 +74,6 @@ public abstract class AbstractModelicaScanner<T> extends beaver.Scanner {
 				++numberOfLineBreaksAdded;
 			}
 		}
-		
 		return numberOfLineBreaksAdded;
 	}
 

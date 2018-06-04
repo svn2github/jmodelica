@@ -6,7 +6,6 @@ public enum FormattingType {
     LINE_BREAK,
     COMMENT,
     VISIBILITY_INFO,
-    PARENTHESIS,
     MIXED,
     EMPTY;
 }

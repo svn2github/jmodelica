@@ -1498,9 +1498,7 @@ SrcExp primary =
   | STRING.s               {: return new SrcStringLitExp(s); :}
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
-  | LPAREN exp.a RPAREN {: formattingRecorder.addItem(FormattingType.PARENTHESIS, "(", LPAREN);
-                           formattingRecorder.addItem(FormattingType.PARENTHESIS, ")", RPAREN);
-                           return a; :}
+  | LPAREN exp.a RPAREN {: return new SrcParExp(a); :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}
   | LBRACE function_arguments RBRACE {: return new SrcArrayConstructor(function_arguments); :}
