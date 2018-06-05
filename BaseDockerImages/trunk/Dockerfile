@@ -17,7 +17,7 @@ ARG DOCKER_DIST_TAG=18.04
 
 FROM $DOCKER_LINUX_DIST:$DOCKER_DIST_TAG
 MAINTAINER Modelon
-RUN useradd baseuser && groupadd docker && usermod -aG docker baseuser
+RUN useradd baseuser && groupadd docker && usermod -aG docker baseuser && chown -R baseuser ~
 USER baseuser
 ARG DOCKER_USR_PATH=/home/baseuser
 ENV USR_PATH=${DOCKER_USR_PATH}
