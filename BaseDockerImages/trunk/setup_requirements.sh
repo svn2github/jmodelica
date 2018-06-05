@@ -19,7 +19,7 @@ set -e
 
 BUILD_PKGS_JM_COMMON="sudo cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy python-matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
-BUILD_PKGS_JM_DEBIAN="lsb dos2unix dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
+BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev lsb"
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
