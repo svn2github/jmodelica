@@ -22,6 +22,9 @@ stage ('Building') {
         node('docker') {
             checkout scm
             ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04")
+            ubuntuImage18_04.inside {
+                sh 'whoami'
+            }
         }
     },
     CentOS7_4: {
@@ -30,6 +33,7 @@ stage ('Building') {
             centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
+                sh 'whoami'
             }
         }
     }
@@ -37,8 +41,8 @@ stage ('Building') {
 node('docker'){
     stage ('Push') {
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage18_04.push("18.04")
-            centosImage7_4.push("7.4")
+            ubuntuImage18_04.push("devel")
+            centosImage7_4.push("devel")
         }
     }
 }
