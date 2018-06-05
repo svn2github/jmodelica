@@ -24,8 +24,11 @@ COPY Docker/*.py ${USR_PATH}/Docker/build/
 
 COPY / ${USR_PATH}/JModelica.org/
 
+USER root
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
+USER baseuser
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
+
 
 ###Tests
 #Need to set the matplotlib backend due to no display (IMPORTANT)
