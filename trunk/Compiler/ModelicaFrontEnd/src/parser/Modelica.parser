@@ -681,7 +681,6 @@ SrcAnnotation class_annotation
     = annotation 
       SEMICOLON 
     {:
-        formattingRecorder.addItem(FormattingType.VISIBILITY_INFO, ";", SEMICOLON);
         return annotation;
     :}
     ;
