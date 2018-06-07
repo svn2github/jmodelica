@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5624
+Made binary result saving more robust.
+
 ; Fixed ; Minor ; PyFMI ; #5623
 Fixed issue with using the result filter together with FMI1
 
