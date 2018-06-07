@@ -24,7 +24,7 @@ RUN whoami
 COPY --chown=baseuser Docker/*.sh ${USR_PATH}/Docker/build/
 COPY --chown=baseuser Docker/*.py ${USR_PATH}/Docker/build/
 
-COPY / ${USR_PATH}/JModelica.org/
+COPY --chown=baseuser / ${USR_PATH}/JModelica.org/
 
 #USER root
 #RUN chown -R baseuser /home/baseuser && cat /etc/passwd
