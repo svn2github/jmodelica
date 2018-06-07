@@ -21,7 +21,7 @@ RUN whoami
 #RUN apt list --installed
 #RUN if [ "$DOCKER_LINUX_DIST"=="ubuntu" ] ; then apt list --installed ; else yum list installed ; fi
 
-COPY --chown=baseuser <hostPath>Docker/*.sh ${USR_PATH}/Docker/build/
+COPY --chown=baseuser Docker/*.sh ${USR_PATH}/Docker/build/
 COPY --chown=baseuser Docker/*.py ${USR_PATH}/Docker/build/
 
 COPY / ${USR_PATH}/JModelica.org/
