@@ -16,6 +16,8 @@ ARG DOCKER_USR_PATH=/home/baseuser
 ENV USR_PATH=${DOCKER_USR_PATH}
 ENV JM_TESTS_WS=${DOCKER_JM_TESTS_WS}
 
+RUN whoami
+
 #RUN apt list --installed
 #RUN if [ "$DOCKER_LINUX_DIST"=="ubuntu" ] ; then apt list --installed ; else yum list installed ; fi
 
@@ -24,17 +26,17 @@ COPY Docker/*.py ${USR_PATH}/Docker/build/
 
 COPY / ${USR_PATH}/JModelica.org/
 
-USER root
+#USER root
 #RUN chown -R baseuser /home/baseuser && cat /etc/passwd
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
-USER baseuser
+#USER baseuser
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 
 ###Tests
 #Need to set the matplotlib backend due to no display (IMPORTANT)
 ENV MPLBACKEND=Agg
 #Run the tests
-USER root
-RUN chmod -R 777 ${USR_PATH} && mkdir -p $JM_TESTS_WS/test_results && chmod 777 $JM_TESTS_WS/test_results
-USER baseuser
+#USER root
+RUN mkdir -p $JM_TESTS_WS/test_results
+#USER baseuser
 RUN cd ${USR_PATH}/jm_install && printenv && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
