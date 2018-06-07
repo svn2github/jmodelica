@@ -23,21 +23,15 @@ RUN whoami
 
 COPY --chown=baseuser Docker/*.sh ${USR_PATH}/Docker/build/
 COPY --chown=baseuser Docker/*.py ${USR_PATH}/Docker/build/
-
 COPY --chown=baseuser / ${USR_PATH}/JModelica.org/
 
-#USER root
-#RUN chown -R baseuser /home/baseuser && cat /etc/passwd
 RUN ls -la ${USR_PATH}/Docker/build
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
-#USER baseuser
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 
 ###Tests
 #Need to set the matplotlib backend due to no display (IMPORTANT)
 ENV MPLBACKEND=Agg
 #Run the tests
-#USER root
 RUN mkdir -p $JM_TESTS_WS/test_results
-#USER baseuser
 RUN cd ${USR_PATH}/jm_install && printenv && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
