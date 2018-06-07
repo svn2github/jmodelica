@@ -225,19 +225,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>generate_block_jacobian</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, then code for computing block Jacobians is generated. If blocks are needed to compute ODE jacobians they will be generated anyway
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>generate_html_diagnostics</literal>
                 </entry>
                 <entry>
@@ -260,19 +247,6 @@
                 </entry>
                 <entry>
                 If enabled, then flat model before and after transformations will be generated.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>generate_ode_jacobian</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, then code for computing ODE Jacobians are generated.
                 </entry>
               </row>
               <row>
@@ -389,7 +363,7 @@
                   <literal>&apos;&apos;</literal>
                 </entry>
                 <entry>
-                Microsoft Visual Studio Compiler version or year edition to compile C code with.If the <literal>msvs_path</literal> option is not set, then this option will be used to find an installation among the default install locations. If the <literal>msvs_path</literal> option is set, then this option will be used to verify the compiler version. In both cases the compilation will fail if the installation found mismatches the version specified with this option.
+                Microsoft Visual Studio Compiler version to compile C code with.If the <literal>msvs_path</literal> option is not set, then this option will be used to find an installation among the default install locations. If the <literal>msvs_path</literal> option is set, then this option will be used to verify the compiler version. In both cases the compilation will fail if the installation found mismatches the version specified with this option.
                 </entry>
               </row>
               <row>
@@ -719,32 +693,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>exclude_internal_variables</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Name pattern(s) of internal variables to be excluded from the compilation target. Overridden by selection from <literal>include_internal_variables</literal> and <literal>include_internal_variables_from</literal>. Multiple name patterns are separated by spaces.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>exclude_internal_variables_ from</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Path to file (absolute, relative, file URI, or modelica URI) which contains name pattern(s) of internal variables to be excluded from the compilation target. Overridden by selection from <literal>include_internal_variables</literal> and <literal>include_internal_variables_from</literal>. Multiple name patterns are separated by spaces and new lines.
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>export_functions</literal>
                 </entry>
                 <entry>
@@ -810,19 +758,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>generate_runtime_option_ parameters</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>true</literal>
-                </entry>
-                <entry>
-                If enabled, generate parameters for runtime options. Should always be <literal>true</literal> for normal compilation.
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>homotopy_type</literal>
                 </entry>
                 <entry>
@@ -849,32 +784,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>include_internal_variables</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Name pattern(s) of internal variables to be included in the compilation target. Overrides selection from <literal>exclude_internal_variables</literal> and <literal>exclude_internal_variables_from</literal>. Multiple name patterns are separated by spaces.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>include_internal_variables_ from</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Path to file (absolute, relative, file URI, or modelica URI) which contains name pattern(s) of internal variables to be included in the compilation target. Overrides selection from <literal>exclude_internal_variables</literal> and <literal>exclude_internal_variables_from</literal>. Multiple name patterns are separated by spaces and new lines.
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>inline_functions</literal>
                 </entry>
                 <entry>
@@ -884,32 +793,6 @@
                 </entry>
                 <entry>
                 Controlles what function calls are inlined. <literal>&apos;none&apos;</literal> - no function calls are inlined. <literal>&apos;trivial&apos;</literal> - inline function calls that will not increase the number of variables in the system. <literal>&apos;all&apos;</literal> - inline all function calls that are possible.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>keep_variables</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Name pattern(s) of variables that should not be obfuscated by renaming. Overrides selection from <literal>obfuscate_variables</literal> and <literal>obfuscate_variables_from</literal>. Multiple name patterns are separated by spaces.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>keep_variables_from</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Path to file (absolute, relative, file URI, or modelica URI) which contains name pattern(s) of variables that should not be obfuscated by renaming. Overrides selection from <literal>obfuscate_variables</literal> and <literal>obfuscate_variables_from</literal>. Multiple name patterns are separated by spaces and new lines.
                 </entry>
               </row>
               <row>
@@ -953,32 +836,6 @@
               </row>
               <row>
                 <entry>
-                  <literal>obfuscate_variables</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Name pattern(s) of variables to be obfuscated by renaming. Overridden by selection from <literal>keep_variables</literal> and <literal>keep_variables_from</literal>. Multiple name patterns are separated by spaces.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>obfuscate_variables_from</literal>
-                </entry>
-                <entry>
-                  <literal>string</literal>
-                  /
-                  <literal>&apos;&apos;</literal>
-                </entry>
-                <entry>
-                Path to file (absolute, relative, file URI, or modelica URI) which contains name pattern(s) of variables to be obfuscated by renaming. Overridden by selection from <literal>keep_variables</literal> and <literal>keep_variables_from</literal>. Multiple name patterns are separated by spaces and new lines.
-                </entry>
-              </row>
-              <row>
-                <entry>
                   <literal>propagate_derivatives</literal>
                 </entry>
                 <entry>
@@ -1001,19 +858,6 @@
                 </entry>
                 <entry>
                 If enabled, the compiler performs a global analysis on the equation system and reduces variables to constants and parameters where applicable.
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>variability_propagation_ external</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>true</literal>
-                </entry>
-                <entry>
-                If enabled, the compiler allows external constant evaluation during variability propagation.
                 </entry>
               </row>
               <row>
@@ -1092,19 +936,6 @@
                 </entry>
                 <entry>
                 If enabled, event indicators will be scaled with nominal heuristics
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <literal>event_indicator_structure</literal>
-                </entry>
-                <entry>
-                  <literal>boolean</literal>
-                  /
-                  <literal>false</literal>
-                </entry>
-                <entry>
-                If enabled, additional event indicator structure is written in the FMU XML. Currently this functionality only works for simple models that only contain event generating expressions of relational type.
                 </entry>
               </row>
               <row>

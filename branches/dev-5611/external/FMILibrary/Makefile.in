@@ -96,14 +96,9 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-IPOPT64_HOME = @IPOPT64_HOME@
-IPOPT64_INC = @IPOPT64_INC@
-IPOPT64_LIB = @IPOPT64_LIB@
 IPOPT_HOME = @IPOPT_HOME@
 IPOPT_INC = @IPOPT_INC@
 IPOPT_LIB = @IPOPT_LIB@
-JVMDLL64_HOME = @JVMDLL64_HOME@
-JVMDLL_HOME = @JVMDLL_HOME@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -229,9 +224,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign external/FMILibrary/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu external/FMILibrary/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign external/FMILibrary/Makefile
+	  $(AUTOMAKE) --gnu external/FMILibrary/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
