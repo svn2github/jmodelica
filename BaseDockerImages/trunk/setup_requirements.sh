@@ -41,6 +41,7 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
+#Install package lsb separately because it conflicts with the installation above
 if [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing package lsb"
     apt-get -y install lsb
