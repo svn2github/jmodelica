@@ -19,8 +19,9 @@ set -e
 
 BUILD_PKGS_JM_COMMON="sudo cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy python-matplotlib Cython python-lxml python-nose python-jpype zlib-devel boost-devel"
+BUILD_PYTHON_REDHAT=""
 BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-lxml python-nose python-jpype zlib1g-dev libboost-dev"
-
+BUILD_PYTHON_DEBIAN=""
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
 	yum -y install epel-release  # for some python packages 
@@ -42,7 +43,12 @@ pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
 #Install package lsb separately because it conflicts with the installation above
-if [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
+if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
+    echo "Running pip install jupyter"
+	pip install jupyter
+elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing package lsb"
     apt-get -y install lsb
+    echo "Installing jupyter packages"
+    apt-get -y install python3-notebook jupyter-core python-ipykernel
 fi
