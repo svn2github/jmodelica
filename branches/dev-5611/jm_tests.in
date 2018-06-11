@@ -391,6 +391,7 @@ function junit_test_n() {
 }
 
 function nose_test() {
+  echo "=== PYTHONPATH=$PYTHONPATH"
   nosetests `compute_nose_extra_args "${TEST}"` ${TAGS} -v $1
 }
 
