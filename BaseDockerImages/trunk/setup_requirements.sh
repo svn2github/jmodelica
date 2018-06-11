@@ -46,9 +46,13 @@ pckinstall $BUILD_PKGS_JM
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
     echo "Running pip install jupyter"
 	pip install jupyter
+    echo "Installing colorama on centos"
+    pip install colorama
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing package lsb"
     apt-get -y install lsb
     echo "Installing jupyter packages"
     apt-get -y install python3-notebook jupyter-core python-ipykernel
+    echo "Installing colorama on Ubuntu"
+    pip install colorama
 fi
