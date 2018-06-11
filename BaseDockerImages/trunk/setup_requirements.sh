@@ -41,4 +41,7 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
-
+if [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
+    echo "Installing package lsb"
+    apt-get -y install lsb
+fi
