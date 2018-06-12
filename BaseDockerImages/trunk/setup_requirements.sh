@@ -52,4 +52,8 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     apt-get -y install lsb python3-notebook jupyter-core python-ipykernel
     echo "Installing extra python packages with pip on Ubuntu"
     pip install $BUILD_PYTHON_PIP_PACKAGES
+    #Fix issues with matplotlib backend
+    pip uninstall backports.functools_lru_cache
+    pip install backports.functools_lru_cache
+
 fi
