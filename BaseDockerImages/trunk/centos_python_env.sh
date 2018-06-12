@@ -14,9 +14,9 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
 set -e
-
-if [ -f /etc/centos-release ]; then
-	sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
-fi
+sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
+#if [ -f /etc/centos-release ]; then
+#	sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
+#fi
 
 
