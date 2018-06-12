@@ -40,6 +40,8 @@ stage ('Building') {
 }
 node('docker'){
     stage ('Push') {
+        //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
+        //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
             ubuntuImage18_04.push("devel")
             centosImage7_4.push("devel")

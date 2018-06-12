@@ -33,7 +33,8 @@ elif [ "$LINUX_DISTRIBUTION" = "REDHAT" ]; then
 	alias pckinstall="yum -y install"
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then 
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_DEBIAN
-	apt-get update 
+	apt-get update
+    apt-get -y install tzdata #install separately due to issues with backends in docker
 	alias pckinstall="apt-get -y install"
 else 
 	echo ERROR: current linux distribution not supported yet
@@ -52,7 +53,5 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     apt-get -y install lsb python3-notebook jupyter-core python-ipykernel
     echo "Installing extra python packages with pip on Ubuntu"
     pip install $BUILD_PYTHON_PIP_PACKAGES
-    #Fix issues with matplotlib backend
-    pip install matplotlib==2.0.2
-
+    pip install matplotlib==2.0.2 #due to issues with ImportError: No module named functools_lru_cache
 fi
