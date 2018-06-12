@@ -19,7 +19,7 @@ set -e
 
 BUILD_PKGS_JM_COMMON="sudo cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion gcc-c++ gcc-gfortran python-ipython java-1.8.0-openjdk python-devel numpy scipy python-matplotlib Cython python-nose python-jpype zlib-devel boost-devel"
-BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy python-matplotlib cython python-nose python-jpype zlib1g-dev libboost-dev"
+BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran ipython openjdk-8-jdk python-dev python-numpy python-scipy cython python-nose python-jpype zlib1g-dev libboost-dev"
 
 BUILD_PYTHON_PIP_PACKAGES="jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml numpy"
 
@@ -53,7 +53,6 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing extra python packages with pip on Ubuntu"
     pip install $BUILD_PYTHON_PIP_PACKAGES
     #Fix issues with matplotlib backend
-    pip uninstall backports.functools_lru_cache
-    pip install backports.functools_lru_cache
+    pip install matplotlib==2.0.2
 
 fi
