@@ -9,6 +9,24 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
+    <section>
+    <title>Release notes for JModelica.org version 2.3</title>    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Support for initial parameter external objects.</listitem>
+        <listitem>Changed error check of arguments when compiling from command line to allow empty library argument if a modelica path is supplied.</listitem>
+    </itemizedlist>
+    </section>
+    <section><title>Python Packages Improvements</title>
+    <para>Important improvements to our Python packages:</para>
+    <itemizedlist>
+        <listitem>Fixed issue with getting time varying variables (sometimes wrong variables was returned).</listitem>
+        <listitem>Added functionality to set enumerations with strings.</listitem>
+        <listitem>Improved input handling for FMI2.</listitem>
+    </itemizedlist>
+    </section>
+  </section>
   <section>
     <title>Release notes for JModelica.org version 2.2</title>
     <section><title>Highlights</title>
