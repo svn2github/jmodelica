@@ -47,7 +47,7 @@ pckinstall $BUILD_PKGS_JM
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
     echo "Installing extra python packages with pip on CentOS"
 	pip install $BUILD_PYTHON_PIP_PACKAGES
-    pip install matplotlib=2.0.2
+    pip install matplotlib==2.0.2
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing extra packages for Ubuntu"
     #Install package lsb separately because it conflicts with the installation above
