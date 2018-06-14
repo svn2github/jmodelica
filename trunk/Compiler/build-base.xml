@@ -283,24 +283,34 @@
     </for>
     <propertyregex property="java_dirs" input="${java_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
 
-    <!-- calculate extra java file generators -->
-    <for list="${modules}" param="module">
+    <macrodef name="extra-calc-macro">
+        <attribute name="generate"  default="NOT SET"/>
+        <attribute name="gen-extra" default="NOT SET"/>
+        <attribute name="generated" default="NOT SET"/>
         <sequential>
-            <if>
-                <isset property="@{module}.generate"/>
-                <then>
-                    <propertyregex property="@{module}.gen-extra.javafile" 
-                        input="${@{module}.generate}" defaultValue="${@{module}.generate}" 
-                        regexp="\." replace="/" override="true" global="true" />
-                    <property name="@{module}.gen-extra.java_file_path" value="${@{module}.java_path}/${@{module}.gen-extra.javafile}.java"/>
-                    <propertyregex property="@{module}.gen-extra.gen_path.tmp" 
-                        input="${@{module}.package.generated}" defaultValue="${@{module}.package.generated}" 
-                        regexp="\." replace="/" global="true" />
-                    <property name="@{module}.gen-extra.gen_path" value="${java_output}/${@{module}.gen-extra.gen_path.tmp}"/>
-                </then>
-            </if>
+            <for list="${modules}" param="module">
+                <sequential>
+                    <if>
+                        <isset property="@{module}.@{generate}"/>
+                        <then>
+                            <propertyregex property="@{module}.@{gen-extra}.javafile" 
+                                input="${@{module}.@{generate}}" defaultValue="${@{module}.@{generate}}" 
+                                regexp="\." replace="/" override="true" global="true" />
+                            <property name="@{module}.@{gen-extra}.java_file_path" value="${@{module}.java_path}/${@{module}.@{gen-extra}.javafile}.java"/>
+                            <propertyregex property="@{module}.@{gen-extra}.gen_path.tmp" 
+                                input="${@{module}.package.@{generated}}" defaultValue="${@{module}.package.@{generated}}" 
+                                regexp="\." replace="/" global="true" />
+                            <property name="@{module}.@{gen-extra}.gen_path" value="${java_output}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                        </then>
+                    </if>
+                </sequential>
+            </for>
         </sequential>
-    </for>
+    </macrodef>
+
+    <!-- calculate extra java file generators -->
+    <extra-calc-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
+    <extra-calc-macro generate="generate-pre" gen-extra="gen-extra-pre" generated="generated-pre"/>
 
     <!-- calculate set of junit source file dirs to use -->
     <var name="junit_dirs_temp" value=""/>
@@ -432,7 +442,7 @@
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test,patch-java,gen-extra,patch-test" description="Generate all Java files." />
+    <target name="gen" depends="gen-extra-pre,patch,parser,scanner,gen-test,patch-java,gen-extra,patch-test" description="Generate all Java files." />
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -454,33 +464,45 @@
         </for>
     </target>
 
+    <macrodef name="compile-gen-extra-macro">
+        <attribute name="generate"  default="NOT SET"/>
+        <attribute name="gen-extra" default="NOT SET"/>
+        <sequential>
+            <mkdir dir="${class_output}" />
+            <for list="${modules}" param="module">
+                <sequential>
+                    <if>
+                        <isset property="@{module}.@{generate}"/>
+                        <then>
+                            <javac  classpath="${beaver-rt_jar}" 
+                                    sourcepath="${java_output}:${java_dirs}" 
+                                    compiler="${java_compiler}" 
+                                    source="${java_version}" 
+                                    target="${java_version}" 
+                                    fork="true" 
+                                    encoding="UTF8" 
+                                    debug="false" 
+                                    destdir="${class_output}" 
+                                    includeantruntime="false"
+                                    excludes="${test_helper_java_patterns}" >
+                                <src path="${@{module}.java_path}" />
+                                <src path="${java_output}" />
+                                <include name="${@{module}.@{gen-extra}.javafile}.java" />
+                            </javac>
+                        </then>
+                    </if>
+                </sequential>
+            </for>
+        </sequential>
+    </macrodef>
+
     <!-- Compile class used in gen-extra target. -->
     <target name="compile-gen-extra" depends="ast,patch-java">
-        <mkdir dir="${class_output}" />
-        <for list="${modules}" param="module">
-            <sequential>
-                <if>
-                    <isset property="@{module}.generate"/>
-                    <then>
-                        <javac  classpath="${beaver-rt_jar}" 
-                                sourcepath="${java_output}:${java_dirs}" 
-                                compiler="${java_compiler}" 
-                                source="${java_version}" 
-                                target="${java_version}" 
-                                fork="true" 
-                                encoding="UTF8" 
-                                debug="false" 
-                                destdir="${class_output}" 
-                                includeantruntime="false"
-                                excludes="${test_helper_java_patterns}" >
-                            <src path="${@{module}.java_path}" />
-                            <src path="${java_output}" />
-                            <include name="${@{module}.gen-extra.javafile}.java" />
-                        </javac>
-                    </then>
-                </if>
-            </sequential>
-        </for>
+        <compile-gen-extra-macro generate="generate"     gen-extra="gen-extra" />
+    </target>
+
+    <target name="compile-gen-extra-pre" depends="ast,patch-java">
+        <compile-gen-extra-macro generate="generate-pre" gen-extra="gen-extra-pre" />
     </target>
 
     <!-- Compile all java files required by compiler (generated and static). -->
@@ -609,30 +631,43 @@
         </for>
     </target>
 
+    <macrodef name="gen-extra-macro">
+        <attribute name="generate"  default="NOT SET"/>
+        <attribute name="gen-extra" default="NOT SET"/>
+        <attribute name="generated" default="NOT SET"/>
+        <sequential>
+            <for list="${modules}" param="module">
+                <sequential>
+                    <if>
+                        <isset property="@{module}.@{generate}"/>
+                        <then>
+                            <!-- TODO: only generate when needed
+                            <uptodate property="@{module}.@{gen-extra}.uptodate" targetfile="${@{module}.@{gen-extra}.gen_path}">
+                                <srcresources>
+                                    <fileset file="${@{module}.@{gen-extra}.java_file_path}" />
+                                </srcresources>
+                            </uptodate>
+                            -->
+                            <mkdir dir="${@{module}.@{gen-extra}.gen_path}" />
+                            <java classpath="${class_output}:${beaver-rt_jar}" 
+                                    classname="${@{module}.@{generate}}" failonerror="true">
+                                <arg value="${@{module}.@{gen-extra}.gen_path}" />
+                                <arg value="${@{module}.package.@{generated}}" />
+                                <arg value="${@{module}.path}" />
+                            </java>
+                        </then>
+                    </if>
+                </sequential>
+            </for>
+        </sequential>
+    </macrodef>
+
     <!-- generates any additional java files specified in modules -->
     <target name="gen-extra" depends="compile-gen-extra">
-        <for list="${modules}" param="module">
-            <sequential>
-                <if>
-                    <isset property="@{module}.generate"/>
-                    <then>
-                        <!-- TODO: only generate when needed
-                        <uptodate property="@{module}.gen-extra.uptodate" targetfile="${@{module}.gen-extra.gen_path}">
-                            <srcresources>
-                                <fileset file="${@{module}.gen-extra.java_file_path}" />
-                            </srcresources>
-                        </uptodate>
-                        -->
-                        <mkdir dir="${@{module}.gen-extra.gen_path}" />
-                        <java classpath="${class_output}:${beaver-rt_jar}" 
-                                classname="${@{module}.generate}" failonerror="true">
-                            <arg value="${@{module}.gen-extra.gen_path}" />
-                            <arg value="${@{module}.package.generated}" />
-                        </java>
-                    </then>
-                </if>
-            </sequential>
-        </for>
+        <gen-extra-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
+    </target>
+    <target name="gen-extra-pre" depends="compile-gen-extra-pre">
+        <gen-extra-macro generate="generate-pre" gen-extra="gen-extra-pre" generated="generated-pre"/>
     </target>
 
     <!-- adds changes that need to be patched into the static java files -->
@@ -1010,6 +1045,12 @@ ${test_class_extra_defs}
                     <isset property="@{module}.generate"/>
                     <then>
                         <delete dir="${@{module}.gen-extra.gen_path}" />
+                    </then>
+                </if>
+                <if>
+                    <isset property="@{module}.generate-pre"/>
+                    <then>
+                        <delete dir="${@{module}.gen-extra-pre.gen_path}" />
                     </then>
                 </if>
             </sequential>
