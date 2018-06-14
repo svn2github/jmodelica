@@ -217,7 +217,6 @@ SrcConditionalAttribute : SrcBaseNode ::= SrcExp;
 abstract SrcModification : SrcBaseNode;
 SrcCompleteModification  : SrcModification ::= SrcClassModification [SrcValueModification];
 SrcValueModification     : SrcModification ::= SrcExp;
-//AssignModification    : SrcModification ::= SrcExp;
 SrcDummyModification     : SrcValueModification;
 
 SrcClassModification : SrcModification ::= SrcArgument*;
