@@ -54,8 +54,8 @@ node('docker'){
         //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
         //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage18_04.push("devel")
-            centosImage7_4.push("devel")
+            ubuntuImage18_04.push("18.04")
+            centosImage7_4.push("7.4")
             centosImage7_2.push("7.2")
         }
     }
