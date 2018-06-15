@@ -21,7 +21,7 @@
     <section><title>Python Packages Improvements</title>
     <para>Important improvements to our Python packages:</para>
     <itemizedlist>
-        <listitem>Fixed issue with getting time varying variables (sometimes wrong variables was returned).</listitem>
+        <listitem>Fixed issue with getting time varying variables (sometimes wrong variables were returned).</listitem>
         <listitem>Added functionality to set enumerations with strings.</listitem>
         <listitem>Improved input handling for FMI2.</listitem>
     </itemizedlist>
