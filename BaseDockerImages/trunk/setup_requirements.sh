@@ -44,7 +44,7 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
-pip install --upgrade pip 
+#pip install --upgrade pip #Dont update now it wont update any other packages then
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
     echo "Installing extra python packages with pip on CentOS"

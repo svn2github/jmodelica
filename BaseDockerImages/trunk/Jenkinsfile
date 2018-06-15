@@ -14,6 +14,7 @@
 
 def ubuntuImage18_04
 def centosImage7_4
+def centosImage7_2
 def buildBaseImage(targetName, linuxDist, distTag) {
     return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag .")
 }
@@ -36,6 +37,16 @@ stage ('Building') {
                 sh 'whoami'
             }
         }
+    },
+    CentOS7_2: {
+        node('docker') {
+            checkout scm
+            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511")
+            centosImage7_2.inside {
+                sh 'echo Built version: && cat /etc/centos-release'
+                sh 'whoami'
+            }
+        }
     }
 }
 node('docker'){
@@ -45,6 +56,7 @@ node('docker'){
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
             ubuntuImage18_04.push("devel")
             centosImage7_4.push("devel")
+            centosImage7_2.push("devel")
         }
     }
 }
