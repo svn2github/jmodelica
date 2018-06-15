@@ -56,7 +56,7 @@ node('docker'){
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
             ubuntuImage18_04.push("devel")
             centosImage7_4.push("devel")
-            centosImage7_2.push("devel")
+            centosImage7_2.push("7.2")
         }
     }
 }
