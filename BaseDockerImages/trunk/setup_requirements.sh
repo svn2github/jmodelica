@@ -48,7 +48,7 @@ pckinstall $BUILD_PKGS_JM
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
     echo "Installing extra python packages with pip on CentOS"
-    pip install numpy
+
     pip install scipy 
     pip install cython 
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
