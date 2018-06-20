@@ -654,6 +654,7 @@
                                 <arg value="${@{module}.@{gen-extra}.gen_path}" />
                                 <arg value="${@{module}.package.@{generated}}" />
                                 <arg value="${@{module}.path}" />
+                                <arg value="${module_dirs}" />
                             </java>
                         </then>
                     </if>

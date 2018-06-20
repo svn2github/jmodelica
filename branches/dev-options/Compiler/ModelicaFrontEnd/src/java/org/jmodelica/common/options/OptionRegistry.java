@@ -1014,7 +1014,7 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.uncommon,
              true,
-             "If enabled, the intial guess for the iteration variables will be set to the iteration variables from the last integrator step."),
+             "If enabled, the initial guess for the iteration variables will be set to the iteration variables from the last integrator step."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               OptionType.runtime, 
@@ -2034,6 +2034,37 @@ abstract public class OptionRegistry {
         public InvalidOptionValueException(String message) {
             super(message);
         }
+    }
+
+    public String getOptionConvertString() {
+        String sep = "";
+        for (int i = 0; i < 80; i++) {
+            sep += "*";
+        }
+        sep += "\n";
+        
+        StringBuilder sb = new StringBuilder();
+        for (Option<?> o : optionsMap.values()) {
+            sb.append(sep);
+            sb.append(o.getType().toUpperCase());
+            sb.append(" ");
+            sb.append(o.getKey());
+            sb.append(" ");
+            sb.append(o.getOptionType().name());
+            sb.append(" ");
+            sb.append(o.getCategory().name());
+            sb.append(" ");
+            sb.append(o.getDefault());
+            if (!o.getTestValue().equals(o.getDefault())) {
+                sb.append(" ");
+                sb.append(o.getTestValue());
+            }
+            sb.append("\n\n\"");
+            sb.append(o.getDescription());
+            sb.append("\"\n\n");
+        }
+        sb.append(sep);
+        return sb.toString();
     }
 
 }
