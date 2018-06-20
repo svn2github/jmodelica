@@ -86,7 +86,9 @@ public class OptionsParser {
 
         @Override
         public void toJavaString(StringBuilderVarArgs sb) {
-            sb.append("        options.set", options.get(name).getKind(), "Option(\"");
+            OptionParsed original = options.get(name);
+            String originalKind = original != null ? original.getKind() : "Boolean";
+            sb.append("        options.set", originalKind, "Option(\"");
             sb.append(name, "\", ", defaultValue);
             sb.append(");\n");
         }
@@ -198,7 +200,7 @@ public class OptionsParser {
             return null;
         }
         String[] parts = line.split(" ");
-        if (parts.length > 6) {
+        if (parts.length > 7) {
             throw new ParseException("Too many parts on the line! " + optionsFile.getAbsolutePath());
         }
 
