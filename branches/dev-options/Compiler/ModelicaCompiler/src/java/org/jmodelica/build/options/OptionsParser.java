@@ -8,13 +8,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class OptionsParser {
 
-    private Map<String, OptionParsed> options = new LinkedHashMap<>();
+    private Map<String, OptionParsedFull> options = new LinkedHashMap<>();
+    private ArrayList<OptionParsedModification> optionsModification = new ArrayList<>();
 
     static class ParseException extends Exception {
         public ParseException(String string) {
@@ -63,35 +63,48 @@ public class OptionsParser {
         public String getName() {
             return name;
         }
-
-        public final String toJavaString() {
-            StringBuilderVarArgs sb = new StringBuilderVarArgs();
-            toJavaString(sb);
-            return sb.toString();
-        }
-
-        public abstract void toJavaString(StringBuilderVarArgs sb);
     }
 
-    class OptionParsedDefault extends OptionParsed {
+    abstract class OptionParsedModification extends OptionParsed {
+        public OptionParsedModification(String filePath, String kind, String name, String defaultValue) {
+            super(filePath, kind, name, defaultValue);
+        }
+        
+        void modify() throws ParseException {
+            OptionParsedFull opt = options.get(getName());
+            if (opt == null) {
+                throw new ParseException("Missing option for modification " + getKind() + " " + getName());
+            }
+            opt.setModified();
+            modify(opt);
+        }
+        abstract void modify(OptionParsedFull opt) throws ParseException;
+    }
+    
+    class OptionParsedSetDefault extends OptionParsedModification {
 
-        public OptionParsedDefault(String filePath, String kind, String name, String defaultValue) {
+        public OptionParsedSetDefault(String filePath, String kind, String name, String defaultValue) {
             super(filePath, kind, name, defaultValue);
         }
 
         @Override
-        public String getName() {
-            return getKind() + " " + super.getName();
+        void modify(OptionParsedFull opt) throws ParseException {
+            opt.setDefaultValue(defaultValue);
+        }
+
+    }
+
+    class OptionParsedRemove extends OptionParsedModification {
+
+        public OptionParsedRemove(String filePath, String kind, String name) throws ParseException {
+            super(filePath, kind, name, null);
         }
 
         @Override
-        public void toJavaString(StringBuilderVarArgs sb) {
-            OptionParsed original = options.get(name);
-            String originalKind = original != null ? original.getKind() : "Boolean";
-            sb.append("        options.set", originalKind, "Option(\"");
-            sb.append(name, "\", ", defaultValue);
-            sb.append(");\n");
+        void modify(OptionParsedFull opt) throws ParseException {
+            opt.setRemoved();
         }
+
     }
 
     static class OptionParsedFull extends OptionParsed {
@@ -102,12 +115,30 @@ public class OptionsParser {
         private String[] args;
         private String comment;
         private String[] possibleValues;
+        private boolean removed = false;
+        private boolean modified = false;
 
         public OptionParsedFull(String filePath, String cls, String name, String defaultValue, String type,
                 String cat) {
             super(filePath, cls, name, defaultValue);
+            this.testDefaultValue = defaultValue;
             this.type = type;
             this.cat = cat;
+        }
+
+        public void setModified() throws ParseException {
+            if (modified) {
+                throw new ParseException("Option already modified " + getName());
+            }
+            modified = true;
+        }
+
+        public void setDefaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        public void setRemoved() {
+            removed = true;
         }
 
         public void setTestDefaultValue(String testDefaultValue) {
@@ -126,18 +157,23 @@ public class OptionsParser {
             this.possibleValues = possibleValues;
         }
 
-        @Override
+        public final String toJavaString() {
+            StringBuilderVarArgs sb = new StringBuilderVarArgs();
+            toJavaString(sb);
+            return sb.toString();
+        }
+        
         public void toJavaString(StringBuilderVarArgs sb) {
+            if (removed) {
+                return;
+            }
             sb.append("        options.add", kind, "Option(\"");
             sb.append(name, "\", ");
             sb.append("OptionType.", type, ", ");
             sb.append("Category.", cat, ", ");
-            sb.append(defaultValue);
-            if (testDefaultValue != null) {
-                sb.append(", ");
-                sb.append(testDefaultValue);
-            }
-            sb.append(", ", comment);
+            sb.append(defaultValue, ", ");
+            sb.append(testDefaultValue, ", ");
+            sb.append(comment);
             if (args != null) {
                 for (String s : args) {
                     sb.append(", ", s);
@@ -163,7 +199,7 @@ public class OptionsParser {
                 + "public class OptionsAggregated {\n");
 
         out.write("    public static void addTo(OptionRegistry options) {\n");
-        for (OptionParsed opt : options.values()) {
+        for (OptionParsedFull opt : options.values()) {
             out.write(opt.toJavaString());
         }
         out.write("    }\n");
@@ -183,46 +219,43 @@ public class OptionsParser {
     }
 
     private String parseKind(String kind) throws ParseException {
-        if (kind.equals("STRING")) {
-            return "String";
-        } else if (kind.equals("BOOLEAN")) {
-            return "Boolean";
-        } else if (kind.equals("INTEGER")) {
-            return "Integer";
-        } else {
-            throw new ParseException("Unknown kind '" + kind + "'");
-        }
+        return kind.substring(0, 1).toUpperCase() + kind.substring(1).toLowerCase();
     }
 
-    private OptionParsed parseNextOption(File optionsFile, BufferedReader reader) throws IOException, ParseException {
+    private boolean parseNextOption(File optionsFile, BufferedReader reader) throws IOException, ParseException {
         String line = nextLine(reader);
         if (line == null) {
-            return null;
+            return false;
         }
         String[] parts = line.split(" ");
         if (parts.length > 7) {
             throw new ParseException("Too many parts on the line! " + optionsFile.getAbsolutePath());
         }
 
-        String kind = parts[0];
-        if (kind.equals("DEFAULT")) {
+        System.out.println(parts[0]);
+        System.out.println(parts[1]);
+        if (parts[0].equals("DEFAULT")) {
             String name = parts[1];
             String defaultValue = parts[2];
-            return new OptionParsedDefault(optionsFile.getAbsolutePath(), kind, name, defaultValue);
-        } else {
-            kind = parseKind(kind);
+            optionsModification.add(new OptionParsedSetDefault(optionsFile.getAbsolutePath(), parts[0], name, defaultValue));
+            return true;
+        } else if (parts[0].equals("REMOVE")) {
+            String name = parts[1];
+            optionsModification.add(new OptionParsedRemove(optionsFile.getAbsolutePath(), parts[0], name));
+            return true;
         }
+        
+        String kind = parseKind(parts[0]);
         String name = parts[1];
         String category = parts[2];
         String type = parts[3];
         String defaultValue = parts[4];
         OptionParsedFull res = new OptionParsedFull(optionsFile.getAbsolutePath(), kind, name, defaultValue, category,
                 type);
-        if (parts.length > 5) {
-            res.setTestDefaultValue(parts[5]);
-        }
         if (parts.length > 6) {
             res.setArgs(Arrays.copyOfRange(parts, 5, parts.length));
+        } else if (parts.length > 5) {
+            res.setTestDefaultValue(parts[5]);
         }
 
         line = reader.readLine();
@@ -238,35 +271,45 @@ public class OptionsParser {
 
         res.setComment(comment.toString());
 
-        return res;
+        OptionParsed old = options.get(res.getName());
+        if (old != null) {
+            throw new ParseException(
+                    "Found duplicated option declaration for " + res.getName() + ". Old declaration from "
+                            + old.getFilePath() + ". New declaration from " + res.getFilePath());
+        }
+        options.put(res.getName(), res);
+        
+        return true;
     }
 
     public void parseFile(File optionsFile) throws IOException, ParseException {
-
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(optionsFile), "UTF8"));
-
-        OptionParsed opt;
-        while ((opt = parseNextOption(optionsFile, reader)) != null) {
-            OptionParsed old = options.get(opt.getName());
-            if (old != null) {
-                throw new ParseException(
-                        "Found duplicated option declaration for " + opt.getName() + ". Old declaration from "
-                                + old.getFilePath() + ". New declaration from " + opt.getFilePath());
-            }
-            options.put(opt.getName(), opt);
+        while (parseNextOption(optionsFile, reader)) {
+            
         }
         reader.close();
-
     }
 
     public void parseFiles(String modules) throws IOException, ParseException {
         for (String module : modules.split(",")) {
             module = module.trim();
             module = module.substring(1, module.length() - 1);
-            File in = new File(module, "module.options");
-            if (in.exists()) {
-                parseFile(in);
+            System.out.println(module);
+            File moduleFile = new File(module);
+            if (moduleFile.exists()) {
+                for (File in : moduleFile.listFiles()) {
+                    System.out.println(in.getAbsolutePath());
+                    if (in.getName().endsWith(".options")) {
+                        parseFile(in);
+                    }
+                }
             }
+        }
+    }
+
+    public void modify() throws ParseException {
+        for (OptionParsedModification mod : optionsModification) {
+            mod.modify();
         }
     }
 
@@ -279,6 +322,7 @@ public class OptionsParser {
         File outFile = new File(outDir, "OptionsAggregated.java");
         FileWriter fw = new FileWriter(outFile);
         op.parseFiles(modules);
+        op.modify();
         op.generate(fw, pack);
         fw.close();
         System.out.println("Generated " + outFile.getAbsolutePath() + "...");
