@@ -2893,28 +2893,32 @@ aspect ReinitStates {
 }
 
 aspect LoadResource {
-    
+
     /**
      * Copies all files included by loadResource() to Resource folder.
      */
     public void FClass.loadResources(File resourcePath) {
-        ArrayList<String> list = resourcesToLoad();
-        for (int i = 0; i < list.size(); i++) {
-            File src  = new File(list.get(i));
-            File dest = new File(resourcePath, String.format("%d_%s", i, src.getName()));
-            if (!src.exists() || !src.isFile()) {
-                error(String.format("loadResource(): Resource file '%s' does not exist", src.getAbsolutePath()));
+        ArrayList<String> resources = resourcesToLoad();
+
+        for (int i = 0; i < resources.size(); ++i) {
+            File source  = new File(resources.get(i));
+            File destination = new File(resourcePath, String.format("%d_%s", i, source.getName()));
+
+            if (!source.exists() || !source.isFile()) {
+                error(String.format("loadResource(): Resource file '%s' does not exist", source.getAbsolutePath()));
                 continue;
             }
+
             try {
-                copyFile(src, dest);
-            } catch (IOException e) {
-                error("loadResource(): Could not copy resource: " + src.getAbsolutePath() + " to destination: '" + dest.getAbsolutePath() + "'");
+                FileUtil.copy(source, destination);
+            } catch (IOException error) {
+                error("loadResource(): Could not copy resource: " + source.getAbsolutePath() +
+                        " to destination: '" + destination.getAbsolutePath() + "'");
             }
         }
         breakOnErrors();
     }
-    
+
     syn lazy ArrayList<String> FClass.resourcesToLoad() {
         LinkedHashSet<String> s = new LinkedHashSet<String>();
         collectResourcesToLoad(s);

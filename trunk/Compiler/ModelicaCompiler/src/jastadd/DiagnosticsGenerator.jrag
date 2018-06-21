@@ -97,7 +97,7 @@ public class DiagnosticsGenerator {
             file.clear();
         for (String file : new String[]{"scripts.js","style.css","zepto.min.js"}) {
             try {
-                ASTNode.exportResourceFromJAR("htmldiag/" + file, new File(diagnosticsDir, file));
+                FileUtil.copy(new File("htmldiag/" + file), new File(diagnosticsDir, file));
             } catch (IOException e) {
                 ASTNode.log.warning("Unable to export resource '" + file + "' from JAR! " + e.getMessage());
             }
