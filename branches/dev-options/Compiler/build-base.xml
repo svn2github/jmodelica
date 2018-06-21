@@ -501,7 +501,8 @@
         <compile-gen-extra-macro generate="generate"     gen-extra="gen-extra" />
     </target>
 
-    <target name="compile-gen-extra-pre" depends="ast,patch-java">
+    <target name="compile-gen-extra-pre">
+        <mkdir dir="${java_output}"/>
         <compile-gen-extra-macro generate="generate-pre" gen-extra="gen-extra-pre" />
     </target>
 

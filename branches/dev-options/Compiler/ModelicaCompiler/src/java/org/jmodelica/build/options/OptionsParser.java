@@ -232,8 +232,6 @@ public class OptionsParser {
             throw new ParseException("Too many parts on the line! " + optionsFile.getAbsolutePath());
         }
 
-        System.out.println(parts[0]);
-        System.out.println(parts[1]);
         if (parts[0].equals("DEFAULT")) {
             String name = parts[1];
             String defaultValue = parts[2];
@@ -294,11 +292,9 @@ public class OptionsParser {
         for (String module : modules.split(",")) {
             module = module.trim();
             module = module.substring(1, module.length() - 1);
-            System.out.println(module);
             File moduleFile = new File(module);
             if (moduleFile.exists()) {
                 for (File in : moduleFile.listFiles()) {
-                    System.out.println(in.getAbsolutePath());
                     if (in.getName().endsWith(".options")) {
                         parseFile(in);
                     }
