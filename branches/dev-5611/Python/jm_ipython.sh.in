@@ -3,10 +3,16 @@
 if test "${JAVA_HOME}" = ""; then
   export JAVA_HOME=@_JAVA_HOME_@
 fi
-PATH_TO_SCRIPT=$(readlink -f "$0")
-INSTALL_BIN_DIR=$(dirname "$PATH_TO_SCRIPT")
+
+#Create path to file
+CURRENT_DIR="$(pwd)"
+cd "$(dirname "$0")"
+FILE_DIR="$(pwd)"
+#Go back to previous location
+cd ${CURRENT_DIR}
+
 #Set variables using relative paths
-JMODELICA_HOME=${INSTALL_BIN_DIR}/.. \
+JMODELICA_HOME=${FILE_DIR}/.. \
 IPOPT_HOME=@IPOPT_HOME@ \
 SUNDIALS_HOME=${JMODELICA_HOME}/ThirdParty/Sundials \
 PYTHONPATH=:${JMODELICA_HOME}/Python/:@CASADI_HOME@:$PYTHONPATH \
