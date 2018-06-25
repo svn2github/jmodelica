@@ -157,16 +157,26 @@ public final class FileUtil {
 
     /**
      * Copies a file from one location to another.
+     * Wrapper function for {@link #copy(File, File, boolean)} defaulting to
+     * override any existing file
+     * in {@code destination}.
      * 
-     * @param source
-     *            The file to copy.
-     * @param destination
-     *            The location of the copied file.
-     * @param replace
-     *            A flag specifying whether or not to replace the file if it
+     * @param source The file to copy.
+     * @param destination The location of the copied file.
+     * @throws IOException if there was any error copying the file.
+     */
+    public static void copy(File source, File destination) throws IOException {
+        copy(source, destination, true);
+    }
+
+    /**
+     * Copies a file from one location to another.
+     * 
+     * @param source The file to copy.
+     * @param destination The location of the copied file.
+     * @param replace A flag specifying whether or not to replace the file if it
      *            already exists at {@code destination}.
-     * @throws IOException
-     *             if there was any error copying the file.
+     * @throws IOException if there was any error copying the file.
      */
     public static void copy(File source, File destination, boolean replace) throws IOException {
         if (!source.exists()) {
@@ -241,7 +251,7 @@ public final class FileUtil {
      * 
      * @param file The file or directory to delete.
      * @return True if the file doesn't exist, or if, file or entire directory
-     *              structure was deleted, otherwise false.
+     *         structure was deleted, otherwise false.
      */
     public static boolean recursiveDelete(File file) {
         if (!file.exists()) {
@@ -274,10 +284,11 @@ public final class FileUtil {
     /**
      * Filters a set of file on their extensions.
      * 
-     * @param files         the files to filter.
-     * @param extensions    the extensions to filter on.
-     * @return              a collection of files from {@code files} with a file extension present
-     *                      in {@code extensions}.
+     * @param files the files to filter.
+     * @param extensions the extensions to filter on.
+     * @return a collection of files from {@code files} with a file extension
+     *         present
+     *         in {@code extensions}.
      */
     public static Collection<File> filterOnExtensions(Collection<File> files, String... extensions) {
         Collection<File> filtered = new ArrayList<File>();
@@ -291,7 +302,7 @@ public final class FileUtil {
         }
         return filtered;
     }
-    
+
     /**
      * Quick method for specifying {@link StandardCopyOption#REPLACE_EXISTING}.
      * 
@@ -310,7 +321,7 @@ public final class FileUtil {
      * Creates a list of {@link File} objects from a list of string paths.
      * 
      * @param paths the string paths.
-     * @return      a list of {@link File} objects.
+     * @return a list of {@link File} objects.
      */
     public static Collection<File> toFile(String... paths) {
         java.util.List<File> files = new ArrayList<File>();
@@ -319,12 +330,12 @@ public final class FileUtil {
         }
         return files;
     }
-    
+
     /**
      * Creates a list of {@link File} objects from a list of string paths.
      * 
      * @param paths the string paths.
-     * @return      a list of {@link File} objects.
+     * @return a list of {@link File} objects.
      */
     public static Collection<File> toFile(List<String> paths) {
         java.util.List<File> files = new ArrayList<File>();
@@ -333,5 +344,4 @@ public final class FileUtil {
         }
         return files;
     }
-
 }

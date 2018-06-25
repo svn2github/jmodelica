@@ -17,10 +17,7 @@
 package org.jmodelica.util.ccompiler;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.util.files.FileUtil;
 import org.jmodelica.util.logging.ModelicaLogger;
 
 /**
@@ -203,7 +201,7 @@ public abstract class CCompilerDelegator {
                         String destfile = "binaries" + File.separator + platform + File.separator + libname; 
                         File destdir = new File(outDir, destfile);
                         try {
-                            copyFile(shlib, destdir);
+                            FileUtil.copy(shlib, destdir);
                         } catch (IOException e) {
                             // TODO: this should result in an error message about failing copy shared libs
                             e.printStackTrace();
@@ -325,17 +323,6 @@ public abstract class CCompilerDelegator {
 
     }
 
-    protected static void copyFile(File sourceFile, File destFile) throws IOException {
-        // TODO: There must be a util for this somewhere?!?!
-        try (FileInputStream fis = new FileInputStream(sourceFile); FileOutputStream fos = new FileOutputStream(destFile)) {
-            FileChannel source = fis.getChannel();
-            FileChannel destination = fos.getChannel();
-            long count = 0;
-            long size = source.size();
-            while ((count += destination.transferFrom(source, 0, size-count)) < size);
-        }
-    }
-    
     protected static Object printStringArrayObject(final String[] strArr) {
         return new Object() {
             @Override
