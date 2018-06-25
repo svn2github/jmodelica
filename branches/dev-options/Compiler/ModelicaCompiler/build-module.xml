@@ -15,6 +15,6 @@
 -->
 
 <project name="ModelicaFrontEnd-module">
-    <property name="ModelicaCompiler.generate-pre" value="org.jmodelica.build.options.OptionsParser"/>
+    <property name="ModelicaCompiler.generate-pre" value="org.jmodelica.build.options.OptionsAggregator"/>
     <property name="ModelicaCompiler.package.generated-pre" value="org.jmodelica.common.options.generated"/>
 </project>
