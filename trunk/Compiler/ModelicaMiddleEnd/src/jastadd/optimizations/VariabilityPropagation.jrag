@@ -17,6 +17,43 @@
 
 aspect VariabilityPropagation {
 
+    private static final OptionRegistry.OptionContributor ModelicaCompiler.VARIABILITY_PROPAGATION = 
+            OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+                
+                @Override
+                public void addOptions(OptionRegistry options) {
+                    options.addBooleanOption("variability_propagation",
+                            OptionRegistry.OptionType.compiler,
+                            OptionRegistry.Category.uncommon,
+                            true,
+                            "If enabled, the compiler performs a global analysis on the equation system and reduces "
+                            + "variables to constants and parameters where applicable.");
+                }
+                
+                public Object identity() {
+                    return "org.jmodelica.modelica.compiler.ModelicaCompiler.VARIABILITY_PROPAGATION";
+                }
+            });
+
+    private static final OptionRegistry.OptionContributor ModelicaCompiler.VARIABILITY_PROPAGATION_EXTERNAL = 
+            OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+                
+                @Override
+                public void addOptions(OptionRegistry options) {
+                    options.addBooleanOption("variability_propagation_external",
+                            OptionRegistry.OptionType.compiler,
+                            OptionRegistry.Category.uncommon,
+                            true,
+                            "If enabled, the compiler allows external constant evaluation during variability "
+                            + "propagation.");
+                }
+                
+                public Object identity() {
+                    return "org.jmodelica.modelica.compiler.ModelicaCompiler.VARIABILITY_PROPAGATION_EXTERNAL";
+                }
+            });
+
+
     public boolean FFunctionCallEquation.taggedForCleanup = false;
 	public boolean FAbstractEquation.taggedByVProp = false;
 	public boolean FAbstractVariable.taggedByVProp = false;

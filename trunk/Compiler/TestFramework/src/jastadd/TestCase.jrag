@@ -90,7 +90,6 @@ abstract public class TestCase implements GenericTestCase {
      */
     protected OptionRegistry createOptionRegistry() {
         OptionRegistry or = new TestOptions();
-        OptionsAggregated.addTo(or);
         File modelicapath = EnvironmentUtils.getThirdPartyMSL();
         or.setStringOption("MODELICAPATH", modelicapath.getPath());
         return or;

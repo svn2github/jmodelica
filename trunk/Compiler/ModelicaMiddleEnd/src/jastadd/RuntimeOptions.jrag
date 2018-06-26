@@ -15,6 +15,25 @@
 */
 
 aspect RuntimeOptions {
+    
+    private static final OptionRegistry.OptionContributor ModelicaCompiler.RUNTIME_PARAM = 
+            OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+                
+                @Override
+                public void addOptions(OptionRegistry options) {
+                    options.addBooleanOption("generate_runtime_option_parameters",
+                            OptionRegistry.OptionType.compiler,
+                            OptionRegistry.Category.uncommon,
+                            true,
+                            false,
+                            "If enabled, generate parameters for runtime options. "
+                            + "Should always be true for normal compilation.");
+                }
+                
+                public Object identity() {
+                    return "org.jmodelica.modelica.compiler.ModelicaCompiler.RUNTIME_PARAM";
+                }
+            });
 
     public class FClass {
         /**

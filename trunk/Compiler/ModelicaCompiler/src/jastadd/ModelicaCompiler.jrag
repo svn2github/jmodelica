@@ -80,7 +80,6 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.common.options.generated.OptionsAggregated;
 
 import org.xml.sax.SAXException;
 
@@ -278,9 +277,7 @@ public class ModelicaCompiler implements LogContainer {
     }
 
     public static OptionRegistry createOptions() {
-        OptionRegistry res = new OptionRegistry() {};
-        OptionsAggregated.addTo(res);
-        return res;
+        return new OptionRegistry() {};
     }
 
     public static ModulesSettings createModulesSettings(OptionRegistry options)    
@@ -2620,6 +2617,26 @@ public class CompilationAbortedException extends RuntimeException {
         super(msg);
     }
 }
+
+private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER_OPTIONS = 
+    OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+        public void addOptions(OptionRegistry opt) {
+            opt.addStringOption(CCompilerDelegator.OPTION, 
+                    OptionRegistry.OptionType.compiler, 
+                    OptionRegistry.Category.user, 
+                    GccCompilerDelegator.NAME, 
+                    CCompilerDelegator.OPTION_DESC, 
+                    new String[0]);
+        }
+        
+        public void modifyOptions(OptionRegistry opt) {
+            CCompilerDelegator.addCompilerOptionValues(opt);
+        }
+
+        public Object identity() {
+            return "org.jmodelica.modelica.compiler.ModelicaCompiler.CCOMPILER_OPTIONS";
+        }
+    });
 
     public class ModelicaCompiler {
         static {
