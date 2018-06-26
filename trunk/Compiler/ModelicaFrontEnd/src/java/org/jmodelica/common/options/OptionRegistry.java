@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,57 +42,6 @@ import org.jmodelica.util.xml.XMLPrinter;
  * any OptionRegistry instances are created.
  */
 abstract public class OptionRegistry {
-
-    /**
-     * Extend this class and add an instance to the contributor list with 
-     * {@link OptionRegistry#addContributor(OptionContributor)} to contribute 
-     * to set of options. The preferred way to do this is adding a static 
-     * field in ModelicaCompiler that gets its value from a call to addContributor().
-     */
-    public abstract static class OptionContributor {
-        /**
-         * Add additional options to the registry.
-         */
-        public void addOptions(OptionRegistry opt) {}
-
-        /**
-         * Change options that are in the registry.
-         */
-        public void modifyOptions(OptionRegistry opt) {}
-
-        /**
-         * Returns an object that uniquely identifies this contributor, to protect 
-         * against the same contributor being added several times. One example is when 
-         * Modelica and Optimica versions of compiler are loaded in the same JVM.
-         * 
-         * Recommended is a string literal in the jrag file.
-         */
-        public abstract Object identity();
-    }
-
-    /**
-     * Extend this class and add an instance to the contributor list with 
-     * {@link OptionRegistry#addRemover(OptionRemover)} to remove an option 
-     * from the set of options. The preferred way to do this is by adding a static 
-     * field in ModelicaCompiler that gets its value from a call to addRemover().
-     */
-    public abstract static class OptionRemover {
-        /**
-         * A list of the options to remove in the option registry when this remover is added.
-         * 
-         * @return  a list of the names of the options to remove.
-         */
-        public abstract String[] options();
-
-        /**
-         * Returns an object that uniquely identifies this contributor, to protect 
-         * against the same contributor being added several times. One example is when 
-         * Modelica and Optimica versions of compiler are loaded in the same JVM.
-         * 
-         * Recommended is a string literal in the jrag file.
-         */
-        public abstract Object identity();
-    }
 
     public abstract static class Default<T> {
         public final Class<T> type;
@@ -197,52 +145,6 @@ abstract public class OptionRegistry {
         
     }
 
-    private static java.util.List<OptionContributor> CONTRIBUTORS = new ArrayList<OptionContributor>();
-    private static java.util.List<OptionRemover> REMOVERS = new ArrayList<OptionRemover>();
-
-    private static java.util.Map<Object, OptionContributor> CONTRIBUTOR_IDENTITES = new LinkedHashMap<Object,OptionContributor>();
-    private static java.util.Map<Object, OptionRemover> REMOVER_IDENTITIES = new LinkedHashMap<Object, OptionRemover>();
-    
-    /**
-     * Adds a new options contributor.
-     * 
-     * @param oc
-     *          The contributor
-     * @return
-     *          The contributor, for convenience.
-     */
-    public static OptionContributor addContributor(OptionContributor oc) {
-        Object id = oc.identity();
-        OptionContributor old = CONTRIBUTOR_IDENTITES.get(id);
-        if (old == null) {
-            CONTRIBUTOR_IDENTITES.put(id, oc);
-            CONTRIBUTORS.add(oc);
-            return oc;
-        } else {
-            return old;
-        }
-    }
-
-    /**
-     * Adds a new options remover.
-     * 
-     * @param or
-     *          The remover
-     * @return
-     *          The remover, for convenience.
-     */
-    public static OptionRemover addRemover(OptionRemover or) {
-        Object id = or.identity();
-        OptionRemover old = REMOVER_IDENTITIES.get(id);
-        if (old == null) {
-            REMOVER_IDENTITIES.put(id, or);
-            REMOVERS.add(or);
-            return or;
-        } else {
-            return old;
-        }
-    }
-    
     public interface Inlining {
         public static final String NONE    = "none";
         public static final String TRIVIAL = "trivial";
@@ -755,12 +657,6 @@ abstract public class OptionRegistry {
              Category.uncommon,
              4,
              "The maximum number of processes used during c-code compilation."),
-        COPY_SOURCE_FILES_TO_FMU
-            ("copy_source_files_to_fmu",
-            OptionType.compiler,
-            Category.user,
-            false,
-            "If enabled, the generated source files will be copied to the FMU."),
         CC_EXTRA_FLAGS_APPLIES_TO
             ("cc_extra_flags_applies_to",
             OptionType.compiler,
@@ -807,284 +703,7 @@ abstract public class OptionRegistry {
              Category.internal,
              "compiler_version_file_not_read",
              "The version string for the compiler. Uses default value during unit testing."),
-
-        /* ================== *
-         *  Runtime options.  *
-         * ================== */
-
-        /*
-         * Note: Two JUnit tests are affected by changes to runtime options:
-         * ModelicaCompiler : TransformCanonicalTests.mo : TestRuntimeOptions1
-         * ModelicaCBackEnd : CCodeGenTests.mo : TestRuntimeOptions1
-         */
-        RUNTIME_LOG_LEVEL
-            ("log_level",
-             OptionType.runtime, 
-             Category.user, 
-             RuntimeLogLevel.WARNING,
-             "Log level for the runtime: 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 - verbose, 6 - debug.",
-             RuntimeLogLevel.NONE, RuntimeLogLevel.MAXDEBUG),
-        ENFORCE_BOUNDS
-            ("enforce_bounds",
-             OptionType.runtime, 
-             Category.user,
-             true,
-             "If enabled, min / max bounds on variables are enforced in the equation blocks."),
-        USE_JACOBIAN_EQUILIBRATION
-            ("use_jacobian_equilibration",
-             OptionType.runtime, 
-             Category.uncommon,
-             false,
-             "If enabled, jacobian equilibration will be utilized in the equation block solvers to improve linear solver accuracy."),
-        USE_NEWTON_FOR_BRENT
-            ("use_newton_for_brent",
-             OptionType.runtime, 
-             Category.uncommon,
-             true,
-             "If enabled, a few Newton steps are computed to get a better initial guess for Brent."),
-        ITERATION_VARIABLE_SCALING
-            ("iteration_variable_scaling",
-             OptionType.runtime, 
-             Category.user,
-             1,
-             "Scaling mode for the iteration variables in the equation block solvers: "+
-             "0 - no scaling, 1 - scaling based on nominals, 2 - utilize heuristic to guess nominal based on min, max, start, etc.",
-             0, 2),
-        RESIDUAL_EQUATION_SCALING
-            ("residual_equation_scaling",
-             OptionType.runtime, 
-             Category.user,
-             1,
-             "Equations scaling mode in equation block solvers: " +
-             "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid, 4- aggressive automatic scaling, 5 - automatic rescaling at full Jacobian update",
-             0, 5),
-        NLE_SOLVER_EXIT_CRITERION
-            ("nle_solver_exit_criterion",
-             OptionType.runtime, 
-             Category.user,
-             3,
-             "Exit criterion mode: " +
-             "0 - step length and residual based, 1 - only step length based, 2 - only residual based, 3 - hybrid.",
-             0, 3),
-        NLE_JACOBIAN_UPDATE_MODE
-            ("nle_jacobian_update_mode",
-             OptionType.runtime, 
-             Category.user,
-             2,
-             "Mode for how to update the Jacobian: " +
-             "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
-             0, 2),
-        NLE_JACOBIAN_CALCULATION_MODE
-            ("nle_jacobian_calculation_mode",
-             OptionType.runtime, 
-             Category.user,
-             0,
-             "Mode for how to calculate the Jacobian: " +
-             "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally, 9 - Jacobian compresssion.",
-             0, 9),
-        NLE_JACOBIAN_FINITE_DIFFERENCE_DELTA
-            ("nle_jacobian_finite_difference_delta",
-             OptionType.runtime, 
-             Category.user,
-             1.490116119384766e-08,
-             "Delta to use when calculating finite difference Jacobians.",
-             2.220446049250313e-16, 1e-1),
-        NLE_ACTIVE_BOUNDS_MODE
-            ("nle_active_bounds_mode",
-             OptionType.runtime, 
-             Category.user,
-             0,
-             "Mode for how to handle active bounds: " +
-             "0 - project Newton step at active bounds, 1 - use projected steepest descent direction.",
-             0, 1),
-        NLE_SOLVER_MIN_RESIDUAL_SCALING_FACTOR
-            ("nle_solver_min_residual_scaling_factor",
-             OptionType.runtime, 
-             Category.user,
-             1e-10,
-             "Minimal scaling factor used by automatic and hybrid residual scaling algorithm.",
-             1e-32, 1),
-        NLE_SOLVER_MAX_RESIDUAL_SCALING_FACTOR
-            ("nle_solver_max_residual_scaling_factor",
-             OptionType.runtime, 
-             Category.user,
-             1e10,
-             "Maximal scaling factor used by automatic and hybrid residual scaling algorithm.",
-             1, 1e32),
-        RESCALE_EACH_STEP
-            ("rescale_each_step",
-             OptionType.runtime, 
-             Category.user,
-             false,
-             "If enabled, scaling will be updated at every step (only active if automatic scaling is used)."),
-        RESCALE_AFTER_SINGULAR_JAC
-            ("rescale_after_singular_jac",
-             OptionType.runtime, 
-             Category.user,
-             true,
-             "If enabled, scaling will be updated after a singular jacobian was detected (only active if automatic scaling is used)."),
-        USE_BRENT_IN_1D
-            ("use_Brent_in_1d",
-             OptionType.runtime, 
-             Category.user,
-             true,
-             "If enabled, Brent search will be used to improve accuracy in solution of 1D non-linear equations."),
-        BLOCK_SOLVER_PROFILING
-            ("block_solver_profiling",
-             OptionType.runtime, 
-             Category.uncommon,
-             false,
-             "If enabled, methods involved in solving an equation block will be timed."),
-        BLOCK_SOLVER_EXPERIMENTAL_MODE
-            ("block_solver_experimental_mode",
-             OptionType.runtime, 
-             Category.experimental,
-             0,
-             "Activates experimental features of equation block solvers",
-             0, Integer.MAX_VALUE),
-        NLE_SOLVER_DEFAULT_TOL
-            ("nle_solver_default_tol",
-             OptionType.runtime, 
-             Category.user,
-             1e-10,
-             "Default tolerance for the equation block solver.",
-             1e-14, 1e-2),
-        NLE_SOLVER_CHECK_JAC_COND
-            ("nle_solver_check_jac_cond",
-             OptionType.runtime, 
-             Category.uncommon, 
-             false,
-             "If enabled, the equation block solver computes and log the jacobian condition number."),
-        NLE_SOLVER_BRENT_IGNORE_ERROR
-            ("nle_brent_ignore_error",
-             OptionType.runtime, 
-             Category.uncommon, 
-             false,
-             "If enabled, the Brent solver will ignore convergence failures."),
-        NLE_SOLVER_MIN_TOL
-            ("nle_solver_min_tol",
-             OptionType.runtime, 
-             Category.uncommon,
-             1e-12,
-             "Minimum tolerance for the equation block solver. Note that, e.g. default Kinsol tolerance is machine precision pwr 1/3, i.e. 1e-6.", 
-             1e-14, 1e-6),
-        NLE_SOLVER_TOL_FACTOR
-            ("nle_solver_tol_factor",
-             OptionType.runtime, 
-             Category.uncommon,
-             0.0001,
-             "Tolerance safety factor for the equation block solver. Used when external solver specifies relative tolerance.",
-             1e-6, 1.0),
-        NLE_SOLVER_MAX_ITER
-            ("nle_solver_max_iter",
-             OptionType.runtime, 
-             Category.uncommon,
-             100,
-             "Maximum number of iterations for the equation block solver.",
-             2, 500),
-        NLE_SOLVER_MAX_ITER_NO_JACOBIAN
-            ("nle_solver_max_iter_no_jacobian",
-             OptionType.runtime, 
-             Category.uncommon,
-             10,
-             "Maximum number of iterations without jacobian update. Value 1 means an update in every iteration.",
-             1, 500),
-        NLE_SOLVER_STEP_LIMIT_FACTOR
-            ("nle_solver_step_limit_factor",
-             OptionType.runtime, 
-             Category.uncommon,
-             10,
-             "Factor limiting the step-size taken by the nonlinear block solver.",
-             0, 1e10),
-        NLE_SOLVER_REGULARIZATION_TOLERANCE
-            ("nle_solver_regularization_tolerance",
-             OptionType.runtime, 
-             Category.uncommon,
-             -1,
-             "Tolerance for deciding when regularization should be activated (i.e. when condition number > reg tol).",
-             -1, 1e20),
-        NLE_SOLVER_NOMINALS_AS_FALLBACK
-            ("nle_solver_use_nominals_as_fallback",
-             OptionType.runtime, 
-             Category.uncommon,
-             true,
-             "If enabled, the nominal values will be used as initial guess to the solver if initialization failed."),
-        NLE_SOLVER_LAST_INTEGRATOR_STEP
-            ("nle_solver_use_last_integrator_step",
-             OptionType.runtime, 
-             Category.uncommon,
-             true,
-             "If enabled, the intial guess for the iteration variables will be set to the iteration variables from the last integrator step."),
-        EVENTS_DEFAULT_TOL
-            ("events_default_tol",
-              OptionType.runtime, 
-             Category.uncommon,
-              1e-10,
-              "Default tolerance for the event iterations.",
-              1e-14, 1e-2),
-        TIME_EVENTS_DEFAULT_TOL
-            ("time_events_default_tol",
-              OptionType.runtime, 
-             Category.uncommon,
-              2.2204460492503131E-014,
-              "Default tolerance for the time event iterations.",
-              0, 1.0),
-        EVENTS_TOL_FACTOR
-            ("events_tol_factor",
-             OptionType.runtime, 
-             Category.uncommon,
-             0.0001,
-             "Tolerance safety factor for the event indicators. Used when external solver specifies relative tolerance.",
-             1e-6, 1.0),
-        BLOCK_JACOBIAN_CHECK
-            ("block_jacobian_check",
-             OptionType.runtime, 
-             Category.debug,
-             false,
-             "Compares the analytic block jacobians with the finite difference block jacobians during block evaluation. " + 
-             "An error is given if the relative error is to big."),
-        BLOCK_JACOBIAN_CHECK_TOL
-            ("block_jacobian_check_tol",
-             OptionType.runtime, 
-             Category.debug,
-             1e-6,
-             "Specifies the relative tolerance for block jacobian check.",
-             1e-12, 1.0),
-        CS_SOLVER
-            ("cs_solver",
-             OptionType.runtime, 
-             Category.user,
-             0,
-             "Specifies the internal solver used in Co-Simulation. 0 - CVode, 1 - Euler.",
-             0, 1),
-        CS_REL_TOL
-            ("cs_rel_tol",
-             OptionType.runtime, 
-             Category.user,
-             1e-6,
-             "Tolerance for the adaptive solvers in the Co-Simulation case.",
-             1e-14, 1.0),
-        CS_STEP_SIZE
-            ("cs_step_size",
-             OptionType.runtime, 
-             Category.user,
-             1e-3,
-             "Step-size for the fixed-step solvers in the Co-Simulation case."),
-        CS_EXPERIMENTAL_MODE
-            ("cs_experimental_mode",
-             OptionType.runtime, 
-             Category.experimental,
-             0,
-             "Activates experimental features of CS ode solvers",
-             0, Integer.MAX_VALUE),
-        RUNTIME_LOG_TO_FILE
-            ("runtime_log_to_file",
-             OptionType.runtime, 
-             Category.user,
-             false,
-             "If enabled, log messages from the runtime are written directly to a file, besides passing it through the FMU interface. " +
-             "The log file name is generated based on the FMU name."),
-        ;
+            ;
 
         public String key;
         public OptionType type;
@@ -1167,24 +786,6 @@ abstract public class OptionRegistry {
         }
     }
 
-    /**
-     * Contributor for base options.
-     */
-    static {
-        addContributor(
-            new OptionContributor() {
-                public void addOptions(OptionRegistry opt) {
-                    for (OptionSpecification o : OptionSpecification.values()) {
-                        opt.defaultOption(o);
-                    }
-                }
-
-                public Object identity() {
-                    return "org.jmodelica.common.options.OptionRegistry.BASE_CONTRIBUTOR";
-                }
-        });
-    }
-
     protected Map<String, Option<?>> optionsMap;
 
     /**
@@ -1193,19 +794,8 @@ abstract public class OptionRegistry {
      */
     public OptionRegistry() {
         optionsMap = new HashMap<String, Option<?>>();
-        for (OptionContributor oc : CONTRIBUTORS) {
-            oc.addOptions(this);
-        }
-        for (OptionContributor oc : CONTRIBUTORS) {
-            oc.modifyOptions(this);
-        }
-        for (OptionRemover remover : REMOVERS) {
-            for (String option : remover.options()) {
-                if (!optionsMap.containsKey(option)) {
-                    throw new UnknownOptionException("Failure trying to remove non-existent option " + option + ".");
-                }
-                optionsMap.remove(option);
-            }
+        for (OptionSpecification o : OptionSpecification.values()) {
+            defaultOption(o);
         }
     }
 
@@ -2034,6 +1624,43 @@ abstract public class OptionRegistry {
         public InvalidOptionValueException(String message) {
             super(message);
         }
+    }
+
+    public String getOptionConvertString() {
+        String sep = "";
+        for (int i = 0; i < 80; i++) {
+            sep += "*";
+        }
+        sep += "\n";
+        
+        StringBuilder sb = new StringBuilder();
+        
+        for (OptionSpecification os : OptionSpecification.values()) {
+            if (!os.type.name().equals("runtime")) {
+                continue;
+            }
+            Option<?> o = optionsMap.get(os.key);
+              sb.append(sep);
+              sb.append(o.getType().toUpperCase());
+              sb.append(" ");
+              sb.append(o.getKey());
+              sb.append(" ");
+              sb.append(o.getOptionType().name());
+              sb.append(" ");
+              sb.append(o.getCategory().name());
+              sb.append(" ");
+              sb.append(o.getDefault());
+              if (!o.getTestValue().equals(o.getDefault())) {
+                  sb.append(" ");
+                  sb.append(o.getTestValue());
+              }
+              sb.append("\n\n\"");
+              sb.append(o.getDescription());
+              sb.append("\"\n\n");
+        }
+        
+        sb.append(sep);
+        return sb.toString();
     }
 
 }
