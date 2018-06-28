@@ -2892,6 +2892,56 @@ aspect ReinitStates {
     
 }
 
+aspect LoadResource {
+
+    /**
+     * Copies all files included by loadResource() to Resource folder.
+     */
+    public void FClass.loadResources(File resourcePath) {
+        ArrayList<String> resources = resourcesToLoad();
+
+        for (int i = 0; i < resources.size(); ++i) {
+            File source  = new File(resources.get(i));
+            File destination = new File(resourcePath, String.format("%d_%s", i, source.getName()));
+
+            if (!source.exists() || !source.isFile()) {
+                error(String.format("loadResource(): Resource file '%s' does not exist", source.getAbsolutePath()));
+                continue;
+            }
+
+            try {
+                FileUtil.copy(source, destination);
+            } catch (IOException error) {
+                error("loadResource(): Could not copy resource: " + source.getAbsolutePath() +
+                        " to destination: '" + destination.getAbsolutePath() + "'");
+            }
+        }
+        breakOnErrors();
+    }
+
+    syn lazy ArrayList<String> FClass.resourcesToLoad() {
+        LinkedHashSet<String> s = new LinkedHashSet<String>();
+        collectResourcesToLoad(s);
+        return new ArrayList<String>(s);
+    }
+    public void ASTNode.collectResourcesToLoad(LinkedHashSet<String> list) {
+        for (ASTNode n : this)
+            n.collectResourcesToLoad(list);
+    }
+    public void FLoadResource.collectResourcesToLoad(LinkedHashSet<String> list) {
+        if (!inFunction()) {
+            list.add(ceval().stringValue());
+        }
+    }
+    
+    syn String FLoadResource.resourceName() {
+        int index = myFClass().resourcesToLoad().indexOf(ceval().stringValue());
+        if (index < 0)
+            throw new UnsupportedOperationException();
+        return String.format("%d_%s", index, new File(ceval().stringValue()).getName());
+    }
+}
+
 aspect FunctionAndRecordCleanup {
     /**
      * Remove unused function and record declarations from the flat model.

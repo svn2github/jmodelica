@@ -246,7 +246,7 @@ aspect CCodeGenExpressions {
         if (inFunction()) {
             error("Cannot generate code for loadResource() in function");
         } else {
-            str.formatln("%sjmi_load_resource(jmi, %s, \"/%s\");", indent, tempName_C(), loadedResourceRelativePath());
+            str.formatln("%sjmi_load_resource(jmi, %s, \"/%s\");", indent, tempName_C(), resourceName());
         }
     }
 

@@ -19,7 +19,6 @@ from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
 from assimulo.solvers.sundials import CVodeError
 from pyfmi.fmi import FMUException
-from pymodelica.compiler_exceptions import CompilerError
 
 class TestHomotopy(SimulationTest):
     """
@@ -411,20 +410,6 @@ class TestLoadResource(SimulationTest):
         self.assert_end_value('x', 9)
         self.assert_end_value('y', 9)
         self.assert_end_value('z', 9)
-
-class TestLoadResourceError1(SimulationTest):
-    """
-    Test compiler error from resource loading.
-    """
-
-    @testattr(stddist_full = True)
-    def test_compilation_error(self):
-        try:
-            SimulationTest.setup_class_base('LoadResourceTest/package.mo', 'LoadResourceTest.LoadResourceError1')
-            fail()
-        except CompilerError as e:
-            assert(len(e.get_noncompliance_errors()) == 2, "Expected 2 errors")
-            assert(str(e).find("loadResource()"), "Expected loadResource() errors")
 
 class TestOutOfRangeOps(SimulationTest):
     """

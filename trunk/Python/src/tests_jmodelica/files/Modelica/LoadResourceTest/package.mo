@@ -25,9 +25,4 @@ int fileLength(const char* name) {
         parameter Integer y = fileLength(Modelica.Utilities.Files.loadResource("modelica://LoadResourceTest/Resources/aFile.txt"));
         discrete  Integer z = fileLength(ModelicaServices.ExternalReferences.loadResource("modelica://LoadResourceTest/Resources/aFile.txt"));
     end LoadResource;
-    
-    model LoadResourceError1
-        String s1 = Modelica.Utilities.Files.loadResource("modelica://LoadResourceTest/Resources/missing1.txt");
-        String s2 = Modelica.Utilities.Files.loadResource("modelica://LoadResourceTest/Resources/missing2.txt");
-    end LoadResourceError1;
 end LoadResourceTest;
