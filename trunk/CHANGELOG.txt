@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5632
+Fixed issue with FExp.dynamicFExp(FExp exp) for null input.
+
 ; Fixed ; Minor ; PyFMI ; #5624
 Made binary result saving more robust.
 
