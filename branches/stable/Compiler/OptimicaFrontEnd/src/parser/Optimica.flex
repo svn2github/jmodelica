@@ -64,6 +64,12 @@ import beaver.Scanner;
             length = yylength();
         }
 
+        public Symbol(short id, Object value, int lineOffset, int endColumn) {
+            super(id, makePosition(yyline + 1,  yycolumn + 1), makePosition(yyline + 1 + lineOffset, endColumn), value);
+            offset = yychar;
+            length = yylength();
+        }
+        
         public int getOffset() {
             return offset;
         }
@@ -104,6 +110,14 @@ import beaver.Scanner;
     }
 
     private Symbol newSymbol(short id, Object value) {
+        return new Symbol(id, value);
+    }
+    
+    private Symbol newSymbolCountLineBreaks(short id, String value, int numLineBreaks) {
+        if (numLineBreaks > 0) {
+            int endColumn = value.length() - value.lastIndexOf('\n');
+            return new Symbol(id, value, numLineBreaks, endColumn);
+        }
         return new Symbol(id, value);
     }
     
@@ -298,12 +312,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "<>"            { return newSymbol(Terminals.NEQ); }
   
   {STRING}  { String s = yytext();
-              addLineBreaks(s);
+              int numLineBreaks = addLineBreaks(s);
               s = s.substring(1,s.length()-1);
-              return newSymbol(Terminals.STRING,s); }
+              return newSymbolCountLineBreaks(Terminals.STRING, s, numLineBreaks); }
   {ID}      { String s = yytext();
-  			  addLineBreaks(s);
-  			  return newSymbol(Terminals.ID, s); }
+              int numLineBreaks = addLineBreaks(s);
+              return newSymbolCountLineBreaks(Terminals.ID, s, numLineBreaks); }
   			  
   {UNSIGNED_INTEGER}       { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}        { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }

@@ -15,6 +15,10 @@ public abstract class AbstractAdjustableSymbol extends Symbol implements Adjusta
     public AbstractAdjustableSymbol(short id, int line, int column, int length, Object value) {
         super(id, line, column, length, value);
     }
+    
+    public AbstractAdjustableSymbol(short id, int start, int end, Object value) {
+        super(id, start, end, value);
+    }
 
     /* NB: This method is (mostly) duplicated in:
      * ModelicaFrontEnd/src/jastadd/source/Parser.jrag, ASTNode */

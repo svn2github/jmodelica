@@ -4,13 +4,14 @@ import java.lang.reflect.Array;
 
 public class ArrayUtil {
 
+    @SafeVarargs
     public static <T> T[] concat(T[] first, T[]... rest) {
         int len = first.length;
         for (T[] part : rest) {
             len += part.length;
         }
         
-        Class type = first.getClass().getComponentType();
+        Class<?> type = first.getClass().getComponentType();
         @SuppressWarnings("unchecked")
         T[] res = (T[]) Array.newInstance(type, len);
         
@@ -24,6 +25,7 @@ public class ArrayUtil {
         return res;
     }
 
+    @SafeVarargs
     public static <T> T[] append(T[] arr, T... vals) {
         return concat(arr, vals);
     }

@@ -316,7 +316,7 @@ class CompilerLogHandler:
         if exception.kind == 'org.jmodelica.util.logging.IllegalLogStringException':
             raise IllegalLogStringError(exception.message)
         
-        if exception.kind == 'org.jmodelica.util.OptionRegistry$UnknownOptionException':
+        if exception.kind == 'org.jmodelica.common.options.OptionRegistry$UnknownOptionException':
             raise UnknownOptionError(exception.message)
         
         if exception.kind == 'org.jmodelica.util.exceptions.CcodeCompilationException':

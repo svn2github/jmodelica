@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010-2018 Modelon AB
+    Copyright (C) 2018 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,19 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.jmodelica.util;
-
-public class OptionRegistry extends org.jmodelica.common.options.OptionRegistry  {
-    /*
-     * This class is only here to support old versions of pymodelica
-     */
-    
-    public static class UnknownOptionException extends org.jmodelica.common.options.OptionRegistry.UnknownOptionException { 
-        private static final long serialVersionUID = 7226800291471043612L;
-
-        public UnknownOptionException(String message) {
-            super(message);
-        }
-    }
-
-}
+model Alias1
+    Real y;
+    Real y1;
+equation
+    der(y)=0;
+    y1 = y;
+end Alias1;

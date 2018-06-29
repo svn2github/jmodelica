@@ -3107,7 +3107,10 @@ aspect InstantiatedExpressions {
     public InstDerExp SrcDerExp.instantiate() {
         return copyLocationTo(new InstDerExp(getSrcExp().instantiate()));
     }
-    
+
+    public FExp SrcParExp.instantiate() {
+        return getSrcExp().instantiate();
+    }
 
     public FExp SrcAccessExp.instantiate() {
         return copyLocationTo(new FIdUseExp(new FIdUseInstAccess(getSrcAccess().newInstAccess())));

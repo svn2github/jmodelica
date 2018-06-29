@@ -3282,7 +3282,11 @@ aspect ConstantEvaluation {
                 }
             }
             evaluateCell(evaluator, valuesCell);
-            values.get(output).array().setCell(i, valuesCell.get(output));
+            CValue val = valuesCell.get(output);
+            if (val == null) {
+                val = CValue.UNKNOWN;
+            }
+            values.get(output).array().setCell(i, val);
         }
     }
     

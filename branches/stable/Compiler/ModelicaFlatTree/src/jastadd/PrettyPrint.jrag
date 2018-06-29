@@ -343,6 +343,9 @@ aspect PrettyPrint {
         }
         
         str.print(getSrcRestriction(), " ");
+        if (isClassExtends()) {
+            str.print("extends ");
+        }
         prettyPrintClassName(p, str, indent);
         str.println();
 

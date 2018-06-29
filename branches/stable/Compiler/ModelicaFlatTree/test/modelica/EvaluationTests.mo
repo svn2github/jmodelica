@@ -4269,4 +4269,32 @@ end EvaluationTests.ZeroSizeRecordArray1;
 ")})));
 end ZeroSizeRecordArray1;
 
+model EvaluatePartialFunction1
+    function g
+        input Integer[:] x;
+        output Integer y;
+    algorithm
+        y := sum(x);
+    end g;
+
+    function f
+        input Integer x;
+        output Integer y;
+    end f;
+    
+    constant Integer[:] n = g(f({{2}}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="EvaluatePartialFunction1",
+            description="Check for no NullPointerException when evaluating partial vectorized function",
+            errorMessage="
+Error at line 14, column 29, in file '...':
+  Could not evaluate binding expression for constant 'n': 'g(f({{2}}))'
+
+Error at line 14, column 31, in file '...':
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+end EvaluatePartialFunction1;
+
 end EvaluationTests;
