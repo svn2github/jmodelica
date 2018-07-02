@@ -46,7 +46,8 @@ public class OptionsAggregatorTests {
                 );
             fail();
         } catch (OptionsAggregationException e) {
-            assertEquals("Too many parts on the line! /file/path", e.getMessage());
+            String expected = "Too many parts on the line! /file/path\nBOOLEAN opt1 compiler user trueBOOLEAN opt2 compiler user true";
+            assertEquals(expected, e.getMessage());
         }
     }
     

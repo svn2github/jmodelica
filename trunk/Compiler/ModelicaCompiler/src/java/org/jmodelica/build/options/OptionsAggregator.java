@@ -127,7 +127,7 @@ public class OptionsAggregator {
 
         private String testDefaultValue;
         private String[] args;
-        private String comment;
+        private String description;
         private String[] possibleValues;
         private boolean removed = false;
         private boolean modified = false;
@@ -163,8 +163,8 @@ public class OptionsAggregator {
             this.args = args;
         }
 
-        public void setComment(String comment) {
-            this.comment = comment;
+        public void setDescription(String description) {
+            this.description = description;
         }
 
         public void setPossibleValues(String[] possibleValues) {
@@ -187,7 +187,7 @@ public class OptionsAggregator {
             sb.append("Category.", cat, ", ");
             sb.append(defaultValue, ", ");
             sb.append(testDefaultValue, ", ");
-            sb.append(comment);
+            sb.append(description);
             if (args != null) {
                 for (String s : args) {
                     sb.append(", ", s);
@@ -245,16 +245,23 @@ public class OptionsAggregator {
         return kind.substring(0, 1).toUpperCase() + kind.substring(1).toLowerCase();
     }
 
-    private boolean parseNextOption(String optionsFile, BufferedReader reader) throws IOException, OptionsAggregationException {
-        String line = nextLine(reader);
-        if (line == null) {
-            return false;
-        }
-        String[] parts = line.split(" ");
-        if (parts.length > 7) {
-            throw new OptionsAggregationException("Too many parts on the line! " + optionsFile);
-        }
-
+    /**
+     * Tries to parse an option modification. Whitespace and newline sensitive.
+     * 
+     * DEFAULT expects an option name and a value. It will change the default value
+     * of that option to the value. Example line:
+     * DEFAULT opt1 true
+     * 
+     * REMOVE expects an option name. It will remove the option from the set that is
+     * included in the generated output. Example line: 
+     * REMOVE opt1
+     * 
+     * INVERT expects two boolean option names. The default value of the first will
+     * be the inverse of the value of the second. Example line:
+     * INVERT opt1 opt2
+     * 
+     */
+    private boolean parseModification(String optionsFile, String[] parts) throws OptionsAggregationException {
         if (parts[0].equals("DEFAULT")) {
             String name = parts[1];
             String defaultValue = parts[2];
@@ -270,33 +277,76 @@ public class OptionsAggregator {
             optionsModification.add(new OptionModificationInvert(optionsFile, parts[0], name, defaultValue));
             return true;
         }
-        
+        return false;
+    }
+    
+    /**
+     * Parse the first line of a declaration. Whitespace and newline sensitive.
+     * Expects 
+     * 1. the kind of option (BOOLEAN, STRING, etc.)
+     * 2. Name
+     * 3. Category
+     * 4. Type
+     * 5. Default value
+     * 6. Either a test default value or a min and max value
+     * 
+     * Example lines:
+     * BOOLEAN opt1 compiler user true
+     * or
+     * BOOLEAN opt1 compiler user true false
+     * or 
+     * INTEGER opt1 compiler user 1 0 100
+     */
+    private OptionDeclaration parseDeclaration(String optionsFile, String[] parts) throws OptionsAggregationException {
         String kind = parseKind(parts[0]);
         String name = parts[1];
         String category = parts[2];
         String type = parts[3];
         String defaultValue = parts[4];
-        OptionDeclaration res = new OptionDeclaration(optionsFile, kind, name, defaultValue, category,
-                type);
+        OptionDeclaration res = new OptionDeclaration(optionsFile, kind, name, defaultValue, category, type);
         if (parts.length > 6) {
             res.setArgs(Arrays.copyOfRange(parts, 5, parts.length));
         } else if (parts.length > 5) {
             res.setTestDefaultValue(parts[5]);
         }
-
-        line = reader.readLine();
+        return res;
+    }
+    
+    /**
+     * If the next line is not empty, parse a set of possible values for the option. Whitespace and newline sensitive.
+     * Example line:
+     * "str1" "str2"
+     * or
+     * 0 1 2 5 7
+     */
+    private void parsePossibleValues(OptionDeclaration res, BufferedReader reader) throws IOException {
+        String line = reader.readLine();
         if (!isEmpty(line)) {
             res.setPossibleValues(line.split(" "));
         }
-
-        StringBuilder comment = new StringBuilder();
-        line = nextLine(reader);
+    }
+    
+    /**
+     * Parse an option description. The description should start and end with
+     * quotes. Will eat lines until there is an empty one. Newlines will be
+     * discarded. Example lines: 
+     * "This is a
+     * multiline
+     * description"
+     * or
+     * "This is a single line description"
+     */
+    private void parseDescription(OptionDeclaration res, BufferedReader reader) throws IOException {
+        StringBuilder description = new StringBuilder();
+        String line = nextLine(reader);
         do {
-            comment.append(line);
+            description.append(line);
         } while ((line = reader.readLine()) != null && !isEmpty(line));
 
-        res.setComment(comment.toString());
-
+        res.setDescription(description.toString());
+    }
+    
+    private void addDeclaration(OptionDeclaration res) throws OptionsAggregationException {
         Option old = options.get(res.getName());
         if (old != null) {
             throw new OptionsAggregationException(
@@ -304,7 +354,42 @@ public class OptionsAggregator {
                             + old.getFilePath() + ". New declaration from " + res.getFilePath());
         }
         options.put(res.getName(), res);
-        
+    }
+    
+    /**
+     * Parse a full declaration including possible values and description. Example:
+     * STRING opt1 compiler user "default"
+     * "default" "otherValue"
+     * 
+     * "A very nice option"
+     * 
+     */
+    private void parseFullDeclaration(String optionsFile, BufferedReader reader, String[] parts) throws OptionsAggregationException, IOException {
+        OptionDeclaration res = parseDeclaration(optionsFile, parts);
+        parsePossibleValues(res, reader);
+        parseDescription(res, reader);
+        addDeclaration(res);
+    }
+    
+    private boolean parseNextOption(String optionsFile, BufferedReader reader) throws IOException, OptionsAggregationException {
+        String line = nextLine(reader);
+        if (line == null) {
+            return false;
+        }
+        String[] parts = line.split(" ");
+        if (parts.length > 7) {
+            throw new OptionsAggregationException("Too many parts on the line! " + optionsFile + "\n" + line);
+        }
+
+        if (parseModification(optionsFile, parts)) {
+            return true;
+        } else {
+            if (parts.length < 5) {
+                throw new OptionsAggregationException("Too few parts on the line! " + optionsFile + "\n" + line);
+            }
+            parseFullDeclaration(optionsFile, reader, parts);
+        }
+
         return true;
     }
 
