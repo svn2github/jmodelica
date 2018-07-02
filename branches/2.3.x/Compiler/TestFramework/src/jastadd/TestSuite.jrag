@@ -23,6 +23,7 @@ import org.jmodelica.util.test.GenericTestCase;
 import org.jmodelica.util.test.GenericTestSuite;
 import org.jmodelica.util.test.Assert;
 import org.jmodelica.util.test.TestTree;
+import org.jmodelica.common.options.TestOptions;
 
 public class TestSuite implements GenericTestSuite {
     String name;
@@ -40,6 +41,7 @@ public class TestSuite implements GenericTestSuite {
         SourceRoot sr = null;
         File modelicapath = EnvironmentUtils.getThirdPartyMSL();
         OptionRegistry options = new TestOptions();
+        OptionsAggregated.addTo(options);
         options.setStringOption("MODELICAPATH", modelicapath.getPath());
         ASTNode.log = new SysErrLogger();
         try {

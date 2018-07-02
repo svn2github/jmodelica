@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.util.logging.ModelicaLogger;
 
 /**

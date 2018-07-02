@@ -449,7 +449,9 @@ abstract public class TestAnnotationizerHelper {
      */
     protected static OptionRegistry createTestOptions() {
         OptionRegistry tmp = ModelicaCompiler.createOptions();
-        return new TestOptions();
+        OptionRegistry options = new TestOptions();
+        OptionsAggregated.addTo(options);
+        return options;
     }
 
 	/**

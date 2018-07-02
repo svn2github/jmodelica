@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.util.ccompiler.CCompilerDelegator;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
 
