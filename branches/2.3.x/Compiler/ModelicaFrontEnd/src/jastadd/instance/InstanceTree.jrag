@@ -1948,6 +1948,8 @@ aspect InstanceAST_API {
     syn lazy String InstClassDecl.qualifiedName();
     eq InstComponentDecl.qualifiedName()     = getFQName().name();
     eq InstExtends.qualifiedName()           = myInstClass().qualifiedName();
+    eq InstInlineExtends.qualifiedName()     = 
+        surroundingInstClass().myInheritedOrigin().qualifiedName();
     eq InstBaseClassDecl.qualifiedName()     = getInstRestriction().qualifiedClassName();
     eq InstLibNode.qualifiedName()           = resolveLib().qualifiedName();
     eq BadInstClassDecl.qualifiedName()      = buildQualifiedName();
@@ -2686,6 +2688,33 @@ aspect InstanceToString {
     }
 
 }
+
+
+aspect InheritedFrom {
+
+    /**
+     * If this class was inherited into this scope, return the corresponding class 
+     * from the inherited class. 
+     * 
+     * The inhetitance can be either direct or through a surronding class that was 
+     * inherited in. This method only follows a single extends.
+     * 
+     * If no surrounding extends exists or any lookup fails, <code>this</code> is returned.
+     */
+    syn InstClassDecl InstClassDecl.myInheritedOrigin() {
+        InstClassDecl res = inheritedOriginHelper(name());
+        return res.isUnknown() ? this : res;
+    }
+
+    inh InstClassDecl InstClassDecl.inheritedOriginHelper(String name);
+    eq InstExtends  .getInstClassDecl().inheritedOriginHelper(String name) = 
+        myInstClass().memberInstClass(name).target(INST_UNKNOWN_CLASS, this);
+    eq InstClassDecl.getInstClassDecl().inheritedOriginHelper(String name) = 
+        inheritedOriginHelper(name()).memberInstClass(name).target(INST_UNKNOWN_CLASS, this);
+    eq InstNode     .getChild()        .inheritedOriginHelper(String name) = 
+        unknownInstClassDecl();
+}
+
 
 /* TODO: If we are doing this, we should do it properly
 aspect InstancePrettyPrint {

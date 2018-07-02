@@ -373,6 +373,7 @@ aspect InstBindingType {
     inh InstClassDecl InstExternal.surroundingInstClass();
     inh InstClassDecl FGetInstanceName.surroundingInstClass();
     eq InstClassDecl.getChild().surroundingInstClass() = this;
+    eq InstLibNode.getChild().surroundingInstClass()   = surroundingInstClass();
     eq Root.getChild().surroundingInstClass()          = null;
 
     /**

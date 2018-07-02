@@ -32,6 +32,12 @@ aspect SrcUtil {
     eq SourceRoot.getChild().myClassDecl() = null;
 
     /**
+     * Is this a redeclare class extends declaration?
+     */
+    syn boolean SrcClassDecl.isClassExtends() = false;
+    eq SrcExtendClassDecl   .isClassExtends() = true;
+
+    /**
      * Returns true if this import is an unqualified import.
      */
     syn boolean SrcImportClause.isUnqualifiedImport()   = false;
