@@ -148,16 +148,14 @@ aspect InstFunctionBinding {
 	 * for other nodes.
 	 */
 	public void InstFunctionArgument.setErrorArgLocation(ASTNode node) {}
-	public void InstMissingArgument.setErrorArgLocation(ASTNode node) { setLocation(node); }
-	public void InstMultipleBoundArgument.setErrorArgLocation(ASTNode node) { setLocation(node); }
+    public void InstBadArgument.setErrorArgLocation(ASTNode node) { setLocation(node); }
 	
 	/**
 	 * Returns <code>false</code> if this argument node represents an error, 
 	 * e.g. a missing argument.
 	 */
 	syn boolean InstFunctionArgument.isOKArg() = true;
-	eq InstMissingArgument.isOKArg() = false;
-	eq InstMultipleBoundArgument.isOKArg() = false;
+    eq InstBadArgument.isOKArg()               = false;
 
     /**
      * List of arguments that could not be bound to inputs.
@@ -173,28 +171,31 @@ aspect InstFunctionBinding {
 	}
 	public void FUnsupportedBuiltIn.setUnbindableArgsList(ArrayList<InstFunctionArgument> list) {
 	}
-	
-	/**
-	 * Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
-	 * if the input has a default value and an InstMissingArgument otherwise.
-	 */
-	public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
-		throw new UnsupportedOperationException();
-	}
-	
-	public InstFunctionArgument InstAssignable.createInstDefaultArgument() {
-		InstFunctionArgument arg = null;
-		if (hasBindingFExp()) {
-            arg = new InstDefaultArgument(myBindingInstExp());
+
+    /**
+     * Called for inputs that no argument was bound to. Creates an InstDefaultArgument 
+     * if the input has a default value and an InstBadArgument otherwise.
+     */
+    public InstFunctionArgument InstComponentDecl.createInstDefaultArgument() {
+        InstFunctionArgument arg = buildInstDefaultArgument();
+        arg.setBoundInput(this);
+        return arg;
+    }
+
+    public InstFunctionArgument InstComponentDecl.buildInstDefaultArgument() {
+        return new InstUnknownArgument();
+    }
+
+    public InstFunctionArgument InstAssignable.buildInstDefaultArgument() {
+        if (hasBindingFExp()) {
+            return new InstDefaultArgument(myBindingInstExp());
         } else if (!isModifiable() && surroundingInstClass().isRecord()) {
-            arg = new InstPositionalArgument(cevalNoBExp(ASTNode.defaultVariableEvaluator(), Index.NULL).buildLiteral(), -1);
+            return new InstPositionalArgument(cevalNoBExp(ASTNode.defaultVariableEvaluator(), Index.NULL).buildLiteral(), -1);
         } else {
-			arg = new InstMissingArgument();
-		}
-		arg.setBoundInput(this);
-		return arg;
-	}
-	
+            return new InstMissingArgument();
+        }
+    }
+
 	/**
 	 * Add a new argument to list of arguments. (Only valid for some subclasses.)
 	 * 
