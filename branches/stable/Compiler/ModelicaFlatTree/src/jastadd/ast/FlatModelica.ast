@@ -1359,11 +1359,30 @@ InstPositionalArgument : InstGivenArgument ::= <Pos:int>;
 InstNamedArgument : InstGivenArgument ::= Name:InstAccess;
 
 /**
+ * Function call argument using default value in the instance tree.
+ */
+InstDefaultArgument : InstFunctionArgument ::= <OriginalFExp:FExp> /FExp/;
+
+/**
+ * Bad function call argument in the instance tree.
+ *  
+ * This node indicates a semantic error.
+ */
+abstract InstBadArgument : InstFunctionArgument;
+
+/**
  * Missing function call argument in the instance tree.
  *  
  * This node indicates a semantic error.
  */
-InstMissingArgument : InstFunctionArgument;
+InstMissingArgument : InstBadArgument;
+
+/**
+ * Unknown function call argument in the instance tree.
+ *  
+ * This node indicates a semantic error.
+ */
+InstUnknownArgument : InstBadArgument;
 
 /**
  * Function call argument in the instance tree for when several 
@@ -1371,12 +1390,7 @@ InstMissingArgument : InstFunctionArgument;
  *  
  * This node indicates a semantic error.
  */
-InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
-
-/**
- * Function call argument using default value in the instance tree.
- */
-InstDefaultArgument : InstFunctionArgument ::= <OriginalFExp:FExp> /FExp/;
+InstMultipleBoundArgument : InstBadArgument ::= Arg:InstFunctionArgument*;
 
 // Built in functions
 /**

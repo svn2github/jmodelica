@@ -875,7 +875,7 @@ aspect InstanceTreeConstruction {
 	 * @return  the final version of the dynamically placed node.
 	 */
 	public FExp FExp.dynamicFExp(FExp exp) {
-		if (exp == this)
+		if (exp == this || exp == null)
 			return exp;
 		if (exp.parent != null) {
 			int i = exp.parent.getIndexOfChild(exp);

@@ -1939,6 +1939,51 @@ end FunctionTests.FunctionBinding25;
 ")})));
 end FunctionBinding25;
 
+model FunctionBinding26
+    function f
+        input T x = 1;
+        output T y = x;
+        algorithm
+    end f;
+    Real x = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding26",
+            description="Bind argument for missing type of function input #5636",
+            errorMessage="
+Error at line 3, column 15, in file '...':
+  Cannot find class declaration for T
+
+Error at line 4, column 16, in file '...':
+  Cannot find class declaration for T
+
+Error at line 7, column 14, in file '...':
+  Calling function f(): could not resolve argument for required input x
+
+")})));
+end FunctionBinding26;
+
+model FunctionBinding27
+    model T
+    
+    end T;
+    function f
+        input T x = 1;
+        output T y = 1;
+        algorithm
+    end f;
+    Real x = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding27",
+            description="Bind argument for bad type of function input #5636",
+            errorMessage="
+Error at line 10, column 14, in file '...':
+  Calling function f(): could not resolve argument for required input x
+")})));
+end FunctionBinding27;
 
 model BadFunctionCall1
   Real x = NonExistingFunction(1, 2);

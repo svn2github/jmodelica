@@ -1484,10 +1484,11 @@ aspect InstanceErrorCheck {
     /**
      * Check if this node is in a recursive structure.
      */
-    syn boolean InstNode.isRecursed()      = false;
-    eq InstComponentDecl.isRecursed()      = !isPrimitive() && isWithin(myInstClass());
-    eq InstExtends.isRecursed()            = isWithin(myInstClass());
-    eq InstArrayComponentDecl.isRecursed() = instComponentDecl().isRecursed();
+    syn boolean InstNode       .isRecursed() = false;
+    eq InstComponentDecl       .isRecursed() = !isPrimitive() && isWithin(myInstClass());
+    eq InstExtends             .isRecursed() = isWithin(myInstClass());
+    eq InstSimpleShortClassDecl.isRecursed() = isWithin(actualInstClass());
+    eq InstArrayComponentDecl  .isRecursed() = instComponentDecl().isRecursed();
 
 	// TODO: check if we realy need this in addition to isRecursed()
 	/**
@@ -1558,17 +1559,19 @@ aspect InstanceErrorCheck {
     protected static final byte InstNode.RECURSIVE_YES     = 1;
     protected static final byte InstNode.RECURSIVE_NO      = 2;
 
-	/**
-	 * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
-	 *        instance of <code>icd</code>.
-	 */
-	inh boolean InstComponentDecl.isWithin(InstClassDecl icd);
-	inh boolean InstExtends.isWithin(InstClassDecl icd);
-	eq InstNode.getChild().isWithin(InstClassDecl icd)          = isOfInstClassDecl(icd);
-	eq InstComponentDecl.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
-	eq InstExtends.getChild().isWithin(InstClassDecl icd)       = isOfInstClassDecl(icd) || isWithin(icd);
-    eq Root.getChild().isWithin(InstClassDecl icd)              = false;
-	
+    /**
+     * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
+     *        instance of <code>icd</code>.
+     */
+    inh boolean InstComponentDecl.isWithin(InstClassDecl icd);
+    inh boolean InstExtends      .isWithin(InstClassDecl icd);
+    inh boolean InstClassDecl    .isWithin(InstClassDecl icd);
+    eq InstNode         .getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd);
+    eq InstComponentDecl.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
+    eq InstClassDecl    .getChild().isWithin(InstClassDecl icd) = icd == this || (!isFunction() && isWithin(icd));
+    eq InstExtends      .getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
+    eq Root             .getChild().isWithin(InstClassDecl icd) = false;
+
 	/**
 	 * Check if this node is equal to or an instance of <code>icd</code>.
 	 */
