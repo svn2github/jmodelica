@@ -27,5 +27,6 @@ RUN chmod +x ${USR_PATH}/Docker/build/*.sh
 RUN ${USR_PATH}/Docker/build/setup.sh
 RUN ${USR_PATH}/Docker/build/centos_python_env.sh
 RUN rm -rf /tmp/dockerfiles
+RUN rm -rf /*.tgz
 RUN useradd -ms /bin/bash baseuser && groupadd docker && usermod -aG docker baseuser
 USER baseuser
