@@ -32,6 +32,11 @@ RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 ###Tests
 #Need to set the matplotlib backend due to no display (IMPORTANT)
 ENV MPLBACKEND=Agg
+#We will change how we run the tests in a future issue
 #Run the tests
 RUN mkdir -p $JM_TESTS_WS/test_results
 RUN cd ${USR_PATH}/jm_install && printenv && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
+
+###Clean up
+RUN rm -rf /home/basesuser/Docker
+RUN rm -rf /home/baseuser/JModelica.org
