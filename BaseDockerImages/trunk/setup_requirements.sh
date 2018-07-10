@@ -21,7 +21,7 @@ BUILD_PKGS_JM_COMMON="vim sudo cmake swig ant wget tar patch"
 BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion gcc-c++ gcc-gfortran java-1.8.0-openjdk python-devel python-jpype zlib-devel boost-devel"
 BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran openjdk-8-jdk python-dev python-jpype zlib1g-dev libboost-dev"
 
-BUILD_PYTHON_PIP_PACKAGES="jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml==4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7"
+BUILD_PYTHON_PIP_PACKAGES="jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7"
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
