@@ -33,7 +33,7 @@ from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
 from pyjmi.common.xmlparser import XMLException
 from pyfmi.common.core import (unzip_unit, get_platform_suffix,
-                               get_files_in_archive, rename_to_tmp, load_DLL)
+                               get_files_in_archive, rename_to_tmp)
                             
 from pyjmi.linearization import linearize_dae_with_simresult, linearize_dae_with_point
 
