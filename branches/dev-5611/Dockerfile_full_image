@@ -16,16 +16,10 @@ ARG DOCKER_USR_PATH=/home/baseuser
 ENV USR_PATH=${DOCKER_USR_PATH}
 ENV JM_TESTS_WS=${DOCKER_JM_TESTS_WS}
 
-RUN whoami
-
-#RUN apt list --installed
-#RUN if [ "$DOCKER_LINUX_DIST"=="ubuntu" ] ; then apt list --installed ; else yum list installed ; fi
-
 COPY --chown=baseuser Docker/*.sh ${USR_PATH}/Docker/build/
 COPY --chown=baseuser Docker/*.py ${USR_PATH}/Docker/build/
 COPY --chown=baseuser / ${USR_PATH}/JModelica.org/
 
-RUN ls -la ${USR_PATH}/Docker/build
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
 RUN ${USR_PATH}/Docker/build/run_full_scripts.sh
 
@@ -38,5 +32,5 @@ RUN mkdir -p $JM_TESTS_WS/test_results
 RUN cd ${USR_PATH}/jm_install && printenv && ./jm_tests -i -x "$JM_TESTS_WS/test_results"
 
 ###Clean up
-RUN rm -rf /home/basesuser/Docker
-RUN rm -rf /home/baseuser/JModelica.org
+RUN rm -rf ${USR_PATH}/Docker
+RUN rm -rf ${USR_PATH}/JModelica.org
