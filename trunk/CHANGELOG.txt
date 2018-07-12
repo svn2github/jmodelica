@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5634
+Fixed issue where external object constructors where called multiple times.
+
 ; Fixed ; Minor ; Compiler ; #5632
 Fixed issue with FExp.dynamicFExp(FExp exp) for null input.
 

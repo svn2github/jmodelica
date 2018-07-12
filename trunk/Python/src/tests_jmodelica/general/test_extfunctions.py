@@ -334,6 +334,48 @@ class TestExternalObject3:
         log = model.get_log()[-1]
         assert "This should not lead to a segfault" in log
             
+class TestExternalObjectConstructorSingleCall:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+        
+    @testattr(stddist_full = True)
+    def test_ExtObjectConstructor(self):
+        """ 
+        Test independent external object constructor is called once 
+        """
+        cpath = 'ExtFunctionTests.ConstructorSingleCallTest'
+        fmu_name = compile_fmu(cpath, TestExternalObjectConstructorSingleCall.fpath)
+        model = load_fmu(fmu_name)
+        model.simulate()
+        model.terminate()
+
+    @testattr(stddist_full = True)
+    def test_ExtObjectConstructorDependent(self):
+        """ 
+        Test external object constructor dependent on parameter is called once 
+        """
+        cpath = 'ExtFunctionTests.ConstructorSingleCallDepTest'
+        fmu_name = compile_fmu(cpath, TestExternalObjectConstructorSingleCall.fpath)
+        model = load_fmu(fmu_name)
+        model.simulate()
+        model.terminate()
+
+    @testattr(stddist_full = True)
+    def test_ExtObjectConstructorDependentSetParam(self):
+        """ 
+        Test external object constructor dependent on parameter is not called when setting parameters
+        """
+        cpath = 'ExtFunctionTests.ConstructorSingleCallDepTest'
+        fmu_name = compile_fmu(cpath, TestExternalObjectConstructorSingleCall.fpath)
+        model = load_fmu(fmu_name)
+        model.set('s', 'test')
+        model.set('s', 'test2')
+
 class TestAssertEqu3(SimulationTest):
     '''Test structural verification assert'''
     @classmethod

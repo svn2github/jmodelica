@@ -1076,6 +1076,7 @@ model BindingExpVariability1
     
     Real x;
     parameter EO eo = EO(x);
+    parameter EO eo1 = eo1;
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
@@ -1083,7 +1084,10 @@ model BindingExpVariability1
             description="",
             errorMessage="
 Error at line 16, column 5, in file '...', BINDING_EXPRESSION_VARIABILITY:
-  Variability of binding expression (continuous-time) must be lower or equal to the variability of the component (parameter)
+  Variability of binding expression (continuous-time) must be lower or equal to the variability of the component (initial parameter)
+  
+Error at line 17, column 24, in file '...':
+  Circularity in binding expression of parameter: eo1 = eo1
 ")})));
 end BindingExpVariability1;
 

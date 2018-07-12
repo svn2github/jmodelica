@@ -2,6 +2,7 @@
 #define _EXT_OBJECTS_H_
 
 void* constructor_string(const char* str);
+void* constructor_error_multiple_calls(const char* str);
 
 double constant_extobj_func(void* o);
 
