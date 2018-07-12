@@ -1303,22 +1303,23 @@ aspect ExternalObjectTypes {
     syn boolean FFunctionVariable.isConstructor() = false;
     eq FConstructorDecl.isConstructor()           = true;
 
-    syn boolean FExternalObjectVariable.hasConstructorCall(Index i) {
+    syn boolean FExternalObjectVariable.hasConstructorCall() {
         if (hasBindingExp()) {
-            FExp exp = (i == Index.NULL) ? getBindingExp() : getBindingExp().getArray().get(i);
-            return exp.isConstructorCall();
+            return getBindingExp().isConstructorCall();
         } else {
-            return hasParameterEquation() && parameterEquation().hasConstructorCall(i);
+            for (FIdUseExp use : uses()) {
+                if (use.isConstructorAssign()) {
+                    return true;
+                }
+            }
+            return false;
         }
         
     }
-    syn boolean FAbstractEquation.hasConstructorCall(Index i) = false;
-    eq FEquation.hasConstructorCall(Index i) {
-        FExp exp = getRight();
-        if (i != Index.NULL)
-            exp = exp.getArray().get(i);
-        return exp.isConstructorCall();
-    }
+
+    inh boolean FIdUseExp.isConstructorAssign();
+    eq BaseNode.getChild().isConstructorAssign() = false;
+    eq FEquation.getLeft().isConstructorAssign() = getRight().isConstructorCall();
 
 }
 

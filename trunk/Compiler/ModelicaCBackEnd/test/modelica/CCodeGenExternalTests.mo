@@ -3410,6 +3410,12 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
+
+    if (_eo_1 != NULL) {
+        func_CCodeGenExternalTests_TestExtObject9_EO_destructor_def0(_eo_1);
+        _eo_1 = NULL;
+    }
+
 ")})));
 end TestExtObject9;
 
