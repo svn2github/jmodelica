@@ -432,8 +432,9 @@ int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {
 int jmi_ode_derivatives(jmi_t* jmi) {
 
     int return_status;
-    jmi_log_node_t node;
     jmi_real_t *t = jmi_get_t(jmi);
+    jmi_log_node_t node={0};
+    
 
     if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
@@ -468,8 +469,8 @@ int jmi_ode_derivatives_dir_der(jmi_t* jmi) {
 int jmi_ode_initialize(jmi_t* jmi) {
 
     int return_status;
-    jmi_log_node_t node;
     jmi_real_t* t = jmi_get_t(jmi);
+    jmi_log_node_t node={0};
 
     if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
