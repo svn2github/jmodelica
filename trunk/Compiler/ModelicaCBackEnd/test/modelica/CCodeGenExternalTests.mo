@@ -3069,7 +3069,7 @@ equation
             variability_propagation=false,
             template="
 $C_set_start_values$
-$C_ode_initialization$
+$C_DAE_initial_dependent_parameter_assignments$
 $C_destruct_external_object$
 ",
             generatedCode="
@@ -3086,8 +3086,6 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _myEO3_2 = (NULL);
-    _myEO4_3 = (NULL);
     _y1_4 = (0.0);
     _y2_5 = (0.0);
     _y3_6 = (0.0);
@@ -3110,15 +3108,20 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     return ef;
 }
 
-int model_ode_initialize_base(jmi_t* jmi) {
+
+int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _y1_4 = func_CCodeGenExternalTests_useMyEO_exp4(_myEO1_0);
-    _y2_5 = func_CCodeGenExternalTests_useMyEO_exp4(_myEO2_1);
-    _myEO3_2 = func_CCodeGenExternalTests_ExtObjectwInput_constructor_exp3(_z1_8);
-    _y3_6 = func_CCodeGenExternalTests_useMyEOI_exp5(_myEO3_2);
-    _myEO4_3 = func_CCodeGenExternalTests_ExtObjectwInput_constructor_exp3(_z1_8);
-    _y4_7 = func_CCodeGenExternalTests_useMyEOI_exp5(_myEO4_3);
+    if (_myEO3_2 != NULL) {
+        func_CCodeGenExternalTests_ExtObjectwInput_destructor_def2(_myEO3_2);
+        _myEO3_2 = NULL;
+    }
+    _myEO3_2 = (func_CCodeGenExternalTests_ExtObjectwInput_constructor_exp3(_z1_8));
+    if (_myEO4_3 != NULL) {
+        func_CCodeGenExternalTests_ExtObjectwInput_destructor_def2(_myEO4_3);
+        _myEO4_3 = NULL;
+    }
+    _myEO4_3 = (func_CCodeGenExternalTests_ExtObjectwInput_constructor_exp3(_z1_8));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -3304,15 +3307,20 @@ model TestExtObject8
             description="Test that constructor and destructor calls are generated for external objects in records.",
             variability_propagation=false,
             template="
-$C_ode_initialization$
+$C_DAE_initial_dependent_parameter_assignments$
 $C_destruct_external_object$
 ",
             generatedCode="
-int model_ode_initialize_base(jmi_t* jmi) {
+
+int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _eo_1 = func_CCodeGenExternalTests_TestExtObject8_EO_constructor_exp1(_x_0);
-    _r_eo_2 = _eo_1;
+    if (_eo_1 != NULL) {
+        func_CCodeGenExternalTests_TestExtObject8_EO_destructor_def0(_eo_1);
+        _eo_1 = NULL;
+    }
+    _eo_1 = (func_CCodeGenExternalTests_TestExtObject8_EO_constructor_exp1(_x_0));
+    _r_eo_2 = (_eo_1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
