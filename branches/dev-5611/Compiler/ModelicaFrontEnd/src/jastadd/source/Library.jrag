@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 import org.jmodelica.util.problemHandling.ProblemProducer;
 import org.jmodelica.api.problemHandling.ProblemKind;
 import org.jmodelica.api.problemHandling.ProblemSeverity;

@@ -58,12 +58,10 @@ aspect InstVariability {
     
     syn FTypePrefixVariability InstComponentDecl.calcVariability() = originalVariability();
     
-    eq InstEnumLiteral.calcVariability()                           = fConstant();
-    eq UnknownInstComponentDecl.calcVariability()                  = fConstant();
-    eq InstAssignable.calcVariability()                            = calcVariability(super.calcVariability());
-    eq InstExternalObject.calcVariability()                        = calcVariability(ASTNode.fFixedParameter())
-        .combine(ASTNode.fFixedParameter()).combineDown(ASTNode.fInitialParameter());
-    
+    eq InstEnumLiteral.calcVariability()          = fConstant();
+    eq UnknownInstComponentDecl.calcVariability() = fConstant();
+    eq InstAssignable.calcVariability()           = calcVariability(super.calcVariability());
+
     // Parameters variabilities also depend on binding expressions since its nice
     // to propagate known values, these include: 
     // * Structural parameters, marked during error checking.
@@ -72,7 +70,7 @@ aspect InstVariability {
     //
     // Since this is used before/during error checks and depend on expressions
     // we have to guard agains circularity.
-    private boolean InstAssignable.circularVariability = false;
+    protected boolean InstAssignable.circularVariability = false;
     
     public FTypePrefixVariability InstAssignable.calcVariability(FTypePrefixVariability v) {
         if (v.constantVariability() && isInput() && inFunction() && isTopLevelInputOutput()) {
@@ -99,7 +97,22 @@ aspect InstVariability {
         }
         return v;
     }
-    
+
+    eq InstExternalObject.calcVariability() {
+        FTypePrefixVariability v = calcVariability(ASTNode.fFixedParameter());
+        if(!circularVariability) {
+            circularVariability = true;
+            if (v.knownParameterOrLess() || (v.fixedParameterOrLess() && 
+                   (!hasBindingExp() || getBindingFExp().isIndependentParameterExp()))) {
+                v = fFixedParameter();
+            } else {
+                v = fInitialParameter();
+            }
+            circularVariability = false;
+        }
+        return v;
+    }
+
     eq InstRecord.calcVariability() {
         InstComponentDecl rec = scalar();
         if (rec == null) {

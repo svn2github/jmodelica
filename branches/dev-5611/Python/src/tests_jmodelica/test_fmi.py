@@ -551,6 +551,7 @@ class Test_FMUModelME1:
         cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"), version="1.0")
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), version="1.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), version="1.0")
+        cls.alias1 = compile_fmu("Alias1",os.path.join(path_to_mofiles,"TestAlias.mo"), version="1.0")
         
     @testattr(stddist_full = True)
     def test_simulate_with_debug_option(self):
@@ -588,6 +589,15 @@ class Test_FMUModelME1:
         assert len(r) == len(r_f)
         assert len(i) == len(i_f)
         assert len(b) == len(b_f)
+    
+    @testattr(stddist_full = True)
+    def test_get_time_varying_variables_with_alias(self):
+        model = load_fmu(self.alias1)
+        
+        [r,i,b] = model.get_model_time_varying_value_references(filter="y*")
+        
+        assert len(r) == 1
+        assert r[0] == model.get_variable_valueref("y")
     
     @testattr(stddist_full = True)
     def test_get_string(self):

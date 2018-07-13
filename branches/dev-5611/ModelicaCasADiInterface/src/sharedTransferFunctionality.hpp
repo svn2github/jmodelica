@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SHARED_TRANSFER_FUNCTIONALITY
 #define SHARED_TRANSFER_FUNCTIONALITY
 
-#include "iostream"
+#include <iostream>
 
 //JNI
 #include "jni.h"
@@ -466,7 +466,7 @@ void transferFAttributeListForVariable(ModelicaCasADi::Ref<ModelicaCasADi::Varia
     for (int i = 0; i < attributeList.getNumChild(); ++i) {
         attr = Attribute(attributeList.getChild(i).this$);
         std::string name = env->toString(attr.name().this$);
-        if (name != "stateSelect") {
+        if (name != "stateSelect" && name.find("__") != 0) {
             // Don't transfer stateSelect attribute, since enumerations are not supported
             var->setAttribute(name, toMX(attr.getValue()));
         }

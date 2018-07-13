@@ -217,7 +217,6 @@ SrcConditionalAttribute : SrcBaseNode ::= SrcExp;
 abstract SrcModification : SrcBaseNode;
 SrcCompleteModification  : SrcModification ::= SrcClassModification [SrcValueModification];
 SrcValueModification     : SrcModification ::= SrcExp;
-//AssignModification    : SrcModification ::= SrcExp;
 SrcDummyModification     : SrcValueModification;
 
 SrcClassModification : SrcModification ::= SrcArgument*;
@@ -267,6 +266,7 @@ SrcWhenClause          : SrcIfWhenClause;
 SrcForStmt             : SrcStatement ::= SrcForIndex* SrcStatement*;
 SrcWhileStmt           : SrcStatement ::= Test:SrcExp SrcWhileStmt:SrcStatement*;
 
+SrcParExp    : SrcExp ::= SrcExp;
 SrcIfExp     : SrcExp ::= SrcIfExp:SrcExp ThenExp:SrcExp ElseExp:SrcExp;
 
 abstract SrcBinExp : SrcExp ::= Left:SrcExp Right:SrcExp;

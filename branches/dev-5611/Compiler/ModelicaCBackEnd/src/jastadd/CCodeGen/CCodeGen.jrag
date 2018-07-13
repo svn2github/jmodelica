@@ -454,9 +454,6 @@ aspect CCodeGen {
         p.printPreSteps(this, str, indent);
         FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
         FVariable fv = (FVariable)left.myFV();
-        if (fv.isExternalObject()) {
-            fv.genDestructorCall_C(p, str, indent);
-        }
         fv.genAssignment_C(p, str, indent, fv.name_C(), getRight(), getLeft().isNegated());
         p.printPostSteps(this, str, indent);
     }
@@ -466,7 +463,7 @@ aspect CCodeGen {
     }
 
     public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
-        if (hasConstructorCall(Index.NULL)) {
+        if (hasConstructorCall()) {
             str.formatln("%sif (%s != NULL) {", indent, name_C());
             p.print(getDestructorCall(), str, p.indent(indent));
             str.formatln("%s%s = NULL;", p.indent(indent), name_C());

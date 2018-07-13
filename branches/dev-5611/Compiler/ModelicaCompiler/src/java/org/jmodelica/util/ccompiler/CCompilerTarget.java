@@ -16,7 +16,7 @@
 
 package org.jmodelica.util.ccompiler;
 
-import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 
 public interface CCompilerTarget {
 

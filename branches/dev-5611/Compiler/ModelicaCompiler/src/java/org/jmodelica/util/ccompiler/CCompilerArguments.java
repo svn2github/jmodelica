@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.common.options.OptionRegistry;
 
 public class CCompilerArguments {
     private String fileName;

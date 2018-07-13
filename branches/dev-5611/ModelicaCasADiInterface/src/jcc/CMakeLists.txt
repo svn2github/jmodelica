@@ -36,7 +36,7 @@ set(CLASSES_common
   ifcasadi.MXFunction
   ifcasadi.MXVector
   ifcasadi.ifcasadi
-  org.jmodelica.util.OptionRegistry
+  org.jmodelica.common.options.OptionRegistry
   org.jmodelica.util.streams.CodeStream;
 )
 

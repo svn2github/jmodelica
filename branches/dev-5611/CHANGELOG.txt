@@ -1,4 +1,16 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5634
+Fixed issue where external object constructors where called multiple times.
+
+; Fixed ; Minor ; Compiler ; #5632
+Fixed issue with FExp.dynamicFExp(FExp exp) for null input.
+
+; Fixed ; Minor ; PyFMI ; #5624
+Made binary result saving more robust.
+
+; Fixed ; Minor ; PyFMI ; #5623
+Fixed issue with using the result filter together with FMI1
+
 ; Change ; Minor ; MSL ; #5619
 Patched MSL resources to work with VS2015.
 

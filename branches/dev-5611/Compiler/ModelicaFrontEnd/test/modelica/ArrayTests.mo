@@ -9656,4 +9656,26 @@ end ArrayTests.IfExprTemp3;
 ")})));
 end IfExprTemp3;
 
+model BindingExpressionBadDimension1
+    record R
+        Real x;
+    end R;
+
+    R[2] r(x={time});
+    constant Real x = r[2].x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BindingExpressionBadDimension1",
+            description="Check for NullPointerException with bad binding expression array length, #5632",
+            errorMessage="
+Error at line 6, column 14, in file '...', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
+  Array size mismatch in modification of x, expected size is [2] and size of binding expression is [1]
+
+Error at line 7, column 23, in file '...':
+  Could not evaluate binding expression for constant 'x': 'r[2].x'
+
+")})));
+end BindingExpressionBadDimension1;
+
 end ArrayTests;
