@@ -48,6 +48,13 @@ pckinstall $BUILD_PKGS_JM
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
     echo "Installing extra python packages with pip on CentOS"
+    ANT_VERSION=1.9.9
+    wget http://archive.apache.org/dist/ant/binaries/apache-ant-$ANT_VERSION-bin.tar.gz
+    ANTTMP=anttmp
+    mkdir $ANTTMP && cd $ANTTMP && tar -xvf ../apache-ant-$ANT_VERSION-bin.tar.gz && cd ..
+    mv $ANTTMP/$ANT_VERSION /opt/ant && rm -rf apache-ant-$ANT_VERSION-bin.tar.gz && rm -rf $ANTTMP
+    echo 'export ANT_HOME=/opt/ant/'>/etc/profile.d/antenv.sh
+    chmod 0755 /etc/profile.d/antenv.sh
 elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing extra packages for Ubuntu"
     #Install package lsb separately because it conflicts with the installation above
