@@ -40,9 +40,6 @@ aspect CCodeGenFunctionDecl {
     public class StructComputation implements IOComputation {}
     public class HeadComputation implements IOComputation {}
 
-    public boolean FClass.mightBeSplit() {
-        return myOptions().getIntegerOption("cc_split_element_limit") > 0;
-    }
     
     public void FClass.generateFunctionHeaders(CodePrinter p, CodeStream str, String indent) {
         for (FFunctionDecl func : myFFunctionDeclsPartial()) {
@@ -53,11 +50,6 @@ aspect CCodeGenFunctionDecl {
         }
         for (FFunctionDecl func : getFFunctionDecls()) {
             func.genHeader(p, str, "");
-        }
-        if (mightBeSplit()) {
-            for(AbstractEquationBlock block: getDAEBLT()) {
-                block.genBlockResidualSetUpFunctionCallHeader_C(p, str, indent);
-            }
         }
     }
 

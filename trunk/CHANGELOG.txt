@@ -1,8 +1,4 @@
 ================= Unreleased ==================
-Fixed ; Minor ; Compiler ; #5640 
-Fixed a problem where functions had to restrictive visibility.
-Added header information for functions which needed greater visibility.
-
 ; Fixed ; Minor ; Compiler ; #5632
 Fixed issue with FExp.dynamicFExp(FExp exp) for null input.
 

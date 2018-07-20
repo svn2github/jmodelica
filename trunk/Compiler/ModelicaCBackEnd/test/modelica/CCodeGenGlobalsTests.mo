@@ -472,7 +472,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 -----
-void dae_block_0_set_up(jmi_t* jmi) {
+static void dae_block_0_set_up(jmi_t* jmi) {
     JMI_GLOBAL(tmp_2_computed) = 0;
 }
 
@@ -1004,7 +1004,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
-void dae_block_0_set_up(jmi_t* jmi) {
+static void dae_block_0_set_up(jmi_t* jmi) {
     JMI_GLOBAL(tmp_1_computed) = 0;
 }
 
@@ -1237,7 +1237,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
-void dae_block_0_set_up(jmi_t* jmi) {
+static void dae_block_0_set_up(jmi_t* jmi) {
     JMI_GLOBAL(tmp_1_computed) = 0;
 }
 
@@ -1339,7 +1339,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
-void dae_block_0_set_up(jmi_t* jmi) {
+static void dae_block_0_set_up(jmi_t* jmi) {
     JMI_GLOBAL(tmp_1_computed) = 0;
 }
 
