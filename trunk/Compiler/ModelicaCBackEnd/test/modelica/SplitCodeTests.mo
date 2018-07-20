@@ -17,6 +17,227 @@
 
 package SplitCodeTests
 
+model BlockSetupSplit
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x;
+    Real y;
+    Real z[100];
+equation
+    der(x) = f({time});
+    der(y) = f({time+1});
+    when time > 2 then
+        reinit(x, f({1}));
+    end when;
+    when time > 3 then
+        reinit(y, f({2}));
+    end when;
+    der(z) = -ones(100);
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockSetupSplit_1",
+            description="Test setup block headers not generated when spliting disable by option",
+            cc_split_element_limit=0,
+            relational_time_events=false,
+            variability_propagation=false,
+            template="
+            $C_function_headers$
+$CAD_function_headers$
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+            void func_SplitCodeTests_BlockSetupSplit_f_def0(jmi_array_t* x_a, jmi_real_t* y_o);
+jmi_real_t func_SplitCodeTests_BlockSetupSplit_f_exp0(jmi_array_t* x_a);
+
+
+void dae_block_0_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_1_computed) = 0;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871118;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871118;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(jmi, _time - (2), _sw(0), JMI_REL_GT);
+            }
+            _temp_1_102 = _sw(0);
+        }
+        if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
+            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+            jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+            JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit_f_exp0(tmp_2));
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void dae_block_1_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_4_computed) = 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 2 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871119;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871119;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(jmi, _time - (3), _sw(1), JMI_REL_GT);
+            }
+            _temp_2_103 = _sw(1);
+        }
+        if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
+            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
+            jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(2);
+            JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit_f_exp0(tmp_5));
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}")})));
+end BlockSetupSplit;
+
+
+model BlockSetupSplit
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x;
+    Real y;
+    Real z[100];
+equation
+    der(x) = f({time});
+    der(y) = f({time+1});
+    when time > 2 then
+        reinit(x, f({1}));
+    end when;
+    when time > 3 then
+        reinit(y, f({2}));
+    end when;
+    der(z) = -ones(100);
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockSetupSplit_2",
+            description="Test setup block spliting with element limit",
+            cc_split_element_limit=1,
+            relational_time_events=false,
+            variability_propagation=false,
+            template="
+            $C_function_headers$
+$CAD_function_headers$
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+            void func_SplitCodeTests_BlockSetupSplit_f_def0(jmi_array_t* x_a, jmi_real_t* y_o);
+jmi_real_t func_SplitCodeTests_BlockSetupSplit_f_exp0(jmi_array_t* x_a);
+extern void dae_block_0_set_up(jmi_t* jmi);
+extern void dae_block_1_set_up(jmi_t* jmi);
+
+
+void dae_block_0_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_1_computed) = 0;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871118;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871118;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(jmi, _time - (2), _sw(0), JMI_REL_GT);
+            }
+            _temp_1_102 = _sw(0);
+        }
+        if (LOG_EXP_AND(_temp_1_102, LOG_EXP_NOT(pre_temp_1_102))) {
+            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+            jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+            JMI_GLOBAL(tmp_3) = JMI_CACHED(tmp_1, func_SplitCodeTests_BlockSetupSplit_f_exp0(tmp_2));
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void dae_block_1_set_up(jmi_t* jmi) {
+    JMI_GLOBAL(tmp_4_computed) = 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 2 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1)
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871119;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536871119;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(jmi, _time - (3), _sw(1), JMI_REL_GT);
+            }
+            _temp_2_103 = _sw(1);
+        }
+        if (LOG_EXP_AND(_temp_2_103, LOG_EXP_NOT(pre_temp_2_103))) {
+            JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_5, 1, 1, 1)
+            jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(2);
+            JMI_GLOBAL(tmp_6) = JMI_CACHED(tmp_4, func_SplitCodeTests_BlockSetupSplit_f_exp0(tmp_5));
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}")})));
+end BlockSetupSplit;
+
 model SplitCodeTest1
   parameter Real[:] p = {1,2};
   Real[:] x = p .+ time;
