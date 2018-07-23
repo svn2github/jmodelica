@@ -17,7 +17,7 @@
 
 package SplitCodeTests
 
-model BlockSetupSplit
+model BlockSetupSplit1
     function f
         input Real[:] x;
         output Real y = sum(x);
@@ -40,7 +40,7 @@ equation
     der(z) = -ones(100);
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
-            name="BlockSetupSplit_1",
+            name="BlockSetupSplit1",
             description="Test setup block headers not generated when spliting disable by option",
             cc_split_element_limit=0,
             relational_time_events=false,
@@ -124,10 +124,10 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }")})));
-end BlockSetupSplit;
+end BlockSetupSplit1;
 
 
-model BlockSetupSplit
+model BlockSetupSplit2
     function f
         input Real[:] x;
         output Real y = sum(x);
@@ -150,7 +150,7 @@ equation
     der(z) = -ones(100);
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
-            name="BlockSetupSplit_2",
+            name="BlockSetupSplit2",
             description="Test setup block spliting with element limit",
             cc_split_element_limit=1,
             relational_time_events=false,
@@ -236,7 +236,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }")})));
-end BlockSetupSplit;
+end BlockSetupSplit2;
 
 model SplitCodeTest1
   parameter Real[:] p = {1,2};
