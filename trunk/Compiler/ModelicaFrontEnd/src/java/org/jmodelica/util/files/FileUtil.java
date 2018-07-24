@@ -344,4 +344,23 @@ public final class FileUtil {
         }
         return files;
     }
+
+    /**
+     * Creates a file object from a list of names.
+     * 
+     * @param names the names, i.e. directory names and the file name.
+     * @return a file pointing to "{@code names[0]/names[1]/...}".
+     */
+    public static File pathsToFile(String... names) {
+        int length = names.length;
+        if (length == 0) {
+            throw new IllegalArgumentException("Can not build file no names.");
+        }
+
+        File file = new File(names[0]);
+        for (int i = 1; i < length; ++i) {
+            file = new File(file, names[i]);
+        }
+        return file;
+    }
 }
