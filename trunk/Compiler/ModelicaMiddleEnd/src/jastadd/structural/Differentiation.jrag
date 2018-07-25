@@ -576,6 +576,10 @@ aspect Derivatives {
             }
         }
         
+        if (isConstantExp()) {
+            return diffZero();
+        }
+        
         FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
         if (myDecl == null)
             throw new FunctionDifferentiationException(this);
