@@ -21,7 +21,6 @@ public class Util {
     public static String resource(Class<?> clazz, String name) {
         try {
             // This ensures that spaces are encoded correctly!
-            String x = name;
             return URLDecoder.decode(clazz.getResource(name).getPath(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new InternalCompilerError("Unable to decode loaded resource URL; " + e.getMessage(), e);
