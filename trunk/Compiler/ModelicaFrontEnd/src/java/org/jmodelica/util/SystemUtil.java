@@ -41,7 +41,7 @@ public final class SystemUtil {
      * @return a string describing what operating system this is.
      */
     public static String getOS() {
-        return OS.name();
+        return OS.name().toLowerCase();
     }
 
     /**
@@ -63,5 +63,21 @@ public final class SystemUtil {
      */
     public static boolean isWindows() {
         return OS == OperatingSystem.WINDOWS;
+    }
+
+    /**
+     * @return the relevant file extension for the current operating system.
+     */
+    public static String executableExtension() {
+        return isLinux() ? "" : ".exe";
+    }
+
+    /**
+     * @param fileName The string to which to append the relevant file extension.
+     * @return {@code string} with the proper file extension for the operating
+     *         system.
+     */
+    public static String executableExtension(String fileName) {
+        return fileName + executableExtension();
     }
 }
