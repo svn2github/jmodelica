@@ -818,7 +818,7 @@ aspect Derivatives {
     }
 
     /**
-     * Generic implementation of {@link #diffExp(String)} for array expressions 
+     * Generic implementation of {@link #diff(String)} for array expressions 
      * that delegates to the elements of array expansion.
      */
     protected FExp FExp.diffArray(String name) {
@@ -826,7 +826,7 @@ aspect Derivatives {
     }
 
     /**
-     * Generic implementation of {@link #diffExp(String)} for expressions that are 
+     * Generic implementation of {@link #diff(String)} for expressions that are 
      * always constant during simulation.
      */
     protected FExp FExp.diffZero() {
@@ -834,7 +834,7 @@ aspect Derivatives {
     }
 
     /**
-     * Generic implementation of {@link #diffExp(String)} that simply differentiates 
+     * Generic implementation of {@link #diff(String)} that simply differentiates 
      * each argument of the operator/function.
      * 
      * Only valid for operators/functions their arguments as direct children.
@@ -853,7 +853,7 @@ aspect Derivatives {
     
     /**
      * Build an FArray containing the differentiated elements of this array 
-     * (by calling {@link FExp#diffExp(String)} on each one).
+     * (by calling {@link FExp#diff(String)} on each one).
      */
     public FExp Array.buildDiff(final String name) {
         return buildFArray(new ElementBuilder() {
