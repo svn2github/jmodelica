@@ -822,7 +822,7 @@ aspect Derivatives {
      * that delegates to the elements of array expansion.
      */
     protected FExp FExp.diffArray(String name) {
-        return dynamicFExp(getArray().buildDiff(name));
+        return getArray().buildDiff(name);
     }
 
     /**
@@ -830,7 +830,7 @@ aspect Derivatives {
      * always constant during simulation.
      */
     protected FExp FExp.diffZero() {
-        return dynamicFExp(type().sizedZeroLiteral());
+        return type().sizedZeroLiteral();
     }
 
     /**
@@ -848,7 +848,7 @@ aspect Derivatives {
         for (int i = 0; i < exp.length; i++) {
             res.setChild(exp[i].diff(name), i + o);
         }
-        return dynamicFExp(res);
+        return res;
     }
     
     /**
