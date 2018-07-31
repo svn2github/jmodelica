@@ -1219,7 +1219,7 @@ aspect Scalarization {
         List<FAbstractEquation> l = new List<FAbstractEquation>();
         scalarizeList(s.block(l), getFAbstractEquations());
         FIfWhenElseEquation res = createEmptyNode();
-        res.setType((FEquationType) getType().fullCopy());
+        res.setType(getType());
         res.setFAbstractEquationList(l);
         scalarizeTestAndElse(s, res);
         s.add(res);

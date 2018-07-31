@@ -336,7 +336,7 @@ aspect FunctionInlining {
             if (!variability.constantVariability()) {
                 call = (FAbstractFunctionCall) call.preventEvents();
                 FFunctionCallEquation eqn = 
-                    new FFunctionCallEquation(new FNormalEquation(), new List(), call);
+                    new FFunctionCallEquation(EquationType.NORMAL, new List(), call);
                 for (FExp exp : lExps) {
                     FFunctionCallLeft left = new FFunctionCallLeft();
                     if (exp != null)

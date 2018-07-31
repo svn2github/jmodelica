@@ -1360,7 +1360,6 @@ aspect FlatPrettyPrint {
 	
 	public void FAlgorithm.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
-		p.print(getType(),str,"");
 		str.println("algorithm");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 	}

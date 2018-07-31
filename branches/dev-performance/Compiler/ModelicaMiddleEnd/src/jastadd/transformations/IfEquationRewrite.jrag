@@ -263,7 +263,7 @@ aspect IfEquationRewrite {
             FExp left = assignmentEquationMap().get(v).assignmentExp().fullCopy();
             FExp right = getElse().assignmentEquationMap().get(v).assignmentExp().fullCopy();
             FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
-            FEquation e = new FEquation(getType().fullCopy(), v.createUseExp(), ifExp);
+            FEquation e = new FEquation(getType(), v.createUseExp(), ifExp);
             if (isWhen()) {
                 ifExp.setWhen();
                 e.setWhen();
@@ -304,7 +304,7 @@ aspect IfEquationRewrite {
             FExp left = eqs[0].createResidualExp();
             FExp right = eqs[1].createResidualExp();
             FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
-            l.add(new FEquation(getType().fullCopy(), eqs[0].type().zeroLiteral(), ifExp));
+            l.add(new FEquation(getType(), eqs[0].type().zeroLiteral(), ifExp));
         }
 
         // Generate new if equation with remaining equations.
@@ -312,12 +312,12 @@ aspect IfEquationRewrite {
         if (keepLeft.getNumChild() > 0) {
             Opt<FIfWhenElseEquation> elseOpt = new Opt<FIfWhenElseEquation>();
             if (keepRight.getNumChild() > 0) 
-                elseOpt.addChild(new FElseEquation(getType().fullCopy(), keepRight));
-            e = new FIfEquation(getType().fullCopy(), keepLeft, getTest(), elseOpt);
+                elseOpt.addChild(new FElseEquation(getType(), keepRight));
+            e = new FIfEquation(getType(), keepLeft, getTest(), elseOpt);
             copyFlagsTo(e);
             l.add(e);
         } else if (keepRight.getNumChild() > 0) {
-            e = new FIfEquation(getType().fullCopy(), keepRight, new FNotExp(getTest()), new Opt());
+            e = new FIfEquation(getType(), keepRight, new FNotExp(getTest()), new Opt());
             copyFlagsTo(e);
             l.add(e);
         }

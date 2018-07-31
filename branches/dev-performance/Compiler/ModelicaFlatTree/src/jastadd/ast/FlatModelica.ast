@@ -564,27 +564,12 @@ FExpSubscript : FSubscript ::= FExp /AccessContextSizeExp:FExp/;
 FIntegerSubscript : FSubscript ::= <Value:int>;
 
 /**
- * Classifies a flattened equation as initial or normal.
- */
-abstract FEquationType : BaseNode;
-
-/**
- * Classifies a flattened equation as normal.
- */
-FNormalEquation : FEquationType;
-
-/**
- * Classifies a flattened equation as initial.
- */
-FInitialEquation : FEquationType;
-
-/**
  * Base class for flattened equations.
  *
  * The NTA InitialEquation is used to represent default initial equations for
  * when equations that are not active during initialization.
  */
-abstract FAbstractEquation : BaseNode ::= Type:FEquationType
+abstract FAbstractEquation : BaseNode ::= <Type:EquationType>
                                           /InitialEquation:FAbstractEquation*/
                                           FAttribute*
                                           [FStringComment];

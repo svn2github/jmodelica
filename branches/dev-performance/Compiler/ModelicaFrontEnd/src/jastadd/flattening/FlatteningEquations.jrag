@@ -17,16 +17,8 @@
 aspect FlatEquations {
 
     public void FAbstractEquation.flatten(Flattener f) {
-        List<FAbstractEquation> l = getType().equationList(f);
+        List<FAbstractEquation> l = getType().isInitial() ? f.getInitialEquations() : f.getNormalEquations();
         flattenEqn(f, l);
-    }
-
-    abstract public List<FAbstractEquation> FEquationType.equationList(Flattener f);
-    public List<FAbstractEquation> FNormalEquation.equationList(Flattener f) {
-        return f.getNormalEquations();
-    }
-    public List<FAbstractEquation> FInitialEquation.equationList(Flattener f) {
-        return f.getInitialEquations();
     }
 
     public static void FAbstractEquation.flattenEqnList(Flattener f, List<FAbstractEquation> l,
@@ -82,7 +74,7 @@ aspect FlatEquations {
         List<FAbstractEquation> toList = new List<FAbstractEquation>();
         FAbstractEquation.flattenEqnList(f, toList, getFAbstractEquations());
         FIfWhenElseEquation res = createEmptyNode();
-        res.setType((FEquationType) getType().fullCopy());
+        res.setType(getType());
         res.setFAbstractEquationList(toList);
         flattenIfWhenTo(f, res);
         if (!res.isEmpty()) {

@@ -2878,12 +2878,12 @@ aspect FlatExpressions {
 aspect InstantiatedExpressions {
 
     
-    public FEquationType SrcAbstractEquation.equationType() {
-        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+    public EquationType SrcAbstractEquation.equationType() {
+        return isInitial() ? EquationType.INITIAL : EquationType.NORMAL;
     }
 
-    public FEquationType SrcAlgorithm.equationType() {
-        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+    public EquationType SrcAlgorithm.equationType() {
+        return isInitial() ? EquationType.INITIAL : EquationType.NORMAL;
     }
 
     public <T extends FAbstractEquation> T SrcAbstractEquation.copyStringComment(T eqn) {

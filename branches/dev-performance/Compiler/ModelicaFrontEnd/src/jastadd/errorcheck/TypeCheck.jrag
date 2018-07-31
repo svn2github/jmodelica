@@ -802,7 +802,7 @@ aspect FlatTypeCheck {
             } else if (variability().parameterVariability()) {
                 if (isForIndex()) {
                     error("Can not assign a value to a for loop index");
-                } else if (!(myFAlgorithm().getType() instanceof FInitialEquation)) {
+                } else if (!(myFAlgorithm().getType().isInitial())) {
                     error("Assignments to parameters in algorithms is only allowed in initial algorithms");
                 }
             }

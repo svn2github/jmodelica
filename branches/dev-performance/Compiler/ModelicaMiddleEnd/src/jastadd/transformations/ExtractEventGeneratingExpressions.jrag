@@ -136,7 +136,7 @@ aspect ExtractEventGeneratingExpressions {
 
         FAbstractEquation assign = new FEquation(indexVariable().createUseExp(),
                 new FAddExp(preExp, new FIntegerLitExp(1)));
-        FAbstractEquation when = new FWhenEquation(new FNormalEquation(), new List<FAbstractEquation>(assign),
+        FAbstractEquation when = new FWhenEquation(EquationType.NORMAL, new List<FAbstractEquation>(assign),
                 var.treeCopyNoTransform(), new Opt<FIfWhenElseEquation>());
 
         /*

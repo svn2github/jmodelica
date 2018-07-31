@@ -296,7 +296,6 @@ aspect HtmlSourcePrettyPrint {
 	
     public void FAlgorithm.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
-		p.print(getType(),str,"");
 		str.print("algorithm<br>\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";<br>");
 	}
