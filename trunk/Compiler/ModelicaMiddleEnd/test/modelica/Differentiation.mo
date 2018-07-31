@@ -1416,6 +1416,160 @@ fclass Differentiation.Expressions.Literal
 end Differentiation.Expressions.Literal;
 ")})));
         end Literal;
+
+        model ConstantFunctionCallScalar
+            function f
+                input Real x;
+                output Real y = x;
+                algorithm
+                annotation(Inline=false);
+            end f;
+            
+            Real y = f(1);
+            Real x;
+        equation
+            der(y) = x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_ConstantFunctionCallScalar",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.ConstantFunctionCallScalar
+ Real y;
+ Real x;
+equation
+ y = Differentiation.Expressions.ConstantFunctionCallScalar.f(1);
+ x = 0.0;
+
+public
+ function Differentiation.Expressions.ConstantFunctionCallScalar.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ annotation(Inline = false);
+ end Differentiation.Expressions.ConstantFunctionCallScalar.f;
+
+end Differentiation.Expressions.ConstantFunctionCallScalar;
+")})));
+        end ConstantFunctionCallScalar;
+
+        model ConstantFunctionCallRecord
+            record R
+                Real x;
+            end R;
+            function f
+                input R x;
+                output R y = x;
+                algorithm
+                annotation(Inline=false);
+            end f;
+            
+            R y = f(R(1));
+            R x;
+        equation
+            der(y.x) = x.x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_ConstantFunctionCallRecord",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.ConstantFunctionCallRecord
+ Real y.x;
+ Real x.x;
+equation
+ (Differentiation.Expressions.ConstantFunctionCallRecord.R(y.x)) = Differentiation.Expressions.ConstantFunctionCallRecord.f(Differentiation.Expressions.ConstantFunctionCallRecord.R(1));
+ (Differentiation.Expressions.ConstantFunctionCallRecord.R(x.x)) = Differentiation.Expressions.ConstantFunctionCallRecord.R(0.0);
+
+public
+ function Differentiation.Expressions.ConstantFunctionCallRecord.f
+  input Differentiation.Expressions.ConstantFunctionCallRecord.R x;
+  output Differentiation.Expressions.ConstantFunctionCallRecord.R y;
+ algorithm
+  y.x := x.x;
+  return;
+ annotation(Inline = false);
+ end Differentiation.Expressions.ConstantFunctionCallRecord.f;
+
+ record Differentiation.Expressions.ConstantFunctionCallRecord.R
+  Real x;
+ end Differentiation.Expressions.ConstantFunctionCallRecord.R;
+
+end Differentiation.Expressions.ConstantFunctionCallRecord;
+")})));
+        end ConstantFunctionCallRecord;
+
+        model ConstantFunctionCallArray
+            function f
+                input Real[2] x;
+                output Real[2] y = x;
+                algorithm
+                annotation(Inline=false);
+            end f;
+            
+            Real[2] y = f({1,1});
+            Real[2] x;
+        equation
+            der(y) = x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_ConstantFunctionCallArray",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.ConstantFunctionCallArray
+ Real y[1];
+ Real y[2];
+ Real x[1];
+ Real x[2];
+equation
+ ({y[1], y[2]}) = Differentiation.Expressions.ConstantFunctionCallArray.f({1, 1});
+ ({x[1], x[2]}) = zeros(2);
+
+public
+ function Differentiation.Expressions.ConstantFunctionCallArray.f
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x[1];
+  y[2] := x[2];
+  return;
+ annotation(Inline = false);
+ end Differentiation.Expressions.ConstantFunctionCallArray.f;
+
+end Differentiation.Expressions.ConstantFunctionCallArray;
+")})));
+        end ConstantFunctionCallArray;
+
+        model DerivativeScalar
+            Real y = 1 / 2;
+            Real x;
+        equation
+            der(y) = x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DerivativeScalar",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.DerivativeScalar
+ Real y;
+ Real x;
+equation
+ y = 1 / 2;
+ x = 0;
+end Differentiation.Expressions.DerivativeScalar;
+")})));
+        end DerivativeScalar;
+
     end Expressions;
 
     model ComponentArray
@@ -3769,158 +3923,5 @@ public
 end Differentiation.MultipleDerivativeAnnotation2;
 ")})));
 end MultipleDerivativeAnnotation2;
-
-model ConstantFunction1
-    function f
-        input Real x;
-        output Real y = x;
-        algorithm
-        annotation(Inline=false);
-    end f;
-    
-    Real y = f(1);
-    Real x;
-equation
-    der(y) = x;
-
-annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-        name="ConstantFunction1",
-        description="",
-        variability_propagation=false,
-        flatModel="
-fclass Differentiation.ConstantFunction1
- Real y;
- Real x;
-equation
- y = Differentiation.ConstantFunction1.f(1);
- x = 0.0;
-
-public
- function Differentiation.ConstantFunction1.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- annotation(Inline = false);
- end Differentiation.ConstantFunction1.f;
-
-end Differentiation.ConstantFunction1;
-")})));
-end ConstantFunction1;
-
-model ConstantFunction2
-    record R
-        Real x;
-    end R;
-    function f
-        input R x;
-        output R y = x;
-        algorithm
-        annotation(Inline=false);
-    end f;
-    
-    R y = f(R(1));
-    R x;
-equation
-    der(y.x) = x.x;
-
-annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-        name="ConstantFunction2",
-        description="",
-        variability_propagation=false,
-        flatModel="
-fclass Differentiation.ConstantFunction2
- Real y.x;
- Real x.x;
-equation
- (Differentiation.ConstantFunction2.R(y.x)) = Differentiation.ConstantFunction2.f(Differentiation.ConstantFunction2.R(1));
- (Differentiation.ConstantFunction2.R(x.x)) = Differentiation.ConstantFunction2.R(0.0);
-
-public
- function Differentiation.ConstantFunction2.f
-  input Differentiation.ConstantFunction2.R x;
-  output Differentiation.ConstantFunction2.R y;
- algorithm
-  y.x := x.x;
-  return;
- annotation(Inline = false);
- end Differentiation.ConstantFunction2.f;
-
- record Differentiation.ConstantFunction2.R
-  Real x;
- end Differentiation.ConstantFunction2.R;
-
-end Differentiation.ConstantFunction2;
-")})));
-end ConstantFunction2;
-
-model ConstantFunction3
-    function f
-        input Real[2] x;
-        output Real[2] y = x;
-        algorithm
-        annotation(Inline=false);
-    end f;
-    
-    Real[2] y = f({1,1});
-    Real[2] x;
-equation
-    der(y) = x;
-
-annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-        name="ConstantFunction3",
-        description="",
-        variability_propagation=false,
-        flatModel="
-fclass Differentiation.ConstantFunction3
- Real y[1];
- Real y[2];
- Real x[1];
- Real x[2];
-equation
- ({y[1], y[2]}) = Differentiation.ConstantFunction3.f({1, 1});
- ({x[1], x[2]}) = zeros(2);
-
-public
- function Differentiation.ConstantFunction3.f
-  input Real[:] x;
-  output Real[:] y;
- algorithm
-  init y as Real[2];
-  y[1] := x[1];
-  y[2] := x[2];
-  return;
- annotation(Inline = false);
- end Differentiation.ConstantFunction3.f;
-
-end Differentiation.ConstantFunction3;
-")})));
-end ConstantFunction3;
-
-model ConstantFunction4
-    Real y = 1 / 2;
-    Real x;
-equation
-    der(y) = x;
-
-annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-        name="ConstantFunction4",
-        description="",
-        variability_propagation=false,
-        flatModel="
-fclass Differentiation.ConstantFunction4
- Real y;
- Real x;
-equation
- y = 1 / 2;
- x = 0;
-end Differentiation.ConstantFunction4;
-")})));
-end ConstantFunction4;
 
 end Differentiation;
