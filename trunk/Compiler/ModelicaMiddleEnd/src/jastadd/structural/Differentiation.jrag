@@ -147,15 +147,21 @@ aspect Derivatives {
         return (n <= 1) ? diff(name) : diff(name, n - 1).diff(name);
     }
 
-    public FExp FExp.diff(String name) {
+    public final FExp FExp.diff(String name) {
+        return diffExp(name);
+    }
+
+    protected FExp FExp.diffExp(String name) {
         throw new ExpressionDifferentiationException(this);
     }
     
-    public FExp FNoExp.diff(String name) {
+    @Override
+    protected FExp FNoExp.diffExp(String name) {
         return new FNoExp();
     }
     
-    public FExp FDotAddExp.diff(String name) {
+    @Override
+    protected FExp FDotAddExp.diffExp(String name) {
         FExp rd = dynamicFExp(getRight().diff(name));
         FExp ld = dynamicFExp(getLeft().diff(name));
         boolean rz = rd.equalsRealValue(0);
@@ -171,7 +177,8 @@ aspect Derivatives {
         }
     }
 
-    public FExp FDotSubExp.diff(String name) {
+    @Override
+    protected FExp FDotSubExp.diffExp(String name) {
         FExp rd = dynamicFExp(getRight().diff(name));
         FExp ld = dynamicFExp(getLeft().diff(name));
         boolean rz = rd.equalsRealValue(0);
@@ -187,7 +194,8 @@ aspect Derivatives {
         }
     }
 
-    public FExp FDotMulExp.diff(String name) {
+    @Override
+    protected FExp FDotMulExp.diffExp(String name) {
         FExp rd = dynamicFExp((getRight().diff(name)));
         FExp ld = dynamicFExp((getLeft().diff(name)));
         boolean rz = rd.equalsRealValue(0);
@@ -205,7 +213,8 @@ aspect Derivatives {
         }   
     }
 
-    public FExp FDotDivExp.diff(String name) {
+    @Override
+    protected FExp FDotDivExp.diffExp(String name) {
         if (getRight().variability().parameterOrLess()) {
             return dynamicFExp(newFDivExp(
                 getLeft().diff(name),
@@ -218,7 +227,8 @@ aspect Derivatives {
         }
     }
 
-    public FExp FDotPowExp.diff(String name) {
+    @Override
+    protected FExp FDotPowExp.diffExp(String name) {
         if (getRight().variability().discreteOrLess()) {
             FExp e1;
             if (getRight().variability().knownParameterOrLess()) {
@@ -250,11 +260,13 @@ aspect Derivatives {
         }
     }
 
-    public FExp FNegExp.diff(String name) {
+    @Override
+    protected FExp FNegExp.diffExp(String name) {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FSinExp.diff(String name) {
+    @Override
+    protected FExp FSinExp.diffExp(String name) {
         FExp ed = dynamicFExp(getFExp().diff(name));
         try {
             if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
@@ -266,7 +278,8 @@ aspect Derivatives {
             getFExp().diff(name)));
     }
     
-    public FExp FCosExp.diff(String name) {
+    @Override
+    protected FExp FCosExp.diffExp(String name) {
         FExp ed = dynamicFExp(getFExp().diff(name));
         try {
             if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
@@ -278,7 +291,8 @@ aspect Derivatives {
             getFExp().diff(name))));
     }
 
-    public FExp FTanExp.diff(String name) {
+    @Override
+    protected FExp FTanExp.diffExp(String name) {
         FExp ed = dynamicFExp(getFExp().diff(name));
         try {
             if (ed.variability().lessOrEqual(fConstant()) && ed.ceval().realValue()==0.) {
@@ -290,33 +304,38 @@ aspect Derivatives {
                                        new FPowExp(new FCosExp(getFExp().copySymbolic()), new FIntegerLitExp(2))));
     }
 
-    public FExp FExpExp.diff(String name) {
+    @Override
+    protected FExp FExpExp.diffExp(String name) {
         return dynamicFExp(new FMulExp(createNode(getFExp().copySymbolic()),
             getFExp().diff(name)));
     }
 
-    public FExp FAsinExp.diff(String name) {
+    @Override
+    protected FExp FAsinExp.diffExp(String name) {
         return dynamicFExp(new FDivExp(getFExp().diff(name),
                                        new FSqrtExp(new FSubExp(new FIntegerLitExp(1),
                                        new FPowExp(getFExp().copySymbolic(),
                                        new FIntegerLitExp(2))))));
     }
 
-    public FExp FAcosExp.diff(String name) {
+    @Override
+    protected FExp FAcosExp.diffExp(String name) {
         return dynamicFExp(new FDivExp(new FNegExp(getFExp().diff(name)),
                                        new FSqrtExp(new FSubExp(new FIntegerLitExp(1),
                                        new FPowExp(getFExp().copySymbolic(),
                                        new FIntegerLitExp(2))))));
     }
 
-    public FExp FAtanExp.diff(String name) {
+    @Override
+    protected FExp FAtanExp.diffExp(String name) {
         return dynamicFExp(new FDivExp(getFExp().diff(name),
                                        new FAddExp(new FIntegerLitExp(1),
                                        new FPowExp(getFExp().copySymbolic(),
                                        new FIntegerLitExp(2)))));
     }
 
-    public FExp FAtan2Exp.diff(String name) {
+    @Override
+    protected FExp FAtan2Exp.diffExp(String name) {
         /* der(atan2(y,x) = (der(y)*x - y*der(x)) / (y*y + x*x) */
         FExp y = getFExp();
         FExp x = getY();
@@ -329,37 +348,44 @@ aspect Derivatives {
         return dynamicFExp(new FDivExp(exp1,exp2));
     }
     
-    public FExp FSinhExp.diff(String name) {
+    @Override
+    protected FExp FSinhExp.diffExp(String name) {
         return dynamicFExp(new FMulExp(new FCoshExp(getFExp().copySymbolic()),
             getFExp().diff(name)));
     }
     
-    public FExp FCoshExp.diff(String name) {
+    @Override
+    protected FExp FCoshExp.diffExp(String name) {
         return dynamicFExp(new FMulExp(new FSinhExp(getFExp().copySymbolic()),
             getFExp().diff(name)));
     }
 
-    public FExp FTanhExp.diff(String name) {
+    @Override
+    protected FExp FTanhExp.diffExp(String name) {
         return dynamicFExp(new FDivExp(getFExp().diff(name),
                 new FPowExp(new FCoshExp(getFExp().copySymbolic()), new FIntegerLitExp(2))));
     }
 
-    public FExp FLogExp.diff(String name) {
+    @Override
+    protected FExp FLogExp.diffExp(String name) {
         return dynamicFExp(new FDivExp(getFExp().diff(name),
                 getFExp().copySymbolic()));
     }
 
-    public FExp FLog10Exp.diff(String name) {
+    @Override
+    protected FExp FLog10Exp.diffExp(String name) {
         return dynamicFExp(new FDivExp(getFExp().diff(name),
                 new FMulExp(getFExp().copySymbolic(),new FLogExp(new FIntegerLitExp(10)))));
     }
 
-    public FExp FSqrtExp.diff(String name) {
+    @Override
+    protected FExp FSqrtExp.diffExp(String name) {
         return dynamicFExp(new FDivExp(getFExp().diff(name),
                 new FMulExp(new FIntegerLitExp(2),new FSqrtExp(getFExp().copySymbolic()))));
     }
 
-    public FExp FSmoothExp.diff(String name) {
+    @Override
+    protected FExp FSmoothExp.diffExp(String name) {
         int order = getOrder().ceval().intValue();
         FExp diffExp = getFExp().diff(name);
         if (order <= 1)
@@ -370,15 +396,18 @@ aspect Derivatives {
             return diffExp;
     }
 
-    public FExp FHomotopyExp.diff(String name) {
+    @Override
+    protected FExp FHomotopyExp.diffExp(String name) {
         return diffWrap(name, getActual(), getSimplified());
     }
     
-    public FExp FNoEventExp.diff(String name) {
+    @Override
+    protected FExp FNoEventExp.diffExp(String name) {
         return diffWrap(name, getFExp());
     }
     
-    public FExp FIfExp.diff(String name) {
+    @Override
+    protected FExp FIfExp.diffExp(String name) {
         FExp td = dynamicFExp((getThenExp().diff(name)));
         FExp ed = dynamicFExp((getElseExp().diff(name)));
         boolean tz = td.equalsRealValue(0);
@@ -390,15 +419,18 @@ aspect Derivatives {
         return dynamicFExp(new FIfExp(e, td, ed));
     }
     
-    public FExp FMinMaxExp.diff(String name) {
+    @Override
+    protected FExp FMinMaxExp.diffExp(String name) {
         return dynamicFExp(new FNoEventExp(new FIfExp(createCompareNode(getX().copySymbolic(), getY().copySymbolic()), getX().diff(name), getY().diff(name))));
     }
 
-    public FExp FIdUseExp.diff(String name) {
+    @Override
+    protected FExp FIdUseExp.diffExp(String name) {
         return dynamicFExp(diffUseOrDerExp(name, name()));
     }
 
-    public FExp FPreExp.diff(String name) {
+    @Override
+    protected FExp FPreExp.diffExp(String name) {
         if (name.equals(name())) {
             return type().createSizedLiteral(1);
         } else {
@@ -406,11 +438,13 @@ aspect Derivatives {
         }   
     }
 
-    public FExp InstDerExp.diff(String name) {  
+    @Override
+    protected FExp InstDerExp.diffExp(String name) {  
         return dynamicFExp(diffUseOrDerExp(name, null));
     }
 
-    public FExp FAbsExp.diff(String name) {
+    @Override
+    protected FExp FAbsExp.diffExp(String name) {
         FExp diff = getFExp().diff(name);
         if (diff.isLiteralZero()) {
             return dynamicFExp(diff);
@@ -421,19 +455,23 @@ aspect Derivatives {
         }
     }
 
-    public FExp FDSRefExp.diff(String name) {
+    @Override
+    protected FExp FDSRefExp.diffExp(String name) {
         return getOrg().diff(name);
     }
 
-    public FExp FSignExp.diff(String name) {
+    @Override
+    protected FExp FSignExp.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FDivFuncExp.diff(String name) {
+    @Override
+    protected FExp FDivFuncExp.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FModFuncExp.diff(String name) {
+    @Override
+    protected FExp FModFuncExp.diffExp(String name) {
         if (getY().variability().parameterOrLess()) {
             return getX().diff(name);
         } else {
@@ -444,7 +482,8 @@ aspect Derivatives {
         }
     }
 
-    public FExp FRemFuncExp.diff(String name) {
+    @Override
+    protected FExp FRemFuncExp.diffExp(String name) {
         if (getY().variability().parameterOrLess()) {
             return getX().diff(name);
         } else {
@@ -455,7 +494,8 @@ aspect Derivatives {
         }
     }
 
-    public FExp FDelayExp.diff(String name) {
+    @Override
+    protected FExp FDelayExp.diffExp(String name) {
         Opt max = hasMax() ? new Opt(getMax().copySymbolic()) : new Opt();
         FExp res = createNode(getFExp().diff(name), getDelay().copySymbolic(), max);
         if (getDelay().isContinuousExp()) {
@@ -464,25 +504,29 @@ aspect Derivatives {
         return res;
     }
     
-    public FExp FSpatialDistExp.diff(String name) {
+    @Override
+    protected FExp FSpatialDistExp.diffExp(String name) {
         throw new FunctionDifferentiationException(this);
     }
 
-    public FExp FStreamBuiltIn.diff(String name) {
+    @Override
+    protected FExp FStreamBuiltIn.diffExp(String name) {
         if (name.equals(FExp.TIME)) {
             return new FDerStream(copySymbolic());
         }
-        return super.diff(name);
+        return super.diffExp(name);
     }
 
-    public FExp FExInStream.diff(String name) {
+    @Override
+    protected FExp FExInStream.diffExp(String name) {
         if (name.equals(FExp.TIME)) {
             return new FDerStream(copySymbolic());
         }
-        return super.diff(name);
+        return super.diffExp(name);
     }
 
-    public FExp FSubscriptedExp.diff(String name) {
+    @Override
+    protected FExp FSubscriptedExp.diffExp(String name) {
         return new FSubscriptedExp(getFExp().diff(name), getFArraySubscripts().treeCopy());
     }
 
@@ -531,31 +575,36 @@ aspect Derivatives {
         return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
     }
     
-    public FExp FRecordConstructor.diff(String name) {
+    @Override
+    protected FExp FRecordConstructor.diffExp(String name) {
         FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
         for (FExp arg : getArgs())
             res.addArg(arg.diff(name));
         return res;
     }
     
-    public FExp FLitExp.diff(String name) {
+    @Override
+    protected FExp FLitExp.diffExp(String name) {
         return diffZero();
     }
     
-    public FExp FTimeExp.diff(String name) {
+    @Override
+    protected FExp FTimeExp.diffExp(String name) {
         int val = 0;
         if (name.equals(TIME))
             val = 1;
         return dynamicFExp(new FRealLitExp(val));
     }
 
-    public FExp FInStreamEpsExp.diff(String name) {
+    @Override
+    protected FExp FInStreamEpsExp.diffExp(String name) {
         return dynamicFExp(new FRealLitExp(0));
     }
 
     private int FFunctionCall.order = 0;
 
-    public FExp FFunctionCall.diff(String name) {
+    @Override
+    protected FExp FFunctionCall.diffExp(String name) {
         // If the function does not have an argument that matches name,
         // and the name is not 'time', then the derivative is zero.
         if (!name.equals(TIME)) {
@@ -604,7 +653,8 @@ aspect Derivatives {
         return dynamicFExp(der_f);
     }
 
-    public FExp FArray.diff(String name) {
+    @Override
+    protected FExp FArray.diffExp(String name) {
         FArray diff_farray = new FArray();
         for (FExp e : getFExps()) {
             diff_farray.addFExp(e.diff(name));
@@ -612,19 +662,23 @@ aspect Derivatives {
         return dynamicFExp(diff_farray);
     }
 
-    public FExp FCross.diff(String name) {
+    @Override
+    protected FExp FCross.diffExp(String name) {
         return diffWrap(name, getX(), getY());
     }
 
-    public FExp FCeilFuncExp.diff(String name) {
+    @Override
+    protected FExp FCeilFuncExp.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FFloorFuncExp.diff(String name) {
+    @Override
+    protected FExp FFloorFuncExp.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FAbstractCat.diff(String name) {
+    @Override
+    protected FExp FAbstractCat.diffExp(String name) {
         FInfArgsFunctionCall res = createEmptyNode();
         for (FExp e : getFExps()) {
             res.addFExp(e.diff(name));
@@ -632,13 +686,15 @@ aspect Derivatives {
         return dynamicFExp(res);
     }
 
-    public FExp FCatExp.diff(String name) {
-        FCatExp res = (FCatExp) super.diff(name);
+    @Override
+    protected FExp FCatExp.diffExp(String name) {
+        FCatExp res = (FCatExp) super.diffExp(name);
         res.setDim(getDim().copySymbolic());
         return res;   // already dynamicFExp:ed in super call
     }
 
-    public FExp FFillExp.diff(String name) {
+    @Override
+    protected FExp FFillExp.diffExp(String name) {
         FFillExp res = new FFillExp();
         for (FExp e : getFExps()) {
             res.addFExp(e.copySymbolic());
@@ -647,26 +703,31 @@ aspect Derivatives {
         return dynamicFExp(res);
     }
 
-    public FExp FZeros.diff(String name) {
+    @Override
+    protected FExp FZeros.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FOnes.diff(String name) {
+    @Override
+    protected FExp FOnes.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FLinspace.diff(String name) {
+    @Override
+    protected FExp FLinspace.diffExp(String name) {
         FExp start = getStartExp().diff(name);
         FExp stop  = getStopExp().diff(name);
         FExp n     = getN().copySymbolic();
         return dynamicFExp(new FLinspace(start, stop, n));
     }
 
-    public FExp FOuterProduct.diff(String name) {
+    @Override
+    protected FExp FOuterProduct.diffExp(String name) {
         return diffWrap(name, getX(), getY());
     }
 
-    public FExp FSemiLinearExp.diff(String name) {
+    @Override
+    protected FExp FSemiLinearExp.diffExp(String name) {
         if (isArray()) {
             return diffArray(name);
         } else {
@@ -685,19 +746,23 @@ aspect Derivatives {
         return new FDotAddExp(new FDotMulExp(ds, x), new FDotMulExp(s, dx));
     }
 
-    public FExp FDiagonal.diff(String name) {
+    @Override
+    protected FExp FDiagonal.diffExp(String name) {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FDimensionConvert.diff(String name) {
+    @Override
+    protected FExp FDimensionConvert.diffExp(String name) {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FIdentity.diff(String name) {
+    @Override
+    protected FExp FIdentity.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FProductExp.diff(String name) {
+    @Override
+    protected FExp FProductExp.diffExp(String name) {
         Array arr = getFExp().getArray();
         int n = arr.size().numElements();
         FExp add = null;
@@ -713,7 +778,8 @@ aspect Derivatives {
         return dynamicFExp(add);
     }
 
-    public FExp FSumExp.diff(String name) {
+    @Override
+    protected FExp FSumExp.diffExp(String name) {
         if (isArray()) {
             return diffArray(name);
         } else {
@@ -721,32 +787,38 @@ aspect Derivatives {
         }
     }
 
-    public FExp FSkew.diff(String name) {
+    @Override
+    protected FExp FSkew.diffExp(String name) {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FSymmetric.diff(String name) {
+    @Override
+    protected FExp FSymmetric.diffExp(String name) {
         return diffArray(name);
     }
 
-    public FExp FTranspose.diff(String name) {
+    @Override
+    protected FExp FTranspose.diffExp(String name) {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FIterExp.diff(String name) {
+    @Override
+    protected FExp FIterExp.diffExp(String name) {
         return dynamicFExp(new FIterExp(getFExp().diff(name), getForIndexs().treeCopy()));
     }
 
-    public FExp FRangeExp.diff(String name) {
+    @Override
+    protected FExp FRangeExp.diffExp(String name) {
         return diffZero();
     }
 
-    public FExp FRealLitExp.diff(String name) {
+    @Override
+    protected FExp FRealLitExp.diffExp(String name) {
         return diffZero();
     }
 
     /**
-     * Generic implementation of {@link #diff(String)} for array expressions 
+     * Generic implementation of {@link #diffExp(String)} for array expressions 
      * that delegates to the elements of array expansion.
      */
     protected FExp FExp.diffArray(String name) {
@@ -754,7 +826,7 @@ aspect Derivatives {
     }
 
     /**
-     * Generic implementation of {@link #diff(String)} for expressions that are 
+     * Generic implementation of {@link #diffExp(String)} for expressions that are 
      * always constant during simulation.
      */
     protected FExp FExp.diffZero() {
@@ -762,7 +834,7 @@ aspect Derivatives {
     }
 
     /**
-     * Generic implementation of {@link #diff(String)} that simply differentiates 
+     * Generic implementation of {@link #diffExp(String)} that simply differentiates 
      * each argument of the operator/function.
      * 
      * Only valid for operators/functions their arguments as direct children.
@@ -781,7 +853,7 @@ aspect Derivatives {
     
     /**
      * Build an FArray containing the differentiated elements of this array 
-     * (by calling {@link FExp#diff(String)} on each one).
+     * (by calling {@link FExp#diffExp(String)} on each one).
      */
     public FExp Array.buildDiff(final String name) {
         return buildFArray(new ElementBuilder() {
