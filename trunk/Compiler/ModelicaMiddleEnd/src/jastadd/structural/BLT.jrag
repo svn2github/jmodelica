@@ -1235,9 +1235,9 @@ aspect BLT{
                             continue;
                         col = colObj;
                         
-                        FExp dl = l.dynamicFExp(l.diff(fv.name()));
+                        FExp dl = l.diff(fv.name());
                         boolean lz = dl.equalsRealValue(0);
-                        FExp dr = r.dynamicFExp(r.diff(fv.name()));;
+                        FExp dr = r.diff(fv.name());
                         boolean rz = dr.equalsRealValue(0);;
                         FExp je;
                         if (rz && lz) {

@@ -2671,7 +2671,7 @@ aspect FlatExpressions {
     }
     
     public FExp FExp.flattenDer(Flattener f, int order) {
-        return dynamicFExp(diff(TIME, order)).flatten(f);
+        return diff(TIME, order).flatten(f);
     }
     
      public FExp FIdUseExp.flattenDer(Flattener f, int order) {
