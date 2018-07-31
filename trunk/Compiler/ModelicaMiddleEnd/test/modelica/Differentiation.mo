@@ -1565,7 +1565,7 @@ fclass Differentiation.Expressions.DerivativeScalar
  Real x;
 equation
  y = 1 / 2;
- x = 0;
+ x = 0.0;
 end Differentiation.Expressions.DerivativeScalar;
 ")})));
         end DerivativeScalar;

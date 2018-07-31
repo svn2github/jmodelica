@@ -148,7 +148,13 @@ aspect Derivatives {
     }
 
     public final FExp FExp.diff(String name) {
-        return dynamicFExp(diffExp(name));
+        FExp res;
+        if (isConstantExp()) {
+            res = diffZero();
+        } else {
+            res = diffExp(name);
+        }
+        return dynamicFExp(res);
     }
 
     protected FExp FExp.diffExp(String name) {
@@ -623,10 +629,6 @@ aspect Derivatives {
                     return new FRealLitExp(0);
                 }
             }
-        }
-        
-        if (isConstantExp()) {
-            return diffZero();
         }
         
         FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
