@@ -24,7 +24,7 @@ import org.jmodelica.util.exceptions.NameFormatException;
 /**
  * Handle splitting strings into different parts of a qualified name.
  */
-public class QualifiedName implements Iterator<String>{
+public class QualifiedName {
     private boolean isGlobal;
     private int i = 0;
     ArrayList<String> names;
@@ -35,12 +35,10 @@ public class QualifiedName implements Iterator<String>{
        names = splitQualifiedClassName(name);
     }
     
-    @Override
     public boolean hasNext() {
         return i < names.size();
     }
 
-    @Override
     public String next() {
         return names.get(i++);
     }
