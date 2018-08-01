@@ -84,6 +84,7 @@ aspect RuntimeOptions {
     public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
         v.setFVisibilityType(new FRuntimeOptionVisibilityType());
         v.setFTypePrefixVariability(fFixedParameter());
+        v.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         v.setBindingExp(bExp);
         v.setFQName(new FQNameString(name));
         return v;
