@@ -153,7 +153,7 @@ aspect HtmlSourcePrettyPrint {
         ArrayList<FVariable> protectedVars = new ArrayList<FVariable>();
         for (FVariable fv : getFVariables()) {
             if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
-                    !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
+                    !fv.getVisibilityType().isRuntimeOptionVisibility()) {
                 if (fv.isProtected()) {
                   protectedVars.add(fv);
                 } else {

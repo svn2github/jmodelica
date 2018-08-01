@@ -1706,7 +1706,7 @@ aspect Flattening {
 
     public FVariable InstAssignable.createFVariable(Flattener f, FQName name, FlattenBindingExp binding) {
         FVariable fv = createEmptyFVariable();
-        fv.setFVisibilityType(createFVisibilityType());
+        fv.setVisibilityType(createVisibilityType());
         fv.setFTypePrefixVariability(variability().fullCopy());
         
         // Only set input/output prefix for top level inputs and outputs
@@ -1745,13 +1745,13 @@ aspect Flattening {
         return fv;
     }
 
-    public FVisibilityType InstAssignable.createFVisibilityType() {
+    public VisibilityType InstAssignable.createVisibilityType() {
         if (inExpandableConnector()) {
-            return new FExpandableVisibilityType();
+            return VisibilityType.EXPANDABLE;
         } else if (isPublicVar()) {
-            return new FPublicVisibilityType();
+            return VisibilityType.PUBLIC;
         } else {
-            return new FProtectedVisibilityType();
+            return VisibilityType.PROTECTED;
         }
     }
 

@@ -82,7 +82,7 @@ aspect RuntimeOptions {
      * @return  <code>v</code>, for convenience
      */
     public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
-        v.setFVisibilityType(new FRuntimeOptionVisibilityType());
+        v.setVisibilityType(VisibilityType.RUNTIME_OPTION);
         v.setFTypePrefixVariability(fFixedParameter());
         v.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         v.setBindingExp(bExp);
@@ -101,10 +101,7 @@ aspect RuntimeOptions {
         return res;
     }
 
-    syn boolean FVariable.isRuntimeOption() = getFVisibilityType().isRuntimeOptionVisibility();
-
-    syn boolean FVisibilityType.isRuntimeOptionVisibility()     = false;
-    eq FRuntimeOptionVisibilityType.isRuntimeOptionVisibility() = true;
+    syn boolean FVariable.isRuntimeOption() = getVisibilityType().isRuntimeOptionVisibility();
 
 }
 
