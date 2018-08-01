@@ -112,7 +112,7 @@ aspect ContentCheck {
 	}
 	
 	public void FWhenStmt.contentCheck(ErrorCheckType checkType) {
-		if (myFAlgorithm().getType() instanceof FInitialEquation || myFAlgorithm().isInitial())
+		if (myFAlgorithm().getType().isInitial() || myFAlgorithm().isInitial())
 			error("When statements are not allowed in initial algorithms");
 		else if (inFunction())
 			error("When statements are not allowed in functions");
@@ -460,7 +460,7 @@ aspect ContentCheck {
 		super.contentCheck(checkType);
 		if (inWhen())
 			error("Nestled when clauses are not allowed");
-		else if (getType() instanceof FInitialEquation || isInitial()) {
+		else if (getType().isInitial() || isInitial()) {
 			error("When equations are not allowed in initial equation sections");
 		} else {
 			if (!isBalancedAssignments())

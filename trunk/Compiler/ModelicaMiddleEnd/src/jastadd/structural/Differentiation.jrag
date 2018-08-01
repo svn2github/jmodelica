@@ -132,14 +132,14 @@ aspect Derivatives {
                 new Opt<FIfWhenElseEquation>((FElseEquation)getElse().diff(name).iterator().next()):
                 new Opt<FIfWhenElseEquation>();
             return Arrays.asList(dynamicFAbstractEquation(
-                    new FIfEquation(getType().treeCopy(), FAbstractEquation.diffList(name, getFAbstractEquations()), getTest().treeCopy(), elseOpt)));
+                    new FIfEquation(getType(), FAbstractEquation.diffList(name, getFAbstractEquations()), getTest().treeCopy(), elseOpt)));
         } catch (ExpressionDifferentiationException e) {
             throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
         }
     }
     
     eq FElseEquation.diff(String name) = Arrays.asList(dynamicFAbstractEquation(
-            new FElseEquation(getType().treeCopy(), FAbstractEquation.diffList(name, getFAbstractEquations()))));
+            new FElseEquation(getType(), FAbstractEquation.diffList(name, getFAbstractEquations()))));
 
     public static final String FExp.TIME = "time";
     

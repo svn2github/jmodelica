@@ -16,6 +16,7 @@
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.jmodelica.common.ast.prefixes.EquationType;
 
 aspect Constructors {
 
@@ -73,7 +74,7 @@ aspect Constructors {
     /**
      * Construcs a connect clause without any residual.
      */
-    public FConnectClause.FConnectClause(FEquationType type, SrcConnectClause connectClause,
+    public FConnectClause.FConnectClause(EquationType type, SrcConnectClause connectClause,
             FIdUseInstAccess left, FIdUseInstAccess right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), connectClause, left, right);
     }
@@ -81,7 +82,7 @@ aspect Constructors {
     /**
      * Construcs a else equation without any residual.
      */
-    public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
+    public FElseEquation.FElseEquation(EquationType type, List<FAbstractEquation> eqns) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns);
     }
 
@@ -90,13 +91,13 @@ aspect Constructors {
      * residual.
      */
     public FEquation.FEquation(FExp left, FExp right) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), left, right);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), left, right);
     }
 
     /**
      * Constructs an equation that is not marked as residual.
      */
-    public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
+    public FEquation.FEquation(EquationType type, FExp left, FExp right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), left, right);
     }
 
@@ -104,20 +105,20 @@ aspect Constructors {
      * Constructs an equation that is not initial
      */
     public FEquation.FEquation(List<FAttribute> attrs, FExp left, FExp right) {
-        this(new FNormalEquation(), attrs, new Opt<FStringComment>(), left, right);
+        this(EquationType.NORMAL, attrs, new Opt<FStringComment>(), left, right);
     }
 
     /**
      * Constructs a function call equation that is not initial.
      */
     public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), left, call);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), left, call);
     }
 
     /**
      * Constructs a function call equation.
      */
-    public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
+    public FFunctionCallEquation.FFunctionCallEquation(EquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), left, call);
     }
 
@@ -125,20 +126,20 @@ aspect Constructors {
      * Constructs a for clause equation that is not initial.
      */
     public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
 
     /**
      * Constructs a for clause equation that is not initial.
      */
     public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
 
     /**
      * Constructs a for clause equation.
      */
-    public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
+    public InstForClauseE.InstForClauseE(EquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
 
@@ -173,13 +174,13 @@ aspect Constructors {
      * Constructs an algorithm block that is not initial.
      */
     public FAlgorithm.FAlgorithm(List<FStatement> stmts) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), stmts);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), stmts);
     }
 
     /**
      * Constructs an algorithm block.
      */
-    public FAlgorithm.FAlgorithm(FEquationType type, List<FStatement> stmts) {
+    public FAlgorithm.FAlgorithm(EquationType type, List<FStatement> stmts) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), stmts);
     }
 
@@ -187,7 +188,7 @@ aspect Constructors {
      * Constructs a derivative algorithm block that is not initial.
      */
     public FDerivativeAlgorithm.FDerivativeAlgorithm(List<FStatement> stmts, int order) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), stmts, order);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), stmts, order);
     }
 
 	/**
@@ -244,7 +245,7 @@ aspect Constructors {
     /**
      * Constructs an if equation.
      */
-    public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
+    public FIfEquation.FIfEquation(EquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns, guard, elseClause);
     }
 
@@ -362,14 +363,14 @@ aspect Constructors {
     /**
      * Constructs an unsuported equation.
      */
-    public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
+    public FUnsupportedEquation.FUnsupportedEquation(EquationType type) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>());
     }
 
     /**
      * Constructs a when equation.
      */
-    public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
+    public FWhenEquation.FWhenEquation(EquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns, guard, elseClause);
     }
 
