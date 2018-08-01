@@ -6,7 +6,8 @@ public enum VisibilityType {
     PROTECTED,
     TEMPORARY,
     EXPANDABLE,
-    RUNTIME_OPTION;
+    RUNTIME_OPTION,
+    HIDDEN;
     
     public boolean isPublic() {
         return this == PUBLIC;
@@ -26,6 +27,10 @@ public enum VisibilityType {
 
     public boolean isRuntimeOptionVisibility() {
         return this == RUNTIME_OPTION;
+    }
+    
+    public boolean isHidden() {
+        return this == HIDDEN;
     }
 
 }
