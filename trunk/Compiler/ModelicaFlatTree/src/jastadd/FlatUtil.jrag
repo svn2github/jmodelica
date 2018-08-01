@@ -1786,7 +1786,7 @@ aspect FlatFunctionUtils {
     
     public FVariable FExternalObjectType.createFVariable(FVisibilityType fvt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FExternalObjectVariable(fvt, variability.combineDown(fParameter()), name, getConstructor().fullCopy());
+        return new FExternalObjectVariable(fvt, variability.combineDown(fInitialParameter()), name, getConstructor().fullCopy());
     }
 }
 

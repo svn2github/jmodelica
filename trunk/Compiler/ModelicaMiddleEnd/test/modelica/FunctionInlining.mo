@@ -3756,7 +3756,7 @@ end FunctionInlining.InlineAnnotation11;
 end InlineAnnotation11;
 
 
-model InlineAnnotation12
+model InlineInitialTemp1
     function f
         input Real x;
         input Real y;
@@ -3775,10 +3775,10 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="InlineAnnotation12",
+            name="InlineInitialTemp1",
             description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
             flatModel="
-fclass FunctionInlining.InlineAnnotation12
+fclass FunctionInlining.InlineInitialTemp1
  initial parameter Real p(fixed = false);
  Real x[1](start = 1);
  Real x[2](start = 2);
@@ -3793,12 +3793,11 @@ equation
  der(x[1]) = temp_2 - temp_3;
  der(x[2]) = (temp_2 - temp_3) * 2;
  temp_3 = time;
-end FunctionInlining.InlineAnnotation12;
+end FunctionInlining.InlineInitialTemp1;
 ")})));
-end InlineAnnotation12;
+end InlineInitialTemp1;
 
-
-model InlineAnnotation13
+model InlineInitialTemp2
 	record R
 		Real a;
 		Real b;
@@ -3822,10 +3821,10 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="InlineAnnotation13",
+            name="InlineInitialTemp2",
             description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
             flatModel="
-fclass FunctionInlining.InlineAnnotation13
+fclass FunctionInlining.InlineInitialTemp2
  initial parameter Real p(fixed = false);
  Real x.a;
  Real x.b;
@@ -3838,10 +3837,88 @@ equation
  x.a = temp_2 - temp_3;
  x.b = x.a + 2 * temp_3;
  temp_3 = time;
-end FunctionInlining.InlineAnnotation13;
+end FunctionInlining.InlineInitialTemp2;
 ")})));
-end InlineAnnotation13;
+end InlineInitialTemp2;
 
+model InlineInitialTemp3
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO eo;
+        output Real y;
+        external;
+    end f;
+    
+    function w
+        input EO eo;
+        input Real x;
+        output Real y = f(eo) + f(eo) + x;
+        algorithm
+    end w;
+    
+    parameter Real x(fixed=false);
+    parameter EO eo = EO(x);
+    Real y = w(eo, time);
+initial equation
+    x = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InlineInitialTemp3",
+            description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
+            flatModel="
+fclass FunctionInlining.InlineInitialTemp3
+ initial parameter Real x(fixed = false);
+ initial parameter FunctionInlining.InlineInitialTemp3.EO eo;
+ Real y;
+ initial parameter FunctionInlining.InlineInitialTemp3.EO temp_1;
+initial equation
+ x = 1;
+ eo = FunctionInlining.InlineInitialTemp3.EO.constructor(x);
+ temp_1 = eo;
+equation
+ y = FunctionInlining.InlineInitialTemp3.f(temp_1) + FunctionInlining.InlineInitialTemp3.f(temp_1) + time;
+
+public
+ function FunctionInlining.InlineInitialTemp3.EO.destructor
+  input FunctionInlining.InlineInitialTemp3.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end FunctionInlining.InlineInitialTemp3.EO.destructor;
+
+ function FunctionInlining.InlineInitialTemp3.EO.constructor
+  input Real x;
+  output FunctionInlining.InlineInitialTemp3.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x);
+  return;
+ end FunctionInlining.InlineInitialTemp3.EO.constructor;
+
+ function FunctionInlining.InlineInitialTemp3.f
+  input FunctionInlining.InlineInitialTemp3.EO eo;
+  output Real y;
+ algorithm
+  external \"C\" y = f(eo);
+  return;
+ end FunctionInlining.InlineInitialTemp3.f;
+
+ type FunctionInlining.InlineInitialTemp3.EO = ExternalObject;
+end FunctionInlining.InlineInitialTemp3;
+")})));
+end InlineInitialTemp3;
 
 model EmptyArray
     function f

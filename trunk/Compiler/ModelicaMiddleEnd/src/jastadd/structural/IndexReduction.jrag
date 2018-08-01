@@ -126,10 +126,13 @@ aspect IndexReduction {
         // Replace selected dummy derivatives with algebraics
         // Enable rewrite of identifiers? (not necessary?)
         for (FAbstractEquation fe : result.getEquations()) {
-            if (fe.variability().parameterOrLess())
+            if (fe.variability().fixedParameterOrLess()) {
                 addFParameterEquation(fe);
-            else
+            } else if (fe.variability().initialParameterOrLess()) {
+                addFInitialEquation(fe);
+            } else {
                 addFEquation(fe);
+            }
         }
         
         getAliasManager().stopCollectingDerivativeBindings();

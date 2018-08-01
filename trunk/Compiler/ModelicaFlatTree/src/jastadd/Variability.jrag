@@ -68,6 +68,7 @@ aspect Variability {
     syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fInitialParameter());
     syn boolean FTypePrefixVariability.indexParameterOrLess() = lessOrEqual(fIndexParameter());
     syn boolean FTypePrefixVariability.fixedParameterOrLess() = lessOrEqual(fFixedParameter());
+    syn boolean FTypePrefixVariability.initialParameterOrLess() = lessOrEqual(fInitialParameter());
     syn boolean FTypePrefixVariability.discreteOrLess()       = lessOrEqual(fDiscrete());
     syn boolean FTypePrefixVariability.continuousOrLess()     = lessOrEqual(fContinuous());
 
