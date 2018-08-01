@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5634
+Fixed issue where external object constructors where called multiple times.
+
 Fixed ; Minor ; Compiler ; #5640 
 Fixed a problem where functions had to restrictive visibility.
 Added header information for functions which needed greater visibility.
