@@ -19,5 +19,5 @@
 	
 	<property name="mc_set.sets" value="mc_set"/>
     <dirname property="mc_set.base" file="${mc_set.dir}"/>
-    <property name="mc_set.modules" value="ModelicaFlatTree,ModelicaFrontEnd,ModelicaMiddleEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,ModelicaCBackEnd,ModelicaCompiler"/>
+    <property name="mc_set.modules" value="ModelicaFlatTree,ModelicaFrontEnd,ModelicaMiddleEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,ModelicaCBackEnd,ModelicaCompiler,ModelicaCompilerOptions"/>
 </project>

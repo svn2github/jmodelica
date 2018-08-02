@@ -80,7 +80,7 @@ import org.jmodelica.util.ccompiler.CCompilerDelegator.Creator;
 import org.jmodelica.util.ccompiler.CCompilerTarget;
 import org.jmodelica.util.ccompiler.GccCompilerDelegator;
 import org.jmodelica.common.LogContainer;
-import org.jmodelica.common.options.generated.OptionsAggregated;
+import org.jmodelica.modelica.compiler.generated.OptionsAggregated;
 
 import org.xml.sax.SAXException;
 
