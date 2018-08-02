@@ -199,8 +199,15 @@
     <var name="java_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
+            <var name="has_java_copy_temp" value="true"/>
             <var name="has_java_replace_temp" value="false"/>
             <var name="has_java_rename_package_temp" value="false"/>
+            <if>
+                <isset property="@{module}.java_copy" />
+                <then>
+                    <var name="has_java_copy_temp" value="${@{module}.java_copy}"/>
+                </then>
+            </if>
             <if>
                 <isset property="@{module}.java_replace" />
                 <then>
@@ -249,6 +256,7 @@
                     </for>
                 </then>
             </if>
+            <property name="@{module}.has_java_copy" value="${has_java_copy_temp}" />
             <property name="@{module}.has_java_replace" value="${has_java_replace_temp}" />
             <property name="@{module}.has_java_rename_package" value="${has_java_rename_package_temp}" />
             <condition property="@{module}.need_java_copy" else="false">
@@ -694,9 +702,14 @@
                         <not><isset property="${@{module}.patch-java.uptodate}" /></not>
                         <then>
                             <mkdir dir="${java_temp}" />
-                            <copy todir="${java_temp}">
-                                <fileset dir="${@{module}.java_path}" includes="**/*.java" />
-                            </copy>
+                            <if>
+                                <istrue value="${@{module}.has_java_copy}" />
+                                <then>
+                                    <copy todir="${java_temp}">
+                                        <fileset dir="${@{module}.java_path}" includes="**/*.java" />
+                                    </copy>
+                                </then>
+                            </if>
                             <!-- Perform any java_replace -->
                             <if>
                                 <istrue value="${@{module}.has_java_replace}" />
