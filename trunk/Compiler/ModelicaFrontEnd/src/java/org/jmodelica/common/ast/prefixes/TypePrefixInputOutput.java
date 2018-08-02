@@ -12,8 +12,8 @@ public enum TypePrefixInputOutput {
         this.toString = toString;
     }
     
-    public boolean exists() {
-        return this != NONE;
+    public boolean isNone() {
+        return this == NONE;
     }
     
     public boolean inputCausality() {

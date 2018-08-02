@@ -16,7 +16,9 @@
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.jmodelica.common.ast.prefixes.*;
+import org.jmodelica.common.ast.prefixes.EquationType;
+import org.jmodelica.common.ast.prefixes.TypePrefixInputOutput;
+import org.jmodelica.common.ast.prefixes.VisibilityType;
 
 aspect Constructors {
 

@@ -1063,7 +1063,7 @@ aspect FlatPrettyPrint {
         
         str.print(getFTypePrefixVariability());
         
-        if (getTypePrefixInputOutput().exists()) {
+        if (!getTypePrefixInputOutput().isNone()) {
             str.print(getTypePrefixInputOutput(), " ");
         }
         
@@ -1219,7 +1219,7 @@ aspect FlatPrettyPrint {
     }
 
     public void FFunctionVariable.prettyPrint(Printer p, CodeStream str, String indent) {
-        if (getTypePrefixInputOutput().exists()) {
+        if (!getTypePrefixInputOutput().isNone()) {
             str.print(getTypePrefixInputOutput(), " ");
         }
         str.print(getType().scalarType());
@@ -2010,7 +2010,7 @@ aspect PrettyPrint_MC {
 
     public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
         str.print(indent, getFTypePrefixVariability());
-        if (getTypePrefixInputOutput().exists()) {
+        if (!getTypePrefixInputOutput().isNone()) {
             str.print(getTypePrefixInputOutput(), " ");
         }
         
