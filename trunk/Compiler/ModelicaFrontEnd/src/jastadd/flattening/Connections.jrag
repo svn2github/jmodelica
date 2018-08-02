@@ -734,8 +734,8 @@ aspect Connections {
             }
         }
 
-        public void addInsideFlowVar(InstComponentDecl var, FQName name) {
-            addVar(ConnectionSetEntry.create(var, false, name));
+        public void addFlowVar(InstComponentDecl var, boolean outside, FQName name) {
+            addVar(ConnectionSetEntry.create(var, outside, name));
         }
 
         public void addExpandableArrayMember(InstComponentDecl var, FQName name) {
@@ -1332,7 +1332,11 @@ aspect Connections {
 
     public void InstComponentDecl.buildConnectionSetsAsPrimitive(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (useInFlattening() && (isFlow() || isStream())) {
-            csm.addInsideFlowVar(this, getFQName(Index.NULL));
+            FQName fqn = getFQName(Index.NULL);
+            csm.addFlowVar(this, false, fqn);
+            if (inExpandableConnector()) {
+                csm.addFlowVar(this, true, fqn);
+            }
         }
     }
 
@@ -2138,7 +2142,7 @@ aspect ExpandableConnectors {
 
         
         public ExpandableConnectorSets() {
-            map = new HashMap<>();
+            map = new LinkedHashMap<>();
             sets = new LinkedHashSet<>();
             connections = new ArrayList<>();
             uses = new ArrayList<>();
@@ -3094,18 +3098,18 @@ aspect ExpandableConnectors {
     
     public void InstComponentDecl.buildConnectionSetsForExpandableConnector(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (useInFlattening()) {
-            if (isArray()) {
-                super.buildConnectionSets(prefix, csm, connect);
-            } else if (csm.isExpandableConnectorsDone()) {
-                for (InstComponentDecl icd : getInstComponentDecls()) {
-                    if (icd.isArray()) {
-                        icd.addExpandableArrayMembersTopLevel(csm);
+            if (!isArray()) {
+                if (csm.isExpandableConnectorsDone()) {
+                    for (InstComponentDecl icd : getInstComponentDecls()) {
+                        if (icd.isArray()) {
+                            icd.addExpandableArrayMembersTopLevel(csm);
+                        }
                     }
+                } else {
+                    csm.getExpandable().addConnector(this);
                 }
-            } else {
-                csm.getExpandable().addConnector(this);
-                super.buildConnectionSets(prefix, csm, connect);
             }
+            super.buildConnectionSets(prefix, csm, connect);
         }
     }
     

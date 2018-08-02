@@ -54,22 +54,22 @@ end ExpandableConnectors.Expandable1;
     end Expandable1;
 
 
-	model Expandable2
+    model Expandable2
         expandable connector EC
         end EC;
-		
-		connector C
-			Real a;
-			flow Real b;
-		end C;
+        
+        connector C
+            Real a;
+            flow Real b;
+        end C;
 
         EC ec1, ec2, ec3;
         C c1, c2, c3, c4, c5;
-	equation
+    equation
         connect(ec1, ec2);
         connect(ec2, ec3);
-        connect(c1, ec1.x);     
-        connect(c2, ec1.y);     
+        connect(c1, ec1.x);
+        connect(c2, ec1.y);
         connect(ec3.x, c3);
         connect(ec3.y, c4);
         connect(ec2.x, c5);
@@ -81,17 +81,17 @@ end ExpandableConnectors.Expandable1;
             flatModel="
 fclass ExpandableConnectors.Expandable2
  Real ec1.x.a;
- input Real ec1.x.b;
+ Real ec1.x.b;
  Real ec1.y.a;
- input Real ec1.y.b;
+ Real ec1.y.b;
  Real ec2.x.a;
- input Real ec2.x.b;
+ Real ec2.x.b;
  Real ec2.y.a;
- input Real ec2.y.b;
+ Real ec2.y.b;
  Real ec3.x.a;
- input Real ec3.x.b;
+ Real ec3.x.b;
  Real ec3.y.a;
- input Real ec3.y.b;
+ Real ec3.y.b;
  Real c1.a;
  input Real c1.b;
  Real c2.a;
@@ -114,6 +114,12 @@ equation
  ec1.y.a = ec2.y.a;
  ec2.y.a = ec3.y.a;
  - c2.b - c4.b - ec1.y.b - ec2.y.b - ec3.y.b = 0.0;
+ ec1.x.b = 0.0;
+ ec1.y.b = 0.0;
+ ec2.x.b = 0.0;
+ ec2.y.b = 0.0;
+ ec3.x.b = 0.0;
+ ec3.y.b = 0.0;
 end ExpandableConnectors.Expandable2;
 ")})));
 	end Expandable2;
@@ -2797,13 +2803,15 @@ fclass ExpandableConnectors.ConnectorArray1
  input Real c[1].a[1];
  input Real c[1].b;
  Real c[1].c[2];
- input Real ec.x.a[1];
- input Real ec.x.b;
+ Real ec.x.a[1];
+ Real ec.x.b;
  Real ec.x.c[2];
 equation
  - c[1].a[1:1] - ec.x.a[1:1] = zeros(1);
  - c[1].b - ec.x.b = 0.0;
  c[1].c[1:2] = ec.x.c[1:2];
+ ec.x.a[1:1] = zeros(1);
+ ec.x.b = 0.0;
 end ExpandableConnectors.ConnectorArray1;
 ")})));
 end ConnectorArray1;
@@ -2836,11 +2844,11 @@ fclass ExpandableConnectors.ConnectorArray2
  input Real c[2].a[1];
  input Real c[2].b;
  Real c[2].c[2];
- input Real ec.x[1].a[1];
- input Real ec.x[1].b;
+ Real ec.x[1].a[1];
+ Real ec.x[1].b;
  Real ec.x[1].c[2];
- input Real ec.x[2].a[1];
- input Real ec.x[2].b;
+ Real ec.x[2].a[1];
+ Real ec.x[2].b;
  Real ec.x[2].c[2];
 equation
  - c[1].a[1:1] - ec.x[1].a[1:1] = zeros(1);
@@ -2849,6 +2857,10 @@ equation
  - c[2].a[1:1] - ec.x[2].a[1:1] = zeros(1);
  - c[2].b - ec.x[2].b = 0.0;
  c[2].c[1:2] = ec.x[2].c[1:2];
+ ec.x[1].a[1:1] = zeros(1);
+ ec.x[1].b = 0.0;
+ ec.x[2].a[1:1] = zeros(1);
+ ec.x[2].b = 0.0;
 end ExpandableConnectors.ConnectorArray2;
 ")})));
 end ConnectorArray2;
@@ -2884,11 +2896,11 @@ fclass ExpandableConnectors.ConnectorArray3
  input Real c[3].a[1];
  input Real c[3].b;
  Real c[3].c[2];
- input Real ec.x[1].a[1];
- input Real ec.x[1].b;
+ Real ec.x[1].a[1];
+ Real ec.x[1].b;
  Real ec.x[1].c[2];
- input Real ec.x[2].a[1];
- input Real ec.x[2].b;
+ Real ec.x[2].a[1];
+ Real ec.x[2].b;
  Real ec.x[2].c[2];
 equation
  - c[2].a[1:1] - ec.x[1].a[1:1] = zeros(1);
@@ -2897,6 +2909,10 @@ equation
  - c[3].a[1:1] - ec.x[2].a[1:1] = zeros(1);
  - c[3].b - ec.x[2].b = 0.0;
  c[3].c[1:2] = ec.x[2].c[1:2];
+ ec.x[1].a[1:1] = zeros(1);
+ ec.x[1].b = 0.0;
+ ec.x[2].a[1:1] = zeros(1);
+ ec.x[2].b = 0.0;
 end ExpandableConnectors.ConnectorArray3;
 ")})));
 end ConnectorArray3;
@@ -2930,14 +2946,14 @@ fclass ExpandableConnectors.ConnectorArray4
  input Real c2.a[1];
  input Real c2.b;
  Real c2.c[2];
- input Real ec.x[1].a[1];
- input Real ec.x[1].b;
+ Real ec.x[1].a[1];
+ Real ec.x[1].b;
  Real ec.x[1].c[2];
- input Real ec.x[2].a[1];
- input Real ec.x[2].b;
+ Real ec.x[2].a[1];
+ Real ec.x[2].b;
  Real ec.x[2].c[2];
- input Real ec.x[3].a[1];
- input Real ec.x[3].b;
+ Real ec.x[3].a[1];
+ Real ec.x[3].b;
  Real ec.x[3].c[2];
 equation
  - c1.a[1:1] - ec.x[1].a[1:1] = zeros(1);
@@ -2949,6 +2965,12 @@ equation
  - ec.x[2].a[1:1] = zeros(1);
  - ec.x[2].b = 0.0;
  ec.x[2].c[1:2] = zeros(2);
+ ec.x[1].a[1:1] = zeros(1);
+ ec.x[1].b = 0.0;
+ ec.x[2].a[1:1] = zeros(1);
+ ec.x[2].b = 0.0;
+ ec.x[3].a[1:1] = zeros(1);
+ ec.x[3].b = 0.0;
 end ExpandableConnectors.ConnectorArray4;
 ")})));
 end ConnectorArray4;
@@ -2982,16 +3004,18 @@ fclass ExpandableConnectors.ConnectorArray5
  input Real c[2].a[3];
  Real c[2].b[3];
  structural parameter Integer ec.x[1].n = 2 /* 2 */;
- input Real ec.x[1].a[2];
+ Real ec.x[1].a[2];
  Real ec.x[1].b[2];
  structural parameter Integer ec.x[2].n = 3 /* 3 */;
- input Real ec.x[2].a[3];
+ Real ec.x[2].a[3];
  Real ec.x[2].b[3];
 equation
  - c[1].a[1:2] - ec.x[1].a[1:2] = zeros(2);
  c[1].b[1:2] = ec.x[1].b[1:2];
  - c[2].a[1:3] - ec.x[2].a[1:3] = zeros(3);
  c[2].b[1:3] = ec.x[2].b[1:3];
+ ec.x[1].a[1:2] = zeros(2);
+ ec.x[2].a[1:3] = zeros(3);
 end ExpandableConnectors.ConnectorArray5;
 ")})));
 end ConnectorArray5;
@@ -3025,13 +3049,13 @@ fclass ExpandableConnectors.ConnectorArray6
  input Real c2.a;
  Real c2.b;
  Real c2.c;
- input Real ec.x[1].a;
+ Real ec.x[1].a;
  Real ec.x[1].b;
  Real ec.x[1].c;
- input Real ec.x[2].a;
+ Real ec.x[2].a;
  Real ec.x[2].b;
  Real ec.x[2].c;
- input Real ec.x[3].a;
+ Real ec.x[3].a;
  Real ec.x[3].b;
  Real ec.x[3].c;
 equation
@@ -3046,6 +3070,9 @@ equation
  - ec.x[2].a = 0.0;
  ec.x[2].b = 0.0;
  ec.x[2].c = 0.0;
+ ec.x[1].a = 0.0;
+ ec.x[2].a = 0.0;
+ ec.x[3].a = 0.0;
 end ExpandableConnectors.ConnectorArray6;
 ")})));
 end ConnectorArray6;
@@ -3079,11 +3106,12 @@ fclass ExpandableConnectors.ConnectorArray7
  parameter Real a.p = 1 /* 1 */;
  Real a.c.a(start = a.p);
  Real a.c.b;
- input Real ec.c.a(start = a.p);
+ Real ec.c.a(start = a.p);
  Real ec.c.b;
 equation
  a.c.a - ec.c.a = 0.0;
  a.c.b = ec.c.b;
+ ec.c.a = 0.0;
 end ExpandableConnectors.ConnectorArray7;
 ")})));
 end ConnectorArray7;
@@ -3190,5 +3218,58 @@ public
 end ExpandableConnectors.ExpandableWithInputOutput1;
 ")})));
 end ExpandableWithInputOutput1;
+
+
+model FlowInExpandable1
+    connector C
+        Real p;
+        flow Real f;
+    end C;
+    
+    expandable connector EC
+    end EC;
+    
+    model A
+        B b;
+        EC ec;
+    equation
+        connect(b.c, ec.c);
+    end A;
+    
+    model B
+        C c;
+    end B;
+    
+    A a;
+    B b;
+    EC ec;
+equation
+    connect(a.ec, ec);
+    connect(b.c, ec.c);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="FlowInExpandable1",
+        description="Check that flow variables in expandable connectors get zero equations as needed",
+        flatModel="
+fclass ExpandableConnectors.FlowInExpandable1
+ Real a.b.c.p;
+ Real a.b.c.f;
+ Real a.ec.c.p;
+ Real a.ec.c.f;
+ Real b.c.p;
+ Real b.c.f;
+ Real ec.c.p;
+ Real ec.c.f;
+equation
+ a.b.c.f - a.ec.c.f = 0.0;
+ a.ec.c.f + b.c.f - ec.c.f = 0.0;
+ a.ec.c.p = b.c.p;
+ b.c.p = ec.c.p;
+ a.b.c.p = a.ec.c.p;
+ ec.c.f = 0.0;
+end ExpandableConnectors.FlowInExpandable1;
+")})));
+end FlowInExpandable1;
 
 end ExpandableConnectors;
