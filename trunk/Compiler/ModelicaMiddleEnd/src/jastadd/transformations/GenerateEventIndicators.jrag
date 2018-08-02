@@ -623,7 +623,7 @@ aspect GenerateEventIndicators {
                 new FQNameFull(variableName));
 
         if (output) {
-            v.setFTypePrefixInputOutput(new FOutput());
+            v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
         }
 
         myFClass().addFVariable(v);

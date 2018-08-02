@@ -866,9 +866,11 @@ aspect Flattening {
             fqn.removeFArraySubscripts();
             FFunctionVariable ffv = createFFunctionVariable(f, eo, fqn);
             if (isInput())
-                ffv.setFTypePrefixInputOutput(new FInput());
-            if (isOutput())
-                ffv.setFTypePrefixInputOutput(new FOutput());
+                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.INPUT);
+            else if (isOutput())
+                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
+            else
+                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
             vars.addChild(ffv);
             if (isComposite()) {
                 addFInitArrayStmt(f, stmts, isInput(), expandedFQNameCalc(), new ForNames());
@@ -1027,9 +1029,9 @@ aspect Flattening {
         FType type = type().flatten(f, this, !isInput());
         FFunctionVariable ffv;
         if (isArray())
-            ffv = new FFunctionArray(new Opt(), type, eo, fqn);
+            ffv = new FFunctionArray(TypePrefixInputOutput.NONE, type, eo, fqn);
         else
-            ffv = new FFunctionVariable(new Opt(), type, eo, fqn);
+            ffv = new FFunctionVariable(TypePrefixInputOutput.NONE, type, eo, fqn);
         return ffv;
     }
     
@@ -1709,7 +1711,9 @@ aspect Flattening {
         
         // Only set input/output prefix for top level inputs and outputs
         if (isTopLevelInputOutput()) 
-            fv.setFTypePrefixInputOutput(isInput() ? new FInput() : new FOutput());
+            fv.setTypePrefixInputOutput(isInput() ? TypePrefixInputOutput.INPUT : TypePrefixInputOutput.OUTPUT);
+        else
+            fv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         
         if (myInstClass().extendsPrimitive())
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());

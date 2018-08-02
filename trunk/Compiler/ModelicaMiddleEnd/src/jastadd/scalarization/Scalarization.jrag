@@ -416,8 +416,7 @@ aspect Scalarization {
 		FVariable fv = createEmptyNode();
 		fv.setFVisibilityType((FVisibilityType) getFVisibilityType().fullCopy());
 		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
-		if (hasFTypePrefixInputOutput())
-			fv.setFTypePrefixInputOutput((FTypePrefixInputOutput) getFTypePrefixInputOutput().fullCopy());
+		fv.setTypePrefixInputOutput(getTypePrefixInputOutput());
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
 
@@ -608,12 +607,12 @@ aspect Scalarization {
         private String name;
         
         // input/output prefix of top-level variable
-        private Opt<FTypePrefixInputOutput> inputOutput;
+        private TypePrefixInputOutput inputOutput;
         
         private Index index;
         
         private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
-                FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
+                FTypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
             bExp = be;
             this.name = name;
             index = i;
@@ -623,14 +622,14 @@ aspect Scalarization {
         }
         
         private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,
-                FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
+                FTypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
             this(name, ScalarizingVariableInstance.mapped(attrs), be, variability, inputOutput, i);
         }
         
         public ScalarizingVariableInstance(Scalarizer.Variable s, FVariable fv) {
             this(fv.name(), fv.getFAttributes(),
                     fv.hasBindingExp() ? fv.getBindingExp().dynamicFExp(fv.getBindingExp().scalarize(s.select(fv.variability()))) : null,
-                    fv.variability(), fv.getFTypePrefixInputOutputOpt(), Index.NULL);
+                    fv.variability(), fv.getTypePrefixInputOutput(), Index.NULL);
         }
         
         private static Map<String, FAttribute> mapped(List<FAttribute> as) {
@@ -708,7 +707,7 @@ aspect Scalarization {
                 fv.setBindingExpOpt(new Opt());
             }
             fv.setFTypePrefixVariability(variability);
-            fv.setFTypePrefixInputOutputOpt(inputOutput.treeCopy());
+            fv.setTypePrefixInputOutput(inputOutput);
             List<FAttribute> attrs = new List<FAttribute>();
             for (FAttribute attr : mattrs.values()) {
                 attr.scalarize(attrs, index, s.sp);
@@ -734,8 +733,7 @@ aspect Scalarization {
 		fv.getFQName().scalarized = true;
 		fv.setFVisibilityType(getFVisibilityType().fullCopy());
 		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
-		if (hasFTypePrefixInputOutput())
-			fv.setFTypePrefixInputOutput(getFTypePrefixInputOutput().fullCopy());
+		fv.setTypePrefixInputOutput(getTypePrefixInputOutput());
 		fv.setDerivedType(getDerivedType());
 		if (hasBindingExp())
 			fv.setBindingExp(getBindingExp().fullCopy());

@@ -2938,14 +2938,10 @@ aspect ArrayHelpers {
         }
 
 		public FFunctionVariable createFunctionVariable(String name, FType type) {
-		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>());
+		    return createFunctionVariable(name, type, TypePrefixInputOutput.NONE);
 		}
 		
-		public FFunctionVariable createFunctionVariable(String name, FType type, FTypePrefixInputOutput inputOutput) {
-		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>(inputOutput));
-		}
-		
-		public FFunctionVariable createFunctionVariable(String name, FType type, Opt<FTypePrefixInputOutput> inputOutput) {
+		public FFunctionVariable createFunctionVariable(String name, FType type, TypePrefixInputOutput inputOutput) {
 		    if (this == Size.SCALAR)
 		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FQNameString(name));
 		    else

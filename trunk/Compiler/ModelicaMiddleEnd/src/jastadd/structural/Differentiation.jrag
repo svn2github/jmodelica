@@ -924,7 +924,7 @@ aspect AlgorithmDifferentiation{
                 if (ffv.order() == order() && ffv.shouldBeDifferentiated(derNode))
                     derivatedInputs.add(ffv.createDerivative());
             } else if (ffv.isOutput()) {
-                ffvCopy.setFTypePrefixInputOutputOpt(new Opt<FTypePrefixInputOutput>());
+                ffvCopy.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
                 others.add(ffvCopy);
                 if (ffv.order() == order() && ffv.shouldBeDifferentiated(derNode))
                     outputs.add(ffv.createDerivative());
@@ -1039,7 +1039,7 @@ aspect AlgorithmDifferentiation{
     }
     
     syn FFunctionVariable FFunctionVariable.createDerivative() {
-        return createNode(getFTypePrefixInputOutputOpt().fullCopy(), getType().fullCopy(), new Opt<FExp>(), 
+        return createNode(getTypePrefixInputOutput(), getType().fullCopy(), new Opt<FExp>(), 
                 getFQName().createDerPrefixedName(1), order() + 1);
     }
     

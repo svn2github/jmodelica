@@ -954,22 +954,22 @@ aspect TransformCanonical {
 	 * Create an input representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionOutput() {
-		return createFFunctionVariable(new FOutput());
+		return createFFunctionVariable(TypePrefixInputOutput.OUTPUT);
 	}
 
 	/**
 	 * Create an output representing this variable in a generated algorithm function.
 	 */
 	public FFunctionVariable FVariable.createFFunctionInput() {
-		return createFFunctionVariable(new FInput());
+		return createFFunctionVariable(TypePrefixInputOutput.INPUT);
 	}
 
 	/**
 	 * Create an function variable representing this variable in a generated algorithm function.
 	 */
-	public FFunctionVariable FVariable.createFFunctionVariable(FTypePrefixInputOutput io) {
+	public FFunctionVariable FVariable.createFFunctionVariable(TypePrefixInputOutput io) {
 		FType type = (FType) type().fullCopy();
-		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
+		return new FFunctionVariable(io, type, new Opt(), getFQName().fullCopy());
 	}
 
     public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIABLE =
@@ -1066,6 +1066,7 @@ aspect TransformCanonical {
         }
         fdv.setFVisibilityType(getFVisibilityType().fullCopy());
         fdv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+        fdv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         fdv.setFQName(getFQName().fullCopy());
         fdv.setOrder(order() + 1);
         fdv.setMeIntegrated(this);

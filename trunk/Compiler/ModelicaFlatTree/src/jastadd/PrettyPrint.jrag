@@ -1063,8 +1063,8 @@ aspect FlatPrettyPrint {
         
         str.print(getFTypePrefixVariability());
         
-        if (hasFTypePrefixInputOutput()) {
-            str.print(getFTypePrefixInputOutput(), " ");
+        if (getTypePrefixInputOutput().exists()) {
+            str.print(getTypePrefixInputOutput(), " ");
         }
         
         str.print(prettyPrintType(), " ", displayName());
@@ -1219,8 +1219,8 @@ aspect FlatPrettyPrint {
     }
 
     public void FFunctionVariable.prettyPrint(Printer p, CodeStream str, String indent) {
-        if (hasFTypePrefixInputOutput()) {
-            str.print(getFTypePrefixInputOutput(), " ");
+        if (getTypePrefixInputOutput().exists()) {
+            str.print(getTypePrefixInputOutput(), " ");
         }
         str.print(getType().scalarType());
         if (isArray()) {
@@ -1894,9 +1894,6 @@ aspect FlatPrettyPrint {
         p.print(getFExp(), str, indent);
     }
     
-    syn String FTypePrefixInputOutput.toString();
-    eq FInput.toString()      = "input";
-    eq FOutput.toString()     = "output";
     syn String FTypePrefixVariability.toString();
     eq FFixedParameter.toString()       = "parameter ";
     eq FInitialParameter.toString()     = "initial parameter ";
@@ -2013,8 +2010,8 @@ aspect PrettyPrint_MC {
 
     public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
         str.print(indent, getFTypePrefixVariability());
-        if (hasFTypePrefixInputOutput()) {
-            str.print(getFTypePrefixInputOutput(), " ");
+        if (getTypePrefixInputOutput().exists()) {
+            str.print(getTypePrefixInputOutput(), " ");
         }
         
         str.print(prettyPrintType(), " ", nameUnderscore());

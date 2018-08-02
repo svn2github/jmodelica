@@ -84,7 +84,7 @@ abstract FAbstractVariable : BaseNode;
 /**
  * A flat variable in a function.
  */
-FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
+FFunctionVariable : FAbstractVariable ::= <TypePrefixInputOutput:TypePrefixInputOutput>
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
@@ -113,7 +113,7 @@ UnknownFVariable : FAbstractVariable;
  */
 abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            FTypePrefixVariability
-                                           [FTypePrefixInputOutput]
+                                           <TypePrefixInputOutput:TypePrefixInputOutput>
                                            FAttribute*
                                            <DerivedType>
                                            [BindingExp:FExp]
@@ -204,21 +204,6 @@ FConstant : FTypePrefixVariability;
 FCompositeVariability : FTypePrefixVariability ::= Component:FComponentVariability*;
 
 FComponentVariability ::= <Name:String> Variability:FTypePrefixVariability;
-
-/**
- * Base class for causality type prefixes.
- */
-abstract FTypePrefixInputOutput : FTypePrefix;
-
-/**
- * Input causality.
- */ 
-FInput : FTypePrefixInputOutput;
-
-/**
- * Output causality.
- */
-FOutput : FTypePrefixInputOutput;
 
 /**
  * FVariable of type Real.
