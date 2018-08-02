@@ -1160,27 +1160,15 @@ aspect Visibility {
     syn boolean InstAssignable.isPublicVar() = isPublic() && !inProtectedComponent();
 
 
-    syn boolean FVisibilityType.isPublic() = false;
-    eq FPublicVisibilityType.isPublic()    = true;
-
-    syn boolean FVisibilityType.isProtected() = false;
-    eq FProtectedVisibilityType.isProtected() = true;
-
-    syn boolean FVisibilityType.isTemporary() = false;
-    eq FTemporaryVisibilityType.isTemporary() = true;
-
-    syn boolean FVisibilityType.isFromExpandableConnector()  = false;
-    eq FExpandableVisibilityType.isFromExpandableConnector() = true;
-
-    syn boolean FVariable.isPublic()    = getFVisibilityType().isPublic();
-    syn boolean FVariable.isProtected() = getFVisibilityType().isProtected();
+    syn boolean FVariable.isPublic()    = getVisibilityType().isPublic();
+    syn boolean FVariable.isProtected() = getVisibilityType().isProtected();
 
     syn boolean FAbstractVariable.isTemporary() = false;
-    eq FVariable.isTemporary()                  = getFVisibilityType().isTemporary();
+    eq FVariable.isTemporary()                  = getVisibilityType().isTemporary();
 
     syn boolean FAbstractVariable.isFromExpandableConnector() = false;
     eq FVariable.isFromExpandableConnector()                  = 
-        getFVisibilityType().isFromExpandableConnector();
+        getVisibilityType().isFromExpandableConnector();
 
 }
 

@@ -142,7 +142,7 @@ aspect IndexReduction {
         for (FVariable fv : getFVariables()) {
             if (fv.isDerivativeVariable()) {
                 if (result.getDummyDerivatives().contains(fv)) {
-                    FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+                    FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getVisibilityType(),
                         fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(), fv.order());
                     l.add(fdv);
                 } else if (fv.order() > 1) {
@@ -151,7 +151,7 @@ aspect IndexReduction {
                     FQName fqnPrev = fv.getFQName().fullCopy();
                     for (int i = 1; i < fv.order(); i++) {
                         FQName fqn = fv.getFQName().createDerPrefixedName(i);
-                        l.add(new FRealVariable(new FPublicVisibilityType(),
+                        l.add(new FRealVariable(VisibilityType.PUBLIC,
                                 fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
                         // Derivative variable is added later
                         addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));

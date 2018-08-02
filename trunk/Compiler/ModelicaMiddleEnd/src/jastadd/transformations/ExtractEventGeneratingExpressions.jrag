@@ -29,7 +29,7 @@ aspect ExtractEventGeneratingExpressions {
 
                 // Equations.
                 for (FExp exp: eventExps) {
-                    FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(),
+                    FVariable fv = exp.type().createFVariable(VisibilityType.PUBLIC,
                             new FQNameFull(exp.tempVarName()), exp.variability());
                     addFVariable(fv);
                     addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
@@ -211,7 +211,7 @@ aspect ExtractEventGeneratingExpressions {
     private FVariable FSampleExp.indexVariable = null;
     private FVariable FSampleExp.indexVariable() {
         if (indexVariable == null) {
-            indexVariable = new FIntegerVariable(new FPublicVisibilityType(),
+            indexVariable = new FIntegerVariable(VisibilityType.PUBLIC,
                     fDiscrete(), new FQNameFull(calcIndexVarName()));
             myFClass().addFVariable(indexVariable);
         }

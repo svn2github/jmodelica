@@ -1733,7 +1733,7 @@ aspect FlatFunctionUtils {
      * Default implementation returns <code>null</code>.
      */
     public FVariable FType.createTempFVariable(FQName name, FTypePrefixVariability variability) {
-        return createFVariable(new FTemporaryVisibilityType(), name, variability);
+        return createFVariable(VisibilityType.TEMPORARY, name, variability);
     }
     
     /**
@@ -1743,50 +1743,50 @@ aspect FlatFunctionUtils {
      * 
      * Default implementation returns <code>null</code>.
      */
-    public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public FVariable FArrayType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FArrayType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return getFPrimitiveType().createFVariable(fvt, name, variability);
+        return getFPrimitiveType().createFVariable(vt, name, variability);
     }
         
-    public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FRealType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FRealVariable(fvt, variability, name);
+        return new FRealVariable(vt, variability, name);
     }   
     
-    public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FIntegerType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FIntegerVariable(fvt, variability.combineDown(fDiscrete()), name);
+        return new FIntegerVariable(vt, variability.combineDown(fDiscrete()), name);
     }   
     
-    public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FBooleanType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FBooleanVariable(fvt, variability.combineDown(fDiscrete()), name);
+        return new FBooleanVariable(vt, variability.combineDown(fDiscrete()), name);
     }   
     
-    public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FStringType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FStringVariable(fvt, variability.combineDown(fDiscrete()), name);
+        return new FStringVariable(vt, variability.combineDown(fDiscrete()), name);
     }   
     
-    public FVariable FRecordType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FRecordType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FRecordVariable(fvt, variability, name, new FQNameString(getName()));
+        return new FRecordVariable(vt, variability, name, new FQNameString(getName()));
     }   
     
-    public FVariable FEnumType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FEnumType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FEnumVariable(fvt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
+        return new FEnumVariable(vt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
     }   
     
-    public FVariable FExternalObjectType.createFVariable(FVisibilityType fvt, FQName name, 
+    public FVariable FExternalObjectType.createFVariable(VisibilityType vt, FQName name, 
             FTypePrefixVariability variability) {
-        return new FExternalObjectVariable(fvt, variability.combineDown(fInitialParameter()), name, getConstructor().fullCopy());
+        return new FExternalObjectVariable(vt, variability.combineDown(fInitialParameter()), name, getConstructor().fullCopy());
     }
 }
 

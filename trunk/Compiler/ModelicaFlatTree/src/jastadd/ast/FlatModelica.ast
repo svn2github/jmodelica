@@ -111,7 +111,7 @@ UnknownFVariable : FAbstractVariable;
  * variables and scalar variables: this information is embedded in the 
  * FQName class.
  */
-abstract FVariable : FAbstractVariable ::= FVisibilityType
+abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
                                            FTypePrefixVariability
                                            <TypePrefixInputOutput:TypePrefixInputOutput>
                                            FAttribute*
@@ -300,40 +300,6 @@ FDynamicStateVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
  * by dynamic states.
  */
 FDynamicAlgebraicVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
-
-/**
- * Node representing the visibility of an FVariable object.
- */
-abstract FVisibilityType : BaseNode;
-
-/**
- * Public visibility.
- */
-FPublicVisibilityType : FVisibilityType;
-
-/**
- * Protected visibility.
- */
-FProtectedVisibilityType : FVisibilityType;
-
-/**
- * Visibility for temporary variable. 
- *
- * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
- */
-FTemporaryVisibilityType : FPublicVisibilityType;
-
-/**
- * Visibility for variables in expandable connectors. 
- *
- * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
- */
-FExpandableVisibilityType : FPublicVisibilityType;
-
-/**
- * Visibility for runtime option parameters. 
- */
-FRuntimeOptionVisibilityType : FPublicVisibilityType;
 
 /**
  * Base class for all type nodes.

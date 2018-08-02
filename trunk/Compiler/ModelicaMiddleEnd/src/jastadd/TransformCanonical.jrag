@@ -1064,7 +1064,7 @@ aspect TransformCanonical {
         } else {
             fdv = new FDerivativeVariable();
         }
-        fdv.setFVisibilityType(getFVisibilityType().fullCopy());
+        fdv.setVisibilityType(getVisibilityType());
         fdv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
         fdv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         fdv.setFQName(getFQName().fullCopy());
@@ -2547,7 +2547,7 @@ aspect StateInitialEquations {
         
         for (FVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fFixedParameter(), nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(VisibilityType.PUBLIC, fFixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else

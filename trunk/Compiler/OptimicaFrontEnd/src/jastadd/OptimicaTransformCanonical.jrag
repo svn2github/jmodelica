@@ -138,7 +138,7 @@ aspect OptimicaTransformCanonical {
                 v = fOptParameter();
             }
         }
-        FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), v, new FQNameString(name));
+        FRealVariable fv = new FRealVariable(VisibilityType.PUBLIC, v, new FQNameString(name));
 		if (attr != null) 
 			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
 		if (attr != null && attr.hasValue())
