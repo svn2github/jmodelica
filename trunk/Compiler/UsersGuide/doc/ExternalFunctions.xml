@@ -50,8 +50,7 @@
         is not declared with a variability prefix. This is due to the fact that the constructors 
         should only be called once and a discrete or continuous external object would have to call
         its constructor many times. An external object may be dependent on fixed false parameters.
-        If a constructor call is dependent on parameters it will be invoked during the solving of 
-        the initial system.
+        In that case the constructor will be called during the solving of the initial system. 
         External objects are not allowed in algebraic loops. If that is the case an error will be
         given during compilation.
     </para>
