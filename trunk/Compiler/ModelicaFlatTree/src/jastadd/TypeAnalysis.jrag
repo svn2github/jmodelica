@@ -442,7 +442,7 @@ aspect FlatTypeAnalysis {
 
     eq FTerminate.type() = fNoType();
     eq FReinit.type() = fNoType();
-    eq FAssert.type() = getTest().type();
+    eq FAssert.type() = fNoType();
     eq FGetInstanceName.type() = fStringScalarType();
 
     eq FDelayExp.type() = getFExp().type();
@@ -616,7 +616,7 @@ aspect FlatTypeAnalysis {
         return sizedType(s2);
     }
     
-    eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
+    eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fNoType();
     eq FMathematicalFunctionCall.type() = fRealType(size());
     eq FPartialFunctionCall.type() {
         List<FRecordComponentType> inputs = new List<FRecordComponentType>();
