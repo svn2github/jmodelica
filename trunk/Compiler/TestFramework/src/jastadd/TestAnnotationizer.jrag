@@ -100,7 +100,7 @@ abstract public class TestAnnotationizerHelper {
     public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
         try {
             SourceRoot root = parse(filePath, modelName, createTestOptions());
-            SrcClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
+            SrcClassDecl cd = root.getProgram().simpleLookupClass(modelName);
             if (cd.isUnknown()) {
                 System.err.println("Class " + modelName + " not found");
                 return;
@@ -356,7 +356,7 @@ abstract public class TestAnnotationizerHelper {
     protected void process() throws Exception {
         testName = className.substring(className.indexOf('.') + 1).replace('.', '_');
         root = parse(filesToParse(filePath, libs), className, optionRegistry());
-        SrcClassDecl cd = root.getProgram().simpleLookupClassDotted(className);
+        SrcClassDecl cd = root.getProgram().simpleLookupClass(className);
         beginLine = cd.beginLine();
         endLine = cd.endLine();
     }

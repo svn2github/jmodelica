@@ -822,7 +822,7 @@ aspect Names {
         return icd.successful() ? icd.target().dirName() : null;
     }
     eq SrcFullClassDecl.getChild().packagePath(String name) {
-        SrcClassDecl cd = simpleLookupClassDottedGlobal(name);
+        SrcClassDecl cd = simpleLookupClass(name);
         return (cd == null || cd.isUnknown()) ? null : cd.dirName();
     }
 
