@@ -22,7 +22,7 @@ public abstract class MethodTestCase extends TestCase {
     private String output = null;
     private String methodName = null;
     private Object[] arguments = new Object[0];
-    private String inputArray = false;
+    private boolean inputArray = false;
 
     /**
      * Invoke a method with specified arguments on the specified object
