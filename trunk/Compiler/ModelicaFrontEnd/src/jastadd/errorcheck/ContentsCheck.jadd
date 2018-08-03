@@ -823,11 +823,21 @@ aspect ContentCheck {
     /**
      * Check if this class fulfills the requirements of a package.
      */
-    syn boolean InstClassDecl.isOkPackage() {
-        for (InstComponentDecl icd : getInstComponentDecls())
-            if (!icd.isConstant())
+    syn boolean InstNode.isOkPackage() {
+        for (InstComponentDecl icd : getInstComponentDecls()) {
+            if (!icd.isConstant()) {
                 return false;
-        return getNumFAbstractEquation() == 0;
+            }
+        }
+        if (getNumFAbstractEquation() != 0) {
+            return false;
+        }
+        for (InstExtends ie : getInstExtendss()) {
+            if (!ie.isOkPackage()) {
+                return false;
+            }
+        }
+        return true;
     }
     eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
     eq InstLibNode.isOkPackage()              = actualInstClass().isOkPackage();
