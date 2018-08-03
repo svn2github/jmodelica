@@ -14,7 +14,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<project name="ModelicaFrontEnd-module">
+<project name="ModelicaCompiler-module">
     <property name="ModelicaCompiler.generate-pre" value="org.jmodelica.build.options.OptionsAggregator"/>
-    <property name="ModelicaCompiler.package.generated-pre" value="org.jmodelica.common.options.generated"/>
+    <property name="ModelicaCompiler.package.generated-pre" value="${ast_package}.generated"/>
+    
+    <property name="ModelicaCompiler.java_copy" value="false"/>
+    
+    <property name="ModelicaCompiler.java_replace" value="ast"/>
+    <property name="ModelicaCompiler.java_replace.ast.from" value="org.jmodelica.modelica.compiler.generated."/>
+    <property name="ModelicaCompiler.java_replace.ast.to" value="${ast_package}.generated."/>
+    
 </project>

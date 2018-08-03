@@ -199,8 +199,15 @@
     <var name="java_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
+            <var name="has_java_copy_temp" value="true"/>
             <var name="has_java_replace_temp" value="false"/>
             <var name="has_java_rename_package_temp" value="false"/>
+            <if>
+                <isset property="@{module}.java_copy" />
+                <then>
+                    <var name="has_java_copy_temp" value="${@{module}.java_copy}"/>
+                </then>
+            </if>
             <if>
                 <isset property="@{module}.java_replace" />
                 <then>
@@ -249,9 +256,10 @@
                     </for>
                 </then>
             </if>
+            <property name="@{module}.has_java_copy" value="${has_java_copy_temp}" />
             <property name="@{module}.has_java_replace" value="${has_java_replace_temp}" />
             <property name="@{module}.has_java_rename_package" value="${has_java_rename_package_temp}" />
-            <condition property="@{module}.need_java_copy" else="false">
+            <condition property="@{module}.need_patch_java" else="false">
                 <or>
                     <istrue value="${@{module}.has_java_replace}" />
                     <istrue value="${@{module}.has_java_rename_package}" />
@@ -261,7 +269,12 @@
             <if>
                 <and>
                     <available file="${@{module}.java_path}" />
-                    <not><istrue value="${@{module}.has_java_replace}" /></not>
+                    <not>
+                        <and>
+                            <istrue value="${@{module}.need_patch_java}" />
+                            <istrue value="${@{module}.has_java_copy_temp}" />
+                        </and>
+                    </not>
                 </and>
                 <then>
                     <var name="java_dirs_temp" value="${java_dirs_temp}:${@{module}.java_path}" />
@@ -321,7 +334,7 @@
                 <then>
                     <property name="@{module}.junit_path" value="${@{module}.path}/test/junit" />
                     <if>
-                        <isfalse value="${@{module}.need_java_copy}" />
+                        <isfalse value="${@{module}.need_patch_java}" />
                         <then>
                             <var name="junit_dirs_temp" value="${junit_dirs_temp}:${@{module}.junit_path}" />
                         </then>
@@ -442,7 +455,7 @@
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="gen-extra-pre,patch,parser,scanner,gen-test,patch-java,gen-extra,patch-test" description="Generate all Java files." />
+    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra-pre,patch-java,gen-extra,patch-test" description="Generate all Java files." />
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -664,7 +677,12 @@
         </sequential>
     </macrodef>
 
-    <!-- generates any additional java files specified in modules -->
+    <!-- 
+        Generates any additional java files specified in modules. 
+        Performed after ast target since we might generate files into
+        the same folder which the ast target removes. Should not have
+        any other dependencies on the ast target.
+    -->
     <target name="gen-extra" depends="compile-gen-extra">
         <gen-extra-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
     </target>
@@ -677,7 +695,7 @@
         <!-- currently this uses a simple search-replace, but could be expanded to use the same patch tool as above -->
         <for list="${modules}" param="module"> <sequential>
             <if>
-                <istrue value="${@{module}.need_java_copy}" />
+                <istrue value="${@{module}.need_patch_java}" />
                 <then>
                     <echo message="Doing patch-java for @{module}" />
                     <uptodate property="@{module}.patch-java.uptodate">
@@ -689,9 +707,14 @@
                         <not><isset property="${@{module}.patch-java.uptodate}" /></not>
                         <then>
                             <mkdir dir="${java_temp}" />
-                            <copy todir="${java_temp}">
-                                <fileset dir="${@{module}.java_path}" includes="**/*.java" />
-                            </copy>
+                            <if>
+                                <istrue value="${@{module}.has_java_copy}" />
+                                <then>
+                                    <copy todir="${java_temp}">
+                                        <fileset dir="${@{module}.java_path}" includes="**/*.java" />
+                                    </copy>
+                                </then>
+                            </if>
                             <!-- Perform any java_replace -->
                             <if>
                                 <istrue value="${@{module}.has_java_replace}" />
@@ -701,6 +724,8 @@
                                             <isfalse value="${@{module}.java_replace.@{replace}.skip}"/>
                                             <then>
                                                 <replace dir="${java_temp}" includes="**/*.java" 
+                                                    token="${@{module}.java_replace.@{replace}.from}" value="${@{module}.java_replace.@{replace}.to}" />
+                                                <replace dir="${ast_output}" includes="**/*.java" 
                                                     token="${@{module}.java_replace.@{replace}.from}" value="${@{module}.java_replace.@{replace}.to}" />
                                             </then>
                                         </if>
@@ -931,7 +956,7 @@ ${test_class_extra_defs}
         <for list="${modules}" param="module"> <sequential>
             <if>
                 <and>
-                    <istrue value="${@{module}.need_java_copy}" />
+                    <istrue value="${@{module}.need_patch_java}" />
                     <isset property="@{module}.junit_path" />
                 </and>
                 <then>
