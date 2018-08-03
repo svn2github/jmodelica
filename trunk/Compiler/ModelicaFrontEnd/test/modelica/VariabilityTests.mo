@@ -65,6 +65,36 @@ end VariabilityTests.Structural2;
 end Structural2;
 
 
+model Structural3
+    model A
+        parameter Integer p;
+    end A;
+
+    model B
+        parameter Integer p;
+        Real x[p] = (1:p) * time;
+    end B;
+    
+    model C
+        extends A;
+        extends B;
+    end C;
+    
+    C c(p = 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Structural3",
+        description="",
+        flatModel="
+fclass VariabilityTests.Structural3
+ structural parameter Integer c.p = 2 /* 2 */;
+ Real c.x[2] = (1:2) * time;
+end VariabilityTests.Structural3;
+")})));
+end Structural3;
+
+
 model EvaluateAnnotation1
 	parameter Real a = 1.0;
 	parameter Real b = a annotation(Evaluate=true);
