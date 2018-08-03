@@ -171,6 +171,12 @@ aspect FunctionScalarization {
             n.createArrayTemporaries(s);
     }
     
+    public void Array.createArrayTemporaries(Scalarizer s);
+    
+    public void ArrayExp.createArrayTemporaries(Scalarizer s) {
+        super.createArrayTemporaries(s);
+    }
+    
     /**
      * Finds, extracts, and replaces expressions with temporaries
      */

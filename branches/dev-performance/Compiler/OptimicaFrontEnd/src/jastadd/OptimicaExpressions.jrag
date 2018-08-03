@@ -181,10 +181,13 @@ aspect OptimicaArrays {
 	eq FStartTimeExp.size() = Size.SCALAR;
 	eq FFinalTimeExp.size() = Size.SCALAR;
 
-	eq InstTimedVariable.getArray() {
+    eq InstTimedVariable.getArray() = isArray() ? getArrayExp() : this;
+    eq FTimedVariable.getArray() = isArray() ? getArrayExp() : this;
+
+	syn lazy ArrayExp InstTimedVariable.getArrayExp() {
 		if (!isArray()) 
-			return super.getArray();
-		Array array = new Array(indices());
+			return null;
+		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
 			InstAccess name = getName().specify(i);
 			FExp arg = getArg().fullCopy();
@@ -193,10 +196,10 @@ aspect OptimicaArrays {
 		return array;
 	}
 
-	eq FTimedVariable.getArray() {
+	syn lazy ArrayExp FTimedVariable.getArrayExp() {
 		if (!isArray()) 
-			return super.getArray();
-		Array array = new Array(indices());
+			return null;
+		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
 			FIdUse name = getName().specify(i, true);
 			FExp arg = getArg().fullCopy();

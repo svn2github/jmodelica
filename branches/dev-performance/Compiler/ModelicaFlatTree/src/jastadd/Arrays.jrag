@@ -1145,40 +1145,48 @@ aspect Arrays {
 	 * 
 	 * Size of new Array will be (n + m), where n = indices.size() and m = ndims().  
 	 */
-    public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
+    public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices);
+
+    public Array ArrayExp.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
 		if (!forIndices.iterator().hasNext())
 			return (Array) fullCopy();
+		return createExpanded(this, forIndices);
+	}
+
+    public static Array ArrayExp.createExpanded(Array exp, Iterable<? extends CommonForIndex> forIndices) {
 		Indices newIndices = Indices.create(forIndices);
-		Array arr = new Array(Indices.create(expandedSize(newIndices.size())));
+		ArrayExp arr = new ArrayExp(Indices.create(expandedSize(exp, newIndices.size())));
 		Map<String,FExp> indexMap = new HashMap<String,FExp>();
 		for (Index i : newIndices) {
 			newIndices.fillIndexMap(indexMap, i, forIndices);
 			for (CommonForIndex fi : forIndices)
 				indexMap.put(fi.uniqueIterExpName(), fi.evaluationValue().buildLiteral());
-            fillSubset(arr, i, indexMap);
+            fillSubset(arr, i, indexMap, exp);
 		}
         for (CommonForIndex fi : forIndices) {
             fi.clearEvaluationValue();
         }
 		return arr;
-	}
-	
-	protected Size Array.expandedSize(Size size) {
-		return size().expand(size);
+    }
+
+	protected static Size ArrayExp.expandedSize(Array exp, Size size) {
+		return exp.size().expand(size);
 	}
 
-    protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
-		for (Index i2 : indices()) {
-            arr.set(i.expand(i2), createSubsetExp(get(i2), indexMap));
+    protected static void ArrayExp.fillSubset(ArrayExp arr, Index i, Map<String,FExp> indexMap, Array exp) {
+		for (Index i2 : exp.indices()) {
+            arr.set(i.expand(i2), createSubsetExp(exp.get(i2), indexMap));
 		}
 	}
 
-    protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
-        arr.set(i, createSubsetExp(get(Index.NULL), indexMap));
+    protected static FExp ArrayExp.createSubsetExp(FExp e, Map<String,FExp> indexMap) {
+        return e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
     }
 
-    protected FExp Array.createSubsetExp(FExp e, Map<String,FExp> indexMap) {
-        return e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
+    public Array FExp.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
+        if (!forIndices.iterator().hasNext())
+            return this;
+        return ArrayExp.createExpanded(this, forIndices);
     }
 
 	/**
@@ -1240,21 +1248,32 @@ aspect Arrays {
     /**
      * Computes a generic array expansion of the expression.
      * 
+     * @return An Array with scalar expressions if this is an array expression, 
+     *          <code>this</code> otherwise.
+     */
+    syn Array FExp.getArray() = this;
+    
+    eq FAbstractArrayExp.getArray() = isArray() ? getArrayExp() : this;
+
+    /**
+     * Computes a generic array expansion of the expression. Normally {@link #getArray()}
+     * should be called instead.
+     * 
      * This is used mainly to scalarize array expressions. Should be overridden for all 
      * expression types possible, since default implementation clones the original expression 
      * for each cell.
      * 
-     * @return An Array with scalar expressions if this is an array expression, 
-     *          a ScalarAsArray containing <code>this</code> otherwise.
+     * @return An ArrayExp with scalar expressions if this is an array expression, 
+     *          <code>null</code> otherwise.
      */
-    syn lazy Array FExp.getArray() {
+    syn lazy ArrayExp FAbstractArrayExp.getArrayExp() {
         if (!isArray())
-            return new ScalarAsArray(this);
+            return null;
         
         if (useTempVar())
             return createTempArray();
         
-        Array res = new Array(indices());
+        ArrayExp res = new ArrayExp(indices());
         for (Index i : res.indices())
             res.set(i, new FSubscriptedExp(unboundCopy(), i.createFArraySubscripts()));
         return res;
@@ -1263,8 +1282,8 @@ aspect Arrays {
     /**
      * Computes a generic array expansion of the temporary replacing this expression.
      */
-    syn Array FExp.createTempArray() {
-        Array res = new Array(indices());
+    syn ArrayExp FExp.createTempArray() {
+        ArrayExp res = new ArrayExp(indices());
         for (Index i : res.indices()) {
             res.set(i, tempExp(i));
         }
@@ -1292,7 +1311,7 @@ aspect Arrays {
 	 */
 	syn Array FExp.createArray() = getArray();
 	
-	eq FBinExp.getArray() {
+	eq FBinExp.getArrayExp() {
 		if (isArray()) {
 			/* Standard implementation covers many binary operators.
 			 * Apply operator element-wise, if one operand is scalar, use it with 
@@ -1302,36 +1321,36 @@ aspect Arrays {
 			 */
 			Array left  = getLeft().getArray();
 			Array right = getRight().getArray();
-			Array res   = new Array(indices());
+			ArrayExp res   = new ArrayExp(indices());
 			for (Index i : res.indices())
 				res.set(i, createNode(left.get(i).fullCopy(), right.get(i).fullCopy()));
 			return res;
 		} else {
-			return new ScalarAsArray(this);
+			return null;
 		}
 	}
 	
-	eq FUnaryExp.getArray() {
+	eq FUnaryExp.getArrayExp() {
 		if (isArray()) {
 			Array src = getFExp().getArray();
-			Array res = new Array(indices());
+			ArrayExp res = new ArrayExp(indices());
 			for (Index i : res.indices())
 				res.set(i, createNode(src.get(i).fullCopy()));
 			return res;
 		} else {
-			return new ScalarAsArray(this);
+			return null;
 		}
 	}
 	
-	eq FMulExp.getArray() {
+	eq FMulExp.getArrayExp() {
 		if (isElementWise())
-			return super.getArray();
+			return super.getArrayExp();
         if (useTempVar())
             return createTempArray();
 		if (!isArray())
-			return new ScalarAsArray(composeMulScalarCellExp(Index.NULL));
+			return null;
 		
-		Array res = new Array(indices());
+		ArrayExp res = new ArrayExp(indices());
 		for (Index i : res.indices()) 
 			res.set(i, composeMulScalarCellExp(i));
 		return res;
@@ -1351,19 +1370,20 @@ aspect Arrays {
 		return cur;
 	}
 	
-	eq FPowExp.getArray() {
-		if (!isArray())
-			return new ScalarAsArray(this);
+	eq FPowExp.getArrayExp() {
+		if (!isArray()) {
+			return null;
+		}
 		
 		int e = getRight().ceval().intValue();
 		if (e <= 0)
-			return new FIdentity(new FIntegerLitExp(size().get(0))).getArray();
+			return new FIdentity(new FIntegerLitExp(size().get(0))).getArrayExp();
 		
 		Array base = getLeft().getArray();
 		Array res = base;
 		FType type = type();
 		for (; e > 1; e--) {
-			Array cur = new Array(indices());
+			ArrayExp cur = new ArrayExp(indices());
 			for (Index i : cur.indices()) {
 				Iterator<FExp> left = res.leftMulIterator(i);
 				Iterator<FExp> right = base.rightMulIterator(i);
@@ -1371,12 +1391,12 @@ aspect Arrays {
 			}
 			res = cur;
 		}
-		return res;
+		return (ArrayExp) res;
 	}
 	
-	eq FTranspose.getArray() {
+	eq FTranspose.getArrayExp() {
 		Array inner = getFExp().getArray();
-		Array res = new Array(indices());
+		ArrayExp res = new ArrayExp(indices());
 		int[] ind = new int[ndims()];
 		Index ti = new Index(ind);
 		for (Index i : res.indices()) {
@@ -1389,9 +1409,9 @@ aspect Arrays {
 		return res;
 	}
 	
-	eq FSymmetric.getArray() {
+	eq FSymmetric.getArrayExp() {
 		Array inner = getFExp().getArray();
-		Array res = new Array(indices());
+		ArrayExp res = new ArrayExp(indices());
 		int[] ind = new int[ndims()];
 		Index ti = new Index(ind);
 		for (Index i : res.indices()) {
@@ -1407,8 +1427,8 @@ aspect Arrays {
 		return res;
 	}
 	
-	eq FCross.getArray() {
-		Array res = new Array(indices());
+	eq FCross.getArrayExp() {
+		ArrayExp res = new ArrayExp(indices());
 		Array x = getX().getArray();
 		Array y = getY().getArray();
 		for (Index i : res.indices()) {
@@ -1421,8 +1441,8 @@ aspect Arrays {
 		return res;
 	}
 	
-	eq FSkew.getArray() {
-		Array res = new Array(indices());
+	eq FSkew.getArrayExp() {
+		ArrayExp res = new ArrayExp(indices());
 		Array inner = getFExp().getArray();
 		Index j = new Index(new int[1]);
 		for (Index i : res.indices()) {
@@ -1449,8 +1469,8 @@ aspect Arrays {
 		return res;
 	}
 	
-	eq FOuterProduct.getArray() {
-		Array res = new Array(indices());
+	eq FOuterProduct.getArrayExp() {
+		ArrayExp res = new ArrayExp(indices());
 		Array x = getX().getArray();
 		Array y = getY().getArray();
 		for (Index i : res.indices()) 
@@ -1458,26 +1478,26 @@ aspect Arrays {
 		return res;
 	}
 	
-	eq FIdentity.getArray() {
-		Array arr = new Array(indices());
+	eq FIdentity.getArrayExp() {
+		ArrayExp arr = new ArrayExp(indices());
 		for (Index i : arr.indices())
 			arr.set(i, new FIntegerLitExp((i.get(0) == i.get(1)) ? 1 : 0));
 		return arr;
 	}
 	
-	eq FDiagonal.getArray() {
-		Array arr = new Array(indices());
+	eq FDiagonal.getArrayExp() {
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, (i.get(0) == i.get(1)) ? inner.get(i.subIndex(1)) : new FIntegerLitExp(0));
 		return arr;
 	}
 	
-	eq FDimensionConvert.getArray() {
+	eq FDimensionConvert.getArrayExp() {
         if (useTempVar())
             return createTempArray();
 		Indices ind = indices();
-		Array arr = new Array(ind);
+		ArrayExp arr = new ArrayExp(ind);
 		if (getFExp().isArray()) {
 			Array x = getFExp().getArray();
 			for (Index i : ind)
@@ -1489,28 +1509,29 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FSizeExp.getArray() {
+	eq FSizeExp.getArrayExp() {
 		if (hasDim()) 
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Size size = getFExp().size();
 		for (Index i : arr.indices())
 			arr.set(i, size.createFExp(i.first() - 1));
 		return arr;
 	}
 	
-	eq FArray.getArray() {
-		if (isIterArray())
-			return getFExp(0).copyArray();
-		Array arr = new Array(indices());
+	eq FArray.getArrayExp() {
+		if (isIterArray()) {
+            return (ArrayExp) getFExp(0).copyArray();
+		}
+		ArrayExp arr = new ArrayExp(indices());
 		for (Index i : arr.indices())
 			fillArray(arr, i, 0);
 		return arr;
 	}
 	
-	eq FAbstractCat.getArray() {
-		Array arr = new Array(indices());
+	eq FAbstractCat.getArrayExp() {
+		ArrayExp arr = new ArrayExp(indices());
 		int dim = dimension();
 		int adj = 0;
 		for (FExp exp : getFExps()) {
@@ -1522,12 +1543,12 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FReductionExp.getArray() {
+	eq FReductionExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
 		FIterExp exp = (FIterExp) getFExp();
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		for (Index i : arr.indices())
 			arr.set(i, createNode(exp.extract(i)));
 		return arr;
@@ -1540,17 +1561,17 @@ aspect Arrays {
 	}
 	
     syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList());
-	eq FIterExp.getArray() = copyArray();
+	eq FIterExp.getArrayExp() = (ArrayExp) copyArray();
 	
-    eq FSubscriptedExp.getArray() {
+    eq FSubscriptedExp.getArrayExp() {
         
         if (!isArray()) {
-            return new ScalarAsArray(this);
+            return null;
         }
         
         if (!getFExp().variability().knownParameterOrLess() && !getFArraySubscripts().variability().knownParameterOrLess()) {
             FArraySubscripts fas = getFArraySubscripts();
-            Array arr = new Array(indices());
+            ArrayExp arr = new ArrayExp(indices());
             for (Index i : indices()) {
                 arr.set(i, new FSubscriptedExp(getFExp().treeCopy(), fas.specifyAll(i)));
             }
@@ -1559,7 +1580,7 @@ aspect Arrays {
         
         NonConsecutiveIndices expIs = NonConsecutiveIndices.expIndices(getFExp().size(), getFArraySubscripts());
         NonConsecutiveIndices fasIs = NonConsecutiveIndices.fasIndices(getFArraySubscripts());
-        Array arr = new Array(indices());
+        ArrayExp arr = new ArrayExp(indices());
         Iterator<Index> it = arr.indices().iterator();
         
         Array old = getFExp().getArray();
@@ -1614,56 +1635,56 @@ aspect Arrays {
         return res;
     }
 
-	eq FSmoothExp.getArray() {
+	eq FSmoothExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, new FSmoothExp(getOrder().fullCopy(), inner.get(i)));
 		return arr;
 	}
 	
-	eq FVectUnaryBuiltIn.getArray() {
+	eq FVectUnaryBuiltIn.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
 		// TODO: This only supports scalar -> scalar functions, see #528
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner.get(i)));
 		return arr;
 	}
 	
-	eq FUnaryBuiltIn.getArray() {
+	eq FUnaryBuiltIn.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner.get(i)));
 		return arr;
 	}
 	
-	eq FEventGenExp.getArray() {
+	eq FEventGenExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner = getX().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner.get(i)));
 		return arr;
 	}
 	
-	eq FBinEventGenExp.getArray() {
+	eq FBinEventGenExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner1 = getX().getArray();
 		Array inner2 = getY().getArray();
 		for (Index i : arr.indices())
@@ -1671,22 +1692,22 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FMathematicalFunctionCall.getArray() {
+	eq FMathematicalFunctionCall.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner.get(i)));
 		return arr;
 	}
 	
-	eq FAtan2Exp.getArray() {
+	eq FAtan2Exp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner1 = getFExp().getArray();
 		Array inner2 = getY().getArray();
 		for (Index i : arr.indices())
@@ -1694,11 +1715,11 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FHomotopyExp.getArray() {
+	eq FHomotopyExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner1 = getActual().getArray();
 		Array inner2 = getSimplified().getArray();
 		for (Index i : arr.indices())
@@ -1706,11 +1727,11 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FSemiLinearExp.getArray() {
+	eq FSemiLinearExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
-		Array arr = new Array(indices());
+		ArrayExp arr = new ArrayExp(indices());
 		Array inner1 = getX().getArray();
 		Array inner2 = getPosSlope().getArray();
 		Array inner3 = getNegSlope().getArray();
@@ -1719,8 +1740,8 @@ aspect Arrays {
 		return arr;
 	}
 
-    eq FVectorFunctionCall.getArray() {
-        Array arr = new Array(indices());
+    eq FVectorFunctionCall.getArrayExp() {
+        ArrayExp arr = new ArrayExp(indices());
         boolean[] vec = getVectorized();
         int j;
         for (Index i : arr.indices()) {
@@ -1733,12 +1754,12 @@ aspect Arrays {
         return arr;
     }
 
-    eq FReinit.getArray() {
+    eq FReinit.getArrayExp() {
         if (!isArray()) {
-            return super.getArray();
+            return super.getArrayExp();
         }
         
-        Array arr = new Array(indices());
+        ArrayExp arr = new ArrayExp(indices());
         Array inner1 = getVar().getArray();
         Array inner2 = getFExp().getArray();
         for (Index i : arr.indices())
@@ -1746,12 +1767,12 @@ aspect Arrays {
         return arr;
     }
     
-    eq FAssert.getArray() {
+    eq FAssert.getArrayExp() {
         if (!isArray()) {
-            return super.getArray();
+            return super.getArrayExp();
         }
         
-        Array arr = new Array(indices());
+        ArrayExp arr = new ArrayExp(indices());
         Array inner1 = getTest().getArray();
         Array inner2 = getMsg().getArray();
         Array inner3 = null;
@@ -1764,11 +1785,11 @@ aspect Arrays {
         return arr;
     }
 
-    eq FDelayExp.getArray() {
+    eq FDelayExp.getArrayExp() {
         if (!isArray()) {
-            return super.getArray();
+            return super.getArrayExp();
         }
-        Array arr = new Array(indices());
+        ArrayExp arr = new ArrayExp(indices());
         for (Index i : arr.indices()) {
             arr.set(i, createNode(getFExp().getArray().get(i), getDelay().getArray().get(i), 
                     hasMax() ? new Opt(getMax().getArray().get(i)) : new Opt()));
@@ -1776,11 +1797,11 @@ aspect Arrays {
         return arr;
     }
     
-    eq FSpatialDistExp.getArray() {
+    eq FSpatialDistExp.getArrayExp() {
         if (!isArray()) {
-            return super.getArray();
+            return super.getArrayExp();
         }
-        Array arr = new Array(indices());
+        ArrayExp arr = new ArrayExp(indices());
         boolean vecPoints = getInitialPoints().ndims() > 1;
         boolean vecValues = getInitialValues().ndims() > 1;
         FExp points = getInitialPoints();
@@ -1798,11 +1819,11 @@ aspect Arrays {
         return arr;
     }
 
-    eq FExInStream.getArray() {
+    eq FExInStream.getArrayExp() {
         if (!isArray()) {
-            return super.getArray();
+            return super.getArrayExp();
         }
-        Array arr = new Array(indices());
+        ArrayExp arr = new ArrayExp(indices());
         for (Index i : arr.indices()) {
             FExInStream cell = new FExInStream(getDefault().getArray().get(i).treeCopy(), getEps().treeCopy(), new List<FExp>());
             for (FExp e : getVars()) {
@@ -1817,7 +1838,7 @@ aspect Arrays {
 	/**
 	 * Add a copy of this expression to arr at position i. 
 	 */
-	public void FExp.fillArray(Array arr, Index i, int level) {
+	public void FExp.fillArray(ArrayExp arr, Index i, int level) {
 		if (isArray())
             arr.set(i, getArray().get(i.subIndex(level)).copySymbolic());
 		else
@@ -1831,18 +1852,18 @@ aspect Arrays {
 	 * @param i      the index to add at, denotes position in both Array and FArray.
 	 * @param level  the level this FArray is at in a structure of nestled FArrays.
 	 */
-	public void FArray.fillArray(Array arr, Index i, int level) {
+	public void FArray.fillArray(ArrayExp arr, Index i, int level) {
 	    if (isIterArray())
 	        super.fillArray(arr, i, level);
 	    else
 	        getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 
-    eq InstFunctionCall.getArray() {
+    eq InstFunctionCall.getArrayExp() {
         if (!isArray())
-            return super.getArray();
+            return super.getArrayExp();
         if (variability().knownParameterOrLess()) {
-            Array arr = new Array(indices());
+            ArrayExp arr = new ArrayExp(indices());
             CValue val = cevalArray(Index.NULL);
             if (val.isArray()) {
                 CValueArray carr = val.array();
@@ -1852,17 +1873,17 @@ aspect Arrays {
                 return arr;
             }
         }
-        return super.getArray();
+        return super.getArrayExp();
     }
 
-    eq FFunctionCall.getArray() {
+    eq FFunctionCall.getArrayExp() {
         FClass fc = myFClass();
         if (!isComposite() || fc == null) {
-            return super.getArray();
+            return super.getArrayExp();
         }
         
         if (isArray() && variability().knownParameterOrLess() && inKeptBExp()) {
-            Array arr = new Array(indices());
+            ArrayExp arr = new ArrayExp(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
                 arr.set(i, carr.getCell(i).buildLiteral());
@@ -1871,7 +1892,7 @@ aspect Arrays {
         }
         
         if (isFunctionCallArg()) {
-            return super.getArray();
+            return super.getArrayExp();
         }
         
         return createTempArray();
@@ -1892,12 +1913,12 @@ aspect Arrays {
 	eq FClass.getChild().iterExpDepth()   = 0;
 	eq InstNode.getChild().iterExpDepth() = 0;
 	
-	eq FIfExp.getArray() {
+	eq FIfExp.getArrayExp() {
 		if (!isArray())
-			return super.getArray();
+			return super.getArrayExp();
 		
 		if (getThenExp().size().equivalent(getElseExp().size(), inFunction())) {
-			Array arr = new Array(indices());
+			ArrayExp arr = new ArrayExp(indices());
 			Array thenArr = getThenExp().getArray();
 			Array elseArr = getElseExp().getArray();
 			for (Index i : arr.indices()) {
@@ -1906,22 +1927,22 @@ aspect Arrays {
 			}
 			return arr;
 		} else {
-			return cevalSelectExp().copyArray();
+			return (ArrayExp) cevalSelectExp().copyArray();
 		}
 	}
 	
-	eq FIdUseExp.getArray() {
+	eq FIdUseExp.getArrayExp() {
 		if (isArray()) {
 			/*
 			 * Based on an array access, say x, corresponding to the declaration
 			 * Real x[2], the array {x[1],x[2]} is generated. 
 			 */
-			Array array = new Array(indices());
+			ArrayExp array = new ArrayExp(indices());
 			for (Index i : array.indices()) 
 				array.set(i, createNode(getFIdUse().specify(i, false)));
 			return array;
 		} else {
-			return new ScalarAsArray(this);
+			return null;
 		}
 	}
 	
@@ -2123,9 +2144,9 @@ aspect Arrays {
 		return res;
 	}
 
-	eq FRangeExp.getArray() {
+	eq FRangeExp.getArrayExp() {
 		//log.debug("FRangeExp.getArray(): size = " + size().get(0));
-		Array array = new Array(indices());
+		ArrayExp array = new ArrayExp(indices());
 		if (type().isReal()) {
 			double i1 = getFExp(0).ceval().realValue();
 			double i2 = 1.0;
@@ -2149,11 +2170,11 @@ aspect Arrays {
 		return array;
 	}
 	
-	eq FLinspace.getArray() {
+	eq FLinspace.getArrayExp() {
 		int n = size().get(0);
 		FExp len = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());
 		FExp step = new FDivExp(len, new FIntegerLitExp(n - 1));
-		Array array = new Array(indices());
+		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
 			FExp part = new FMulExp(new FIntegerLitExp(i.first() - 1), step.unboundCopy());
 			array.set(i, new FAddExp(getStartExp().fullCopy(), part));
@@ -2161,7 +2182,7 @@ aspect Arrays {
 		return array;
 	}
 	
-	eq FArrayDimAsArgsExp.getArray() = new Array(indices()).fill(fillExp());
+	eq FArrayDimAsArgsExp.getArrayExp() = (ArrayExp) new ArrayExp(indices()).fill(fillExp());
 	
 	/**
 	 * Get the expression the array is filled with.
@@ -2349,10 +2370,10 @@ aspect Arrays {
 	eq ASTNode.getChild().inferredType() = null;
 
 	/**
-	 * The type of the expression this Array belongs to.
+	 * The type of the expression this ArrayExp belongs to.
 	 */
-	inh FType Array.type();
-	eq FExp.getArray().type()             = type();
+	inh FType ArrayExp.type();
+	eq FAbstractArrayExp.getArrayExp().type()             = type();
 
 }
 
@@ -3447,16 +3468,60 @@ aspect ArrayHelpers {
         }
 		
 	}
-	
-	public class Array {
+    
+    public interface Array {
+        /**
+         * Creates an iterator that iterates over all FExp nodes in this Array.
+         */
+        public Iterator<FExp> iteratorFExp();
+        
+        /**
+         * Returns an Iterable<FExp> containing all expressions in Array.
+         */
+        public Iterable<FExp> iterable();
+        
+        /**
+         * Creates a left-hand iterator for multiplication. 
+         * 
+         * Creates an iterator that iterates over all FExp nodes involved in 
+         * calculating the cell i in a multiplication with this Array at the 
+         * left side. 
+         */
+        public Iterator<FExp> leftMulIterator(Index i);
+        
+        /**
+         * Creates a right-hand iterator for multiplication. 
+         * 
+         * Creates an iterator that iterates over all FExp nodes involved in 
+         * calculating the cell i in a multiplication with this Array at the 
+         * right side. 
+         */
+        public Iterator<FExp> rightMulIterator(Index i);
+        public FExp getFExp(int i);
+        public FExp get(Index i);
+        public FExp get(int i);
+        public Indices indices();
+        public int ndims();
+        public Size size();
+        public int length();
+        
+        /**
+         * Create an FExp describing the part of this array indicated by <code>i</code>.
+         */
+        public FExp subArrayFExp(Index i);
+        public FExp subArrayFExp(Index i, NonConsecutiveIndices indices);
+        public ASTNode unboundCopy();
+    }
+    
+	public class ArrayExp implements Array {
 		
 		protected Indices indices;
 		protected int length;
 		
 		/**
-		 * Create an Array spanning a given Indices.
+		 * Create an ArrayExp spanning a given Indices.
 		 */
-		public Array(Indices indices) {
+		public ArrayExp(Indices indices) {
 			this.indices = indices;
 			setChild(new List<FExp>(), 0);
 			length = indices.numElements();
@@ -3581,6 +3646,10 @@ aspect ArrayHelpers {
 		public Size size() {
 			return indices.size();
 		}
+		
+        public int length() {
+            return length;
+        }
 		
 	    /**
 	     * Recursive method for building an FArray describing this Array.
@@ -3773,56 +3842,39 @@ aspect ArrayHelpers {
 		
 	}
 
-	public class ScalarAsArray {
-
-		/**
-		 * Constructs a ScalarAsArray containing <code>exp</code>.
-		 */
-		public ScalarAsArray(FExp exp) {
-			this(exp, Indices.create(Size.SCALAR));
-		}
-		
-		/**
-		 * Constructs a ScalarAsArray containing <code>exp</code>, 
-		 *        pretending to have <code>ind</code> indices.
-		 * 
-		 * This makes indices().iterator() meaningful.
-		 */
-		public ScalarAsArray(FExp exp, Indices ind) {
-			this(new List().add(exp.fullCopy()));
-			indices = ind;
-			length = 1;
-		}
-		
-	    /**
-	     * Recursive method for building an FArray describing this Array.
-	     *        For use by methods creating specific types of FArrays.
-	     *        
-	     * This implementation only applies builder to the single expression of this 
-	     * ScalarAsArray.
-	     * 
-	     * @see #buildLiteral(boolean)
-	     * @see #buildScalarized(java.util.Map,FExp)
-	     */
-	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
-	    	return builder.build(it.next()).unboundCopy();
-	    }
-	    
-		/**
-		 * Returns the single element wrapped by this Array. 
-		 */
-		public FExp get(Index i) {
-			return getFExp(0);
-		}
-		
-		/**
-		 * Sets the single element wrapped by this Array to <code>exp</code>.
-		 */
-		public void set(Index i, FExp exp) {
-			setFExp(exp.unboundCopy(), 0);
-		}
-		
-	}
+    public class FExp implements Array {
+        
+        public Iterator<FExp> iteratorFExp() {
+            return iterable().iterator();
+        }
+        public Iterable<FExp> iterable() {return Collections.singleton(this);}
+        public Iterator<FExp> leftMulIterator(Index i) {return iteratorFExp();}
+        public Iterator<FExp> rightMulIterator(Index i) {return iteratorFExp();}
+        
+        public FExp getFExp(int i) {
+            return this;
+        }
+        
+        public FExp get(Index i) {
+            return this;
+        }
+        
+        public FExp get(int i) {
+            return this;
+        }
+        
+        public int length() {
+            return 1;
+        }
+        
+        public FExp subArrayFExp(Index i) {
+            return this;
+        }
+        
+        public FExp subArrayFExp(Index i, NonConsecutiveIndices indices) {
+            return this;
+        }
+    }
 
 	
 	/**

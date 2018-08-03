@@ -1907,11 +1907,17 @@ aspect ConstantEvaluation {
      * 
      * @param toReal  if <code>true</code>, convert all values to real.
      */
-    public FExp Array.buildLiteral(boolean toReal) {
-    	return buildFArray(new LiteralBuilder(toReal));
+    public FExp Array.buildLiteral(boolean toReal);
+    
+    public FExp ArrayExp.buildLiteral(boolean toReal) {
+        return buildFArray(new LiteralBuilder(toReal));
+    }
+    
+    public FExp FExp.buildLiteral(boolean toReal) {
+        return toReal ? ceval().convertReal().buildLiteral() : ceval().buildLiteral();
     }
 
-    public class Array {
+    public class ArrayExp {
         /**
          * Helper object for {@link #buildLiteral(boolean)}.
          */

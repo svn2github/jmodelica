@@ -1661,7 +1661,6 @@ aspect Scalarization {
      */
     public FExp FExp.reduceToScalarized(FExp template, Scalarizer s) {
         if (isArray()) {
-            List<FExp> exps = getArray().getFExps();
             java.util.List<FExp> scalarizedExps = new ArrayList<FExp>();
             Iterator<FExp> it = getArray().iteratorFExp();
             while (it.hasNext()) {
