@@ -16,6 +16,7 @@
 package org.jmodelica.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jmodelica.util.exceptions.NameFormatException;
@@ -27,11 +28,9 @@ public class QualifiedName {
     private boolean isGlobal;
     private int i = 0;
     ArrayList<String> names;
-    private boolean isUnQualifiedImport;
     public QualifiedName(String name) {
        if (name.length() == 0)
-           throw new NameFormatException("A name must have atleast one caracter"); 
-       isUnQualifiedImport = name.endsWith(".*");
+           throw new NameFormatException("A name must have atleast one caracter");
        isGlobal = name.startsWith(".");
        names = splitQualifiedClassName(name);
     }
@@ -42,10 +41,6 @@ public class QualifiedName {
 
     public String next() {
         return names.get(i++);
-    }
-    
-    public ArrayList<String> getNames() {
-        return names;
     }
     
     @Override
@@ -66,16 +61,12 @@ public class QualifiedName {
     
     private static void findNameSeparations(Matcher m, ArrayList<Integer> list) {
         boolean inquoted = false;
-        int prev = -1;
+        int prev = 0;
         while (m.find()) {
             String token = m.group();
             if (token.equals("'")) {
                 if (inquoted) {
                     checkNameLength(prev, m.start());
-                } else {
-                    if (m.start() - prev > 2) {
-                        throw new NameFormatException("Quotes not allowed inside unqouted name");
-                    }
                 }
                 prev = inquoted ? prev : m.start();
                 inquoted = !inquoted;
@@ -96,10 +87,8 @@ public class QualifiedName {
      * @return array with the names of all accessed classes.
      */
     private final ArrayList<String> splitQualifiedClassName(String name) {
-        if (isGlobal || isUnQualifiedImport) {
-            int start = isGlobal ? 1 : 0;
-            int end = isUnQualifiedImport ? name.length() -2 : name.length(); 
-            name = name.substring(start, end);
+        if (isGlobal) {
+            name = name.substring(1);
         }
         Matcher m = p.matcher(name);
         ArrayList<Integer> nameSeparations = new ArrayList<Integer>();
@@ -107,7 +96,7 @@ public class QualifiedName {
         nameSeparations.add(name.length() + 1);
         ArrayList<String> parts = new ArrayList<String>();
         int partEnd = 0;
-        for (int namePart = 0; namePart < nameSeparations.size() ; namePart++) {
+        for (int namePart = 0; namePart < nameSeparations.size(); namePart++) {
             parts.add(name.substring(partEnd, nameSeparations.get(namePart) - 1));
             partEnd = nameSeparations.get(namePart);
         }

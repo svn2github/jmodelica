@@ -22,27 +22,20 @@ public abstract class MethodTestCase extends TestCase {
     private String output = null;
     private String methodName = null;
     private Object[] arguments = new Object[0];
-    private boolean inputArray = false;
 
     /**
-     * Invoke a method with specified arguments on the specified object
+     * Invoke a method with no arguments on the specified object and compare 
+     * the result to the expected result.
      */
-    protected Object getMethodReturn(Object o, String methodName, Object[] arguments) {
+    protected void testMethod(Object o) {
         try {
-            Class[] types = null;
-            if (!inputArray) { 
-                types = unwrapClasses(arguments);
-            }else {
-                String[] temp = new String[arguments.length];
-                for (int i=0;i< arguments.length;i++) {
-                    temp[i]=(String) arguments[i];
-                }
-                arguments = new Object[] { temp }; 
-                types = unwrapClasses(arguments);
-                types = new Class[] {temp.getClass()}; 
-            }
-            Method method = o.getClass().getMethod(methodName, types);
-            return method.invoke(o, arguments);
+            Class[] types = unwrapClasses(arguments);
+            Method method = o.getClass().getMethod(getMethodName(), types);
+
+            String test = method.invoke(o, arguments).toString();
+            String correct = filter(getOutput());
+
+            compareResult("Method result does not match expected.", correct, test);
         } catch (NoSuchMethodException e) {
             fail(e);
         } catch (IllegalAccessException e) {
@@ -55,17 +48,6 @@ public abstract class MethodTestCase extends TestCase {
                 fail(t);
             }
         }
-        return null;
-    }
-
-    /**
-     * Invoke a method with no arguments on the specified object and compare 
-     * the result to the expected result.
-     */
-    protected void testMethod(Object o) {
-            String test = getMethodReturn(o, getMethodName(), arguments).toString();
-            String correct = filter(getOutput());
-            compareResult("Method result does not match expected.", correct, test);
     }
 
     /**
@@ -117,19 +99,6 @@ public abstract class MethodTestCase extends TestCase {
         this.arguments = arguments;
     }
 
-    /**
-     * @param inputArray if input should be interpreted as a String array.
-     */
-    public void setInputStringArray(boolean inputArray) {
-        this.inputArray = inputArray;
-    }
-
-    /**
-     * @return if this should be a string array.
-     */
-    public boolean getInputStringArray() {
-        return inputArray;
-    }
 }
 
 public class FClassMethodTestCase extends MethodTestCase {
@@ -155,7 +124,6 @@ public class SourceMethodTestCase extends MethodTestCase {
         return true;
     }
 }
-
 public class InstClassMethodTestCase extends MethodTestCase {
     /**
      * Perform tests on instantiated class.
