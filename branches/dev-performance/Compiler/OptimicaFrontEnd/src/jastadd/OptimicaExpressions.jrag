@@ -185,8 +185,6 @@ aspect OptimicaArrays {
     eq FTimedVariable.getArray() = isArray() ? getArrayExp() : this;
 
 	syn lazy ArrayExp InstTimedVariable.getArrayExp() {
-		if (!isArray()) 
-			return null;
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
 			InstAccess name = getName().specify(i);
@@ -197,8 +195,6 @@ aspect OptimicaArrays {
 	}
 
 	syn lazy ArrayExp FTimedVariable.getArrayExp() {
-		if (!isArray()) 
-			return null;
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
 			FIdUse name = getName().specify(i, true);
