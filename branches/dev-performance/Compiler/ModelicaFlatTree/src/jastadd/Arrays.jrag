@@ -3576,7 +3576,6 @@ aspect ArrayHelpers {
 	     * @param builder  helper object that processes each subexpression
 	     * @param dim      the dimension to start at, use 0 to process entire array
 	     * 
-	     * @see #buildLiteral(boolean)
 	     * @see #buildScalarized(java.util.Map,FExp)
 	     */
         protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
@@ -3609,7 +3608,6 @@ aspect ArrayHelpers {
 	     *  
 	     * @param builder  helper object that processes each subexpression
 	     * 
-	     * @see #buildLiteral(boolean)
 	     * @see #buildScalarized(java.util.Map,FExp)
 	     * @see #buildFArray(Iterator,ElementBuilder,int)
 	     */
