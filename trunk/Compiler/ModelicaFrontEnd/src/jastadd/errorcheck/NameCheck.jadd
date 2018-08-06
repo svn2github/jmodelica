@@ -158,7 +158,7 @@ aspect DuplicateComponents {
      */
     public void InstNode.calculateDuplicates() {
         Map<String,InstComponentDecl> map = new HashMap<String,InstComponentDecl>();
-        for (InstComponentDecl comp : allInstComponentDecls()) 
+        for (InstComponentDecl comp : allInstComponentDeclsWithDuplicates()) 
             comp.calculateDuplicate(map);
     }
 
