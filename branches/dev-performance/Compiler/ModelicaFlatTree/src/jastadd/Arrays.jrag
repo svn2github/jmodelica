@@ -3425,7 +3425,6 @@ aspect ArrayHelpers {
         public Indices indices();
         public int ndims();
         public Size size();
-        public int length();
         
         /**
          * Create an FExp describing the part of this array indicated by <code>i</code>.
@@ -3568,10 +3567,6 @@ aspect ArrayHelpers {
 		public Size size() {
 			return indices.size();
 		}
-		
-        public int length() {
-            return length;
-        }
 		
 	    /**
 	     * Recursive method for building an FArray describing this Array.
@@ -3783,10 +3778,6 @@ aspect ArrayHelpers {
         
         public FExp get(int i) {
             return this;
-        }
-        
-        public int length() {
-            return 1;
         }
         
         public FExp subArrayFExp(Index i) {
