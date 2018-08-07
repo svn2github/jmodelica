@@ -272,7 +272,7 @@
                     <not>
                         <and>
                             <istrue value="${@{module}.need_patch_java}" />
-                            <istrue value="${@{module}.has_java_copy_temp}" />
+                            <istrue value="${@{module}.has_java_copy}" />
                         </and>
                     </not>
                 </and>
@@ -680,7 +680,7 @@
     <!-- 
         Generates any additional java files specified in modules. 
         Performed after ast target since we might generate files into
-        the same folder which the ast target removes. Should not have
+        the same directory where the ast target remove. Should not have
         any other dependencies on the ast target.
     -->
     <target name="gen-extra" depends="compile-gen-extra">
