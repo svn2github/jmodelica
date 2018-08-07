@@ -1145,15 +1145,13 @@ aspect Arrays {
 	 * 
 	 * Size of new Array will be (n + m), where n = indices.size() and m = ndims().  
 	 */
-    public Array Array.createExpanded(Iterable<? extends CommonForIndex> forIndices);
+    public ArrayExp Array.createExpanded(Iterable<? extends CommonForIndex> forIndices);
 
-    public Array ArrayExp.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
-		if (!forIndices.iterator().hasNext())
-			return (Array) fullCopy();
+    public ArrayExp ArrayExp.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
 		return createExpanded(this, forIndices);
 	}
 
-    public static Array ArrayExp.createExpanded(Array exp, Iterable<? extends CommonForIndex> forIndices) {
+    public static ArrayExp ArrayExp.createExpanded(Array exp, Iterable<? extends CommonForIndex> forIndices) {
 		Indices newIndices = Indices.create(forIndices);
 		ArrayExp arr = new ArrayExp(Indices.create(expandedSize(exp, newIndices.size())));
 		Map<String,FExp> indexMap = new HashMap<String,FExp>();
@@ -1183,9 +1181,7 @@ aspect Arrays {
         return e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
     }
 
-    public Array FExp.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
-        if (!forIndices.iterator().hasNext())
-            return this;
+    public ArrayExp FExp.createExpanded(Iterable<? extends CommonForIndex> forIndices) {
         return ArrayExp.createExpanded(this, forIndices);
     }
 
@@ -1287,26 +1283,29 @@ aspect Arrays {
         return res;
     }
 
+    syn FAbstractArrayExp FExp.asFAbstractArrayExp() = (FAbstractArrayExp) this;
+
 	/**
-	 * Allows for more efficient execution of {@link #getArray()} in some cases.
+	 * Allows for more efficient execution of {@link #getArrayExp()} in some cases.
 	 * 
 	 * When the Array of a parent node is the same as a childs, replace 
-	 * getArray() with {@link #createArray()} for the types the child can have, 
-	 * let getArray() for those types delegate to copyArray() and use copyArray() 
-	 * on the child in getArray() for the parent.
+	 * getArrayExp() with {@link #createArrayExp()} for the types the child can have, 
+	 * let getArrayExp() for those types delegate to copyArrayExp() and use copyArrayExp() 
+	 * on the child in getArrayExp() for the parent.
 	 * 
 	 * This ensures that the Array is created only once and that only as many copies 
 	 * as necessary are made.
 	 */
-	syn Array FExp.copyArray() = (Array) createArray().unboundCopy();
+	syn ArrayExp FExp.copyArrayExp() = (ArrayExp) asFAbstractArrayExp().createArrayExp().unboundCopy();
 	
 	/**
-	 * Allows for more efficient execution of {@link #getArray()} in some cases.
+	 * Allows for more efficient execution of {@link #getArrayExp()} in some cases.
+	 * Result is only defined if this expression is an array.
 	 * 
-	 * See {@link #copyArray()} for instructions. 
-	 * When overriding createArray(), always declare it as lazy.
+	 * See {@link #copyArrayExp()} for instructions. 
+	 * When overriding createArrayExp(), always declare it as lazy.
 	 */
-	syn Array FExp.createArray() = getArray();
+	syn ArrayExp FAbstractArrayExp.createArrayExp() = getArrayExp();
 	
 	eq FBinExp.getArrayExp() {
 		/* Standard implementation covers many binary operators.
@@ -1362,8 +1361,8 @@ aspect Arrays {
 		if (e <= 0)
 			return new FIdentity(new FIntegerLitExp(size().get(0))).getArrayExp();
 		
-		Array base = getLeft().getArray();
-		Array res = base;
+		ArrayExp base = getLeft().asFAbstractArrayExp().getArrayExp();
+		ArrayExp res = base;
 		FType type = type();
 		for (; e > 1; e--) {
 			ArrayExp cur = new ArrayExp(indices());
@@ -1374,7 +1373,7 @@ aspect Arrays {
 			}
 			res = cur;
 		}
-		return (ArrayExp) res;
+		return res;
 	}
 	
 	eq FTranspose.getArrayExp() {
@@ -1505,7 +1504,7 @@ aspect Arrays {
 	
 	eq FArray.getArrayExp() {
 		if (isIterArray()) {
-            return (ArrayExp) getFExp(0).copyArray();
+            return getFExp(0).copyArrayExp();
 		}
 		ArrayExp arr = new ArrayExp(indices());
 		for (Index i : arr.indices())
@@ -1540,8 +1539,8 @@ aspect Arrays {
 		return new FIterExp(exp, fil);
 	}
 	
-    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList());
-	eq FIterExp.getArrayExp() = (ArrayExp) copyArray();
+    syn lazy ArrayExp FIterExp.createArrayExp() = getFExp().getArray().createExpanded(getForIndexList());
+	eq FIterExp.getArrayExp() = copyArrayExp();
 	
     eq FSubscriptedExp.getArrayExp() {
         if (!getFExp().variability().knownParameterOrLess() && !getFArraySubscripts().variability().knownParameterOrLess()) {
@@ -1853,7 +1852,7 @@ aspect Arrays {
 			}
 			return arr;
 		} else {
-			return (ArrayExp) cevalSelectExp().copyArray();
+			return cevalSelectExp().copyArrayExp();
 		}
 	}
 	
@@ -2104,7 +2103,7 @@ aspect Arrays {
 		return array;
 	}
 	
-	eq FArrayDimAsArgsExp.getArrayExp() = (ArrayExp) new ArrayExp(indices()).fill(fillExp());
+	eq FArrayDimAsArgsExp.getArrayExp() = new ArrayExp(indices()).fill(fillExp());
 	
 	/**
 	 * Get the expression the array is filled with.
@@ -3542,7 +3541,7 @@ aspect ArrayHelpers {
 		 * 
 		 * @return <code>this</code> 
 		 */
-		public Array fill(FExp exp) {
+		public ArrayExp fill(FExp exp) {
 			if (exp.isArray()) {
 				int n = exp.size().numElements();
 				for (int i = 0; i < length; i++)
