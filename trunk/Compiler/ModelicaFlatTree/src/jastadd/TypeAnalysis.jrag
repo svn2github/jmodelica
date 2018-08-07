@@ -442,7 +442,7 @@ aspect FlatTypeAnalysis {
 
     eq FTerminate.type() = fNoType();
     eq FReinit.type() = fNoType();
-    eq FAssert.type() = fNoType();
+    eq FAssert.type() = getTest().type(); /* For scalarizing record type asserts. Needed for TestExternalRecordCeval */
     eq FGetInstanceName.type() = fStringScalarType();
 
     eq FDelayExp.type() = getFExp().type();
