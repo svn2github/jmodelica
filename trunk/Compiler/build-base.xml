@@ -455,7 +455,7 @@
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra-pre,patch-java,gen-extra,patch-test" description="Generate all Java files." />
+    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files." />
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -510,7 +510,7 @@
     </macrodef>
 
     <!-- Compile class used in gen-extra target. -->
-    <target name="compile-gen-extra" depends="ast,patch-java">
+    <target name="compile-gen-extra">
         <compile-gen-extra-macro generate="generate"     gen-extra="gen-extra" />
     </target>
 
@@ -683,15 +683,15 @@
         the same directory where the ast target remove. Should not have
         any other dependencies on the ast target.
     -->
-    <target name="gen-extra" depends="compile-gen-extra">
-        <gen-extra-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
-    </target>
-    <target name="gen-extra-pre" depends="compile-gen-extra-pre">
+    <target name="gen-extra-pre" depends="ast,compile-gen-extra-pre">
         <gen-extra-macro generate="generate-pre" gen-extra="gen-extra-pre" generated="generated-pre"/>
+    </target>
+    <target name="gen-extra" depends="patch-java,compile-gen-extra">
+        <gen-extra-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
     </target>
 
     <!-- adds changes that need to be patched into the static java files -->
-    <target name="patch-java" depends="ast">
+    <target name="patch-java" depends="gen-extra-pre">
         <!-- currently this uses a simple search-replace, but could be expanded to use the same patch tool as above -->
         <for list="${modules}" param="module"> <sequential>
             <if>
