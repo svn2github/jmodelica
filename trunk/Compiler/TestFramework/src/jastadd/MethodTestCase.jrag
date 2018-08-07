@@ -22,20 +22,50 @@ public abstract class MethodTestCase extends TestCase {
     private String output = null;
     private String methodName = null;
     private Object[] arguments = new Object[0];
+    private Object[] inputArray = null;
 
     /**
-     * Invoke a method with no arguments on the specified object and compare 
-     * the result to the expected result.
+     * Obtain array of target classes from the string names in argumentTypes.
      */
-    protected void testMethod(Object o) {
+    private Class<?>[] castedArgumentClasses(Object[] argumentTypes) throws ClassNotFoundException {
+        Class[] types = new Class[argumentTypes.length];
+        for (int i=0; i < argumentTypes.length; i++) {
+            types[i] = Class.forName(argumentTypes[0].toString());
+        }
+        return types;
+    }
+
+    /**
+     * Cast the arguments to the target types even for 
+     */
+    private <T> Object[] castArguments(Class[] types, Object[] arguments) { 
+        Object[] argumentsCasted = new Object[arguments.length];
+        for (int i = 0; i< arguments.length; i++) {
+            if (types[i].isArray()) {
+                T[] temp = (T[]) arguments[i];
+                Class<? extends Object[]> arrayType = types[i];
+                argumentsCasted[i] = Arrays.copyOf(temp, temp.length, arrayType);
+            } else {
+                argumentsCasted[i] = types[i].cast(arguments[i]);
+            }
+        }
+        return argumentsCasted; 
+    }
+
+    /**
+     * Invoke a method with specified arguments on the specified object
+     */
+    protected Object getMethodReturn(Object o, String methodName, Object[] arguments) {
         try {
-            Class[] types = unwrapClasses(arguments);
-            Method method = o.getClass().getMethod(getMethodName(), types);
-
-            String test = method.invoke(o, arguments).toString();
-            String correct = filter(getOutput());
-
-            compareResult("Method result does not match expected.", correct, test);
+            Class[] types = null;
+            if (inputArray == null) { 
+                types = unwrapClasses(arguments);
+            }else {
+                types = castedArgumentClasses(inputArray);
+                arguments = castArguments(types, arguments);
+            }
+            Method method = o.getClass().getMethod(methodName, types);
+            return method.invoke(o, arguments);
         } catch (NoSuchMethodException e) {
             fail(e);
         } catch (IllegalAccessException e) {
@@ -47,7 +77,20 @@ public abstract class MethodTestCase extends TestCase {
             } else {
                 fail(t);
             }
+        } catch (ClassNotFoundException e) {
+            fail(e);
         }
+        return null;
+    }
+
+    /**
+     * Invoke a method with no arguments on the specified object and compare 
+     * the result to the expected result.
+     */
+    protected void testMethod(Object o) {
+            String test = getMethodReturn(o, getMethodName(), arguments).toString();
+            String correct = filter(getOutput());
+            compareResult("Method result does not match expected.", correct, test);
     }
 
     /**
@@ -99,6 +142,19 @@ public abstract class MethodTestCase extends TestCase {
         this.arguments = arguments;
     }
 
+    /**
+     * @param inputArray if input should be interpreted as a String array.
+     */
+    public void setArgumentTypes(Object[] inputArray) {
+        this.inputArray = inputArray;
+    }
+
+    /**
+     * @return if this should be a string array.
+     */
+    public Object[] getArgumentTypes() {
+        return inputArray;
+    }
 }
 
 public class FClassMethodTestCase extends MethodTestCase {
@@ -124,6 +180,7 @@ public class SourceMethodTestCase extends MethodTestCase {
         return true;
     }
 }
+
 public class InstClassMethodTestCase extends MethodTestCase {
     /**
      * Perform tests on instantiated class.
