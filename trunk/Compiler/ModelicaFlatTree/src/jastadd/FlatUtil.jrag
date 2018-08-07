@@ -1608,7 +1608,7 @@ aspect FlatFunctionUtils {
      syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
      syn FPreExp   FExp.tempPreExp() = new FPreExp(new FIdUse(tempVarName()));
      syn FVariable FExp.tempVar() = tempVar(variability(), type());
-     syn FVariable FExp.tempVar(FTypePrefixVariability variability, FType type)
+     syn FVariable FExp.tempVar(TypePrefixVariability variability, FType type)
          = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
 
 
@@ -1705,7 +1705,7 @@ aspect FlatFunctionUtils {
      * @param name         the name of the new variable
      * @param variability  the variability of the new variable
      */
-    public void FType.createTempFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
+    public void FType.createTempFVariables(List vars, FQNameString name, TypePrefixVariability variability) {
         if (isArray()) {
             for (Index i : indices()) {
                 createTempCellFVariables(vars, name.copyAndAddFas(i), variability);
@@ -1715,11 +1715,11 @@ aspect FlatFunctionUtils {
         }
     }
 
-    public void FType.createTempCellFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
+    public void FType.createTempCellFVariables(List vars, FQNameString name, TypePrefixVariability variability) {
         vars.add(createTempFVariable(name, variability));
     }
 
-    public void FRecordType.createTempCellFVariables(List vars, FQNameString name, FTypePrefixVariability variability) {
+    public void FRecordType.createTempCellFVariables(List vars, FQNameString name, TypePrefixVariability variability) {
         for (FRecordComponentType comp : getComponents()) {
             comp.getFType().createTempFVariables(vars, name.copyAndAppend(comp.getName()), variability);
         }
@@ -1732,7 +1732,7 @@ aspect FlatFunctionUtils {
      * 
      * Default implementation returns <code>null</code>.
      */
-    public FVariable FType.createTempFVariable(FQName name, FTypePrefixVariability variability) {
+    public FVariable FType.createTempFVariable(FQName name, TypePrefixVariability variability) {
         return createFVariable(VisibilityType.TEMPORARY, name, variability);
     }
     
@@ -1744,49 +1744,49 @@ aspect FlatFunctionUtils {
      * Default implementation returns <code>null</code>.
      */
     public FVariable FType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public FVariable FArrayType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         return getFPrimitiveType().createFVariable(vt, name, variability);
     }
         
     public FVariable FRealType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         return new FRealVariable(vt, variability, name);
     }   
     
     public FVariable FIntegerType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FIntegerVariable(vt, variability.combineDown(fDiscrete()), name);
+            TypePrefixVariability variability) {
+        return new FIntegerVariable(vt, variability.combineDown(Variability.discrete()), name);
     }   
     
     public FVariable FBooleanType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FBooleanVariable(vt, variability.combineDown(fDiscrete()), name);
+            TypePrefixVariability variability) {
+        return new FBooleanVariable(vt, variability.combineDown(Variability.discrete()), name);
     }   
     
     public FVariable FStringType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FStringVariable(vt, variability.combineDown(fDiscrete()), name);
+            TypePrefixVariability variability) {
+        return new FStringVariable(vt, variability.combineDown(Variability.discrete()), name);
     }   
     
     public FVariable FRecordType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         return new FRecordVariable(vt, variability, name, new FQNameString(getName()));
     }   
     
     public FVariable FEnumType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FEnumVariable(vt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
+            TypePrefixVariability variability) {
+        return new FEnumVariable(vt, variability.combineDown(Variability.discrete()), name, new FQNameString(getName()));
     }   
     
     public FVariable FExternalObjectType.createFVariable(VisibilityType vt, FQName name, 
-            FTypePrefixVariability variability) {
-        return new FExternalObjectVariable(vt, variability.combineDown(fInitialParameter()), name, getConstructor().fullCopy());
+            TypePrefixVariability variability) {
+        return new FExternalObjectVariable(vt, variability.combineDown(Variability.initialParameter()), name, getConstructor().fullCopy());
     }
 }
 
@@ -1813,7 +1813,7 @@ aspect FlatExpressions {
     eq FFunctionDecl.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
-    eq FClass.getFParameterEquation().inNoEventExp() = true;
+    eq FClass.getParameterEquation().inNoEventExp() = true;
 
     inh boolean FExp.inSmoothExp(int order);
     eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;

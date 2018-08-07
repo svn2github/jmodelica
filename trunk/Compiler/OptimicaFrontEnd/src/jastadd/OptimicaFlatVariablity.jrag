@@ -21,68 +21,76 @@
  */
 aspect OptimicaVariability {
 
-	syn boolean FTypePrefixVariability.timedVariability() = false;
-	eq FTimed.timedVariability() = true;
+    public class FTimed extends TypePrefixVariability {
+        private FTimed() {}
+    }
+    
+    public class FOptParameter extends Parameter {
+        private FOptParameter() {}
+    }
+
+	public boolean TypePrefixVariability.timedVariability() { return false; }
+	public boolean FTimed.timedVariability() { return true; }
 	
 	syn boolean FExp.isTimedExp() = variability().timedVariability();
 	
-	eq FTimedVariable.variability()    = fTimed();
-	eq InstTimedVariable.variability() = fTimed();
-	eq FStartTimeExp.variability()     = fParameter();
-	eq FFinalTimeExp.variability()     = fParameter();
+	eq FTimedVariable.variability()    = Variability.fTimed();
+	eq InstTimedVariable.variability() = Variability.fTimed();
+	eq FStartTimeExp.variability()     = Variability.parameter();
+	eq FFinalTimeExp.variability()     = Variability.parameter();
 	
 	public static final FTimed FTimed.instance = new FTimed();	
-	public static FTimed ASTNode.fTimed() { return FTimed.instance; }
+	public static FTimed Variability.fTimed() { return FTimed.instance; }
 		
 	public static final FOptParameter FOptParameter.instance = new FOptParameter();	
-	public static FOptParameter ASTNode.fOptParameter() { return FOptParameter.instance; }
+	public static FOptParameter Variability.fOptParameter() { return FOptParameter.instance; }
 	
-	syn boolean FTypePrefixVariability.optParameterVariability() = false;
-	eq FOptParameter.optParameterVariability() = true;	
+	public boolean TypePrefixVariability.optParameterVariability() { return false; }
+	public boolean FOptParameter.optParameterVariability() { return true; }	
 	syn boolean FExp.isOptParameterExp() = variability().optParameterVariability();
 	
 	protected int FTimed.variabilityLevel()        { return VARIABILITY_LEVEL; }
 	protected int FOptParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
-	protected static final int FTimed.VARIABILITY_LEVEL        = FDiscrete.VARIABILITY_LEVEL - 5;
-	protected static final int FOptParameter.VARIABILITY_LEVEL = FFixedParameter.VARIABILITY_LEVEL;
+	protected static final int FTimed.VARIABILITY_LEVEL        = Discrete.VARIABILITY_LEVEL - 5;
+	protected static final int FOptParameter.VARIABILITY_LEVEL = FixedParameter.VARIABILITY_LEVEL;
 	
-	syn int FOptParameter.combineLevel() = variabilityLevel() * 10 + 5;
+	public int FOptParameter.combineLevel() { return variabilityLevel() * 10 + 5; }
 	
 	// Notice that the attribute FVariable.isParameter is not redefined in order
 	// not to render a lot of attributes in FlatAPI to be redefined as a
 	// consequence.
-    syn boolean FVariable.isOptParameter() = variability().optParameterVariability();
+    public boolean FVariable.isOptParameter() { return variability().optParameterVariability(); }
 	
 	// TODO: Change to be more in line with Variability and more extensible
     refine InstVariability eq InstAssignable.calcVariability() {
-        FTypePrefixVariability v = refined();
+        TypePrefixVariability v = refined();
         if (v.parameterVariability() && freeAttribute()) {
-            v = fOptParameter();
+            v = Variability.fOptParameter();
         }
         return v;
     }
     
-    eq FTimed.toString()               = "timed ";
-    eq FOptParameter.toString()        = "free parameter ";
+    public String FTimed.toString()        { return "timed "; }
+    public String FOptParameter.toString() { return "free parameter "; }
     
-    eq FTimed.toStringLiteral()        = "timed";
-    eq FOptParameter.toStringLiteral() = "free parameter";
+    public String FTimed.toStringLiteral()        { return "timed"; }
+    public String FOptParameter.toStringLiteral() { return "free parameter"; }
     
-    syn boolean FConstraint.isTimed()     = variability().lessOrEqual(fTimed());
+    syn boolean FConstraint.isTimed()     = variability().lessOrEqual(Variability.fTimed());
     syn boolean FConstraint.isParameter() = variability().parameterOrLess();
     
-    syn FTypePrefixVariability FConstraint.variability();
+    syn TypePrefixVariability FConstraint.variability();
     eq FRelationConstraint.variability() = getLeft().variability().combine(getRight().variability());
     eq InstForClauseC.variability() = combineFConstraintsListVariability(getFConstraints());
     
-    syn FTypePrefixVariability FConstraint.combineFConstraintsListVariability(List<FConstraint> l) {
-        FTypePrefixVariability res = fConstant();
+    syn TypePrefixVariability FConstraint.combineFConstraintsListVariability(List<FConstraint> l) {
+        TypePrefixVariability res = Variability.constant();
         for (FConstraint c : l) {
             res = res.combine(c.variability());
         }
         return res;
     }
     
-    eq FTimed.genJMIVariabilityConstant_C()        = null;
-    eq FOptParameter.genJMIVariabilityConstant_C() = null;
+    public String FTimed.genJMIVariabilityConstant_C()        { return null; }
+    public String FOptParameter.genJMIVariabilityConstant_C() { return null; }
 }

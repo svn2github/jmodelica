@@ -1934,7 +1934,7 @@ aspect ConstantEvaluation {
      */ 
     syn boolean FExp.equalsRealValue(double val) {
     	try {
-    		return variability().lessOrEqual(fConstant()) && ceval().realValue()==val;
+    		return variability().lessOrEqual(Variability.constant()) && ceval().realValue()==val;
     	} catch(Exception e) {
     		return false;
     	}
@@ -3150,7 +3150,7 @@ aspect ConstantEvaluation {
         public CValue ceval(VariableEvaluator evaluator, Index i);
         public String name();
         public Size size();
-        public FTypePrefixVariability variability();
+        public TypePrefixVariability variability();
 
         // Added for codegeneration when evaluating external functions
         public FType   type();

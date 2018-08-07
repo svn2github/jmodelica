@@ -156,7 +156,7 @@ aspect FunctionInlining {
         private FlatVariableMap lookupMap;
         private Map<String,FType> typeMap;
         private Queue<FAbstractEquation> outerMostWorklist = null;
-        public FTypePrefixVariability contextVariability = ASTNode.fContinuous();
+        public TypePrefixVariability contextVariability = Variability.continuous();
         
         /**
          * Inline all function calls that we can from a specific list of equations.
@@ -197,11 +197,11 @@ aspect FunctionInlining {
             }
         }
         
-        public void setContextVariability(FTypePrefixVariability v) {
+        public void setContextVariability(TypePrefixVariability v) {
             contextVariability = v;
         }
         
-        public FTypePrefixVariability contextVariability(FExp e) {
+        public TypePrefixVariability contextVariability(FExp e) {
             return contextVariability.combineDown(e.variability());
         }
 
@@ -277,7 +277,7 @@ aspect FunctionInlining {
         }
         
         public void addVarAndEqn(String oldName, FExp value, boolean noEvent, FType type,
-                FTypePrefixVariability variability) {
+                TypePrefixVariability variability) {
             if (type.isNoType()) {
                 replMap.put(oldName, value);
                 return;
@@ -309,7 +309,7 @@ aspect FunctionInlining {
          */
         public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
             int nLefts = lefts.getNumChild();
-            FTypePrefixVariability variability = (nLefts == 0) ? ASTNode.fContinuous() : contextVariability(call).fullCopy();
+            TypePrefixVariability variability = (nLefts == 0) ? Variability.continuous() : contextVariability(call);
             FExp[] exps = null;
             if (variability.constantVariability()) {
                 try {
@@ -347,7 +347,7 @@ aspect FunctionInlining {
             }
         }
 
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+        protected void addEquation(FAbstractEquation eqn, TypePrefixVariability variability) {
             outerMostWorklist.add(eqn);
         }
         
@@ -355,7 +355,7 @@ aspect FunctionInlining {
         
         protected abstract void addVar(FVariable var);
         
-        protected FVariable addVar(String oldName, FTypePrefixVariability variability, FType type) {
+        protected FVariable addVar(String oldName, TypePrefixVariability variability, FType type) {
             String n = nextTempVarName();
             FQName name = type.isArray() ? 
                     new FQNameFull(n, type.size().createFArraySubscripts()) : 
@@ -366,7 +366,7 @@ aspect FunctionInlining {
             return var;
         }
         
-        protected FVariable addVar(FQName name, FTypePrefixVariability variability, FType type) {
+        protected FVariable addVar(FQName name, TypePrefixVariability variability, FType type) {
             FVariable var = type.createTempFVariable(name, variability);
             lookupMap.addVariable(var);
             addVar(var);
@@ -418,7 +418,7 @@ aspect FunctionInlining {
         }
 
         @Override
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+        protected void addEquation(FAbstractEquation eqn, TypePrefixVariability variability) {
             List<FAbstractEquation> toList = variability.selectEquations(initialEqns, paramEqns, normalEqns);
             if (currentNewList == toList) {
                 currentOldList.add(eqn);
@@ -444,18 +444,18 @@ aspect FunctionInlining {
          * Inline all function calls that we can.
          */
         public void inline() {
-            setContextVariability(ASTNode.fInitialParameter());
+            setContextVariability(Variability.initialParameter());
             inlineFCList(fc.getFInitialEquations(), initialEqns);
             
-            setContextVariability(ASTNode.fContinuous());
+            setContextVariability(Variability.continuous());
             inlineFCList(fc.getFAbstractEquations(), normalEqns);
             
-            setContextVariability(ASTNode.fFixedParameter());
-            inlineFCList(fc.getFParameterEquations(), paramEqns);
+            setContextVariability(Variability.fixedParameter());
+            inlineFCList(fc.getParameterEquations(), paramEqns);
             
             fc.setFInitialEquationList(initialEqns);
             fc.setFAbstractEquationList(normalEqns);
-            fc.setFParameterEquationList(paramEqns);
+            fc.setParameterEquationList(paramEqns);
         }
         
         private List<FAbstractEquation> currentOldList = null;
@@ -486,7 +486,7 @@ aspect FunctionInlining {
     
     public void FFunctionCall.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
         if (isComposite()) {
-            FTypePrefixVariability v = fi.contextVariability(this);
+            TypePrefixVariability v = fi.contextVariability(this);
             if (v.constantVariability()) {
                 try {
                     CValue cval = ceval();
@@ -513,7 +513,7 @@ aspect FunctionInlining {
                 String tempName = temp + suffix;
                 String oldName = old + suffix;
                 FExp e = src.dynamicFExp(new FIdUseExp(tempName));
-                FTypePrefixVariability v = fi.contextVariability(src);
+                TypePrefixVariability v = fi.contextVariability(src);
                 fi.addVarAndEqn(oldName, e, noEvent, type, v);
                 fi.addVar(new FQNameString(tempName), v, type);
                 return e.fullCopy();
@@ -527,7 +527,7 @@ aspect FunctionInlining {
      * it is a left of, and return an access.
      */
     public FExp FFunctionCallLeft.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, TypePrefixVariability variability) {
         return hasFExp() ? getFExp().createInlineVars(fi, bExp, variability) : null;
     }
 
@@ -536,12 +536,12 @@ aspect FunctionInlining {
      * it is a left of, and return an access. Non-access expressions returns null.
      */
     public FExp FExp.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, TypePrefixVariability variability) {
         return null;
     }
 
     public FExp FIdUseExp.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, TypePrefixVariability variability) {
         FVariable var = fi.addVar(scalarName(), variability, type());
         if (bExp != null) {
             var.setBindingExp(bExp);
@@ -551,7 +551,7 @@ aspect FunctionInlining {
     }
 
     public FExp FArray.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, TypePrefixVariability variability) {
         FArray bArr = (FArray) bExp;
         FArray res = new FArray();
         int n = getNumFExp();
@@ -563,7 +563,7 @@ aspect FunctionInlining {
     }
 
     public FExp FRecordConstructor.createInlineVars(
-            AbstractFunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
+            AbstractFunctionInliner fi, FExp bExp, TypePrefixVariability variability) {
         FRecordConstructor bRec = (FRecordConstructor) bExp;
         FRecordConstructor res = new FRecordConstructor(getRecord().fullCopy(), new List());
         Iterator<FExp> bArgs = (bRec != null) ? bRec.getArgs().iterator() : null;

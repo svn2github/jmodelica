@@ -127,7 +127,7 @@ aspect IndexReduction {
         // Enable rewrite of identifiers? (not necessary?)
         for (FAbstractEquation fe : result.getEquations()) {
             if (fe.variability().fixedParameterOrLess()) {
-                addFParameterEquation(fe);
+                addParameterEquation(fe);
             } else if (fe.variability().initialParameterOrLess()) {
                 addFInitialEquation(fe);
             } else {
@@ -143,7 +143,7 @@ aspect IndexReduction {
             if (fv.isDerivativeVariable()) {
                 if (result.getDummyDerivatives().contains(fv)) {
                     FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getVisibilityType(),
-                        fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(), fv.order());
+                        fv.getTypePrefixVariability(), fv.getFQName().fullCopy(), fv.order());
                     l.add(fdv);
                 } else if (fv.order() > 1) {
                     // Convert higher order derivative variables into
@@ -152,7 +152,7 @@ aspect IndexReduction {
                     for (int i = 1; i < fv.order(); i++) {
                         FQName fqn = fv.getFQName().createDerPrefixedName(i);
                         l.add(new FRealVariable(VisibilityType.PUBLIC,
-                                fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
+                                fv.getTypePrefixVariability(), fqn.fullCopy()));
                         // Derivative variable is added later
                         addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
                         fqnPrev = fqn;
@@ -291,7 +291,7 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
             return new IndexReductionEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
         }
 
@@ -320,7 +320,7 @@ aspect IndexReduction {
         private Set<FAbstractEquation> nonDiffEqns;
         private Set<IndexReductionVar> remoteVars = null;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
             super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
         }
 
@@ -595,7 +595,7 @@ aspect IndexReduction {
         }
 
         @Override
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
+        protected void addEquation(FAbstractEquation eqn, TypePrefixVariability variability) {
             eqn.flushAllRecursiveClearFinal();
             dynamicEquation(eqn);
             newEquations.add(eqn);
@@ -1219,10 +1219,10 @@ aspect IndexReduction {
         
         public enum COEFFICIENT_STATE{
             CONSTANT, CONTINUOUS, EXCEPTION, SPLIT;
-            public static COEFFICIENT_STATE create(FTypePrefixVariability variability) {
+            public static COEFFICIENT_STATE create(TypePrefixVariability variability) {
                 if (variability == null)
                     return EXCEPTION;
-                if (variability.lessOrEqual(ASTNode.fParameter()))
+                if (variability.lessOrEqual(Variability.parameter()))
                     return CONSTANT;
                 return CONTINUOUS;
             }
@@ -1252,7 +1252,7 @@ aspect IndexReduction {
             if (!getEquation().referencedFVariables().contains(variable))
                 return 0;
             Collection<FAbstractEquation> feqds = getEquation().diff(variable.name());
-            FTypePrefixVariability variability = ASTNode.fConstant();
+            TypePrefixVariability variability = Variability.constant();
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
             if (feqds.size() > 1) {
@@ -1267,9 +1267,9 @@ aspect IndexReduction {
             FAbstractEquation eqn = feqds.iterator().next();
             coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), IndexReductionBiPGraph.COEFFICIENT_STATE.create(variability)));
             
-            if (!variability.lessOrEqual(ASTNode.fParameter())) {
+            if (!variability.lessOrEqual(Variability.parameter())) {
                 return 2;
-            } else if (!variability.lessOrEqual(ASTNode.fConstant()))
+            } else if (!variability.lessOrEqual(Variability.constant()))
                 return 0;
         } catch(EquationDifferentiationException e) {
             coefficients.put(var, new IndexReductionBiPGraph.Coefficient(null, IndexReductionBiPGraph.COEFFICIENT_STATE.EXCEPTION));

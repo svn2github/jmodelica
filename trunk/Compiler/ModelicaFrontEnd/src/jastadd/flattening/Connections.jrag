@@ -163,7 +163,7 @@ aspect Connections {
      */
     private FExp FExInStream.addEquation(FlatVariableMap.GeneratedVarType varType, FExp exp) {
         String name = calcGeneratedVarName(varType);
-        FTypePrefixVariability v = variability().combine(ASTNode.fFixedParameter());
+        TypePrefixVariability v = variability().combine(Variability.fixedParameter());
         myFClass().addFVariable(type().createTempFVariable(new FQNameString(name), variability()));
         myFClass().equationList(v).add(new FEquation(new FIdUseExp(name), exp));
         return new FIdUseExp(name);
@@ -172,11 +172,11 @@ aspect Connections {
     /**
      * Get (no transform) equation list matching the variability <code>v</code>.
      */
-    public List<FAbstractEquation> FClass.equationList(FTypePrefixVariability v) {
+    public List<FAbstractEquation> FClass.equationList(TypePrefixVariability v) {
         if (v.knownParameterOrLess()) {
             throw new UnsupportedOperationException();
         } else if (v.fixedParameterVariability()) {
-            return getFParameterEquationsNoTransform();
+            return getParameterEquationsNoTransform();
         } else if (v.initialParameterVariability()) {
             return getFInitialEquationsNoTransform();
         } else {

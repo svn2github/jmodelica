@@ -174,9 +174,9 @@ aspect HtmlSourcePrettyPrint {
             str.print(indent + "<b>initial equation</b><br>\n");
         getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", "");
 
-        if (getNumFParameterEquation()>0)
+        if (getNumParameterEquation()>0)
             str.print(indent + "<b>parameter equation</b><br>\n");
-        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", "");
+        getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", "");
     
         boolean wroteEquation = false;
         for (FAbstractEquation e : getFAbstractEquations()) {
@@ -214,14 +214,16 @@ aspect HtmlSourcePrettyPrint {
     }
 	
 	syn String BaseNode.htmlSourceNodeClass() = null;
-	eq FTypePrefixVariability.htmlSourceNodeClass() = "variabilityPrefix";
+	eq TypePrefixVariability.htmlSourceNodeClass() = "variabilityPrefix";
 	eq FIdUseExp.htmlSourceNodeClass() = variability().htmlSourceVarUseClass();
 	
-	syn String FTypePrefixVariability.htmlSourceVarUseClass() = null;
-	eq FConstant.htmlSourceVarUseClass() = "constantUse";
-	eq FParameter.htmlSourceVarUseClass() = "parameterUse";
-	eq FContinuous.htmlSourceVarUseClass() = "continuousUse";
-	eq FDiscrete.htmlSourceVarUseClass() = "discreteUse";
+	public String TypePrefixVariability.htmlSourceVarUseClass() { 
+	    return null;
+	}
+	public String Constant.htmlSourceVarUseClass() { return "constantUse"; }
+	public String Parameter.htmlSourceVarUseClass() { return "parameterUse"; }
+	public String Continuous.htmlSourceVarUseClass() { return "continuousUse"; }
+	public String Discrete.htmlSourceVarUseClass() { return "discreteUse"; }
 	
 	public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		SourceLocation[] file = null;

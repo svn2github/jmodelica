@@ -1008,10 +1008,10 @@ aspect FlatPrettyPrint {
         }
         getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
 
-        if (getNumFParameterEquation() > 0) {
+        if (getNumParameterEquation() > 0) {
             str.println(indent, "parameter equation");
         }
-        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
+        getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
     
         boolean wroteEquation = false;
         for (FAbstractEquation e : getFAbstractEquations()) {
@@ -1061,7 +1061,7 @@ aspect FlatPrettyPrint {
     public void FVariable.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(indent);
         
-        str.print(getFTypePrefixVariability());
+        str.print(getTypePrefixVariability());
         
         if (!getTypePrefixInputOutput().isNone()) {
             str.print(getTypePrefixInputOutput(), " ");
@@ -1894,31 +1894,33 @@ aspect FlatPrettyPrint {
         p.print(getFExp(), str, indent);
     }
     
-    syn String FTypePrefixVariability.toString();
-    eq FFixedParameter.toString()       = "parameter ";
-    eq FInitialParameter.toString()     = "initial parameter ";
-    eq FIndexParameter.toString()       = "index parameter";
-    eq FEvalTrueParameter.toString()    = "eval parameter ";
-    eq FFinalParameter.toString()       = "final parameter ";
-    eq FStructParameter.toString()      =
-            getReason().isEmpty() ? "structural parameter " : "structural (" + getReason() + ") parameter ";
-    eq FDiscrete.toString()             = "discrete ";
-    eq FConstant.toString()             = "constant ";
-    eq FContinuous.toString()           = "";
-    eq FCompositeVariability.toString() = combine().toString();
-    syn String FComponentVariability.toString() = 
-        getVariability().toString() + " /* " + getName() + " */ ";
+    public abstract String TypePrefixVariability.toString();
+    public String FixedParameter.toString()    { return "parameter "; }
+    public String InitialParameter.toString()  { return "initial parameter "; }
+    public String IndexParameter.toString()    { return "index parameter"; }
+    public String EvalTrueParameter.toString() { return "eval parameter "; }
+    public String FinalParameter.toString()    { return "final parameter "; }
+    public String StructParameter.toString()   {
+        return getReason().isEmpty() ? "structural parameter " : "structural (" + getReason() + ") parameter ";
+    }
+    public String Discrete.toString()             { return "discrete "; }
+    public String Constant.toString()             { return "constant "; }
+    public String Continuous.toString()           { return ""; }
+    public String CompositeVariability.toString() { return combine().toString(); }
+    public String ComponentVariability.toString() {
+        return getVariability().toString() + " /* " + getName() + " */ ";
+    }
 
-    syn String FTypePrefixVariability.toStringLiteral();
-    eq FParameter.toStringLiteral()         = "parameter";
-    eq FInitialParameter.toStringLiteral()  = "initial parameter";
-    eq FEvalTrueParameter.toStringLiteral() = "eval parameter";
-    eq FFinalParameter.toStringLiteral()    = "final parameter";
-    eq FStructParameter.toStringLiteral()   = "structural parameter";
-    eq FDiscrete.toStringLiteral()          = "discrete-time";
-    eq FConstant.toStringLiteral()          = "constant";
-    eq FContinuous.toStringLiteral()        = "continuous-time";
-    eq FCompositeVariability.toStringLiteral() = combine().toStringLiteral();
+    public abstract String TypePrefixVariability.toStringLiteral();
+    public String Parameter.toStringLiteral()         { return "parameter"; }
+    public String InitialParameter.toStringLiteral()  { return "initial parameter"; }
+    public String EvalTrueParameter.toStringLiteral() { return "eval parameter"; }
+    public String FinalParameter.toStringLiteral()    { return "final parameter"; }
+    public String StructParameter.toStringLiteral()   { return "structural parameter"; }
+    public String Discrete.toStringLiteral()          { return "discrete-time"; }
+    public String Constant.toStringLiteral()          { return "constant"; }
+    public String Continuous.toStringLiteral()        { return "continuous-time"; }
+    public String CompositeVariability.toStringLiteral() { return combine().toStringLiteral(); }
 
     syn String SrcRestriction.toString();
     eq SrcModel.toString()               = "model";
@@ -2009,7 +2011,7 @@ aspect PrettyPrint_MC {
 	}
 
     public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
-        str.print(indent, getFTypePrefixVariability());
+        str.print(indent, getTypePrefixVariability());
         if (!getTypePrefixInputOutput().isNone()) {
             str.print(getTypePrefixInputOutput(), " ");
         }
@@ -2064,10 +2066,10 @@ aspect PrettyPrint_MC {
         getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
 
     /*
-        if (getNumFParameterEquation() > 0) {
+        if (getNumParameterEquation() > 0) {
             str.println(indent, "parameter equation");
         }
-        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
+        getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
     */
         boolean wroteEquation = false;
         for (FAbstractEquation e : getFAbstractEquations()) {

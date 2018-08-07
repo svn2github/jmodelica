@@ -255,7 +255,7 @@ aspect ContentCheck {
 
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
         if (!inFunction()) // Array sizes outside functions should be structural parameters
-            size().forceVariability(checkType, fStructParameter());
+            size().forceVariability(checkType, Variability.structParameter());
         checkQuotedIdentifier(getSrcComponentDecl(), name());
         checkAbsoluteValue();
     }
@@ -431,7 +431,7 @@ aspect ContentCheck {
     
     public void FIfEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
         super.checkMayContainConnect(checkType, connect);
-        FTypePrefixVariability v = getTest().variability();
+        TypePrefixVariability v = getTest().variability();
         if (!v.fixedParameterOrLess()) {
             connect.error("Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions");
         } else {
@@ -487,7 +487,7 @@ aspect ContentCheck {
             boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
             boolean functionCallEqu = hasFunctionCallEquations(); 
             if (hasOnlyFixedParamTests()) {
-                forceTestVariability(checkType, balanced ? ASTNode.fTestParameter() : ASTNode.fStructParameter());
+                forceTestVariability(checkType, balanced ? Variability.testParameter() : Variability.structParameter());
             } else {
                 if (!balanced) {
                     error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
@@ -502,10 +502,10 @@ aspect ContentCheck {
 			error("Only assignment equations are allowed in when clauses");
 	}
 
-    protected void FIfWhenElseEquation.forceTestVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    protected void FIfWhenElseEquation.forceTestVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
     @Override
-    protected void FIfEquation.forceTestVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    protected void FIfEquation.forceTestVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         getTest().forceVariability(checkType, v);
         if (hasElse()) {
             getElse().forceTestVariability(checkType, v);
@@ -855,38 +855,38 @@ aspect ContentCheck {
 
 aspect ForceVariability {
 
-    private FTypePrefixVariability InstAssignable.forcedVariability = fContinuous();
+    private TypePrefixVariability InstAssignable.forcedVariability = Variability.continuous();
 
     public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
-        forceVariability(checkType, fStructParameter());
+        forceVariability(checkType, Variability.structParameter());
     }
 
-    public void FExp.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+    public void FExp.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         if (!inFunction()) {
             forceUsesVariability(checkType, v);
         }
     }
 
-    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         for (FSubscript s : getFSubscripts()) {
             s.forceVariability(checkType, v);
         }
     }
 
-    public void FSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {}
+    public void FSubscript.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {}
 
-    public void FExpSubscript.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
+    public void FExpSubscript.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         getFExp().forceVariability(checkType, v);
     }
 
 
-    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void InstComponentDecl.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void InstAssignable.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstAssignable.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         if (forcedVariability.lessOrEqual(v)) {
             return;
         }
-        FTypePrefixVariability currentVariability = variability().combine();
+        TypePrefixVariability currentVariability = variability().combine();
         if (!currentVariability.parameterVariability() || inFunction() || isForIndex())
             return;
         if (indices().numElements() > 0 && currentVariability.initialParameterVariability()) {
@@ -904,18 +904,18 @@ aspect ForceVariability {
         }
     }
 
-    public void InstRecord.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstRecord.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
             icd.forceVariability(checkType, v);
         }
     }
 
-    public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void InstExternalObject.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
 
-    public void Size.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void Size.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void MutableSize.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void MutableSize.forceVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (FExp e : exps) {
             if (e != null) {
                 e.forceVariability(checkType, v);
@@ -924,37 +924,37 @@ aspect ForceVariability {
     }
 
 
-    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void ASTNode.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (ASTNode n : this) {
             n.forceUsesVariability(checkType, v);
         }
     }
 
-    public void FAbstractExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void FAbstractExp.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         super.forceUsesVariability(checkType, v);
         setVariabilityNotCalculated();
     }
 
-    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void FSizeExp.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         getDimOpt().forceUsesVariability(checkType, v);
     }
 
-    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void FNdimsExp.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstAccess.forceUsesVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         myInstComponentDecl().forceVariability(checkType, v);
         forceUsesInSubscriptsVariability(checkType, v);
     }
 
-    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {}
+    public void InstAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, TypePrefixVariability v) {}
 
-    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstDot.forceUsesInSubscriptsVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         for (InstAccess ia : getInstAccesss()) {
             ia.forceUsesInSubscriptsVariability(checkType, v);
         }
     }
 
-    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
+    public void InstArrayAccess.forceUsesInSubscriptsVariability(ErrorCheckType checkType, TypePrefixVariability v) {
         getFArraySubscripts().forceUsesVariability(checkType, v);
     }
 

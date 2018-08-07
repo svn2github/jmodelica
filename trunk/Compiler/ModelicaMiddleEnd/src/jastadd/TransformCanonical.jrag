@@ -1065,7 +1065,7 @@ aspect TransformCanonical {
             fdv = new FDerivativeVariable();
         }
         fdv.setVisibilityType(getVisibilityType());
-        fdv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+        fdv.setTypePrefixVariability(getTypePrefixVariability());
         fdv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         fdv.setFQName(getFQName().fullCopy());
         fdv.setOrder(order() + 1);
@@ -1294,7 +1294,7 @@ aspect TransformCanonical {
         }
     }
 
-    syn boolean FTypePrefixVariability.aliasCompatible(FTypePrefixVariability that) {
+    public boolean TypePrefixVariability.aliasCompatible(TypePrefixVariability that) {
         return this.equals(that);
     }
 	
@@ -1367,7 +1367,7 @@ aspect TransformCanonical {
 				aliasManager.addAliasVariables(equation.aliasVariables());
 		}
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            for (FAbstractEquation equation : getFParameterEquations()) {
+            for (FAbstractEquation equation : getParameterEquations()) {
                 equation.aliasClassified = false; 
                 if (equation.isAliasEquation()) 
                     aliasManager.addAliasVariables(equation.aliasVariables());
@@ -1433,7 +1433,7 @@ aspect TransformCanonical {
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            for (FAbstractEquation equation : getFParameterEquations()) { 
+            for (FAbstractEquation equation : getParameterEquations()) { 
                 if (!equation.isAliasEquation()) {
                     pEqns.add(equation);
                 }
@@ -1452,7 +1452,7 @@ aspect TransformCanonical {
 		setAliasVariableList(new List(aliasVars));
 		setFAbstractEquationList(new List(eqns));
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            setFParameterEquationList(new List(pEqns));
+            setParameterEquationList(new List(pEqns));
         }
 		
 		aliasVariablesEliminated = true;
@@ -1847,7 +1847,7 @@ aspect TransformCanonical {
 	 */
 	public void FClass.removeMarkedEqns() {
 		setFInitialEquationList(removeMarkedEqns(getFInitialEquations()));
-		setFParameterEquationList(removeMarkedEqns(getFParameterEquations()));
+		setParameterEquationList(removeMarkedEqns(getParameterEquations()));
 		setFAbstractEquationList(removeMarkedEqns(getFAbstractEquations()));
 	}
 	
@@ -2012,7 +2012,7 @@ aspect TransformCanonical {
     }
     
     public void FClass.insertTempsInLHS() {
-        for (FAbstractEquation equation : getFParameterEquations()) {
+        for (FAbstractEquation equation : getParameterEquations()) {
             equation.insertTempsInLHS(this, true);
         }
         for (FAbstractEquation equation : getFAbstractEquations()) {
@@ -2037,9 +2037,9 @@ aspect TransformCanonical {
     
     public void FExp.insertTempsInLHS(FClass fClass, boolean param) {
         String tempName = calcTempVarName();
-        FTypePrefixVariability v;
+        TypePrefixVariability v;
         if (param) {
-            v = fFixedParameter();
+            v = Variability.fixedParameter();
         } else {
             v = type().funcOutputVariability();
         }
@@ -2047,7 +2047,7 @@ aspect TransformCanonical {
         replaceMe(new FIdUseExp(tempName));
         FEquation e = new FEquation(this, new FIdUseExp(tempName));
         if (param) {
-            fClass.addFParameterEquation(e);
+            fClass.addParameterEquation(e);
         } else {
             fClass.addFEquation(e);
         }
@@ -2157,7 +2157,7 @@ aspect ParameterSorting {
     public void FClass.sortDependentParameters() {
         // Check that all independent parameters can be evaluated.
         for (FVariable var : getFVariables()) {
-            FTypePrefixVariability variability = var.variability();
+            TypePrefixVariability variability = var.variability();
             if (variability.parameterVariability() && var.hasBindingExp()) {
                 FExp bExp = var.getBindingExp();
                 if (!bExp.isLiteralExp() && !var.isExternalObject()) {
@@ -2172,7 +2172,7 @@ aspect ParameterSorting {
                         var.setBindingExp(literal);
                     } else {
                         FAbstractEquation fae = new FEquation(var.createUseExp(), bExp);
-                        addFParameterEquationNoTransform(fae);
+                        addParameterEquationNoTransform(fae);
                         var.removeBindingExp();
                         parameterEquationsMap().put(var, fae);
                     }
@@ -2180,7 +2180,7 @@ aspect ParameterSorting {
             }
         }
 		// Get the list of parameter equations and set up preliminary data.
-		ArrayList<FAbstractEquation> eqns = getFParameterEquations().toArrayList();
+		ArrayList<FAbstractEquation> eqns = getParameterEquations().toArrayList();
 		
 		// Check if there is any dependent parameters that can be made independent.
 		Iterator<FAbstractEquation> it = eqns.iterator();
@@ -2264,7 +2264,7 @@ aspect ParameterSorting {
 			error("The model "+ name() +" contains cyclic parameter dependencies.");
 		} else {
 			// Replace old parameter equation list
-			setFParameterEquationList(L);
+			setParameterEquationList(L);
 			
 			// Rearrange parameters in same order as parameter equations
 			ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
@@ -2547,7 +2547,7 @@ aspect StateInitialEquations {
         
         for (FVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(VisibilityType.PUBLIC, fFixedParameter(), nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(VisibilityType.PUBLIC, Variability.fixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else
@@ -2570,7 +2570,7 @@ aspect SemiLinear {
             public void perform() {
                 setFAbstractEquationList(transform(getFAbstractEquations()));
                 setFInitialEquationList(transform(getFInitialEquations()));
-                setFParameterEquationList(transform(getFParameterEquations()));
+                setParameterEquationList(transform(getParameterEquations()));
                 
                 // Change all remaining semiLinear exps to if exps.
                 Set<FSemiLinearExp> fsls = collectSemiLinearExps();
@@ -2905,7 +2905,7 @@ aspect FunctionAndRecordCleanup {
             decl.resetUsedIndicator();
         getFVariables().markUsedFunctionsAndRecords();
         getFInitialEquations().markUsedFunctionsAndRecords();
-        getFParameterEquations().markUsedFunctionsAndRecords();
+        getParameterEquations().markUsedFunctionsAndRecords();
         getFAbstractEquations().markUsedFunctionsAndRecords();
         getDynamicStateManager().markUsedFunctionsAndRecords();
         List<FFunctionDecl> funcs = new List<FFunctionDecl>();

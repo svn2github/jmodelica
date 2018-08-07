@@ -107,9 +107,9 @@ aspect FlatOptimicaPrettyPrint {
     		}
     	}
 	  	
-		if (getNumFParameterEquation()>0)
+		if (getNumParameterEquation()>0)
 			str.println(indent + "parameter equation");
-		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
+		getParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";" + str.getLineEnder());
 	  	
 		str.println(indent + "constraint");
 	  	for (int j=0;j<getNumFConstraint();j++) {

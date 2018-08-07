@@ -198,7 +198,7 @@ aspect Flattening {
             return normalEqns.add(fae);
         }
         
-         public List<FAbstractEquation> addFParameterEquation(FAbstractEquation fae) {
+         public List<FAbstractEquation> addParameterEquation(FAbstractEquation fae) {
             return parameterEqns.add(fae);
         }
         
@@ -251,7 +251,7 @@ aspect Flattening {
         setFVariableList(f.getFVariables());
         setFAbstractEquationList(f.getNormalEquations());
         setFInitialEquationList(f.getInitialEquations());
-        setFParameterEquationList(f.getParameterEquations());
+        setParameterEquationList(f.getParameterEquations());
         
         setFFunctionDeclList(f.getFFunctionDecls());
         setFRecordDeclList(f.getFRecordDecls());
@@ -1307,7 +1307,7 @@ aspect Flattening {
                         + name() + "' did not evaluate to same result as during compilation");
                 CValue cval = ceval();
                 if (cval.hasBuildLiteral()) {
-                    f.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
+                    f.addParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
                             new FAssert(new FEqExp(cval.buildLiteral(), flatten(f)),
                                     new FStringLitExp(msg), new Opt<FExp>())));
                 }
@@ -1707,7 +1707,7 @@ aspect Flattening {
     public FVariable InstAssignable.createFVariable(Flattener f, FQName name, FlattenBindingExp binding) {
         FVariable fv = createEmptyFVariable();
         fv.setVisibilityType(createVisibilityType());
-        fv.setFTypePrefixVariability(variability().fullCopy());
+        fv.setTypePrefixVariability(variability());
         
         // Only set input/output prefix for top level inputs and outputs
         if (isTopLevelInputOutput()) 
@@ -2871,12 +2871,12 @@ aspect FlatExpressions {
      *
      * This is done during variability calculation to keep compatibility with FExp. 
      */
-    abstract public FTypePrefixVariability SrcTypePrefixVariability.flatten();
-    public FTypePrefixVariability SrcContinuous.flatten()     { return fContinuous();     }
-    public FTypePrefixVariability SrcDiscrete.flatten()       { return fDiscrete();       }
-    public FTypePrefixVariability SrcParameter.flatten()      { return fFixedParameter(); }
-    public FTypePrefixVariability SrcIndexParameter.flatten() { return fIndexParameter(); }
-    public FTypePrefixVariability SrcConstant.flatten()       { return fConstant();       }
+    abstract public TypePrefixVariability SrcTypePrefixVariability.flatten();
+    public TypePrefixVariability SrcContinuous.flatten()     { return Variability.continuous();     }
+    public TypePrefixVariability SrcDiscrete.flatten()       { return Variability.discrete();       }
+    public TypePrefixVariability SrcParameter.flatten()      { return Variability.fixedParameter(); }
+    public TypePrefixVariability SrcIndexParameter.flatten() { return Variability.indexParameter(); }
+    public TypePrefixVariability SrcConstant.flatten()       { return Variability.constant();       }
 }
 
 aspect InstantiatedExpressions {

@@ -218,7 +218,7 @@ aspect CCodeGen {
     public static final String ASTNode.C_SUFFIX_FPOUT    = "fpout";
     public static final String ASTNode.C_SUFFIX_SETFLAG  = "_s";
     
-    public class FTypePrefixVariability {
+    public abstract class TypePrefixVariability {
         public enum VariabilityCausality_C {
             CI("ci"),
             CD("cd"),
@@ -242,17 +242,31 @@ aspect CCodeGen {
         }
     }
     
-    syn FTypePrefixVariability.VariabilityCausality_C FVariable.variabilityCausality_C() = variability().variabilityCausality_C(this);
+    public TypePrefixVariability.VariabilityCausality_C FVariable.variabilityCausality_C() {
+        return variability().variabilityCausality_C(this);
+    }
     
-    syn VariabilityCausality_C FTypePrefixVariability.variabilityCausality_C(FVariable fv) {
+    public VariabilityCausality_C TypePrefixVariability.variabilityCausality_C(FVariable fv) {
         throw new UnsupportedOperationException();
     }
-    eq FConstant.variabilityCausality_C(FVariable fv)          = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
-    eq FParameter.variabilityCausality_C(FVariable fv)         = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
-    eq FStructParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
-    eq FFinalParameter.variabilityCausality_C(FVariable fv)    = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
-    eq FEvalTrueParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
-    eq FDiscrete.variabilityCausality_C(FVariable fv)          = VariabilityCausality_C.W;
+    public VariabilityCausality_C Constant.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
+    }
+    public VariabilityCausality_C Parameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
+    }
+    public VariabilityCausality_C StructParameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
+    }
+    public VariabilityCausality_C FinalParameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
+    }
+    public VariabilityCausality_C EvalTrueParameter.variabilityCausality_C(FVariable fv) {
+        return fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
+    }
+    public VariabilityCausality_C Discrete.variabilityCausality_C(FVariable fv) {
+        return VariabilityCausality_C.W;
+    }
 
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);

@@ -824,7 +824,7 @@ aspect BLT{
 
         private BlockDependency blockDependency;
         private FExp[][] jacobian = null;
-        private FTypePrefixVariability variability = FContinuous.instance;
+        private TypePrefixVariability variability = Continuous.instance;
         private final EquationBlockFactory.BlockProducer producer;
         private String label;
         private int sequenceNumber = -1;
@@ -1135,7 +1135,7 @@ aspect BLT{
             return jacobian != null;
         }
 
-        public FTypePrefixVariability variability() {
+        public TypePrefixVariability variability() {
             return variability;
         }
 
@@ -1257,8 +1257,8 @@ aspect BLT{
             return jacobian;
         }
 
-        protected final static FTypePrefixVariability computeVariability(FExp[][] jacobian) {
-            FTypePrefixVariability blockVariability = ASTNode.fConstant();
+        protected final static TypePrefixVariability computeVariability(FExp[][] jacobian) {
+            TypePrefixVariability blockVariability = Variability.constant();
             for (FExp[] row : jacobian)
                 for (FExp element : row)
                     if (element != null && !element.variability().lessOrEqual(blockVariability))
