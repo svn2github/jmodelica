@@ -1248,8 +1248,33 @@ aspect Arrays {
      *          <code>this</code> otherwise.
      */
     syn Array FExp.getArray() = this;
+
+    eq FAbstractArrayExp.getArray() {
+        if (isArray()) {
+            if (canBuildArrayFromChild()) {
+                return childToBuildArray().getArray();
+            } else {
+                return getArrayExp();
+            }
+        } else {
+            return this;
+        }
+    }
+
+    /*
+     * canBuildArrayFromChild() and childToBuildArray() are designed so an expression can get its Array 
+     * directly from a child, rather than building a new ArrayExp nta which would be a copy.
+     */
     
-    eq FAbstractArrayExp.getArray() = isArray() ? getArrayExp() : this;
+    syn boolean FAbstractArrayExp.canBuildArrayFromChild() = false;
+    eq FArray .canBuildArrayFromChild() = isIterArray();
+    eq FPowExp.canBuildArrayFromChild() = isArray() && getRight().ceval().intValue() == 1;
+    eq FIfExp .canBuildArrayFromChild() = isArray() && !getThenExp().size().equivalent(getElseExp().size(), inFunction());
+
+    syn FExp FAbstractArrayExp.childToBuildArray() { throw new UnsupportedOperationException(); }
+    eq FArray .childToBuildArray() = getFExp(0);
+    eq FPowExp.childToBuildArray() = getLeft();
+    eq FIfExp .childToBuildArray() = cevalSelectExp();
 
     /**
      * Computes a generic array expansion of the expression. If this expression is not an array the result is undefined.
@@ -1282,30 +1307,6 @@ aspect Arrays {
         }
         return res;
     }
-
-    syn FAbstractArrayExp FExp.asFAbstractArrayExp() = (FAbstractArrayExp) this;
-
-	/**
-	 * Allows for more efficient execution of {@link #getArrayExp()} in some cases.
-	 * 
-	 * When the Array of a parent node is the same as a childs, replace 
-	 * getArrayExp() with {@link #createArrayExp()} for the types the child can have, 
-	 * let getArrayExp() for those types delegate to copyArrayExp() and use copyArrayExp() 
-	 * on the child in getArrayExp() for the parent.
-	 * 
-	 * This ensures that the Array is created only once and that only as many copies 
-	 * as necessary are made.
-	 */
-	syn ArrayExp FExp.copyArrayExp() = (ArrayExp) asFAbstractArrayExp().createArrayExp().unboundCopy();
-	
-	/**
-	 * Allows for more efficient execution of {@link #getArrayExp()} in some cases.
-	 * Result is only defined if this expression is an array.
-	 * 
-	 * See {@link #copyArrayExp()} for instructions. 
-	 * When overriding createArrayExp(), always declare it as lazy.
-	 */
-	syn ArrayExp FAbstractArrayExp.createArrayExp() = getArrayExp();
 	
 	eq FBinExp.getArrayExp() {
 		/* Standard implementation covers many binary operators.
@@ -1355,27 +1356,31 @@ aspect Arrays {
 			cur = new FAddExp(cur, new FMulExp( left.next().fullCopy(), right.next().fullCopy()));
 		return cur;
 	}
-	
-	eq FPowExp.getArrayExp() {
-		int e = getRight().ceval().intValue();
-		if (e <= 0)
-			return new FIdentity(new FIntegerLitExp(size().get(0))).getArrayExp();
-		
-		ArrayExp base = getLeft().asFAbstractArrayExp().getArrayExp();
-		ArrayExp res = base;
-		FType type = type();
-		for (; e > 1; e--) {
-			ArrayExp cur = new ArrayExp(indices());
-			for (Index i : cur.indices()) {
-				Iterator<FExp> left = res.leftMulIterator(i);
-				Iterator<FExp> right = base.rightMulIterator(i);
-				cur.set(i, vectorMultiplication(left, right, type));
-			}
-			res = cur;
-		}
-		return res;
-	}
-	
+
+    eq FPowExp.getArrayExp() {
+        int e = getRight().ceval().intValue();
+        if (e < 1) {
+            return new FIdentity(new FIntegerLitExp(size().get(0))).getArrayExp();
+        }
+        if (e == 1) {
+            /* Handled in getArray() */
+            throw new UnsupportedOperationException();
+        }
+        Array base = getLeft().getArray();
+        ArrayExp res = null;
+        FType type = type();
+        for (; e > 1; e--) {
+            ArrayExp cur = new ArrayExp(indices());
+            for (Index i : cur.indices()) {
+                Iterator<FExp> left = (res == null ? base : res).leftMulIterator(i);
+                Iterator<FExp> right = base.rightMulIterator(i);
+                cur.set(i, vectorMultiplication(left, right, type));
+            }
+            res = cur;
+        }
+        return res;
+    }
+
 	eq FTranspose.getArrayExp() {
 		Array inner = getFExp().getArray();
 		ArrayExp res = new ArrayExp(indices());
@@ -1503,9 +1508,6 @@ aspect Arrays {
 	}
 	
 	eq FArray.getArrayExp() {
-		if (isIterArray()) {
-            return getFExp(0).copyArrayExp();
-		}
 		ArrayExp arr = new ArrayExp(indices());
 		for (Index i : arr.indices())
 			fillArray(arr, i, 0);
@@ -1538,10 +1540,9 @@ aspect Arrays {
 		List fil = (List) getForIndexList().fullCopy();
 		return new FIterExp(exp, fil);
 	}
-	
-    syn lazy ArrayExp FIterExp.createArrayExp() = getFExp().getArray().createExpanded(getForIndexList());
-	eq FIterExp.getArrayExp() = copyArrayExp();
-	
+
+    eq FIterExp.getArrayExp() = getFExp().getArray().createExpanded(getForIndexList());
+
     eq FSubscriptedExp.getArrayExp() {
         if (!getFExp().variability().knownParameterOrLess() && !getFArraySubscripts().variability().knownParameterOrLess()) {
             FArraySubscripts fas = getFArraySubscripts();
@@ -1840,22 +1841,18 @@ aspect Arrays {
 	eq FIterExp.getFExp().iterExpDepth()  = iterExpDepth() + 1;
 	eq FClass.getChild().iterExpDepth()   = 0;
 	eq InstNode.getChild().iterExpDepth() = 0;
-	
-	eq FIfExp.getArrayExp() {
-		if (getThenExp().size().equivalent(getElseExp().size(), inFunction())) {
-			ArrayExp arr = new ArrayExp(indices());
-			Array thenArr = getThenExp().getArray();
-			Array elseArr = getElseExp().getArray();
-			for (Index i : arr.indices()) {
-				FExp ifExp = getIfExp().fullCopy();
-				arr.set(i, new FIfExp(ifExp, thenArr.get(i), elseArr.get(i)));
-			}
-			return arr;
-		} else {
-			return cevalSelectExp().copyArrayExp();
-		}
-	}
-	
+
+    eq FIfExp.getArrayExp() {
+        ArrayExp arr = new ArrayExp(indices());
+        Array thenArr = getThenExp().getArray();
+        Array elseArr = getElseExp().getArray();
+        for (Index i : arr.indices()) {
+            FExp ifExp = getIfExp().fullCopy();
+            arr.set(i, new FIfExp(ifExp, thenArr.get(i), elseArr.get(i)));
+        }
+        return arr;
+    }
+
 	eq FIdUseExp.getArrayExp() {
 		/*
 		 * Based on an array access, say x, corresponding to the declaration
