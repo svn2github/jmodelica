@@ -199,15 +199,11 @@
     <var name="java_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
-            <var name="has_java_copy_temp" value="true"/>
+            <condition property="@{module}.disable_java_copy" else="false">
+                <isset property="@{module}.disable_java_copy" />
+            </condition>
             <var name="has_java_replace_temp" value="false"/>
             <var name="has_java_rename_package_temp" value="false"/>
-            <if>
-                <isset property="@{module}.java_copy" />
-                <then>
-                    <var name="has_java_copy_temp" value="${@{module}.java_copy}"/>
-                </then>
-            </if>
             <if>
                 <isset property="@{module}.java_replace" />
                 <then>
@@ -256,7 +252,6 @@
                     </for>
                 </then>
             </if>
-            <property name="@{module}.has_java_copy" value="${has_java_copy_temp}" />
             <property name="@{module}.has_java_replace" value="${has_java_replace_temp}" />
             <property name="@{module}.has_java_rename_package" value="${has_java_rename_package_temp}" />
             <condition property="@{module}.need_patch_java" else="false">
@@ -272,7 +267,7 @@
                     <not>
                         <and>
                             <istrue value="${@{module}.need_patch_java}" />
-                            <istrue value="${@{module}.has_java_copy}" />
+                            <isfalse value="${@{module}.disable_java_copy}" />
                         </and>
                     </not>
                 </and>
@@ -323,7 +318,6 @@
 
     <!-- calculate extra java file generators -->
     <extra-calc-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
-    <extra-calc-macro generate="generate-pre" gen-extra="gen-extra-pre" generated="generated-pre"/>
 
     <!-- calculate set of junit source file dirs to use -->
     <var name="junit_dirs_temp" value=""/>
@@ -514,11 +508,6 @@
         <compile-gen-extra-macro generate="generate"     gen-extra="gen-extra" />
     </target>
 
-    <target name="compile-gen-extra-pre">
-        <mkdir dir="${java_output}"/>
-        <compile-gen-extra-macro generate="generate-pre" gen-extra="gen-extra-pre" />
-    </target>
-
     <!-- Compile all java files required by compiler (generated and static). -->
     <target name="compile-ast" depends="gen">
         <mkdir dir="${class_output}" />
@@ -683,15 +672,12 @@
         the same directory where the ast target remove. Should not have
         any other dependencies on the ast target.
     -->
-    <target name="gen-extra-pre" depends="ast,compile-gen-extra-pre">
-        <gen-extra-macro generate="generate-pre" gen-extra="gen-extra-pre" generated="generated-pre"/>
-    </target>
     <target name="gen-extra" depends="patch-java,compile-gen-extra">
         <gen-extra-macro generate="generate"     gen-extra="gen-extra"     generated="generated"/>
     </target>
 
     <!-- adds changes that need to be patched into the static java files -->
-    <target name="patch-java" depends="gen-extra-pre">
+    <target name="patch-java" depends="ast">
         <!-- currently this uses a simple search-replace, but could be expanded to use the same patch tool as above -->
         <for list="${modules}" param="module"> <sequential>
             <if>
@@ -708,7 +694,7 @@
                         <then>
                             <mkdir dir="${java_temp}" />
                             <if>
-                                <istrue value="${@{module}.has_java_copy}" />
+                                <isfalse value="${@{module}.disable_java_copy}" />
                                 <then>
                                     <copy todir="${java_temp}">
                                         <fileset dir="${@{module}.java_path}" includes="**/*.java" />
@@ -1072,12 +1058,6 @@ ${test_class_extra_defs}
                     <isset property="@{module}.generate"/>
                     <then>
                         <delete dir="${@{module}.gen-extra.gen_path}" />
-                    </then>
-                </if>
-                <if>
-                    <isset property="@{module}.generate-pre"/>
-                    <then>
-                        <delete dir="${@{module}.gen-extra-pre.gen_path}" />
                     </then>
                 </if>
             </sequential>

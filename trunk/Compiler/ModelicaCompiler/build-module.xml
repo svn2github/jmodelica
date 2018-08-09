@@ -15,10 +15,10 @@
 -->
 
 <project name="ModelicaCompiler-module">
-    <property name="ModelicaCompiler.generate-pre" value="org.jmodelica.build.options.OptionsAggregator"/>
-    <property name="ModelicaCompiler.package.generated-pre" value="${ast_package}.generated"/>
+    <property name="ModelicaCompiler.generate" value="org.jmodelica.build.options.OptionsAggregator"/>
+    <property name="ModelicaCompiler.package.generated" value="${ast_package}.generated"/>
     
-    <property name="ModelicaCompiler.java_copy" value="false"/>
+    <property name="ModelicaCompiler.disable_java_copy" value="true"/>
     
     <property name="ModelicaCompiler.java_replace" value="ast"/>
     <property name="ModelicaCompiler.java_replace.ast.from" value="org.jmodelica.modelica.compiler.generated."/>
