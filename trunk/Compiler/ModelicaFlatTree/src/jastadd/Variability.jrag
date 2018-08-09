@@ -120,40 +120,15 @@ aspect Variability {
      * records between flattening and scalarization.
      */
     public class CompositeVariability extends TypePrefixVariability {
-        private java.util.List<ComponentVariability> components;
+    
+        private Map<String, TypePrefixVariability> components;
         
-        public CompositeVariability(java.util.List<ComponentVariability> components) {
+        public CompositeVariability(Map<String, TypePrefixVariability> components) {
             this.components = components;
         }
         
-        public java.util.List<ComponentVariability> getComponents() {
-            return components;
-        }
-        
-        public ComponentVariability getComponent(int i) {
-            return components.get(i);
-        }
-        
-        public int getNumComponent() {
-            return components.size();
-        }
-    }
-    
-    public class ComponentVariability {
-        private String name; 
-        private TypePrefixVariability variability;
-        
-        public ComponentVariability(String name, TypePrefixVariability variability) {
-            this.name = name;
-            this.variability = variability;
-        }
-        
-        public String getName() {
-            return name;
-        }
-        
-        public TypePrefixVariability getVariability() {
-            return variability;
+        public TypePrefixVariability component(String name) {
+            return components.get(name);
         }
     }
 
@@ -255,8 +230,8 @@ aspect Variability {
     
     public TypePrefixVariability CompositeVariability.combine() {
         TypePrefixVariability high = Variability.constant();
-        for (ComponentVariability v : getComponents()) {
-            high = high.combine(v.getVariability().combine());
+        for (TypePrefixVariability v : components.values()) {
+            high = high.combine(v.combine());
         }
         return high;
     }
@@ -270,8 +245,8 @@ aspect Variability {
     
     public TypePrefixVariability CompositeVariability.combineDown() {
         TypePrefixVariability high = Variability.constant();
-        for (ComponentVariability v : getComponents()) {
-            high = high.combineDown(v.getVariability().combineDown());
+        for (TypePrefixVariability v : components.values()) {
+            high = high.combineDown(v.combineDown());
         }
         return high;
     }
@@ -280,17 +255,6 @@ aspect Variability {
      * If this is a composite variability, return the named component, else this.
      */
     public TypePrefixVariability  TypePrefixVariability.component(String name) { return this; }
-    
-    private Map<String,Integer> CompositeVariability.nameMap = null;
-    public TypePrefixVariability CompositeVariability.component(String name) {
-        if (nameMap==null) {
-            nameMap = new HashMap<String,Integer>();
-            for (int i = 0; i < getNumComponent(); i++) {
-                nameMap.put(getComponent(i).getName(), i);
-            }
-        }
-        return getComponent(nameMap.get(name)).getVariability();
-    }
     
     syn TypePrefixVariability FAbstractEquation.variability() = Variability.continuous();
     eq FEquation.variability() = isWhen() ? Variability.discrete() : getLeft().variability().combine(getRight().variability());
@@ -748,20 +712,20 @@ aspect Variability {
         TypePrefixVariability low = Variability.continuous();
         TypePrefixVariability high = Variability.constant();
         boolean containsComposite = false;
-        ArrayList<ComponentVariability> l = new ArrayList<ComponentVariability>();
-        for (ComponentVariability fcv : getComponents()) {
-            String name = fcv.getName();
-            TypePrefixVariability v = fcv.getVariability();
+        Map<String, TypePrefixVariability> map = new HashMap<>();
+        for (Map.Entry<String, TypePrefixVariability> fcv : components.entrySet()) {
+            String name = fcv.getKey();
+            TypePrefixVariability v = fcv.getValue();
             TypePrefixVariability nv = other.component(name);
             nv = v.combine(nv, combiner);
-            l.add(new ComponentVariability(fcv.getName(), nv));
+            map.put(name, nv);
             low = low.combineDown(nv.combineDown());
             high = high.combine(nv.combine());
             containsComposite = containsComposite || nv.compositeVariability();
         }
         if (!containsComposite && low.equals(high))
             return low;
-        return new CompositeVariability(l);
+        return new CompositeVariability(map);
     }
 
 

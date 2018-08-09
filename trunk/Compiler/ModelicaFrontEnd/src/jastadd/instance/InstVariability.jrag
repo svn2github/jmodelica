@@ -105,11 +105,11 @@ aspect InstVariability {
         if (rec == null) {
             return Variability.continuous();
         }
-        java.util.List<ComponentVariability> l = new ArrayList<ComponentVariability>();
+        Map<String, TypePrefixVariability> map = new HashMap<>();
         for (InstComponentDecl icd : rec.allInstComponentDecls()) {
-            l.add(new ComponentVariability(icd.name(), icd.variability()));
+            map.put(icd.name(), icd.variability());
         }
-        return new CompositeVariability(l).combineInherit(super.calcVariability());
+        return new CompositeVariability(map).combineInherit(super.calcVariability());
     }
 
     syn boolean InstAssignable.isFinalIndependent() =

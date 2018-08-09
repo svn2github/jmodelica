@@ -1907,9 +1907,6 @@ aspect FlatPrettyPrint {
     public String Constant.toString()             { return "constant "; }
     public String Continuous.toString()           { return ""; }
     public String CompositeVariability.toString() { return combine().toString(); }
-    public String ComponentVariability.toString() {
-        return getVariability().toString() + " /* " + getName() + " */ ";
-    }
 
     public abstract String TypePrefixVariability.toStringLiteral();
     public String Parameter.toStringLiteral()         { return "parameter"; }
