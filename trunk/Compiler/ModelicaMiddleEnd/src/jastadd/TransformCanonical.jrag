@@ -1401,33 +1401,17 @@ aspect TransformCanonical {
     }
 
 	/**
-	 * Flag indicating if alias variables have been eliminated from the
-	 * model.
-	 */
-	public boolean FClass.aliasVariablesEliminated = false;
-	
-	/**
 	 * Eliminate alias variables from the flat model.
 	 * 
 	 * The non-alias variables are kept in the list FClass.FVariableList but the
 	 * alias variables are moved to FClass.AliasVariablesList.
 	 */
 	public void FClass.eliminateAliasVariables() {
-		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
-		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
 		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
         ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
 		
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
-		
-		// Go through all variables and insert in correct list
-		for (FVariable fv : getAliasVariables()) {
-				aliasVars.add(fv);
-		}
-		for (FVariable fv : getFVariables()) {
-            fv.aliasSort(nonAliasVars, aliasVars);
-		}
-		
+
 		// Remove alias equations.
 		for (FAbstractEquation equation : getFAbstractEquations()) 
 			if (!equation.isAliasEquation()) 
@@ -1448,19 +1432,36 @@ aspect TransformCanonical {
             }
         }
 
-		setFVariableList(new List(nonAliasVars));
-		setAliasVariableList(new List(aliasVars));
 		setFAbstractEquationList(new List(eqns));
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
             setParameterEquationList(new List(pEqns));
         }
 		
-		aliasVariablesEliminated = true;
-		enableAliasRewrite();
+        sortAliasvariables(false);
 		
 		flush();
 	}
-	
+
+    public void FClass.sortAliasvariables(boolean recompute) {
+        ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
+        ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
+        if (recompute) {
+            for (FVariable fv : getAliasVariables()) {
+                fv.aliasSort(nonAliasVars, aliasVars);
+            }
+        } else {
+            for (FVariable fv : getAliasVariables()) {
+                aliasVars.add(fv);
+            }
+        }
+        for (FVariable fv : getFVariables()) {
+             fv.aliasSort(nonAliasVars, aliasVars);
+        }
+        setFVariableList(new List(nonAliasVars));
+        setAliasVariableList(new List(aliasVars));
+        enableAliasRewrite();
+    }
+
     /**
      * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
      * <code>nonAliasVars</code>, if it is not.
@@ -1532,7 +1533,7 @@ aspect TransformCanonical {
      * FIdUses referring to alias variables need to be changed to 
      * FIdUses referring to their alias targets. 
      * 
-     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * This is done by rewrites which are activated once FIdUseExp.rewriteAlias
      * is true. Notice that in order for the rewrite to be enable, the is$final
      * field of FIdUseExp needs to be set to false: this is done by the recursive
      * method ASTNode.flushAllRecursiveClearFinal. 
@@ -1608,7 +1609,7 @@ aspect TransformCanonical {
      * FDerExps referring to alias variables need to be changed to 
      * FDerExps referring to their alias targets. 
      * 
-     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * This is done by rewrites which are activated once FIdUseExp.rewriteAlias
      * is true. Notice that in order for the rewrite to be enable, the is$final
      * field of FIdUseExp needs to be set to false: this is done by the recursive
      * method ASTNode.flushAllRecursiveClearFinal. 
