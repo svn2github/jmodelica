@@ -16992,4 +16992,66 @@ end FunctionTests.ConstantInFunction5;
 ")})));
 end ConstantInFunction5;
 
+model AssignmentSizeCheck1
+  function f
+      input Integer n;
+      output Real[n] y;
+    algorithm
+      y := zeros(0);
+  end f;
+
+  constant Real[:] p1 = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AssignmentSizeCheck1",
+            description="Verify that array size mismatches are found during instantiation; #5654.",
+            errorMessage="
+Error at line 6, column 7, in file '...', ARRAY_SIZE_MISMATCH_IN_EQUATION:
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [1], and size of right-hand side is [0]
+")})));
+end AssignmentSizeCheck1;
+
+model AssignmentSizeCheck2
+  function f
+      input Integer m;
+      input Integer n;
+      output Real[m, n] y;
+    algorithm
+      y := { { 1, 2 }, { 3, 4 } };
+  end f;
+
+  constant Real[:, :] p1 = f(1, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AssignmentSizeCheck2",
+            description="Verify that matrix size mismatches are found during instantiation; #5654.",
+            errorMessage="
+Error at line 7, column 7, in file '...', ARRAY_SIZE_MISMATCH_IN_EQUATION:
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [1, 2], and size of right-hand side is [2, 2]
+")})));
+end AssignmentSizeCheck2;
+
+model AssignmentSizeCheck3
+  function f
+      input Integer m;
+      input Integer n;
+      output Real[m, n] y;
+    algorithm
+      y := { { 1 } };
+  end f;
+
+  constant Real[:, :] p1 = f(2, 1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AssignmentSizeCheck3",
+            description="Verify that matrix size mismatches are found during instantiation; #5654.",
+            errorMessage="
+Error at line 7, column 7, in file '...', ARRAY_SIZE_MISMATCH_IN_EQUATION:
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [2, 1], and size of right-hand side is [1, 1]
+")})));
+end AssignmentSizeCheck3;
+
 end FunctionTests;

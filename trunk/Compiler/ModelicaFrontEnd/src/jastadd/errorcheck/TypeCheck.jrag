@@ -1050,7 +1050,7 @@ aspect FlatTypeCheck {
   eq InstEnumClassDecl.isComponentSizeClass()      = true;
   
   inh boolean InstClassAccess.isInstComponentSize();
-    inh boolean FIdUseExp.isInstComponentSize();
+  inh boolean FIdUseExp.isInstComponentSize();
   inh boolean FExpSubscript.isInstComponentSize();
   inh boolean FArraySubscripts.isInstComponentSize();
   eq InstComponentDecl.getLocalFArraySubscripts().isInstComponentSize() = true;

@@ -165,12 +165,24 @@ aspect ConstantEvaluationStatements {
     public void InstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         InstAccess firstPart = getFirstInstAccess();
         InstComponentDecl comp = firstPart.myInstComponentDecl();
+
         if (comp instanceof InstAssignable) {
             InstAssignable var = (InstAssignable) comp;
+
+            Size leftSize = size();
+            Size rightSize = right.size();
+
+            if (!leftSize.equals(rightSize)) {
+                ASTNode.ARRAY_SIZE_MISMATCH_IN_EQUATION.invoke(this, leftSize, rightSize);
+            }
+
             CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
             evaluator.setEvaluationValue(var, val);
         }
     }
+
+    syn boolean BaseNode.isInstAssignable() = false;
+    eq InstAssignable.isInstAssignable() = true;
 
     /**
      * Common interface for parts of qualified names.
