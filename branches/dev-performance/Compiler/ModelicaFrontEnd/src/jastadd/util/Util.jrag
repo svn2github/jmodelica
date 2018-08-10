@@ -822,7 +822,7 @@ aspect Names {
         return icd.successful() ? icd.target().dirName() : null;
     }
     eq SrcFullClassDecl.getChild().packagePath(String name) {
-        SrcClassDecl cd = simpleLookupClassDottedGlobal(name);
+        SrcClassDecl cd = simpleLookupClass(new QualifiedName(name, true));
         return (cd == null || cd.isUnknown()) ? null : cd.dirName();
     }
 
@@ -1331,7 +1331,7 @@ aspect ComponentDeclMethods {
      * Check if this component is or is part of a component that is declared input or output on the top level.
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
-    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && 
+    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && !inExpandableConnector() && 
             (isInput() || isOutput()) && !isProtected() && isPublicVar();
 
     inh boolean InstComponentDecl.isTopLevel();

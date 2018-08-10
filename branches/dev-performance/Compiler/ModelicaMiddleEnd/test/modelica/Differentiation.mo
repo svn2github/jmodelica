@@ -2373,6 +2373,86 @@ end Differentiation.DerivativeAnnotation.Order2;
 
         model Functional1
             partial function partFunc
+                output Real y;
+            end partFunc;
+
+            function fullFunc
+                extends partFunc;
+                input Real x1;
+            algorithm
+                y := x1;
+            end fullFunc;
+
+            function usePartFunc
+                input partFunc pf;
+                output Real y;
+            algorithm
+                y := pf();
+                annotation(smoothOrder=1);
+            end usePartFunc;
+
+            Real x1,x2;
+        equation
+            der(x1) + der(x2) = 1;
+            x1 + usePartFunc(function fullFunc(x1=x2)) = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Functional1",
+                description="Test differentiation of functional input arguments",
+                flatModel="
+fclass Differentiation.DerivativeAnnotation.Functional1
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + Differentiation.DerivativeAnnotation.Functional1.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 1;
+ _der_x1 + Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 0;
+
+public
+ function Differentiation.DerivativeAnnotation.Functional1.usePartFunc
+  input ((Real y) = Differentiation.DerivativeAnnotation.Functional1.partFunc()) pf;
+  output Real y;
+ algorithm
+  y := pf();
+  return;
+ annotation(smoothOrder = 1,derivative(order = 1) = Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc);
+ end Differentiation.DerivativeAnnotation.Functional1.usePartFunc;
+
+ function Differentiation.DerivativeAnnotation.Functional1.partFunc
+  output Real y;
+ algorithm
+  return;
+ end Differentiation.DerivativeAnnotation.Functional1.partFunc;
+
+ function Differentiation.DerivativeAnnotation.Functional1.fullFunc
+  output Real y;
+  input Real x1;
+ algorithm
+  y := x1;
+  return;
+ end Differentiation.DerivativeAnnotation.Functional1.fullFunc;
+
+ function Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc
+  input ((Real y) = Differentiation.DerivativeAnnotation.Functional1.partFunc()) pf;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := 0.0;
+  y := pf();
+  return;
+ annotation(smoothOrder = 0);
+ end Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc;
+
+end Differentiation.DerivativeAnnotation.Functional1;
+")})));
+        end Functional1;
+
+        model Functional1b
+            partial function partFunc
                 input Real xb;
                 output Real y;
             end partFunc;
@@ -2397,18 +2477,18 @@ end Differentiation.DerivativeAnnotation.Order2;
             der(x1) + der(x2) = 1;
             x1 + usePartFunc(function fullFunc(x1=x2)) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_Functional1",
-            description="Test failing differentiation of functional input arguments",
-            errorMessage="
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+                name="DerivativeAnnotation_Functional1b",
+                description="Test failing differentiation of functional input arguments",
+                errorMessage="
 1 errors found:
 
 Error in flattened model:
   Cannot differentiate call to function without derivative or smooth order annotation 'pf(y)' in equation:
-   x1 + Differentiation.DerivativeAnnotation.Functional1.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 1
+   x1 + Differentiation.DerivativeAnnotation.Functional1b.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1b.fullFunc(x2)) = 1
 ")})));
-        end Functional1;
+        end Functional1b;
 
     end DerivativeAnnotation;
 

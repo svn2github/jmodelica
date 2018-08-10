@@ -179,7 +179,7 @@ aspect ParameterEquations {
 	
 	syn lazy Map<FAbstractVariable,FAbstractEquation> FClass.parameterEquationsMap() {
 		Map<FAbstractVariable,FAbstractEquation> map = new HashMap<FAbstractVariable,FAbstractEquation>();
-		for (FAbstractEquation equ : getFParameterEquations())
+		for (FAbstractEquation equ : getParameterEquations())
 			equ.addToParameterEquationsMap(map);
 		return map;
 	}
@@ -225,7 +225,7 @@ aspect ParameterEquations {
 	 * Is this expression in a parameter equation?
 	 */
 	inh boolean FExp.inParameterEquation();
-	eq FClass.getFParameterEquation().inParameterEquation() = true;
+	eq FClass.getParameterEquation().inParameterEquation() = true;
 	eq FClass.getChild().inParameterEquation()              = false;
 	eq FFunctionDecl.getChild().inParameterEquation()       = false;
 	eq Root.getChild().inParameterEquation()                = false;

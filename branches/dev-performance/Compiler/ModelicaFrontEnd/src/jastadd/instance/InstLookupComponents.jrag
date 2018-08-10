@@ -609,7 +609,7 @@ aspect InstLookupComponents {
         } else {    
             for (InstComponentDecl ic : getInstComponentDecls()) 
                 if (ic.matches(name))
-                    return findInnerComponentIfAny(ic);
+                    return findInnerComponentIfAny(ic.duplicateOriginal());
 
             for (InstExtends ie : getInstExtendss()) {
                 InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
@@ -671,7 +671,7 @@ aspect InstLookupComponents {
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstConstant(String name) {
         for (InstComponentDecl ic : getInstComponentDecls()) 
             if (ic.getSrcComponentDecl().isConstant() && ic.matches(name))
-                return InstLookupResult.found(ic);
+                return InstLookupResult.found(ic.duplicateOriginal());
         
         return InstLookupResult.notFound();
     }

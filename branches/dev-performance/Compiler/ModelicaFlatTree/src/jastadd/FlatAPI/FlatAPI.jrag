@@ -1020,21 +1020,35 @@ aspect FlatAPI {
      * Returns the z variability enum for this variability and supplied
      * variable.
      */
-    syn FClass.ZVariability FTypePrefixVariability.zVariability(FVariable var) = null;
-    eq FConstant.zVariability(FVariable var)          = FClass.ZVariability.CONSTANT;
-    eq FFixedParameter.zVariability(FVariable var)    = FClass.ZVariability.REGULAR_PARAMETER;
-    eq FStructParameter.zVariability(FVariable var)   = FClass.ZVariability.STRUCTURAL_PARAMETER;
-    eq FFinalParameter.zVariability(FVariable var)    = FClass.ZVariability.FINAL_PARAMETER;
-    eq FEvalTrueParameter.zVariability(FVariable var) = FClass.ZVariability.EVAL_PARAMETER;
-    eq FInitialParameter.zVariability(FVariable var)  = FClass.ZVariability.INITIAL_PARAMETER;
-    eq FDiscrete.zVariability(FVariable var) {
+    public FClass.ZVariability TypePrefixVariability.zVariability(FVariable var) {
+        return null;
+    }
+    public FClass.ZVariability Constant.zVariability(FVariable var) {
+        return FClass.ZVariability.CONSTANT;
+    }
+    public FClass.ZVariability FixedParameter.zVariability(FVariable var) {
+        return FClass.ZVariability.REGULAR_PARAMETER;
+    }
+    public FClass.ZVariability StructParameter.zVariability(FVariable var) {
+        return FClass.ZVariability.STRUCTURAL_PARAMETER;
+    }
+    public FClass.ZVariability FinalParameter.zVariability(FVariable var) {
+        return FClass.ZVariability.FINAL_PARAMETER;
+    }
+    public FClass.ZVariability EvalTrueParameter.zVariability(FVariable var) {
+        return FClass.ZVariability.EVAL_PARAMETER;
+    }
+    public FClass.ZVariability InitialParameter.zVariability(FVariable var) {
+        return FClass.ZVariability.INITIAL_PARAMETER;
+    }
+    public FClass.ZVariability Discrete.zVariability(FVariable var) {
         if (var.isInput()) {
             return FClass.ZVariability.INPUT;
         } else {
             return FClass.ZVariability.DISCRETE;
         }
     }
-    eq FContinuous.zVariability(FVariable var) {
+    public FClass.ZVariability Continuous.zVariability(FVariable var) {
         if (var.isInput()) {
             return FClass.ZVariability.INPUT;
         } else if (var.differentiatedByFDerExp()) {
@@ -1063,7 +1077,7 @@ aspect FlatAPI {
     /**
      * Calculates the z variability enum for this variable.
      */
-    syn FClass.ZVariability FVariable.zVariability() = getFTypePrefixVariability().zVariability(this);
+    syn FClass.ZVariability FVariable.zVariability() = getTypePrefixVariability().zVariability(this);
 
     syn FClass.ZType FType.genType() = null;
     eq FBooleanType.genType()          = FClass.ZType.BOOLEAN;
@@ -1816,7 +1830,7 @@ aspect FlatAPI {
         ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
         l.addAll(equations());
         l.addAll(initialEquations());
-        l.addAll(getFParameterEquations().toArrayList());
+        l.addAll(getParameterEquations().toArrayList());
         return l;
     }
 
@@ -2396,7 +2410,7 @@ aspect FlatAPI {
     syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
     
     inh boolean FAbstractEquation.isParameterEquation();
-    eq FClass.getFParameterEquation().isParameterEquation() = true;
+    eq FClass.getParameterEquation().isParameterEquation() = true;
     eq Root.getChild().isParameterEquation() = false;
     
     inh boolean FAbstractEquation.isNormalEquation();
@@ -2408,7 +2422,7 @@ aspect FlatAPI {
     inh List<FAbstractEquation> FAbstractEquation.myFAbstractEquationList();
     eq FClass.getFAbstractEquation().myFAbstractEquationList() = getFAbstractEquations();
     eq FClass.getFInitialEquation().myFAbstractEquationList() = getFInitialEquations();
-    eq FClass.getFParameterEquation().myFAbstractEquationList() = getFParameterEquations();
+    eq FClass.getParameterEquation().myFAbstractEquationList() = getParameterEquations();
     eq FClass.getChild().myFAbstractEquationList() = null;
     eq Root.getChild().myFAbstractEquationList() = null;
     
@@ -3366,10 +3380,10 @@ aspect FVariableUses {
     eq Root.getChild().inParamBindingExp() = false;
     eq FVariable.getBindingExp().inParamBindingExp() = isParameter();
     
-    inh FTypePrefixVariability FExp.bindingExpVariability();
-    eq Root.getChild().bindingExpVariability() = fContinuous();
+    inh TypePrefixVariability FExp.bindingExpVariability();
+    eq Root.getChild().bindingExpVariability() = Variability.continuous();
     eq FVariable.getChild().bindingExpVariability() = variability();
-    eq FVariable.getFAttribute().bindingExpVariability() = fParameter();
+    eq FVariable.getFAttribute().bindingExpVariability() = Variability.parameter();
     eq FRecordVariable.getFAttribute(int i).bindingExpVariability() =
             variability().component(getFAttribute(i).name());
     

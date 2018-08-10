@@ -111,14 +111,14 @@ aspect VariabilityPropagation {
     /**
      * If any arg is constant return constant. Otherwise returns combined variability.
      */
-    syn FTypePrefixVariability FFunctionCallEquation.potentialPartialVariability()
+    syn TypePrefixVariability FFunctionCallEquation.potentialPartialVariability()
         = getCall().potentialPartialVariability();
     
-    syn FTypePrefixVariability FAbstractFunctionCall.potentialPartialVariability() = variability();
+    syn TypePrefixVariability FAbstractFunctionCall.potentialPartialVariability() = variability();
     eq FFunctionCall.potentialPartialVariability() {
         for (FExp exp : getArgs()) {
             if (exp.variability().knownParameterOrLess()) {
-                return fConstant();
+                return Variability.constant();
             }
         }
         return super.potentialPartialVariability();
@@ -200,7 +200,7 @@ aspect VariabilityPropagation {
                 return evaluator;
             }
             
-            public VariableEvaluator evaluator(FTypePrefixVariability variability) {
+            public VariableEvaluator evaluator(TypePrefixVariability variability) {
                 if (variability.knownParameterOrLess()) {
                     return evaluator;
                 } else {
@@ -208,11 +208,11 @@ aspect VariabilityPropagation {
                 }
             }
             
-            public void addEquation(FTypePrefixVariability v, FAbstractEquation fae) {
+            public void addEquation(TypePrefixVariability v, FAbstractEquation fae) {
                 if (v.initialParameterVariability()) {
                     addFInitialEquationNoTransform(fae);
                 } else {
-                    addFParameterEquationNoTransform(fae);
+                    addParameterEquationNoTransform(fae);
                 }
             }
             
@@ -248,7 +248,7 @@ aspect VariabilityPropagation {
 	 */
     public void FClass.variabilityPropagation(FClass.VariabilityPropagator propagator) {
 
-		List<FAbstractEquation> parameterEquations = getFParameterEquations();
+		List<FAbstractEquation> parameterEquations = getParameterEquations();
         LinkedHashSet<FAbstractEquation> worklist = propagator.getWorklist();
 		List<FAbstractEquation> equations = getFAbstractEquations();
 
@@ -310,7 +310,7 @@ aspect VariabilityPropagation {
         
         FVariable fVariable;
         FExp solution;
-        FTypePrefixVariability solutionVariability;
+        TypePrefixVariability solutionVariability;
 
         fVariable = variables().iterator().next();
 
@@ -349,7 +349,7 @@ aspect VariabilityPropagation {
             } catch (ConstantEvaluationException e) {}
             if (newSolution == null) {
                 // If we can't evaluate right now, set it as parameter
-                solutionVariability = fParameter();
+                solutionVariability = Variability.parameter();
             }
         }
 
@@ -364,10 +364,10 @@ aspect VariabilityPropagation {
     
     public void FFunctionCallEquation.variabilityPropagation(FClass.VariabilityPropagator propagator) {
         
-        FTypePrefixVariability variability = getCall().variability();
+        TypePrefixVariability variability = getCall().variability();
         for (FFunctionCallLeft left : getLefts()) {
             if (left.hasFExp() && !left.getFExp().canPropagate()) {
-                variability = fContinuous();
+                variability = Variability.continuous();
                 break;
             }
         }
@@ -399,7 +399,7 @@ aspect VariabilityPropagation {
         if (allRemoved) {
             this.taggedByVProp = true;
         } else {
-            variability = variability.combine(fFixedParameter());
+            variability = variability.combine(Variability.fixedParameter());
             if (variability.parameterVariability()) {
                 propagator.addEquation(variability, this);
                 this.taggedByVProp = true;
@@ -409,7 +409,7 @@ aspect VariabilityPropagation {
     }
     
     public void FAlgorithm.variabilityPropagation(FClass.VariabilityPropagator propagator) {
-        FTypePrefixVariability variability = variabilityRHS();
+        TypePrefixVariability variability = variabilityRHS();
         if (variability.parameterVariability()) {
             for (FVariable fv : referencedFVariablesInLHS()) {
                 fv.variabilityPropagation(propagator, variability, null);
@@ -422,7 +422,7 @@ aspect VariabilityPropagation {
 	public boolean FExp.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
             CValue value,
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
 		throw new UnsupportedOperationException();
 	}
     
@@ -430,7 +430,7 @@ aspect VariabilityPropagation {
     public boolean FNoExp.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
             CValue value,
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         return true;
     }
     
@@ -438,7 +438,7 @@ aspect VariabilityPropagation {
 	public boolean FRecordConstructor.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
             CValue value,
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         
         if (taggedByVProp) {
             return taggedByVProp;
@@ -462,7 +462,7 @@ aspect VariabilityPropagation {
     public boolean FArray.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
             CValue value,
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         
         if (taggedByVProp) {
             return taggedByVProp;
@@ -479,7 +479,7 @@ aspect VariabilityPropagation {
     public boolean FExp.variabilityPropagationArray(
             FClass.VariabilityPropagator propagator,
             CValueArray value,
-            FTypePrefixVariability variability,
+            TypePrefixVariability variability,
             Enumerator enumerator) {
         return this.variabilityPropagation(propagator,
                     value == null ? CValue.UNKNOWN : value.values[enumerator.next()], variability);
@@ -489,7 +489,7 @@ aspect VariabilityPropagation {
     public boolean FArray.variabilityPropagationArray(
             FClass.VariabilityPropagator propagator,
             CValueArray value,
-            FTypePrefixVariability variability,
+            TypePrefixVariability variability,
             Enumerator enumerator) {
         boolean res = true;
         for (FExp exp : getFExps()) {
@@ -502,7 +502,7 @@ aspect VariabilityPropagation {
     public boolean FIdUseExp.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
             CValue value,
-            FTypePrefixVariability variability) {
+            TypePrefixVariability variability) {
         
         if (taggedByVProp) {
             return taggedByVProp;
@@ -512,12 +512,12 @@ aspect VariabilityPropagation {
         if (value.hasBuildLiteral()) {
             try {
                 bexp = value.buildLiteral();
-                variability = fConstant();
+                variability = Variability.constant();
             } catch (ConstantEvaluationException e) {
-                variability = variability.combine(fFixedParameter());
+                variability = variability.combine(Variability.fixedParameter());
             }
         } else {
-            variability = variability.combine(fFixedParameter());
+            variability = variability.combine(Variability.fixedParameter());
         }
         
         if (variability.parameterOrLess()) {
@@ -531,7 +531,7 @@ aspect VariabilityPropagation {
     
     public void FAbstractVariable.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
-            FTypePrefixVariability variability,
+            TypePrefixVariability variability,
             FExp bindingExp) {
         
         throw new UnsupportedOperationException();
@@ -540,7 +540,7 @@ aspect VariabilityPropagation {
     @Override
     public void FVariable.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
-            FTypePrefixVariability variability,
+            TypePrefixVariability variability,
             FExp bindingExp) {
         
         FAbstractEquation equation;
@@ -550,8 +550,8 @@ aspect VariabilityPropagation {
         // Declaration
         // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
         if (variability.evalTrueParameterVariability())
-            variability = fStructParameter();
-        setFTypePrefixVariability(variability);
+            variability = Variability.structParameter();
+        setTypePrefixVariability(variability);
         if (variability.knownParameterOrLess()) {
             setBindingExp(bindingExp.fullCopy());
         }
@@ -606,7 +606,7 @@ aspect VariabilityPropagation {
         if (isDifferentiatedVariable()) {
             FAbstractVariable derVar = myDerivativeVariable();
             derVar.taggedByVProp = true;
-            derVar.variabilityPropagation(propagator, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));
+            derVar.variabilityPropagation(propagator, Variability.constant(), new FIntegerLitExp(0));
         }
         
         // Alias variables
@@ -618,7 +618,7 @@ aspect VariabilityPropagation {
                 FVariable fv = av.getFVariable();
                 boolean neg = av.isNegated() ^ thisAlias.isNegated();
                 if (fv != this) {
-                    fv.setFTypePrefixVariability(variability);
+                    fv.setTypePrefixVariability(variability);
                     if (variability.knownParameterOrLess()) {
                         fv.setBindingExp(bindingExp.negated(neg));
                     } else if (unAlias && variability.parameterVariability() && !fv.isTemporary()) {
@@ -649,8 +649,8 @@ aspect VariabilityPropagation {
     }
     
     
-    refine Variability eq FMulExp.expVariability() = taggedByVProp ? fConstant() : refined();
-    refine Variability eq FDivExp.expVariability() = taggedByVProp ? fConstant() : refined();
+    refine Variability eq FMulExp.expVariability() = taggedByVProp ? Variability.constant() : refined();
+    refine Variability eq FDivExp.expVariability() = taggedByVProp ? Variability.constant() : refined();
     
     refine ConstantEvaluation eq FDotMulExp.cevalCalc(VariableEvaluator evaluator) = taggedByVProp ? 
             type().zeroCValue() : refined(evaluator);

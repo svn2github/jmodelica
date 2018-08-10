@@ -31,7 +31,7 @@ FClass : BaseNode ::= FQName
                       FVariable* 
                       AliasVariable:FVariable* 
                       FInitialEquation:FAbstractEquation*
-                      FParameterEquation:FAbstractEquation*
+                      ParameterEquation:FAbstractEquation*
                       FAbstractEquation*
                       FFunctionDecl*
                       FRecordDecl*
@@ -112,7 +112,7 @@ UnknownFVariable : FAbstractVariable;
  * FQName class.
  */
 abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
-                                           FTypePrefixVariability
+                                           <TypePrefixVariability:TypePrefixVariability>
                                            <TypePrefixInputOutput:TypePrefixInputOutput>
                                            FAttribute*
                                            <DerivedType>
@@ -131,79 +131,6 @@ FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
  * Base class for variable type prefixes.
  */
 abstract FTypePrefix : BaseNode;
-
-/**
- * Base class for variability type prefixes.
- */
-abstract FTypePrefixVariability : FTypePrefix;
-
-/**
- * Continuous (default) variability.
- *
- * Continuous is not a valid prefix but is used to identify expressions that 
- * are not declared as parameters, constants, or discrete.
- */
-FContinuous : FTypePrefixVariability;
-
-/**
- * Discrete variability.
- */
-FDiscrete : FTypePrefixVariability;
-
-/**
- * Parameter variability.
- */
-abstract FParameter : FTypePrefixVariability;
-
-FInitialParameter : FParameter;
-
-FFixedParameter : FParameter;
-
-FIndexParameter : FParameter;
-
-/**
- * Evaluate false parameter variability.
- */
-FEvalFalseParameter : FFixedParameter;
-
-/**
- * Parameter with known value variability
- */
-abstract FKnownParameter : FParameter;
-
-/**
- * Structural parameter variability.
- */
-FStructParameter : FKnownParameter ::= <Reason:String>;
-
-/**
- * Used to force variability for if equation tests
- * Is canceled by setting Evaluate=false
- */
-FTestParameter   : FStructParameter;
-
-/**
- * Evaluate true parameter variability.
- */
-FEvalTrueParameter : FKnownParameter;
-
-/**
- * Final parameter variability.
- */
-FFinalParameter : FKnownParameter;
-
-/**
- * Constant variability.
- */
-FConstant : FTypePrefixVariability;
-
-/**
- * Composite variability. Represents variability of
- * records between flattening and scalarization.
- */
-FCompositeVariability : FTypePrefixVariability ::= Component:FComponentVariability*;
-
-FComponentVariability ::= <Name:String> Variability:FTypePrefixVariability;
 
 /**
  * FVariable of type Real.

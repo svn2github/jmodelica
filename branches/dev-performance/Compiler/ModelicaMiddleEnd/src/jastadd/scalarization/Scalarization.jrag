@@ -28,9 +28,9 @@ aspect Scalarization {
         private List vars;
         private List clauses;
         private ForNames forNames;
-        private FTypePrefixVariability variability;
+        private TypePrefixVariability variability;
         
-        public Scalarizer(List vars, List clauses, ForNames forNames, FTypePrefixVariability variability) {
+        public Scalarizer(List vars, List clauses, ForNames forNames, TypePrefixVariability variability) {
             this.vars = vars;
             this.clauses = clauses;
             this.forNames = forNames;
@@ -85,7 +85,7 @@ aspect Scalarization {
         public abstract<T extends Scalarizer> T block(List clauses);
         public abstract<T extends Scalarizer> T block(List vars, List clauses);
         
-        public FTypePrefixVariability getVariability() {
+        public TypePrefixVariability getVariability() {
             return variability;
         }
         
@@ -106,12 +106,12 @@ aspect Scalarization {
             
             public Variable(List vars) {
                 this.vars = vars;
-                si = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), ASTNode.fInitialParameter());
-                sp = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), ASTNode.fFixedParameter());
-                sc = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), ASTNode.fContinuous());
+                si = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.initialParameter());
+                sp = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.fixedParameter());
+                sc = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.continuous());
             }
             
-            public Scalarizer.Equation select(FTypePrefixVariability variability) {
+            public Scalarizer.Equation select(TypePrefixVariability variability) {
                 if (variability.fixedParameterOrLess()) {
                     return sp;
                 } else if (variability.parameterOrLess()) {
@@ -124,11 +124,11 @@ aspect Scalarization {
         
         public static class Equation extends Scalarizer {
             
-            public Equation(List vars, List equs, FTypePrefixVariability variability) {
+            public Equation(List vars, List equs, TypePrefixVariability variability) {
                 this(vars, equs, new ForNames(), variability);
             }
             
-            public Equation(List vars, List equs, ForNames forNames, FTypePrefixVariability variability) {
+            public Equation(List vars, List equs, ForNames forNames, TypePrefixVariability variability) {
                 super(vars, equs, forNames, variability);
             }
             
@@ -164,13 +164,13 @@ aspect Scalarization {
         }
         
         public static Scalarizer.Algorithm function(List<FFunctionVariable> vars, List<FStatement> stmts) {
-            return new Algorithm(vars, stmts, new ForNames(), true, ASTNode.fDiscrete());
+            return new Algorithm(vars, stmts, new ForNames(), true, Variability.discrete());
         }
         
         public static class Algorithm extends Scalarizer {
             private boolean func;
             
-            public Algorithm(List vars, List clauses, ForNames forNames, boolean func, FTypePrefixVariability variability) {
+            public Algorithm(List vars, List clauses, ForNames forNames, boolean func, TypePrefixVariability variability) {
                 super(vars, clauses, forNames, variability);
                 this.func = func;
             }
@@ -221,12 +221,12 @@ aspect Scalarization {
         }
     }
     
-    syn List<FAbstractEquation> FTypePrefixVariability.selectEquations(List<FAbstractEquation> iEqus,
-            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) = equs;
-    eq FParameter.selectEquations(List<FAbstractEquation> iEqus,
-            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) = pEqus;
-    eq FInitialParameter.selectEquations(List<FAbstractEquation> iEqus,
-            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) = iEqus;
+    public List<FAbstractEquation> TypePrefixVariability.selectEquations(List<FAbstractEquation> iEqus,
+            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) { return equs; }
+    public List<FAbstractEquation> Parameter.selectEquations(List<FAbstractEquation> iEqus,
+            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) { return pEqus; }
+    public List<FAbstractEquation> InitialParameter.selectEquations(List<FAbstractEquation> iEqus,
+            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) { return iEqus; }
     
 	/**
 	 * Flag indicating if a variable is scalarized.
@@ -269,7 +269,7 @@ aspect Scalarization {
         
         FAbstractEquation.scalarizeList(sv.sc, getFAbstractEquations());
         FAbstractEquation.scalarizeList(sv.si, getFInitialEquations());
-        FAbstractEquation.scalarizeList(sv.sp, getFParameterEquations());
+        FAbstractEquation.scalarizeList(sv.sp, getParameterEquations());
         
         for (FVariable fv : getFVariables()) {
             fv.scalarize(sv);
@@ -277,7 +277,7 @@ aspect Scalarization {
         
         setFAbstractEquationList(sv.sc.getClauses());
         setFInitialEquationList(sv.si.getClauses());
-        setFParameterEquationList(sv.sp.getClauses());
+        setParameterEquationList(sv.sp.getClauses());
     }
     
 	protected void FClass.scalarizeFuncs() {
@@ -390,10 +390,10 @@ aspect Scalarization {
         }
     }
     
-    public void FAttribute.createArrayTemporaries(Scalarizer.Variable s, FTypePrefixVariability variability, FType type) {
+    public void FAttribute.createArrayTemporaries(Scalarizer.Variable s, TypePrefixVariability variability, FType type) {
         type = type.componentType(name());
         if (type.isUnknown()) {
-            variability = ASTNode.fParameter();
+            variability = Variability.parameter();
         } else {
             variability = variability.component(name());
         }
@@ -415,7 +415,7 @@ aspect Scalarization {
 		// Create new variable and copy fields that should be same
 		FVariable fv = createEmptyNode();
 		fv.setVisibilityType(getVisibilityType());
-		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+		fv.setTypePrefixVariability(getTypePrefixVariability());
 		fv.setTypePrefixInputOutput(getTypePrefixInputOutput());
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
@@ -586,7 +586,7 @@ aspect Scalarization {
     /**
      * Check if this FVariable should have a binding exp after scalarization
      */
-    syn boolean FVariable.keepBExp(FTypePrefixVariability variability, FExp bexp) =
+    syn boolean FVariable.keepBExp(TypePrefixVariability variability, FExp bexp) =
             variability.knownParameterOrLess() ||
             (variability.parameterVariability() && bexp.isIndependentParameterExp());
     
@@ -595,7 +595,7 @@ aspect Scalarization {
      */
     public class ScalarizingVariableInstance {
         
-        private FTypePrefixVariability variability; 
+        private TypePrefixVariability variability; 
         
         // Binding expression
         private FExp bExp;
@@ -612,7 +612,7 @@ aspect Scalarization {
         private Index index;
         
         private ScalarizingVariableInstance(String name, Map<String, FAttribute> mattrs, FExp be,
-                FTypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
+                TypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
             bExp = be;
             this.name = name;
             index = i;
@@ -622,7 +622,7 @@ aspect Scalarization {
         }
         
         private ScalarizingVariableInstance(String name, List<FAttribute> attrs, FExp be,
-                FTypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
+                TypePrefixVariability variability, TypePrefixInputOutput inputOutput, Index i)  {
             this(name, ScalarizingVariableInstance.mapped(attrs), be, variability, inputOutput, i);
         }
         
@@ -668,7 +668,7 @@ aspect Scalarization {
         public ScalarizingVariableInstance create(Scalarizer.Variable s, FVariable comp) {
             String cName = comp.name();
             
-            FTypePrefixVariability nv = variability.component(cName);
+            TypePrefixVariability nv = variability.component(cName);
             
             List<FAttribute> attrs = null;
             FAttribute a = mattrs.get(cName);
@@ -706,7 +706,7 @@ aspect Scalarization {
             } else {
                 fv.setBindingExpOpt(new Opt());
             }
-            fv.setFTypePrefixVariability(variability);
+            fv.setTypePrefixVariability(variability);
             fv.setTypePrefixInputOutput(inputOutput);
             List<FAttribute> attrs = new List<FAttribute>();
             for (FAttribute attr : mattrs.values()) {
@@ -732,7 +732,7 @@ aspect Scalarization {
         fv.setFQName(new FQNameString(name));
 		fv.getFQName().scalarized = true;
 		fv.setVisibilityType(getVisibilityType());
-		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
+		fv.setTypePrefixVariability(getTypePrefixVariability());
 		fv.setTypePrefixInputOutput(getTypePrefixInputOutput());
 		fv.setDerivedType(getDerivedType());
 		if (hasBindingExp())

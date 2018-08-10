@@ -5127,12 +5127,12 @@ end RedeclareElement10;
 
 
 model RedeclareElement11
-	package A
+	model A
 		replaceable model C = D;
 		C c;
 	end A;
 	
-	package B
+	model B
 		extends A;
 		
 		redeclare model extends C

@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collections;
+import org.jmodelica.util.Criteria;
+import org.jmodelica.util.collections.FilteredIterable;
 
 aspect Environment {
 
@@ -2284,14 +2286,12 @@ aspect InstanceAST_API {
 
     /**
      * Iterate over all components in this node and all InstExtends (recursively).
+     * Filters out any duplicate components.
      * 
      * @return  an Iterable over the components
      */
     public Iterable<InstComponentDecl> InstNode.allInstComponentDecls() {
-        return new AllInstComponentIterable(this);
-    }
-    public Iterable<InstComponentDecl> InstClassDecl.allInstComponentDecls() {
-        return new AllInstComponentIterable(actualInstClass());
+        return new FilteredIterable(allInstComponentDeclsWithDuplicates(), NO_DUPLICATE);
     }
 
     /**
@@ -2301,6 +2301,26 @@ aspect InstanceAST_API {
      */
     public Iterable<InstComponentDecl> InstRecordConstructor.allInstComponentDecls() {
         return new AllInstComponentIterable(this);
+    }
+
+
+    public static final Criteria<InstComponentDecl> InstNode.NO_DUPLICATE = new Criteria<InstComponentDecl>() {
+        public boolean test(InstComponentDecl elem) {
+            return !elem.isDuplicate();
+        }
+    };
+
+    /**
+     * Iterate over all components in this node and all InstExtends (recursively).
+     * Includes any duplicate components.
+     * 
+     * @return  an Iterable over the components
+     */
+    public Iterable<InstComponentDecl> InstNode.allInstComponentDeclsWithDuplicates() {
+        return new AllInstComponentIterable(this);
+    }
+    public Iterable<InstComponentDecl> InstClassDecl.allInstComponentDeclsWithDuplicates() {
+        return new AllInstComponentIterable(actualInstClass());
     }
 
     /**

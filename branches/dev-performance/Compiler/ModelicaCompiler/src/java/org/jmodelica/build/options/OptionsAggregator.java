@@ -17,7 +17,7 @@ public class OptionsAggregator {
     private Map<String, OptionDeclaration> options = new LinkedHashMap<>();
     private ArrayList<OptionModification> optionsModification = new ArrayList<>();
 
-    static class OptionsAggregationException extends Exception {
+    public static class OptionsAggregationException extends Exception {
         public OptionsAggregationException(String string) {
             super(string);
         }
@@ -39,7 +39,7 @@ public class OptionsAggregator {
         }
     }
 
-    private static abstract class Option {
+    public static abstract class Option {
 
         protected String filePath;
         protected String kind;
@@ -121,7 +121,7 @@ public class OptionsAggregator {
         }
     }
 
-    private static class OptionDeclaration extends Option {
+    public static class OptionDeclaration extends Option {
         private String type;
         private String cat;
 
@@ -140,6 +140,14 @@ public class OptionsAggregator {
             this.cat = cat;
         }
 
+        public String getType() {
+            return type;
+        }
+
+        public String getCategory() {
+            return cat;
+        }
+        
         public void setModified() throws OptionsAggregationException {
             if (modified) {
                 throw new OptionsAggregationException("Option already modified " + getName());
@@ -426,19 +434,30 @@ public class OptionsAggregator {
         }
     }
 
+    public OptionsAggregator() {
+        
+    }
+
+    public OptionsAggregator(String modules) throws IOException, OptionsAggregationException {
+        parseFiles(modules);
+        modify();
+    }
+
     public static void main(String[] args) throws IOException, OptionsAggregationException {
         File outDir = new File(args[0]);
         String pack = args[1];
         String modules = args[3];
 
-        OptionsAggregator op = new OptionsAggregator();
+        OptionsAggregator op = new OptionsAggregator(modules);
         File outFile = new File(outDir, "OptionsAggregated.java");
-        op.parseFiles(modules);
-        op.modify();
         OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(outFile));
         op.generate(out, pack);
         out.close();
         System.out.println("Generated " + outFile.getAbsolutePath() + "...");
+    }
+
+    public Iterable<OptionDeclaration> getOptions() {
+        return options.values();
     }
 
 }

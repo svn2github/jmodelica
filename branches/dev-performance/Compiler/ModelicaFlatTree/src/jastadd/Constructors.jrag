@@ -402,7 +402,7 @@ aspect Constructors {
 		this();
 		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
 		setFVariable(new FIntegerVariable(VisibilityType.TEMPORARY, 
-				fParameter(), new FQNameString(name)));
+				Variability.parameter(), new FQNameString(name)));
 	}
 	
 	/**
@@ -539,7 +539,7 @@ aspect Constructors {
 	 * Create a real variable with only the required children.
 	 */
 	public FRealVariable.FRealVariable(VisibilityType vt, 
-			FTypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FQName name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -547,7 +547,7 @@ aspect Constructors {
      * Create a derivative variable with only the required children.
      */
     public FDerivativeVariable.FDerivativeVariable(VisibilityType vt, 
-            FTypePrefixVariability variability, FQName name, int order) {
+            TypePrefixVariability variability, FQName name, int order) {
         this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
@@ -555,7 +555,7 @@ aspect Constructors {
      * Create a derivative variable with only the required children.
      */
     public FDummyDerivativeVariable.FDummyDerivativeVariable(VisibilityType vt, 
-            FTypePrefixVariability variability, FQName name, int order) {
+            TypePrefixVariability variability, FQName name, int order) {
         this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
@@ -563,7 +563,7 @@ aspect Constructors {
 	 * Create a pre variable for a discrete real variable.
 	 */
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
-		this(fv.getVisibilityType(), fv.getFTypePrefixVariability().fullCopy(),
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
@@ -572,7 +572,7 @@ aspect Constructors {
 	 * Create a integer variable with only the required children.
 	 */
 	public FIntegerVariable.FIntegerVariable(VisibilityType vt, 
-			FTypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FQName name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -580,7 +580,7 @@ aspect Constructors {
 	 * Create a pre variable for an integer variable.
 	 */
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
-		this(fv.getVisibilityType(), fv.getFTypePrefixVariability().fullCopy(),
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
@@ -589,7 +589,7 @@ aspect Constructors {
 	 * Create a enum variable with only the required children.
 	 */
 	public FEnumVariable.FEnumVariable(VisibilityType vt, 
-			FTypePrefixVariability variability, FQName name, FQName enumName) {
+			TypePrefixVariability variability, FQName name, FQName enumName) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
 	}
 	
@@ -597,7 +597,7 @@ aspect Constructors {
 	 * Create a pre variable for a enum variable.
 	 */
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
-		this(fv.getVisibilityType(), fv.getFTypePrefixVariability().fullCopy(),
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getEnum().fullCopy());
 	}
@@ -606,7 +606,7 @@ aspect Constructors {
 	 * Create a boolean variable with only the required children.
 	 */
 	public FBooleanVariable.FBooleanVariable(VisibilityType vt, 
-			FTypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FQName name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -614,7 +614,7 @@ aspect Constructors {
 	 * Create a pre variable for a boolean variable.
 	 */
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
-		this(fv.getVisibilityType(), fv.getFTypePrefixVariability().fullCopy(),
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
@@ -623,7 +623,7 @@ aspect Constructors {
 	 * Create a string variable with only the required children.
 	 */
 	public FStringVariable.FStringVariable(VisibilityType vt, 
-			FTypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FQName name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -631,7 +631,7 @@ aspect Constructors {
 	 * Create a pre variable for a string variable.
 	 */
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
-		this(fv.getVisibilityType(), fv.getFTypePrefixVariability().fullCopy(),
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
@@ -640,7 +640,7 @@ aspect Constructors {
 	 * Create a record variable with only the required children.
 	 */
 	public FRecordVariable.FRecordVariable(VisibilityType vt, 
-			FTypePrefixVariability variability, FQName name, FQName record) {
+			TypePrefixVariability variability, FQName name, FQName record) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 	
@@ -648,7 +648,7 @@ aspect Constructors {
      * Create an external object variable with only the required children.
      */
     public FExternalObjectVariable.FExternalObjectVariable(VisibilityType vt, 
-            FTypePrefixVariability variability, FQName name, FIdUse constructorName) {
+            TypePrefixVariability variability, FQName name, FIdUse constructorName) {
         this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
     }
 
@@ -656,14 +656,14 @@ aspect Constructors {
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, new FContinuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".s" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.continuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".s" + number), set, number);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, new FContinuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".a" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.continuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".a" + number), set, number);
     }
     
 	/**
