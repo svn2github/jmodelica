@@ -1593,10 +1593,10 @@ aspect FlatPrettyPrint {
     }
 
 	public void FIdUse.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (getFQName().isScalarized())
+		if (asFQName().isScalarized())
 			str.print(name());
 		else 
-			p.print(getFQName(), str, indent);
+			p.print(this, str, indent);
 	}
 	
 	public void FIdUseInstAccess.prettyPrint(Printer p, CodeStream str, String indent) {

@@ -56,7 +56,7 @@ aspect FlatteningAccess {
     }
 
     public FIdUse FIdUseInstAccess.flatten(Flattener f) {
-        return new FIdUse(getInstAccess().flatten());
+        return getInstAccess().flatten();
     }
 
     /**

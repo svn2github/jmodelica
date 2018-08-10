@@ -22,16 +22,17 @@ aspect FlatNameBinding {
 
     syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
     eq FAbstractDerExp.myFV()                   = myDerFV(order());
-    syn FAbstractVariable FIdUse.myFV()         = getFQName().myFV();
+    syn FAbstractVariable FIdUse.myFV()         = asFQName().myFV();
+    eq FIdUseInstAccess.myFV() { throw new UnsupportedOperationException(); }
     syn FAbstractVariable FReinit.myFV()        = getVar().asFIdUseExp().myFV();
 
     syn FAbstractVariable FIdUseExp.myDerFV(int index) = getFIdUse().myDerFV(index);
-    syn FAbstractVariable FIdUse.myDerFV(int index)    = getFQName().myDerFV(index);
+    syn FAbstractVariable FIdUse.myDerFV(int index)    = asFQName().myDerFV(index);
     syn FAbstractVariable FQName.myDerFV(int index)    = lookupFV(derName(index));
 
     syn FAbstractVariable FQName.myPreFV() = lookupFV(preName());
 
-    syn FFunctionVariable FIdUseExp.myFuncFV() = getFIdUse().getFQName().myFuncFV();
+    syn FFunctionVariable FIdUseExp.myFuncFV() = getFIdUse().asFQName().myFuncFV();
     syn FFunctionVariable FQName.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
     syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getFIdUse().myCommonVarDecl();
@@ -364,8 +365,8 @@ aspect FlatExternalObjectBinding {
 }
 
 aspect FlatPreBinding {
-	syn FAbstractVariable FPreExp.myFV()       = lookupFV(getFIdUse().getFQName().preName());
-	syn FAbstractVariable FPreExp.myNonPreFV() = getFIdUse().getFQName().myFV();
+	syn FAbstractVariable FPreExp.myFV()       = lookupFV(getFIdUse().asFQName().preName());
+	syn FAbstractVariable FPreExp.myNonPreFV() = getFIdUse().myFV();
 }
 
 aspect UnknownFVariables {

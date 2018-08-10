@@ -79,7 +79,7 @@ aspect OptimicaTransformCanonical {
 					// If the start attribute is not explicitly set, then it
 					// should be set to the value of the initialGuess attribute.
 					if (!fv_startTime.startAttributeSet()) {
-						fv_startTime.addFAttribute(new FAttribute(new FIdUse("Real"),
+						fv_startTime.addFAttribute(new FAttribute(new FQNameString("Real"),
 	                            new FIdDecl(new FQNameString("start")),
 	                            initialGuess_exp != null ? initialGuess_exp : new FRealLitExp(0.0),
 	                            true,
@@ -109,7 +109,7 @@ aspect OptimicaTransformCanonical {
 						}	
 					}	
 					if (!fv_finalTime.startAttributeSet()) {
-						fv_finalTime.addFAttribute(new FAttribute(new FIdUse("Real"),
+						fv_finalTime.addFAttribute(new FAttribute(new FQNameString("Real"),
 	                            new FIdDecl(new FQNameString("start")),
 	                            initialGuess_exp != null ? initialGuess_exp : new FRealLitExp(1.0),
 	                            true,
@@ -188,7 +188,7 @@ aspect OptimicaTransformCanonical {
 	}
 
     public FExp FTimedVariable.scalarizeExp(Scalarizer s) { 
-        return new FTimedVariable(getName().scalarize(s, null), getArg().scalarize(s));  
+        return new FTimedVariable(getName().asFQName().scalarize(s, null), getArg().scalarize(s));  
     }
 
     eq FOptClass.indexReductionErrorsAsWarnings() = true;
@@ -212,8 +212,8 @@ aspect NormalizeFinalTimeProblems {
 	boolean FDerExp.rewritten = false;
 	
 	rewrite FDerExp {when (rewriteStartAndFinalTime && !rewritten) to FExp {
-			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FIdUse("finalTime")),
-					new FIdUseExp(new FIdUse("startTime"))));
+			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FQNameString("finalTime")),
+					new FIdUseExp(new FQNameString("startTime"))));
 			rewritten = true;
 			return e;
 		}

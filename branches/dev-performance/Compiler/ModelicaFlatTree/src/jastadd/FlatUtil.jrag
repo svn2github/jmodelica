@@ -76,9 +76,9 @@ aspect FlatNames {
     eq FQNameFull.getFArraySubscripts()               = lastFQNamePart().getFArraySubscripts();
 
     syn boolean FIdUse.hasFArraySubscripts() = 
-        getFQName().hasFArraySubscripts();
+        asFQName().hasFArraySubscripts();
     syn FArraySubscripts FIdUse.getFArraySubscripts() = 
-        getFQName().getFArraySubscripts();
+        asFQName().getFArraySubscripts();
 
     syn boolean FIdUseInstAccess.hasFArraySubscripts() = 
         getInstAccess().hasFArraySubscripts();
@@ -301,14 +301,14 @@ aspect FlatNames {
     }
     
     syn String FDummyDerivativeVariable.derPrefixName() = getFQName().derPrefixName(order());
-    syn String FDummyDerExp.derPrefixName() = getFIdUse().getFQName().derPrefixName(order());
+    syn String FDummyDerExp.derPrefixName() = getFIdUse().asFQName().derPrefixName(order());
     
     syn String FDynamicDerivativeVariable.dynDerName() = getFQName().dynDerName(order());
-    syn String FDynamicDerExp.dynDerName() = getFIdUse().getFQName().dynDerName(order());
+    syn String FDynamicDerExp.dynDerName() = getFIdUse().asFQName().dynDerName(order());
     
     syn String FQNamePart.name() = getName();
 
-    syn String FIdUse.name()    = getFQName().name();
+    syn String FIdUse.name()    = asFQName().name();
     syn String FIdUseExp.name() = getFIdUse().name();
     eq FAbstractDerExp.name()   = derName(order());
     eq FPreExp.name()           = preName();
@@ -342,7 +342,8 @@ aspect FlatNames {
     
     eq FAbstractDerivativeVariable.name() = getFQNameNoTransform().derName(order());
 
-    syn String FIdUse.derName(int order)    = getFQNameNoTransform().derName(order);
+    syn String FIdUse.derName(int order);
+    eq FIdUseInstAccess.derName(int order) { throw new UnsupportedOperationException(); }
     syn String FIdUseExp.derName(int order) = getFIdUseNoTransform().derName(order);
 
     eq FPreRealVariable.name()     = getFQNameNoTransform().preName();
@@ -351,10 +352,11 @@ aspect FlatNames {
     eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
     eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
 
-    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
+    syn String FIdUse.preName();
+    eq FIdUseInstAccess.preName() { throw new UnsupportedOperationException(); }
     syn String FIdUseExp.preName() = getFIdUseNoTransform().preName();
     
-    syn String FIdUse.scalarName()    = getFQName().scalarName();
+    syn String FIdUse.scalarName()    = asFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
     
     public static String ASTNode.underScore(String s) {
@@ -384,7 +386,7 @@ aspect FlatNames {
     
     syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     
-    syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
+    syn String FIdUse.nameUnderscore() = asFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
     eq FAbstractDerExp.nameUnderscore() {
         if (order() == 1)
@@ -419,7 +421,7 @@ aspect FlatNames {
     }
 
     syn String FQName.funcNameUnderscore(String suffix)            = "func_" + nameUnderscore() + "_" + suffix;
-    syn String FIdUse.funcNameUnderscore(String suffix)            = getFQName().funcNameUnderscore(suffix);
+    syn String FIdUse.funcNameUnderscore(String suffix)            = asFQName().funcNameUnderscore(suffix);
     syn String FFunctionCall.funcNameUnderscore(String suffix)     = getName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionDecl.funcNameUnderscore(String suffix)     = getFQName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
@@ -479,7 +481,7 @@ aspect FlatNames {
     /**
      * Check if this use has any expression or colon array subscripts. 
      */
-    syn boolean FIdUse.hasNonLiteralSubscripts()  = getFQName().hasNonLiteralSubscripts();
+    syn boolean FIdUse.hasNonLiteralSubscripts()  = asFQName().hasNonLiteralSubscripts();
     eq FIdUseInstAccess.hasNonLiteralSubscripts() = false;
 
     /**
@@ -982,18 +984,20 @@ aspect FlatNames {
     eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createFIdUse(), (String)null, order());
     eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createFIdUse(), (String)null, order());
 
-    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(new FIdUse(getFQName().treeCopy()));
+    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp((FQName) getFQName().treeCopy());
     syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
     syn FExp UnknownFVariable.createUseExp()       = null;
+
+    syn FQName FIdUse.asFQName() = (FQName) this;
 
     /**
      * Create an access to this variable.
      */
     syn FIdUse FVariable.createFIdUse() {
         if (isArray()) {
-            return new FIdUse(getFQName().copyAndAddFas(size().createExpandedFArraySubscripts()));
+            return getFQName().copyAndAddFas(size().createExpandedFArraySubscripts());
         } else {
-            return new FIdUse(getFQName().treeCopy());
+            return (FQName) getFQName().treeCopy();
         }
     }
 
@@ -1023,8 +1027,8 @@ aspect FlatNames {
     /**
      * Create an FIdUse for this name, using a copy if needed.
      */
-    public FIdUse FQName.createFIdUse() {
-        return new FIdUse((FQName) unboundCopy()); 
+    public FIdUse FQName.createFIdUse() { // REMOVE?
+        return (FQName) unboundCopy(); 
     }
     
 
@@ -1606,7 +1610,7 @@ aspect FlatFunctionUtils {
       * Creates expressions based on tempVarName();
       */
      syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
-     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FIdUse(tempVarName()));
+     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FQNameString(tempVarName()));
      syn FVariable FExp.tempVar() = tempVar(variability(), type());
      syn FVariable FExp.tempVar(TypePrefixVariability variability, FType type)
          = type.createTempFVariable(new FQNameFull(tempVarName()), variability);

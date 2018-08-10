@@ -237,7 +237,7 @@ aspect FlatStatements {
 
     public boolean FBreakStmt.flatten(Flattener f, List<FStatement> sl){
         if (!inFunction() && enclosingLoop() instanceof InstForStmt) {
-            sl.add(new FAssignStmt(new FIdUseExp(new FIdUse(breakCondName())), new FBooleanLitExpFalse()));
+            sl.add(new FAssignStmt(new FIdUseExp(new FQNameString(breakCondName())), new FBooleanLitExpFalse()));
             return true;
         }
         sl.add(new FBreakStmt());

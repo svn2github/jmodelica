@@ -130,7 +130,7 @@ aspect FlatAPIAttributes {
     public void FVariable.setAttribute(String name, String type, FExp exp, int level) {
         FAttribute attr = findMatching(getFAttributes(), name);
         if (attr == null) {
-            attr = new FAttribute(new FIdUse(type), new FIdDecl(name), exp, true, level);
+            attr = new FAttribute(new FQNameString(type), new FIdDecl(name), exp, true, level);
             addFAttribute(attr);
         } else {
             attr.setValue(exp);

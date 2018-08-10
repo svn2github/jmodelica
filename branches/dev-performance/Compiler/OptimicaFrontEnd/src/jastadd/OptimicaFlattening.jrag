@@ -182,7 +182,7 @@ aspect OptimicaFlattening {
 	}
 
     public FExp InstTimedVariable.flatten(Flattener f) {
-        return new FTimedVariable(new FIdUse(getName().flatten()), getArg().flatten(f));
+        return new FTimedVariable(getName().flatten(), getArg().flatten(f));
     }
 
 }

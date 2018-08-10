@@ -602,7 +602,7 @@ aspect FunctionInlining {
     }
 
     public FExp FIdUseExp.preventEvents() {
-        getFIdUse().getFQName().preventEvents();
+        getFIdUse().asFQName().preventEvents();
         return this;
     }
 
@@ -648,7 +648,7 @@ aspect FunctionInlining {
         return false;
     }
     eq FNoEventExp.generatesEvents() = false;
-    eq FIdUseExp.generatesEvents()   = getFIdUse().getFQName().generatesEvents();
+    eq FIdUseExp.generatesEvents()   = getFIdUse().asFQName().generatesEvents();
     eq FSmoothExp.generatesEvents()  = super.generatesEvents() && !(order() == 0 && myOptions().getBooleanOption("disable_smooth_events"));
 
     syn boolean FQName.generatesEvents() = false;
@@ -703,7 +703,7 @@ aspect FunctionInlining {
     eq FFunctionCall.hasInlinableFunctions(AbstractFunctionInliner fi) =
         isInlinableFunctionCall(fi) || super.hasInlinableFunctions(fi);
     eq FIdUseExp.hasInlinableFunctions(AbstractFunctionInliner fi)     = 
-        getFIdUse().getFQName().hasInlinableFunctions(fi);
+        getFIdUse().asFQName().hasInlinableFunctions(fi);
     eq FSubscriptedExp.hasInlinableFunctions(AbstractFunctionInliner fi) {
         return getFArraySubscripts().hasInlinableFunctions(fi) || super.hasInlinableFunctions(fi);
     }
@@ -888,7 +888,7 @@ aspect FunctionInlining {
     
 
     public void FIdUseExp.inlineFunctions(AbstractFunctionInliner fi) {
-        getFIdUse().getFQName().inlineFunctions(fi);
+        getFIdUse().asFQName().inlineFunctions(fi);
     }
     
     public void FSubscriptedExp.inlineFunctions(AbstractFunctionInliner fi) {
@@ -1142,8 +1142,8 @@ aspect FunctionInlining {
             }
 
             protected void check(FIdUse use, int i) {
-                if (i < use.getFQName().numParts()) {
-                    TrivialInlineCheck part = parts.get(use.getFQName().partName(i));
+                if (i < use.asFQName().numParts()) {
+                    TrivialInlineCheck part = parts.get(use.asFQName().partName(i));
                     if (part != null)
                         part.check(use, i + 1);
                     else
@@ -1539,7 +1539,7 @@ aspect FunctionInlining {
     }
 
     public FIdUse FIdUse.copyWithNonLiteralSubscriptsAsColon() {
-        return new FIdUse(getFQName().copyWithNonLiteralSubscriptsAsColon());
+        return asFQName().copyWithNonLiteralSubscriptsAsColon();
     }
 
     public FIdUse FIdUseInstAccess.copyWithNonLiteralSubscriptsAsColon() {
@@ -1588,7 +1588,7 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FIdUse.copyNonLiteralSubscripts() {
-        return getFQName().copyNonLiteralSubscripts();
+        return asFQName().copyNonLiteralSubscripts();
     }
 
     public FArraySubscripts FIdUseInstAccess.copyNonLiteralSubscripts() {

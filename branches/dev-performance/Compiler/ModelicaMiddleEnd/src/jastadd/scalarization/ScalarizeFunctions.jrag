@@ -429,7 +429,7 @@ aspect FunctionScalarization {
                     names.fillLayer(arg);
                     
                     String tempName = arg.calcTempVarName();
-                    FIdUseExp tempExp = new FIdUseExp(new FIdUse(tempName));
+                    FIdUseExp tempExp = new FIdUseExp(new FQNameString(tempName));
 
                     FType tempType = arg.type().arrayType(arg.size().contract(1));
                     s.block(firstLoop).addTempVar(tempType, tempName);
@@ -1039,7 +1039,7 @@ aspect FunctionScalarizationHelpers {
             FArraySubscripts fas = new FArraySubscripts();
             for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
-                    fas.addFSubscript(new FIdTempExp(new FIdUse(new FQNameFull(topLayer()[i]))));
+                    fas.addFSubscript(new FIdTempExp(new FQNameFull(topLayer()[i])));
                 else
                     fas.addFSubscript(new FIntegerLitExp(1));
             }

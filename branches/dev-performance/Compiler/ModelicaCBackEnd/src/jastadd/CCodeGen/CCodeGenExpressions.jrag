@@ -578,15 +578,15 @@ aspect CCodeGenExpressions {
      * Helper method that prints the variable reference for assignment (LHS).
      */
     public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        genAssignedRef(myFV(), p, str, indent);
-    }
-
-    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         p.print(getFIdUse(), str, "");
     }
 
+    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        genAssignedRef(p, str, indent);
+    }
+
     @Override
-    public void FAbstractDerExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FAbstractDerExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         str.print(p.name(myFV()));
     }
 
@@ -595,7 +595,11 @@ aspect CCodeGenExpressions {
     }
 
     public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        genScaledAssignedRef(myFV(), p, str, indent);
+        if (needsScaling()) {
+            genScaledAssignedRef(myFV(), p, str, indent);
+        } else {
+            genAssignedRef(p, str, indent);
+        }
     }
 
     syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
@@ -691,9 +695,9 @@ aspect CCodeGenExpressions {
     syn String FIdUse.toString_C(CodePrinter.ExecuteCodePrinter p) {
         String type = myFV().funcArrayType(isAssignUse());
         if (myFV().inRecord() && inFunction()) {
-            return getFQName().genRecordUse_C(p, getFQName().myOutermostFV(), type);
+            return asFQName().genRecordUse_C(p, asFQName().myOutermostFV(), type);
         } else {
-            return myFV().genUse_C(p, getFQName().getFArraySubscripts(), type);
+            return myFV().genUse_C(p, asFQName().getFArraySubscripts(), type);
         }
     }
 

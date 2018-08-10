@@ -1047,7 +1047,7 @@ aspect Slices {
     eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
     eq FSubscriptedExp.isSlice() = isArray();
     
-    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
+    syn boolean FIdUse.isSlice()  = asFQName().isSlice();
     eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
     
     syn boolean InstAccess.isSlice() {

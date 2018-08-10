@@ -36,7 +36,7 @@ aspect AccessSizes {
     eq InstComponentDecl.getFArraySubscripts().inSubscriptedExp()      = false;
     eq InstComponentDecl.getLocalFArraySubscripts().inSubscriptedExp() = false;
     eq FQNamePartArray.getFArraySubscripts().inSubscriptedExp()        = false;
-    eq FIdUse.getExpandedSubscripts().inSubscriptedExp()               = false;
+    eq FQName.getExpandedSubscripts().inSubscriptedExp()               = false;
 
     /**
      * Get the size this subscript(s) would have if all subscripts were colons.
@@ -51,7 +51,7 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FIdUse.getChild().mySize() = getFQName().calcMySize(getFQName().numParts());
+    eq FIdUse.getChild().mySize() = asFQName().calcMySize(asFQName().numParts());
     eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
     
     syn Size FQName.calcMySize(int i) = myFV().size();
@@ -162,9 +162,9 @@ aspect AccessSizes {
     eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
             new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
     eq FQNamePart.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUse(new FQNameFull(buildAccessContext(name(), null))));
+            new FIdUseExp(new FQNameFull(buildAccessContext(name(), null)));
     eq FIdUse.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUse(new FQNameFull(getFQName().buildAccessContext())));
+            new FIdUseExp(new FQNameFull(asFQName().buildAccessContext()));
     
     syn List<FQNamePart> FQName.buildAccessContext() = null;
     eq FQNameString.buildAccessContext() {

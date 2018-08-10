@@ -1215,7 +1215,7 @@ aspect BuiltInFlatTypes {
             for (FRecordComponentType t : getComponents()) {
                 args.add(t.getFType().zeroLiteral());
             }
-            return new FRecordConstructor(new FIdUse(getName()), args);
+            return new FRecordConstructor(new FQNameString(getName()), args);
         } else {
             List<InstFunctionArgument> args = new List<InstFunctionArgument>();
             int i = 1;

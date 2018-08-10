@@ -220,13 +220,6 @@ aspect Constructors {
 	public FEnumLitExp.FEnumLitExp(String name, String val) {
 		this(name, val, new Opt());
 	}
-	
-	/**
-	 * Constructs an FIdUse that refers to the variable with the given name.
-	 */
-	public FIdUse.FIdUse(String name) {
-		this(new FQNameString(name));
-	}
     
     /**
      * Constructs an FIdDecl with the given name.
@@ -234,15 +227,6 @@ aspect Constructors {
     public FIdDecl.FIdDecl(String name) {
         this(new FQNameString(name));
     }
-	
-	/**
-	 * Constructs an FIdUse that refers to a cell of the variable with the given name.
-	 *
-	 * @param fas  the array subscripts to set for the last name part
-	 */
-	public FIdUse.FIdUse(String name, FArraySubscripts fas) {
-		this(new FQNameFull(name, fas));
-	}
 
     /**
      * Constructs an if equation.
@@ -292,14 +276,7 @@ aspect Constructors {
 	 * Constructs a flat FIdUseExp that refers to the variable with the given name.
 	 */
 	public FIdUseExp.FIdUseExp(String name) {
-		this(new FIdUse(name));
-	}
-	
-	/**
-	 * Constructs an FIdUseExp that refers to the variable with the given name.
-	 */
-	public FIdUseExp.FIdUseExp(FQName name) {
-		this(new FIdUse(name));
+		this(new FQNameString(name));
 	}
 	
 	/**
@@ -308,7 +285,7 @@ aspect Constructors {
 	 * @param fas  the array subscripts to set for the last name part
 	 */
 	public FIdUseExp.FIdUseExp(String name, FArraySubscripts fas) {
-		this(new FIdUse(name, fas));
+		this(new FQNameFull(name, fas));
 	}
 
     /**
@@ -317,19 +294,12 @@ aspect Constructors {
     public FDerExp.FDerExp(FIdUse name, int order) {
         this(name, (String)null, order);
     }
-    
-    /**
-     * Constructs an FDerExp that refers to the variable with the given name.
-     */
-    public FDerExp.FDerExp(FQName name, int order) {
-        this(new FIdUse(name), order);
-    }
 
     /**
      * Constructs an FDerExp of order one that refers to the variable with the given name.
      */
     public FDerExp.FDerExp(FQName name) {
-        this(new FIdUse(name), 1);
+        this(name, 1);
     }
 
     /**
@@ -352,15 +322,6 @@ aspect Constructors {
     public FIdTempExp.FIdTempExp(FIdUse name) {
         this(name, (String)null);
     }
-    
-	/**
-	 * Constructs an FIdUseInstAccess with an empty FQName.
-	 * 
-	 * Note: the FQName of an FIdUseInstAccess should always be empty.
-	 */
-	public FIdUseInstAccess.FIdUseInstAccess(InstAccess ia) {
-		this(new FQNameEmpty(), ia);
-	}
 
     /**
      * Constructs an unsuported equation.
@@ -528,7 +489,7 @@ aspect Constructors {
      * Constructs an FRecordConstructor for a record with the given name and no arguments.
      */
     public FRecordConstructor.FRecordConstructor(String name) {
-        this(new FIdUse(name), new List<FExp>());
+        this(new FQNameString(name), new List<FExp>());
     }
     
     public FRecordConstructor.FRecordConstructor(FIdUse name, List<FExp> args) {
@@ -671,7 +632,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name) {
-	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+	    this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
 	            true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
 	}
 	
@@ -680,7 +641,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String name, int level) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+        this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
                 true, level, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -689,7 +650,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
-		this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt(value), 
+		this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt(value), 
 				true, 0, new Opt(), new Opt(), new List());
 	}
 	
@@ -698,7 +659,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp exp, boolean eachKey) {
-	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+	    this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
 	            true, Integer.MAX_VALUE, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
 	}
 	
@@ -707,7 +668,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp exp, int level, boolean eachKey) {
-	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+	    this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
 	            true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
 	}
 	
@@ -716,7 +677,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String name, int level, boolean eachKey) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+        this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
                 true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -725,7 +686,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String type, String name, FExp exp, int level) {
-        this(new FIdUse(type), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+        this(new FQNameString(type), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
                 true, level, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -734,7 +695,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FAnnotationAttribute.FAnnotationAttribute(String name) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+        this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
                 true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -743,7 +704,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FAnnotationAttribute.FAnnotationAttribute(String name, FExp exp, int level, boolean eachKey) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+        this(new FQNameEmpty(), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
                 true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -758,7 +719,7 @@ aspect Constructors {
      * Create an attribute with only the required children.
      */
     public FAttribute.FAttribute(String typeName, String name, boolean isSet, int level) {
-        this(new FIdUse(typeName), new FIdDecl(name), isSet, level);
+        this(new FQNameString(typeName), new FIdDecl(name), isSet, level);
     }
 	
 	/**
@@ -778,7 +739,7 @@ aspect Constructors {
      * The value may be <code>null</code>, then no value is set.
      */
     public FAttribute.FAttribute(String typeName, String name, FExp value, boolean isSet, int level) {
-        this(new FIdUse(typeName), new FIdDecl(name), value, isSet, level);
+        this(new FQNameString(typeName), new FIdDecl(name), value, isSet, level);
     }
 	
 	/**

@@ -77,7 +77,7 @@ aspect Components {
     }
     
     public FIdUse FIdUse.extractRecordFExp(String suffix) {
-        return new FIdUse(getFQName().copyAsFQNameFull().append(suffix));
+        return asFQName().copyAsFQNameFull().append(suffix);
     }
     
     public FIdUse FIdUseInstAccess.extractRecordFExp(String suffix) {

@@ -736,7 +736,7 @@ aspect Variability {
     eq FIdUseExp.indexVariability()       = getFIdUse().indexVariability();
 
     syn TypePrefixVariability FIdUse.indexVariability() {
-        FQName fqn = getFQName();
+        FQName fqn = asFQName();
         TypePrefixVariability variability = Variability.constant();
         if (fqn.isSimple())
             return variability;

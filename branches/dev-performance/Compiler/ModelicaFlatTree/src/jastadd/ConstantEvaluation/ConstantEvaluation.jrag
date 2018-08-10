@@ -2318,7 +2318,7 @@ aspect ConstantEvaluation {
 
     syn CValue FIdUse.ceval(VariableEvaluator evaluator) {
         boolean func = inFunction();
-        FQName name = getFQName();
+        FQName name = asFQName();
         FAbstractVariable var = myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
@@ -3772,7 +3772,9 @@ aspect ConstantEvaluation {
         return map;
     }
     
-    public Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+    public abstract Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map);
+    
+    public Map<CommonVariableDecl,CValue> FQName.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
         return myFV().collectMyEvaluationValue(map);
     }
     

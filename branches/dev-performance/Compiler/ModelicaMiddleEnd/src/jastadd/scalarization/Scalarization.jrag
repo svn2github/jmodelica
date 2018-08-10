@@ -886,9 +886,9 @@ aspect Scalarization {
     public FIdUseExp FExp.tempExp(String name, Index i) {
         FIdUseExp res;
         if (inFunction()) {
-            res = new FIdTempExp(new FIdUse(name, i.createFArraySubscripts()));
+            res = new FIdTempExp(new FQNameFull(name, i.createFArraySubscripts()));
         } else {
-            res = new FIdTempExp(new FIdUse(name + i));
+            res = new FIdTempExp(new FQNameString(name + i));
         }
         return (FIdUseExp) dynamicFExp(res);
     }
@@ -896,12 +896,12 @@ aspect Scalarization {
     public FIdUseExp FExp.tempExp(String name, FArraySubscripts fas) {
         FIdUseExp res;
         if (inFunction()) {
-            res = new FIdTempExp(new FIdUse(name, fas));
+            res = new FIdTempExp(new FQNameFull(name, fas));
         } else {
             if (fas == null) {
-                res = new FIdTempExp(new FIdUse(name));
+                res = new FIdTempExp(new FQNameString(name));
             } else {
-                res = new FIdTempExp(new FIdUse(name + fas));
+                res = new FIdTempExp(new FQNameString(name + fas));
             }
         }
         return (FIdUseExp) dynamicFExp(res);
@@ -1072,13 +1072,13 @@ aspect Scalarization {
     }
 
     public FExp FIdUseExp.scalarRecordFExp(Scalarizer s, FQName suffix) {
-      FQName fqn = getFIdUse().getFQName();
+      FQName fqn = getFIdUse().asFQName();
       if (indexNames != null) {
           fqn = fqn.copyAndAddFas(createIndexNameFas());
       }
       fqn = fqn.asFQNameFull().copyAndAppend(suffix);
       fqn.scalarized = false;
-      FExp res = createNode(new FIdUse(fqn));
+      FExp res = createNode(fqn);
       res = dynamicFExp(res).scalarize(s);
       res.setLocation(this);
       return res;
@@ -1157,11 +1157,11 @@ aspect Scalarization {
     }
 
     public FExp FIdUseExp.extractArrayCell(Scalarizer s, Index i) {
-        return dynamicFExp(createNode(new FIdUse(getFIdUse().getFQName().specify(i, true))));
+        return dynamicFExp(createNode(getFIdUse().specify(i, true)));
     }
 
     public FExp FIdTempExp.extractArrayCell(Scalarizer s, Index i) {
-        return dynamicFExp(createNode(new FIdUse(getFIdUse().getFQName().copyAndAddFas(i))));
+        return dynamicFExp(createNode(getFIdUse().asFQName().copyAndAddFas(i)));
     }
 
     public FExp FIfExp.extractArrayCell(Scalarizer s, Index i) {
@@ -1386,7 +1386,7 @@ aspect Scalarization {
     }
 
     public FExp FRecordType.createRecordConstructorCell(Scalarizer s, FExp exp) {
-		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
+		FRecordConstructor rc = new FRecordConstructor(new FQNameString(getName()), new List());
 		for (FRecordComponentType comp : getComponents()) {
              FExp next = exp.scalarRecordFExp(s, comp.getName());
              if (exp.type().isUnknown() || exp.useTempVar) {
@@ -1455,34 +1455,34 @@ aspect Scalarization {
         if (fin != null) {
             return setLocationOf(new FIdUseExp(fin));
         }
-        return setLocationOf(new FIdUseExp(getFIdUse().scalarize(s, indexNames)));
+        return setLocationOf(new FIdUseExp(getFIdUse().asFQName().scalarize(s, indexNames)));
     }
 
     public FExp FIdTempExp.scalarizeExp(Scalarizer s) {
         if (indexNames != null) {
-            FQName fqn = getFIdUse().getFQName().scalarize(s);
+            FQName fqn = getFIdUse().asFQName().scalarize(s);
             fqn = fqn.asFQNameFull().addFArraySubscripts(createIndexNameFas());
-            return setLocationOf(new FIdUseExp(new FIdUse(fqn)));
+            return setLocationOf(new FIdUseExp(fqn));
         }
         return super.scalarizeExp(s);
     }
 
     @Override
     public FExp FDerExp.scalarizeExp(Scalarizer s) {
-        return new FDerExp(getFIdUse().scalarize(s, indexNames), order());
+        return new FDerExp(getFIdUse().asFQName().scalarize(s, indexNames), order());
     }
     
     @Override
     public FExp FPreExp.scalarizeExp(Scalarizer s) {
-        return new FPreExp(getFIdUse().scalarize(s, indexNames));
+        return new FPreExp(getFIdUse().asFQName().scalarize(s, indexNames));
     }
 
-    public FIdUse FIdUse.scalarize(Scalarizer s, FExp[] indexNames) {
-        FQName fqn = getFQName().scalarize(s);
+    public FIdUse FQName.scalarize(Scalarizer s, FExp[] indexNames) {
+        FQName fqn = asFQName().scalarize(s);
         if (indexNames != null) {
-            fqn = fqn.asFQNameFull().addFArraySubscripts(getExpandedSubscripts().scalarize(s));
+            fqn = fqn.asFQNameFull().addFArraySubscripts(asFQName().getExpandedSubscripts().scalarize(s));
         }
-        return new FIdUse(fqn);
+        return fqn;
     }
 
 	public abstract FQName FQName.scalarize(Scalarizer s);
@@ -1740,7 +1740,7 @@ aspect Scalarization {
     }
 	
 	public FExp FRecordConstructor.scalarizeExp(Scalarizer s) {
-        FRecordConstructor rc = new FRecordConstructor(getRecord().scalarize(s, null), new List());
+        FRecordConstructor rc = new FRecordConstructor(getRecord().asFQName().scalarize(s, null), new List());
         for (FExp arg : getArgs()) {
             rc.addArg(arg.scalarize(s));
         }

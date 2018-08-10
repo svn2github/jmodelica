@@ -90,7 +90,7 @@ aspect OptimicaExpressions {
 	rewrite FTimedVariable {
 		when (rewriteAlias && !getName().myFV().isUnknown() && getName().myFV().isAlias()) to FExp {
 			FQName new_name = (FQName)((FVariable)getName().myFV()).alias().getFQName().fullCopy();
-			FExp new_exp = new FTimedVariable(new FIdUse(new_name),getArg());
+			FExp new_exp = new FTimedVariable(new_name, getArg());
 			if (getName().myFV().isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;

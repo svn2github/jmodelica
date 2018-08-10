@@ -291,7 +291,7 @@ aspect Arrays {
 		// This is because if scalarization is in progress, 
 		// then this node will be hanging without a proper AST.
 		int n = 0;
-		if (!getFQName().isScalarized())
+		if (!asFQName().isScalarized())
 			for (FArraySubscripts fas : allFArraySubscripts())
 				n += fas.accessNdims();
 		return n;
@@ -380,9 +380,9 @@ aspect Arrays {
 	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
 	syn lazy ArrayList<FArraySubscripts> FIdUse.allFArraySubscripts() {
-		ArrayList<FArraySubscripts> res = getFQName().createFArraySubscriptsList();
+		ArrayList<FArraySubscripts> res = asFQName().createFArraySubscriptsList();
         if (!hasFArraySubscripts() && myFV().isArray()) {
-            res.add(getExpandedSubscripts());
+            res.add(asFQName().getExpandedSubscripts());
         }
 		return res;
 	}
@@ -417,10 +417,10 @@ aspect Arrays {
 	 * 
 	 * @return  an FArraySubscripts that spans the entire FV this access points to.
 	 */
-    syn lazy FArraySubscripts FIdUse.getExpandedSubscripts() {
+    syn lazy FArraySubscripts FQName.getExpandedSubscripts() {
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
-            s = getFQName().calcMySize(getFQName().numParts());
+            s = asFQName().calcMySize(asFQName().numParts());
 		}
 		return s.createExpandedFArraySubscripts();
 	}
@@ -469,7 +469,7 @@ aspect Arrays {
 
 	syn int FAbstractVariable.ndims() = -1;
 	
-	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims();
+	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims_FQ();
 	eq FFunctionArray.ndims()    = getType().ndims();
 	eq FFunctionVariable.ndims() = 0;
 
@@ -483,8 +483,8 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FQName.ndims() = 0;
-	eq FQNameFull.ndims() {
+	syn int FQName.ndims_FQ() = 0;
+	eq FQNameFull.ndims_FQ() {
 		// Only look at the array subscripts for the last FQNamePart,
 		// all other array subscripts has been expanded in the instantiation.
 		FQNamePart last = getFQNamePart(getNumFQNamePart() - 1);
@@ -1080,7 +1080,7 @@ aspect Arrays {
 	 * Get the array sizes. 
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
-	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
+	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size_FQ();
 	eq FFunctionArray.size() = type().size();
 
     /**
@@ -1092,8 +1092,8 @@ aspect Arrays {
 	/**
 	 * Get the array sizes. 
 	 */
-	syn Size FQName.size() = Size.SCALAR;
-	syn lazy Size FQNameFull.size() {
+	syn Size FQName.size_FQ() = Size.SCALAR;
+	syn lazy Size FQNameFull.size_FQ() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().declarationSize(); 
@@ -1870,7 +1870,7 @@ aspect Arrays {
 	}
 	
 	public void FIdUseExp.setScalarizedFlag() {
-		getFIdUse().getFQName().scalarized = true;
+		getFIdUse().asFQName().scalarized = true;
 	}
 	
 	/**
@@ -1883,6 +1883,10 @@ aspect Arrays {
 		InstAccess ia = getInstAccess().specify(i);
 		return new FIdUseInstAccess(ia);
 	}
+    public FIdUseInstAccess FIdUseInstAccess.specify(Index i) {
+        InstAccess ia = getInstAccess().specify(i);
+        return new FIdUseInstAccess(ia);
+    }
 	
 	/**
 	 * Returns a scalar FIdUse, as specified by an index.
@@ -1891,9 +1895,7 @@ aspect Arrays {
 	 * 
 	 * @param i  the Index specifying what array subscripts to use
 	 */
-	public FIdUse FIdUse.specify(Index i) {
-		return new FIdUse(getFQName().specify(i));
-	}
+	public abstract FIdUse FIdUse.specify(Index i);
 	
 	/**
 	 * Returns a scalar FIdUse, as specified by an index.
@@ -1901,9 +1903,7 @@ aspect Arrays {
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  <code>true</code> if the use should be marked as scalarized 
 	 */
-	public FIdUse FIdUse.specify(Index i, boolean scalarize) {
-		return new FIdUse(getFQName().specify(i, scalarize));
-	}
+	public abstract FIdUse FIdUse.specify(Index i, boolean scalarize);
 	
 	/**
 	 * Creates a new FQName with the FArraySubscripts taken from the given Index.

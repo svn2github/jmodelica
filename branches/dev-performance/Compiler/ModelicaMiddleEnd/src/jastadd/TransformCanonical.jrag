@@ -1626,7 +1626,7 @@ aspect TransformCanonical {
             } else {
                 FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
                 FAbstractDerExp new_exp = createEmptyNode();
-                new_exp.setFIdUse(new FIdUse(new_name));
+                new_exp.setFIdUse(new_name);
                 new_exp.setOrder(order());
                 new_exp.setOriginalVariable(this, getFIdUse().myFV());
                 if (getFIdUse().myFV().isNegated())
@@ -1812,7 +1812,7 @@ aspect TransformCanonical {
 		var.uses().remove(this);
 		var.definingUses().remove(this);
 		var.nonDefiningUses().remove(this);
-		getFIdUse().getFQName().removeFromUses();
+		getFIdUse().asFQName().removeFromUses();
 	}
 	
 	/**
@@ -1973,8 +1973,8 @@ aspect TransformCanonical {
 		when (rewriteEquivalentRecord)
 		to FRecordConstructor {
 			rewriteEquivalentRecord = false;
-			getRecord().setFQName(myFClass().createEquivalentRecordFQName(getRecord().getFQName()));
-			getRecord().flushAll();
+			setRecord(myFClass().createEquivalentRecordFQName(getRecord().asFQName()));
+			getRecord().flushAll(); // remove?
 			flushAll();
 			return this;
 		}
@@ -2382,7 +2382,7 @@ aspect DummyDerivatives {
 
     rewrite FDerExp {
         when (rewriteFHDer && order() > 1) to FDerExp 
-        new FDerExp(getFIdUse().getFQName().createDerPrefixedName(order() - 1));
+        new FDerExp(getFIdUse().asFQName().createDerPrefixedName(order() - 1));
     }
 
 }

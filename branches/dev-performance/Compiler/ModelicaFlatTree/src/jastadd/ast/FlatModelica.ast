@@ -337,7 +337,7 @@ FUnknownType : FCellType;
  * needs to be printed in a number of different way (dot notation, underscore
  * notation etc).
  */
-abstract FQName : BaseNode;
+abstract FQName : FIdUse ::= /ExpandedSubscripts:FArraySubscripts/;
 
 /**
  * An empty FQName, used as the start of prefixes.
@@ -972,7 +972,7 @@ abstract CommonAccess : BaseNode;
 /**
  * A qualified identifier.
  */
-FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
+abstract FIdUse : CommonAccess;
 
 
 
