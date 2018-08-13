@@ -135,7 +135,7 @@ aspect OptimicaTransformCanonical {
         if (attr != null) {
             FAttribute freeAttr = findMatching(attr.getFAttributes(), FAttribute.FREE);
             if (freeAttr != null && freeAttr.hasValue() && freeAttr.getValue().ceval().booleanValue()) {
-                v = Variability.fOptParameter();
+                v = Variability.optParameter();
             }
         }
         FRealVariable fv = new FRealVariable(VisibilityType.PUBLIC, v, new FQNameString(name));

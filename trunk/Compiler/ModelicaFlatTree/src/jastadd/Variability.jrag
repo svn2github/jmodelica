@@ -713,9 +713,9 @@ aspect Variability {
         TypePrefixVariability high = Variability.constant();
         boolean containsComposite = false;
         Map<String, TypePrefixVariability> map = new HashMap<>();
-        for (Map.Entry<String, TypePrefixVariability> fcv : components.entrySet()) {
-            String name = fcv.getKey();
-            TypePrefixVariability v = fcv.getValue();
+        for (Map.Entry<String, TypePrefixVariability> component : components.entrySet()) {
+            String name = component.getKey();
+            TypePrefixVariability v = component.getValue();
             TypePrefixVariability nv = other.component(name);
             nv = v.combine(nv, combiner);
             map.put(name, nv);
