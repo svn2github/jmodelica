@@ -2339,8 +2339,8 @@ aspect ParameterSorting {
 	 * Test if this is a use of a parameter (in the flat tree).
 	 */
 	syn boolean FExp.isFlatParameterUse()   = false;
-	eq FIdUseExp.isFlatParameterUse()       = getFIdUse().isFlatParameterUse();
-	syn boolean FIdUse.isFlatParameterUse() = myFV().isParameter();
+	eq FIdUseExp.isFlatParameterUse()       = getFIdUse().asFQName().isFlatParameterUse();
+	syn boolean FQName.isFlatParameterUse() = myFV().isParameter();
 	
 	/**
 	 * Convert this parameter equation to a binding expression.

@@ -77,7 +77,7 @@ aspect Constructors {
      * Construcs a connect clause without any residual.
      */
     public FConnectClause.FConnectClause(EquationType type, SrcConnectClause connectClause,
-            FIdUseInstAccess left, FIdUseInstAccess right) {
+            InstAccess left, InstAccess right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), connectClause, left, right);
     }
 

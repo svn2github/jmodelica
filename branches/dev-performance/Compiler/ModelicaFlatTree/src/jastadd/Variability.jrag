@@ -608,7 +608,8 @@ aspect Variability {
     eq FPreExp.expVariability() = super.expVariability().combineDown(Variability.discrete());
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.discrete());
 
-    syn TypePrefixVariability FIdUse.variability() {
+    syn TypePrefixVariability FIdUse.variability();
+    eq FQName.variability() {
         FAbstractVariable variable = myFV();
         if (variable instanceof FVariable) {
             FVariable fVariable = (FVariable) variable;

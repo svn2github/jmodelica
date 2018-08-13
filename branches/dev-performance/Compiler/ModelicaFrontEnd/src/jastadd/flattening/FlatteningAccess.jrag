@@ -55,8 +55,8 @@ aspect FlatteningAccess {
         return (FIdUse)fullCopy();
     }
 
-    public FIdUse FIdUseInstAccess.flatten(Flattener f) {
-        return getInstAccess().flatten();
+    public FIdUse InstAccess.flatten(Flattener f) {
+        return flatten();
     }
 
     /**
@@ -150,13 +150,11 @@ aspect FlatteningAccess {
     }
     
     inh boolean InstAccess.flattenFASContext();
-    inh boolean FIdUseInstAccess.flattenFASContext();
     inh boolean FExp.flattenFASContext();
     eq BaseNode.getChild().flattenFASContext()             = true;
     eq FUnknownSizeExp.getFExp().flattenFASContext()       = false;
     eq FExternalStmt.getChild().flattenFASContext()        = false;
     eq InstDot.getInstAccess(int i).flattenFASContext()    = i != getNumInstAccess() - 1 || flattenFASContext();
-    eq FIdUseInstAccess.getChild().flattenFASContext()     = flattenFASContext();
     eq FIfExp.getChild().flattenFASContext()               = flattenFASContext();
     eq FIdUseExp.getChild().flattenFASContext()            = flattenFASContext() || isSlice();
     

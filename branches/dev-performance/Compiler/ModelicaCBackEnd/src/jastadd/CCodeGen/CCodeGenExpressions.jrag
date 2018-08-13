@@ -691,7 +691,9 @@ aspect CCodeGenExpressions {
 
     syn String FIdUse.name_C() = toString_C(printer_C);
 
-    syn String FIdUse.toString_C(CodePrinter p) = toString_C(p.getExecStep());
+    syn String FIdUse.toString_C(CodePrinter p);
+    eq FQName.toString_C(CodePrinter p) = toString_C(p.getExecStep());
+
     syn String FIdUse.toString_C(CodePrinter.ExecuteCodePrinter p) {
         String type = myFV().funcArrayType(isAssignUse());
         if (myFV().inRecord() && inFunction()) {

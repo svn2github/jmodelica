@@ -1379,8 +1379,8 @@ aspect Connections {
 
     public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (!isDisabled() && connect) {
-            InstAccess left  = getConnector1().getInstAccess();
-            InstAccess right = getConnector2().getInstAccess();
+            InstAccess left  = getConnector1();
+            InstAccess right = getConnector2();
             left.connectTo(right, prefix, csm, this);
         }
     }
@@ -1765,8 +1765,8 @@ aspect OverconstrainedConnections {
 		public OpsResult ops(FExp e) {
 			OpsResult res = null;
             FIdUse u = ((FIdUseExp) e).getFIdUse();
-			if (u instanceof FIdUseInstAccess) {
-                InstComponentDecl var = ((FIdUseInstAccess) u).getInstAccess().myInstComponentDecl();
+			if (u.isInstAccess()) {
+                InstComponentDecl var = u.asInstAccess().myInstComponentDecl();
 				Node n = getNode(var);
 				res = (n == null) ? null : n.opsResult();
 			} else {
@@ -2915,7 +2915,7 @@ aspect ExpandableConnectors {
                     }
                     
                     public ASTNode errorNode() {
-                        return target.getParent().getParent();
+                        return target.getParent();
                     }
                     
                     public String toString() {
@@ -3079,9 +3079,9 @@ aspect ExpandableConnectors {
         return true;
     }
     
-    public void FIdUseInstAccess.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-        if (getInstAccess().isExpandableConnectorPart())
-            csm.getExpandable().addUse(getInstAccess());
+    public void InstAccess.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        if (isExpandableConnectorPart())
+            csm.getExpandable().addUse(this);
     }
     
     public void InstExpandableConnectorDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
@@ -3220,7 +3220,8 @@ aspect Cardinality {
     }
     eq FIdUseExp.cardinalityValue()      = getFIdUse().cardinalityValue();
 
-    syn int FIdUse.cardinalityValue()      = myFClass().getConnectionSetManager().getCardinality(scalarName());
-    eq FIdUseInstAccess.cardinalityValue() = 1;
+    syn int FIdUse.cardinalityValue();
+    eq FQName.cardinalityValue()     = myFClass().getConnectionSetManager().getCardinality(scalarName());
+    eq InstAccess.cardinalityValue() = 1;
 
 }

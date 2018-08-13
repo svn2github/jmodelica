@@ -491,8 +491,8 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * as an intermediate node type.
  */
 FConnectClause : FAbstractEquation ::= <SrcConnectClause:SrcConnectClause>
-                                       Connector1:FIdUseInstAccess 
-                                       Connector2:FIdUseInstAccess;
+                                       Connector1:InstAccess 
+                                       Connector2:InstAccess;
 
 /**
  * Base class for operators concerning overconstrained connection graphs.
@@ -1055,11 +1055,6 @@ FPreExp : FIdUseExp;
  * Higher order derivatives occurring as a result of index reduction.
  */
 InstHDerExp : InstDerExp ::= <Order:int>; 
-
-/**
- * Identifier in the instance tree.
- */
-FIdUseInstAccess : FIdUse ::= InstAccess;
 
 /**
  * Record constructor.

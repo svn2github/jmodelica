@@ -22,13 +22,12 @@ aspect FlatNameBinding {
 
     syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
     eq FAbstractDerExp.myFV()                   = myDerFV(order());
-    syn FAbstractVariable FIdUse.myFV()         = asFQName().myFV();
-    eq FIdUseInstAccess.myFV() { throw new UnsupportedOperationException(); }
+    syn FAbstractVariable FIdUse.myFV() { throw new UnsupportedOperationException(); }
     syn FAbstractVariable FReinit.myFV()        = getVar().asFIdUseExp().myFV();
 
     syn FAbstractVariable FIdUseExp.myDerFV(int index) = getFIdUse().myDerFV(index);
-    syn FAbstractVariable FIdUse.myDerFV(int index)    = asFQName().myDerFV(index);
-    syn FAbstractVariable FQName.myDerFV(int index)    = lookupFV(derName(index));
+    syn FAbstractVariable FIdUse.myDerFV(int index) { throw new UnsupportedOperationException(); }
+    eq FQName.myDerFV(int index)    = lookupFV(derName(index));
 
     syn FAbstractVariable FQName.myPreFV() = lookupFV(preName());
 
@@ -36,8 +35,9 @@ aspect FlatNameBinding {
     syn FFunctionVariable FQName.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
     syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getFIdUse().myCommonVarDecl();
-    syn CommonVariableDecl FIdUse.myCommonVarDecl()    = myFV();
-    eq  FIdUseInstAccess.myCommonVarDecl()             = getInstAccess().myInstComponentDecl();
+    syn CommonVariableDecl FIdUse.myCommonVarDecl();
+    eq  FQName.myCommonVarDecl()     = myFV();
+    eq  InstAccess.myCommonVarDecl() = myInstComponentDecl();
 
     syn FVariable FRelExp.myIndicatorVariableOrException() {
         FVariable variable = myIndicatorVariableOrNull();
@@ -149,10 +149,10 @@ aspect FlatNameBinding {
     eq FQNameFull.getFQNamePart(int i).myContextFV() = 
             i == 0 ? null : getFQNamePart(i - 1).myFV();
 	
-	syn boolean FIdUse.isForIndex()            = myFV().isForIndex();
-	syn boolean FIdUseExp.isForIndex()         = getFIdUse().isForIndex();
-	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
-	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();
+	syn boolean FIdUse.isForIndex();
+	syn boolean FIdUseExp.isForIndex() = getFIdUse().isForIndex();
+	eq FQName.isForIndex()             = myFV().isForIndex();
+	eq InstAccess.isForIndex()         = myInstComponentDecl().isForIndex();
     inh boolean FAbstractVariable.isForIndex();
     inh boolean InstComponentDecl.isForIndex();
     eq FForIndex.getFVariable().isForIndex()        = true;
@@ -360,8 +360,8 @@ aspect FlatExternalObjectBinding {
     syn FExternalStmt FExternalObjectType.myConstructorStmt() = getConstructor().myFExternalStmt();
     syn FExternalStmt FExternalObjectType.myDestructorStmt()  = getDestructor().myFExternalStmt();
     
-    syn FExternalStmt FIdUse.myFExternalStmt()           = myFCallable().asFFunctionDecl().getFAlgorithm().getFExternalStmt();
-    syn FExternalStmt FIdUseInstAccess.myFExternalStmt() = getInstAccess().myInstClassDecl().findFunctionExternal().getFAlgorithm().getFExternalStmt();
+    syn FExternalStmt FIdUse.myFExternalStmt()     = myFCallable().asFFunctionDecl().getFAlgorithm().getFExternalStmt();
+    syn FExternalStmt InstAccess.myFExternalStmt() = myInstClassDecl().findFunctionExternal().getFAlgorithm().getFExternalStmt();
 }
 
 aspect FlatPreBinding {

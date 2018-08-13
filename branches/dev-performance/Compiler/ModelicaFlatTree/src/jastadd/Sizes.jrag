@@ -51,7 +51,7 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FIdUse.getChild().mySize() = asFQName().calcMySize(asFQName().numParts());
+    eq FQName.getChild().mySize() = asFQName().calcMySize(asFQName().numParts());
     eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
     
     syn Size FQName.calcMySize(int i) = myFV().size();
@@ -140,11 +140,7 @@ aspect AccessSizes {
         return new FIdUseExp(treeCopy());
     }
     
-    public FExp FIdUseInstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        return new FIdUseExp(new FIdUseInstAccess(getInstAccess().buildAccessContextSizeExp(crp)));
-    }
-    
-    public InstAccess InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+    public FIdUseExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         List<InstAccess> res = crp.buildContext();
         for (InstAccess part : allParts()) {
             if (hasFArraySubscripts()) {
@@ -154,13 +150,13 @@ aspect AccessSizes {
             }
             res.addChild(part);
         }
-        return new InstDot(res);
+        return new FIdUseExp(new InstDot(res));
     }
     
     inh FIdUseExp FSubscript.buildAccessContextSizeExp();
     eq Root.getChild().buildAccessContextSizeExp()   = null;
     eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
+            new FIdUseExp(new InstDot(buildAccessContext(name(), null)));
     eq FQNamePart.getChild().buildAccessContextSizeExp() =
             new FIdUseExp(new FQNameFull(buildAccessContext(name(), null)));
     eq FIdUse.getChild().buildAccessContextSizeExp() =

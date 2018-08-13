@@ -149,7 +149,7 @@ InstInlineExtends     : InstNormalExtends;
 InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExtendsShortClass>;
 
 // Accesses in the instance tree
-abstract InstAccess : CommonAccess;
+abstract InstAccess : FIdUse;
 abstract InstNamedAccess : InstAccess ::= <ID>;
 InstDot : InstAccess ::= InstAccess*;
 

@@ -1598,10 +1598,6 @@ aspect FlatPrettyPrint {
 		else 
 			p.print(this, str, indent);
 	}
-	
-	public void FIdUseInstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
-		p.print(getInstAccess(), str, indent);
-	}
 
 	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getFIdUse(), str, indent);

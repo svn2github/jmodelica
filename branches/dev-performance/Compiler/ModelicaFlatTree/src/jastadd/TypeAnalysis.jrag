@@ -571,7 +571,9 @@ aspect FlatTypeAnalysis {
     
     eq FDSRefExp.type() = getOrg().type();
 
-    syn lazy FType FIdUse.type() = myFV().type().sizedType(size());
+    syn FType FIdUse.type();
+    
+    syn lazy FType FQName.type() = myFV().type().sizedType(size());
 
     syn FType InstAccess.type() {
         if (myInstComponentDecl().isAssignable()) {

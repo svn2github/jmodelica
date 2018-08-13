@@ -966,6 +966,8 @@ aspect Names {
     eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
     eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
     
+    syn boolean InstAccess.isTopInstAccess() = this == getTopInstAccess();
+    
     /**
      * Get the top node in an access (possibly qualified).
      */
@@ -1047,10 +1049,8 @@ aspect Slices {
     eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
     eq FSubscriptedExp.isSlice() = isArray();
     
-    syn boolean FIdUse.isSlice()  = asFQName().isSlice();
-    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
-    
-    syn boolean InstAccess.isSlice() {
+    syn boolean FIdUse.isSlice();
+    eq InstAccess.isSlice() {
         java.util.List<FArraySubscripts> l = allFArraySubscripts();
         int last = l.size() - 1;
         for (int i = 0; i < last; i++) {
@@ -1090,7 +1090,7 @@ aspect Slices {
     /**
      * Check if this is a slice operation.
      */
-    syn boolean FQName.isSlice() = false;
+    eq FQName.isSlice() = false;
     eq FQNameFull.isSlice() {
     	int n = getNumFQNamePart() - 1;
     	for (int i = 0; i < n; i++) {
@@ -1450,7 +1450,6 @@ aspect ComponentDeclMethods {
         return false;
     }
     
-    syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
     eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
     eq InstComponentArrayAccess.isDisabled() = myInstComponentDecl().isDisabled();

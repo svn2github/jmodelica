@@ -283,7 +283,7 @@ aspect DerivativeFunctions {
     eq FType.shouldBeDifferentiated()             = isReal() || isRecord();
     eq FFunctionVariable.shouldBeDifferentiated() = delegateShouldBeDifferentiated();
     eq FVariable.shouldBeDifferentiated()         = variability().continuousVariability();
-    eq FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
+    eq FQName.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
     eq FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && 
             (inFunction() || isContinuousExp());
     eq FEventGenExp.shouldBeDifferentiated()      = false;

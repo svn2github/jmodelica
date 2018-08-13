@@ -453,11 +453,7 @@ aspect CCodeGenExternalCeval {
     /*
      * Some code generation for the instance tree.
      */
-    syn String FIdUseInstAccess.name_C() = toString_C(printer_C);
-    
-    syn String FIdUseInstAccess.toString_C(CodePrinter p) {
-        return getInstAccess().toString_C(p);
-    }
+    syn String InstAccess.name_C() = toString_C(printer_C);
 
     syn String InstAccess.toString_C(CodePrinter p) =
         myInstLookupComponent().target().name_C();

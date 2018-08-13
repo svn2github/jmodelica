@@ -76,12 +76,14 @@ aspect Components {
         return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
     }
     
-    public FIdUse FIdUse.extractRecordFExp(String suffix) {
+    public abstract FIdUse FIdUse.extractRecordFExp(String suffix);
+    
+    public FIdUse FQName.extractRecordFExp(String suffix) {
         return asFQName().copyAsFQNameFull().append(suffix);
     }
     
-    public FIdUse FIdUseInstAccess.extractRecordFExp(String suffix) {
-        return new FIdUseInstAccess(getInstAccess().copyAndAppend(suffix));
+    public FIdUse InstAccess.extractRecordFExp(String suffix) {
+        return copyAndAppend(suffix);
     }
     
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {

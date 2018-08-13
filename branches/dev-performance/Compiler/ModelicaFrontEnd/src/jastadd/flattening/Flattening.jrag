@@ -325,8 +325,8 @@ aspect Flattening {
 
     public void FConnectClause.flattenUsedFuncsAndEnums(Flattener f) {
         super.flattenUsedFuncsAndEnums(f);
-        getConnector1().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(f);
-        getConnector2().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(f);
+        getConnector1().myInstComponentDecl().flattenOverloadedOperatorsForFlow(f);
+        getConnector2().myInstComponentDecl().flattenOverloadedOperatorsForFlow(f);
     }
     
     public void InstNode.flattenOverloadedOperatorsForFlow(Flattener f) {
@@ -395,11 +395,10 @@ aspect Flattening {
         getFExp().flattenUsedFuncsAndEnums(f);
     }
 
-    public void FIdUseInstAccess.flattenUsedFuncsAndEnums(Flattener f) {
+    public void InstAccess.flattenUsedFuncsAndEnums(Flattener f) {
         super.flattenUsedFuncsAndEnums(f);
-        InstAccess ia = getInstAccess();
-        if (ia.myInstComponentDecl().isRecord() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
-            ((InstAssignable) ia.myInstComponentDecl()).flattenMyType(f);
+        if (myInstComponentDecl().isRecord() && myInstComponentDecl().isConstant() && !hasUnknownIndices() && isTopInstAccess()) 
+            ((InstAssignable) myInstComponentDecl()).flattenMyType(f);
     }
 
     public void FExp.flattenUsedFuncsAndEnums(Flattener f) {
@@ -797,7 +796,7 @@ aspect Flattening {
         if (hasInstExternalCall()) {
             InstExternalCall call = getInstExternalCall();
             if (call.hasReturnVar()) {
-                stmt.setReturnVar(new FIdUseExp(new FIdUseInstAccess(call.getReturnVar().fullCopy())));
+                stmt.setReturnVar(new FIdUseExp(call.getReturnVar().fullCopy()));
             }
             stmt.setName(call.getName());
             for (FExp arg : call.getArgs()) {
@@ -807,7 +806,7 @@ aspect Flattening {
             boolean hasReturn = func.myOutputs().size() == 1 && 
                     func.myOutputs().get(0).canBeExternalReturn(stmt.getFExternalLanguage());
             if (hasReturn) {
-                stmt.setReturnVar(new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(func.myOutputs().get(0).name()))));
+                stmt.setReturnVar(new FIdUseExp(new InstComponentAccess(func.myOutputs().get(0).name())));
             }
             stmt.setName(func.name());
             for (InstComponentDecl arg : func.allInstComponentDecls()) {
@@ -821,7 +820,7 @@ aspect Flattening {
     
     public void InstComponentDecl.addExternalArg(FExternalStmt stmt) {}
     public void InstAssignable.addExternalArg(FExternalStmt stmt) {
-        FIdUseExp use = new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+        FIdUseExp use = new FIdUseExp(new InstComponentAccess(name()));
         stmt.addArg(use);
         for (int i = 0; i < ndims(); i++) {
             stmt.addArg(new FSizeExp(use.treeCopy(), new Opt(new FIntegerLitExp(i + 1))));
@@ -1923,8 +1922,7 @@ aspect Flattening {
      * 
      * Note: Current implementation assumes that only last name part needs to be considered.
      */
-    syn FIdUse FIdUse.splitArrayAccess(int index) = asFQName().splitArrayAccess(index);
-    eq FIdUseInstAccess.splitArrayAccess(int index) = new FIdUseInstAccess(getInstAccess().splitArrayAccess(index));
+    syn FIdUse FIdUse.splitArrayAccess(int index);
     
     /**
      * Return a new name that has index instead of the first array subscript with ndims() > 1.
@@ -2915,8 +2913,8 @@ aspect InstantiatedExpressions {
     
     public FAbstractEquation SrcConnectClause.instantiate() {
         FConnectClause c = new FConnectClause(equationType(), this,
-                new FIdUseInstAccess(getConnector1().newInstAccess()),
-                new FIdUseInstAccess(getConnector2().newInstAccess()));
+                getConnector1().newInstAccess(),
+                getConnector2().newInstAccess());
         c.setLocation(this);
         return contribute(copyStringComment(c));
     }
@@ -2961,7 +2959,7 @@ aspect InstantiatedExpressions {
     
     public  FFunctionCallLeft SrcFunctionCallLeft.instantiate() {
         Opt id = hasSrcAccess() ? 
-                new Opt(setLocationOf(new FIdUseExp(new FIdUseInstAccess(getSrcAccess().newInstAccess())))) : 
+                new Opt(setLocationOf(new FIdUseExp(getSrcAccess().newInstAccess()))) : 
                 new Opt();
         return new FFunctionCallLeft(id);
     }
@@ -3020,7 +3018,7 @@ aspect InstantiatedExpressions {
     protected abstract FStatement SrcStatement.instantiateStatement();
     
     protected FAssignStmt SrcAssignStmt.instantiateStatement() {
-        FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
+        FIdUseExp left = new FIdUseExp(getLeft().newInstAccess());
         left.setLocation(this);
         return new FAssignStmt(left, getRight().instantiate());
     }
@@ -3123,7 +3121,7 @@ aspect InstantiatedExpressions {
     }
 
     public FExp SrcAccessExp.instantiate() {
-        return copyLocationTo(new FIdUseExp(new FIdUseInstAccess(getSrcAccess().newInstAccess())));
+        return copyLocationTo(new FIdUseExp(getSrcAccess().newInstAccess()));
     }
 
 

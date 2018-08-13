@@ -2316,7 +2316,8 @@ aspect ConstantEvaluation {
     eq FStringLitExp.cevalCalc(VariableEvaluator evaluator)       = new CValueString(getString());
     eq FEnumLitExp.cevalCalc(VariableEvaluator evaluator)         = new CValueEnum(type(), getValue());
 
-    syn CValue FIdUse.ceval(VariableEvaluator evaluator) {
+    syn CValue FIdUse.ceval(VariableEvaluator evaluator);
+    eq FQName.ceval(VariableEvaluator evaluator) {
         boolean func = inFunction();
         FQName name = asFQName();
         FAbstractVariable var = myFV();
@@ -2334,12 +2335,11 @@ aspect ConstantEvaluation {
             return CValue.UNKNOWN;
         }
     }
-    eq FIdUseInstAccess.ceval(VariableEvaluator evaluator) = getInstAccess().ceval(evaluator);
 
     /**
      * Perform constant evaluation of an access to a record member.
      */
-    syn CValue FIdUse.cevalRecordMember(VariableEvaluator evaluator, FQName name) {
+    syn CValue FQName.cevalRecordMember(VariableEvaluator evaluator, FQName name) {
         if (name.numDots() < 1)
           return CValue.UNKNOWN;
         String last = name.lastActualPartName();
@@ -3778,7 +3778,7 @@ aspect ConstantEvaluation {
         return myFV().collectMyEvaluationValue(map);
     }
     
-    public Map<CommonVariableDecl,CValue> FIdUseInstAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+    public Map<CommonVariableDecl,CValue> InstAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
         return map;
     }
 
@@ -4288,8 +4288,9 @@ aspect CircularExpressions {
 	
     eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular(-1);
     
-    syn boolean FIdUse.isCircular(int dim)  = myFV().isCircular();
-    eq FIdUseInstAccess.isCircular(int dim) = getInstAccess().myInstComponentDecl().isCircular(dim);
+    syn boolean FIdUse.isCircular(int dim);
+    eq FQName.isCircular(int dim)     = myFV().isCircular();
+    eq InstAccess.isCircular(int dim) = myInstComponentDecl().isCircular(dim);
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = getFExp().isCircular(); // TODO: test without when it works
 
@@ -4317,10 +4318,9 @@ aspect CircularExpressions {
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
 	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
 	
-	syn boolean FIdUse.isUnknownSizeVarUse()  = myFV().isUnknownSizeVar();
-	eq FIdUseInstAccess.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
-	
-	syn boolean InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
+	syn boolean FIdUse.isUnknownSizeVarUse();
+	eq FQName.isUnknownSizeVarUse()     = myFV().isUnknownSizeVar();
+	eq InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
 	
 	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
 	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();

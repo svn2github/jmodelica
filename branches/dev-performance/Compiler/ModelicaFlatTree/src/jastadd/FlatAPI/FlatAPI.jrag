@@ -3722,15 +3722,13 @@ aspect LinearFVariables {
         return getFIdUse().isIndependent(set);
     }
 
-    syn boolean FIdUse.isIndependent(Set<? extends CommonVariableDecl> set) {
+    syn boolean FIdUse.isIndependent(Set<? extends CommonVariableDecl> set);
+    
+    eq FQName.isIndependent(Set<? extends CommonVariableDecl> set) {
         return !set.contains(myFV());
     }
 
-    eq FIdUseInstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
-        return getInstAccess().isIndependent(set);
-    }
-
-    syn boolean InstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
+    eq InstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
         return !set.contains(myInstComponentDecl());
     }
 

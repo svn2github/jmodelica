@@ -568,10 +568,8 @@ aspect Derivatives {
 
     syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);
     
-    syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
-    
     syn InstDerExp InstAccess.createDerExp(int order) {
-        FExp use = new FIdUseExp(new FIdUseInstAccess(fullCopy()));
+        FExp use = new FIdUseExp(fullCopy());
         return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
     }
     

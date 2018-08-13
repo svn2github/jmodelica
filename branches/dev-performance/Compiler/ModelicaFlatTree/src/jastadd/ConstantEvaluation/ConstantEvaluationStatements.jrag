@@ -120,17 +120,6 @@ aspect ConstantEvaluationStatements {
      * @param right     the CValue to assign
      */
     public abstract void FIdUse.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right);
-    
-    /**
-     * Evaluate an assignment with this as the left side during function evaluation.
-     * 
-     * @param evaluator the evaluator used to evaluate the algorithm
-     * @param right     the CValue to assign
-     */
-    @Override
-    public void FIdUseInstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
-        getInstAccess().assignToInFuncEval(evaluator, val);
-    }
 
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
@@ -158,7 +147,8 @@ aspect ConstantEvaluationStatements {
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
      * 
-     * @param values  constant values for the variables
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
      */
     public void InstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         InstAccess firstPart = getFirstInstAccess();

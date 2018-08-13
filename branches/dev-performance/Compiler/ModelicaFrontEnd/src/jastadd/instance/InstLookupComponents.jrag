@@ -721,8 +721,6 @@ aspect InstLookupComponents {
     eq InstComponentAccess.myInstComponentDecl()           = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
     eq InstComponentArrayAccess.myInstComponentDecl()      = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
     
-    syn InstComponentDecl FIdUseInstAccess.myInstComponentDecl() = getInstAccess().myInstComponentDecl();
-    
     syn InstLookupResult<InstComponentDecl> InstAccess.myInstLookupComponent() = lookupInstComponent(name());
     
     syn InstLookupResult<? extends InstLookupResult.Item>  InstAccess.myInstLookup() = myInstLookupClass();

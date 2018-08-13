@@ -1539,10 +1539,6 @@ aspect FunctionInlining {
     }
 
     public FIdUse FIdUse.copyWithNonLiteralSubscriptsAsColon() {
-        return asFQName().copyWithNonLiteralSubscriptsAsColon();
-    }
-
-    public FIdUse FIdUseInstAccess.copyWithNonLiteralSubscriptsAsColon() {
         throw new UnsupportedOperationException();
     }
 
@@ -1588,10 +1584,6 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FIdUse.copyNonLiteralSubscripts() {
-        return asFQName().copyNonLiteralSubscripts();
-    }
-
-    public FArraySubscripts FIdUseInstAccess.copyNonLiteralSubscripts() {
         throw new UnsupportedOperationException();
     }
 

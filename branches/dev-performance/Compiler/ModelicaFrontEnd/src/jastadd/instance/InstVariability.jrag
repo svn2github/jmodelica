@@ -246,12 +246,10 @@ aspect InstExpVariability {
      * Uses
      */
 
-    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability().combine(indexVariability());
+    eq InstAccess.variability() = myInstComponentDecl().variability().combine(indexVariability());
 
-    eq FIdUseInstAccess.indexVariability() = getInstAccess().indexVariability();
-
-    syn TypePrefixVariability InstAccess.indexVariability() = Variability.constant();
-    eq InstArrayAccess.indexVariability()                    = getFArraySubscripts().variability();
+    eq InstAccess.indexVariability()      = Variability.constant();
+    eq InstArrayAccess.indexVariability() = getFArraySubscripts().variability();
     eq InstDot.indexVariability() {
         TypePrefixVariability variability = Variability.constant();
         for (InstAccess part : getInstAccesss())
