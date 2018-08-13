@@ -653,7 +653,20 @@ aspect Variability {
 
     eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(Variability.discrete());
     eq FChangeExp.expVariability() = getFExp().variability().combineDown(Variability.discrete());
-    eq FLoadResource.expVariability() = Variability.parameter();
+    eq FLoadResource.expVariability() {
+        try {
+            CValue cval = ceval();
+            if (cval.hasStringValue()) {
+                String s = cval.stringValue();
+                if (new File(s).isDirectory()) {
+                    return super.expVariability();
+                }
+            }
+        } catch (ConstantEvaluationException e) {
+            // This will be handled in error check or flattening
+        }
+        return Variability.parameter();
+    }
     eq FSampleExp.expVariability() = Variability.discrete();
     eq FStringExp.expVariability() = super.expVariability().combineDown(Variability.discrete());
 
