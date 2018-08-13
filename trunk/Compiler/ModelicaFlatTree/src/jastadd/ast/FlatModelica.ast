@@ -960,6 +960,11 @@ FForIndex : CommonForIndex ::= FVariable FExp;
 FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
+ * If expression in instance tree.
+ */
+InstIfExp : FIfExp;
+
+/**
  * Declaration of a qualified name. 
  */
 FIdDecl : BaseNode ::= FQName;
@@ -1073,7 +1078,8 @@ InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess
                                                   Arg:InstFunctionArgument* 
                                                   /InstComponentDecl*/ 
                                                   /InstExtends*/
-                                                  /InstModification*/;
+                                                  /InstModification*/
+                                                  /Type:FType/;
 
 /**
  * Array constructor expression.

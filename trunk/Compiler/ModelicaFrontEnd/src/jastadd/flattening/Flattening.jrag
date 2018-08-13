@@ -3163,9 +3163,9 @@ aspect InstantiatedExpressions {
     }
 
     public FExp SrcIfExp.instantiate() {
-        FIfExp n = new FIfExp(getSrcIfExp().instantiate(),
-                              getThenExp().instantiate(),
-                              getElseExp().instantiate());
+        InstIfExp n = new InstIfExp(getSrcIfExp().instantiate(),
+                                    getThenExp().instantiate(),
+                                    getElseExp().instantiate());
         return copyLocationTo(n);
     }
 

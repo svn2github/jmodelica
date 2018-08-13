@@ -469,12 +469,15 @@ aspect FunctionInlining {
     }
     
     public void FExp.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
+        FType type = type();
         if (isArray()) {
+            fi.setTypeOf(oldName, type);
             Array arr = getArray();
             for (Index i : indices()) {
                 arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
             }
-        } else if (type().isRecord()) {
+        } else if (type.isRecord()) {
+            fi.setTypeOf(oldName, type);
             oldName += ".";
             for (FRecordComponentType part : ((FRecordType) type()).getComponents()) {
                 component(part.getName()).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);

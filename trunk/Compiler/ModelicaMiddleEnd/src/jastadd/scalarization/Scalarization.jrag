@@ -1355,7 +1355,12 @@ aspect Scalarization {
 		for (int i = 0, n = size().get(dim); i < n; i++) {
 			FExp res;
             if (last) {
-                res = createRecordConstructorCell(s, exp.extractArrayCell(s, it.next()));
+                FExp subExp = exp.extractArrayCell(s, it.next());
+                FType t = subExp.type();
+                if (t.isUnknown()) {
+                    t = this;
+                }
+                res = t.createRecordConstructorCell(s, subExp);
             } else {
                 res = createRecordConstructorArray(s, exp, it, dim + 1);
             }

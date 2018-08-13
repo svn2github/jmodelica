@@ -35,7 +35,6 @@ import java.util.Iterator;
 
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.collections.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.munkres.DenseMunkresProblem;
 import org.jmodelica.util.munkres.IntegerCost;
@@ -1896,33 +1895,61 @@ aspect TransformCanonical {
 				list.add(rec);
 		setFRecordDeclList(list);
 	}
-	
-	public void FClass.computeEquivalentRecords() {
-		ArrayList<FType> distinctTypes = new ArrayList<FType>();
-		ArrayList<FRecordDecl> keptDecl = new ArrayList<FRecordDecl>();
-		for (FRecordDecl rec : getFRecordDecls()) {
-			boolean found = false;
-			FType type = rec.type();
-			for (int i = 0; !found && i < distinctTypes.size(); i++) {
-				if (type.typeCompatible(distinctTypes.get(i))) {
-					found = true;
-					rec.equivalentRecordGroup = i;
-				}
-			}
-			if (!found) {
-				rec.equivalentRecordToKeep = true;
-				rec.equivalentRecordGroup = distinctTypes.size();
-				distinctTypes.add(type);
-				keptDecl.add(rec);
-			}
-		}
-		equivalentRecordMap = new HashMap<String,FRecordDecl>();
-		for (FRecordDecl rec : getFRecordDecls())
-			equivalentRecordMap.put(rec.name(), keptDecl.get(rec.equivalentRecordGroup));
-	}
-	
-	protected Map<String,FRecordDecl> FClass.equivalentRecordMap;
-	
+
+    public void FClass.computeEquivalentRecords() {
+        ArrayList<FRecordType> distinctTypes = new ArrayList<>();
+        ArrayList<FRecordDecl> keptDecl = new ArrayList<>();
+        equivalentRecordComponentOrderMap = new HashMap<>();
+        for (FRecordDecl rec : getFRecordDecls()) {
+            boolean found = false;
+            FRecordType type = rec.type();
+            for (int i = 0; !found && i < distinctTypes.size(); i++) {
+                FRecordType other = distinctTypes.get(i);
+                /* TODO: Also check that this type is not used in any external functions.
+                 *       If it is, do not remove it (if the one chosen to be kept isn't used 
+                 *       in an external, keep this one instead). */
+                if (type.typeCompatible(other)) {
+                    found = true;
+                    rec.equivalentRecordGroup = i;
+                    type.addComponentReorderFrom(other, equivalentRecordComponentOrderMap);
+                }
+            }
+            if (!found) {
+                rec.equivalentRecordToKeep = true;
+                rec.equivalentRecordGroup = distinctTypes.size();
+                distinctTypes.add(type);
+                keptDecl.add(rec);
+            }
+        }
+        equivalentRecordMap = new HashMap<>();
+        for (FRecordDecl rec : getFRecordDecls())
+            equivalentRecordMap.put(rec.name(), keptDecl.get(rec.equivalentRecordGroup));
+    }
+
+    public void FRecordType.addComponentReorderFrom(FRecordType other, Map<String, int[]> map) {
+        Map<String,Integer> myOrder = new HashMap<>();
+        for (int i = 0, n = getNumComponent(); i < n; i++) {
+            myOrder.put(getComponent(i).getName(), i);
+        }
+        
+        int[] order = new int[getNumComponent()];
+        boolean different = false;
+        for (int i = 0, n = other.getNumComponent(); i < n; i++) {
+            int j = myOrder.get(other.getComponent(i).getName());
+            order[i] = j;
+            if (i != j) {
+                different = true;
+            }
+        }
+        
+        if (different) {
+            map.put(name(), order);
+        }
+    }
+
+    protected Map<String,FRecordDecl> FClass.equivalentRecordMap;
+    protected Map<String,int[]> FClass.equivalentRecordComponentOrderMap;
+
 	public boolean FRecordDecl.equivalentRecordToKeep = false;
 	public int FRecordDecl.equivalentRecordGroup = -1;
 	
@@ -1968,22 +1995,34 @@ aspect TransformCanonical {
 			return this;
 		}
 	}
-	
-	rewrite FRecordConstructor {
-		when (rewriteEquivalentRecord)
-		to FRecordConstructor {
-			rewriteEquivalentRecord = false;
-			getRecord().setFQName(myFClass().createEquivalentRecordFQName(getRecord().getFQName()));
-			getRecord().flushAll();
-			flushAll();
-			return this;
-		}
-	}
+
+    rewrite FRecordConstructor {
+        when (rewriteEquivalentRecord)
+        to FRecordConstructor {
+            rewriteEquivalentRecord = false;
+            FQName old = getRecord().getFQName();
+            getRecord().setFQName(myFClass().createEquivalentRecordFQName(old));
+            int[] order = myFClass().getEquivalentRecordComponentOrder(old);
+            if (order != null) {
+                List<FExp> args = new List<>();
+                for (int i : order) {
+                    args.add(getArg(i));
+                }
+                setArgList(args);
+            }
+            flushAll();
+            return this;
+        }
+    }
 
 	public FQName FClass.createEquivalentRecordFQName(FQName old) {
 		FRecordDecl rec = equivalentRecordMap.get(old.name());
 		return (rec != null) ? rec.getFQName().fullCopy() : old;
 	}
+
+    public int[] FClass.getEquivalentRecordComponentOrder(FQName old) {
+        return equivalentRecordComponentOrderMap.get(old.name());
+    }
 
 	public FType FClass.createEquivalentRecordType(FType old) {
         FRecordDecl rec = equivalentRecordMap.get(old.name());

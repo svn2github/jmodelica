@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.jmodelica.util.collections.ParallelIterable;
+
 
 aspect FlatTypeAnalysis {
 
@@ -281,13 +283,25 @@ aspect FlatTypeAnalysis {
             getX().type().scalarType().numericPromotion(getY().type().scalarType()).sizedType(size());
 
     eq FRecordConstructor.type() = getType();
-    syn FType FRecordConstructor.getType() {
-        FRecordType frt = getRecord().recordType().fullCopy();
+
+    syn FType FRecordConstructor.getType() = getRecord().recordType().forConstructor(getArgs());
+
+    public FType FRecordType.forConstructor(List<? extends HasType> args) {
+        FRecordType frt = treeCopy();
         for (int i = 0; i < frt.getNumComponent(); i++) {
-            frt.getComponent(i).getFType().transferSizes(getArg(i).type());
+            frt.getComponent(i).getFType().transferSizes(args.getChild(i).type());
         }
         return frt;
     }
+
+    public interface HasType {
+        public FType type();
+    }
+
+    FExp implements HasType;
+    InstFunctionArgument implements HasType;
+
+    syn FType InstFunctionArgument.type() = getFExp().type();
 
     syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
 
@@ -399,6 +413,13 @@ aspect FlatTypeAnalysis {
         if (!getIfExp().isOKTestExp() || thenType.ndims() != elseType.ndims())
             return fUnknownType();
         
+        return fypeSelection(thenType, elseType);
+    }
+
+    syn FType FIfExp.fypeSelection(FType thenType, FType elseType) = 
+        thenType.typePromotion(elseType, inFunction(), null);
+
+    syn FType InstIfExp.fypeSelection(FType thenType, FType elseType) {
         if (thenType.equivalentTo(elseType))
             return thenType.typePromotion(elseType);
         
@@ -416,7 +437,7 @@ aspect FlatTypeAnalysis {
         return thenType.typePromotion(elseType, inFunction(), null);
     }
 
-    syn boolean FIfExp.isParameterIf() = getIfExp().variability().parameterOrLess();
+    syn boolean InstIfExp.isParameterIf() = getIfExp().variability().parameterOrLess();
 
     syn boolean FExp.isOKTestExp() = type().isBoolean() && type().isScalar();
 
@@ -734,22 +755,29 @@ aspect TypePromotion {
         if (getNumComponent() != rec.getNumComponent()) {
             return fUnknownType();
         }
-        List<FRecordComponentType> comps = new List<FRecordComponentType>();
-        Iterator<FRecordComponentType> i1 = componentTreeSet().iterator();
-        Iterator<FRecordComponentType> i2 = rec.componentTreeSet().iterator();
-        while (i1.hasNext()) {
-            FRecordComponentType frct1 = i1.next();
-            FRecordComponentType frct2 = i2.next();
-            if (!frct1.getName().equals(frct2.getName())) {
+        Map<String, FRecordComponentType> comps = new HashMap<>();
+        Iterable<FRecordComponentType[]> iter = new ParallelIterable(
+                new FRecordComponentType[2], true, componentTreeSet(), rec.componentTreeSet());
+        for (FRecordComponentType[] frct : iter) {
+            if (frct[0] == null || frct[1] == null || 
+                    !frct[0].getName().equals(frct[1].getName())) {
                 return fUnknownType();
             }
-            FType comp = frct1.getFType().mergeRecordType(frct2.getFType());
+            FType comp = frct[0].getFType().mergeRecordType(frct[1].getFType());
             if (comp.isUnknown()) {
                 return fUnknownType();
             }
-            comps.add(new FRecordComponentType(frct1.getName(), comp));
+            String name = frct[0].getName();
+            comps.put(name, new FRecordComponentType(name, comp));
         }
-        return new FRecordType(getSize().mergeRecordType(other.getSize()), getName(), comps, getFClass());
+        
+        List<FRecordComponentType> compList = new List<>();
+        for (FRecordComponentType comp : getComponents()) {
+            compList.add(comps.get(comp.getName()));
+        }
+        
+        Size size = getSize().mergeRecordType(other.getSize());
+        return new FRecordType(size, getName(), compList, getFClass());
     }
     
     syn TreeSet<FRecordComponentType> FRecordType.componentTreeSet() {
@@ -891,8 +919,6 @@ aspect FTypeCompatibility {
         if (!dimensionCompatible(type, allowUnknown) || !type.isRecord())
             return false;
         FRecordType rec = (FRecordType) type;
-        if (getName().equals(rec.getName())) 
-            return true;
         if (getNumComponent() != rec.getNumComponent())
             return false;
         return typeMatches(componentTreeSet(), rec.componentTreeSet(), compatible, true);

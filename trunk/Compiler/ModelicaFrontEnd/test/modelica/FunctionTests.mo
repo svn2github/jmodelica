@@ -16992,6 +16992,45 @@ end FunctionTests.ConstantInFunction5;
 ")})));
 end ConstantInFunction5;
 
+
+model ArrayWithIfInput
+    function g
+        input Real[:] x;
+        output Real y = x[1];
+        algorithm
+    end g;
+
+    function f
+        input Real[:] x;
+        output Real y = x[1];
+        algorithm
+    end f;
+
+    parameter Real p0 = 1;
+    parameter Real p1 = g({if p0 > 0 then p0 else p0 + 1});
+    parameter Real p2 = f({if p1 > 0 then p1 else p1 + 1});
+
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="ArrayWithIfInput",
+        description="",
+        flatModel="
+fclass FunctionTests.ArrayWithIfInput
+ parameter Real p0 = 1 /* 1 */;
+ parameter Real temp_1;
+ parameter Real p1;
+ parameter Real temp_3;
+ parameter Real p2;
+parameter equation
+ temp_1 = if p0 > 0 then p0 else p0 + 1;
+ p1 = temp_1;
+ temp_3 = if p1 > 0 then p1 else p1 + 1;
+ p2 = temp_3;
+end FunctionTests.ArrayWithIfInput;
+")})));
+end ArrayWithIfInput;
+
+
 model AssignmentSizeCheck1
   function f
       input Integer n;
@@ -17053,5 +17092,6 @@ Error at line 7, column 7, in file '...', ARRAY_SIZE_MISMATCH_IN_EQUATION:
   The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [2, 1], and size of right-hand side is [1, 1]
 ")})));
 end AssignmentSizeCheck3;
+
 
 end FunctionTests;
