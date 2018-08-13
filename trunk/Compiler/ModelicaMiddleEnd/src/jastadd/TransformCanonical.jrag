@@ -1202,12 +1202,28 @@ aspect TransformCanonical {
             
             public void perform() {
                 genAlias();
-                eliminateAliasVariables();
+                propagateDerivativeBindings();
+                sortAliasVariables(false);
+                sortAliasEquations();
+                enableAliasRewrite();
+                change();
                 removeUnusedTemporaries();
                 mergeEquivalentRecords();
                 insertTempsInLHS();
                 remoteRedundantInitialEquations();
                 change();
+            }
+            
+            public void propagateDerivativeBindings() {
+                // Collect derivative binding equations, however only if we are going
+                // to perform index reduction!
+                if (myOptions().getBooleanOption("propagate_derivatives")) {
+                    for (FAbstractEquation equation : getFAbstractEquations()) {
+                        if (!equation.isAliasEquation()) {
+                            equation.propagateDerivativeBindings();
+                        }
+                    }
+                }
             }
         }
         
@@ -1380,9 +1396,7 @@ aspect TransformCanonical {
                 fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
             }
         }
-		aliasManager.reportAliasErrors(this);
-		//flush();
-		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
+        aliasManager.reportAliasErrors(this);
 	}
 	
     public void FVariable.classifyAliasConstant(AliasManager aliasManager, 
@@ -1400,49 +1414,13 @@ aspect TransformCanonical {
         }
     }
 
-	/**
-	 * Eliminate alias variables from the flat model.
-	 * 
-	 * The non-alias variables are kept in the list FClass.FVariableList but the
-	 * alias variables are moved to FClass.AliasVariablesList.
-	 */
-	public void FClass.eliminateAliasVariables() {
-		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
-        ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
-		
-		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
-
-		// Remove alias equations.
-		for (FAbstractEquation equation : getFAbstractEquations()) 
-			if (!equation.isAliasEquation()) 
-				eqns.add(equation);
-        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            for (FAbstractEquation equation : getParameterEquations()) { 
-                if (!equation.isAliasEquation()) {
-                    pEqns.add(equation);
-                }
-            }
-        }
-        
-        // Collect derivative binding equations, however only if we are going
-        // to perform index reduction!
-        if (myOptions().getBooleanOption("propagate_derivatives")) {
-            for (FAbstractEquation eqn : eqns) {
-                eqn.propagateDerivativeBindings();
-            }
-        }
-
-		setFAbstractEquationList(new List(eqns));
-        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            setParameterEquationList(new List(pEqns));
-        }
-		
-        sortAliasvariables(false);
-		
-		flush();
-	}
-
-    public void FClass.sortAliasvariables(boolean recompute) {
+    /**
+     * Eliminate alias variables from the flat model.
+     * 
+     * The non-alias variables are kept in the list FClass.FVariableList but the
+     * alias variables are moved to FClass.AliasVariablesList.
+     */
+    public void FClass.sortAliasVariables(boolean recompute) {
         ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
         ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
         if (recompute) {
@@ -1459,7 +1437,28 @@ aspect TransformCanonical {
         }
         setFVariableList(new List(nonAliasVars));
         setAliasVariableList(new List(aliasVars));
-        enableAliasRewrite();
+    }
+
+    /**
+     * Eliminate alias equation from the flat model.
+     */
+    public void FClass.sortAliasEquations() {
+        ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            if (!equation.isAliasEquation()) {
+                eqns.add(equation);
+            }
+        }
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            for (FAbstractEquation equation : getParameterEquations()) { 
+                if (!equation.isAliasEquation()) {
+                    pEqns.add(equation);
+                }
+            }
+            setParameterEquationList(new List(pEqns));
+        }
+        setFAbstractEquationList(new List(eqns));
     }
 
     /**
