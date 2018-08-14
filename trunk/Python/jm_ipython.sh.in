@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if test "${JAVA_HOME}" = ""; then
-  export JAVA_HOME=@_JAVA_HOME_@
+  export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1    | sed '/^[[:space:]]*java\.home/!d;s/^[[:space:]]*java\.home[[:space:]]*=[[:space:]]*//;s/jre//')"
 fi
 
 #Create path to file
@@ -17,5 +17,5 @@ IPOPT_HOME=@IPOPT_HOME@ \
 SUNDIALS_HOME=${JMODELICA_HOME}/ThirdParty/Sundials \
 PYTHONPATH=:${JMODELICA_HOME}/Python/:@CASADI_HOME@:$PYTHONPATH \
 LD_LIBRARY_PATH=:@IPOPT_HOME@/lib/:${JMODELICA_HOME}/ThirdParty/Sundials/lib:${JMODELICA_HOME}/ThirdParty/CasADi/lib:$LD_LIBRARY_PATH \
-SEPARATE_PROCESS_JVM=@_JAVA_HOME_@ \
+SEPARATE_PROCESS_JVM=${JAVA_HOME} \
 ipython $@
