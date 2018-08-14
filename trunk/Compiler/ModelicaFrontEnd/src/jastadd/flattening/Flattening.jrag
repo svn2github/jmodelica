@@ -2500,21 +2500,15 @@ aspect FlatExpressions {
     /**
      * Create an FArray containing flattened subexpressions.
      */
-    public FExp Array.buildFlattened(Flattener f, FExp context);
-    
-    public FExp FExp.buildFlattened(Flattener f, FExp context) {
-        return flatten(f);
-    }
-    
-    public FExp ArrayExp.buildFlattened(Flattener f, FExp context) {
+    public FExp Array.buildFlattened(Flattener f, FExp context) {
         return buildFArray(new FlattenedBuilder(f, context, 0));
     }
 
-    public FExp ArrayExp.buildFlattened(Flattener f, FExp context, int order) {
+    public FExp Array.buildFlattened(Flattener f, FExp context, int order) {
         return buildFArray(new FlattenedBuilder(f, context, order));
     }
 
-    public class ArrayExp {
+    public class Array {
         /**
          * Helper object for {@link #buildFlattened(FQName, FExp)}.
          */

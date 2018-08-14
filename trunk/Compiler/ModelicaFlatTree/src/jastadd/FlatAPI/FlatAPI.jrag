@@ -2507,7 +2507,7 @@ aspect FlatAPI {
     }
     
     public FExp FSpatialDistExp.createInitialReplacement(boolean second) {
-        int size = getInitialValues().size().numElements();
+        int size = getInitialValues().getArray().length;
         return new FIfExp(getPositiveVelocity().copySymbolic(),
                 getInitialValues().getArray().get(second ? size : 1).copySymbolic(), 
                 getInitialValues().getArray().get(second ? 1 : size).copySymbolic());

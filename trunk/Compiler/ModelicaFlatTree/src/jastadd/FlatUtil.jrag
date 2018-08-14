@@ -1597,8 +1597,8 @@ aspect FlatFunctionUtils {
      inh String FExp.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
      inh String FAssignStmt.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
      eq InstNode.getChild().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)            = null;
-     eq FFunctionCall.getArrayExp().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)       = tempVarName();
-     eq FVectorFunctionCall.getArrayExp().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt) = calcGeneratedVarName(gvt);
+     eq FFunctionCall.getArray().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)       = tempVarName();
+     eq FVectorFunctionCall.getArray().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt) = calcGeneratedVarName(gvt);
      eq FClass.getChild().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)              = nextGeneratedVarName(gvt);
      eq FFunctionDecl.getChild().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)       = nextGeneratedVarName(gvt);
      

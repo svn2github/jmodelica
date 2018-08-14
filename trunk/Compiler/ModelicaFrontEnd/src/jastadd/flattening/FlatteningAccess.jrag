@@ -29,7 +29,7 @@ aspect FlatteningAccess {
         InstComponentDecl var = ia.myInstComponentDecl();
         if (!inFunction()) {
             if (ia.isNonAssignableArray()) {
-                return getArrayExp().buildFlattened(f, this, order);
+                return getArray().buildFlattened(f, this, order);
             } else if (!ia.indexVariability().indexParameterOrLess()) {
                 FIdUseExp copy = (FIdUseExp) dynamicFExp(treeCopy());
                 List<FSubscript> sub = new List<FSubscript>();
@@ -239,7 +239,7 @@ aspect FlatteningFunctionConstant {
                         // If this is a package constant, then the variable will not be available in the flattened model 
                         if (!ia.inFunction() && variability().constantVariability()) {
                             // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
-                            FExp exp = getBindingFExp().buildLiteral(isReal());
+                            FExp exp = getBindingFExp().getArray().buildLiteral(isReal());
                             FArraySubscripts fas = ia.getFArraySubscripts().flatten(f);
                             return new FSubscriptedExp(exp, fas);
                         }

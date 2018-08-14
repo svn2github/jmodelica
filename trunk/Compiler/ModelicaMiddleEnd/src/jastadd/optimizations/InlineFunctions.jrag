@@ -1630,15 +1630,7 @@ aspect FunctionInlining {
         fas.addFSubscriptNoTransform(treeCopyNoTransform());
     }
 
-    public interface Array {
-        public FExp buildWithReplacedReferences(AbstractFunctionInliner fi, FExp context);
-    }
-
-    public FExp FExp.buildWithReplacedReferences(AbstractFunctionInliner fi, FExp context) {
-        return context.dynamicFExp(this).replaceReferences(fi);
-    }
-
-    public class ArrayExp {
+    public class Array {
 
         public FExp buildWithReplacedReferences(AbstractFunctionInliner fi, FExp context) {
             return buildFArray(new ReplaceReferenceBuilder(fi, context));

@@ -855,18 +855,12 @@ aspect Derivatives {
      * Build an FArray containing the differentiated elements of this array 
      * (by calling {@link FExp#diff(String)} on each one).
      */
-    public FExp Array.buildDiff(final String name);
-    
-    public FExp ArrayExp.buildDiff(final String name) {
+    public FExp Array.buildDiff(final String name) {
         return buildFArray(new ElementBuilder() {
             public FExp build(FExp exp) {
                 return exp.diff(name);
             }
         });
-    }
-    
-    public FExp FExp.buildDiff(final String name) {
-        return diff(name);
     }
 
 }
