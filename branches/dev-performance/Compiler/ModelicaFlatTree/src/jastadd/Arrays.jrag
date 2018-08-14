@@ -1259,6 +1259,8 @@ aspect Arrays {
         }
     }
 
+    eq FDeferExp.getArray() = getFExp().getArray();
+
     /*
      * canBuildArrayFromChild() and childToBuildArray() are designed so an expression can get its Array 
      * directly from a child, rather than building a new ArrayExp nta which would be a copy.
