@@ -1044,12 +1044,17 @@ aspect Flattening {
     @Override
     public FType FPrimitiveType.flatten(Flattener f, InstAssignable ia, boolean keepSizeExpressions) {
         FType res;
-        if(keepSizeExpressions && ia == null && !getSize().variability().knownParameterOrLess() && !inFunction()) {
+        if(keepSizeExpressions && !getSize().variability().knownParameterOrLess()) {
             MutableSize mutableSize = (MutableSize) getSize();
             List<FExp> l = mutableSize.flattenExps(f);
-            FPrimitiveType copy = fullCopy();
-            copy.setSize(Size.SCALAR);
-            res = new FArrayType(copy , l);
+            if (l.getNumChild() > 0 && l.getNumChild() == mutableSize.ndims()) {
+                FPrimitiveType copy = fullCopy();
+                copy.setSize(Size.SCALAR);
+                res = new FArrayType(copy , l);
+            } else {
+                res = fullCopy();
+                res.setSize(getSize().flatten(f, res, keepSizeExpressions));
+            }
         } else {
             res = fullCopy();
             res.setSize(getSize().flatten(f, res, keepSizeExpressions));
