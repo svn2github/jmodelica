@@ -1386,7 +1386,7 @@ aspect Scalarization {
     }
 
     public FExp FRecordType.createRecordConstructorCell(Scalarizer s, FExp exp) {
-		FRecordConstructor rc = new FRecordConstructor(new FQNameString(getName()), new List());
+		FRecordConstructor rc = new FRecordConstructor(new FRecordAccess(getName()), new List());
 		for (FRecordComponentType comp : getComponents()) {
              FExp next = exp.scalarRecordFExp(s, comp.getName());
              if (exp.type().isUnknown() || exp.useTempVar) {
@@ -1477,10 +1477,10 @@ aspect Scalarization {
         return new FPreExp(getFIdUse().asFQName().scalarize(s, indexNames));
     }
 
-    public FIdUse FQName.scalarize(Scalarizer s, FExp[] indexNames) {
-        FQName fqn = asFQName().scalarize(s);
+    public FQName FQName.scalarize(Scalarizer s, FExp[] indexNames) {
+        FQName fqn = scalarize(s);
         if (indexNames != null) {
-            fqn = fqn.asFQNameFull().addFArraySubscripts(asFQName().getExpandedSubscripts().scalarize(s));
+            fqn = fqn.asFQNameFull().addFArraySubscripts(getExpandedSubscripts().scalarize(s));
         }
         return fqn;
     }
@@ -1494,6 +1494,10 @@ aspect Scalarization {
 	public FQName FQNameString.scalarize(Scalarizer s) {
 		return new FQNameString(getName());
 	}
+
+    public FRecordAccess FRecordAccess.scalarize(Scalarizer s) {
+        return new FRecordAccess(getName());
+    }
 
     public FQName FQNameFull.scalarize(Scalarizer s) {
         if (!inFunction()) {
@@ -1740,7 +1744,7 @@ aspect Scalarization {
     }
 	
 	public FExp FRecordConstructor.scalarizeExp(Scalarizer s) {
-        FRecordConstructor rc = new FRecordConstructor(getRecord().asFQName().scalarize(s, null), new List());
+        FRecordConstructor rc = new FRecordConstructor(getRecord().scalarize(s), new List());
         for (FExp arg : getArgs()) {
             rc.addArg(arg.scalarize(s));
         }

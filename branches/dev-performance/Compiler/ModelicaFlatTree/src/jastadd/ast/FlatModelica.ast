@@ -190,7 +190,7 @@ FPreEnumVariable : FEnumVariable;
 /**
  * FVariable of a record type.
  */
-FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
+FRecordVariable : FVariable ::= Record:FRecordAccess /Type:FType/;
 
 /**
  * Abstract variable type for all the different derivative variable types.
@@ -965,16 +965,11 @@ FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 FIdDecl : BaseNode ::= FQName;
 
 /**
- * Abstract superclass for accesses in both instance and flat trees.
- */
-abstract CommonAccess : BaseNode;
-
-/**
  * A qualified identifier.
  */
-abstract FIdUse : CommonAccess;
+abstract FIdUse : BaseNode;
 
-
+FRecordAccess : FQNameString;
 
 /**
  * Abstract FExp type for all FExps that describes a variable references.
@@ -1059,7 +1054,7 @@ InstHDerExp : InstDerExp ::= <Order:int>;
 /**
  * Record constructor.
  */
-FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;
+FRecordConstructor : FBuiltInFunctionCall ::= Record:FRecordAccess Arg:FExp* /Type:FType/;
 
 /**
  * Record constructor in instance trees.

@@ -1963,7 +1963,7 @@ aspect TransformCanonical {
 		when (rewriteEquivalentRecord)
 		to FRecordVariable {
 			rewriteEquivalentRecord = false;
-			setRecord(myFClass().createEquivalentRecordFQName(getRecord()));
+			setRecord(myFClass().createEquivalentRecordAccess(getRecord()));
 			flushAll();
 			return this;
 		}
@@ -1973,16 +1973,16 @@ aspect TransformCanonical {
 		when (rewriteEquivalentRecord)
 		to FRecordConstructor {
 			rewriteEquivalentRecord = false;
-			setRecord(myFClass().createEquivalentRecordFQName(getRecord().asFQName()));
+			setRecord(myFClass().createEquivalentRecordAccess(getRecord()));
 			getRecord().flushAll(); // remove?
 			flushAll();
 			return this;
 		}
 	}
 
-	public FQName FClass.createEquivalentRecordFQName(FQName old) {
+	public FRecordAccess FClass.createEquivalentRecordAccess(FRecordAccess old) {
 		FRecordDecl rec = equivalentRecordMap.get(old.name());
-		return (rec != null) ? rec.getFQName().fullCopy() : old;
+		return (rec != null) ? rec.getFQName().createFRecordAccess() : old;
 	}
 
 	public FType FClass.createEquivalentRecordType(FType old) {

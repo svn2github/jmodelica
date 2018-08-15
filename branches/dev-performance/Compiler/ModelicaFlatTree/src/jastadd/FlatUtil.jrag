@@ -1025,6 +1025,12 @@ aspect FlatNames {
         return (FQName) unboundCopy(); 
     }
     
+    /**
+     * Create an FRecordAccess with the same name.
+     */
+    public FRecordAccess FQName.createFRecordAccess() {
+        return new FRecordAccess(name());
+    }
 
     syn String FType.name();
     eq FArrayType.name()            = getFPrimitiveType().name();
@@ -1774,7 +1780,7 @@ aspect FlatFunctionUtils {
     
     public FVariable FRecordType.createFVariable(VisibilityType vt, FQName name, 
             TypePrefixVariability variability) {
-        return new FRecordVariable(vt, variability, name, new FQNameString(getName()));
+        return new FRecordVariable(vt, variability, name, new FRecordAccess(getName()));
     }   
     
     public FVariable FEnumType.createFVariable(VisibilityType vt, FQName name, 

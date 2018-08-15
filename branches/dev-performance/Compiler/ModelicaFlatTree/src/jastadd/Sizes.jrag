@@ -51,7 +51,7 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FQName.getChild().mySize() = asFQName().calcMySize(asFQName().numParts());
+    eq FQName.getChild().mySize() = calcMySize(numParts());
     eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
     
     syn Size FQName.calcMySize(int i) = myFV().size();

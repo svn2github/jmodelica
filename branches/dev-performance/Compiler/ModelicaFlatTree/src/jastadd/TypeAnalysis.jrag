@@ -289,7 +289,7 @@ aspect FlatTypeAnalysis {
         return frt;
     }
 
-    syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
+    syn FRecordType FRecordAccess.recordType() = myFRecordDecl().type();
 
     eq FTranspose.type() = 
         getFExp().ndims() < 2 ? 
@@ -573,7 +573,7 @@ aspect FlatTypeAnalysis {
 
     syn FType FIdUse.type();
     
-    syn lazy FType FQName.type() = myFV().type().sizedType(size());
+    eq FQName.type() = myFV().type().sizedType(size());
 
     syn FType InstAccess.type() {
         if (myInstComponentDecl().isAssignable()) {
@@ -1217,7 +1217,7 @@ aspect BuiltInFlatTypes {
             for (FRecordComponentType t : getComponents()) {
                 args.add(t.getFType().zeroLiteral());
             }
-            return new FRecordConstructor(new FQNameString(getName()), args);
+            return new FRecordConstructor(new FRecordAccess(getName()), args);
         } else {
             List<InstFunctionArgument> args = new List<InstFunctionArgument>();
             int i = 1;

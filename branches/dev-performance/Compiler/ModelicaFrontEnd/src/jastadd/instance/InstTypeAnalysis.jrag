@@ -150,7 +150,7 @@ aspect InstTypeAnalysis {
         return res == null ? super.componentType(name) : res;
     }
     
-    eq InstAccess.recordType() = myInstClassDecl().recordType();
+    syn FType InstAccess.recordType() = myInstClassDecl().recordType();
 
     syn lazy FType InstComponentDecl.type() = fUnknownType();
 

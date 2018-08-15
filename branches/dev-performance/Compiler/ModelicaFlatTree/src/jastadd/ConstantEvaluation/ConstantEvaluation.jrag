@@ -2319,17 +2319,16 @@ aspect ConstantEvaluation {
     syn CValue FIdUse.ceval(VariableEvaluator evaluator);
     eq FQName.ceval(VariableEvaluator evaluator) {
         boolean func = inFunction();
-        FQName name = asFQName();
         FAbstractVariable var = myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
             if (var.ndims() > 0 && hasFArraySubscripts()) {
-                i = name.getFArraySubscripts().createIndex();
+                i = getFArraySubscripts().createIndex();
             }
             if (i != Index.NULL) {
-                return var.inRecord() ? cevalRecordMember(evaluator, name).array().getCell(i) : evaluator.ceval(var, i);
+                return var.inRecord() ? cevalRecordMember(evaluator, this).array().getCell(i) : evaluator.ceval(var, i);
             } else {
-                return var.inRecord() ? cevalRecordMember(evaluator, name) : evaluator.ceval(var);
+                return var.inRecord() ? cevalRecordMember(evaluator, this) : evaluator.ceval(var);
             }
         } else {
             return CValue.UNKNOWN;

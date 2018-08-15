@@ -1562,7 +1562,7 @@ aspect Flattening {
     
     public FVariable InstRecord.createEmptyFVariable() {
         FRecordVariable rec = new FRecordVariable();
-        rec.setRecord(new FQNameString(qualifiedTypeName()));
+        rec.setRecord(new FRecordAccess(qualifiedTypeName()));
         return rec;
     }
     
@@ -2753,8 +2753,8 @@ aspect FlatExpressions {
         }
     }
     
-    public FIdUse InstAccess.flattenRecordName() {
-        return new FQNameString(myInstClassDecl().qualifiedName());
+    public FRecordAccess InstAccess.flattenRecordName() {
+        return new FRecordAccess(myInstClassDecl().qualifiedName());
     }
     
     public FFunctionCall FFunctionCall.flatten(Flattener f) {

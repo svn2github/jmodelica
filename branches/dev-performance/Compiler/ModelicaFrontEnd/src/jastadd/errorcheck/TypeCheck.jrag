@@ -1395,7 +1395,7 @@ aspect FlatTypeCheck {
         if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
             if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
                 FIdUse use = getFExp().asFIdUse();
-                FType useType = use.type();
+                FType useType = getFExp().type();
                 FType outType = type();
                 if (!use.isForIndex()) {
                     if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
