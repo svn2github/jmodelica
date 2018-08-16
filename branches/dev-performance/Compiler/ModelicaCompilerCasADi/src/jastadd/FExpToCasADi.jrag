@@ -360,7 +360,7 @@ aspect FExpToCasADi {
      */
     eq FIdUseExp.toMX() {
         if (myFV().inRecord()) {
-            return getParent().getMXVariableFromRecordHashMap(getFIdUse().getFQName().toString());
+            return getParent().getMXVariableFromRecordHashMap(getFIdUse().asFQName().toString());
         } else if (hasFArraySubscripts() && inFunction()) {
             int flatIndex = getFArraySubscripts().computeFlattenedIndexBasedOnSizeData(myFV().size());
             return myFV().asMXVector().get(flatIndex);
