@@ -33,48 +33,38 @@ aspect CCodeGenTypes {
     syn String FType.nameScalar_C(CodePrinter p, boolean external) = external ? nameScalarExt_C(p) : nameScalar_C(p);
     syn String FType.nameArray_C(CodePrinter p, boolean external)  = external ? nameArrayExt_C(p) : nameArray_C(p);
 
-    public abstract String FType.nameScalar_C(CodePrinter p);
-    syn String FArrayType.nameScalar_C(CodePrinter p)  = getFPrimitiveType().nameScalar_C(p);
-    syn String FCellType.nameScalar_C(CodePrinter p)   = "jmi_real_t";
+    syn String FType.nameScalar_C(CodePrinter p)       = "jmi_real_t";
     eq FRecordType.nameScalar_C(CodePrinter p)         = (getFClass() != null ? myFRecordDecl().name_C() : 
         ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC;
     eq FStringType.nameScalar_C(CodePrinter p)         = "jmi_string_t";
     eq FExternalObjectType.nameScalar_C(CodePrinter p) = "jmi_extobj_t";
     eq FFunctionType.nameScalar_C(CodePrinter p)       = p.funcNameUnderscore(myFFunctionDecl(), C_SUFFIX_FP)+ "*";
 
-    public abstract String FType.nameArray_C(CodePrinter p);
-    syn String FArrayType.nameArray_C(CodePrinter p)   = getFPrimitiveType().nameArray_C(p);
-    syn String FCellType.nameArray_C(CodePrinter p)    = "jmi_array_t";
+    syn String FType.nameArray_C(CodePrinter p)        = "jmi_array_t";
     eq FRecordType.nameArray_C(CodePrinter p)          = nameScalar_C(p) + C_SUFFIX_ARRAY;
     eq FStringType.nameArray_C(CodePrinter p)          = "jmi_string_array_t";
     eq FExternalObjectType.nameArray_C(CodePrinter p)  = "jmi_extobj_array_t";
 
-    public abstract String FType.nameScalarExt_C(CodePrinter p);
-    syn String FArrayType.nameScalarExt_C(CodePrinter p) = getFPrimitiveType().nameScalarExt_C(p);
-    syn String FCellType.nameScalarExt_C(CodePrinter p)  = nameScalar_C(p);
-    eq FRecordType.nameScalarExt_C(CodePrinter p)        = nameScalar_C(p) +  C_SUFFIX_EXT;
-    eq FIntegerType.nameScalarExt_C(CodePrinter p)       = "jmi_int_t";
-    eq FBooleanType.nameScalarExt_C(CodePrinter p)       = "jmi_int_t";
-    eq FEnumType.nameScalarExt_C(CodePrinter p)          = "jmi_int_t";
+    syn String FType.nameScalarExt_C(CodePrinter p)    = nameScalar_C(p);
+    eq FRecordType.nameScalarExt_C(CodePrinter p)      = nameScalar_C(p) +  C_SUFFIX_EXT;
+    eq FIntegerType.nameScalarExt_C(CodePrinter p)     = "jmi_int_t";
+    eq FBooleanType.nameScalarExt_C(CodePrinter p)     = "jmi_int_t";
+    eq FEnumType.nameScalarExt_C(CodePrinter p)        = "jmi_int_t";
 
-    public abstract String FType.nameArrayExt_C(CodePrinter p);
-    syn String FArrayType.nameArrayExt_C(CodePrinter p) = getFPrimitiveType().nameArrayExt_C(p);
-    syn String FCellType.nameArrayExt_C(CodePrinter p)  = nameArray_C(p);
-    eq FIntegerType.nameArrayExt_C(CodePrinter p)       = "jmi_int_array_t";
-    eq FBooleanType.nameArrayExt_C(CodePrinter p)       = "jmi_int_array_t";
-    eq FEnumType.nameArrayExt_C(CodePrinter p)          = "jmi_int_array_t";
+    syn String FType.nameArrayExt_C(CodePrinter p)     = nameArray_C(p);
+    eq FIntegerType.nameArrayExt_C(CodePrinter p)      = "jmi_int_array_t";
+    eq FBooleanType.nameArrayExt_C(CodePrinter p)      = "jmi_int_array_t";
+    eq FEnumType.nameArrayExt_C(CodePrinter p)         = "jmi_int_array_t";
 
 
     /* Corresponding external c representation */
     syn String FExp.argType_C(CodePrinter p, boolean ref) = type().argType_C(p, ref);
     eq FSizeExp.argType_C(CodePrinter p, boolean ref)     = ref ? type().argType_C(p, ref) : "size_t";
 
-    public abstract String FType.argType_C(CodePrinter p, boolean ref);
-    syn String FArrayType.argType_C(CodePrinter p, boolean ref)   = getFPrimitiveType().argType_C(p, ref);
-    syn String FCellType.argType_C(CodePrinter p, boolean ref)    = argTypeBase_C(p) + (ref ? "*" : "");
-    eq FStringType.argType_C(CodePrinter p, boolean ref)          = "const " + super.argType_C(p, ref);
+    syn String FType.argType_C(CodePrinter p, boolean ref)        = argTypeBase_C(p) + (ref ? "*" : "");
+    eq FStringType.argType_C(CodePrinter p, boolean ref)          = "const " + super.argType_C(p, isArray());
 
-    syn String FCellType.argTypeBase_C(CodePrinter p)    = type_C(p);
+    syn String FType.argTypeBase_C(CodePrinter p)        = type_C(p);
     eq FPrimitiveType.argTypeBase_C(CodePrinter p)       = "double";
     eq FIntegerType.argTypeBase_C(CodePrinter p)         = "int";
     eq FBooleanType.argTypeBase_C(CodePrinter p)         = "int";
@@ -82,26 +72,15 @@ aspect CCodeGenTypes {
     eq FExternalObjectType.argTypeBase_C(CodePrinter p)  = "void*";
     eq FStringType.argTypeBase_C(CodePrinter p)          = "char*";
 
-    /*
-     * Returns true if the type defined in argTypeBase_C() is a pointer.
-     */
-    syn boolean FType.isArgTypeBaseRef()  = false;
-    eq FArrayType.isArgTypeBaseRef()  = getFPrimitiveType().isArgTypeBaseRef();
-    eq FExternalObjectType.isArgTypeBaseRef()  = true;
-    eq FStringType.isArgTypeBaseRef()  = true;
-
     /* Macro type tokens */
     syn String FType.macroType() = macroTypeScalar() + (isArray() ? "_ARR" : "");
 
     syn String FType.macroTypeScalar() = "GEN";
-    eq FArrayType.macroTypeScalar()   = getFPrimitiveType().macroTypeScalar();
     eq FStringType.macroTypeScalar()   = "STR";
 
     syn String FType.macroTypeDecl(boolean external) = external ? macroTypeDeclScalar() + "_EXT" : macroTypeDeclScalar();
 
-    public abstract String FType.macroTypeDeclScalar();
-    syn String FArrayType.macroTypeDeclScalar()  = getFPrimitiveType().macroTypeDeclScalar();
-    syn String FCellType.macroTypeDeclScalar()   = "GEN";
+    syn String FType.macroTypeDeclScalar()       = "GEN";
     eq FRealType.macroTypeDeclScalar()           = "REA";
     eq FIntegerType.macroTypeDeclScalar()        = "INT";
     eq FBooleanType.macroTypeDeclScalar()        = "BOO";

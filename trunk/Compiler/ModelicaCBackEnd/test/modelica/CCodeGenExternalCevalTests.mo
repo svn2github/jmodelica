@@ -41,13 +41,13 @@ model Scalar
 equation
     (x1,x2,x3,x4,x5) = f(1,2,true,"s",E.A);
 
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="Scalar",
-        description="Test code gen for external C functions evaluation. Scalars.",
-        variability_propagation=false,
-        inline_functions="none",
-        template="
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Scalar",
+            description="Test code gen for external C functions evaluation. Scalars.",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
 $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
@@ -68,10 +68,7 @@ $ECE_calc_free$
 ---
 $ECE_free$
 ",
-        generatedCode="
-
-
-
+            generatedCode="
 ---
 
 ---
@@ -95,7 +92,7 @@ $ECE_free$
         JMI_DEF(INT_EXT, tmp_4)
         JMI_DEF(BOO_EXT, tmp_5)
         JMI_DEF(ENU_EXT, tmp_6)
-        extern void f(double, int, int, const char*, int, double*, int*, int*, const char**, int*);
+        extern void f(double, int, int, const char*, int, double*, int*, int*, const char*, int*);
 
 ---
         JMCEVAL_parse(Real, a1_v);
@@ -131,6 +128,7 @@ $ECE_free$
 ---
 
 ---
+
 ")})));
 end Scalar;
 

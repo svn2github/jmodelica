@@ -151,13 +151,7 @@ aspect AlgorithmScalarization {
         super.scalarize(s);
     }
     
-    public abstract void FType.scalarizeInitArray(Scalarizer.Algorithm s, ASTNode context);
-
-    public void FArrayType.scalarizeInitArray(Scalarizer.Algorithm s, ASTNode context) {
-        scalarizeFExps(s);
-    }
-
-    public void FCellType.scalarizeInitArray(Scalarizer.Algorithm s, ASTNode context) {
+    public void FType.scalarizeInitArray(Scalarizer.Algorithm s, ASTNode context) {
         setSize(getSize().scalarizeInitArray(s, context == null ? this : context));
     }
     
