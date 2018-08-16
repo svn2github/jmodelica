@@ -575,7 +575,7 @@ aspect FlatTypeCheck {
     @Override
     public void FLoadResource.typeCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        getFExp().forceVariability(checkType, Variability.structParameterLoadResource());
+        getFExp().forceVariability(checkType, Variability.LOADRESOURCEPARAMETER);
     }
     
     public class FExp {
@@ -1387,7 +1387,7 @@ aspect FlatTypeCheck {
             size().markAsStructuralParameter(checkType, this);
         }
         if (callsLoadResource()) {
-            getArgs().forceUsesVariability(checkType, Variability.structParameterLoadResource());
+            getArgs().forceUsesVariability(checkType, Variability.LOADRESOURCEPARAMETER);
         }
     }
   

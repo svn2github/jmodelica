@@ -160,7 +160,7 @@ aspect EquationSolve {
     private static FExp FEquation.computeActiveSolution(Collection<FExp> exps, FVariable var,
             boolean dontAllowDivisionByVariable, double tol) {
         java.util.List<FExp> parts = new ArrayList<FExp>();
-        TypePrefixVariability mulCoeffVar = Variability.constant(); // Keep track of variability
+        TypePrefixVariability mulCoeffVar = Variability.CONSTANT; // Keep track of variability
         // Compute new expressions for the active terms
         for (FExp e : exps) {
             ArrayList<FExp> fac = e.factors();
@@ -202,7 +202,7 @@ aspect EquationSolve {
             }
             parts.add(coeff);
         }
-        if (dontAllowDivisionByVariable && !mulCoeffVar.lessOrEqual(Variability.constant())) {
+        if (dontAllowDivisionByVariable && !mulCoeffVar.lessOrEqual(Variability.CONSTANT)) {
             return new FNoExp();
         }
         return FExp.createBalancedBinaryTree(new FAddExp(), parts);

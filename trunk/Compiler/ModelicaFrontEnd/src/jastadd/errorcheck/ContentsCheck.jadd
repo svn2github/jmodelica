@@ -255,7 +255,7 @@ aspect ContentCheck {
 
     public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
         if (!inFunction()) // Array sizes outside functions should be structural parameters
-            size().forceVariability(checkType, Variability.structParameter());
+            size().forceVariability(checkType, Variability.STRUCTPARAMETER);
         checkQuotedIdentifier(getSrcComponentDecl(), name());
         checkAbsoluteValue();
     }
@@ -486,8 +486,8 @@ aspect ContentCheck {
             boolean inWhen = inWhen();
             boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
             boolean functionCallEqu = hasFunctionCallEquations(); 
-            if (hasOnlyFixedParamTests()) {
-                forceTestVariability(checkType, balanced ? Variability.testParameter() : Variability.structParameter());
+            if (canSelectBranch()) {
+                forceTestVariability(checkType, balanced ? Variability.TESTPARAMETER : Variability.STRUCTPARAMETER);
             } else {
                 if (!balanced) {
                     error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
@@ -495,6 +495,10 @@ aspect ContentCheck {
             }
         }
     }
+
+    syn boolean FIfWhenElseEquation.canSelectBranch() = true;
+    eq FIfWhenEquation.canSelectBranch()              = getTest().variability().fixedParameterOrLess() 
+            && (!hasElse() || getElse().canSelectBranch());
 
 	public void FEquation.contentCheck(ErrorCheckType checkType) {
 		super.contentCheck(checkType);
@@ -579,10 +583,6 @@ aspect ContentCheck {
     eq FIfWhenElseEquation.getChild().isTopWhenIfEquation() = true;
     eq FIfWhenEquation.getElse().isTopWhenIfEquation()      = false;
 
-    syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
-    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().variability().fixedParameterOrLess() 
-            && (!hasElse() || getElse().hasOnlyFixedParamTests());
-	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
 	eq FEquation.isAssignmentEqn()                  = getLeft().isAccess();
 	
@@ -855,10 +855,10 @@ aspect ContentCheck {
 
 aspect ForceVariability {
 
-    private TypePrefixVariability InstAssignable.forcedVariability = Variability.continuous();
+    private TypePrefixVariability InstAssignable.forcedVariability = Variability.CONTINUOUS;
 
     public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
-        forceVariability(checkType, Variability.structParameter());
+        forceVariability(checkType, Variability.STRUCTPARAMETER);
     }
 
     public void FExp.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {

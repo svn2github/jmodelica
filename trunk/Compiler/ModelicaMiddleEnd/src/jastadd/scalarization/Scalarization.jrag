@@ -106,9 +106,9 @@ aspect Scalarization {
             
             public Variable(List vars) {
                 this.vars = vars;
-                si = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.initialParameter());
-                sp = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.fixedParameter());
-                sc = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.continuous());
+                si = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.INITIALPARAMETER);
+                sp = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.FIXEDPARAMETER);
+                sc = new Scalarizer.Equation(vars, new List<FAbstractEquation>(), Variability.CONTINUOUS);
             }
             
             public Scalarizer.Equation select(TypePrefixVariability variability) {
@@ -164,7 +164,7 @@ aspect Scalarization {
         }
         
         public static Scalarizer.Algorithm function(List<FFunctionVariable> vars, List<FStatement> stmts) {
-            return new Algorithm(vars, stmts, new ForNames(), true, Variability.discrete());
+            return new Algorithm(vars, stmts, new ForNames(), true, Variability.DISCRETE);
         }
         
         public static class Algorithm extends Scalarizer {
@@ -393,7 +393,7 @@ aspect Scalarization {
     public void FAttribute.createArrayTemporaries(Scalarizer.Variable s, TypePrefixVariability variability, FType type) {
         type = type.componentType(name());
         if (type.isUnknown()) {
-            variability = Variability.parameter();
+            variability = Variability.FIXEDPARAMETER;
         } else {
             variability = variability.component(name());
         }
