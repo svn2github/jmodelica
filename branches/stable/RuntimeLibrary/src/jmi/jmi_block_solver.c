@@ -813,7 +813,7 @@ static int jmi_block_default_restore_solver_state_mode(void* b) {
 }
 
 jmi_block_solver_callbacks_t jmi_block_solver_default_callbacks(void) {
-    jmi_block_solver_callbacks_t cb;
+    jmi_block_solver_callbacks_t cb={0};
     cb.F = NULL; /* The user must set this */
     cb.dF = NULL; /* NULL is ok to pass on */
     cb.Jacobian = NULL; /* NULL is ok to pass on */

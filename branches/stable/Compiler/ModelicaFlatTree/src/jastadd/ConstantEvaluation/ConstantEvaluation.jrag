@@ -1907,25 +1907,8 @@ aspect ConstantEvaluation {
      * 
      * @param toReal  if <code>true</code>, convert all values to real.
      */
-    public FExp Array.buildLiteral(boolean toReal) {
-    	return buildFArray(new LiteralBuilder(toReal));
-    }
-
-    public class Array {
-        /**
-         * Helper object for {@link #buildLiteral(boolean)}.
-         */
-        protected static class LiteralBuilder implements ElementBuilder {
-            private boolean toReal;
-            
-            public LiteralBuilder(boolean toReal) {
-                this.toReal = toReal;
-            }
-            
-            public FExp build(FExp e) {
-                return toReal ? e.ceval().convertReal().buildLiteral() : e.ceval().buildLiteral();
-            }
-        }
+    public FExp FExp.buildLiteral(boolean toReal) {
+        return toReal ? ceval().convertReal().buildLiteral() : ceval().buildLiteral();
     }
 
     /** 
@@ -1934,7 +1917,7 @@ aspect ConstantEvaluation {
      */ 
     syn boolean FExp.equalsRealValue(double val) {
     	try {
-    		return variability().lessOrEqual(fConstant()) && ceval().realValue()==val;
+    		return variability().lessOrEqual(Variability.constant()) && ceval().realValue()==val;
     	} catch(Exception e) {
     		return false;
     	}
@@ -3150,7 +3133,7 @@ aspect ConstantEvaluation {
         public CValue ceval(VariableEvaluator evaluator, Index i);
         public String name();
         public Size size();
-        public FTypePrefixVariability variability();
+        public TypePrefixVariability variability();
 
         // Added for codegeneration when evaluating external functions
         public FType   type();

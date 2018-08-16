@@ -198,7 +198,7 @@ aspect Flattening {
             return normalEqns.add(fae);
         }
         
-         public List<FAbstractEquation> addFParameterEquation(FAbstractEquation fae) {
+         public List<FAbstractEquation> addParameterEquation(FAbstractEquation fae) {
             return parameterEqns.add(fae);
         }
         
@@ -251,7 +251,7 @@ aspect Flattening {
         setFVariableList(f.getFVariables());
         setFAbstractEquationList(f.getNormalEquations());
         setFInitialEquationList(f.getInitialEquations());
-        setFParameterEquationList(f.getParameterEquations());
+        setParameterEquationList(f.getParameterEquations());
         
         setFFunctionDeclList(f.getFFunctionDecls());
         setFRecordDeclList(f.getFRecordDecls());
@@ -866,9 +866,11 @@ aspect Flattening {
             fqn.removeFArraySubscripts();
             FFunctionVariable ffv = createFFunctionVariable(f, eo, fqn);
             if (isInput())
-                ffv.setFTypePrefixInputOutput(new FInput());
-            if (isOutput())
-                ffv.setFTypePrefixInputOutput(new FOutput());
+                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.INPUT);
+            else if (isOutput())
+                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);
+            else
+                ffv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
             vars.addChild(ffv);
             if (isComposite()) {
                 addFInitArrayStmt(f, stmts, isInput(), expandedFQNameCalc(), new ForNames());
@@ -1027,9 +1029,9 @@ aspect Flattening {
         FType type = type().flatten(f, this, !isInput());
         FFunctionVariable ffv;
         if (isArray())
-            ffv = new FFunctionArray(new Opt(), type, eo, fqn);
+            ffv = new FFunctionArray(TypePrefixInputOutput.NONE, type, eo, fqn);
         else
-            ffv = new FFunctionVariable(new Opt(), type, eo, fqn);
+            ffv = new FFunctionVariable(TypePrefixInputOutput.NONE, type, eo, fqn);
         return ffv;
     }
     
@@ -1305,7 +1307,7 @@ aspect Flattening {
                         + name() + "' did not evaluate to same result as during compilation");
                 CValue cval = ceval();
                 if (cval.hasBuildLiteral()) {
-                    f.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
+                    f.addParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
                             new FAssert(new FEqExp(cval.buildLiteral(), flatten(f)),
                                     new FStringLitExp(msg), new Opt<FExp>())));
                 }
@@ -1704,12 +1706,14 @@ aspect Flattening {
 
     public FVariable InstAssignable.createFVariable(Flattener f, FQName name, FlattenBindingExp binding) {
         FVariable fv = createEmptyFVariable();
-        fv.setFVisibilityType(createFVisibilityType());
-        fv.setFTypePrefixVariability(variability().fullCopy());
+        fv.setVisibilityType(createVisibilityType());
+        fv.setTypePrefixVariability(variability());
         
         // Only set input/output prefix for top level inputs and outputs
         if (isTopLevelInputOutput()) 
-            fv.setFTypePrefixInputOutput(isInput() ? new FInput() : new FOutput());
+            fv.setTypePrefixInputOutput(isInput() ? TypePrefixInputOutput.INPUT : TypePrefixInputOutput.OUTPUT);
+        else
+            fv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
         
         if (myInstClass().extendsPrimitive())
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
@@ -1741,13 +1745,13 @@ aspect Flattening {
         return fv;
     }
 
-    public FVisibilityType InstAssignable.createFVisibilityType() {
+    public VisibilityType InstAssignable.createVisibilityType() {
         if (inExpandableConnector()) {
-            return new FExpandableVisibilityType();
+            return VisibilityType.EXPANDABLE;
         } else if (isPublicVar()) {
-            return new FPublicVisibilityType();
+            return VisibilityType.PUBLIC;
         } else {
-            return new FProtectedVisibilityType();
+            return VisibilityType.PROTECTED;
         }
     }
 
@@ -2496,15 +2500,21 @@ aspect FlatExpressions {
     /**
      * Create an FArray containing flattened subexpressions.
      */
-    public FExp Array.buildFlattened(Flattener f, FExp context) {
+    public FExp Array.buildFlattened(Flattener f, FExp context);
+    
+    public FExp FExp.buildFlattened(Flattener f, FExp context) {
+        return flatten(f);
+    }
+    
+    public FExp ArrayExp.buildFlattened(Flattener f, FExp context) {
         return buildFArray(new FlattenedBuilder(f, context, 0));
     }
 
-    public FExp Array.buildFlattened(Flattener f, FExp context, int order) {
+    public FExp ArrayExp.buildFlattened(Flattener f, FExp context, int order) {
         return buildFArray(new FlattenedBuilder(f, context, order));
     }
 
-    public class Array {
+    public class ArrayExp {
         /**
          * Helper object for {@link #buildFlattened(FQName, FExp)}.
          */
@@ -2548,9 +2558,18 @@ aspect FlatExpressions {
         try {
             CValue cval = ceval();
             if (cval.hasStringValue()) {
-                return createNode(new FStringLitExp(cval.stringValue()));
+                String s = cval.stringValue();
+                if (new File(s).isDirectory()) {
+                    return new FStringLitExp(s);
+                }
+                return createNode(new FStringLitExp(s));
             }
-        } catch (ConstantEvaluationException e) {}
+            // TODO: unit tests depending on lack of error handling
+            // throw new InternalCompilerError("Could not evaluate loadResource during flattening");
+        } catch (ConstantEvaluationException e) {
+            // TODO: unit tests depending on lack of error handling
+            // throw new InternalCompilerError("Could not evaluate loadResource during flattening: " + e.getModelicaStackTrace());
+        }
         return createNode(getFExp().flatten(f));
     }
     
@@ -2671,7 +2690,7 @@ aspect FlatExpressions {
     }
     
     public FExp FExp.flattenDer(Flattener f, int order) {
-        return dynamicFExp(diff(TIME, order)).flatten(f);
+        return diff(TIME, order).flatten(f);
     }
     
      public FExp FIdUseExp.flattenDer(Flattener f, int order) {
@@ -2867,23 +2886,23 @@ aspect FlatExpressions {
      *
      * This is done during variability calculation to keep compatibility with FExp. 
      */
-    abstract public FTypePrefixVariability SrcTypePrefixVariability.flatten();
-    public FTypePrefixVariability SrcContinuous.flatten()     { return fContinuous();     }
-    public FTypePrefixVariability SrcDiscrete.flatten()       { return fDiscrete();       }
-    public FTypePrefixVariability SrcParameter.flatten()      { return fFixedParameter(); }
-    public FTypePrefixVariability SrcIndexParameter.flatten() { return fIndexParameter(); }
-    public FTypePrefixVariability SrcConstant.flatten()       { return fConstant();       }
+    abstract public TypePrefixVariability SrcTypePrefixVariability.flatten();
+    public TypePrefixVariability SrcContinuous.flatten()     { return Variability.continuous();     }
+    public TypePrefixVariability SrcDiscrete.flatten()       { return Variability.discrete();       }
+    public TypePrefixVariability SrcParameter.flatten()      { return Variability.fixedParameter(); }
+    public TypePrefixVariability SrcIndexParameter.flatten() { return Variability.indexParameter(); }
+    public TypePrefixVariability SrcConstant.flatten()       { return Variability.constant();       }
 }
 
 aspect InstantiatedExpressions {
 
     
-    public FEquationType SrcAbstractEquation.equationType() {
-        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+    public EquationType SrcAbstractEquation.equationType() {
+        return isInitial() ? EquationType.INITIAL : EquationType.NORMAL;
     }
 
-    public FEquationType SrcAlgorithm.equationType() {
-        return isInitial() ? new FInitialEquation() : new FNormalEquation();
+    public EquationType SrcAlgorithm.equationType() {
+        return isInitial() ? EquationType.INITIAL : EquationType.NORMAL;
     }
 
     public <T extends FAbstractEquation> T SrcAbstractEquation.copyStringComment(T eqn) {
@@ -3144,9 +3163,9 @@ aspect InstantiatedExpressions {
     }
 
     public FExp SrcIfExp.instantiate() {
-        FIfExp n = new FIfExp(getSrcIfExp().instantiate(),
-                              getThenExp().instantiate(),
-                              getElseExp().instantiate());
+        InstIfExp n = new InstIfExp(getSrcIfExp().instantiate(),
+                                    getThenExp().instantiate(),
+                                    getElseExp().instantiate());
         return copyLocationTo(n);
     }
 

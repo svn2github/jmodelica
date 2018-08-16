@@ -9415,7 +9415,7 @@ fclass ArrayTests.Other.ArraySizeInComp2
  structural parameter Integer r2.n = 3 /* 3 */;
  constant Real x[1] = 1.0;
  constant Real x[2] = 2.0;
- constant Real x[3] = 0.0;
+ constant Real x[3] = 3.0;
 end ArrayTests.Other.ArraySizeInComp2;
 ")})));
 end ArraySizeInComp2;

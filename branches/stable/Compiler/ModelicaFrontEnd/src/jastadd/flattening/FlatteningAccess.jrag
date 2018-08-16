@@ -29,7 +29,7 @@ aspect FlatteningAccess {
         InstComponentDecl var = ia.myInstComponentDecl();
         if (!inFunction()) {
             if (ia.isNonAssignableArray()) {
-                return getArray().buildFlattened(f, this, order);
+                return getArrayExp().buildFlattened(f, this, order);
             } else if (!ia.indexVariability().indexParameterOrLess()) {
                 FIdUseExp copy = (FIdUseExp) dynamicFExp(treeCopy());
                 List<FSubscript> sub = new List<FSubscript>();
@@ -80,9 +80,9 @@ aspect FlatteningAccess {
      * Move any non-parameter indices to given list and replace with colon.
      * Copy any parameter non-scalar indices to given list.
      */
-    public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {}
+    public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {}
 
-    public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+    public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
         FArraySubscripts fas = getFArraySubscripts();
         for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
             FSubscript fs = fas.getFSubscript(i);
@@ -95,7 +95,7 @@ aspect FlatteningAccess {
         }
     }
 
-    public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+    public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
         if (isArray()) {
             for (int i = 0, n = ndims(); i < n; i++) {
                 sub.add(size().rangeFSubscript(i));
@@ -103,7 +103,7 @@ aspect FlatteningAccess {
         }
     }
 
-    public void InstDot.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+    public void InstDot.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
         for (InstAccess ia : getInstAccesss()) {
             ia.extractNonParameterIndices(sub, v);
         }
@@ -239,7 +239,7 @@ aspect FlatteningFunctionConstant {
                         // If this is a package constant, then the variable will not be available in the flattened model 
                         if (!ia.inFunction() && variability().constantVariability()) {
                             // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
-                            FExp exp = getBindingFExp().getArray().buildLiteral(isReal());
+                            FExp exp = getBindingFExp().buildLiteral(isReal());
                             FArraySubscripts fas = ia.getFArraySubscripts().flatten(f);
                             return new FSubscriptedExp(exp, fas);
                         }

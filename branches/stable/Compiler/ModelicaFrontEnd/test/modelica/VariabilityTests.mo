@@ -65,6 +65,36 @@ end VariabilityTests.Structural2;
 end Structural2;
 
 
+model Structural3
+    model A
+        parameter Integer p;
+    end A;
+
+    model B
+        parameter Integer p;
+        Real x[p] = (1:p) * time;
+    end B;
+    
+    model C
+        extends A;
+        extends B;
+    end C;
+    
+    C c(p = 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    FlatteningTestCase(
+        name="Structural3",
+        description="",
+        flatModel="
+fclass VariabilityTests.Structural3
+ structural parameter Integer c.p = 2 /* 2 */;
+ Real c.x[2] = (1:2) * time;
+end VariabilityTests.Structural3;
+")})));
+end Structural3;
+
+
 model EvaluateAnnotation1
 	parameter Real a = 1.0;
 	parameter Real b = a annotation(Evaluate=true);
@@ -1058,7 +1088,27 @@ Error at line 9, column 27, in file '...', CANNOT_EVALUATE_LOADRESOURCE:
 ")})));
 end LoadResource6;
 
+model LoadResource7
+    parameter String p1 = "modelica://Modelica/Resources/Data/Utilities";
+    parameter String p2 = Modelica.Utilities.Files.loadResource(p1);
+    String p3 = Modelica.Utilities.Files.loadResource(p1) + "file.txt";
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoadResource7",
+            description="Mark loadResource input as structural",
+            regexp="/\"[^\"]+\"/\"\"/",
+            flatModel="
+fclass VariabilityTests.LoadResource.LoadResource7
+ structural (loadResource) parameter String p1 = \"\" /* \"\" */;
+ structural parameter String p2 = \"\" /* \"\" */;
+ discrete String p3 = \"\" + \"\";
+end VariabilityTests.LoadResource.LoadResource7;
+")})));
+end LoadResource7;
+
 end LoadResource;
+
 
 model BindingExpVariability1
     model EO

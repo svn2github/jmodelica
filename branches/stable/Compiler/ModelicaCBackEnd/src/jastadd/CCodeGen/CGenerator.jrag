@@ -302,7 +302,7 @@ public class CGenerator extends GenericGenerator {
     
         public void generate(CodeStream genPrinter) {
             Enumerator enumerator = new Enumerator();
-            for (FAbstractEquation e : fclass.getFParameterEquations())
+            for (FAbstractEquation e : fclass.getParameterEquations())
                 e.genResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator, null, null);
         }
     
@@ -323,7 +323,7 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<FAbstractEquation> cs = new CodeSplitter<FAbstractEquation>(p, str, next, 
-                    true, "model_init_eval_parameters_", fclass.myOptions(), fclass.getFParameterEquations().toArrayList()) {
+                    true, "model_init_eval_parameters_", fclass.myOptions(), fclass.getParameterEquations().toArrayList()) {
                 @Override
                 public void genDecl(FAbstractEquation element) {
                     p.printVarDecls(element, str, indent);
@@ -421,8 +421,8 @@ public class CGenerator extends GenericGenerator {
     }
 
     class ZOffsets {
-        private LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable> m = 
-                new LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable>();
+        private LinkedHashListMap<TypePrefixVariability.VariabilityCausality_C, FVariable> m = 
+                new LinkedHashListMap<TypePrefixVariability.VariabilityCausality_C, FVariable>();
         
         public ZOffsets(Collection<? extends FVariable> fvs) {
             for (FVariable fv : fvs) {
@@ -438,7 +438,7 @@ public class CGenerator extends GenericGenerator {
             return res;
         }
         
-        public java.util.List<FVariable> get(FTypePrefixVariability.VariabilityCausality_C s) {
+        public java.util.List<FVariable> get(TypePrefixVariability.VariabilityCausality_C s) {
             return m.getList(s);
         }
     }
@@ -452,20 +452,20 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodeStream str) {
             ZOffsets zo = new ZOffsets(fclass.strings());
             int o = 0;
-            o = genList(str, fclass.numIndependentStringConstants()           , o, FTypePrefixVariability.VariabilityCausality_C.CI);
-            o = genList(str, fclass.numDependentStringConstants()             , o, FTypePrefixVariability.VariabilityCausality_C.CD);
-            o = genList(str, fclass.numRegularIndependentStringParameters()   , o, FTypePrefixVariability.VariabilityCausality_C.PI);
-            o = genList(str, fclass.numStructuralIndependentStringParameters(), o, FTypePrefixVariability.VariabilityCausality_C.PS);
-            o = genList(str, fclass.numFinalIndependentStringParameters()     , o, FTypePrefixVariability.VariabilityCausality_C.PF);
-            o = genList(str, fclass.numEvalIndependentStringParameters()      , o, FTypePrefixVariability.VariabilityCausality_C.PE);
-            o = genList(str, fclass.numDependentStringParameters()            , o, FTypePrefixVariability.VariabilityCausality_C.PD);
+            o = genList(str, fclass.numIndependentStringConstants()           , o, TypePrefixVariability.VariabilityCausality_C.CI);
+            o = genList(str, fclass.numDependentStringConstants()             , o, TypePrefixVariability.VariabilityCausality_C.CD);
+            o = genList(str, fclass.numRegularIndependentStringParameters()   , o, TypePrefixVariability.VariabilityCausality_C.PI);
+            o = genList(str, fclass.numStructuralIndependentStringParameters(), o, TypePrefixVariability.VariabilityCausality_C.PS);
+            o = genList(str, fclass.numFinalIndependentStringParameters()     , o, TypePrefixVariability.VariabilityCausality_C.PF);
+            o = genList(str, fclass.numEvalIndependentStringParameters()      , o, TypePrefixVariability.VariabilityCausality_C.PE);
+            o = genList(str, fclass.numDependentStringParameters()            , o, TypePrefixVariability.VariabilityCausality_C.PD);
             int nStringVariables = fclass.numDiscreteStringVariables() + fclass.numStringInputs();
-            o = genList(str, nStringVariables                                 , o, FTypePrefixVariability.VariabilityCausality_C.W);
-            o = genList(str, nStringVariables                                 , o, FTypePrefixVariability.VariabilityCausality_C.WP);
+            o = genList(str, nStringVariables                                 , o, TypePrefixVariability.VariabilityCausality_C.W);
+            o = genList(str, nStringVariables                                 , o, TypePrefixVariability.VariabilityCausality_C.WP);
             str.print("z->n = ", o, ";\n");
         }
         
-        int genList(CodeStream str, int n, int o, FTypePrefixVariability.VariabilityCausality_C s) {
+        int genList(CodeStream str, int n, int o, TypePrefixVariability.VariabilityCausality_C s) {
             str.print("z->offs.", s, " = ", o, ";\n");
             str.print("z->nums.", s, " = ", n, ";\n");
             return o + n;

@@ -248,7 +248,7 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
     double delta_prev = delta;
     int flag;
     int i = 0;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     
     if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { 
             node = jmi_log_enter_fmt(block->log, logInfo, "BrentNewton", 
@@ -416,7 +416,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     double dNewton = 0.0;
     double xBest = 0.0;
     double fBest = 0.0;
-    jmi_log_node_t topnode;
+    jmi_log_node_t topnode={0};
     jmi_log_t *log = block->log;
 #ifdef JMI_PROFILE_RUNTIME
     if (block->parent_block) {
@@ -839,7 +839,7 @@ int jmi_brent_search(jmi_brent_func_t f, jmi_real_t u_min, jmi_real_t u_max, jmi
     int flag;
     jmi_block_solver_t* block = (jmi_block_solver_t*)data;
     jmi_log_t* log = block->log;
-    jmi_log_node_t log_node;
+    jmi_log_node_t log_node={0};
     if (block->callbacks->log_options.log_level >= BRENT_EXTENDED_LOG_LEVEL) {
         log_node = jmi_log_enter(log, logInfo, "BrentSearch");
     }

@@ -126,7 +126,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return equationIndexMap.getList(eqn);
     }
 
-    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
+    private E addEquation(FAbstractEquation eqn, int groupNumber, TypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
         String name;
         do {
             name = prefix + enumerator.next() + subfix;
@@ -134,15 +134,15 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return addEquation(eqn, groupNumber, variability, type, isMeta, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, TypePrefixVariability variability, FType type, String name) {
         return addEquation(eqn, groupNumber, groupMemberList, variability, type, false, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, TypePrefixVariability variability, FType type, boolean isMeta, String name) {
         return addEquation(eqn, groupNumber, equationIndexMap.getList(eqn, true), variability, type, isMeta, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, TypePrefixVariability variability, FType type, boolean isMeta, String name) {
         E e = equationMap.get(name);
         if (e != null)
             throw new IllegalArgumentException("Equation with the name '" + name + "' already exists:\n" + e.getEquation() + "\nNew equation:\n" + eqn);
@@ -152,7 +152,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return e;
     }
 
-    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta);
+    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta);
 
     public V addVariable(FVariable var) {
         return addVariable(var.name(), var);
@@ -221,12 +221,12 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         DERIVATIVE_VARIABLES { 
             public Collection<? extends FVariable> variables(FClass c)            { return c.derivativeVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.derivativeVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         },
         DIFFERENTIATED_VARIABLES { 
             public Collection<? extends FVariable> variables(FClass c)            { return c.allDifferentiatedRealVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         ALGEBRAIC_VARIABLES { 
             public Collection<? extends FVariable> variables(FClass c)            { return c.normalAlgebraicVariables(); }
@@ -235,27 +235,27 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         CONTINUOUS_ALGEBRAIC_VARIABLES { 
             public Collection<? extends FVariable> variables(FClass c)            { return c.normalAlgebraicContinousRealVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.continuousVariability(); }
         }, 
         DISCRETE_ALGEBRAIC_VARIABLES { 
             public Collection<? extends FVariable> variables(FClass c)            { return c.discreteVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discreteVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.discreteVariability(); }
         }, 
         DISCRETE_PRE_VARIABLES { 
             public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.discreteVariability(); }
         },
         NON_FIXED_PARAMETERS {
             public Collection<? extends FVariable> variables(FClass c)            { return c.initialParameters(); }
             public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.initialParameters(); }
-            public boolean isOk(FTypePrefixVariability variability)               { return variability.parameterVariability(); }
+            public boolean isOk(TypePrefixVariability variability)               { return variability.parameterVariability(); }
         };
 
         public abstract Collection<? extends FVariable> variables(FClass c);
         public abstract Collection<? extends FVariable> variables(FAbstractEquation e);
-        public boolean isOk(FTypePrefixVariability e) { return true; }
+        public boolean isOk(TypePrefixVariability e) { return true; }
     }
 
     public void addVariables(FClass fclass, EnumSet<VarType> variableTypes) {
@@ -350,7 +350,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return vars;
         }
         
-        public FTypePrefixVariability variability(int i) {
+        public TypePrefixVariability variability(int i) {
             return equation.variability();
         }
         
@@ -477,7 +477,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         @Override
-        public FTypePrefixVariability variability(int i) {
+        public TypePrefixVariability variability(int i) {
             V var = lhs().get(i);
             if (var == null) {
                 return super.variability(i);
@@ -485,8 +485,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             return variability(var.getVariable());
         }
         
-        private FTypePrefixVariability variability(FAbstractVariable fv) {
-            FTypePrefixVariability v = fv.variability();
+        private TypePrefixVariability variability(FAbstractVariable fv) {
+            TypePrefixVariability v = fv.variability();
             if (v.parameterOrLess()) {
                 v = fv.type().funcOutputVariability();
             }
@@ -1575,7 +1575,7 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
     }
 
     @Override
-    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         return new Eq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1592,7 +1592,7 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
 
 public class Eq extends AbstractEq<Eq, Var> {
 
-    public Eq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public Eq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1648,7 +1648,7 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCC
     }
 
     @Override
-    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         return new SolvingEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1678,7 +1678,7 @@ public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comp
     private int sameTypeOccurrences = 0;
     private boolean isRes = false;
 
-    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
@@ -1834,7 +1834,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
     private final String name;
     private final FAbstractEquation eqn;
     private final int groupNumber;
-    private final FTypePrefixVariability variability;
+    private final TypePrefixVariability variability;
     private final FType type;
     private final boolean isMeta;
     private java.util.List<V> variables = new ArrayList<V>();
@@ -1854,7 +1854,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
      */
     private final Collection<E> groupMembers;
 
-    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, TypePrefixVariability variability, FType type, boolean isMeta) {
         this.name = name;
         this.eqn = eqn;
         this.groupNumber = groupNumber;
@@ -1986,7 +1986,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
         return null;
     }
 
-    public FTypePrefixVariability variability() {
+    public TypePrefixVariability variability() {
         return variability;
     }
 

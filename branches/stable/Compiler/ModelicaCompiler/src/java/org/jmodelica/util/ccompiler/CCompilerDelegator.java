@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jmodelica.common.options.OptionRegistry;
+import org.jmodelica.util.SystemUtil;
 import org.jmodelica.util.files.FileUtil;
 import org.jmodelica.util.logging.ModelicaLogger;
 
@@ -163,7 +164,7 @@ public abstract class CCompilerDelegator {
         String[] platform = {reduceBits(getBuildPlatform(), getTargetPlatforms())};
         compileCCode(log, args, workDir, platform);
         File dir = new File(workDir, "binaries");
-        File executable = new File(dir, args.getFileName() + (platform[0].startsWith("win") ? ".exe" : ""));
+        File executable = new File(dir, args.getFileName() + SystemUtil.executableExtension());
         return executable.getAbsolutePath();
     }
     

@@ -1293,8 +1293,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     booleantype rangeLimited = FALSE;
     int i;
     jmi_log_t *log = block->log;
-    jmi_log_node_t outer;
-    jmi_log_node_t inner;
+    jmi_log_node_t outer={0};
+    jmi_log_node_t inner={0};
     clock_t t = jmi_block_solver_start_clock(block);
 
     /* MAX_NEWTON_STEP_RATIO is used just to ensure that full Newton step can 
@@ -2033,7 +2033,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     clock_t t;
     realtype*  bd = N_VGetArrayPointer(b); /* - residuals, i.e. -F(x) */
     realtype*  xd = N_VGetArrayPointer(x); /* on input - last successfull step; on output - new step */
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     long int  nniters;           
     int N = block->n;
     int ret = 0, i;
@@ -2206,7 +2206,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
         /* Evaluate discrete variables after a regularization. */
         if (block->at_event) {
-            jmi_log_node_t inner_node;
+            jmi_log_node_t inner_node={0};
             if(block->callbacks->log_options.log_level >= 5 && block->log_discrete_variables) {
                 inner_node =jmi_log_enter_fmt(block->log, logInfo, "RegularizationDiscreteUpdate", 
                                 "Evaluating switches after regularization.");
@@ -2263,7 +2263,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     block->step_calc_time += jmi_block_solver_elapsed_time(block, t);
 
     {
-        jmi_log_node_t topnode;
+        jmi_log_node_t topnode={0};
         if(block->callbacks->log_options.log_level >= 5) {
             topnode = jmi_log_enter_(block->log,logInfo,"StepDirection");
             jmi_log_reals(block->log, topnode, logInfo, "unbounded_step", xd, block->n);
@@ -2585,7 +2585,7 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
 static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
     jmi_kinsol_solver_t* solver = block->solver;
     int flag;
-    jmi_log_node_t topnode;
+    jmi_log_node_t topnode={0};
     struct KINMemRec* kin_mem = (struct KINMemRec*) solver->kin_mem;
     
     if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step || 
@@ -2847,7 +2847,7 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     int flag = 0;
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_t *log = block->log;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     long int nniters = 0;
     
     flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
@@ -2909,7 +2909,7 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         /* Kinsol specific handling of a completed step */
         int flag;
         jmi_kinsol_solver_t* solver = block->solver;
-        jmi_log_node_t node;
+        jmi_log_node_t node={0};
         long int nniters = 0;
         
         flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);

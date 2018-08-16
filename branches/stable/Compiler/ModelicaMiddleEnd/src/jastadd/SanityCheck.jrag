@@ -24,7 +24,7 @@ aspect Sanity {
     public void FClass.sanityCheck() {
         if (myOptions().getBooleanOption("debug_sanity_check")) {
             sanityCheckFIdUseConsistency(this);
-            for (FAbstractEquation eqn : getFParameterEquations()) {
+            for (FAbstractEquation eqn : getParameterEquations()) {
                 eqn.sanityCheckParameterEquations(this);
             }
             sanityCheckType(this);

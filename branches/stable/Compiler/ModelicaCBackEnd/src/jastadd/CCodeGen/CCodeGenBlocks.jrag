@@ -764,7 +764,7 @@ aspect CCodeGenBlocks {
             private Collection<String> attributes = Arrays.asList(FAttribute.START, FAttribute.MIN, FAttribute.MAX, FAttribute.NOMINAL);
 
             public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
-                FTypePrefixVariability variability = ASTNode.fConstant();
+                TypePrefixVariability variability = Variability.constant();
                 for (FVariable var : iterVars) {
                     for (String attr : attributes) {
                         FExp exp = attributeExp(var, attr);
@@ -1118,13 +1118,13 @@ aspect CCodeGenBlocks {
                 block.genBlockAddCall_C(p, str, indent, dirDer, inInit, generateSparse, nleSolver, parentBlockNumber);
     }
 
-    syn String FTypePrefixVariability.genJMIVariabilityConstant_C();
-    eq FParameter.genJMIVariabilityConstant_C() = "JMI_PARAMETER_VARIABILITY";
-    eq FDiscrete.genJMIVariabilityConstant_C() = "JMI_DISCRETE_VARIABILITY";
-    eq FConstant.genJMIVariabilityConstant_C() = "JMI_CONSTANT_VARIABILITY";
-    eq FContinuous.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
+    public abstract String TypePrefixVariability.genJMIVariabilityConstant_C();
+    public String Parameter.genJMIVariabilityConstant_C()  { return "JMI_PARAMETER_VARIABILITY"; }
+    public String Discrete.genJMIVariabilityConstant_C()   { return "JMI_DISCRETE_VARIABILITY"; }
+    public String Constant.genJMIVariabilityConstant_C()   { return "JMI_CONSTANT_VARIABILITY"; }
+    public String Continuous.genJMIVariabilityConstant_C() { return "JMI_CONTINUOUS_VARIABILITY"; }
     /* Composite variabilities are removed during scalarization */
-    eq FCompositeVariability.genJMIVariabilityConstant_C() = null;
+    public String CompositeVariability.genJMIVariabilityConstant_C() { return null; }
     
     public String AbstractEquationBlock.genJMISolverConstant_C(String nleSolver) {
         if (isLinear() || localUnsolvedEquations().isEmpty())

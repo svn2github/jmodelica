@@ -1416,6 +1416,160 @@ fclass Differentiation.Expressions.Literal
 end Differentiation.Expressions.Literal;
 ")})));
         end Literal;
+
+        model ConstantFunctionCallScalar
+            function f
+                input Real x;
+                output Real y = x;
+                algorithm
+                annotation(Inline=false);
+            end f;
+            
+            Real y = f(1);
+            Real x;
+        equation
+            der(y) = x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_ConstantFunctionCallScalar",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.ConstantFunctionCallScalar
+ Real y;
+ Real x;
+equation
+ y = Differentiation.Expressions.ConstantFunctionCallScalar.f(1);
+ x = 0.0;
+
+public
+ function Differentiation.Expressions.ConstantFunctionCallScalar.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ annotation(Inline = false);
+ end Differentiation.Expressions.ConstantFunctionCallScalar.f;
+
+end Differentiation.Expressions.ConstantFunctionCallScalar;
+")})));
+        end ConstantFunctionCallScalar;
+
+        model ConstantFunctionCallRecord
+            record R
+                Real x;
+            end R;
+            function f
+                input R x;
+                output R y = x;
+                algorithm
+                annotation(Inline=false);
+            end f;
+            
+            R y = f(R(1));
+            R x;
+        equation
+            der(y.x) = x.x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_ConstantFunctionCallRecord",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.ConstantFunctionCallRecord
+ Real y.x;
+ Real x.x;
+equation
+ (Differentiation.Expressions.ConstantFunctionCallRecord.R(y.x)) = Differentiation.Expressions.ConstantFunctionCallRecord.f(Differentiation.Expressions.ConstantFunctionCallRecord.R(1));
+ (Differentiation.Expressions.ConstantFunctionCallRecord.R(x.x)) = Differentiation.Expressions.ConstantFunctionCallRecord.R(0.0);
+
+public
+ function Differentiation.Expressions.ConstantFunctionCallRecord.f
+  input Differentiation.Expressions.ConstantFunctionCallRecord.R x;
+  output Differentiation.Expressions.ConstantFunctionCallRecord.R y;
+ algorithm
+  y.x := x.x;
+  return;
+ annotation(Inline = false);
+ end Differentiation.Expressions.ConstantFunctionCallRecord.f;
+
+ record Differentiation.Expressions.ConstantFunctionCallRecord.R
+  Real x;
+ end Differentiation.Expressions.ConstantFunctionCallRecord.R;
+
+end Differentiation.Expressions.ConstantFunctionCallRecord;
+")})));
+        end ConstantFunctionCallRecord;
+
+        model ConstantFunctionCallArray
+            function f
+                input Real[2] x;
+                output Real[2] y = x;
+                algorithm
+                annotation(Inline=false);
+            end f;
+            
+            Real[2] y = f({1,1});
+            Real[2] x;
+        equation
+            der(y) = x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_ConstantFunctionCallArray",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.ConstantFunctionCallArray
+ Real y[1];
+ Real y[2];
+ Real x[1];
+ Real x[2];
+equation
+ ({y[1], y[2]}) = Differentiation.Expressions.ConstantFunctionCallArray.f({1, 1});
+ ({x[1], x[2]}) = zeros(2);
+
+public
+ function Differentiation.Expressions.ConstantFunctionCallArray.f
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x[1];
+  y[2] := x[2];
+  return;
+ annotation(Inline = false);
+ end Differentiation.Expressions.ConstantFunctionCallArray.f;
+
+end Differentiation.Expressions.ConstantFunctionCallArray;
+")})));
+        end ConstantFunctionCallArray;
+
+        model DerivativeScalar
+            Real y = 1 / 2;
+            Real x;
+        equation
+            der(y) = x;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="Expressions_DerivativeScalar",
+                description="",
+                variability_propagation=false,
+                flatModel="
+fclass Differentiation.Expressions.DerivativeScalar
+ Real y;
+ Real x;
+equation
+ y = 1 / 2;
+ x = 0;
+end Differentiation.Expressions.DerivativeScalar;
+")})));
+        end DerivativeScalar;
+
     end Expressions;
 
     model ComponentArray
@@ -2242,18 +2396,99 @@ end Differentiation.DerivativeAnnotation.Order2;
             der(x1) + der(x2) = 1;
             x1 + usePartFunc(function fullFunc(x1=x2)) = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="DerivativeAnnotation_Functional1",
-            description="Test failing differentiation of functional input arguments",
-            errorMessage="
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="DerivativeAnnotation_Functional1",
+                description="Test differentiation of functional input arguments",
+                flatModel="
+fclass Differentiation.DerivativeAnnotation.Functional1
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + Differentiation.DerivativeAnnotation.Functional1.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 1;
+ _der_x1 + Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 0;
+
+public
+ function Differentiation.DerivativeAnnotation.Functional1.usePartFunc
+  input ((Real y) = Differentiation.DerivativeAnnotation.Functional1.partFunc()) pf;
+  output Real y;
+ algorithm
+  y := pf();
+  return;
+ annotation(smoothOrder = 1,derivative(order = 1) = Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc);
+ end Differentiation.DerivativeAnnotation.Functional1.usePartFunc;
+
+ function Differentiation.DerivativeAnnotation.Functional1.partFunc
+  output Real y;
+ algorithm
+  return;
+ end Differentiation.DerivativeAnnotation.Functional1.partFunc;
+
+ function Differentiation.DerivativeAnnotation.Functional1.fullFunc
+  output Real y;
+  input Real x1;
+ algorithm
+  y := x1;
+  return;
+ end Differentiation.DerivativeAnnotation.Functional1.fullFunc;
+
+ function Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc
+  input ((Real y) = Differentiation.DerivativeAnnotation.Functional1.partFunc()) pf;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := 0.0;
+  y := pf();
+  return;
+ annotation(smoothOrder = 0);
+ end Differentiation.DerivativeAnnotation.Functional1._der_usePartFunc;
+
+end Differentiation.DerivativeAnnotation.Functional1;
+")})));
+        end Functional1;
+
+        model Functional1b
+            partial function partFunc
+                input Real xb;
+                output Real y;
+            end partFunc;
+
+            function fullFunc
+                extends partFunc;
+                input Real x1;
+            algorithm
+                y := x1;
+            end fullFunc;
+
+            function usePartFunc
+                input partFunc pf;
+                output Real y;
+            algorithm
+                y := pf(y);
+                annotation(smoothOrder=1);
+            end usePartFunc;
+
+            Real x1,x2;
+        equation
+            der(x1) + der(x2) = 1;
+            x1 + usePartFunc(function fullFunc(x1=x2)) = 1;
+
+        annotation(__JModelica(UnitTesting(tests={
+            ErrorTestCase(
+                name="DerivativeAnnotation_Functional1b",
+                description="Test failing differentiation of functional input arguments",
+                errorMessage="
 1 errors found:
 
 Error in flattened model:
-  Cannot differentiate call to function without derivative or smooth order annotation 'pf()' in equation:
-   x1 + Differentiation.DerivativeAnnotation.Functional1.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 1
+  Cannot differentiate call to function without derivative or smooth order annotation 'pf(y)' in equation:
+   x1 + Differentiation.DerivativeAnnotation.Functional1b.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1b.fullFunc(x2)) = 1
 ")})));
-        end Functional1;
+        end Functional1b;
 
     end DerivativeAnnotation;
 
@@ -3768,6 +4003,5 @@ public
 end Differentiation.MultipleDerivativeAnnotation2;
 ")})));
 end MultipleDerivativeAnnotation2;
-
 
 end Differentiation;

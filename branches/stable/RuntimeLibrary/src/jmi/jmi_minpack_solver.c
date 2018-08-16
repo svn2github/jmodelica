@@ -227,7 +227,7 @@ static int jmi_minpack_init(jmi_block_solver_t * block) {
 
 int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
     jmi_minpack_solver_t* solver = block->solver;
-    jmi_log_node_t topnode;
+    jmi_log_node_t topnode={0};
     int info, i;
     int mode; /* 2 for scaling with nominals, 1 for scaling done internally */
     int nprint = 1; /* Enables logging entire simulation. */

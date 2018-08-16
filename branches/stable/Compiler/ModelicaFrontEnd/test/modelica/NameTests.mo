@@ -2069,6 +2069,49 @@ model ConstantLookup40
     parameter Real y = A.x;
 end ConstantLookup40;
 
+model ConstantLookup41
+    class P1
+        Real x;
+    end P1;
+    
+    package P2
+        extends P1;
+    end P2;
+
+    Real x = P2.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup41",
+            description="Constant lookup: in not ok package",
+            errorMessage="
+Error at line 6, column 5, in file '...':
+  Packages may only contain classes and constants
+")})));
+end ConstantLookup41;
+
+model ConstantLookup42
+    class P1
+        constant Real x;
+    equation
+        x = 1;
+    end P1;
+    
+    package P2
+        extends P1;
+    end P2;
+
+    Real x = P2.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup42",
+            description="Constant lookup: in not ok package",
+            errorMessage="
+Error at line 8, column 5, in file '...':
+  Packages may only contain classes and constants
+")})));
+end ConstantLookup42;
 
 class ExtendsTest1
   class C

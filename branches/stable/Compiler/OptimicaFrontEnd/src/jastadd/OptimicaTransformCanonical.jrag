@@ -24,7 +24,7 @@ aspect OptimicaTransformCanonical {
 		
 		if (myOptions().getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
 			for (FVariable fv : freeDependentParameters()) {
-				fv.setFTypePrefixVariability(new FContinuous());
+				fv.setTypePrefixVariability(Variability.continuous());
                 for (FIdUseExp use : fv.uses())
                     if (use.inObjective())
                         use.replaceMe(new FTimedVariable(use.getFIdUse().fullCopy(), new FStartTimeExp()));
@@ -131,14 +131,14 @@ aspect OptimicaTransformCanonical {
 	
 	private FRealVariable FOptClass.addExperimentTimeParameter(
 			String name, FAttribute attr, double defaultValue) {
-        FTypePrefixVariability v = fParameter();
+        TypePrefixVariability v = Variability.parameter();
         if (attr != null) {
             FAttribute freeAttr = findMatching(attr.getFAttributes(), FAttribute.FREE);
             if (freeAttr != null && freeAttr.hasValue() && freeAttr.getValue().ceval().booleanValue()) {
-                v = fOptParameter();
+                v = Variability.optParameter();
             }
         }
-        FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), v, new FQNameString(name));
+        FRealVariable fv = new FRealVariable(VisibilityType.PUBLIC, v, new FQNameString(name));
 		if (attr != null) 
 			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
 		if (attr != null && attr.hasValue())

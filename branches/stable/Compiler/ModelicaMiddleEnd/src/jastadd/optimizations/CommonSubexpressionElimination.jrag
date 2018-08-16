@@ -115,7 +115,7 @@ aspect CommonSubexpressionElimination {
                 public void add(FAbstractEquation fae) {
                     fae.parent = getFAbstractEquationListNoTransform();
                     if (fae.variability().parameterOrLess()) {
-                        addFParameterEquationNoTransform(fae);
+                        addParameterEquationNoTransform(fae);
                     } else {
                         addFAbstractEquationNoTransform(fae);
                     }
@@ -128,8 +128,8 @@ aspect CommonSubexpressionElimination {
 
                     FAbstractFunctionCall call = get(0);
 
-                    final FTypePrefixVariability variability = call.variability().combine(
-                            ASTNode.fFixedParameter()).combineDown(call.type().funcOutputVariability());
+                    final TypePrefixVariability variability = call.variability().combine(
+                            Variability.fixedParameter()).combineDown(call.type().funcOutputVariability());
 
                     FAbstractVariable var = variablesMap().lookup(call.tempVarName());
                     if (var == null) {

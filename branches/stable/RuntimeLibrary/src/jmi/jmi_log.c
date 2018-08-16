@@ -375,7 +375,7 @@ static void set_category(log_t *log, category_t c) {
 }
 
 static node_t node_from_top(log_t *log) {
-    node_t node;
+    node_t node={0};
     node.inner_id = topof(log)->id;
     return node;
 }
@@ -593,7 +593,7 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
 }
 
 jmi_log_node_t jmi_log_get_current_node(jmi_log_t *log) {
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     node.inner_id = topof(log)->id;
     return node;
 }
@@ -783,7 +783,7 @@ static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, v
             }
             else if (is_name_char(ch)) {
                 /* Try to log an attribute */
-                node_t node;
+                node_t node={0};
                 const char *name_end;
                 const char *name_start = fmt;
                 

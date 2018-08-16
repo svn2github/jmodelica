@@ -77,7 +77,7 @@ static int jmi_linear_find_dependent_set(jmi_block_solver_t * block) {
     int nbr_dep = 0, info = 0, rank = 0;
     jmi_real_t test_value = 0; 
     jmi_linear_solver_t* solver = block->solver;
-    jmi_log_node_t destnode;
+    jmi_log_node_t destnode={0};
     
     /* Reset the dependent sets */
     for (i = 0; i < n_x; i++) { solver->dependent_set[(n_x-1)*n_x+i] = 0; }
@@ -170,7 +170,7 @@ static int jmi_linear_find_active_set(jmi_block_solver_t * block ) {
     int i = 0, j = 0, k = 0, set = 0, n_x = block->n;
     int active = 0, nbr_active = 0, n_ux = 0;
     jmi_linear_solver_t* solver = block->solver;
-    jmi_log_node_t destnode;
+    jmi_log_node_t destnode={0};
     
     if(block->check_discrete_variables_change && solver->update_active_set == 1) {
         
@@ -263,7 +263,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     double rcond;
     int info;
     int i;
-    jmi_log_node_t destnode;
+    jmi_log_node_t destnode={0};
 
     char trans;
     jmi_linear_solver_t* solver = block->solver;

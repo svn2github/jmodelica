@@ -31,7 +31,7 @@ FClass : BaseNode ::= FQName
                       FVariable* 
                       AliasVariable:FVariable* 
                       FInitialEquation:FAbstractEquation*
-                      FParameterEquation:FAbstractEquation*
+                      ParameterEquation:FAbstractEquation*
                       FAbstractEquation*
                       FFunctionDecl*
                       FRecordDecl*
@@ -84,7 +84,7 @@ abstract FAbstractVariable : BaseNode;
 /**
  * A flat variable in a function.
  */
-FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
+FFunctionVariable : FAbstractVariable ::= <TypePrefixInputOutput:TypePrefixInputOutput>
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
@@ -111,9 +111,9 @@ UnknownFVariable : FAbstractVariable;
  * variables and scalar variables: this information is embedded in the 
  * FQName class.
  */
-abstract FVariable : FAbstractVariable ::= FVisibilityType
-                                           FTypePrefixVariability
-                                           [FTypePrefixInputOutput]
+abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
+                                           <TypePrefixVariability:TypePrefixVariability>
+                                           <TypePrefixInputOutput:TypePrefixInputOutput>
                                            FAttribute*
                                            <DerivedType>
                                            [BindingExp:FExp]
@@ -131,94 +131,6 @@ FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
  * Base class for variable type prefixes.
  */
 abstract FTypePrefix : BaseNode;
-
-/**
- * Base class for variability type prefixes.
- */
-abstract FTypePrefixVariability : FTypePrefix;
-
-/**
- * Continuous (default) variability.
- *
- * Continuous is not a valid prefix but is used to identify expressions that 
- * are not declared as parameters, constants, or discrete.
- */
-FContinuous : FTypePrefixVariability;
-
-/**
- * Discrete variability.
- */
-FDiscrete : FTypePrefixVariability;
-
-/**
- * Parameter variability.
- */
-abstract FParameter : FTypePrefixVariability;
-
-FInitialParameter : FParameter;
-
-FFixedParameter : FParameter;
-
-FIndexParameter : FParameter;
-
-/**
- * Evaluate false parameter variability.
- */
-FEvalFalseParameter : FFixedParameter;
-
-/**
- * Parameter with known value variability
- */
-abstract FKnownParameter : FParameter;
-
-/**
- * Structural parameter variability.
- */
-FStructParameter : FKnownParameter ::= <Reason:String>;
-
-/**
- * Used to force variability for if equation tests
- * Is canceled by setting Evaluate=false
- */
-FTestParameter   : FStructParameter;
-
-/**
- * Evaluate true parameter variability.
- */
-FEvalTrueParameter : FKnownParameter;
-
-/**
- * Final parameter variability.
- */
-FFinalParameter : FKnownParameter;
-
-/**
- * Constant variability.
- */
-FConstant : FTypePrefixVariability;
-
-/**
- * Composite variability. Represents variability of
- * records between flattening and scalarization.
- */
-FCompositeVariability : FTypePrefixVariability ::= Component:FComponentVariability*;
-
-FComponentVariability ::= <Name:String> Variability:FTypePrefixVariability;
-
-/**
- * Base class for causality type prefixes.
- */
-abstract FTypePrefixInputOutput : FTypePrefix;
-
-/**
- * Input causality.
- */ 
-FInput : FTypePrefixInputOutput;
-
-/**
- * Output causality.
- */
-FOutput : FTypePrefixInputOutput;
 
 /**
  * FVariable of type Real.
@@ -315,40 +227,6 @@ FDynamicStateVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
  * by dynamic states.
  */
 FDynamicAlgebraicVariable : FRealVariable ::= <Set:DynamicStateSet> <Number:int>;
-
-/**
- * Node representing the visibility of an FVariable object.
- */
-abstract FVisibilityType : BaseNode;
-
-/**
- * Public visibility.
- */
-FPublicVisibilityType : FVisibilityType;
-
-/**
- * Protected visibility.
- */
-FProtectedVisibilityType : FVisibilityType;
-
-/**
- * Visibility for temporary variable. 
- *
- * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
- */
-FTemporaryVisibilityType : FPublicVisibilityType;
-
-/**
- * Visibility for variables in expandable connectors. 
- *
- * Used to mark temporary variables added during elaboration, e.g. to handle function calls returning array.
- */
-FExpandableVisibilityType : FPublicVisibilityType;
-
-/**
- * Visibility for runtime option parameters. 
- */
-FRuntimeOptionVisibilityType : FPublicVisibilityType;
 
 /**
  * Base class for all type nodes.
@@ -564,27 +442,12 @@ FExpSubscript : FSubscript ::= FExp /AccessContextSizeExp:FExp/;
 FIntegerSubscript : FSubscript ::= <Value:int>;
 
 /**
- * Classifies a flattened equation as initial or normal.
- */
-abstract FEquationType : BaseNode;
-
-/**
- * Classifies a flattened equation as normal.
- */
-FNormalEquation : FEquationType;
-
-/**
- * Classifies a flattened equation as initial.
- */
-FInitialEquation : FEquationType;
-
-/**
  * Base class for flattened equations.
  *
  * The NTA InitialEquation is used to represent default initial equations for
  * when equations that are not active during initialization.
  */
-abstract FAbstractEquation : BaseNode ::= Type:FEquationType
+abstract FAbstractEquation : BaseNode ::= <Type:EquationType>
                                           /InitialEquation:FAbstractEquation*/
                                           FAttribute*
                                           [FStringComment];
@@ -853,28 +716,12 @@ FUnknownExternalLanguage : FExternalLanguage ::= <Language>;
 /**
  * Describes the set of scalarized FExp nodes corresponding to an array expression.
  */
-Array : BaseNode ::= FExp*;
-
-/**
- * Dummy array for representing a scalar expression in algorithms handling Arrays. 
- * 
- * Iterator acts as if on a vector of length 1.
- * 
- * The get() and set() methods ignore the Index and always operate on the single element.
- * This allows a ScalarAsArray to be used with an Array in an algorithm that expects 
- * two Array objects, as long as the Indices from a real Array is used to iterate. 
- * 
- * Since the indices of a scalar makes no sense, the Iterator returned by 
- * indices().iterator() will have no elements. 
- * 
- * The Iterator returned by iterator() will have one element.
- */
-ScalarAsArray : Array;
+ArrayExp : BaseNode ::= FExp*;
 
 /**
  * Abstract base class for all flattened expressions.
  */
-abstract FExp : BaseNode ::= /Array/;
+abstract FExp : BaseNode;
 
 /**
  * Abstract base class for all flattened expressions that is not literal or unsupported.
@@ -889,7 +736,7 @@ abstract FAbstractScalarExp : FAbstractExp;
 /**
  * Abstract base class for all flattened expressions that can be an array.
  */
-abstract FAbstractArrayExp : FAbstractExp;
+abstract FAbstractArrayExp : FAbstractExp ::= /ArrayExp/;
 
 /**
  * Unsupported expression.
@@ -1113,6 +960,11 @@ FForIndex : CommonForIndex ::= FVariable FExp;
 FIfExp : FAbstractArrayExp ::= IfExp:FExp ThenExp:FExp ElseExp:FExp;
 
 /**
+ * If expression in instance tree.
+ */
+InstIfExp : FIfExp;
+
+/**
  * Declaration of a qualified name. 
  */
 FIdDecl : BaseNode ::= FQName;
@@ -1226,7 +1078,8 @@ InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess
                                                   Arg:InstFunctionArgument* 
                                                   /InstComponentDecl*/ 
                                                   /InstExtends*/
-                                                  /InstModification*/;
+                                                  /InstModification*/
+                                                  /Type:FType/;
 
 /**
  * Array constructor expression.

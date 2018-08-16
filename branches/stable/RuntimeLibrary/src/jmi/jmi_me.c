@@ -110,7 +110,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
 
 int jmi_initialize(jmi_t* jmi) {
     int retval;
-    jmi_log_node_t top_node;
+    jmi_log_node_t top_node={0};
     
     if (jmi->is_initialized == 1) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one initialization is allowed");
@@ -364,7 +364,7 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     
     jmi_real_t* store_dz = jmi->dz[0];
     int i, ef;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
 
     if (jmi->jmi_callbacks.log_options.log_level >= 5) {
         node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDirectionalDerivatives",
@@ -442,7 +442,7 @@ int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx) {
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     int retval = 0;
-    jmi_log_node_t node;
+    jmi_log_node_t node={0};
     *triggered_event = JMI_FALSE;
     
     if (jmi->jmi_callbacks.log_options.log_level >= 5){
@@ -515,10 +515,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_int_t i, max_iterations;
     jmi_real_t* z = jmi_get_z(jmi);
     jmi_real_t* switches;
-    jmi_log_node_t top_node;
-    jmi_log_node_t iter_node;
-    jmi_log_node_t discrete_node;
-    jmi_log_node_t reinit_node;
+    jmi_log_node_t top_node={0};
+    jmi_log_node_t iter_node={0};
+    jmi_log_node_t discrete_node={0};
+    jmi_log_node_t reinit_node={0};
 
     /* Used for logging */
     switches = jmi_get_sw(jmi);

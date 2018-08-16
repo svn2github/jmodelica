@@ -16,6 +16,9 @@
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.jmodelica.common.ast.prefixes.EquationType;
+import org.jmodelica.common.ast.prefixes.TypePrefixInputOutput;
+import org.jmodelica.common.ast.prefixes.VisibilityType;
 
 aspect Constructors {
 
@@ -73,7 +76,7 @@ aspect Constructors {
     /**
      * Construcs a connect clause without any residual.
      */
-    public FConnectClause.FConnectClause(FEquationType type, SrcConnectClause connectClause,
+    public FConnectClause.FConnectClause(EquationType type, SrcConnectClause connectClause,
             FIdUseInstAccess left, FIdUseInstAccess right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), connectClause, left, right);
     }
@@ -81,7 +84,7 @@ aspect Constructors {
     /**
      * Construcs a else equation without any residual.
      */
-    public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
+    public FElseEquation.FElseEquation(EquationType type, List<FAbstractEquation> eqns) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns);
     }
 
@@ -90,13 +93,13 @@ aspect Constructors {
      * residual.
      */
     public FEquation.FEquation(FExp left, FExp right) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), left, right);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), left, right);
     }
 
     /**
      * Constructs an equation that is not marked as residual.
      */
-    public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
+    public FEquation.FEquation(EquationType type, FExp left, FExp right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), left, right);
     }
 
@@ -104,20 +107,20 @@ aspect Constructors {
      * Constructs an equation that is not initial
      */
     public FEquation.FEquation(List<FAttribute> attrs, FExp left, FExp right) {
-        this(new FNormalEquation(), attrs, new Opt<FStringComment>(), left, right);
+        this(EquationType.NORMAL, attrs, new Opt<FStringComment>(), left, right);
     }
 
     /**
      * Constructs a function call equation that is not initial.
      */
     public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), left, call);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), left, call);
     }
 
     /**
      * Constructs a function call equation.
      */
-    public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
+    public FFunctionCallEquation.FFunctionCallEquation(EquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), left, call);
     }
 
@@ -125,20 +128,20 @@ aspect Constructors {
      * Constructs a for clause equation that is not initial.
      */
     public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
 
     /**
      * Constructs a for clause equation that is not initial.
      */
     public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
 
     /**
      * Constructs a for clause equation.
      */
-    public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
+    public InstForClauseE.InstForClauseE(EquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), indices, eqns);
     }
 
@@ -173,13 +176,13 @@ aspect Constructors {
      * Constructs an algorithm block that is not initial.
      */
     public FAlgorithm.FAlgorithm(List<FStatement> stmts) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), stmts);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), stmts);
     }
 
     /**
      * Constructs an algorithm block.
      */
-    public FAlgorithm.FAlgorithm(FEquationType type, List<FStatement> stmts) {
+    public FAlgorithm.FAlgorithm(EquationType type, List<FStatement> stmts) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), stmts);
     }
 
@@ -187,7 +190,7 @@ aspect Constructors {
      * Constructs a derivative algorithm block that is not initial.
      */
     public FDerivativeAlgorithm.FDerivativeAlgorithm(List<FStatement> stmts, int order) {
-        this(new FNormalEquation(), new List<FAttribute>(), new Opt<FStringComment>(), stmts, order);
+        this(EquationType.NORMAL, new List<FAttribute>(), new Opt<FStringComment>(), stmts, order);
     }
 
 	/**
@@ -244,7 +247,7 @@ aspect Constructors {
     /**
      * Constructs an if equation.
      */
-    public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
+    public FIfEquation.FIfEquation(EquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns, guard, elseClause);
     }
 
@@ -362,14 +365,14 @@ aspect Constructors {
     /**
      * Constructs an unsuported equation.
      */
-    public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
+    public FUnsupportedEquation.FUnsupportedEquation(EquationType type) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>());
     }
 
     /**
      * Constructs a when equation.
      */
-    public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
+    public FWhenEquation.FWhenEquation(EquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), eqns, guard, elseClause);
     }
 
@@ -398,8 +401,8 @@ aspect Constructors {
 	public FForIndex.FForIndex(String name, FExp end) {
 		this();
 		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
-		setFVariable(new FIntegerVariable(new FTemporaryVisibilityType(), 
-				fParameter(), new FQNameString(name)));
+		setFVariable(new FIntegerVariable(VisibilityType.TEMPORARY, 
+				Variability.parameter(), new FQNameString(name)));
 	}
 	
 	/**
@@ -535,132 +538,132 @@ aspect Constructors {
 	/**
 	 * Create a real variable with only the required children.
 	 */
-	public FRealVariable.FRealVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	public FRealVariable.FRealVariable(VisibilityType vt, 
+			TypePrefixVariability variability, FQName name) {
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
     /**
      * Create a derivative variable with only the required children.
      */
-    public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
-            FTypePrefixVariability variability, FQName name, int order) {
-        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+    public FDerivativeVariable.FDerivativeVariable(VisibilityType vt, 
+            TypePrefixVariability variability, FQName name, int order) {
+        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
     /**
      * Create a derivative variable with only the required children.
      */
-    public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
-            FTypePrefixVariability variability, FQName name, int order) {
-        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
+    public FDummyDerivativeVariable.FDummyDerivativeVariable(VisibilityType vt, 
+            TypePrefixVariability variability, FQName name, int order) {
+        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
 	/**
 	 * Create a pre variable for a discrete real variable.
 	 */
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
-		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
-				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
 	 * Create a integer variable with only the required children.
 	 */
-	public FIntegerVariable.FIntegerVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	public FIntegerVariable.FIntegerVariable(VisibilityType vt, 
+			TypePrefixVariability variability, FQName name) {
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
 	 * Create a pre variable for an integer variable.
 	 */
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
-		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
-				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
 	 * Create a enum variable with only the required children.
 	 */
-	public FEnumVariable.FEnumVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name, FQName enumName) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, enumName);
+	public FEnumVariable.FEnumVariable(VisibilityType vt, 
+			TypePrefixVariability variability, FQName name, FQName enumName) {
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
 	}
 	
 	/**
 	 * Create a pre variable for a enum variable.
 	 */
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
-		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
-				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getEnum().fullCopy());
 	}
 	
 	/**
 	 * Create a boolean variable with only the required children.
 	 */
-	public FBooleanVariable.FBooleanVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	public FBooleanVariable.FBooleanVariable(VisibilityType vt, 
+			TypePrefixVariability variability, FQName name) {
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
 	 * Create a pre variable for a boolean variable.
 	 */
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
-		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
-				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
 	 * Create a string variable with only the required children.
 	 */
-	public FStringVariable.FStringVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
+	public FStringVariable.FStringVariable(VisibilityType vt, 
+			TypePrefixVariability variability, FQName name) {
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
 	 * Create a pre variable for a string variable.
 	 */
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
-		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
-				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
+		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
+				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
 				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
 	 * Create a record variable with only the required children.
 	 */
-	public FRecordVariable.FRecordVariable(FVisibilityType fvt, 
-			FTypePrefixVariability variability, FQName name, FQName record) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
+	public FRecordVariable.FRecordVariable(VisibilityType vt, 
+			TypePrefixVariability variability, FQName name, FQName record) {
+		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 	
     /**
      * Create an external object variable with only the required children.
      */
-    public FExternalObjectVariable.FExternalObjectVariable(FVisibilityType fvt, 
-            FTypePrefixVariability variability, FQName name, FIdUse constructorName) {
-        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, constructorName);
+    public FExternalObjectVariable.FExternalObjectVariable(VisibilityType vt, 
+            TypePrefixVariability variability, FQName name, FIdUse constructorName) {
+        this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(new FPublicVisibilityType(), new FContinuous(), new Opt(), new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".s" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.continuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".s" + number), set, number);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
-        this(new FPublicVisibilityType(), new FContinuous(), new Opt(), new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".a" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.continuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".a" + number), set, number);
     }
     
 	/**
@@ -783,34 +786,34 @@ aspect Constructors {
 	 *        Extracts array subscripts from type.
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
-        this(new Opt(), type, new Opt(), new FQNameFull(name));
+        this(TypePrefixInputOutput.NONE, type, new Opt(), new FQNameFull(name));
 	}
 	
 	/**
 	 * Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(new Opt(), new List<FAttribute>(), type, new Opt(), new FQNameString(name), 0);
+		this(TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FQNameString(name), 0);
 	}
 	
     /**
      * Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
-    public FFunctionVariable.FFunctionVariable(FType type, String name, FTypePrefixInputOutput inputOutput) {
-        this(new Opt<FTypePrefixInputOutput>(inputOutput), new List<FAttribute>(), type, new Opt<FExp>(), new FQNameString(name), 0);
+    public FFunctionVariable.FFunctionVariable(FType type, String name, TypePrefixInputOutput inputOutput) {
+        this(inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FQNameString(name), 0);
     }
     
     /**
      * Create an FFunctionVariable with everything but order and attributes given.
      */
-    public FFunctionVariable.FFunctionVariable(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+    public FFunctionVariable.FFunctionVariable(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
         this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
     /**
      * Create an FFunctionArray with everything but order and attributes given.
      */
-    public FFunctionArray.FFunctionArray(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+    public FFunctionArray.FFunctionArray(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
         this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
@@ -1329,9 +1332,9 @@ aspect InheritedFactoryMethods {
     /**
      * Create new node of same class as this, with the specified children.
      */
-    public FFunctionVariable FFunctionVariable.createNode(Opt<FTypePrefixInputOutput> prefix, FType type, Opt<FExp> bindingExp, FQName name, int order) {
+    public FFunctionVariable FFunctionVariable.createNode(TypePrefixInputOutput prefix, FType type, Opt<FExp> bindingExp, FQName name, int order) {
         FFunctionVariable node = createEmptyNode();
-        node.setFTypePrefixInputOutputOpt(prefix);
+        node.setTypePrefixInputOutput(prefix);
         node.setType(type);
         node.setBindingExpOpt(bindingExp);
         node.setFQName(name);

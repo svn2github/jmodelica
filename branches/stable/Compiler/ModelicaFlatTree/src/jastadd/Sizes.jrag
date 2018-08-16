@@ -63,7 +63,17 @@ aspect AccessSizes {
     public Size FAbstractVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
         return type().lookupHierarchical(name, part+1, last).size();
     }
-    
+
+    public Size FFunctionVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
+        if (functionInliner != null) {
+            FType t = functionInliner.lookupType(name.name());
+            if (t != null) {
+                return t.size();
+            }
+        } 
+        return super.lookupHierarchicalSize(name, part, last);
+    }
+
     public Size FRecordVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
         FExp res = findHierarchicalAttributeValue(name, last, FAttribute.SIZE);
         if (res != null) {

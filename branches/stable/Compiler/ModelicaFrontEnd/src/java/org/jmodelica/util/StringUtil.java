@@ -189,4 +189,14 @@ public final class StringUtil {
         return text.trim().replaceAll("\\s+", " ");
     }
 
+    /**
+     * Corrects file separators in case they are incorrect for the current operating system.
+     * 
+     * @param string The file name to correct.
+     * @return {@code fileName} with updated file separators.
+     */
+    public static String correctSeparators(String string) {
+        return SystemUtil.isLinux() ? string.replaceAll("\\", "/") : string.replace("/", "\\");
+    }
+
 }

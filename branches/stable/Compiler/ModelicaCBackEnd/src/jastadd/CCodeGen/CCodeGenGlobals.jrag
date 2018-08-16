@@ -97,17 +97,22 @@ aspect CCodeGenGlobalsCached {
         }
     }
 
+    public void AbstractEquationBlock.genBlockResidualSetUpFunctionCallHeader_C(CodePrinter p, CodeStream str, String indent) {
+        if (getSetupNodes().size() > 0 && hasResidualFunction()) {
+            str.print(indent,"extern void " + genBlockResidualSetUpFunctionName_C(p), "(jmi_t* jmi);\n");
+        }
+    }
+
     public void AbstractEquationBlock.genBlockResidualSetUpFunctionDecl_C(CodePrinter p, CodeStream str, String indent) {
         if (getSetupNodes().size() > 0) {
             String next = p.indent(indent);
-            str.print(indent, "static void ", genBlockResidualSetUpFunctionName_C(p), "(jmi_t* jmi) {\n");
+            str.print(indent, "void ", genBlockResidualSetUpFunctionName_C(p), "(jmi_t* jmi) {\n");
             for (FFunctionCall call : getSetupNodes()) {
                 call.genStaticTempVars_C(p, str, next);
             }
             str.print(indent, "}\n\n");
         }
     }
-    
     
     public void FFunctionCall.genStaticTempVars_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent, FExp.global_C(FExp.computed_C(tempName_C())), " = 0;\n");
