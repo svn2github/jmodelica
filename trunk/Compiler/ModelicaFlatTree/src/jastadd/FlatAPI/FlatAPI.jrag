@@ -3381,9 +3381,9 @@ aspect FVariableUses {
     eq FVariable.getBindingExp().inParamBindingExp() = isParameter();
     
     inh TypePrefixVariability FExp.bindingExpVariability();
-    eq Root.getChild().bindingExpVariability() = Variability.continuous();
+    eq Root.getChild().bindingExpVariability() = Variability.CONTINUOUS;
     eq FVariable.getChild().bindingExpVariability() = variability();
-    eq FVariable.getFAttribute().bindingExpVariability() = Variability.parameter();
+    eq FVariable.getFAttribute().bindingExpVariability() = Variability.FIXEDPARAMETER;
     eq FRecordVariable.getFAttribute(int i).bindingExpVariability() =
             variability().component(getFAttribute(i).name());
     

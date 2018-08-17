@@ -212,7 +212,7 @@ aspect ExtractEventGeneratingExpressions {
     private FVariable FSampleExp.indexVariable() {
         if (indexVariable == null) {
             indexVariable = new FIntegerVariable(VisibilityType.PUBLIC,
-                    Variability.discrete(), new FQNameFull(calcIndexVarName()));
+                    Variability.DISCRETE, new FQNameFull(calcIndexVarName()));
             myFClass().addFVariable(indexVariable);
         }
         return indexVariable;

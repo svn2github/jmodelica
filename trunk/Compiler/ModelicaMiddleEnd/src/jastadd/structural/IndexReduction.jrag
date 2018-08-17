@@ -128,7 +128,7 @@ aspect IndexReduction {
         for (FAbstractEquation fe : result.getEquations()) {
             if (fe.variability().fixedParameterOrLess()) {
                 addParameterEquation(fe);
-            } else if (fe.variability().initialParameterOrLess()) {
+            } else if (fe.variability().parameterOrLess()) {
                 addFInitialEquation(fe);
             } else {
                 addFEquation(fe);
@@ -1222,7 +1222,7 @@ aspect IndexReduction {
             public static COEFFICIENT_STATE create(TypePrefixVariability variability) {
                 if (variability == null)
                     return EXCEPTION;
-                if (variability.lessOrEqual(Variability.parameter()))
+                if (variability.lessOrEqual(Variability.FIXEDPARAMETER))
                     return CONSTANT;
                 return CONTINUOUS;
             }
@@ -1252,7 +1252,7 @@ aspect IndexReduction {
             if (!getEquation().referencedFVariables().contains(variable))
                 return 0;
             Collection<FAbstractEquation> feqds = getEquation().diff(variable.name());
-            TypePrefixVariability variability = Variability.constant();
+            TypePrefixVariability variability = Variability.CONSTANT;
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
             if (feqds.size() > 1) {
@@ -1267,9 +1267,9 @@ aspect IndexReduction {
             FAbstractEquation eqn = feqds.iterator().next();
             coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), IndexReductionBiPGraph.COEFFICIENT_STATE.create(variability)));
             
-            if (!variability.lessOrEqual(Variability.parameter())) {
+            if (!variability.lessOrEqual(Variability.FIXEDPARAMETER)) {
                 return 2;
-            } else if (!variability.lessOrEqual(Variability.constant()))
+            } else if (!variability.lessOrEqual(Variability.CONSTANT))
                 return 0;
         } catch(EquationDifferentiationException e) {
             coefficients.put(var, new IndexReductionBiPGraph.Coefficient(null, IndexReductionBiPGraph.COEFFICIENT_STATE.EXCEPTION));

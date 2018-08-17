@@ -155,7 +155,7 @@ aspect WhenClauses{
         }
         
         fclass.addFVariable(type().createFVariable(VisibilityType.PUBLIC,
-                new FQNameFull(tempVarName()), variability().combine(Variability.discrete())));
+                new FQNameFull(tempVarName()), variability().combine(Variability.DISCRETE)));
         return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
     }
     

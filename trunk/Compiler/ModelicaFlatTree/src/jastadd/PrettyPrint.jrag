@@ -1895,28 +1895,28 @@ aspect FlatPrettyPrint {
     }
     
     public abstract String TypePrefixVariability.toString();
-    public String FixedParameter.toString()    { return "parameter "; }
-    public String InitialParameter.toString()  { return "initial parameter "; }
-    public String IndexParameter.toString()    { return "index parameter"; }
-    public String EvalTrueParameter.toString() { return "eval parameter "; }
-    public String FinalParameter.toString()    { return "final parameter "; }
-    public String StructParameter.toString()   {
-        return getReason().isEmpty() ? "structural parameter " : "structural (" + getReason() + ") parameter ";
-    }
-    public String Discrete.toString()             { return "discrete "; }
-    public String Constant.toString()             { return "constant "; }
-    public String Continuous.toString()           { return ""; }
-    public String CompositeVariability.toString() { return combine().toString(); }
+    public String Continuous.toString()            { return ""; }
+    public String Discrete.toString()              { return "discrete "; }
+    public String InitialParameter.toString()      { return "initial parameter "; }
+    public String EvalFalseParameter.toString()    { return "parameter "; }
+    public String FixedParameter.toString()        { return "parameter "; }
+    public String IndexParameter.toString()        { return "index parameter"; }
+    public String EvalTrueParameter.toString()     { return "eval parameter "; }
+    public String FinalParameter.toString()        { return "final parameter "; }
+    public String StructParameter.toString()       { return "structural parameter "; }
+    public String LoadResourceParameter.toString() { return "structural (loadResource) parameter "; }
+    public String Constant.toString()              { return "constant "; }
+    public String CompositeVariability.toString()  { return combine().toString(); }
 
     public abstract String TypePrefixVariability.toStringLiteral();
-    public String Parameter.toStringLiteral()         { return "parameter"; }
+    public String Continuous.toStringLiteral()        { return "continuous-time"; }
+    public String Discrete.toStringLiteral()          { return "discrete-time"; }
     public String InitialParameter.toStringLiteral()  { return "initial parameter"; }
+    public String Parameter.toStringLiteral()         { return "parameter"; }
     public String EvalTrueParameter.toStringLiteral() { return "eval parameter"; }
     public String FinalParameter.toStringLiteral()    { return "final parameter"; }
     public String StructParameter.toStringLiteral()   { return "structural parameter"; }
-    public String Discrete.toStringLiteral()          { return "discrete-time"; }
     public String Constant.toStringLiteral()          { return "constant"; }
-    public String Continuous.toStringLiteral()        { return "continuous-time"; }
     public String CompositeVariability.toStringLiteral() { return combine().toStringLiteral(); }
 
     syn String SrcRestriction.toString();
