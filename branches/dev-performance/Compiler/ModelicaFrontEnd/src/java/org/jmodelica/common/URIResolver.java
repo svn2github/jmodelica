@@ -44,7 +44,7 @@ public class URIResolver {
         } catch (IOException e) {
             res = path.getAbsolutePath();
         }
-        if (separatorChar() == '\\') {
+        if (File.separatorChar == '\\') {
             res = res.replace('\\', '/');
         }
         return res;
@@ -64,7 +64,8 @@ public class URIResolver {
             String scheme = scheme(uri);
             if (scheme != null) {
                 if (scheme.equalsIgnoreCase("file")) {
-                    return uri.getPath();
+                    String auth = uri.getAuthority();
+                    return (auth == null) ? uri.getPath() : (auth + uri.getPath());
                 } else if (scheme.equalsIgnoreCase("modelica")) {
                     String pack = n.packagePath(uri.getAuthority());
                     if (pack != null) {
@@ -152,10 +153,6 @@ public class URIResolver {
 
     boolean exists(File f) {
         return f.exists();
-    }
-
-    char separatorChar() {
-        return File.separatorChar;
     }
 
     String scheme(URI uri) {

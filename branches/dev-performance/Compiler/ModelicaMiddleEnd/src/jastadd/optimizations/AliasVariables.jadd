@@ -355,6 +355,20 @@ aspect AliasVariables {
 			private AliasSet() {
 			}
 			
+            /*
+             * Recompute the model variable.
+             */
+            public void recompute() {
+                AliasVariable oldModelVariable = model;
+                java.util.List<AliasVariable> oldAliases = aliases;
+                aliases = new ArrayList<>();
+                model = null;
+                score = 0;
+                for (AliasVariable v : oldAliases) {
+                    add(v);
+                }
+            }
+			
 			/**
 			 * An iterator over all the alias variables in this set.
 			 * 
@@ -915,7 +929,12 @@ aspect AliasVariables {
     syn long FVariable.aliasHeuristicScore() {
         long score = 0;
 
+        if (!getVisibilityType().isHidden()) {
+            score += 1;
+        }
+
         // Temporary variables added during transformations or in expandable connectors.
+        score *= 10;
         if (isFromExpandableConnector()) {
             score += 1;
         } else if (!isTemporary()) {

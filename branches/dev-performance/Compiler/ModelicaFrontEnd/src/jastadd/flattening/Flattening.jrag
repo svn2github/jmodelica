@@ -2556,9 +2556,18 @@ aspect FlatExpressions {
         try {
             CValue cval = ceval();
             if (cval.hasStringValue()) {
-                return createNode(new FStringLitExp(cval.stringValue()));
+                String s = cval.stringValue();
+                if (new File(s).isDirectory()) {
+                    return new FStringLitExp(s);
+                }
+                return createNode(new FStringLitExp(s));
             }
-        } catch (ConstantEvaluationException e) {}
+            // TODO: unit tests depending on lack of error handling
+            // throw new InternalCompilerError("Could not evaluate loadResource during flattening");
+        } catch (ConstantEvaluationException e) {
+            // TODO: unit tests depending on lack of error handling
+            // throw new InternalCompilerError("Could not evaluate loadResource during flattening: " + e.getModelicaStackTrace());
+        }
         return createNode(getFExp().flatten(f));
     }
     
@@ -3152,9 +3161,9 @@ aspect InstantiatedExpressions {
     }
 
     public FExp SrcIfExp.instantiate() {
-        FIfExp n = new FIfExp(getSrcIfExp().instantiate(),
-                              getThenExp().instantiate(),
-                              getElseExp().instantiate());
+        InstIfExp n = new InstIfExp(getSrcIfExp().instantiate(),
+                                    getThenExp().instantiate(),
+                                    getElseExp().instantiate());
         return copyLocationTo(n);
     }
 

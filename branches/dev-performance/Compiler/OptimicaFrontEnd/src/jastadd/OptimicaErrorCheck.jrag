@@ -60,12 +60,12 @@ aspect OptimicaErrorCheck {
      	super.checkOptimicaAttribute(iocd);
 
      	if (!iocd.isStatic() && getName().name().equals("objective") && 
-     			!(getInstModification().instValueMod().variability().lessOrEqual(Variability.fTimed()))) {
+     			!(getInstModification().instValueMod().variability().lessOrEqual(Variability.timed()))) {
      				error("The class attribute 'objective' must have parameter or timed variability.");
  		}
  
      	if (!iocd.isStatic() && getName().name().equals("objectiveIntegrand") && 
-     			(getInstModification().instValueMod().variability().equals(Variability.fTimed()))) {
+     			(getInstModification().instValueMod().variability().equals(Variability.timed()))) {
      				error("The class attribute 'objectiveIntegrand' must not have timed variability.");
  		}
 

@@ -534,7 +534,7 @@ end RecordTests.RecordFlat14;
 ")})));
 end RecordFlat14;
 
-model RecordType1
+model EquivalentRecords1
  record A
   Real a;
   Real b;
@@ -552,33 +552,33 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="RecordType1",
+            name="EquivalentRecords1",
             description="Records: equivalent types",
             variability_propagation=false,
             flatModel="
-fclass RecordTests.RecordType1
- RecordTests.RecordType1.A x;
- RecordTests.RecordType1.B y;
+fclass RecordTests.EquivalentRecords1
+ RecordTests.EquivalentRecords1.A x;
+ RecordTests.EquivalentRecords1.B y;
 equation
  y = x;
 
 public
- record RecordTests.RecordType1.A
+ record RecordTests.EquivalentRecords1.A
   Real a;
   Real b;
- end RecordTests.RecordType1.A;
+ end RecordTests.EquivalentRecords1.A;
 
- record RecordTests.RecordType1.B
+ record RecordTests.EquivalentRecords1.B
   Real a;
   Real b;
- end RecordTests.RecordType1.B;
+ end RecordTests.EquivalentRecords1.B;
 
-end RecordTests.RecordType1;
+end RecordTests.EquivalentRecords1;
 ")})));
-end RecordType1;
+end EquivalentRecords1;
 
 
-model RecordType2
+model EquivalentRecords2
  record A
   Real a;
   Real b;
@@ -596,19 +596,19 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="RecordType2",
+            name="EquivalentRecords2",
             description="Records: non-equivalent types (component name)",
             variability_propagation=false,
             errorMessage="
 1 errors found:
 
 Error at line 15, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
-  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType2.B, and type of right-hand side is RecordTests.RecordType2.A
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.EquivalentRecords2.B, and type of right-hand side is RecordTests.EquivalentRecords2.A
 ")})));
-end RecordType2;
+end EquivalentRecords2;
 
 
-model RecordType3
+model EquivalentRecords3
  record A
   Real a;
   Real b;
@@ -626,19 +626,19 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="RecordType3",
+            name="EquivalentRecords3",
             description="Records: non-equivalent types (component type)",
             variability_propagation=false,
             errorMessage="
 1 errors found:
 
 Error at line 15, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
-  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType3.B, and type of right-hand side is RecordTests.RecordType3.A
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.EquivalentRecords3.B, and type of right-hand side is RecordTests.EquivalentRecords3.A
 ")})));
-end RecordType3;
+end EquivalentRecords3;
 
 
-model RecordType4
+model EquivalentRecords4
  record A
   Real a;
   Real b;
@@ -666,43 +666,43 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="RecordType4",
+            name="EquivalentRecords4",
             description="Records: equivalent nested types",
             variability_propagation=false,
             flatModel="
-fclass RecordTests.RecordType4
- RecordTests.RecordType4.C x;
- RecordTests.RecordType4.D y;
+fclass RecordTests.EquivalentRecords4
+ RecordTests.EquivalentRecords4.C x;
+ RecordTests.EquivalentRecords4.D y;
 equation
  y = x;
 
 public
- record RecordTests.RecordType4.A
+ record RecordTests.EquivalentRecords4.A
   Real a;
   Real b;
- end RecordTests.RecordType4.A;
+ end RecordTests.EquivalentRecords4.A;
 
- record RecordTests.RecordType4.C
-  RecordTests.RecordType4.A a;
+ record RecordTests.EquivalentRecords4.C
+  RecordTests.EquivalentRecords4.A a;
   Real e;
- end RecordTests.RecordType4.C;
+ end RecordTests.EquivalentRecords4.C;
 
- record RecordTests.RecordType4.B
+ record RecordTests.EquivalentRecords4.B
   Real a;
   Real b;
- end RecordTests.RecordType4.B;
+ end RecordTests.EquivalentRecords4.B;
 
- record RecordTests.RecordType4.D
-  RecordTests.RecordType4.B a;
+ record RecordTests.EquivalentRecords4.D
+  RecordTests.EquivalentRecords4.B a;
   Real e;
- end RecordTests.RecordType4.D;
+ end RecordTests.EquivalentRecords4.D;
 
-end RecordTests.RecordType4;
+end RecordTests.EquivalentRecords4;
 ")})));
-end RecordType4;
+end EquivalentRecords4;
 
 
-model RecordType5
+model EquivalentRecords5
  record A
   Real a;
   Real b;
@@ -730,16 +730,67 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="RecordType5",
+            name="EquivalentRecords5",
             description="Records: non-equivalent nested types",
             variability_propagation=false,
             errorMessage="
 1 errors found:
 
 Error at line 25, column 2, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
-  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType5.D, and type of right-hand side is RecordTests.RecordType5.C
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.EquivalentRecords5.D, and type of right-hand side is RecordTests.EquivalentRecords5.C
 ")})));
-end RecordType5;
+end EquivalentRecords5;
+
+
+model EquivalentRecords6
+    record A
+        Real x;
+        String s;
+    end A;
+    
+    record B
+        String s;
+        Real x;
+    end B;
+    
+    function f
+        input A a[2];
+        output Real x;
+    algorithm
+        x := sum(a.x);
+        x := x + 1;
+    end f;
+    
+    Real x = f({ A(time, "aa"), B("bb", 2) });
+
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="EquivalentRecords6",
+        description="Check that elimination of equivalent records correctly reorders arguments of record constructors",
+        flatModel="
+fclass RecordTests.EquivalentRecords6
+ Real x;
+equation
+ x = RecordTests.EquivalentRecords6.f({RecordTests.EquivalentRecords6.A(time, \"aa\"), RecordTests.EquivalentRecords6.A(2, \"bb\")});
+
+public
+ function RecordTests.EquivalentRecords6.f
+  input RecordTests.EquivalentRecords6.A[:] a;
+  output Real x;
+ algorithm
+  x := a[1].x + a[2].x;
+  x := x + 1;
+  return;
+ end RecordTests.EquivalentRecords6.f;
+
+ record RecordTests.EquivalentRecords6.A
+  Real x;
+  discrete String s;
+ end RecordTests.EquivalentRecords6.A;
+
+end RecordTests.EquivalentRecords6;
+")})));
+end EquivalentRecords6;
 
 
 model RecordType6
@@ -2678,7 +2729,10 @@ model RecordConstructor13
             name="RecordConstructor13",
             description="Size of array in record depending on input to constructor",
             errorMessage="
-1 errors found:
+2 errors found:
+
+Error at line 7, column 11, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable r does not match the declared type of the variable
 
 Error at line 7, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of positional argument 2 and input x are not compatible

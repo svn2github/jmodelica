@@ -17,26 +17,30 @@ import org.junit.Test;
 
 public class URIResolverTest {
 
+    
+
     /*
      * Test canonicalPath()
      */
 
     @Test
     public void testCanonicalPath() {
-        String res = URIResolver.DEFAULT.canonicalPath(new File("C:/test.txt"));
-        assertEquals("C:/test.txt", res);
+        String path = URIResolverMock.absolutePath("test.txt");
+        String res = URIResolver.DEFAULT.canonicalPath(new File(path));
+        assertEquals(path, res);
     }
 
     @Test
     public void testCanonicalPathNoIO() {
+        String path = URIResolverMock.absolutePath("test.txt");
         @SuppressWarnings("serial")
-        String res = URIResolver.DEFAULT.canonicalPath(new File("C:/test.txt") {
+        String res = URIResolver.DEFAULT.canonicalPath(new File(path) {
             @Override
             public String getCanonicalPath() throws IOException {
                 throw new IOException();
             }
         });
-        assertEquals("C:/test.txt", res);
+        assertEquals(path, res);
     }
 
     /*
@@ -46,24 +50,28 @@ public class URIResolverTest {
     @Test
     public void testResolvePathCorrect() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolve(n, "C:/pack/subpath");
+        String path = URIResolverMock.absolutePath("pack/subpath");
+        String res = URIResolver.DEFAULT.resolve(n, path);
         assertTrue(n.hasError());
-        assertEquals("C:/pack/subpath", res);
+        assertEquals(path, res);
     }
 
     @Test
     public void testResolvePathMissing() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolve(n, "C:/pack/subpath/missing");
+        String path = URIResolverMock.absolutePath("pack/subpath/missing");
+        String res = URIResolver.DEFAULT.resolve(n, path);
         assertTrue(n.hasError());
-        assertEquals("C:/pack/subpath/missing", res);
+        assertEquals(path, res);
     }
 
     @Test
     public void testResolveModelicaCorrect() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolve(n, "modelica://pack/subpath");
-        assertEquals("C:/packpath/subpath", res);
+        String uri = "modelica://pack/subpath";
+        String path = URIResolverMock.absolutePath("packpath/subpath");
+        String res = URIResolver.DEFAULT.resolve(n, uri);
+        assertEquals(path, res);
     }
 
     /*
@@ -73,12 +81,18 @@ public class URIResolverTest {
     @Test
     public void testResolveInPackageModelicaCorrect() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
-        String res = URIResolver.DEFAULT.resolveInPackage(n, "modelica://pack/subpath");
-        assertEquals("C:/packpath/subpath", res);
+        String uri = "modelica://pack/subpath";
+        String path = URIResolverMock.absolutePath("packpath/subpath");
+        String res = URIResolver.DEFAULT.resolveInPackage(n, uri);
+        assertEquals(path, res);
     }
 
     @Test
     public void testResolveInPackageModelicaIncorrect() {
+        // TODO: This is a strange test, it is very unclear if the tested behavior is actually the 
+        //       desired one. When given a modelica URI with an unknown package as host, shouldn't 
+        //       you get a URI exception back? It also seems made redundant by 
+        //       testResolveInPackageModelicaIncorrect3() below.
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String res = URIResolver.DEFAULT.resolveInPackage(n, "modelica://pack2/subpath");
         String expected = System.getProperty("user.dir").replaceAll("\\\\", "/") + "/modelica:/pack2/subpath";
@@ -99,9 +113,13 @@ public class URIResolverTest {
 
     @Test
     public void testResolveInPackageModelicaIncorrect3() {
+        // TODO: This is a strange test, it is very unclear if the tested behavior is actually the 
+        //       desired one. When given a modelica URI with an unknown package as host, shouldn't 
+        //       you get a URI exception back?
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String res = new URIResolverMock().resolveInPackage(n, "modelica://pack2/subpath");
-        assertEquals("C:\\toppath\\modelica:\\pack2\\subpath", res);
+        String path = URIResolverMock.absolutePath("toppath/modelica:/pack2/subpath");
+        assertEquals(path, res);
     }
 
     /*
@@ -109,15 +127,13 @@ public class URIResolverTest {
      */
 
     @Test
-    public void testResolveURICheckedCorrect() {
+    public void testResolveURICheckedCorrect() throws URIException {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String res = "";
-        try {
-            res = URIResolver.DEFAULT.resolveURIChecked(n, "modelica://pack/subpath");
-        } catch (URIException e) {
-            fail();
-        }
-        assertEquals("C:/packpath/subpath", res);
+        String uri = "modelica://pack/subpath";
+        String path = URIResolverMock.absolutePath("packpath/subpath");
+        res = URIResolver.DEFAULT.resolveURIChecked(n, uri);
+        assertEquals(path, res);
     }
 
     @Test
@@ -126,33 +142,32 @@ public class URIResolverTest {
         try {
             new URIResolverMock().resolveURIChecked(n, "modelica://pack2/subpath");
             fail();
-        } catch (URIException e) {
-
-        }
+        } catch (URIException e) {}
     }
     
     @Test
-    public void testResolveURICheckedFileCorrect() {
+    public void testResolveURICheckedFileCorrect() throws URIException {
         PackageNode n = new URIResolverPackageNodeMock();
-        try {
-            String res = URIResolver.DEFAULT.resolveURIChecked(n, "file:///pack/subpath");
-            assertEquals("/pack/subpath", res);
-        } catch (URIException e) {
-            fail();
-        }
+        String path = URIResolverMock.absolutePath("/pack/subpath");
+        String uri = "file://" + path;
+        String res = URIResolver.DEFAULT.resolveURIChecked(n, uri);
+        assertEquals(path, res);
     }
 
     @Test
-    public void testResolveURICheckedFileIncorrect() {
+    public void testResolveURICheckedFileNoHost() throws URIException {
         PackageNode n = new URIResolverPackageNodeMock();
-        try {
-            String res = URIResolver.DEFAULT.resolveURIChecked(n, "file://pack/subpath");
-            assertEquals("/subpath", res);
-        } catch (URIException e) {
-            fail();
-        }
+        String res = URIResolver.DEFAULT.resolveURIChecked(n, "file:///pack/subpath");
+        assertEquals("/pack/subpath", res);
     }
-    
+
+    @Test
+    public void testResolveURICheckedFileWithHost() throws URIException {
+        PackageNode n = new URIResolverPackageNodeMock();
+        String res = URIResolver.DEFAULT.resolveURIChecked(n, "file://pack/subpath");
+        assertEquals("pack/subpath", res);
+    }
+
     @Test
     public void testResolveURICheckedModelicaIncorrectSyntax() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();

@@ -458,9 +458,9 @@ aspect FlatTypeCheck {
     eq FEqRelExp.generateTypeError()     = super.generateTypeError() ||
             (getLeft().type().isReal() || getRight().type().isReal()) && !inFunction();
 
-    public void FIfExp.typeCheck(ErrorCheckType checkType) {
+    public void InstIfExp.typeCheck(ErrorCheckType checkType) {
         if (!generateTypeError()) {
-            if (!getThenExp().size().equivalent(getElseExp().size(), false)) {
+            if (!getThenExp().type().equivalentTo(getElseExp().type())) {
                 getIfExp().markAsStructuralParameter(checkType);
             }
         }
@@ -763,7 +763,7 @@ aspect FlatTypeCheck {
 		  top.error("Illegal access to class in expression: " + top.name());
   }
 
-    public void FIfExp.typeError(ErrorCheckType checkType) {
+    public void InstIfExp.typeError(ErrorCheckType checkType) {
         FType thenType = getThenExp().type();
         FType elseType = getElseExp().type();
         FType scalar = thenType.scalarType().typePromotion(elseType.scalarType());

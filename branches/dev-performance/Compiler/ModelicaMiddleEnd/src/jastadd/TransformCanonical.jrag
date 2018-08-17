@@ -35,7 +35,6 @@ import java.util.Iterator;
 
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.collections.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.munkres.DenseMunkresProblem;
 import org.jmodelica.util.munkres.IntegerCost;
@@ -1202,12 +1201,28 @@ aspect TransformCanonical {
             
             public void perform() {
                 genAlias();
-                eliminateAliasVariables();
+                propagateDerivativeBindings();
+                sortAliasVariables(false);
+                sortAliasEquations();
+                enableAliasRewrite();
+                change();
                 removeUnusedTemporaries();
                 mergeEquivalentRecords();
                 insertTempsInLHS();
                 remoteRedundantInitialEquations();
                 change();
+            }
+            
+            public void propagateDerivativeBindings() {
+                // Collect derivative binding equations, however only if we are going
+                // to perform index reduction!
+                if (myOptions().getBooleanOption("propagate_derivatives")) {
+                    for (FAbstractEquation equation : getFAbstractEquations()) {
+                        if (!equation.isAliasEquation()) {
+                            equation.propagateDerivativeBindings();
+                        }
+                    }
+                }
             }
         }
         
@@ -1380,9 +1395,7 @@ aspect TransformCanonical {
                 fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
             }
         }
-		aliasManager.reportAliasErrors(this);
-		//flush();
-		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
+        aliasManager.reportAliasErrors(this);
 	}
 	
     public void FVariable.classifyAliasConstant(AliasManager aliasManager, 
@@ -1400,67 +1413,53 @@ aspect TransformCanonical {
         }
     }
 
-	/**
-	 * Flag indicating if alias variables have been eliminated from the
-	 * model.
-	 */
-	public boolean FClass.aliasVariablesEliminated = false;
-	
-	/**
-	 * Eliminate alias variables from the flat model.
-	 * 
-	 * The non-alias variables are kept in the list FClass.FVariableList but the
-	 * alias variables are moved to FClass.AliasVariablesList.
-	 */
-	public void FClass.eliminateAliasVariables() {
-		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
-		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
-		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+    /**
+     * Eliminate alias variables from the flat model.
+     * 
+     * The non-alias variables are kept in the list FClass.FVariableList but the
+     * alias variables are moved to FClass.AliasVariablesList.
+     */
+    public void FClass.sortAliasVariables(boolean recompute) {
+        ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
+        ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
+        if (recompute) {
+            for (FVariable fv : getAliasVariables()) {
+                fv.aliasSort(nonAliasVars, aliasVars);
+            }
+        } else {
+            for (FVariable fv : getAliasVariables()) {
+                aliasVars.add(fv);
+            }
+        }
+        for (FVariable fv : getFVariables()) {
+             fv.aliasSort(nonAliasVars, aliasVars);
+        }
+        setFVariableList(new List(nonAliasVars));
+        setAliasVariableList(new List(aliasVars));
+    }
+
+    /**
+     * Eliminate alias equation from the flat model.
+     */
+    public void FClass.sortAliasEquations() {
+        ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
         ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
-		
-		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
-		
-		// Go through all variables and insert in correct list
-		for (FVariable fv : getAliasVariables()) {
-				aliasVars.add(fv);
-		}
-		for (FVariable fv : getFVariables()) {
-            fv.aliasSort(nonAliasVars, aliasVars);
-		}
-		
-		// Remove alias equations.
-		for (FAbstractEquation equation : getFAbstractEquations()) 
-			if (!equation.isAliasEquation()) 
-				eqns.add(equation);
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            if (!equation.isAliasEquation()) {
+                eqns.add(equation);
+            }
+        }
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
             for (FAbstractEquation equation : getParameterEquations()) { 
                 if (!equation.isAliasEquation()) {
                     pEqns.add(equation);
                 }
             }
-        }
-        
-        // Collect derivative binding equations, however only if we are going
-        // to perform index reduction!
-        if (myOptions().getBooleanOption("propagate_derivatives")) {
-            for (FAbstractEquation eqn : eqns) {
-                eqn.propagateDerivativeBindings();
-            }
-        }
-
-		setFVariableList(new List(nonAliasVars));
-		setAliasVariableList(new List(aliasVars));
-		setFAbstractEquationList(new List(eqns));
-        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
             setParameterEquationList(new List(pEqns));
         }
-		
-		aliasVariablesEliminated = true;
-		enableAliasRewrite();
-		
-		flush();
-	}
-	
+        setFAbstractEquationList(new List(eqns));
+    }
+
     /**
      * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
      * <code>nonAliasVars</code>, if it is not.
@@ -1532,7 +1531,7 @@ aspect TransformCanonical {
      * FIdUses referring to alias variables need to be changed to 
      * FIdUses referring to their alias targets. 
      * 
-     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * This is done by rewrites which are activated once FIdUseExp.rewriteAlias
      * is true. Notice that in order for the rewrite to be enable, the is$final
      * field of FIdUseExp needs to be set to false: this is done by the recursive
      * method ASTNode.flushAllRecursiveClearFinal. 
@@ -1608,7 +1607,7 @@ aspect TransformCanonical {
      * FDerExps referring to alias variables need to be changed to 
      * FDerExps referring to their alias targets. 
      * 
-     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * This is done by rewrites which are activated once FIdUseExp.rewriteAlias
      * is true. Notice that in order for the rewrite to be enable, the is$final
      * field of FIdUseExp needs to be set to false: this is done by the recursive
      * method ASTNode.flushAllRecursiveClearFinal. 
@@ -1896,33 +1895,61 @@ aspect TransformCanonical {
 				list.add(rec);
 		setFRecordDeclList(list);
 	}
-	
-	public void FClass.computeEquivalentRecords() {
-		ArrayList<FType> distinctTypes = new ArrayList<FType>();
-		ArrayList<FRecordDecl> keptDecl = new ArrayList<FRecordDecl>();
-		for (FRecordDecl rec : getFRecordDecls()) {
-			boolean found = false;
-			FType type = rec.type();
-			for (int i = 0; !found && i < distinctTypes.size(); i++) {
-				if (type.typeCompatible(distinctTypes.get(i))) {
-					found = true;
-					rec.equivalentRecordGroup = i;
-				}
-			}
-			if (!found) {
-				rec.equivalentRecordToKeep = true;
-				rec.equivalentRecordGroup = distinctTypes.size();
-				distinctTypes.add(type);
-				keptDecl.add(rec);
-			}
-		}
-		equivalentRecordMap = new HashMap<String,FRecordDecl>();
-		for (FRecordDecl rec : getFRecordDecls())
-			equivalentRecordMap.put(rec.name(), keptDecl.get(rec.equivalentRecordGroup));
-	}
-	
-	protected Map<String,FRecordDecl> FClass.equivalentRecordMap;
-	
+
+    public void FClass.computeEquivalentRecords() {
+        ArrayList<FRecordType> distinctTypes = new ArrayList<>();
+        ArrayList<FRecordDecl> keptDecl = new ArrayList<>();
+        equivalentRecordComponentOrderMap = new HashMap<>();
+        for (FRecordDecl rec : getFRecordDecls()) {
+            boolean found = false;
+            FRecordType type = rec.type();
+            for (int i = 0; !found && i < distinctTypes.size(); i++) {
+                FRecordType other = distinctTypes.get(i);
+                /* TODO: Also check that this type is not used in any external functions.
+                 *       If it is, do not remove it (if the one chosen to be kept isn't used 
+                 *       in an external, keep this one instead). */
+                if (type.typeCompatible(other)) {
+                    found = true;
+                    rec.equivalentRecordGroup = i;
+                    type.addComponentReorderFrom(other, equivalentRecordComponentOrderMap);
+                }
+            }
+            if (!found) {
+                rec.equivalentRecordToKeep = true;
+                rec.equivalentRecordGroup = distinctTypes.size();
+                distinctTypes.add(type);
+                keptDecl.add(rec);
+            }
+        }
+        equivalentRecordMap = new HashMap<>();
+        for (FRecordDecl rec : getFRecordDecls())
+            equivalentRecordMap.put(rec.name(), keptDecl.get(rec.equivalentRecordGroup));
+    }
+
+    public void FRecordType.addComponentReorderFrom(FRecordType other, Map<String, int[]> map) {
+        Map<String,Integer> myOrder = new HashMap<>();
+        for (int i = 0, n = getNumComponent(); i < n; i++) {
+            myOrder.put(getComponent(i).getName(), i);
+        }
+        
+        int[] order = new int[getNumComponent()];
+        boolean different = false;
+        for (int i = 0, n = other.getNumComponent(); i < n; i++) {
+            int j = myOrder.get(other.getComponent(i).getName());
+            order[i] = j;
+            if (i != j) {
+                different = true;
+            }
+        }
+        
+        if (different) {
+            map.put(name(), order);
+        }
+    }
+
+    protected Map<String,FRecordDecl> FClass.equivalentRecordMap;
+    protected Map<String,int[]> FClass.equivalentRecordComponentOrderMap;
+
 	public boolean FRecordDecl.equivalentRecordToKeep = false;
 	public int FRecordDecl.equivalentRecordGroup = -1;
 	
@@ -1968,22 +1995,34 @@ aspect TransformCanonical {
 			return this;
 		}
 	}
-	
-	rewrite FRecordConstructor {
-		when (rewriteEquivalentRecord)
-		to FRecordConstructor {
-			rewriteEquivalentRecord = false;
-			setRecord(myFClass().createEquivalentRecordAccess(getRecord()));
-			getRecord().flushAll(); // remove?
-			flushAll();
-			return this;
-		}
-	}
 
-	public FRecordAccess FClass.createEquivalentRecordAccess(FRecordAccess old) {
+    rewrite FRecordConstructor {
+        when (rewriteEquivalentRecord)
+        to FRecordConstructor {
+            rewriteEquivalentRecord = false;
+            FRecordAccess old = getRecord();
+            setRecord(myFClass().createEquivalentRecordAccess(getRecord()));
+            int[] order = myFClass().getEquivalentRecordComponentOrder(old);
+            if (order != null) {
+                List<FExp> args = new List<>();
+                for (int i : order) {
+                    args.add(getArg(i));
+                }
+                setArgList(args);
+            }
+            flushAll();
+            return this;
+        }
+    }
+
+    public FRecordAccess FClass.createEquivalentRecordAccess(FRecordAccess old) {
 		FRecordDecl rec = equivalentRecordMap.get(old.name());
 		return (rec != null) ? rec.getFQName().createFRecordAccess() : old;
 	}
+
+    public int[] FClass.getEquivalentRecordComponentOrder(FQName old) {
+        return equivalentRecordComponentOrderMap.get(old.name());
+    }
 
 	public FType FClass.createEquivalentRecordType(FType old) {
         FRecordDecl rec = equivalentRecordMap.get(old.name());

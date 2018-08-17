@@ -1088,7 +1088,27 @@ Error at line 9, column 27, in file '...', CANNOT_EVALUATE_LOADRESOURCE:
 ")})));
 end LoadResource6;
 
+model LoadResource7
+    parameter String p1 = "modelica://Modelica/Resources/Data/Utilities";
+    parameter String p2 = Modelica.Utilities.Files.loadResource(p1);
+    String p3 = Modelica.Utilities.Files.loadResource(p1) + "file.txt";
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LoadResource7",
+            description="Mark loadResource input as structural",
+            regexp="/\"[^\"]+\"/\"\"/",
+            flatModel="
+fclass VariabilityTests.LoadResource.LoadResource7
+ structural (loadResource) parameter String p1 = \"\" /* \"\" */;
+ structural parameter String p2 = \"\" /* \"\" */;
+ discrete String p3 = \"\" + \"\";
+end VariabilityTests.LoadResource.LoadResource7;
+")})));
+end LoadResource7;
+
 end LoadResource;
+
 
 model BindingExpVariability1
     model EO

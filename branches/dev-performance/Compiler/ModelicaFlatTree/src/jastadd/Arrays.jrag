@@ -990,17 +990,19 @@ aspect Arrays {
 	eq FFunctionCall.size()    = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
     eq InstPartialFunctionCall.size() = Size.SCALAR;
-	
-	eq FIfExp.size() {
-		if (isParameterIf()) {
-			try {
-				return cevalSelectExp().size();
-			} catch (ConstantEvaluationException e) {
-			}
-		}
-		return getThenExp().size();
-	}
-	
+
+    eq FIfExp.size() = getThenExp().size();
+
+    eq InstIfExp.size() {
+        if (isParameterIf()) {
+            try {
+                return cevalSelectExp().size();
+            } catch (ConstantEvaluationException e) {
+            }
+        }
+        return getThenExp().size();
+    }
+
 	/**
 	 * Get the array sizes.
 	 */

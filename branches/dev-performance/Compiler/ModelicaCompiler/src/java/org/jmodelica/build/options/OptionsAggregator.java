@@ -163,6 +163,10 @@ public class OptionsAggregator {
             removed = true;
         }
 
+        public boolean getRemoved() {
+            return removed;
+        }
+
         public void setTestDefaultValue(String testDefaultValue) {
             this.testDefaultValue = testDefaultValue;
         }
@@ -224,7 +228,7 @@ public class OptionsAggregator {
     }
     
     public void generateCalls(OutputStreamWriter out) throws IOException {
-        for (OptionDeclaration opt : options.values()) {
+        for (OptionDeclaration opt : getOptions()) {
             out.write(opt.toJavaString());
         }
     }
@@ -457,7 +461,12 @@ public class OptionsAggregator {
     }
 
     public Iterable<OptionDeclaration> getOptions() {
-        return options.values();
+        ArrayList<OptionDeclaration> res = new ArrayList<>();
+        for (OptionDeclaration opt : options.values()) {
+            if (!opt.getRemoved()) {
+                res.add(opt);
+            }
+        }
+        return res;
     }
-
 }
