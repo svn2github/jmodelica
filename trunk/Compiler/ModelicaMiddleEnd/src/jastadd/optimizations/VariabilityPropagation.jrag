@@ -118,7 +118,7 @@ aspect VariabilityPropagation {
     eq FFunctionCall.potentialPartialVariability() {
         for (FExp exp : getArgs()) {
             if (exp.variability().knownParameterOrLess()) {
-                return Variability.CONSTANT;
+                return Variability.constant();
             }
         }
         return super.potentialPartialVariability();
@@ -349,7 +349,7 @@ aspect VariabilityPropagation {
             } catch (ConstantEvaluationException e) {}
             if (newSolution == null) {
                 // If we can't evaluate right now, set it as parameter
-                solutionVariability = Variability.FIXEDPARAMETER;
+                solutionVariability = Variability.parameter();
             }
         }
 
@@ -367,7 +367,7 @@ aspect VariabilityPropagation {
         TypePrefixVariability variability = getCall().variability();
         for (FFunctionCallLeft left : getLefts()) {
             if (left.hasFExp() && !left.getFExp().canPropagate()) {
-                variability = Variability.CONTINUOUS;
+                variability = Variability.continuous();
                 break;
             }
         }
@@ -399,7 +399,7 @@ aspect VariabilityPropagation {
         if (allRemoved) {
             this.taggedByVProp = true;
         } else {
-            variability = variability.combine(Variability.FIXEDPARAMETER);
+            variability = variability.combine(Variability.fixedParameter());
             if (variability.parameterVariability()) {
                 propagator.addEquation(variability, this);
                 this.taggedByVProp = true;
@@ -512,12 +512,12 @@ aspect VariabilityPropagation {
         if (value.hasBuildLiteral()) {
             try {
                 bexp = value.buildLiteral();
-                variability = Variability.CONSTANT;
+                variability = Variability.constant();
             } catch (ConstantEvaluationException e) {
-                variability = variability.combine(Variability.FIXEDPARAMETER);
+                variability = variability.combine(Variability.fixedParameter());
             }
         } else {
-            variability = variability.combine(Variability.FIXEDPARAMETER);
+            variability = variability.combine(Variability.fixedParameter());
         }
         
         if (variability.parameterOrLess()) {
@@ -550,7 +550,7 @@ aspect VariabilityPropagation {
         // Declaration
         // TODO: after we have added "dependent parameter that is evaluated" variability, this exception should use that instead
         if (variability.evalTrueParameterVariability())
-            variability = Variability.STRUCTPARAMETER;
+            variability = Variability.structParameter();
         setTypePrefixVariability(variability);
         if (variability.knownParameterOrLess()) {
             setBindingExp(bindingExp.fullCopy());
@@ -606,7 +606,7 @@ aspect VariabilityPropagation {
         if (isDifferentiatedVariable()) {
             FAbstractVariable derVar = myDerivativeVariable();
             derVar.taggedByVProp = true;
-            derVar.variabilityPropagation(propagator, Variability.CONSTANT, new FIntegerLitExp(0));
+            derVar.variabilityPropagation(propagator, Variability.constant(), new FIntegerLitExp(0));
         }
         
         // Alias variables
@@ -649,8 +649,8 @@ aspect VariabilityPropagation {
     }
     
     
-    refine Variability eq FMulExp.expVariability() = taggedByVProp ? Variability.CONSTANT : refined();
-    refine Variability eq FDivExp.expVariability() = taggedByVProp ? Variability.CONSTANT : refined();
+    refine Variability eq FMulExp.expVariability() = taggedByVProp ? Variability.constant() : refined();
+    refine Variability eq FDivExp.expVariability() = taggedByVProp ? Variability.constant() : refined();
     
     refine ConstantEvaluation eq FDotMulExp.cevalCalc(VariableEvaluator evaluator) = taggedByVProp ? 
             type().zeroCValue() : refined(evaluator);

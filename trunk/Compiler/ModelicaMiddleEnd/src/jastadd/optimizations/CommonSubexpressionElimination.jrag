@@ -129,7 +129,7 @@ aspect CommonSubexpressionElimination {
                     FAbstractFunctionCall call = get(0);
 
                     final TypePrefixVariability variability = call.variability().combine(
-                            Variability.FIXEDPARAMETER).combineDown(call.type().funcOutputVariability());
+                            Variability.fixedParameter()).combineDown(call.type().funcOutputVariability());
 
                     FAbstractVariable var = variablesMap().lookup(call.tempVarName());
                     if (var == null) {

@@ -307,7 +307,6 @@ aspect TransformCanonical {
             } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
             }
-            root().flushAllRecursiveClearFinal();
         }
     }
     
@@ -2079,7 +2078,7 @@ aspect TransformCanonical {
         String tempName = calcTempVarName();
         TypePrefixVariability v;
         if (param) {
-            v = Variability.FIXEDPARAMETER;
+            v = Variability.fixedParameter();
         } else {
             v = type().funcOutputVariability();
         }
@@ -2587,7 +2586,7 @@ aspect StateInitialEquations {
         
         for (FVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(VisibilityType.PUBLIC, Variability.FIXEDPARAMETER, nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(VisibilityType.PUBLIC, Variability.fixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else

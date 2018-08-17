@@ -2887,11 +2887,11 @@ aspect FlatExpressions {
      * This is done during variability calculation to keep compatibility with FExp. 
      */
     abstract public TypePrefixVariability SrcTypePrefixVariability.flatten();
-    public TypePrefixVariability SrcContinuous.flatten()     { return Variability.CONTINUOUS;     }
-    public TypePrefixVariability SrcDiscrete.flatten()       { return Variability.DISCRETE;       }
-    public TypePrefixVariability SrcParameter.flatten()      { return Variability.FIXEDPARAMETER; }
-    public TypePrefixVariability SrcIndexParameter.flatten() { return Variability.INDEXPARAMETER; }
-    public TypePrefixVariability SrcConstant.flatten()       { return Variability.CONSTANT;       }
+    public TypePrefixVariability SrcContinuous.flatten()     { return Variability.continuous();     }
+    public TypePrefixVariability SrcDiscrete.flatten()       { return Variability.discrete();       }
+    public TypePrefixVariability SrcParameter.flatten()      { return Variability.fixedParameter(); }
+    public TypePrefixVariability SrcIndexParameter.flatten() { return Variability.indexParameter(); }
+    public TypePrefixVariability SrcConstant.flatten()       { return Variability.constant();       }
 }
 
 aspect InstantiatedExpressions {

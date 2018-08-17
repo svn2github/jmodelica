@@ -764,7 +764,7 @@ aspect CCodeGenBlocks {
             private Collection<String> attributes = Arrays.asList(FAttribute.START, FAttribute.MIN, FAttribute.MAX, FAttribute.NOMINAL);
 
             public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
-                TypePrefixVariability variability = Variability.CONSTANT;
+                TypePrefixVariability variability = Variability.constant();
                 for (FVariable var : iterVars) {
                     for (String attr : attributes) {
                         FExp exp = attributeExp(var, attr);

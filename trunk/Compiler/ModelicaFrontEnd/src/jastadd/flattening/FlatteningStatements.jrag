@@ -184,7 +184,7 @@ aspect FlatStatements {
                 FVariable tempVar = null;
                 boolean hasBreak = getForStmts().containsBreakStmt();
                 if (hasBreak) {
-                    tempVar = new FBooleanVariable(VisibilityType.TEMPORARY, Variability.DISCRETE, new FQNameString(myTempVarName()));
+                    tempVar = new FBooleanVariable(VisibilityType.TEMPORARY, Variability.discrete(), new FQNameString(myTempVarName()));
                     f.addFVariable(tempVar);
                     sl.add(new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()));
                 }

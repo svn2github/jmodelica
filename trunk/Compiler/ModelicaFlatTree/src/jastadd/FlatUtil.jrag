@@ -1761,17 +1761,17 @@ aspect FlatFunctionUtils {
     
     public FVariable FIntegerType.createFVariable(VisibilityType vt, FQName name, 
             TypePrefixVariability variability) {
-        return new FIntegerVariable(vt, variability.combineDown(Variability.DISCRETE), name);
+        return new FIntegerVariable(vt, variability.combineDown(Variability.discrete()), name);
     }   
     
     public FVariable FBooleanType.createFVariable(VisibilityType vt, FQName name, 
             TypePrefixVariability variability) {
-        return new FBooleanVariable(vt, variability.combineDown(Variability.DISCRETE), name);
+        return new FBooleanVariable(vt, variability.combineDown(Variability.discrete()), name);
     }   
     
     public FVariable FStringType.createFVariable(VisibilityType vt, FQName name, 
             TypePrefixVariability variability) {
-        return new FStringVariable(vt, variability.combineDown(Variability.DISCRETE), name);
+        return new FStringVariable(vt, variability.combineDown(Variability.discrete()), name);
     }   
     
     public FVariable FRecordType.createFVariable(VisibilityType vt, FQName name, 
@@ -1781,12 +1781,12 @@ aspect FlatFunctionUtils {
     
     public FVariable FEnumType.createFVariable(VisibilityType vt, FQName name, 
             TypePrefixVariability variability) {
-        return new FEnumVariable(vt, variability.combineDown(Variability.DISCRETE), name, new FQNameString(getName()));
+        return new FEnumVariable(vt, variability.combineDown(Variability.discrete()), name, new FQNameString(getName()));
     }   
     
     public FVariable FExternalObjectType.createFVariable(VisibilityType vt, FQName name, 
             TypePrefixVariability variability) {
-        return new FExternalObjectVariable(vt, variability.combineDown(Variability.INITIALPARAMETER), name, getConstructor().fullCopy());
+        return new FExternalObjectVariable(vt, variability.combineDown(Variability.initialParameter()), name, getConstructor().fullCopy());
     }
 }
 

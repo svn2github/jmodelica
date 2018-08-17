@@ -269,7 +269,7 @@ aspect Derivatives {
     protected FExp FSinExp.diffExp(String name) {
         FExp ed = getFExp().diff(name);
         try {
-            if (ed.variability().lessOrEqual(Variability.CONSTANT) && ed.ceval().realValue()==0.) {
+            if (ed.variability().lessOrEqual(Variability.constant()) && ed.ceval().realValue()==0.) {
                 return new FRealLitExp(0.0);
             }
         } catch(Exception e) {
@@ -282,7 +282,7 @@ aspect Derivatives {
     protected FExp FCosExp.diffExp(String name) {
         FExp ed = getFExp().diff(name);
         try {
-            if (ed.variability().lessOrEqual(Variability.CONSTANT) && ed.ceval().realValue()==0.) {
+            if (ed.variability().lessOrEqual(Variability.constant()) && ed.ceval().realValue()==0.) {
                 return new FRealLitExp(0.0);
             }
         } catch(Exception e) {
@@ -295,7 +295,7 @@ aspect Derivatives {
     protected FExp FTanExp.diffExp(String name) {
         FExp ed = getFExp().diff(name);
         try {
-            if (ed.variability().lessOrEqual(Variability.CONSTANT) && ed.ceval().realValue()==0.) {
+            if (ed.variability().lessOrEqual(Variability.constant()) && ed.ceval().realValue()==0.) {
                 return new FRealLitExp(0.0);
             }
         } catch(Exception e) {
