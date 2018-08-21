@@ -469,7 +469,7 @@ aspect Arrays {
 
 	syn int FAbstractVariable.ndims() = -1;
 	
-	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims_FQ();
+	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().declarationNDims();
 	eq FFunctionArray.ndims()    = getType().ndims();
 	eq FFunctionVariable.ndims() = 0;
 
@@ -483,8 +483,8 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FQName.ndims_FQ() = 0;
-	eq FQNameFull.ndims_FQ() {
+	syn int FQName.declarationNDims() = 0;
+	eq FQNameFull.declarationNDims() {
 		// Only look at the array subscripts for the last FQNamePart,
 		// all other array subscripts has been expanded in the instantiation.
 		FQNamePart last = getFQNamePart(getNumFQNamePart() - 1);
@@ -1081,7 +1081,7 @@ aspect Arrays {
 	 * Get the array sizes. 
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
-	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size_FQ();
+	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().declarationSize();
 	eq FFunctionArray.size() = type().size();
 
     /**
@@ -1093,8 +1093,8 @@ aspect Arrays {
 	/**
 	 * Get the array sizes. 
 	 */
-	syn Size FQName.size_FQ() = Size.SCALAR;
-	syn lazy Size FQNameFull.size_FQ() {
+	syn Size FQName.declarationSize() = Size.SCALAR;
+	syn lazy Size FQNameFull.declarationSize() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().declarationSize(); 
