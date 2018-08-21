@@ -2004,7 +2004,7 @@ aspect Arrays {
 	 *             wrapped in an array so that it can be changed by the method
 	 */
 	protected InstAccess InstAccess.specifyEach(Index i, int[] dim) {
-		return (InstAccess) fullCopy();
+		return treeCopy();
 	}
 
 	protected InstDot InstDot.specifyEach(Index i, int[] dim) {

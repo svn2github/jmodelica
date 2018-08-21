@@ -1623,7 +1623,7 @@ aspect TransformCanonical {
                 else
                     return new_exp;
             } else {
-                FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
+                FQName new_name = ((FVariable)getFIdUse().myFV()).alias().getFQName().treeCopy();
                 FAbstractDerExp new_exp = createEmptyNode();
                 new_exp.setFIdUse(new_name);
                 new_exp.setOrder(order());

@@ -52,7 +52,7 @@ aspect FlatteningAccess {
     }
 
     public FIdUse FIdUse.flatten(Flattener f) {
-        return (FIdUse)fullCopy();
+        return treeCopy();
     }
 
     public FIdUse InstAccess.flatten(Flattener f) {

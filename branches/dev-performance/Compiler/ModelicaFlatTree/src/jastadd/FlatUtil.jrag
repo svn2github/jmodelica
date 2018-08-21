@@ -973,7 +973,7 @@ aspect FlatNames {
     eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createFIdUse(), (String)null, order());
     eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createFIdUse(), (String)null, order());
 
-    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp((FQName) getFQName().treeCopy());
+    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(getFQName().treeCopy());
     syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
     syn FExp UnknownFVariable.createUseExp()       = null;
 
@@ -989,7 +989,7 @@ aspect FlatNames {
         if (isArray()) {
             return getFQName().copyAndAddFas(size().createExpandedFArraySubscripts());
         } else {
-            return (FQName) getFQName().treeCopy();
+            return getFQName().treeCopy();
         }
     }
 
