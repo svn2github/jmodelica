@@ -1449,7 +1449,7 @@ aspect OverconstrainedConnections {
 			func.flattenFunction(f);
 			Size s = func.myOutputs().get(0).size();
 			FFunctionCall right = new FFunctionCall();
-			right.setName(new FQNameString(func.qualifiedName()).createFIdUse());
+			right.setName(new FQNameString(func.qualifiedName()));
             right.addArg(cse1.createFIdUseExp());
             right.addArg(cse2.createFIdUseExp());
             right.setFType(func.functionType().flatten(Flattener.expressionFlattener(), null, true));

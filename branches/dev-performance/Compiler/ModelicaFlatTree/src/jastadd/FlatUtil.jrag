@@ -75,10 +75,8 @@ aspect FlatNames {
     eq FQNameFull.hasFArraySubscripts()               = lastFQNamePart().hasFArraySubscripts();
     eq FQNameFull.getFArraySubscripts()               = lastFQNamePart().getFArraySubscripts();
 
-    syn boolean FIdUse.hasFArraySubscripts() = 
-        asFQName().hasFArraySubscripts();
-    syn FArraySubscripts FIdUse.getFArraySubscripts() = 
-        asFQName().getFArraySubscripts();
+    syn boolean FIdUse.hasFArraySubscripts();
+    syn FArraySubscripts FIdUse.getFArraySubscripts();
 
     syn boolean FIdUseExp.hasFArraySubscripts() = 
         getFIdUse().hasFArraySubscripts();
@@ -1011,20 +1009,6 @@ aspect FlatNames {
         return new FPreExp(createFIdUse());
     }
 
-    /**
-     * Create an FIdUseExp for this name, using a copy if needed.
-     */
-    public FIdUseExp FQName.createFIdUseExp() {
-        return new FIdUseExp(createFIdUse()); 
-    }
-
-    /**
-     * Create an FIdUse for this name, using a copy if needed.
-     */
-    public FIdUse FQName.createFIdUse() { // REMOVE?
-        return (FQName) unboundCopy(); 
-    }
-    
     /**
      * Create an FRecordAccess with the same name.
      */

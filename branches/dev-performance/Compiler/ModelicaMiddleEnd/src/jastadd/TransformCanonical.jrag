@@ -906,7 +906,7 @@ aspect TransformCanonical {
 			for (int i = 0; i < outVars.size(); i++)
 				sizes[i] = outVars.get(i).size();
             FType type = FFunctionType.create(funcName.name(), outVars, this);
-            FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, type);
+            FFunctionCall call = new FFunctionCall(funcName, args, type);
 			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 			for (FVariable fv : outVars)
 				lefts.add(fv.getFQName().createFFunctionCallLeft());

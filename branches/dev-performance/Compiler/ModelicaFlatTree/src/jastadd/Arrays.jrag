@@ -282,7 +282,10 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FIdUse.ndims() {
+	syn int FIdUse.ndims();
+    eq FIdUseExp.ndims() = getFIdUse().ndims();
+    
+	eq FQName.ndims() {
 		// Notice here the use of accessNdims. Also, if the access has
 		// no subscripts, it may still have dimension > 0 if its declaration
 		// is an array declaration. 
@@ -296,16 +299,7 @@ aspect Arrays {
 				n += fas.accessNdims();
 		return n;
 	}
-	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
-	/**
-	 * Get array dimensions.
-	 * 
-	 * A value > 0 indicates an array, 0 indicates a scalar and -1 indicates
-	 * an error in computation of the array dimensions.
-	 * 
-	 * @return Array dimension.
-	 */	
 	eq InstAccess.ndims()  = 0;
 	eq InstScalarAccess.ndims() = myInstComponentDecl().ndims();
 	eq InstArrayAccess.ndims()  = getFArraySubscripts().accessNdims();
