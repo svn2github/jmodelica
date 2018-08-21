@@ -282,19 +282,19 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FIdUse.ndims();
-    eq FIdUseExp.ndims() = getFIdUse().ndims();
+	syn int CommonAccess.ndims();
+    eq FIdUseExp.ndims() = getCommonAccess().ndims();
     
-	eq FQName.ndims() {
+	eq FAccess.ndims() {
 		// Notice here the use of accessNdims. Also, if the access has
 		// no subscripts, it may still have dimension > 0 if its declaration
 		// is an array declaration. 
-		// If the FQName is marked as scalarized, then dimension must 
+		// If the FAccess is marked as scalarized, then dimension must 
 		// be 0 and using myFV() might cause a NullPointerException.
 		// This is because if scalarization is in progress, 
 		// then this node will be hanging without a proper AST.
 		int n = 0;
-		if (!asFQName().isScalarized())
+		if (!asFAccess().isScalarized())
 			for (FArraySubscripts fas : allFArraySubscripts())
 				n += fas.accessNdims();
 		return n;
@@ -372,8 +372,8 @@ aspect Arrays {
 	/**
 	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
-	syn java.util.List<FArraySubscripts> FIdUse.allFArraySubscripts();
-	syn lazy java.util.List<FArraySubscripts> FQName.allFArraySubscripts() {
+	syn java.util.List<FArraySubscripts> CommonAccess.allFArraySubscripts();
+	syn lazy java.util.List<FArraySubscripts> FAccess.allFArraySubscripts() {
 		ArrayList<FArraySubscripts> res = createFArraySubscriptsList();
         if (!hasFArraySubscripts() && myFV().isArray()) {
             res.add(getExpandedSubscripts());
@@ -384,13 +384,13 @@ aspect Arrays {
 	/**
 	 * Create a list with an FArraySubscripts for each part of this access, empty for parts that has none.
 	 */
-    public ArrayList<FArraySubscripts> FQName.createFArraySubscriptsList() {
+    public ArrayList<FArraySubscripts> FAccess.createFArraySubscriptsList() {
         return new ArrayList<FArraySubscripts>();
     }
 
-    public ArrayList<FArraySubscripts> FQNameFull.createFArraySubscriptsList() {
+    public ArrayList<FArraySubscripts> FAccessFull.createFArraySubscriptsList() {
         ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>();
-        for (FQNamePart fqnp : getFQNameParts()) {
+        for (FAccessPart fqnp : getFAccessParts()) {
             if (fqnp.hasFArraySubscripts()) {
                 res.add(fqnp.getFArraySubscripts());
             }
@@ -411,7 +411,7 @@ aspect Arrays {
 	 * 
 	 * @return  an FArraySubscripts that spans the entire FV this access points to.
 	 */
-    syn lazy FArraySubscripts FQName.getExpandedSubscripts() {
+    syn lazy FArraySubscripts FAccess.getExpandedSubscripts() {
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
             s = calcMySize(numParts());
@@ -463,7 +463,7 @@ aspect Arrays {
 
 	syn int FAbstractVariable.ndims() = -1;
 	
-	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().declarationNDims();
+	eq FVariable.ndims()         = isScalarized()? 0 : getFAccess().declarationNDims();
 	eq FFunctionArray.ndims()    = getType().ndims();
 	eq FFunctionVariable.ndims() = 0;
 
@@ -477,11 +477,11 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int FQName.declarationNDims() = 0;
-	eq FQNameFull.declarationNDims() {
-		// Only look at the array subscripts for the last FQNamePart,
+	syn int FAccess.declarationNDims() = 0;
+	eq FAccessFull.declarationNDims() {
+		// Only look at the array subscripts for the last FAccessPart,
 		// all other array subscripts has been expanded in the instantiation.
-		FQNamePart last = getFQNamePart(getNumFQNamePart() - 1);
+		FAccessPart last = getFAccessPart(getNumFAccessPart() - 1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().ndims(); 
 		} else {
@@ -500,17 +500,17 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */		
-	syn int FQName.accessNdims() = 0;
-	eq FQNameFull.accessNdims() {
+	syn int FAccess.accessNdims() = 0;
+	eq FAccessFull.accessNdims() {
         int res = 0;
-        for (FQNamePart fqnp : getFQNameParts()) {
+        for (FAccessPart fqnp : getFAccessParts()) {
             res = res + fqnp.accessNdims();
         }
         return res;
     }
     
-    syn int FQNamePart.accessNdims() = 0;
-    eq FQNamePartArray.accessNdims() = getFArraySubscripts().accessNdims();
+    syn int FAccessPart.accessNdims() = 0;
+    eq FAccessPartArray.accessNdims() = getFArraySubscripts().accessNdims();
 
 	
 	// Array sizes
@@ -614,7 +614,7 @@ aspect Arrays {
 	 * The variable declaration that this subscript is a part of the size of, if any.
 	 */
 	inh CommonVariableDecl FColonSubscript.surroundingVariableDecl();
-	eq FVariable.getFQName().surroundingVariableDecl()                   = this;
+	eq FVariable.getFAccess().surroundingVariableDecl()                   = this;
 	eq InstComponentDecl.getFArraySubscripts().surroundingVariableDecl() = this;
 	eq FExp.getChild().surroundingVariableDecl()                         = null;
 	eq Root.getChild().surroundingVariableDecl()                         = null;
@@ -1000,8 +1000,8 @@ aspect Arrays {
 	/**
 	 * Get the array sizes.
 	 */
-	syn Size FIdUse.size();
-	eq FQName.size() {
+	syn Size CommonAccess.size();
+	eq FAccess.size() {
 		if (ndims() == 0)
 			return Size.SCALAR;
 		
@@ -1012,7 +1012,7 @@ aspect Arrays {
 					s.append(fs.size());
 		return s;
 	}
-	eq FIdUseExp.size() = getFIdUse().size();
+	eq FIdUseExp.size() = getCommonAccess().size();
 	
     /**
      * Get the array sizes. 
@@ -1075,7 +1075,7 @@ aspect Arrays {
 	 * Get the array sizes. 
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
-	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().declarationSize();
+	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFAccess().declarationSize();
 	eq FFunctionArray.size() = type().size();
 
     /**
@@ -1087,9 +1087,9 @@ aspect Arrays {
 	/**
 	 * Get the array sizes. 
 	 */
-	syn Size FQName.declarationSize() = Size.SCALAR;
-	syn lazy Size FQNameFull.declarationSize() {
-		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+	syn Size FAccess.declarationSize() = Size.SCALAR;
+	syn lazy Size FAccessFull.declarationSize() {
+		FAccessPart last = getFAccessPart(getNumFAccessPart()-1);
 		if (last.hasFArraySubscripts()) {
 			return last.getFArraySubscripts().declarationSize(); 
 		} else {
@@ -1107,7 +1107,7 @@ aspect Arrays {
     /**
      * Check if an expression is an array expression.
      */
-    syn boolean FIdUse.isArray() = ndims() > 0;
+    syn boolean CommonAccess.isArray() = ndims() > 0;
 
 	/**
 	 * check if an access is an array expression.
@@ -1218,7 +1218,7 @@ aspect Arrays {
 	/**
 	 * Find the closest ancestor that is an FExpSubscript, if any.
 	 */
-	inh FExpSubscript FIdUse.surroundingFExpSubscript();
+	inh FExpSubscript CommonAccess.surroundingFExpSubscript();
 	inh FExpSubscript FExpSubscript.surroundingFExpSubscript();
 	eq FExpSubscript.getChild().surroundingFExpSubscript() = this;
 	eq Root.getChild().surroundingFExpSubscript()          = null;
@@ -1226,7 +1226,7 @@ aspect Arrays {
 	/**
 	 * Find the all ancestors that are FExpSubscripts, if any.
 	 */
-	syn ArrayList<FExpSubscript> FIdUse.allSurroundingFExpSubscripts() {
+	syn ArrayList<FExpSubscript> CommonAccess.allSurroundingFExpSubscripts() {
 		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
 		FExpSubscript cur = surroundingFExpSubscript();
 		while (cur != null) {
@@ -1857,56 +1857,56 @@ aspect Arrays {
 		 */
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) 
-			array.set(i, createNode(getFIdUse().specify(i, false)));
+			array.set(i, createNode(getCommonAccess().specify(i, false)));
 		return array;
 	}
 	
 	/**
-	 * Returns a scalar FIdUse, as specified by an index.
+	 * Returns a scalar CommonAccess, as specified by an index.
 	 * 
 	 * The use is marked scalarized if this use is.
 	 * 
 	 * @param i  the Index specifying what array subscripts to use
 	 */
-	public abstract FIdUse FIdUse.specify(Index i);
+	public abstract CommonAccess CommonAccess.specify(Index i);
 	
 	/**
-	 * Returns a scalar FIdUse, as specified by an index.
+	 * Returns a scalar CommonAccess, as specified by an index.
 	 * 
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  <code>true</code> if the use should be marked as scalarized 
 	 */
-	public abstract FIdUse FIdUse.specify(Index i, boolean scalarize);
+	public abstract CommonAccess CommonAccess.specify(Index i, boolean scalarize);
 	
 	/**
-	 * Creates a new FQName with the FArraySubscripts taken from the given Index.
+	 * Creates a new FAccess with the FArraySubscripts taken from the given Index.
 	 * 
-	 * The FQName is marked scalarized if this use is.
+	 * The FAccess is marked scalarized if this use is.
 	 * 
 	 * @param i  the Index specifying what array subscripts to use
 	 */
-	public FQName FQName.specify(Index i) {
+	public FAccess FAccess.specify(Index i) {
 		return specify(i, isScalarized());
 	}
 	
 	/**
-	 * Creates a new FQName with the FArraySubscripts taken from the given Index.
+	 * Creates a new FAccess with the FArraySubscripts taken from the given Index.
 	 * 
 	 * @param i          the Index specifying what array subscripts to use
-	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
+	 * @param scalarize  <code>true</code> if the FAccess should be marked as scalarized 
 	 */
-	public FQName FQName.specify(Index i, boolean scalarize) {
-		FQName fqn = copyAndAddFas(i.createFArraySubscripts());
+	public FAccess FAccess.specify(Index i, boolean scalarize) {
+		FAccess fqn = copyAndAddFas(i.createFArraySubscripts());
 		fqn.scalarized = scalarize;
 		return fqn;
 	}
 	
-	public FQName FQNameFull.specify(Index i, boolean scalarize) {
-		FQNameFull res = new FQNameFull();
+	public FAccess FAccessFull.specify(Index i, boolean scalarize) {
+		FAccessFull res = new FAccessFull();
 		int[] dim = new int[1];
-		int np = getNumFQNamePart();
+		int np = getNumFAccessPart();
 		for (int j = 0; j < np; j++) {
-			FQNamePart part = getFQNamePart(j);
+			FAccessPart part = getFAccessPart(j);
 			int n = part.numFSubscripts();
 			if (n == 0 && j == np - 1)
 				n = i.ndims() - dim[0];
@@ -1925,10 +1925,10 @@ aspect Arrays {
                 while (j == np - 1 && dim[0] < i.ndims())
                     newfas.addFSubscript(i.get(dim[0]++));
 			}
-			FQNamePart newpart = (newfas == null) ? 
-					new FQNamePart(part.getName()) : 
-					new FQNamePartArray(part.getName(), newfas);
-			res.addFQNamePart(newpart);
+			FAccessPart newpart = (newfas == null) ? 
+					new FAccessPart(part.getName()) : 
+					new FAccessPartArray(part.getName(), newfas);
+			res.addFAccessPart(newpart);
 		}
 		res.scalarized = scalarize;
 		return res;
@@ -1964,9 +1964,9 @@ aspect Arrays {
 	}
 	
 	/**
-	 * Gets the number of FSubscripts in the FArraySubscripts of this FQNamePart, if any.
+	 * Gets the number of FSubscripts in the FArraySubscripts of this FAccessPart, if any.
 	 */
-	syn int FQNamePart.numFSubscripts() = 
+	syn int FAccessPart.numFSubscripts() = 
 		hasFArraySubscripts() ? getFArraySubscripts().getNumFSubscript() : 0;
 	
 	/**
@@ -2102,7 +2102,7 @@ aspect Arrays {
 	 */
 	syn Indices FExp.indices()                   = Indices.create(size());
 	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
-	eq FIdUseExp.indices()                       = getFIdUse().indices();
+	eq FIdUseExp.indices()                       = getCommonAccess().indices();
 	eq FDimensionConvert.indices() {
 		int n = getFExp().ndims();
 		if (n == 0) {
@@ -2149,7 +2149,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices FIdUse.indices() = Indices.createFromFas(allFArraySubscripts());
+	syn Indices CommonAccess.indices() = Indices.createFromFas(allFArraySubscripts());
 
 	/**
 	 * Get the set of all array indices of an instance array access. 
@@ -2863,9 +2863,9 @@ aspect ArrayHelpers {
 		
 		public FFunctionVariable createFunctionVariable(String name, FType type, TypePrefixInputOutput inputOutput) {
 		    if (this == Size.SCALAR)
-		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FQNameString(name));
+		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FAccessString(name));
 		    else
-		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FQNameString(name));
+		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FAccessString(name));
 		}
 		
 	}

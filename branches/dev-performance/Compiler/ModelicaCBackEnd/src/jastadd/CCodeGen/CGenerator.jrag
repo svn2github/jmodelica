@@ -966,7 +966,7 @@ public class CGenerator extends GenericGenerator {
                 out.format("char* %s_names[] = { ", name);
                 String fmt = "\"%s\"";
                 for (FFunctionDecl f : grp) {
-                    out.format(fmt, f.getFQName().nameUnderscore());
+                    out.format(fmt, f.getFAccess().nameUnderscore());
                     fmt = ", \"%s\"";
                 }
                 out.print(" };\n");
@@ -974,7 +974,7 @@ public class CGenerator extends GenericGenerator {
                 out.format("int %s_lengths[] = { ", name);
                 fmt = "%d";
                 for (FFunctionDecl f : grp) {
-                    out.format(fmt, f.getFQName().nameUnderscore().length());
+                    out.format(fmt, f.getFAccess().nameUnderscore().length());
                     fmt = ", %d";
                 }
                 out.print(" };\n");

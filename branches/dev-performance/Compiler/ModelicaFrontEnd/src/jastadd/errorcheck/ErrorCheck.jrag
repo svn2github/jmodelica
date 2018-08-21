@@ -593,7 +593,7 @@ aspect ErrorCheck {
 
     syn String ASTNode.errorComponentName() {
         InstComponentDecl parent = errorEnclosingComponent();
-        return parent == null ? null : parent.getFQName().scalarName(false);
+        return parent == null ? null : parent.getFAccess().scalarName(false);
     }
 
 }

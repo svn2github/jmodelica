@@ -343,7 +343,7 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FIdUseExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%1$si = 0; %1$si < jmi_array_size(%2$s, 0); %1$si++", 
-                name, getFIdUse().toString_C(p));
+                name, getCommonAccess().toString_C(p));
     }
 
     @Override
@@ -373,7 +373,7 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FIdUseExp.printForIndexNext_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%1$s%2$s = jmi_array_val_1(%3$s, %2$si);\n", 
-                indent, name, getFIdUse().toString_C(p));
+                indent, name, getCommonAccess().toString_C(p));
     }
 
 
@@ -388,7 +388,7 @@ aspect CCodeGenAlgorithms {
 	syn String FType.enumNames_C() = null;
 	eq FEnumType.enumNames_C()     = myFEnumDecl().name_C();
 
-    syn String FEnumDecl.name_C() = getName().getFQName().lastActualPartName() + "_" + enumIndex() + "_" + C_SUFFIX_ENUM;
+    syn String FEnumDecl.name_C() = getName().getFAccess().lastActualPartName() + "_" + enumIndex() + "_" + C_SUFFIX_ENUM;
 
 
     @Override
@@ -402,7 +402,7 @@ aspect CCodeGenAlgorithms {
         if(hasReturnVar()) {
             String name = getReturnVar().type().isRecord() ?
                     "*"+getReturnVar().tempName_C() :
-                    getReturnVar().getFIdUse().name_C();
+                    getReturnVar().getCommonAccess().name_C();
             str.print(getCodeGenContext().alias(name));
             str.print(" = ");
         }

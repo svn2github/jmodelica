@@ -558,12 +558,12 @@ aspect ContentCheck {
      * If this is an instance tree access, return set containing accessed var, otherwise empty set.
      */
     syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
-    eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
+    eq FIdUseExp.accessedVarSet()                    = getCommonAccess().accessedVarSet();
 
     /**
      * If this is an instance tree access, return set containing accessed var, otherwise empty set.
      */
-    syn Set<InstComponentDecl> FIdUse.accessedVarSet() = Collections.emptySet();
+    syn Set<InstComponentDecl> CommonAccess.accessedVarSet() = Collections.emptySet();
     eq InstAccess.accessedVarSet() = Collections.singleton(myInstComponentDecl());
 
 

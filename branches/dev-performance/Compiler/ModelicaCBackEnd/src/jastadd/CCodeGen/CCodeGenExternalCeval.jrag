@@ -460,7 +460,7 @@ aspect CCodeGenExternalCeval {
 
     public String InstComponentDecl.name_C() {
         StringBuilder buf = new StringBuilder();
-        buf.append(getFQName().nameUnderscore());
+        buf.append(getFAccess().nameUnderscore());
         buf.append('_');
         buf.append(type().isArray() ? C_SUFFIX_ARRAY : C_SUFFIX_VARIABLE);
         return buf.toString();

@@ -55,7 +55,7 @@ aspect InstTypeAnalysis {
         else if (isString()) 
             return fStringScalarType();
         else if (isExternalObject())
-            return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FQNameString("ExternalObject.constructor"), new FQNameString("ExternalObject.destructor"));
+            return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FAccessString("ExternalObject.constructor"), new FAccessString("ExternalObject.destructor"));
         return fUnknownType();
     }
 

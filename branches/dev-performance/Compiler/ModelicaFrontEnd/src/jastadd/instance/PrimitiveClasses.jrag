@@ -117,8 +117,8 @@ aspect UnknownDeclarations {
 	syn boolean InstComponentDecl.isRecord() = false;
 	eq InstRecord.isRecord() = true;
 
-    syn boolean FIdUse.isUnknown();
-    eq FQName.isUnknown()                   = myFV().isUnknown();
+    syn boolean CommonAccess.isUnknown();
+    eq FAccess.isUnknown()                   = myFV().isUnknown();
     eq InstAccess.isUnknown()               = true;
     eq InstDot.isUnknown()                  = getLastInstAccess().isUnknown();
     eq InstComponentAccess.isUnknown()      = myInstComponentDecl().isUnknown();

@@ -101,8 +101,8 @@ aspect OptimicaFlattening {
             c.flatten(f);
     }
 
-	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-		prefix = getFQName();
+	refine Connections public void InstNode.buildConnectionSets(FAccess prefix, ConnectionSetManager csm, boolean connect) {
+		prefix = getFAccess();
 		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.buildConnectionSets(prefix, csm, connect);
         for (FConstraint c : getFConstraints()) 
