@@ -1861,15 +1861,6 @@ aspect Arrays {
 		return array;
 	}
 	
-	public void FExp.setScalarizedFlag() {
-		for (FExp child : childFExps())
-			child.setScalarizedFlag();
-	}
-	
-	public void FIdUseExp.setScalarizedFlag() {
-		getFIdUse().asFQName().scalarized = true;
-	}
-	
 	/**
 	 * Returns a scalar FIdUse, as specified by an index.
 	 * 
