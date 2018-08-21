@@ -492,7 +492,7 @@ aspect CCodeGen {
 
     syn FFunctionCallStmt FExternalObjectVariable.getDestructorCall() {
         String strName = type().name() + ".destructor";
-        FIdUse name = new FQNameString(strName);
+        FQName name = new FQNameString(strName);
         List<FExp> args = new List<FExp>();
         args.add(createUseExp());
         FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));

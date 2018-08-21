@@ -607,7 +607,7 @@ aspect Derivatives {
         // and the name is not 'time', then the derivative is zero.
         if (!name.equals(TIME)) {
             boolean isIndependent = true;
-            FAbstractVariable fv = getName().asFQName().lookupFV(name);
+            FAbstractVariable fv = getName().lookupFV(name);
             if (fv != null) {
                 HashSet<FVariable> s = new HashSet<FVariable>();
                 s.add((FVariable) fv);

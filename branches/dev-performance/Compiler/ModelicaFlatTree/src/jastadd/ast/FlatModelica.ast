@@ -1154,7 +1154,7 @@ abstract CommonFunctionCall : FAbstractFunctionCall;
 /**
  * Generic function call expression in flat tree.
  */
-FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* FType;
+FFunctionCall : CommonFunctionCall ::= Name:FQName Arg:FExp* FType;
  
 /**
  * Partial function call expression in flat tree.

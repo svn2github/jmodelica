@@ -222,7 +222,7 @@ aspect XMLCodeGen {
 	public void FFunctionCall.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		open_XML(str, indent);
-		enclose_XML(p, str, indent2, "Name", getName().asFQName());
+		enclose_XML(p, str, indent2, "Name", getName());
 		enclose_XML(p, str, indent2, "Arguments", getArgs());
 		close_XML(str, indent);
 	}

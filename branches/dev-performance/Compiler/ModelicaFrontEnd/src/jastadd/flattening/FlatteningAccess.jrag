@@ -51,11 +51,13 @@ aspect FlatteningAccess {
         return false;
     }
 
-    public FIdUse FIdUse.flatten(Flattener f) {
+    public abstract FQName FIdUse.flatten(Flattener f);
+
+    public FQName FQName.flatten(Flattener f) {
         return treeCopy();
     }
 
-    public FIdUse InstAccess.flatten(Flattener f) {
+    public FQName InstAccess.flatten(Flattener f) {
         return flatten();
     }
 

@@ -2798,7 +2798,7 @@ aspect FlatExpressions {
         for (InstFunctionArgument e : getArgs()) 
             args.add(e.flatten(f));
         InstCallable target = myInstCallable().actualInstCallable();
-        FIdUse name = new FQNameString(target.qualifiedName());
+        FQName name = new FQNameString(target.qualifiedName());
         return createFFunctionCall(name, args, getFType().flatten(f, null, true));
     }
 
@@ -2806,18 +2806,18 @@ aspect FlatExpressions {
             new SimpleErrorProducer("CANNOT_EVALUATE_LOADRESOURCE", ProblemKind.SEMANTIC,
                     "Could not evaluate function call which depends on loadResource during flattening: %s%s");
 
-    public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
+    public FFunctionCall InstFunctionCall.createFFunctionCall(FQName name, List args, FType type) {
         return setLocationOf(new FFunctionCall(name, args, type));
     }
     
-    public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
+    public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FQName name, List args, FType type) {
         List<FIdUse> argNames = new List<FIdUse>();
         for (String s : namedArgs())
             argNames.add(new FQNameString(s));
         return new FPartialFunctionCall(name, args, type, argNames);
     }
 
-    public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
+    public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FQName name, List args, FType type) {
         boolean[] vectorFlags = new boolean[getNumArg()];
         int i = 0;
         for (InstFunctionArgument e : getArgs())
@@ -2834,7 +2834,7 @@ aspect FlatExpressions {
 
     public FFunctionCall InstClassDecl.flattenOverloadedFunctionCall(Flattener f, FExp[] args, FType[] argTypes) {
         // TODO: handle array operations (scalar * matrix, etc)
-        FIdUse name = new FQNameString(qualifiedName());
+        FQName name = new FQNameString(qualifiedName());
         int nIn = myInputs().size();
         if (nIn > args.length)
             args = Arrays.copyOf(args, nIn);
