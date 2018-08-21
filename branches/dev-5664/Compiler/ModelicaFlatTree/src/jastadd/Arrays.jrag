@@ -2045,11 +2045,14 @@ aspect Arrays {
 			return fullCopy();
 		}
 	}
-	
-	syn InstArrayAccess InstScalarAccess.getArrayCopy(FArraySubscripts fas);
-	eq InstParseAccess.getArrayCopy(FArraySubscripts fas) = new InstParseArrayAccess(getID(), fas);
-	eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = new InstAmbiguousArrayAccess(getID(), fas);
-	eq InstComponentAccess.getArrayCopy(FArraySubscripts fas) = new InstComponentArrayAccess(getID(), fas);
+
+    syn InstArrayAccess InstScalarAccess.getArrayCopy(FArraySubscripts fas);
+    eq InstParseAccess    .getArrayCopy(FArraySubscripts fas) = 
+        new InstParseArrayAccess(getID(), getSrcNamedAccess(), fas);
+    eq InstAmbiguousAccess.getArrayCopy(FArraySubscripts fas) = 
+        new InstAmbiguousArrayAccess(getID(), getSrcNamedAccess(), fas);
+    eq InstComponentAccess.getArrayCopy(FArraySubscripts fas) = 
+        new InstComponentArrayAccess(getID(), getSrcNamedAccess(), fas);
 
 	protected InstNamedAccess InstArrayAccess.specifyEach(Index i, int[] dim) {
 		InstArrayAccess res = fullCopy();

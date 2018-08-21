@@ -288,9 +288,10 @@ aspect InstModifications{
         }
         InstAccess name;
         if (hasVarArraySubscripts()) {
-            name = new InstParseArrayAccess(getName().getID(), getVarArraySubscripts().instantiate());
+            name = new InstParseArrayAccess(getName().getID(), null, 
+                    getVarArraySubscripts().instantiate());
         } else {
-            name = new InstParseAccess(getName().getID());
+            name = new InstParseAccess(getName().getID(), null);
         }
         name.setLocation(getName());
         InstComponentRedeclare icr = new InstComponentRedeclare(this, false, false, name);
@@ -948,7 +949,7 @@ aspect InstanceTreeConstruction {
     }
 
     public InstComponentDecl InstComponentDecl.createInstArrayComponentDecl(int i) {
-        return new InstArrayComponentDecl(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayComponentDecl(name(), new InstClassAccess("ArrayDecl", null), new Opt(), 
                 getSrcComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
 
@@ -1561,13 +1562,13 @@ aspect InstanceTreeConstruction {
     public abstract InstAccess SrcAccess.newInstAccess();
 
     public InstAccess SrcArrayAccess.newInstAccess() {
-        InstAccess ia = new InstParseArrayAccess(getID(), getSrcArraySubscripts().instantiate());
+        InstAccess ia = new InstParseArrayAccess(getID(), this, getSrcArraySubscripts().instantiate());
         ia.setLocation(this);
         return ia;
     }
 
     public InstAccess SrcNamedAccess.newInstAccess() {
-        InstAccess ia = new InstParseAccess(getID());
+        InstAccess ia = new InstParseAccess(getID(), this);
         ia.setLocation(this);
         return ia;
     }
@@ -1783,15 +1784,15 @@ aspect ExpandableConnectorMembers {
         (expandedMembers != null) ? new List<InstExtends>() : super.getInstExtendsList();
     
     public InstComponentDecl InstExpandableConnectorDecl.createInstArrayComponentDecl(int i) {
-        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl", null), new Opt(), 
                 getSrcComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
     public InstComponentDecl InstReplacingExpandableConnectorDecl.createInstArrayComponentDecl(int i) {
-        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl", null), new Opt(), 
                 getSrcComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
     public InstComponentDecl InstArrayExpandableConnector.createInstArrayComponentDecl(int i) {
-        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl"), new Opt(), 
+        return new InstArrayExpandableConnector(name(), new InstClassAccess("ArrayDecl", null), new Opt(), 
                 getSrcComponentDecl(), new Opt(), new Opt(), new Opt(), i);
     }
 

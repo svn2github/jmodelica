@@ -86,7 +86,7 @@ aspect UnknownDeclarations {
     syn lazy UnknownInstComponentDecl InstProgramRoot.getUnknownInstComponentDecl() = 
         new UnknownInstComponentDecl(
             "unknown", 
-            new InstParseAccess("Unknown"), 
+            new InstParseAccess("Unknown", null), 
             new Opt(), 
             unknownComponentDecl(), 
             new Opt(), 

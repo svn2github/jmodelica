@@ -153,12 +153,15 @@ aspect AccessSizes {
     public FExp FIdUseInstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         return new FIdUseExp(new FIdUseInstAccess(getInstAccess().buildAccessContextSizeExp(crp)));
     }
-    
+
+    syn SrcNamedAccess InstAccess.getSrcNamedAccess() = null;
+
     public InstAccess InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         List<InstAccess> res = crp.buildContext();
         for (InstAccess part : allParts()) {
             if (hasFArraySubscripts()) {
-                part = new InstAmbiguousArrayAccess(part.name(), part.getFArraySubscripts().copyReplaceAccess(crp));
+                part = new InstAmbiguousArrayAccess(part.name(), part.getSrcNamedAccess(), 
+                        part.getFArraySubscripts().copyReplaceAccess(crp));
             } else {
                 part = part.treeCopy();
             }
@@ -170,7 +173,7 @@ aspect AccessSizes {
     inh FIdUseExp FSubscript.buildAccessContextSizeExp();
     eq Root.getChild().buildAccessContextSizeExp()   = null;
     eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
+            new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(null))));
     eq FQNamePart.getChild().buildAccessContextSizeExp() =
             new FIdUseExp(new FIdUse(new FQNameFull(buildAccessContext(name(), null))));
     eq FIdUse.getChild().buildAccessContextSizeExp() =
@@ -187,12 +190,12 @@ aspect AccessSizes {
         return last.buildAccessContext(last.name(), null);
     }
     
-    public List<InstAccess> InstAccess.buildAccessContext(String name, FArraySubscripts fas) {
+    public List<InstAccess> InstNamedAccess.buildAccessContext(FArraySubscripts fas) {
         List<InstAccess> res = accessContextInst();
         if (fas == null) {
-            res.add(new InstAmbiguousAccess(name));
+            res.add(new InstAmbiguousAccess(name(), getSrcNamedAccess()));
         } else {
-            res.add(new InstAmbiguousArrayAccess(name, fas));
+            res.add(new InstAmbiguousArrayAccess(name(), getSrcNamedAccess(), fas));
         }
         return res;
     }
@@ -219,7 +222,10 @@ aspect AccessSizes {
     eq FQNameFull.getFQNamePart(int i).accessContextFlat() = 
             i == 0 ? new List<FQNamePart>() : getFQNamePart(i-1).buildAccessContext();
     
-    syn List<InstAccess> InstAccess.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
+    syn List<InstAccess> InstAccess.buildAccessContext() {
+        throw new UnsupportedOperationException();
+    }
+    eq InstNamedAccess.buildAccessContext()              = buildAccessContext(accessContextFAS());
     syn List<FQNamePart> FQNamePart.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
     
     syn FArraySubscripts InstAccess.accessContextFAS() {

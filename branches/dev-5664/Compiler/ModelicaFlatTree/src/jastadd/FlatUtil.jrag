@@ -1004,7 +1004,7 @@ aspect FlatNames {
         return new FIdUseExp(new FIdUseInstAccess(createInstAccess()));
     }
     
-    syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
+    syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name(), null);
 
     /**
      * Create a pre() expression for this variable.

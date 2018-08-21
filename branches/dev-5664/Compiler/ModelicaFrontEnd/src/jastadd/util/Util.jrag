@@ -1029,13 +1029,13 @@ aspect Names {
      * Create an InstAccess suitable for appending to this access.
      */
     public InstAccess InstAccess.createPartToAppend(String id) {
-    	return new InstParseAccess(id);
+    	return new InstParseAccess(id, null);
     }
     
     public InstAccess InstComponentAccess.createPartToAppend(String id) {
-    	return new InstComponentAccess(id);
+    	return new InstComponentAccess(id, null);
     }
-    
+
 }
 
 aspect Slices {
@@ -1138,10 +1138,12 @@ aspect Visibility {
 
     inh boolean SrcClassDecl.isPublic();
     inh boolean SrcComponentDecl.isPublic();
-    eq SrcPublicElementList.getSrcElement().isPublic()    = true;
-    eq SrcProtectedElementList.getSrcElement().isPublic() = false;
-    eq SourceRoot.getProgram().isPublic()           = true; 
-    eq Root.getChild().isPublic()                   = true; 
+    eq SrcElementList.getSrcElement().isPublic() = isPublic();
+    eq SourceRoot    .getProgram()   .isPublic() = true; 
+    eq Root          .getChild()     .isPublic() = true; 
+
+    syn boolean SrcElementList.isPublic() = true;
+    eq SrcProtectedElementList.isPublic() = false;
 
     syn boolean InstClassDecl.isPublic()     = getSrcClassDecl().isPublic();
     syn boolean InstComponentDecl.isPublic() = getSrcComponentDecl().isPublic();

@@ -500,7 +500,7 @@ aspect InstFunctionBinding {
     public InstAccess InstClassDecl.retargetFrom(InstClassDecl orig, InstAccess access) {
         if (this == orig)
             return access;
-        InstAccess part = new InstClassAccess(name());
+        InstAccess part = new InstClassAccess(name(), null);
         InstClassDecl parent = surroundingInstClass();
         if (parent == null)
             return part;

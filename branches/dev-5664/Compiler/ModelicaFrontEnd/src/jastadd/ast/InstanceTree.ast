@@ -150,7 +150,7 @@ InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExte
 
 // Accesses in the instance tree
 abstract InstAccess : CommonAccess;
-abstract InstNamedAccess : InstAccess ::= <ID>;
+abstract InstNamedAccess : InstAccess ::= <ID> <SrcNamedAccess:SrcNamedAccess>;
 InstDot : InstAccess ::= InstAccess*;
 
 InstClassAccess           : InstNamedAccess;
