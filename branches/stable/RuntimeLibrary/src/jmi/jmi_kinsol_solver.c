@@ -1078,7 +1078,7 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
 /* Helper to convert log_level used in the logger to print level in KINSOL */
 static int get_print_level(jmi_block_solver_t* bs) {
     int log_level = bs->callbacks->log_options.log_level;
-    if (log_level <= 2) return 0;
+    if (log_level <= 3) return 0;
     else if (log_level <= 4) return log_level-2;
     else return 3;
 }

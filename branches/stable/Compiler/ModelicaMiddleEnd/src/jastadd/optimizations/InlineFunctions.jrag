@@ -156,7 +156,7 @@ aspect FunctionInlining {
         private FlatVariableMap lookupMap;
         private Map<String,FType> typeMap;
         private Queue<FAbstractEquation> outerMostWorklist = null;
-        public TypePrefixVariability contextVariability = Variability.continuous();
+        public TypePrefixVariability contextVariability = Variability.CONTINUOUS;
         
         /**
          * Inline all function calls that we can from a specific list of equations.
@@ -309,7 +309,7 @@ aspect FunctionInlining {
          */
         public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
             int nLefts = lefts.getNumChild();
-            TypePrefixVariability variability = (nLefts == 0) ? Variability.continuous() : contextVariability(call);
+            TypePrefixVariability variability = (nLefts == 0) ? Variability.CONTINUOUS : contextVariability(call);
             FExp[] exps = null;
             if (variability.constantVariability()) {
                 try {
@@ -444,13 +444,13 @@ aspect FunctionInlining {
          * Inline all function calls that we can.
          */
         public void inline() {
-            setContextVariability(Variability.initialParameter());
+            setContextVariability(Variability.INITIALPARAMETER);
             inlineFCList(fc.getFInitialEquations(), initialEqns);
             
-            setContextVariability(Variability.continuous());
+            setContextVariability(Variability.CONTINUOUS);
             inlineFCList(fc.getFAbstractEquations(), normalEqns);
             
-            setContextVariability(Variability.fixedParameter());
+            setContextVariability(Variability.FIXEDPARAMETER);
             inlineFCList(fc.getParameterEquations(), paramEqns);
             
             fc.setFInitialEquationList(initialEqns);

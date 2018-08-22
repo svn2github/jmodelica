@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5665
+Updated the loglevel conversion between runtime and Kinsol which in some
+models has significant impact on the performance.
+
 ; Change ; Minor ; Compiler ; #5659
 loadResource on directories now always leads to compile time evaluation of path.
 
