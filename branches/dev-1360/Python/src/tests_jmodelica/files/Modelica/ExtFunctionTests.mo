@@ -212,6 +212,32 @@ equation
     z = get_y(myEOs);  
 end ExternalObjectTests2;
 
+class ConstructorSingleCall
+    extends ExternalObject;
+    
+    function constructor
+        input String name;
+        output ConstructorSingleCall out;
+        external "C" out = constructor_error_multiple_calls(name) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end constructor;
+    
+    function destructor
+        input ConstructorSingleCall obj;
+        external "C" destructor(obj) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end destructor; 
+end ConstructorSingleCall;
+
+model ConstructorSingleCallTest
+    ConstructorSingleCall obj = ConstructorSingleCall("test_ext_object.marker");
+end ConstructorSingleCallTest;
+
+model ConstructorSingleCallDepTest
+    parameter String s = "test_ext_object.marker";
+    ConstructorSingleCall obj = ConstructorSingleCall(s);
+end ConstructorSingleCallDepTest;
+
 model ExternalInfinityTest
 function whileTrue
     input Real a;

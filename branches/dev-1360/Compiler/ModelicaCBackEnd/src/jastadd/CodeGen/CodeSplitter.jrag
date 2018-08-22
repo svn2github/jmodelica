@@ -50,6 +50,16 @@ aspect CodeSplitter {
             add(elements);
         }
         
+        public void generate() {
+            genFuncImpls();
+            genFuncHeads();
+            str.print("int ", funcName,"(jmi_t* jmi) {\n");
+            printStatusDecl();
+            genFuncCalls();
+            printStatusReturn();
+            str.print("}\n");
+        }
+        
         private int cap(int x) {
             return x < 1 ? Integer.MAX_VALUE : x;
         }
@@ -88,10 +98,7 @@ aspect CodeSplitter {
         
         public void genFuncHeads() {
             for (int split = 0; split < numSplits(); split++) {
-                str.print("int ");
-                str.print(funcName);
-                str.print(split);
-                str.print("(jmi_t* jmi);\n");
+                str.print("int ", funcName, "_", split, "(jmi_t* jmi);\n");
             }
             str.print("\n");
         }
@@ -101,10 +108,7 @@ aspect CodeSplitter {
                 if (split > 0 && split % chunkLimit == 0) {
                     str.splitFile();
                 }
-                str.print("int ");
-                str.print(funcName);
-                str.print(split);
-                str.print("(jmi_t* jmi) {\n");
+                str.print("int ", funcName, "_", split, "(jmi_t* jmi) {\n");
                 printStatusDecl();
                 int n = Math.min(itemLimit, elements.size() - split * itemLimit);
                 gen(elements.get(split));
@@ -121,11 +125,7 @@ aspect CodeSplitter {
                 }
             }
             for (int split = 0; split < n; split++) {
-                str.print(indent);
-                str.print("ef |= ");
-                str.print(funcName);
-                str.print(split);
-                str.print("(jmi);\n");
+                str.print(indent, "ef |= ", funcName, "_", split, "(jmi);\n");
             }
         }
         

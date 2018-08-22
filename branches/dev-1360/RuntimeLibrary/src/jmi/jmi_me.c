@@ -58,9 +58,12 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     jmi_->resource_location = resource_location;
     
     /* set start values*/
-    if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
+    if (jmi_generic_func(jmi_, jmi->model->init_eval_independent) != 0) {
         jmi_log_node(jmi_->log, logError, "SetStartValuesFailure","Failed to set start values.");
         jmi_delete(jmi_);
+        return -1;
+    }
+    if (jmi_init_eval_variables(jmi) != 0) {
         return -1;
     }
     
@@ -122,8 +125,8 @@ int jmi_initialize(jmi_t* jmi) {
                                 "Starting initialization.");
     }
     
-    /* Evaluate parameters */
-    retval = jmi_init_eval_parameters(jmi);
+    /* Reevaluate parameters and start variables if necessary */
+    retval = jmi_init_eval_variables(jmi);
     
     if(retval != 0) { /* Error check */
         jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters. Initialization failed.");

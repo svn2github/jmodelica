@@ -44,7 +44,9 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_derivatives,
                     jmi_residual_func_t model_ode_event_indicators,
                     jmi_generic_func_t model_ode_initialize,
-                    jmi_generic_func_t model_init_eval_parameters,
+                    jmi_generic_func_t model_init_eval_independent,
+                    jmi_generic_func_t model_init_eval_dependent,
+                    jmi_generic_func_t model_init_eval_variables,
                     jmi_next_time_event_func_t model_ode_next_time_event) {
     
     /* Create jmi_model_t struct */
@@ -56,7 +58,9 @@ void jmi_model_init(jmi_t* jmi,
     jmi->model->ode_initialize = model_ode_initialize;
     jmi->model->ode_next_time_event = model_ode_next_time_event;
     jmi->model->ode_event_indicators = model_ode_event_indicators;
-    jmi->model->init_eval_parameters = model_init_eval_parameters;
+    jmi->model->init_eval_independent = model_init_eval_independent;
+    jmi->model->init_eval_dependent   = model_init_eval_dependent;
+    jmi->model->init_eval_variables   = model_init_eval_variables;
 }
 
 void jmi_model_delete(jmi_t* jmi) {
@@ -283,6 +287,8 @@ int jmi_init(jmi_t** jmi,
     jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->time_events_epsilon = jmi_->options.time_events_default_tol;
     jmi_->recomputeVariables = 1;
+    jmi_init_eval_dependent_set_dirty(jmi_);
+    jmi_init_eval_variables_set_dirty(jmi_);
 
     jmi_->log = jmi_log_init(jmi_callbacks);
 
@@ -546,8 +552,40 @@ int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res){
     return 0;
 }
 
-int jmi_init_eval_parameters(jmi_t* jmi) {
-    return jmi_generic_func(jmi, jmi->model->init_eval_parameters);
+void jmi_init_eval_dependent_set_dirty(jmi_t* jmi) {
+    jmi->recompute_init_dependent = 1;
+}
+
+void jmi_init_eval_variables_set_dirty(jmi_t* jmi) {
+    jmi->recompute_init_variables = 1;
+}
+
+int jmi_init_eval_dependent(jmi_t* jmi) {
+    if (jmi->recompute_init_dependent == 1 && jmi->is_initialized == 0) {
+        int retval = jmi_generic_func(jmi, jmi->model->init_eval_dependent);
+        if(retval != 0) {
+            jmi_log_node(jmi->log, logError, "DependentParametersEvaluationFailed", "Error evaluating dependent parameters.");
+            return retval;
+        }
+        jmi->recompute_init_dependent = 0;
+    }
+    return 0;
+}
+
+int jmi_init_eval_variables(jmi_t* jmi) {
+    int retval = jmi_init_eval_dependent(jmi);
+    if (retval != 0) {
+        return retval;
+    }
+    if (jmi->recompute_init_variables == 1 && jmi->is_initialized == 0) {
+        int retval = jmi_generic_func(jmi, jmi->model->init_eval_variables);
+        if(retval != 0) {
+            jmi_log_node(jmi->log, logError, "VariableStartValueEvaluationFailed", "Error evaluating start values of variables.");
+            return retval;
+        }
+        jmi->recompute_init_variables = 0;
+    }
+    return 0;
 }
 
 int jmi_destruct_external_objects(jmi_t* jmi) {

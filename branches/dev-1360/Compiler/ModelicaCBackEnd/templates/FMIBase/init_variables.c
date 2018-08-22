@@ -15,8 +15,4 @@
 
 $C_enum_strings$
 
-$C_set_start_values$
-
-int jmi_set_start_values(jmi_t* jmi) {
-    return jmi_set_start_values_base(jmi);
-}
+$C_model_init_eval_variables$
