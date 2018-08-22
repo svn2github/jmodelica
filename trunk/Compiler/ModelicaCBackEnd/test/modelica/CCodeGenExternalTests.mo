@@ -3086,10 +3086,6 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _y1_4 = (0.0);
-    _y2_5 = (0.0);
-    _y3_6 = (0.0);
-    _y4_7 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -3372,8 +3368,6 @@ $C_destruct_external_object$
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = (0.0);
-    _y_2 = (0.0);
     _eo_1 = (NULL);
     JMI_DYNAMIC_FREE()
     return ef;
