@@ -457,11 +457,12 @@
             do not exist anymore. Then remove the intermediate directory.
         -->
         <sequential>
+            <mkdir dir="${java_output_final}" />
             <delete>
                 <!-- 
                     In addition to removing files that do not exist in intermediate anymore
                     this also wipes any changed files, to make sure we don't get any problems
-                    with case on windows.
+                    with file name case on windows.
                 -->
                 <fileset dir="${java_output_final}" includes="**/*">
                     <different targetdir="${java_output_intermediate}"/>
