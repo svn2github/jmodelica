@@ -375,6 +375,8 @@ class TestExternalObjectConstructorSingleCall:
         model = load_fmu(fmu_name)
         model.set('s', 'test')
         model.set('s', 'test2')
+        model.simulate()
+        model.terminate()
 
 class TestAssertEqu3(SimulationTest):
     '''Test structural verification assert'''

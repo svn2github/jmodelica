@@ -449,8 +449,9 @@ struct jmi_t {
     jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
-    jmi_int_t recompute_init_dependent;  /**< \brief Dirty flag indicating when dependent parameters should be resolved */
-    jmi_int_t recompute_init_variables;  /**< \brief Dirty flag indicating when start values for variables should be resolved */
+    jmi_int_t recompute_init_independent;/**< \brief Dirty flag indicating when independent parameters should be reevaluated */
+    jmi_int_t recompute_init_dependent;  /**< \brief Dirty flag indicating when dependent parameters should be reevaluated */
+    jmi_int_t recompute_init_variables;  /**< \brief Dirty flag indicating when start values for variables should be reevaluated */
     jmi_int_t updated_states;            /**< \brief Flag indicating if the dynamic set of states has been updated. */
 
     jmi_real_t* real_x_work;             /**< \brief Work array for the real x variables */
@@ -586,16 +587,24 @@ int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
 int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res);
 
 /**
+ * \brief Mark independent parameters as dirty, triggering reevaluation 
+ * on the next call to jmi_init_eval_independent.
+ */
+void jmi_init_eval_independent_set_dirty(jmi_t* jmi);
+
+/**
+ * \brief Reevaluate the independent parameters if necessary.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_init_eval_independent(jmi_t* jmi);
+
+/**
  * \brief Mark dependent parameters as dirty, triggering reevaluation 
  * on the next call to jmi_init_eval_dependent.
  */
 void jmi_init_eval_dependent_set_dirty(jmi_t* jmi);
-
-/**
- * \brief Mark variable start values as dirty, triggering reevaluation 
- * on the next call to jmi_init_eval_variables.
- */
-void jmi_init_eval_variables_set_dirty(jmi_t* jmi);
 
 /**
  * \brief Reevaluate the dependent parameters if necessary.
@@ -604,6 +613,12 @@ void jmi_init_eval_variables_set_dirty(jmi_t* jmi);
  * @return Error code.
  */
 int jmi_init_eval_dependent(jmi_t* jmi);
+
+/**
+ * \brief Mark variable start values as dirty, triggering reevaluation 
+ * on the next call to jmi_init_eval_variables.
+ */
+void jmi_init_eval_variables_set_dirty(jmi_t* jmi);
 
 /**
  * \brief Reevaluate the dependent parameters and variable start values if necessary.

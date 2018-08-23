@@ -64,6 +64,8 @@ int jmi_set_precheck(jmi_t* jmi, int index, int offset, int* needRecomputeVars, 
     *needRecomputeVars = 1;
     if (index < offset) {
         *needParameterUpdate = 1;
+    } else {
+        jmi_init_eval_variables(jmi);
     }
     return 0;
 }
@@ -201,8 +203,8 @@ int jmi_set_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     return jmi_set_update(jmi, needParameterUpdate, needRecomputeVars);
 }
 
-/* Local helper for checking if variables are parameters or constants */
-static int jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, size_t offset) {
+/* Local helper for checking if we need to evaluate discrete or continuous variables */
+static int jmi_evaluate_variables_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, size_t offset) {
     jmi_value_reference i;
     for (i = 0; i < nvr; i++) {
         if (jmi_get_index_from_value_ref(vr[i]) >= offset) {
@@ -215,12 +217,16 @@ static int jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], s
 /* Local helper for updating variables before one is retrieved */
 int jmi_get_update(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, size_t offset) {
     int retval;
-    int eval_required = jmi_evaluation_required(jmi, vr, nvr, offset);
-    retval = jmi_init_eval_dependent(jmi);
+    int eval_variables_required = jmi_evaluate_variables_required(jmi, vr, nvr, offset);
+    if (eval_variables_required == 0) {
+        retval = jmi_init_eval_dependent(jmi);
+    } else {
+        retval = jmi_init_eval_variables(jmi);
+    }
     if (retval != 0) {
         return -1;
     }
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_variables_required == 1 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");

@@ -42,6 +42,10 @@ class TestParameterEvalDependentStart:
         fmu_name = compile_fmu(cpath, TestParameterEvalDependentStart.fpath)
         model = load_fmu(fmu_name)
         model.set('p', 2)
-        assert model.get('x') == 2 # Start values not reevaluated after parameter update
+        assert model.get('pd') == 3
         model.set('p', 3)
-        assert model.get('x') == 2 # Start values not reevaluated after parameter update
+        assert model.get('pd') == 4
+        assert model.get('x') == 4
+        model.set('p', 4)
+        assert model.get('pd') == 5
+        assert model.get('x') == 4 # Evaluated on first get of variable, not reevaluated
