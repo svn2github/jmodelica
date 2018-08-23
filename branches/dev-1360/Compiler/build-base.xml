@@ -283,7 +283,7 @@
                         <sequential>
                             <propertyregex property="java_dir_pre_temp" input="@{pregenerated}" regexp="\." replace="/" 
                                     defaultValue="@{pregenerated}" override="true" global="true" />
-                            <var name="java_dirs_temp" value="${java_dirs_temp}:${java_output_intermediate}/${java_dir_pre_temp}" />
+                            <var name="java_dirs_temp" value="${java_dirs_temp}:${java_output_final}/${java_dir_pre_temp}" />
                         </sequential>
                     </for>
                 </then>
