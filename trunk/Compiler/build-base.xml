@@ -32,7 +32,8 @@
     <property name="java_compiler" value="javac${java_version}"/>
 
     <property name="target" value="${user.dir}"/>
-    <property name="java_output" value="${target}/src/java-generated" />
+    <property name="java_output_intermediate" value="${target}/src/java-generated-intermediate" />
+    <property name="java_output_final"        value="${target}/src/java-generated" />
     <property name="java_temp" value="${target}/src/java-generated-temporary" />
     <property name="resources_temp" value="${target}/src/resources-temporary" />
     <property name="junit_output" value="${target}/src/junit-generated" />
@@ -84,9 +85,9 @@
         <else> <property name="test_package" value="org.jmodelica.test.${sub_package}.junitgenerated" /> </else>
     </if>
     <propertyregex property="ast_package_dir" input="${ast_package}" defaultValue="${ast_package}" regexp="\." replace="/" global="true" />
-    <property name="ast_output" value="${java_output}/${ast_package_dir}" />
+    <property name="ast_output" value="${java_output_intermediate}/${ast_package_dir}" />
     <propertyregex property="parser_package_dir" input="${parser_package}" defaultValue="${parser_package}" regexp="\." replace="/" global="true" />
-    <property name="parser_output" value="${java_output}/${parser_package_dir}" />
+    <property name="parser_output" value="${java_output_intermediate}/${parser_package_dir}" />
     <propertyregex property="test_package_dir" input="${test_package}" defaultValue="${test_package}" regexp="\." replace="/" global="true" />
     <property name="test_package_output" value="${junit_output}/${test_package_dir}" />
     <property name="test_class_name" value="Tests" />
@@ -282,7 +283,7 @@
                         <sequential>
                             <propertyregex property="java_dir_pre_temp" input="@{pregenerated}" regexp="\." replace="/" 
                                     defaultValue="@{pregenerated}" override="true" global="true" />
-                            <var name="java_dirs_temp" value="${java_dirs_temp}:${java_output}/${java_dir_pre_temp}" />
+                            <var name="java_dirs_temp" value="${java_dirs_temp}:${java_output_final}/${java_dir_pre_temp}" />
                         </sequential>
                     </for>
                 </then>
@@ -308,7 +309,7 @@
                             <propertyregex property="@{module}.@{gen-extra}.gen_path.tmp" 
                                 input="${@{module}.package.@{generated}}" defaultValue="${@{module}.package.@{generated}}" 
                                 regexp="\." replace="/" global="true" />
-                            <property name="@{module}.@{gen-extra}.gen_path" value="${java_output}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
+                            <property name="@{module}.@{gen-extra}.gen_path" value="${java_output_intermediate}/${@{module}.@{gen-extra}.gen_path.tmp}"/>
                         </then>
                     </if>
                 </sequential>
@@ -449,7 +450,50 @@
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files." />
+    <target name="gen" depends="patch,parser,scanner,gen-test,gen-extra,patch-test" description="Generate all Java files.">
+        <!-- 
+            Mirror the intermediate directory with the final one (that's used in 
+            subsequent steps), copying files that differ and removing files that 
+            do not exist anymore. Then remove the intermediate directory.
+        -->
+        <sequential>
+            <mkdir dir="${java_output_final}" />
+            <!-- Build list of files to exclude from deletion -->
+            <var name="excludes" value="" />
+            <for list="${modules}" param="module">
+                <sequential>
+                    <if>
+                        <isset property="@{module}.pre_generated" />
+                        <then>
+                            <for list="${@{module}.pre_generated}" param="pregenerated">
+                                <sequential>
+                                    <propertyregex property="java_dir_pre_temp" input="@{pregenerated}" regexp="\." replace="/" 
+                                            defaultValue="@{pregenerated}" override="true" global="true" />
+                                    <var name="excludes" value="${excludes} ${java_dir_pre_temp}/**/*" />
+                                </sequential>
+                            </for>
+                        </then>
+                    </if>
+                </sequential>
+            </for>
+            <delete>
+                <!-- 
+                    In addition to removing files that do not exist in intermediate anymore
+                    this also wipes any changed files, to make sure we don't get any problems
+                    with file name case on windows.
+                -->
+                <fileset dir="${java_output_final}" includes="**/*" excludes="${excludes}">
+                    <different targetdir="${java_output_intermediate}"/>
+                </fileset>
+            </delete>
+            <copy overwrite="true" todir="${java_output_final}">
+                <fileset dir="${java_output_intermediate}" includes="**/*">
+                    <different targetdir="${java_output_final}"/>
+                </fileset>
+            </copy>
+            <delete dir="${java_output_intermediate}" />
+        </sequential>
+    </target>
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -482,7 +526,7 @@
                         <isset property="@{module}.@{generate}"/>
                         <then>
                             <javac  classpath="${beaver-rt_jar}" 
-                                    sourcepath="${java_output}:${java_dirs}" 
+                                    sourcepath="${java_output_intermediate}:${java_dirs}" 
                                     compiler="${java_compiler}" 
                                     source="${java_version}" 
                                     target="${java_version}" 
@@ -493,7 +537,7 @@
                                     includeantruntime="false"
                                     excludes="${test_helper_java_patterns}" >
                                 <src path="${@{module}.java_path}" />
-                                <src path="${java_output}" />
+                                <src path="${java_output_intermediate}" />
                                 <include name="${@{module}.@{gen-extra}.javafile}.java" />
                             </javac>
                         </then>
@@ -521,7 +565,7 @@
             debug="false" 
             destdir="${class_output}" 
             includeantruntime="false"
-            srcdir="${java_output}:${java_dirs}" 
+            srcdir="${java_output_final}:${java_dirs}" 
             includes="${compile_java_patterns}" 
             excludes="${test_helper_java_patterns}" />
     </target>
@@ -537,7 +581,7 @@
                 <mkdir dir="${javadoc_output}" />
                 <javadoc 
                     access="public" 
-                    sourcepath="${java_output}:${java_dirs}" 
+                    sourcepath="${java_output_final}:${java_dirs}" 
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 
                     excludepackagenames="${test_helper_packages}" 
@@ -581,11 +625,11 @@
                     <format property="ast_creation_time" pattern="${timestamp_format}" />
                 </tstamp>
                 <!-- create a directory for the generated files -->
-                <mkdir dir="${java_output}" />
+                <mkdir dir="${java_output_intermediate}" />
                 <!-- run jastadd to generate AST files -->
                 <java classname="org.jastadd.JastAdd" classpath="${jastadd_dir}/jastadd2.jar" failonerror="true">
                     <arg value="--package=${ast_package}" />
-                    <arg value="--o=${java_output}" />
+                    <arg value="--o=${java_output_intermediate}" />
                     <arg value="--beaver" />
                     <arg value="--rewrite" />
                     <arg value="--cacheCycle" />
@@ -687,7 +731,7 @@
                     <uptodate property="@{module}.patch-java.uptodate">
                         <srcfiles dir= "${@{module}.java_path}" includes="**/*.java"/>
                         <srcfiles dir= "${@{module}.junit_path}" includes="**/*.java"/>
-                        <globmapper from="*" to="${java_output}/*" />
+                        <globmapper from="*" to="${java_output_intermediate}/*" />
                     </uptodate>
                     <if>
                         <not><isset property="${@{module}.patch-java.uptodate}" /></not>
@@ -742,7 +786,7 @@
                                     </sequential> </for>
                                 </then>
                             </if>
-                             <copy todir="${java_output}">
+                             <copy todir="${java_output_intermediate}">
                                 <fileset dir="${java_temp}" includes="**/*.java" />
                             </copy>
                             <delete dir="${java_temp}"/>
@@ -875,7 +919,7 @@
                                     <then>
                                         <var name="scanners.package" value="${@{module}.@{scanner}.package}" />
                                         <propertyregex property="scanners.package_dir" input="${scanners.package}" defaultValue="${scanners.package}" regexp="\." replace="/" global="true" override="true" />
-                                        <var name="scanners.output" value="${java_output}/${scanners.package_dir}" />
+                                        <var name="scanners.output" value="${java_output_intermediate}/${scanners.package_dir}" />
                                         <mkdir dir="${scanners.output}" />
                                     </then>
                                     <else>
@@ -1047,7 +1091,8 @@ ${test_class_extra_defs}
 
     <!-- cleans all generated java files in the compiler -->
     <target name="clean-ast">
-        <delete dir="${java_output}" />
+        <delete dir="${java_output_intermediate}" />
+        <delete dir="${java_output_final}" />
     </target>
 
     <!-- cleans all extra generated java files -->
