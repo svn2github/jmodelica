@@ -1515,7 +1515,7 @@ class Test_FMI_ODE_2:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-7
-        assert opts["with_jacobian"] == "Default"
+        opts["with_jacobian"] = False
         
         res = model.simulate(final_time=1.5,options=opts)
         print res.final("J1.w")

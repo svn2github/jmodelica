@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5668
+Fixed issue with reusing the PyFMI computed FD Jacobian.
+
 ; Fixed ; Minor ; Runtime ; #5665
 Updated the loglevel conversion between runtime and Kinsol which in some
 models has significant impact on the performance.

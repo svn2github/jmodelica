@@ -34,6 +34,7 @@ except (NameError, ImportError):
 
 def check_result(results, ref):
     for key in ref:
+        print "Ref: ", ref[key], " Test: ", results[key][-1]
         assert abs(ref[key] - results[key][-1]) < 1e-5
         
 
