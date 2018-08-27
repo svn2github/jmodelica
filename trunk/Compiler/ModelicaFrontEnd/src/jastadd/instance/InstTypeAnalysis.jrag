@@ -55,7 +55,7 @@ aspect InstTypeAnalysis {
         else if (isString()) 
             return fStringScalarType();
         else if (isExternalObject())
-            return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FIdUse("ExternalObject.constructor"), new FIdUse("ExternalObject.destructor"));
+            return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FAccessString("ExternalObject.constructor"), new FAccessString("ExternalObject.destructor"));
         return fUnknownType();
     }
 
@@ -71,8 +71,8 @@ aspect InstTypeAnalysis {
     eq InstNode.getChild().myInstForIndexType()                  = fUnknownType();
 
     syn nta FType InstExternalObject.getType() {
-        FIdUseInstAccess con = new FIdUseInstAccess(InstAccess.fromName(myConstructor().qualifiedName()));
-        FIdUseInstAccess de  = new FIdUseInstAccess(InstAccess.fromName(myDestructor().qualifiedName()));
+        InstAccess con = InstAccess.fromName(myConstructor().qualifiedName());
+        InstAccess de  = InstAccess.fromName(myDestructor().qualifiedName());
         return new FExternalObjectType(size(), getClassName().myInstClassDecl().qualifiedName(), con, de);
     }
 
@@ -152,10 +152,7 @@ aspect InstTypeAnalysis {
         return res == null ? super.componentType(name) : res;
     }
     
-    eq FIdUseInstAccess.recordType()        = getInstAccess().recordType();
     syn FRecordType InstAccess.recordType() = myInstClassDecl().recordType();
-
-    eq FIdUseInstAccess.type() = getInstAccess().type();
 
     syn lazy FType InstComponentDecl.type() = fUnknownType();
 

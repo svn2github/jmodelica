@@ -2316,34 +2316,33 @@ aspect ConstantEvaluation {
     eq FStringLitExp.cevalCalc(VariableEvaluator evaluator)       = new CValueString(getString());
     eq FEnumLitExp.cevalCalc(VariableEvaluator evaluator)         = new CValueEnum(type(), getValue());
 
-    syn CValue FIdUse.ceval(VariableEvaluator evaluator) {
+    syn CValue CommonAccess.ceval(VariableEvaluator evaluator);
+    eq FAccess.ceval(VariableEvaluator evaluator) {
         boolean func = inFunction();
-        FQName name = getFQName();
         FAbstractVariable var = myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
             if (var.ndims() > 0 && hasFArraySubscripts()) {
-                i = name.getFArraySubscripts().createIndex();
+                i = getFArraySubscripts().createIndex();
             }
             if (i != Index.NULL) {
-                return var.inRecord() ? cevalRecordMember(evaluator, name).array().getCell(i) : evaluator.ceval(var, i);
+                return var.inRecord() ? cevalRecordMember(evaluator, this).array().getCell(i) : evaluator.ceval(var, i);
             } else {
-                return var.inRecord() ? cevalRecordMember(evaluator, name) : evaluator.ceval(var);
+                return var.inRecord() ? cevalRecordMember(evaluator, this) : evaluator.ceval(var);
             }
         } else {
             return CValue.UNKNOWN;
         }
     }
-    eq FIdUseInstAccess.ceval(VariableEvaluator evaluator) = getInstAccess().ceval(evaluator);
 
     /**
      * Perform constant evaluation of an access to a record member.
      */
-    syn CValue FIdUse.cevalRecordMember(VariableEvaluator evaluator, FQName name) {
+    syn CValue FAccess.cevalRecordMember(VariableEvaluator evaluator, FAccess name) {
         if (name.numDots() < 1)
           return CValue.UNKNOWN;
         String last = name.lastActualPartName();
-        FQName prefix = name.copyPrefix();
+        FAccess prefix = name.copyPrefix();
         prefix.parent = this;
         FAbstractVariable var = prefix.myFV();
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
@@ -2354,9 +2353,9 @@ aspect ConstantEvaluation {
 
     eq FIdUseExp.cevalCalc(VariableEvaluator evaluator) = evaluator.cevalUse(this);
     
-    syn CValue FIdUseExp.cevalUse(VariableEvaluator evaluator) = getFIdUse().ceval(evaluator);
+    syn CValue FIdUseExp.cevalUse(VariableEvaluator evaluator) = getCommonAccess().ceval(evaluator);
     eq FAbstractDerExp.cevalUse(VariableEvaluator evaluator) {
-        if (getFIdUse().variability().discreteOrLess())
+        if (getCommonAccess().variability().discreteOrLess())
             return new CValueInteger(0);
         FAbstractVariable decl = myFV();
         return decl == null ? CValue.UNKNOWN : evaluator.ceval(decl);
@@ -2972,7 +2971,7 @@ aspect ConstantEvaluation {
    *        or <code>null</code> if none match. 
    */
   syn CValue FExp.extractCValue(CValue val, FVariable fv) = null;
-  eq FIdUseExp.extractCValue(CValue val, FVariable fv)    = getFIdUse().myFV() == fv ? val : null;
+  eq FIdUseExp.extractCValue(CValue val, FVariable fv)    = getCommonAccess().myFV() == fv ? val : null;
   eq FArray.extractCValue(CValue val, FVariable fv) {
 	  CValueArray arr = val.array();
 	  for (Index i : indices()) {
@@ -3760,7 +3759,7 @@ aspect ConstantEvaluation {
         return super.collectEvaluationValues(collectMyEvaluationValue(map));
     }
 
-    public Map<CommonVariableDecl,CValue> FIdUse.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+    public Map<CommonVariableDecl,CValue> CommonAccess.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
         return super.collectEvaluationValues(collectMyEvaluationValue(map));
     }
 
@@ -3772,11 +3771,13 @@ aspect ConstantEvaluation {
         return map;
     }
     
-    public Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+    public abstract Map<CommonVariableDecl,CValue> CommonAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map);
+    
+    public Map<CommonVariableDecl,CValue> FAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
         return myFV().collectMyEvaluationValue(map);
     }
     
-    public Map<CommonVariableDecl,CValue> FIdUseInstAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+    public Map<CommonVariableDecl,CValue> InstAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
         return map;
     }
 
@@ -4284,10 +4285,11 @@ aspect CircularExpressions {
 	
 	private boolean FAbstractExp.inIsCircular = false; 
 	
-    eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular(-1);
+    eq FIdUseExp.isCircularCalc() = getCommonAccess().isCircular(-1);
     
-    syn boolean FIdUse.isCircular(int dim)  = myFV().isCircular();
-    eq FIdUseInstAccess.isCircular(int dim) = getInstAccess().myInstComponentDecl().isCircular(dim);
+    syn boolean CommonAccess.isCircular(int dim);
+    eq FAccess.isCircular(int dim)     = myFV().isCircular();
+    eq InstAccess.isCircular(int dim) = myInstComponentDecl().isCircular(dim);
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = getFExp().isCircular(); // TODO: test without when it works
 
@@ -4295,7 +4297,7 @@ aspect CircularExpressions {
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((FIdUseExp)getFExp()).getFIdUse().isCircular(dimension());
+    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((FIdUseExp)getFExp()).getCommonAccess().isCircular(dimension());
     
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {
@@ -4313,12 +4315,11 @@ aspect CircularExpressions {
     }
 
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
-	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
+	eq FIdUseExp.isUnknownSizeVarUse()      = getCommonAccess().isUnknownSizeVarUse();
 	
-	syn boolean FIdUse.isUnknownSizeVarUse()  = myFV().isUnknownSizeVar();
-	eq FIdUseInstAccess.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
-	
-	syn boolean InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
+	syn boolean CommonAccess.isUnknownSizeVarUse();
+	eq FAccess.isUnknownSizeVarUse()     = myFV().isUnknownSizeVar();
+	eq InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
 	
 	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
 	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
@@ -4368,18 +4369,18 @@ aspect CircularExpressions {
 
 
 	syn lazy boolean FAbstractVariable.isCircular() circular [true] = false;
-	eq FVariable.isCircular() = getFQName().isCircular() || (hasBindingExp() && getBindingExp().isCircular());
+	eq FVariable.isCircular() = getFAccess().isCircular() || (hasBindingExp() && getBindingExp().isCircular());
 	
-	syn boolean FQName.isCircular() = false;
-	eq FQNameFull.isCircular() {
-		for (FQNamePart part : getFQNameParts())
+	syn boolean FAccess.isCircular() = false;
+	eq FAccessFull.isCircular() {
+		for (FAccessPart part : getFAccessParts())
 			if (part.isCircular())
 				return true;
 		return false;
 	}
 	
-	syn boolean FQNamePart.isCircular() = false;
-	eq FQNamePartArray.isCircular()     = getFArraySubscripts().isCircular();
+	syn boolean FAccessPart.isCircular() = false;
+	eq FAccessPartArray.isCircular()     = getFArraySubscripts().isCircular();
 
     syn lazy boolean InstComponentDecl.isCircular(int dim) circular [true] = false;
     eq InstAssignable.isCircular(int dim) {

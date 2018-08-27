@@ -103,7 +103,7 @@ aspect ConstantEvaluationStatements {
      */
     @Override
     public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        getFIdUse().assignToInFuncEval(evaluator, right);
+        getCommonAccess().assignToInFuncEval(evaluator, right);
     }
     
     @Override
@@ -119,20 +119,7 @@ aspect ConstantEvaluationStatements {
      * @param evaluator the evaluator used to evaluate the algorithm
      * @param right     the CValue to assign
      */
-    public void FIdUse.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        getFQName().assignToInFuncEval(evaluator, right, this);
-    }
-    
-    /**
-     * Evaluate an assignment with this as the left side during function evaluation.
-     * 
-     * @param evaluator the evaluator used to evaluate the algorithm
-     * @param right     the CValue to assign
-     */
-    @Override
-    public void FIdUseInstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
-        getInstAccess().assignToInFuncEval(evaluator, val);
-    }
+    public abstract void CommonAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right);
 
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
@@ -141,18 +128,18 @@ aspect ConstantEvaluationStatements {
      * @param right    the right hand side
      * @param context  the use to look up names from
      */
-    public void FQName.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
+    public void FAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         throw new UnsupportedOperationException();
     }
 
-    public void FQNameString.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
+    public void FAccessString.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         FFunctionVariable var = myFuncFV();
         var.setEvaluationValue(evaluator, right);
     }
 
-    public void FQNameFull.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
+    public void FAccessFull.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         FFunctionVariable var = myFuncFV();
-        FQNamePart firstPart = getFQNamePart(0);
+        FAccessPart firstPart = getFAccessPart(0);
         CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
         evaluator.setEvaluationValue(var, val);
     }
@@ -160,7 +147,8 @@ aspect ConstantEvaluationStatements {
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
      * 
-     * @param values  constant values for the variables
+     * @param evaluator the evaluator used to evaluate the algorithm
+     * @param right     the CValue to assign
      */
     public void InstAccess.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         InstAccess firstPart = getFirstInstAccess();
@@ -184,9 +172,9 @@ aspect ConstantEvaluationStatements {
         public CommonNamePart nextNamePart();
     }
     InstAccess implements CommonNamePart;
-    FQNamePart implements CommonNamePart;
+    FAccessPart implements CommonNamePart;
 
-    public Indices FQNamePart.indices() {
+    public Indices FAccessPart.indices() {
         return Indices.createFromFas(getFArraySubscripts());
     }
 
@@ -197,7 +185,7 @@ aspect ConstantEvaluationStatements {
      * without array subscripts is assumed to be scalar. Thus this method should 
      * only be used for name parts with array subscripts.
      */
-    syn boolean FQNamePart.isArray() {
+    syn boolean FAccessPart.isArray() {
         if (hasFArraySubscripts()) {
             for (FSubscript fs : getFArraySubscripts().getFSubscripts()) {
                 if (fs.ndims() > 0) {
@@ -212,9 +200,9 @@ aspect ConstantEvaluationStatements {
      * Get the next part in the name this is a part of, or null if this is the last part. 
      */
     syn CommonNamePart InstAccess.nextNamePart() = getNextInstAccess();
-    inh CommonNamePart FQNamePart.nextNamePart();
-    eq FQNameFull.getFQNamePart(int i).nextNamePart() = 
-            getNumFQNamePart() > i + 1 ? getFQNamePart(i + 1) : null;
+    inh CommonNamePart FAccessPart.nextNamePart();
+    eq FAccessFull.getFAccessPart(int i).nextNamePart() = 
+            getNumFAccessPart() > i + 1 ? getFAccessPart(i + 1) : null;
 
     /**
      * Handle one part of the left access of an assignment during function evaluation.

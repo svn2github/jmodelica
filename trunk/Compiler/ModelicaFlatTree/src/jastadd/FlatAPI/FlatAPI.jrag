@@ -1067,7 +1067,7 @@ aspect FlatAPI {
      */
     coll LinkedHashSet<FVariable> FClass.differentiatedByFDerExp() 
         [new LinkedHashSet<FVariable>()] with add root FClass;
-    FDerExp contributes getFIdUse().myFV().asFVariable() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
+    FDerExp contributes getCommonAccess().myFV().asFVariable() when getCommonAccess().myFV().isFVariable() && !inDeadIfBranch()
         to FClass.differentiatedByFDerExp() for myFClass();
     FDerivativeVariable contributes myDifferentiatedVariable().asFVariable() when (shouldContribute())
         to FClass.differentiatedByFDerExp() for myFClass();
@@ -1523,7 +1523,7 @@ aspect FlatAPI {
      */
     coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesFilteredSet() 
       [new LinkedHashSet<FRealVariable>()] with add root FClass;
-    FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
+    FDerExp contributes (FRealVariable) getCommonAccess().myFV() when getCommonAccess().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDerivativeVariable contributes
         myDifferentiatedVariable().asFRealVariable() when (shouldContributeFiltered())
@@ -1630,10 +1630,10 @@ aspect FlatAPI {
     syn lazy Collection<FVariable> FClass.discretePreVariables() {
         Collection<FVariable> l = new ArrayList<FVariable>();
         for (FVariable fv : discreteVariables()) {
-            l.add((FVariable) lookupFV(fv.getFQName().preName()));
+            l.add((FVariable) lookupFV(fv.getFAccess().preName()));
         }
         for (FVariable fv : continuousVariablesUsedInPreInInitial()) {
-            l.add((FVariable) lookupFV(fv.getFQName().preName()));
+            l.add((FVariable) lookupFV(fv.getFAccess().preName()));
         }
         return l;
     }
@@ -2313,8 +2313,8 @@ aspect FlatAPI {
     inh FClass FAbstractVariable.myFClass();
     inh FClass FExp.myFClass();
     inh FClass FType.myFClass();
-    inh FClass FIdUse.myFClass();
-    inh FClass FQName.myFClass();
+    inh FClass CommonAccess.myFClass();
+    inh FClass FAccess.myFClass();
     inh FClass FFunctionDecl.myFClass();
     inh FClass FRecordDecl.myFClass();
     inh FClass FAlgorithm.myFClass();
@@ -3590,9 +3590,9 @@ aspect FVariableUses {
         if (order() <= 0) {
             return unknownFVariable();
         } else if (order() == 1) {
-            return getFQName().myFV();
+            return getFAccess().myFV();
         } else {
-            return getFQName().myDerFV(order() - 1);
+            return getFAccess().myDerFV(order() - 1);
         }
     }
 
@@ -3600,19 +3600,19 @@ aspect FVariableUses {
      * Get the derivative variabel (FDerivativeVariable) corresponding to 
      * a differentiated variable (FVariable)
      */
-    syn FAbstractVariable FVariable.myDerivativeVariable() = getFQName().myDerFV(order() + 1);
+    syn FAbstractVariable FVariable.myDerivativeVariable() = getFAccess().myDerFV(order() + 1);
 
     /**
      * Get the pre variable connected to a normal variable, if any.
      */
-    syn FAbstractVariable FAbstractVariable.myPreVariable() = getFQName().myPreFV();
+    syn FAbstractVariable FAbstractVariable.myPreVariable() = getFAccess().myPreFV();
     
     /**
      * Get the normal variable connected to a pre variable.
      * 
      * Will be unknown for non-pre variables.
      */
-    syn FAbstractVariable FAbstractVariable.myNonPreVariable() = getFQName().myFV();
+    syn FAbstractVariable FAbstractVariable.myNonPreVariable() = getFAccess().myFV();
 }
 
 aspect LinearFVariables {
@@ -3719,18 +3719,16 @@ aspect LinearFVariables {
     }
 
     eq FIdUseExp.isIndependent(Set<? extends CommonVariableDecl> set) {
-        return getFIdUse().isIndependent(set);
+        return getCommonAccess().isIndependent(set);
     }
 
-    syn boolean FIdUse.isIndependent(Set<? extends CommonVariableDecl> set) {
+    syn boolean CommonAccess.isIndependent(Set<? extends CommonVariableDecl> set);
+    
+    eq FAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
         return !set.contains(myFV());
     }
 
-    eq FIdUseInstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
-        return getInstAccess().isIndependent(set);
-    }
-
-    syn boolean InstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
+    eq InstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
         return !set.contains(myInstComponentDecl());
     }
 
@@ -4218,8 +4216,8 @@ aspect FlatAlgorithmAPI {
     
     syn boolean FExp.inFAlgorithm() = myFAlgorithm() != null;
     
-    syn FAlgorithm FIdUseExp.myFAlgorithm() = getFIdUse().myFAlgorithm();
-    inh lazy FAlgorithm FIdUse.myFAlgorithm();
+    syn FAlgorithm FIdUseExp.myFAlgorithm() = getCommonAccess().myFAlgorithm();
+    inh lazy FAlgorithm CommonAccess.myFAlgorithm();
     inh lazy FAlgorithm FStatement.myFAlgorithm();
     inh FAlgorithm FExp.myFAlgorithm();
     eq FAbstractEquation.getChild().myFAlgorithm() = null;
@@ -4231,7 +4229,7 @@ aspect FlatAlgorithmAPI {
     FAlgorithm contributes this when !inFunction()
         to FClass.myAlgorithms() for myFClass();
     
-    inh boolean FIdUse.useIsAssignment();
+    inh boolean CommonAccess.useIsAssignment();
     inh boolean FAssignableExp.useIsAssignment();
     inh boolean FArray.useIsAssignment();
     inh boolean FRecordConstructor.useIsAssignment();

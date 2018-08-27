@@ -35,8 +35,8 @@ aspect AccessSizes {
     eq InstShortClassDecl.getFArraySubscripts().inSubscriptedExp()     = false;
     eq InstComponentDecl.getFArraySubscripts().inSubscriptedExp()      = false;
     eq InstComponentDecl.getLocalFArraySubscripts().inSubscriptedExp() = false;
-    eq FQNamePartArray.getFArraySubscripts().inSubscriptedExp()        = false;
-    eq FIdUse.getExpandedSubscripts().inSubscriptedExp()               = false;
+    eq FAccessPartArray.getFArraySubscripts().inSubscriptedExp()        = false;
+    eq FAccess.getExpandedSubscripts().inSubscriptedExp()               = false;
 
     /**
      * Get the size this subscript(s) would have if all subscripts were colons.
@@ -51,20 +51,20 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FIdUse.getChild().mySize() = getFQName().calcMySize(getFQName().numParts());
-    eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
+    eq FAccess.getChild().mySize() = calcMySize(numParts());
+    eq FAccessFull.getFAccessPart(int i).mySize() = calcMySize(i+1);
     
-    syn Size FQName.calcMySize(int i) = myFV().size();
-    eq FQNameFull.calcMySize(int i)   = getFQNamePart(0).myFV().lookupHierarchicalSize(this, 0, i);
+    syn Size FAccess.calcMySize(int i) = myFV().size();
+    eq FAccessFull.calcMySize(int i)   = getFAccessPart(0).myFV().lookupHierarchicalSize(this, 0, i);
 
-    syn FQNamePart FQNamePart.copyFirstElement() = new FQNamePart(getName());
-    eq FQNamePartArray.copyFirstElement()        = new FQNamePartArray(getName(), accessContextFAS());
+    syn FAccessPart FAccessPart.copyFirstElement() = new FAccessPart(getName());
+    eq FAccessPartArray.copyFirstElement()        = new FAccessPartArray(getName(), accessContextFAS());
     
-    public Size FAbstractVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
+    public Size FAbstractVariable.lookupHierarchicalSize(FAccessFull name, int part, int last) {
         return type().lookupHierarchical(name, part+1, last).size();
     }
 
-    public Size FFunctionVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
+    public Size FFunctionVariable.lookupHierarchicalSize(FAccessFull name, int part, int last) {
         if (functionInliner != null) {
             FType t = functionInliner.lookupType(name.name());
             if (t != null) {
@@ -74,11 +74,11 @@ aspect AccessSizes {
         return super.lookupHierarchicalSize(name, part, last);
     }
 
-    public Size FRecordVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
+    public Size FRecordVariable.lookupHierarchicalSize(FAccessFull name, int part, int last) {
         FExp res = findHierarchicalAttributeValue(name, last, FAttribute.SIZE);
         if (res != null) {
             for (int i = part; i < last - 1; i++) {
-                FArraySubscripts fas = name.getFQNamePart(i).getFArraySubscripts();
+                FArraySubscripts fas = name.getFAccessPart(i).getFArraySubscripts();
                 if (fas != null) {
                     res = res.splitArrayExp(fas.createIndex());
                 }
@@ -132,7 +132,7 @@ aspect AccessSizes {
             
             @Override
             public FExp copyReplaceAccess(FIdUseExp use) {
-                return use.getFIdUse().buildAccessContextSizeExp(this);
+                return use.getCommonAccess().buildAccessContextSizeExp(this);
             }
             
             @Override
@@ -146,15 +146,11 @@ aspect AccessSizes {
         }
     }
     
-    public FExp FIdUse.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+    public FExp CommonAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         return new FIdUseExp(treeCopy());
     }
     
-    public FExp FIdUseInstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        return new FIdUseExp(new FIdUseInstAccess(getInstAccess().buildAccessContextSizeExp(crp)));
-    }
-    
-    public InstAccess InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+    public FIdUseExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         List<InstAccess> res = crp.buildContext();
         for (InstAccess part : allParts()) {
             if (hasFArraySubscripts()) {
@@ -164,26 +160,26 @@ aspect AccessSizes {
             }
             res.addChild(part);
         }
-        return new InstDot(res);
+        return new FIdUseExp(new InstDot(res));
     }
     
     inh FIdUseExp FSubscript.buildAccessContextSizeExp();
     eq Root.getChild().buildAccessContextSizeExp()   = null;
     eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
-    eq FQNamePart.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUse(new FQNameFull(buildAccessContext(name(), null))));
-    eq FIdUse.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FIdUse(new FQNameFull(getFQName().buildAccessContext())));
+            new FIdUseExp(new InstDot(buildAccessContext(name(), null)));
+    eq FAccessPart.getChild().buildAccessContextSizeExp() =
+            new FIdUseExp(new FAccessFull(buildAccessContext(name(), null)));
+    eq CommonAccess.getChild().buildAccessContextSizeExp() =
+            new FIdUseExp(new FAccessFull(asFAccess().buildAccessContext()));
     
-    syn List<FQNamePart> FQName.buildAccessContext() = null;
-    eq FQNameString.buildAccessContext() {
-        List<FQNamePart> l = new List<FQNamePart>();
-        l.add(new FQNamePart(name()));
+    syn List<FAccessPart> FAccess.buildAccessContext() = null;
+    eq FAccessString.buildAccessContext() {
+        List<FAccessPart> l = new List<FAccessPart>();
+        l.add(new FAccessPart(name()));
         return l;
     }
-    eq FQNameFull.buildAccessContext() {
-        FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+    eq FAccessFull.buildAccessContext() {
+        FAccessPart last = getFAccessPart(getNumFAccessPart()-1);
         return last.buildAccessContext(last.name(), null);
     }
     
@@ -197,12 +193,12 @@ aspect AccessSizes {
         return res;
     }
     
-    public List<FQNamePart> FQNamePart.buildAccessContext(String name, FArraySubscripts fas) {
-        List<FQNamePart> res = accessContextFlat();
+    public List<FAccessPart> FAccessPart.buildAccessContext(String name, FArraySubscripts fas) {
+        List<FAccessPart> res = accessContextFlat();
         if (fas == null) {
-            res.add(new FQNamePart(name));
+            res.add(new FAccessPart(name));
         } else {
-            res.add(new FQNamePartArray(name, fas));
+            res.add(new FAccessPartArray(name, fas));
         }
         return res;
     }
@@ -213,14 +209,14 @@ aspect AccessSizes {
     eq InstDot.getInstAccess(int i).accessContextInst() = 
             i == 0 ? new List<InstAccess>() : getInstAccess(i-1).buildAccessContext();
     
-    inh List<FQNamePart> FQNamePart.accessContextFlat();
-    eq Root.getChild().accessContextFlat()     = new List<FQNamePart>();
-    eq FExp.getChild().accessContextFlat()     = new List<FQNamePart>();
-    eq FQNameFull.getFQNamePart(int i).accessContextFlat() = 
-            i == 0 ? new List<FQNamePart>() : getFQNamePart(i-1).buildAccessContext();
+    inh List<FAccessPart> FAccessPart.accessContextFlat();
+    eq Root.getChild().accessContextFlat()     = new List<FAccessPart>();
+    eq FExp.getChild().accessContextFlat()     = new List<FAccessPart>();
+    eq FAccessFull.getFAccessPart(int i).accessContextFlat() = 
+            i == 0 ? new List<FAccessPart>() : getFAccessPart(i-1).buildAccessContext();
     
     syn List<InstAccess> InstAccess.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
-    syn List<FQNamePart> FQNamePart.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
+    syn List<FAccessPart> FAccessPart.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
     
     syn FArraySubscripts InstAccess.accessContextFAS() {
         FArraySubscripts res = null;
@@ -232,8 +228,8 @@ aspect AccessSizes {
         return res;
     }
     
-    syn FArraySubscripts FQNamePart.accessContextFAS() = null;
-    eq FQNamePartArray.accessContextFAS() = getFArraySubscripts().buildAccessContext();
+    syn FArraySubscripts FAccessPart.accessContextFAS() = null;
+    eq FAccessPartArray.accessContextFAS() = getFArraySubscripts().buildAccessContext();
     
     syn FArraySubscripts FArraySubscripts.buildAccessContext() {
         FArraySubscripts res = new FArraySubscripts();

@@ -578,15 +578,15 @@ aspect CCodeGenExpressions {
      * Helper method that prints the variable reference for assignment (LHS).
      */
     public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        genAssignedRef(myFV(), p, str, indent);
+        p.print(getCommonAccess(), str, "");
     }
 
     public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        p.print(getFIdUse(), str, "");
+        genAssignedRef(p, str, indent);
     }
 
     @Override
-    public void FAbstractDerExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FAbstractDerExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         str.print(p.name(myFV()));
     }
 
@@ -595,7 +595,11 @@ aspect CCodeGenExpressions {
     }
 
     public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        genScaledAssignedRef(myFV(), p, str, indent);
+        if (needsScaling()) {
+            genScaledAssignedRef(myFV(), p, str, indent);
+        } else {
+            genAssignedRef(p, str, indent);
+        }
     }
 
     syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
@@ -670,7 +674,7 @@ aspect CCodeGenExpressions {
     }
 
     @Override
-    public void FIdUse.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+    public void CommonAccess.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(toString_C(p));
     }
 
@@ -678,22 +682,24 @@ aspect CCodeGenExpressions {
      * Checks if the use is in an assignment possition, LHS of a function call
      * equation or LHS of a statemet.
      */
-    inh boolean FIdUse.isAssignUse();
+    inh boolean CommonAccess.isAssignUse();
     eq InstNode.getChild().isAssignUse()          = false;
     eq FClass.getChild().isAssignUse()            = false;
     eq FFunctionCallLeft.getChild().isAssignUse() = true;
     eq FAssignStmt.getLeft().isAssignUse()        = true;
     eq FAssignStmt.getRight().isAssignUse()       = false;
 
-    syn String FIdUse.name_C() = toString_C(printer_C);
+    syn String CommonAccess.name_C() = toString_C(printer_C);
 
-    syn String FIdUse.toString_C(CodePrinter p) = toString_C(p.getExecStep());
-    syn String FIdUse.toString_C(CodePrinter.ExecuteCodePrinter p) {
+    syn String CommonAccess.toString_C(CodePrinter p);
+    eq FAccess.toString_C(CodePrinter p) = toString_C(p.getExecStep());
+
+    syn String FAccess.toString_C(CodePrinter.ExecuteCodePrinter p) {
         String type = myFV().funcArrayType(isAssignUse());
         if (myFV().inRecord() && inFunction()) {
-            return getFQName().genRecordUse_C(p, getFQName().myOutermostFV(), type);
+            return asFAccess().genRecordUse_C(p, asFAccess().myOutermostFV(), type);
         } else {
-            return myFV().genUse_C(p, getFQName().getFArraySubscripts(), type);
+            return myFV().genUse_C(p, asFAccess().getFArraySubscripts(), type);
         }
     }
 
@@ -732,7 +738,7 @@ aspect CCodeGenExpressions {
     /**
      * Helper, generates an record variable use
      */
-    public String FQName.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
+    public String FAccess.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
         throw new UnsupportedOperationException();
     }
 
@@ -740,12 +746,12 @@ aspect CCodeGenExpressions {
      * Helper, generates an record variable use
      */
     @Override
-    public String FQNameFull.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
-        FQNamePart part = getFQNamePart(0);
+    public String FAccessFull.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
+        FAccessPart part = getFAccessPart(0);
         FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
         String res = fv.genUse_C(p, fas, C_ARRAY_RECORD);
-        for (int i = 1, n = getNumFQNamePart(); i < n; i++) {
-            part = getFQNamePart(i);
+        for (int i = 1, n = getNumFAccessPart(); i < n; i++) {
+            part = getFAccessPart(i);
             res = res + "->" + part.getName();
             if (part.hasFArraySubscripts()) {
                 String curType = (n - i > 1 ? C_ARRAY_RECORD : type);

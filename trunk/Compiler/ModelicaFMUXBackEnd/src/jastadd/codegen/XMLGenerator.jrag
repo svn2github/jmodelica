@@ -308,7 +308,7 @@ public class XMLGenerator extends GenericXMLGenerator {
                     if (fclass.myOptions().getBooleanOption("generate_xml_equations")){
                         //qualified name
                         generateOpenTag("QualifiedName", genPrinter);
-                        variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
+                        variable.getFAccess().prettyPrint_XML(genPrinter,"\t\t\t");
                         generateClosing("QualifiedName", genPrinter);
                     }
                     
@@ -490,7 +490,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 						FExp expression = variable.getBindingExp();
 						genPrinter.println("\t\t<equ:BindingEquation>");
 						genPrinter.print("\t\t\t<equ:Parameter>");
-						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
+						variable.getFAccess().prettyPrint_XML(genPrinter,"\t\t\t");
 						genPrinter.println("</equ:Parameter>");
 						genPrinter.println("\t\t\t<equ:BindingExp>");
 						expression.prettyPrint_XML(genPrinter,"\t\t\t\t");
@@ -510,7 +510,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 				
 						genPrinter.println("\t\t<equ:BindingEquation>");
 						genPrinter.print("\t\t\t<equ:Parameter>");
-						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
+						variable.getFAccess().prettyPrint_XML(genPrinter,"\t\t\t");
 						genPrinter.println("</equ:Parameter>");
 						genPrinter.println("\t\t\t<equ:BindingExp>");
 						expression.prettyPrint_XML(genPrinter,"\t\t\t\t");
@@ -644,8 +644,8 @@ public class VariableNameComparator implements Comparator<FVariable> {
 
     @Override
     public int compare(FVariable variable1, FVariable variable2) {
-        char[] name1 = variable1.getFQNameNoTransform().name().toCharArray();
-        char[] name2 = variable2.getFQNameNoTransform().name().toCharArray();
+        char[] name1 = variable1.getFAccessNoTransform().name().toCharArray();
+        char[] name2 = variable2.getFAccessNoTransform().name().toCharArray();
 
         int length1 = name1.length;
         int length2 = name2.length;

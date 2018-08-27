@@ -31,13 +31,13 @@ aspect FunctionScalarization {
             throw new org.jmodelica.util.exceptions.InternalCompilerError("Exception caught while scalarizing function'" + name() + "'", e);
         }
         setFAlgorithm(new FAlgorithm(stmts));
-        clearScalarized();  // Functions need scalarized = false in FQNames
+        clearScalarized();  // Functions need scalarized = false in FAccesss
         flushAllRecursive();
     }
     
     /**
      * Post processing FFunctionDecls after scalarization.
-     * Clear the scalarized flag for all FQNames.
+     * Clear the scalarized flag for all FAccesss.
      * Rewrite FIdTempExp to FIdUseExp
      */
     public void ASTNode.clearScalarized() {
@@ -45,7 +45,7 @@ aspect FunctionScalarization {
             node.clearScalarized();
     }
     
-    public void FQName.clearScalarized() {
+    public void FAccess.clearScalarized() {
         scalarized = false;
     }
     
@@ -56,7 +56,7 @@ aspect FunctionScalarization {
     }
     
     rewrite FIdTempExp {
-        when (clearScalarized) to FIdUseExp new FIdUseExp(getFIdUse());
+        when (clearScalarized) to FIdUseExp new FIdUseExp(getCommonAccess());
     }
     
     /**
@@ -429,7 +429,7 @@ aspect FunctionScalarization {
                     names.fillLayer(arg);
                     
                     String tempName = arg.calcTempVarName();
-                    FIdUseExp tempExp = new FIdUseExp(new FIdUse(tempName));
+                    FIdUseExp tempExp = new FIdUseExp(new FAccessString(tempName));
 
                     FType tempType = arg.type().arrayType(arg.size().contract(1));
                     s.block(firstLoop).addTempVar(tempType, tempName);
@@ -747,7 +747,7 @@ aspect FunctionScalarization {
         super.addArrayUsesToIndexMap(names);
     }
     
-    public void FIdUse.addArrayUsesToIndexMap(FExp[] names) {
+    public void CommonAccess.addArrayUsesToIndexMap(FExp[] names) {
         if (isArray()) {
             int i = 0;
             for (FArraySubscripts fas : allFArraySubscripts()) {
@@ -987,7 +987,7 @@ aspect FunctionScalarizationHelpers {
          * @param inner  list of statements put inside the loop
          * @param var    name of the variable to loop over
          */
-        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FQName var) {
+        public void createForLoops(List<FStatement> outer, List<FStatement> inner, FAccess var) {
             int n = topLayer().length;
             FExp[] sizes = new FExp[n];
             for (int i = 0; i < n; i++) {
@@ -1039,7 +1039,7 @@ aspect FunctionScalarizationHelpers {
             FArraySubscripts fas = new FArraySubscripts();
             for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
-                    fas.addFSubscript(new FIdTempExp(new FIdUse(new FQNameFull(topLayer()[i]))));
+                    fas.addFSubscript(new FIdTempExp(new FAccessFull(topLayer()[i])));
                 else
                     fas.addFSubscript(new FIntegerLitExp(1));
             }

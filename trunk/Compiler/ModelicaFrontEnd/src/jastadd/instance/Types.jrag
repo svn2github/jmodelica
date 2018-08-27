@@ -283,7 +283,7 @@ aspect DerivativeFunctions {
     eq FType.shouldBeDifferentiated()             = isReal() || isRecord();
     eq FFunctionVariable.shouldBeDifferentiated() = delegateShouldBeDifferentiated();
     eq FVariable.shouldBeDifferentiated()         = variability().continuousVariability();
-    eq FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
+    eq FAccess.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
     eq FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && 
             (inFunction() || isContinuousExp());
     eq FEventGenExp.shouldBeDifferentiated()      = false;
@@ -347,7 +347,7 @@ aspect DerivativeFunctions {
     syn Set<String> FFunctionDecl.zeroDerivative(AnnotationNode derNode) {
         Set<String> set = new HashSet<String>();
         for (AnnotationNode zeroNode : derNode.allFor("zeroDerivative")) {
-            set.add(zeroNode.fExp().asFIdUse().name());
+            set.add(zeroNode.fExp().asCommonAccess().name());
         }
         return set;
     }
@@ -358,7 +358,7 @@ aspect DerivativeFunctions {
     syn Set<String> FFunctionDecl.noDerivative(AnnotationNode derNode) {
         Set<String> set = new HashSet<String>();
         for (AnnotationNode noDerNode : derNode.allFor("noDerivative")) {
-            set.add(noDerNode.fExp().asFIdUse().name());
+            set.add(noDerNode.fExp().asCommonAccess().name());
         }
         return set;
     }
@@ -375,7 +375,7 @@ aspect DerivativeFunctions {
     syn FFunctionDecl FFunctionDecl.derivativeFunction(AnnotationNode derNode) {
         FCallable fc = null;
         if (derNode != null && derNode.exists()) {
-            fc = derNode.fExp().asFIdUse().myFCallable();
+            fc = derNode.fExp().asCommonAccess().myFCallable();
         }
         return (fc == null) ? null : fc.asFFunctionDecl();
     }

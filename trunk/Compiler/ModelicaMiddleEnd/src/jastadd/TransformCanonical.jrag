@@ -774,8 +774,8 @@ aspect TransformCanonical {
     
     syn FAbstractVariable FAbstractEquation.isPrePropagationEquation() = null;
     eq FEquation.isPrePropagationEquation() {
-        FAbstractVariable left = getLeft().isAccess() ? getLeft().asFIdUse().myFV() : null;
-        FAbstractVariable right = getRight().isAccess() ? getRight().asFIdUse().myFV() : null;
+        FAbstractVariable left = getLeft().isAccess() ? getLeft().asCommonAccess().myFV() : null;
+        FAbstractVariable right = getRight().isAccess() ? getRight().asCommonAccess().myFV() : null;
         return left == right ? left : null;
     }
     
@@ -835,7 +835,7 @@ aspect TransformCanonical {
 		for (FAlgorithm alg : myAlgorithms()) {
 			// Create function declaration
 			List<FFunctionVariable> vars = new List<FFunctionVariable>();
-			FQName funcName = new FQNameString(alg.generateFunctionName());
+			FAccess funcName = new FAccessString(alg.generateFunctionName());
 			
 			// - Find inputs
 			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
@@ -886,7 +886,7 @@ aspect TransformCanonical {
 					}
 					
 					// Rename input
-                    ffv.setFQName(new FQNameString(name));
+                    ffv.setFAccess(new FAccessString(name));
 					
 					// Create and add binding expression for output
                     stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), ffv.createUseExp()));
@@ -906,10 +906,10 @@ aspect TransformCanonical {
 			for (int i = 0; i < outVars.size(); i++)
 				sizes[i] = outVars.get(i).size();
             FType type = FFunctionType.create(funcName.name(), outVars, this);
-            FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, type);
+            FFunctionCall call = new FFunctionCall(funcName, args, type);
 			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 			for (FVariable fv : outVars)
-				lefts.add(fv.getFQName().createFFunctionCallLeft());
+				lefts.add(fv.getFAccess().createFFunctionCallLeft());
 			replaceEquation(alg, new FFunctionCallEquation(lefts, call));
 			
 			// Add return statement, create function declaration and add it to FClass 
@@ -928,8 +928,8 @@ aspect TransformCanonical {
 	/**
 	 * Create an FFunctionCallLeft using a copy of this name.
 	 */
-	public FFunctionCallLeft FQName.createFFunctionCallLeft() {
-		FQName fqn = fullCopy();
+	public FFunctionCallLeft FAccess.createFFunctionCallLeft() {
+		FAccess fqn = fullCopy();
 		fqn.removeFArraySubscripts();
 		return new FFunctionCallLeft(new Opt(new FIdUseExp(fqn)));
 	}
@@ -968,7 +968,7 @@ aspect TransformCanonical {
 	 */
 	public FFunctionVariable FVariable.createFFunctionVariable(TypePrefixInputOutput io) {
 		FType type = (FType) type().fullCopy();
-		return new FFunctionVariable(io, type, new Opt(), getFQName().fullCopy());
+		return new FFunctionVariable(io, type, new Opt(), getFAccess().fullCopy());
 	}
 
     public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIABLE =
@@ -1066,7 +1066,7 @@ aspect TransformCanonical {
         fdv.setVisibilityType(getVisibilityType());
         fdv.setTypePrefixVariability(getTypePrefixVariability());
         fdv.setTypePrefixInputOutput(TypePrefixInputOutput.NONE);
-        fdv.setFQName(getFQName().fullCopy());
+        fdv.setFAccess(getFAccess().fullCopy());
         fdv.setOrder(order() + 1);
         fdv.setMeIntegrated(this);
         this.setMeDifferentiated(fdv);
@@ -1114,7 +1114,7 @@ aspect TransformCanonical {
     }
     
     public void FPreExp.gatherContinuousVariablesUsedInPre(Set<FVariable> res) {
-        FAbstractVariable fv = getFIdUse().myFV();
+        FAbstractVariable fv = getCommonAccess().myFV();
         if (fv.isContinuous())
             res.add((FVariable) fv);
     }
@@ -1337,7 +1337,7 @@ aspect TransformCanonical {
 
     syn boolean FAbstractVariable.canBeAlias() = false;
     // TODO: Use meDifferentiated instead of myDerivativeVariable()
-    eq FVariable.canBeAlias() = !getFQName().myDerFV(order() + 1).isDummyDerivativeVariable() 
+    eq FVariable.canBeAlias() = !getFAccess().myDerFV(order() + 1).isDummyDerivativeVariable() 
             && !isPreVariable() && !isNonDummyDerivativeVariable()
             && !isInput() && !isOutput();
 
@@ -1528,8 +1528,8 @@ aspect TransformCanonical {
 	boolean FAssignStmt.rewriteAlias = false;
 
     /**
-     * FIdUses referring to alias variables need to be changed to 
-     * FIdUses referring to their alias targets. 
+     * CommonAccesss referring to alias variables need to be changed to 
+     * CommonAccesss referring to their alias targets. 
      * 
      * This is done by rewrites which are activated once FIdUseExp.rewriteAlias
      * is true. Notice that in order for the rewrite to be enable, the is$final
@@ -1613,7 +1613,7 @@ aspect TransformCanonical {
      * method ASTNode.flushAllRecursiveClearFinal. 
      */
     rewrite FAbstractDerExp {
-        when (rewriteAlias && getFIdUse().myFV().isFVariable() && (myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
+        when (rewriteAlias && getCommonAccess().myFV().isFVariable() && (myFV().isAlias() || getCommonAccess().myFV().isAlias())) to FExp {
             if (myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
@@ -1623,12 +1623,12 @@ aspect TransformCanonical {
                 else
                     return new_exp;
             } else {
-                FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
+                FAccess new_name = ((FVariable)getCommonAccess().myFV()).alias().getFAccess().treeCopy();
                 FAbstractDerExp new_exp = createEmptyNode();
-                new_exp.setFIdUse(new FIdUse(new_name));
+                new_exp.setCommonAccess(new_name);
                 new_exp.setOrder(order());
-                new_exp.setOriginalVariable(this, getFIdUse().myFV());
-                if (getFIdUse().myFV().isNegated())
+                new_exp.setOriginalVariable(this, getCommonAccess().myFV());
+                if (getCommonAccess().myFV().isNegated())
                     return new FNegExp(new_exp);
                 else
                     return new_exp;
@@ -1661,7 +1661,7 @@ aspect TransformCanonical {
      * Rewrite derivatives of parameters to zeros.
      */
     rewrite FAbstractDerExp {
-        when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().parameterOrLess()) to FExp {
+        when (getCommonAccess().myFV().isFVariable() && getCommonAccess().myFV().variability().parameterOrLess()) to FExp {
             return new FRealLitExp(0.0);
         }
     }
@@ -1811,7 +1811,7 @@ aspect TransformCanonical {
 		var.uses().remove(this);
 		var.definingUses().remove(this);
 		var.nonDefiningUses().remove(this);
-		getFIdUse().getFQName().removeFromUses();
+		getCommonAccess().asFAccess().removeFromUses();
 	}
 	
 	/**
@@ -1820,10 +1820,10 @@ aspect TransformCanonical {
 	 * Should only be used to allow iterative algorithms to use updated uses lists while 
 	 * removing expressions. Only valid in flat tree.
 	 */
-	public void FQName.removeFromUses() {}
+	public void FAccess.removeFromUses() {}
 	
-	public void FQNameFull.removeFromUses() {
-		for (FQNamePart p : getFQNameParts())
+	public void FAccessFull.removeFromUses() {
+		for (FAccessPart p : getFAccessParts())
 			if (p.hasFArraySubscripts())
 				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
 					s.removeFromUses();
@@ -1990,7 +1990,7 @@ aspect TransformCanonical {
 		when (rewriteEquivalentRecord)
 		to FRecordVariable {
 			rewriteEquivalentRecord = false;
-			setRecord(myFClass().createEquivalentRecordFQName(getRecord()));
+			setRecord(myFClass().createEquivalentRecordAccess(getRecord()));
 			flushAll();
 			return this;
 		}
@@ -2000,8 +2000,8 @@ aspect TransformCanonical {
         when (rewriteEquivalentRecord)
         to FRecordConstructor {
             rewriteEquivalentRecord = false;
-            FQName old = getRecord().getFQName();
-            getRecord().setFQName(myFClass().createEquivalentRecordFQName(old));
+            FRecordAccess old = getRecord();
+            setRecord(myFClass().createEquivalentRecordAccess(getRecord()));
             int[] order = myFClass().getEquivalentRecordComponentOrder(old);
             if (order != null) {
                 List<FExp> args = new List<>();
@@ -2015,12 +2015,12 @@ aspect TransformCanonical {
         }
     }
 
-	public FQName FClass.createEquivalentRecordFQName(FQName old) {
+    public FRecordAccess FClass.createEquivalentRecordAccess(FRecordAccess old) {
 		FRecordDecl rec = equivalentRecordMap.get(old.name());
-		return (rec != null) ? rec.getFQName().fullCopy() : old;
+		return (rec != null) ? rec.getFAccess().createFRecordAccess() : old;
 	}
 
-    public int[] FClass.getEquivalentRecordComponentOrder(FQName old) {
+    public int[] FClass.getEquivalentRecordComponentOrder(FAccess old) {
         return equivalentRecordComponentOrderMap.get(old.name());
     }
 
@@ -2082,7 +2082,7 @@ aspect TransformCanonical {
         } else {
             v = type().funcOutputVariability();
         }
-        fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), v));
+        fClass.addFVariable(type().createTempFVariable(new FAccessString(tempName), v));
         replaceMe(new FIdUseExp(tempName));
         FEquation e = new FEquation(this, new FIdUseExp(tempName));
         if (param) {
@@ -2354,7 +2354,7 @@ aspect ParameterSorting {
 	}
 	
 	public void FIdUseExp.removeBindingExpOfReferencedVars() {
-		getFIdUse().myFV().removeBindingExp();
+		getCommonAccess().myFV().removeBindingExp();
 	}
 	
 	/**
@@ -2378,15 +2378,15 @@ aspect ParameterSorting {
 	 * Test if this is a use of a parameter (in the flat tree).
 	 */
 	syn boolean FExp.isFlatParameterUse()   = false;
-	eq FIdUseExp.isFlatParameterUse()       = getFIdUse().isFlatParameterUse();
-	syn boolean FIdUse.isFlatParameterUse() = myFV().isParameter();
+	eq FIdUseExp.isFlatParameterUse()       = getCommonAccess().asFAccess().isFlatParameterUse();
+	syn boolean FAccess.isFlatParameterUse() = myFV().isParameter();
 	
 	/**
 	 * Convert this parameter equation to a binding expression.
 	 */
 	public void FAbstractEquation.revertToBindingExp() {}
 	public void FEquation.revertToBindingExp() throws ConstantEvaluationException {
-		FVariable fv = (FVariable) ((FIdUseExp) getLeft()).getFIdUse().myFV();
+		FVariable fv = (FVariable) ((FIdUseExp) getLeft()).getCommonAccess().myFV();
 		fv.setBindingExp(getRight().ceval().buildLiteral());
 	}
 
@@ -2396,7 +2396,7 @@ aspect DummyDerivatives {
 
     rewrite FDerExp {
         when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
-            return new FDummyDerExp(getFIdUse(), getOriginalVariable(), order());
+            return new FDummyDerExp(getCommonAccess(), getOriginalVariable(), order());
         }
     }
 
@@ -2421,7 +2421,7 @@ aspect DummyDerivatives {
 
     rewrite FDerExp {
         when (rewriteFHDer && order() > 1) to FDerExp 
-        new FDerExp(getFIdUse().getFQName().createDerPrefixedName(order() - 1));
+        new FDerExp(getCommonAccess().asFAccess().createDerPrefixedName(order() - 1));
     }
 
 }
@@ -2585,7 +2585,7 @@ aspect StateInitialEquations {
         setFInitialEquationList(new List());
         
         for (FVariable fv : differentiatedRealVariables()) {
-            FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
+            FAccess nameToAdd = fv.getFAccess().copyAndAddPrefix("_start_");
             FRealVariable fvToAdd = new FRealVariable(VisibilityType.PUBLIC, Variability.FIXEDPARAMETER, nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());

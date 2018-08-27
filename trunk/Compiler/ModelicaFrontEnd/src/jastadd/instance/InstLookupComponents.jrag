@@ -444,7 +444,7 @@ aspect InstLookupComponents {
     /**
      * Get a specific child access, triggering transformations on that child, but *not* on the entire list.
      */
-    syn InstAccess InstDot.getInstAccessNoListTrans(int i) = (InstAccess) getInstAccessListNoTransform().getChild(i);
+    syn InstAccess InstDot.getInstAccessNoListTrans(int i) = getInstAccessListNoTransform().getChild(i);
 
     /**
      * Lookup the specific array component corresponding to this access, using current ceval() 
@@ -720,8 +720,6 @@ aspect InstLookupComponents {
     eq InstGlobalAccess.myInstComponentDecl()              = getInstAccess().myInstComponentDecl();
     eq InstComponentAccess.myInstComponentDecl()           = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
     eq InstComponentArrayAccess.myInstComponentDecl()      = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
-    
-    syn InstComponentDecl FIdUseInstAccess.myInstComponentDecl() = getInstAccess().myInstComponentDecl();
     
     syn InstLookupResult<InstComponentDecl> InstAccess.myInstLookupComponent() = lookupInstComponent(name());
     

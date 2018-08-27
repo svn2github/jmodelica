@@ -75,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/FRealVariable.h"
 #include "org/jmodelica/optimica/compiler/FDerivativeVariable.h"
 #include "org/jmodelica/optimica/compiler/FTimedVariable.h"
-#include "org/jmodelica/optimica/compiler/FIdUse.h"
+#include "org/jmodelica/optimica/compiler/CommonAccess.h"
 #include "org/jmodelica/optimica/compiler/FExp.h"
 #include "org/jmodelica/optimica/compiler/FFunctionDecl.h"
 #include "org/jmodelica/optimica/compiler/Root.h"

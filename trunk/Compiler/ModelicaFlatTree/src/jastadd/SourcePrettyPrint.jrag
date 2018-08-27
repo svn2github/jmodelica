@@ -31,11 +31,11 @@ aspect SourcePrettyPrint {
 		prettyPrint(p, str, indent);
 	}
 	
-	public void FIdUse.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// to ignore the error output
+	public void CommonAccess.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// to ignore the error output
 		prettyPrint(p, str, indent);
 	}
 	
-	public void FQNameString.sourcePrettyPrint(Printer p, CodeStream str, String indent){	// to ignore the error output
+	public void FAccessString.sourcePrettyPrint(Printer p, CodeStream str, String indent){	// to ignore the error output
 		prettyPrint(p, str, indent);
 	}
 	

@@ -143,14 +143,14 @@ aspect IndexReduction {
             if (fv.isDerivativeVariable()) {
                 if (result.getDummyDerivatives().contains(fv)) {
                     FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getVisibilityType(),
-                        fv.getTypePrefixVariability(), fv.getFQName().fullCopy(), fv.order());
+                        fv.getTypePrefixVariability(), fv.getFAccess().fullCopy(), fv.order());
                     l.add(fdv);
                 } else if (fv.order() > 1) {
                     // Convert higher order derivative variables into
                     // first order derivatives, generating variables for each step
-                    FQName fqnPrev = fv.getFQName().fullCopy();
+                    FAccess fqnPrev = fv.getFAccess().fullCopy();
                     for (int i = 1; i < fv.order(); i++) {
-                        FQName fqn = fv.getFQName().createDerPrefixedName(i);
+                        FAccess fqn = fv.getFAccess().createDerPrefixedName(i);
                         l.add(new FRealVariable(VisibilityType.PUBLIC,
                                 fv.getTypePrefixVariability(), fqn.fullCopy()));
                         // Derivative variable is added later
@@ -262,15 +262,15 @@ aspect IndexReduction {
 
     
     /**
-     * Create a new FQName that is a copy of this one, prefixed with "_der" <code>order</code> times in the last name part.
+     * Create a new FAccess that is a copy of this one, prefixed with "_der" <code>order</code> times in the last name part.
      */
-    public FQName FQName.createDerPrefixedName(int order) {
-        FQName pref = copyPrefix();
+    public FAccess FAccess.createDerPrefixedName(int order) {
+        FAccess pref = copyPrefix();
         String name = lastActualPartName();
         if (name.startsWith("_"))
             name = name.substring(1);
         name = createDerPrefixString(order) + name;
-        FQName der;
+        FAccess der;
         if (hasFArraySubscripts())
             der = pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
         else
@@ -280,10 +280,10 @@ aspect IndexReduction {
     }
     
     /**
-     * Create a new FQName that is a copy of this one, prefixed with "_der" <code>order</code> times in the first name
+     * Create a new FAccess that is a copy of this one, prefixed with "_der" <code>order</code> times in the first name
      * part. This function is used in functions, instead of createDerPrefixedName(int).
      */
-    public FQName FQName.createDerPrefixedFunctionName(int order) {
+    public FAccess FAccess.createDerPrefixedFunctionName(int order) {
         String prefix = createDerPrefixString(order);
         return copyAndAddPrefix(prefix, true);
     }
@@ -784,7 +784,7 @@ aspect IndexReduction {
             else if (!originalDiffedFEqns.contains(fEqn))
                 newExtraEquations.add(fEqn);
             for (FIdUseExp use : fEqn.findFIdUseExpsInTree()) {
-                String baseName = use.getFIdUse().name();
+                String baseName = use.getCommonAccess().name();
                 FVariable topTempDerivative = temporaryVarsMap.get(baseName);
                 if (topTempDerivative == null)
                     continue;
