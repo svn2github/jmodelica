@@ -24,6 +24,7 @@ import os
 import numpy as N
 import sys as S
 import scipy.sparse.csc
+from collections import OrderedDict
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
@@ -32,6 +33,7 @@ import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 from pyjmi.log import parse_jmi_log, gather_solves
 from pyfmi.common.io import ResultHandler
+import pyfmi.fmi_util as fmi_util
 import pyfmi.fmi as fmi
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
@@ -45,6 +47,28 @@ ME2 = 'bouncingBall2_me.fmu'
 CS2 = 'bouncingBall2_cs.fmu'
 ME1 = 'bouncingBall.fmu'
 CS1 = 'bouncingBall.fmu'
+
+class Test_FMIUtil:
+    
+    @testattr(stddist_full = True)
+    def test_cpr_seed(self):
+        structure = OrderedDict([('der(inertia3.phi)', ['inertia3.w']),
+             ('der(inertia3.w)', ['damper.phi_rel', 'inertia3.phi']),
+             ('der(damper.phi_rel)', ['damper.w_rel']),
+             ('der(damper.w_rel)',
+              ['damper.phi_rel', 'damper.w_rel', 'inertia3.phi'])])
+        
+        states = ['inertia3.phi', 'inertia3.w', 'damper.phi_rel', 'damper.w_rel']
+        
+        groups = fmi_util.cpr_seed(structure, states)
+        
+        assert groups[0][5] == [1,2,3]
+        assert groups[1][5] == [5,7]
+        assert groups[2][5] == [8,9]
+        assert groups[0][4] == [0,1,2]
+        assert groups[1][4] == [3,4]
+        assert groups[2][4] == [5,6]
+
 
 class Test_FMUModelBase2:
     @classmethod

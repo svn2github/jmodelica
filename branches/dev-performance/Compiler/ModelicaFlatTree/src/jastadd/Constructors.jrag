@@ -363,7 +363,7 @@ aspect Constructors {
 		this();
 		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
 		setFVariable(new FIntegerVariable(VisibilityType.TEMPORARY, 
-				Variability.parameter(), new FAccessString(name)));
+				Variability.FIXEDPARAMETER, new FAccessString(name)));
 	}
 	
 	/**
@@ -617,14 +617,14 @@ aspect Constructors {
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.continuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.continuous(), TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
     }
     
 	/**

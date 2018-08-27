@@ -894,16 +894,29 @@ aspect CCodeGen {
 	}
 
     public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPreSteps(this, str, indent);
-        FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
-        boolean noExp = exp == null;
-        if (noExp)
-            setBindingExp(exp = type().zeroLiteral());
-        genAssignment_C(p, str, indent, name_C(), exp, false);
-        if (noExp)
-            setBindingExpOpt(new Opt());
-        p.printPostSteps(this, str, indent);
+        if (shouldGenStartValue()) {
+            p.printPreSteps(this, str, indent);
+            FExp exp = startValueExp();
+            boolean noExp = exp == null;
+            Opt bindingExpOpt = null;
+            if (noExp) {
+                bindingExpOpt = getBindingExpOpt();
+                setBindingExp(exp = type().zeroLiteral());
+            }
+            genAssignment_C(p, str, indent, name_C(), exp, false);
+            if (noExp) {
+                setBindingExpOpt(bindingExpOpt);
+            }
+            p.printPostSteps(this, str, indent);
+        }
     }
+
+    syn boolean FVariable.shouldGenStartValue() {
+        FExp exp = startValueExp();
+        return !type().isNumeric() || (exp != null && !exp.isZeroLiteral());
+    }
+
+    syn FExp FVariable.startValueExp() = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 
     public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right,
             boolean neg) {

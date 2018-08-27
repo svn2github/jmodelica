@@ -941,7 +941,6 @@ $C_DAE_initial_dependent_parameter_assignments$
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _p_0 = (0.0);
     JMI_DYNAMIC_FREE()
     return ef;
 }

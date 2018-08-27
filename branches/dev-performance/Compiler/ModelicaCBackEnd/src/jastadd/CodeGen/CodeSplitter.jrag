@@ -169,7 +169,7 @@ aspect CodeSplitter {
         return n;
     }
 
-    eq FVariable.numScalars_C() = 1;
+    eq FVariable.numScalars_C() = shouldGenStartValue() ? 1 : 0;
 
     eq FAbstractEquation.numScalars_C() {
         int n = numScalarEquations();

@@ -21,29 +21,23 @@
  */
 aspect OptimicaVariability {
 
-    public class Timed extends TypePrefixVariability {
-        private Timed() {}
+    class Variability {
+        public static final Timed TIMED = new Timed();
+        public static final OptParameter OPTPARAMETER = new OptParameter();
     }
-    
-    public class OptParameter extends Parameter {
-        private OptParameter() {}
-    }
+
+    public class Timed extends TypePrefixVariability {}
+    public class OptParameter extends Parameter {}
 
 	public boolean TypePrefixVariability.timedVariability() { return false; }
 	public boolean Timed.timedVariability() { return true; }
 	
 	syn boolean FExp.isTimedExp() = variability().timedVariability();
 	
-	eq FTimedVariable.variability()    = Variability.timed();
-	eq InstTimedVariable.variability() = Variability.timed();
-	eq FStartTimeExp.variability()     = Variability.parameter();
-	eq FFinalTimeExp.variability()     = Variability.parameter();
-	
-	public static final Timed Timed.instance = new Timed();	
-	public static Timed Variability.timed() { return Timed.instance; }
-		
-	public static final OptParameter OptParameter.instance = new OptParameter();	
-	public static OptParameter Variability.optParameter() { return OptParameter.instance; }
+    eq FTimedVariable.variability()    = Variability.TIMED;
+    eq InstTimedVariable.variability() = Variability.TIMED;
+	eq FStartTimeExp.variability()     = Variability.FIXEDPARAMETER;
+	eq FFinalTimeExp.variability()     = Variability.FIXEDPARAMETER;
 	
 	public boolean TypePrefixVariability.optParameterVariability() { return false; }
 	public boolean OptParameter.optParameterVariability() { return true; }	
@@ -51,8 +45,8 @@ aspect OptimicaVariability {
 	
 	protected int Timed.variabilityLevel()        { return VARIABILITY_LEVEL; }
 	protected int OptParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
-	protected static final int Timed.VARIABILITY_LEVEL        = Discrete.VARIABILITY_LEVEL - 5;
-	protected static final int OptParameter.VARIABILITY_LEVEL = FixedParameter.VARIABILITY_LEVEL;
+	protected static final int Timed.VARIABILITY_LEVEL        = Variability.DISCRETE.variabilityLevel() - 5;
+	protected static final int OptParameter.VARIABILITY_LEVEL = Variability.FIXEDPARAMETER.variabilityLevel();
 	
 	public int OptParameter.combineLevel() { return variabilityLevel() * 10 + 5; }
 	
@@ -65,7 +59,7 @@ aspect OptimicaVariability {
     refine InstVariability eq InstAssignable.calcVariability() {
         TypePrefixVariability v = refined();
         if (v.parameterVariability() && freeAttribute()) {
-            v = Variability.optParameter();
+            v = Variability.OPTPARAMETER;
         }
         return v;
     }
@@ -76,7 +70,7 @@ aspect OptimicaVariability {
     public String Timed.toStringLiteral()        { return "timed"; }
     public String OptParameter.toStringLiteral() { return "free parameter"; }
     
-    syn boolean FConstraint.isTimed()     = variability().lessOrEqual(Variability.timed());
+    syn boolean FConstraint.isTimed()     = variability().lessOrEqual(Variability.TIMED);
     syn boolean FConstraint.isParameter() = variability().parameterOrLess();
     
     syn TypePrefixVariability FConstraint.variability();
@@ -84,7 +78,7 @@ aspect OptimicaVariability {
     eq InstForClauseC.variability() = combineFConstraintsListVariability(getFConstraints());
     
     syn TypePrefixVariability FConstraint.combineFConstraintsListVariability(List<FConstraint> l) {
-        TypePrefixVariability res = Variability.constant();
+        TypePrefixVariability res = Variability.CONSTANT;
         for (FConstraint c : l) {
             res = res.combine(c.variability());
         }

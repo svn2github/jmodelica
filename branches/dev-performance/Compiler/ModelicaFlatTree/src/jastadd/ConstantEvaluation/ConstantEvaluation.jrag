@@ -1917,7 +1917,7 @@ aspect ConstantEvaluation {
      */ 
     syn boolean FExp.equalsRealValue(double val) {
     	try {
-    		return variability().lessOrEqual(Variability.constant()) && ceval().realValue()==val;
+    		return variability().lessOrEqual(Variability.CONSTANT) && ceval().realValue()==val;
     	} catch(Exception e) {
     		return false;
     	}
