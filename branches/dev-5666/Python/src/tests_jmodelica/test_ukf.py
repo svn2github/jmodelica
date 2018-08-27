@@ -287,7 +287,7 @@ class Test_AlgorithmMethods_UKF:
         assert N.allclose(yp, N.array([[1.00988634]]), rtol=1e-03, atol=1e-04)
         
         #Assert covariance and gain
-        assert N.allclose(K, [[0.99995099], [0.00497003]])
+        assert N.allclose(K, [[0.99995099], [0.00497003]], rtol=1e-4)
         assert N.allclose(P, [[1.00099995e-01, 4.97003235e-07],
                               [4.97003235e-07, 1.00115269e+00]])
     
@@ -306,6 +306,6 @@ class Test_AlgorithmMethods_UKF:
         assert N.allclose(self.ukf.yp, [[1.00988634]], rtol=1e-03, atol=1e-04)
         
         #Assert covariance and gain
-        assert N.allclose(self.ukf.K, [[0.99995099], [0.00497003]])
+        assert N.allclose(self.ukf.K, [[0.99995099], [0.00497003]], rtol=1e-4)
         assert N.allclose(self.ukf.P, [[1.00099995e-01, 4.97003235e-07],
                                        [4.97003235e-07, 1.00115269e+00]])
