@@ -469,8 +469,8 @@ class Test_CoupledFMUModelME2:
 
         res = coupled_model.simulate(final_time=4)
         
-        nose.tools.assert_almost_equal(res.final("plant.speed"),res_full.final("plant.speed"), places=4)
-        nose.tools.assert_almost_equal(res.final("plant.inputTorque"),res_full.final("plant.inputTorque"), places=4)
-        nose.tools.assert_almost_equal(res.initial("plant.speed"),res_full.initial("plant.speed"), places=4)
-        nose.tools.assert_almost_equal(res.initial("plant.inputTorque"),res_full.initial("plant.inputTorque"), places=4)
+        nose.tools.assert_almost_equal(res.final("plant.speed"),res_full.final("plant.speed"), places=3)
+        nose.tools.assert_almost_equal(res.final("plant.inputTorque"),res_full.final("plant.inputTorque"), places=3)
+        nose.tools.assert_almost_equal(res.initial("plant.speed"),res_full.initial("plant.speed"), places=3)
+        nose.tools.assert_almost_equal(res.initial("plant.inputTorque"),res_full.initial("plant.inputTorque"), places=3)
         
