@@ -280,14 +280,14 @@ class Test_AlgorithmMethods_UKF:
         
         #Assert predicted mean and measurement
         print xp
-        assert N.allclose(xp, [[1.00988634], [0.0172094]])
         print yp
-        assert N.allclose(yp, N.array([[1.00988634]]))
+        print K
+        print P
+        assert N.allclose(xp, [[1.00988634], [0.0172094]], rtol=1e-03, atol=1e-04)
+        assert N.allclose(yp, N.array([[1.00988634]]), rtol=1e-03, atol=1e-04)
         
         #Assert covariance and gain
-        print K
         assert N.allclose(K, [[0.99995099], [0.00497003]])
-        print P
         assert N.allclose(P, [[1.00099995e-01, 4.97003235e-07],
                               [4.97003235e-07, 1.00115269e+00]])
     
@@ -299,13 +299,13 @@ class Test_AlgorithmMethods_UKF:
         self.ukf.predict(u, known_values)
         #Assert predicted mean and measurement
         print self.ukf.xp
-        assert N.allclose(self.ukf.xp, [[1.00988634], [0.0172094]])
         print self.ukf.yp
-        assert N.allclose(self.ukf.yp, [[1.00988634]])
+        print self.ukf.K
+        print self.ukf.P
+        assert N.allclose(self.ukf.xp, [[1.00988634], [0.0172094]], rtol=1e-03, atol=1e-04)
+        assert N.allclose(self.ukf.yp, [[1.00988634]], rtol=1e-03, atol=1e-04)
         
         #Assert covariance and gain
-        print self.ukf.K
         assert N.allclose(self.ukf.K, [[0.99995099], [0.00497003]])
-        print self.ukf.P
         assert N.allclose(self.ukf.P, [[1.00099995e-01, 4.97003235e-07],
                                        [4.97003235e-07, 1.00115269e+00]])
