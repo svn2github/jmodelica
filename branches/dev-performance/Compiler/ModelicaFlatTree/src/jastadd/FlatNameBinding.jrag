@@ -20,21 +20,19 @@ import java.util.HashMap;
 
 aspect FlatNameBinding {
 
-    syn lazy FAbstractVariable FIdUseExp.myFV() = getCommonAccess().myFV();
+    syn lazy FAbstractVariable FAccessExp.myFV() = getFAccess().myFV();
     eq FAbstractDerExp.myFV()                   = myDerFV(order());
-    syn FAbstractVariable CommonAccess.myFV() { throw new UnsupportedOperationException(); }
-    syn FAbstractVariable FReinit.myFV()        = getVar().asFIdUseExp().myFV();
+    syn FAbstractVariable FReinit.myFV()        = getVar().asFAccessExp().myFV();
 
-    syn FAbstractVariable FIdUseExp.myDerFV(int index) = getCommonAccess().myDerFV(index);
-    syn FAbstractVariable CommonAccess.myDerFV(int index) { throw new UnsupportedOperationException(); }
-    eq FAccess.myDerFV(int index)    = lookupFV(derName(index));
+    syn FAbstractVariable FAccessExp.myDerFV(int index) = getFAccess().myDerFV(index);
+    syn FAbstractVariable FAccess.myDerFV(int index)    = lookupFV(derName(index));
 
     syn FAbstractVariable FAccess.myPreFV() = lookupFV(preName());
 
-    syn FFunctionVariable FIdUseExp.myFuncFV() = getCommonAccess().asFAccess().myFuncFV();
+    syn FFunctionVariable FAccessExp.myFuncFV() = getFAccess().myFuncFV();
     syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
-    syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getCommonAccess().myCommonVarDecl();
+    syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getAccess().myCommonVarDecl();
     syn CommonVariableDecl CommonAccess.myCommonVarDecl();
     eq  FAccess.myCommonVarDecl()     = myFV();
     eq  InstAccess.myCommonVarDecl() = myInstComponentDecl();
@@ -150,7 +148,7 @@ aspect FlatNameBinding {
             i == 0 ? null : getFAccessPart(i - 1).myFV();
 	
 	syn boolean CommonAccess.isForIndex();
-	syn boolean FIdUseExp.isForIndex() = getCommonAccess().isForIndex();
+	syn boolean FIdUseExp.isForIndex() = getAccess().isForIndex();
 	eq FAccess.isForIndex()             = myFV().isForIndex();
 	eq InstAccess.isForIndex()         = myInstComponentDecl().isForIndex();
     inh boolean FAbstractVariable.isForIndex();
@@ -210,9 +208,9 @@ aspect ParameterEquations {
 			e.addToParameterEquationsMap(map, equ);
 	}
 	
-	public void FIdUseExp.addToParameterEquationsMap(
+	public void FAccessExp.addToParameterEquationsMap(
 			Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
-        getCommonAccess().myFV().addToParameterEquationsMap(map, equ);
+        getFAccess().myFV().addToParameterEquationsMap(map, equ);
 	}
 	
     public void FAbstractVariable.addToParameterEquationsMap(
@@ -364,8 +362,8 @@ aspect FlatExternalObjectBinding {
 }
 
 aspect FlatPreBinding {
-	syn FAbstractVariable FPreExp.myFV()       = lookupFV(getCommonAccess().asFAccess().preName());
-	syn FAbstractVariable FPreExp.myNonPreFV() = getCommonAccess().myFV();
+	syn FAbstractVariable FPreExp.myFV()       = lookupFV(getFAccess().preName());
+	syn FAbstractVariable FPreExp.myNonPreFV() = getFAccess().myFV();
 }
 
 aspect UnknownFVariables {

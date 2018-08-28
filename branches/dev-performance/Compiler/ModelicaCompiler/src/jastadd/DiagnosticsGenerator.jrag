@@ -1098,15 +1098,15 @@ aspect HTMLMarkupPrinter {
     eq FClass.htmlPrintWrapTag() = "div";
     eq FClass.htmlPrintWrapTagClass() = "fclass";
 
-    eq FIdUseExp.htmlPrintWrapTagClass() {
+    eq FAccessExp.htmlPrintWrapTagClass() {
         FAbstractVariable fv = myFV();
         if (fv != null && fv.isFVariable()) {
             return "varRef " + fv.asFVariable().zVariability();
         }
         return null;
     }
-    eq FIdUseExp.htmlPrintLocalObject() = myFV();
-    eq FIdUseExp.htmlPrintWrapTagAttributes() {
+    eq FAccessExp.htmlPrintLocalObject() = myFV();
+    eq FAccessExp.htmlPrintWrapTagAttributes() {
         FAbstractVariable fv = myFV();
         if (fv == null || !fv.isFVariable()) {
             return null;

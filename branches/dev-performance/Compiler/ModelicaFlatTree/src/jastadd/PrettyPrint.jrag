@@ -1454,7 +1454,7 @@ aspect FlatPrettyPrint {
 
     public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print("init ");
-        p.print(getFIdUseExp(), str, indent);
+        p.print(getFAccessExp(), str, indent);
         str.print(" as ", type().scalarType());
         if (type().isArray()) {
             str.print(type().size());
@@ -1592,15 +1592,10 @@ aspect FlatPrettyPrint {
         str.print("_inStreamEpsilon");
     }
 
-	public void CommonAccess.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (asFAccess().isScalarized())
-			str.print(name());
-		else 
-			p.print(this, str, indent);
-	}
+	public abstract void CommonAccess.prettyPrint(Printer p, CodeStream str, String indent);
 
 	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		p.print(getCommonAccess(), str, indent);
+		p.print(getAccess(), str, indent);
 	}
 	
 	public void InstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -2093,12 +2088,12 @@ aspect PrettyPrint_MC {
  		prettyPrint(p, str, indent);
 	}
 	
-	public void FIdUseExp.prettyPrint_MC(Printer p, CodeStream str, String indent) {
+	public void FAccessExp.prettyPrint_MC(Printer p, CodeStream str, String indent) {
 		str.print(nameUnderscore());
 	}
 
     public void FDerExp.prettyPrint_MC(Printer p, CodeStream str, String indent) {
-        str.print("der(", getCommonAccess().nameUnderscore(), ")");
+        str.print("der(", getFAccess().nameUnderscore(), ")");
     }
 
 }

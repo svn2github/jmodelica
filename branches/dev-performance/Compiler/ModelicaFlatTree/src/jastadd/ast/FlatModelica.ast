@@ -632,7 +632,7 @@ FReturnStmt : FStatement;
 /**
  * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FIdUseExp;
+FInitArrayStmt : FStatement ::= FAccessExp;
 
 /**
  * Class for derivated array initalization statements.
@@ -994,13 +994,15 @@ FComponentExp : FExp ::= FExp <Name:String>;
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= CommonAccess <OriginalVariable:String>;
+abstract FIdUseExp : FAssignableExp;
+
+FAccessExp : FIdUseExp ::= FAccess <OriginalVariable:String>;
 
 /**
  * A reference to a dynamic state. These are the states that are introduced by
  * the compiler and exposed as state in the FMU.
  */
-FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FIdUseExp*/ Org:FIdUseExp;
+FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FAccessExp*/ Org:FAccessExp;
 
 /**
  * A reference to a dynamic derivative, similar to FDSRefExp but the derivative
@@ -1011,7 +1013,7 @@ FDSDerExp : FVarRefExp ::= <SetId:int> <Number:int> /Use:FExp*/;
 /**
  * Identifier of temporary variable, used during scalarization
  */
-FIdTempExp : FIdUseExp;
+FIdTempExp : FAccessExp;
 
 /**
  * The built-in function der in the instance tree.
@@ -1021,7 +1023,7 @@ InstDerExp : FUnaryExp;
 /**
  * Abstract super class for all der related expressions.
  */
-abstract FAbstractDerExp : FIdUseExp ::= <Order:int>;
+abstract FAbstractDerExp : FAccessExp ::= <Order:int>;
 
 /**
  * The built-in function der.
@@ -1049,7 +1051,7 @@ InstPreExp : FUnaryBuiltIn;
 /**
  * Pre built-in function.
  */
-FPreExp : FIdUseExp;
+FPreExp : FAccessExp;
 
 /**
  * Higher order derivatives occurring as a result of index reduction.
@@ -1676,7 +1678,7 @@ DynamicStateManager : BaseNode ::= Set:DynamicStateSet*;
 /**
  * A set of dynamic states
  */
-DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FIdUseExp* Coefficient:DynamicStateCoefficient* <StateVars:FDynamicStateVariable[]> <AlgebraicVars:FDynamicAlgebraicVariable[]>;
+DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FAccessExp* Coefficient:DynamicStateCoefficient* <StateVars:FDynamicStateVariable[]> <AlgebraicVars:FDynamicAlgebraicVariable[]>;
 
 /**
  * Node that contains the coefficient incidence for a specific dynamic state

@@ -20,12 +20,14 @@ aspect FlatteningAccess {
         return setLocationOf(flatten(f, 0));
     }
 
-    public FExp FIdUseExp.flatten(Flattener f, int order) {
-        if (!getCommonAccess().isInstAccess()) {
-            return treeCopy();
-        }
-        
-        InstAccess ia = asInstAccess();
+    public abstract FExp FIdUseExp.flatten(Flattener f, int order);
+    
+    public FExp FAccessExp.flatten(Flattener f, int order) {
+        return treeCopy();
+    }
+    
+    public FExp InstAccessExp.flatten(Flattener f, int order) {
+        InstAccess ia = getInstAccess();
         InstComponentDecl var = ia.myInstComponentDecl();
         if (!inFunction()) {
             if (ia.isNonAssignableArray()) {
@@ -304,7 +306,7 @@ aspect FlatteningFunctionConstant {
             fullUse.getFAccessPart(0).setName(ia.findTempVarName(this));
             use = fullUse;
         }
-        return new FIdUseExp(use);
+        return new FAccessExp(use);
     }
 
     private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;

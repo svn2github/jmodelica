@@ -163,10 +163,10 @@ aspect WhenClauses{
         return fullCopy();
     }
     
-    public FExp FIdUseExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
+    public FExp FAccessExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
         if (shouldExtractGuard())
             return super.asGuard(outerEqnList, stmtList, fclass);
         else
-            return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getCommonAccess().fullCopy())));
+            return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFAccess().fullCopy())));
     }
 }

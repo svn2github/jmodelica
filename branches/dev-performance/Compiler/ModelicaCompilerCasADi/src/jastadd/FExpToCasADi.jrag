@@ -358,9 +358,9 @@ aspect FExpToCasADi {
      * of MX instead. 
      * @return A MX
      */
-    eq FIdUseExp.toMX() {
+    eq FAccessExp.toMX() {
         if (myFV().inRecord()) {
-            return getParent().getMXVariableFromRecordHashMap(getCommonAccess().asFAccess().toString());
+            return getParent().getMXVariableFromRecordHashMap(getFAccess().toString());
         } else if (hasFArraySubscripts() && inFunction()) {
             int flatIndex = getFArraySubscripts().computeFlattenedIndexBasedOnSizeData(myFV().size());
             return myFV().asMXVector().get(flatIndex);

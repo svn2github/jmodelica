@@ -80,7 +80,7 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = ((FIdUseExp) getFExp()).getCommonAccess().name();
+        String name = ((FIdUseExp) getFExp()).getAccess().name();
         ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
         return cs.expandInStreamExp(name);
     }
@@ -165,8 +165,8 @@ aspect Connections {
         String name = calcGeneratedVarName(varType);
         TypePrefixVariability v = variability().combine(Variability.FIXEDPARAMETER);
         myFClass().addFVariable(type().createTempFVariable(new FAccessString(name), variability()));
-        myFClass().equationList(v).add(new FEquation(new FIdUseExp(name), exp));
-        return new FIdUseExp(name);
+        myFClass().equationList(v).add(new FEquation(new FAccessExp(name), exp));
+        return new FAccessExp(name);
     }
     
     /**
@@ -342,7 +342,7 @@ aspect Connections {
      * multiplicands is an access to v.
      */
     syn boolean FExp.isMultiplicationOf(FVariable v) = false;
-    eq FIdUseExp.isMultiplicationOf(FVariable v)     = v == myFV();
+    eq FAccessExp.isMultiplicationOf(FVariable v)    = v == myFV();
     eq FNegExp.isMultiplicationOf(FVariable v)       = getFExp().isMultiplicationOf(v);
     eq FDotMulExp.isMultiplicationOf(FVariable v)    = 
         getLeft().isMultiplicationOf(v) || getRight().isMultiplicationOf(v);
@@ -350,7 +350,7 @@ aspect Connections {
     rewrite FActualStream {
         when (rewriteStreams) to FExp {
             // Get the stream variable name prefix
-            FAccess varName = ((FIdUseExp) getFExp()).getCommonAccess().asFAccess();
+            FAccess varName = ((FAccessExp) getFExp()).getFAccess();
             FAccess prefix = varName.copyPrefix();
             ArrayList<ConnectionSetEntry> cses = 
                 myFClass().getConnectionSetManager().getFlowVariables(prefix.name());
@@ -579,7 +579,7 @@ aspect Connections {
          */
         public FExp expandInStreamExp(String name) {
             ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            FExp exp = expandInStreamExp(e, name, new FIdUseExp(name));
+            FExp exp = expandInStreamExp(e, name, new FAccessExp(name));
             exp.enableStreamsRewrite();
             return exp;
         }
@@ -953,22 +953,22 @@ aspect Connections {
             return fqName;
         }
 
-        public FExp createFIdUseExp() {
-            return new FIdUseExp(fqName.treeCopy());
+        public FAccessExp createFIdUseExp() {
+            return new FAccessExp(fqName.treeCopy());
         }
 
         /**
-         * Create an FIdUseExp that is an access to a variable in this entry, that is connected to 
+         * Create an FAccessExp that is an access to a variable in this entry, that is connected to 
          * the variable named <code>name</code> in <code>other</code>.
          */
-        public FExp createFIdUseExp(String name, ConnectionSetEntry other) {
+        public FAccessExp createFIdUseExp(String name, ConnectionSetEntry other) {
             if (other == this)
-                return new FIdUseExp(name); 
+                return new FAccessExp(name); 
             if (scalarNames == null || other.scalarNames == null)
                 return createFIdUseExp();
             int i;
             for (i = 0; i < other.scalarNames.length && !other.scalarNames[i].equals(name); i++);
-            return (i < scalarNames.length) ? new FIdUseExp(scalarNames[i]) : createFIdUseExp();
+            return (i < scalarNames.length) ? new FAccessExp(scalarNames[i]) : createFIdUseExp();
         }
 
         /**
@@ -1069,7 +1069,7 @@ aspect Connections {
             public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
                 super(cd, outside, fqName);
                 InstComponentDecl flow = cd.myFlowVar();
-                flowExp = new FIdUseExp(flow.getFAccess().treeCopy());
+                flowExp = new FAccessExp(flow.getFAccess().treeCopy());
                 try {
                     CValue cval = flow.nominalAttributeCValue();
                     if (cval.hasRealValue()) {
@@ -1418,7 +1418,7 @@ aspect OverconstrainedConnections {
 	/**
 	 * Get the variable referenced by child A.
 	 * 
-     * Assumes A is an FIdUseExp.
+     * Assumes A is an InstAccessExp.
 	 */
 	syn InstComponentDecl FConnectionsOp.variableA() = 
             getA().asInstAccess().myInstComponentDecl();
@@ -1764,7 +1764,7 @@ aspect OverconstrainedConnections {
 		 */
 		public OpsResult ops(FExp e) {
 			OpsResult res = null;
-            CommonAccess u = ((FIdUseExp) e).getCommonAccess();
+            CommonAccess u = ((FIdUseExp) e).getAccess();
 			if (u.isInstAccess()) {
                 InstComponentDecl var = u.asInstAccess().myInstComponentDecl();
 				Node n = getNode(var);
@@ -3218,7 +3218,7 @@ aspect Cardinality {
     syn int FExp.cardinalityValue() {
         throw new UnsupportedOperationException();
     }
-    eq FIdUseExp.cardinalityValue()      = getCommonAccess().cardinalityValue();
+    eq FIdUseExp.cardinalityValue()      = getAccess().cardinalityValue();
 
     syn int CommonAccess.cardinalityValue();
     eq FAccess.cardinalityValue()     = myFClass().getConnectionSetManager().getCardinality(scalarName());

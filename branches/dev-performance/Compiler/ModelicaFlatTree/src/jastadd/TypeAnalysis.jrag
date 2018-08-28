@@ -124,7 +124,7 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.type()      = getCall().type();
     eq FInitArrayStmt.type()         = getType();
     
-    syn FType FInitArrayStmt.getType() = getFIdUseExp().myFV().type();
+    syn FType FInitArrayStmt.getType() = getFAccessExp().myFV().type();
     
     /**
      * True if this equation exclusively equates real types.
@@ -588,7 +588,7 @@ aspect FlatTypeAnalysis {
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
-    eq FIdUseExp.type() = getCommonAccess().type();
+    eq FIdUseExp.type() = getAccess().type();
     
     eq FDSRefExp.type() = getOrg().type();
 
@@ -1335,7 +1335,7 @@ aspect ExternalObjectTypes {
         if (hasBindingExp()) {
             return getBindingExp().isConstructorCall();
         } else {
-            for (FIdUseExp use : uses()) {
+            for (FAccessExp use : uses()) {
                 if (use.isConstructorAssign()) {
                     return true;
                 }

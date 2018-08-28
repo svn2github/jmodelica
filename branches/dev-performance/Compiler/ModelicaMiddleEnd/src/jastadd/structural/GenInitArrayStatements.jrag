@@ -108,7 +108,7 @@ aspect GenInitArrayStatements {
     syn lazy Set<String> FStatement.sortingAssignedNames() = Collections.<String>emptySet();
     eq FAssignStmt.sortingAssignedNames()      = getLeft().sortingAssignedNames();
     eq FInitArrayStmt.sortingAssignedNames()   = 
-        Collections.singleton("size(" + getFIdUseExp().name() + ")");
+        Collections.singleton("size(" + getFAccessExp().name() + ")");
     eq FForStmt.sortingAssignedNames()         = sortingAssignedNames(getForStmts());
     eq FWhileStmt.sortingAssignedNames()       = sortingAssignedNames(getWhileStmts());
     eq FFunctionCallStmt.sortingAssignedNames() {

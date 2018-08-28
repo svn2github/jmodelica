@@ -369,7 +369,7 @@ aspect eliminateLinearEquations {
                 } else if (expKey.equals(FTimeExp.COEFF_KEY)) {
                     return new FTimeExp();
                 }
-                return new FIdUseExp(expKey);
+                return new FAccessExp(expKey);
             }
 
             private FExp newTerm(int coeff, String expKey) {

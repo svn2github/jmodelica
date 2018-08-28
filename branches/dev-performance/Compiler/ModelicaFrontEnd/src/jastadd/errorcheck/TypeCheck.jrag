@@ -791,8 +791,8 @@ aspect FlatTypeCheck {
     }
 
   public void FIdUseExp.typeCheck(ErrorCheckType checkType) {
-	  if (!getCommonAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
-            getCommonAccess().typeError(checkType, this);
+	  if (!getAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
+            getAccess().typeError(checkType, this);
   }
   
 	public void CommonAccess.typeCheck(ErrorCheckType checkType) {
@@ -854,20 +854,22 @@ aspect FlatTypeCheck {
   syn CommonAccess FExp.asCommonAccess() {
 	  throw new UnsupportedOperationException("asCommonAccess() is not supported for class type " + getClass().getSimpleName());
   }
-  eq FIdUseExp.asCommonAccess() = getCommonAccess();
+  eq FIdUseExp.asCommonAccess() = getAccess();
   
-  syn FIdUseExp FExp.asFIdUseExp() {
-      throw new UnsupportedOperationException("asFIdUseExp() is not supported for class type " + getClass().getSimpleName());
+  syn FAccessExp FExp.asFAccessExp() {
+      throw new UnsupportedOperationException("asFAccessExp() is not supported for class type " + getClass().getSimpleName());
   }
-  eq FIdUseExp.asFIdUseExp() = this;
+  eq FAccessExp.asFAccessExp() = this;
   
     syn boolean CommonAccess.isInstAccess() = false;
-    eq InstAccess.isInstAccess()      = true;
+    eq InstAccess.isInstAccess() = true;
+    syn boolean CommonAccess.isFAccess() = false;
+    eq FAccess.isFAccess() = true;
     
 	syn InstAccess FExp.asInstAccess() {
 		throw new UnsupportedOperationException();
 	}
-    eq FIdUseExp.asInstAccess() = getCommonAccess().asInstAccess();
+    eq InstAccessExp.asInstAccess() = getInstAccess();
     
     syn InstAccess CommonAccess.asInstAccess() {
         throw new UnsupportedOperationException();
@@ -875,7 +877,7 @@ aspect FlatTypeCheck {
     eq InstAccess.asInstAccess() = this;
     
   syn boolean FExp.isAccessToStream()  = false;
-  eq FIdUseExp.isAccessToStream()      = getCommonAccess().isAccessToStream();
+  eq FIdUseExp.isAccessToStream()      = getAccess().isAccessToStream();
   
   syn boolean CommonAccess.isAccessToStream() = false;
   eq InstAccess.isAccessToStream()      = myInstComponentDecl().isStream();
@@ -1038,7 +1040,7 @@ aspect FlatTypeCheck {
   eq InstRoot.getChild().inUnknownAccess()                = false;
   
   syn boolean FExp.canBeComponentSize()  = type().isInteger();
-  eq FIdUseExp.canBeComponentSize()      = type().isInteger() || getCommonAccess().isComponentSizeClass();
+  eq FIdUseExp.canBeComponentSize()      = type().isInteger() || getAccess().isComponentSizeClass();
   
   syn boolean CommonAccess.isComponentSizeClass() = false;
   eq InstAccess.isComponentSizeClass()      = myInstClassDecl().isComponentSizeClass();
@@ -1725,7 +1727,7 @@ aspect FlatTypeCheck {
    * Only valid in instance tree.
    */
   syn boolean FExp.isComponentReference(Criteria<InstComponentDecl> criteria)  = false;
-    eq FIdUseExp.isComponentReference(Criteria<InstComponentDecl> criteria) = getCommonAccess().isComponentReference(criteria);
+    eq FIdUseExp.isComponentReference(Criteria<InstComponentDecl> criteria) = getAccess().isComponentReference(criteria);
     
     syn boolean CommonAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = false;
     eq InstAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = 
@@ -1814,7 +1816,7 @@ aspect VariabilityCheck {
     }
     
     public void FPreExp.checkDiscreteOperations() {
-        if (instanceTreeSource != null && getCommonAccess().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
+        if (instanceTreeSource != null && getFAccess().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
             instanceTreeSource.discreteArgError();
         instanceTreeSource = null;
     }

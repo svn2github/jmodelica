@@ -577,11 +577,11 @@ aspect CCodeGenExpressions {
     /**
      * Helper method that prints the variable reference for assignment (LHS).
      */
-    public void FIdUseExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
-        p.print(getCommonAccess(), str, "");
+    public void FAccessExp.genAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+        p.print(getFAccess(), str, "");
     }
 
-    public void FIdUseExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FAccessExp.genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         genAssignedRef(p, str, indent);
     }
 
@@ -594,7 +594,7 @@ aspect CCodeGenExpressions {
         str.print(p.name(v));
     }
 
-    public void FIdUseExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FAccessExp.genScaledAssignedRef(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         if (needsScaling()) {
             genScaledAssignedRef(myFV(), p, str, indent);
         } else {
@@ -605,7 +605,7 @@ aspect CCodeGenExpressions {
     syn boolean FAbstractVariable.needsScaling(WriteBackContext ctx) = isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !ctx.inFunction();
     syn boolean FExp.needsScaling() = type().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction();
 
-    public void FIdUseExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
+    public void FAccessExp.genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent) {
         if (needsScaling()) {
             str.print("(");
             genAssignedRef(v, p, str, indent);
@@ -630,7 +630,7 @@ aspect CCodeGenExpressions {
     }
 
     @Override
-    public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+    public void FAccessExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         genScaledAssignedRef(p.ExecStep, str, indent);
     }
 
@@ -697,9 +697,9 @@ aspect CCodeGenExpressions {
     syn String FAccess.toString_C(CodePrinter.ExecuteCodePrinter p) {
         String type = myFV().funcArrayType(isAssignUse());
         if (myFV().inRecord() && inFunction()) {
-            return asFAccess().genRecordUse_C(p, asFAccess().myOutermostFV(), type);
+            return genRecordUse_C(p, myOutermostFV(), type);
         } else {
-            return myFV().genUse_C(p, asFAccess().getFArraySubscripts(), type);
+            return myFV().genUse_C(p, getFArraySubscripts(), type);
         }
     }
 
@@ -1273,7 +1273,7 @@ aspect CCodeGenExpressions {
     eq FFunctionCall.needsTemp_C() =
             (!isFunctionCallClause() && isComposite()) || isStringExp() ||
             (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall());
-    eq FIdUseExp    .needsTemp_C() = isSlice() || (isFunctionCallLeft() && (!inFunction() || alsoInRHS() || type().isString()));
+    eq FAccessExp.needsTemp_C() = isSlice() || (isFunctionCallLeft() && (!inFunction() || alsoInRHS() || type().isString()));
 
     syn boolean FFunctionCallLeft.needsTemp_C() = hasFExp() && getFExp().needsTemp_C();
     syn boolean FAbstractVariable.needsTemp_C() { return false; }
@@ -1573,9 +1573,9 @@ aspect CCodeGenExpressions {
         }
     }
 
-    syn FIdUseExp FExp.first() = null;
+    syn FAccessExp FExp.first() = null;
     eq FArray.first()          = getFExp(0).first();
-    eq FIdUseExp.first()       = this;
+    eq FAccessExp.first()       = this;
     
     syn lazy boolean FSubscriptedExp.needsTemp() = (getFExp().consecutiveArray(null) == null);
     
@@ -1589,14 +1589,14 @@ aspect CCodeGenExpressions {
         }
         return last;
     }
-    eq FIdUseExp.consecutiveArray(FAbstractVariable last) {
+    eq FAccessExp.consecutiveArray(FAbstractVariable last) {
         if (last == null || last.isConsecutiveInZ(myFV())) {
             return myFV();
         }
         return null;
     }
 
-    public void FIdUseExp.genDirectSubscriptedUse_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
+    public void FAccessExp.genDirectSubscriptedUse_C(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent,
             FArraySubscripts fas) {
         str.print("(&");
         p.print(this, str, indent);

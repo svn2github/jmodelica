@@ -1101,7 +1101,7 @@ aspect OptimicaFreeParameters {
 	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveFreeParameters() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+	FAccessExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
 		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
 		myFV().isFreeParameter() to 
 		FAbstractEquation.retrieveFreeParameters() for myFEquation();

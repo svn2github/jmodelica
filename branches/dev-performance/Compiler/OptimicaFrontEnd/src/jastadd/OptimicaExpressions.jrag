@@ -197,8 +197,8 @@ aspect OptimicaArrays {
 	syn lazy ArrayExp FTimedVariable.getArrayExp() {
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
-			CommonAccess name = getName().specify(i, true);
-			FExp arg = getArg().fullCopy();
+			FAccess name = getName().specify(i, true);
+			FExp arg = getArg().treeCopy();
 			array.set(i, new FTimedVariable(name, arg));
 		}
 		return array;

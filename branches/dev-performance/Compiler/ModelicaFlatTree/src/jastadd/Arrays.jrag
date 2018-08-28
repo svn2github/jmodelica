@@ -283,7 +283,7 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn int CommonAccess.ndims();
-    eq FIdUseExp.ndims() = getCommonAccess().ndims();
+    eq FIdUseExp.ndims() = getAccess().ndims();
     
 	eq FAccess.ndims() {
 		// Notice here the use of accessNdims. Also, if the access has
@@ -294,7 +294,7 @@ aspect Arrays {
 		// This is because if scalarization is in progress, 
 		// then this node will be hanging without a proper AST.
 		int n = 0;
-		if (!asFAccess().isScalarized())
+		if (!isScalarized())
 			for (FArraySubscripts fas : allFArraySubscripts())
 				n += fas.accessNdims();
 		return n;
@@ -1012,7 +1012,7 @@ aspect Arrays {
 					s.append(fs.size());
 		return s;
 	}
-	eq FIdUseExp.size() = getCommonAccess().size();
+	eq FIdUseExp.size() = getAccess().size();
 	
     /**
      * Get the array sizes. 
@@ -1857,7 +1857,7 @@ aspect Arrays {
 		 */
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) 
-			array.set(i, createNode(getCommonAccess().specify(i, false)));
+			array.set(i, createNode(getAccess().specify(i, false)));
 		return array;
 	}
 	
@@ -2102,7 +2102,7 @@ aspect Arrays {
 	 */
 	syn Indices FExp.indices()                   = Indices.create(size());
 	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
-	eq FIdUseExp.indices()                       = getCommonAccess().indices();
+	eq FIdUseExp.indices()                       = getAccess().indices();
 	eq FDimensionConvert.indices() {
 		int n = getFExp().ndims();
 		if (n == 0) {

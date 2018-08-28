@@ -103,7 +103,7 @@ aspect ConstantEvaluationStatements {
      */
     @Override
     public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        getCommonAccess().assignToInFuncEval(evaluator, right);
+        getAccess().assignToInFuncEval(evaluator, right);
     }
     
     @Override
@@ -311,7 +311,7 @@ aspect ConstantEvaluationStatements {
 
     @Override
     public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
-        getFIdUseExp().assignToInFuncEval(evaluator, type().zeroCValue());
+        getFAccessExp().assignToInFuncEval(evaluator, type().zeroCValue());
         return EVAL_CONT;
     }
 

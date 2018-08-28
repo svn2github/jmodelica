@@ -132,7 +132,7 @@ aspect AccessSizes {
             
             @Override
             public FExp copyReplaceAccess(FIdUseExp use) {
-                return use.getCommonAccess().buildAccessContextSizeExp(this);
+                return use.getAccess().buildAccessContextSizeExp(this);
             }
             
             @Override
@@ -146,11 +146,13 @@ aspect AccessSizes {
         }
     }
     
-    public FExp CommonAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        return new FIdUseExp(treeCopy());
+    public abstract FIdUseExp CommonAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp);
+    
+    public FAccessExp FAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+        return new FAccessExp(treeCopy());
     }
     
-    public FIdUseExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+    public InstAccessExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         List<InstAccess> res = crp.buildContext();
         for (InstAccess part : allParts()) {
             if (hasFArraySubscripts()) {
@@ -160,17 +162,17 @@ aspect AccessSizes {
             }
             res.addChild(part);
         }
-        return new FIdUseExp(new InstDot(res));
+        return new InstAccessExp(new InstDot(res));
     }
     
     inh FIdUseExp FSubscript.buildAccessContextSizeExp();
     eq Root.getChild().buildAccessContextSizeExp()   = null;
     eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new InstDot(buildAccessContext(name(), null)));
+            new InstAccessExp(new InstDot(buildAccessContext(name(), null)));
     eq FAccessPart.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FAccessFull(buildAccessContext(name(), null)));
-    eq CommonAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FAccessFull(asFAccess().buildAccessContext()));
+            new FAccessExp(new FAccessFull(buildAccessContext(name(), null)));
+    eq FAccess.getChild().buildAccessContextSizeExp() =
+            new FAccessExp(new FAccessFull(buildAccessContext()));
     
     syn List<FAccessPart> FAccess.buildAccessContext() = null;
     eq FAccessString.buildAccessContext() {

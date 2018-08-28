@@ -163,7 +163,7 @@ aspect BlockFunctionExtraction {
         return false;
     }
     
-    public boolean FIdUseExp.dependsOnBlock(AbstractEquationBlock block) {
+    public boolean FAccessExp.dependsOnBlock(AbstractEquationBlock block) {
         return block.allVariables().contains(myFV());
     }
 

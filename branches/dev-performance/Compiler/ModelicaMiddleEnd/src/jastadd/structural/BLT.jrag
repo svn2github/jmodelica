@@ -505,25 +505,25 @@ aspect BLT{
         return new HomotopyBlock(producer, mergedComponent.computeBlockDependency(), homotopySubBlock, simplifiedBLT);
     }
 
-    public class HomotopySimplifiedVarUseLookupVisitor implements FIdUseExpLookupVisitor {
-        public static final FIdUseExpLookupVisitor instance = new HomotopySimplifiedVarUseLookupVisitor();
+    public class HomotopySimplifiedVarUseLookupVisitor implements FIdUseExpLookupVisitor<FAccessExp> {
+        public static final HomotopySimplifiedVarUseLookupVisitor instance = new HomotopySimplifiedVarUseLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
             node.homotopySimplifiedVarUseLookupVisitor(set, this);
         }
     }
 
-    public Set<FIdUseExp> ASTNode.homotopySimplifiedVarUseLookupVisitor() {
+    public Set<FAccessExp> ASTNode.homotopySimplifiedVarUseLookupVisitor() {
         return findFIdUseExpsInTree(HomotopySimplifiedVarUseLookupVisitor.instance);
     }
 
-    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
         findFIdUseExpsInTree(set, visitor);
     }
 
     @Override
-    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getSimplified(), set);
     }
 
@@ -3675,7 +3675,7 @@ aspect StartValueDependency {
                 if (startExp == null) {
                     return res;
                 }
-                for (V depVar : graph.lookupVars(startExp.findFIdUseExpsInTree())) {
+                for (V depVar : graph.lookupVars(startExp.findFAccessExpsInTree())) {
                     // This is only some optimization so that we don't create a million of empty lists!
                     if (res.isEmpty()) {
                         res = new ArrayList<E>();
