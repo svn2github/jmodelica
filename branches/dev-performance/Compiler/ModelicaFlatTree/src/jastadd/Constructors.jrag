@@ -1072,23 +1072,26 @@ aspect InheritedFactoryMethods {
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
-	public FIdUseExp FIdUseExp.createNode(CommonAccess use) {
-		FIdUseExp node = createEmptyNode();
-		node.setAccess(use);
+	public InstAccessExp InstAccessExp.createNode(InstAccess use) {
+		InstAccessExp node = createEmptyNode();
+		node.setInstAccess(use);
 		node.setLocationNoTree(this);
 		return node;
 	}
 
-    public FAccessExp FAccessExp.createNode(CommonAccess use) {
-        return (FAccessExp) super.createNode(use);
+    public FAccessExp FAccessExp.createNode(FAccess use) {
+        FAccessExp node = createEmptyNode();
+        node.setFAccess(use);
+        node.setLocationNoTree(this);
+        return node;
     }
 
     /**
      * Create new node of same class as this, with the specified children.
      */
-    public FAbstractDerExp FAbstractDerExp.createNode(CommonAccess use) {
+    public FAbstractDerExp FAbstractDerExp.createNode(FAccess use) {
         FAbstractDerExp node = createEmptyNode();
-        node.setAccess(use);
+        node.setFAccess(use);
         node.setOrder(order());
         node.setLocationNoTree(this);
         return node;

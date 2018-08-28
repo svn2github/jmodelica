@@ -1157,7 +1157,7 @@ aspect Scalarization {
     }
 
     public FExp FIdUseExp.extractArrayCell(Scalarizer s, Index i) {
-        return dynamicFExp(createNode(getAccess().specify(i, true)));
+        return dynamicFExp(createSpecifiedNode(i, true));
     }
 
     public FExp FIdTempExp.extractArrayCell(Scalarizer s, Index i) {

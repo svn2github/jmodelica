@@ -1857,10 +1857,19 @@ aspect Arrays {
 		 */
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) 
-			array.set(i, createNode(getAccess().specify(i, false)));
+			array.set(i, createSpecifiedNode(i, false));
 		return array;
 	}
 	
+
+    public abstract FExp FIdUseExp.createSpecifiedNode(Index i, boolean scalarize);
+    public FExp InstAccessExp.createSpecifiedNode(Index i, boolean scalarize) {
+        return createNode(getInstAccess().specify(i, scalarize));
+    }
+    public FExp FAccessExp.createSpecifiedNode(Index i, boolean scalarize) {
+        return createNode(getFAccess().specify(i, scalarize));
+    }
+
 	/**
 	 * Returns a scalar CommonAccess, as specified by an index.
 	 * 

@@ -45,20 +45,6 @@ aspect FlatNames {
     eq InstAccessExp.getAccess() = getInstAccess();
     eq FAccessExp.getAccess()    = getFAccess();
     
-    public abstract void FIdUseExp.setAccess(CommonAccess access);
-    public void InstAccessExp.setAccess(CommonAccess access) {
-        if (!access.isInstAccess()) {
-            throw new IllegalArgumentException();
-        }
-        setInstAccess(access.asInstAccess());
-    }
-    public void FAccessExp.setAccess(CommonAccess access) {
-        if (!access.isFAccess()) {
-            throw new IllegalArgumentException();
-        }
-        setFAccess(access.asFAccess());
-    }
-    
     syn String FVariable.varKind() {
         if (isIndependentConstant()) {
             return "ci";
