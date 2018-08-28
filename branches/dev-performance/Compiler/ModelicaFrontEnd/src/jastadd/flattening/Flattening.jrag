@@ -840,8 +840,8 @@ aspect Flattening {
             args.add(arg.flatten(f));
         }
         Opt<FIdUseExp> ret = hasReturnVar() ? 
-                new Opt<>((FAccessExp)getReturnVar().flatten(f)) : 
-                new Opt<>();
+                new Opt<>((FIdUseExp)getReturnVar().flatten(f)) : 
+                new Opt<FIdUseExp>();
                 
         FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());
         stmt.extractLibrary(this);
