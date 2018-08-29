@@ -746,7 +746,7 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * Unknown value. Keeps track of FIdUseExps that this value is
+     * Unknown value. Keeps track of CommonAccessExps that this value is
      * dependent on. Used when calculating incidences in function 
      * call equations.
      */
@@ -761,7 +761,7 @@ aspect ConstantEvaluation {
             this(new HashSet<FAccessExp>());
         }
         
-        public CValueUnknownUse(FIdUseExp dep) {
+        public CValueUnknownUse(CommonAccessExp dep) {
             this();
             if (dep.getAccess().isFAccess())
                 deps.add(dep.asFAccessExp());
@@ -774,7 +774,7 @@ aspect ConstantEvaluation {
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("(unknown value : \"");
-            for (FIdUseExp dep : deps) {
+            for (CommonAccessExp dep : deps) {
                 sb.append(dep.name());
                 sb.append(", ");
             }
@@ -1643,7 +1643,7 @@ aspect ConstantEvaluation {
          * 
          * Always creates node for the flat tree.
          *  
-         *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
+         *  @return an CommonAccessExp pointing to the literal in the FEnumDecl.
          */
         public FExp buildLiteral() {
             return type.createLiteral(index);
@@ -2045,7 +2045,7 @@ aspect ConstantEvaluation {
     // Bypass for nodes with inherent support for constant evaluation of arrays.
     eq FFunctionCall.cevalArray(VariableEvaluator evaluator, Index i)    = cevalCalc(evaluator);
     eq InstFunctionCall.cevalArray(VariableEvaluator evaluator, Index i) = cevalCalc(evaluator);
-    eq FIdUseExp.cevalArray(VariableEvaluator evaluator, Index i)        = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
+    eq CommonAccessExp.cevalArray(VariableEvaluator evaluator, Index i)  = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
     eq FIfExp.cevalArray(VariableEvaluator evaluator, Index i)           = cevalSelectExp(evaluator).cevalArray(evaluator, i);
 
     /**
@@ -2352,9 +2352,9 @@ aspect ConstantEvaluation {
         return res.record().getMember(last);
     }
 
-    eq FIdUseExp.cevalCalc(VariableEvaluator evaluator) = evaluator.cevalUse(this);
+    eq CommonAccessExp.cevalCalc(VariableEvaluator evaluator) = evaluator.cevalUse(this);
     
-    syn CValue FIdUseExp.cevalUse(VariableEvaluator evaluator) = getAccess().ceval(evaluator);
+    syn CValue CommonAccessExp.cevalUse(VariableEvaluator evaluator) = getAccess().ceval(evaluator);
     eq FAbstractDerExp.cevalUse(VariableEvaluator evaluator) {
         if (getFAccess().variability().discreteOrLess())
             return new CValueInteger(0);
@@ -4251,7 +4251,7 @@ aspect LiteralExpressions {
         return true;
     }
 
-    eq FIdUseExp.hasOnlyLiterals()      = false;
+    eq CommonAccessExp.hasOnlyLiterals()= false;
     eq FFunctionCall.hasOnlyLiterals()  = false;
     eq FTimeExp.hasOnlyLiterals()       = false;
     eq FEndExp.hasOnlyLiterals()        = !inFunction();
@@ -4286,7 +4286,7 @@ aspect CircularExpressions {
 	
 	private boolean FAbstractExp.inIsCircular = false; 
 	
-    eq FIdUseExp.isCircularCalc() = getAccess().isCircular(-1);
+    eq CommonAccessExp.isCircularCalc() = getAccess().isCircular(-1);
     
     syn boolean CommonAccess.isCircular(int dim);
     eq FAccess.isCircular(int dim)     = myFV().isCircular();
@@ -4298,7 +4298,7 @@ aspect CircularExpressions {
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((FIdUseExp)getFExp()).getAccess().isCircular(dimension());
+    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((CommonAccessExp)getFExp()).getAccess().isCircular(dimension());
     
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {
@@ -4316,7 +4316,7 @@ aspect CircularExpressions {
     }
 
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
-	eq FIdUseExp.isUnknownSizeVarUse()      = getAccess().isUnknownSizeVarUse();
+	eq CommonAccessExp.isUnknownSizeVarUse()= getAccess().isUnknownSizeVarUse();
 	
 	syn boolean CommonAccess.isUnknownSizeVarUse();
 	eq FAccess.isUnknownSizeVarUse()     = myFV().isUnknownSizeVar();
@@ -4580,8 +4580,8 @@ aspect VariableEvaluator {
             return variable.ceval(this, i);
         }
         
-        public CValue cevalUse(FIdUseExp use) {
-            return use.cevalUse(this);
+        public CValue cevalUse(CommonAccessExp access) {
+            return access.cevalUse(this);
         }
         
         public AlgorithmEvaluator createAlgorithmEvaluator(OptionRegistry options, Map<CommonVariableDecl, CValue> values) {
@@ -4637,16 +4637,16 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public CValue cevalUse(FIdUseExp use) {
-            if (use.variability().knownParameterOrLess()) {
-                return super.cevalUse(use);
+        public CValue cevalUse(CommonAccessExp access) {
+            if (access.variability().knownParameterOrLess()) {
+                return super.cevalUse(access);
             } else {
-                return createUnknownCValue(use);
+                return createUnknownCValue(access);
             }
         }
         
-        protected CValue createUnknownCValue(FIdUseExp use) {
-            return use.type().unknownCValue();
+        protected CValue createUnknownCValue(CommonAccessExp access) {
+            return access.type().unknownCValue();
         }
         
         protected CValue createUnknownCValue(FExp exp) {
@@ -4696,7 +4696,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        protected CValue createUnknownCValue(FIdUseExp use) {
+        protected CValue createUnknownCValue(CommonAccessExp use) {
             return new CValueUnknownUse(use);
         }
         

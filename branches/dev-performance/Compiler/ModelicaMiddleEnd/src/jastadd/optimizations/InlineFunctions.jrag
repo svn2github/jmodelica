@@ -1732,7 +1732,7 @@ aspect FunctionInlining {
      * We want to be able to scalarize all expressions (except size exps) fully during inlining.
      */
     refine Scalarization eq FExp.scalarizeExpanded()      = duringFunctionInlining() ? isComposite() : refined();
-    refine Scalarization eq FIdUseExp.scalarizeExpanded() = duringFunctionInlining() ? isComposite() : refined();
+    refine Scalarization eq CommonAccessExp.scalarizeExpanded() = duringFunctionInlining() ? isComposite() : refined();
     
     inh boolean FFunctionCallLeft.duringFunctionInlining();
     inh boolean FExp.duringFunctionInlining();

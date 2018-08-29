@@ -538,7 +538,7 @@ aspect Variability {
 
     eq FDelayExp.expVariability() = getFExp().variability();
 
-    eq FIdUseExp.expVariability() = getAccess().variability();
+    eq CommonAccessExp.expVariability() = getAccess().variability();
     eq FAbstractDerExp.expVariability() = 
         getFAccess().variability().discreteOrLess() ? Variability.CONSTANT : getFAccess().variability();
     eq FPreExp.expVariability() = super.expVariability().combineDown(Variability.DISCRETE);
@@ -683,7 +683,7 @@ aspect Variability {
         throw new UnsupportedOperationException();
     }
     eq FSubscriptedExp.indexVariability() = getFArraySubscripts().variability();
-    eq FIdUseExp.indexVariability()       = getAccess().indexVariability();
+    eq CommonAccessExp.indexVariability() = getAccess().indexVariability();
 
     syn TypePrefixVariability CommonAccess.indexVariability();
     eq FAccess.indexVariability() {

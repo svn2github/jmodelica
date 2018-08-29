@@ -685,7 +685,7 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
  *
  * LibTopPackagePath is the file path of the package file of the library that this external statement originated from.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp* <LibTopPackagePath>;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:CommonAccessExp] <Name> Arg:FExp* <LibTopPackagePath>;
 
 /**
  * A language specification for an external function.
@@ -994,9 +994,9 @@ FComponentExp : FExp ::= FExp <Name:String>;
 /**
  * A qualifed identifier in an expression.
  */
-abstract FIdUseExp : FAssignableExp;
+abstract CommonAccessExp : FAssignableExp;
 
-FAccessExp : FIdUseExp ::= FAccess <OriginalVariable:String>;
+FAccessExp : CommonAccessExp ::= FAccess <OriginalVariable:String>;
 
 /**
  * A reference to a dynamic state. These are the states that are introduced by

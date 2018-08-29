@@ -41,7 +41,7 @@ import org.jmodelica.util.AbstractModelicaScanner;
 
 aspect FlatNames {
     
-    syn CommonAccess FIdUseExp.getAccess();
+    syn CommonAccess CommonAccessExp.getAccess();
     eq InstAccessExp.getAccess() = getInstAccess();
     eq FAccessExp.getAccess()    = getFAccess();
     
@@ -82,8 +82,8 @@ aspect FlatNames {
     syn boolean CommonAccess.hasFArraySubscripts();
     syn FArraySubscripts CommonAccess.getFArraySubscripts();
 
-    syn boolean FIdUseExp.hasFArraySubscripts() = getAccess().hasFArraySubscripts();
-    syn FArraySubscripts FIdUseExp.getFArraySubscripts() = getAccess().getFArraySubscripts();
+    syn boolean CommonAccessExp.hasFArraySubscripts() = getAccess().hasFArraySubscripts();
+    syn FArraySubscripts CommonAccessExp.getFArraySubscripts() = getAccess().getFArraySubscripts();
 
     /**
      * Get a string representation of a prefix of this name.
@@ -304,7 +304,7 @@ aspect FlatNames {
     syn String FAccessPart.name() = getName();
 
     syn String CommonAccess.name();
-    syn String FIdUseExp.name() = getAccess().name();
+    syn String CommonAccessExp.name() = getAccess().name();
     eq FAbstractDerExp.name()   = derName(order());
     eq FPreExp.name()           = preName();
 
@@ -415,7 +415,7 @@ aspect FlatNames {
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
 
     syn boolean FExp.isIdentifier(String name) = false;
-    eq FIdUseExp.isIdentifier(String name) = name.equals(name());
+    eq CommonAccessExp.isIdentifier(String name) = name.equals(name());
     eq FDSRefExp.isIdentifier(String name) = getOrg().isIdentifier(name);
 
 

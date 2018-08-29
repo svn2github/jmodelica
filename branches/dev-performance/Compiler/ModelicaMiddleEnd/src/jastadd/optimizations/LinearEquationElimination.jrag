@@ -405,7 +405,7 @@ aspect eliminateLinearEquations {
     syn java.util.List<FExp> FAbstractEquation.linearTerms() = Collections.<FExp> emptyList();
     eq FEquation.linearTerms() {
         ArrayList<FExp> linearTerms = new ArrayList<FExp>();
-        linearTerms.addAll(referencedFIdUseExps());
+        linearTerms.addAll(referencedCommonAccessExps());
         linearTerms.addAll(timeExps());
         for (FExp exp : terms()) {
             if (exp.isLiteralExp()) {
@@ -461,7 +461,7 @@ aspect eliminateLinearEquations {
     public static final String FTimeExp.COEFF_KEY    = "time";
     syn String FExp.myCoeffKey()                    = toString();
 
-    eq FIdUseExp.myCoeffKey()                       = name();
+    eq CommonAccessExp.myCoeffKey()                 = name();
     eq FLitExp.myCoeffKey()                         = COEFF_KEY;
     eq FNegExp.myCoeffKey()                         = getFExp().myCoeffKey();
     eq FTimeExp.myCoeffKey()                        = COEFF_KEY;
@@ -485,7 +485,7 @@ aspect eliminateLinearEquations {
     eq FNegExp.isSimpleLinearExp()          = getFExp().isSimpleLinearExp();
     eq FRelExp.isSimpleLinearExp()          = false;
 
-    eq FIdUseExp.isSimpleLinearExp()        = true;
+    eq CommonAccessExp.isSimpleLinearExp()  = true;
     eq FTimeExp.isSimpleLinearExp()         = true;
     eq FIntegerLitExp.isSimpleLinearExp()   = true;
     eq FRealLitExp.isSimpleLinearExp()      = getValue() == ((int) getValue());
@@ -493,7 +493,7 @@ aspect eliminateLinearEquations {
     syn boolean FAbstractEquation.isSimpleAlias() = false;
     eq FEquation.isSimpleAlias() = getLeft().isSimpleAlias() && getRight().isSimpleAlias();
     syn boolean FExp.isSimpleAlias() = false;
-    eq FIdUseExp.isSimpleAlias() = true;
+    eq CommonAccessExp.isSimpleAlias() = true;
     eq FLitExp.isSimpleAlias() = true;
     eq FNegExp.isSimpleAlias() = getFExp().isSimpleAlias();
 }

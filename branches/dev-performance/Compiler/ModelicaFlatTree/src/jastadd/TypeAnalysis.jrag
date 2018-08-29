@@ -78,7 +78,7 @@ aspect FlatTypeAnalysis {
     }
 
     syn boolean FExp.isConstructorTypeArg() = false;
-    eq FIdUseExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
+    eq CommonAccessExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
     eq FSizeExp.isConstructorTypeArg()      = true;
 
     // TODO: Reduce code duplication here
@@ -588,7 +588,7 @@ aspect FlatTypeAnalysis {
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
-    eq FIdUseExp.type() = getAccess().type();
+    eq CommonAccessExp.type() = getAccess().type();
     
     eq FDSRefExp.type() = getOrg().type();
 
@@ -1345,7 +1345,7 @@ aspect ExternalObjectTypes {
         
     }
 
-    inh boolean FIdUseExp.isConstructorAssign();
+    inh boolean CommonAccessExp.isConstructorAssign();
     eq BaseNode.getChild().isConstructorAssign() = false;
     eq FEquation.getLeft().isConstructorAssign() = getRight().isConstructorCall();
 

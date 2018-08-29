@@ -398,11 +398,11 @@ aspect IndexReduction {
             }
             
             for (FAbstractEquation eqn : new ChainedIterable<FAbstractEquation>(mainEqns, extraEquations)) {
-                for (FAccessExp use : eqn.referencedFIdUseExps()) {
-                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(use.name());
+                for (FAccessExp access : eqn.referencedCommonAccessExps()) {
+                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(access.name());
                     if (eqnList == null) {
                         eqnList = new HashSet<FAbstractEquation>();
-                        varToEqnMap.put(use.name(), eqnList);
+                        varToEqnMap.put(access.name(), eqnList);
                     }
                     eqnList.add(eqn);
                 }
@@ -420,11 +420,11 @@ aspect IndexReduction {
                 if (currentNonDiffValue != null && (!currentNonDiffValue || nonDiff))
                     continue;
                 eqnNonDiffMap.put(eqn, nonDiff);
-                for (FAccessExp use : eqn.referencedFIdUseExps()) {
-                    Boolean oldValue = varNonDiffMap.get(use.name());
+                for (FAccessExp access : eqn.referencedCommonAccessExps()) {
+                    Boolean oldValue = varNonDiffMap.get(access.name());
                     boolean value = (oldValue == null || oldValue) && (nonDiff || use.inNonDiffArg());
                     varNonDiffMap.put(use.name(), value);
-                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(use.name());
+                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(access.name());
                     if (eqnList == null)
                         continue;
                     for (FAbstractEquation otherEqn : eqnList)
@@ -667,7 +667,7 @@ aspect IndexReduction {
                 extraEqMap = new HashMap<String, AssignmentIncidenceMap>();
                 for (FAbstractEquation equation : equations) {
                     AssignmentIncidenceMap incidenceMap = equation.assignmentIncidenceMap(IndexReductionBiPGraph.this, null, this);
-                    for (FIdUseExp lhs : incidenceMap.assigned()) {
+                    for (CommonAccessExp lhs : incidenceMap.assigned()) {
                         extraEqMap.put(lhs.name(), incidenceMap);
                     }
                 }

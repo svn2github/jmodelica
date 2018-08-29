@@ -29,13 +29,13 @@ aspect OptimicaExpressions {
 		 }
 	}
 	/*
-	rewrite FIdUseExp {
+	rewrite CommonAccessExp {
 		when (name().equals("startTime") && !rewritten) to FStartTimeExp {
 			return new FStartTimeExp();
 		}
 	}
 
-	rewrite FIdUseExp {
+	rewrite CommonAccessExp {
 		when (name().equals("finalTime") && !rewritten) to FFinalTimeExp {
 			return new FFinalTimeExp();
 		}

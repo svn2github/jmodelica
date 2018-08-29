@@ -820,8 +820,8 @@ aspect Flattening {
     
     public void InstComponentDecl.addExternalArg(FExternalStmt stmt) {}
     public void InstAssignable.addExternalArg(FExternalStmt stmt) {
-        FIdUseExp use = new InstAccessExp(new InstComponentAccess(name()));
-        stmt.addArg(use);
+        InstAccessExp access = new InstAccessExp(new InstComponentAccess(name()));
+        stmt.addArg(access);
         for (int i = 0; i < ndims(); i++) {
             stmt.addArg(new FSizeExp(use.treeCopy(), new Opt(new FIntegerLitExp(i + 1))));
         }
@@ -839,9 +839,9 @@ aspect Flattening {
         for (FExp arg : getArgs()) {
             args.add(arg.flatten(f));
         }
-        Opt<FIdUseExp> ret = hasReturnVar() ? 
-                new Opt<>((FIdUseExp)getReturnVar().flatten(f)) : 
-                new Opt<FIdUseExp>();
+        Opt<CommonAccessExp> ret = hasReturnVar() ? 
+                new Opt<>((CommonAccessExp)getReturnVar().flatten(f)) : 
+                new Opt<CommonAccessExp>();
                 
         FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());
         stmt.extractLibrary(this);
@@ -2359,7 +2359,7 @@ aspect FlatExpressions {
     /**
      * Separate method for extensibility.
      */
-    private FAccessExp InstComponentDecl.createFIdUseExp(FAccess name, int order) {
+    private FAccessExp InstComponentDecl.createCommonAccessExp(FAccess name, int order) {
         if (order > 0) {
             return new FDerExp(name, order);
         } else {
@@ -2692,7 +2692,7 @@ aspect FlatExpressions {
         return diff(TIME, order).flatten(f);
     }
     
-     public FExp FIdUseExp.flattenDer(Flattener f, int order) {
+     public FExp CommonAccessExp.flattenDer(Flattener f, int order) {
          return setLocationOf(flatten(f, order));
      }
 

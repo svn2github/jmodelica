@@ -947,7 +947,7 @@ aspect InheritedFactoryMethods {
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
 
     // Identifier expressions
-    public abstract FIdUseExp FIdUseExp.createEmptyNode();
+    public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
     public InstAccessExp  InstAccessExp.createEmptyNode()  { return new InstAccessExp();  }
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
     public FAccessExp     FAccessExp.createEmptyNode()     { return new FAccessExp();     }

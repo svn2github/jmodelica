@@ -283,7 +283,7 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn int CommonAccess.ndims();
-    eq FIdUseExp.ndims() = getAccess().ndims();
+    eq CommonAccessExp.ndims() = getAccess().ndims();
     
 	eq FAccess.ndims() {
 		// Notice here the use of accessNdims. Also, if the access has
@@ -1012,7 +1012,7 @@ aspect Arrays {
 					s.append(fs.size());
 		return s;
 	}
-	eq FIdUseExp.size() = getAccess().size();
+	eq CommonAccessExp.size() = getAccess().size();
 	
     /**
      * Get the array sizes. 
@@ -1210,7 +1210,7 @@ aspect Arrays {
 		return this;
 	}
     
-	protected ASTNode FIdUseExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
+	protected ASTNode CommonAccessExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		FExp res = indexMap.get(name());
 		return (res == null) ? this : res;
 	}
@@ -1850,7 +1850,7 @@ aspect Arrays {
         return arr;
     }
 
-	eq FIdUseExp.getArrayExp() {
+	eq CommonAccessExp.getArrayExp() {
 		/*
 		 * Based on an array access, say x, corresponding to the declaration
 		 * Real x[2], the array {x[1],x[2]} is generated. 
@@ -1862,7 +1862,7 @@ aspect Arrays {
 	}
 	
 
-    public abstract FExp FIdUseExp.createSpecifiedNode(Index i, boolean scalarize);
+    public abstract FExp CommonAccessExp.createSpecifiedNode(Index i, boolean scalarize);
     public FExp InstAccessExp.createSpecifiedNode(Index i, boolean scalarize) {
         return createNode(getInstAccess().specify(i, scalarize));
     }
@@ -2111,7 +2111,7 @@ aspect Arrays {
 	 */
 	syn Indices FExp.indices()                   = Indices.create(size());
 	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
-	eq FIdUseExp.indices()                       = getAccess().indices();
+	eq CommonAccessExp.indices()                 = getAccess().indices();
 	eq FDimensionConvert.indices() {
 		int n = getFExp().ndims();
 		if (n == 0) {

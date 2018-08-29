@@ -137,7 +137,7 @@ aspect GenInitArrayStatements {
     }
     
     syn Set<String> FAssignableExp.sortingAssignedNames();
-    eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
+    eq CommonAccessExp.sortingAssignedNames() = Collections.singleton(name());
     eq FSubscriptedExp.sortingAssignedNames() {
         Set<String> res = new LinkedHashSet<String>();
         for (FAccessExp use : findFAccessExpsInTree()) {

@@ -251,7 +251,7 @@ aspect CCodeGenExternalCeval {
         
     }
     
-    public void FIdUseExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
+    public void CommonAccessExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
         CommonVariableDecl cvd = myCommonVarDecl();
         if (!decls.contains(cvd))
             decls.add(cvd);

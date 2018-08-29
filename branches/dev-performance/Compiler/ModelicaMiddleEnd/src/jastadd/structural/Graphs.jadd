@@ -320,7 +320,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
-    protected FIdUseExpLookupVisitor<FAccessExp> getFIdUseExpLookupVisitor() {
+    protected CommonAccessExpLookupVisitor<FAccessExp> getCommonAccessExpLookupVisitor() {
         if (isInitialSystem()) {
             return InitDAEVarUseLookupVisitor.instance;
         } else {
@@ -345,7 +345,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         protected Set<V> vars() {
             if (vars == null) {
-                vars = resolver.lookupVars(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
+                vars = resolver.lookupVars(equation.findCommonAccessExpsInTree(getCommonAccessExpLookupVisitor()));
             }
             return vars;
         }
@@ -397,7 +397,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         private Collection<FAccessExp> rhsUses() {
             if (rhsUses == null) {
-                rhsUses = equation.FAccessExpsInRHS(getFIdUseExpLookupVisitor());
+                rhsUses = equation.FAccessExpsInRHS(getCommonAccessExpLookupVisitor());
             }
             return rhsUses;
         }
@@ -433,7 +433,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         protected Set<FAccessExp> lhsUses() {
             if (lhsUses == null) {
-                lhsUses = equation.FAccessExpsInLHS(getFIdUseExpLookupVisitor());
+                lhsUses = equation.FAccessExpsInLHS(getCommonAccessExpLookupVisitor());
             }
             return lhsUses;
         }
@@ -1506,30 +1506,30 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
     
 
-    public void ASTNode.findDAEVarUsesInTree(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
-        findFIdUseExpsInTree(set, visitor);
+    public void ASTNode.findDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
+        findCommonAccessExpsInTree(set, visitor);
     }
 
     @Override
-    public void FHomotopyExp.findDAEVarUsesInTree(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
+    public void FHomotopyExp.findDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getActual(), set);
     }
 
-    public void ASTNode.findInitDAEVarUsesInTree(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
-        findFIdUseExpsInTree(set, visitor);
+    public void ASTNode.findInitDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
+        findCommonAccessExpsInTree(set, visitor);
     }
 
     public Set<FAccessExp> ASTNode.findInitUniqueDAEVarUsesInTree() {
-        return findFIdUseExpsInTree(InitUniqueDAEVarUseLookupVisitor.instance);
+        return findCommonAccessExpsInTree(InitUniqueDAEVarUseLookupVisitor.instance);
     }
 
-    public void ASTNode.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
+    public void ASTNode.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         for (ASTNode n : this) {
             visitor.visit(n, set);
         }
     }
 
-    public void FHomotopyExp.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
+    public void FHomotopyExp.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getActual(), set);
         DefaultFAccessExpLookupVisitor.instance.visit(getSimplified(), set);
     }

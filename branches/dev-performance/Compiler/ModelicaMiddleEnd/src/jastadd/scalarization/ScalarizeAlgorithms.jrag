@@ -42,7 +42,7 @@ aspect AlgorithmScalarization {
             FType t = left.size().isUnknown() ? left.type() : right.type();
             if (extractTemp()) {
                 s.addTempVar(this);
-                FIdUseExp temp = getRight().tempExp(tempVarName());
+                CommonAccessExp temp = getRight().tempExp(tempVarName());
                 t.scalarizeAssignment(s, temp, right);
                 right = temp;
             }

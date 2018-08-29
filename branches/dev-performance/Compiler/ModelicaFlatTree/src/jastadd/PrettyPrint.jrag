@@ -1594,7 +1594,7 @@ aspect FlatPrettyPrint {
 
 	public abstract void CommonAccess.prettyPrint(Printer p, CodeStream str, String indent);
 
-	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+	protected void CommonAccessExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getAccess(), str, indent);
 	}
 	

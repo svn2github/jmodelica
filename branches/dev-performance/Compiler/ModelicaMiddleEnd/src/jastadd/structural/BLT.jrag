@@ -515,15 +515,15 @@ aspect BLT{
     }
 
     public Set<FAccessExp> ASTNode.homotopySimplifiedVarUseLookupVisitor() {
-        return findFIdUseExpsInTree(HomotopySimplifiedVarUseLookupVisitor.instance);
+        return findCommonAccessExpsInTree(HomotopySimplifiedVarUseLookupVisitor.instance);
     }
 
-    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
-        findFIdUseExpsInTree(set, visitor);
+    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
+        findCommonAccessExpsInTree(set, visitor);
     }
 
     @Override
-    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
+    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getSimplified(), set);
     }
 

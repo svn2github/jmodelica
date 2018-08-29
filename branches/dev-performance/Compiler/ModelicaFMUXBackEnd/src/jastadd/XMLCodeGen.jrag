@@ -643,7 +643,7 @@ aspect XMLTagBinding{
        
         //literals and identifiers
         eq CommonAccess.xmlTag() = "Identifier";
-        eq FIdUseExp.xmlTag() = "Identifier";
+        eq CommonAccessExp.xmlTag() = "Identifier";
         eq FEnumLitExp.xmlTag() = "Identifier";	
         eq FIntegerLitExp.xmlTag() = "IntegerLiteral";
         eq FRealLitExp.xmlTag() = "RealLiteral";

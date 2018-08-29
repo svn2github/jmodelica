@@ -102,7 +102,7 @@ aspect ConstantEvaluationStatements {
      * @param right     the CValue to assign
      */
     @Override
-    public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+    public void CommonAccessExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         getAccess().assignToInFuncEval(evaluator, right);
     }
     

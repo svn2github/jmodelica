@@ -119,7 +119,7 @@ aspect DynamicStateSelect{
     }
 
     @Override
-    public <T extends FIdUseExp> void FDSRefExp.findFIdUseExpsInTree(Set<T> set, FIdUseExpLookupVisitor<T> visitor) {
+    public <T extends CommonAccessExp> void FDSRefExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
         for (FAccessExp exp : getUses())
             visitor.visit(exp, set);
         visitor.visit(getOrg(), set);
@@ -134,7 +134,7 @@ aspect DynamicStateSelect{
     }
 
     @Override
-    public <T extends FIdUseExp> void FDSDerExp.findFIdUseExpsInTree(Set<T> set, FIdUseExpLookupVisitor<T> visitor) {
+    public <T extends CommonAccessExp> void FDSDerExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
         for (FExp exp : getUses())
             visitor.visit(exp, set);
     }

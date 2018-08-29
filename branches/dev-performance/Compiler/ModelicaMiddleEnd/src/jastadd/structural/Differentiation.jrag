@@ -425,7 +425,7 @@ aspect Derivatives {
     }
 
     @Override
-    protected FExp FIdUseExp.diffExp(String name) {
+    protected FExp CommonAccessExp.diffExp(String name) {
         return diffUseOrDerExp(name, name());
     }
 
@@ -549,7 +549,7 @@ aspect Derivatives {
         }
     }
 
-    syn int FIdUseExp.order()              = 0;
+    syn int CommonAccessExp.order()        = 0;
     eq FAbstractDerExp.order()             = getOrder();
     syn int InstDerExp.order()             = 1;
     eq InstHDerExp.order()                 = getOrder();
@@ -1047,7 +1047,7 @@ aspect AlgorithmDifferentiation{
     }
     
     rewrite FDerExp {
-        when (inFunction()) to FIdUseExp 
+        when (inFunction()) to CommonAccessExp 
         new FAccessExp(getFAccess().createDerPrefixedFunctionName(order()));
     }
     

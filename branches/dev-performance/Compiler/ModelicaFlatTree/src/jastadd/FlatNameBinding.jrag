@@ -32,7 +32,7 @@ aspect FlatNameBinding {
     syn FFunctionVariable FAccessExp.myFuncFV() = getFAccess().myFuncFV();
     syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
-    syn CommonVariableDecl FIdUseExp.myCommonVarDecl();
+    syn CommonVariableDecl CommonAccessExp.myCommonVarDecl();
     eq  FAccessExp.myCommonVarDecl()    = getFAccess().myFV();
     eq  InstAccessExp.myCommonVarDecl() = getInstAccess().myInstComponentDecl();
 
@@ -147,7 +147,7 @@ aspect FlatNameBinding {
             i == 0 ? null : getFAccessPart(i - 1).myFV();
 	
 	syn boolean CommonAccess.isForIndex();
-	syn boolean FIdUseExp.isForIndex() = getAccess().isForIndex();
+	syn boolean CommonAccessExp.isForIndex() = getAccess().isForIndex();
 	eq FAccess.isForIndex()             = myFV().isForIndex();
 	eq InstAccess.isForIndex()         = myInstComponentDecl().isForIndex();
     inh boolean FAbstractVariable.isForIndex();

@@ -80,7 +80,7 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = ((FIdUseExp) getFExp()).getAccess().name();
+        String name = ((CommonAccessExp) getFExp()).getAccess().name();
         ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
         return cs.expandInStreamExp(name);
     }
@@ -599,10 +599,10 @@ aspect Connections {
             List<FExp> vars = new List<FExp>();
             for (ConnectionSetEntry e : this) {
                 if (cse != e) {
-                    stream = (name == null) ? e.createFAccessExp() : e.createFIdUseExp(name, cse);
+                    stream = (name == null) ? e.createFAccessExp() : e.createCommonAccessExp(name, cse);
                     if (e.isOutside()) 
                         stream = new FInStream(stream);
-                    vars.add(e.createFlowFIdUseExp());
+                    vars.add(e.createFlowCommonAccessExp());
                     vars.add(stream);
                     vars.add(FBooleanLitExp.create(e.isOutside()));
                 }
@@ -961,7 +961,7 @@ aspect Connections {
          * Create an FAccessExp that is an access to a variable in this entry, that is connected to 
          * the variable named <code>name</code> in <code>other</code>.
          */
-        public FAccessExp createFIdUseExp(String name, ConnectionSetEntry other) {
+        public FAccessExp createCommonAccessExp(String name, ConnectionSetEntry other) {
             if (other == this)
                 return new FAccessExp(name); 
             if (scalarNames == null || other.scalarNames == null)
@@ -1025,7 +1025,7 @@ aspect Connections {
          * 
          * Only valid for stream connection entries.
          */
-        public FExp createFlowFIdUseExp() {
+        public FExp createFlowCommonAccessExp() {
             throw new UnsupportedOperationException("Only supported for stream connection sets");
         }
 
@@ -1089,7 +1089,7 @@ aspect Connections {
                 return true;
             }
 
-            public FExp createFlowFIdUseExp() {
+            public FExp createFlowCommonAccessExp() {
                 return flowExp.fullCopy();
             }
 
@@ -1764,7 +1764,7 @@ aspect OverconstrainedConnections {
 		 */
 		public OpsResult ops(FExp e) {
 			OpsResult res = null;
-            CommonAccess u = ((FIdUseExp) e).getAccess();
+            CommonAccess u = ((CommonAccessExp) e).getAccess();
 			if (u.isInstAccess()) {
                 InstComponentDecl var = u.asInstAccess().myInstComponentDecl();
 				Node n = getNode(var);
