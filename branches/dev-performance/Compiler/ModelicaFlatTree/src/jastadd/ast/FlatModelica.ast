@@ -1013,7 +1013,7 @@ FDSDerExp : FVarRefExp ::= <SetId:int> <Number:int> /Use:FExp*/;
 /**
  * Identifier of temporary variable, used during scalarization
  */
-FIdTempExp : FAccessExp;
+FTempAccessExp : FAccessExp;
 
 /**
  * The built-in function der in the instance tree.

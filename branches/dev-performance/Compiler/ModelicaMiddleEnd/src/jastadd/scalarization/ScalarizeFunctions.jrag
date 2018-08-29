@@ -38,7 +38,7 @@ aspect FunctionScalarization {
     /**
      * Post processing FFunctionDecls after scalarization.
      * Clear the scalarized flag for all FAccesss.
-     * Rewrite FIdTempExp to FAccessExp
+     * Rewrite FTempAccessExp to FAccessExp
      */
     public void ASTNode.clearScalarized() {
         for (ASTNode node : this)
@@ -49,13 +49,13 @@ aspect FunctionScalarization {
         scalarized = false;
     }
     
-    private boolean FIdTempExp.clearScalarized = false;
-    public void FIdTempExp.clearScalarized() {
+    private boolean FTempAccessExp.clearScalarized = false;
+    public void FTempAccessExp.clearScalarized() {
         super.clearScalarized();
         clearScalarized = true;
     }
     
-    rewrite FIdTempExp {
+    rewrite FTempAccessExp {
         when (clearScalarized) to FAccessExp new FAccessExp(getFAccess());
     }
     
@@ -76,7 +76,7 @@ aspect FunctionScalarization {
     eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon(this);
     eq FVectorExp.extractTemp()             = extractTempArrayCon(getFExp());
     eq FMatrixExp.extractTemp()             = extractTempArrayCon(getFExp());
-    eq FIdTempExp.extractTemp()             = false;
+    eq FTempAccessExp.extractTemp()         = false;
     eq FIfExp.extractTemp()                 = false;
     
     syn boolean FExp.extractForIndexTemp() = isForIndexExp();
@@ -763,7 +763,7 @@ aspect FunctionScalarization {
         }
     }
 
-    public void FIdTempExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FTempAccessExp.addArrayUsesToIndexMap(FExp[] names) {
         indexNames = names;
     }
 
@@ -1039,7 +1039,7 @@ aspect FunctionScalarizationHelpers {
             FArraySubscripts fas = new FArraySubscripts();
             for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
-                    fas.addFSubscript(new FIdTempExp(new FAccessFull(topLayer()[i])));
+                    fas.addFSubscript(new FTempAccessExp(new FAccessFull(topLayer()[i])));
                 else
                     fas.addFSubscript(new FIntegerLitExp(1));
             }
