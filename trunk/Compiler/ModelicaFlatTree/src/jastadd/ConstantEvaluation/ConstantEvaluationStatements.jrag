@@ -66,7 +66,7 @@ aspect ConstantEvaluationStatements {
      */
     @Override
     public int FAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
-        getLeft().assignToInFuncEval(evaluator, evaluator.ceval(getRight()));
+        getLeft().assignToInFuncEval(evaluator, evaluator.ceval(getRight()), getRight().type());
         return EVAL_CONT;
     }
     
@@ -76,9 +76,9 @@ aspect ConstantEvaluationStatements {
      * @param evaluator the evaluator used to evaluate the algorithm
      * @param right     the CValue to assign
      */
-    public void FFunctionCallLeft.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue val) {
+    public void FFunctionCallLeft.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType) {
         if (hasFExp()) {
-            getFExp().assignToInFuncEval(evaluator, val);
+            getFExp().assignToInFuncEval(evaluator, right, rightType);
         }
     }
     
@@ -88,12 +88,12 @@ aspect ConstantEvaluationStatements {
      * @param evaluator the evaluator used to evaluate the algorithm
      * @param right     the CValue to assign
      */
-    public void FExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+    public void FExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType) {
         throw new ConstantEvaluationException();
     }
     
     @Override
-    public abstract void FAssignableExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right);
+    public abstract void FAssignableExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType);
     
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
@@ -102,13 +102,18 @@ aspect ConstantEvaluationStatements {
      * @param right     the CValue to assign
      */
     @Override
-    public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+    public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType) {
+        CValue ceval = ceval(evaluator);
+        if (!ceval.isPartlyUnknown() && !right.isPartlyUnknown() && !ceval.typeMatches(right)) {
+            throw new ConstantEvaluationException(null, "Mismatching types when evaluating assignment,"
+                    + " type of left-hand side is "+type()+", and type of right-hand side is "+rightType+" " + errorLocation());
+        }
         getCommonAccess().assignToInFuncEval(evaluator, right);
     }
     
     @Override
-    public void FSubscriptedExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        ((FAssignableExp)select()).assignToInFuncEval(evaluator, right);
+    public void FSubscriptedExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType) {
+        ((FAssignableExp)select()).assignToInFuncEval(evaluator, right, rightType);
     }
     
     syn FExp FSubscriptedExp.select() = getFExp().getArray().get(getFArraySubscripts().createIndex());
@@ -157,6 +162,10 @@ aspect ConstantEvaluationStatements {
             InstAssignable var = (InstAssignable) comp;
             CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
             evaluator.setEvaluationValue(var, val);
+        } else if (comp.isUnknown()) {
+            // Do nothing
+        } else {
+            throw new ConstantEvaluationException(null, "Assigning to non-assignable");
         }
     }
 
@@ -308,15 +317,16 @@ aspect ConstantEvaluationStatements {
 
     @Override
     public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
-        getFIdUseExp().assignToInFuncEval(evaluator, type().zeroCValue());
+        getFIdUseExp().assignToInFuncEval(evaluator, type().zeroCValue(), type());
         return EVAL_CONT;
     }
 
     @Override
     public int FFunctionCallStmt.evaluate(AlgorithmEvaluator evaluator) {
         CValue[] vals = getCall().evaluate(evaluator);
+        ArrayList<? extends CommonVariableDecl> outputs = getCall().myCallOutputs();
         for (int i = 0, n = getNumLeft(); i < n; i++) {
-            getLeft(i).assignToInFuncEval(evaluator, vals[i]);
+            getLeft(i).assignToInFuncEval(evaluator, vals[i], outputs.get(i).type());
         }
         return EVAL_CONT;
     }
