@@ -230,9 +230,9 @@ aspect FlatteningFunctionConstant {
         // flattened during error checks, when using qualifiedName()
         InstAccess ia = access.asInstAccess();
         if (variability().indexParameterOrLess()) {
-            if (iae.canInlineConstant()) {
+            if (access.canInlineConstant()) {
                 try {
-                    FType t = iae.type();
+                    FType t = access.type();
                     if (t.isEmpty()) {
                         return t.createEmptyExp();
                     }
@@ -247,7 +247,7 @@ aspect FlatteningFunctionConstant {
                         }
                     } else {
                         // Inline value
-                        CValue cval = iae.ceval();
+                        CValue cval = access.ceval();
                         if (isReal() && cval.hasConvertReal()) {
                             cval = cval.convertReal();
                         }

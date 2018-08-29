@@ -422,8 +422,8 @@ aspect IndexReduction {
                 eqnNonDiffMap.put(eqn, nonDiff);
                 for (FAccessExp access : eqn.referencedCommonAccessExps()) {
                     Boolean oldValue = varNonDiffMap.get(access.name());
-                    boolean value = (oldValue == null || oldValue) && (nonDiff || use.inNonDiffArg());
-                    varNonDiffMap.put(use.name(), value);
+                    boolean value = (oldValue == null || oldValue) && (nonDiff || access.inNonDiffArg());
+                    varNonDiffMap.put(access.name(), value);
                     Collection<FAbstractEquation> eqnList = varToEqnMap.get(access.name());
                     if (eqnList == null)
                         continue;

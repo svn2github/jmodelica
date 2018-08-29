@@ -823,7 +823,7 @@ aspect Flattening {
         InstAccessExp access = new InstAccessExp(new InstComponentAccess(name()));
         stmt.addArg(access);
         for (int i = 0; i < ndims(); i++) {
-            stmt.addArg(new FSizeExp(use.treeCopy(), new Opt(new FIntegerLitExp(i + 1))));
+            stmt.addArg(new FSizeExp(access.treeCopy(), new Opt(new FIntegerLitExp(i + 1))));
         }
     }
     
