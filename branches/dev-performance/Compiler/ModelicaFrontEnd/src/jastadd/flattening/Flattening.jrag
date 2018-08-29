@@ -840,7 +840,7 @@ aspect Flattening {
             args.add(arg.flatten(f));
         }
         Opt<CommonAccessExp> ret = hasReturnVar() ? 
-                new Opt<>((CommonAccessExp)getReturnVar().flatten(f)) : 
+                new Opt<>(getReturnVar().flatten(f).asCommonAccessExp()) : 
                 new Opt<CommonAccessExp>();
                 
         FExternalStmt stmt = new FExternalStmt(getFExternalLanguage().treeCopy(), ret, getName(), args, getLibTopPackagePath());

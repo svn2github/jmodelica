@@ -542,7 +542,7 @@ aspect ExpressionSimplification {
     eq CommonAccessExp.equalsSymbolic(FExp other) {
         if (!(other instanceof CommonAccessExp))
             return false;
-        CommonAccessExp o = (CommonAccessExp) other;
+        CommonAccessExp o = other.asCommonAccessExp();
         return toString().equals(o.toString());
     }
 

@@ -856,6 +856,11 @@ aspect FlatTypeCheck {
   }
   eq CommonAccessExp.asCommonAccess() = getAccess();
   
+  syn CommonAccessExp FExp.asCommonAccessExp() {
+      throw new UnsupportedOperationException("asCommonAccessExp() is not supported for class type " + getClass().getSimpleName());
+  }
+  eq CommonAccessExp.asCommonAccessExp() = this;
+  
   syn FAccessExp FExp.asFAccessExp() {
       throw new UnsupportedOperationException("asFAccessExp() is not supported for class type " + getClass().getSimpleName());
   }

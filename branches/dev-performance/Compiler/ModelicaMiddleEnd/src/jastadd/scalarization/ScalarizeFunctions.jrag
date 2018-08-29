@@ -361,7 +361,7 @@ aspect FunctionScalarization {
             FAccessExp left = tempExp();
             FExp right = owner.enterExtractedTempScalarization(this);
             if (writeBack) {
-                FAccessExp temp = (FAccessExp) right;
+                FAccessExp temp = right.asFAccessExp();
                 right = left;
                 left  = temp;
             }

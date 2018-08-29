@@ -466,7 +466,7 @@ aspect CCodeGen {
     @Override
     public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        FAccessExp left = (FAccessExp)getLeft().stripNegations();
+        FAccessExp left = getLeft().stripNegations().asFAccessExp();
         FVariable fv = (FVariable)left.myFV();
         if (fv.isExternalObject()) {
             fv.genDestructorCall_C(p, str, indent);

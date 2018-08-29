@@ -4298,7 +4298,7 @@ aspect CircularExpressions {
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((CommonAccessExp)getFExp()).getAccess().isCircular(dimension());
+    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || getFExp().asCommonAccess().isCircular(dimension());
     
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {

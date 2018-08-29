@@ -33,7 +33,7 @@ aspect FlatteningAccess {
             if (ia.isNonAssignableArray()) {
                 return getArrayExp().buildFlattened(f, this, order);
             } else if (!ia.indexVariability().indexParameterOrLess()) {
-                CommonAccessExp copy = (CommonAccessExp) dynamicFExp(treeCopy());
+                CommonAccessExp copy = dynamicFExp(treeCopy()).asCommonAccessExp();
                 List<FSubscript> sub = new List<FSubscript>();
                 copy.asInstAccess().extractNonParameterIndices(sub, ia.myInstComponentDecl().variability());
                 FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));

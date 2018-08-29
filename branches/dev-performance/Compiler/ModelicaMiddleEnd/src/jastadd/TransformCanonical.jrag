@@ -1587,7 +1587,7 @@ aspect TransformCanonical {
 
     rewrite FAssignStmt {
         when (rewriteAlias && getLeft() instanceof FAccessExp) to FAssignStmt {
-            FAccessExp left = (FAccessExp) getLeft();
+            FAccessExp left = getLeft().asFAccessExp();
             if (left.myFV().isFVariable() && left.myFV().isAlias()) {
                 FVariable fv = (FVariable) left.myFV();
                 FAccessExp exp = fv.alias().createAccessExp();
@@ -2386,7 +2386,7 @@ aspect ParameterSorting {
 	 */
 	public void FAbstractEquation.revertToBindingExp() {}
 	public void FEquation.revertToBindingExp() throws ConstantEvaluationException {
-		FVariable fv = (FVariable) ((FAccessExp) getLeft()).getFAccess().myFV();
+		FVariable fv = (FVariable) getLeft().asFAccessExp().getFAccess().myFV();
 		fv.setBindingExp(getRight().ceval().buildLiteral());
 	}
 
@@ -2789,7 +2789,7 @@ aspect SemiLinear {
     syn FAccessExp FEquation.zeroFlowGetLeft() {
         FExp l = getLeft().stripNegations();
         FExp r = getRight().stripNegations();
-        return (FAccessExp) (l.isSemiLinear() ? r : l);
+        return (l.isSemiLinear() ? r : l).asFAccessExp();
     } 
     
     syn FSemiLinearExp FEquation.zeroFlowGetRight() {

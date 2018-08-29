@@ -80,7 +80,7 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = ((CommonAccessExp) getFExp()).getAccess().name();
+        String name = getFExp().asCommonAccess().name();
         ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
         return cs.expandInStreamExp(name);
     }
@@ -350,7 +350,7 @@ aspect Connections {
     rewrite FActualStream {
         when (rewriteStreams) to FExp {
             // Get the stream variable name prefix
-            FAccess varName = ((FAccessExp) getFExp()).getFAccess();
+            FAccess varName = getFExp().asFAccessExp().getFAccess();
             FAccess prefix = varName.copyPrefix();
             ArrayList<ConnectionSetEntry> cses = 
                 myFClass().getConnectionSetManager().getFlowVariables(prefix.name());
@@ -1764,7 +1764,7 @@ aspect OverconstrainedConnections {
 		 */
 		public OpsResult ops(FExp e) {
 			OpsResult res = null;
-            CommonAccess u = ((CommonAccessExp) e).getAccess();
+            CommonAccess u = e.asCommonAccess();
 			if (u.isInstAccess()) {
                 InstComponentDecl var = u.asInstAccess().myInstComponentDecl();
 				Node n = getNode(var);
