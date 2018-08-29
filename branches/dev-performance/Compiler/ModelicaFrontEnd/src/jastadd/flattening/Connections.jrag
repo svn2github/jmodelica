@@ -3218,10 +3218,9 @@ aspect Cardinality {
     syn int FExp.cardinalityValue() {
         throw new UnsupportedOperationException();
     }
-    eq FIdUseExp.cardinalityValue()      = getAccess().cardinalityValue();
+    eq InstAccessExp.cardinalityValue() = 1;
+    eq FAccessExp.cardinalityValue()    = getFAccess().cardinalityValue();
 
-    syn int CommonAccess.cardinalityValue();
-    eq FAccess.cardinalityValue()     = myFClass().getConnectionSetManager().getCardinality(scalarName());
-    eq InstAccess.cardinalityValue() = 1;
+    syn int FAccess.cardinalityValue() = myFClass().getConnectionSetManager().getCardinality(scalarName());
 
 }

@@ -32,10 +32,9 @@ aspect FlatNameBinding {
     syn FFunctionVariable FAccessExp.myFuncFV() = getFAccess().myFuncFV();
     syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
-    syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getAccess().myCommonVarDecl();
-    syn CommonVariableDecl CommonAccess.myCommonVarDecl();
-    eq  FAccess.myCommonVarDecl()     = myFV();
-    eq  InstAccess.myCommonVarDecl() = myInstComponentDecl();
+    syn CommonVariableDecl FIdUseExp.myCommonVarDecl();
+    eq  FAccessExp.myCommonVarDecl()    = getFAccess().myFV();
+    eq  InstAccessExp.myCommonVarDecl() = getInstAccess().myInstComponentDecl();
 
     syn FVariable FRelExp.myIndicatorVariableOrException() {
         FVariable variable = myIndicatorVariableOrNull();
