@@ -297,7 +297,7 @@ aspect FunctionInlining {
             if (noEvent)
                 value = value.preventEvents();
             value.resetOriginalReferences();
-            FEquation eqn = new FEquation(var.createUseExp(), value);
+            FEquation eqn = new FEquation(var.createAccessExp(), value);
             addEquation(eqn, variability);
         }
 
@@ -362,7 +362,7 @@ aspect FunctionInlining {
                     new FAccessString(n);
             FVariable var = addVar(name, variability, type);
             setTypeOf(oldName, type);
-            replMap.put(oldName, var.createUseExp());
+            replMap.put(oldName, var.createAccessExp());
             return var;
         }
         
@@ -550,7 +550,7 @@ aspect FunctionInlining {
             var.setBindingExp(bExp);
             fi.setReplacementExp(scalarName(), bExp);
         }
-        return var.createUseExp();
+        return var.createAccessExp();
     }
 
     public FExp FArray.createInlineVars(
@@ -1411,7 +1411,7 @@ aspect FunctionInlining {
         FExp loopExp = getIndex().getFExp();
         loopExp = loopExp.dynamicFExp(loopExp.fullCopy()).replaceReferences(fi);
         for (FExp e : loopExp.getArray().iterable()) {
-            stmts.add(new FAssignStmt(index.createUseExp(), e.fullCopy()));
+            stmts.add(new FAssignStmt(index.createAccessExp(), e.fullCopy()));
             for (FStatement stmt : newStmts)
                 stmts.add(stmt.fullCopy());
         }

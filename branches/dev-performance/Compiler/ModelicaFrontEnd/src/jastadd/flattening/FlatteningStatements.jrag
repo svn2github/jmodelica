@@ -186,7 +186,7 @@ aspect FlatStatements {
                 if (hasBreak) {
                     tempVar = new FBooleanVariable(VisibilityType.TEMPORARY, Variability.DISCRETE, new FAccessString(myTempVarName()));
                     f.addFVariable(tempVar);
-                    sl.add(new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()));
+                    sl.add(new FAssignStmt(tempVar.createAccessExp(), new FBooleanLitExpTrue()));
                 }
                 
                 List<FStatement> inner = sl;
@@ -198,7 +198,7 @@ aspect FlatStatements {
                     getForStmts().flushAllRecursive();
                     FStatement.flattenFStatementList(f, getForStmts(), inner);
                     if (hasBreak) {
-                        sl.add(FStatement.breakBlock(inner, tempVar.createUseExp()));
+                        sl.add(FStatement.breakBlock(inner, tempVar.createAccessExp()));
                     }
                 }
                 for (InstForIndex ifi : getInstForIndexs()) {

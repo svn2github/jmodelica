@@ -627,7 +627,7 @@ aspect GenerateEventIndicators {
         }
 
         myFClass().addFVariable(v);
-        setIndicator(v.createUseExp());
+        setIndicator(v.createAccessExp());
         setIndicatorVarName(variableName);
     }
 

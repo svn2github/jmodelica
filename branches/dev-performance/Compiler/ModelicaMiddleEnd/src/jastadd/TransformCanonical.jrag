@@ -722,7 +722,7 @@ aspect TransformCanonical {
                 if (fe == null && fv.isPreVariable())
                     fe = prePropagationEquations.remove(fv.myNonPreVariable());
                 if (fe == null) {
-                    FAccessExp lhs = fv.isPreVariable() ? fv.createFPreExp() : fv.createUseExp();
+                    FAccessExp lhs = fv.isPreVariable() ? fv.createFPreExp() : fv.createAccessExp();
                     FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
                     fe = new FEquation(lhs, rhs);
                     fe.setLocationNoTree(fv);
@@ -889,7 +889,7 @@ aspect TransformCanonical {
                     ffv.setFAccess(new FAccessString(name));
 					
 					// Create and add binding expression for output
-                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), ffv.createUseExp()));
+                    stmts.add(new FAssignStmt(bothInVars.get(i).createAccessExp(), ffv.createAccessExp()));
 				}
 			}
 			
@@ -946,7 +946,7 @@ aspect TransformCanonical {
 			if (isContinuous())
 				return createStartAttributeExp();
 		}
-		return createUseExp();
+		return createAccessExp();
 	}
 	
 	/**
@@ -1180,7 +1180,7 @@ aspect TransformCanonical {
                     }
                     
                     if (generate) {
-                        FExp lhs = fv.setLocationOf(fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp());
+                        FExp lhs = fv.setLocationOf(fv.isDiscrete() ? fv.createFPreExp() : fv.createAccessExp());
                         FExp rhs = fv.setLocationOf(fv.startAttributeSet() ? fv.startAttributeExp().fullCopy() : fv.type().zeroLiteral());
                         addFInitialEquation(new FEquation(lhs, rhs));
                     }
@@ -1540,7 +1540,7 @@ aspect TransformCanonical {
         when (rewriteAlias) to FExp {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
-                FAccessExp new_exp = fv.alias().createUseExp();
+                FAccessExp new_exp = fv.alias().createAccessExp();
                 new_exp.setLocationNoTree(this);
                 new_exp.addLocation(fv);
                 new_exp.setOriginalVariable(this, fv);
@@ -1556,7 +1556,7 @@ aspect TransformCanonical {
                     && order() == 0 && inEquationSection()
                     && !inWhen() && !inFunctionCallLeft()) {
                 FVariable var = myFV().derivativeEquivalent();
-                FAccessExp exp = var.getMeDifferentiated().createUseExp();
+                FAccessExp exp = var.getMeDifferentiated().createAccessExp();
                 exp.setOriginalVariable(this, var);
                 if (var.isAlias())
                     exp.rewriteAlias = true;
@@ -1590,7 +1590,7 @@ aspect TransformCanonical {
             FAccessExp left = (FAccessExp) getLeft();
             if (left.myFV().isFVariable() && left.myFV().isAlias()) {
                 FVariable fv = (FVariable) left.myFV();
-                FAccessExp exp = fv.alias().createUseExp();
+                FAccessExp exp = fv.alias().createAccessExp();
                 setLeft(exp);
                 exp.setOriginalVariable(left, fv);
                 if (fv.isNegated()) 
@@ -1616,7 +1616,7 @@ aspect TransformCanonical {
         when (rewriteAlias && getFAccess().myFV().isFVariable() && (myFV().isAlias() || getFAccess().myFV().isAlias())) to FExp {
             if (myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
-                FAccessExp new_exp = fv.alias().createUseExp();
+                FAccessExp new_exp = fv.alias().createAccessExp();
                 new_exp.setOriginalVariable(this, fv);
                 if (myFV().isNegated()) 
                     return new FNegExp(new_exp);
@@ -2210,7 +2210,7 @@ aspect ParameterSorting {
                     if (literal != null) {
                         var.setBindingExp(literal);
                     } else {
-                        FAbstractEquation fae = new FEquation(var.createUseExp(), bExp);
+                        FAbstractEquation fae = new FEquation(var.createAccessExp(), bExp);
                         addParameterEquationNoTransform(fae);
                         var.removeBindingExp();
                         parameterEquationsMap().put(var, fae);
@@ -2592,7 +2592,7 @@ aspect StateInitialEquations {
             else
                 fvToAdd.setBindingExp(fv.type().zeroLiteral());
             addFVariable(fvToAdd);
-            FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
+            FEquation eqnToAdd = new FEquation(fv.createAccessExp(), fvToAdd.createAccessExp());
             addFInitialEquation(eqnToAdd);
             flushAllRecursive();
         }

@@ -227,7 +227,7 @@ aspect FunctionScalarization {
                 s.add(new FIfStmt(cl, elseClauses));
             } else {
                 for (FAbstractVariable fv : thenVars) {
-                    elseClauses.add(new FEquation(fv.createUseExp(), fv.type().zeroLiteral()));
+                    elseClauses.add(new FEquation(fv.createAccessExp(), fv.type().zeroLiteral()));
                 }
                 FElseEquation elseClause = new FElseEquation(EquationType.NORMAL, elseClauses);
                 FIfEquation equation = new FIfEquation(EquationType.NORMAL, thenClauses, ifExp, new Opt<FIfWhenElseEquation>(elseClause));

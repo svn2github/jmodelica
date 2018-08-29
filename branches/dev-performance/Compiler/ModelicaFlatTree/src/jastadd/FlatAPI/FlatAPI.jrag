@@ -2551,7 +2551,7 @@ aspect FlatAPI {
         ArrayList<FStatement> initStmts = new ArrayList<FStatement>();
         for (FVariable fv : lhs)
             if (!fvSet.contains(fv))
-                initStmts.add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
+                initStmts.add(new FAssignStmt(fv.createAccessExp(), fv.createAlgorithmArgument(true)));
         for (FStatement stmt : stmts)
             initStmts.add(stmt);
         if (initStmts.size() > 0)
@@ -2562,7 +2562,7 @@ aspect FlatAPI {
         Set<FVariable> removedFVs = referencedFVariablesInLHS();
         removedFVs.removeAll(lhs);
         for (FVariable fv : removedFVs)
-            l.add(new FEquation(fv.createUseExp(), fv.createFPreExp()));
+            l.add(new FEquation(fv.createAccessExp(), fv.createFPreExp()));
         
         return new List<FAbstractEquation>(l);
     }
@@ -3263,7 +3263,7 @@ aspect Nominals {
     
     syn FExp FAbstractVariable.nominal() {
         if (variability().fixedParameterOrLess()) {
-            return new FAbsExp(createUseExp());
+            return new FAbsExp(createAccessExp());
         } else {
             return variableNominal();
         }

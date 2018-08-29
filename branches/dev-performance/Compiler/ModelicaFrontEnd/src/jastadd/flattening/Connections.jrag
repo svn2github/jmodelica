@@ -383,13 +383,13 @@ aspect Connections {
                 FExp res = null, elseExp = null;
                 FInStream thenExp = null;
                 if (thenValid) {
-                    res = thenExp = new FInStream(var.createUseExp());
+                    res = thenExp = new FInStream(var.createAccessExp());
                     thenExp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
                 }
                 if (elseValid) 
-                    res = elseExp = var.createUseExp();
+                    res = elseExp = var.createAccessExp();
                 if (thenValid && elseValid) {
-                    FExp guard = new FGtExp(flowVar.createUseExp(), new FRealLitExp(0.0));
+                    FExp guard = new FGtExp(flowVar.createAccessExp(), new FRealLitExp(0.0));
                     res = new FIfExp(guard, thenExp, elseExp);
                     if (multFlow)
                         res = new FSmoothExp(0, res);

@@ -960,21 +960,21 @@ aspect FlatNames {
      * Interface for variable declarations in flat and instance trees.
      */
     public interface CommonVariableDecl {
-        public FExp createUseExp();
+        public FExp createAccessExp();
     }
 
     /**
      * Create an access expression to this variable.
      */
-    syn FAccessExp FVariable.createUseExp() = 
+    syn FAccessExp FVariable.createAccessExp() = 
             isPreVariable() ? new FPreExp(createFAccess()) : new FAccessExp(createFAccess());
-    eq FDerivativeVariable.createUseExp()          = new FDerExp(createFAccess(), order());
-    eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createFAccess(), (String)null, order());
-    eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createFAccess(), (String)null, order());
+    eq FDerivativeVariable.createAccessExp()          = new FDerExp(createFAccess(), order());
+    eq FDummyDerivativeVariable.createAccessExp()     = new FDummyDerExp(createFAccess(), (String)null, order());
+    eq FDynamicDerivativeVariable.createAccessExp()   = new FDynamicDerExp(createFAccess(), (String)null, order());
 
-    syn FAccessExp FFunctionVariable.createUseExp() = new FAccessExp(getFAccess().treeCopy());
-    syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
-    syn FExp UnknownFVariable.createUseExp()       = null;
+    syn FAccessExp FFunctionVariable.createAccessExp() = new FAccessExp(getFAccess().treeCopy());
+    syn FExp FEnumLiteral.createAccessExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
+    syn FExp UnknownFVariable.createAccessExp()       = null;
 
     syn FAccess CommonAccess.asFAccess() {
         throw new UnsupportedOperationException();
@@ -995,7 +995,7 @@ aspect FlatNames {
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
-    public InstAccessExp InstComponentDecl.createUseExp() {
+    public InstAccessExp InstComponentDecl.createAccessExp() {
         return new InstAccessExp(createInstAccess());
     }
     

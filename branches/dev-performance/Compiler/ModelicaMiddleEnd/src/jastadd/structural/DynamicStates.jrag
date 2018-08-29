@@ -222,7 +222,7 @@ aspect DynamicStateSelect{
             for (IndexReductionVar var : resSet.vars) {
                 FVariable fVar = var.getVariable();
                 if (fVar.order() == 1)
-                    varList.add(fVar.getMeIntegrated().createUseExp());
+                    varList.add(fVar.getMeIntegrated().createAccessExp());
                 else
                     varList.add(new FAccessExp(fVar.getFAccess().createDerPrefixedName(fVar.order() - 1)));
             }

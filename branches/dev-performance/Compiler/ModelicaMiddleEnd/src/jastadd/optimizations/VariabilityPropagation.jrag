@@ -354,7 +354,7 @@ aspect VariabilityPropagation {
         }
 
         if (!solutionVariability.knownParameterOrLess()) {
-            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
+            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createAccessExp()), solution)));
         }
         
         this.taggedByVProp = true;
@@ -622,7 +622,7 @@ aspect VariabilityPropagation {
                     if (variability.knownParameterOrLess()) {
                         fv.setBindingExp(bindingExp.negated(neg));
                     } else if (unAlias && variability.parameterVariability() && !fv.isTemporary()) {
-                        propagator.addEquation(variability, new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
+                        propagator.addEquation(variability, new FEquation(fv.createAccessExp(), createAccessExp().negated(neg)));
                     }
                 }
             }

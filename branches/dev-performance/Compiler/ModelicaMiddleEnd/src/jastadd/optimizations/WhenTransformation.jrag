@@ -65,7 +65,7 @@ aspect WhenClauses{
         } else {
             ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
             for (FVariable fv : referencedFVariablesInLHS()) {
-                l.add(new FEquation(fv.createUseExp(), fv.createFPreExp()));
+                l.add(new FEquation(fv.createAccessExp(), fv.createFPreExp()));
             }
             e.setElse(new FElseEquation(getType(), new List<FAbstractEquation>(l)));
         }

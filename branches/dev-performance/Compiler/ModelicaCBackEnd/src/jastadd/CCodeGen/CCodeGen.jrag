@@ -494,7 +494,7 @@ aspect CCodeGen {
         String strName = type().name() + ".destructor";
         FAccess name = new FAccessString(strName);
         List<FExp> args = new List<FExp>();
-        args.add(createUseExp());
+        args.add(createAccessExp());
         FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }
