@@ -505,7 +505,7 @@ aspect BLT{
         return new HomotopyBlock(producer, mergedComponent.computeBlockDependency(), homotopySubBlock, simplifiedBLT);
     }
 
-    public class HomotopySimplifiedVarUseLookupVisitor implements FIdUseExpLookupVisitor<FAccessExp> {
+    public class HomotopySimplifiedVarUseLookupVisitor extends FAccessExpLookupVisitor {
         public static final HomotopySimplifiedVarUseLookupVisitor instance = new HomotopySimplifiedVarUseLookupVisitor();
         
         @Override

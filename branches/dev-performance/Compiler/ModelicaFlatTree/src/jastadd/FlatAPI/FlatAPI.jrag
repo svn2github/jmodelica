@@ -2591,7 +2591,7 @@ aspect FlatAPI {
                 }
                 first = false;
             } else {
-                usesLHS.removeAll(c.findFIdUseExpsInTree());
+                usesLHS.removeAll(c.findFAccessExpsInTree());
             }
         }
     }
@@ -2812,24 +2812,57 @@ aspect ReferencedVariables {
     
     public interface FIdUseExpLookupVisitor<T extends FIdUseExp> {
         public void visit(ASTNode<? extends ASTNode> node, Set<T> set);
+        public abstract void add(FIdUseExp access, Set<T> set);
     }
     
-    public class DefaultFidUseExpLookupVisitor<T extends FIdUseExp> implements FIdUseExpLookupVisitor<T> {
-        public static final DefaultFidUseExpLookupVisitor<FIdUseExp> fIdUseExpInstance = new DefaultFidUseExpLookupVisitor();
-        public static final DefaultFidUseExpLookupVisitor<FAccessExp> fAccessExpInstance = new DefaultFidUseExpLookupVisitor();
+    public abstract class InstAccessExpLookupVisitor implements FIdUseExpLookupVisitor<InstAccessExp> {
+        @Override
+        public void add(FIdUseExp access, Set<InstAccessExp> set) {
+            access.addToInstAccessExpSet(set);
+        }
+    }
+
+    public abstract class FAccessExpLookupVisitor implements FIdUseExpLookupVisitor<FAccessExp> {
+        @Override
+        public void add(FIdUseExp access, Set<FAccessExp> set) {
+            access.addToFAccessExpSet(set);
+        }
+    }
+
+    public class DefaultInstAccessExpLookupVisitor extends InstAccessExpLookupVisitor {
+        public static final DefaultInstAccessExpLookupVisitor instance = new DefaultInstAccessExpLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<T> set) {
+        public void visit(ASTNode<? extends ASTNode> node, Set<InstAccessExp> set) {
             node.findFIdUseExpsInTree(set, this);
         }
     }
     
-    public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree() {
-        return findFIdUseExpsInTree(DefaultFidUseExpLookupVisitor.fIdUseExpInstance);
+    public class DefaultFAccessExpLookupVisitor extends FAccessExpLookupVisitor {
+        public static final DefaultFAccessExpLookupVisitor instance = new DefaultFAccessExpLookupVisitor();
+        
+        @Override
+        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
+            node.findFIdUseExpsInTree(set, this);
+        }
     }
     
+    public void FIdUseExp.addToInstAccessExpSet(Set<InstAccessExp> set) {}
+    public void InstAccessExp.addToInstAccessExpSet(Set<InstAccessExp> set) {
+        set.add(this);
+    }
+
+    public void FIdUseExp.addToFAccessExpSet(Set<FAccessExp> set) {}
+    public void FAccessExp.addToFAccessExpSet(Set<FAccessExp> set) {
+        set.add(this);
+    }
+
+    public Set<InstAccessExp> ASTNode.findInstAccessExpsInTree() {
+        return findFIdUseExpsInTree(DefaultInstAccessExpLookupVisitor.instance);
+    }
+
     public Set<FAccessExp> ASTNode.findFAccessExpsInTree() {
-        return findFIdUseExpsInTree(DefaultFidUseExpLookupVisitor.fAccessExpInstance);
+        return findFIdUseExpsInTree(DefaultFAccessExpLookupVisitor.instance);
     }
     
     public <T extends FIdUseExp> Set<T> ASTNode.findFIdUseExpsInTree(FIdUseExpLookupVisitor<T> visitor) {
@@ -2846,10 +2879,7 @@ aspect ReferencedVariables {
 
     @Override
     public <T extends FIdUseExp> void FIdUseExp.findFIdUseExpsInTree(Set<T> set, FIdUseExpLookupVisitor<T> visitor) {
-        try {
-            set.add((T) this);
-        } catch (ClassCastException e) {
-        }
+        visitor.add(this, set);
         super.findFIdUseExpsInTree(set, visitor);
     }
 
@@ -2872,7 +2902,7 @@ aspect ReferencedVariables {
     public <T extends FIdUseExp> void FAttribute.findFIdUseExpsInTree(Set<T> set, FIdUseExpLookupVisitor<T> visitor) {
     }
 
-    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInRHS() = FAccessExpsInRHS(DefaultFidUseExpLookupVisitor.fAccessExpInstance);
+    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInRHS() = FAccessExpsInRHS(DefaultFAccessExpLookupVisitor.instance);
 
     syn Set<FAccessExp> FAbstractEquation.FAccessExpsInRHS(FIdUseExpLookupVisitor<FAccessExp> visitor)
         = Collections.emptySet();
@@ -2887,7 +2917,7 @@ aspect ReferencedVariables {
         return res;
     }
 
-    syn Set<FAccessExp> FStatement.FAccessExpsInRHS() = FAccessExpsInRHS(DefaultFidUseExpLookupVisitor.fAccessExpInstance);
+    syn Set<FAccessExp> FStatement.FAccessExpsInRHS() = FAccessExpsInRHS(DefaultFAccessExpLookupVisitor.instance);
 
     syn Set<FAccessExp> FStatement.FAccessExpsInRHS(FIdUseExpLookupVisitor<FAccessExp> visitor) {
         Set<FAccessExp> res = new LinkedHashSet<>();
@@ -2913,7 +2943,7 @@ aspect ReferencedVariables {
         return res;
     }
     
-    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInLHS() = FAccessExpsInLHS(DefaultFidUseExpLookupVisitor.fAccessExpInstance);
+    syn Set<FAccessExp> FAbstractEquation.FAccessExpsInLHS() = FAccessExpsInLHS(DefaultFAccessExpLookupVisitor.instance);
     
     syn Set<FAccessExp> FAbstractEquation.FAccessExpsInLHS(FIdUseExpLookupVisitor<FAccessExp> visitor) = Collections.emptySet();
     eq FEquation.FAccessExpsInLHS(FIdUseExpLookupVisitor<FAccessExp> visitor)                         = getLeft().findFIdUseExpsInTree(visitor);
@@ -2925,7 +2955,7 @@ aspect ReferencedVariables {
         return res;
     }
     
-    syn Set<FAccessExp> FStatement.FAccessExpsInLHS() = FAccessExpsInLHS(DefaultFidUseExpLookupVisitor.fAccessExpInstance);
+    syn Set<FAccessExp> FStatement.FAccessExpsInLHS() = FAccessExpsInLHS(DefaultFAccessExpLookupVisitor.instance);
     
     syn Set<FAccessExp> FStatement.FAccessExpsInLHS(FIdUseExpLookupVisitor<FAccessExp> visitor) {
         Set<FAccessExp> res = new LinkedHashSet<>();

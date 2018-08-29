@@ -783,7 +783,7 @@ aspect IndexReduction {
                 inlineStack.push(fEqn);
             else if (!originalDiffedFEqns.contains(fEqn))
                 newExtraEquations.add(fEqn);
-            for (FIdUseExp use : fEqn.findFIdUseExpsInTree()) {
+            for (FAccessExp use : fEqn.findFAccessExpsInTree()) {
                 String baseName = use.getAccess().name();
                 FVariable topTempDerivative = temporaryVarsMap.get(baseName);
                 if (topTempDerivative == null)

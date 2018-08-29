@@ -140,7 +140,7 @@ aspect GenInitArrayStatements {
     eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
     eq FSubscriptedExp.sortingAssignedNames() {
         Set<String> res = new LinkedHashSet<String>();
-        for (FIdUseExp use : findFIdUseExpsInTree()) {
+        for (FAccessExp use : findFAccessExpsInTree()) {
             res.add(use.name());
         }
         return res;

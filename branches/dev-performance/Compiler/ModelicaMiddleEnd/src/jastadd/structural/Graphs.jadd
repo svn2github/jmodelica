@@ -1478,7 +1478,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 }
 
-    public class DAEVarUseLookupVisitor implements FIdUseExpLookupVisitor<FAccessExp> {
+    public class DAEVarUseLookupVisitor extends FAccessExpLookupVisitor {
         public static final DAEVarUseLookupVisitor instance = new DAEVarUseLookupVisitor();
         
         @Override
@@ -1487,7 +1487,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
 
-    public class InitDAEVarUseLookupVisitor implements FIdUseExpLookupVisitor<FAccessExp> {
+    public class InitDAEVarUseLookupVisitor extends FAccessExpLookupVisitor {
         public static final InitDAEVarUseLookupVisitor instance = new InitDAEVarUseLookupVisitor();
         
         @Override
@@ -1496,7 +1496,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
-    public class InitUniqueDAEVarUseLookupVisitor implements FIdUseExpLookupVisitor<FAccessExp> {
+    public class InitUniqueDAEVarUseLookupVisitor extends FAccessExpLookupVisitor {
         public static final InitUniqueDAEVarUseLookupVisitor instance = new InitUniqueDAEVarUseLookupVisitor();
         
         @Override
@@ -1531,7 +1531,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
 
     public void FHomotopyExp.findInitUniqueDAEVarUsesInTree(Set<FAccessExp> set, FIdUseExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getActual(), set);
-        DefaultFidUseExpLookupVisitor.fAccessExpInstance.visit(getSimplified(), set);
+        DefaultFAccessExpLookupVisitor.instance.visit(getSimplified(), set);
     }
     
 

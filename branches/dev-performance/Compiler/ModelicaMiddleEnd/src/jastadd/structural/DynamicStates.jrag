@@ -121,7 +121,7 @@ aspect DynamicStateSelect{
     @Override
     public <T extends FIdUseExp> void FDSRefExp.findFIdUseExpsInTree(Set<T> set, FIdUseExpLookupVisitor<T> visitor) {
         for (FAccessExp exp : getUses())
-            set.add((T) exp);
+            visitor.visit(exp, set);
         visitor.visit(getOrg(), set);
     }
 

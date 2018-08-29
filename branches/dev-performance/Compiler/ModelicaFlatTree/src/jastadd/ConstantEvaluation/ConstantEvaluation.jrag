@@ -4703,7 +4703,7 @@ aspect VariableEvaluator {
         @Override
         protected CValue createUnknownCValue(FExp exp) {
             CValue val = new CValueUnknownUse();
-            for (FIdUseExp use : exp.findFIdUseExpsInTree()) {
+            for (FAccessExp use : exp.findFAccessExpsInTree()) {
                 val = val.merge(use.cevalUse(this));
             }
             return val;
