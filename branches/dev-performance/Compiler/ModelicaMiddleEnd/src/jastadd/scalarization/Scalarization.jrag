@@ -1072,13 +1072,13 @@ aspect Scalarization {
     }
 
     public FExp FAccessExp.scalarRecordFExp(Scalarizer s, FAccess suffix) {
-      FAccess fqn = getFAccess();
+      FAccess access = getFAccess();
       if (indexNames != null) {
-          fqn = fqn.copyAndAddFas(createIndexNameFas());
+          access = access.copyAndAddFas(createIndexNameFas());
       }
-      fqn = fqn.asFAccessFull().copyAndAppend(suffix);
-      fqn.scalarized = false;
-      FExp res = createNode(fqn);
+      access = access.asFAccessFull().copyAndAppend(suffix);
+      access.scalarized = false;
+      FExp res = createNode(access);
       res = dynamicFExp(res).scalarize(s);
       res.setLocation(this);
       return res;
@@ -1465,9 +1465,9 @@ aspect Scalarization {
 
     public FExp FIdTempExp.scalarizeExp(Scalarizer s) {
         if (indexNames != null) {
-            FAccess fqn = getFAccess().scalarize(s);
-            fqn = fqn.asFAccessFull().addFArraySubscripts(createIndexNameFas());
-            return setLocationOf(new FAccessExp(fqn));
+            FAccess access = getFAccess().scalarize(s);
+            access = access.asFAccessFull().addFArraySubscripts(createIndexNameFas());
+            return setLocationOf(new FAccessExp(access));
         }
         return super.scalarizeExp(s);
     }
@@ -1483,11 +1483,11 @@ aspect Scalarization {
     }
 
     public FAccess FAccess.scalarize(Scalarizer s, FExp[] indexNames) {
-        FAccess fqn = scalarize(s);
+        FAccess access = scalarize(s);
         if (indexNames != null) {
-            fqn = fqn.asFAccessFull().addFArraySubscripts(getExpandedSubscripts().scalarize(s));
+            access = access.asFAccessFull().addFArraySubscripts(getExpandedSubscripts().scalarize(s));
         }
-        return fqn;
+        return access;
     }
 
 	public abstract FAccess FAccess.scalarize(Scalarizer s);
@@ -1514,10 +1514,10 @@ aspect Scalarization {
             }
             return new FAccessString(name.toString());
         } else {
-            FAccessFull fqn = new FAccessFull(new List());
-            for (FAccessPart fqnp : getFAccessParts()) 
-                fqn.addFAccessPart(fqnp.scalarize(s));
-            return fqn;
+            FAccessFull access = new FAccessFull(new List());
+            for (FAccessPart accessp : getFAccessParts()) 
+                access.addFAccessPart(accessp.scalarize(s));
+            return access;
         }
     }
 
@@ -1948,15 +1948,15 @@ aspect Scalarization {
 	}
 	
 	public void ConnectionSetEntry.scalarize() {
-		if (fqName.accessNdims() == 0) {
+		if (access.accessNdims() == 0) {
 			// Can't use FAccess.scalarize(), since it relies on rewrites
-			fqName = new FAccessString(fqName.scalarName());
+			access = new FAccessString(access.scalarName());
 		} else {
-			Indices ind = Indices.createFromFas(fqName.getFArraySubscripts());
+			Indices ind = Indices.createFromFas(access.getFArraySubscripts());
 			scalarNames = new String[ind.numElements()];
 			int j = 0;
 			for (Index i : ind)
-				scalarNames[j++] = fqName.copyAndAddFas(i.createFArraySubscripts()).scalarName();
+				scalarNames[j++] = access.copyAndAddFas(i.createFArraySubscripts()).scalarName();
 		}
 	}
 

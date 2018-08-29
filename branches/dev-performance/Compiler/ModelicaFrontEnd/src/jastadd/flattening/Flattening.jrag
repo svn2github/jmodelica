@@ -861,9 +861,9 @@ aspect Flattening {
             if (hasInstValueMod())
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             Opt eo = new Opt();
-            FAccess fqn = createFAccessForFuncVar(func);
-            fqn.removeFArraySubscripts();
-            FFunctionVariable ffv = createFFunctionVariable(f, eo, fqn);
+            FAccess access = createFAccessForFuncVar(func);
+            access.removeFArraySubscripts();
+            FFunctionVariable ffv = createFFunctionVariable(f, eo, access);
             if (isInput())
                 ffv.setTypePrefixInputOutput(TypePrefixInputOutput.INPUT);
             else if (isOutput())
@@ -882,24 +882,24 @@ aspect Flattening {
         }
     }
     
-    public void InstComponentDecl.addFInitArrayStmt(Flattener f, List<FStatement> l, boolean input, FAccess fqn, ForNames names) {
+    public void InstComponentDecl.addFInitArrayStmt(Flattener f, List<FStatement> l, boolean input, FAccess access, ForNames names) {
         
     }
     
-    public void InstAssignable.addFInitArrayStmt(Flattener f, List<FStatement> l, boolean input, FAccess fqn, ForNames names) {
+    public void InstAssignable.addFInitArrayStmt(Flattener f, List<FStatement> l, boolean input, FAccess access, ForNames names) {
         if (isArray()) {
             if (input) {
-                size().addSizeCheck(f, l, this, fqn);
+                size().addSizeCheck(f, l, this, access);
             } else {
-                FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(fqn));
+                FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(access));
                 stmt.shouldBeSorted = true;
                 l.add(stmt);
             }
         }
     }
     
-    public void InstRecord.addFInitArrayStmt(Flattener f, List<FStatement> l, boolean input, FAccess fqn, ForNames names) {
-        super.addFInitArrayStmt(f, l, input, fqn, names);
+    public void InstRecord.addFInitArrayStmt(Flattener f, List<FStatement> l, boolean input, FAccess access, ForNames names) {
+        super.addFInitArrayStmt(f, l, input, access, names);
         if (input) {
             if (isArray()) {
                 InstComponentDecl rec = scalar();
@@ -909,27 +909,27 @@ aspect Flattening {
                 names.addLayer(ndims());
                 names.fillLayer(null);
                 List<FStatement> ll = new List<FStatement>();
-                rec.addFInitArrayStmtCell(f, ll, input, fqn.copyAndAddFas(names.createFArraySubscripts()), names);
-                names.createForLoops(l, ll, fqn);
+                rec.addFInitArrayStmtCell(f, ll, input, access.copyAndAddFas(names.createFArraySubscripts()), names);
+                names.createForLoops(l, ll, access);
                 names.removeLayer();
             } else {
-                addFInitArrayStmtCell(f, l, input, fqn, names);
+                addFInitArrayStmtCell(f, l, input, access, names);
             }
         }
     }
     
-    public void InstComponentDecl.addFInitArrayStmtCell(Flattener f, List<FStatement> l, boolean input, FAccess fqn, ForNames names) {
+    public void InstComponentDecl.addFInitArrayStmtCell(Flattener f, List<FStatement> l, boolean input, FAccess access, ForNames names) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
-            icd.addFInitArrayStmt(f, l, input, fqn.copyAndAppend(icd.name()), names);
+            icd.addFInitArrayStmt(f, l, input, access.copyAndAppend(icd.name()), names);
         }
     }
     
-    public void Size.addSizeCheck(Flattener f, List<FStatement> l, InstAssignable n, FAccess fqn) {
+    public void Size.addSizeCheck(Flattener f, List<FStatement> l, InstAssignable n, FAccess access) {
         for (int i = 0; i < ndims(); i++) {
             if (needSizeCheck(i)) {
                 String msg = "Mismatching sizes in function '" + n.surroundingInstClass().qualifiedName() +
-                        "', component '" + fqn.toString() + "', dimension '" + (i+1) + "'";
-                FAssert call = new FAssert(new FEqExp(flattenFExp(f, i), new FUnknownSizeExp(new FAccessExp(fqn.treeCopy()), i)), new FStringLitExp(msg), new Opt<FExp>());
+                        "', component '" + access.toString() + "', dimension '" + (i+1) + "'";
+                FAssert call = new FAssert(new FEqExp(flattenFExp(f, i), new FUnknownSizeExp(new FAccessExp(access.treeCopy()), i)), new FStringLitExp(msg), new Opt<FExp>());
                 FFunctionCallStmt stmt = new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
                 stmt.shouldBeSorted = true;
                 l.add(stmt);
@@ -1023,14 +1023,14 @@ aspect Flattening {
         return createFAccessForFuncVar(func).asFAccessFull().addFArraySubscripts(null);
     }
     
-    public FFunctionVariable InstAssignable.createFFunctionVariable(Flattener f, Opt eo, FAccess fqn) {
+    public FFunctionVariable InstAssignable.createFFunctionVariable(Flattener f, Opt eo, FAccess access) {
         // TODO: if we need separate variable class for records, override this
         FType type = type().flatten(f, this, !isInput());
         FFunctionVariable ffv;
         if (isArray())
-            ffv = new FFunctionArray(TypePrefixInputOutput.NONE, type, eo, fqn);
+            ffv = new FFunctionArray(TypePrefixInputOutput.NONE, type, eo, access);
         else
-            ffv = new FFunctionVariable(TypePrefixInputOutput.NONE, type, eo, fqn);
+            ffv = new FFunctionVariable(TypePrefixInputOutput.NONE, type, eo, access);
         return ffv;
     }
     
@@ -1242,15 +1242,15 @@ aspect Flattening {
     public boolean FVariable.modifiableInRecord = true;
     public void InstAssignable.flattenInRecord(Flattener f, FRecordDecl frd, Set<String> names) {
         if (names.add(name())) {
-            FAccess fqn;
+            FAccess access;
             if (isArray()) {
                 List<FAccessPart> l = new List<FAccessPart>();
                 l.add(new FAccessPartArray(name(), size().flattenFArraySubscripts(f)));
-                fqn = new FAccessFull(l);
+                access = new FAccessFull(l);
             } else {
-                fqn = new FAccessString(name());
+                access = new FAccessString(name());
             }
-            FVariable fv = createFVariable(f, fqn, FlattenBindingExp.NONE);
+            FVariable fv = createFVariable(f, access, FlattenBindingExp.NONE);
             fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
             flattenMyType(f);

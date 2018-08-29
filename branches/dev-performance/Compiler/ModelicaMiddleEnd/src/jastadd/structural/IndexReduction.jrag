@@ -148,14 +148,14 @@ aspect IndexReduction {
                 } else if (fv.order() > 1) {
                     // Convert higher order derivative variables into
                     // first order derivatives, generating variables for each step
-                    FAccess fqnPrev = fv.getFAccess().treeCopy();
+                    FAccess accessPrev = fv.getFAccess().treeCopy();
                     for (int i = 1; i < fv.order(); i++) {
-                        FAccess fqn = fv.getFAccess().createDerPrefixedName(i);
+                        FAccess access = fv.getFAccess().createDerPrefixedName(i);
                         l.add(new FRealVariable(VisibilityType.PUBLIC,
-                                fv.getTypePrefixVariability(), fqn.fullCopy()));
+                                fv.getTypePrefixVariability(), access.fullCopy()));
                         // Derivative variable is added later
-                        addFEquation(new FEquation(new FAccessExp(fqn), new FDerExp(fqnPrev.treeCopy())));
-                        fqnPrev = fqn;
+                        addFEquation(new FEquation(new FAccessExp(access), new FDerExp(accessPrev.treeCopy())));
+                        accessPrev = access;
                     }
                 }
             } else {

@@ -186,13 +186,13 @@ aspect FlatNames {
         return n;
     }
     
-    syn int FAccess.numMatchingParts(FAccessFull fqn)  = 0;
-    eq FAccessString.numMatchingParts(FAccessFull fqn) = 
-        fqn.getFAccessPart(0).getName().equals(getName()) ? 1 : 0;
-    eq FAccessFull.numMatchingParts(FAccessFull fqn) {
+    syn int FAccess.numMatchingParts(FAccessFull access)  = 0;
+    eq FAccessString.numMatchingParts(FAccessFull access) = 
+        access.getFAccessPart(0).getName().equals(getName()) ? 1 : 0;
+    eq FAccessFull.numMatchingParts(FAccessFull access) {
         int n = getNumFAccessPart();
         for (int i = 0; i < n; i++)
-            if (!getFAccessPart(i).getName().equals(fqn.getFAccessPart(i).getName()))
+            if (!getFAccessPart(i).getName().equals(access.getFAccessPart(i).getName()))
                 return i;
         return n;
     }
@@ -541,30 +541,30 @@ aspect FlatNames {
     }
 
     /**
-     * Copy and append all name parts from <code>fqn</code>.
+     * Copy and append all name parts from <code>access</code>.
      * 
      * @return  <code>this</code>, for convenience
      */
-    public FAccessFull FAccessFull.append(FAccess fqn) {
-        return fqn.appendTo(this);
+    public FAccessFull FAccessFull.append(FAccess access) {
+        return access.appendTo(this);
     }
  
-    protected abstract FAccessFull FAccess.appendTo(FAccessFull fqn);
+    protected abstract FAccessFull FAccess.appendTo(FAccessFull access);
     
-    protected FAccessFull FAccessEmpty.appendTo(FAccessFull fqn) {
-        return fqn;
+    protected FAccessFull FAccessEmpty.appendTo(FAccessFull access) {
+        return access;
     }
     
-    protected FAccessFull FAccessString.appendTo(FAccessFull fqn) {
-        return fqn.append(getName());
+    protected FAccessFull FAccessString.appendTo(FAccessFull access) {
+        return access.append(getName());
     }
     
-    protected FAccessFull FAccessFull.appendTo(FAccessFull fqn) {
-        return fqn.appendFull(this);
+    protected FAccessFull FAccessFull.appendTo(FAccessFull access) {
+        return access.appendFull(this);
     }
     
-    protected FAccessFull FAccessFull.appendFull(FAccessFull fqn) {
-        for (FAccessPart part : fqn.getFAccessParts())
+    protected FAccessFull FAccessFull.appendFull(FAccessFull access) {
+        for (FAccessPart part : access.getFAccessParts())
             addFAccessPart(part.fullCopy());
         return this;
     }

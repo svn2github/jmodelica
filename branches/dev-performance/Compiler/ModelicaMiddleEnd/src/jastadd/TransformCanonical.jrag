@@ -929,9 +929,9 @@ aspect TransformCanonical {
 	 * Create an FFunctionCallLeft using a copy of this name.
 	 */
 	public FFunctionCallLeft FAccess.createFFunctionCallLeft() {
-		FAccess fqn = fullCopy();
-		fqn.removeFArraySubscripts();
-		return new FFunctionCallLeft(new Opt(new FAccessExp(fqn)));
+		FAccess access = fullCopy();
+		access.removeFArraySubscripts();
+		return new FFunctionCallLeft(new Opt(new FAccessExp(access)));
 	}
 
 	/**

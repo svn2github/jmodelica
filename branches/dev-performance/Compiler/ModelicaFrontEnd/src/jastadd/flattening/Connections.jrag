@@ -1332,10 +1332,10 @@ aspect Connections {
 
     public void InstComponentDecl.buildConnectionSetsAsPrimitive(FAccess prefix, ConnectionSetManager csm, boolean connect) {
         if (useInFlattening() && (isFlow() || isStream())) {
-            FAccess fqn = getFAccess(Index.NULL);
-            csm.addFlowVar(this, false, fqn);
+            FAccess access = getFAccess(Index.NULL);
+            csm.addFlowVar(this, false, access);
             if (inExpandableConnector()) {
-                csm.addFlowVar(this, true, fqn);
+                csm.addFlowVar(this, true, access);
             }
         }
     }
