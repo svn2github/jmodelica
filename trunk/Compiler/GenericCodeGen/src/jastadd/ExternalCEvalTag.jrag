@@ -56,8 +56,7 @@ public abstract class ExternalCEvalTag extends AbstractTag {
     public  void generate(CodeStream str) {
         if (ext == null) {
             for (FExternalStmt ext : fClass.myExternals()) {
-                if (ext.canEvaluate(ASTNode.defaultVariableEvaluator().createEmptyAlgorithmEvaluator(ext.myOptions()))
-                        && !ext.isConstructorStmt() && !ext.isDestructorStmt()) {
+                if (!ext.isConstructorStmt() && !ext.isDestructorStmt()) {
                     generate_wrap(str, ext, unitCgc, unitTempMap);
                 }
             }

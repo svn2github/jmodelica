@@ -97,7 +97,7 @@ aspect CCodeGenExternalCeval {
             FExternalStmt stmt = type.myConstructorStmt();
             stmt.setCodeGenContext(cgc.createProxy());
             ArrayList<FExp> args = stmt.myConstructorArgs();
-            CommonVariableDecl out = stmt.myConstructorOutput();
+            ExternalArgument out = stmt.myConstructorOutput();
             String name = acquireTemp(name());
             stmt.getCodeGenContext().setAlias(out.name_C(), name());
             for (FExp arg : args)
@@ -164,24 +164,24 @@ aspect CCodeGenExternalCeval {
      * @param tempMap maps expressions that should be replaced with temporaries
      */
     public void FExternalStmt.genSerialize_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
-        for (CommonVariableDecl cvd : cvds) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<ExternalArgument> cvds) {
+        for (ExternalArgument cvd : cvds) {
             tp.resetUnknown(cvd.name_C(), cvd.type(), indent);
             cvd.type().print(tp);
         }
     }
     
     public void FExternalStmt.genSerializeComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
-        for (CommonVariableDecl cvd : cvds) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<ExternalArgument> cvds) {
+        for (ExternalArgument cvd : cvds) {
             tp.resetUnknown(cvd.name_C(), cvd.type(), indent);
             tp.printComps((FExternalObjectType)cvd.type());
         }
     }
     
     public void FExternalStmt.genSerializeNoComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
-        for (CommonVariableDecl cvd : cvds) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<ExternalArgument> cvds) {
+        for (ExternalArgument cvd : cvds) {
             tp.resetUnknown(cvd.name_C(), cvd.type(), indent);
             tp.printExt((FExternalObjectType)cvd.type());
         }
@@ -197,7 +197,7 @@ aspect CCodeGenExternalCeval {
             CodeGenContext cgc, Map<String,String> tempMap) {
         prettyPrint_C(p, str, indent);
         genCheckPoint(str, indent, "DONE");
-        for (CommonVariableDecl cvd : varsToDeserialize())
+        for (ExternalArgument cvd : varsToDeserialize())
             cvd.type().genSerialize_C(str, indent, cvd.name_C(), false);
         str.println();
     }
@@ -231,14 +231,14 @@ aspect CCodeGenExternalCeval {
     }
     
     /**
-     * List of CommonVariableDecl which has to be sent to the process
+     * List of ExternalArgument which has to be sent to the process
      * when evaluating an external function.
      */
-    syn ArrayList<CommonVariableDecl> FExternalStmt.varsToSerialize() {
+    syn ArrayList<ExternalArgument> FExternalStmt.varsToSerialize() {
         if (!hasArg() && !hasReturnVar())
-            return myCommonVarDecls();
+            return new ArrayList<ExternalArgument>(myCommonVarDecls());
         
-        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>();
+        ArrayList<ExternalArgument> res = new ArrayList<>();
         if (hasReturnVar())
             res.add(getReturnVar().myCommonVarDecl());
         for (FExp e : getArgs()) {
@@ -247,25 +247,25 @@ aspect CCodeGenExternalCeval {
         return res;
     }
     
-    public void FExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
+    public void FExp.varsToSerialize(ArrayList<ExternalArgument> decls) {
         
     }
     
-    public void FIdUseExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
-        CommonVariableDecl cvd = myCommonVarDecl();
+    public void FIdUseExp.varsToSerialize(ArrayList<ExternalArgument> decls) {
+        ExternalArgument cvd = myCommonVarDecl();
         if (!decls.contains(cvd))
             decls.add(cvd);
     }
     
-    public void FSizeExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
+    public void FSizeExp.varsToSerialize(ArrayList<ExternalArgument> decls) {
         getFExp().varsToSerialize(decls);
         //getDim().varsToSerialize(decls);
     }
     
-    syn ArrayList<CommonVariableDecl> FExternalStmt.externalObjectsToSerialize() {
-        ArrayList<CommonVariableDecl> externalObjects = new ArrayList<CommonVariableDecl>();
+    syn ArrayList<ExternalArgument> FExternalStmt.externalObjectsToSerialize() {
+        ArrayList<ExternalArgument> externalObjects = new ArrayList<ExternalArgument>();
 
-        for (CommonVariableDecl var : varsToSerialize()) {
+        for (ExternalArgument var : varsToSerialize()) {
             if (var.type().isExternalObject()) {
                 externalObjects.add(var);
             }
@@ -274,10 +274,10 @@ aspect CCodeGenExternalCeval {
         return externalObjects;
     }
     
-    syn ArrayList<CommonVariableDecl> FExternalStmt.functionArgsToSerialize() {
-        ArrayList<CommonVariableDecl> functionArgs = new ArrayList<CommonVariableDecl>();
+    syn ArrayList<ExternalArgument> FExternalStmt.functionArgsToSerialize() {
+        ArrayList<ExternalArgument> functionArgs = new ArrayList<ExternalArgument>();
 
-        for (CommonVariableDecl var : varsToSerialize()) {
+        for (ExternalArgument var : varsToSerialize()) {
             if (!var.type().isExternalObject()) {
                 functionArgs.add(var);
             }
@@ -291,11 +291,25 @@ aspect CCodeGenExternalCeval {
      * when evaluating an external function.
      */
     syn ArrayList<CommonVariableDecl> FExternalStmt.varsToDeserialize() {
-        ArrayList<CommonVariableDecl> res = new ArrayList<CommonVariableDecl>();
-        for (CommonVariableDecl cvd : varsToSerialize())
-            if (cvd.isOutput())
-                res.add(cvd);
+        ArrayList<CommonVariableDecl> res = new ArrayList<>();
+        for (ExternalArgument cvd : varsToSerialize()) {
+            cvd.addVarToDeserialize(res);
+        }
         return res;
+    }
+    
+    @Override
+    public void InstComponentDecl.addVarToDeserialize(ArrayList<CommonVariableDecl> res) {
+        if (isOutput()) {
+            res.add(this);
+        }
+    }
+    
+    @Override
+    public void FAbstractVariable.addVarToDeserialize(ArrayList<CommonVariableDecl> res) {
+        if (isOutput()) {
+            res.add(this);
+        }
     }
     
     /**
@@ -314,7 +328,7 @@ aspect CCodeGenExternalCeval {
      */
     public Map<String,FType> FExternalStmt.usedTypes() {
         Map<String,FType> res = new LinkedHashMap<String,FType>();
-        for (CommonVariableDecl cvd : varsToSerialize()) {
+        for (ExternalArgument cvd : varsToSerialize()) {
             cvd.type().usedTypes(res);
         }
         return res;

@@ -33,48 +33,53 @@ import org.jmodelica.common.evaluation.ProcessCommunicator;
 
 aspect ExternalConstantEvaluation {
     
+    public interface ExternalArgument {
+        CValue ceval();
+        FType type();
+        
+        String name_C();
+        void addVarToDeserialize(ArrayList<CommonVariableDecl> res);
+    }
+    
+    public interface CommonVariableDecl extends ExternalArgument {}
+    
     class ModelicaCompiler {}
     
-    ModelicaCompiler   implements ExternalProcessMultiCache.Compiler<CommonVariableDecl, FExternalStmt>;
-    FExternalStmt      implements ExternalProcessMultiCache.External<CommonVariableDecl>;
-    CommonVariableDecl implements ExternalProcessMultiCache.Variable<CValue,FType>;
+    ModelicaCompiler   implements ExternalProcessMultiCache.Compiler<ExternalArgument, FExternalStmt>;
+    FExternalStmt      implements ExternalProcessMultiCache.External<ExternalArgument>;
+    ExternalArgument   extends    ExternalProcessMultiCache.Variable<CValue,FType>;
     CValue             implements ExternalProcessMultiCache.Value;
     FType              implements ExternalProcessMultiCache.Type<CValue>;
     
-    public class ExternalFunctionCache extends ExternalProcessMultiCache<CommonVariableDecl, CValue, FType, FExternalStmt> {
+    public class ExternalFunctionCache extends ExternalProcessMultiCache<ExternalArgument, CValue, FType, FExternalStmt> {
         public ExternalFunctionCache(ModelicaCompiler mc) {
             super(mc);
         }
     }
     
     /**
-     * Check if this external function can be evaluated.
+     * Check if this external function can be evaluated. Throw ConstantEvaluationException otherwise
      */
-    syn boolean FExternalStmt.canEvaluate(AlgorithmEvaluator evaluator) {
+    public void FExternalStmt.checkCanEvaluate(AlgorithmEvaluator evaluator, Map<ExternalArgument, CValue> values) throws ConstantEvaluationException {
         if (evaluator.externalEvaluation() == 0) {
-            return false;
+            throw new ConstantEvaluationException(null, "Could not evaluate external function, external evaluation disabled");
         }
         for (FExp arg : getArgs()) {
             if (!arg.type().externalValid()) {
-                return false;
+                throw new ConstantEvaluationException(null, "Could not evaluate external function, invalid argument type");
             }
         }
         if (hasReturnVar() && !getReturnVar().type().externalValid()) {
-            return false;
+            throw new ConstantEvaluationException(null, "Could not evaluate external function, invalid return type");
         }
-        return true;
-    }
-
-    syn boolean FExternalStmt.hasUnknownArguments(Map<CommonVariableDecl, CValue> values) {
-        for (CommonVariableDecl cvd : varsToSerialize()) {
-            if (!cvd.isOutput()) {
-                CValue val = values.containsKey(cvd) ? values.get(cvd) : cvd.ceval();
-                if (val.isPartlyUnknown()) {
-                    return true;
+        Collection<CommonVariableDecl> outputs = varsToDeserialize();
+        for (ExternalArgument arg : values.keySet()) {
+            if (!outputs.contains(arg)) {
+                if (values.get(arg).isPartlyUnknown()) {
+                    throw new ConstantEvaluationException(null, "Could not evaluate external function, unknown values in arguments");
                 }
             }
         }
-        return false;
     }
 
     /**
@@ -88,9 +93,9 @@ aspect ExternalConstantEvaluation {
      * Returns a single scalar external object which can be cached. If there is not exactly
      * one scalar external object, return null.
      */
-    syn CommonVariableDecl FExternalStmt.cachedExternalObject() {
-        CommonVariableDecl eo = null;
-        for (CommonVariableDecl cvd : varsToSerialize()) {
+    syn ExternalArgument FExternalStmt.cachedExternalObject() {
+        ExternalArgument eo = null;
+        for (ExternalArgument cvd : varsToSerialize()) {
             if (cvd.type().isExternalObject() && cvd.type().isScalar()) {
                 if (eo != null) {
                     return null;
@@ -157,7 +162,7 @@ aspect ExternalConstantEvaluation {
      * Retrieve {@link ExternalFunction} object which represents the external function
      * this statement refers to.
      */
-    public ExternalFunction<CommonVariableDecl, CValue> FExternalStmt.myExternalFunction() {
+    public ExternalFunction<ExternalArgument, CValue> FExternalStmt.myExternalFunction() {
         ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
         if (efc == null) {
             return new ExternalProcessCacheImpl<>(root().getUtilInterface().getModelicaCompiler())
@@ -171,15 +176,20 @@ aspect ExternalConstantEvaluation {
      */
     public int FExternalStmt.evaluateExternal(AlgorithmEvaluator evaluator) {
         
-        Map<CommonVariableDecl, CValue> values = evaluator.getValues();
+        Map<ExternalArgument, CValue> values = new LinkedHashMap<>();
+        for (ExternalArgument arg : varsToSerialize()) {
+            values.put(arg, arg.ceval());
+        }
+        
+        checkCanEvaluate(evaluator, values);
         
         if (isConstructorStmt()) {
-            return evaluateConstructor(values);
+            return evaluateConstructor(evaluator.getValues());
         }
         
         int res = 0;
         int timeout = evaluator.externalEvaluation();
-        ExternalFunction<CommonVariableDecl,CValue> ef = myExternalFunction();
+        ExternalFunction<ExternalArgument,CValue> ef = myExternalFunction();
         String error = null;
         try {
             res = ef.evaluate(this, values, timeout);
@@ -192,6 +202,10 @@ aspect ExternalConstantEvaluation {
         
         if (error != null) {
             throw new ConstantEvaluationException(null, ExternalProcessCacheImpl.failedEvalMsg(getName(), error));
+        }
+        
+        for (CommonVariableDecl output : varsToDeserialize()) {
+            evaluator.getValues().put(output, values.get(output));
         }
         
         return EVAL_CONT;
