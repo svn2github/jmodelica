@@ -565,7 +565,7 @@ aspect Connections {
             }
             for (ConnectionSetEntry e : this) {
                 if (e.isOutside()) {
-                    FExp left = e.createFIdUseExp();
+                    FExp left = e.createFAccessExp();
                     FExp right = expandInStreamExp(e, null, e.createZeroExp());
                     f.addNormalEquation(new FEquation(left, right));
                 }
@@ -599,7 +599,7 @@ aspect Connections {
             List<FExp> vars = new List<FExp>();
             for (ConnectionSetEntry e : this) {
                 if (cse != e) {
-                    stream = (name == null) ? e.createFIdUseExp() : e.createFIdUseExp(name, cse);
+                    stream = (name == null) ? e.createFAccessExp() : e.createFIdUseExp(name, cse);
                     if (e.isOutside()) 
                         stream = new FInStream(stream);
                     vars.add(e.createFlowFIdUseExp());
@@ -654,7 +654,7 @@ aspect Connections {
             } else {
                 FExp e1 = null;
                 for (ConnectionSetEntry cse : this) {
-                    FExp e2 = cse.createFIdUseExp();
+                    FExp e2 = cse.createFAccessExp();
                     if (e1 != null) {
                         f.addNormalEquation(new FEquation(e1, e2));
                     }
@@ -868,24 +868,24 @@ aspect Connections {
 
         private InstComponentDecl cd;
         private boolean outside;
-        private FAccess fqName;
+        private FAccess access;
         private String prefix;
         private String str;
         private String[] scalarNames;
 
-        public static ConnectionSetEntry create(InstComponentDecl cd, boolean outside, FAccess fqName) {
+        public static ConnectionSetEntry create(InstComponentDecl cd, boolean outside, FAccess access) {
             if (cd.isFlow()) 
-                return new FlowConnectionSetEntry(cd, outside, fqName);
+                return new FlowConnectionSetEntry(cd, outside, access);
             if (cd.isStream()) 
-                return new StreamConnectionSetEntry(cd, outside, fqName);
-            return new ConnectionSetEntry(cd, outside, fqName);
+                return new StreamConnectionSetEntry(cd, outside, access);
+            return new ConnectionSetEntry(cd, outside, access);
         }
 
-        private ConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
+        private ConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess access) {
             //log.debug("Created ConnectionSetEntry: " + cd.name());
             this.cd = cd;
             this.outside = outside;
-            this.fqName = fqName;
+            this.access = access;
             prefix = null;
         }
 
@@ -914,7 +914,7 @@ aspect Connections {
         }
 
         public String name() {
-           return fqName.name();
+           return access.name();
         }
         
         public String[] names() {
@@ -926,7 +926,7 @@ aspect Connections {
 
         public String prefix() {
             if (prefix == null) 
-                prefix = fqName.copyPrefix().name();
+                prefix = access.copyPrefix().name();
             return prefix;
         }
 
@@ -945,16 +945,16 @@ aspect Connections {
 
         public String toString() {
             if (str == null)
-                str = fqName + (outside ? " (o)" : " (i)");
+                str = access + (outside ? " (o)" : " (i)");
             return str;
         }
 
         public FAccess getFAccess() {
-            return fqName;
+            return access;
         }
 
-        public FAccessExp createFIdUseExp() {
-            return new FAccessExp(fqName.treeCopy());
+        public FAccessExp createFAccessExp() {
+            return new FAccessExp(access.treeCopy());
         }
 
         /**
@@ -965,10 +965,10 @@ aspect Connections {
             if (other == this)
                 return new FAccessExp(name); 
             if (scalarNames == null || other.scalarNames == null)
-                return createFIdUseExp();
+                return createFAccessExp();
             int i;
             for (i = 0; i < other.scalarNames.length && !other.scalarNames[i].equals(name); i++);
-            return (i < scalarNames.length) ? new FAccessExp(scalarNames[i]) : createFIdUseExp();
+            return (i < scalarNames.length) ? new FAccessExp(scalarNames[i]) : createFAccessExp();
         }
 
         /**
@@ -976,7 +976,7 @@ aspect Connections {
          */
         public FExp createZeroExp() {
             FType t = cd.type();
-            if (fqName.hasFArraySubscripts() && fqName.getFArraySubscripts().accessNdims() == 0) {
+            if (access.hasFArraySubscripts() && access.getFArraySubscripts().accessNdims() == 0) {
                 t = t.scalarType();
             }
             return t.flattenZeroLiteral();
@@ -986,7 +986,7 @@ aspect Connections {
          * Create an equation setting the variable of this entry to zero.
          */
         public FAbstractEquation createZeroEquation() {
-            return new FEquation(createFIdUseExp(), createZeroExp());
+            return new FEquation(createFAccessExp(), createZeroExp());
         }
 
         /**
@@ -995,7 +995,7 @@ aspect Connections {
          * Used to build up flow equations.
          */
         public FExp buildFlow(FExp e) {
-            return createFIdUseExp().appendSum(e, outside, cd.type());
+            return createFAccessExp().appendSum(e, outside, cd.type());
         }
 
         public int hashCode() {
@@ -1050,8 +1050,8 @@ aspect Connections {
 
         private static class FlowConnectionSetEntry extends ConnectionSetEntry {
 
-            public FlowConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
-                super(cd, outside, fqName);
+            public FlowConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess access) {
+                super(cd, outside, access);
             }
 
             public boolean isFlow() {
@@ -1066,8 +1066,8 @@ aspect Connections {
             private double nominal = 1;
             private boolean contribute = true;
 
-            public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
-                super(cd, outside, fqName);
+            public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess access) {
+                super(cd, outside, access);
                 InstComponentDecl flow = cd.myFlowVar();
                 flowExp = new FAccessExp(flow.getFAccess().treeCopy());
                 try {
@@ -1450,8 +1450,8 @@ aspect OverconstrainedConnections {
 			Size s = func.myOutputs().get(0).size();
 			FFunctionCall right = new FFunctionCall();
 			right.setName(new FAccessString(func.qualifiedName()));
-            right.addArg(cse1.createFIdUseExp());
-            right.addArg(cse2.createFIdUseExp());
+            right.addArg(cse1.createFAccessExp());
+            right.addArg(cse2.createFAccessExp());
             right.setFType(func.functionType().flatten(Flattener.expressionFlattener(), null, true));
 			FAbstractEquation eqn;
 			if (!s.isUnknown() && s.numElements() == 0) 
