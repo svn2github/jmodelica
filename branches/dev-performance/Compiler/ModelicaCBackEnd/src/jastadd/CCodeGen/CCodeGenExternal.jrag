@@ -47,8 +47,8 @@ aspect CCodeGenExternal {
     
     
     @Override
-    public void FAccessExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
-        if (!writeback || myFV().isOutput()) {
+    public void CommonAccessExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
+        if (!writeback || myCommonVarDecl().isOutput()) {
             if (isArray() && !writeback) {
                 type().print(p.createInitPrinter(str), indent, tempName_C(), this, true);
             }
@@ -116,8 +116,8 @@ aspect CCodeGenExternal {
         str.print(");\n");
     }
     
-    syn boolean FExp.isExternalArgumentRef(boolean fortran) = fortran || isArray();
-    eq FAccessExp.isExternalArgumentRef(boolean fortran)     = super.isExternalArgumentRef(fortran) || myFV().isOutput();
+    syn boolean FExp.isExternalArgumentRef(boolean fortran)   = fortran || isArray();
+    eq CommonAccessExp.isExternalArgumentRef(boolean fortran) = super.isExternalArgumentRef(fortran) || myCommonVarDecl().isOutput();
     
     public void FExp.genExternalFortranFuncArgs(CodePrinter p, CodeStream str, String indent) {
         if (!isArray() && !type().isString()) {
@@ -138,8 +138,8 @@ aspect CCodeGenExternal {
     }
     
     @Override
-    public void FAccessExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
-        if (myFV().isOutput() && !isComposite())
+    public void CommonAccessExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
+        if (myCommonVarDecl().isOutput() && !isComposite())
             str.print("&");
         if (useTempVar) {
             str.print(tempName_C());
