@@ -761,10 +761,8 @@ aspect ConstantEvaluation {
             this(new HashSet<FAccessExp>());
         }
         
-        public CValueUnknownUse(CommonAccessExp dep) {
+        public CValueUnknownUse(FAccessExp dep) {
             this();
-            if (dep.getAccess().isFAccess())
-                deps.add(dep.asFAccessExp());
         }
         
         public CValueUnknownUse unknownUse() {
@@ -4697,7 +4695,11 @@ aspect VariableEvaluator {
         
         @Override
         protected CValue createUnknownCValue(CommonAccessExp use) {
-            return new CValueUnknownUse(use);
+            if (use.getAccess().isFAccess()) {
+                return new CValueUnknownUse(use.asFAccessExp());
+            } else {
+                return new CValueUnknownUse();
+            }
         }
         
         @Override
