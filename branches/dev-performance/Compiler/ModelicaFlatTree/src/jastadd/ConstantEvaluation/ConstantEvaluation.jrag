@@ -763,6 +763,7 @@ aspect ConstantEvaluation {
         
         public CValueUnknownUse(FAccessExp dep) {
             this();
+            deps.add(dep);
         }
         
         public CValueUnknownUse unknownUse() {
