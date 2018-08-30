@@ -2369,7 +2369,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     jmi_matrix_to_fortran_real(eigenVectors_a, eigenVectors_a->var, tmp_8->var);
     tmp_9 = (int)n_v;
     tmp_10 = (int)info_v;
-    dgeev_(tmp_1, tmp_2, &tmp_3, tmp_4->var, &tmp_5, eigenReal_a->var, eigenImag_a->var, tmp_6->var, &tmp_7, tmp_8->var, &tmp_9, work_a->var, &jmi_array_size(work_a, 0), &tmp_10);
+    dgeev_(tmp_1, tmp_2, &tmp_9, tmp_4->var, &tmp_9, eigenReal_a->var, eigenImag_a->var, tmp_6->var, &tmp_7, tmp_8->var, &tmp_9, work_a->var, &jmi_array_size(work_a, 0), &tmp_10);
     jmi_matrix_from_fortran_real(eigenVectors_a, tmp_8->var, eigenVectors_a->var);
     info_v = tmp_10;
     JMI_RET(GEN, info_o, info_v)

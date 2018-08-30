@@ -38,10 +38,13 @@ aspect ExternalConstantEvaluation {
         FType type();
         
         String name_C();
-        void addVarToDeserialize(ArrayList<CommonVariableDecl> res);
+        boolean isOutput();
     }
     
     public interface CommonVariableDecl extends ExternalArgument {}
+    FExp implements ExternalArgument;
+    
+    syn boolean FExp.isOutput() = false;
     
     class ModelicaCompiler {}
     
@@ -72,7 +75,7 @@ aspect ExternalConstantEvaluation {
         if (hasReturnVar() && !getReturnVar().type().externalValid()) {
             throw new ConstantEvaluationException(null, "Could not evaluate external function, invalid return type");
         }
-        Collection<CommonVariableDecl> outputs = varsToDeserialize();
+        Collection<ExternalArgument> outputs = varsToDeserialize();
         for (ExternalArgument arg : values.keySet()) {
             if (!outputs.contains(arg)) {
                 if (values.get(arg).isPartlyUnknown()) {
@@ -204,8 +207,8 @@ aspect ExternalConstantEvaluation {
             throw new ConstantEvaluationException(null, ExternalProcessCacheImpl.failedEvalMsg(getName(), error));
         }
         
-        for (CommonVariableDecl output : varsToDeserialize()) {
-            evaluator.getValues().put(output, values.get(output));
+        for (ExternalArgument output : varsToDeserialize()) {
+            evaluator.getValues().put((CommonVariableDecl)output, values.get(output));
         }
         
         return EVAL_CONT;

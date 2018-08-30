@@ -20,6 +20,26 @@ import java.util.Map;
 import java.util.Set;
 
 aspect CCodeGenExternalCeval {
+
+    public void FExternalStmt.setExternalArgumentAliases(CodeGenContext cgc) {
+        setExternalArgumentAliases(cgc, getName(), false);
+    }
+
+    public void FExternalStmt.setExternalArgumentAliases(CodeGenContext cgc, String name, boolean all) {
+        int i = 0;
+        for (ExternalArgument arg : varsToSerialize()) {
+            if (all || arg instanceof FExp) {
+                cgc.setAlias(arg, name + "_arg" + i);
+            }
+            i++;
+        }
+    }
+
+    public void FExternalStmt.setExternalArgumentAliases(CodeGenContext cgc, String outName, String name) {
+        setExternalArgumentAliases(cgc, name, true);
+        cgc.setAlias(myConstructorOutput(), outName);
+    }
+
     public class DeclPrinter_ECE extends DeclPrinter_C {
         private CodeGenContext cgc;
         private Map<String,String> tempMap;
@@ -43,7 +63,8 @@ aspect CCodeGenExternalCeval {
         }
         protected void printComps(FExternalObjectType type) {
             FExternalStmt stmt = type.myConstructorStmt();
-            stmt.setCodeGenContext(cgc.createProxy());
+            stmt.setExternalArgumentAliases(cgc, name(), acquireTemp(name()));
+            stmt.setCodeGenContext(cgc);
             stmt.genVarDecls_C(p, str, indent());
             stmt.setCodeGenContext(null);
             super.printComps(type);
@@ -93,15 +114,9 @@ aspect CCodeGenExternalCeval {
             }
         }
         protected void printExt(FExternalObjectType type) {
-            int i = 0;
             FExternalStmt stmt = type.myConstructorStmt();
-            stmt.setCodeGenContext(cgc.createProxy());
-            ArrayList<FExp> args = stmt.myConstructorArgs();
-            ExternalArgument out = stmt.myConstructorOutput();
-            String name = acquireTemp(name());
-            stmt.getCodeGenContext().setAlias(out.name_C(), name());
-            for (FExp arg : args)
-                stmt.getCodeGenContext().setAlias(arg.prettyPrint_C(), name + "_arg" + i++);
+            stmt.setExternalArgumentAliases(cgc, name(), acquireTemp(name()));
+            stmt.setCodeGenContext(cgc);
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
@@ -143,9 +158,8 @@ aspect CCodeGenExternalCeval {
         @Override
         protected void printExt(FExternalObjectType type) {
             FExternalStmt stmt = type.myDestructorStmt();
-            ArrayList<FExp> args = stmt.myConstructorArgs();
-            stmt.setCodeGenContext(cgc.createProxy());
-            stmt.getCodeGenContext().setAlias(args.get(0).prettyPrint_C(), name());
+            type.myConstructorStmt().setExternalArgumentAliases(cgc, name(), acquireTemp(name()));
+            stmt.setCodeGenContext(cgc);
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
@@ -166,7 +180,11 @@ aspect CCodeGenExternalCeval {
     public void FExternalStmt.genSerialize_C(TypePrinter_C tp, String indent,
             CodeGenContext cgc, Map<String,String> tempMap, Iterable<ExternalArgument> cvds) {
         for (ExternalArgument cvd : cvds) {
-            tp.resetUnknown(cvd.name_C(), cvd.type(), indent);
+            String name = cgc.alias(cvd);
+            if (name == null) {
+                name = cvd.name_C();
+            }
+            tp.resetUnknown(name, cvd.type(), indent);
             cvd.type().print(tp);
         }
     }
@@ -176,14 +194,6 @@ aspect CCodeGenExternalCeval {
         for (ExternalArgument cvd : cvds) {
             tp.resetUnknown(cvd.name_C(), cvd.type(), indent);
             tp.printComps((FExternalObjectType)cvd.type());
-        }
-    }
-    
-    public void FExternalStmt.genSerializeNoComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<ExternalArgument> cvds) {
-        for (ExternalArgument cvd : cvds) {
-            tp.resetUnknown(cvd.name_C(), cvd.type(), indent);
-            tp.printExt((FExternalObjectType)cvd.type());
         }
     }
     
@@ -234,34 +244,29 @@ aspect CCodeGenExternalCeval {
      * List of ExternalArgument which has to be sent to the process
      * when evaluating an external function.
      */
-    syn ArrayList<ExternalArgument> FExternalStmt.varsToSerialize() {
+    syn Collection<ExternalArgument> FExternalStmt.varsToSerialize() {
         if (!hasArg() && !hasReturnVar())
             return new ArrayList<ExternalArgument>(myCommonVarDecls());
         
-        ArrayList<ExternalArgument> res = new ArrayList<>();
-        if (hasReturnVar())
-            res.add(getReturnVar().myCommonVarDecl());
+        Collection<ExternalArgument> res = new LinkedHashSet<>();
+        if (hasReturnVar()) {
+            res.add(getReturnVar().externalArgument());
+        }
         for (FExp e : getArgs()) {
-            e.varsToSerialize(res);
+            res.add(e.externalArgument());
         }
         return res;
     }
     
-    public void FExp.varsToSerialize(ArrayList<ExternalArgument> decls) {
-        
+    public ExternalArgument FExp.externalArgument() {
+        return this;
     }
     
-    public void FIdUseExp.varsToSerialize(ArrayList<ExternalArgument> decls) {
-        ExternalArgument cvd = myCommonVarDecl();
-        if (!decls.contains(cvd))
-            decls.add(cvd);
+    public ExternalArgument FIdUseExp.externalArgument() {
+        return myCommonVarDecl();
     }
-    
-    public void FSizeExp.varsToSerialize(ArrayList<ExternalArgument> decls) {
-        getFExp().varsToSerialize(decls);
-        //getDim().varsToSerialize(decls);
-    }
-    
+
+
     syn ArrayList<ExternalArgument> FExternalStmt.externalObjectsToSerialize() {
         ArrayList<ExternalArgument> externalObjects = new ArrayList<ExternalArgument>();
 
@@ -276,13 +281,11 @@ aspect CCodeGenExternalCeval {
     
     syn ArrayList<ExternalArgument> FExternalStmt.functionArgsToSerialize() {
         ArrayList<ExternalArgument> functionArgs = new ArrayList<ExternalArgument>();
-
         for (ExternalArgument var : varsToSerialize()) {
             if (!var.type().isExternalObject()) {
                 functionArgs.add(var);
             }
         }
-
         return functionArgs;
     }
     
@@ -290,26 +293,14 @@ aspect CCodeGenExternalCeval {
      * List of CommonVariableDecl which has to be read from the process
      * when evaluating an external function.
      */
-    syn ArrayList<CommonVariableDecl> FExternalStmt.varsToDeserialize() {
-        ArrayList<CommonVariableDecl> res = new ArrayList<>();
+    syn ArrayList<ExternalArgument> FExternalStmt.varsToDeserialize() {
+        ArrayList<ExternalArgument> res = new ArrayList<>();
         for (ExternalArgument cvd : varsToSerialize()) {
-            cvd.addVarToDeserialize(res);
+            if (cvd.isOutput()) {
+                res.add(cvd);
+            }
         }
         return res;
-    }
-    
-    @Override
-    public void InstComponentDecl.addVarToDeserialize(ArrayList<CommonVariableDecl> res) {
-        if (isOutput()) {
-            res.add(this);
-        }
-    }
-    
-    @Override
-    public void FAbstractVariable.addVarToDeserialize(ArrayList<CommonVariableDecl> res) {
-        if (isOutput()) {
-            res.add(this);
-        }
     }
     
     /**
@@ -355,8 +346,8 @@ aspect CCodeGenExternalCeval {
         }
         res.put(name(), this);
         FExternalStmt stmt = myConstructorStmt();
-        for (FExp exp : stmt.myConstructorArgs()) {
-            FType t = exp.type();
+        for (ExternalArgument arg : stmt.varsToSerialize()) {
+            FType t = arg.type();
             boolean par = t.getParent() == null;
             if (par) {
                 t.setParent(stmt);
@@ -433,8 +424,8 @@ aspect CCodeGenExternalCeval {
         }
         res.add(this);
         
-        for (FExp exp : myConstructorArgs()) {
-            FType t = exp.type();
+        for (ExternalArgument arg : varsToSerialize()) {
+            FType t = arg.type();
             boolean par = t.getParent() == null;
             if (par) {
                 t.setParent(this);

@@ -121,7 +121,7 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FExternalStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         FExternalLanguage lang = getFExternalLanguage();
-        lang.genVarDecls_C(p, str, indent, this);
+        lang.genVarDecls_C(p, str, indent, this, codeGenContext != null);
         lang.genFuncDecl(p, str, indent, this);
     }
 
@@ -393,25 +393,30 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        boolean ceval = codeGenContext != null;
         // Generate temp arrays for all array inputs and outputs
         // and transpose array for if array is input (Fortran 77 only)
-        getFExternalLanguage().prepExternalArg(p, str, indent, this, false);
+        getFExternalLanguage().prepExternalArg(p, str, indent, this, false, getCodeGenContext(), ceval);
         
         str.print(indent);
         // return variable?
         if(hasReturnVar()) {
-            String name = getReturnVar().type().isRecord() ?
+            String name = getCodeGenContext().alias(getReturnVar().myCommonVarDecl());
+            if (name == null) {
+                name = getReturnVar().type().isRecord() ?
                     "*"+getReturnVar().tempName_C() :
                     getReturnVar().getCommonAccess().name_C();
-            str.print(getCodeGenContext().alias(name));
+            }
+            str.print(name);
             str.print(" = ");
         }
         
-        // print function call
-        getFExternalLanguage().genFuncCall(p, str, indent, this);
+        CodeGenContext cgc = getCodeGenContext().createProxy();
+        getFExternalLanguage().extraContext(this, cgc, ceval);
+        getFExternalLanguage().genFuncCall(p, str, indent, this, cgc);
         
         // If there are any output arrays, transpose these before returning (Fortran 77 only)
-        getFExternalLanguage().prepExternalArg(p, str, indent, this, true);
+        getFExternalLanguage().prepExternalArg(p, str, indent, this, true, getCodeGenContext(), ceval);
     }
 
     public class MatrixOp {
@@ -436,21 +441,28 @@ aspect CCodeGenAlgorithms {
         }
     }
 
-    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback){
+    public void FExternalLanguage.extraContext(FExternalStmt stmt, CodeGenContext cgc, boolean ceval) {
         for (FExp arg : stmt.getArgs()) {
-            if (extShouldArgConvert(arg)) {
-                arg.prepExternalArg(p, str, indent, this, writeback);
+            if (extShouldArgConvert(arg, ceval)) {
+                cgc.setAlias(arg.externalArgument(), arg.tempName_C());
             }
-        }
-        if (writeback && stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
-            stmt.getReturnVar().prepExternalArg(p, str, indent, this, writeback);
         }
     }
 
-    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
+    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback, CodeGenContext cgc, boolean ceval){
+        for (FExp arg : stmt.getArgs()) {
+            if (extShouldArgConvert(arg, ceval)) {
+                arg.prepExternalArg(p, str, indent, this, writeback, cgc);
+            }
+        }
+        if (writeback && stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
+            stmt.getReturnVar().prepExternalArg(p, str, indent, this, writeback, cgc);
+        }
+    }
+
+    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback, CodeGenContext cgc) {
         String tempName = tempName_C();
-        String src = alias_C(p);
-        useTempVar = true;
+        String src = alias_C(p, cgc);
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);
             if (writeback)

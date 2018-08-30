@@ -191,72 +191,112 @@ $ECE_free$
 
 ---
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, a1_a, -1, 1)
+        JMI_DEF(INT, f_arg1)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, a2_a, -1, 1)
+        JMI_DEF(INT, f_arg3)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, a3_a, -1, 1)
+        JMI_DEF(INT, f_arg5)
         JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, a4_a, -1, 1)
+        JMI_DEF(INT, f_arg7)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, a5_a, -1, 1)
+        JMI_DEF(INT, f_arg9)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b1_a, -1, 1)
+        JMI_DEF(INT, f_arg11)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b2_a, -1, 1)
+        JMI_DEF(INT, f_arg13)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b3_a, -1, 1)
+        JMI_DEF(INT, f_arg15)
         JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, b4_a, -1, 1)
+        JMI_DEF(INT, f_arg17)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b5_a, -1, 1)
+        JMI_DEF(INT, f_arg19)
+        JMI_DEF(INT_EXT, tmp_1)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, -1, 1)
+        JMI_DEF(INT_EXT, tmp_3)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_4, -1, 1)
+        JMI_DEF(INT_EXT, tmp_5)
+        JMI_DEF(INT_EXT, tmp_6)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_7, -1, 1)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_8, -1, 1)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_9, -1, 1)
+        JMI_DEF(INT_EXT, tmp_8)
+        JMI_DEF(INT_EXT, tmp_9)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_10, -1, 1)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_11, -1, 1)
+        JMI_DEF(INT_EXT, tmp_11)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_12, -1, 1)
+        JMI_DEF(INT_EXT, tmp_13)
+        JMI_DEF(INT_EXT, tmp_14)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_15, -1, 1)
+        JMI_DEF(INT_EXT, tmp_16)
         extern void f(double*, size_t, int*, size_t, int*, size_t, const char**, size_t, int*, size_t, double*, size_t, int*, size_t, int*, size_t, const char**, size_t, int*, size_t);
 
 ---
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, a1_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Real, a1_a);
+        JMCEVAL_parse(Integer, f_arg1);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, a2_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Integer, a2_a);
+        JMCEVAL_parse(Integer, f_arg3);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, a3_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Boolean, a3_a);
+        JMCEVAL_parse(Integer, f_arg5);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, a4_a, d[0], 1, d[0])
         JMCEVAL_parseArray(String, a4_a);
+        JMCEVAL_parse(Integer, f_arg7);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, a5_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Enum, a5_a);
+        JMCEVAL_parse(Integer, f_arg9);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, b1_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Real, b1_a);
+        JMCEVAL_parse(Integer, f_arg11);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, b2_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Integer, b2_a);
+        JMCEVAL_parse(Integer, f_arg13);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, b3_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Boolean, b3_a);
+        JMCEVAL_parse(Integer, f_arg15);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, b4_a, d[0], 1, d[0])
         JMCEVAL_parseArray(String, b4_a);
+        JMCEVAL_parse(Integer, f_arg17);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, b5_a, d[0], 1, d[0])
         JMCEVAL_parseArray(Enum, b5_a);
+        JMCEVAL_parse(Integer, f_arg19);
 
 ---
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_7, jmi_array_size(a2_a, 0), 1, jmi_array_size(a2_a, 0))
-            jmi_copy_matrix_to_int(a2_a, a2_a->var, tmp_7->var);
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_8, jmi_array_size(a3_a, 0), 1, jmi_array_size(a3_a, 0))
-            jmi_copy_matrix_to_int(a3_a, a3_a->var, tmp_8->var);
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_9, jmi_array_size(a5_a, 0), 1, jmi_array_size(a5_a, 0))
-            jmi_copy_matrix_to_int(a5_a, a5_a->var, tmp_9->var);
+            tmp_1 = (int)f_arg1;
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(a2_a, 0), 1, jmi_array_size(a2_a, 0))
+            jmi_copy_matrix_to_int(a2_a, a2_a->var, tmp_2->var);
+            tmp_3 = (int)f_arg3;
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_4, jmi_array_size(a3_a, 0), 1, jmi_array_size(a3_a, 0))
+            jmi_copy_matrix_to_int(a3_a, a3_a->var, tmp_4->var);
+            tmp_5 = (int)f_arg5;
+            tmp_6 = (int)f_arg7;
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_7, jmi_array_size(a5_a, 0), 1, jmi_array_size(a5_a, 0))
+            jmi_copy_matrix_to_int(a5_a, a5_a->var, tmp_7->var);
+            tmp_8 = (int)f_arg9;
+            tmp_9 = (int)f_arg11;
             JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_10, jmi_array_size(b2_a, 0), 1, jmi_array_size(b2_a, 0))
             jmi_copy_matrix_to_int(b2_a, b2_a->var, tmp_10->var);
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_11, jmi_array_size(b3_a, 0), 1, jmi_array_size(b3_a, 0))
-            jmi_copy_matrix_to_int(b3_a, b3_a->var, tmp_11->var);
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_12, jmi_array_size(b5_a, 0), 1, jmi_array_size(b5_a, 0))
-            jmi_copy_matrix_to_int(b5_a, b5_a->var, tmp_12->var);
-            f(a1_a->var, jmi_array_size(a1_a, 0), tmp_7->var, jmi_array_size(a2_a, 0), tmp_8->var, jmi_array_size(a3_a, 0), a4_a->var, jmi_array_size(a4_a, 0), tmp_9->var, jmi_array_size(a5_a, 0), b1_a->var, jmi_array_size(b1_a, 0), tmp_10->var, jmi_array_size(b2_a, 0), tmp_11->var, jmi_array_size(b3_a, 0), b4_a->var, jmi_array_size(b4_a, 0), tmp_12->var, jmi_array_size(b5_a, 0));
+            tmp_11 = (int)f_arg13;
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_12, jmi_array_size(b3_a, 0), 1, jmi_array_size(b3_a, 0))
+            jmi_copy_matrix_to_int(b3_a, b3_a->var, tmp_12->var);
+            tmp_13 = (int)f_arg15;
+            tmp_14 = (int)f_arg17;
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_15, jmi_array_size(b5_a, 0), 1, jmi_array_size(b5_a, 0))
+            jmi_copy_matrix_to_int(b5_a, b5_a->var, tmp_15->var);
+            tmp_16 = (int)f_arg19;
+            f(a1_a->var, tmp_1, tmp_2->var, tmp_3, tmp_4->var, tmp_5, a4_a->var, tmp_6, tmp_7->var, tmp_8, b1_a->var, tmp_9, tmp_10->var, tmp_11, tmp_12->var, tmp_13, b4_a->var, tmp_14, tmp_15->var, tmp_16);
             jmi_copy_matrix_from_int(b2_a, tmp_10->var, b2_a->var);
-            jmi_copy_matrix_from_int(b3_a, tmp_11->var, b3_a->var);
-            jmi_copy_matrix_from_int(b5_a, tmp_12->var, b5_a->var);
+            jmi_copy_matrix_from_int(b3_a, tmp_12->var, b3_a->var);
+            jmi_copy_matrix_from_int(b5_a, tmp_15->var, b5_a->var);
             JMCEVAL_check(\"DONE\");
             JMCEVAL_printArray(Real, b1_a);
             JMCEVAL_printArray(Integer, b2_a);
@@ -300,7 +340,7 @@ model ExtObj1
             input Boolean[:] b;
             input String[:] s;
             output Obj2 o2;
-            external "C" my_constructor2(x,y,o2,b,s)
+            external "C" my_constructor2(x,y,o2,b,s,size(x,1),3.14)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -373,31 +413,39 @@ $ECE_free$
         JMI_DEF(EXO, o2_v)
 
 ---
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, -1, 1)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, -1, 1)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_15_arg0, -1, 1)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_15_arg1, -1, 1)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_15_arg2, -1, 1)
-        JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_15_arg3, -1, 1)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, -1, 1)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_3, -1, 1)
+        JMI_DEF(INT_EXT, tmp_4)
+        JMI_DEF(REA_EXT, tmp_5)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_6_arg0, -1, 1)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_6_arg1, -1, 1)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_6_arg3, -1, 1)
+        JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_6_arg4, -1, 1)
+        JMI_DEF(INT, tmp_6_arg5)
+        JMI_DEF(REA, tmp_6_arg6)
 
 ---
         JMCEVAL_parseArrayDims(1);
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_15_arg0, d[0], 1, d[0])
-        JMCEVAL_parseArray(Real, tmp_15_arg0);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_6_arg0, d[0], 1, d[0])
+        JMCEVAL_parseArray(Real, tmp_6_arg0);
         JMCEVAL_parseArrayDims(1);
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_15_arg1, d[0], 1, d[0])
-        JMCEVAL_parseArray(Integer, tmp_15_arg1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_6_arg1, d[0], 1, d[0])
+        JMCEVAL_parseArray(Integer, tmp_6_arg1);
         JMCEVAL_parseArrayDims(1);
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_15_arg2, d[0], 1, d[0])
-        JMCEVAL_parseArray(Boolean, tmp_15_arg2);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_6_arg3, d[0], 1, d[0])
+        JMCEVAL_parseArray(Boolean, tmp_6_arg3);
         JMCEVAL_parseArrayDims(1);
-        JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_15_arg3, d[0], 1, d[0])
-        JMCEVAL_parseArray(String, tmp_15_arg3);
-        JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, jmi_array_size(tmp_15_arg1, 0), 1, jmi_array_size(tmp_15_arg1, 0))
-        jmi_copy_matrix_to_int(tmp_15_arg1, tmp_15_arg1->var, tmp_13->var);
-        JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, jmi_array_size(tmp_15_arg2, 0), 1, jmi_array_size(tmp_15_arg2, 0))
-        jmi_copy_matrix_to_int(tmp_15_arg2, tmp_15_arg2->var, tmp_14->var);
-        my_constructor2(tmp_15_arg0->var, tmp_13->var, &o2_v, tmp_14->var, tmp_15_arg3->var);
+        JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_6_arg4, d[0], 1, d[0])
+        JMCEVAL_parseArray(String, tmp_6_arg4);
+        JMCEVAL_parse(Integer, tmp_6_arg5);
+        JMCEVAL_parse(Real, tmp_6_arg6);
+        JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(tmp_6_arg1, 0), 1, jmi_array_size(tmp_6_arg1, 0))
+        jmi_copy_matrix_to_int(tmp_6_arg1, tmp_6_arg1->var, tmp_2->var);
+        JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_3, jmi_array_size(tmp_6_arg3, 0), 1, jmi_array_size(tmp_6_arg3, 0))
+        jmi_copy_matrix_to_int(tmp_6_arg3, tmp_6_arg3->var, tmp_3->var);
+        tmp_4 = (int)tmp_6_arg5;
+        tmp_5 = (double)tmp_6_arg6;
+        my_constructor2(tmp_6_arg0->var, tmp_2->var, &o2_v, tmp_3->var, tmp_6_arg4->var, tmp_4, tmp_5);
 
 ---
 
@@ -458,59 +506,67 @@ $ECE_free$
         JMI_DEF(EXO, o3_v)
 
 ---
-        JMI_DEF(EXO, tmp_16_arg0)
-        JMI_DEF(INT_EXT, tmp_17)
-        JMI_DEF(BOO_EXT, tmp_18)
-        JMI_DEF(REA, tmp_19_arg0)
-        JMI_DEF(INT, tmp_19_arg1)
-        JMI_DEF(BOO, tmp_19_arg2)
-        JMI_DEF(STR, tmp_19_arg3)
-        JMI_ARR(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_16_arg1, -1, 1)
-        JMI_DEF(REA, tmp_20)
-        JMI_DEF(REA, tmp_20_max)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, -1, 1)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, -1, 1)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_23_arg0, -1, 1)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_23_arg1, -1, 1)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_23_arg2, -1, 1)
-        JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_23_arg3, -1, 1)
+        JMI_DEF(EXO, tmp_2_arg0)
+        JMI_DEF(INT_EXT, tmp_4)
+        JMI_DEF(BOO_EXT, tmp_5)
+        JMI_DEF(REA, tmp_6_arg1)
+        JMI_DEF(INT, tmp_6_arg2)
+        JMI_DEF(BOO, tmp_6_arg3)
+        JMI_DEF(STR, tmp_6_arg4)
+        JMI_ARR(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_2_arg1, -1, 1)
+        JMI_DEF(REA, tmp_7)
+        JMI_DEF(REA, tmp_7_max)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_9, -1, 1)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_10, -1, 1)
+        JMI_DEF(INT_EXT, tmp_11)
+        JMI_DEF(REA_EXT, tmp_12)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_13_arg0, -1, 1)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_13_arg1, -1, 1)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_13_arg3, -1, 1)
+        JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_13_arg4, -1, 1)
+        JMI_DEF(INT, tmp_13_arg5)
+        JMI_DEF(REA, tmp_13_arg6)
 
 ---
-        JMCEVAL_parse(Real, tmp_19_arg0);
-        JMCEVAL_parse(Integer, tmp_19_arg1);
-        JMCEVAL_parse(Boolean, tmp_19_arg2);
-        JMCEVAL_parse(String, tmp_19_arg3);
-        tmp_17 = (int)tmp_19_arg1;
-        tmp_18 = (int)tmp_19_arg2;
-        tmp_16_arg0 = my_constructor1(tmp_19_arg0, tmp_17, tmp_18, tmp_19_arg3);
+        JMCEVAL_parse(Real, tmp_6_arg1);
+        JMCEVAL_parse(Integer, tmp_6_arg2);
+        JMCEVAL_parse(Boolean, tmp_6_arg3);
+        JMCEVAL_parse(String, tmp_6_arg4);
+        tmp_4 = (int)tmp_6_arg2;
+        tmp_5 = (int)tmp_6_arg3;
+        tmp_2_arg0 = my_constructor1(tmp_6_arg1, tmp_4, tmp_5, tmp_6_arg4);
         JMCEVAL_parseArrayDims(1);
-        JMI_ARRAY_INIT_1(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_16_arg1, d[0], 1, d[0])
-        tmp_20_max = d[0] + 1;
-        for (tmp_20 = 1; tmp_20 < tmp_20_max; tmp_20++) {
+        JMI_ARRAY_INIT_1(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_2_arg1, d[0], 1, d[0])
+        tmp_7_max = d[0] + 1;
+        for (tmp_7 = 1; tmp_7 < tmp_7_max; tmp_7++) {
             JMCEVAL_parseArrayDims(1);
-            JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_23_arg0, d[0], 1, d[0])
-            JMCEVAL_parseArray(Real, tmp_23_arg0);
+            JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_13_arg0, d[0], 1, d[0])
+            JMCEVAL_parseArray(Real, tmp_13_arg0);
             JMCEVAL_parseArrayDims(1);
-            JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_23_arg1, d[0], 1, d[0])
-            JMCEVAL_parseArray(Integer, tmp_23_arg1);
+            JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_13_arg1, d[0], 1, d[0])
+            JMCEVAL_parseArray(Integer, tmp_13_arg1);
             JMCEVAL_parseArrayDims(1);
-            JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_23_arg2, d[0], 1, d[0])
-            JMCEVAL_parseArray(Boolean, tmp_23_arg2);
+            JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_13_arg3, d[0], 1, d[0])
+            JMCEVAL_parseArray(Boolean, tmp_13_arg3);
             JMCEVAL_parseArrayDims(1);
-            JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_23_arg3, d[0], 1, d[0])
-            JMCEVAL_parseArray(String, tmp_23_arg3);
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, jmi_array_size(tmp_23_arg1, 0), 1, jmi_array_size(tmp_23_arg1, 0))
-            jmi_copy_matrix_to_int(tmp_23_arg1, tmp_23_arg1->var, tmp_21->var);
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, jmi_array_size(tmp_23_arg2, 0), 1, jmi_array_size(tmp_23_arg2, 0))
-            jmi_copy_matrix_to_int(tmp_23_arg2, tmp_23_arg2->var, tmp_22->var);
-            my_constructor2(tmp_23_arg0->var, tmp_21->var, &jmi_array_ref_1(tmp_16_arg1, tmp_20), tmp_22->var, tmp_23_arg3->var);
+            JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_13_arg4, d[0], 1, d[0])
+            JMCEVAL_parseArray(String, tmp_13_arg4);
+            JMCEVAL_parse(Integer, tmp_13_arg5);
+            JMCEVAL_parse(Real, tmp_13_arg6);
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_9, jmi_array_size(tmp_13_arg1, 0), 1, jmi_array_size(tmp_13_arg1, 0))
+            jmi_copy_matrix_to_int(tmp_13_arg1, tmp_13_arg1->var, tmp_9->var);
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_10, jmi_array_size(tmp_13_arg3, 0), 1, jmi_array_size(tmp_13_arg3, 0))
+            jmi_copy_matrix_to_int(tmp_13_arg3, tmp_13_arg3->var, tmp_10->var);
+            tmp_11 = (int)tmp_13_arg5;
+            tmp_12 = (double)tmp_13_arg6;
+            my_constructor2(tmp_13_arg0->var, tmp_9->var, &jmi_array_ref_1(tmp_2_arg1, tmp_7), tmp_10->var, tmp_13_arg4->var, tmp_11, tmp_12);
         }
-        my_constructor3(tmp_16_arg0, tmp_16_arg1->var, &o3_v);
+        my_constructor3(tmp_2_arg0, tmp_2_arg1->var, &o3_v);
 
 ---
-        destructor(tmp_16_arg0);
-        for (tmp_20 = 1; tmp_20 < tmp_20_max; tmp_20++) {
-            destructor(jmi_array_ref_1(tmp_16_arg1, tmp_20));
+        destructor(o1_v);
+        for (tmp_7 = 1; tmp_7 < tmp_7_max; tmp_7++) {
+            destructor(o2_v);
         }
 
 ---
@@ -672,22 +728,26 @@ Library
 Library2b
 
 my_constructor2
+#include \"extObjects2b.h\"
 #include \"extObjects2.h\"
+Include2b
 Include
+extObjects2b
 extObjects2
+Library2b
 Library
 
 destructor
 #include \"extObjects.h\"
-#include \"extObjects2.h\"
 #include \"extObjects2b.h\"
+#include \"extObjects2.h\"
 #include \"extObjects3.h\"
 #include \"extObjects3b.h\"
 Include
 Include2b
 extObjects
-extObjects2
 extObjects2b
+extObjects2
 extObjects3
 extObjects3b
 Library
@@ -695,32 +755,34 @@ Library2b
 
 my_constructor3
 #include \"extObjects.h\"
-#include \"extObjects2.h\"
 #include \"extObjects2b.h\"
+#include \"extObjects2.h\"
+#include \"extObjects3b.h\"
 #include \"extObjects3.h\"
 Include
 Include2b
 extObjects
-extObjects2
 extObjects2b
+extObjects2
+extObjects3b
 extObjects3
 Library
 Library2b
 
 use3
 #include \"extObjects.h\"
-#include \"extObjects2.h\"
 #include \"extObjects2b.h\"
-#include \"extObjects3.h\"
+#include \"extObjects2.h\"
 #include \"extObjects3b.h\"
+#include \"extObjects3.h\"
 #include \"extObjects4.h\"
 Include
 Include2b
 extObjects
-extObjects2
 extObjects2b
-extObjects3
+extObjects2
 extObjects3b
+extObjects3
 extObjects4
 Library
 Library2b
@@ -751,7 +813,7 @@ model Dgelsx
       Real Awork[size(A, 1), size(A, 2)]=A;
       Integer jpvt[size(A, 2)]=zeros(ncol);
     external"FORTRAN 77" dgelsx(
-              nrow,
+              size(A, 1),
               ncol,
               nrhs,
               Awork,
@@ -800,9 +862,6 @@ $ECE_calc_free$
 $ECE_free$
 ",
             generatedCode="
-
-
-
 ---
 
 ---
@@ -810,10 +869,11 @@ $ECE_free$
 ---
 
 ---
-        JMI_DEF(INT, nrow_v)
+        JMI_DEF(INT, dgelsx_arg0)
         JMI_DEF(INT, ncol_v)
         JMI_DEF(INT, nrhs_v)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
+        JMI_DEF(INT, nrow_v)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, X_a, -1, 2)
         JMI_DEF(INT, nx_v)
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, jpvt_a, -1, 1)
@@ -822,26 +882,27 @@ $ECE_free$
         JMI_ARR(DYNA, jmi_real_t, jmi_array_t, work_a, -1, 1)
         JMI_DEF(INT, lwork_v)
         JMI_DEF(INT, info_v)
-        JMI_DEF(INT_EXT, tmp_24)
-        JMI_DEF(INT_EXT, tmp_25)
-        JMI_DEF(INT_EXT, tmp_26)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_27, -1, 2)
-        JMI_DEF(INT_EXT, tmp_28)
-        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_29, -1, 2)
-        JMI_DEF(INT_EXT, tmp_30)
-        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_31, -1, 1)
-        JMI_DEF(INT_EXT, tmp_32)
-        JMI_DEF(INT_EXT, tmp_33)
-        JMI_DEF(INT_EXT, tmp_34)
+        JMI_DEF(INT_EXT, tmp_1)
+        JMI_DEF(INT_EXT, tmp_2)
+        JMI_DEF(INT_EXT, tmp_3)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_4, -1, 2)
+        JMI_DEF(INT_EXT, tmp_5)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_6, -1, 2)
+        JMI_DEF(INT_EXT, tmp_7)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_8, -1, 1)
+        JMI_DEF(INT_EXT, tmp_9)
+        JMI_DEF(INT_EXT, tmp_10)
+        JMI_DEF(INT_EXT, tmp_11)
         extern void dgelsx_(int*, int*, int*, double*, int*, double*, int*, int*, double*, int*, double*, int*, int*);
 
 ---
-        JMCEVAL_parse(Integer, nrow_v);
+        JMCEVAL_parse(Integer, dgelsx_arg0);
         JMCEVAL_parse(Integer, ncol_v);
         JMCEVAL_parse(Integer, nrhs_v);
         JMCEVAL_parseArrayDims(2);
         JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, Awork_a, d[0]*d[1], 2, d[0], d[1])
         JMCEVAL_parseArray(Real, Awork_a);
+        JMCEVAL_parse(Integer, nrow_v);
         JMCEVAL_parseArrayDims(2);
         JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, X_a, d[0]*d[1], 2, d[0], d[1])
         JMCEVAL_parseArray(Real, X_a);
@@ -858,24 +919,24 @@ $ECE_free$
         JMCEVAL_parse(Integer, info_v);
 
 ---
-            tmp_24 = (int)nrow_v;
-            tmp_25 = (int)ncol_v;
-            tmp_26 = (int)nrhs_v;
-            JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_27, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
-            jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_27->var);
-            tmp_28 = (int)nrow_v;
-            JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_29, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), 2, jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
-            jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_29->var);
-            tmp_30 = (int)nx_v;
-            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_31, jmi_array_size(jpvt_a, 0), 1, jmi_array_size(jpvt_a, 0))
-            jmi_matrix_to_fortran_int(jpvt_a, jpvt_a->var, tmp_31->var);
-            tmp_32 = (int)rank_v;
-            tmp_33 = (int)lwork_v;
-            tmp_34 = (int)info_v;
-            dgelsx_(&tmp_24, &tmp_25, &tmp_26, tmp_27->var, &tmp_28, tmp_29->var, &tmp_30, tmp_31->var, &rcond_v, &tmp_32, work_a->var, &tmp_33, &tmp_34);
-            jmi_matrix_from_fortran_real(X_a, tmp_29->var, X_a->var);
-            rank_v = tmp_32;
-            info_v = tmp_34;
+            tmp_1 = (int)dgelsx_arg0;
+            tmp_2 = (int)ncol_v;
+            tmp_3 = (int)nrhs_v;
+            JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_4, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
+            jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_4->var);
+            tmp_5 = (int)nrow_v;
+            JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, tmp_6, jmi_array_size(X_a, 0) * jmi_array_size(X_a, 1), 2, jmi_array_size(X_a, 0), jmi_array_size(X_a, 1))
+            jmi_matrix_to_fortran_real(X_a, X_a->var, tmp_6->var);
+            tmp_7 = (int)nx_v;
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_8, jmi_array_size(jpvt_a, 0), 1, jmi_array_size(jpvt_a, 0))
+            jmi_matrix_to_fortran_int(jpvt_a, jpvt_a->var, tmp_8->var);
+            tmp_9 = (int)rank_v;
+            tmp_10 = (int)lwork_v;
+            tmp_11 = (int)info_v;
+            dgelsx_(&tmp_1, &tmp_2, &tmp_3, tmp_4->var, &tmp_5, tmp_6->var, &tmp_7, tmp_8->var, &rcond_v, &tmp_9, work_a->var, &tmp_10, &tmp_11);
+            jmi_matrix_from_fortran_real(X_a, tmp_6->var, X_a->var);
+            rank_v = tmp_9;
+            info_v = tmp_11;
             JMCEVAL_check(\"DONE\");
             JMCEVAL_printArray(Real, X_a);
             JMCEVAL_print(Integer, rank_v);
@@ -977,11 +1038,11 @@ $ECE_free$
 
 ---
         JMI_RECORD_STATIC(R_1_r, a_v)
-        JMI_RECORD_STATIC(R2_0_r, tmp_35)
+        JMI_RECORD_STATIC(R2_0_r, tmp_1)
         JMI_RECORD_STATIC(R_1_r, b_v)
-        JMI_RECORD_STATIC(R2_0_r, tmp_36)
-        JMI_RECORD_STATIC(R_1_r_ext, tmp_37)
-        JMI_RECORD_STATIC(R_1_r_ext, tmp_38)
+        JMI_RECORD_STATIC(R2_0_r, tmp_2)
+        JMI_RECORD_STATIC(R_1_r_ext, tmp_3)
+        JMI_RECORD_STATIC(R_1_r_ext, tmp_4)
         extern void f(R_1_r*, R_1_r**);
 
 ---
@@ -990,36 +1051,36 @@ $ECE_free$
         JMCEVAL_parse(Boolean, a_v->a3);
         JMCEVAL_parse(String, a_v->a4);
         JMCEVAL_parse(Enum, a_v->a5);
-        JMCEVAL_parse(Real, tmp_35->x);
-        a_v->r2 = tmp_35;
+        JMCEVAL_parse(Real, tmp_1->x);
+        a_v->r2 = tmp_1;
         JMCEVAL_parse(Real, b_v->a1);
         JMCEVAL_parse(Integer, b_v->a2);
         JMCEVAL_parse(Boolean, b_v->a3);
         JMCEVAL_parse(String, b_v->a4);
         JMCEVAL_parse(Enum, b_v->a5);
-        JMCEVAL_parse(Real, tmp_36->x);
-        b_v->r2 = tmp_36;
+        JMCEVAL_parse(Real, tmp_2->x);
+        b_v->r2 = tmp_2;
 
 ---
-            tmp_37->a1 = (double)a_v->a1;
-            tmp_37->a2 = (int)a_v->a2;
-            tmp_37->a3 = (int)a_v->a3;
-            JMI_ASG(STR, tmp_37->a4, a_v->a4)
-            tmp_37->a5 = (int)a_v->a5;
-            tmp_37->r2.x = (double)a_v->r2->x;
-            tmp_38->a1 = (double)b_v->a1;
-            tmp_38->a2 = (int)b_v->a2;
-            tmp_38->a3 = (int)b_v->a3;
-            JMI_ASG(STR, tmp_38->a4, b_v->a4)
-            tmp_38->a5 = (int)b_v->a5;
-            tmp_38->r2.x = (double)b_v->r2->x;
-            f(tmp_37, tmp_38);
-            b_v->a1 = tmp_38->a1;
-            b_v->a2 = tmp_38->a2;
-            b_v->a3 = tmp_38->a3;
-            JMI_ASG(STR, tmp_38->a4, b_v->a4)
-            b_v->a5 = tmp_38->a5;
-            b_v->r2->x = tmp_38->r2.x;
+            tmp_3->a1 = (double)a_v->a1;
+            tmp_3->a2 = (int)a_v->a2;
+            tmp_3->a3 = (int)a_v->a3;
+            JMI_ASG(STR, tmp_3->a4, a_v->a4)
+            tmp_3->a5 = (int)a_v->a5;
+            tmp_3->r2.x = (double)a_v->r2->x;
+            tmp_4->a1 = (double)b_v->a1;
+            tmp_4->a2 = (int)b_v->a2;
+            tmp_4->a3 = (int)b_v->a3;
+            JMI_ASG(STR, tmp_4->a4, b_v->a4)
+            tmp_4->a5 = (int)b_v->a5;
+            tmp_4->r2.x = (double)b_v->r2->x;
+            f(tmp_3, tmp_4);
+            b_v->a1 = tmp_4->a1;
+            b_v->a2 = tmp_4->a2;
+            b_v->a3 = tmp_4->a3;
+            JMI_ASG(STR, tmp_4->a4, b_v->a4)
+            b_v->a5 = tmp_4->a5;
+            b_v->r2->x = tmp_4->r2.x;
             JMCEVAL_check(\"DONE\");
             JMCEVAL_print(Real, b_v->a1);
             JMCEVAL_print(Integer, b_v->a2);
@@ -1118,16 +1179,16 @@ $ECE_free$
         JMI_DEF(EXO, eo_v)
 
 ---
-        JMI_RECORD_STATIC(R1_1_r_ext, tmp_39)
+        JMI_RECORD_STATIC(R1_1_r_ext, tmp_2)
         extern void* constructor(R1_1_r*);
-        JMI_RECORD_STATIC(R1_1_r, tmp_40_arg0)
-        JMI_RECORD_STATIC(R2_0_r, tmp_41)
+        JMI_RECORD_STATIC(R1_1_r, tmp_3_arg1)
+        JMI_RECORD_STATIC(R2_0_r, tmp_4)
 
 ---
-        JMCEVAL_parse(Real, tmp_41->x);
-        tmp_40_arg0->r2 = tmp_41;
-        tmp_39->r2.x = (double)tmp_40_arg0->r2->x;
-        eo_v = constructor(tmp_39);
+        JMCEVAL_parse(Real, tmp_4->x);
+        tmp_3_arg1->r2 = tmp_4;
+        tmp_2->r2.x = (double)tmp_3_arg1->r2->x;
+        eo_v = constructor(tmp_2);
 
 ---
 

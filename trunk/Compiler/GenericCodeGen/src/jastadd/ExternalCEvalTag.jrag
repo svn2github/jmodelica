@@ -50,11 +50,11 @@ public abstract class ExternalCEvalTag extends AbstractTag {
     }
     
     /* Used when unit testing. Temp names will accumulate over all tests */
-    private static final CodeGenContext unitCgc = new CodeGenContext();
     private static final Map<String,String> unitTempMap = new HashMap<String,String>();
     
     public  void generate(CodeStream str) {
         if (ext == null) {
+            CodeGenContext unitCgc = new CodeGenContext().createProxy();
             for (FExternalStmt ext : fClass.myExternals()) {
                 if (!ext.isConstructorStmt() && !ext.isDestructorStmt()) {
                     generate_wrap(str, ext, unitCgc, unitTempMap);

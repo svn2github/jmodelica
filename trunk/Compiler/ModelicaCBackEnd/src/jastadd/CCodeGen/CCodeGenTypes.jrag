@@ -133,7 +133,24 @@ aspect CCodeGenTypes {
     syn boolean FFunctionCallLeft.useAlias_C() = getFExp().useAlias_C();
     syn boolean FAbstractVariable.useAlias_C() = true;
 
-    syn String FExp             .alias_C(CodePrinter p) = myCodeGenContext().alias(prettyPrint_C());
+    syn String FExp.alias_C(CodePrinter p) {
+        return alias_C(p, myCodeGenContext());
+    }
+
+    syn String FExp.alias_C(CodePrinter p, CodeGenContext cgc) {
+        String res = cgc.alias(this);
+        if (res == null) {
+            res = prettyPrint_C();
+        }
+        return res;
+    }
+    eq FIdUseExp.alias_C(CodePrinter p, CodeGenContext cgc) {
+        String res = cgc.alias(myCommonVarDecl());
+        if (res == null) {
+            res = super.alias_C(p, cgc);
+        }
+        return res;
+    }
     syn String FFunctionCallLeft.alias_C(CodePrinter p) = getFExp().alias_C(p);
     syn String FAbstractVariable.alias_C(CodePrinter p) = p.getExecStep().name(this);
 
@@ -309,9 +326,13 @@ aspect CCodeGenTypes {
         protected void printComps(FExternalObjectType type) {
             int i = 0;
             String name = acquireTemp(name());
-            for (FExp arg : type.myConstructorStmt().myConstructorArgs()) {
-                pushLevelExt(name + "_arg" + i, false, arg.size());
+            for (ExternalArgument arg : type.myConstructorStmt().varsToSerialize()) {
+                if (arg.isOutput()) {
+                    i++;
+                    continue;
+                }
                 FType t = arg.type();
+                pushLevelExt(name + "_arg" + i, false, t.size());
                 boolean b = t.parent == null;
                 if (b) {
                     // This needs to be done since some exps does

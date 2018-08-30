@@ -1476,6 +1476,7 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
+            ext.setExternalArgumentAliases(cgc);
             TypePrinter_C tp = new DeclPrinter_ECE(p, str, tempMap, cgc);
             ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
             ext.genVarDecls_C(p, str, indent);
@@ -1491,6 +1492,7 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
+            ext.setExternalArgumentAliases(cgc);
             TypePrinter_C tp = new InitPrinter_ECE(p, str, tempMap, cgc);
             ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
         }
@@ -1504,8 +1506,8 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            indent = p.indent(indent);
-            indent = p.indent(indent);
+            indent = p.indent(p.indent(indent));
+            ext.setExternalArgumentAliases(cgc);
             ext.genSerializeCalc_C(p, str, indent, cgc, tempMap);
         }
     }
@@ -1520,6 +1522,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
+            ext.setExternalArgumentAliases(cgc);
             ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
         }
     }
