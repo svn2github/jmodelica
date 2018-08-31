@@ -4997,4 +4997,78 @@ end FunctionInlining.EqType1;
 ")})));
 end EqType1;
 
+model GlobalConst1
+    constant Real[:] c = {2,3};
+
+    function f
+        input Real i;
+        output Real o;
+    algorithm
+        o := c[integer(i)];
+    end f;
+
+    Real x = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConst1",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConst1
+ constant Real c[1] = 2;
+ constant Real c[2] = 3;
+ Real x;
+package constant
+ constant Real FunctionInlining.GlobalConst1.c[2] = {2, 3};
+equation
+ x = 2.0;
+end FunctionInlining.GlobalConst1;
+")})));
+end GlobalConst1;
+
+model GlobalConst2
+    record R1
+        parameter Real x;
+    end R1;
+    record R2
+        parameter R1[2] r1;
+    end R2;
+    function f
+        input Integer i;
+        constant R2 a = R2({R1(2),R1(3)});
+        output R1 y = a.r1[i];
+    algorithm
+    end f;
+    
+    R1 y = f(integer(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConst2",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConst2
+ parameter Integer temp_2;
+ parameter Real y.x;
+package constant
+ constant FunctionInlining.GlobalConst2.R2 FunctionInlining.GlobalConst2.f.a = FunctionInlining.GlobalConst2.R2({FunctionInlining.GlobalConst2.R1(2), FunctionInlining.GlobalConst2.R1(3)});
+parameter equation
+ temp_2 = integer(time);
+ y.x = ({2, 3})[temp_2];
+
+public
+ record FunctionInlining.GlobalConst2.R1
+  parameter Real x;
+ end FunctionInlining.GlobalConst2.R1;
+
+ record FunctionInlining.GlobalConst2.R2
+  parameter FunctionInlining.GlobalConst2.R1 r1[2];
+ end FunctionInlining.GlobalConst2.R2;
+
+end FunctionInlining.GlobalConst2;
+")})));
+end GlobalConst2;
+
 end FunctionInlining;

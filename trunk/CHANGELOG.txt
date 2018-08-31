@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Changed ; Minor ; Compiler ; #5670
+Update handling of constants, and accesses to package constants, in functions
+for improved compilation and simulation performance.
 ; Fixed ; Minor ; PyFMI ; #5668
 Fixed issue with reusing the PyFMI computed FD Jacobian.
 

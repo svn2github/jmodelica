@@ -138,12 +138,11 @@ aspect ConstantEvaluationStatements {
     }
 
     public void FAccessString.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        FFunctionVariable var = myFuncFV();
-        var.setEvaluationValue(evaluator, right);
+        myTopFV().setEvaluationValue(evaluator, right);
     }
 
     public void FAccessFull.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        FFunctionVariable var = myFuncFV();
+        FAbstractVariable var = myTopFV();
         FAccessPart firstPart = getFAccessPart(0);
         CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
         evaluator.setEvaluationValue(var, val);

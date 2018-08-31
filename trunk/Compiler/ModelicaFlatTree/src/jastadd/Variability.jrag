@@ -403,10 +403,11 @@ aspect Variability {
     eq FIdUseExp.assignedFV()               = myFV();
 
 
-    syn TypePrefixVariability FAbstractVariable.variability() {
-        throw new UnsupportedOperationException("Unable to get variability of FAbstractVariable type " + getClass().getSimpleName());
-    }
-    eq FVariable.variability() = getTypePrefixVariability();
+    syn TypePrefixVariability FAbstractVariable.variability();
+    eq FVariable        .variability() = getTypePrefixVariability();
+    eq FFunctionVariable.variability() = Variability.CONTINUOUS;
+    eq FEnumLiteral     .variability() = Variability.CONTINUOUS;
+    eq UnknownFVariable .variability() = Variability.CONTINUOUS;
     
     syn boolean FExp.isConstantExp()   = variability().constantVariability();
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();
@@ -545,15 +546,7 @@ aspect Variability {
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.DISCRETE);
 
     syn TypePrefixVariability CommonAccess.variability();
-    eq FAccess.variability() {
-        FAbstractVariable variable = myFV();
-        if (variable instanceof FVariable) {
-            FVariable fVariable = (FVariable) variable;
-            return(fVariable.variability());
-        } else {
-            return (Variability.CONTINUOUS);
-        }
-    }
+    eq FAccess.variability() = myTopFV().variability();
 
     syn TypePrefixVariability FSubscript.variability() = Variability.CONSTANT;
 	eq FExpSubscript.variability() = getFExp().variability();

@@ -222,47 +222,34 @@ aspect FlatteningFAccesss {
 
 aspect FlatteningFunctionConstant {
     public FExp InstAssignable.flattenAccessToConst(Flattener f, FIdUseExp iae) {
-        // If the FInstAccess refers to a constant or string parameter, then inline expression
-        // Checks in the instance tree ensures that constants always
-        // have binding expressions, however, array subscripts may need to be 
-        // flattened during error checks, when using qualifiedName()
+        FType t = iae.type();
+        if (t.isEmpty()) {
+            return t.createEmptyExp();
+        }
         InstAccess ia = iae.asInstAccess();
-        if (variability().indexParameterOrLess()) {
-            if (iae.canInlineConstant()) {
-                try {
-                    FType t = iae.type();
-                    if (t.isEmpty()) {
-                        return t.createEmptyExp();
-                    }
-                    // Check if we have non-constant array subscripts
-                    if (ia.hasUnknownIndices()) {
-                        // If this is a package constant, then the variable will not be available in the flattened model 
-                        if (!ia.inFunction() && variability().constantVariability()) {
-                            // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
-                            FExp exp = getBindingFExp().buildLiteral(isReal());
-                            FArraySubscripts fas = ia.getFArraySubscripts().flatten(f);
-                            return new FSubscriptedExp(exp, fas);
-                        }
-                    } else {
-                        // Inline value
-                        CValue cval = iae.ceval();
-                        if (isReal() && cval.hasConvertReal()) {
-                            cval = cval.convertReal();
-                        }
-                        if (cval.hasBuildLiteral()) {
-                            return cval.buildLiteral();
-                        }
-                    }
-                } catch (ConstantEvaluationException e) {
-                    // In this case, simply don't inline value if we aren't in a function
+        if (iae.canInlineConstant() && !ia.hasUnknownIndices()) {
+            try {
+                CValue cval = iae.ceval();
+                if (isReal() && cval.hasConvertReal()) {
+                    cval = cval.convertReal();
                 }
+                if (cval.hasBuildLiteral()) {
+                    return cval.buildLiteral();
+                }
+            } catch (ConstantEvaluationException e) {
+                // TODO: Error
             }
-            if (ia.inFunction() && flattenAsFunctionConstant())
-                return ia.topInstAssignable().flattenAccessToConstInFunction(f, ia);
+        }
+        if (ia.inFunction() && flattenAsFunctionConstant()) {
+            InstAssignable top = ia.topInstAssignable();
+            if (!f.isFlattenedGlobalVariable(top)) {
+                top.flatten(f, FlattenBindingExp.ALL, 0, true);
+            }
+            return new FIdUseExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()));
         }
         return null;
     }
-    
+
     syn boolean InstAssignable.flattenAsFunctionConstant() =
             !isInput() && !isOutput() && variability().knownParameterOrLess();
 
@@ -288,24 +275,6 @@ aspect FlatteningFunctionConstant {
     eq FSizeExp.getFExp().canInlineConstant()               = canInlineConstant();
     eq InstFunctionArgument.getChild().canInlineConstant()  = canInlineConstant();
     eq InstRecordConstructor.getArg().canInlineConstant()   = canInlineConstant();
-
-    /**
-     * Flatten an access to this constant in a function.
-     * 
-     * Used when the access can't be constant evaluated. The constant is added to the function.
-     */
-    public FExp InstAssignable.flattenAccessToConstInFunction(Flattener f, InstAccess ia) {
-        ia.functionConstantList().add(this);
-        FAccess name = getFAccess();
-        FAccess use = ia.flatten();
-        if (name.numParts() > 1 || ia.localLookupInstComponent(name.name()).foundOther(this)) {
-            // TODO: this should probably be a helper function on FAccess
-            FAccessFull fullUse = use.asFAccessFull();
-            fullUse.getFAccessPart(0).setName(ia.findTempVarName(this));
-            use = fullUse;
-        }
-        return new FIdUseExp(use);
-    }
 
     private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;
     private int InstClassDecl.nextTempVarIndex = 1;

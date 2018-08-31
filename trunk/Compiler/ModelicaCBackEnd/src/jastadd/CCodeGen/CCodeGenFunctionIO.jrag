@@ -171,6 +171,8 @@ aspect CodeFuncCallInOutArgPrinters {
         
         public abstract String arrayAccessConst();
         
+        public abstract void printAssign(CodeStream str, String indent, String name, FExp exp);
+        
         /**
          * Notify printer that a component has ended.
          */
@@ -246,6 +248,12 @@ aspect CodeFuncCallInOutArgPrinters {
             protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
                 firstUse.genTempInputCellAssignsMemcpy_C(str, indent, firstName, n);
             }
+            
+            public void printAssign(CodeStream str, String indent, String name, FExp exp) {
+                str.print(indent, "JMI_ASG(", exp.type().macroType(), ", ", name, ", ");
+                CodePrinter.this.print(exp, str, indent);
+                str.print(")\n");
+            }
         }
 
         public abstract void printTempInputAssigns(CodeStream str, String indent, FExp exp);
@@ -294,6 +302,12 @@ aspect CodeFuncCallInOutArgPrinters {
 
             @Override
             public abstract void printCellUse(CodeStream str, String indent, String name, FIdUseExp exp);
+            
+            public void printAssign(CodeStream str, String indent, String name, FExp exp) {
+                str.print(indent, "JMI_ASG(", exp.type().macroType(), ", ");
+                CodePrinter.this.print(exp, str, indent);
+                str.print(", ", name, ")");
+            }
         }
     }
 
@@ -423,10 +437,7 @@ aspect CodeFuncCallInOutArg {
     public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
         if (isArray()) {
             if (exp.genAssignMacro()) {
-                // Works for now!
-                str.format("%sJMI_ASG(%s, ", indent, macroType());
-                ASTNode.printer_C.print(exp, str, indent);
-                str.formatln(", %s)", name);
+                p.printAssign(str, indent, name, exp);
             } else {
                 String type = isRecord() ? C_ARRAY_RECORD : p.arrayAccessConst();
                 String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);

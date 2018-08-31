@@ -258,27 +258,30 @@ aspect CCodeGenExternalCeval {
         return res;
     }
     
-    public ExternalArgument FExp.externalArgument() {
-        return this;
-    }
-    
-    public ExternalArgument FIdUseExp.externalArgument() {
-        return myCommonVarDecl();
+    syn ExternalArgument FExp.externalArgument();
+    eq FExp     .externalArgument() = this;
+    eq FIdUseExp.externalArgument() = myCommonVarDecl().externalArgument(this);
+
+    interface CommonVariableDecl {
+        ExternalArgument externalArgument(FExp exp);
     }
 
+    syn ExternalArgument InstComponentDecl.externalArgument(FExp exp) = variability().constantVariability() ? exp : this;
+
+    syn ExternalArgument FAbstractVariable.externalArgument(FExp exp);
+    eq FAbstractVariable.externalArgument(FExp exp) = exp;
+    eq FFunctionVariable.externalArgument(FExp exp) = this;
 
     syn ArrayList<ExternalArgument> FExternalStmt.externalObjectsToSerialize() {
         ArrayList<ExternalArgument> externalObjects = new ArrayList<ExternalArgument>();
-
         for (ExternalArgument var : varsToSerialize()) {
             if (var.type().isExternalObject()) {
                 externalObjects.add(var);
             }
         }
-
         return externalObjects;
     }
-    
+
     syn ArrayList<ExternalArgument> FExternalStmt.functionArgsToSerialize() {
         ArrayList<ExternalArgument> functionArgs = new ArrayList<ExternalArgument>();
         for (ExternalArgument var : varsToSerialize()) {
@@ -308,10 +311,17 @@ aspect CCodeGenExternalCeval {
      */
     private ArrayList<CommonVariableDecl> FExternalStmt.myCommonVarDecls() {
         FFunctionDecl decl = containingFFunctionDecl();
-        if (decl != null)
+        if (decl != null) {
             return new ArrayList<CommonVariableDecl>(decl.getFFunctionVariables().toArrayList());
-        else
-            return new ArrayList<CommonVariableDecl>(enclosingInstClassDecl().getInstComponentDecls().toArrayList());
+        } else {
+            ArrayList<CommonVariableDecl> res = new ArrayList<>();
+            for (CommonVariableDecl cvd : enclosingInstClassDecl().allInstComponentDecls()) {
+                if (!cvd.variability().constantVariability()) {
+                    res.add(cvd);
+                }
+            }
+            return res;
+        }
     }
 
     /**

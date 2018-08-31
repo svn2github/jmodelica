@@ -1213,4 +1213,77 @@ $ECE_free$
 ")})));
 end RecordExternalObject;
 
+model PackageConstant1
+type E = enumeration(A,B);
+function f
+    input Real[:] a;
+    output Real[size(a,1)] b;
+    constant Real[:] c = {2};
+    external "C" f(a,b,c);
+end f;
+    Real[1] x1 = f({1});
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="PackageConstant1",
+            description="",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_decl$
+---
+$ECE_setup_decl$
+---
+$ECE_setup_init$
+---
+$ECE_setup_free$
+---
+$ECE_calc_decl$
+---
+$ECE_calc_init$
+---
+$ECE_calc$
+---
+$ECE_calc_free$
+---
+$ECE_free$
+",
+            generatedCode="
+---
+
+---
+
+---
+
+---
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, a_a, -1, 1)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, b_a, -1, 1)
+        JMI_ARR(DYNA, jmi_real_t, jmi_array_t, f_arg2, -1, 1)
+        extern void f(double*, double*, double*);
+
+---
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, a_a, d[0], 1, d[0])
+        JMCEVAL_parseArray(Real, a_a);
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, b_a, d[0], 1, d[0])
+        JMCEVAL_parseArray(Real, b_a);
+        JMCEVAL_parseArrayDims(1);
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, f_arg2, d[0], 1, d[0])
+        JMCEVAL_parseArray(Real, f_arg2);
+
+---
+            f(a_a->var, b_a->var, f_arg2->var);
+            JMCEVAL_check(\"DONE\");
+            JMCEVAL_printArray(Real, b_a);
+
+
+---
+
+---
+")})));
+end PackageConstant1;
+
 end CCodeGenExternalCevalTests;

@@ -1002,7 +1002,13 @@ aspect FlatPrettyPrint {
                 str.println(";");
             }
         }
-
+        if (getNumGlobalVariable() > 0) {
+            str.println(indent, "package constant");
+            for (FVariable fv : getGlobalVariables()) {
+                p.print(fv, str, nextInd);
+                str.println(";");
+            }
+        }
         if (getNumFInitialEquation() > 0) {
             str.println(indent, "initial equation");
         }

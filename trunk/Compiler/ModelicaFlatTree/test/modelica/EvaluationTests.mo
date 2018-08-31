@@ -4217,6 +4217,14 @@ fclass EvaluationTests.ConstantInFunction1
  constant Real r[1].x = 1;
  constant Real r[2].x = 2;
  constant Real y = 6.0;
+package constant
+ constant EvaluationTests.ConstantInFunction1.R EvaluationTests.ConstantInFunction1.r[2] = {EvaluationTests.ConstantInFunction1.R(1), EvaluationTests.ConstantInFunction1.R(2)};
+
+public
+ record EvaluationTests.ConstantInFunction1.R
+  Real x;
+ end EvaluationTests.ConstantInFunction1.R;
+
 end EvaluationTests.ConstantInFunction1;
 ")})));
 end ConstantInFunction1;
@@ -4248,6 +4256,14 @@ fclass EvaluationTests.ConstantInFunction2
  constant Real r[2].x = 2;
  constant Real y1 = 4.0;
  constant Real y2 = 2.0;
+package constant
+ constant EvaluationTests.ConstantInFunction2.R EvaluationTests.ConstantInFunction2.r[2] = {EvaluationTests.ConstantInFunction2.R(1), EvaluationTests.ConstantInFunction2.R(2)};
+
+public
+ record EvaluationTests.ConstantInFunction2.R
+  Real x;
+ end EvaluationTests.ConstantInFunction2.R;
+
 end EvaluationTests.ConstantInFunction2;
 ")})));
 end ConstantInFunction2;

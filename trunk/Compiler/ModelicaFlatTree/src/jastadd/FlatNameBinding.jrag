@@ -25,14 +25,14 @@ aspect FlatNameBinding {
     syn FAbstractVariable CommonAccess.myFV() { throw new UnsupportedOperationException(); }
     syn FAbstractVariable FReinit.myFV()        = getVar().asFIdUseExp().myFV();
 
+    syn FAbstractVariable      FAccess    .myTopFV() = myFV();
+    syn lazy FAbstractVariable FAccessFull.myTopFV() = getFAccessPart(0).myFV();
+
     syn FAbstractVariable FIdUseExp.myDerFV(int index) = getCommonAccess().myDerFV(index);
     syn FAbstractVariable CommonAccess.myDerFV(int index) { throw new UnsupportedOperationException(); }
     eq FAccess.myDerFV(int index)    = lookupFV(derName(index));
 
     syn FAbstractVariable FAccess.myPreFV() = lookupFV(preName());
-
-    syn FFunctionVariable FIdUseExp.myFuncFV() = getCommonAccess().asFAccess().myFuncFV();
-    syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
     syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getCommonAccess().myCommonVarDecl();
     syn CommonVariableDecl CommonAccess.myCommonVarDecl();
@@ -72,8 +72,15 @@ aspect FlatNameBinding {
         if (res == null) {
 			res = variablesMap().lookup(name);
         }
+        if (res == null) {
+            res = lookupGlobalVariable(name);
+        }
 		return nullUnknown(res);
 	}
+
+    inh FAbstractVariable FFunctionDecl.lookupGlobalVariable(String name);
+    eq Root.getChild().lookupGlobalVariable(String name)   = null;
+    eq FClass.getChild().lookupGlobalVariable(String name) = globalVariablesMap().lookup(name);
 
 	private FlatVariableMap FFunctionDecl.tempLookupMap = null;
 
@@ -103,6 +110,7 @@ aspect FlatNameBinding {
 	}
 	
     syn lazy FlatVariableMap FClass.variablesMap()        = new FlatVariableMap(getFVariables(), getAliasVariables());
+    syn lazy FlatVariableMap FClass.globalVariablesMap() = new FlatVariableMap(getGlobalVariables());
     syn lazy FlatVariableMap FFunctionDecl.variablesMap() = new FlatVariableMap(getFFunctionVariables());
     syn lazy FlatVariableMap FRecordDecl.variablesMap()   = new FlatVariableMap(getFVariables());
 
@@ -275,6 +283,7 @@ aspect FlatFunctionBinding {
 aspect FlatRecordBinding {
 	
 	syn lazy FRecordDecl FAbstractVariable.myFRecordDecl() = null;
+    eq FGlobalVariable.myFRecordDecl()   = type().myFRecordDecl();
 	eq FRecordVariable.myFRecordDecl()   = lookupFRec(getRecord().name());
 	eq FFunctionVariable.myFRecordDecl() = type().myFRecordDecl();
     eq FVariable.myFRecordDecl() = containingRecordDecl();

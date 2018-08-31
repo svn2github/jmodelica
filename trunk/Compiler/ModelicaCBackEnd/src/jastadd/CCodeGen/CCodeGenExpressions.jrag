@@ -707,11 +707,6 @@ aspect CCodeGenExpressions {
      * Helper, generates an regular variable use
      */
     public String FAbstractVariable.genUse_C(CodePrinter.ExecuteCodePrinter p, FArraySubscripts fas, String type) {
-        return p.name(this);
-    }
-
-    @Override
-    public String FFunctionArray.genUse_C(CodePrinter.ExecuteCodePrinter p, FArraySubscripts fas, String type) {
         if (fas == null) {
             return p.name(this);
         } else {

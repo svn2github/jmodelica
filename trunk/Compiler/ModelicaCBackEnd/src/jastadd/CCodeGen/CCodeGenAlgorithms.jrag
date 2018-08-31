@@ -61,17 +61,17 @@ aspect CCodeGenAlgorithms {
      */
 
     public class CodePrinter {
-        public abstract void printInit(FFunctionVariable v, CodeStream str, String indent, FType type);
+        public abstract void printInit(FAbstractVariable v, CodeStream str, String indent, FType type);
     }
 
     public class CPrettyPrinter {
         @Override
-        public void printInit(FFunctionVariable v, CodeStream str, String indent, FType type) {
+        public void printInit(FAbstractVariable v, CodeStream str, String indent, FType type) {
             v.printInit(ExecStep, str, indent, type);
         }
     }
 
-    public void FFunctionVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
+    public void FAbstractVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
         String name = p.name(this);
         TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
         if (isComposite() && isOutput() && !isString()) {
@@ -192,7 +192,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(getFIdUseExp().myFuncFV(), str, indent, type());
+        p.printInit(getFIdUseExp().getCommonAccess().asFAccess().myTopFV(), str, indent, type());
     }
 
     @Override

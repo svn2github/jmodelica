@@ -129,10 +129,11 @@ aspect Flattening {
      */ 
     public class Flattener {
         private FClass fc;
-        private List<FVariable>         variables   = new List<FVariable>();
-        private List<FAbstractEquation> normalEqns  = new List<FAbstractEquation>();
-        private List<FAbstractEquation> initialEqns = new List<FAbstractEquation>();
-        private List<FAbstractEquation> parameterEqns = new List<FAbstractEquation>();
+        private List<FVariable>         globalVariables = new List<FVariable>();
+        private List<FVariable>         variables       = new List<FVariable>();
+        private List<FAbstractEquation> normalEqns      = new List<FAbstractEquation>();
+        private List<FAbstractEquation> initialEqns     = new List<FAbstractEquation>();
+        private List<FAbstractEquation> parameterEqns   = new List<FAbstractEquation>();
         
         private List<FFunctionDecl> functionDecls = new List<FFunctionDecl>();
         private List<FRecordDecl> recordDecls = new List<FRecordDecl>();
@@ -158,6 +159,10 @@ aspect Flattening {
             return flattenedNodes.contains(n.qualifiedTypeName());
         }
 
+        public boolean isFlattenedGlobalVariable(InstNode n) {
+            return flattenedNodes.contains(n.surroundingInstClass().qualifiedName() + "." + n.qualifiedName());
+        }
+
         public List<FAbstractEquation> getNormalEquations() {
             return normalEqns;
         }
@@ -168,6 +173,10 @@ aspect Flattening {
         
         public List<FAbstractEquation> getParameterEquations() {
             return parameterEqns;
+        }
+        
+        public List<FVariable> getGlobalVariables() {
+            return globalVariables;
         }
         
         public List<FVariable> getFVariables() {
@@ -188,6 +197,11 @@ aspect Flattening {
         
         public List<FDerivedType> getFDerivedTypes() {
             return derivedTypes;
+        }
+        
+        public List<FVariable> addGlobalVariable(FVariable fvariable) {
+            addFlattened(fvariable.name());
+            return globalVariables.add(fvariable);
         }
         
         public List<FVariable> addFVariable(FVariable fvariable) {
@@ -248,6 +262,7 @@ aspect Flattening {
     
     // refined in OptimicaFlattening
     public void FClass.update(Flattener f) {
+        setGlobalVariableList(f.getGlobalVariables());
         setFVariableList(f.getFVariables());
         setFAbstractEquationList(f.getNormalEquations());
         setFInitialEquationList(f.getInitialEquations());
@@ -471,8 +486,6 @@ aspect Flattening {
             copyDerivativeAnnotations(f, ffd.annotation());
             ffd.copyInlineAnnotation(findInlineAnnotationRoot());
             ffd.smoothOrder(smoothOrder());
-            
-            addLocalFunctionConstants(f, ffd);
             flattenUsedFuncsAndEnums(f);
             ffd.updateRecordArraySizes();
             
@@ -621,29 +634,6 @@ aspect Flattening {
         }
     }
 
-    private void InstBaseClassDecl.addLocalFunctionConstants(Flattener f, FFunctionDecl ffd) {
-        Set<InstAssignable> added = new HashSet<InstAssignable>();
-        Set<InstAssignable> all = localFunctionConstantList();
-        List<FFunctionVariable> ffvs = new List<FFunctionVariable>();
-        List<FStatement> stmts = new List<FStatement>();
-        int n = 0;
-        while (n < all.size()) {
-            n = all.size();
-            // We need a copy of all since it can be modified during iteration
-            for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
-                if (added.add(cons)) {
-                    cons.flattenInFunction(f, ffvs, stmts, true, this);
-                    cons.flattenUsedFuncsAndEnums(f);
-                    all.remove(cons);
-                }
-            }
-        }
-        ffvs.addAll(ffd.getFFunctionVariableListNoTransform());
-        stmts.addAll(ffd.getFAlgorithmNoTransform().getFStatementListNoTransform());
-        ffd.setFFunctionVariableList(ffvs);
-        ffd.getFAlgorithmNoTransform().setFStatementList(stmts);
-    }
-
     public void FFunctionDecl.updateRecordArraySizes() {
         for (FFunctionVariable ffv : getFFunctionVariables())
             ffv.updateRecordArraySizes();
@@ -685,7 +675,7 @@ aspect Flattening {
         for (InstComponentDecl icd : getInstComponentDecls()) {
             if (added.add(icd.name())) {
                 HashMap<InstNode,Integer> oldLevels2 = icd.setModificationLevel(level + 1);
-                icd.flattenInFunction(f, vars, stmts, false, null);
+                icd.flattenInFunction(f, vars, stmts);
                 icd.flattenUsedFuncsAndEnums(f);
                 icd.clearModificationLevel(oldLevels2);
             }
@@ -849,20 +839,15 @@ aspect Flattening {
         return false;
     }
     
-    public void InstComponentDecl.flattenInFunction(
-            Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts, boolean useConstant, InstClassDecl func) {}
+    public void InstComponentDecl.flattenInFunction(Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts) {}
     
     @Override
-    public void InstAssignable.flattenInFunction(
-            Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts, boolean useConstant, InstClassDecl func) {
-        if (useConstant || !flattenAsFunctionConstant()) {
-            InstClassDecl old = temporarilyInFunction;
-            temporarilyInFunction = func;
+    public void InstAssignable.flattenInFunction(Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts) {
+        if (!flattenAsFunctionConstant()) {
             if (hasInstValueMod())
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             Opt eo = new Opt();
-            FAccess fqn = createFAccessForFuncVar(func);
-            fqn.removeFArraySubscripts();
+            FAccess fqn = getFAccess().treeCopy().removeFArraySubscripts();
             FFunctionVariable ffv = createFFunctionVariable(f, eo, fqn);
             if (isInput())
                 ffv.setTypePrefixInputOutput(TypePrefixInputOutput.INPUT);
@@ -878,7 +863,6 @@ aspect Flattening {
                 addBindingAssignments(f, stmts);
             }
             myInstClass().flattenRecord(f);
-            temporarilyInFunction = old;
         }
     }
     
@@ -955,14 +939,8 @@ aspect Flattening {
             super.addBindingAssignments(f, l);
         }
     }
-    
-    syn FAccess InstAssignable.expandedFAccessCalc() {
-        if (temporarilyInFunction != null) {
-            return createFAccessForFuncUse(temporarilyInFunction);
-        } else {
-            return expandedFAccess().append(name());
-        }
-    }
+
+    syn FAccess InstAssignable.expandedFAccessCalc() = expandedFAccess().append(name());
 
     inh FAccess InstComponentDecl.expandedFAccess();
     eq InstClassDecl.getChild().expandedFAccess()          = new FAccessFull();
@@ -970,9 +948,6 @@ aspect Flattening {
     eq InstComponentDecl.getChild().expandedFAccess()      = expandedFAccess();
     eq InstArrayComponentDecl.getChild().expandedFAccess() = appendMyName(expandedFAccess());
     eq InstAssignable.getChild().expandedFAccess() {
-        if (temporarilyInFunction != null) {
-            return createFAccessForFuncUse(temporarilyInFunction);
-        }
         if (size().isUnknown()) {
             return expandedFAccess().append(name(), size().flattenSubscript());
         } else {
@@ -980,27 +955,6 @@ aspect Flattening {
         }
     }
 
-    /**
-     * Get the list of constants that need to be added to the surrounding function.
-     */
-    inh Set<InstAssignable> InstAccess.functionConstantList();
-    inh Set<InstAssignable> InstAssignable.functionConstantList();
-    eq InstClassDecl.getChild().functionConstantList()  = localFunctionConstantList();
-    eq InstAssignable.getChild().functionConstantList() = 
-        (temporarilyInFunction != null) ? 
-                temporarilyInFunction.localFunctionConstantList() : 
-                functionConstantList();
-    eq Root.getChild().functionConstantList()           = null;
-    
-    /**
-     * The list of constants that need to be added to this function.
-     * 
-     * The list will be populated when expressions in the function are flattened.
-     */
-    syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
-        new LinkedHashSet<InstAssignable>();
-    
-    
     public class InstLookupResult<T extends InstNode> {
         /**
          * Check if lookup found a target that is not the same as the given one.
@@ -1010,19 +964,6 @@ aspect Flattening {
         }
     }
 
-    public FAccess InstComponentDecl.createFAccessForFuncVar(InstClassDecl func) {
-        FAccess name = getFAccess();
-        if (func != null) {
-            if (name.numParts() > 1 || func.memberInstComponent(name.name()).foundOther(this))
-                return new FAccessString(func.localTempVarName(this));
-        }
-        return name.fullCopy();
-    }
-    
-    public FAccess InstAssignable.createFAccessForFuncUse(InstClassDecl func) {
-        return createFAccessForFuncVar(func).asFAccessFull().addFArraySubscripts(null);
-    }
-    
     public FFunctionVariable InstAssignable.createFFunctionVariable(Flattener f, Opt eo, FAccess fqn) {
         // TODO: if we need separate variable class for records, override this
         FType type = type().flatten(f, this, !isInput());
@@ -1250,7 +1191,7 @@ aspect Flattening {
             } else {
                 fqn = new FAccessString(name());
             }
-            FVariable fv = createFVariable(f, fqn, FlattenBindingExp.NONE);
+            FVariable fv = createFVariable(f, fqn, FlattenBindingExp.NONE, false);
             fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
             flattenMyType(f);
@@ -1282,12 +1223,27 @@ aspect Flattening {
     }
 
     public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level) {
+        flatten(f, binding, level, false);
+    }
+
+    public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level, boolean global) {
         if (useInFlattening()) {
             if (hasBindingFExp()) {
                 getBindingFExp().flattenAssertExternal(f);
             }
             HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
-            f.addFVariable(createFVariable(f, getFAccess().copyAndAddFas(size().flattenFArraySubscripts(f)), binding));
+            FAccess name;
+            if (global) {
+                name = getFAccess().copyAndPrepend(surroundingInstClass().qualifiedName()).copyAndAddFas(size().flattenFArraySubscripts(f));
+            } else {
+                name = getFAccess().copyAndAddFas(size().flattenFArraySubscripts(f));
+            }
+            FVariable fv = createFVariable(f, name, binding, global);
+            if (global) {
+                f.addGlobalVariable(fv);
+            } else {
+                f.addFVariable(fv);
+            }
             flattenMyType(f);
             clearModificationLevel(oldLevels);
         }
@@ -1551,6 +1507,12 @@ aspect Flattening {
     public void InstLibNode.flattenEnum(Flattener f) {
         actualInstClass().flattenEnum(f);
     }
+
+    public FVariable InstAssignable.createEmptyFGlobalVariable(Flattener f) {
+        FGlobalVariable res = new FGlobalVariable();
+        res.setFType(type().flatten(f, this, false));
+        return res;
+    }
     
     public abstract FVariable InstAssignable.createEmptyFVariable();
     
@@ -1649,7 +1611,7 @@ aspect Flattening {
             list.addAll(a.getFAttributes());
         }
         boolean flattenBinding = binding.shouldFlattenExp(this);
-        if (flattenBinding && declaredSizeCalc().isUnknownNoEval()) {
+        if (flattenBinding && !isConstant() && declaredSizeCalc().isUnknownNoEval()) {
             FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
             if (ia == null) {
                 ia = new FInternalAttribute(FAttribute.SIZE, new FArray(new List<FExp>()));
@@ -1712,11 +1674,11 @@ aspect Flattening {
     }
 
     public FVariable InstAssignable.createFVariable(Flattener f) {
-        return createFVariable(f, getFAccess(), FlattenBindingExp.ALL);
+        return createFVariable(f, getFAccess(), FlattenBindingExp.ALL, false);
     }
 
-    public FVariable InstAssignable.createFVariable(Flattener f, FAccess name, FlattenBindingExp binding) {
-        FVariable fv = createEmptyFVariable();
+    public FVariable InstAssignable.createFVariable(Flattener f, FAccess name, FlattenBindingExp binding, boolean global) {
+        FVariable fv = global ? createEmptyFGlobalVariable(f) : createEmptyFVariable();
         fv.setVisibilityType(createVisibilityType());
         fv.setTypePrefixVariability(variability());
         

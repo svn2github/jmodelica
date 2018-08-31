@@ -1124,7 +1124,11 @@ aspect TransformCanonical {
 	 * Create a pre variable for this variable.
 	 */
 	abstract public FVariable FVariable.createPreVariable();
-	
+
+    public FVariable FGlobalVariable.createPreVariable() {
+        throw new UnsupportedOperationException();
+    }
+
 	public FVariable FRealVariable.createPreVariable() {
 		return new FPreRealVariable(this);
 	}
@@ -2943,6 +2947,7 @@ aspect FunctionAndRecordCleanup {
         for (FRecordDecl decl : getFRecordDecls())
             decl.resetUsedIndicator();
         getFVariables().markUsedFunctionsAndRecords();
+        getGlobalVariables().markUsedFunctionsAndRecords();
         getFInitialEquations().markUsedFunctionsAndRecords();
         getParameterEquations().markUsedFunctionsAndRecords();
         getFAbstractEquations().markUsedFunctionsAndRecords();
@@ -3067,7 +3072,13 @@ aspect FunctionAndRecordCleanup {
             myFCallable().markUsedFunctionsAndRecords(type);
         }
     }
-    
+
+    @Override
+    public void FRecordVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        myFRecordDecl().markUsedFunctionsAndRecords(type);
+    }
+
     @Override
     public void FType.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
         super.markUsedFunctionsAndRecords(type);

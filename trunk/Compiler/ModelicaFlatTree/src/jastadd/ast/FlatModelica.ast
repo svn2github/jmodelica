@@ -29,7 +29,8 @@ FlatRoot : Root ::= FClass;
  */ 
 FClass : BaseNode ::= FAccess 
                       FVariable* 
-                      AliasVariable:FVariable* 
+                      AliasVariable:FVariable*
+                      GlobalVariable:FVariable*
                       FInitialEquation:FAbstractEquation*
                       ParameterEquation:FAbstractEquation*
                       FAbstractEquation*
@@ -131,6 +132,8 @@ FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
  * Base class for variable type prefixes.
  */
 abstract FTypePrefix : BaseNode;
+
+FGlobalVariable : FVariable ::= FType;
 
 /**
  * FVariable of type Real.

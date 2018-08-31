@@ -292,11 +292,15 @@ aspect CCodeGen {
 	
 	syn String FAbstractVariable.preName_C() = null; 
 	eq FVariable.preName_C() = name_C("pre");
-	
-	protected String FVariable.name_C(String prefix) {
-		return name_C(prefix, Integer.toString(variableIndex()));
-	}
-	
+
+    protected String FVariable.name_C(String prefix) {
+        return name_C(prefix, Integer.toString(variableIndex()));
+    }
+
+    protected String FGlobalVariable.name_C(String prefix) {
+        return FExp.global_C(nameUnderscore());
+    }
+
 	protected String FAbstractVariable.name_C(String prefix, String suffix) {
 		StringBuilder buf = new StringBuilder();
 		if (prefix != null) {

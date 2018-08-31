@@ -1277,6 +1277,7 @@ aspect InheritedFactoryMethods {
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
 	
 	public abstract FVariable FVariable.createEmptyNode();
+    public FGlobalVariable  FGlobalVariable.createEmptyNode()                   { return new FGlobalVariable(); }
 	public FRealVariable    FRealVariable.createEmptyNode()    					{ return new FRealVariable(); }
 	public FIntegerVariable FIntegerVariable.createEmptyNode() 					{ return new FIntegerVariable(); }
 	public FBooleanVariable FBooleanVariable.createEmptyNode() 					{ return new FBooleanVariable(); }

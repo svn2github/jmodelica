@@ -1044,6 +1044,18 @@ aspect FunctionInlining {
         return true;
     }
 
+    /**
+     * All uses of this variable that are the left-hand side of an assignment or 
+     * function call statement. 
+     */
+    coll HashSet<FIdUseExp> FFunctionVariable.assigningUses() [new HashSet<FIdUseExp>()] 
+        with add root FFunctionDecl;
+    FIdUseExp contributes this when isAssignedTo() && myFuncFV() != null
+        to FFunctionVariable.assigningUses() for myFuncFV();
+
+    syn FFunctionVariable FIdUseExp.myFuncFV() = getCommonAccess().asFAccess().myFuncFV();
+    syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
+
     syn boolean FFunctionVariable.isTrivialInlinable(boolean late, FFunctionCall call) = false;
 
     /**
@@ -1522,7 +1534,9 @@ aspect FunctionInlining {
             if (exp != null) {
                 exp = dynamicFExp(exp.treeCopyNoTransform());
             } else {
-                if (isArray() && !size().isUnknown()) { 
+                if (variability().knownParameterOrLess()) {
+                    exp = ceval().buildLiteral();
+                } else if (isArray() && !size().isUnknown()) { 
                     exp = getArray().buildWithReplacedReferences(fi, this);
                 } else if (type().isRecord()) {
                     exp = dynamicFExp(type().createRecordConstructor(fi.scalarizer(), this));

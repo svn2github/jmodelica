@@ -38,6 +38,9 @@ aspect CCodeGenGlobals {
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                     block.genSetupNodeDecls_C(p, str, indent);
                 }
+                for (FVariable fv : fclass.getGlobalVariables()) {
+                    fv.genGlobalVariableDecl_C(p, str, indent);
+                }
             }
         }
     }
@@ -260,4 +263,77 @@ aspect CCodeGenGlobalsReinit {
     public void FReinit.collectReinits_C(CodePrinter p, Collection<FReinit> res) {
         res.add(this);
     }
+}
+
+aspect CCodeGenGlobalVariables {
+
+    public class CGenerator {
+        public class DAETag_C_set_globals_start extends DAETag {
+            
+            public DAETag_C_set_globals_start(AbstractGenerator myGenerator, FClass fclass) {
+                super("C_set_globals_start", myGenerator, fclass);
+            }
+            
+            
+            public void generate(CodeStream str) {
+                CodePrinter p = ASTNode.printer_C;
+                String indent = "";
+                String next = p.indent(indent);
+                
+                ArrayList<FVariable> globals = new ArrayList<FVariable>();
+                for (FVariable fv : fclass.getGlobalVariables()) {
+                    globals.add(fv);
+                }
+                
+                CodeSplitter<FVariable> splitter = new CodeSplitter<FVariable>(p, str, next, false,
+                        "jmi_set_globals_start_", fclass.myOptions(), globals) {
+                    @Override
+                    public void genDecl(FVariable element) {
+                        element.genGlobalVariableInitDecl_C(p, str, indent);
+                    }
+                    @Override
+                    public void gen(FVariable element) {
+                        element.genGlobalVariableInit_C(p, str, indent);
+                    }
+                    @Override
+                    public void genPre() {
+                        str.print(indent, "JMI_GLOBALS_INIT()\n");
+                    }
+                    @Override
+                    public void genPost() {
+                        str.print(indent, "JMI_GLOBALS_FREE()\n");
+                    }
+                };
+                splitter.genFuncImpls();
+                splitter.genFuncHeads();
+                str.print("int jmi_set_globals_start(jmi_t* jmi) {\n");
+                splitter.printStatusDecl();
+                splitter.genFuncCalls();
+                splitter.printStatusReturn();
+                str.print("}\n");
+            }
+        }
+    }
+
+    public void FVariable.genGlobalVariableDecl_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, type().type_C(p), " ", nameUnderscore(), ";\n");
+    }
+
+    public void FVariable.genGlobalVariableInitDecl_C(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite()) {
+            p.print(getBindingExp(), indent, type(), p.createDeclPrinter(str).forceDynamic());
+        }
+    }
+
+    public void FVariable.genGlobalVariableInit_C(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite()) {
+            p.print(getBindingExp(), indent, type(), p.createInitPrinter(str).forceDynamic());
+            p.printTempInputAssigns(str, indent, getBindingExp());
+        }
+        
+        str.print(indent, FExp.global_C(nameUnderscore()), " = ");
+        p.printIOExec(getBindingExp(), str, indent);
+        str.print(";\n");
+    }
+
 }

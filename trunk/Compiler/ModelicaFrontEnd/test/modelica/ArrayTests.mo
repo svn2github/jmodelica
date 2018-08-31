@@ -8985,22 +8985,44 @@ end ArrayConst2;
 
 
 model ArrayConst3
-	function f
-		input Real i;
-		output Real o;
-	algorithm
-		o := testConst[integer(i)];
-	end f;
-	
-	Real x = f(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Other_ArrayConst3",
-			description="Array constants used with index of discrete variability",
-			flatModel="
+    constant Real[:] c = {2,3};
+
+    function f
+        input Real i;
+        output Real o;
+    algorithm
+        o := c[integer(i)];
+        annotation(Inline=false);
+    end f;
+
+    Real x = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Other_ArrayConst3",
+            description="Array constants used with index of discrete variability",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayTests.Other.ArrayConst3
- constant Real x = 1;
+ constant Real c[1] = 2;
+ constant Real c[2] = 3;
+ Real x;
+package constant
+ constant Real ArrayTests.Other.ArrayConst3.c[2] = {2, 3};
+equation
+ x = ArrayTests.Other.ArrayConst3.f(1);
+
+public
+ function ArrayTests.Other.ArrayConst3.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := ArrayTests.Other.ArrayConst3.c[integer(i)];
+  return;
+ annotation(Inline = false);
+ end ArrayTests.Other.ArrayConst3.f;
+
 end ArrayTests.Other.ArrayConst3;
 ")})));
 end ArrayConst3;

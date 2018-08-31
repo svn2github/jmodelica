@@ -297,6 +297,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->nbr_consec_time_events = 0;
 
     jmi_->dyn_fcn_mem = jmi_dynamic_function_pool_create(JMI_MEMORY_POOL_SIZE);
+    jmi_->dyn_fcn_mem_globals = jmi_dynamic_function_pool_create(JMI_MEMORY_POOL_SIZE);
 
     return 0;
 }
@@ -352,6 +353,7 @@ int jmi_delete(jmi_t* jmi){
 
     jmi_destroy_delay_if(jmi);
     jmi_dynamic_function_pool_destroy(jmi->dyn_fcn_mem);
+    jmi_dynamic_function_pool_destroy(jmi->dyn_fcn_mem_globals);
 
     free(jmi->globals);
 
