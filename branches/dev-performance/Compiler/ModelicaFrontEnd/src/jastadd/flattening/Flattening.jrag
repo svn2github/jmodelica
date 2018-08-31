@@ -1302,7 +1302,7 @@ aspect Flattening {
     public void InstFunctionCall.flattenAssertExternal(Flattener f) {
         if (variability().knownParameterOrLess() && myInstCallable().isExternalFunction()) {
             try {
-                String msg = runtimeErrorString("Structural parameter external function call '"
+                String msg = "Error " + runtimeErrorString("Structural parameter external function call '"
                         + name() + "' did not evaluate to same result as during compilation");
                 CValue cval = ceval();
                 if (cval.hasBuildLiteral()) {
@@ -1316,15 +1316,27 @@ aspect Flattening {
     
     public String ASTNode.runtimeErrorString(String msg) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Error at line ");
+        sb.append("Error ");
+        errorLocation(sb);
+        sb.append("': ");
+        sb.append(msg);
+        return sb.toString().replace("\\", "\\\\");
+    }
+    
+    public String ASTNode.errorLocation() {
+        StringBuilder sb = new StringBuilder();
+        errorLocation(sb);
+        return sb.toString();
+    }
+    
+    public void ASTNode.errorLocation(StringBuilder sb) {
+        sb.append("at line ");
         sb.append(beginLineRecursive());
         sb.append(", column ");
         sb.append(beginColumnRecursive());
         sb.append(", in file '");
-        sb.append(fileName().replace("\\", "\\\\"));
-        sb.append("': ");
-        sb.append(msg);
-        return sb.toString();
+        sb.append(fileName());
+        sb.append("'");
     }
     
     syn boolean ASTNode.externalDependency() {

@@ -994,4 +994,21 @@ model ExternalObjectTests3
     Real x = use_MMOD(obj);
 end ExternalObjectTests3;
 
+model MultiUse1
+    function f1
+        input Real x;
+        output Real y;
+        external "C" y = add(x,1) annotation(Library="addNumbers",
+                                           Include="#include \"addNumbers.h\"");
+    end f1;
+    function f2
+        input Real x;
+        output Real y;
+        external "C" y = add(x,2) annotation(Library="addNumbers",
+                                           Include="#include \"addNumbers.h\"");
+    end f2;
+    
+    Real y = f1(1) + f2(1);
+end MultiUse1;
+
 end ExtFunctionTests;

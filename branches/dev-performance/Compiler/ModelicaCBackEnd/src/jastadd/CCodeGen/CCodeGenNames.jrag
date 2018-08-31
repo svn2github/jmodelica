@@ -64,11 +64,11 @@ aspect CCodeGenNames {
         public String nextTempName_C() {
             return "tmp_" + nextTempNbr_C++;
         }
-        public void setAlias(String key, String val) {
+        public void setAlias(ExternalArgument arg, String val) {
             throw new UnsupportedOperationException();
         }
-        public String alias(String key) {
-            return key;
+        public String alias(ExternalArgument arg) {
+            return null;
         }
         public CodeGenContext createProxy() {
             return new CodeGenContextProxy(this);
@@ -78,18 +78,22 @@ aspect CCodeGenNames {
         }
         private class CodeGenContextProxy extends CodeGenContext {
             private CodeGenContext redirect;
-            private Map<String,String> aliases = new HashMap<String,String>();
+            private Map<ExternalArgument,String> aliases = new HashMap<>();
             public CodeGenContextProxy(CodeGenContext redirect) {
                 this.redirect = redirect;
             }
             public String nextTempName_C() {
                 return redirect.nextTempName_C();
             }
-            public void setAlias(String key, String val) {
-                aliases.put(key,val);
+            public void setAlias(ExternalArgument arg, String val) {
+                aliases.put(arg,val);
             }
-            public String alias(String key) {
-                return aliases.get(key);
+            public String alias(ExternalArgument arg) {
+                String res = aliases.get(arg);
+                if (res == null) {
+                    res = redirect.alias(arg);
+                }
+                return res;
             }
             public Map<String,String> recordChildTempNames() {
                 return redirect.recordChildTempNames();

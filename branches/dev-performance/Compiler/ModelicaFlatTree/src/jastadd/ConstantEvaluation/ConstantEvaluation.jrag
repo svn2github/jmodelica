@@ -1678,7 +1678,7 @@ aspect ConstantEvaluation {
         }
     }
 
-    public CValue FType.zeroCValueScalar()        { return CValue.UNSUPPORTED; }
+    public CValue FType.zeroCValueScalar()        { return CValue.UNKNOWN; }
     public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
     public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
     public CValue FEnumType.zeroCValueScalar()    { return new CValueEnum(this, 1); }
@@ -1835,6 +1835,70 @@ aspect ConstantEvaluation {
         return super.equals(other);
     }
     
+    public abstract boolean CValue.typeMatches(CValue other);
+    
+    public boolean CValueUnknown.typeMatches(CValue other) {
+        return other.isUnknown();
+    }
+    
+    public boolean CValueReal.typeMatches(CValue other) {
+        return other.isReal() || other.isInteger();
+    }
+    
+    public boolean CValueInteger.typeMatches(CValue other) {
+        return other.isReal() || other.isInteger();
+    }
+    
+    public boolean CValueBoolean.typeMatches(CValue other) {
+        return other.isBoolean();
+    }
+    
+    public boolean CValueEnum.typeMatches(CValue other) {
+        return other.isEnum();
+    }
+    
+    public boolean CValueString.typeMatches(CValue other) {
+        return other.isString();
+    }
+    
+    public boolean CValueRecord.typeMatches(CValue other) {
+        if (other instanceof CValueRecord) {
+            CValueRecord o = (CValueRecord) other;
+            if (values.length != o.values.length)
+                return false;
+            for (int i = 0; i < values.length; i++) {
+                if (!values[i].typeMatches(o.values[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean CValueArray.typeMatches(CValue other) {
+        if (other instanceof CValueArray) {
+            CValueArray o = (CValueArray) other;
+            if (values.length != o.values.length)
+                return false;
+            for (int i = 0; i < values.length; i++) {
+                if (!values[i].typeMatches(o.values[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    
+    public boolean CValueExternalObject.typeMatches(CValue other) {
+        throw new UnsupportedOperationException("typeMatches() not implemented for "+getClass().getSimpleName());
+    }
+    public boolean CValuePartialFunction.typeMatches(CValue other) {
+        throw new UnsupportedOperationException("typeMatches() not implemented for "+getClass().getSimpleName());
+    }
+
     /**
      * Modifies <code>this</code> CValue so that components that do not match to
      * <code>other</code> are replaced with <code>CValue.UNKNOWN</code>.
@@ -2326,7 +2390,16 @@ aspect ConstantEvaluation {
                 i = getFArraySubscripts().createIndex();
             }
             if (i != Index.NULL) {
-                return var.inRecord() ? cevalRecordMember(evaluator, this).array().getCell(i) : evaluator.ceval(var, i);
+                if(var.inRecord()) {
+                    CValue cevalRecordMember = cevalRecordMember(evaluator, this);
+                    if (cevalRecordMember.isUnknown()) {
+                        return CValue.UNKNOWN; 
+                    } else {
+                        return cevalRecordMember.array().getCell(i);
+                    }
+                } else {
+                    return evaluator.ceval(var, i);
+                }
             } else {
                 return var.inRecord() ? cevalRecordMember(evaluator, this) : evaluator.ceval(var);
             }
@@ -2346,8 +2419,10 @@ aspect ConstantEvaluation {
         prefix.parent = this;
         FAbstractVariable var = prefix.myFV();
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
+        if (res.isUnknown()) return CValue.UNKNOWN;
         if (prefix.hasFArraySubscripts())
           res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
+        if (res.isUnknown()) return CValue.UNKNOWN;
         return res.record().getMember(last);
     }
 

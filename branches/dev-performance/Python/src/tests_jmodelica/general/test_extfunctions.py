@@ -736,3 +736,15 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.UseCrash"
         fmu_name = compile_fmu(cpath, self.fpath)
         
+class TestMultiUse:
+    @classmethod
+    def setUpClass(self):
+        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+    
+    @testattr(stddist_full = True)
+    def testMultiUse1(self):
+        cpath = "ExtFunctionTests.MultiUse1"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('y'), 5.0)

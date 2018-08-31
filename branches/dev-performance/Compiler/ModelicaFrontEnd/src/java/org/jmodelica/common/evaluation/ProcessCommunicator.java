@@ -70,8 +70,7 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
      * Print <code>val</code>, serialized, to the process
      */
     public void put(V val, T type) throws IOException {
-        // mc.log().debug("ProcessCommunicator WRITE: " + val.toString() + " of type:
-        // "+type.toString());
+//        mc.log().debug("ProcessCommunicator WRITE: " + val.toString() + " of type:" + type.toString());
         val.serialize(out);
         out.flush();
     }
@@ -81,7 +80,7 @@ public class ProcessCommunicator<V extends Value, T extends Type<V>> {
      */
     public V get(T type) throws IOException {
         V val = type.deserialize(this);
-        // mc.log().debug("ProcessCommunicator READ: " + val.toString());
+//        mc.log().debug("ProcessCommunicator READ: " + val.toString());
         return val;
     }
 

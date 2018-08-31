@@ -11,7 +11,6 @@ loadResource on directories now always leads to compile time evaluation of path.
 
 ; Fixed ; Minor ; Compiler ; #5642
 Improved and added tests for SimpleLookup. Now supports Quoted names.
-JavaDoc has also been added.
 
 ; Fixed ; Minor ; Compiler ; #5640 
 Fixed a problem where functions had to restrictive visibility.
