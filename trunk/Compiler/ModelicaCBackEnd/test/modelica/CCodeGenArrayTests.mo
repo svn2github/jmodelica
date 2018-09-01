@@ -17,6 +17,51 @@
 
 package CCodeGenArrayTests
 
+model VectorLength1
+    function f
+        input Real x[:];
+        output Real y;
+      algorithm
+        y := sqrt(x*x);
+        annotation(Inline=false);
+    end f;
+
+    Real y = f({time});
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="VectorLength1",
+        description="",
+        template="
+$C_functions$
+",
+        generatedCode="
+void func_CCodeGenArrayTests_VectorLength1_f_def0(jmi_array_t* x_a, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
+    JMI_DEF(REA, temp_2_v)
+    jmi_real_t i1_0i;
+    jmi_real_t i1_0ie;
+    temp_2_v = 0.0;
+    i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        temp_2_v = temp_2_v + jmi_array_val_1(x_a, i1_0i) * jmi_array_val_1(x_a, i1_0i);
+    }
+    temp_1_v = temp_2_v;
+    y_v = sqrt(temp_1_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenArrayTests_VectorLength1_f_exp0(jmi_array_t* x_a) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenArrayTests_VectorLength1_f_def0(x_a, &y_v);
+    return y_v;
+}
+")})));
+end VectorLength1;
+
 model UnknownSizeInEquation1
     function mysum
         input Real[:] x;
