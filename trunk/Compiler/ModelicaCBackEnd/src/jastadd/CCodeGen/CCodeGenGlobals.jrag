@@ -38,7 +38,7 @@ aspect CCodeGenGlobals {
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                     block.genSetupNodeDecls_C(p, str, indent);
                 }
-                for (FVariable fv : fclass.getGlobalVariables()) {
+                for (FVariable fv : fclass.getFGlobalVariables()) {
                     fv.genGlobalVariableDecl_C(p, str, indent);
                 }
             }
@@ -281,7 +281,7 @@ aspect CCodeGenGlobalVariables {
                 String next = p.indent(indent);
                 
                 ArrayList<FVariable> globals = new ArrayList<FVariable>();
-                for (FVariable fv : fclass.getGlobalVariables()) {
+                for (FVariable fv : fclass.getFGlobalVariables()) {
                     globals.add(fv);
                 }
                 

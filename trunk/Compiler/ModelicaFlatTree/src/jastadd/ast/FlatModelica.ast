@@ -30,7 +30,7 @@ FlatRoot : Root ::= FClass;
 FClass : BaseNode ::= FAccess 
                       FVariable* 
                       AliasVariable:FVariable*
-                      GlobalVariable:FVariable*
+                      FGlobalVariable*
                       FInitialEquation:FAbstractEquation*
                       ParameterEquation:FAbstractEquation*
                       FAbstractEquation*

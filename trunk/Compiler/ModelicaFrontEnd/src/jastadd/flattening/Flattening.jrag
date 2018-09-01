@@ -129,7 +129,7 @@ aspect Flattening {
      */ 
     public class Flattener {
         private FClass fc;
-        private List<FVariable>         globalVariables = new List<FVariable>();
+        private List<FGlobalVariable>   globalVariables = new List<FGlobalVariable>();
         private List<FVariable>         variables       = new List<FVariable>();
         private List<FAbstractEquation> normalEqns      = new List<FAbstractEquation>();
         private List<FAbstractEquation> initialEqns     = new List<FAbstractEquation>();
@@ -175,7 +175,7 @@ aspect Flattening {
             return parameterEqns;
         }
         
-        public List<FVariable> getGlobalVariables() {
+        public List<FGlobalVariable> getFGlobalVariables() {
             return globalVariables;
         }
         
@@ -199,41 +199,41 @@ aspect Flattening {
             return derivedTypes;
         }
         
-        public List<FVariable> addGlobalVariable(FVariable fvariable) {
+        public void addGlobalVariable(FVariable fvariable) {
             addFlattened(fvariable.name());
-            return globalVariables.add(fvariable);
+            globalVariables.add((FGlobalVariable)fvariable);
         }
         
-        public List<FVariable> addFVariable(FVariable fvariable) {
-            return variables.add(fvariable);
+        public void addFVariable(FVariable fvariable) {
+            variables.add(fvariable);
         }
         
-        public List<FAbstractEquation> addNormalEquation(FAbstractEquation fae) {
-            return normalEqns.add(fae);
+        public void addNormalEquation(FAbstractEquation fae) {
+            normalEqns.add(fae);
         }
         
-         public List<FAbstractEquation> addParameterEquation(FAbstractEquation fae) {
-            return parameterEqns.add(fae);
+         public void addParameterEquation(FAbstractEquation fae) {
+            parameterEqns.add(fae);
         }
         
-        public List<FFunctionDecl> addFFunctionDecl(FFunctionDecl ffd) {
+        public void addFFunctionDecl(FFunctionDecl ffd) {
             addFlattened(ffd.name());
-            return functionDecls.add(ffd);
+            functionDecls.add(ffd);
         }
         
-        public List<FRecordDecl> addFRecordDecl(FRecordDecl frd) {
+        public void addFRecordDecl(FRecordDecl frd) {
             addFlattened(frd.name());
-            return recordDecls.add(frd);
+            recordDecls.add(frd);
         }
         
-        public List<FEnumDecl> addFEnumDecl(FEnumDecl fed) {
+        public void addFEnumDecl(FEnumDecl fed) {
             addFlattened(fed.name());
-            return enumDecls.add(fed);
+            enumDecls.add(fed);
         }
         
-        public List<FDerivedType> addFDerivedType(FDerivedType fdt) {
+        public void addFDerivedType(FDerivedType fdt) {
             addFlattened(fdt.name());
-            return derivedTypes.add(fdt);
+            derivedTypes.add(fdt);
         }
 
         private void addFlattened(String name) {
@@ -262,7 +262,7 @@ aspect Flattening {
     
     // refined in OptimicaFlattening
     public void FClass.update(Flattener f) {
-        setGlobalVariableList(f.getGlobalVariables());
+        setFGlobalVariableList(f.getFGlobalVariables());
         setFVariableList(f.getFVariables());
         setFAbstractEquationList(f.getNormalEquations());
         setFInitialEquationList(f.getInitialEquations());

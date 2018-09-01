@@ -5019,8 +5019,6 @@ fclass FunctionInlining.GlobalConst1
  constant Real c[1] = 2;
  constant Real c[2] = 3;
  Real x;
-package constant
- constant Real FunctionInlining.GlobalConst1.c[2] = {2, 3};
 equation
  x = 2.0;
 end FunctionInlining.GlobalConst1;
@@ -5052,21 +5050,9 @@ model GlobalConst2
 fclass FunctionInlining.GlobalConst2
  parameter Integer temp_2;
  parameter Real y.x;
-package constant
- constant FunctionInlining.GlobalConst2.R2 FunctionInlining.GlobalConst2.f.a = FunctionInlining.GlobalConst2.R2({FunctionInlining.GlobalConst2.R1(2), FunctionInlining.GlobalConst2.R1(3)});
 parameter equation
  temp_2 = integer(time);
  y.x = ({2, 3})[temp_2];
-
-public
- record FunctionInlining.GlobalConst2.R1
-  parameter Real x;
- end FunctionInlining.GlobalConst2.R1;
-
- record FunctionInlining.GlobalConst2.R2
-  parameter FunctionInlining.GlobalConst2.R1 r1[2];
- end FunctionInlining.GlobalConst2.R2;
-
 end FunctionInlining.GlobalConst2;
 ")})));
 end GlobalConst2;

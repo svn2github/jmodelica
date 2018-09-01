@@ -110,7 +110,7 @@ aspect FlatNameBinding {
 	}
 	
     syn lazy FlatVariableMap FClass.variablesMap()        = new FlatVariableMap(getFVariables(), getAliasVariables());
-    syn lazy FlatVariableMap FClass.globalVariablesMap() = new FlatVariableMap(getGlobalVariables());
+    syn lazy FlatVariableMap FClass.globalVariablesMap() = new FlatVariableMap(getFGlobalVariables());
     syn lazy FlatVariableMap FFunctionDecl.variablesMap() = new FlatVariableMap(getFFunctionVariables());
     syn lazy FlatVariableMap FRecordDecl.variablesMap()   = new FlatVariableMap(getFVariables());
 
