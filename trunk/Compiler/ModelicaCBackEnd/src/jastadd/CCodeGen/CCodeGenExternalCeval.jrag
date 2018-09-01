@@ -158,7 +158,7 @@ aspect CCodeGenExternalCeval {
         @Override
         protected void printExt(FExternalObjectType type) {
             FExternalStmt stmt = type.myDestructorStmt();
-            type.myConstructorStmt().setExternalArgumentAliases(cgc, name(), acquireTemp(name()));
+            cgc.setAlias(stmt.varsToSerialize().iterator().next(), name());
             stmt.setCodeGenContext(cgc);
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);

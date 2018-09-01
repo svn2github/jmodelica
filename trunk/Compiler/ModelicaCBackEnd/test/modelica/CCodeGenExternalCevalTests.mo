@@ -564,9 +564,9 @@ $ECE_free$
         my_constructor3(tmp_2_arg0, tmp_2_arg1->var, &o3_v);
 
 ---
-        destructor(o1_v);
+        destructor(tmp_2_arg0);
         for (tmp_7 = 1; tmp_7 < tmp_7_max; tmp_7++) {
-            destructor(o2_v);
+            destructor(jmi_array_ref_1(tmp_2_arg1, tmp_7));
         }
 
 ---
@@ -1109,23 +1109,24 @@ model RecordExternalObject
         extends ExternalObject;
         function constructor
             input R1 r1;
-            output EO eo;
+            output EO eo_c;
             external;
         end constructor;
         function destructor
-            input EO eo;
+            input EO eo_d;
             external;
         end destructor;
     end EO;
     
     function f
-        input EO eo;
+        input EO eo_1_f;
+        input EO eo_2_f;
         output Real y;
         external;
     end f;
     
-    parameter EO eo = EO(R1(R2(3)));
-    Real y = f(eo);
+    parameter EO eo_m = EO(R1(R2(3)));
+    Real y = f(eo_m, eo_m);
     
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -1176,31 +1177,40 @@ $ECE_free$
     };
 
 
-        JMI_DEF(EXO, eo_v)
+        JMI_DEF(EXO, eo_1_f_v)
+        JMI_DEF(EXO, eo_2_f_v)
 
 ---
         JMI_RECORD_STATIC(R1_1_r_ext, tmp_2)
         extern void* constructor(R1_1_r*);
         JMI_RECORD_STATIC(R1_1_r, tmp_3_arg1)
         JMI_RECORD_STATIC(R2_0_r, tmp_4)
+        JMI_RECORD_STATIC(R1_1_r_ext, tmp_2)
+        extern void* constructor(R1_1_r*);
+        JMI_RECORD_STATIC(R1_1_r, tmp_6_arg1)
+        JMI_RECORD_STATIC(R2_0_r, tmp_7)
 
 ---
         JMCEVAL_parse(Real, tmp_4->x);
         tmp_3_arg1->r2 = tmp_4;
         tmp_2->r2.x = (double)tmp_3_arg1->r2->x;
-        eo_v = constructor(tmp_2);
+        eo_1_f_v = constructor(tmp_2);
+        JMCEVAL_parse(Real, tmp_7->x);
+        tmp_6_arg1->r2 = tmp_7;
+        tmp_2->r2.x = (double)tmp_6_arg1->r2->x;
+        eo_2_f_v = constructor(tmp_2);
 
 ---
 
 ---
         JMI_DEF(REA, y_v)
-        extern double f(void*);
+        extern double f(void*, void*);
 
 ---
         JMCEVAL_parse(Real, y_v);
 
 ---
-            y_v = f(eo_v);
+            y_v = f(eo_1_f_v, eo_2_f_v);
             JMCEVAL_check(\"DONE\");
             JMCEVAL_print(Real, y_v);
 
@@ -1208,7 +1218,8 @@ $ECE_free$
 ---
 
 ---
-        destructor(eo_v);
+        destructor(eo_1_f_v);
+        destructor(eo_2_f_v);
 
 ")})));
 end RecordExternalObject;
