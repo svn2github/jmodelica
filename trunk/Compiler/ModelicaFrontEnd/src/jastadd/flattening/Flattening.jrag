@@ -1784,6 +1784,8 @@ aspect Flattening {
         try {
             if (variability().knownParameterOrLess()) {
                 CValue cval = ceval();
+                FExp t = dynamicFExp(cval.buildInstLiteral());
+                t.flattenUsedFuncsAndEnums(f);
                 if (cval.hasBuildLiteral()) {
                     return cval.buildLiteral();
                 }

@@ -330,11 +330,11 @@ aspect CCodeGenGlobalVariables {
         super.genGlobalVariableInit_C(p, str, indent);
         
         String next = p.indent(indent);
-        str.print(indent, type().nameArray_C(p), "* jmi_global_", tempName_C(), "(jmi_t* jmi) {\n");
+        str.print(indent, type().nameScalar_C(p), "* jmi_global_", tempName_C(), "(jmi_t* jmi) {\n");
         str.print(next, "JMI_DYNAMIC_INIT()\n");
         str.print(next, "JMI_GLOBALS_INIT()\n");
         
-        String typeName = type().nameScalar_C(p, false);
+        String typeName = type().nameScalar_C(p);
         str.print(next, typeName, "* ", tempName_C(), ";\n");
         str.print(next, tempName_C(), " = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(", typeName, "), TRUE);\n");
         
