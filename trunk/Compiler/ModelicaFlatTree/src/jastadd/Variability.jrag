@@ -546,7 +546,7 @@ aspect Variability {
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.DISCRETE);
 
     syn TypePrefixVariability CommonAccess.variability();
-    eq FAccess.variability() = myTopFV().variability();
+    eq FAccess.variability() = myTopFV().variability().combine(indexVariability());
 
     syn TypePrefixVariability FSubscript.variability() = Variability.CONSTANT;
 	eq FExpSubscript.variability() = getFExp().variability();
