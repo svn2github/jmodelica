@@ -24,13 +24,13 @@ aspect FlatNameBinding {
     eq FAbstractDerExp.myFV()                   = myDerFV(order());
     syn FAbstractVariable FReinit.myFV()        = getVar().asFAccessExp().myFV();
 
+    syn FAbstractVariable      FAccess    .myTopFV() = myFV();
+    syn lazy FAbstractVariable FAccessFull.myTopFV() = getFAccessPart(0).myFV();
+
     syn FAbstractVariable FAccessExp.myDerFV(int index) = getFAccess().myDerFV(index);
     syn FAbstractVariable FAccess.myDerFV(int index)    = lookupFV(derName(index));
 
     syn FAbstractVariable FAccess.myPreFV() = lookupFV(preName());
-
-    syn FFunctionVariable FAccessExp.myFuncFV() = getFAccess().myFuncFV();
-    syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
     syn CommonVariableDecl CommonAccessExp.myCommonVarDecl();
     eq  FAccessExp.myCommonVarDecl()    = getFAccess().myFV();
@@ -69,8 +69,15 @@ aspect FlatNameBinding {
         if (res == null) {
 			res = variablesMap().lookup(name);
         }
+        if (res == null) {
+            res = lookupGlobalVariable(name);
+        }
 		return nullUnknown(res);
 	}
+
+    inh FAbstractVariable FFunctionDecl.lookupGlobalVariable(String name);
+    eq Root.getChild().lookupGlobalVariable(String name)   = null;
+    eq FClass.getChild().lookupGlobalVariable(String name) = globalVariablesMap().lookup(name);
 
 	private FlatVariableMap FFunctionDecl.tempLookupMap = null;
 
@@ -100,6 +107,7 @@ aspect FlatNameBinding {
 	}
 	
     syn lazy FlatVariableMap FClass.variablesMap()        = new FlatVariableMap(getFVariables(), getAliasVariables());
+    syn lazy FlatVariableMap FClass.globalVariablesMap() = new FlatVariableMap(getFGlobalVariables());
     syn lazy FlatVariableMap FFunctionDecl.variablesMap() = new FlatVariableMap(getFFunctionVariables());
     syn lazy FlatVariableMap FRecordDecl.variablesMap()   = new FlatVariableMap(getFVariables());
 
@@ -272,6 +280,7 @@ aspect FlatFunctionBinding {
 aspect FlatRecordBinding {
 	
 	syn lazy FRecordDecl FAbstractVariable.myFRecordDecl() = null;
+    eq FGlobalVariable.myFRecordDecl()   = type().myFRecordDecl();
 	eq FRecordVariable.myFRecordDecl()   = lookupFRec(getRecord().name());
 	eq FFunctionVariable.myFRecordDecl() = type().myFRecordDecl();
     eq FVariable.myFRecordDecl() = containingRecordDecl();

@@ -472,6 +472,14 @@ class TestCBasic:
         resConst = model.simulate()
         nose.tools.assert_almost_equal(resConst.final('a1'), 10*3.14)
 
+    @testattr(stddist_full = True)
+    def testCEvalPackageConstant(self):
+        cpath = "ExtFunctionTests.CEval.C.PackageConstantTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('x[2]'), 4)
+
 class TestFortranBasic:
     '''
     Test basic external fortran functions.

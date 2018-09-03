@@ -2033,6 +2033,7 @@ model UnmodifiableComponent5
         output Real x;
     algorithm
         x := f2(r[i]);
+        annotation(Inline=false);
     end f1;
     
     function f2
@@ -2058,6 +2059,8 @@ fclass RecordTests.UnmodifiableComponent5
  constant Real r[2].x = 2;
  Real w;
  discrete Integer i;
+package constant
+ constant RecordTests.UnmodifiableComponent5.R RecordTests.UnmodifiableComponent5.r[2] = {RecordTests.UnmodifiableComponent5.R(1), RecordTests.UnmodifiableComponent5.R(2)};
 initial equation
  pre(i) = 0;
 equation
@@ -2066,15 +2069,12 @@ equation
 
 public
  function RecordTests.UnmodifiableComponent5.f1
-  RecordTests.UnmodifiableComponent5.R[:] r;
   input Integer i;
   output Real x;
  algorithm
-  init r as RecordTests.UnmodifiableComponent5.R[2];
-  r[1].x := 1;
-  r[2].x := 2;
-  x := RecordTests.UnmodifiableComponent5.f2(r[i]);
+  x := RecordTests.UnmodifiableComponent5.f2(RecordTests.UnmodifiableComponent5.r[i]);
   return;
+ annotation(Inline = false);
  end RecordTests.UnmodifiableComponent5.f1;
 
  function RecordTests.UnmodifiableComponent5.f2

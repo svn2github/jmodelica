@@ -467,6 +467,7 @@ struct jmi_t {
     jmi_chattering_t* chattering;        /**< \brief Contains chattering information, used for logging */
 
     jmi_dynamic_function_memory_t* dyn_fcn_mem;
+    jmi_dynamic_function_memory_t* dyn_fcn_mem_globals;
     
     void* globals;                       /**< \brief Global temporaries used in generated code */
 };
@@ -599,6 +600,8 @@ int jmi_init_eval_parameters(jmi_t* jmi);
  * @param jmi A jmi_t struct.
  */
 int jmi_set_start_values(jmi_t *jmi);
+
+int jmi_set_globals_start(jmi_t *jmi);
 
 /* Initialize delay interface 
  * Called when initializing jmi struct */

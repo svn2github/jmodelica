@@ -226,3 +226,18 @@ class TestFuncCallInputOutputArray1(SimulationTest):
         self.assert_end_value('p1[2]', 3)
         self.assert_end_value('p2[1]', 3)
         self.assert_end_value('p2[2]', 3)
+
+class TestGlobalConstant1(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.GlobalConstant1')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+        self.run()
+        
+    @testattr(stddist_full = True)
+    def test_GlobalConstant1(self):
+        self.assert_end_value('y', 14)

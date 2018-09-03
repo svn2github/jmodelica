@@ -2688,7 +2688,7 @@ aspect ConstantEvaluation {
                 FExp bexp = getBindingFExp();
                 if (!bexp.type().isUnknown())
                     val = bexp.ceval(evaluator, i);
-            } else if (!func && !inRecordDecl()) {
+            } else if ((!func && !inRecordDecl()) || isRecord()) {
                 val = cevalNoBExp(evaluator, i);
             }
             if (!func) {

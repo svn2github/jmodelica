@@ -1710,16 +1710,15 @@ model ConstantLookup32
 fclass NameTests.ConstantLookup32
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup32.f(j);
+package constant
+ constant NameTests.ConstantLookup32.A NameTests.ConstantLookup32.C.d[2] = {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
 
 public
  function NameTests.ConstantLookup32.f
-  NameTests.ConstantLookup32.A[:] d;
   input Integer i;
   output Real x;
  algorithm
-  init d as NameTests.ConstantLookup32.A[2];
-  d := {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
-  x := d[i].b;
+  x := NameTests.ConstantLookup32.C.d[i].b;
   return;
  end NameTests.ConstantLookup32.f;
 
@@ -1768,16 +1767,15 @@ model ConstantLookup33
 fclass NameTests.ConstantLookup33
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup33.f(j);
+package constant
+ constant NameTests.ConstantLookup33.D.A NameTests.ConstantLookup33.C.d[2] = {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
 
 public
  function NameTests.ConstantLookup33.f
-  NameTests.ConstantLookup33.D.A[:] d;
   input Integer i;
   output Real x;
  algorithm
-  init d as NameTests.ConstantLookup33.D.A[2];
-  d := {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
-  x := d[i].b;
+  x := NameTests.ConstantLookup33.C.d[i].b;
   return;
  end NameTests.ConstantLookup33.f;
 
@@ -1804,6 +1802,7 @@ model ConstantLookup34
         output Real x;
     algorithm
         x := A.x[i].y[i];
+        annotation(Inline=false);
     end f;
     
     parameter Integer j = 1;
@@ -1817,22 +1816,19 @@ model ConstantLookup34
 fclass NameTests.ConstantLookup34
  parameter Integer j = 1 /* 1 */;
  parameter Real z;
+package constant
+ constant NameTests.ConstantLookup34.A.B NameTests.ConstantLookup34.A.x[2] = {NameTests.ConstantLookup34.A.B({1, 2}), NameTests.ConstantLookup34.A.B({3, 4})};
 parameter equation
  z = NameTests.ConstantLookup34.f(j);
 
 public
  function NameTests.ConstantLookup34.f
-  NameTests.ConstantLookup34.A.B[:] temp_1;
   input Integer i;
   output Real x;
  algorithm
-  init temp_1 as NameTests.ConstantLookup34.A.B[2];
-  temp_1[1].y[1] := 1;
-  temp_1[1].y[2] := 2;
-  temp_1[2].y[1] := 3;
-  temp_1[2].y[2] := 4;
-  x := temp_1[i].y[i];
+  x := NameTests.ConstantLookup34.A.x[i].y[i];
   return;
+ annotation(Inline = false);
  end NameTests.ConstantLookup34.f;
 
  record NameTests.ConstantLookup34.A.B
@@ -1902,20 +1898,18 @@ model ConstantLookup35
 fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
  parameter Real b.z;
+package constant
+ constant Real NameTests.ConstantLookup35.L.a[2] = {1, 2};
 parameter equation
  b.z = NameTests.ConstantLookup35.J.f1(b.j);
 
 public
  function NameTests.ConstantLookup35.J.f1
-  Real[:] a;
   input Integer i;
   output Real x;
   Real y;
  algorithm
-  init a as Real[2];
-  a[1] := 1;
-  a[2] := 2;
-  y := a[i];
+  y := NameTests.ConstantLookup35.L.a[i];
   x := y;
   return;
  end NameTests.ConstantLookup35.J.f1;
@@ -1937,6 +1931,7 @@ model ConstantLookup36
 		constant B[2] a = { B({1,2}), B({3,4}) };
     algorithm
         x := a[i].b[i];
+        annotation(Inline=false);
     end f;
     
     parameter Integer j = 1;
@@ -1950,22 +1945,19 @@ model ConstantLookup36
 fclass NameTests.ConstantLookup36
  parameter Integer j = 1 /* 1 */;
  parameter Real z;
+package constant
+ constant NameTests.ConstantLookup36.B NameTests.ConstantLookup36.f.a[2] = {NameTests.ConstantLookup36.B({1, 2}), NameTests.ConstantLookup36.B({3, 4})};
 parameter equation
  z = NameTests.ConstantLookup36.f(j);
 
 public
  function NameTests.ConstantLookup36.f
-  NameTests.ConstantLookup36.B[:] a;
   input Integer i;
   output Real x;
  algorithm
-  init a as NameTests.ConstantLookup36.B[2];
-  a[1].b[1] := 1;
-  a[1].b[2] := 2;
-  a[2].b[1] := 3;
-  a[2].b[2] := 4;
-  x := a[i].b[i];
+  x := NameTests.ConstantLookup36.f.a[i].b[i];
   return;
+ annotation(Inline = false);
  end NameTests.ConstantLookup36.f;
 
  record NameTests.ConstantLookup36.B

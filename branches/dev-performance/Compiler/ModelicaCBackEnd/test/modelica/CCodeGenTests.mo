@@ -5345,53 +5345,6 @@ jmi_real_t func_CCodeGenTests_CUnknownArray11_f_exp0() {
 ")})));
 end CUnknownArray11;
 
-model CUnknownArray12
-    record R
-        Real[:] a;
-    end R;
-    
-    function f
-        input Integer i;
-        constant R[:] c = {R(1:2)};
-        output Real y = c[i].a[1];
-        algorithm
-    end f;
-    
-    Real x = f(1);
-    
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="CUnknownArray12",
-        description="Sorted initialization",
-        variability_propagation=false,
-        inline_functions="none",
-        template="$C_functions$",
-        generatedCode="
-void func_CCodeGenTests_CUnknownArray12_f_def0(jmi_real_t i_v, jmi_real_t* y_o) {
-    JMI_DYNAMIC_INIT()
-    JMI_ARR(STAT, R_0_r, R_0_ra, c_a, 1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_DEF(REA, y_v)
-    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, c_a, 1, 1, 1)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-    jmi_array_rec_1(c_a, 1)->a = tmp_1;
-    jmi_array_ref_1(jmi_array_rec_1(c_a, 1)->a, 1) = 1;
-    jmi_array_ref_1(jmi_array_rec_1(c_a, 1)->a, 2) = 2;
-    y_v = jmi_array_val_1(jmi_array_rec_1(c_a, i_v)->a, 1);
-    JMI_RET(GEN, y_o, y_v)
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_real_t func_CCodeGenTests_CUnknownArray12_f_exp0(jmi_real_t i_v) {
-    JMI_DEF(REA, y_v)
-    func_CCodeGenTests_CUnknownArray12_f_def0(i_v, &y_v);
-    return y_v;
-}
-
-")})));
-end CUnknownArray12;
-
 model CUnknownArray13
     function f
         input Real[:] x;

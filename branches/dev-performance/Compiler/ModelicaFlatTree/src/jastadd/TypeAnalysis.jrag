@@ -29,6 +29,7 @@ import org.jmodelica.util.collections.ParallelIterable;
 aspect FlatTypeAnalysis {
 
     syn lazy FType FAbstractVariable.type();
+    eq FGlobalVariable.type()           = getFType();
     eq FRealVariable.type()             = fRealType(size());
     eq FIntegerVariable.type()          = fIntegerType(size());
     eq FBooleanVariable.type()          = fBooleanType(size());

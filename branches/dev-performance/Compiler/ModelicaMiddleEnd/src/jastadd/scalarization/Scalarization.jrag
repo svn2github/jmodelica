@@ -1076,7 +1076,7 @@ aspect Scalarization {
       if (indexNames != null) {
           access = access.copyAndAddFas(createIndexNameFas());
       }
-      access = access.asFAccessFull().copyAndAppend(suffix);
+      access = access.asFAccessFull().treeCopy().append(suffix);
       access.scalarized = false;
       FExp res = createNode(access);
       res = dynamicFExp(res).scalarize(s);

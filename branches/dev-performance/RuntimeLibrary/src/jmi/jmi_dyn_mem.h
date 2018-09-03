@@ -48,6 +48,15 @@ typedef struct jmi_local_dynamic_function_memory_t {
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() jmi_dynamic_function_free(&dyn_mem);
 
+/* Repoint to a persistent memory pool, used for functions that set up memory that should not
+   be freed when exiting function. */
+#define JMI_GLOBALS_INIT() \
+    dyn_mem.mem = jmi->dyn_fcn_mem_globals;
+
+/* Reset the pool pointer, avoiding freeing of the memory in the persistent pool */
+#define JMI_GLOBALS_FREE() \
+    dyn_mem.mem = NULL;
+
 /**
  * \brief Retrieves the memory pool from the jmi struct
  *
