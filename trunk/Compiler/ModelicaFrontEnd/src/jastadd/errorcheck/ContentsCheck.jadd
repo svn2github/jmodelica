@@ -793,9 +793,7 @@ aspect ContentCheck {
     }
     
     syn boolean FType.externalValid() = externalValid(false);
-    public abstract boolean FType.externalValid(boolean rec);
-    syn boolean FArrayType.externalValid(boolean rec) = getFPrimitiveType().externalValid(rec);
-    syn boolean FCellType.externalValid(boolean rec)  = false;
+    syn boolean FType.externalValid(boolean rec)      = false;
     eq FExternalObjectType.externalValid(boolean rec) = !rec || !isArray();
     eq FPrimitiveType.externalValid(boolean rec)      = !rec || !isArray();
     eq FRecordType.externalValid(boolean rec) {

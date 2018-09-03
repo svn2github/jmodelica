@@ -1692,11 +1692,10 @@ aspect FunctionInlining {
      */
     public FType FType.copyAndReplaceReferences(AbstractFunctionInliner fi) {
         FType res = fullCopy();
-        res.setParent(parent);
-        return (FType) res.replaceReferences(fi);
+        return res.replaceReferences(fi);
     }
     
-    public FType FCellType.replaceReferences(AbstractFunctionInliner fi) {
+    public FType FType.replaceReferences(AbstractFunctionInliner fi) {
         setSize(getSize().replaceReferences(fi, this));
         return this;
     }

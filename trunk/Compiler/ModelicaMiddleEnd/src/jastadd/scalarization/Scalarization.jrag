@@ -202,12 +202,12 @@ aspect Scalarization {
                         FFunctionVariable v = type.isArray() ?
                                 new FFunctionArray(type, name) :
                                 new FFunctionVariable(type, name);
-                        add(v);
                         if (type.isArray()) {
                             FInitArrayStmt stmt = new FInitArrayStmt(new FIdUseExp(name));
                             add(stmt);
                             type.scalarizeInitArray(this, stmt);
                         }
+                        add(v);
                     } else {
                         super.addTempVar(type, name);
                     }
@@ -1788,7 +1788,7 @@ aspect Scalarization {
 
     @Override
     public FType FCellType.scalarize(Scalarizer s, FExp context) {
-        FCellType res = treeCopy();
+        FType res = treeCopy();
         res.scalarizeTypeSizes(s, context);
         return res;
     }
@@ -1834,23 +1834,15 @@ aspect Scalarization {
         return res;
     }
 
-    public abstract void FType.scalarizeTypeSizes(Scalarizer s, FExp context);
-
-    @Override
-    public void FArrayType.scalarizeTypeSizes(Scalarizer s, FExp context) {
-        scalarizeFExps(s);
-    }
-
-    private void FArrayType.scalarizeFExps(Scalarizer s) {
-        for (int i = 0; i < getNumFExp(); i++) {
-            getFExp(i).createArrayTemporaries(s);
-            setFExp(getFExp(i).scalarize(s), i);
+    public void ASTNode.scalarizeTypeSizes(Scalarizer s, FExp context) {
+        for (ASTNode n : this) {
+            n.scalarizeTypeSizes(s, context);
         }
     }
-
-    @Override
-    public void FCellType.scalarizeTypeSizes(Scalarizer s, FExp context) {
+    
+    public void FType.scalarizeTypeSizes(Scalarizer s, FExp context) {
         setSize(getSize().scalarize(s, context));
+        super.scalarizeTypeSizes(s, context);
     }
     
     public Size Size.scalarize(Scalarizer s, FExp context) {

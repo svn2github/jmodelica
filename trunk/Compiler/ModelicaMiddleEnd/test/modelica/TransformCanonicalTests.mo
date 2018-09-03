@@ -8122,11 +8122,11 @@ model RangeInSumInSum
 	n = F(2, {0,3}, {1,2,time}, {1,2,time});
 	
 	
-annotation(__JModelica(UnitTesting(tests={
-    TransformCanonicalTestCase(
-        name="RangeBugTests_RangeInSumInSum",
-        description="Scalarization of range exp in a Sum",
-        flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RangeInSumInSum",
+            description="Scalarization of range exp in a Sum",
+            flatModel="
 fclass TransformCanonicalTests.RangeBugTests.RangeInSumInSum
  Real n;
 equation
@@ -8140,9 +8140,9 @@ public
   input Real[:] vf;
   output Real n;
   Real temp_1;
-  Real[:] temp_2;
   Integer temp_3;
   Integer temp_4;
+  Real[:] temp_2;
   Integer temp_5;
   Integer temp_6;
  algorithm
