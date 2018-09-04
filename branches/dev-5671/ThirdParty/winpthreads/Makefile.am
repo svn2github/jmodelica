@@ -18,7 +18,7 @@ $(WINPTHREADS_DIR64):
 	cp -r $(abs_top_srcdir)/ThirdParty/winpthreads/winpthreads/* $(abs_builddir)/$(WINPTHREADS_DIR64)/
 
 all-local: $(WINPTHREADS_DIR) $(WINPTHREADS_DIR64)
-	cd $(WINPTHREADS_DIR) && ./configure && make EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR= && make EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR=
+	cd $(WINPTHREADS_DIR) && ./configure && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR=
 	cd $(WINPTHREADS_DIR64) && ./configure && make $(AM_MAKEFLAGS) DESTDIR= && make $(AM_MAKEFLAGS) DESTDIR=
 
 else !JM_WIN64
@@ -26,7 +26,7 @@ else !JM_WIN64
 all-local: $(WINPTHREADS_DIR)
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cd $(WINPTHREADS_DIR) && make EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR= && make EXTRA_CFLAGS=-m32 $(AM_MAKEFLAGS) DESTDIR= ;; \
+	cd $(WINPTHREADS_DIR) && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= ;; \
 	*-apple*) \
 	cd $(WINPTHREADS_DIR) && make $(AM_MAKEFLAGS) DESTDIR= && make $(AM_MAKEFLAGS) DESTDIR= ;; \
 	*) \
