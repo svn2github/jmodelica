@@ -16,7 +16,7 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary Python
+SUBDIRS = ThirdParty/winpthreads ThirdParty/SuperLU ThirdParty/Sundials ThirdParty/Minpack ThirdParty/Blas ThirdParty/Lapack ThirdParty/MSL external/FMILibrary RuntimeLibrary Python
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -506,10 +506,13 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/Makefiles
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
 	case $(build) in \
-	*-cygwin*) \
-	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
-	*-mingw*) \
-	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	*-cygwin*|*-mingw*) \
+	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile && \
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/include && \
+	cp $(abs_builddir)/winpthreads_build/COPYING $(DESTDIR)$(prefix)/ThirdParty/winpthreads && \
+	cp $(abs_builddir)/winpthreads_build/.libs/libwinpthread.a $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
+	cp $(abs_builddir)/winpthreads_build/include/*.h $(DESTDIR)$(prefix)/ThirdParty/winpthreads/include ;; \
 	*-apple*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	*) \
@@ -535,6 +538,8 @@ endif
 if JM_WIN64
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
 	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads64
+	cp $(abs_builddir)/winpthreads_build64/.libs/libwinpthread.a $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads64
 endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
