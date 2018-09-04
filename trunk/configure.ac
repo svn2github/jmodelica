@@ -477,6 +477,7 @@ AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
+ ThirdParty/winpthreads/Makefile
  ThirdParty/SuperLU/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
