@@ -546,7 +546,18 @@ aspect Variability {
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.DISCRETE);
 
     syn TypePrefixVariability CommonAccess.variability();
-    eq FAccess.variability() = myTopFV().variability().combine(indexVariability());
+    eq FAccess.variability()     = myFV()   .variability()                   .combine(indexVariability());
+    eq FAccessFull.variability() = myTopFV().variabilityHierarchical(this, 1).combine(indexVariability());
+
+    syn TypePrefixVariability FAbstractVariable.variabilityHierarchical(FAccessFull name, int i) {
+        TypePrefixVariability res = variability();
+        if (i < name.getNumFAccessPart()) {
+            FAccessPart part = name.getFAccessPart(i);
+            res = res.combine().combineDown(myFRecordDecl().lookupFV(part.getName()).variabilityHierarchical(name, i + 1));
+        }
+        return res;
+    }
+    eq FFunctionVariable.variabilityHierarchical(FAccessFull name, int i) = variability();
 
     syn TypePrefixVariability FSubscript.variability() = Variability.CONSTANT;
 	eq FExpSubscript.variability() = getFExp().variability();
