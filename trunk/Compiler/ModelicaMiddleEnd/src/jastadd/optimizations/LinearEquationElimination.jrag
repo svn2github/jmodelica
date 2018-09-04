@@ -40,18 +40,15 @@ aspect eliminateLinearEquations {
             public void perform() {
                 ArrayList<FAbstractEquation> equations = new ArrayList<FAbstractEquation>();
                 for (FAbstractEquation faq : getFAbstractEquations()) {
-                    equations.add(faq);
+                    if (faq.isSimpleLinear()) {
+                        equations.add(faq);
+                    }
                 }
 
                 Set<FAbstractEquation> modified = new HashSet<FAbstractEquation>();
-                Map<FAbstractEquation, Map<String, Integer>> equationMap =
-                        new LinkedHashMap<FAbstractEquation, Map<String, Integer>>();
+                Map<FAbstractEquation, Map<String, Integer>> equationMap = new LinkedHashMap<>();
                 for (int i = 0; i < equations.size(); ++i) {
                     FAbstractEquation src = equations.get(i);
-
-                    if (!src.isSimpleLinear()) {
-                        continue;
-                    }
 
                     Map<String, Integer> srcCoeff = src.coefficientMap();
                     if (hasSuperfluousTerms(srcCoeff)) {
@@ -64,7 +61,7 @@ aspect eliminateLinearEquations {
                     for (int j = i + 1; j < equations.size(); ++j) {
                         FAbstractEquation dest = equations.get(j);
 
-                        if (modified.contains(dest) || !dest.isSimpleLinear()) {
+                        if (modified.contains(dest)) {
                             continue;
                         }
                         
@@ -135,14 +132,11 @@ aspect eliminateLinearEquations {
                 Map<String, Integer> coeffSource = equationMap.get(source);
                 Map<String, Integer> coeffDest   = equationMap.get(dest);
                 
-                Set<String> keysSource = nonZeroCoeffKeys(coeffSource);
-                Set<String> keysDest   = nonZeroCoeffKeys(coeffDest);
+                Set<String> mutual       = new LinkedHashSet<>();
+                Set<String> uniqueSource = new LinkedHashSet<>();
+                Set<String> uniqueDest   = new LinkedHashSet<>();
                 
-                Set<String> mutual              = new LinkedHashSet<String>();
-                Set<String> uniqueSource        = new LinkedHashSet<String>();
-                Set<String> uniqueDest          = new LinkedHashSet<String>();
-                
-                if (!coefficientSort(mutual, uniqueSource, uniqueDest, keysSource, keysDest)) {
+                if (!coefficientSort(mutual, uniqueSource, uniqueDest, coeffSource, coeffDest)) {
                     return null;
                 }
                 
@@ -255,19 +249,6 @@ aspect eliminateLinearEquations {
             }
 
             /**
-             * Get the set of keys in a given coefficient map that have non-zero coefficients.
-             */
-            protected Set<String> nonZeroCoeffKeys(Map<String, Integer> coeffMap) {
-                Set<String> keys = new LinkedHashSet<>();
-                for (String key : coeffMap.keySet()) {
-                    if (coeffMap.get(key) != 0) {
-                        keys.add(key);
-                    }
-                }
-                return keys;
-            }
-
-            /**
              * Returns the greatest common divisor of two integers.
              * 
              * Uses Euclid's algorithm.
@@ -317,18 +298,23 @@ aspect eliminateLinearEquations {
              *          The coefficient keys of the destination equation.
              */
             private boolean coefficientSort(Set<String> mutual, Set<String> sourceUnique, Set<String> destUnique,
-                    Set<String> sourceKeys, Set<String> destKeys) {
+                    Map<String, Integer> coeffSrc, Map<String, Integer> coeffDest) {
 
-                destUnique.addAll(destKeys);
-
-                for (String key : sourceKeys) {
-                    if (destKeys.contains(key)) {
-                        mutual.add(key);
-                    } else {
-                        sourceUnique.add(key);
+                Set<String> destKeys = coeffDest.keySet();
+                for (String key : coeffSrc.keySet()) {
+                    if (coeffSrc.get(key) != 0) {
+                        if (destKeys.contains(key) && coeffDest.get(key) != 0) {
+                            mutual.add(key);
+                        } else {
+                            sourceUnique.add(key);
+                        }
                     }
                 }
-                destUnique.removeAll(mutual);
+                for (String key : destKeys) {
+                    if (coeffDest.get(key) != 0 && !mutual.contains(key)) {
+                        destUnique.add(key);
+                    }
+                }
 
                 if (mutual.isEmpty()) {
                     return false;
@@ -387,7 +373,9 @@ aspect eliminateLinearEquations {
      *  Collect term coefficients.  *
      * ============================ */
 
-    syn Map<String, Integer> FAbstractEquation.coefficientMap() { return new LinkedHashMap<>(); }
+    syn Map<String, Integer> FAbstractEquation.coefficientMap() {
+        throw new UnsupportedOperationException();
+    }
     eq FEquation.coefficientMap() {
         Map<String, Integer> coefficientMap = new LinkedHashMap<>();
 
@@ -459,7 +447,9 @@ aspect eliminateLinearEquations {
 
     public static final String FLitExp.COEFF_KEY     = "#const";
     public static final String FTimeExp.COEFF_KEY    = "time";
-    syn String FExp.myCoeffKey()                    = toString();
+    syn String FExp.myCoeffKey() {
+        throw new UnsupportedOperationException();
+    }
 
     eq FIdUseExp.myCoeffKey()                       = name();
     eq FLitExp.myCoeffKey()                         = COEFF_KEY;
