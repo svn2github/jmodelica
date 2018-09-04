@@ -279,10 +279,6 @@ class Test_AlgorithmMethods_UKF:
             self.ukf.mes, self.ukf.Wm, self.ukf.Wc)
         
         #Assert predicted mean and measurement
-        print xp
-        print yp
-        print K
-        print P
         assert N.allclose(xp, [[1.00988634], [0.0172094]], rtol=1e-03, atol=1e-04)
         assert N.allclose(yp, N.array([[1.00988634]]), rtol=1e-03, atol=1e-04)
         
@@ -298,10 +294,6 @@ class Test_AlgorithmMethods_UKF:
         known_values = {}
         self.ukf.predict(u, known_values)
         #Assert predicted mean and measurement
-        print self.ukf.xp
-        print self.ukf.yp
-        print self.ukf.K
-        print self.ukf.P
         assert N.allclose(self.ukf.xp, [[1.00988634], [0.0172094]], rtol=1e-03, atol=1e-04)
         assert N.allclose(self.ukf.yp, [[1.00988634]], rtol=1e-03, atol=1e-04)
         

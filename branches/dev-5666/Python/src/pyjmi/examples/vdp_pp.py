@@ -72,7 +72,7 @@ def run_demo(with_plots=True):
             p.plot(x1, x2,'b')
     
     assert N.abs(res.final('x1') - 1.75293937)     < 1e-3
-    assert N.abs(res.final('x2') + 3.98830742e-01) < 1e-3
+    assert N.abs(res.final('x2') + 3.98830742e-01) < 1e-2
 
     if with_plots:
         p.grid()
