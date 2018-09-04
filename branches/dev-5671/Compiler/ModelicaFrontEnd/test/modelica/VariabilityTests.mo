@@ -1141,4 +1141,39 @@ Error at line 17, column 24, in file '...':
 ")})));
 end BindingExpVariability1;
 
+model RecordVariabilityScalarization1
+        record R1
+            Real x;
+            constant Real y = 2;
+        end R1;
+        
+        record R2
+            Real x;
+            constant Real z = 2;
+        end R2;
+        
+        parameter R1 r1(x=time);
+        parameter R2 r2(x=time);
+        parameter Real[:] x = {r1.x, r2.x};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordVariabilityScalarization1",
+            description="",
+            flatModel="
+fclass VariabilityTests.RecordVariabilityScalarization1
+ parameter Real r1.x;
+ constant Real r1.y = 2;
+ parameter Real r2.x;
+ parameter Real x[1];
+ parameter Real x[2];
+parameter equation
+ r1.x = time;
+ r2.x = time;
+ x[1] = r1.x;
+ x[2] = r2.x;
+end VariabilityTests.RecordVariabilityScalarization1;
+")})));
+end RecordVariabilityScalarization1;
+
 end VariabilityTests;

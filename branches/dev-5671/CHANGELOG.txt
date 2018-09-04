@@ -1,7 +1,12 @@
 ================= Unreleased ==================
+; Fixed ; Major ; Build system ; #5671
+Fixed an issue where gcc compiled FMUs did not work on Windows 10 together
+with a VS2017 compiled software.
+
 ; Changed ; Minor ; Compiler ; #5670
 Update handling of constants, and accesses to package constants, in functions
 for improved compilation and simulation performance.
+
 ; Fixed ; Minor ; PyFMI ; #5668
 Fixed issue with reusing the PyFMI computed FD Jacobian.
 
