@@ -26,17 +26,13 @@ else !JM_WIN64
 all-local: $(WINPTHREADS_DIR)
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cd $(WINPTHREADS_DIR) && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= ;; \
-	*-apple*) \
-	cd $(WINPTHREADS_DIR) && make $(AM_MAKEFLAGS) DESTDIR= && make $(AM_MAKEFLAGS) DESTDIR= ;; \
-	*) \
-	cd $(WINPTHREADS_DIR) && make $(AM_MAKEFLAGS) DESTDIR= && make $(AM_MAKEFLAGS) DESTDIR= ;; \
+	cd $(WINPTHREADS_DIR) && ./configure && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= && make CFLAGS=-m32 LDFLAGS=-m32 RCFLAGS='-F pe-i386' $(AM_MAKEFLAGS) DESTDIR= ;; \
 	esac
 
 endif !JM_WIN64
 
 check-local:
-	cd $(WINPTHREADS_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	-cd $(WINPTHREADS_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
 	-cd $(WINPTHREADS_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
