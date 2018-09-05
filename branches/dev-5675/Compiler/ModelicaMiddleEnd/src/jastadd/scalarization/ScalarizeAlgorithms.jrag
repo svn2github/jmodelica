@@ -37,6 +37,7 @@ aspect AlgorithmScalarization {
         if (scalarizedAsFFunctionCallStmt()) {
             // Special case, Function call stmt
             FFunctionCall call = (FFunctionCall) right;
+            call.getFType().createArrayTemporaries(s);
             s.createScalarizedFunctionCallClause(left, call);
         } else {
             FType t = left.size().isUnknown() ? left.type() : right.type();
