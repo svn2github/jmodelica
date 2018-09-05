@@ -203,8 +203,18 @@ aspect FlatNames {
         return res;
     }
 
+    public abstract FExp FSubscript.getFExp();
+
+    public FExp FIntegerSubscript.getFExp() {
+        return new FIntegerLitExp(getValue());
+    }
+
+    public FExp FColonSubscript.getFExp() {
+        throw new UnsupportedOperationException();
+    }
+
     public FSubscript FSubscript.createEvaluated() {
-        return (FSubscript) fullCopy();
+        return treeCopy();
     }
 
     public FSubscript FColonSubscript.createEvaluated() {
@@ -221,7 +231,7 @@ aspect FlatNames {
                 return val.createFSubscript();
             }
         } catch (ConstantEvaluationException e) {}
-        return fullCopy();
+        return treeCopy();
     }
     
     syn boolean FSubscript.isColon() = false;

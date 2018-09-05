@@ -557,7 +557,7 @@ aspect FunctionScalarization {
             exp.addArrayUsesToIndexMap(s);
             
             FArraySubscripts fas = names.createFArraySubscripts(ndims());
-            FExp ind = fas.getFSubscript(catDim).asExpSubscript().getFExp();
+            FExp ind = fas.getFSubscript(catDim).getFExp();
             ind = new FAddExp(ind, offset.fullCopy());
             fas.setFSubscript(new FExpSubscript(ind), catDim);
             

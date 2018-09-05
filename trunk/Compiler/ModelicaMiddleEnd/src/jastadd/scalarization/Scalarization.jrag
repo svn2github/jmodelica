@@ -876,7 +876,7 @@ aspect Scalarization {
         if (subs != null && subs.length > 0) {
             List<FSubscript> l = new List<FSubscript>();
             for (FExp e : subs) {
-                l.add(new FExpSubscript(e.fullCopy()));
+                l.add(e.treeCopy().createFSubscript());
             }
             fas = new FArraySubscripts(l);
         }
@@ -924,7 +924,7 @@ aspect Scalarization {
     public FArraySubscripts FIdUseExp.createIndexNameFas() {
         List<FSubscript> l = new List<FSubscript>();
         for (FExp e : indexNames) {
-            l.add(new FExpSubscript(e.fullCopy()));
+            l.add(e.treeCopy().createFSubscript());
         }
         return new FArraySubscripts(l);
     }
@@ -1553,11 +1553,11 @@ aspect Scalarization {
     public FSubscript FColonSubscript.scalarize(Scalarizer s) {
         if (indexName == null)
             throw new UnsupportedOperationException("Colon subscript without index name");
-        return new FExpSubscript(indexName.fullCopy());
+        return indexName.treeCopy().createFSubscript();
     }
     
     public FSubscript FExpSubscript.scalarize(Scalarizer s) {
-        return new FExpSubscript(getFExp().scalarize(s));
+        return getFExp().scalarize(s).createFSubscript();
     }
 
 

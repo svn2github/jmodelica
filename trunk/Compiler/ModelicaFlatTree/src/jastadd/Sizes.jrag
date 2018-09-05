@@ -242,7 +242,7 @@ aspect AccessSizes {
     syn FSubscript FSubscript.buildAccessContext() = treeCopy();
     eq FColonSubscript.buildAccessContext()   = new FIntegerSubscript(1);
     eq FExpSubscript.buildAccessContext()     = getFExp().isArray() ? 
-            new FExpSubscript(getFExp().createFirstIndexExp()) : super.buildAccessContext();
+            getFExp().createFirstIndexExp().createFSubscript() : super.buildAccessContext();
     
     syn FExp FExp.createFirstIndexExp() {
         FArraySubscripts fas = new FArraySubscripts();
@@ -589,7 +589,7 @@ aspect SizesUtil {
     }
     
     public FSubscript FExpSubscript.copyReplaceAccess(FExp.ContextReplacer crp) {
-        return new FExpSubscript(getFExp().copyReplaceAccess(crp));
+        return getFExp().copyReplaceAccess(crp).createFSubscript();
     }
     
     /**

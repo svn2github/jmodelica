@@ -1224,7 +1224,7 @@ aspect Flattening {
                 exps[i].variability().knownParameterOrLess()) {
             return super.flattenFSubscript(f, i);
         }
-        return new FExpSubscript(exps[i].flatten(f));
+        return exps[i].flatten(f).createFSubscript();
     }
 
     public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level) {
@@ -1987,7 +1987,7 @@ aspect Flattening {
     
     syn FSubscript FSubscript.specify(int index);
     eq FExpSubscript.specify(int index)     = 
-        new FExpSubscript(getFExp().getArray().getFExp(index - 1).fullCopy());
+        getFExp().getArray().getFExp(index - 1).treeCopy().createFSubscript();
     eq FIntegerSubscript.specify(int index) = this;
     eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
@@ -2320,7 +2320,7 @@ aspect FlatExpressions {
     }
 
     public FSubscript FExpSubscript.flatten(Flattener f) {
-        return new FExpSubscript(getFExp().flatten(f));
+        return getFExp().flatten(f).createFSubscript();
     }
 
     public FExp FExp.flatten(Flattener f) {
@@ -2351,7 +2351,7 @@ aspect FlatExpressions {
      * Create a constant FSubscript.
      */
     public FSubscript CValue.createFSubscript() {
-        return new FExpSubscript(buildLiteral());
+        return buildLiteral().createFSubscript();
     }
     
     public FSubscript CValueInteger.createFSubscript() {
@@ -3094,7 +3094,7 @@ aspect InstantiatedExpressions {
     }
     
     public FSubscript SrcExpSubscript.instantiate() {
-        return copyLocationTo(new FExpSubscript(getSrcExp().instantiate()));
+        return copyLocationTo(getSrcExp().instantiate().createFSubscript());
     }
     
     public FExp SrcExp.instantiate() {

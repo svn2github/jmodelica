@@ -559,7 +559,7 @@ aspect Arrays {
     eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
 
     public FSubscript InstForIndex.createFSubscript() {
-        return new FExpSubscript(getFExp().flatten(Flattener.expressionFlattener()));
+        return getFExp().flatten(Flattener.expressionFlattener()).createFSubscript();
     }
     @Override
     public FSubscript InstForIndexNoExp.createFSubscript() {
@@ -1960,7 +1960,7 @@ aspect Arrays {
 			return fullCopy();
 		
 		int index = i.get(dim[0]++) - 1;
-		return new FExpSubscript(getFExp().getArray().getFExp(index));
+		return getFExp().getArray().getFExp(index).createFSubscript();
 	}
 	
 	/**
@@ -2766,7 +2766,7 @@ aspect ArrayHelpers {
          * If nothing is known of the length of the dimension, an FColonSubscript is created.
          */
         public FSubscript createFSubscript(int d) {
-            return hasValue(d) ? new FExpSubscript(createFExp(d)) : new FColonSubscript();
+            return hasValue(d) ? createFExp(d).createFSubscript() : new FColonSubscript();
         }
 		
 		/**
@@ -2788,7 +2788,7 @@ aspect ArrayHelpers {
          */
         public FSubscript createExpandedFSubscript(int d) {
             if (!isUnknown(d)) {
-                return new FExpSubscript(createRangeExp(d));
+                return createRangeExp(d).createFSubscript();
             } else {
                 return new FColonSubscript();
             }

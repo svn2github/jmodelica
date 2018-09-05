@@ -807,7 +807,7 @@ aspect Constructors {
 	 * Add a new use expression subscript to the list of FSubscripts.
 	 */
 	public void FArraySubscripts.addFSubscript(FExp e) {
-		addFSubscript(new FExpSubscript(e));
+		addFSubscript(e.createFSubscript());
 	}
 	
 	/**
@@ -850,6 +850,15 @@ aspect Constructors {
 		l.add(new FIntegerSubscript(i));
 		return new FArraySubscripts(l);
 	}
+
+    public FSubscript FExp.createFSubscript() {
+        return new FExpSubscript(this);
+    }
+
+    public FIntegerSubscript FIntegerLitExp.createFSubscript() {
+        return new FIntegerSubscript(getValue());
+    }
+
 	
 	/**
 	 * Create a new FArraySubscripts containing integer literals.
