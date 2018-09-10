@@ -275,7 +275,27 @@ class Test_Compiler:
             comp_res = 0
     
         assert comp_res==1, "Compilation failed in test_MODELICAPATH"
-        
+
+class Test_Compile_Load:
+    
+    @testattr(windows_base = True)
+    def test_load_FMU_VS2017(self):
+        """
+        Test that a gcc compiled FMU can be loaded into a VS2017 compiled program.
+        """
+        cwd = os.getcwd()
+        try:
+            import subprocess
+            os.chdir(os.path.join(get_files_path(), "Programs", "Load_and_initialize"))
+            name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", compile_to="CC.fmu", compiler_options={"c_compiler":"gcc"}, platform="win64")
+            
+            #Basically just verify that the process terminates
+            return_code = subprocess.call("LoadAndInitialize.exe CC.fmu .", shell=True)
+            assert return_code == 0
+        except pym.compiler_exceptions.CcodeCompilationError:
+            pass #64bit not supported
+        os.chdir(cwd)
+
 class Test_Compiler_functions:
     """ This class tests the compiler functions. """
 
