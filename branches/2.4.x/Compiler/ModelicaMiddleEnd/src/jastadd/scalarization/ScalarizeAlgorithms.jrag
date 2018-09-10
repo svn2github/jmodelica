@@ -231,6 +231,6 @@ aspect AssignmentScalarization {
     }
     
     protected void FRecordType.scalarizeScalarAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        scalarRecordClauses(s, new FQNameEmpty(), left, right);
+        scalarRecordClauses(s, new FAccessEmpty(), left, right);
     }
 }

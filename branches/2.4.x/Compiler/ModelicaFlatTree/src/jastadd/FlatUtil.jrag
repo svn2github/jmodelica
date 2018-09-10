@@ -63,32 +63,25 @@ aspect FlatNames {
         }
     }
     
-    syn FQNamePart FQNameFull.lastFQNamePart() = getFQNamePart(getNumFQNamePart()-1);
+    syn FAccessPart FAccessFull.lastFAccessPart() = getFAccessPart(getNumFAccessPart()-1);
     
-    syn boolean FQNamePart.hasFArraySubscripts()          = false;
-    eq FQNamePartArray.hasFArraySubscripts()              = true;
-    syn FArraySubscripts FQNamePart.getFArraySubscripts() = null;
-    // FQNamePartArray.getFArraySubscripts() declared from .ast file
+    syn boolean FAccessPart.hasFArraySubscripts()          = false;
+    eq FAccessPartArray.hasFArraySubscripts()              = true;
+    syn FArraySubscripts FAccessPart.getFArraySubscripts() = null;
+    // FAccessPartArray.getFArraySubscripts() declared from .ast file
 
-    syn boolean FQName.hasFArraySubscripts()          = false;
-    syn FArraySubscripts FQName.getFArraySubscripts() = null;
-    eq FQNameFull.hasFArraySubscripts()               = lastFQNamePart().hasFArraySubscripts();
-    eq FQNameFull.getFArraySubscripts()               = lastFQNamePart().getFArraySubscripts();
+    syn boolean FAccess.hasFArraySubscripts()          = false;
+    syn FArraySubscripts FAccess.getFArraySubscripts() = null;
+    eq FAccessFull.hasFArraySubscripts()               = lastFAccessPart().hasFArraySubscripts();
+    eq FAccessFull.getFArraySubscripts()               = lastFAccessPart().getFArraySubscripts();
 
-    syn boolean FIdUse.hasFArraySubscripts() = 
-        getFQName().hasFArraySubscripts();
-    syn FArraySubscripts FIdUse.getFArraySubscripts() = 
-        getFQName().getFArraySubscripts();
-
-    syn boolean FIdUseInstAccess.hasFArraySubscripts() = 
-        getInstAccess().hasFArraySubscripts();
-    syn FArraySubscripts FIdUseInstAccess.getFArraySubscripts() = 
-        getInstAccess().getFArraySubscripts();
+    syn boolean CommonAccess.hasFArraySubscripts();
+    syn FArraySubscripts CommonAccess.getFArraySubscripts();
 
     syn boolean FIdUseExp.hasFArraySubscripts() = 
-        getFIdUse().hasFArraySubscripts();
+        getCommonAccess().hasFArraySubscripts();
     syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
-        getFIdUse().getFArraySubscripts();
+        getCommonAccess().getFArraySubscripts();
 
     /**
      * Get a string representation of a prefix of this name.
@@ -101,8 +94,8 @@ aspect FlatNames {
      * @param index if greater or equal to two, then the index added as a second argument (eg "der(a.b,2)").
      *              This only works if op is not null. 
      */
-    private String FQNameFull.prefixName(int start, int n, String op, boolean eval, int index) {
-        int tot = getNumFQNamePart();
+    private String FAccessFull.prefixName(int start, int n, String op, boolean eval, int index) {
+        int tot = getNumFAccessPart();
         if (n <= 0)
             n = tot + n;
         StringBuilder str = new StringBuilder();
@@ -111,7 +104,7 @@ aspect FlatNames {
             str.append("(");
         }
         for (int i = start; i < n; i++) {
-            FQNamePart part = getFQNamePart(i);
+            FAccessPart part = getFAccessPart(i);
             boolean last = i == n - 1;
             str.append(part.getName());
             if ((!last || op != null || isScalarized()) && part.hasFArraySubscripts()) {
@@ -134,35 +127,35 @@ aspect FlatNames {
     }
     
     /**
-     * Gets a specific name part. Consides FQNameString as always having a single part.
+     * Gets a specific name part. Consides FAccessString as always having a single part.
      */
-    syn String FQName.partName(int i) {
+    syn String FAccess.partName(int i) {
         throw new UnsupportedOperationException();
     }
-    eq FQNameString.partName(int i) = (i == 0) ? getName() : super.partName(i);
-    eq FQNameFull.partName(int i)   = getFQNamePart(i).getName();
+    eq FAccessString.partName(int i) = (i == 0) ? getName() : super.partName(i);
+    eq FAccessFull.partName(int i)   = getFAccessPart(i).getName();
     
     /**
-     * Gets the last name part. Consides FQNameString as always having a single part.
+     * Gets the last name part. Consides FAccessString as always having a single part.
      */
-    syn String FQName.lastPartName() = partName(numParts() - 1);
+    syn String FAccess.lastPartName() = partName(numParts() - 1);
 
     /**
-     * Gets the last name part. Considers FQNameString as having one part for each '.'-separated substring.
+     * Gets the last name part. Considers FAccessString as having one part for each '.'-separated substring.
      */
-    syn String FQName.lastActualPartName() = lastPartName();
-    eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
+    syn String FAccess.lastActualPartName() = lastPartName();
+    eq FAccessString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
-    syn String FQName.lastActualTypePartName() = lastPartName();
-    eq FQNameString.lastActualTypePartName()   = getName().substring(Math.max(getName().lastIndexOf('.'), getName().lastIndexOf(':')) + 1);
+    syn String FAccess.lastActualTypePartName() = lastPartName();
+    eq FAccessString.lastActualTypePartName()   = getName().substring(Math.max(getName().lastIndexOf('.'), getName().lastIndexOf(':')) + 1);
     
     /**
-     * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
+     * Gets the prefix name parts. Considers FAccessString as having one part for each '.'-separated substring.
      */
-    syn String FQName.prefixActualPartName();
-    eq FQNameFull.prefixActualPartName()   = prefixName(0, -1, null, false, -1);
-    eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
-    eq FQNameEmpty.prefixActualPartName() {
+    syn String FAccess.prefixActualPartName();
+    eq FAccessFull.prefixActualPartName()   = prefixName(0, -1, null, false, -1);
+    eq FAccessString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
+    eq FAccessEmpty.prefixActualPartName() {
         throw new UnsupportedOperationException();
     }
 
@@ -173,31 +166,31 @@ aspect FlatNames {
     eq InstDot.numParts()         = getNumInstAccess();
 
     /**
-     * The number of name parts. Will always report 1 for FQNameString.
+     * The number of name parts. Will always report 1 for FAccessString.
      */
-    syn int FQName.numParts()  = 0;
-    eq FQNameString.numParts() = 1;
-    eq FQNameFull.numParts()   = getNumFQNamePart();
+    syn int FAccess.numParts()  = 0;
+    eq FAccessString.numParts() = 1;
+    eq FAccessFull.numParts()   = getNumFAccessPart();
     
     /**
      * The number of dots in the name.
      */
-    syn int FQName.numDots() = 0;
-    eq FQNameFull.numDots()  = getNumFQNamePart() - 1;
-    eq FQNameString.numDots() {
+    syn int FAccess.numDots() = 0;
+    eq FAccessFull.numDots()  = getNumFAccessPart() - 1;
+    eq FAccessString.numDots() {
         String name = getName();
         int n = 0;
         for (int i = name.indexOf('.'); i >= 0; n++, i = name.indexOf('.', i + 1));
         return n;
     }
     
-    syn int FQName.numMatchingParts(FQNameFull fqn)  = 0;
-    eq FQNameString.numMatchingParts(FQNameFull fqn) = 
-        fqn.getFQNamePart(0).getName().equals(getName()) ? 1 : 0;
-    eq FQNameFull.numMatchingParts(FQNameFull fqn) {
-        int n = getNumFQNamePart();
+    syn int FAccess.numMatchingParts(FAccessFull fqn)  = 0;
+    eq FAccessString.numMatchingParts(FAccessFull fqn) = 
+        fqn.getFAccessPart(0).getName().equals(getName()) ? 1 : 0;
+    eq FAccessFull.numMatchingParts(FAccessFull fqn) {
+        int n = getNumFAccessPart();
         for (int i = 0; i < n; i++)
-            if (!getFQNamePart(i).getName().equals(fqn.getFQNamePart(i).getName()))
+            if (!getFAccessPart(i).getName().equals(fqn.getFAccessPart(i).getName()))
                 return i;
         return n;
     }
@@ -242,35 +235,35 @@ aspect FlatNames {
     }
     eq FExpSubscript.asExpSubscript() = this;
     
-    syn FQName FAbstractVariable.getFQName() = null;
+    syn FAccess FAbstractVariable.getFAccess() = null;
 
-    syn String FQName.name()                = "";
-    syn String FQName.derName(int index)    = "";
-    syn String FQName.dynDerName(int index) = "";
-    syn String FQName.preName()             = "";
+    syn String FAccess.name()                = "";
+    syn String FAccess.derName(int index)    = "";
+    syn String FAccess.dynDerName(int index) = "";
+    syn String FAccess.preName()             = "";
     
-    eq FQNameString.name()                             = getName();
-    syn lazy String FQNameString.derName(int index)    = applyOpToName(getName(), DER, index);
-    syn lazy String FQNameString.dynDerName(int index) = applyOpToName(getName(), DYN_DER, index);
-    syn lazy String FQNameString.preName()             = applyOpToName(getName(), PRE, -1);
+    eq FAccessString.name()                             = getName();
+    syn lazy String FAccessString.derName(int index)    = applyOpToName(getName(), DER, index);
+    syn lazy String FAccessString.dynDerName(int index) = applyOpToName(getName(), DYN_DER, index);
+    syn lazy String FAccessString.preName()             = applyOpToName(getName(), PRE, -1);
     
-    syn lazy String FQNameFull.name()                = prefixName(0, 0, null, false, -1);
-    syn lazy String FQNameFull.derName(int index)    = prefixName(0, 0, DER, false, index);
-    syn lazy String FQNameFull.dynDerName(int index) = prefixName(0, 0, DYN_DER, false, index);
-    syn lazy String FQNameFull.preName()             = prefixName(0, 0, PRE, false, -1);
+    syn lazy String FAccessFull.name()                = prefixName(0, 0, null, false, -1);
+    syn lazy String FAccessFull.derName(int index)    = prefixName(0, 0, DER, false, index);
+    syn lazy String FAccessFull.dynDerName(int index) = prefixName(0, 0, DYN_DER, false, index);
+    syn lazy String FAccessFull.preName()             = prefixName(0, 0, PRE, false, -1);
     
-    protected static final String FQName.DER = "der";
-    protected static final String FQName.PRE = "pre";
-    protected static final String FQName.DYN_DER = "dynDer";
+    protected static final String FAccess.DER = "der";
+    protected static final String FAccess.PRE = "pre";
+    protected static final String FAccess.DYN_DER = "dynDer";
     
-    private String FQNameString.applyOpToName(String name, String op, int index) {
+    private String FAccessString.applyOpToName(String name, String op, int index) {
         return op + '(' + name + (index > 1 ? "," + index : "") + ')';
     }
 
-    syn String FQName.scalarName() = scalarName(true);
-    syn String FQName.scalarName(boolean eval) = scalarName(eval, false);
-    syn String FQName.scalarName(boolean eval, boolean onlyLast) = name();
-    eq FQNameFull.scalarName(boolean eval, boolean onlyLast) {
+    syn String FAccess.scalarName() = scalarName(true);
+    syn String FAccess.scalarName(boolean eval) = scalarName(eval, false);
+    syn String FAccess.scalarName(boolean eval, boolean onlyLast) = name();
+    eq FAccessFull.scalarName(boolean eval, boolean onlyLast) {
         boolean scalar = scalarized;
         scalarized = true;
         int start = onlyLast ? numParts() - 1 : 0;
@@ -279,15 +272,15 @@ aspect FlatNames {
         return res;
     }
     
-    private static String FQName.derPrefixString = "_der_der_der_der";
+    private static String FAccess.derPrefixString = "_der_der_der_der";
     
-    protected static String FQName.createDerPrefixString(int order) {
+    protected static String FAccess.createDerPrefixString(int order) {
         while (4 * order >= derPrefixString.length())
             derPrefixString = derPrefixString + derPrefixString;
         return derPrefixString.substring(0, 4 * order + 1);
     }
     
-    syn String FQName.derPrefixName(int order) {
+    syn String FAccess.derPrefixName(int order) {
         String name = prefixActualPartName();
         if (!name.isEmpty())
             name += ".";
@@ -300,25 +293,24 @@ aspect FlatNames {
         return name;
     }
     
-    syn String FDummyDerivativeVariable.derPrefixName() = getFQName().derPrefixName(order());
-    syn String FDummyDerExp.derPrefixName() = getFIdUse().getFQName().derPrefixName(order());
+    syn String FDummyDerivativeVariable.derPrefixName() = getFAccess().derPrefixName(order());
+    syn String FDummyDerExp.derPrefixName() = getCommonAccess().asFAccess().derPrefixName(order());
     
-    syn String FDynamicDerivativeVariable.dynDerName() = getFQName().dynDerName(order());
-    syn String FDynamicDerExp.dynDerName() = getFIdUse().getFQName().dynDerName(order());
+    syn String FDynamicDerivativeVariable.dynDerName() = getFAccess().dynDerName(order());
+    syn String FDynamicDerExp.dynDerName() = getCommonAccess().asFAccess().dynDerName(order());
     
-    syn String FQNamePart.name() = getName();
+    syn String FAccessPart.name() = getName();
 
-    syn String FIdUse.name()    = getFQName().name();
-    syn String FIdUseExp.name() = getFIdUse().name();
+    syn String CommonAccess.name();
+    syn String FIdUseExp.name() = getCommonAccess().name();
     eq FAbstractDerExp.name()   = derName(order());
     eq FPreExp.name()           = preName();
-    eq FIdUseInstAccess.name()  = getInstAccessNoTransform().name();
 
-    syn String FIdDecl.name() = getFQNameNoTransform().name();
+    syn String FIdDecl.name() = getFAccessNoTransform().name();
 
-    syn String FClass.name()        = getFQNameNoTransform().name();
-    syn String FFunctionDecl.name() = getFQNameNoTransform().name();
-    syn String FRecordDecl.name()   = getFQNameNoTransform().name();
+    syn String FClass.name()        = getFAccessNoTransform().name();
+    syn String FFunctionDecl.name() = getFAccessNoTransform().name();
+    syn String FRecordDecl.name()   = getFAccessNoTransform().name();
     syn String FAttribute.name()    = getName().name();
     
     syn String FFunctionDecl.qualifiedName()     = name();
@@ -331,8 +323,8 @@ aspect FlatNames {
     eq FBuiltInFunctionCall.name()  = builtInName();
     
     syn String FAbstractVariable.name() = null;
-    eq FVariable.name()         = getFQNameNoTransform().name();
-    eq FFunctionVariable.name() = getFQNameNoTransform().name();
+    eq FVariable.name()         = getFAccessNoTransform().name();
+    eq FFunctionVariable.name() = getFAccessNoTransform().name();
     
     syn String FEnumDecl.name() = getName().name();
     
@@ -340,35 +332,34 @@ aspect FlatNames {
 
     syn String FDerivedType.name() = getName();
     
-    eq FAbstractDerivativeVariable.name() = getFQNameNoTransform().derName(order());
+    eq FAbstractDerivativeVariable.name() = getFAccessNoTransform().derName(order());
 
-    syn String FIdUse.derName(int order)    = getFQNameNoTransform().derName(order);
-    syn String FIdUseExp.derName(int order) = getFIdUseNoTransform().derName(order);
+    syn String CommonAccess.derName(int order) { throw new UnsupportedOperationException(); }
+    syn String FIdUseExp.derName(int order) = getCommonAccessNoTransform().derName(order);
 
-    eq FPreRealVariable.name()     = getFQNameNoTransform().preName();
-    eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();  
-    eq FPreBooleanVariable.name()  = getFQNameNoTransform().preName();
-    eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
-    eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
+    eq FPreRealVariable.name()     = getFAccessNoTransform().preName();
+    eq FPreIntegerVariable.name()  = getFAccessNoTransform().preName();  
+    eq FPreBooleanVariable.name()  = getFAccessNoTransform().preName();
+    eq FPreStringVariable.name()   = getFAccessNoTransform().preName();
+    eq FPreEnumVariable.name()     = getFAccessNoTransform().preName();
 
-    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
-    syn String FIdUseExp.preName() = getFIdUseNoTransform().preName();
+    syn String CommonAccess.preName() { throw new UnsupportedOperationException(); }
+    syn String FIdUseExp.preName() = getCommonAccessNoTransform().preName();
     
-    syn String FIdUse.scalarName()    = getFQName().scalarName();
-    syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
+    syn String FIdUseExp.scalarName() = getCommonAccess().asFAccess().scalarName();
     
     public static String ASTNode.underScore(String s) {
         return s.replaceAll("[^0-9a-zA-Z_]", "_");
     }
     
-    syn String FQName.nameUnderscore()            = "";
-    syn lazy String FQNameString.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
-    syn lazy String FQNameFull.nameUnderscore() {
+    eq FAccess.nameUnderscore()            = "";
+    syn lazy String FAccessString.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
+    syn lazy String FAccessFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
-        int last = getNumFQNamePart() - 1;
+        int last = getNumFAccessPart() - 1;
         String sep = "";
-        for (FQNamePart part : getFQNameParts()) {
+        for (FAccessPart part : getFAccessParts()) {
             str.append(sep);
             sep = "_";
             str.append(part.nameUnderscore());
@@ -382,20 +373,20 @@ aspect FlatNames {
         return str.toString();
     }
     
-    syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
+    syn String FAccessPart.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     
-    syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
-    syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
+    syn String CommonAccess.nameUnderscore() { throw new UnsupportedOperationException(); }
+    syn String FIdUseExp.nameUnderscore() = getCommonAccess().nameUnderscore();
     eq FAbstractDerExp.nameUnderscore() {
         if (order() == 1)
-            return "der_" + getFIdUse().nameUnderscore();
+            return "der_" + getCommonAccess().nameUnderscore();
         else
-            return "der_" + order() + "_" + getFIdUse().nameUnderscore();
+            return "der_" + order() + "_" + getCommonAccess().nameUnderscore();
     }
     
-    syn String FIdDecl.nameUnderscore() = getFQName().nameUnderscore();
+    syn String FIdDecl.nameUnderscore() = getFAccess().nameUnderscore();
 
-    syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
+    syn String FClass.nameUnderscore() = getFAccess().nameUnderscore();
     
     public static String FClass.removeModifiersFromClassName(String name) {
         int p = name.indexOf('(');
@@ -409,19 +400,19 @@ aspect FlatNames {
     }
 
     syn String FAbstractVariable.nameUnderscore() = null;
-    eq FVariable.nameUnderscore()         = getFQName().nameUnderscore();
-    eq FFunctionVariable.nameUnderscore() = getFQName().nameUnderscore();
+    eq FVariable.nameUnderscore()         = getFAccess().nameUnderscore();
+    eq FFunctionVariable.nameUnderscore() = getFAccess().nameUnderscore();
     eq FAbstractDerivativeVariable.nameUnderscore() {
         if (order() == 1)
-            return "der_" + getFQName().nameUnderscore();
+            return "der_" + getFAccess().nameUnderscore();
         else
-            return "der_" + order() + "_" + getFQName().nameUnderscore();
+            return "der_" + order() + "_" + getFAccess().nameUnderscore();
     }
 
-    syn String FQName.funcNameUnderscore(String suffix)            = "func_" + nameUnderscore() + "_" + suffix;
-    syn String FIdUse.funcNameUnderscore(String suffix)            = getFQName().funcNameUnderscore(suffix);
+    eq FAccess.funcNameUnderscore(String suffix)            = "func_" + nameUnderscore() + "_" + suffix;
+    syn String CommonAccess.funcNameUnderscore(String suffix) { throw new UnsupportedOperationException(); }
     syn String FFunctionCall.funcNameUnderscore(String suffix)     = getName().funcNameUnderscore(suffix) + functionIndex();
-    syn String FFunctionDecl.funcNameUnderscore(String suffix)     = getFQName().funcNameUnderscore(suffix) + functionIndex();
+    syn String FFunctionDecl.funcNameUnderscore(String suffix)     = getFAccess().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
 
     syn boolean FExp.isIdentifier(String name) = false;
@@ -473,21 +464,21 @@ aspect FlatNames {
     /**
      * Check if this is a simple name, i.e. just a string or empty name.
      */
-    syn boolean FQName.isSimple() = true;
-    eq FQNameFull.isSimple()      = false;
+    syn boolean FAccess.isSimple() = true;
+    eq FAccessFull.isSimple()      = false;
 
     /**
      * Check if this use has any expression or colon array subscripts. 
      */
-    syn boolean FIdUse.hasNonLiteralSubscripts()  = getFQName().hasNonLiteralSubscripts();
-    eq FIdUseInstAccess.hasNonLiteralSubscripts() = false;
+    syn boolean CommonAccess.hasNonLiteralSubscripts();
+    eq InstAccess.hasNonLiteralSubscripts() = false;
 
     /**
      * Check if this name has any expression or colon array subscripts. 
      */
-    syn boolean FQName.hasNonLiteralSubscripts() = false;
-    eq FQNameFull.hasNonLiteralSubscripts() {
-        for (FQNamePart part : getFQNameParts())
+    eq FAccess.hasNonLiteralSubscripts() = false;
+    eq FAccessFull.hasNonLiteralSubscripts() {
+        for (FAccessPart part : getFAccessParts())
             if (part.hasNonLiteralSubscripts())
                 return true;
         return false;
@@ -496,8 +487,8 @@ aspect FlatNames {
     /**
      * Check if this name part has any expression or colon array subscripts.
      */
-    syn boolean FQNamePart.hasNonLiteralSubscripts() = false;
-    eq FQNamePartArray.hasNonLiteralSubscripts()     = getFArraySubscripts().hasNonLiteralSubscripts();
+    syn boolean FAccessPart.hasNonLiteralSubscripts() = false;
+    eq FAccessPartArray.hasNonLiteralSubscripts()     = getFArraySubscripts().hasNonLiteralSubscripts();
     
     /**
      * Check if this array subscript list has any expression or colon subscripts.
@@ -519,34 +510,34 @@ aspect FlatNames {
     /**
      * Append a new name part.
      */
-    public FQName FQName.append(String name) {
+    public FAccess FAccess.append(String name) {
         throw new UnsupportedOperationException();
     }
     
-    public FQNameString FQNameString.append(String name) {
+    public FAccessString FAccessString.append(String name) {
         setName(getName() + '.' + name);
         return this;
     }
     
-    public FQNameFull FQNameFull.append(String name) {
-        addFQNamePart(name);
+    public FAccessFull FAccessFull.append(String name) {
+        addFAccessPart(name);
         return this;
     }
     
-    public FQName FQName.append(String name, FArraySubscripts fas) {
-        return asFQNameFull().append(name, fas);
+    public FAccess FAccess.append(String name, FArraySubscripts fas) {
+        return asFAccessFull().append(name, fas);
     }
     
-    public FQName FQNameFull.append(String name, FArraySubscripts fas) {
+    public FAccess FAccessFull.append(String name, FArraySubscripts fas) {
         if (use(fas)) {
-            addFQNamePart(new FQNamePartArray(name, fas));
+            addFAccessPart(new FAccessPartArray(name, fas));
         } else {
-            addFQNamePart(new FQNamePart(name));
+            addFAccessPart(new FAccessPart(name));
         }
         return this;
     }
     
-    public boolean FQName.use(FArraySubscripts fas) {
+    public boolean FAccess.use(FArraySubscripts fas) {
         return fas != null && fas.ndims() > 0;
     }
 
@@ -555,44 +546,44 @@ aspect FlatNames {
      * 
      * @return  <code>this</code>, for convenience
      */
-    public FQNameFull FQNameFull.append(FQName fqn) {
+    public FAccessFull FAccessFull.append(FAccess fqn) {
         return fqn.appendTo(this);
     }
  
-    protected abstract FQNameFull FQName.appendTo(FQNameFull fqn);
+    protected abstract FAccessFull FAccess.appendTo(FAccessFull fqn);
     
-    protected FQNameFull FQNameEmpty.appendTo(FQNameFull fqn) {
+    protected FAccessFull FAccessEmpty.appendTo(FAccessFull fqn) {
         return fqn;
     }
     
-    protected FQNameFull FQNameString.appendTo(FQNameFull fqn) {
+    protected FAccessFull FAccessString.appendTo(FAccessFull fqn) {
         return fqn.append(getName());
     }
     
-    protected FQNameFull FQNameFull.appendTo(FQNameFull fqn) {
+    protected FAccessFull FAccessFull.appendTo(FAccessFull fqn) {
         return fqn.appendFull(this);
     }
     
-    protected FQNameFull FQNameFull.appendFull(FQNameFull fqn) {
-        for (FQNamePart part : fqn.getFQNameParts())
-            addFQNamePart(part.fullCopy());
+    protected FAccessFull FAccessFull.appendFull(FAccessFull fqn) {
+        for (FAccessPart part : fqn.getFAccessParts())
+            addFAccessPart(part.fullCopy());
         return this;
     }
     
     /**
      * Create a copy of the name, with a new name part appended.
      */
-    public abstract FQName FQName.copyAndAppend(String name);
+    public abstract FAccess FAccess.copyAndAppend(String name);
     
-    public FQNameString FQNameEmpty.copyAndAppend(String name) {
-        return new FQNameString(name);
+    public FAccessString FAccessEmpty.copyAndAppend(String name) {
+        return new FAccessString(name);
     }
     
-    public FQNameString FQNameString.copyAndAppend(String name) {
-        return new FQNameString(getName() + '.' + name);
+    public FAccessString FAccessString.copyAndAppend(String name) {
+        return new FAccessString(getName() + '.' + name);
     }
     
-    public FQNameFull FQNameFull.copyAndAppend(String name) {
+    public FAccessFull FAccessFull.copyAndAppend(String name) {
         return fullCopy().append(name);
     }
     
@@ -602,11 +593,11 @@ aspect FlatNames {
      * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
      * to using {@link #copyAndAppend(String)}.
      */
-    public FQName FQName.copyAndAppend(String name, FArraySubscripts fas) {
+    public FAccess FAccess.copyAndAppend(String name, FArraySubscripts fas) {
         if (fas == null || fas.ndims() == 0)
             return copyAndAppend(name);
-        FQNameFull res = copyAsFQNameFull();
-        res.addFQNamePart(new FQNamePartArray(name, fas));
+        FAccessFull res = copyAsFAccessFull();
+        res.addFAccessPart(new FAccessPartArray(name, fas));
         return res;
     }
     
@@ -614,138 +605,138 @@ aspect FlatNames {
      * Create a copy of the name, with another name appended, and <code>fas</code> applied to the last part.
      * 
      * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
-     * to using {@link #copyAndAppend(FQName)}.
+     * to using {@link #copyAndAppend(FAccess)}.
      */
-    public FQName FQName.copyAndAppend(FQName name, FArraySubscripts fas) {
+    public FAccess FAccess.copyAndAppend(FAccess name, FArraySubscripts fas) {
         if (fas == null || fas.ndims() == 0)
             return copyAndAppend(name);
-        FQName res = copyAndAppend(name);
-        return res.asFQNameFull().addFArraySubscripts(fas);
+        FAccess res = copyAndAppend(name);
+        return res.asFAccessFull().addFArraySubscripts(fas);
     }
     
     /**
-     * Create a copy of the name as an FQNameFull.
+     * Create a copy of the name as an FAccessFull.
      */
-    public abstract FQNameFull FQName.copyAsFQNameFull();
+    public abstract FAccessFull FAccess.copyAsFAccessFull();
     
-    public FQNameFull FQNameEmpty.copyAsFQNameFull() {
-        return new FQNameFull();
+    public FAccessFull FAccessEmpty.copyAsFAccessFull() {
+        return new FAccessFull();
     }
     
-    public FQNameFull FQNameString.copyAsFQNameFull() {
-        return new FQNameFull(getName());
+    public FAccessFull FAccessString.copyAsFAccessFull() {
+        return new FAccessFull(getName());
     }
     
-    public FQNameFull FQNameFull.copyAsFQNameFull() {
+    public FAccessFull FAccessFull.copyAsFAccessFull() {
         return fullCopy();
     }
     
     /**
-     * Return this name as an FQNameFull. 
+     * Return this name as an FAccessFull. 
      * 
      * Creates a copy only if needed.
      */
-    public FQNameFull FQName.asFQNameFull() {
-        return copyAsFQNameFull();
+    public FAccessFull FAccess.asFAccessFull() {
+        return copyAsFAccessFull();
     }
     
-    public FQNameFull FQNameFull.asFQNameFull() {
+    public FAccessFull FAccessFull.asFAccessFull() {
         return this;
     }
     
     /**
      * Create a copy of the name, with a new name part prepended.
      */
-    public abstract FQName FQName.copyAndPrepend(String name);
+    public abstract FAccess FAccess.copyAndPrepend(String name);
     
-    public FQNameString FQNameEmpty.copyAndPrepend(String name) {
-        return new FQNameString(name);
+    public FAccessString FAccessEmpty.copyAndPrepend(String name) {
+        return new FAccessString(name);
     }
     
-    public FQNameString FQNameString.copyAndPrepend(String name) {
-        return new FQNameString(name + '.' + getName());
+    public FAccessString FAccessString.copyAndPrepend(String name) {
+        return new FAccessString(name + '.' + getName());
     }
     
-    public FQNameFull FQNameFull.copyAndPrepend(String name) {
-        FQNameFull res = new FQNameFull(name);
-        int n = res.getNumFQNamePart();
-        for (int i = getNumFQNamePart() - 1; i >= 0; i--)
-            res.setFQNamePart(getFQNamePart(i).fullCopy(), i + n);
+    public FAccessFull FAccessFull.copyAndPrepend(String name) {
+        FAccessFull res = new FAccessFull(name);
+        int n = res.getNumFAccessPart();
+        for (int i = getNumFAccessPart() - 1; i >= 0; i--)
+            res.setFAccessPart(getFAccessPart(i).fullCopy(), i + n);
         return res;
     }
    
     /**
      * Create a copy of the name, with a prefix added to the first name part.
      */
-    public FQName FQName.copyAndAddPrefix(String prefix) {
+    public FAccess FAccess.copyAndAddPrefix(String prefix) {
         return copyAndAddPrefix(prefix, false);
     }
     
     
-    public abstract FQName FQName.copyAndAddPrefix(String prefix, boolean removeUnderscore);
+    public abstract FAccess FAccess.copyAndAddPrefix(String prefix, boolean removeUnderscore);
     
-    public FQNameString FQNameEmpty.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
+    public FAccessString FAccessEmpty.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
         throw new UnsupportedOperationException();
     }
     
-    public FQNameString FQNameString.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
+    public FAccessString FAccessString.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
         String name = getName();
         if (removeUnderscore && name.startsWith("_")) {
             name = name.substring(1);
         }
-        return new FQNameString(prefix + name);
+        return new FAccessString(prefix + name);
     }
     
-    public FQNameFull FQNameFull.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
-        FQNameFull res = fullCopy();
-        String name = res.getFQNamePart(0).getName();
+    public FAccessFull FAccessFull.copyAndAddPrefix(String prefix, boolean removeUnderscore) {
+        FAccessFull res = fullCopy();
+        String name = res.getFAccessPart(0).getName();
         if (removeUnderscore && name.startsWith("_")) {
             name = name.substring(1);
         }
-        res.getFQNamePart(0).setName(prefix + name);
+        res.getFAccessPart(0).setName(prefix + name);
         return res;
     }
     
     /**
-     * Create a copy of the name, with another FQName appended.
+     * Create a copy of the name, with another FAccess appended.
      */
-    public abstract FQName FQName.copyAndAppend(FQName name);
+    public abstract FAccess FAccess.copyAndAppend(FAccess name);
     
-    public FQName FQNameEmpty.copyAndAppend(FQName name) {
+    public FAccess FAccessEmpty.copyAndAppend(FAccess name) {
         return name.fullCopy();
     }
     
-    public FQName FQNameString.copyAndAppend(FQName name) {
+    public FAccess FAccessString.copyAndAppend(FAccess name) {
         return name.copyAndPrepend(getName());
     }
     
-    public FQName FQNameFull.copyAndAppend(FQName name) {
+    public FAccess FAccessFull.copyAndAppend(FAccess name) {
         return fullCopy().append(name);
     }
     
     /**
      * Create a copy of the name, with an FSubscript added to the last part.
      */
-    public abstract FQName FQName.copyAndAddSubscript(FSubscript s);
+    public abstract FAccess FAccess.copyAndAddSubscript(FSubscript s);
     
-    public FQName FQNameEmpty.copyAndAddSubscript(FSubscript s) {
+    public FAccess FAccessEmpty.copyAndAddSubscript(FSubscript s) {
         throw new UnsupportedOperationException();
     }
     
-    public FQName FQNameString.copyAndAddSubscript(FSubscript s) {
-        return new FQNameFull(getName()).addSubscript(s);
+    public FAccess FAccessString.copyAndAddSubscript(FSubscript s) {
+        return new FAccessFull(getName()).addSubscript(s);
     }
     
-    public FQName FQNameFull.copyAndAddSubscript(FSubscript s) {
+    public FAccess FAccessFull.copyAndAddSubscript(FSubscript s) {
         return fullCopy().addSubscript(s);
     }
 
     /**
      * Add new FSubscript to the last name part.
      */
-    public FQName FQNameFull.addSubscript(FSubscript s) {
-        int i = getNumFQNamePart() - 1;
-        setFQNamePart(getFQNamePart(i).addSubscript(s), i);
+    public FAccess FAccessFull.addSubscript(FSubscript s) {
+        int i = getNumFAccessPart() - 1;
+        setFAccessPart(getFAccessPart(i).addSubscript(s), i);
         return this;
     }
     
@@ -754,11 +745,11 @@ aspect FlatNames {
      * 
      * This name part might or might not be altered - replace it with the return value.
      */
-    public FQNamePartArray FQNamePart.addSubscript(FSubscript s) {
-        return new FQNamePartArray(getName(), new FArraySubscripts(new List(s)));
+    public FAccessPartArray FAccessPart.addSubscript(FSubscript s) {
+        return new FAccessPartArray(getName(), new FArraySubscripts(new List(s)));
     }
    
-    public FQNamePartArray FQNamePartArray.addSubscript(FSubscript s) {
+    public FAccessPartArray FAccessPartArray.addSubscript(FSubscript s) {
         getFArraySubscripts().addFSubscript(s);
         return this;
     }
@@ -769,25 +760,25 @@ aspect FlatNames {
      * Any previous FArraySubscripts is removed. Passing null as fas is equivalent 
      * to calling {@link #removeFArraySubscripts()}.
      */
-    public abstract FQName FQName.copyAndAddFas(FArraySubscripts fas);
+    public abstract FAccess FAccess.copyAndAddFas(FArraySubscripts fas);
 
-    public FQNameEmpty FQNameEmpty.copyAndAddFas(FArraySubscripts fas) {
-        throw new InternalCompilerError("Cannot add FArraySubscripts to FQNameEmpty");
+    public FAccessEmpty FAccessEmpty.copyAndAddFas(FArraySubscripts fas) {
+        throw new InternalCompilerError("Cannot add FArraySubscripts to FAccessEmpty");
     }
 
-    public FQName FQNameString.copyAndAddFas(FArraySubscripts fas) {
+    public FAccess FAccessString.copyAndAddFas(FArraySubscripts fas) {
         if (fas == null) {
             return treeCopy();
         }
-        return new FQNameFull(getName()).addFArraySubscripts(fas);
+        return new FAccessFull(getName()).addFArraySubscripts(fas);
     }
 
-    public FQNameFull FQNameFull.copyAndAddFas(FArraySubscripts fas) {
+    public FAccessFull FAccessFull.copyAndAddFas(FArraySubscripts fas) {
         return treeCopy().addFArraySubscripts(fas);
     }
 
 
-    public FQName FQName.copyAndRemoveFas() {
+    public FAccess FAccess.copyAndRemoveFas() {
         return copyAndAddFas((FArraySubscripts) null);
     }
 
@@ -795,17 +786,17 @@ aspect FlatNames {
     /**
      * Create a copy of the name with <code>i</code> added as subscripts.
      */
-    public abstract FQName FQName.copyAndAddFas(Index i);
+    public abstract FAccess FAccess.copyAndAddFas(Index i);
 
-    public FQNameEmpty FQNameEmpty.copyAndAddFas(Index i) {
-        throw new InternalCompilerError("Cannot add FArraySubscripts to FQNameEmpty");
+    public FAccessEmpty FAccessEmpty.copyAndAddFas(Index i) {
+        throw new InternalCompilerError("Cannot add FArraySubscripts to FAccessEmpty");
     }
 
-    public FQNameString FQNameString.copyAndAddFas(Index i) {
-        return new FQNameString(getName() + i);
+    public FAccessString FAccessString.copyAndAddFas(Index i) {
+        return new FAccessString(getName() + i);
     }
 
-    public FQNameFull FQNameFull.copyAndAddFas(Index i) {
+    public FAccessFull FAccessFull.copyAndAddFas(Index i) {
         return copyAndAddFas(i.createFArraySubscripts());
     }
 
@@ -813,7 +804,7 @@ aspect FlatNames {
      * Copies this and add <code>i</code> as subscripts if <code>i</code>
      * has dimensions. Otherwise returns this.
      */
-    public FQName FQName.copyAndAddIfFas(Index i) {
+    public FAccess FAccess.copyAndAddIfFas(Index i) {
         if (i.ndims() > 0) {
             return copyAndAddFas(i.createFArraySubscripts());
         }
@@ -821,33 +812,33 @@ aspect FlatNames {
     }
     
     /**
-     * Set the FArraySubscripts of the last FQNamePart.
+     * Set the FArraySubscripts of the last FAccessPart.
      * 
      * Passing null as fas is equivalent to calling {@link #removeFArraySubscripts()}.
      * 
      * @return  <code>this</code>, for convenience
      */
-    public FQNameFull FQNameFull.addFArraySubscripts(FArraySubscripts fas) {
+    public FAccessFull FAccessFull.addFArraySubscripts(FArraySubscripts fas) {
         if (fas == null)
             return removeFArraySubscripts();
-        int i = getNumFQNamePart() - 1;
-        setFQNamePart(new FQNamePartArray(getFQNamePart(i).getName(), fas), i);
+        int i = getNumFAccessPart() - 1;
+        setFAccessPart(new FAccessPartArray(getFAccessPart(i).getName(), fas), i);
         return this;
     }
     
     /**
-     * Remove the FArraySubscripts of the last FQNamePart, if any.
+     * Remove the FArraySubscripts of the last FAccessPart, if any.
      * 
      * @return  <code>this</code>, for convenience
      */
-    public FQName FQName.removeFArraySubscripts() {
+    public FAccess FAccess.removeFArraySubscripts() {
         return this;
     }
 
-    public FQNameFull FQNameFull.removeFArraySubscripts() {
-        int i = getNumFQNamePart() - 1;
-        if (getFQNamePart(i).hasFArraySubscripts())
-            setFQNamePart(new FQNamePart(getFQNamePart(i).getName()), i);
+    public FAccessFull FAccessFull.removeFArraySubscripts() {
+        int i = getNumFAccessPart() - 1;
+        if (getFAccessPart(i).hasFArraySubscripts())
+            setFAccessPart(new FAccessPart(getFAccessPart(i).getName()), i);
         return this;
     }
 
@@ -856,20 +847,20 @@ aspect FlatNames {
      * 
      * Creates a copy only if needed.
      */
-    inh FQName FQNamePart.partialName();
-    eq FQNameFull.getFQNamePart(int i).partialName() = (i == getNumFQNamePart() - 1) ? this : copyPrefix();
+    inh FAccess FAccessPart.partialName();
+    eq FAccessFull.getFAccessPart(int i).partialName() = (i == getNumFAccessPart() - 1) ? this : copyPrefix();
 
     /**
      * Create a copy of the name excluding the first part.
      */
-    public FQName FQName.copySuffix() {
+    public FAccess FAccess.copySuffix() {
         return copyPart(1, numDots());
     }
     
     /**
      * Create a copy of the last part of this name.
      */
-    public FQName FQName.copyLastSuffix() {
+    public FAccess FAccess.copyLastSuffix() {
         int i = numDots();
         return copyPart(i, i);
     }
@@ -877,7 +868,7 @@ aspect FlatNames {
     /**
      * Create a copy of the last <code>n</code> parts of this name.
      */
-    public FQName FQName.copySuffix(int n) {
+    public FAccess FAccess.copySuffix(int n) {
         int m = numDots();
         return copyPart(m - n + 1, m);
     }
@@ -885,50 +876,50 @@ aspect FlatNames {
     /**
      * Create a copy of all but the first <code>n</code> parts of this name.
      */
-    public FQName FQName.copyWithoutPrefix(int n) {
+    public FAccess FAccess.copyWithoutPrefix(int n) {
         return copyPart(n, numDots());
     }
 
     /**
      * Create a copy of the name excluding the last part.
      */
-    public FQName FQName.copyPrefix() {
+    public FAccess FAccess.copyPrefix() {
         return copyPart(0, numDots() - 1);
     }
     
     /**
      * Create a copy of the first part of this name.
      */
-    public FQName FQName.copyFirstPrefix() {
+    public FAccess FAccess.copyFirstPrefix() {
         return copyPart(0, 0);
     }
 
     /**
      * Create a copy of the first <code>n</code> parts of this name.
      */
-    public FQName FQName.copyPrefix(int n) {
+    public FAccess FAccess.copyPrefix(int n) {
         return copyPart(0, n - 1);
     }
 
     /**
      * Create a copy of all but the last <code>n</code> parts of this name.
      */
-    public FQName FQName.copyWithoutSuffix(int n) {
+    public FAccess FAccess.copyWithoutSuffix(int n) {
         return copyPart(0, numDots() - n);
     }
     
     /**
      * Create a copy of parts <code>first</code> to <code>last</code> of this name (zero-based).
      */
-    public abstract FQName FQName.copyPart(int first, int last);
+    public abstract FAccess FAccess.copyPart(int first, int last);
     
-    public FQName FQNameEmpty.copyPart(int first, int last) {
+    public FAccess FAccessEmpty.copyPart(int first, int last) {
         throw new UnsupportedOperationException();
     }
     
-    public FQName FQNameString.copyPart(int first, int last) {
+    public FAccess FAccessString.copyPart(int first, int last) {
         if (last < first)
-            return new FQNameEmpty();
+            return new FAccessEmpty();
         int fp = -1;
         String name = getName();
         for (int i = 0; i < first && (i == 0 || fp >= 0); i++)
@@ -941,29 +932,29 @@ aspect FlatNames {
         if (lp < 0 && last > 0)
             throw new ArrayIndexOutOfBoundsException(last);
         lp = name.indexOf('.', lp + 1);
-        return new FQNameString((lp < 0) ? name.substring(fp + 1) : name.substring(fp + 1, lp));
+        return new FAccessString((lp < 0) ? name.substring(fp + 1) : name.substring(fp + 1, lp));
     }
     
-    public FQName FQNameFull.copyPart(int first, int last) {
+    public FAccess FAccessFull.copyPart(int first, int last) {
         if (last < first)
-            return new FQNameEmpty();
+            return new FAccessEmpty();
         if (last == first)
-            return getFQNamePart(first).createFQName();
-        FQNameFull res = new FQNameFull();
+            return getFAccessPart(first).createFAccess();
+        FAccessFull res = new FAccessFull();
         for (int i = first; i <= last; i++)
-            res.addFQNamePart(getFQNamePart(i).fullCopy());
+            res.addFAccessPart(getFAccessPart(i).fullCopy());
         return res;
     }
 
     /**
-     * Create an FQName containing only a copy of this part.
+     * Create an FAccess containing only a copy of this part.
      */
-    public FQName FQNamePart.createFQName() {
-        return new FQNameString(getName());
+    public FAccess FAccessPart.createFAccess() {
+        return new FAccessString(getName());
     }
     
-    public FQName FQNamePartArray.createFQName() {
-        return new FQNameFull(new List(fullCopy()));
+    public FAccess FAccessPartArray.createFAccess() {
+        return new FAccessFull(new List(fullCopy()));
     }
 
     /**
@@ -977,23 +968,28 @@ aspect FlatNames {
      * Create an access expression to this variable.
      */
     syn FIdUseExp FVariable.createUseExp() = 
-            isPreVariable() ? new FPreExp(createFIdUse()) : new FIdUseExp(createFIdUse());
-    eq FDerivativeVariable.createUseExp()          = new FDerExp(createFIdUse(), order());
-    eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createFIdUse(), (String)null, order());
-    eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createFIdUse(), (String)null, order());
+            isPreVariable() ? new FPreExp(createCommonAccess()) : new FIdUseExp(createCommonAccess());
+    eq FDerivativeVariable.createUseExp()          = new FDerExp(createCommonAccess(), order());
+    eq FDummyDerivativeVariable.createUseExp()     = new FDummyDerExp(createCommonAccess(), (String)null, order());
+    eq FDynamicDerivativeVariable.createUseExp()   = new FDynamicDerExp(createCommonAccess(), (String)null, order());
 
-    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(new FIdUse(getFQName().treeCopy()));
+    syn FIdUseExp FFunctionVariable.createUseExp() = new FIdUseExp(getFAccess().treeCopy());
     syn FExp FEnumLiteral.createUseExp()           = new FEnumLitExp(myFEnumDecl().name(), name(), null);
     syn FExp UnknownFVariable.createUseExp()       = null;
+
+    syn FAccess CommonAccess.asFAccess() {
+        throw new UnsupportedOperationException();
+    }
+    eq FAccess.asFAccess() = this;
 
     /**
      * Create an access to this variable.
      */
-    syn FIdUse FVariable.createFIdUse() {
+    syn CommonAccess FVariable.createCommonAccess() {
         if (isArray()) {
-            return new FIdUse(getFQName().copyAndAddFas(size().createExpandedFArraySubscripts()));
+            return getFAccess().copyAndAddFas(size().createExpandedFArraySubscripts());
         } else {
-            return new FIdUse(getFQName().treeCopy());
+            return getFAccess().treeCopy();
         }
     }
 
@@ -1001,7 +997,7 @@ aspect FlatNames {
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
     public FIdUseExp InstComponentDecl.createUseExp() {
-        return new FIdUseExp(new FIdUseInstAccess(createInstAccess()));
+        return new FIdUseExp(createInstAccess());
     }
     
     syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
@@ -1010,23 +1006,15 @@ aspect FlatNames {
      * Create a pre() expression for this variable.
      */
     public FPreExp FVariable.createFPreExp() {
-        return new FPreExp(createFIdUse());
+        return new FPreExp(createCommonAccess());
     }
 
     /**
-     * Create an FIdUseExp for this name, using a copy if needed.
+     * Create an FRecordAccess with the same name.
      */
-    public FIdUseExp FQName.createFIdUseExp() {
-        return new FIdUseExp(createFIdUse()); 
+    public FRecordAccess FAccess.createFRecordAccess() {
+        return new FRecordAccess(name());
     }
-
-    /**
-     * Create an FIdUse for this name, using a copy if needed.
-     */
-    public FIdUse FQName.createFIdUse() {
-        return new FIdUse((FQName) unboundCopy()); 
-    }
-    
 
     syn String FType.name();
     eq FArrayType.name()            = getFPrimitiveType().name();
@@ -1468,7 +1456,7 @@ aspect FlatFunctionUtils {
       */
      inh boolean FSubscript.inAlgorithm();
      inh boolean FFunctionCall.inAlgorithm();
-     inh boolean FIdUse.inAlgorithm();
+     inh boolean CommonAccess.inAlgorithm();
      inh boolean FExp.inAlgorithm();
      eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
@@ -1606,10 +1594,10 @@ aspect FlatFunctionUtils {
       * Creates expressions based on tempVarName();
       */
      syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
-     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FIdUse(tempVarName()));
+     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FAccessString(tempVarName()));
      syn FVariable FExp.tempVar() = tempVar(variability(), type());
      syn FVariable FExp.tempVar(TypePrefixVariability variability, FType type)
-         = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
+         = type.createTempFVariable(new FAccessFull(tempVarName()), variability);
 
 
      private FlatVariableMap.NameIndexCache FClass.nameIndexCache = new FlatVariableMap.NameIndexCache();
@@ -1705,7 +1693,7 @@ aspect FlatFunctionUtils {
      * @param name         the name of the new variable
      * @param variability  the variability of the new variable
      */
-    public void FType.createTempFVariables(List vars, FQNameString name, TypePrefixVariability variability) {
+    public void FType.createTempFVariables(List vars, FAccessString name, TypePrefixVariability variability) {
         if (isArray()) {
             for (Index i : indices()) {
                 createTempCellFVariables(vars, name.copyAndAddFas(i), variability);
@@ -1715,11 +1703,11 @@ aspect FlatFunctionUtils {
         }
     }
 
-    public void FType.createTempCellFVariables(List vars, FQNameString name, TypePrefixVariability variability) {
+    public void FType.createTempCellFVariables(List vars, FAccessString name, TypePrefixVariability variability) {
         vars.add(createTempFVariable(name, variability));
     }
 
-    public void FRecordType.createTempCellFVariables(List vars, FQNameString name, TypePrefixVariability variability) {
+    public void FRecordType.createTempCellFVariables(List vars, FAccessString name, TypePrefixVariability variability) {
         for (FRecordComponentType comp : getComponents()) {
             comp.getFType().createTempFVariables(vars, name.copyAndAppend(comp.getName()), variability);
         }
@@ -1732,7 +1720,7 @@ aspect FlatFunctionUtils {
      * 
      * Default implementation returns <code>null</code>.
      */
-    public FVariable FType.createTempFVariable(FQName name, TypePrefixVariability variability) {
+    public FVariable FType.createTempFVariable(FAccess name, TypePrefixVariability variability) {
         return createFVariable(VisibilityType.TEMPORARY, name, variability);
     }
     
@@ -1743,48 +1731,48 @@ aspect FlatFunctionUtils {
      * 
      * Default implementation returns <code>null</code>.
      */
-    public FVariable FType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public FVariable FArrayType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FArrayType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         return getFPrimitiveType().createFVariable(vt, name, variability);
     }
         
-    public FVariable FRealType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FRealType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         return new FRealVariable(vt, variability, name);
     }   
     
-    public FVariable FIntegerType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FIntegerType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         return new FIntegerVariable(vt, variability.combineDown(Variability.DISCRETE), name);
     }   
     
-    public FVariable FBooleanType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FBooleanType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         return new FBooleanVariable(vt, variability.combineDown(Variability.DISCRETE), name);
     }   
     
-    public FVariable FStringType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FStringType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         return new FStringVariable(vt, variability.combineDown(Variability.DISCRETE), name);
     }   
     
-    public FVariable FRecordType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FRecordType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
-        return new FRecordVariable(vt, variability, name, new FQNameString(getName()));
+        return new FRecordVariable(vt, variability, name, new FRecordAccess(getName()));
     }   
     
-    public FVariable FEnumType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FEnumType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
-        return new FEnumVariable(vt, variability.combineDown(Variability.DISCRETE), name, new FQNameString(getName()));
+        return new FEnumVariable(vt, variability.combineDown(Variability.DISCRETE), name, new FAccessString(getName()));
     }   
     
-    public FVariable FExternalObjectType.createFVariable(VisibilityType vt, FQName name, 
+    public FVariable FExternalObjectType.createFVariable(VisibilityType vt, FAccess name, 
             TypePrefixVariability variability) {
         return new FExternalObjectVariable(vt, variability.combineDown(Variability.INITIALPARAMETER), name, getConstructor().fullCopy());
     }

@@ -26,7 +26,7 @@ aspect CCodeGenNames {
 
     syn String FExp             .name_C() = tempName_C();
     eq FSubscriptedExp          .name_C() = getFExp().name_C();
-    eq FIdUseExp                .name_C() = getFIdUse().name_C();
+    eq FIdUseExp                .name_C() = getCommonAccess().name_C();
     syn String FFunctionCallLeft.name_C() = getFExp().name_C();
 
     syn String FFunctionCallLeft.tempName_C() = getFExp().tempName_C();

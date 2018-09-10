@@ -414,8 +414,8 @@ aspect FlatTypeCheck {
                     "Sizes do not match in connection, size of '%s' is %s and size of '%s' is %s");
 
     public void FConnectClause.typeCheck(ErrorCheckType checkType) {
-        InstAccess left  = getConnector1().getInstAccess();
-        InstAccess right = getConnector2().getInstAccess();
+        InstAccess left  = getConnector1();
+        InstAccess right = getConnector2();
         boolean checkTypes = !isDisabled();
         boolean expandableSame = true;
         for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
@@ -615,14 +615,6 @@ aspect FlatTypeCheck {
         TYPE_MISMATCH_IN_EXPRESSION.invoke(this);
     }
 
-    public void FIdUse.typeError(ErrorCheckType checkType, FIdUseExp use) {
-        use.typeError(checkType);
-    }
-
-    public void FIdUseInstAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
-        getInstAccess().typeError();
-    }
-
     /**
      * Check if type error is only in array lengths.
      */
@@ -719,6 +711,14 @@ aspect FlatTypeCheck {
         super.typeError(checkType);
     }
 
+    public void CommonAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
+        use.typeError(checkType);
+    }
+
+    public void InstAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
+        typeError();
+    }
+
   public void InstAccess.typeError() {
 	  typeError(this);
   }
@@ -791,11 +791,11 @@ aspect FlatTypeCheck {
     }
 
   public void FIdUseExp.typeCheck(ErrorCheckType checkType) {
-	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
-            getFIdUse().typeError(checkType, this);
+	  if (!getCommonAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
+            getCommonAccess().typeError(checkType, this);
   }
   
-	public void FIdUse.typeCheck(ErrorCheckType checkType) {
+	public void CommonAccess.typeCheck(ErrorCheckType checkType) {
         if (inAlgorithm() && useIsAssignment()) {
             if (variability().constantVariability()) {
                 error("Assignments to constants is not allowed in algorithms");
@@ -851,36 +851,34 @@ aspect FlatTypeCheck {
   
   syn boolean FExp.isAccess()  = false;
   eq FIdUseExp.isAccess()      = true;
-  syn FIdUse FExp.asFIdUse() {
-	  throw new UnsupportedOperationException("asFIdUse() is not supported for class type " + getClass().getSimpleName());
+  syn CommonAccess FExp.asCommonAccess() {
+	  throw new UnsupportedOperationException("asCommonAccess() is not supported for class type " + getClass().getSimpleName());
   }
-  eq FIdUseExp.asFIdUse() = getFIdUse();
+  eq FIdUseExp.asCommonAccess() = getCommonAccess();
   
   syn FIdUseExp FExp.asFIdUseExp() {
       throw new UnsupportedOperationException("asFIdUseExp() is not supported for class type " + getClass().getSimpleName());
   }
   eq FIdUseExp.asFIdUseExp() = this;
   
-    syn boolean FIdUse.isInstAccess()  = false;
-    eq FIdUseInstAccess.isInstAccess() = true;
+    syn boolean CommonAccess.isInstAccess() = false;
+    eq InstAccess.isInstAccess()      = true;
     
 	syn InstAccess FExp.asInstAccess() {
 		throw new UnsupportedOperationException();
 	}
-    eq FIdUseExp.asInstAccess() = getFIdUse().asInstAccess();
+    eq FIdUseExp.asInstAccess() = getCommonAccess().asInstAccess();
     
-    syn InstAccess FIdUse.asInstAccess() {
+    syn InstAccess CommonAccess.asInstAccess() {
         throw new UnsupportedOperationException();
     }
-    eq FIdUseInstAccess.asInstAccess() = getInstAccess();
+    eq InstAccess.asInstAccess() = this;
     
   syn boolean FExp.isAccessToStream()  = false;
-  eq FIdUseExp.isAccessToStream()      = getFIdUse().isAccessToStream();
+  eq FIdUseExp.isAccessToStream()      = getCommonAccess().isAccessToStream();
   
-  syn boolean FIdUse.isAccessToStream()  = false;
-  eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
-  
-  syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
+  syn boolean CommonAccess.isAccessToStream() = false;
+  eq InstAccess.isAccessToStream()      = myInstComponentDecl().isStream();
 
 
 
@@ -1033,18 +1031,17 @@ aspect FlatTypeCheck {
   }
   
   inh boolean FSubscript.inUnknownAccess();
-  eq FIdUse.getChild().inUnknownAccess()                  = myFV().isUnknown();
+  eq FAccess.getChild().inUnknownAccess()                  = myFV().isUnknown();
   eq InstScalarAccess.getChild().inUnknownAccess()        = myInstComponentDecl().isUnknown();
   eq InstArrayAccess.getChild().inUnknownAccess()         = myInstComponentDecl().isUnknown();
   eq FlatRoot.getChild().inUnknownAccess()                = false;
   eq InstRoot.getChild().inUnknownAccess()                = false;
   
   syn boolean FExp.canBeComponentSize()  = type().isInteger();
-  eq FIdUseExp.canBeComponentSize()      = type().isInteger() || getFIdUse().isComponentSizeClass();
+  eq FIdUseExp.canBeComponentSize()      = type().isInteger() || getCommonAccess().isComponentSizeClass();
   
-  syn boolean InstAccess.isComponentSizeClass() = myInstClassDecl().isComponentSizeClass();
-  syn boolean FIdUse.isComponentSizeClass()     = false;
-  eq FIdUseInstAccess.isComponentSizeClass()    = getInstAccess().isComponentSizeClass();
+  syn boolean CommonAccess.isComponentSizeClass() = false;
+  eq InstAccess.isComponentSizeClass()      = myInstClassDecl().isComponentSizeClass();
   
   syn boolean InstClassDecl.isComponentSizeClass() = isBoolean();
   eq InstEnumClassDecl.isComponentSizeClass()      = true;
@@ -1057,8 +1054,8 @@ aspect FlatTypeCheck {
   eq InstComponentDecl.getFArraySubscripts().isInstComponentSize()      = true;
   eq InstShortClassDecl.getFArraySubscripts().isInstComponentSize()     = true;
   eq InstAccess.getChild().isInstComponentSize()                        = false;
-  eq FQNamePart.getChild().isInstComponentSize()                        = false;
-  eq FIdUse.getChild().isInstComponentSize()                            = false;
+  eq FAccessPart.getChild().isInstComponentSize()                        = false;
+  eq CommonAccess.getChild().isInstComponentSize()                            = false;
   eq FExp.getChild().isInstComponentSize()                              = false;
     eq FIdUseExp.getChild().isInstComponentSize()                         = isInstComponentSize();
   eq FAbstractVariable.getChild().isInstComponentSize()                 = false;
@@ -1397,8 +1394,8 @@ aspect FlatTypeCheck {
     public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
         if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
             if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
-                FIdUse use = getFExp().asFIdUse();
-                FType useType = use.type();
+                CommonAccess use = getFExp().asCommonAccess();
+                FType useType = getFExp().type();
                 FType outType = type();
                 if (!use.isForIndex()) {
                     if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
@@ -1501,6 +1498,7 @@ aspect FlatTypeCheck {
               !myInstComponentDecl().isInput() && !checkType.allowIncompleteSizes()) {
           compliance("Using variables with undefined size is not supported");
       }
+      super.typeCheck(checkType);
   }
   
   public boolean Size.isUndefined() {
@@ -1727,11 +1725,11 @@ aspect FlatTypeCheck {
    * Only valid in instance tree.
    */
   syn boolean FExp.isComponentReference(Criteria<InstComponentDecl> criteria)  = false;
-    eq FIdUseExp.isComponentReference(Criteria<InstComponentDecl> criteria) = getFIdUse().isComponentReference(criteria);
+    eq FIdUseExp.isComponentReference(Criteria<InstComponentDecl> criteria) = getCommonAccess().isComponentReference(criteria);
     
-    syn boolean FIdUse.isComponentReference(Criteria<InstComponentDecl> criteria) = false;
-    eq FIdUseInstAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = 
-            criteria.test(getInstAccess().myInstComponentDecl());
+    syn boolean CommonAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = false;
+    eq InstAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = 
+            criteria.test(myInstComponentDecl());
 
   /**
    * Check if the given Size is valid for the argument of the operator.
@@ -1816,7 +1814,7 @@ aspect VariabilityCheck {
     }
     
     public void FPreExp.checkDiscreteOperations() {
-        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
+        if (instanceTreeSource != null && getCommonAccess().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
             instanceTreeSource.discreteArgError();
         instanceTreeSource = null;
     }

@@ -224,7 +224,7 @@ aspect DynamicStateSelect{
                 if (fVar.order() == 1)
                     varList.add(fVar.getMeIntegrated().createUseExp());
                 else
-                    varList.add(new FIdUseExp(fVar.getFQName().createDerPrefixedName(fVar.order() - 1)));
+                    varList.add(new FIdUseExp(fVar.getFAccess().createDerPrefixedName(fVar.order() - 1)));
             }
             List<DynamicStateCoefficient> coffList = new List<DynamicStateCoefficient>();
             for (int eqn = 0; eqn < resSet.coefficients.length; eqn++) {
@@ -246,7 +246,7 @@ aspect DynamicStateSelect{
                 FDynamicStateVariable var = new FDynamicStateVariable(set, i);
                 stateVars[i - 1] = var;
                 addFVariable(var);
-                addFEquation(new FEquation(new FDerExp(var.createFIdUse()), new FDSDerExp(set.id(), i)));
+                addFEquation(new FEquation(new FDerExp(var.createCommonAccess()), new FDSDerExp(set.id(), i)));
             }
             set.setStateVars(stateVars);
             manager.addSet(set);
@@ -256,7 +256,7 @@ aspect DynamicStateSelect{
     
     rewrite FDerExp {
         when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
-            return new FDynamicDerExp(getFIdUse(), getOriginalVariable(), order());
+            return new FDynamicDerExp(getCommonAccess(), getOriginalVariable(), order());
         }
     }
     

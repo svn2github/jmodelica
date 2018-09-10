@@ -27,7 +27,7 @@ FlatRoot : Root ::= FClass;
  * a list of variables and variables, a list of functions and a list of equations, 
  * of which some are initial equations.
  */ 
-FClass : BaseNode ::= FQName 
+FClass : BaseNode ::= FAccess 
                       FVariable* 
                       AliasVariable:FVariable* 
                       FInitialEquation:FAbstractEquation*
@@ -47,7 +47,7 @@ FClass : BaseNode ::= FQName
  *
  * Results from a class with the restriction "function" and an algorithm block.
  */
-FFunctionDecl : BaseNode ::= FQName 
+FFunctionDecl : BaseNode ::= FAccess 
                              FFunctionVariable* 
                              FAlgorithm 
                              FAttribute*;
@@ -65,7 +65,7 @@ FDestructorDecl : FFunctionDecl;
 /**
  * A flattenend record declaration.
  */
-FRecordDecl : BaseNode ::= FQName FVariable*;
+FRecordDecl : BaseNode ::= FAccess FVariable*;
 
 /**
  * A flattenend enumeration declaration.
@@ -74,7 +74,7 @@ FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;
-FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
+FEnumLiteral : FAbstractVariable ::= Name:CommonAccess [FStringComment];
 
 /**
  * Abstract base class for flat variables.
@@ -88,7 +88,7 @@ FFunctionVariable : FAbstractVariable ::= <TypePrefixInputOutput:TypePrefixInput
                                           FAttribute*
                                           Type:FType
                                           [BindingExp:FExp]
-                                          FQName
+                                          FAccess
                                           <Order:int>;
 
 /**
@@ -109,7 +109,7 @@ UnknownFVariable : FAbstractVariable;
  * (input or output). In addition, FVariable contains a list of attributes
  * and, optionally, a binding expression. FVariables may represent both array
  * variables and scalar variables: this information is embedded in the 
- * FQName class.
+ * FAccess class.
  */
 abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
                                            <TypePrefixVariability:TypePrefixVariability>
@@ -118,7 +118,7 @@ abstract FVariable : FAbstractVariable ::= <VisibilityType:VisibilityType>
                                            <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
-                                           FQName;
+                                           FAccess;
 
 /**
  * Represents a set of attributes that can be used by several variables.
@@ -155,12 +155,12 @@ FStringVariable : FVariable;
 /**
  * FVariable of type Enumeration.
  */
-FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
+FEnumVariable : FVariable ::= Enum:FAccess /Type:FType/;
 
 /**
  * An external object variable.
  */
-FExternalObjectVariable : FVariable ::= Constructor:FIdUse /DestructorCall:FFunctionCallStmt/;
+FExternalObjectVariable : FVariable ::= Constructor:CommonAccess /DestructorCall:FFunctionCallStmt/;
 
 /**
  * Pre FVariable of type Real.
@@ -190,7 +190,7 @@ FPreEnumVariable : FEnumVariable;
 /**
  * FVariable of a record type.
  */
-FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
+FRecordVariable : FVariable ::= Record:FRecordAccess /Type:FType/;
 
 /**
  * Abstract variable type for all the different derivative variable types.
@@ -255,7 +255,7 @@ FRecordType : FCellType ::= <Name> Component:FRecordComponentType* <FClass:FClas
 /**
  * Class representing the external object type.
  */
-FExternalObjectType : FCellType ::= <Name> Constructor:FIdUse Destructor:FIdUse;
+FExternalObjectType : FCellType ::= <Name> Constructor:CommonAccess Destructor:CommonAccess;
 
 /**
  * Partial function call type
@@ -331,42 +331,42 @@ FUnknownType : FCellType;
  * A qualified name supporting array subscripts.
  *
  * Flattened variables and identifiers typically have qualified names, which
- * are represented by FQName. FQName contains a list of FQNamePart objects
+ * are represented by FAccess. FAccess contains a list of FAccessPart objects
  * which in turn contains a name and, optionally, array subscripts. The 
- * structure of the FQName class is motivated by the fact that flat names
+ * structure of the FAccess class is motivated by the fact that flat names
  * needs to be printed in a number of different way (dot notation, underscore
  * notation etc).
  */
-abstract FQName : BaseNode;
+abstract FAccess : CommonAccess ::= /ExpandedSubscripts:FArraySubscripts/;
 
 /**
- * An empty FQName, used as the start of prefixes.
+ * An empty FAccess, used as the start of prefixes.
  */
-FQNameEmpty : FQName;
+FAccessEmpty : FAccess;
 
 /**
- * An FQName that is a simple string, used for scalarized names and simple names. 
+ * An FAccess that is a simple string, used for scalarized names and simple names. 
  */
-FQNameString : FQName ::= <Name:String>;
+FAccessString : FAccess ::= <Name:String>;
 
 /**
- * A full FQName, with a list of FQNameParts.
+ * A full FAccess, with a list of FAccessParts.
  */
-FQNameFull : FQName ::= FQNamePart*;
+FAccessFull : FAccess ::= FAccessPart*;
 
 /**
  * A name part without array subscripts.
  * 
- * To be used in FQName:s.
+ * To be used in FAccess:s.
  */
-FQNamePart : BaseNode ::= <Name:String>;
+FAccessPart : BaseNode ::= <Name:String>;
 
 /**
  * A name part with array subscripts.
  * 
- * To be used in FQName:s.
+ * To be used in FAccess:s.
  */
-FQNamePartArray : FQNamePart ::= FArraySubscripts;
+FAccessPartArray : FAccessPart ::= FArraySubscripts;
 
 /**
  * Representation of an attribute for a built-in types.
@@ -377,7 +377,7 @@ FQNamePartArray : FQNamePart ::= FArraySubscripts;
  * type, its value, whether it is set explicitly by the user and the prefixes
  * each and final. 
  */
-FAttribute : BaseNode ::= Type:FIdUse
+FAttribute : BaseNode ::= Type:CommonAccess
                           Name:FIdDecl
                           [Value:FExp]
                           <AttributeSet:boolean>
@@ -417,7 +417,7 @@ FFinal : BaseNode;
 FStringComment : BaseNode ::= <Comment:String>;
 
 /**
- * Array subscripts used in FQNames.
+ * Array subscripts used in FAccesss.
  */
 FArraySubscripts : BaseNode ::= FSubscript*;
 
@@ -473,7 +473,7 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
 /**
  * A class for storing hand guided tearing on system level.
  */
-FResidualPair : BaseNode ::= ResidualEquation:FIdUse IterationVariable:FIdUse <Level:int>;
+FResidualPair : BaseNode ::= ResidualEquation:CommonAccess IterationVariable:CommonAccess <Level:int>;
 
 /**
  * One of the left hand side variables in a function call equation. 
@@ -491,8 +491,8 @@ FFunctionCallLeft : BaseNode ::= [FExp];
  * as an intermediate node type.
  */
 FConnectClause : FAbstractEquation ::= <SrcConnectClause:SrcConnectClause>
-                                       Connector1:FIdUseInstAccess 
-                                       Connector2:FIdUseInstAccess;
+                                       Connector1:InstAccess 
+                                       Connector2:InstAccess;
 
 /**
  * Base class for operators concerning overconstrained connection graphs.
@@ -967,19 +967,14 @@ InstIfExp : FIfExp;
 /**
  * Declaration of a qualified name. 
  */
-FIdDecl : BaseNode ::= FQName;
-
-/**
- * Abstract superclass for accesses in both instance and flat trees.
- */
-abstract CommonAccess : BaseNode;
+FIdDecl : BaseNode ::= FAccess;
 
 /**
  * A qualified identifier.
  */
-FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
+abstract CommonAccess : BaseNode;
 
-
+FRecordAccess : FAccessString;
 
 /**
  * Abstract FExp type for all FExps that describes a variable references.
@@ -999,7 +994,7 @@ FComponentExp : FExp ::= FExp <Name:String>;
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= FIdUse <OriginalVariable:String>;
+FIdUseExp : FAssignableExp ::= CommonAccess <OriginalVariable:String>;
 
 /**
  * A reference to a dynamic state. These are the states that are introduced by
@@ -1062,14 +1057,9 @@ FPreExp : FIdUseExp;
 InstHDerExp : InstDerExp ::= <Order:int>; 
 
 /**
- * Identifier in the instance tree.
- */
-FIdUseInstAccess : FIdUse ::= InstAccess;
-
-/**
  * Record constructor.
  */
-FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;
+FRecordConstructor : FBuiltInFunctionCall ::= Record:FRecordAccess Arg:FExp* /Type:FType/;
 
 /**
  * Record constructor in instance trees.
@@ -1164,12 +1154,12 @@ abstract CommonFunctionCall : FAbstractFunctionCall;
 /**
  * Generic function call expression in flat tree.
  */
-FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* FType;
+FFunctionCall : CommonFunctionCall ::= Name:FAccess Arg:FExp* FType;
  
 /**
  * Partial function call expression in flat tree.
  */
-FPartialFunctionCall : FFunctionCall ::= ArgName:FIdUse*;
+FPartialFunctionCall : FFunctionCall ::= ArgName:CommonAccess*;
  
 /**
  * Generic vectorized function call expression.

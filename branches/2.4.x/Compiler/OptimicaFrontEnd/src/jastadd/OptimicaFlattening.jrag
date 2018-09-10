@@ -101,8 +101,8 @@ aspect OptimicaFlattening {
             c.flatten(f);
     }
 
-	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-		prefix = getFQName();
+	refine Connections public void InstNode.buildConnectionSets(FAccess prefix, ConnectionSetManager csm, boolean connect) {
+		prefix = getFAccess();
 		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.buildConnectionSets(prefix, csm, connect);
         for (FConstraint c : getFConstraints()) 
@@ -142,7 +142,7 @@ aspect OptimicaFlattening {
 
 	
 	public FTimedVariable SrcTimedVariable.instantiate() {
-		FIdUseInstAccess name = new FIdUseInstAccess(getName().newInstAccess());
+		InstAccess name = getName().newInstAccess();
 		return copyLocationTo(new FTimedVariable(name, getArg().instantiate()));
 	}
 	
@@ -182,7 +182,7 @@ aspect OptimicaFlattening {
 	}
 
     public FExp InstTimedVariable.flatten(Flattener f) {
-        return new FTimedVariable(new FIdUse(getName().flatten()), getArg().flatten(f));
+        return new FTimedVariable(getName().flatten(), getArg().flatten(f));
     }
 
 }

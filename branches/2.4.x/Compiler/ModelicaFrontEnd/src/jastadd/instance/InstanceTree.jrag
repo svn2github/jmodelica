@@ -1940,9 +1940,9 @@ aspect InstanceAST_API {
     syn String InstNode.getElementName() = name();
     eq InstArrayComponentDecl.getElementName() {
         if (ndims() != 0 )  {
-            return getFQName().scalarName(false, true) + myIndex().partIndex(0, myDimension() + 1).toString();
+            return getFAccess().scalarName(false, true) + myIndex().partIndex(0, myDimension() + 1).toString();
         }
-        return getFQName().scalarName(false, true);
+        return getFAccess().scalarName(false, true);
     }
     
     syn SrcBaseClassDecl InstBaseClassDecl.getSrcBaseClassDecl() = (SrcBaseClassDecl)getSrcClassDecl();
@@ -1952,7 +1952,7 @@ aspect InstanceAST_API {
 
     syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
-    eq InstComponentDecl.qualifiedName()     = getFQName().name();
+    eq InstComponentDecl.qualifiedName()     = getFAccess().name();
     eq InstExtends.qualifiedName()           = myInstClass().qualifiedName();
     eq InstInlineExtends.qualifiedName()     = 
         surroundingInstClass().myInheritedOrigin().qualifiedName();
