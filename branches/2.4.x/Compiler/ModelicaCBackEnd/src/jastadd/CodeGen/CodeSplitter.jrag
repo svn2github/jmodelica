@@ -133,6 +133,7 @@ aspect CodeSplitter {
             for (T element : splitElements) {
                 genDecl(element);
             }
+            genPre();
             for (T element : splitElements) {
                 genPre(element);
             }
@@ -142,12 +143,15 @@ aspect CodeSplitter {
             for (T element : splitElements) {
                 genPost(element);
             }
+            genPost();
         }
         
         public abstract void genDecl(T element);
         public void genPre(T element) {}
         public abstract void gen(T element);
         public void genPost(T element) {}
+        public void genPre() {}
+        public void genPost() {}
     }
 
     AbstractEquationBlock implements CodeSplitter.Item;

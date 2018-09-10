@@ -3340,15 +3340,6 @@ aspect FVariableUses {
     }
     
     /**
-     * All uses of this variable that are the left-hand side of an assignment or 
-     * function call statement. 
-     */
-    coll HashSet<FIdUseExp> FFunctionVariable.assigningUses() [new HashSet<FIdUseExp>()] 
-        with add root FFunctionDecl;
-    FIdUseExp contributes this when isAssignedTo() && myFuncFV() != null
-        to FFunctionVariable.assigningUses() for myFuncFV();
-    
-    /**
      * Check if this is the left hand side of an equation.
      */
     inh boolean FExp.isLeftHandSide();

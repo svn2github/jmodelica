@@ -1383,4 +1383,816 @@ end WhenTestCache5;
 
 end WhenTestCache;
 
+package GlobalVariables
+
+model GlobalConstantScalar1
+    function f1
+        input Real x;
+        output Real y;
+        constant Real c = 3;
+        constant Real[1] d = {3};
+        external "C" y = f(x,c,d);
+    end f1;
+    function f2
+        input Real x;
+        output Real y;
+        constant Real c = 3;
+        constant Real[1] d = {3};
+        external "C";
+    end f2;
+    
+    Real y = f1(time) + f2(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="GlobalConstantScalar1",
+            description="Constants in external calls",
+            variability_propagation=false,
+            template="
+$C_global_temps$
+$C_set_globals_start$
+$C_function_headers$
+$C_functions$
+",
+            generatedCode="
+    jmi_real_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_c;
+    jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_d;
+    jmi_real_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_c;
+    jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 1, 1, 1)
+    jmi_array_val_1(tmp_1, 1) = 3;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_val_1(tmp_2, 1) = 3;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_c) = 3;
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_d) = jmi_global_tmp_1(jmi);
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_c) = 3;
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d) = jmi_global_tmp_2(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_def0(jmi_real_t x_v, jmi_real_t* y_o);
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_exp0(jmi_real_t x_v);
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_def1(jmi_real_t x_v, jmi_real_t* y_o);
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_exp1(jmi_real_t x_v);
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_def0(jmi_real_t x_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    extern double f(double, double, double*);
+    y_v = f(x_v, JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_c), JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_d)->var);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_exp0(jmi_real_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_def0(x_v, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_def1(jmi_real_t x_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    extern double f2(double, double, double*, size_t);
+    y_v = f2(x_v, JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_c), JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d)->var, jmi_array_size(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_d), 0));
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_exp1(jmi_real_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f2_def1(x_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantScalar1;
+
+model GlobalConstantArray1
+    
+    constant Real[:] c = {4,0,5};
+    
+    function f
+        input Real x;
+        input Integer i;
+        output Real y = x .+ c[i];
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time, 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantArray1",
+        description="",
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+",
+        generatedCode="
+    jmi_array_t* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_c;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_val_1(tmp_1, 1) = 4;
+    jmi_array_val_1(tmp_1, 3) = 5;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_c) = jmi_global_tmp_1(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = x_v + jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_c), i_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_f_exp0(jmi_real_t x_v, jmi_real_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_f_def0(x_v, i_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantArray1;
+
+model GlobalConstantRecordScalar1
+    record R1
+        Real[:] a;
+    end R1;
+    
+    record R2
+        R1 r1;
+    end R2;
+    
+    function f
+        input Real x;
+        input Integer i;
+        constant R2 r2 = R2(R1(1:2));
+        output Real y = x + r2.r1.a[i];
+    algorithm
+    annotation(Inline=false);
+    end f;
+    
+    Real y = f(time, 2);
+    
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantRecordScalar1",
+        description="",
+        variability_propagation=false,
+        template="
+$C_records$
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+",
+        generatedCode="
+typedef struct R1_0_r_ R1_0_r;
+struct R1_0_r_ {
+    jmi_array_t* a;
+};
+JMI_ARRAY_TYPE(R1_0_r, R1_0_ra)
+
+
+typedef struct R2_1_r_ R2_1_r;
+struct R2_1_r_ {
+    R1_0_r* r1;
+};
+JMI_ARRAY_TYPE(R2_1_r, R2_1_ra)
+
+
+
+    R2_1_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_r2;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R1_0_r* tmp_2;
+    JMI_GLOBALS_INIT()
+    tmp_2 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R1_0_r), TRUE);
+    tmp_2->a = jmi_global_tmp_1(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R2_1_r* tmp_3;
+    JMI_GLOBALS_INIT()
+    tmp_3 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R2_1_r), TRUE);
+    tmp_3->r1 = jmi_global_tmp_2(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_3;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_r2) = jmi_global_tmp_3(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = x_v + jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_r2)->r1->a, i_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_exp0(jmi_real_t x_v, jmi_real_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_def0(x_v, i_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantRecordScalar1;
+
+model GlobalConstantRecordArray1
+    record R
+        Real[:] a;
+    end R;
+    
+    function f
+        input Real x;
+        input Integer i;
+        constant R[:] c = {R(1.0:2.0), R(3.0:4.0)};
+        output Real y = c[i].a[i] + x;
+        algorithm
+    annotation(Inline=false);
+    end f;
+    
+    Real y = f(time, 2);
+    
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantRecordArray1",
+        description="",
+        variability_propagation=false,
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+",
+        generatedCode="
+    R_0_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_c;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = 1.0;
+    jmi_array_val_1(tmp_1, 2) = 2.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_val_1(tmp_2, 1) = 3.0;
+    jmi_array_val_1(tmp_2, 2) = 4.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+R_0_ra* jmi_global_tmp_3(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
+    jmi_array_rec_1(tmp_3, 1)->a = jmi_global_tmp_1(jmi);
+    jmi_array_rec_1(tmp_3, 2)->a = jmi_global_tmp_2(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_3;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_c) = jmi_global_tmp_3(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = jmi_array_val_1(jmi_array_rec_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_c), i_v)->a, i_v) + x_v;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_exp0(jmi_real_t x_v, jmi_real_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_def0(x_v, i_v, &y_v);
+    return y_v;
+}")})));
+end GlobalConstantRecordArray1;
+
+model GlobalConstantRecordArray2
+    record R1
+        Real[:] a;
+    end R1;
+    
+    record R2
+        R1 r1;
+    end R2;
+    
+    record R3
+        R2 r2;
+    end R3;
+    
+    function f
+        input Real x;
+        input Integer i;
+        constant R3[:] c = {R3(R2(R1(1.0:2.0))),R3(R2(R1(3.0:4.0)))};
+        output Real y = c[i].r2.r1.a[i] + x;
+        algorithm
+    annotation(Inline=false);
+    end f;
+    
+    Real y = f(time, 2);
+    
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantRecordArray2",
+        description="",
+        variability_propagation=false,
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+",
+        generatedCode="
+    R3_2_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_c;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = 1.0;
+    jmi_array_val_1(tmp_1, 2) = 2.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R1_0_r* tmp_2;
+    JMI_GLOBALS_INIT()
+    tmp_2 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R1_0_r), TRUE);
+    tmp_2->a = jmi_global_tmp_1(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R2_1_r* tmp_3;
+    JMI_GLOBALS_INIT()
+    tmp_3 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R2_1_r), TRUE);
+    tmp_3->r1 = jmi_global_tmp_2(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_3;
+}
+
+jmi_array_t* jmi_global_tmp_4(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_4, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_4, 2, 1, 2)
+    jmi_array_val_1(tmp_4, 1) = 3.0;
+    jmi_array_val_1(tmp_4, 2) = 4.0;
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_4;
+}
+
+R1_0_r* jmi_global_tmp_5(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R1_0_r* tmp_5;
+    JMI_GLOBALS_INIT()
+    tmp_5 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R1_0_r), TRUE);
+    tmp_5->a = jmi_global_tmp_4(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_5;
+}
+
+R2_1_r* jmi_global_tmp_6(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R2_1_r* tmp_6;
+    JMI_GLOBALS_INIT()
+    tmp_6 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R2_1_r), TRUE);
+    tmp_6->r1 = jmi_global_tmp_5(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_6;
+}
+
+R3_2_ra* jmi_global_tmp_7(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, R3_2_r, R3_2_ra, tmp_7, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, R3_2_r, R3_2_ra, tmp_7, 2, 1, 2)
+    jmi_array_rec_1(tmp_7, 1)->r2 = jmi_global_tmp_3(jmi);
+    jmi_array_rec_1(tmp_7, 2)->r2 = jmi_global_tmp_6(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_7;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_c) = jmi_global_tmp_7(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = jmi_array_val_1(jmi_array_rec_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_c), i_v)->r2->r1->a, i_v) + x_v;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_exp0(jmi_real_t x_v, jmi_real_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_def0(x_v, i_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantRecordArray2;
+
+
+model GlobalConstantForPowInt1
+    record R
+        Real[:] a;
+    end R;
+    
+    function f
+        input Real x;
+        constant Integer[:] c = 1:2;
+        output Real y = x;
+    algorithm
+        for i in 1:2 loop
+            y := y ^ c[i];
+        end for;
+    annotation(Inline=false);
+    end f;
+    
+    Real y = f(time);
+    
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantForPowInt1",
+        description="",
+        variability_propagation=false,
+        template="
+$C_functions$
+",
+        generatedCode="
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(jmi_real_t x_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    jmi_real_t i_0i;
+    jmi_real_t i_0ie;
+    y_v = x_v;
+    i_0ie = 2 + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        y_v = jmi_pow_function(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i]\");
+    }
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_exp0(jmi_real_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantForPowInt1;
+
+model GlobalConstantRef1
+    
+    record R1
+        Real[:] x;
+    end R1;
+    
+    record R2
+        extends R1;
+    end R2;
+    
+    record R3
+        extends R1;
+    end R3;
+    
+    package P
+        constant R1 r1 = R1(1:2);
+        constant R2 r2 = r1;
+    end P;
+    
+    function f
+        input Real x;
+        input Integer i;
+        output Real y = x + P.r2.x[i];
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time, 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantRef1",
+        description="",
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+",
+        generatedCode="
+    R1_0_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_P_r2;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R1_0_r* tmp_2;
+    JMI_GLOBALS_INIT()
+    tmp_2 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R1_0_r), TRUE);
+    tmp_2->x = jmi_global_tmp_1(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_P_r2) = jmi_global_tmp_2(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = x_v + jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_P_r2)->x, i_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_f_exp0(jmi_real_t x_v, jmi_real_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_f_def0(x_v, i_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantRef1;
+
+model GlobalConstantRef2
+    
+    record R1
+        Real[:] x;
+    end R1;
+    
+    record R2
+        extends R1;
+    end R2;
+    
+    record R3
+        extends R1;
+    end R3;
+    
+    package P
+        constant R1 r1(x=1:2);
+        constant R2 r2 = r1;
+    end P;
+    
+    function f
+        input Real x;
+        input Integer i;
+        output Real y = x + P.r2.x[i];
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time, 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantRef2",
+        description="",
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+",
+        generatedCode="
+    R1_0_r* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_P_r2;
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    R1_0_r* tmp_2;
+    JMI_GLOBALS_INIT()
+    tmp_2 = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(R1_0_r), TRUE);
+    tmp_2->x = jmi_global_tmp_1(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_P_r2) = jmi_global_tmp_2(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_f_def0(jmi_real_t x_v, jmi_real_t i_v, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = x_v + jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_P_r2)->x, i_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_f_exp0(jmi_real_t x_v, jmi_real_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_f_def0(x_v, i_v, &y_v);
+    return y_v;
+}
+")})));
+end GlobalConstantRef2;
+
+end GlobalVariables;
+
 end CCodeGenGlobalsTests;

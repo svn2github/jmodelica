@@ -372,5 +372,22 @@ model FuncCallInputOutputArray1
     parameter Real[2] p2 = F1(2,1);
 end FuncCallInputOutputArray1;
 
+model GlobalConstant1
+    record R
+        Real[:] a;
+    end R;
+    
+    function f
+        input Real x;
+        input Integer i;
+        constant R[:] c = {R(1:2), R(3:4)};
+        output Real y = c[i].a[i] + x;
+        algorithm
+    annotation(Inline=false);
+    end f;
+    
+    Real y = f(time, 2);
+end GlobalConstant1;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;

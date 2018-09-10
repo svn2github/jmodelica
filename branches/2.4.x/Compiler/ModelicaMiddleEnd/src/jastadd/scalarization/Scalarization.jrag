@@ -1076,7 +1076,7 @@ aspect Scalarization {
       if (indexNames != null) {
           fqn = fqn.copyAndAddFas(createIndexNameFas());
       }
-      fqn = fqn.asFAccessFull().copyAndAppend(suffix);
+      fqn = fqn.asFAccessFull().treeCopy().append(suffix);
       fqn.scalarized = false;
       FExp res = createNode(fqn);
       res = dynamicFExp(res).scalarize(s);

@@ -3,6 +3,10 @@
 Fixed an issue where gcc compiled FMUs did not work on Windows 10 together
 with a VS2017 compiled software.
 
+; Changed ; Minor ; Compiler ; #5670
+Update handling of constants, and accesses to package constants, in functions
+for improved compilation and simulation performance.
+
 ; Fixed ; Minor ; Runtime ; #5665
 Updated the loglevel conversion between runtime and Kinsol which in some
 models has significant impact on the performance.

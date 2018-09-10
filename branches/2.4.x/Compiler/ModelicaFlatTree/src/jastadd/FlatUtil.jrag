@@ -602,19 +602,6 @@ aspect FlatNames {
     }
     
     /**
-     * Create a copy of the name, with another name appended, and <code>fas</code> applied to the last part.
-     * 
-     * Passing <code>null</code> as <code>fas</code> is supported, and equivalent 
-     * to using {@link #copyAndAppend(FAccess)}.
-     */
-    public FAccess FAccess.copyAndAppend(FAccess name, FArraySubscripts fas) {
-        if (fas == null || fas.ndims() == 0)
-            return copyAndAppend(name);
-        FAccess res = copyAndAppend(name);
-        return res.asFAccessFull().addFArraySubscripts(fas);
-    }
-    
-    /**
      * Create a copy of the name as an FAccessFull.
      */
     public abstract FAccessFull FAccess.copyAsFAccessFull();
@@ -658,10 +645,9 @@ aspect FlatNames {
     }
     
     public FAccessFull FAccessFull.copyAndPrepend(String name) {
-        FAccessFull res = new FAccessFull(name);
-        int n = res.getNumFAccessPart();
-        for (int i = getNumFAccessPart() - 1; i >= 0; i--)
-            res.setFAccessPart(getFAccessPart(i).fullCopy(), i + n);
+        FAccessFull res = treeCopy();
+        FAccessPart first = res.getFAccessPart(0);
+        first.setName(name + "." + first.getName());
         return res;
     }
    
@@ -695,23 +681,6 @@ aspect FlatNames {
         }
         res.getFAccessPart(0).setName(prefix + name);
         return res;
-    }
-    
-    /**
-     * Create a copy of the name, with another FAccess appended.
-     */
-    public abstract FAccess FAccess.copyAndAppend(FAccess name);
-    
-    public FAccess FAccessEmpty.copyAndAppend(FAccess name) {
-        return name.fullCopy();
-    }
-    
-    public FAccess FAccessString.copyAndAppend(FAccess name) {
-        return name.copyAndPrepend(getName());
-    }
-    
-    public FAccess FAccessFull.copyAndAppend(FAccess name) {
-        return fullCopy().append(name);
     }
     
     /**
@@ -1412,18 +1381,12 @@ aspect FlatFunctionUtils {
      eq FRecordType.signatureString()   = String.format("(%s)%d", getName(), ndims());
      
      /**
-      * Set to a class to make all children behave as if this was declared in that function.
-      */
-     private InstClassDecl InstAssignable.temporarilyInFunction = null;
-     
-     /**
       * Check is this node is in a function.
       */
      inh boolean ASTNode.inFunction();
      eq Root.getChild().inFunction()              = false;
      eq FFunctionDecl.getChild().inFunction()     = true;
      eq InstBaseClassDecl.getChild().inFunction() = isFunction();
-     eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
      eq InstNormalExtends.getInstClassModification().inFunction() = extendsInFunction();
      
      inh boolean InstExtends.extendsInFunction();
