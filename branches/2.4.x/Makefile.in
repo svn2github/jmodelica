@@ -1202,7 +1202,7 @@ install-exec-local: install-python-packages
 	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile && \
+	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile && \
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/include && \
 	cp $(abs_builddir)/winpthreads_build/COPYING $(DESTDIR)$(prefix)/ThirdParty/winpthreads && \
