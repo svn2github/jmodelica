@@ -568,6 +568,7 @@ aspect Variability {
 			total = total.combine(arg.variability());
 		return total;
 	}
+	eq FArrayLitSubscripts.variability() = Variability.CONSTANT;
 
     eq FLinspace.expVariability() = getStartExp().variability().combine(getStopExp().variability());
 

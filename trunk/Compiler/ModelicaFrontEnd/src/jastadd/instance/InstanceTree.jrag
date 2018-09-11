@@ -2651,10 +2651,11 @@ aspect InstArrays {
 	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
 	    if (myFSubscripts().isEmpty())
 	        return null;
-		FArraySubscripts fas = new FArraySubscripts();
-		for (FSubscript fs : myFSubscripts()) 
-			fas.addFSubscript(fs.deferredCopy());
-		return fas;
+        List<FSubscript> list = new List<FSubscript>();
+        for (FSubscript fs : myFSubscripts()) { 
+            list.add(fs.deferredCopy());
+        }
+        return FArraySubscripts.createFArraySubscripts(list);
 	}
 	
 	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;

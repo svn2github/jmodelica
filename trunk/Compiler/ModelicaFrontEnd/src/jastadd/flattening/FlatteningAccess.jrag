@@ -34,7 +34,7 @@ aspect FlatteningAccess {
                 FIdUseExp copy = (FIdUseExp) dynamicFExp(treeCopy());
                 List<FSubscript> sub = new List<FSubscript>();
                 copy.asInstAccess().extractNonParameterIndices(sub, ia.myInstComponentDecl().variability());
-                FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
+                FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArrayExpSubscripts(sub)));
                 return res.flatten(f);
             }
         }
@@ -257,11 +257,11 @@ aspect FlatteningFunctionConstant {
      *  Determines whether or not a constant can be in-lined
      *  for the given context.
      */
-    eq BaseNode.getChild().canInlineConstant()              = true;
-    eq FArraySubscripts.getFSubscript().canInlineConstant() = true;
-    eq FExternalStmt.getArg().canInlineConstant()           = false;
-    eq FFunctionCallLeft.getFExp().canInlineConstant()      = false;
-    eq InstExternalCall.getArg().canInlineConstant()        = false;
+    eq BaseNode.getChild().canInlineConstant()                 = true;
+    eq FArrayExpSubscripts.getFSubscript().canInlineConstant() = true;
+    eq FExternalStmt.getArg().canInlineConstant()              = false;
+    eq FFunctionCallLeft.getFExp().canInlineConstant()         = false;
+    eq InstExternalCall.getArg().canInlineConstant()           = false;
     
     inh boolean FArray.canInlineConstant();
     inh boolean FIdUseExp.canInlineConstant();
@@ -317,12 +317,14 @@ aspect FlatteningFunctionConstant {
         return false;
     }
     
-    syn lazy boolean FArraySubscripts.hasUnknownIndices() {
+    syn boolean FArraySubscripts.hasUnknownIndices();
+    syn lazy boolean FArrayExpSubscripts.hasUnknownIndices() {
         for (FSubscript fs : getFSubscripts())
             if (fs.isUnknownIndex())
                 return true;
         return false;
     }
+    eq FArrayLitSubscripts.hasUnknownIndices() = false;
     
     // TODO: this doesn't seem to cover colon subscripts to arrays of unknown size
     syn boolean FSubscript.isUnknownIndex() = false;

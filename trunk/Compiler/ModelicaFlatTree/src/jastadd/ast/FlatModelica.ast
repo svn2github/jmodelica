@@ -422,7 +422,9 @@ FStringComment : BaseNode ::= <Comment:String>;
 /**
  * Array subscripts used in FAccesss.
  */
-FArraySubscripts : BaseNode ::= FSubscript*;
+abstract FArraySubscripts : BaseNode;
+FArrayExpSubscripts : FArraySubscripts ::= FSubscript*;
+FArrayLitSubscripts : FArraySubscripts;
 
 /**
  * Base class for array subscripts.

@@ -479,7 +479,7 @@ aspect FunctionScalarization {
                 List<FSubscript> subs = new List<FSubscript>();
                 subs.add(new FIntegerSubscript(i+1));
                 subs.addAll(names.createFArraySubscripts().getFSubscriptListNoTransform());
-                left = tempExp(new FArraySubscripts(subs));
+                left = tempExp(new FArrayExpSubscripts(subs));
                 right.createArrayTemporaries(s);
                 right.addArrayUsesToIndexMap(s);
             }
@@ -610,7 +610,7 @@ aspect FunctionScalarization {
         }
         ind = new FAddExp(ind, new FIntegerLitExp(1));
         
-        FArraySubscripts fas = new FArraySubscripts();
+        FArraySubscripts fas = new FArrayExpSubscripts();
         fas.addFSubscript(new FExpSubscript(ind));
 
         FExp right = getFExp().scalarize(s);
@@ -1036,12 +1036,12 @@ aspect FunctionScalarizationHelpers {
         public FArraySubscripts createFArraySubscripts(int d1, int d2) {
             if (d1 < 0)
                 throw new UnsupportedOperationException();
-            FArraySubscripts fas = new FArraySubscripts();
+            FArraySubscripts fas = new FArrayExpSubscripts();
             for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
-                    fas.addFSubscript(new FIdTempExp(new FAccessFull(topLayer()[i])));
+                    fas.addFSubscript(new FExpSubscript(new FIdTempExp(new FAccessFull(topLayer()[i]))));
                 else
-                    fas.addFSubscript(new FIntegerLitExp(1));
+                    fas.addFSubscript(new FIntegerSubscript(1));
             }
             return fas;
         }

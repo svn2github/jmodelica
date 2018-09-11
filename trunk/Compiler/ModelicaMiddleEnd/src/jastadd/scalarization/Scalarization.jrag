@@ -878,7 +878,7 @@ aspect Scalarization {
             for (FExp e : subs) {
                 l.add(e.treeCopy().createFSubscript());
             }
-            fas = new FArraySubscripts(l);
+            fas = new FArrayExpSubscripts(l);
         }
         return tempExp(tempVarName(), fas);
     }
@@ -926,7 +926,7 @@ aspect Scalarization {
         for (FExp e : indexNames) {
             l.add(e.treeCopy().createFSubscript());
         }
-        return new FArraySubscripts(l);
+        return new FArrayExpSubscripts(l);
     }
     
     public List<FAttribute> FAbstractEquation.scalarizeAttributeList(Index i, Scalarizer s) {
@@ -1539,15 +1539,19 @@ aspect Scalarization {
     }
 
     public FArraySubscripts FArraySubscripts.scalarize(Scalarizer s) {
-        FArraySubscripts fas = new FArraySubscripts();
+        FArraySubscripts fas = new FArrayExpSubscripts();
         for (FSubscript fs : getFSubscripts()) {
             fas.addFSubscript(fs.scalarize(s));
         }
         return fas;
     }
+    
+    public FArraySubscripts FArrayLitSubscripts.scalarize(Scalarizer s) {
+        return treeCopy();
+    }
 
     public FSubscript FSubscript.scalarize(Scalarizer s) {
-        return (FSubscript) fullCopy();
+        return treeCopy();
     }
     
     public FSubscript FColonSubscript.scalarize(Scalarizer s) {

@@ -812,7 +812,7 @@ aspect FunctionInlining {
             ArrayList<FAbstractEquation> list, AbstractFunctionInliner fi, FAccess name) {
         int i = 1;
         for (FExp exp : getFExps()) {
-            FAccess cellName = name.copyAndAddSubscript(new FIntegerSubscript(i));
+            FAccess cellName = name.copyAndAddSubscript(i);
             exp.createInliningOutputEquations(list, fi, cellName);
             i++;
         }
@@ -1580,7 +1580,7 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FArraySubscripts.copyWithNonLiteralSubscriptsAsColon() {
-        FArraySubscripts res = new FArraySubscripts();
+        FArraySubscripts res = new FArrayExpSubscripts();
         for (FSubscript s : getFSubscripts()) {
             res.addFSubscriptNoTransform(s.copyWithNonLiteralSubscriptsAsColon());
         }
@@ -1605,11 +1605,11 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FAccess.copyNonLiteralSubscripts() {
-        return new FArraySubscripts();
+        return new FArrayExpSubscripts();
     }
 
     public FArraySubscripts FAccessFull.copyNonLiteralSubscripts() {
-        FArraySubscripts fas = new FArraySubscripts();
+        FArraySubscripts fas = new FArrayExpSubscripts();
         for (FAccessPart p : getFAccessParts()) {
             p.copyNonLiteralSubscriptsTo(fas);
         }

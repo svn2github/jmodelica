@@ -797,25 +797,32 @@ aspect Constructors {
 	 * Create a new FArraySubscripts <code>n</code> literal subscripts from 
 	 *        <code>i</code>, starting at <code>j</code>.
 	 */
-	public FArraySubscripts.FArraySubscripts(Index i, int j, int n) {
+	public FArrayLitSubscripts.FArrayLitSubscripts(Index i, int j, int n) {
 		this();
-		for (int k = j; k < n+j; k++)
-			addFSubscript(i.get(k));
+		subscripts = new int[n];
+		for (int k = 0; k < n; k++)
+			subscripts[k] = i.get(k+j);
 	}
 	
-	/**
-	 * Add a new use expression subscript to the list of FSubscripts.
-	 */
-	public void FArraySubscripts.addFSubscript(FExp e) {
-		addFSubscript(e.createFSubscript());
-	}
-	
+    public FArrayLitSubscripts.FArrayLitSubscripts(int... subscripts) {
+        this();
+        this.subscripts = Arrays.copyOf(subscripts, subscripts.length);
+    }
+
+
+
 	/**
 	 * Add a new integer literal subscript to the list of FSubscripts.
 	 */
-	public void FArraySubscripts.addFSubscript(int i) {
-		addFSubscript(new FIntegerSubscript(i));
-	}
+    public void FArraySubscripts.addFSubscript(int i) {
+        addFSubscript(new FIntegerSubscript(i));
+    }
+
+    public void FArrayLitSubscripts.addFSubscript(int i) {
+        int length = subscripts.length;
+        subscripts = Arrays.copyOf(subscripts, length + 1);
+        subscripts[length] = i;
+    }
 	
 	/**
 	 * Add new integer literal subscripts for each index to the list of FSubscripts.
@@ -824,6 +831,12 @@ aspect Constructors {
 		for (int i : index)
 			addFSubscript(i);
 	}
+
+    public void FArrayLitSubscripts.addFSubscripts(int[] index) {
+        int length = subscripts.length;
+        subscripts = Arrays.copyOf(subscripts, length + index.length);
+        System.arraycopy(index, 0, subscripts, length, index.length);
+    }
 	
 	/**
 	 * Add new integer literal subscripts for each index to the list of FSubscripts.
@@ -839,17 +852,21 @@ aspect Constructors {
 		List<FSubscript> l = new List<FSubscript>();
 		for (int i = 0; i < n; i++)
 			l.add(new FColonSubscript());
-		return new FArraySubscripts(l);
+		return new FArrayExpSubscripts(l);
 	}
-	
-	/**
-	 * Create a new FArraySubscripts containing an integer literal.
-	 */
-	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
-		List<FSubscript> l = new List<FSubscript>();
-		l.add(new FIntegerSubscript(i));
-		return new FArraySubscripts(l);
-	}
+
+    public static FArraySubscripts FArraySubscripts.createFArraySubscripts(List<FSubscript> list) {
+        for (FSubscript fs : list) {
+            if (!fs.isIntegerSubscript()) {
+                return new FArrayExpSubscripts(list);
+            }
+        }
+        int[] subscripts = new int[list.getNumChildNoTransform()];
+        for (int i = 0; i < subscripts.length; i++) {
+            subscripts[i] = list.getChildNoTransform(i).getValue();
+        }
+        return new FArrayLitSubscripts(subscripts);
+    }
 
     public FSubscript FExp.createFSubscript() {
         return new FExpSubscript(this);
@@ -859,15 +876,6 @@ aspect Constructors {
         return new FIntegerSubscript(getValue());
     }
 
-	
-	/**
-	 * Create a new FArraySubscripts containing integer literals.
-	 */
-	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
-		FArraySubscripts fas = new FArraySubscripts();
-		fas.addFSubscripts(index);
-		return fas;
-	}
 
     public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
         this(new FAccessString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new List<FAttribute>());

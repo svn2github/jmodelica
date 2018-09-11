@@ -4481,6 +4481,7 @@ aspect CircularExpressions {
 				return true;
 		return false;
 	}
+	eq FArrayLitSubscripts.isCircular() = false;
 	
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();

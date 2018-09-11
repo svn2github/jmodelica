@@ -1209,7 +1209,7 @@ aspect Flattening {
             for (int i = 0; i < ndims(); i++) {
                 l.add(flattenFSubscript(f, i));
             }
-            return new FArraySubscripts(l);
+            return FArraySubscripts.createFArraySubscripts(l);
         }
         return null;
     }
@@ -2265,7 +2265,7 @@ aspect FlatExpressions {
         List l = new List();
         for (FSubscript fs : getFSubscripts())
             l.add(fs.flatten(f));
-        return new FArraySubscripts(l);
+        return FArraySubscripts.createFArraySubscripts(l);
     }
 
     abstract public FSubscript FSubscript.flatten(Flattener f);
@@ -2308,11 +2308,11 @@ aspect FlatExpressions {
         if (ndims() == 0) {
             return null;
         }
-        FArraySubscripts fas = new FArraySubscripts();
+        List<FSubscript> list = new List<FSubscript>();
         for (int i = 0; i < ndims(); i++) {
-            fas.addFSubscript(flattenSubscript(i));
+            list.add(flattenSubscript(i));
         }
-        return fas;
+        return FArraySubscripts.createFArraySubscripts(list);
     }
     
     public FSubscript FIntegerSubscript.flatten(Flattener f) { 
@@ -3085,7 +3085,7 @@ aspect InstantiatedExpressions {
         List l = new List();
         for (SrcSubscript s : getSrcSubscripts())
             l.add(s.instantiate());
-        return copyLocationTo(new FArraySubscripts(l));
+        return copyLocationTo(new FArrayExpSubscripts(l));
     }
     
     abstract public FSubscript SrcSubscript.instantiate();
