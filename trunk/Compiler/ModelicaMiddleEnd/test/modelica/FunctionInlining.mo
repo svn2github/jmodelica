@@ -5050,11 +5050,102 @@ model GlobalConst2
 fclass FunctionInlining.GlobalConst2
  parameter Integer temp_2;
  parameter Real y.x;
+package constant
+ constant FunctionInlining.GlobalConst2.R2 FunctionInlining.GlobalConst2.f.a = FunctionInlining.GlobalConst2.R2({FunctionInlining.GlobalConst2.R1(2), FunctionInlining.GlobalConst2.R1(3)});
 parameter equation
  temp_2 = integer(time);
- y.x = ({2, 3})[temp_2];
+ y.x = global(FunctionInlining.GlobalConst2.f.a.r1[temp_2].x);
+
+public
+ record FunctionInlining.GlobalConst2.R1
+  parameter Real x;
+ end FunctionInlining.GlobalConst2.R1;
+
+ record FunctionInlining.GlobalConst2.R2
+  parameter FunctionInlining.GlobalConst2.R1 r1[2];
+ end FunctionInlining.GlobalConst2.R2;
+
 end FunctionInlining.GlobalConst2;
 ")})));
 end GlobalConst2;
+
+model GlobalConstExtObj1
+    package P
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Real[:] x;
+                output EO eo;
+                external;
+            end constructor;
+            function destructor
+                input EO eo;
+                external;
+            end destructor;
+        end EO;
+        
+        function f
+            input EO eo;
+            output Real y;
+            external;
+        end f;
+        
+        constant Real x = 1;
+        constant EO eo = EO({x});
+        constant EO eo1 = eo;
+    end P;
+    
+    function f
+        input Real x;
+        input P.EO eo;
+        output Real y = x + P.f(eo);
+    algorithm
+    end f;
+
+    Real y = f(time, P.eo1);
+
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConstExtObj1",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConstExtObj1
+ Real y;
+package constant
+ constant FunctionInlining.GlobalConstExtObj1.P.EO FunctionInlining.GlobalConstExtObj1.P.eo = FunctionInlining.GlobalConstExtObj1.P.EO.constructor({1.0});
+ constant FunctionInlining.GlobalConstExtObj1.P.EO FunctionInlining.GlobalConstExtObj1.P.eo1 = global(FunctionInlining.GlobalConstExtObj1.P.eo);
+equation
+ y = time + FunctionInlining.GlobalConstExtObj1.P.f(global(FunctionInlining.GlobalConstExtObj1.P.eo1));
+
+public
+ function FunctionInlining.GlobalConstExtObj1.P.EO.destructor
+  input FunctionInlining.GlobalConstExtObj1.P.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end FunctionInlining.GlobalConstExtObj1.P.EO.destructor;
+
+ function FunctionInlining.GlobalConstExtObj1.P.EO.constructor
+  input Real[:] x;
+  output FunctionInlining.GlobalConstExtObj1.P.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x, size(x, 1));
+  return;
+ end FunctionInlining.GlobalConstExtObj1.P.EO.constructor;
+
+ function FunctionInlining.GlobalConstExtObj1.P.f
+  input FunctionInlining.GlobalConstExtObj1.P.EO eo;
+  output Real y;
+ algorithm
+  external \"C\" y = f(eo);
+  return;
+ end FunctionInlining.GlobalConstExtObj1.P.f;
+
+ type FunctionInlining.GlobalConstExtObj1.P.EO = ExternalObject;
+end FunctionInlining.GlobalConstExtObj1;
+")})));
+end GlobalConstExtObj1;
 
 end FunctionInlining;

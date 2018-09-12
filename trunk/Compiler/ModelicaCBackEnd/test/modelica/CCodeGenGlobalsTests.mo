@@ -1980,7 +1980,7 @@ void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(j
     y_v = x_v;
     i_0ie = 2 + 1 / 2.0;
     for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
-        y_v = jmi_pow_function(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i]\");
+        y_v = jmi_pow_function(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ global(CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i])\");
     }
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -2192,6 +2192,132 @@ jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_f_exp0(j
 }
 ")})));
 end GlobalConstantRef2;
+
+model GlobalConstantExternalObject1
+    
+    package P
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Real[:] x;
+                output EO eo;
+                external;
+            end constructor;
+            function destructor
+                input EO eo;
+                external;
+            end destructor;
+        end EO;
+        
+        function f
+            output Real y;
+            external "C" y = f(eo1);
+        end f;
+        
+        constant Real x = 1;
+        constant EO eo = EO({x});
+        constant EO eo1 = eo;
+    end P;
+    
+    function f
+        input Real x;
+        output Real y = x + P.f();
+    algorithm
+    end f;
+
+    Real y = f(time);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantExternalObject1",
+        description="",
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+$C_destruct_external_object$
+",
+        generatedCode="
+    jmi_extobj_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo;
+    jmi_extobj_t CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo1;
+
+jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    jmi_extobj_t tmp_1;
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_ref_1(tmp_2, 1) = 1.0;
+    tmp_1 = func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_constructor_exp2(tmp_2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo) = jmi_global_tmp_1(jmi);
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo1) = JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_f_def0(jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    extern double f(void*);
+    y_v = f(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo1));
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_f_exp0() {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_f_def0(&y_v);
+    return y_v;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(jmi_extobj_t eo_v) {
+    JMI_DYNAMIC_INIT()
+    extern void destructor(void*);
+    destructor(eo_v);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_constructor_def2(jmi_array_t* x_a, jmi_extobj_t* eo_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(EXO, eo_v)
+    extern void* constructor(double*, size_t);
+    eo_v = constructor(x_a->var, jmi_array_size(x_a, 0));
+    JMI_RET(GEN, eo_o, eo_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_extobj_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_constructor_exp2(jmi_array_t* x_a) {
+    JMI_DEF(EXO, eo_v)
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_constructor_def2(x_a, &eo_v);
+    return eo_v;
+}
+
+
+    func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_EO_destructor_def1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo));
+
+")})));
+end GlobalConstantExternalObject1;
 
 end GlobalVariables;
 

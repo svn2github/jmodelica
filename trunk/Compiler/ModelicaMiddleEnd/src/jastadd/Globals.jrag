@@ -187,6 +187,13 @@ aspect GlobalsCleanup {
         getSize().markUsedGlobals(type);
     }
     
+    @Override
+    public void FExternalObjectType.markUsedGlobals(Global.UseType type) {
+        super.markUsedGlobals(type);
+        getConstructor().myFCallable().markUsedGlobals(type);
+        getDestructor ().myFCallable().markUsedGlobals(type);
+    }
+    
     public void Size.markUsedGlobals(Global.UseType type) {
         
     }
@@ -218,15 +225,16 @@ aspect GlobalsCleanup {
     }
     
     @Override
-    public void FAccess.markUsedGlobals(Global.UseType type) {
+    public void FGlobalAccessExp.markUsedGlobals(Global.UseType type) {
         super.markUsedGlobals(type);
-        myTopFV().markUsedGlobalVariable(type);
+        getCommonAccess().asFAccess().myTopFV().markUsedGlobalVariable(type);
     }
     
     public void FAbstractVariable.markUsedGlobalVariable(Global.UseType type) {}
     public void FGlobalVariable.markUsedGlobalVariable(Global.UseType type) {
         if (global().update(type)) {
-            super.markUsedGlobals(type);
+            markUsedGlobals(type);
+            //type().markUsedGlobals(type);
         }
     }
 }

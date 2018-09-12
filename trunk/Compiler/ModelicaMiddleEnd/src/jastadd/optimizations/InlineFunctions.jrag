@@ -1550,6 +1550,14 @@ aspect FunctionInlining {
         return exp;
     }
 
+    @Override
+    public FExp FGlobalAccessExp.replaceReferences(AbstractFunctionInliner fi) {
+        FExp res = dynamicFExp(treeCopy());
+        for (ASTNode n : res) {
+            n.replaceReferences(fi);
+        }
+        return res;
+    }
 
     public FIdUseExp FIdUseExp.copyWithNonLiteralSubscriptsAsColon() {
         return createNode(getCommonAccess().copyWithNonLiteralSubscriptsAsColon());
