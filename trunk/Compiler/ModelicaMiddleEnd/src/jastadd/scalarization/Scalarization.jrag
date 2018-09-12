@@ -1124,7 +1124,7 @@ aspect Scalarization {
         FAccessPart first = getFAccessPart(0);
         FExp arg = con.component(first.getName());
         if (first.hasFArraySubscripts()) {
-            arg = arg.extractArrayCell(s, first.getFArraySubscripts().asIndex());
+            arg = arg.extractArrayCell(s, first.getFArraySubscripts().createIndex());
         }
         return copySuffix().scalarRecordFExp(s, arg);
     }

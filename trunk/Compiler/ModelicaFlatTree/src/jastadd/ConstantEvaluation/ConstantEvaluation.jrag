@@ -2461,7 +2461,7 @@ aspect ConstantEvaluation {
           
           if (isSlice()) {
               FArraySubscripts fas = getFArraySubscripts();
-              iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
+              iHere = fas.createIndex();
               i = iHere.expand(i);
           }
           
