@@ -3428,7 +3428,12 @@ aspect ConstantEvaluation {
     public void FExp.resetAfterCeval() {
         flushAllRecursive();
     }
-    
+
+    @Override
+    public void FInitArrayStmt.resetAfterCeval() {
+        flushAllRecursive();
+    }
+
     // TODO: reduce code duplication
 
     /**
