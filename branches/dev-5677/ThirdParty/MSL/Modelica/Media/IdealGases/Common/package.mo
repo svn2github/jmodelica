@@ -22,14 +22,14 @@ This data record contains the coefficients for the
 ideal gas equations according to:
 </p>
 <blockquote>
-  <p>McBride B.J., Zehe M.J., and Gordon S. (2002): <b>NASA Glenn Coefficients
-  for Calculating Thermodynamic Properties of Individual Species</b>. NASA
+  <p>McBride B.J., Zehe M.J., and Gordon S. (2002): <strong>NASA Glenn Coefficients
+  for Calculating Thermodynamic Properties of Individual Species</strong>. NASA
   report TP-2002-211556</p>
 </blockquote>
 <p>
 The equations have the following structure:
 </p>
-<IMG src=\"modelica://Modelica/Resources/Images/Media/IdealGases/singleEquations.png\">
+<img src=\"modelica://Modelica/Resources/Images/Media/IdealGases/singleEquations.png\">
 <p>
 The polynomials for h(T) and s0(T) are derived via integration from the one for cp(T)  and contain the integration constants b1, b2 that define the reference specific enthalpy and entropy. For entropy differences the reference pressure p0 is arbitrary, but not for absolute entropies. It is chosen as 1 standard atmosphere (101325 Pa).
 </p>
@@ -447,10 +447,10 @@ transform the formula to SI units:
 </p>
 
 <ul>
-<li> <b>Const1_SI:</b> The factor 10^(-9.5) =10^(-2.5)*1e-7 where the
+<li> <strong>Const1_SI:</strong> The factor 10^(-9.5) =10^(-2.5)*1e-7 where the
      factor 10^(-2.5) originates from the conversion of g/mol->kg/mol + cm^3/mol->m^3/mol
       and the factor 1e-7 is due to conversion from microPoise->Pa.s.</li>
-<li>  <b>Const2_SI:</b> The factor 1/3.335641e-27 = 1e-3/3.335641e-30
+<li>  <strong>Const2_SI:</strong> The factor 1/3.335641e-27 = 1e-3/3.335641e-30
       where the factor 3.335641e-30 comes from debye->C.m and
       1e-3 is due to conversion from cm^3/mol->m^3/mol</li>
 </ul>
@@ -502,7 +502,7 @@ This model calculates medium properties
 for an ideal gas of a single substance, or for an ideal
 gas consisting of several substances where the
 mass fractions are fixed. Independent variables
-are temperature <b>T</b> and pressure <b>p</b>.
+are temperature <strong>T</strong> and pressure <strong>p</strong>.
 Only density is a function of T and p. All other quantities
 are solely a function of T. The properties
 are valid in the range:
@@ -514,18 +514,18 @@ are valid in the range:
 The following quantities are always computed:
 </p>
 <table border=1 cellspacing=0 cellpadding=2>
-  <tr><td valign=\"top\"><b>Variable</b></td>
-      <td valign=\"top\"><b>Unit</b></td>
-      <td valign=\"top\"><b>Description</b></td></tr>
-  <tr><td valign=\"top\">h</td>
-      <td valign=\"top\">J/kg</td>
-      <td valign=\"top\">specific enthalpy h = h(T)</td></tr>
-  <tr><td valign=\"top\">u</td>
-      <td valign=\"top\">J/kg</td>
-      <td valign=\"top\">specific internal energy u = u(T)</td></tr>
-  <tr><td valign=\"top\">d</td>
-      <td valign=\"top\">kg/m^3</td>
-      <td valign=\"top\">density d = d(p,T)</td></tr>
+  <tr><td><strong>Variable</strong></td>
+      <td><strong>Unit</strong></td>
+      <td><strong>Description</strong></td></tr>
+  <tr><td>h</td>
+      <td>J/kg</td>
+      <td>specific enthalpy h = h(T)</td></tr>
+  <tr><td>u</td>
+      <td>J/kg</td>
+      <td>specific internal energy u = u(T)</td></tr>
+  <tr><td>d</td>
+      <td>kg/m^3</td>
+      <td>density d = d(p,T)</td></tr>
 </table>
 <p>
 For the other variables, see the functions in
@@ -571,7 +571,7 @@ Currently these are the following gases:
   SO3
 </pre>
 <p>
-<b>Sources for model and literature:</b><br>
+<strong>Sources for model and literature:</strong><br>
 Original Data: Computer program for calculation of complex chemical
 equilibrium compositions and applications. Part 1: Analysis
 Document ID: 19950013764 N (95N20180) File Series: NASA Technical Reports
@@ -580,7 +580,7 @@ Authors: Gordon, Sanford (NASA Lewis Research Center)
  Mcbride, Bonnie J. (NASA Lewis Research Center)
 Published: Oct 01, 1994.
 </p>
-<p><b>Known limits of validity:</b></br>
+<p><strong>Known limits of validity:</strong><br>
 The data is valid for
 temperatures between 200K and 6000K.  A few of the data sets for
 monatomic gases have a discontinuous 1st derivative at 1000K, but
@@ -955,9 +955,9 @@ cases, only nonpolar mixtures were compared, and very good results
 obtained. For some systems containing hydrogen as one component, less
 satisfactory agreement was noted. Wilke's method predicted mixture
 viscosities that were larger than experimental for the H2-N2 system,
-but for H2-NH3, it underestimated the viscosities. <br>
+but for H2-NH3, it underestimated the viscosities.<br>
 Gururaja, et al. (1967) found that this method also overpredicted in
-the H2-O2 case but was quite accurate for the H2-CO2 system. <br>
+the H2-O2 case but was quite accurate for the H2-CO2 system.<br>
 Wilke's approximation has proved reliable even for polar-polar gas
 mixtures of aliphatic alcohols (Reid and Belenyessy, 1960). The
 principal reservation appears to lie in those cases where Mi&gt;&gt;Mj
@@ -1081,7 +1081,7 @@ Values of kappa for a few such materials:
 cellspacing=\"0\" cellpadding=\"2\">
 <tbody>
 <tr>
-<td style=\"vertical-align: top;\">Compound <br>
+<td style=\"vertical-align: top;\">Compound<br>
 </td>
 <td style=\"vertical-align: top; text-align: center;\">Kappa<br>
 </td>
@@ -1154,7 +1154,7 @@ cellspacing=\"0\" cellpadding=\"2\">
 <p>
 Chung, et al. (1984) suggest that for other alcohols not shown in the
 table:<br>
-&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp; kappa = 0.0682 + 4.704*[(number of -OH
 groups)]/[molecular weight]<br>
 <br>
@@ -1411,7 +1411,7 @@ end lowPressureThermalConductivity;
 This model calculates the medium properties for single component ideal gases.
 </p>
 <p>
-<b>Sources for model and literature:</b><br>
+<strong>Sources for model and literature:</strong><br>
 Original Data: Computer program for calculation of complex chemical
 equilibrium compositions and applications. Part 1: Analysis
 Document ID: 19950013764 N (95N20180) File Series: NASA Technical Reports
@@ -1420,7 +1420,7 @@ Authors: Gordon, Sanford (NASA Lewis Research Center)
  Mcbride, Bonnie J. (NASA Lewis Research Center)
 Published: Oct 01, 1994.
 </p>
-<p><b>Known limits of validity:</b></br>
+<p><strong>Known limits of validity:</strong><br>
 The data is valid for
 temperatures between 200 K and 6000 K.  A few of the data sets for
 monatomic gases have a discontinuous 1st derivative at 1000 K, but

@@ -1,6 +1,6 @@
 within Modelica.Mechanics.MultiBody.Examples.Elementary;
 package Utilities
-  "Utility models and functions used by MultiBody.Examples.Elementary"
+  "Utility classes used by elementary multi-body example models"
   extends Modelica.Icons.UtilitiesPackage;
   function theoreticalNormalGravityWGS84
     "WGS84 normal gravity over earth ellipsoid in negative y-direction"
@@ -71,7 +71,7 @@ ellipsoid surface.
         for j in 1:nv loop
            X[i,j] := x_min + (x_max - x_min)*(j - 1)/(nv - 1);
            Y[i,j] := aux_y;
-           Z[i,j] := A*sin(wz + 0.1*j + 0.1*i)+A;
+           Z[i,j] := A*Modelica.Math.sin(wz + 0.1*j + 0.1*i)+A;
         end for;
      end for;
 
@@ -82,13 +82,14 @@ ellipsoid surface.
 <p>
 Function defining the characteristics of a moving sine in three dimensions.
 This function is used in example
-<a href=\"Modelica.Mechanics.MultiBody.Examples.Elementary.Surfaces\">Elementary.Surfaces</a>.
+<a href=\"modelica://Modelica.Mechanics.MultiBody.Examples.Elementary.Surfaces\">Elementary.Surfaces</a>.
 </p>
 </html>"));
   end sineSurface;
   annotation (Documentation(info="<html>
 <p>
-This package contains utility functions used by some of the example models.
+This package contains utility models and functions used by some
+of the elementary example models from the multi-body package.
 </p>
 </html>"));
 end Utilities;

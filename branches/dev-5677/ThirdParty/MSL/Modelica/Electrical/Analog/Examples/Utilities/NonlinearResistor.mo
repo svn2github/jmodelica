@@ -24,7 +24,7 @@ equation
           fillPattern=FillPattern.Solid,
           lineColor={0,0,255}),
         Text(
-          extent={{-150,97},{150,67}},
+          extent={{-170,110},{150,70}},
           lineColor={0,0,255},
           textString="%name")}),
     Diagram(coordinateSystem(
@@ -44,6 +44,6 @@ equation
           textString="%name",
           lineColor={0,0,255})}),
     Documentation(info="<html>
-<p>This is the only nonlinear component for Chua&#39;;s circuit. It is a piecewise linear resistor with both an inner and an outer range, which includes the inner one. The slopes of both ranges are given by parameters. The resistance characteristic is continuous. For Chua&#39;;s circuit both slopes have to be chosen to be negative.</p>
+<p>This is the only nonlinear component for Chua&#39;s circuit. It is a piecewise linear resistor with both an inner and an outer range, which includes the inner one. The slopes of both ranges are given by parameters. The resistance characteristic is continuous. For Chua&#39;s circuit both slopes have to be chosen to be negative.</p>
 </html>"));
 end NonlinearResistor;

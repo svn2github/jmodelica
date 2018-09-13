@@ -1,6 +1,6 @@
 /* ModelicaRandom.c - External functions for Modelica.Math.Random library
 
-   Copyright (C) 2015-2016, Modelica Association and DLR
+   Copyright (C) 2015-2018, Modelica Association and DLR
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -12,6 +12,10 @@
    2. Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
+
+   3. Neither the name of the copyright holder nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,19 +29,10 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/* The functions in this file are non-portable. The following #define's are used
-   to define the system calls of the operating system
+/* Release Notes:
+      Sep. 23, 2016: by Thomas Beutlich, ESI ITI GmbH
+                     Fixed resource leak (ticket #2069)
 
-   _MSC_VER       : Microsoft Visual C++
-   MODELICA_EXPORT: Prefix used for function calls. If not defined, blank is used
-                    Useful definitions:
-                    - "static" that is all functions become static
-                      (useful if file is included with other C-sources for an
-                       embedded system)
-                    - "__declspec(dllexport)" if included in a DLL and the
-                      functions shall be visible outside of the DLL
-
-   Release Notes:
       Oct. 27, 2015: by Thomas Beutlich, ITI GmbH
                      Added nonnull attribute/annotations (ticket #1436)
 
@@ -45,9 +40,7 @@
                      Implemented a first version
 */
 
-#if !defined(MODELICA_EXPORT)
-#   define MODELICA_EXPORT
-#endif
+#include "ModelicaRandom.h"
 
 /* Have RANDOM int64 / uint64 */
 #if defined (_WIN32)
@@ -104,10 +97,11 @@
 #include <limits.h>
 #include <math.h>
 #include <string.h>
+#include "ModelicaInternal.h"
 #include "ModelicaUtilities.h"
 #include "gconstructor.h"
 
-/* The standard way to detect posix is to check _POSIX_VERSION,
+/* The standard way to detect POSIX is to check _POSIX_VERSION,
  * which is defined in <unistd.h>
  */
 #if defined(__unix__) || defined(__linux__) || defined(__APPLE_CC__)
@@ -117,7 +111,7 @@
   #define _POSIX_ 1
 #endif
 
-/* On Posix systems define a mutex using the single static variable "m" */
+/* On POSIX systems define a mutex using the single static variable "m" */
 #if defined(_POSIX_) && !defined(NO_MUTEX)
 #include <pthread.h>
 static pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
@@ -129,7 +123,7 @@ static pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 #if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <Windows.h>
+#include <windows.h>
 static CRITICAL_SECTION cs;
 #ifdef G_DEFINE_CONSTRUCTOR_NEEDS_PRAGMA
 #pragma G_DEFINE_CONSTRUCTOR_PRAGMA_ARGS(ModelicaRandom_initializeCS)
@@ -153,36 +147,6 @@ static void ModelicaRandom_deleteCS(void) {
 #define MUTEX_LOCK()
 #define MUTEX_UNLOCK()
 #endif
-
-/*
- * Non-null pointers need to be passed to external functions.
- *
- * The following macros handle nonnull attributes for GNU C and Microsoft SAL.
- */
-#if defined(__GNUC__)
-#define MODELICA_NONNULLATTR __attribute__((nonnull))
-#else
-#define MODELICA_NONNULLATTR
-#endif
-#if !defined(__ATTR_SAL)
-#define _In_
-#define _Out_
-#endif
-
-MODELICA_EXPORT void ModelicaRandom_xorshift64star(_In_ int state_in[],
-    _Out_ int state_out[], _Out_ double* y) MODELICA_NONNULLATTR;
-MODELICA_EXPORT void ModelicaRandom_xorshift128plus(_In_ int state_in[],
-    _Out_ int state_out[], _Out_ double* y) MODELICA_NONNULLATTR;
-MODELICA_EXPORT void ModelicaRandom_xorshift1024star(_In_ int state_in[],
-    _Out_ int state_out[], _Out_ double* y) MODELICA_NONNULLATTR;
-MODELICA_EXPORT void ModelicaRandom_setInternalState_xorshift1024star(
-    _In_ int* state, size_t nState, int id) MODELICA_NONNULLATTR;
-MODELICA_EXPORT void ModelicaRandom_convertRealToIntegers(double d,
-    _Out_ int i[]) MODELICA_NONNULLATTR;
-void ModelicaInternal_getTime(_Out_ int* ms, _Out_ int* sec,
-    _Out_ int* min, _Out_ int* hour, _Out_ int* mday, _Out_ int* mon,
-    _Out_ int* year) MODELICA_NONNULLATTR;
-int ModelicaInternal_getpid(void);
 
 /* XORSHIFT ALGORITHMS */
 
@@ -209,7 +173,8 @@ int ModelicaInternal_getpid(void);
 #define ModelicaRandom_INVM64 5.42101086242752217004e-20 /* = 2^(-64) */
 #define ModelicaRandom_RAND(INT64) ( (int64_t)(INT64) * ModelicaRandom_INVM64 + 0.5 )
 
-MODELICA_EXPORT void ModelicaRandom_xorshift64star(int state_in[], int state_out[], double* y) {
+void ModelicaRandom_xorshift64star(_In_ int* state_in,
+                                   _Out_ int* state_out, _Out_ double* y) {
     /*  xorshift64* random number generator.
         For details see http://xorshift.di.unimi.it/
 
@@ -258,7 +223,8 @@ MODELICA_EXPORT void ModelicaRandom_xorshift64star(int state_in[], int state_out
     *y = ModelicaRandom_RAND(x);
 }
 
-MODELICA_EXPORT void ModelicaRandom_xorshift128plus(int state_in[], int state_out[], double* y) {
+void ModelicaRandom_xorshift128plus(_In_ int* state_in,
+                                    _Out_ int* state_out, _Out_ double* y) {
     /*  xorshift128+ random number generator.
         For details see http://xorshift.di.unimi.it
         Arguments seed and newSeed must be int32_t vectors with at least 4 elements each.
@@ -359,7 +325,8 @@ static void ModelicaRandom_xorshift1024star_internal(uint64_t s[], int* p, doubl
 #endif
 }
 
-MODELICA_EXPORT void ModelicaRandom_xorshift1024star(int state_in[], int state_out[], double* y) {
+void ModelicaRandom_xorshift1024star(_In_ int* state_in,
+                                     _Out_ int* state_out, _Out_ double* y) {
     /*  xorshift1024* random number generator.
         For details see http://xorshift.di.unimi.it
 
@@ -418,7 +385,8 @@ static uint64_t ModelicaRandom_s[ 16 ];
 static int ModelicaRandom_p;
 static int ModelicaRandom_id = 0;
 
-MODELICA_EXPORT void ModelicaRandom_setInternalState_xorshift1024star(int* state, size_t nState, int id) {
+void ModelicaRandom_setInternalState_xorshift1024star(_In_ int* state,
+                                                      size_t nState, int id) {
     /* Receive the external states from Modelica */
     union s_tag {
         int32_t  s32[2];
@@ -440,7 +408,7 @@ MODELICA_EXPORT void ModelicaRandom_setInternalState_xorshift1024star(int* state
     MUTEX_UNLOCK();
 }
 
-MODELICA_EXPORT double ModelicaRandom_impureRandom_xorshift1024star(int id) {
+double ModelicaRandom_impureRandom_xorshift1024star(int id) {
     /* xorshift1024* random number generator (same as above, but with internal state, instead of external one).
        For details see http://xorshift.di.unimi.it
 
@@ -463,21 +431,23 @@ MODELICA_EXPORT double ModelicaRandom_impureRandom_xorshift1024star(int id) {
        a 64-bit seed,  we suggest to seed a xorshift64* generator and use its
        output to fill s. */
 
-    double y;
-
     MUTEX_LOCK();
     /* Check that ModelicaRandom_initializeImpureRandome_xorshift1024star was called before */
     if ( id != ModelicaRandom_id ) {
+        MUTEX_UNLOCK();
         ModelicaError("Function impureRandom not initialized with function initializeImpureRandom\n");
+        return 0;
     }
-
-    /* Compute random number */
-    ModelicaRandom_xorshift1024star_internal(ModelicaRandom_s, &ModelicaRandom_p, &y);
-    MUTEX_UNLOCK();
-    return y;
+    else {
+        /* Compute random number */
+        double y;
+        ModelicaRandom_xorshift1024star_internal(ModelicaRandom_s, &ModelicaRandom_p, &y);
+        MUTEX_UNLOCK();
+        return y;
+    }
 }
 
-MODELICA_EXPORT int ModelicaRandom_automaticGlobalSeed(double dummy) {
+int ModelicaRandom_automaticGlobalSeed(double dummy) {
     /* Creates an automatic integer seed (typically from the current time and process id) */
 
     int ms, sec, min, hour, mday, mon, year;
@@ -497,7 +467,7 @@ MODELICA_EXPORT int ModelicaRandom_automaticGlobalSeed(double dummy) {
     return seed;
 }
 
-MODELICA_EXPORT void ModelicaRandom_convertRealToIntegers(double d, int i[]) {
+void ModelicaRandom_convertRealToIntegers(double d, _Out_ int* i) {
     /* Cast a double to two integers */
     union d2i {
         double d;

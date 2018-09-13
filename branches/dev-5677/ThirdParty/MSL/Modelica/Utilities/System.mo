@@ -1,6 +1,6 @@
 within Modelica.Utilities;
 package System "Interaction with environment"
-  extends Modelica.Icons.Package;
+  extends Modelica.Icons.FunctionsPackage;
 
 function getWorkDirectory "Get full path name of work directory"
   extends Modelica.Icons.Function;
@@ -28,7 +28,7 @@ function getEnvironmentVariable "Get content of environment variable"
   extends Modelica.Icons.Function;
   input String name "Name of environment variable";
   input Boolean convertToSlash =  false
-      "True, if native directory separators in 'result' shall be changed to '/'";
+      "True, if native directory separators in environment variable shall be changed to '/'";
   output String content
       "Content of environment variable (empty, if not existent)";
   output Boolean exist
@@ -45,7 +45,7 @@ function setEnvironmentVariable "Set content of local environment variable"
   input String name "Name of environment variable";
   input String content "Value of the environment variable";
   input Boolean convertFromSlash =  false
-      "True, if '/' in content shall be changed to the native directory separator";
+      "True, if '/' in environment variable shall be changed to native directory separators";
 external "C" ModelicaInternal_setenv(name, content, convertFromSlash) annotation(Library="ModelicaExternalC");
     annotation (__ModelicaAssociation_Impure=true,
 Documentation(info="<html>
@@ -54,6 +54,7 @@ Documentation(info="<html>
 end setEnvironmentVariable;
 
   function getTime "Retrieve the local time (in the local time zone)"
+    extends Modelica.Icons.Function;
     output Integer ms "Millisecond";
     output Integer sec "Second";
     output Integer min "Minute";
@@ -67,7 +68,7 @@ end setEnvironmentVariable;
 Documentation(info="<html>
 <h4>Syntax</h4>
 <blockquote><pre>
-(ms, sec, min, hour, day, mon, year) = System.<b>getTime</b>();
+(ms, sec, min, hour, day, mon, year) = System.<strong>getTime</strong>();
 </pre></blockquote>
 <h4>Description</h4>
 <p>
@@ -112,15 +113,14 @@ All returned values are of type Integer and have the following meaning:
 <h4>Note</h4>
 <p>This function is impure!</p>
 </html>",   revisions="<html>
-<p>
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> June 22, 2015 </td>
-    <td valign=\"top\">
+<tr><td> June 22, 2015 </td>
+    <td>
 
 <table border=0>
-<tr><td valign=\"top\">
+<tr><td>
          <img src=\"modelica://Modelica/Resources/Images/Logos/dlr_logo.png\">
 </td><td valign=\"bottom\">
          Initial version implemented by
@@ -130,18 +130,18 @@ All returned values are of type Integer and have the following meaning:
 </td></tr>
 
 </table>
-</p>
 </html>"));
   end getTime;
 
   function getPid "Retrieve the current process id"
+    extends Modelica.Icons.Function;
     output Integer pid "Process ID";
     external "C" pid=  ModelicaInternal_getpid() annotation(Library="ModelicaExternalC");
     annotation (__ModelicaAssociation_Impure=true,
 Documentation(info="<html>
 <h4>Syntax</h4>
 <blockquote><pre>
-pid = System.<b>getPid</b>();
+pid = System.<strong>getPid</strong>();
 </pre></blockquote>
 <h4>Description</h4>
 <p>
@@ -157,15 +157,14 @@ getPid()   // = 3044
 <h4>Note</h4>
 <p>This function is impure!</p>
 </html>",   revisions="<html>
-<p>
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> June 22, 2015 </td>
-    <td valign=\"top\">
+<tr><td> June 22, 2015 </td>
+    <td>
 
 <table border=0>
-<tr><td valign=\"top\">
+<tr><td>
          <img src=\"modelica://Modelica/Resources/Images/Logos/dlr_logo.png\">
 </td><td valign=\"bottom\">
          Initial version implemented by
@@ -175,7 +174,6 @@ getPid()   // = 3044
 </td></tr>
 
 </table>
-</p>
 </html>"));
   end getPid;
 
@@ -191,10 +189,7 @@ Documentation(info="<html>
 end command;
 
 function exit "Terminate execution of Modelica environment"
-  extends Modelica.Icons.Function;
-  input Integer status=0
-      "Result to be returned by environment (0 means success)";
-  external "C" exit(status) annotation(Include="#include <stdlib.h>", Library="ModelicaExternalC");
+  extends ModelicaServices.System.exit;
     annotation (__ModelicaAssociation_Impure=true,
 Documentation(info="<html>
 

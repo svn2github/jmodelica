@@ -42,7 +42,7 @@ package FastFourierTransform
         "Simulation time for one FFT calculation";
 
       Integer iTick(start=0, fixed=true);
-      Real y_buf[ns](each start=0, each fixed=true);
+      Real y_buf[ns](start=vector([6.5; fill(0, ns - 1)]), each fixed=true);
     initial equation
       for i in 1:nfi loop
          fi[i] = (i-1)*f_resolution;
@@ -62,13 +62,13 @@ package FastFourierTransform
          end if;
       end when;
 
-      annotation (experiment(StopTime=6),
+      annotation (experiment(StopTime=6), preferredView="text",
         Documentation(revisions="<html>
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -98,10 +98,9 @@ With the default values for f_max (= 4 Hz) and f_resolution (= 0.2 Hz), the foll
 A plot of the resulting FFT is shown in the next image:
 </p>
 
-<p><blockquote>
+<blockquote>
 <img src=\"modelica://Modelica/Resources/Images/Math/FFT1.png\">
 </blockquote>
-</p>
 
 <p>
 Note, phases of small amplitudes (= smaller as 0.0001*maximalAmplitude) are explicitly set to zero, since the corresponding
@@ -121,7 +120,7 @@ Furthermore, note that the FFT phases are with respect to a cos(..) signal.
         "Frequency resolution";
       parameter Modelica.SIunits.Frequency f1 = 2 "Frequency of sine";
       parameter Modelica.SIunits.Frequency f2 = 3 "Frequency of cosine";
-      parameter String FFT_resultFileName = "RealFFT1_resultFFT.mat"
+      parameter String FFT_resultFileName = "RealFFT2_resultFFT.mat"
         "File where FFT will be stored as [f,A,Phi], with f in {Hz] and A the amplitues and Phi the phases in [rad]";
       final parameter Integer nfi = max(1,min(integer(ceil(f_max/f_resolution))+1,nf))
         "Number of frequency points of the interested frequency range (only up to f_max)";
@@ -144,7 +143,7 @@ Furthermore, note that the FFT phases are with respect to a cos(..) signal.
         "Simulation time for one FFT calculation";
 
       Integer iTick(start=0, fixed=true);
-      Real y_buf[ns](each start=0, each fixed=true);
+      Real y_buf[ns](start=vector([6.5; fill(0, ns - 1)]), each fixed=true);
     initial equation
       for i in 1:nfi loop
          fi[i] = (i-1)*f_resolution;
@@ -164,13 +163,13 @@ Furthermore, note that the FFT phases are with respect to a cos(..) signal.
          end if;
       end when;
 
-      annotation (experiment(StopTime=6),
+      annotation (experiment(StopTime=6), preferredView="text",
         Documentation(revisions="<html>
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -178,7 +177,7 @@ Furthermore, note that the FFT phases are with respect to a cos(..) signal.
 </html>",
       info="<html>
 <p>
-This is the same example as <a href=\"Modelica.Math.FastFourierTransform.Examples.RealFFT1\">Examples.RealFFT1</a>
+This is the same example as <a href=\"modelica://Modelica.Math.FastFourierTransform.Examples.RealFFT1\">Examples.RealFFT1</a>
 with the only difference that just the amplitudes of the FFT are stored on file (but not the phases).
 </p>
 </html>"));
@@ -187,8 +186,8 @@ with the only difference that just the amplitudes of the FFT are stored on file 
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -235,8 +234,8 @@ with the only difference that just the amplitudes of the FFT are stored on file 
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -246,7 +245,7 @@ with the only difference that just the amplitudes of the FFT are stored on file 
 <h4>Syntax</h4>
 
 <blockquote><p>
-<b>realFFTinfo</b>(f_max, f_resolution, f_max_factor=5);
+<strong>realFFTinfo</strong>(f_max, f_resolution, f_max_factor=5);
 </p></blockquote>
 
 <h4>Description</h4>
@@ -324,8 +323,8 @@ results in the following output:
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -335,7 +334,7 @@ results in the following output:
 <h4>Syntax</h4>
 
 <blockquote><p>
-ns = <b>realFFTsamplePoints</b>(f_max, f_resolution, f_max_factor=5);
+ns = <strong>realFFTsamplePoints</strong>(f_max, f_resolution, f_max_factor=5);
 </p></blockquote>
 
 <h4>Description</h4>
@@ -364,19 +363,19 @@ used in this function
 
 <dl>
 <dt>Mark Borgerding (2010):</dt>
-<dd> <b>KissFFT, version 1.3.0</b>.
+<dd> <strong>KissFFT, version 1.3.0</strong>.
      <a href=\"http://sourceforge.net/projects/kissfft/\">http://sourceforge.net/projects/kissfft/</a>.
      <br>&nbsp;
      </dd>
 
 <dt>James W. Cooley, John W. Tukey (1965):</dt>
-<dd> <b>An algorithm for the machine calculation of complex Fourier series</b>.
+<dd> <strong>An algorithm for the machine calculation of complex Fourier series</strong>.
      Math. Comput. 19: 297-301. doi:10.2307/2003354.
      <br>&nbsp;
      </dd>
 
 <dt>Martin R. Kuhn, Martin Otter, Tim Giese (2015):</dt>
-<dd> <b>Model Based Specifications in Aircraft Systems Design</b>.
+<dd> <strong>Model Based Specifications in Aircraft Systems Design</strong>.
      Modelica 2015 Conference, Versailles, France,
      pp. 491-500, Sept.23-25, 2015.
      Download from:
@@ -448,8 +447,8 @@ results in the following output:
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -459,16 +458,16 @@ results in the following output:
 <h4>Syntax</h4>
 
 <blockquote><p>
-(info, amplitudes, phases) = <b>realFFT</b>(u);
+(info, amplitudes, phases) = <strong>realFFT</strong>(u);
 </p></blockquote>
 
 <h4>Description</h4>
 <p>
-The input argument of this function is a Real vector u. size(u,1) <b>must</b> be even. An efficient computation
+The input argument of this function is a Real vector u. size(u,1) <strong>must</strong> be even. An efficient computation
 is performed, if size(u,1) = 2^a*3^b*5^c (a,b,c Integer &ge; 0).
 An appropriate length of vector u can be computed with function
 <a href=\"modelica://Modelica.Math.FastFourierTransform.realFFTsamplePoints\">realFFTsamplePoints</a>.
-Function <b>realFFT</b> computes a real FFT (Fast Fourier Transform) of u and returns the result
+Function <strong>realFFT</strong> computes a real FFT (Fast Fourier Transform) of u and returns the result
 in form of the outputs amplitudes and phases. Argument info provides additional information:
 </p>
 
@@ -494,19 +493,19 @@ amplitudes[i] is the amplitude of a sine-function at the i-th frequency.
 
 <dl>
 <dt>Mark Borgerding (2010):</dt>
-<dd> <b>KissFFT, version 1.3.0</b>.
+<dd> <strong>KissFFT, version 1.3.0</strong>.
      <a href=\"http://sourceforge.net/projects/kissfft/\">http://sourceforge.net/projects/kissfft/</a>.
      <br>&nbsp;
      </dd>
 
 <dt>James W. Cooley, John W. Tukey (1965):</dt>
-<dd> <b>An algorithm for the machine calculation of complex Fourier series</b>.
+<dd> <strong>An algorithm for the machine calculation of complex Fourier series</strong>.
      Math. Comput. 19: 297-301. doi:10.2307/2003354.
      <br>&nbsp;
      </dd>
 
 <dt>Martin R. Kuhn, Martin Otter, Tim Giese (2015):</dt>
-<dd> <b>Model Based Specifications in Aircraft Systems Design</b>.
+<dd> <strong>Model Based Specifications in Aircraft Systems Design</strong>.
      Modelica 2015 Conference, Versailles, France,
      pp. 491-500, Sept.23-25, 2015.
      Download from:
@@ -548,9 +547,9 @@ which is a complete example where an FFT is computed during simulation and store
       "Phases of FFT (either provide no argument, or a vector with the same length as amplitudes)";
      input String format = "4"
       "MATLAB MAT-file version: \"4\" -> v4, \"6\" -> v6, \"7\" -> v7"
-       annotation(choices(choice="4" "Matlat MAT v4",
-                          choice="6" "Matlat MAT v6",
-                          choice="7" "Matlat MAT v7"));
+       annotation(choices(choice="4" "MATLAB v4 MAT-file",
+                          choice="6" "MATLAB v6 MAT-file",
+                          choice="7" "MATLAB v7 MAT-file"));
     output Boolean success "true if successful";
   protected
      Integer nA = size(amplitudes,1);
@@ -578,26 +577,26 @@ which is a complete example where an FFT is computed during simulation and store
      // Write matrix on file and print message
      success := writeRealMatrix(fileName, "FFT", fA, format=format);
      if success then
-        print("... FFT result computed at time = " + String(t_computed) + " s stored on file: " + fileName);
+        print("... FFT result computed at time = " + String(t_computed) + " s stored on file: " + Modelica.Utilities.Files.fullPathName(fileName));
      end if;
     annotation (Documentation(info="<html>
 <h4>Syntax</h4>
 
 <blockquote><p>
-success = <b>realFFTwriteToFile</b>(t_computed, fileName, f_max, amplitudes, phases, format);
+success = <strong>realFFTwriteToFile</strong>(t_computed, fileName, f_max, amplitudes, phases, format);
 </p></blockquote>
 
 <h4>Description</h4>
 <p>
 This functions stores the result of an FFT computation on file, so that it can
-be easily plotted. <b>amplitudes</b> and <b>phases</b> are the vectors that hold the
+be easily plotted. <strong>amplitudes</strong> and <strong>phases</strong> are the vectors that hold the
 amplitudes and phases values of an FFT computation. If the size of the phases vector is zero,
 no phases will be stored on file. Otherwise, phases must have the same dimension as the amplitudes
 vector. The frequency vector f is constructed within the function from the dimension of the
-amplitudes vector and the information that amplitudes[end] is at frequency <b>f_max</b>.
-The <b>format</b> argument defines the file format (for details see
+amplitudes vector and the information that amplitudes[end] is at frequency <strong>f_max</strong>.
+The <strong>format</strong> argument defines the file format (for details see
 <a href=\"modelica://Modelica.Utilities.Streams.writeRealMatrix\">writeRealMatrix</a>).
-Argument <b>t_computed</b> is the actual time instant when the FFT was computed.
+Argument <strong>t_computed</strong> is the actual time instant when the FFT was computed.
 It is used in the print message after the result was stored on file.
 </p>
 
@@ -646,8 +645,8 @@ See detailed example model:
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -657,13 +656,13 @@ See detailed example model:
 <h4>Syntax</h4>
 
 <blockquote><p>
-(info, amplitudes, phases) = <b>rawRealFFT</b>(u);
+(info, amplitudes, phases) = <strong>rawRealFFT</strong>(u);
 </p></blockquote>
 
 <h4>Description</h4>
 <p>
 Raw interface to a function of the Kiss_FFT package to compute the FFT of a real, sampled signal.
-The input argument of this function is a Real vector u. size(u,1) <b>must</b> be even. An efficient computation
+The input argument of this function is a Real vector u. size(u,1) <strong>must</strong> be even. An efficient computation
 is performed, if size(u,1) = 2^a*3^b*5^c (a,b,c Integer &ge; 0).
 The function computes a real FFT (Fast Fourier Transform) of u and returns the result
 in form of the outputs amplitudes and phases. Argument info provides additional information:
@@ -687,19 +686,19 @@ used in this function.
 
 <dl>
 <dt>Mark Borgerding (2010):</dt>
-<dd> <b>KissFFT, version 1.3.0</b>.
+<dd> <strong>KissFFT, version 1.3.0</strong>.
      <a href=\"http://sourceforge.net/projects/kissfft/\">http://sourceforge.net/projects/kissfft/</a>.
      <br>&nbsp;
      </dd>
 
 <dt>James W. Cooley, John W. Tukey (1965):</dt>
-<dd> <b>An algorithm for the machine calculation of complex Fourier series</b>.
+<dd> <strong>An algorithm for the machine calculation of complex Fourier series</strong>.
      Math. Comput. 19: 297-301. doi:10.2307/2003354.
      <br>&nbsp;
      </dd>
 
 <dt>Martin R. Kuhn, Martin Otter, Tim Giese (2015):</dt>
-<dd> <b>Model Based Specifications in Aircraft Systems Design</b>.
+<dd> <strong>Model Based Specifications in Aircraft Systems Design</strong>.
      Modelica 2015 Conference, Versailles, France,
      pp. 491-500, Sept.23-25, 2015.
      Download from:
@@ -748,8 +747,8 @@ used in this function.
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -759,7 +758,7 @@ used in this function.
 <h4>Syntax</h4>
 
 <blockquote><p>
-(success, e2, e3, e5) = <b>prime235Factorization</b>(n);
+(success, e2, e3, e5) = <strong>prime235Factorization</strong>(n);
 </p></blockquote>
 
 <h4>Description</h4>
@@ -779,8 +778,8 @@ If this is not possible, success = false, and e2, e3, e5 are dummy values.
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -789,7 +788,7 @@ If this is not possible, success = false, and e2, e3, e5 are dummy values.
   end Internal;
 annotation (Documentation(info="<html>
 <p>
-This package provides functions to compute the Fast Fourier Transform (FFT).
+This package provides functions to compute the Fast Fourier Transform (FFT).</p>
 
 <p>
 For an example see <a href=\"modelica://Modelica.Math.FastFourierTransform.Examples.RealFFT1\">Examples.RealFFT1</a>
@@ -805,28 +804,28 @@ the continuous-time signal y is sampled and the FFT is computed with a call to r
 resulting in:
 </p>
 
-<p><blockquote>
+<blockquote>
 <img src=\"modelica://Modelica/Resources/Images/Math/FFT1.png\">
-</blockquote></p>
+</blockquote>
 
 
 <h4>References</h4>
 
 <dl>
 <dt>Mark Borgerding (2010):</dt>
-<dd> <b>KissFFT, version 1.3.0</b>.
+<dd> <strong>KissFFT, version 1.3.0</strong>.
      <a href=\"http://sourceforge.net/projects/kissfft/\">http://sourceforge.net/projects/kissfft/</a>.
      <br>&nbsp;
      </dd>
 
 <dt>James W. Cooley, John W. Tukey (1965):</dt>
-<dd> <b>An algorithm for the machine calculation of complex Fourier series</b>.
+<dd> <strong>An algorithm for the machine calculation of complex Fourier series</strong>.
      Math. Comput. 19: 297-301. doi:10.2307/2003354.
      <br>&nbsp;
      </dd>
 
 <dt>Martin R. Kuhn, Martin Otter, Tim Giese (2015):</dt>
-<dd> <b>Model Based Specifications in Aircraft Systems Design</b>.
+<dd> <strong>Model Based Specifications in Aircraft Systems Design</strong>.
      Modelica 2015 Conference, Versailles, France,
      pp. 491-500, Sept.23-25, 2015.
      Download from:
@@ -838,8 +837,8 @@ resulting in:
 <table border=1 cellspacing=0 cellpadding=2>
 <tr><th>Date</th> <th align=\"left\">Description</th></tr>
 
-<tr><td valign=\"top\"> Nov. 29, 2015 </td>
-    <td valign=\"top\">
+<tr><td> Nov. 29, 2015 </td>
+    <td>
      Initial version implemented by
      Martin R. Kuhn and Martin Otter
      (<a href=\"http://www.dlr.de/rmc/sr/en\">DLR Institute of System Dynamics and Control</a>.</td></tr>
@@ -848,5 +847,5 @@ resulting in:
         Line(points={{-60,20},{-60,-80}}, color={95,95,95}),
         Line(points={{-20,60},{-20,-80}}, color={95,95,95}),
         Line(points={{20,40},{20,-80}}, color={95,95,95}),
-        Line(points={{60,-20},{60,-80}},color={95,95,95})}));
+        Line(points={{60,-20},{60,-80}}, color={95,95,95})}));
 end FastFourierTransform;
