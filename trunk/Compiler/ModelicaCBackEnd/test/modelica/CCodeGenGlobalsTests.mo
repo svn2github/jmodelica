@@ -2193,6 +2193,82 @@ jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_f_exp0(j
 ")})));
 end GlobalConstantRef2;
 
+model GlobalConstantRef3
+    
+    constant R1[1] r = {R1(2)};
+    record R1
+        parameter Real x;
+    end R1;
+    function f
+        input Integer i;
+        output Real y = 1 + r[i].x;
+    algorithm
+    end f;
+    
+    Real y = f(integer(time));
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="GlobalConstantRef3",
+        description="",
+        template="
+$C_global_temps$
+$C_set_globals_start$
+$C_functions$
+$C_ode_derivatives$
+",
+        generatedCode="
+    R1_0_ra* CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef3_r;
+
+R1_0_ra* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, R1_0_r, R1_0_ra, tmp_1, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, R1_0_r, R1_0_ra, tmp_1, 1, 1, 1)
+    jmi_array_rec_1(tmp_1, 1)->x = AD_WRAP_LITERAL(2);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef3_r) = jmi_global_tmp_1(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_globals_start_0(jmi_t* jmi);
+
+int jmi_set_globals_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_globals_start_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (pre_temp_1_2), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (pre_temp_1_2 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
+    }
+    _temp_1_2 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_temp_1_2);
+    pre_temp_1_2 = _temp_1_2;
+    _y_1 = 1 + jmi_array_rec_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef3_r), _temp_1_2)->x;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end GlobalConstantRef3;
+
 model GlobalConstantExternalObject1
     
     package P

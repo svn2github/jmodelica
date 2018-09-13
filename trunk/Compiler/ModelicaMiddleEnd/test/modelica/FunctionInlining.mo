@@ -5069,6 +5069,46 @@ end FunctionInlining.GlobalConst2;
 ")})));
 end GlobalConst2;
 
+model GlobalConst3
+    constant R1[1] r = {R1(2)};
+    record R1
+        parameter Real x;
+    end R1;
+    function f
+        input Integer i;
+        output Real y = 1 + r[i].x;
+    algorithm
+    end f;
+    
+    Real y = f(integer(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConst3",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConst3
+ constant Real r[1].x = 2;
+ Real y;
+ discrete Integer temp_1;
+package constant
+ constant FunctionInlining.GlobalConst3.R1 FunctionInlining.GlobalConst3.r[1] = {FunctionInlining.GlobalConst3.R1(2)};
+initial equation
+ pre(temp_1) = 0;
+equation
+ y = 1 + global(FunctionInlining.GlobalConst3.r[temp_1].x);
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+
+public
+ record FunctionInlining.GlobalConst3.R1
+  parameter Real x;
+ end FunctionInlining.GlobalConst3.R1;
+
+end FunctionInlining.GlobalConst3;
+")})));
+end GlobalConst3;
+
 model GlobalConstExtObj1
     package P
         model EO
