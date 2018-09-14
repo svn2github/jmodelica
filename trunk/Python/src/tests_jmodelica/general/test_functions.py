@@ -241,3 +241,24 @@ class TestGlobalConstant1(SimulationTest):
     @testattr(stddist_full = True)
     def test_GlobalConstant1(self):
         self.assert_end_value('y', 14)
+
+class TestLoopWithLargeStepSize(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.LoopWithLargeStepSize')
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+        self.run()
+
+    @testattr(stddist_full = True)
+    def test_LoopWithLargeStepSize(self):
+        self.assert_end_value('b[1]', 0.0195)
+        self.assert_end_value('b[2]', 0.44363)
+        self.assert_end_value('b[3]', 0.0585754)
+        self.assert_end_value('b[4]', 0.4130916)
+        self.assert_end_value('b[5]', 0.00295055)
+        self.assert_end_value('b[6]', 0.00103245)
+        self.assert_end_value('b[7]', 0.06122)
