@@ -242,18 +242,6 @@ aspect SrcAnnotations {
     }
 
     /**
-     * Move the ValueModification into a CompleteModification when
-     * sub modifiers are needed to the modifier
-     */
-    private void SrcComponentModification.moveValueModIntoCompleteMod() {
-        SrcValueModification oldValueModification = (SrcValueModification) getSrcModification();
-        SrcCompleteModification completeModification = new SrcCompleteModification(new SrcClassModification(),
-            new Opt<SrcValueModification>(oldValueModification));   
-        setSrcModification(completeModification);
-                        
-    }
-
-    /**
      * Remove this ASTNode from the AST.
      *
      * The ASTNode is removed and the AST state is then cleaned up using cleanUpAfterRemove.
@@ -285,8 +273,7 @@ aspect SrcAnnotations {
     @Override
     public void SrcComponentModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (!hasSrcModification()) {
-            setSrcModification(new SrcValueModification(newValue));
-            return;
+            setSrcModification(new SrcCompleteModification(new SrcClassModification()));
         }
         getSrcModification().setAnnotationValue(newValue);
     }
@@ -302,16 +289,6 @@ aspect SrcAnnotations {
             setSrcValueModification(new SrcValueModification(newValue));
         }
     }
-    
-    /**
-    * Check if the modification is a value modification (which can't have submodifers) or not. 
-    */
-    public boolean SrcModification.isValueModification(){
-        return false;
-    }
-    public boolean SrcValueModification.isValueModification(){
-        return true;
-    } 
 
     @Override
     public SrcAnnotationProvider SrcModification.addAnnotationSubNode(String name) {
@@ -332,9 +309,6 @@ aspect SrcAnnotations {
     public SrcAnnotationProvider SrcComponentModification.addAnnotationSubNode(String name) {
         if (!hasSrcModification()) {
             setSrcModification(new SrcCompleteModification(new SrcClassModification()));
-        
-        }else if (getSrcModification().isValueModification()){
-            moveValueModIntoCompleteMod();
         }
         return getSrcModification().addAnnotationSubNode(name);
     }
