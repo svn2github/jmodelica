@@ -192,7 +192,7 @@ aspect GenInitArrayStatements {
         return set;
     }
     
-    public Set<String> FIdUse.sortingAddNamesUsed(Set<String> set) {
+    public Set<String> FAccess.sortingAddNamesUsed(Set<String> set) {
         if (!myFV().isUnknown())
             set.add(name());
         return super.sortingAddNamesUsed(set);

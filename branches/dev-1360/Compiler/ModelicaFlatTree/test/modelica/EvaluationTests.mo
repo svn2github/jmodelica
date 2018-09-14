@@ -1966,7 +1966,7 @@ Error at line 23, column 5, in file '...', EXTERNAL_OBJECT_MISSING_BINDING_EXPRE
 Error at line 24, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate binding expression for structural parameter 'n': 'f(a)'
     in function 'EvaluationTests.EvalNoBinding5.f'
-    Could not evaluate external function
+    Could not evaluate external function, unknown values in arguments
 
 Error at line 25, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
   Could not evaluate array size expression: n

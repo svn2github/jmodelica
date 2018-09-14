@@ -1292,7 +1292,7 @@ public class ModelicaCompiler implements LogContainer {
     }
 
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
-        CodeGenContext cgc = new CodeGenContext();
+        CodeGenContext cgc = new CodeGenContext().createProxy();
         Map<String,String> tempMap = new HashMap<String,String>();
         return new ExternCEvalGenerator(ASTNode.prettyPrinter, '$', null, ext, cgc, tempMap);
     }

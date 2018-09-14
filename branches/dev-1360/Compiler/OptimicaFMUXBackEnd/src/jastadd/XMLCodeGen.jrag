@@ -23,7 +23,7 @@ aspect XMLCodeGen_Optimica {
 		String tagId = "Identifier";
 		String tagExp = "Instant";
 		
-		FIdUse iduse = this.getName();
+		CommonAccess iduse = this.getName();
 		FExp arg = this.getArg();
 		
 		str.print(indent + "<" + namespace + ":" + tag);

@@ -150,7 +150,7 @@ aspect CCodeGen {
      * Record declaration
      */
     
-    syn String FRecordDecl.name_C()      = getFQName().lastActualTypePartName() + "_" + recordIndex();
+    syn String FRecordDecl.name_C()      = getFAccess().lastActualTypePartName() + "_" + recordIndex();
 	
     @Override
     public void FRecordDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -292,11 +292,15 @@ aspect CCodeGen {
 	
 	syn String FAbstractVariable.preName_C() = null; 
 	eq FVariable.preName_C() = name_C("pre");
-	
-	protected String FVariable.name_C(String prefix) {
-		return name_C(prefix, Integer.toString(variableIndex()));
-	}
-	
+
+    protected String FVariable.name_C(String prefix) {
+        return name_C(prefix, Integer.toString(variableIndex()));
+    }
+
+    protected String FGlobalVariable.name_C(String prefix) {
+        return FExp.global_C(nameUnderscore());
+    }
+
 	protected String FAbstractVariable.name_C(String prefix, String suffix) {
 		StringBuilder buf = new StringBuilder();
 		if (prefix != null) {
@@ -492,7 +496,7 @@ aspect CCodeGen {
 
     syn FFunctionCallStmt FExternalObjectVariable.getDestructorCall() {
         String strName = type().name() + ".destructor";
-        FIdUse name = new FIdUse(strName);
+        FAccess name = new FAccessString(strName);
         List<FExp> args = new List<FExp>();
         args.add(createUseExp());
         FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));

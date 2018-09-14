@@ -464,6 +464,7 @@ model FunctionFlatten9
         output Real[2] y;
     algorithm
         y := x .+ a[i] .+ a[i+1];
+        annotation(Inline=false);
     end f;
     
     Real[2] z = f({3,4}, 1);
@@ -480,24 +481,22 @@ fclass FunctionTests.FunctionFlatten9
  constant Real a[3] = 3;
  Real z[1];
  Real z[2];
+package constant
+ constant Real FunctionTests.FunctionFlatten9.a[3] = {1, 2, 3};
 equation
  ({z[1], z[2]}) = FunctionTests.FunctionFlatten9.f({3, 4}, 1);
 
 public
  function FunctionTests.FunctionFlatten9.f
-  Real[:] a;
   input Real[:] x;
   input Integer i;
   output Real[:] y;
  algorithm
-  init a as Real[3];
-  a[1] := 1;
-  a[2] := 2;
-  a[3] := 3;
   init y as Real[2];
-  y[1] := x[1] .+ a[i] .+ a[i + 1];
-  y[2] := x[2] .+ a[i] .+ a[i + 1];
+  y[1] := x[1] .+ global(FunctionTests.FunctionFlatten9.a[i]) .+ global(FunctionTests.FunctionFlatten9.a[i + 1]);
+  y[2] := x[2] .+ global(FunctionTests.FunctionFlatten9.a[i]) .+ global(FunctionTests.FunctionFlatten9.a[i + 1]);
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten9.f;
 
 end FunctionTests.FunctionFlatten9;
@@ -1002,13 +1001,14 @@ model FunctionFlatten21
             flatModel="
 fclass FunctionTests.FunctionFlatten21
  Real x = FunctionTests.FunctionFlatten21.f();
+package constant
+ constant Real FunctionTests.FunctionFlatten21.f.x; // TODO: Compilation error?
 
 public
  function FunctionTests.FunctionFlatten21.f
-  Real x;
   output Real y;
  algorithm
-  y := x;
+  y := global(FunctionTests.FunctionFlatten21.f.x);
   return;
  end FunctionTests.FunctionFlatten21.f;
 
@@ -1080,19 +1080,18 @@ model FunctionFlatten23
             flatModel="
 fclass FunctionTests.FunctionFlatten23
  Real y;
+package constant
+ constant FunctionTests.FunctionFlatten23.R FunctionTests.FunctionFlatten23.f.r = FunctionTests.FunctionFlatten23.R(1, {3.14});
 equation
  y = FunctionTests.FunctionFlatten23.f(time);
 
 public
  function FunctionTests.FunctionFlatten23.f
-  FunctionTests.FunctionFlatten23.R r;
   input Real x;
   output Real y;
  algorithm
-  r.n := 1;
-  r.a[1] := 3.14;
   for i in 1:1 loop
-   y := r.a[i] * x;
+   y := global(FunctionTests.FunctionFlatten23.f.r.a[i]) * x;
   end for;
   return;
  end FunctionTests.FunctionFlatten23.f;
@@ -10279,12 +10278,14 @@ model UnknownArray29
         output Real y1;
     algorithm
       y1 := f2({a[i], a[i+1]});
+        annotation(Inline=false);
     end f1;
     
     function f2
         input Real x2[:];
         output Real y2 = sum(x2);
     algorithm
+        annotation(Inline=false);
     end f2;
     
     Real x = f1(1);
@@ -10300,21 +10301,19 @@ fclass FunctionTests.UnknownArray29
  constant Real a[2] = 2;
  constant Real a[3] = 3;
  Real x;
+package constant
+ constant Real FunctionTests.UnknownArray29.a[3] = {1, 2, 3};
 equation
  x = FunctionTests.UnknownArray29.f1(1);
 
 public
  function FunctionTests.UnknownArray29.f1
-  Real[:] a;
   input Integer i;
   output Real y1;
  algorithm
-  init a as Real[3];
-  a[1] := 1;
-  a[2] := 2;
-  a[3] := 3;
-  y1 := FunctionTests.UnknownArray29.f2({a[i], a[i + 1]});
+  y1 := FunctionTests.UnknownArray29.f2({global(FunctionTests.UnknownArray29.a[i]), global(FunctionTests.UnknownArray29.a[i + 1])});
   return;
+ annotation(Inline = false);
  end FunctionTests.UnknownArray29.f1;
 
  function FunctionTests.UnknownArray29.f2
@@ -10328,6 +10327,7 @@ public
   end for;
   y2 := temp_1;
   return;
+ annotation(Inline = false);
  end FunctionTests.UnknownArray29.f2;
 
 end FunctionTests.UnknownArray29;
@@ -12480,18 +12480,17 @@ model ExtendFunc2
 fclass FunctionTests.ExtendFunc2
  constant Real d[2] = {1, 2};
  Real x = FunctionTests.ExtendFunc2.f2(1, 2);
+package constant
+ constant Real FunctionTests.ExtendFunc2.d[2] = {1, 2};
 
 public
  function FunctionTests.ExtendFunc2.f2
-  Real[:] d;
   input Real a;
   output Real b;
   input Integer c;
   Real f;
  algorithm
-  init d as Real[2];
-  d := {1, 2};
-  f := a + d[c];
+  f := a + global(FunctionTests.ExtendFunc2.d[c]);
   b := f;
   return;
  end FunctionTests.ExtendFunc2.f2;
@@ -17029,5 +17028,167 @@ parameter equation
 end FunctionTests.ArrayWithIfInput;
 ")})));
 end ArrayWithIfInput;
+
+
+model AssignmentSizeCheck1
+  function f
+      input Integer n;
+      output Real[n] y;
+    algorithm
+      y := zeros(0);
+  end f;
+
+  constant Real[:] p1 = f(1);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck1",
+        description="Verify that array size mismatches are found during evaluation; #5654.",
+        errorMessage="
+1 errors found:
+
+Error at line 9, column 25, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'p1': 'f(1)'
+    in function 'FunctionTests.AssignmentSizeCheck1.f'
+    Mismatching types when evaluating assignment, type of left-hand side is Real[1], and type of right-hand side is Integer[0] at line 6, column 7, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+")})));
+end AssignmentSizeCheck1;
+
+model AssignmentSizeCheck2
+  function f
+      input Integer m;
+      input Integer n;
+      output Real[m, n] y;
+    algorithm
+      y := { { 1, 2 }, { 3, 4 } };
+  end f;
+
+  constant Real[:, :] p1 = f(1, 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck2",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+1 errors found:
+
+Error at line 10, column 28, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'p1': 'f(1, 2)'
+    in function 'FunctionTests.AssignmentSizeCheck2.f'
+    Mismatching types when evaluating assignment, type of left-hand side is Real[1, 2], and type of right-hand side is Integer[2, 2] at line 7, column 7, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+")})));
+end AssignmentSizeCheck2;
+
+model AssignmentSizeCheck3
+    record R
+        Real[:] x;
+    end R;
+
+  function f
+      input Integer n;
+      output R r(x={1});
+    algorithm
+      r := R(1:n);
+  end f;
+
+  constant R r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck3",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+2 errors found:
+
+Error at line 13, column 18, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck3.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R, and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R at line 10, column 7, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+
+Error at line 13, column 18, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
+    in function 'FunctionTests.AssignmentSizeCheck3.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R, and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R at line 10, column 7, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+")})));
+end AssignmentSizeCheck3;
+
+model AssignmentSizeCheck4
+    record R
+        Real x;
+    end R;
+
+  function f
+      input Integer n;
+      output R[1] r(x={1});
+    algorithm
+      r := {R(i) for i in 1:n};
+  end f;
+
+  constant R[:] r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck4",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+2 errors found:
+
+Error at line 13, column 21, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck4.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R[2] at line 10, column 7, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+
+Error at line 13, column 21, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r[1].x': '((f(2)).x)[1]'
+    in function 'FunctionTests.AssignmentSizeCheck4.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R[2] at line 10, column 7, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+")})));
+end AssignmentSizeCheck4;
+
+model AssignmentSizeCheck5
+    record R1
+        Real x;
+        Real y;
+    end R1;
+
+    record R2
+        Real x;
+    end R2;
+
+    function f
+        input Integer n;
+        output R1 r;
+    algorithm
+        r := R2(1);
+    end f;
+
+    constant R1 r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck5",
+        description="Verify that record with mismatching number of components are found during evaluation; #5654.",
+        errorMessage="
+4 errors found:
+
+Error at line 15, column 9, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  The right and left expression types of assignment are not compatible, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2
+
+Error at line 18, column 21, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2 at line 15, column 9, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+
+Error at line 18, column 21, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2 at line 15, column 9, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+
+Error at line 18, column 21, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo':
+  Could not evaluate binding expression for constant 'r.y': '(f(2)).y'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2 at line 15, column 9, in file 'C:\\Users\\axel.martensson\\eclipse-workspace\\JModelica\\Compiler\\ModelicaFrontEnd\\test\\modelica\\FunctionTests.mo'
+")})));
+end AssignmentSizeCheck5;
 
 end FunctionTests;

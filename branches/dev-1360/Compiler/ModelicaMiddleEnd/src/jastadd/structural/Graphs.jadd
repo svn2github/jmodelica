@@ -1821,7 +1821,7 @@ public class SolvingVar extends AbstractVar<SolvingEq, SolvingVar> implements Co
         diff = (getVariable().attributeSet(FAttribute.START) ? 1 : 0) - (other.getVariable().attributeSet(FAttribute.START) ? 1 : 0);
         if (diff != 0)
             return diff;
-        diff = other.getVariable().getFQName().numDots() - getVariable().getFQName().numDots();
+        diff = other.getVariable().getFAccess().numDots() - getVariable().getFAccess().numDots();
         if (diff != 0)
             return diff;
         return 0;

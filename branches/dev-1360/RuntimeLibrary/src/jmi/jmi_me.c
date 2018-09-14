@@ -58,6 +58,12 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     jmi_->resource_location = resource_location;
     
     /* set start values*/
+    if (jmi_generic_func(jmi_, jmi_set_globals_start) != 0) {
+        jmi_log_node(jmi_->log, logError, "SetGlobalsValuesFailure","Failed to set globals start values.");
+        jmi_delete(jmi_);
+        return -1;
+    }
+
     if (jmi_init_eval_independent(jmi) != 0) {
         return -1;
     }

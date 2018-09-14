@@ -155,7 +155,7 @@ aspect WhenClauses{
         }
         
         fclass.addFVariable(type().createFVariable(VisibilityType.PUBLIC,
-                new FQNameFull(tempVarName()), variability().combine(Variability.DISCRETE)));
+                new FAccessFull(tempVarName()), variability().combine(Variability.DISCRETE)));
         return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
     }
     
@@ -167,6 +167,6 @@ aspect WhenClauses{
         if (shouldExtractGuard())
             return super.asGuard(outerEqnList, stmtList, fclass);
         else
-            return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFIdUse().fullCopy())));
+            return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getCommonAccess().fullCopy())));
     }
 }

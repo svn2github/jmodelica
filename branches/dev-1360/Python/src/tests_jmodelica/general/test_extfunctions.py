@@ -516,6 +516,14 @@ class TestCBasic:
         resConst = model.simulate()
         nose.tools.assert_almost_equal(resConst.final('a1'), 10*3.14)
 
+    @testattr(stddist_full = True)
+    def testCEvalPackageConstant(self):
+        cpath = "ExtFunctionTests.CEval.C.PackageConstantTest"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('x[2]'), 4)
+
 class TestFortranBasic:
     '''
     Test basic external fortran functions.
@@ -651,7 +659,7 @@ class TestAdvanced:
         nose.tools.assert_equals(resConst.final('x'), 32.67)
     
     @testattr(stddist_full = True)
-    def testExtObjRecursive(self):
+    def testPartialEvalFail(self):
         '''
         Test failing of partial constant evaluation on external function
         '''
@@ -780,3 +788,15 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.UseCrash"
         fmu_name = compile_fmu(cpath, self.fpath)
         
+class TestMultiUse:
+    @classmethod
+    def setUpClass(self):
+        self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
+    
+    @testattr(stddist_full = True)
+    def testMultiUse1(self):
+        cpath = "ExtFunctionTests.MultiUse1"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('y'), 5.0)

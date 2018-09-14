@@ -913,7 +913,7 @@ aspect AliasVariables {
                 protected void negate(FAttribute sel) {
                     super.negate(sel);
                     String name = sel.name().equals(FAttribute.MIN) ? FAttribute.MAX : FAttribute.MIN;
-                    sel.getName().setFQName(new FQNameString(name));
+                    sel.getName().setFAccess(new FAccessString(name));
                 }
                 
             }
@@ -990,7 +990,7 @@ aspect AliasVariables {
 
         // Distance to user
         score *= 1000;
-        score += 999 - Math.min(getFQName().numDots(), 999);
+        score += 999 - Math.min(getFAccess().numDots(), 999);
 
         // Number of differentiation steps in dummy derivative
         score *= 10;
