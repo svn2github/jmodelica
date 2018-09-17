@@ -1649,6 +1649,11 @@ aspect ConstantEvaluation {
         }
 
         @Override
+        public FExp buildInstLiteral() {
+            return new FEnumLitExp(type, index);
+        }
+
+        @Override
         public boolean hasBuildLiteral() {
             return true;
         }
@@ -2456,7 +2461,7 @@ aspect ConstantEvaluation {
           
           if (isSlice()) {
               FArraySubscripts fas = getFArraySubscripts();
-              iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
+              iHere = fas.createIndex();
               i = iHere.expand(i);
           }
           
@@ -3423,7 +3428,12 @@ aspect ConstantEvaluation {
     public void FExp.resetAfterCeval() {
         flushAllRecursive();
     }
-    
+
+    @Override
+    public void FInitArrayStmt.resetAfterCeval() {
+        flushAllRecursive();
+    }
+
     // TODO: reduce code duplication
 
     /**
@@ -4481,6 +4491,7 @@ aspect CircularExpressions {
 				return true;
 		return false;
 	}
+	eq FArrayLitSubscripts.isCircular() = false;
 	
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();

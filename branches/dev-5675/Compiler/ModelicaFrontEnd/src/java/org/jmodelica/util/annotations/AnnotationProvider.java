@@ -42,4 +42,5 @@ public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extend
             this.node = node;
         }
     }
+    
 }

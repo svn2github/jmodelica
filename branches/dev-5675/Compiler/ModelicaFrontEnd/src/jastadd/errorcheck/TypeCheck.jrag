@@ -952,7 +952,7 @@ aspect FlatTypeCheck {
         super.collectSubscriptUses(name, nodes);
     }
 
-    public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
+    public void FSubscript.typeCheckAsSize(ErrorCheckType checkType) {
         if (ndims() > 0) { 
             error("Array size must be scalar expression: " + getFExp());
         } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
@@ -972,42 +972,58 @@ aspect FlatTypeCheck {
         }
     }
 
-    public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
+    public void FSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
         if (ndims() > 1) { 
-            error("Array index must be scalar or vector expression: " + getFExp());
+            error("Array index must be scalar or vector expression: " + toString());
         } else if (!type().isUnknown() && !type().canBeIndex()) {
-            error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
+            error("Array index must be Integer, Boolean, or enumeration expression: " + toString());
         } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
             error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
         } else if (!inFunction()) { 
-              if (!getFExp().variability().fixedParameterOrLess()) {
+            if (!variability().fixedParameterOrLess()) {
                 warning("Variable array index in equation can result in slow simulation time");
-              } else if (!reportedOutOfBound && !inUnknownAccess() && !mySize().isUnknown()) {
-                // Check array bounds
-                // TODO: Perform bounds check in functions if index has parameter variability or lower?
-                try {
-                    int max = mySize().get(0);
-                    for (FExp e : getFExp().getArray().iterable()) {
-                        CValue cval = e.ceval();
-                        if (cval.hasIntValue()) {
-                            int i = cval.intValue();
-                            if (i < 1 || i > max) {
-                                if (!lockBranch(checkType))
-                                    errorUnlessDisabled("Array index out of bounds: " + i + 
-                                                        ", index expression: " + getFExp());
-                                reportedOutOfBound = true;
-                                return;
-                            }
-                        }
-                    }
-                } catch (ConstantEvaluationException e) {
-                }
+            } else if (!inUnknownAccess() && !mySize().isUnknown()) {
+                typeCheckOutOfBounds(checkType);
             }
         }
     }
 
-  syn FType FExpSubscript.myIndexType() = myIndexType(myDim());
-  inh FType FExpSubscript.myIndexType(int i);
+    public void FSubscript.typeCheckOutOfBounds(ErrorCheckType checkType) {}
+    public void FExpSubscript.typeCheckOutOfBounds(ErrorCheckType checkType) {
+        if (!reportedOutOfBound) {
+            // Check array bounds
+            // TODO: Perform bounds check in functions if index has parameter variability or lower?
+            try {
+                int max = mySize().get(0);
+                for (FExp e : getFExp().getArray().iterable()) {
+                    CValue cval = e.ceval();
+                    if (cval.hasIntValue()) {
+                        int i = cval.intValue();
+                        if (i < 1 || i > max) {
+                            if (!lockBranch(checkType)) {
+                                errorUnlessDisabled("Array index out of bounds: " + i + 
+                                                    ", index expression: " + getFExp());
+                            }
+                            reportedOutOfBound = true;
+                            return;
+                        }
+                    }
+                }
+            } catch (ConstantEvaluationException e) {
+            }
+        }
+    }
+    public void FIntegerSubscript.typeCheckOutOfBounds(ErrorCheckType checkType) {
+        int max = mySize().get(0);
+        int i = getValue();
+        if ((i < 1 || i > max) && !lockBranch(checkType)) {
+            errorUnlessDisabled("Array index out of bounds: " + i +
+                                ", index expression: " + i);
+        }
+    }
+
+  syn FType FSubscript.myIndexType() = myIndexType(myDim());
+  inh FType FSubscript.myIndexType(int i);
   eq Root.getChild().myIndexType(int i)                                = fUnknownType();
   eq InstArrayAccess.getFArraySubscripts().myIndexType(int i)          = fUnknownType();
   eq InstComponentArrayAccess.getFArraySubscripts().myIndexType(int i) = myInstComponentDecl().myIndexType(i);
@@ -1023,12 +1039,13 @@ aspect FlatTypeCheck {
   private boolean FExpSubscript.reportedOutOfBound = false;
   
   
-  public void FExpSubscript.typeCheck(ErrorCheckType checkType) {
+  public void FSubscript.typeCheck(ErrorCheckType checkType) {
 	  if (isInstComponentSize()) 
 		  typeCheckAsSize(checkType);
 	  else 
 		  typeCheckAsIndex(checkType);
   }
+  public void FColonSubscript.typeCheck(ErrorCheckType checkType) {}
   
   inh boolean FSubscript.inUnknownAccess();
   eq FAccess.getChild().inUnknownAccess()                  = myFV().isUnknown();
@@ -1048,7 +1065,7 @@ aspect FlatTypeCheck {
   
   inh boolean InstClassAccess.isInstComponentSize();
     inh boolean FIdUseExp.isInstComponentSize();
-  inh boolean FExpSubscript.isInstComponentSize();
+  inh boolean FSubscript.isInstComponentSize();
   inh boolean FArraySubscripts.isInstComponentSize();
   eq InstComponentDecl.getLocalFArraySubscripts().isInstComponentSize() = true;
   eq InstComponentDecl.getFArraySubscripts().isInstComponentSize()      = true;

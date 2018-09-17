@@ -298,7 +298,8 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%sjmi_real_t %se;\n", indent, name);
+        str.format("%sjmi_int_t %se;\n", indent, name);
+        str.format("%sjmi_int_t %sn;\n", indent, name);
     }
 
     @Override
@@ -310,16 +311,33 @@ aspect CCodeGenAlgorithms {
         getFExp().printForIndexInit_C(p, str, indent, getFVariable().name_C());
     }
 
-    public void FExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {
-    }
+    public void FExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {}
 
     @Override
     public void FRangeExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%s%se = ", indent, name);
-        p.print(getFExp(hasStep() ? 2 : 1), str, indent);
-        str.print(" + ");
-        printForIndexStep_C(p, str, indent);
-        str.print(" / 2.0;\n");
+        str.format("%s%sn = 0;\n", indent, name);
+        boolean hasStep = hasStep();
+        
+        FExp start = getFExp(0);
+        FExp end = getFExp(hasStep ? 2 : 1);
+        FExp step = hasStep ? getFExp(1) : null;
+        
+        str.format("%s%se = floor(", indent, name);
+        if (hasStep) {
+            str.print("(");
+        }
+
+        p.print(end, str, indent);
+        str.print(" - ");
+        p.print(start, str, indent);
+
+        if (hasStep) {
+            str.print(") / (");
+            p.print(step, str, indent);
+            str.print(")");
+        }
+
+        str.print(");\n");
     }
 
     protected void FRangeExp.printForIndexStep_C(CodePrinter p, CodeStream str, String indent) {
@@ -348,19 +366,33 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
+        FExp start = getFExp(0);
+        FExp step = getFExp(1);
+
+        /*
+         * Initial expression.
+         */
         str.format("%s = ", name);
-        p.print(getFExp(0), str, indent);
-        if (hasStep() && !getFExp(1).variability().knownParameterOrLess()) {
-            str.format("; %s * ", name);
-            p.print(getFExp(1), str, indent);
-            str.format(" < %se * ", name);
-            p.print(getFExp(1), str, indent);
-            str.format("; %s += ", name);
-        } else {
-            String cmp = (hasStep() && getFExp(1).ceval().isNegative()) ? ">" : "<";
-            str.format("; %s %s %se; %s += ", name, cmp, name, name);
+        p.print(start, str, indent);
+        str.print(";");
+
+        /*
+         * Conditional expression.
+         */
+        str.format(" %sn <= %se; ", name, name);
+
+        /*
+         * Iteration expression.
+         */
+        str.format("%s = ", name);
+        p.print(start, str, indent);
+        str.print(" + ");
+        if (hasStep()) {
+            str.print("(");
+            p.print(step, str, indent);
+            str.print(") * ");
         }
-        printForIndexStep_C(p, str, indent);
+        str.format("(++%sn)", name);
     }
 
     public void FForIndex.printForIndexNext_C(CodePrinter p, CodeStream str, String indent) {

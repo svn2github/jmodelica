@@ -316,7 +316,6 @@ aspect ConstantEvaluationStatements {
 
     @Override
     public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
-        flushAttrCache(); 
         getFIdUseExp().assignToInFuncEval(evaluator, type().zeroCValue(), type());
         return EVAL_CONT;
     }

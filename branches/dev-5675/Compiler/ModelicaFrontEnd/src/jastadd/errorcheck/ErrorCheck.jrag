@@ -426,6 +426,7 @@ aspect ErrorCheck {
     // TODO: find way to move side-effects out from inh attr
     inh boolean FExp.lockBranch(ErrorCheckType checkType);
     inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+    inh boolean FIntegerSubscript.lockBranch(ErrorCheckType checkType);
     inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
     inh boolean FStatement.lockBranch(ErrorCheckType checkType);
     inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
