@@ -13194,7 +13194,7 @@ public
   for i1 in 1:size(x, 1) loop
    temp_3[i1] := x[i1,1];
   end for;
-  (t) := FunctionTests.FuncColonSubscript.f(temp_3);
+  (t) := FunctionTests.FuncColonSubscript.f(temp_2);
   y := t[1] + t[2] + t[3] + (t[4] + t[5]) + (t[6] + t[7] + t[8] + (t[9] + t[10]));
   return;
  end FunctionTests.FuncColonSubscript.h;
@@ -13920,7 +13920,6 @@ public
 end FunctionTests.ComponentFunc8;
 ")})));
 end ComponentFunc8;
-
 
 model MinOnInput1
     function F
