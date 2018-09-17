@@ -112,7 +112,14 @@ public final class EnvironmentUtils {
         }
         return jmodelicaHome_cache;
     }
-
+    
+    /**
+     * Temporary addition for backwards compatibility
+     */
+    public static void setJModelicaHome(String jmHome) {
+        jmodelicaHome_cache = new File(jmHome);
+    }
+    
     /**
      * Calculates the path to the ThirdParty folder in the installation
      * 

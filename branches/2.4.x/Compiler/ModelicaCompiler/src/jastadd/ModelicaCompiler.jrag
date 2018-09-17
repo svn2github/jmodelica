@@ -1349,6 +1349,13 @@ public class ModelicaCompiler implements LogContainer {
     }
     
     /**
+     * Temporary addition for backwards compatibility
+     */
+    public static void setJModelicaHome(String jmHome) {
+        EnvironmentUtils.setJModelicaHome(jmHome);
+    }
+    
+    /**
      * Configure logging according to <code>logString</code>.
      */
     public void setLogger(String logString) throws IllegalLogStringException {
