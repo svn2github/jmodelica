@@ -389,25 +389,5 @@ model GlobalConstant1
     Real y = f(time, 2);
 end GlobalConstant1;
 
-model LoopWithLargeStepSize
-    function f1
-        input Real X[9];
-        output Real Y[7];
-        Integer iStep;
-    algorithm
-        iStep:=integer(7);
-        Y:=zeros(7);
-        for i in 1:iStep loop
-            for j in i:iStep:7 loop
-                Y[i]:=Y[i]+X[j];
-            end for;
-        end for;
-    annotation(Inline=false);
-    end f1;
-    
-    parameter Real a[9]={0.0195, 0.44363, 0.0585754, 0.4130916, 0.00295055, 0.00103245, 0.06122, 100.0, 1000.0};
-    Real b[7]=f1(a);
-end LoopWithLargeStepSize;
-
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;

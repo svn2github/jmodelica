@@ -1965,21 +1965,21 @@ model GlobalConstantForPowInt1
     
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
-        name="GlobalVariables_GlobalConstantForPowInt1",
+        name="GlobalConstantForPowInt1",
         description="",
         variability_propagation=false,
-        template="$C_functions$",
+        template="
+$C_functions$
+",
         generatedCode="
 void func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(jmi_real_t x_v, jmi_real_t* y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     jmi_real_t i_0i;
-    jmi_int_t i_0ie;
-    jmi_int_t i_0in;
+    jmi_real_t i_0ie;
     y_v = x_v;
-    i_0in = 0;
-    i_0ie = floor(2 - 1);
-    for (i_0i = 1; i_0in <= i_0ie; i_0i = 1 + (++i_0in)) {
+    i_0ie = 2 + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
         y_v = jmi_pow_function(\"CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f\", y_v, jmi_array_val_1(JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_c), i_0i), \"y ^ global(CCodeGenGlobalsTests.GlobalVariables.GlobalConstantForPowInt1.f.c[i])\");
     }
     JMI_RET(GEN, y_o, y_v)
@@ -1992,7 +1992,6 @@ jmi_real_t func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_
     func_CCodeGenGlobalsTests_GlobalVariables_GlobalConstantForPowInt1_f_def0(x_v, &y_v);
     return y_v;
 }
-
 ")})));
 end GlobalConstantForPowInt1;
 
