@@ -402,6 +402,7 @@ model LoopWithLargeStepSize
                 Y[i]:=Y[i]+X[j];
             end for;
         end for;
+    annotation(Inline=false);
     end f1;
     
     parameter Real a[9]={0.0195, 0.44363, 0.0585754, 0.4130916, 0.00295055, 0.00103245, 0.06122, 100.0, 1000.0};
