@@ -1684,7 +1684,6 @@ aspect ConstantEvaluation {
     }
 
     public CValue FType.zeroCValueScalar()        { return CValue.UNKNOWN; }
-    public CValue FArrayType.zeroCValueScalar()   { return getFPrimitiveType().zeroCValueScalar(); }
     public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
     public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
     public CValue FEnumType.zeroCValueScalar()    { return new CValueEnum(this, 1); }

@@ -125,7 +125,7 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.type()      = getCall().type();
     eq FInitArrayStmt.type()         = getType();
     
-    syn FType FInitArrayStmt.getType() = getFIdUseExp().myFV().type().treeCopy();
+    syn FType FInitArrayStmt.getType() = getFIdUseExp().myFV().type();
     
     /**
      * True if this equation exclusively equates real types.
@@ -890,9 +890,6 @@ aspect TypePromotion {
         else 
             return super.scalarNumericPromotion(type, operator);
     }
-    eq FArrayType.scalarNumericPromotion(FType type, String operator) {
-        return scalarType().scalarNumericPromotion(type.scalarType(), operator);
-    }
 
 }
 
@@ -1041,28 +1038,20 @@ aspect BuiltInFlatTypes {
     public static final FStringType  FStringType.SCALAR                 = new FStringType(Size.SCALAR);
     public static final FUnknownType FUnknownType.SCALAR                = new FUnknownType(Size.SCALAR);
     public static final FNoType      FNoType.SCALAR                     = new FNoType(Size.SCALAR);
-    public static final FRecordType         FRecordType.SCALAR          = new FRecordType(Size.SCALAR, "scalar", new List(), null);
-    public static final FEnumType           FEnumType.SCALAR            = new FEnumType(Size.SCALAR, "scalar", new List());
-    public static final FExternalObjectType FExternalObjectType.SCALAR  = new FExternalObjectType(Size.SCALAR, "scalar", null, null);
 
     syn boolean FType.isReal()                  = false;
-    eq FArrayType.isReal()                      = getFPrimitiveType().isReal();
     eq FRealType.isReal()                       = true;
     syn boolean FType.isInteger()               = false;
-    eq FArrayType.isInteger()                   = getFPrimitiveType().isInteger();
     eq FIntegerType.isInteger()                 = true;
     syn boolean FType.isBoolean()               = false;
-    eq FArrayType.isBoolean()                   = getFPrimitiveType().isBoolean();
     eq FBooleanType.isBoolean()                 = true;
     syn boolean FType.isString()                = false;
-    eq FArrayType.isString()                    = getFPrimitiveType().isString();
     eq FStringType.isString()                   = true;
     syn boolean FType.isRecord()                = false;
     eq FRecordType.isRecord()                   = true;
     syn boolean FType.isOperatorRecord()        = false;
     eq FOperatorRecordType.isOperatorRecord()   = true;
     syn boolean FType.isEnum()                  = false;
-    eq FArrayType.isEnum()                      = getFPrimitiveType().isEnum();
     eq FEnumType.isEnum()                       = true;
     syn boolean FType.isExternalObject()        = false;
     eq FExternalObjectType.isExternalObject()   = true;
@@ -1073,7 +1062,6 @@ aspect BuiltInFlatTypes {
     syn boolean FType.isScalar() = getSize() == Size.SCALAR;
 
     syn boolean FType.isNumeric()        = false;
-    eq FArrayType.isNumeric()            = getFPrimitiveType().isNumeric();
     eq FPrimitiveNumericType.isNumeric() = true;
 
     syn boolean FType.isPrimitive() = false;
@@ -1098,37 +1086,42 @@ aspect BuiltInFlatTypes {
     syn boolean FType.isExternalObjectScalar()  = isScalar() && isExternalObject();
     syn boolean FType.isExternalObjectArray()   = isExternalObject() && isArray();
 
-    public abstract boolean FType.isType(FType type);
-    syn boolean FArrayType.isType(FType type) = getFPrimitiveType().isType(type);
-    syn boolean FCellType.isType(FType type) {
-        throw new UnsupportedOperationException("isType() is not supported for class type " + getClass().getSimpleName());
-    }
-    eq FRealType.isType(FType type) = type.isReal();
-    eq FIntegerType.isType(FType type) = type.isInteger();
-    eq FBooleanType.isType(FType type) = type.isBoolean();
-    eq FStringType.isType(FType type) = type.isString();
-    eq FRecordType.isType(FType type) = type.isRecord();
-    eq FOperatorRecordType.isType(FType type) = type.isOperatorRecord();
-    eq FEnumType.isType(FType type) = type.isEnum();
-    eq FExternalObjectType.isType(FType type) = type.isExternalObject();
-    eq FFunctionType.isType(FType type) = type.isFunction();
-
-    public abstract boolean FType.containsType(FType type);
-    syn boolean FArrayType.containsType(FType type) = getFPrimitiveType().containsType(type);
-    syn boolean FCellType.containsType(FType type) = isType(type);
-    eq FRecordType.containsType(FType type) {
+    syn boolean FType.containsReal() = isReal();
+    eq FRecordType.containsReal() {
         for (FRecordComponentType component : getComponents())
-            if (component.getFType().containsType(type))
+            if (component.getFType().containsReal())
                 return true;
         return false;
     }
-
-    syn boolean FType.containsReal()           = containsType(FRealType.SCALAR);
-    syn boolean FType.containsInteger()        = containsType(FIntegerType.SCALAR);
-    syn boolean FType.containsBoolean()        = containsType(FBooleanType.SCALAR);
-    syn boolean FType.containsRecord()         = containsType(FRecordType.SCALAR);
-    syn boolean FType.containsEnum()           = containsType(FEnumType.SCALAR);
-    syn boolean FType.containsExternalObject() = containsType(FExternalObjectType.SCALAR);
+    syn boolean FType.containsInteger() = isInteger();
+    eq FRecordType.containsInteger() {
+        for (FRecordComponentType component : getComponents())
+            if (component.getFType().containsInteger())
+                return true;
+        return false;
+    }
+    syn boolean FType.containsBoolean() = isBoolean();
+    eq FRecordType.containsBoolean() {
+        for (FRecordComponentType component : getComponents())
+            if (component.getFType().containsBoolean())
+                return true;
+        return false;
+    }
+    syn boolean FType.containsRecord() = isRecord();
+    syn boolean FType.containsEnum() = isEnum();
+    eq FRecordType.containsEnum() {
+        for (FRecordComponentType component : getComponents())
+            if (component.getFType().containsEnum())
+                return true;
+        return false;
+    }
+    syn boolean FType.containsExternalObject() = isExternalObject();
+    eq FRecordType.containsExternalObject() {
+        for (FRecordComponentType component : getComponents())
+            if (component.getFType().containsExternalObject())
+                return true;
+        return false;
+    }
 
     // For type comparisons ending with "or records of such types"
     public abstract class FType {
@@ -1178,13 +1171,6 @@ aspect BuiltInFlatTypes {
             return this;
         FType copy = (FType) fullCopy();
         copy.setSize(Size.SCALAR);
-        copy.setParent(parent);
-        return copy;
-    }
-    eq FArrayType.scalarType() {
-        FType copy = (FType) getFPrimitiveType().fullCopy();
-        copy.setSize(Size.SCALAR);
-        copy.setParent(parent);
         return copy;
     }
     eq FUnknownType.scalarType()        = this;
@@ -1224,15 +1210,6 @@ aspect BuiltInFlatTypes {
             return this;
         FType copy = (FType) fullCopy();
         copy.setSize(size);
-        copy.setParent(parent);
-        return copy;
-    }
-    eq FArrayType.arrayType(Size size) {
-        if (size == size())
-            return this;
-        FType copy = (FType) getFPrimitiveType().fullCopy();
-        copy.setSize(size);
-        copy.setParent(parent);
         return copy;
     }
     eq FUnknownType.arrayType(Size size)        = this;

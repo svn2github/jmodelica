@@ -637,7 +637,7 @@ FReturnStmt : FStatement;
 /**
  * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FIdUseExp /Type:FType/;
+FInitArrayStmt : FStatement ::= FIdUseExp;
 
 /**
  * Class for derivated array initalization statements.
