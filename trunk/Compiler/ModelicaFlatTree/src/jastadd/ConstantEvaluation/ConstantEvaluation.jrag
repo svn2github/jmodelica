@@ -4973,7 +4973,7 @@ aspect VariableEvaluator {
         public void failed(CommonCallable cc, ConstantEvaluationException e) {
             values.clear();
             for (CommonVariableDecl cvd : cc.myOutputs()) {
-                values.put(cvd, CValue.UNKNOWN);
+                values.put(cvd, cvd.type().unknownCValue());
             }
         }
         
