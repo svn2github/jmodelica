@@ -10,6 +10,23 @@
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
     <section>
+    <title>Release notes for JModelica.org version 2.4</title>    
+    <section><title>Runtime Changes</title>
+    <para>Important changes to Runtime:</para>
+    <itemizedlist>
+        <listitem>Improved the runtime logging framework due to performance issues with specific models.</listitem>
+    </itemizedlist>
+    </section>
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Minor improvements of compilation and simulation performance.</listitem>
+        <listitem>loadResource on directories now always leads to compile time evaluation of path.</listitem>
+    </itemizedlist>
+    </section>
+
+    <section>
     <title>Release notes for JModelica.org version 2.3</title>    
     <section><title>Compiler Changes</title>
     <para>Important changes to the compiler:</para>
