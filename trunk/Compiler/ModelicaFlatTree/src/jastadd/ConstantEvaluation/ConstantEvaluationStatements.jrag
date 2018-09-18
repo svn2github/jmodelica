@@ -106,7 +106,7 @@ aspect ConstantEvaluationStatements {
         CValue ceval = ceval(evaluator);
         if (!ceval.isPartlyUnknown() && !right.isPartlyUnknown() && !ceval.typeMatches(right)) {
             throw new ConstantEvaluationException(null, "Mismatching types when evaluating assignment,"
-                    + " type of left-hand side is "+type()+", and type of right-hand side is "+rightType+" " + errorLocation());
+                    + " type of left-hand side is "+type().printStructure()+", and type of right-hand side is "+rightType.printStructure()+" " + errorLocation());
         }
         getCommonAccess().assignToInFuncEval(evaluator, right);
     }

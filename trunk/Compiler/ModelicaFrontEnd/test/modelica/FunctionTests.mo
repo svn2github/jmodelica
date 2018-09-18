@@ -17197,12 +17197,12 @@ annotation(__JModelica(UnitTesting(tests={
 Error at line 13, column 18, in file '...':
   Could not evaluate binding expression for constant 'r': 'f(2)'
     in function 'FunctionTests.AssignmentSizeCheck3.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R, and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R at line 10, column 7, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[1]), and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[2]) at line 10, column 7, in file 'FunctionTests.mo'
 
 Error at line 13, column 18, in file '...':
   Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
     in function 'FunctionTests.AssignmentSizeCheck3.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R, and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R at line 10, column 7, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[1]), and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[2]) at line 10, column 7, in file 'FunctionTests.mo'
 ")})));
 end AssignmentSizeCheck3;
 
@@ -17230,12 +17230,12 @@ annotation(__JModelica(UnitTesting(tests={
 Error at line 13, column 21, in file '...':
   Could not evaluate binding expression for constant 'r': 'f(2)'
     in function 'FunctionTests.AssignmentSizeCheck4.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R[2] at line 10, column 7, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
 
 Error at line 13, column 21, in file '...':
   Could not evaluate binding expression for constant 'r[1].x': '((f(2)).x)[1]'
     in function 'FunctionTests.AssignmentSizeCheck4.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R[2] at line 10, column 7, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
 ")})));
 end AssignmentSizeCheck4;
 
@@ -17271,17 +17271,17 @@ Error at line 15, column 9, in file '...':
 Error at line 18, column 21, in file '...':
   Could not evaluate binding expression for constant 'r': 'f(2)'
     in function 'FunctionTests.AssignmentSizeCheck5.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2 at line 15, column 9, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
 
 Error at line 18, column 21, in file '...':
   Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
     in function 'FunctionTests.AssignmentSizeCheck5.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2 at line 15, column 9, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
 
 Error at line 18, column 21, in file '...':
   Could not evaluate binding expression for constant 'r.y': '(f(2)).y'
     in function 'FunctionTests.AssignmentSizeCheck5.f'
-    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2 at line 15, column 9, in file 'FunctionTests.mo'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
 ")})));
 end AssignmentSizeCheck5;
 

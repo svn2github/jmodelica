@@ -978,6 +978,42 @@ aspect PrettyPrint {
 
 }
 
+aspect TypeStructurePrint {
+
+    public String FType.printStructure() {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        CodeStream str = new NotNullCodeStream(os);
+        printStructure(str);
+        return os.toString();
+    }
+
+    public void FType.printStructure(CodeStream str) {
+        str.print(toString());
+    }
+
+    public void FRecordType.printStructure(CodeStream str) {
+        str.print(name());
+        if (hasComponent()) {
+            str.print("(");
+            String sep = "";
+            for (FRecordComponentType frct : getComponents()) {
+                str.print(sep);
+                frct.printStructure(str);
+                sep = ", ";
+            }
+            str.print(")");
+        }
+        if (ndims() > 0) {
+            str.print(size());
+        }
+    }
+
+    public void FRecordComponentType.printStructure(CodeStream str) {
+        str.print(getFType().toString());
+    }
+
+}
+
 aspect FlatPrettyPrint {
 
     public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
