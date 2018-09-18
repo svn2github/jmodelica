@@ -179,7 +179,7 @@ abstract public class TestAnnotationizerHelper {
         String ttl = testType.toLowerCase();
         for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
             if (cl.getSimpleName().toLowerCase().startsWith(ttl) && !Modifier.isAbstract(cl.getModifiers())) {
-                System.out.println("Creating " + cl.getSimpleName() + "...");
+                System.out.println("Creating " + TestAnnotationizerHelper.testClassName(cl.getSimpleName()) + "...");
                 return cl;
             }
         }
@@ -601,7 +601,7 @@ abstract public class TestAnnotationizerHelper {
             out.print(indent + ANNOTATION);
         }
         out.println(HEADER);
-        out.println(indent + "    " + getClass().getSimpleName() + "(");
+        out.println(indent + "    " + testClassName() + "(");
         out.println(indent + "        name=\"" + testName + "\",");
         out.println(indent + "        description=\"" + description + "\",");
         if (hasModelicaLibraries())
@@ -612,6 +612,14 @@ abstract public class TestAnnotationizerHelper {
             out.println(indent + "        checkType=" + checkType.toString().toLowerCase() + ",");
         printSpecific(out, indent + "        ");
         out.println(")})));");
+    }
+
+    protected String testClassName() {
+        return testClassName(getClass().getSimpleName());
+    }
+
+    protected static String testClassName(String name) {
+        return name.replace("Helper", "");
     }
 
     /**
@@ -922,7 +930,7 @@ abstract public class TestAnnotationizerHelper {
 	/**
 	 * An error test case.
 	 */
-	public static class ErrorTestCase extends TestAnnotationizerHelper {
+	public static class ErrorTestCaseHelper extends TestAnnotationizerHelper {
 
 		private String message;
 
@@ -933,7 +941,7 @@ abstract public class TestAnnotationizerHelper {
          * exception is caught, an error message is composed, to be included in 
          * the annotation.
          */
-        public ErrorTestCase(String filePath, String className, String description,
+        public ErrorTestCaseHelper(String filePath, String className, String description,
                 String[] opts, Object[] data) throws Exception {
 
             super(filePath, className, description, opts, data);
@@ -947,7 +955,7 @@ abstract public class TestAnnotationizerHelper {
 		 * @param filePath     the path to the Modelica file containing the test model
 		 * @param className    the name of the test model
 		 */
-		public ErrorTestCase(SrcClassDecl cd, String filePath, String className) throws Exception {
+		public ErrorTestCaseHelper(SrcClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
 
@@ -966,7 +974,7 @@ abstract public class TestAnnotationizerHelper {
          * in addition to escaping characters that aren't allowed in the annotation.
          */
         protected String prepareErrorMsg(String str) {
-            org.jmodelica.modelica.compiler.ErrorTestCase ec = new org.jmodelica.modelica.compiler.ErrorTestCase();
+            ErrorTestCase ec = new ErrorTestCase();
             ec.setSourceFileName(filePath);
             ec.setBeginLine(beginLine);
             str = ec.filterTestResult(str, true);
@@ -994,7 +1002,7 @@ abstract public class TestAnnotationizerHelper {
 	/**
 	 * A warning test.
 	 */
-	public static class WarningTestCase extends ErrorTestCase {
+	public static class WarningTestCase extends ErrorTestCaseHelper {
 
         /**
          * Constructor for warning test.
@@ -1040,7 +1048,7 @@ abstract public class TestAnnotationizerHelper {
 	/**
 	 * A compliance error test.
 	 */
-	public static class ComplianceErrorTestCase extends ErrorTestCase {
+	public static class ComplianceErrorTestCase extends ErrorTestCaseHelper {
 
         /**
          * Constructor for compliance error test.
