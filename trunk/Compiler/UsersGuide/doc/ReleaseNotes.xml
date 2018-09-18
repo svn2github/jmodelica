@@ -25,6 +25,7 @@
         <listitem>loadResource on directories now always leads to compile time evaluation of path.</listitem>
     </itemizedlist>
     </section>
+    </section>
 
     <section>
     <title>Release notes for JModelica.org version 2.3</title>    
