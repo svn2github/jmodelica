@@ -287,7 +287,7 @@ aspect CCodeGenGlobalVariables {
                 }
                 
                 CodeSplitter<FGlobalVariable> splitter = new CodeSplitter<FGlobalVariable>(p, str, next, false,
-                        "jmi_set_globals_start_", fclass.myOptions(), globals) {
+                        "jmi_set_globals_start", fclass.myOptions(), globals) {
                     @Override
                     public void genDecl(FGlobalVariable element) {
                         
