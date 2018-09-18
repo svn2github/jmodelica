@@ -966,7 +966,10 @@ abstract public class TestAnnotationizerHelper {
          * in addition to escaping characters that aren't allowed in the annotation.
          */
         protected String prepareErrorMsg(String str) {
-            str = TestCase.adjustErrorLines(str, filePath, beginLine);
+            org.jmodelica.modelica.compiler.ErrorTestCase ec = new org.jmodelica.modelica.compiler.ErrorTestCase();
+            ec.setSourceFileName(filePath);
+            ec.setBeginLine(beginLine);
+            str = ec.filterTestResult(str, true);
             return prepare(str);
         }
 
