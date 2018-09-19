@@ -43,7 +43,7 @@ void func_CCodeGenArrayTests_VectorLength1_f_def0(jmi_array_t* x_a, jmi_real_t* 
     jmi_int_t i1_0in;
     temp_2_v = 0.0;
     i1_0in = 0;
-    i1_0ie = floor(jmi_array_size(x_a, 0) - 1);
+    i1_0ie = floor((jmi_array_size(x_a, 0)) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
         temp_2_v = temp_2_v + jmi_array_val_1(x_a, i1_0i) * jmi_array_val_1(x_a, i1_0i);
     }
@@ -799,11 +799,11 @@ void func_CCodeGenArrayTests_RecordArray10_f_def1(R_0_ra* r_a, jmi_real_t* y_o) 
     jmi_int_t i1_1ie;
     jmi_int_t i1_1in;
     i_0in = 0;
-    i_0ie = floor(jmi_array_size(r_a, 0) - 1);
+    i_0ie = floor((jmi_array_size(r_a, 0)) - (1));
     for (i_0i = 1; i_0in <= i_0ie; i_0i = 1 + (++i_0in)) {
         temp_1_v = 0.0;
         i1_1in = 0;
-        i1_1ie = floor(jmi_array_size(jmi_array_rec_1(r_a, i_0i)->x, 0) - 1);
+        i1_1ie = floor((jmi_array_size(jmi_array_rec_1(r_a, i_0i)->x, 0)) - (1));
         for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
             temp_1_v = temp_1_v + jmi_array_val_1(jmi_array_rec_1(r_a, i_0i)->x, i1_1i);
         }

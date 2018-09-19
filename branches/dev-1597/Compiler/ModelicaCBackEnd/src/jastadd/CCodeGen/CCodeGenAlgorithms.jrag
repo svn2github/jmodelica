@@ -327,9 +327,11 @@ aspect CCodeGenAlgorithms {
             str.print("(");
         }
 
+        str.print("(");
         p.print(end, str, indent);
-        str.print(" - ");
+        str.print(") - (");
         p.print(start, str, indent);
+        str.print(")");
 
         if (hasStep) {
             str.print(") / (");
