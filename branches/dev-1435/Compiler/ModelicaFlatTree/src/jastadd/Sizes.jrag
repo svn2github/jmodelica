@@ -267,7 +267,7 @@ aspect FunctionCallSizes {
         return newSize;
     }
     @Override
-    public void FArrayType.setSize(Size size) {}
+    public void FArrayType.setSize(Size size) {throw new InternalCompilerError("FArrayType does not support setSize()");}
     
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
     eq CommonFunctionCall.sizeOfOutput(int i)          = typeOfOutput(i).size();

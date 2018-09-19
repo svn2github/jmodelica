@@ -3469,6 +3469,93 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end CFunctionTest23;
 
+model FuncWithArray
+    function g
+      input Real x[:];
+      output Integer n;
+    algorithm
+      n := integer(sum(x)/sum(x));
+    end g;
+	function F
+        input Real x;
+        output Real y[g({x,x})];
+    algorithm
+        y := {x};
+	end F;
+	Real[1] a(start=2);
+	equation
+		der(a) = F(1);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="FuncWithArray",
+        description="",
+        variability_propagation=false,
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_FuncWithArray_F_def0(jmi_real_t x_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, y_an, -1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    jmi_real_t i1_0i;
+    jmi_real_t i1_0ie;
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1), 1, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1))
+        y_a = y_an;
+    }
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = x_v;
+    jmi_array_ref_1(tmp_2, 2) = x_v;
+    if (COND_EXP_EQ(func_CCodeGenTests_FuncWithArray_g_exp1(tmp_2), AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.FuncWithArray.F\", JMI_ASSERT_ERROR);
+    }
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1, 1)
+    jmi_array_ref_1(temp_1_a, 1) = x_v;
+    i1_0ie = 1 + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_1_a, i1_0i);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_FuncWithArray_g_def1(jmi_array_t* x_a, jmi_real_t* n_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(INT, n_v)
+    JMI_DEF(REA, temp_1_v)
+    JMI_DEF(REA, temp_2_v)
+    jmi_real_t i1_1i;
+    jmi_real_t i1_1ie;
+    jmi_real_t i1_2i;
+    jmi_real_t i1_2ie;
+    temp_1_v = 0.0;
+    i1_1ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        temp_1_v = temp_1_v + jmi_array_val_1(x_a, i1_1i);
+    }
+    temp_2_v = 0.0;
+    i1_2ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
+        temp_2_v = temp_2_v + jmi_array_val_1(x_a, i1_2i);
+    }
+    n_v = floor(jmi_divide_function(\"CCodeGenTests.FuncWithArray.g\", temp_1_v, temp_2_v, \"temp_1 / temp_2\"));
+    JMI_RET(GEN, n_o, n_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_FuncWithArray_g_exp1(jmi_array_t* x_a) {
+    JMI_DEF(INT, n_v)
+    func_CCodeGenTests_FuncWithArray_g_def1(x_a, &n_v);
+    return n_v;
+}
+
+")})));
+end FuncWithArray;
+
+
 model CForLoop1
  function f
   output Real o = 1.0;
