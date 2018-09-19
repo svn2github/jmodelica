@@ -298,8 +298,8 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%sjmi_int_t %se;\n", indent, name);
-        str.format("%sjmi_int_t %sn;\n", indent, name);
+        str.print(indent, "jmi_int_t ", name, "e;\n");
+        str.print(indent, "jmi_int_t ", name, "n;\n");
     }
 
     @Override
@@ -315,14 +315,14 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%s%sn = 0;\n", indent, name);
-        boolean hasStep = hasStep();
+        str.print(indent, name, "n = 0;\n");
         
+        boolean hasStep = hasStep();
         FExp start = getFExp(0);
         FExp end = getFExp(hasStep ? 2 : 1);
         FExp step = hasStep ? getFExp(1) : null;
         
-        str.format("%s%se = floor(", indent, name);
+        str.print(indent, name, "e = floor(");
         if (hasStep) {
             str.print("(");
         }
@@ -369,22 +369,25 @@ aspect CCodeGenAlgorithms {
         FExp start = getFExp(0);
         FExp step = getFExp(1);
 
+        String nameE = name + "e";
+        String nameN = name + "n";
+
         /*
          * Initial expression.
          */
-        str.format("%s = ", name);
+        str.print(name, " = ");
         p.print(start, str, indent);
-        str.print(";");
+        str.print("; ");
 
         /*
          * Conditional expression.
          */
-        str.format(" %sn <= %se; ", name, name);
+        str.print(nameN, " <= ", nameE, "; ");
 
         /*
          * Iteration expression.
          */
-        str.format("%s = ", name);
+        str.print(name, " = ");
         p.print(start, str, indent);
         str.print(" + ");
         if (hasStep()) {
@@ -392,7 +395,7 @@ aspect CCodeGenAlgorithms {
             p.print(step, str, indent);
             str.print(") * ");
         }
-        str.format("(++%sn)", name);
+        str.print("(++", nameN, ")");
     }
 
     public void FForIndex.printForIndexNext_C(CodePrinter p, CodeStream str, String indent) {
