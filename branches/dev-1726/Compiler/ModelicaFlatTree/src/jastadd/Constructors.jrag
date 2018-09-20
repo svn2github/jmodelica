@@ -814,7 +814,9 @@ aspect Constructors {
 	/**
 	 * Add a new integer literal subscript to the list of FSubscripts.
 	 */
-    public void FArraySubscripts.addFSubscript(int i) {
+    public abstract void FArraySubscripts.addFSubscript(int i);
+
+    public void FArrayExpSubscripts.addFSubscript(int i) {
         addFSubscript(new FIntegerSubscript(i));
     }
 

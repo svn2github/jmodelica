@@ -614,10 +614,18 @@ aspect FunctionInlining {
      */
     public void FAccess.preventEvents() {}
     public void FAccessFull.preventEvents() {
-        for (FAccessPart part : getFAccessParts())
-            if (part.hasFArraySubscripts())
-                for (FSubscript s : part.getFArraySubscripts().getFSubscripts())
-                    s.preventEvents();
+        for (FAccessPart part : getFAccessParts()) {
+            if (part.hasFArraySubscripts()) {
+                part.getFArraySubscripts().preventEvents();
+            }
+        }
+    }
+
+    public void FArraySubscripts.preventEvents() {}
+    public void FArrayExpSubscripts.preventEvents() {
+        for (FSubscript s : getFSubscripts()) {
+            s.preventEvents();
+        }
     }
 
     /**
@@ -656,11 +664,23 @@ aspect FunctionInlining {
 
     syn boolean FAccess.generatesEvents() = false;
     eq FAccessFull.generatesEvents() {
-        for (FAccessPart part : getFAccessParts())
-            if (part.hasFArraySubscripts())
-                for (FSubscript s : part.getFArraySubscripts().getFSubscripts())
-                    if (s.generatesEvents())
-                        return true;
+        for (FAccessPart part : getFAccessParts()) {
+            if (part.hasFArraySubscripts()) {
+                if (part.getFArraySubscripts().generatesEvents()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    syn boolean FArraySubscripts.generatesEvents() = false;
+    eq FArrayExpSubscripts.generatesEvents() {
+        for (FSubscript s : getFSubscripts()) {
+            if (s.generatesEvents()) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -721,16 +741,26 @@ aspect FunctionInlining {
     syn boolean FAccessFull.hasInlinableFunctions(AbstractFunctionInliner fi) {
         for (FAccessPart part : getFAccessParts())
             if (part.hasFArraySubscripts())
-                for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
-                    if (sub.hasInlinableFunctions(fi))
-                        return true;
+                if (part.getFArraySubscripts().hasInlinableFunctions(fi))
+                    return true;
+        return false;
+    }
+
+    syn boolean FArraySubscripts.hasInliableFunctions(AbstractFunctionInliner fi) = false;
+    eq FArrayExpSubscripts.hasInliableFunctions(AbstractFunctionInliner fi) {
+        for (FSubscript sub : getFSubscripts()) {
+            if (sub.hasInlinableFunctions(fi)) {
+                return true;
+            }
+        }
         return false;
     }
 
     /**
      * Check if an array subscript contains any calls to functions that we can inline.
      */
-    syn boolean FArraySubscripts.hasInlinableFunctions(AbstractFunctionInliner fi) {
+    syn boolean FArraySubscripts.hasInlinableFunctions(AbstractFunctionInliner fi) = false;
+    eq FArrayExpSubscripts.hasInlinableFunctions(AbstractFunctionInliner fi) {
         for (FSubscript fs : getFSubscripts()) {
             if (fs.hasInlinableFunctions(fi)) {
                 return true;
@@ -913,7 +943,8 @@ aspect FunctionInlining {
     /**
      * Inline all calls to functions that we can inline.
      */
-    public void FArraySubscripts.inlineFunctions(AbstractFunctionInliner fi) {
+    public void FArraySubscripts.inlineFunctions(AbstractFunctionInliner fi) {}
+    public void FArrayExpSubscripts.inlineFunctions(AbstractFunctionInliner fi) {
         for (FSubscript fs : getFSubscripts()) {
             fs.inlineFunctions(fi);
         }
@@ -1585,7 +1616,10 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FArraySubscripts.copyWithNonLiteralSubscriptsAsColon() {
-        FArraySubscripts res = new FArrayExpSubscripts();
+        return treeCopy();
+    }
+    public FArraySubscripts FArrayExpSubscripts.copyWithNonLiteralSubscriptsAsColon() {
+        FArrayExpSubscripts res = new FArrayExpSubscripts();
         for (FSubscript s : getFSubscripts()) {
             res.addFSubscriptNoTransform(s.copyWithNonLiteralSubscriptsAsColon());
         }
@@ -1614,30 +1648,31 @@ aspect FunctionInlining {
     }
 
     public FArraySubscripts FAccessFull.copyNonLiteralSubscripts() {
-        FArraySubscripts fas = new FArrayExpSubscripts();
+        FArrayExpSubscripts fas = new FArrayExpSubscripts();
         for (FAccessPart p : getFAccessParts()) {
             p.copyNonLiteralSubscriptsTo(fas);
         }
         return fas;
     }
 
-    public void FAccessPart.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    public void FAccessPart.copyNonLiteralSubscriptsTo(FArrayExpSubscripts fas) {
     }
-
-    public void FAccessPartArray.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    @Override
+    public void FAccessPartArray.copyNonLiteralSubscriptsTo(FArrayExpSubscripts fas) {
         getFArraySubscripts().copyNonLiteralSubscriptsTo(fas);
     }
 
-    public void FArraySubscripts.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    public void FArraySubscripts.copyNonLiteralSubscriptsTo(FArrayExpSubscripts fas) {}
+    public void FArrayExpSubscripts.copyNonLiteralSubscriptsTo(FArrayExpSubscripts fas) {
         for (FSubscript s : getFSubscripts()) {
             s.copyNonLiteralSubscriptsTo(fas);
         }
     }
 
-    public void FSubscript.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    public void FSubscript.copyNonLiteralSubscriptsTo(FArrayExpSubscripts fas) {
     }
 
-    public void FExpSubscript.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    public void FExpSubscript.copyNonLiteralSubscriptsTo(FArrayExpSubscripts fas) {
         fas.addFSubscriptNoTransform(treeCopyNoTransform());
     }
 

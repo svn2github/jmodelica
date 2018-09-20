@@ -1305,11 +1305,11 @@ aspect FlatPrettyPrint {
     }
     
     public void FArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (getNumFSubscript()>0) {
+		if (numSubscript()>0) {
 			str.print("[");
-			for (int i=0;i<getNumFSubscript();i++) {
-				p.print(getFSubscript(i),str,indent);
-				if (i<getNumFSubscript()-1)
+			for (int i=0;i<numSubscript();i++) {
+				subscript(i).prettyPrint(p, str, indent);
+				if (i<numSubscript()-1)
 					str.print(",");
 			}
 			str.print("]");
@@ -1327,6 +1327,14 @@ aspect FlatPrettyPrint {
 	public void FExpSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getFExp(),str,indent);
 	}
+
+    public void IntegerSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(value);
+    }
+
+    public String IntegerSubscript.prettyPrint(String indent) {
+        return String.valueOf(value);
+    }
 
 	protected void FRangeExp.prettyPrintExp(Printer p, CodeStream str, String indent) { 
 		for (int i=0;i<getNumFExp();i++) {

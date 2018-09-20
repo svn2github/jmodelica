@@ -1181,7 +1181,7 @@ aspect InstanceErrorCheck {
 	eq Root.getChild().myAccessExists()       = false;
 	eq InstAccess.getChild().myAccessExists() = !myInstComponentDecl().isUnknown();
 	
-	public void FArraySubscripts.collectErrors(ErrorCheckType checkType) {
+	public void FArrayExpSubscripts.collectErrors(ErrorCheckType checkType) {
 		// Should this check be in the access instead?
         int ndims = myDims();
 		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
@@ -1195,6 +1195,10 @@ aspect InstanceErrorCheck {
     		super.collectErrors(checkType);
 		}
 	}
+
+    public void FArrayLitSubscripts.collectErrors(ErrorCheckType checkType) {
+        // TODO
+    }
 
     public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
         if (enclosingLoop() == null)

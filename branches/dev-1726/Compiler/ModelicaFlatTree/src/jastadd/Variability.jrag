@@ -561,14 +561,15 @@ aspect Variability {
 
     syn TypePrefixVariability FSubscript.variability() = Variability.CONSTANT;
 	eq FExpSubscript.variability() = getFExp().variability();
+	public TypePrefixVariability IntegerSubscript.variability() { return Variability.CONSTANT; }
 	
-	syn TypePrefixVariability FArraySubscripts.variability() {
+	syn TypePrefixVariability FArraySubscripts.variability() = Variability.CONSTANT;
+	eq FArrayExpSubscripts.variability() {
 		TypePrefixVariability total = Variability.CONSTANT;
 		for (FSubscript arg : getFSubscripts()) 
 			total = total.combine(arg.variability());
 		return total;
 	}
-	eq FArrayLitSubscripts.variability() = Variability.CONSTANT;
 
     eq FLinspace.expVariability() = getStartExp().variability().combine(getStopExp().variability());
 

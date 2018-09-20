@@ -1030,8 +1030,8 @@ aspect FlatTypeCheck {
   
   syn FType InstComponentDecl.myIndexType(int dim) {
     FArraySubscripts fas = getFArraySubscripts();
-    if (fas != null && fas.getNumFSubscript() > dim)
-        return fas.getFSubscript(dim).type().scalarType();
+    if (fas != null && fas.ndims() > dim)
+        return fas.subscript(dim).type().scalarType();
     else
         return fUnknownType();
   }
@@ -1080,7 +1080,8 @@ aspect FlatTypeCheck {
   eq InstNode.getChild().isInstComponentSize()                          = false;
   eq FlatRoot.getChild().isInstComponentSize()                          = false;
 	
-  syn boolean FArraySubscripts.isFullSize() {
+  syn boolean FArraySubscripts.isFullSize() = false;
+  eq FArrayExpSubscripts.isFullSize() {
       for (FSubscript fs : getFSubscripts())
           if (!fs.isColon())
               return false;

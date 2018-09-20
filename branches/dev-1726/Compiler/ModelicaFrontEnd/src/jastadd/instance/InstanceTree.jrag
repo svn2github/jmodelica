@@ -1301,12 +1301,12 @@ aspect InstanceTreeConstruction {
 
     // TODO: Should probably represent different var & type subscripts in instance tree as well
     public FArraySubscripts SrcComponentDecl.instantiateArraySubscripts() {
-        FArraySubscripts fas = null;
+        FArrayExpSubscripts fas = null;
         if (hasVarArraySubscripts()) {
             fas = getVarArraySubscripts().instantiate();
         }
         if (hasTypeArraySubscripts()) {
-            FArraySubscripts fas2 = getTypeArraySubscripts().instantiate();
+            FArrayExpSubscripts fas2 = getTypeArraySubscripts().instantiate();
             if (fas == null) {
                 fas = fas2;
             } else {
@@ -2604,45 +2604,52 @@ aspect InstArrays {
     eq InstArrayComponentDecl.arrayTopInstComponentDecl()               = instComponentDecl();
 
 	syn boolean InstComponentDecl.isArrayDecl() = hasFArraySubscripts() && 
-		getFArraySubscripts().getNumFSubscript()>0;
+		getFArraySubscripts().ndims()>0;
 	
-    syn java.util.List<FSubscript> InstNode.myFSubscripts() = Collections.emptyList();
+    syn java.util.List<? extends Subscript> InstNode.myFSubscripts() = Collections.emptyList();
     eq InstSimpleShortClassDecl.myFSubscripts()             = actualInstClass().myFSubscripts();
     eq InstLibNode.myFSubscripts()                          = actualInstClass().myFSubscripts();
     eq InstFullClassDecl.myFSubscripts()                    = 
         (getNumInstExtends() == 1) ? getInstExtends(0).myFSubscripts() : super.myFSubscripts();
     eq InstExtends.myFSubscripts()                          = 
         isRecursive() ? Collections.<FSubscript>emptyList() : myInstClass().myFSubscripts();
-	syn lazy java.util.List<FSubscript> InstShortClassDecl.myFSubscripts() {
-		java.util.List<FSubscript> l = new ArrayList<FSubscript>();
-		if (hasFArraySubscripts()) 
-			getFArraySubscripts().getFSubscripts().addAllTo(l);
-		if (getNumInstExtends() == 1)
+    syn lazy java.util.List<Subscript> InstShortClassDecl.myFSubscripts() {
+		java.util.List<Subscript> l = new ArrayList<>();
+        if (hasFArraySubscripts()) {
+            for (Subscript s : getFArraySubscripts().subscripts()) {
+                l.add(s);
+            }
+        }
+        if (getNumInstExtends() == 1) {
 			l.addAll(getInstExtends(0).myFSubscripts());
+        }
 		return l;
 	}
-	syn lazy java.util.List<FSubscript> InstComponentDecl.myFSubscripts() {
-		java.util.List<FSubscript> l = new ArrayList<FSubscript>();
+	syn lazy java.util.List<Subscript> InstComponentDecl.myFSubscripts() {
+		java.util.List<Subscript> l = new ArrayList<>();
 		addLocalFArraySubscriptsTo(l);
 		l.addAll(myInstClass().myFSubscripts());
 		return l;
 	}
 	
-	public void InstComponentDecl.addLocalFArraySubscriptsTo(java.util.List<FSubscript> l) {
-        if (hasLocalFArraySubscripts())
-            getLocalFArraySubscripts().getFSubscripts().addAllTo(l);
-        else
+	public void InstComponentDecl.addLocalFArraySubscriptsTo(java.util.List<Subscript> l) {
+        if (hasLocalFArraySubscripts()) {
+            for (Subscript s : getLocalFArraySubscripts().subscripts()) {
+                l.add(s);
+            }
+        } else {
             addFSubscriptsFromOriginalDeclTo(l);
+        }
 	}
 	
-    public void InstComponentDecl.addFSubscriptsFromOriginalDeclTo(java.util.List<FSubscript> l) {}
-    public void InstReplacingComposite.addFSubscriptsFromOriginalDeclTo(java.util.List<FSubscript> l) {
+    public void InstComponentDecl.addFSubscriptsFromOriginalDeclTo(java.util.List<Subscript> l) {}
+    public void InstReplacingComposite.addFSubscriptsFromOriginalDeclTo(java.util.List<Subscript> l) {
         getOriginalInstComponent().addLocalFArraySubscriptsTo(l);
     }
-    public void InstReplacingRecord.addFSubscriptsFromOriginalDeclTo(java.util.List<FSubscript> l) {
+    public void InstReplacingRecord.addFSubscriptsFromOriginalDeclTo(java.util.List<Subscript> l) {
         getOriginalInstComponent().addLocalFArraySubscriptsTo(l);
     }
-    public void InstReplacingPrimitive.addFSubscriptsFromOriginalDeclTo(java.util.List<FSubscript> l) {
+    public void InstReplacingPrimitive.addFSubscriptsFromOriginalDeclTo(java.util.List<Subscript> l) {
         getOriginalInstComponent().addLocalFArraySubscriptsTo(l);
     }
 
@@ -2656,8 +2663,8 @@ aspect InstArrays {
 	    if (myFSubscripts().isEmpty())
 	        return null;
         List<FSubscript> list = new List<FSubscript>();
-        for (FSubscript fs : myFSubscripts()) { 
-            list.add(fs.deferredCopy());
+        for (Subscript s : myFSubscripts()) { 
+            list.add(s.deferredCopy());
         }
         return FArraySubscripts.createFArraySubscripts(list);
 	}
@@ -2669,11 +2676,15 @@ aspect InstArrays {
 aspect DeferredSubscripts {
 
     public FSubscript FSubscript.deferredCopy() {
-        return fullCopy();
+        return treeCopy();
     }
 
     public FSubscript FExpSubscript.deferredCopy() {
-        return copyLocationTo(new FDeferExpSubscript(getFExp().fullCopy(), this));
+        return copyLocationTo(new FDeferExpSubscript(getFExp().treeCopy(), this));
+    }
+
+    public FSubscript IntegerSubscript.deferredCopy() {
+        return new FIntegerSubscript(value);
     }
 
     inh InstLookupResult<InstComponentDecl> FExpSubscript.lookupInstComponent(String name);
