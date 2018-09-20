@@ -409,5 +409,20 @@ model LoopWithLargeStepSize
     Real b[7]=f1(a);
 end LoopWithLargeStepSize;
 
+model LoopWithSubtractionInBounds
+    function f1
+        input Integer a;
+        output Integer b;
+    algorithm
+        b:=0;
+        for i in a-1:a-2:5 loop
+            b:=b+i;
+        end for;
+    annotation(Inline=false);
+    end f1;
+    
+    Integer b=f1(3);
+end LoopWithSubtractionInBounds;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;
