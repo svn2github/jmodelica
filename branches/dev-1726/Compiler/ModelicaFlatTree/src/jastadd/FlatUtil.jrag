@@ -208,17 +208,10 @@ aspect FlatNames {
         return res;
     }
 
-    public abstract FExp FSubscript.getFExp();
-
-    public FExp FIntegerSubscript.getFExp() {
-        return new FIntegerLitExp(getValue());
-    }
-
-    public FExp FColonSubscript.getFExp() {
-        throw new UnsupportedOperationException();
-    }
-
-    public int FSubscript.getValue() {
+    syn FExp FSubscript.createFExp();
+    eq FExpSubscript.createFExp()     = getFExp().treeCopy();
+    eq FIntegerSubscript.createFExp() = new FIntegerLitExp(getValue());
+    eq FColonSubscript.createFExp()   {
         throw new UnsupportedOperationException();
     }
 
