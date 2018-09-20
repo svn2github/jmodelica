@@ -9018,7 +9018,7 @@ public
   input Real i;
   output Real o;
  algorithm
-  o := global(ArrayTests.Other.ArrayConst3.c[integer(i)]);
+  o := ArrayTests.Other.ArrayConst3.c[integer(i)];
   return;
  annotation(Inline = false);
  end ArrayTests.Other.ArrayConst3.f;

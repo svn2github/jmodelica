@@ -72,8 +72,15 @@ aspect FlatNameBinding {
         if (res == null) {
 			res = variablesMap().lookup(name);
         }
+        if (res == null) {
+            res = lookupGlobalVariable(name);
+        }
 		return nullUnknown(res);
 	}
+
+    inh FAbstractVariable FFunctionDecl.lookupGlobalVariable(String name);
+    eq Root.getChild().lookupGlobalVariable(String name)   = null;
+    eq FClass.getChild().lookupGlobalVariable(String name) = globalVariablesMap().lookup(name);
 
 	private FlatVariableMap FFunctionDecl.tempLookupMap = null;
 
@@ -127,8 +134,8 @@ aspect FlatNameBinding {
             return flatMap.get(name);
         }
     }
-    syn FAbstractVariable FAccess.myFV();
-    eq FAccess    .myFV() = isGlobalAccess() ? lookupGlobalVariable(name()) : lookupFV(name());
+
+    syn FAbstractVariable FAccess.myFV() = lookupFV(name());
     eq FAccessFull.myFV() = getFAccessPart(getNumFAccessPart() - 1).myFV();
 
     syn FAbstractVariable FAccess.myOutermostFV() = myFV();
@@ -139,11 +146,7 @@ aspect FlatNameBinding {
     syn FAbstractVariable FAccessPart.myFV() {
         FAbstractVariable res = myContextFV();
         if (res == null) {
-            if (isGlobalAccess()) {
-                res = lookupGlobalVariable(name());
-            } else {
-                res = lookupFV(name());
-            }
+            res = lookupFV(name());
         } else if (!res.isUnknown()) {
             res = res.myFRecordDecl().lookupFV(name());
         }
@@ -153,18 +156,7 @@ aspect FlatNameBinding {
     inh FAbstractVariable FAccessPart.myContextFV();
     eq FAccessFull.getFAccessPart(int i).myContextFV() = 
             i == 0 ? null : getFAccessPart(i - 1).myFV();
-
-    inh FAbstractVariable FAccess.lookupGlobalVariable(String name);
-    inh FAbstractVariable FAccessPart.lookupGlobalVariable(String name);
-    eq Root.getChild().lookupGlobalVariable(String name)   = null;
-    eq FClass.getChild().lookupGlobalVariable(String name) = globalVariablesMap().lookup(name);
-
-    inh boolean FAccess.isGlobalAccess();
-    inh boolean FAccessPart.isGlobalAccess();
-    eq BaseNode.getChild().isGlobalAccess() = false;
-    eq FAccessFull.getChild().isGlobalAccess() = isGlobalAccess();
-    eq FGlobalAccessExp.getChild().isGlobalAccess() = true;
-
+	
 	syn boolean CommonAccess.isForIndex();
 	syn boolean FIdUseExp.isForIndex() = getCommonAccess().isForIndex();
 	eq FAccess.isForIndex()             = myFV().isForIndex();

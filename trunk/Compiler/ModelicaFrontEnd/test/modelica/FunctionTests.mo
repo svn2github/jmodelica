@@ -493,10 +493,10 @@ public
   output Real[:] y;
  algorithm
   init y as Real[2];
-  y[1] := x[1] .+ global(FunctionTests.FunctionFlatten9.a[i]) .+ global(FunctionTests.FunctionFlatten9.a[i + 1]);
-  y[2] := x[2] .+ global(FunctionTests.FunctionFlatten9.a[i]) .+ global(FunctionTests.FunctionFlatten9.a[i + 1]);
+  y[1] := x[1] .+ FunctionTests.FunctionFlatten9.a[i] .+ FunctionTests.FunctionFlatten9.a[i + 1];
+  y[2] := x[2] .+ FunctionTests.FunctionFlatten9.a[i] .+ FunctionTests.FunctionFlatten9.a[i + 1];
   return;
- annotation(Inline = false);
+ annotation(Inline=false);
  end FunctionTests.FunctionFlatten9.f;
 
 end FunctionTests.FunctionFlatten9;
@@ -1008,7 +1008,7 @@ public
  function FunctionTests.FunctionFlatten21.f
   output Real y;
  algorithm
-  y := global(FunctionTests.FunctionFlatten21.f.x);
+  y := FunctionTests.FunctionFlatten21.f.x;
   return;
  end FunctionTests.FunctionFlatten21.f;
 
@@ -1091,7 +1091,7 @@ public
   output Real y;
  algorithm
   for i in 1:1 loop
-   y := global(FunctionTests.FunctionFlatten23.f.r.a[i]) * x;
+   y := FunctionTests.FunctionFlatten23.f.r.a[i] * x;
   end for;
   return;
  end FunctionTests.FunctionFlatten23.f;
@@ -10311,9 +10311,9 @@ public
   input Integer i;
   output Real y1;
  algorithm
-  y1 := FunctionTests.UnknownArray29.f2({global(FunctionTests.UnknownArray29.a[i]), global(FunctionTests.UnknownArray29.a[i + 1])});
+  y1 := FunctionTests.UnknownArray29.f2({FunctionTests.UnknownArray29.a[i], FunctionTests.UnknownArray29.a[i + 1]});
   return;
- annotation(Inline = false);
+ annotation(Inline=false);
  end FunctionTests.UnknownArray29.f1;
 
  function FunctionTests.UnknownArray29.f2
@@ -10327,7 +10327,7 @@ public
   end for;
   y2 := temp_1;
   return;
- annotation(Inline = false);
+ annotation(Inline=false);
  end FunctionTests.UnknownArray29.f2;
 
 end FunctionTests.UnknownArray29;
@@ -12490,7 +12490,7 @@ public
   input Integer c;
   Real f;
  algorithm
-  f := a + global(FunctionTests.ExtendFunc2.d[c]);
+  f := a + FunctionTests.ExtendFunc2.d[c];
   b := f;
   return;
  end FunctionTests.ExtendFunc2.f2;

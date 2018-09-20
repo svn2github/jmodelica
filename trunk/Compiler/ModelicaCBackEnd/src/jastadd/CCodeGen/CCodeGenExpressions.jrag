@@ -695,27 +695,12 @@ aspect CCodeGenExpressions {
     eq FAccess.toString_C(CodePrinter p) = toString_C(p.getExecStep());
 
     syn String FAccess.toString_C(CodePrinter.ExecuteCodePrinter p) {
-        return myFV().genUse_C(p, asFAccess().getFArraySubscripts(), myFV().funcArrayType(isAssignUse()));
-    }
-
-    syn String FAccessFull.toString_C(CodePrinter.ExecuteCodePrinter p) {
-        if (getNumFAccessPart() < 2) {
-            return super.toString_C(p);
-        }
-        
         String type = myFV().funcArrayType(isAssignUse());
-        FAccessPart part = getFAccessPart(0);
-        FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
-        String res = myOutermostFV().genUse_C(p, fas, C_ARRAY_RECORD);
-        for (int i = 1, n = getNumFAccessPart(); i < n; i++) {
-            part = getFAccessPart(i);
-            res = res + "->" + part.getName();
-            if (part.hasFArraySubscripts()) {
-                String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
-                res = part.getFArraySubscripts().genFunctionArrayUse_C(p.codePrinter(), res, curType);
-            }
+        if (myFV().inRecord() && inFunction()) {
+            return asFAccess().genRecordUse_C(p, asFAccess().myOutermostFV(), type);
+        } else {
+            return myFV().genUse_C(p, asFAccess().getFArraySubscripts(), type);
         }
-        return res;
     }
 
     /**
@@ -743,6 +728,32 @@ aspect CCodeGenExpressions {
 
     public void FArraySubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
+    }
+
+    /**
+     * Helper, generates an record variable use
+     */
+    public String FAccess.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Helper, generates an record variable use
+     */
+    @Override
+    public String FAccessFull.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
+        FAccessPart part = getFAccessPart(0);
+        FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
+        String res = fv.genUse_C(p, fas, C_ARRAY_RECORD);
+        for (int i = 1, n = getNumFAccessPart(); i < n; i++) {
+            part = getFAccessPart(i);
+            res = res + "->" + part.getName();
+            if (part.hasFArraySubscripts()) {
+                String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
+                res = part.getFArraySubscripts().genFunctionArrayUse_C(p.codePrinter(), res, curType);
+            }
+        }
+        return res;
     }
 
     /*=========================================================================

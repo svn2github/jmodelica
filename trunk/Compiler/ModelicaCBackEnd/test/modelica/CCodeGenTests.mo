@@ -11626,60 +11626,6 @@ $C_dae_init_add_blocks_residual_functions$
 ")})));
 end BlockTest24;
 
-model BlockTest25
-    record R
-        constant Real y;
-    end R;
-    
-    function f
-        constant R[:] p = {R(3)};
-        input Integer i;
-        output Real y = p[i].y;
-    algorithm
-    end f;
-    
-    function f2
-        input Real x;
-        output Real y = x;
-    algorithm
-        annotation(Inline=false);
-    end f2;
-    
-    parameter Integer i = 1;
-    Real x = f(i) + f2(x);
-
-annotation(__JModelica(UnitTesting(tests={
-    CCodeGenTestCase(
-        name="BlockTest25",
-        description="Nominal with global constant in record",
-        template="$C_dae_blocks_residual_functions$",
-        variability_propagation=false,
-        generatedCode="
-static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[0] = 1;
-    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = jmi_max(AD_WRAP_LITERAL(1), jmi_max(jmi_abs(jmi_array_rec_1(JMI_GLOBAL(CCodeGenTests_BlockTest25_f_p), _i_0)->y), AD_WRAP_LITERAL(1)));
-    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _x_1;
-    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
-        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
-            _x_1 = x[0];
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = jmi_array_rec_1(JMI_GLOBAL(CCodeGenTests_BlockTest25_f_p), _i_0)->y + func_CCodeGenTests_BlockTest25_f2_exp0(_x_1) - (_x_1);
-        }
-    }
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-")})));
-end BlockTest25;
-
 model NestedUnsolvedScalarInSolvedBlock
     Real a;
     Real b;

@@ -90,7 +90,7 @@ aspect InstTypeAnalysis {
         return type;
     }
 
-    syn nta lazy FRecordType InstClassDecl.recordType() {
+    syn lazy FRecordType InstClassDecl.recordType() {
         FRecordType type = resolveLib().createEmptyFRecordType(Size.SCALAR);
         for (InstComponentDecl icd : allInstComponentDecls()) 
             type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));

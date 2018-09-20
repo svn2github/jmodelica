@@ -3219,7 +3219,6 @@ aspect Nominals {
     eq FDelayExp.nominal()       = getFExp().nominal();
     
     eq FIdUseExp.nominal() = myFV().nominal();
-    eq FGlobalAccessExp.nominal() = new FAbsExp(treeCopy());
     
     syn FExp FAbstractVariable.nominal() {
         if (variability().fixedParameterOrLess()) {

@@ -1550,11 +1550,6 @@ aspect FunctionInlining {
         return exp;
     }
 
-    @Override
-    public FExp FGlobalAccessExp.replaceReferences(AbstractFunctionInliner fi) {
-        replaceReferencesInSubscripts(fi);
-        return this;
-    }
 
     public FIdUseExp FIdUseExp.copyWithNonLiteralSubscriptsAsColon() {
         return createNode(getCommonAccess().copyWithNonLiteralSubscriptsAsColon());
