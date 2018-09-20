@@ -1308,6 +1308,87 @@ end VariabilityPropagationTests.FunctionCallEquationPartial8;
 ")})));
 end FunctionCallEquationPartial8;
 
+model FunctionCallEquationPartial9
+        function f
+            input Real x1;
+            input Integer n;
+            output Real[n] y;
+        algorithm
+            y := {x1,x1};
+            assert(x1==1,"nope");
+        end f;
+    
+        function g
+            input Real x1;
+            input Real x2;
+            input Integer n;
+            output Real[n] y;
+        algorithm
+            if x1 < x2 then
+                y := f(x1,n);
+            else
+                y := {1,2};
+            end if;
+        end g;
+    
+        Real[:] y = g(2,time,2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial9",
+            description="Bug when returning cloned CValueUnknown",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial9
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = VariabilityPropagationTests.FunctionCallEquationPartial9.g(2, time, 2);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquationPartial9.g
+  input Real x1;
+  input Real x2;
+  input Integer n;
+  output Real[:] y;
+  Integer[:] temp_1;
+ algorithm
+  init y as Real[n];
+  if x1 < x2 then
+   (y) := VariabilityPropagationTests.FunctionCallEquationPartial9.f(x1, n);
+  else
+   assert(n == 2, \"Mismatching sizes in VariabilityPropagationTests.FunctionCallEquationPartial9.g\");
+   init temp_1 as Integer[2];
+   temp_1[1] := 1;
+   temp_1[2] := 2;
+   for i1 in 1:2 loop
+    y[i1] := temp_1[i1];
+   end for;
+  end if;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial9.g;
+
+ function VariabilityPropagationTests.FunctionCallEquationPartial9.f
+  input Real x1;
+  input Integer n;
+  output Real[:] y;
+  Real[:] temp_1;
+ algorithm
+  init y as Real[n];
+  assert(n == 2, \"Mismatching sizes in VariabilityPropagationTests.FunctionCallEquationPartial9.f\");
+  init temp_1 as Real[2];
+  temp_1[1] := x1;
+  temp_1[2] := x1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
+  assert(x1 == 1, \"nope\");
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial9.f;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial9;
+")})));
+end FunctionCallEquationPartial9;
+
     model PartiallyKnownComposite1
         function f
             input Real x1;
