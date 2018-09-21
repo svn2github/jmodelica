@@ -1461,10 +1461,8 @@ aspect FlatPrettyPrint {
     public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print("init ");
         p.print(getFIdUseExp(), str, indent);
-        str.print(" as ", type().scalarType());
-        if (type().isArray()) {
-            str.print(type().size());
-        }
+        str.print(" as ");
+        str.print(type());
     }
 
     public void FExternalLanguage.prettyPrint(Printer p, CodeStream str, String indent) {
