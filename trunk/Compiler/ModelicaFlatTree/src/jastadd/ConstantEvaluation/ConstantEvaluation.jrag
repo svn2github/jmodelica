@@ -71,19 +71,17 @@ aspect ConstantEvaluation {
 		 */
 	    protected CValue() {
 	    }
-	    
-	    /**
-	     * Copy this constant value.
-	     */
-	    public CValue clone() {
-	    	try {
-				return (CValue) super.clone();
-			} catch (CloneNotSupportedException e) {
-				return null;
-			}
-	    }
-	    
 
+        /**
+         * Copy this constant value.
+         */
+        public CValue clone() {
+            try {
+                return (CValue) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new UnsupportedOperationException();
+            }
+        }
 
         /**
          * Create a literal AST node from constant, for use in flat tree.
@@ -734,7 +732,12 @@ aspect ConstantEvaluation {
         public boolean isValid() {
             return false;
         }
-
+        
+        @Override
+        public CValue clone() {
+            return this;
+        }
+        
         /**
          * Get a string describing this CValue for use in 
          *        ConstantEvaluationExceptions.
@@ -1684,6 +1687,7 @@ aspect ConstantEvaluation {
     }
 
     public CValue FType.zeroCValueScalar()        { return CValue.UNKNOWN; }
+    public CValue FArrayType.zeroCValueScalar()   { return getFPrimitiveType().zeroCValueScalar(); }
     public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
     public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
     public CValue FEnumType.zeroCValueScalar()    { return new CValueEnum(this, 1); }
@@ -4972,7 +4976,7 @@ aspect VariableEvaluator {
         public void failed(CommonCallable cc, ConstantEvaluationException e) {
             values.clear();
             for (CommonVariableDecl cvd : cc.myOutputs()) {
-                values.put(cvd, cvd.type().unknownCValue());
+                values.put(cvd, CValue.UNKNOWN);
             }
         }
         
