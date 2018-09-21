@@ -17123,4 +17123,166 @@ end FunctionTests.ArrayWithIfInput;
 ")})));
 end ArrayWithIfInput;
 
+
+model AssignmentSizeCheck1
+  function f
+      input Integer n;
+      output Real[n] y;
+    algorithm
+      y := zeros(0);
+  end f;
+
+  constant Real[:] p1 = f(1);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck1",
+        description="Verify that array size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 9, column 25, in file '...':
+  Could not evaluate binding expression for constant 'p1': 'f(1)'
+    in function 'FunctionTests.AssignmentSizeCheck1.f'
+    Mismatching types when evaluating assignment, type of left-hand side is Real[1], and type of right-hand side is Integer[0] at line 6, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck1;
+
+model AssignmentSizeCheck2
+  function f
+      input Integer m;
+      input Integer n;
+      output Real[m, n] y;
+    algorithm
+      y := { { 1, 2 }, { 3, 4 } };
+  end f;
+
+  constant Real[:, :] p1 = f(1, 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck2",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 10, column 28, in file '...':
+  Could not evaluate binding expression for constant 'p1': 'f(1, 2)'
+    in function 'FunctionTests.AssignmentSizeCheck2.f'
+    Mismatching types when evaluating assignment, type of left-hand side is Real[1, 2], and type of right-hand side is Integer[2, 2] at line 7, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck2;
+
+model AssignmentSizeCheck3
+    record R
+        Real[:] x;
+    end R;
+
+  function f
+      input Integer n;
+      output R r(x={1});
+    algorithm
+      r := R(1:n);
+  end f;
+
+  constant R r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck3",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 13, column 18, in file '...':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck3.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[1]), and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[2]) at line 10, column 7, in file 'FunctionTests.mo'
+
+Error at line 13, column 18, in file '...':
+  Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
+    in function 'FunctionTests.AssignmentSizeCheck3.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[1]), and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[2]) at line 10, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck3;
+
+model AssignmentSizeCheck4
+    record R
+        Real x;
+    end R;
+
+  function f
+      input Integer n;
+      output R[1] r(x={1});
+    algorithm
+      r := {R(i) for i in 1:n};
+  end f;
+
+  constant R[:] r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck4",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 13, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck4.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
+
+Error at line 13, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r[1].x': '((f(2)).x)[1]'
+    in function 'FunctionTests.AssignmentSizeCheck4.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck4;
+
+model AssignmentSizeCheck5
+    record R1
+        Real x;
+        Real y;
+    end R1;
+
+    record R2
+        Real x;
+    end R2;
+
+    function f
+        input Integer n;
+        output R1 r;
+    algorithm
+        r := R2(1);
+    end f;
+
+    constant R1 r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck5",
+        description="Verify that record with mismatching number of components are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 15, column 9, in file '...':
+  The right and left expression types of assignment are not compatible, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2
+
+Error at line 18, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
+
+Error at line 18, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
+
+Error at line 18, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r.y': '(f(2)).y'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck5;
+
 end FunctionTests;

@@ -615,7 +615,7 @@ class TestAdvanced:
         nose.tools.assert_equals(resConst.final('x'), 32.67)
     
     @testattr(stddist_full = True)
-    def testExtObjRecursive(self):
+    def testPartialEvalFail(self):
         '''
         Test failing of partial constant evaluation on external function
         '''
