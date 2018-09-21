@@ -360,7 +360,7 @@ aspect FExpToCasADi {
      */
     eq FIdUseExp.toMX() {
         if (myFV().inRecord()) {
-            return getParent().getMXVariableFromRecordHashMap(getFIdUse().getFQName().toString());
+            return getParent().getMXVariableFromRecordHashMap(getCommonAccess().asFAccess().toString());
         } else if (hasFArraySubscripts() && inFunction()) {
             int flatIndex = getFArraySubscripts().computeFlattenedIndexBasedOnSizeData(myFV().size());
             return myFV().asMXVector().get(flatIndex);
@@ -472,12 +472,12 @@ aspect FExpToCasADi {
     
     
     eq FVariable.asMXVariable() = ifcasadi.msym(name());
-    eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
+    eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFAccess().toString());
     
     eq FFunctionArray.asMXVector() {
         MXVector MXVec = new MXVector();
         for (int i = 0; i < size().numElements(); ++i) {
-            MX mx = ifcasadi.msym(getFQName().toString() + "_" +i);
+            MX mx = ifcasadi.msym(getFAccess().toString() + "_" +i);
             MXVec.add(mx);
         }
         return MXVec;
@@ -489,8 +489,8 @@ aspect FExpToCasADi {
      * Note that this method handles records. MX variables for records
      * are created by recursive flattening. These MX variables are saved in
      * a hashmap in the FFunctionDecl, put there via AST traversation. Furthermore
-     * the key for the variables in the hashmap is the same as the FQName
-     * of the FIdUse's that later refer to them. 
+     * the key for the variables in the hashmap is the same as the FAccess
+     * of the CommonAccess's that later refer to them. 
      * @return A MXVector.
      */ 
     eq FFunctionVariable.asMXVector() {
@@ -597,7 +597,7 @@ aspect FExpToCasADi {
     
     /**
      * Does a recursive AST traversation up to the first encountered FFunctionDecl. The FFunctionDecl has an hash map that contains 
-     * MX symbolic variables for records, and the MX for the passed in key (which should be equal to the FQName of the variable) is returned. 
+     * MX symbolic variables for records, and the MX for the passed in key (which should be equal to the FAccess of the variable) is returned. 
      * @param A String 
      * @return A MX
      */
@@ -610,7 +610,7 @@ aspect FExpToCasADi {
     }
     
     /**
-     * Retrieves the MX for the record variable with this key (which should be equal to the FQName of the variable).
+     * Retrieves the MX for the record variable with this key (which should be equal to the FAccess of the variable).
      * @param A String 
      * @return A MX
      */
@@ -618,7 +618,7 @@ aspect FExpToCasADi {
     
     /**
      * Does a recursive AST traversation to the first encountered FFunctionDecl. The FFunctionDecl
-     * has a hash map where the key,value-pair passed in is set. The key should be the FQName of a 
+     * has a hash map where the key,value-pair passed in is set. The key should be the FAccess of a 
      * variable  in a record and value its symbolic MX. 
      * @param A String 
      * @param A MX
@@ -630,7 +630,7 @@ aspect FExpToCasADi {
     }
     
     /**
-     * Sets the passed in key,value-pair in the map, where the key should be the FQName 
+     * Sets the passed in key,value-pair in the map, where the key should be the FAccess 
      * of a variable in a record, and value its symbolic MX. 
      * @param A String
      * @param A MX

@@ -29,6 +29,7 @@ import org.jmodelica.util.collections.ParallelIterable;
 aspect FlatTypeAnalysis {
 
     syn lazy FType FAbstractVariable.type();
+    eq FGlobalVariable.type()           = getFType();
     eq FRealVariable.type()             = fRealType(size());
     eq FIntegerVariable.type()          = fIntegerType(size());
     eq FBooleanVariable.type()          = fBooleanType(size());
@@ -303,7 +304,7 @@ aspect FlatTypeAnalysis {
 
     syn FType InstFunctionArgument.type() = getFExp().type();
 
-    syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
+    syn FRecordType FRecordAccess.recordType() = myFRecordDecl().type();
 
     eq FTranspose.type() = 
         getFExp().ndims() < 2 ? 
@@ -588,11 +589,13 @@ aspect FlatTypeAnalysis {
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
-    eq FIdUseExp.type() = getFIdUse().type();
+    eq FIdUseExp.type() = getCommonAccess().type();
     
     eq FDSRefExp.type() = getOrg().type();
 
-    syn lazy FType FIdUse.type() = myFV().type().sizedType(size());
+    syn FType CommonAccess.type();
+    
+    eq FAccess.type() = myFV().type().sizedType(size());
 
     syn FType InstAccess.type() {
         if (myInstComponentDecl().isAssignable()) {
@@ -642,7 +645,7 @@ aspect FlatTypeAnalysis {
     eq FPartialFunctionCall.type() {
         List<FRecordComponentType> inputs = new List<FRecordComponentType>();
         Set<String> s = new HashSet<String>();
-        for (FIdUse u : getArgNames()) {
+        for (CommonAccess u : getArgNames()) {
             s.add(u.name());
         }
         for (CommonVariableDecl cvd : myFCallable().myInputs()) {
@@ -657,16 +660,16 @@ aspect FlatTypeAnalysis {
     }
 
     // TODO: expand to handle boolean and enum index (see #3597)
-    syn lazy FType FSubscript.type();
-    eq FColonSubscript.type()   = fIntegerArrayType(size());
+    syn FType FSubscript.type();
+    syn lazy FType FColonSubscript.type() = fIntegerArrayType(size());
     eq FIntegerSubscript.type() = fIntegerScalarType();
     eq FExpSubscript.type()     = getFExp().type();
 
-    public FType FType.lookupHierarchical(FQName name, int part, int last) {
+    public FType FType.lookupHierarchical(FAccess name, int part, int last) {
         return this;
     }
     
-    public FType FRecordType.lookupHierarchical(FQName name, int part, int last) {
+    public FType FRecordType.lookupHierarchical(FAccess name, int part, int last) {
         if (part == last) {
             return this;
         }
@@ -1241,7 +1244,7 @@ aspect BuiltInFlatTypes {
             for (FRecordComponentType t : getComponents()) {
                 args.add(t.getFType().zeroLiteral());
             }
-            return new FRecordConstructor(new FIdUse(getName()), args);
+            return new FRecordConstructor(new FRecordAccess(getName()), args);
         } else {
             List<InstFunctionArgument> args = new List<InstFunctionArgument>();
             int i = 1;

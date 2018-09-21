@@ -42,7 +42,7 @@ aspect BlockFunctionExtraction {
                 // Create new temp. variable and add it to the variable list and the BiPGraph
                 String newTempName = fCall.calcTempVarName();
                 Collection<Eq> eqs = g.getEquations(fCall.myFEquation());
-                funcRepVariable = fCall.type().createTempFVariable(new FQNameFull(newTempName), fCall.variability());
+                funcRepVariable = fCall.type().createTempFVariable(new FAccessFull(newTempName), fCall.variability());
                 addFVariable(funcRepVariable);
                 if (!fCall.variability().parameterOrLess()) {
                     Var var = g.addVariable(newTempName, funcRepVariable);

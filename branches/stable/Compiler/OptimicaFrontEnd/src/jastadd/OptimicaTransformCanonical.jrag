@@ -27,7 +27,7 @@ aspect OptimicaTransformCanonical {
 				fv.setTypePrefixVariability(Variability.CONTINUOUS);
                 for (FIdUseExp use : fv.uses())
                     if (use.inObjective())
-                        use.replaceMe(new FTimedVariable(use.getFIdUse().fullCopy(), new FStartTimeExp()));
+                        use.replaceMe(new FTimedVariable(use.getCommonAccess().fullCopy(), new FStartTimeExp()));
 			}
 		}
 
@@ -79,8 +79,8 @@ aspect OptimicaTransformCanonical {
 					// If the start attribute is not explicitly set, then it
 					// should be set to the value of the initialGuess attribute.
 					if (!fv_startTime.startAttributeSet()) {
-						fv_startTime.addFAttribute(new FAttribute(new FIdUse("Real"),
-	                            new FIdDecl(new FQNameString("start")),
+						fv_startTime.addFAttribute(new FAttribute(new FAccessString("Real"),
+	                            new FIdDecl(new FAccessString("start")),
 	                            initialGuess_exp != null ? initialGuess_exp : new FRealLitExp(0.0),
 	                            true,
 	                            Integer.MAX_VALUE));											
@@ -109,8 +109,8 @@ aspect OptimicaTransformCanonical {
 						}	
 					}	
 					if (!fv_finalTime.startAttributeSet()) {
-						fv_finalTime.addFAttribute(new FAttribute(new FIdUse("Real"),
-	                            new FIdDecl(new FQNameString("start")),
+						fv_finalTime.addFAttribute(new FAttribute(new FAccessString("Real"),
+	                            new FIdDecl(new FAccessString("start")),
 	                            initialGuess_exp != null ? initialGuess_exp : new FRealLitExp(1.0),
 	                            true,
 	                            Integer.MAX_VALUE));											
@@ -138,7 +138,7 @@ aspect OptimicaTransformCanonical {
                 v = Variability.OPTPARAMETER;
             }
         }
-        FRealVariable fv = new FRealVariable(VisibilityType.PUBLIC, v, new FQNameString(name));
+        FRealVariable fv = new FRealVariable(VisibilityType.PUBLIC, v, new FAccessString(name));
 		if (attr != null) 
 			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
 		if (attr != null && attr.hasValue())
@@ -188,7 +188,7 @@ aspect OptimicaTransformCanonical {
 	}
 
     public FExp FTimedVariable.scalarizeExp(Scalarizer s) { 
-        return new FTimedVariable(getName().scalarize(s, null), getArg().scalarize(s));  
+        return new FTimedVariable(getName().asFAccess().scalarize(s, null), getArg().scalarize(s));  
     }
 
     eq FOptClass.indexReductionErrorsAsWarnings() = true;
@@ -212,8 +212,8 @@ aspect NormalizeFinalTimeProblems {
 	boolean FDerExp.rewritten = false;
 	
 	rewrite FDerExp {when (rewriteStartAndFinalTime && !rewritten) to FExp {
-			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FIdUse("finalTime")),
-					new FIdUseExp(new FIdUse("startTime"))));
+			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FAccessString("finalTime")),
+					new FIdUseExp(new FAccessString("startTime"))));
 			rewritten = true;
 			return e;
 		}

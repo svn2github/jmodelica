@@ -30,7 +30,7 @@ aspect ExtractEventGeneratingExpressions {
                 // Equations.
                 for (FExp exp: eventExps) {
                     FVariable fv = exp.type().createFVariable(VisibilityType.PUBLIC,
-                            new FQNameFull(exp.tempVarName()), exp.variability());
+                            new FAccessFull(exp.tempVarName()), exp.variability());
                     addFVariable(fv);
                     addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
 
@@ -130,7 +130,7 @@ aspect ExtractEventGeneratingExpressions {
         /*
          *  Create the when statement.
          */
-        FPreExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FPreExp preExp = new FPreExp(indexVariable().createCommonAccess());
         FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
         FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
 
@@ -180,7 +180,7 @@ aspect ExtractEventGeneratingExpressions {
         /*
          *  Create the when statement.
          */
-        FPreExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FPreExp preExp = new FPreExp(indexVariable().createCommonAccess());
         FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
         FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
 
@@ -212,7 +212,7 @@ aspect ExtractEventGeneratingExpressions {
     private FVariable FSampleExp.indexVariable() {
         if (indexVariable == null) {
             indexVariable = new FIntegerVariable(VisibilityType.PUBLIC,
-                    Variability.DISCRETE, new FQNameFull(calcIndexVarName()));
+                    Variability.DISCRETE, new FAccessFull(calcIndexVarName()));
             myFClass().addFVariable(indexVariable);
         }
         return indexVariable;
@@ -225,7 +225,7 @@ aspect ExtractEventGeneratingExpressions {
     // Use TreeCopyNoTransform
     syn FExp FExp.eventTempExpCalc()    = null;
     eq FSampleExp.eventTempExpCalc() {
-        FExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp preExp = new FPreExp(indexVariable().createCommonAccess());
         FExp mulExp = new FMulExp(preExp, getInterval().treeCopyNoTransform());
         FExp addExp = new FAddExp(getOffset().treeCopyNoTransform(), mulExp);
         FExp notInitial = new FNotExp(new FInitialExp());

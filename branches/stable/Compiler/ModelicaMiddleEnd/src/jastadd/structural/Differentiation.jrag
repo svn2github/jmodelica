@@ -558,7 +558,7 @@ aspect Derivatives {
 
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
     eq FIdUseExp.createDerExp(int order) {
-        FExp exp = getFIdUse().createDerExp(order() + order);
+        FExp exp = getCommonAccess().createDerExp(order() + order);
         if (exp instanceof FIdUseExp) {
             ((FIdUseExp)exp).setOriginalVariable(getOriginalVariable());
         }
@@ -566,12 +566,10 @@ aspect Derivatives {
     }
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 
-    syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);
-    
-    syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
+    syn FExp CommonAccess.createDerExp(int order) = new FDerExp(fullCopy(), order);
     
     syn InstDerExp InstAccess.createDerExp(int order) {
-        FExp use = new FIdUseExp(new FIdUseInstAccess(fullCopy()));
+        FExp use = new FIdUseExp(fullCopy());
         return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
     }
     
@@ -609,7 +607,7 @@ aspect Derivatives {
         // and the name is not 'time', then the derivative is zero.
         if (!name.equals(TIME)) {
             boolean isIndependent = true;
-            FAbstractVariable fv = getName().getFQName().lookupFV(name);
+            FAbstractVariable fv = getName().lookupFV(name);
             if (fv != null) {
                 HashSet<FVariable> s = new HashSet<FVariable>();
                 s.add((FVariable) fv);
@@ -648,7 +646,7 @@ aspect Derivatives {
                 args.add(e.diff(name));
             i++;
         }
-        FFunctionCall der_f = new FFunctionCall(new FIdUse(myDiffDecl.name()), args, getFType().treeCopy());
+        FFunctionCall der_f = new FFunctionCall(new FAccessString(myDiffDecl.name()), args, getFType().treeCopy());
         der_f.order = order + 1;
         return der_f;
     }
@@ -915,7 +913,7 @@ aspect AlgorithmDifferentiation{
     }
     
     public FFunctionDecl FFunctionDecl.createAndAddDerivativeFunction(AnnotationNode derNode) {
-        FQName name = getFQName().createDerPrefixedName(1);
+        FAccess name = getFAccess().createDerPrefixedName(1);
         derNode.setValue(new FIdUseExp(name));
         derNode.forPath("order").setValue(new FIntegerLitExp(order() + 1));
         
@@ -1046,12 +1044,12 @@ aspect AlgorithmDifferentiation{
     
     syn FFunctionVariable FFunctionVariable.createDerivative() {
         return createNode(getTypePrefixInputOutput(), getType().fullCopy(), new Opt<FExp>(), 
-                getFQName().createDerPrefixedName(1), order() + 1);
+                getFAccess().createDerPrefixedName(1), order() + 1);
     }
     
     rewrite FDerExp {
         when (inFunction()) to FIdUseExp 
-        new FIdUseExp(getFIdUse().getFQName().createDerPrefixedFunctionName(order()));
+        new FIdUseExp(getCommonAccess().asFAccess().createDerPrefixedFunctionName(order()));
     }
     
     

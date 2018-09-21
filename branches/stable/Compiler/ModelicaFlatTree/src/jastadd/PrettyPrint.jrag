@@ -978,6 +978,42 @@ aspect PrettyPrint {
 
 }
 
+aspect TypeStructurePrint {
+
+    public String FType.printStructure() {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        CodeStream str = new NotNullCodeStream(os);
+        printStructure(str);
+        return os.toString();
+    }
+
+    public void FType.printStructure(CodeStream str) {
+        str.print(toString());
+    }
+
+    public void FRecordType.printStructure(CodeStream str) {
+        str.print(name());
+        if (hasComponent()) {
+            str.print("(");
+            String sep = "";
+            for (FRecordComponentType frct : getComponents()) {
+                str.print(sep);
+                frct.printStructure(str);
+                sep = ", ";
+            }
+            str.print(")");
+        }
+        if (ndims() > 0) {
+            str.print(size());
+        }
+    }
+
+    public void FRecordComponentType.printStructure(CodeStream str) {
+        str.print(getFType().toString());
+    }
+
+}
+
 aspect FlatPrettyPrint {
 
     public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1002,7 +1038,13 @@ aspect FlatPrettyPrint {
                 str.println(";");
             }
         }
-
+        if (getNumFGlobalVariable() > 0) {
+            str.println(indent, "package constant");
+            for (FVariable fv : getFGlobalVariables()) {
+                p.print(fv, str, nextInd);
+                str.println(";");
+            }
+        }
         if (getNumFInitialEquation() > 0) {
             str.println(indent, "initial equation");
         }
@@ -1048,7 +1090,7 @@ aspect FlatPrettyPrint {
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
 	syn String FAbstractVariable.displayName()  = name();
-	eq FVariable.displayName()                  = getFQName().toString();
+	eq FVariable.displayName()                  = getFAccess().toString();
 	eq FDerivativeVariable.displayName()        = name();
 	eq FPreBooleanVariable.displayName()        = name();
 	eq FPreEnumVariable.displayName()           = name();
@@ -1241,22 +1283,22 @@ aspect FlatPrettyPrint {
         }
     }
 
-    public void FQNamePart.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void FAccessPart.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(getName());
 		if (hasFArraySubscripts())
 			p.print(getFArraySubscripts(),str,indent);
     }
     
-    public void FQName.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void FAccess.prettyPrint(Printer p, CodeStream str, String indent) {
     }
     
-    public void FQNameString.prettyPrint(Printer p, CodeStream str, String indent) {
+    public void FAccessString.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName());
     }
     
-    public void FQNameFull.prettyPrint(Printer p, CodeStream str, String indent) {
-		for (int i = 0, n = getNumFQNamePart(); i < n; i++) {
-			p.print(getFQNamePart(i), str, indent);
+    public void FAccessFull.prettyPrint(Printer p, CodeStream str, String indent) {
+		for (int i = 0, n = getNumFAccessPart(); i < n; i++) {
+			p.print(getFAccessPart(i), str, indent);
 			if (i < n - 1)
 				str.print(".");
 		}
@@ -1592,20 +1634,22 @@ aspect FlatPrettyPrint {
         str.print("_inStreamEpsilon");
     }
 
-	public void FIdUse.prettyPrint(Printer p, CodeStream str, String indent) {
-		if (getFQName().isScalarized())
+	public void CommonAccess.prettyPrint(Printer p, CodeStream str, String indent) {
+		if (asFAccess().isScalarized())
 			str.print(name());
 		else 
-			p.print(getFQName(), str, indent);
-	}
-	
-	public void FIdUseInstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
-		p.print(getInstAccess(), str, indent);
+			p.print(this, str, indent);
 	}
 
 	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		p.print(getFIdUse(), str, indent);
+		p.print(getCommonAccess(), str, indent);
 	}
+	
+    protected void FGlobalAccessExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("global(");
+        super.prettyPrintExp(p, str, indent);
+        str.print(")");
+    }
 	
 	public void InstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(name());
@@ -2102,7 +2146,7 @@ aspect PrettyPrint_MC {
 	}
 
     public void FDerExp.prettyPrint_MC(Printer p, CodeStream str, String indent) {
-        str.print("der(", getFIdUse().nameUnderscore(), ")");
+        str.print("der(", getCommonAccess().nameUnderscore(), ")");
     }
 
 }

@@ -620,7 +620,7 @@ aspect GenerateEventIndicators {
     public void FRelExp.genIndicator(boolean output) {
         String variableName = calcIndicatorVarName();
         FVariable v = new FRealVariable(VisibilityType.PUBLIC, Variability.CONTINUOUS,
-                new FQNameFull(variableName));
+                new FAccessFull(variableName));
 
         if (output) {
             v.setTypePrefixInputOutput(TypePrefixInputOutput.OUTPUT);

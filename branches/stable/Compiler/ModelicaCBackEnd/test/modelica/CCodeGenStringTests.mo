@@ -81,7 +81,6 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _t_1 = (0.0);
     JMI_ASG(STR_Z, _s_pd_s1_2, (\"\"));
     JMI_ASG(STR_Z, _s_pd_s2_3, (\"\"));
     JMI_DYNAMIC_FREE()

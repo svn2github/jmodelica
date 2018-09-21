@@ -784,9 +784,9 @@ aspect Names {
     eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
     eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
 
-    eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
-    eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFQName());
-    eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FQNameEmpty());
+    eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFAccessPrefix());
+    eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFAccess());
+    eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FAccessEmpty());
     eq InstProgramRoot.getChild().calcInstanceName() {
         throw new UnsupportedOperationException("Missing equation for inh calcInstanceName().");
     }
@@ -794,7 +794,7 @@ aspect Names {
     /**
      * Create an instance name from a class declaration and a suffix.
      */
-    syn String InstNode.buildInstanceName(InstClassDecl cls, FQName suffix) =
+    syn String InstNode.buildInstanceName(InstClassDecl cls, FAccess suffix) =
         (suffix.numParts() == 0) ? cls.name() : cls.name() + '.' + suffix.name();
 
   inh String InstExternal.packageName();
@@ -966,6 +966,8 @@ aspect Names {
     eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
     eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
     
+    syn boolean InstAccess.isTopInstAccess() = this == getTopInstAccess();
+    
     /**
      * Get the top node in an access (possibly qualified).
      */
@@ -1044,13 +1046,11 @@ aspect Slices {
      * Check if this is a slice operation.
      */
     syn boolean FExp.isSlice() = true;
-    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    eq FIdUseExp.isSlice() = isArray() && getCommonAccess().isSlice();
     eq FSubscriptedExp.isSlice() = isArray();
     
-    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
-    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
-    
-    syn boolean InstAccess.isSlice() {
+    syn boolean CommonAccess.isSlice();
+    eq InstAccess.isSlice() {
         java.util.List<FArraySubscripts> l = allFArraySubscripts();
         int last = l.size() - 1;
         for (int i = 0; i < last; i++) {
@@ -1090,17 +1090,17 @@ aspect Slices {
     /**
      * Check if this is a slice operation.
      */
-    syn boolean FQName.isSlice() = false;
-    eq FQNameFull.isSlice() {
-    	int n = getNumFQNamePart() - 1;
+    eq FAccess.isSlice() = false;
+    eq FAccessFull.isSlice() {
+    	int n = getNumFAccessPart() - 1;
     	for (int i = 0; i < n; i++) {
-    		FQNamePart part = getFQNamePart(i);
+    		FAccessPart part = getFAccessPart(i);
     		if (part.hasFArraySubscripts())
     			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts())
     				if (fs.ndims() > 0)
     					return true;
     	}
-		FQNamePart part = getFQNamePart(n);
+		FAccessPart part = getFAccessPart(n);
         return part.hasFArraySubscripts() && part.getFArraySubscripts().isSlice();
     }
 }
@@ -1129,7 +1129,7 @@ aspect DebugHelpers {
     public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }
     public String FEnumLitExp.toString()         { return getEnum() + "." + getValue(); }
 
-    public String FQNameString.toString()        { return getName(); }
+    public String FAccessString.toString()        { return getName(); }
 
 }
 
@@ -1450,7 +1450,6 @@ aspect ComponentDeclMethods {
         return false;
     }
     
-    syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
     eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
     eq InstComponentArrayAccess.isDisabled() = myInstComponentDecl().isDisabled();

@@ -68,7 +68,7 @@ aspect FlatAPIAttributes {
     syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
     syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
 
-    syn FExp FRecordVariable.findHierarchicalAttributeValue(FQNameFull name, int n, String attrName) {
+    syn FExp FRecordVariable.findHierarchicalAttributeValue(FAccessFull name, int n, String attrName) {
         FAttribute attr = findHierarchicalAttribute(name, n);
         if (attr != null) {
             attr = attr.findAttribute(attrName);
@@ -79,21 +79,21 @@ aspect FlatAPIAttributes {
         return null;
     }
 
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQNameFull name) =
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FAccessFull name) =
             findHierarchicalAttribute(name, name.numParts());
 
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQNameFull name, int n) = null;
-    eq FVariable.findHierarchicalAttribute(FQNameFull name, int n) =
-            name.findHierarchicalAttribute(getFQName().asFQNameFull(), this, n);
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FAccessFull name, int n) = null;
+    eq FVariable.findHierarchicalAttribute(FAccessFull name, int n) =
+            name.findHierarchicalAttribute(getFAccess().asFAccessFull(), this, n);
 
-    syn FAttribute FQName.findHierarchicalAttribute(FQNameFull prefix, FVariable var, int n) = asFQNameFull().findHierarchicalAttribute(prefix, var, n);
-    eq FQNameFull.findHierarchicalAttribute(FQNameFull prefix, FVariable var, int n) {
+    syn FAttribute FAccess.findHierarchicalAttribute(FAccessFull prefix, FVariable var, int n) = asFAccessFull().findHierarchicalAttribute(prefix, var, n);
+    eq FAccessFull.findHierarchicalAttribute(FAccessFull prefix, FVariable var, int n) {
         int i = prefix.numMatchingParts(this);
         if (i >= n)
             return null;
-        FAttribute attr = var.findAttribute(getFQNamePart(i).getName());
+        FAttribute attr = var.findAttribute(getFAccessPart(i).getName());
         for (i++; i < n && attr != null; i++)
-            attr = attr.findAttribute(getFQNamePart(i).getName());
+            attr = attr.findAttribute(getFAccessPart(i).getName());
         return attr;
     }
 
@@ -130,7 +130,7 @@ aspect FlatAPIAttributes {
     public void FVariable.setAttribute(String name, String type, FExp exp, int level) {
         FAttribute attr = findMatching(getFAttributes(), name);
         if (attr == null) {
-            attr = new FAttribute(new FIdUse(type), new FIdDecl(name), exp, true, level);
+            attr = new FAttribute(new FAccessString(type), new FIdDecl(name), exp, true, level);
             addFAttribute(attr);
         } else {
             attr.setValue(exp);

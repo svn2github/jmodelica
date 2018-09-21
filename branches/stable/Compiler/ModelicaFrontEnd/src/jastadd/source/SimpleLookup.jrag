@@ -358,8 +358,11 @@ aspect SimpleClassLookup {
     }
 
     /**
-    * Test the lookup of classes for classes in a model. The required input is pairs of class to start from and the class
-    * which should be search for in an array.
+    * Test the lookup of classes for classes in a model. 
+    * This method is only for use by JUnit tests testing the simpleLookup functionality.
+    *
+    * The required input is pairs of class to start from and the class which should be search for in an array. 
+    *
     * The lookup result will be returned in a string with the start class and found class pairs.
     * 
     * The classes are identified with their qualified names.
@@ -377,6 +380,7 @@ aspect SimpleClassLookup {
 
     /**
     * Test the lookup of all extends, imports and components which can be looked up in a given class.
+    * This method is only for use by JUnit tests testing the simpleLookup functionality.
     */
     public String SourceRoot.testFindMyClassDecl(String whichClass) {
         StringBuilder sb = new StringBuilder();
@@ -384,16 +388,19 @@ aspect SimpleClassLookup {
         if (scd.isUnknown()) {
             throw new AssertionError("The test class " + whichClass + "can't be found using simple lookup.");
         }
-        lookupAllClassDecls(sb, scd);
+        testLookupAllClassDecls(sb, scd);
         return sb.toString();
     }
 
-    private void SourceRoot.lookupAllClassDecls(StringBuilder sb, ASTNode node) {
+    /**
+    * This method is only for use by JUnit tests testing the simpleLookup functionality.
+    */
+    private void SourceRoot.testLookupAllClassDecls(StringBuilder sb, ASTNode node) {
         for (Object sub : node) {
             if (sub instanceof ClassLookupable) {
                 sb.append(sub.toString() + " : " + ((ClassLookupable) sub).findClassDecl().qualifiedName()+ "\n\n");
             }
-            lookupAllClassDecls(sb, (ASTNode) sub);
+            testLookupAllClassDecls(sb, (ASTNode) sub);
         }
     }
 }

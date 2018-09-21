@@ -61,17 +61,17 @@ aspect CCodeGenAlgorithms {
      */
 
     public class CodePrinter {
-        public abstract void printInit(FFunctionVariable v, CodeStream str, String indent, FType type);
+        public abstract void printInit(FAbstractVariable v, CodeStream str, String indent, FType type);
     }
 
     public class CPrettyPrinter {
         @Override
-        public void printInit(FFunctionVariable v, CodeStream str, String indent, FType type) {
+        public void printInit(FAbstractVariable v, CodeStream str, String indent, FType type) {
             v.printInit(ExecStep, str, indent, type);
         }
     }
 
-    public void FFunctionVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
+    public void FAbstractVariable.printInit(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, FType type) {
         String name = p.name(this);
         TypePrinter_C tp = p.codePrinter().createInitSetPrinter(str);
         if (isComposite() && isOutput() && !isString()) {
@@ -121,7 +121,7 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FExternalStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         FExternalLanguage lang = getFExternalLanguage();
-        lang.genVarDecls_C(p, str, indent, this);
+        lang.genVarDecls_C(p, str, indent, this, codeGenContext != null);
         lang.genFuncDecl(p, str, indent, this);
     }
 
@@ -192,7 +192,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(getFIdUseExp().myFuncFV(), str, indent, type());
+        p.printInit(getFIdUseExp().getCommonAccess().asFAccess().myTopFV(), str, indent, type());
     }
 
     @Override
@@ -298,7 +298,8 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%sjmi_real_t %se;\n", indent, name);
+        str.print(indent, "jmi_int_t ", name, "e;\n");
+        str.print(indent, "jmi_int_t ", name, "n;\n");
     }
 
     @Override
@@ -310,16 +311,35 @@ aspect CCodeGenAlgorithms {
         getFExp().printForIndexInit_C(p, str, indent, getFVariable().name_C());
     }
 
-    public void FExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {
-    }
+    public void FExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {}
 
     @Override
     public void FRangeExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%s%se = ", indent, name);
-        p.print(getFExp(hasStep() ? 2 : 1), str, indent);
-        str.print(" + ");
-        printForIndexStep_C(p, str, indent);
-        str.print(" / 2.0;\n");
+        str.print(indent, name, "n = 0;\n");
+        
+        boolean hasStep = hasStep();
+        FExp start = getFExp(0);
+        FExp end = getFExp(hasStep ? 2 : 1);
+        FExp step = hasStep ? getFExp(1) : null;
+        
+        str.print(indent, name, "e = floor(");
+        if (hasStep) {
+            str.print("(");
+        }
+
+        str.print("(");
+        p.print(end, str, indent);
+        str.print(") - (");
+        p.print(start, str, indent);
+        str.print(")");
+
+        if (hasStep) {
+            str.print(") / (");
+            p.print(step, str, indent);
+            str.print(")");
+        }
+
+        str.print(");\n");
     }
 
     protected void FRangeExp.printForIndexStep_C(CodePrinter p, CodeStream str, String indent) {
@@ -343,24 +363,41 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FIdUseExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%1$si = 0; %1$si < jmi_array_size(%2$s, 0); %1$si++", 
-                name, getFIdUse().toString_C(p));
+                name, getCommonAccess().toString_C(p));
     }
 
     @Override
     public void FRangeExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%s = ", name);
-        p.print(getFExp(0), str, indent);
-        if (hasStep() && !getFExp(1).variability().knownParameterOrLess()) {
-            str.format("; %s * ", name);
-            p.print(getFExp(1), str, indent);
-            str.format(" < %se * ", name);
-            p.print(getFExp(1), str, indent);
-            str.format("; %s += ", name);
-        } else {
-            String cmp = (hasStep() && getFExp(1).ceval().isNegative()) ? ">" : "<";
-            str.format("; %s %s %se; %s += ", name, cmp, name, name);
+        FExp start = getFExp(0);
+        FExp step = getFExp(1);
+
+        String nameE = name + "e";
+        String nameN = name + "n";
+
+        /*
+         * Initial expression.
+         */
+        str.print(name, " = ");
+        p.print(start, str, indent);
+        str.print("; ");
+
+        /*
+         * Conditional expression.
+         */
+        str.print(nameN, " <= ", nameE, "; ");
+
+        /*
+         * Iteration expression.
+         */
+        str.print(name, " = ");
+        p.print(start, str, indent);
+        str.print(" + ");
+        if (hasStep()) {
+            str.print("(");
+            p.print(step, str, indent);
+            str.print(") * ");
         }
-        printForIndexStep_C(p, str, indent);
+        str.print("(++", nameN, ")");
     }
 
     public void FForIndex.printForIndexNext_C(CodePrinter p, CodeStream str, String indent) {
@@ -373,7 +410,7 @@ aspect CCodeGenAlgorithms {
     @Override
     public void FIdUseExp.printForIndexNext_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%1$s%2$s = jmi_array_val_1(%3$s, %2$si);\n", 
-                indent, name, getFIdUse().toString_C(p));
+                indent, name, getCommonAccess().toString_C(p));
     }
 
 
@@ -388,30 +425,35 @@ aspect CCodeGenAlgorithms {
 	syn String FType.enumNames_C() = null;
 	eq FEnumType.enumNames_C()     = myFEnumDecl().name_C();
 
-    syn String FEnumDecl.name_C() = getName().getFQName().lastActualPartName() + "_" + enumIndex() + "_" + C_SUFFIX_ENUM;
+    syn String FEnumDecl.name_C() = getName().getFAccess().lastActualPartName() + "_" + enumIndex() + "_" + C_SUFFIX_ENUM;
 
 
     @Override
     public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        boolean ceval = codeGenContext != null;
         // Generate temp arrays for all array inputs and outputs
         // and transpose array for if array is input (Fortran 77 only)
-        getFExternalLanguage().prepExternalArg(p, str, indent, this, false);
+        getFExternalLanguage().prepExternalArg(p, str, indent, this, false, getCodeGenContext(), ceval);
         
         str.print(indent);
         // return variable?
         if(hasReturnVar()) {
-            String name = getReturnVar().type().isRecord() ?
+            String name = getCodeGenContext().alias(getReturnVar().myCommonVarDecl());
+            if (name == null) {
+                name = getReturnVar().type().isRecord() ?
                     "*"+getReturnVar().tempName_C() :
-                    getReturnVar().getFIdUse().name_C();
-            str.print(getCodeGenContext().alias(name));
+                    getReturnVar().getCommonAccess().name_C();
+            }
+            str.print(name);
             str.print(" = ");
         }
         
-        // print function call
-        getFExternalLanguage().genFuncCall(p, str, indent, this);
+        CodeGenContext cgc = getCodeGenContext().createProxy();
+        getFExternalLanguage().extraContext(this, cgc, ceval);
+        getFExternalLanguage().genFuncCall(p, str, indent, this, cgc);
         
         // If there are any output arrays, transpose these before returning (Fortran 77 only)
-        getFExternalLanguage().prepExternalArg(p, str, indent, this, true);
+        getFExternalLanguage().prepExternalArg(p, str, indent, this, true, getCodeGenContext(), ceval);
     }
 
     public class MatrixOp {
@@ -436,21 +478,28 @@ aspect CCodeGenAlgorithms {
         }
     }
 
-    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback){
+    public void FExternalLanguage.extraContext(FExternalStmt stmt, CodeGenContext cgc, boolean ceval) {
         for (FExp arg : stmt.getArgs()) {
-            if (extShouldArgConvert(arg)) {
-                arg.prepExternalArg(p, str, indent, this, writeback);
+            if (extShouldArgConvert(arg, ceval)) {
+                cgc.setAlias(arg.externalArgument(), arg.tempName_C());
             }
-        }
-        if (writeback && stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
-            stmt.getReturnVar().prepExternalArg(p, str, indent, this, writeback);
         }
     }
 
-    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
+    public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback, CodeGenContext cgc, boolean ceval){
+        for (FExp arg : stmt.getArgs()) {
+            if (extShouldArgConvert(arg, ceval)) {
+                arg.prepExternalArg(p, str, indent, this, writeback, cgc);
+            }
+        }
+        if (writeback && stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
+            stmt.getReturnVar().prepExternalArg(p, str, indent, this, writeback, cgc);
+        }
+    }
+
+    public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback, CodeGenContext cgc) {
         String tempName = tempName_C();
-        String src = alias_C(p);
-        useTempVar = true;
+        String src = alias_C(p, cgc);
         if (isArray()) {
             MatrixOp op = new MatrixOp(type(), lang, writeback);
             if (writeback)

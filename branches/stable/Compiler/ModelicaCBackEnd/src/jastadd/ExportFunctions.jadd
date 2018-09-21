@@ -211,7 +211,7 @@ aspect ExportFunctions {
 	public static final Comparator<FFunctionDecl> FFunctionDecl.UNAME_COMPARATOR = 
 		new Comparator<FFunctionDecl>() {
 		 public int compare(FFunctionDecl f1, FFunctionDecl f2) {
-			 return f1.getFQName().nameUnderscore().compareTo(f2.getFQName().nameUnderscore());
+			 return f1.getFAccess().nameUnderscore().compareTo(f2.getFAccess().nameUnderscore());
 		 }
 		 
 		 public boolean equals(Object obj) {
