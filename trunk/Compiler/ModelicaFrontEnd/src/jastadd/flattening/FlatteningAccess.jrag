@@ -240,18 +240,23 @@ aspect FlatteningFunctionConstant {
                 // TODO: Error
             }
         }
-        if (ia.inFunction() && flattenAsFunctionConstant()) {
+        if (ia.flattenAsGlobalAccess()) {
             InstAssignable top = ia.topInstAssignable();
             if (!f.isFlattenedGlobalVariable(top)) {
                 top.flatten(f, FlattenBindingExp.ALL, 0, true);
             }
-            return new FIdUseExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()));
+            return new FGlobalAccessExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()), (String)null);
         }
         return null;
     }
 
-    syn boolean InstAssignable.flattenAsFunctionConstant() =
-            !isInput() && !isOutput() && variability().knownParameterOrLess();
+    syn boolean InstAccess.flattenAsGlobalAccess() =
+            topInstAssignable().flattenAsGlobalVariable() || 
+            (inFunction() && topInstAssignable().flattenAsGlobalVariableFromFunction());
+    syn boolean InstAssignable.flattenAsGlobalVariable() =
+            isExternalObject() && variability().constantVariability();
+    syn boolean InstAssignable.flattenAsGlobalVariableFromFunction() =
+            !isInput() && !isOutput() && variability().constantVariability();
 
     /**
      *  Determines whether or not a constant can be in-lined

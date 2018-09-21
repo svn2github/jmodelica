@@ -1645,6 +1645,12 @@ aspect FlatPrettyPrint {
 		p.print(getCommonAccess(), str, indent);
 	}
 	
+    protected void FGlobalAccessExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("global(");
+        super.prettyPrintExp(p, str, indent);
+        str.print(")");
+    }
+	
 	public void InstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(name());
 		if (hasFArraySubscripts())

@@ -972,6 +972,7 @@ aspect InheritedFactoryMethods {
 
     // Identifier expressions
     public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
+    public FGlobalAccessExp FGlobalAccessExp.createEmptyNode() { return new FGlobalAccessExp(); }
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
     public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
     public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
