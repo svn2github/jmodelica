@@ -856,11 +856,7 @@ aspect InstanceTreeConstruction {
 		getDynamicFExpOpt().setChild(exp, 0);
 		return (FExp) getDynamicFExpOpt().getChild(0);
 	}
-
-    public void InstNode.clearDynamicFExp() {
-       getDynamicFExpOpt().setChild(null, 0);
-    }
-
+	
     /**
      * Dynamically places an FExp in the tree under this InstExternal.
      * 

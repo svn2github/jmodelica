@@ -2072,7 +2072,7 @@ public
   input Integer i;
   output Real x;
  algorithm
-  x := RecordTests.UnmodifiableComponent5.f2(global(RecordTests.UnmodifiableComponent5.r[i]));
+  x := RecordTests.UnmodifiableComponent5.f2(RecordTests.UnmodifiableComponent5.r[i]);
   return;
  annotation(Inline = false);
  end RecordTests.UnmodifiableComponent5.f1;

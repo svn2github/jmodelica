@@ -61,13 +61,8 @@ aspect InstVariability {
     eq InstEnumLiteral.calcVariability()          = Variability.CONSTANT;
     eq UnknownInstComponentDecl.calcVariability() = Variability.CONSTANT;
     eq InstAssignable.calcVariability()           = calcVariability(super.calcVariability());
-    eq InstExternalObject.calcVariability() {
-        TypePrefixVariability v = super.calcVariability();
-        if (!v.constantVariability()) {
-            v = calcVariability(Variability.FIXEDPARAMETER).combine(Variability.FIXEDPARAMETER).combineDown(Variability.INITIALPARAMETER);
-        }
-        return v;
-    }
+    eq InstExternalObject.calcVariability()                        = calcVariability(Variability.FIXEDPARAMETER)
+                .combine(Variability.FIXEDPARAMETER).combineDown(Variability.INITIALPARAMETER);
     
     // Parameters variabilities also depend on binding expressions since its nice
     // to propagate known values, these include: 

@@ -1458,9 +1458,9 @@ aspect Scalarization {
     public FExp FIdUseExp.scalarizeExp(Scalarizer s) {
         String fin = myFV().myForIndexName();
         if (fin != null) {
-            return setLocationOf(createNode(new FAccessString(fin)));
+            return setLocationOf(new FIdUseExp(fin));
         }
-        return setLocationOf(createNode(getCommonAccess().asFAccess().scalarize(s, indexNames)));
+        return setLocationOf(new FIdUseExp(getCommonAccess().asFAccess().scalarize(s, indexNames)));
     }
 
     public FExp FIdTempExp.scalarizeExp(Scalarizer s) {

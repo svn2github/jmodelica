@@ -1002,11 +1002,6 @@ FComponentExp : FExp ::= FExp <Name:String>;
 FIdUseExp : FAssignableExp ::= CommonAccess <OriginalVariable:String>;
 
 /**
- * Access expression to global variable
- */
-FGlobalAccessExp : FIdUseExp;
-
-/**
  * A reference to a dynamic state. These are the states that are introduced by
  * the compiler and exposed as state in the FMU.
  */
