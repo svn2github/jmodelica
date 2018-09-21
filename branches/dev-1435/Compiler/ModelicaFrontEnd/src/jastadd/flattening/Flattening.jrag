@@ -843,7 +843,7 @@ aspect Flattening {
     
     @Override
     public void InstAssignable.flattenInFunction(Flattener f, List<FFunctionVariable> vars, List<FStatement> stmts) {
-        if (!flattenAsFunctionConstant()) {
+        if (!flattenAsGlobalVariableFromFunction()) {
             if (hasInstValueMod())
                 getBindingFExp().flattenUsedFuncsAndEnums(f);
             Opt eo = new Opt();
@@ -1232,7 +1232,7 @@ aspect Flattening {
     }
 
     public void InstAssignable.flatten(Flattener f, FlattenBindingExp binding, int level, boolean global) {
-        if (useInFlattening()) {
+        if (useInFlattening() && (global || !flattenAsGlobalVariable())) {
             if (hasBindingFExp()) {
                 getBindingFExp().flattenAssertExternal(f);
             }
@@ -1789,10 +1789,12 @@ aspect Flattening {
         try {
             if (variability().knownParameterOrLess()) {
                 CValue cval = ceval();
-                FExp t = dynamicFExp(cval.buildInstLiteral());
-                t.flattenUsedFuncsAndEnums(f);
                 if (cval.hasBuildLiteral()) {
-                    return cval.buildLiteral();
+                    FExp t = dynamicFExp(cval.buildInstLiteral());
+                    t.flattenUsedFuncsAndEnums(f);
+                    FExp res = t.flatten(f);
+                    clearDynamicFExp();
+                    return res;
                 }
             }
         } catch (ConstantEvaluationException e) {}
@@ -2519,7 +2521,7 @@ aspect FlatExpressions {
     }
 
     public FExp FLitExp.flatten(Flattener f)     { return fullCopy(); }
-    public FExp FEnumLitExp.flatten(Flattener f) { return new FEnumLitExp(getEnum(), getValue(), null); }
+    public FExp FEnumLitExp.flatten(Flattener f) { return new FEnumLitExp(getEnum(), getValue(), new Opt<FEnumType>()); }
     
     public FExp FModFuncExp.flatten(Flattener f) {
         FExp toRound = new FDivExp(getX().flatten(f), getY().flatten(f));

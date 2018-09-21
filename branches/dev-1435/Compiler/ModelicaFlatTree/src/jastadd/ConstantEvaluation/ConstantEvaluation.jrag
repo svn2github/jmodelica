@@ -1652,6 +1652,11 @@ aspect ConstantEvaluation {
         }
 
         @Override
+        public FExp buildInstLiteral() {
+            return new FEnumLitExp(type, index);
+        }
+
+        @Override
         public boolean hasBuildLiteral() {
             return true;
         }

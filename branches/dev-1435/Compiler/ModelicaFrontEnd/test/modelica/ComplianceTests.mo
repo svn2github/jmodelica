@@ -738,54 +738,6 @@ Compliance error at line 16, column 20, in file 'Compiler/ModelicaFrontEnd/test/
 ")})));
 end ExtObjInFunction1;
 
-model ExtObjInFunction2
-    package Ext
-        extends ExternalObject;
-        function constructor
-            input String s;
-            output Ext ext;
-            external "C" ext = ext_constructor(s);
-        end constructor;
-        function destructor
-            input Ext ext;
-            external "C" ext_destructor(ext);
-        end destructor;
-    end Ext;
-    function EXT_F
-        input Ext  ext;
-        input Real  u;
-        output Real y;
-    external "C"
-        y = ext_f(ext, u);
-    end EXT_F;
-    package Map
-        constant String n = "";
-        final constant Ext ext = Ext(n);
-        function f
-            input Real x;
-            output Real y;
-        algorithm
-            y := EXT_F(ext, x);
-        end f;
-    end Map;
-    
-    package map = Map;
-    
-    Real x = map.f(time);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="ExtObjInFunction2",
-            description="Test compliance error for external object constants used in functions",
-            errorMessage="
-1 errors found:
-
-Compliance error at line 28, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', EXTERNAL_OBJECT_CONSTANT_FROM_FUNCTION:
-  Access to external object constants is not supported in functions
-")})));
-end ExtObjInFunction2;
-
-
 model DeprecatedDecoupleTest1
     Real x[2] = time * (1:2);
     Real y[:] = Subtask.decouple(x);
