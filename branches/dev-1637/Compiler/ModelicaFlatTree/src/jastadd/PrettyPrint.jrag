@@ -1497,10 +1497,8 @@ aspect FlatPrettyPrint {
     public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print("init ");
         p.print(getFIdUseExp(), str, indent);
-        str.print(" as ", type().scalarType());
-        if (type().isArray()) {
-            str.print(type().size());
-        }
+        str.print(" as ");
+        str.print(type());
     }
 
     public void FExternalLanguage.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1644,6 +1642,12 @@ aspect FlatPrettyPrint {
 	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getCommonAccess(), str, indent);
 	}
+	
+    protected void FGlobalAccessExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("global(");
+        super.prettyPrintExp(p, str, indent);
+        str.print(")");
+    }
 	
 	public void InstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(name());

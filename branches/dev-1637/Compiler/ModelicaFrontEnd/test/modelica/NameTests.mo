@@ -1718,7 +1718,7 @@ public
   input Integer i;
   output Real x;
  algorithm
-  x := NameTests.ConstantLookup32.C.d[i].b;
+  x := global(NameTests.ConstantLookup32.C.d[i].b);
   return;
  end NameTests.ConstantLookup32.f;
 
@@ -1775,7 +1775,7 @@ public
   input Integer i;
   output Real x;
  algorithm
-  x := NameTests.ConstantLookup33.C.d[i].b;
+  x := global(NameTests.ConstantLookup33.C.d[i].b);
   return;
  end NameTests.ConstantLookup33.f;
 
@@ -1826,7 +1826,7 @@ public
   input Integer i;
   output Real x;
  algorithm
-  x := NameTests.ConstantLookup34.A.x[i].y[i];
+  x := global(NameTests.ConstantLookup34.A.x[i].y[i]);
   return;
  annotation(Inline = false);
  end NameTests.ConstantLookup34.f;
@@ -1909,7 +1909,7 @@ public
   output Real x;
   Real y;
  algorithm
-  y := NameTests.ConstantLookup35.L.a[i];
+  y := global(NameTests.ConstantLookup35.L.a[i]);
   x := y;
   return;
  end NameTests.ConstantLookup35.J.f1;
@@ -1955,7 +1955,7 @@ public
   input Integer i;
   output Real x;
  algorithm
-  x := NameTests.ConstantLookup36.f.a[i].b[i];
+  x := global(NameTests.ConstantLookup36.f.a[i].b[i]);
   return;
  annotation(Inline = false);
  end NameTests.ConstantLookup36.f;

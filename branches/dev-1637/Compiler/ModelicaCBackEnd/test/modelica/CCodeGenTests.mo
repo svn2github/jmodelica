@@ -3474,6 +3474,97 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end CFunctionTest23;
 
+model FuncWithArray
+    function g
+      input Real x[:];
+      output Integer n;
+    algorithm
+      n := integer(sum(x)/sum(x));
+    end g;
+	function F
+        input Real x;
+        output Real y[g({x,x})];
+    algorithm
+        y := {x};
+	end F;
+	Real[1] a(start=2);
+	equation
+		der(a) = F(1);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="FuncWithArray",
+        description="",
+        variability_propagation=false,
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_FuncWithArray_F_def0(jmi_real_t x_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, y_an, -1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1), 1, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1))
+        y_a = y_an;
+    }
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = x_v;
+    jmi_array_ref_1(tmp_2, 2) = x_v;
+    if (COND_EXP_EQ(func_CCodeGenTests_FuncWithArray_g_exp1(tmp_2), AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.FuncWithArray.F\", JMI_ASSERT_ERROR);
+    }
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1, 1)
+    jmi_array_ref_1(temp_1_a, 1) = x_v;
+    i1_0in = 0;
+    i1_0ie = floor((1) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_1_a, i1_0i);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_FuncWithArray_g_def1(jmi_array_t* x_a, jmi_real_t* n_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(INT, n_v)
+    JMI_DEF(REA, temp_1_v)
+    JMI_DEF(REA, temp_2_v)
+    jmi_real_t i1_1i;
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
+    jmi_real_t i1_2i;
+    jmi_int_t i1_2ie;
+    jmi_int_t i1_2in;
+    temp_1_v = 0.0;
+    i1_1in = 0;
+    i1_1ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
+        temp_1_v = temp_1_v + jmi_array_val_1(x_a, i1_1i);
+    }
+    temp_2_v = 0.0;
+    i1_2in = 0;
+    i1_2ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
+        temp_2_v = temp_2_v + jmi_array_val_1(x_a, i1_2i);
+    }
+    n_v = floor(jmi_divide_function(\"CCodeGenTests.FuncWithArray.g\", temp_1_v, temp_2_v, \"temp_1 / temp_2\"));
+    JMI_RET(GEN, n_o, n_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_FuncWithArray_g_exp1(jmi_array_t* x_a) {
+    JMI_DEF(INT, n_v)
+    func_CCodeGenTests_FuncWithArray_g_def1(x_a, &n_v);
+    return n_v;
+}
+
+")})));
+end FuncWithArray;
 
 
 package Loops
@@ -11626,6 +11717,60 @@ $C_dae_init_add_blocks_residual_functions$
 ")})));
 end BlockTest24;
 
+model BlockTest25
+    record R
+        constant Real y;
+    end R;
+    
+    function f
+        constant R[:] p = {R(3)};
+        input Integer i;
+        output Real y = p[i].y;
+    algorithm
+    end f;
+    
+    function f2
+        input Real x;
+        output Real y = x;
+    algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    parameter Integer i = 1;
+    Real x = f(i) + f2(x);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="BlockTest25",
+        description="Nominal with global constant in record",
+        template="$C_dae_blocks_residual_functions$",
+        variability_propagation=false,
+        generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = jmi_max(AD_WRAP_LITERAL(1), jmi_max(jmi_abs(jmi_array_rec_1(JMI_GLOBAL(CCodeGenTests_BlockTest25_f_p), _i_0)->y), AD_WRAP_LITERAL(1)));
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_1 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = jmi_array_rec_1(JMI_GLOBAL(CCodeGenTests_BlockTest25_f_p), _i_0)->y + func_CCodeGenTests_BlockTest25_f2_exp0(_x_1) - (_x_1);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end BlockTest25;
+
 model NestedUnsolvedScalarInSolvedBlock
     Real a;
     Real b;
@@ -17440,6 +17585,146 @@ model IntegerEnumIndices
 #define pre_e3_5 ((*(jmi->z))[jmi->offs_pre_integer_d+1])
 ")})));
 end IntegerEnumIndices;
+
+model FuncInitOrder
+    function g
+        input Real[:] x;
+        output Integer y = integer(sum(x));
+    algorithm
+    end g;
+
+    function f
+        input Real[:] x;
+        output Real[g(x)] y;
+    algorithm
+        y := zeros(0);
+    end f;
+    
+    function h
+        input Real[:,:] x;
+        output Real y = sum(f(x[:,1]));
+    algorithm
+    end h;
+    
+    Real y = h({{time}});
+        
+        
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="FuncInitOrder",
+        description="",
+        variability_propagation=false,
+        generate_ode=false,
+        generate_dae=true,
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenTests_FuncInitOrder_h_def0(jmi_array_t* x_a, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_2_a, -1, 1)
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_3_a, -1, 1)
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_4_a, -1, 1)
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_5_a, -1, 1)
+    jmi_real_t i2_0i;
+    jmi_int_t i2_0ie;
+    jmi_int_t i2_0in;
+    jmi_real_t i2_1i;
+    jmi_int_t i2_1ie;
+    jmi_int_t i2_1in;
+    jmi_real_t i2_2i;
+    jmi_int_t i2_2ie;
+    jmi_int_t i2_2in;
+    jmi_real_t i1_3i;
+    jmi_int_t i1_3ie;
+    jmi_int_t i1_3in;
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_2_a, func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a), 1, func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_3_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
+    i2_0in = 0;
+    i2_0ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i2_0i = 1; i2_0in <= i2_0ie; i2_0i = 1 + (++i2_0in)) {
+        jmi_array_ref_1(temp_3_a, i2_0i) = jmi_array_val_2(x_a, i2_0i, 1);
+    }
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_4_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
+    i2_1in = 0;
+    i2_1ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
+        jmi_array_ref_1(temp_4_a, i2_1i) = jmi_array_val_2(x_a, i2_1i, 1);
+    }
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_5_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
+    i2_2in = 0;
+    i2_2ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i2_2i = 1; i2_2in <= i2_2ie; i2_2i = 1 + (++i2_2in)) {
+        jmi_array_ref_1(temp_5_a, i2_2i) = jmi_array_val_2(x_a, i2_2i, 1);
+    }
+    func_CCodeGenTests_FuncInitOrder_f_def1(temp_4_a, temp_2_a);
+    temp_1_v = 0.0;
+    i1_3in = 0;
+    i1_3ie = floor((func_CCodeGenTests_FuncInitOrder_g_exp2(temp_5_a)) - (1));
+    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
+        temp_1_v = temp_1_v + jmi_array_val_1(temp_2_a, i1_3i);
+    }
+    y_v = temp_1_v;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_FuncInitOrder_h_exp0(jmi_array_t* x_a) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_FuncInitOrder_h_def0(x_a, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_FuncInitOrder_f_def1(jmi_array_t* x_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, y_an, -1, 1)
+    jmi_real_t i1_4i;
+    jmi_int_t i1_4ie;
+    jmi_int_t i1_4in;
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncInitOrder_g_exp2(x_a), 1, func_CCodeGenTests_FuncInitOrder_g_exp2(x_a))
+        y_a = y_an;
+    }
+    if (COND_EXP_EQ(func_CCodeGenTests_FuncInitOrder_g_exp2(x_a), AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.FuncInitOrder.f\", JMI_ASSERT_ERROR);
+    }
+    i1_4in = 0;
+    i1_4ie = floor((0) - (1));
+    for (i1_4i = 1; i1_4in <= i1_4ie; i1_4i = 1 + (++i1_4in)) {
+        jmi_array_ref_1(y_a, i1_4i) = 0;
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_FuncInitOrder_g_def2(jmi_array_t* x_a, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(INT, y_v)
+    JMI_DEF(REA, temp_1_v)
+    jmi_real_t i1_5i;
+    jmi_int_t i1_5ie;
+    jmi_int_t i1_5in;
+    temp_1_v = 0.0;
+    i1_5in = 0;
+    i1_5ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i1_5i = 1; i1_5in <= i1_5ie; i1_5i = 1 + (++i1_5in)) {
+        temp_1_v = temp_1_v + jmi_array_val_1(x_a, i1_5i);
+    }
+    y_v = floor(temp_1_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenTests_FuncInitOrder_g_exp2(jmi_array_t* x_a) {
+    JMI_DEF(INT, y_v)
+    func_CCodeGenTests_FuncInitOrder_g_def2(x_a, &y_v);
+    return y_v;
+}
+
+")})));
+end FuncInitOrder;
 
 model Functional1
     partial function partFunc

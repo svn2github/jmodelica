@@ -1308,6 +1308,87 @@ end VariabilityPropagationTests.FunctionCallEquationPartial8;
 ")})));
 end FunctionCallEquationPartial8;
 
+model FunctionCallEquationPartial9
+        function f
+            input Real x1;
+            input Integer n;
+            output Real[n] y;
+        algorithm
+            y := {x1,x1};
+            assert(x1==1,"nope");
+        end f;
+    
+        function g
+            input Real x1;
+            input Real x2;
+            input Integer n;
+            output Real[n] y;
+        algorithm
+            if x1 < x2 then
+                y := f(x1,n);
+            else
+                y := {1,2};
+            end if;
+        end g;
+    
+        Real[:] y = g(2,time,2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCallEquationPartial9",
+            description="Bug when returning cloned CValueUnknown",
+            flatModel="
+fclass VariabilityPropagationTests.FunctionCallEquationPartial9
+ Real y[1];
+ Real y[2];
+equation
+ ({y[1], y[2]}) = VariabilityPropagationTests.FunctionCallEquationPartial9.g(2, time, 2);
+
+public
+ function VariabilityPropagationTests.FunctionCallEquationPartial9.g
+  input Real x1;
+  input Real x2;
+  input Integer n;
+  output Real[:] y;
+  Integer[:] temp_1;
+ algorithm
+  init y as Real[n];
+  if x1 < x2 then
+   (y) := VariabilityPropagationTests.FunctionCallEquationPartial9.f(x1, n);
+  else
+   assert(n == 2, \"Mismatching sizes in VariabilityPropagationTests.FunctionCallEquationPartial9.g\");
+   init temp_1 as Integer[2];
+   temp_1[1] := 1;
+   temp_1[2] := 2;
+   for i1 in 1:2 loop
+    y[i1] := temp_1[i1];
+   end for;
+  end if;
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial9.g;
+
+ function VariabilityPropagationTests.FunctionCallEquationPartial9.f
+  input Real x1;
+  input Integer n;
+  output Real[:] y;
+  Real[:] temp_1;
+ algorithm
+  init y as Real[n];
+  assert(n == 2, \"Mismatching sizes in VariabilityPropagationTests.FunctionCallEquationPartial9.f\");
+  init temp_1 as Real[2];
+  temp_1[1] := x1;
+  temp_1[2] := x1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
+  assert(x1 == 1, \"nope\");
+  return;
+ end VariabilityPropagationTests.FunctionCallEquationPartial9.f;
+
+end VariabilityPropagationTests.FunctionCallEquationPartial9;
+")})));
+end FunctionCallEquationPartial9;
+
     model PartiallyKnownComposite1
         function f
             input Real x1;
@@ -2581,5 +2662,155 @@ fclass VariabilityPropagationTests.StringVariable1
 end VariabilityPropagationTests.StringVariable1;
 ")})));
 end StringVariable1;
+
+model ExternalObjectConstant1
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO x;
+        output Real y;
+        external;
+    end f;
+    
+    constant Real x = 1;
+    constant EO eo = EO(x);
+    Real y = f(eo);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ExternalObjectConstant1",
+            description="",
+            flatModel="
+            
+fclass VariabilityPropagationTests.ExternalObjectConstant1
+ constant Real x = 1;
+ parameter Real y;
+package constant
+ constant VariabilityPropagationTests.ExternalObjectConstant1.EO VariabilityPropagationTests.ExternalObjectConstant1.eo = VariabilityPropagationTests.ExternalObjectConstant1.EO.constructor(1.0);
+parameter equation
+ y = VariabilityPropagationTests.ExternalObjectConstant1.f(global(VariabilityPropagationTests.ExternalObjectConstant1.eo));
+
+public
+ function VariabilityPropagationTests.ExternalObjectConstant1.EO.destructor
+  input VariabilityPropagationTests.ExternalObjectConstant1.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end VariabilityPropagationTests.ExternalObjectConstant1.EO.destructor;
+
+ function VariabilityPropagationTests.ExternalObjectConstant1.EO.constructor
+  input Real x;
+  output VariabilityPropagationTests.ExternalObjectConstant1.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x);
+  return;
+ end VariabilityPropagationTests.ExternalObjectConstant1.EO.constructor;
+
+ function VariabilityPropagationTests.ExternalObjectConstant1.f
+  input VariabilityPropagationTests.ExternalObjectConstant1.EO x;
+  output Real y;
+ algorithm
+  external \"C\" y = f(x);
+  return;
+ end VariabilityPropagationTests.ExternalObjectConstant1.f;
+
+ type VariabilityPropagationTests.ExternalObjectConstant1.EO = ExternalObject;
+end VariabilityPropagationTests.ExternalObjectConstant1;
+")})));
+end ExternalObjectConstant1;
+
+model ExternalObjectConstant2
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    function f
+        input EO x;
+        output Real y;
+        external;
+    end f;
+    
+    function g
+        input EO x;
+        output EO y = x;
+    algorithm
+        annotation(Inline=false);
+    end g;
+    
+    constant Real x = 1;
+    constant EO eo = EO(x);
+    Real y = f(g(eo));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ExternalObjectConstant2",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.ExternalObjectConstant2
+ constant Real x = 1;
+ parameter Real y;
+package constant
+ constant VariabilityPropagationTests.ExternalObjectConstant2.EO VariabilityPropagationTests.ExternalObjectConstant2.eo = VariabilityPropagationTests.ExternalObjectConstant2.EO.constructor(1.0);
+parameter equation
+ y = VariabilityPropagationTests.ExternalObjectConstant2.f(VariabilityPropagationTests.ExternalObjectConstant2.g(global(VariabilityPropagationTests.ExternalObjectConstant2.eo)));
+
+public
+ function VariabilityPropagationTests.ExternalObjectConstant2.EO.destructor
+  input VariabilityPropagationTests.ExternalObjectConstant2.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end VariabilityPropagationTests.ExternalObjectConstant2.EO.destructor;
+
+ function VariabilityPropagationTests.ExternalObjectConstant2.EO.constructor
+  input Real x;
+  output VariabilityPropagationTests.ExternalObjectConstant2.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x);
+  return;
+ end VariabilityPropagationTests.ExternalObjectConstant2.EO.constructor;
+
+ function VariabilityPropagationTests.ExternalObjectConstant2.f
+  input VariabilityPropagationTests.ExternalObjectConstant2.EO x;
+  output Real y;
+ algorithm
+  external \"C\" y = f(x);
+  return;
+ end VariabilityPropagationTests.ExternalObjectConstant2.f;
+
+ function VariabilityPropagationTests.ExternalObjectConstant2.g
+  input VariabilityPropagationTests.ExternalObjectConstant2.EO x;
+  output VariabilityPropagationTests.ExternalObjectConstant2.EO y;
+ algorithm
+  y := x;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationTests.ExternalObjectConstant2.g;
+
+ type VariabilityPropagationTests.ExternalObjectConstant2.EO = ExternalObject;
+end VariabilityPropagationTests.ExternalObjectConstant2;
+")})));
+end ExternalObjectConstant2;
+
 
 end VariabilityPropagationTests;

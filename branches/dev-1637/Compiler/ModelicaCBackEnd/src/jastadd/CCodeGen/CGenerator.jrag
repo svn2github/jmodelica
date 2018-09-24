@@ -1225,6 +1225,9 @@ public class CGenerator extends GenericGenerator {
             for (FVariable eo : fclass.externalObjectVariables()) {
                 eo.genDestructorCall_C(p, str, p.indent(""));
             }
+            for (FGlobalVariable eo : fclass.getFGlobalVariables()) {
+                eo.genDestructorCall_C(p, str, p.indent(""));
+            }
         }
     }
     

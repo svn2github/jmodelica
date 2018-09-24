@@ -262,3 +262,19 @@ class TestLoopWithLargeStepSize(SimulationTest):
         self.assert_end_value('b[5]', 0.00295055)
         self.assert_end_value('b[6]', 0.00103245)
         self.assert_end_value('b[7]', 0.06122)
+
+class TestLoopWithSubtractionInBounds(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.LoopWithSubtractionInBounds',
+            options={"variability_propagation":False})
+
+    @testattr(stddist_full = True)
+    def setUp(self):
+        self.setup_base()
+        self.run()
+
+    @testattr(stddist_full = True)
+    def test_LoopWithSubtractionInBounds(self):
+        self.assert_end_value('b', 14)

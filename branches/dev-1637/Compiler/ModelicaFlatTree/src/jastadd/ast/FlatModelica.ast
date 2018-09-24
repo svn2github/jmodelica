@@ -637,7 +637,7 @@ FReturnStmt : FStatement;
 /**
  * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FIdUseExp;
+FInitArrayStmt : FStatement ::= FIdUseExp /Type:FType/;
 
 /**
  * Class for derivated array initalization statements.
@@ -1000,6 +1000,11 @@ FComponentExp : FExp ::= FExp <Name:String>;
  * A qualifed identifier in an expression.
  */
 FIdUseExp : FAssignableExp ::= CommonAccess <OriginalVariable:String>;
+
+/**
+ * Access expression to global variable
+ */
+FGlobalAccessExp : FIdUseExp;
 
 /**
  * A reference to a dynamic state. These are the states that are introduced by
