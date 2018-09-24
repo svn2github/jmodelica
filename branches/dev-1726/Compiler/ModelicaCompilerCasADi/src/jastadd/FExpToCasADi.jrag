@@ -393,7 +393,7 @@ aspect FExpToCasADi {
      */
     int FArraySubscripts.computeFlattenedIndexBasedOnSizeData(Size size) {
         int flattenedIndex = 0;
-        List<FSubscript> subs = getFSubscripts();
+        List<Subscript> subs = subscripts();
         int nbrOfSizeDimsZeroBased = subs.getNumChild() - 1;
         
         try {
