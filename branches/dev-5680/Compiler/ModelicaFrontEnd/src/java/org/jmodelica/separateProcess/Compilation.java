@@ -46,6 +46,9 @@ public final class Compilation
     
     protected Compilation(List<String> args, String jmodelicaHome) throws IOException {
         ProcessBuilder builder = new ProcessBuilder(args);
+        System.out.println("========= Compilation args separate process ======");
+        System.out.println(args);
+        System.out.println("===================================");
         builder.environment().put("JMODELICA_HOME", jmodelicaHome);
         
         process = builder.start();
