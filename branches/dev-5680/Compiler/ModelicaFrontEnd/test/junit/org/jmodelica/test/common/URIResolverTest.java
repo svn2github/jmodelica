@@ -53,7 +53,7 @@ public class URIResolverTest {
         String path = URIResolverMock.absolutePath("pack/subpath");
         String res = URIResolver.DEFAULT.resolve(n, path);
         assertTrue(n.hasError());
-        assertEquals(path, res);
+        assertEquals("URI resolver paths not equal.", path, res);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class URIResolverTest {
         String path = URIResolverMock.absolutePath("pack/subpath/missing");
         String res = URIResolver.DEFAULT.resolve(n, path);
         assertTrue(n.hasError());
-        assertEquals(path, res);
+        assertEquals("URI resolver paths not equal.", path, res);
     }
 
     @Test
