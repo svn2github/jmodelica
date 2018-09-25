@@ -196,7 +196,7 @@ public final class StringUtil {
      * @return {@code fileName} with updated file separators.
      */
     public static String correctSeparators(String string) {
-        return SystemUtil.isLinux() ? string.replaceAll("\\", "/") : string.replace("/", "\\");
+        return SystemUtil.isLinux() ? string.replaceAll("\\\\", "/") : string.replace("/", "\\");
     }
 
 }
