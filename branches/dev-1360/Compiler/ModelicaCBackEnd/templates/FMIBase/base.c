@@ -172,7 +172,6 @@ $C_dynamic_state_add_call$
                    *model_ode_initialize,
                    *model_init_eval_independent,
                    *model_init_eval_dependent,
-                   *model_init_eval_variables,
                    *model_ode_next_time_event);
     
     /* Initialize the delay interface */

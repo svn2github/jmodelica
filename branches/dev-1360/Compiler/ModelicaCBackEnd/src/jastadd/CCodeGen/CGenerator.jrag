@@ -1074,10 +1074,10 @@ public class CGenerator extends GenericGenerator {
     
     }
 
-    public class DAETag_model_init_eval_independent extends DAETag {
+    public class DAETag_model_init_eval_independent_start extends DAETag {
         
-        public DAETag_model_init_eval_independent(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_model_init_eval_independent", myGenerator, fclass);
+        public DAETag_model_init_eval_independent_start(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_model_init_eval_independent_start", myGenerator, fclass);
         }
         
         public void generate(CodeStream str) {
@@ -1086,7 +1086,7 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<FVariable> splitter = new CodeSplitter<FVariable>(p, str, next, true,
-                    "model_init_eval_independent", fclass.myOptions()) {
+                    "model_init_eval_independent_start", fclass.myOptions()) {
                 @Override
                 public void genDecl(FVariable element) {
                     p.printVarDecls(element, str, indent);
@@ -1099,6 +1099,22 @@ public class CGenerator extends GenericGenerator {
             splitter.add(fclass.independentConstants());
             splitter.add(fclass.dependentConstants());
             splitter.add(fclass.independentParameters());
+            
+            for (FVariable fv : fclass.initialParameters()) {
+                if (!fv.hasParameterEquation() && !fv.hasDependentStartValue()) {
+                    splitter.add(fv);
+                }
+            }
+            for (FVariable fv : fclass.variables()) {
+                if (!fv.hasDependentStartValue()) {
+                    splitter.add(fv);
+                }
+            }
+            for (FVariable fv : fclass.discretePreVariables()) {
+                if (!fv.hasDependentStartValue()) {
+                    splitter.add(fv);
+                }
+            }
             splitter.generate();
         }
     }
@@ -1106,7 +1122,7 @@ public class CGenerator extends GenericGenerator {
     public class DAETag_model_init_eval_dependent extends DAETag {
         
         public DAETag_model_init_eval_dependent(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_model_init_eval_dependent", myGenerator, fclass);
+            super("C_model_init_eval_dependent_parameters", myGenerator, fclass);
         }
         
         public void generate(CodeStream str) {
@@ -1115,7 +1131,7 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<FAbstractEquation> splitter = new CodeSplitter<FAbstractEquation>(p, str, next, 
-                    true, "model_init_eval_dependent", fclass.myOptions(), fclass.getParameterEquations().toArrayList()) {
+                    true, "model_init_eval_dependent_parameters", fclass.myOptions(), fclass.getParameterEquations().toArrayList()) {
                 @Override
                 public void genDecl(FAbstractEquation element) {
                     p.printVarDecls(element, str, indent);
@@ -1129,10 +1145,10 @@ public class CGenerator extends GenericGenerator {
         }
     }
     
-    public class DAETag_model_init_eval_variables extends DAETag {
+    public class DAETag_model_init_eval_dependent_variables extends DAETag {
         
-        public DAETag_model_init_eval_variables(AbstractGenerator myGenerator, FClass fclass) {
-            super("C_model_init_eval_variables", myGenerator, fclass);
+        public DAETag_model_init_eval_dependent_variables(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_model_init_eval_dependent_variables", myGenerator, fclass);
         }
         
         public void generate(CodeStream str) {
@@ -1141,7 +1157,7 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<FVariable> splitter = new CodeSplitter<FVariable>(p, str, next, true,
-                    "model_init_eval_variables", fclass.myOptions()) {
+                    "model_init_eval_dependent_variables", fclass.myOptions()) {
                 @Override
                 public void genDecl(FVariable element) {
                     p.printVarDecls(element, str, indent);
@@ -1152,12 +1168,20 @@ public class CGenerator extends GenericGenerator {
                 }
             };
             for (FVariable fv : fclass.initialParameters()) {
-                if (!fv.hasParameterEquation()) {
+                if (fv.hasParameterEquation() || fv.hasDependentStartValue()) {
                     splitter.add(fv);
                 }
             }
-            splitter.add(fclass.variables());
-            splitter.add(fclass.discretePreVariables());
+            for (FVariable fv : fclass.variables()) {
+                if (fv.hasDependentStartValue()) {
+                    splitter.add(fv);
+                }
+            }
+            for (FVariable fv : fclass.discretePreVariables()) {
+                if (fv.hasDependentStartValue()) {
+                    splitter.add(fv);
+                }
+            }
             splitter.generate();
         }
     }

@@ -207,10 +207,10 @@ annotation(__JModelica(UnitTesting(tests={
         name="UnknownSizeInEquation4",
         description="",
         inline_functions="none",
-        template="$C_model_init_eval_dependent$",
+        template="$C_model_init_eval_dependent_parameters$",
         generatedCode="
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)

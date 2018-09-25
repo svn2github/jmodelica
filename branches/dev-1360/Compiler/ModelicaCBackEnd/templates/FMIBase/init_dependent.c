@@ -15,5 +15,12 @@
 
 $C_enum_strings$
 
-$C_model_init_eval_dependent$
+$C_model_init_eval_dependent_parameters$
 
+$C_model_init_eval_dependent_variables$
+
+int model_init_eval_dependent(jmi_t* jmi) {
+    model_init_eval_dependent_parameters(jmi);
+    model_init_eval_dependent_variables(jmi);
+    return 0;
+}

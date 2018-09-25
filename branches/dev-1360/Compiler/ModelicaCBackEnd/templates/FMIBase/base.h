@@ -34,7 +34,6 @@ void model_add_blocks(jmi_t** jmi);
 void model_init_add_blocks(jmi_t** jmi);
 int model_init_eval_independent(jmi_t* jmi);
 int model_init_eval_dependent(jmi_t* jmi);
-int model_init_eval_variables(jmi_t* jmi);
 int model_ode_guards(jmi_t* jmi);
 int model_ode_guards_init(jmi_t* jmi);
 

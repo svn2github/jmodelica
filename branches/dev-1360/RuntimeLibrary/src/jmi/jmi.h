@@ -220,7 +220,6 @@ int jmi_delete(jmi_t* jmi);
  * @param model_ode_initialize A function pointer to the ODE initialization function.
  * @param model_init_eval_dependent   A function pointer for evaluating the independent parameters.
  * @param model_init_eval_independent A function pointer for evaluating the dependent parameters.
- * @param model_init_eval_variables   A function pointer for evaluating the variables start values.
  * @param model_ode_next_time_event A function pointer for evaluating the next time event.
  */
 void jmi_model_init(jmi_t* jmi,
@@ -230,7 +229,6 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_initialize,
                     jmi_generic_func_t model_init_eval_independent,
                     jmi_generic_func_t model_init_eval_dependent,
-                    jmi_generic_func_t model_init_eval_variables,
                     jmi_next_time_event_func_t model_ode_next_time_event);
 
 /**
@@ -491,7 +489,6 @@ struct jmi_model_t {
     jmi_generic_func_t ode_initialize;               /**< \brief A function for initializing the ODE. */
     jmi_generic_func_t init_eval_independent;        /**< \brief A function for initial evaluation of independent parameters. */
     jmi_generic_func_t init_eval_dependent;          /**< \brief A function for initial evaluation of dependent   parameters. */
-    jmi_generic_func_t init_eval_variables;          /**< \brief A function for initial evaluation of variables. */
     jmi_next_time_event_func_t ode_next_time_event;  /**< \brief A function for computing the next time event instant. */
 };
 
@@ -615,20 +612,6 @@ void jmi_init_eval_dependent_set_dirty(jmi_t* jmi);
  */
 int jmi_init_eval_dependent(jmi_t* jmi);
 
-/**
- * \brief Mark variable start values as dirty, triggering reevaluation 
- * on the next call to jmi_init_eval_variables.
- */
-void jmi_init_eval_variables_set_dirty(jmi_t* jmi);
-
-/**
- * \brief Reevaluate the dependent parameters and variable start values if necessary.
- *
- * @param jmi A jmi_t struct.
- * @return Error code.
- */
-int jmi_init_eval_variables(jmi_t* jmi);
-
 /* @} */
 
 /**
@@ -636,15 +619,6 @@ int jmi_init_eval_variables(jmi_t* jmi);
  * \brief Miscanellous functions.
  */
 /* @{ */
-
-/**
- * \brief Set start values for all non alias variables.
- *  
- * @param jmi A jmi_t struct.
- */
-int jmi_set_start_values(jmi_t *jmi);
-
-int jmi_set_globals_start(jmi_t *jmi);
 
 /* Initialize delay interface 
  * Called when initializing jmi struct */

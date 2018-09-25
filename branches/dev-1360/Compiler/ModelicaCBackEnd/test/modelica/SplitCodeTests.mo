@@ -254,14 +254,14 @@ model SplitCodeTest1
             description="Test negative split options",
             cc_split_element_limit=0,
             template="
-$C_model_init_eval_independent$
-$C_model_init_eval_dependent$
-$C_model_init_eval_variables$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
+$C_model_init_eval_dependent_variables$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
             generatedCode="
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p_1_0 = (1);
@@ -335,7 +335,7 @@ model SplitCodeTest2
             cc_split_element_limit=1,
             cc_split_function_limit=-1,
             template="
-$C_model_init_eval_independent$
+$C_model_init_eval_independent_start$
 ",
             generatedCode="
 int model_init_eval_independent_0(jmi_t* jmi) {
@@ -792,10 +792,10 @@ model SplitCodeTestStartValueZero
             description="Test split with start values that are zero",
             cc_split_element_limit=2,
             template="
-$C_model_init_eval_independent$
+$C_model_init_eval_independent_start$
 ",
             generatedCode="
-int model_init_eval_independent_0(jmi_t* jmi) {
+int model_init_eval_independent_start_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p1_1_0 = (1);
@@ -804,7 +804,7 @@ int model_init_eval_independent_0(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_independent_1(jmi_t* jmi) {
+int model_init_eval_independent_start_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p2_2_3 = (4);
@@ -812,14 +812,14 @@ int model_init_eval_independent_1(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_independent_0(jmi_t* jmi);
-int model_init_eval_independent_1(jmi_t* jmi);
+int model_init_eval_independent_start_0(jmi_t* jmi);
+int model_init_eval_independent_start_1(jmi_t* jmi);
 
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= model_init_eval_independent_0(jmi);
-    ef |= model_init_eval_independent_1(jmi);
+    ef |= model_init_eval_independent_start_0(jmi);
+    ef |= model_init_eval_independent_start_1(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }

@@ -1345,13 +1345,13 @@ annotation(__JModelica(UnitTesting(tests={
         enable_variable_scaling=true,
         variability_propagation=false,
         template="
-$C_model_init_eval_dependent$
-$C_model_init_eval_independent$
-$C_model_init_eval_variables$
+$C_model_init_eval_dependent_parameters$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 ",
         generatedCode="
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _y_1 = ((_x_0*sf(0)))/sf(1);
@@ -1360,7 +1360,7 @@ int model_init_eval_dependent(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = (1)/sf(0);
@@ -1368,7 +1368,7 @@ int model_init_eval_independent(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_variables(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
@@ -1439,9 +1439,9 @@ $C_z_offsets_strings$
 ---
 $C_variable_aliases$
 ---
-$C_model_init_eval_dependent$
+$C_model_init_eval_dependent_variables$
 ---
-$C_model_init_eval_independent$
+$C_model_init_eval_independent_start$
 ",
             generatedCode="
 N_real_pi = 6;
@@ -1509,7 +1509,7 @@ z->n = 4;
 
 ---
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
@@ -1517,7 +1517,7 @@ int model_init_eval_dependent(jmi_t* jmi) {
 }
 
 ---
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _reg1_0 = (1);
@@ -1573,8 +1573,8 @@ model CCodeGenParameters3
             template="
 $C_variable_aliases$
 $C_z_offsets_strings$
-$C_model_init_eval_independent$
-$C_model_init_eval_dependent$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_parameters$
 ",
             generatedCode="
 #define _time ((*(jmi->z))[jmi->offs_t])
@@ -1607,7 +1607,7 @@ z->offs.wp = 7;
 z->nums.wp = 0;
 z->n = 7;
 
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_ci_ci_0, (\"s1\"));
@@ -1620,7 +1620,7 @@ int model_init_eval_independent(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_pd_pd_6, (_s_pi_pi_2));
@@ -1655,9 +1655,11 @@ $C_z_offsets_strings$
 ---
 $C_variable_aliases$
 ---
-$C_model_init_eval_dependent$
+$C_model_init_eval_independent_start$
 ---
-$C_model_init_eval_variables$
+$C_model_init_eval_dependent_parameters$
+---
+$C_model_init_eval_dependent_variables$
 ",
             generatedCode="
 N_real_pd = 1;
@@ -1694,10 +1696,21 @@ z->n = 1;
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define _s_pd_initial5_4 (jmi->z_t.strings.values[0])
 
+---
+
+int model_init_eval_independent_start(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _initial3_2 = (1);
+    _initial4_3 = (JMI_FALSE);
+    JMI_ASG(STR_Z, _s_pd_initial5_4, (\"\"));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
 
 ---
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
@@ -1705,12 +1718,9 @@ int model_init_eval_dependent(jmi_t* jmi) {
 }
 
 ---
-int model_init_eval_variables(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _initial3_2 = (1);
-    _initial4_3 = (JMI_FALSE);
-    JMI_ASG(STR_Z, _s_pd_initial5_4, (\"\"));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -2941,13 +2951,13 @@ equation
             description="Declare temp variables for parameters and start values at start of function",
             inline_functions="none",
             template="
-$C_model_init_eval_independent$
-$C_model_init_eval_dependent$
-$C_model_init_eval_variables$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_parameters$
+$C_model_init_eval_dependent_variables$
 $C_DAE_initial_guess_equation_residuals$
 ",
             generatedCode="
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p1_1_0 = (1);
@@ -2957,7 +2967,7 @@ int model_init_eval_independent(jmi_t* jmi) {
 }
 
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
@@ -2974,7 +2984,7 @@ int model_init_eval_dependent(jmi_t* jmi) {
 }
 
 
-int model_init_eval_variables(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_3, 2, 1)
@@ -3333,10 +3343,10 @@ annotation(__JModelica(UnitTesting(tests={
         name="CFunctionTest22",
         description="memcpy for parts of array",
         eliminate_alias_parameters=true,
-        template="$C_model_init_eval_dependent$",
+        template="$C_model_init_eval_dependent_parameters$",
         generatedCode="
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R_0_r, tmp_1)
@@ -7088,10 +7098,10 @@ annotation(__JModelica(UnitTesting(tests={
         enable_variable_scaling=true,
         variability_propagation=false,
         inline_functions="none",
-        template="$C_model_init_eval_dependent$",
+        template="$C_model_init_eval_dependent_parameters$",
         generatedCode="
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R_0_r, tmp_1)
@@ -9256,10 +9266,10 @@ annotation(__JModelica(UnitTesting(tests={
         description="Code generation for if equation in parameter equations",
         variability_propagation=false,
         inline_functions="none",
-        template="$C_model_init_eval_dependent$",
+        template="$C_model_init_eval_dependent_parameters$",
         generatedCode="
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 1, 1)
@@ -12054,23 +12064,23 @@ equation
             description="",
             variability_propagation=false,
             template="
-$C_model_init_eval_independent$
-$C_model_init_eval_variables$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 ",
             generatedCode="
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _y_1 = (2);
     _z_2 = (3);
+    _x_0 = (1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
-int model_init_eval_variables(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = (1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -12099,28 +12109,28 @@ equation
             description="",
             variability_propagation=false,
             template="
-$C_model_init_eval_independent$
-$C_model_init_eval_variables$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 ",
             generatedCode="
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _pr_0 = (1.5);
     _pi_1 = (2);
     _pb_2 = (JMI_TRUE);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_init_eval_variables(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_init_eval_dependent_variables(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -13402,7 +13412,7 @@ model TestRuntimeOptions1
             template="
 $C_runtime_option_map$
 $C_variable_aliases$
-$C_model_init_eval_independent$
+$C_model_init_eval_independent_start$
 ",
             generatedCode="
 const char *fmi_runtime_options_map_names[] = {
@@ -13500,7 +13510,7 @@ const int fmi_runtime_options_map_length = 39;
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 #define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
 
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     __block_jacobian_check_tol_2 = (1.0E-6);
@@ -16114,11 +16124,11 @@ annotation(__JModelica(UnitTesting(tests={
         name="TestStringWithUnicode2",
         description="C string literal with unicode followed by a C, checks bug where the hex escape also included the C",
         template="
-$C_model_init_eval_independent$
+$C_model_init_eval_independent_start$
 $C_ode_derivatives$
 ",
         generatedCode="
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_pi_s_0, (\"\\xc2\\xb0\"\"C\"));
@@ -16163,7 +16173,7 @@ $C_ode_derivatives$
 ***Initialization:
 $C_ode_initialization$
 ***Param:
-$C_model_init_eval_dependent$
+$C_model_init_eval_dependent_variables$
 ",
         generatedCode="
 ***Derivatives:
@@ -16192,7 +16202,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
 ***Param:
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
@@ -16215,21 +16225,22 @@ annotation(__JModelica(UnitTesting(tests={
         name="CFixedFalseParam2",
         description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
         template="
-$C_model_init_eval_independent$
-$C_model_init_eval_dependent$
-$C_model_init_eval_variables$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_parameters$
+$C_model_init_eval_dependent_variables$
 $C_ode_initialization$
 ",
         generatedCode="
-int model_init_eval_independent(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _y_3 = (4);
+    _x3_2 = (1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x1_0 = (_y_3);
@@ -16238,11 +16249,10 @@ int model_init_eval_dependent(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_variables(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x2_1 = (_z_4);
-    _x3_2 = (1);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -16271,9 +16281,9 @@ annotation(__JModelica(UnitTesting(tests={
         name="CFixedFalseParam3",
         description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
         variability_propagation=false,
-        template="$C_model_init_eval_variables$",
+        template="$C_model_init_eval_independent_start$",
         generatedCode="
-int model_init_eval_variables(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1)
@@ -17308,7 +17318,7 @@ model LoadResource1
             common_subexp_elim=false,
             template="
 $C_ode_derivatives$
-$C_model_init_eval_dependent$
+$C_model_init_eval_dependent_parameters$
 ",
             generatedCode="
 
@@ -17336,7 +17346,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     char tmp_5[JMI_PATH_MAX];
@@ -20343,10 +20353,10 @@ annotation(__JModelica(UnitTesting(tests={
         name="AliasNegParam1",
         description="",
         eliminate_alias_parameters=true,
-        template="$C_model_init_eval_dependent$",
+        template="$C_model_init_eval_dependent_parameters$",
         generatedCode="
 
-int model_init_eval_dependent(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _z_1 = -(_x_0 + 1);

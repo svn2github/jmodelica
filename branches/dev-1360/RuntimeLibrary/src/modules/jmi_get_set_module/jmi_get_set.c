@@ -65,7 +65,7 @@ int jmi_set_precheck(jmi_t* jmi, int index, int offset, int* needRecomputeVars, 
     if (index < offset) {
         *needParameterUpdate = 1;
     } else {
-        jmi_init_eval_variables(jmi);
+        jmi_init_eval_independent(jmi);
     }
     return 0;
 }
@@ -217,15 +217,14 @@ static int jmi_evaluate_variables_required(jmi_t* jmi, const jmi_value_reference
 /* Local helper for updating variables before one is retrieved */
 int jmi_get_update(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, size_t offset) {
     int retval;
-    int eval_variables_required = jmi_evaluate_variables_required(jmi, vr, nvr, offset);
-    if (eval_variables_required == 0) {
-        retval = jmi_init_eval_dependent(jmi);
-    } else {
-        retval = jmi_init_eval_variables(jmi);
-    }
+    int eval_variables_required;
+    
+    retval = jmi_init_eval_dependent(jmi);
     if (retval != 0) {
         return -1;
     }
+    
+    eval_variables_required = jmi_evaluate_variables_required(jmi, vr, nvr, offset);
     if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_variables_required == 1 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {

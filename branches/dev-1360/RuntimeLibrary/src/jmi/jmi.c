@@ -46,7 +46,6 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_initialize,
                     jmi_generic_func_t model_init_eval_independent,
                     jmi_generic_func_t model_init_eval_dependent,
-                    jmi_generic_func_t model_init_eval_variables,
                     jmi_next_time_event_func_t model_ode_next_time_event) {
     
     /* Create jmi_model_t struct */
@@ -60,7 +59,6 @@ void jmi_model_init(jmi_t* jmi,
     jmi->model->ode_event_indicators = model_ode_event_indicators;
     jmi->model->init_eval_independent = model_init_eval_independent;
     jmi->model->init_eval_dependent   = model_init_eval_dependent;
-    jmi->model->init_eval_variables   = model_init_eval_variables;
 }
 
 void jmi_model_delete(jmi_t* jmi) {
@@ -289,7 +287,6 @@ int jmi_init(jmi_t** jmi,
     jmi_->recomputeVariables = 1;
     jmi_init_eval_independent_set_dirty(jmi_);
     jmi_init_eval_dependent_set_dirty(jmi_);
-    jmi_init_eval_variables_set_dirty(jmi_);
 
     jmi_->log = jmi_log_init(jmi_callbacks);
 
@@ -592,7 +589,7 @@ int jmi_init_eval_independent(jmi_t* jmi) {
                             &jmi->recompute_init_independent, 
                             jmi->model->init_eval_independent, 
                             "SetStartValuesFailed",
-                            "Failed to set start values.");
+                            "Error evaluating independent start values");
 }
 
 void jmi_init_eval_dependent_set_dirty(jmi_t* jmi) {
@@ -605,20 +602,7 @@ int jmi_init_eval_dependent(jmi_t* jmi) {
                             &jmi->recompute_init_dependent, 
                             jmi->model->init_eval_dependent, 
                             "DependentParametersEvaluationFailed",
-                            "Error evaluating dependent parameters.");
-}
-
-void jmi_init_eval_variables_set_dirty(jmi_t* jmi) {
-    jmi->recompute_init_variables = 1;
-}
-
-int jmi_init_eval_variables(jmi_t* jmi) {
-    return jmi_init_eval_generic(jmi,
-                            jmi_init_eval_dependent,
-                            &jmi->recompute_init_variables, 
-                            jmi->model->init_eval_variables, 
-                            "VariableStartValueEvaluationFailed",
-                            "Error evaluating start values of variables.");
+                            "Error evaluating dependent start values");
 }
 
 int jmi_destruct_external_objects(jmi_t* jmi) {
