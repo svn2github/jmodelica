@@ -2178,6 +2178,7 @@ public class ModelicaCompiler implements LogContainer {
      */ 
     private File ModelicaCompiler.makePackagingDirs(String className, File destination, TargetObject target) {
         File dest = new File(destination.getAbsolutePath());
+        log.error("before: "+destination+" after: "+dest);
         if (dest.isDirectory()) { 
             String mangledName = FClass.convertClassNameToUnderscore(className);
             dest = new File(dest, mangledName + "." + target.getUnitSuffix());
