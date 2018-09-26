@@ -485,13 +485,13 @@ aspect XMLCodeGen {
 	}
 	
     public void FArraySubscripts.prettyPrint_XML(Printer p, CodeStream str, String indent){
-        if (getNumFSubscript()>0) {
+        if (numSubscript()>0) {
             String namespace = "exp";
             String tag = this.xmlTag();
             
             str.println(indent + "<" + namespace + ":" + tag + ">");
             
-            for (FSubscript s : this.getFSubscriptList()) {
+            for (Subscript s : this.subscripts()) {
                 s.prettyPrint_XML(str,p.indent(indent+"\t"));
             }
             
@@ -532,6 +532,11 @@ aspect XMLCodeGen {
 		str.println(indent + "</" + namespace + ":" + tag +  ">");
 			
 	}
+
+    public void IntegerSubscript.prettyPrint_XML(CodeStream str, String indent){
+        FIntegerSubscript fs = new FIntegerSubscript(value);
+        fs.prettyPrint_XML(str, indent);
+    }
 
     syn String FVariable.quantity_XML()    =  quantityAttribute();
     syn String FVariable.unit_XML()        =  unitAttribute();

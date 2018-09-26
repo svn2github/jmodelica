@@ -1978,7 +1978,8 @@ aspect Flattening {
     eq InstGlobalAccess.splitArrayAccess(int index) = 
         new InstGlobalAccess(getInstAccess().splitArrayAccess(index));
     
-    public void FArraySubscripts.specifyNext(int index) {
+    public void FArraySubscripts.specifyNext(int index) {}
+    public void FArrayExpSubscripts.specifyNext(int index) {
         for (int i = 0; i < getNumFSubscript(); i++) {
             if (getFSubscript(i).ndims() > 0) {
                 setFSubscript(getFSubscript(i).specify(index), i);
@@ -2264,6 +2265,9 @@ aspect FlatExpressions {
     }
 
     public FArraySubscripts FArraySubscripts.flatten(Flattener f) {
+        return treeCopy();
+    }
+    public FArraySubscripts FArrayExpSubscripts.flatten(Flattener f) {
         List l = new List();
         for (FSubscript fs : getFSubscripts())
             l.add(fs.flatten(f));
@@ -3083,7 +3087,7 @@ aspect InstantiatedExpressions {
         return new FWhileStmt(getTest().instantiate(), l);
     }
 
-    public FArraySubscripts SrcArraySubscripts.instantiate() {
+    public FArrayExpSubscripts SrcArraySubscripts.instantiate() {
         List l = new List();
         for (SrcSubscript s : getSrcSubscripts())
             l.add(s.instantiate());

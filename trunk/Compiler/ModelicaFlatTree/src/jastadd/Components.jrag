@@ -41,8 +41,9 @@ aspect Components {
             }
         }
         FExp e = getFExp().component(name);
-        FArraySubscripts fas = getFArraySubscripts().treeCopy();
-        for (int i = 0; i < e.ndims() - getFArraySubscripts().getNumFSubscript(); i++) {
+        FArrayExpSubscripts fas = getFArraySubscripts().copyAsFArrayExpSubscripts();
+        int numFSubscripts = fas.getNumFSubscriptNoTransform();
+        for (int i = 0; i < e.ndims() - numFSubscripts; i++) {
             fas.addFSubscriptNoTransform(new FColonSubscript());
         }
         return dynamicFExp(new FSubscriptedExp(e.treeCopy(), fas));

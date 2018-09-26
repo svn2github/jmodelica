@@ -1540,15 +1540,15 @@ aspect Scalarization {
     }
 
     public FArraySubscripts FArraySubscripts.scalarize(Scalarizer s) {
-        FArraySubscripts fas = new FArrayExpSubscripts();
+        return treeCopy();
+    }
+
+    public FArraySubscripts FArrayExpSubscripts.scalarize(Scalarizer s) {
+        FArrayExpSubscripts fas = new FArrayExpSubscripts();
         for (FSubscript fs : getFSubscripts()) {
             fas.addFSubscript(fs.scalarize(s));
         }
         return fas;
-    }
-    
-    public FArraySubscripts FArrayLitSubscripts.scalarize(Scalarizer s) {
-        return treeCopy();
     }
 
     public FSubscript FSubscript.scalarize(Scalarizer s) {

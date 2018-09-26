@@ -27,6 +27,7 @@ aspect AccessSizes {
     eq FExpSubscript.size()     = getFExp().size();
     eq FColonSubscript.size()   = inSubscriptedExp() ? mySize() : accessContextSize();
     eq FIntegerSubscript.size() = Size.SCALAR;
+    public Size IntegerSubscript.size() { return Size.SCALAR; }
 
     inh boolean FSubscript.inSubscriptedExp();
     eq FSubscriptedExp.getFArraySubscripts().inSubscriptedExp()        = true;
@@ -231,7 +232,8 @@ aspect AccessSizes {
     syn FArraySubscripts FAccessPart.accessContextFAS() = null;
     eq FAccessPartArray.accessContextFAS() = getFArraySubscripts().buildAccessContext();
     
-    syn FArraySubscripts FArraySubscripts.buildAccessContext() {
+    syn FArraySubscripts FArraySubscripts.buildAccessContext() = treeCopy();
+    eq FArrayExpSubscripts.buildAccessContext() {
         List<FSubscript> list = new List<FSubscript>();
         for (FSubscript fs : getFSubscripts()) {
             list.add(fs.buildAccessContext());
@@ -577,11 +579,14 @@ aspect SizesUtil {
     eq FDeferExp.cell(Index i)  = getFExp().cell(i);
 
     public FArraySubscripts FArraySubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
-        FArraySubscripts res = new FArrayExpSubscripts();
+        return treeCopy();
+    }
+    public FArraySubscripts FArrayExpSubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
+        List<FSubscript> list = new List<>();
         for (FSubscript f : getFSubscripts()) {
-            res.addFSubscript(f.copyReplaceAccess(crp));
+            list.add(f.copyReplaceAccess(crp));
         }
-        return res;
+        return FArraySubscripts.createFArraySubscripts(list);
     }
     
     public FArraySubscripts FArrayLitSubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {

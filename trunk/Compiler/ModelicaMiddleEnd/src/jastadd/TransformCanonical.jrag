@@ -1825,12 +1825,20 @@ aspect TransformCanonical {
 	public void FAccess.removeFromUses() {}
 	
 	public void FAccessFull.removeFromUses() {
-		for (FAccessPart p : getFAccessParts())
-			if (p.hasFArraySubscripts())
-				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
-					s.removeFromUses();
+        for (FAccessPart p : getFAccessParts()) {
+            if (p.hasFArraySubscripts()) {
+                p.getFArraySubscripts().removeFromUses();
+            }
+        }
 	}
 	
+    public void FArraySubscripts.removeFromUses() {}
+    public void FArrayExpSubscripts.removeFromUses() {
+        for (FSubscript s : getFSubscripts()) {
+            s.removeFromUses();
+        }
+    }
+
 	/**
 	 * Remove all uses in an expression from the uses lists of their respective variables.
 	 * 

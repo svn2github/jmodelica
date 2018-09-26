@@ -195,8 +195,8 @@ aspect ConstantEvaluationStatements {
      */
     syn boolean FAccessPart.isArray() {
         if (hasFArraySubscripts()) {
-            for (FSubscript fs : getFArraySubscripts().getFSubscripts()) {
-                if (fs.ndims() > 0) {
+            for (Subscript s : getFArraySubscripts().subscripts()) {
+                if (s.ndims() > 0) {
                     return true;
                 }
             }

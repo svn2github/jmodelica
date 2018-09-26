@@ -4479,7 +4479,7 @@ aspect CircularExpressions {
                     return true;
                 }
             } else {
-                if (getFArraySubscripts().getFSubscript(dim).isCircular()) {
+                if (getFArraySubscripts().subscript(dim).isCircular()) {
                     return true;
                 }
             }
@@ -4488,16 +4488,17 @@ aspect CircularExpressions {
     }
     eq InstRecord.isCircular(int dim) = false;
 
-	syn boolean FArraySubscripts.isCircular() {
+	syn boolean FArraySubscripts.isCircular() = false;
+	eq FArrayExpSubscripts.isCircular() {
 		for (FSubscript fs : getFSubscripts())
 			if (fs.isCircular())
 				return true;
 		return false;
 	}
-	eq FArrayLitSubscripts.isCircular() = false;
 	
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();
+	public boolean IntegerSubscript.isCircular() { return false; }
 
 }
 

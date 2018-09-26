@@ -85,16 +85,7 @@ aspect FlatteningAccess {
     public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {}
 
     public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
-        FArraySubscripts fas = getFArraySubscripts();
-        for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
-            FSubscript fs = fas.getFSubscript(i);
-            if (!fs.variability().indexParameterOrLess()) {
-                sub.add(fs);
-                fas.setFSubscript(new FColonSubscript(), i);
-            } else if (fs.ndims() == 1) {
-                sub.add(fs.size().rangeFSubscript(0));
-            }
-        }
+        getFArraySubscripts().extractNonParameterIndices(sub);
     }
 
     public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
@@ -108,6 +99,19 @@ aspect FlatteningAccess {
     public void InstDot.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
         for (InstAccess ia : getInstAccesss()) {
             ia.extractNonParameterIndices(sub, v);
+        }
+    }
+
+    public void FArraySubscripts.extractNonParameterIndices(List<FSubscript> sub) {}
+    public void FArrayExpSubscripts.extractNonParameterIndices(List<FSubscript> sub) {
+        for (int i = 0, n = getNumFSubscript(); i < n; i++) {
+            FSubscript fs = getFSubscript(i);
+            if (!fs.variability().indexParameterOrLess()) {
+                sub.add(fs);
+                setFSubscript(new FColonSubscript(), i);
+            } else if (fs.ndims() == 1) {
+                sub.add(fs.size().rangeFSubscript(0));
+            }
         }
     }
 

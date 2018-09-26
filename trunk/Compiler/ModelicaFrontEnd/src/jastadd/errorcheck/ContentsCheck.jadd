@@ -863,7 +863,8 @@ aspect ForceVariability {
         }
     }
 
-    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
+    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {}
+    public void FArrayExpSubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         for (FSubscript s : getFSubscripts()) {
             s.forceVariability(checkType, v);
         }

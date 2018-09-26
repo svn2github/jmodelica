@@ -196,6 +196,9 @@ aspect FlatNames {
     }
     
     public FArraySubscripts FArraySubscripts.createEvaluated() {
+        return treeCopy();
+    }
+    public FArraySubscripts FArrayExpSubscripts.createEvaluated() {
         List<FSubscript> list = new List<FSubscript>();
         for (FSubscript fs : getFSubscripts()) {
             list.add(fs.createEvaluated());
@@ -205,17 +208,10 @@ aspect FlatNames {
         return res;
     }
 
-    public abstract FExp FSubscript.getFExp();
-
-    public FExp FIntegerSubscript.getFExp() {
-        return new FIntegerLitExp(getValue());
-    }
-
-    public FExp FColonSubscript.getFExp() {
-        throw new UnsupportedOperationException();
-    }
-
-    public int FSubscript.getValue() {
+    syn FExp FSubscript.createFExp();
+    eq FExpSubscript.createFExp()     = getFExp().treeCopy();
+    eq FIntegerSubscript.createFExp() = new FIntegerLitExp(getValue());
+    eq FColonSubscript.createFExp()   {
         throw new UnsupportedOperationException();
     }
 
@@ -242,6 +238,7 @@ aspect FlatNames {
     
     syn boolean FSubscript.isColon() = false;
     eq FColonSubscript.isColon()     = true;
+    public boolean IntegerSubscript.isColon() { return false; }
     
     syn boolean FSubscript.isExpSubscript() = false;
     eq FExpSubscript.isExpSubscript()       = true;
@@ -383,9 +380,9 @@ aspect FlatNames {
             sep = "_";
             str.append(part.nameUnderscore());
             if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
-                for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
+                for (Subscript s : part.getFArraySubscripts().subscripts()) {
                     str.append(sep);
-                    str.append(fs.prettyPrint(""));
+                    str.append(s.prettyPrint(""));
                 }
             }
         }
@@ -512,13 +509,13 @@ aspect FlatNames {
     /**
      * Check if this array subscript list has any expression or colon subscripts.
      */
-    syn boolean FArraySubscripts.hasNonLiteralSubscripts() {
+    syn boolean FArraySubscripts.hasNonLiteralSubscripts() = false;
+    eq FArrayExpSubscripts.hasNonLiteralSubscripts() {
         for (FSubscript s : getFSubscripts())
             if (s.hasNonLiteralSubscripts())
                 return true;
         return false;
     }
-    eq FArrayLitSubscripts.hasNonLiteralSubscripts() = false;
 
     /**
      * Check if this array subscript is an expression or colon. 

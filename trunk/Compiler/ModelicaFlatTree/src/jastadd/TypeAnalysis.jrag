@@ -664,6 +664,7 @@ aspect FlatTypeAnalysis {
     syn lazy FType FColonSubscript.type() = fIntegerArrayType(size());
     eq FIntegerSubscript.type() = fIntegerScalarType();
     eq FExpSubscript.type()     = getFExp().type();
+    public FType IntegerSubscript.type() { return FIntegerType.SCALAR; }
 
     public FType FType.lookupHierarchical(FAccess name, int part, int last) {
         return this;

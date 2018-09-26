@@ -814,7 +814,9 @@ aspect Constructors {
 	/**
 	 * Add a new integer literal subscript to the list of FSubscripts.
 	 */
-    public void FArraySubscripts.addFSubscript(int i) {
+    public abstract void FArraySubscripts.addFSubscript(int i);
+
+    public void FArrayExpSubscripts.addFSubscript(int i) {
         addFSubscript(new FIntegerSubscript(i));
     }
 
@@ -863,7 +865,7 @@ aspect Constructors {
         }
         int[] subscripts = new int[list.getNumChildNoTransform()];
         for (int i = 0; i < subscripts.length; i++) {
-            subscripts[i] = list.getChildNoTransform(i).getValue();
+            subscripts[i] = list.getChildNoTransform(i).value();
         }
         return new FArrayLitSubscripts(subscripts);
     }
