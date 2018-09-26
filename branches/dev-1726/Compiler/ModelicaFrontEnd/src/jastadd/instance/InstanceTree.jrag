@@ -2666,7 +2666,7 @@ aspect InstArrays {
         for (Subscript s : myFSubscripts()) { 
             list.add(s.deferredCopy());
         }
-        return FArraySubscripts.createFArraySubscripts(list);
+        return new FArrayExpSubscripts(list);
 	}
 	
 	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;

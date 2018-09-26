@@ -2767,7 +2767,7 @@ aspect ExpandableConnectors {
                     
                     // Create subscripts for size
                     if (s != Size.SCALAR && s != null) {
-                        subscripts = s.createFArraySubscripts();
+                        subscripts = s.createFArrayExpSubscripts();
                     }
                     
                     // Check against connections to non-existing members of non-expandable connectors

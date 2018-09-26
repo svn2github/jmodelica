@@ -2830,11 +2830,19 @@ aspect ArrayHelpers {
          * Dimension that nothing is known about get an FColonSubscript.
          */
         public FArraySubscripts createFArraySubscripts() {
+            return FArraySubscripts.createFArraySubscripts(createFArraySubscriptsList());
+        }
+        
+        public FArraySubscripts createFArrayExpSubscripts() {
+            return new FArrayExpSubscripts(createFArraySubscriptsList());
+        }
+        
+        private List<FSubscript> createFArraySubscriptsList() {
             List<FSubscript> list = new List<FSubscript>();
             for (int i = 0; i < ndims(); i++) {
                 list.add(createFSubscript(i));
             }
-            return FArraySubscripts.createFArraySubscripts(list);
+            return list;
         }
         
         /**
