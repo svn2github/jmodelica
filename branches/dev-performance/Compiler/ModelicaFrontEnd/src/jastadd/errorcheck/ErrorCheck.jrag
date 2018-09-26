@@ -426,6 +426,7 @@ aspect ErrorCheck {
     // TODO: find way to move side-effects out from inh attr
     inh boolean FExp.lockBranch(ErrorCheckType checkType);
     inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+    inh boolean FIntegerSubscript.lockBranch(ErrorCheckType checkType);
     inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
     inh boolean FStatement.lockBranch(ErrorCheckType checkType);
     inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
@@ -1180,7 +1181,7 @@ aspect InstanceErrorCheck {
 	eq Root.getChild().myAccessExists()       = false;
 	eq InstAccess.getChild().myAccessExists() = !myInstComponentDecl().isUnknown();
 	
-	public void FArraySubscripts.collectErrors(ErrorCheckType checkType) {
+	public void FArrayExpSubscripts.collectErrors(ErrorCheckType checkType) {
 		// Should this check be in the access instead?
         int ndims = myDims();
 		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
@@ -1194,6 +1195,10 @@ aspect InstanceErrorCheck {
     		super.collectErrors(checkType);
 		}
 	}
+
+    public void FArrayLitSubscripts.collectErrors(ErrorCheckType checkType) {
+        // TODO
+    }
 
     public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
         if (enclosingLoop() == null)

@@ -36,7 +36,7 @@ aspect FlatteningAccess {
                 CommonAccessExp copy = dynamicFExp(treeCopy()).asCommonAccessExp();
                 List<FSubscript> sub = new List<FSubscript>();
                 copy.asInstAccess().extractNonParameterIndices(sub, ia.myInstComponentDecl().variability());
-                FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
+                FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArrayExpSubscripts(sub)));
                 return res.flatten(f);
             }
         }
@@ -87,16 +87,7 @@ aspect FlatteningAccess {
     public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {}
 
     public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
-        FArraySubscripts fas = getFArraySubscripts();
-        for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
-            FSubscript fs = fas.getFSubscript(i);
-            if (!fs.variability().indexParameterOrLess()) {
-                sub.add(fs);
-                fas.setFSubscript(new FColonSubscript(), i);
-            } else if (fs.ndims() == 1) {
-                sub.add(fs.size().rangeFSubscript(0));
-            }
-        }
+        getFArraySubscripts().extractNonParameterIndices(sub);
     }
 
     public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
@@ -110,6 +101,19 @@ aspect FlatteningAccess {
     public void InstDot.extractNonParameterIndices(List<FSubscript> sub, TypePrefixVariability v) {
         for (InstAccess ia : getInstAccesss()) {
             ia.extractNonParameterIndices(sub, v);
+        }
+    }
+
+    public void FArraySubscripts.extractNonParameterIndices(List<FSubscript> sub) {}
+    public void FArrayExpSubscripts.extractNonParameterIndices(List<FSubscript> sub) {
+        for (int i = 0, n = getNumFSubscript(); i < n; i++) {
+            FSubscript fs = getFSubscript(i);
+            if (!fs.variability().indexParameterOrLess()) {
+                sub.add(fs);
+                setFSubscript(new FColonSubscript(), i);
+            } else if (fs.ndims() == 1) {
+                sub.add(fs.size().rangeFSubscript(0));
+            }
         }
     }
 
@@ -242,28 +246,32 @@ aspect FlatteningFunctionConstant {
                 // TODO: Error
             }
         }
-        if (ia.inFunction() && flattenAsFunctionConstant()) {
+        if (ia.flattenAsGlobalAccess()) {
             InstAssignable top = ia.topInstAssignable();
             if (!f.isFlattenedGlobalVariable(top)) {
                 top.flatten(f, FlattenBindingExp.ALL, 0, true);
             }
-            return new FAccessExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()));
-        }
+            return new FGlobalAccessExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()), (String)null);        }
         return null;
     }
 
-    syn boolean InstAssignable.flattenAsFunctionConstant() =
-            !isInput() && !isOutput() && variability().knownParameterOrLess();
+    syn boolean InstAccess.flattenAsGlobalAccess() =
+            topInstAssignable().flattenAsGlobalVariable() || 
+            (inFunction() && topInstAssignable().flattenAsGlobalVariableFromFunction());
+    syn boolean InstAssignable.flattenAsGlobalVariable() =
+            isExternalObject() && variability().constantVariability();
+    syn boolean InstAssignable.flattenAsGlobalVariableFromFunction() =
+            !isInput() && !isOutput() && variability().constantVariability();
 
     /**
      *  Determines whether or not a constant can be in-lined
      *  for the given context.
      */
-    eq BaseNode.getChild().canInlineConstant()              = true;
-    eq FArraySubscripts.getFSubscript().canInlineConstant() = true;
-    eq FExternalStmt.getArg().canInlineConstant()           = false;
-    eq FFunctionCallLeft.getFExp().canInlineConstant()      = false;
-    eq InstExternalCall.getArg().canInlineConstant()        = false;
+    eq BaseNode.getChild().canInlineConstant()                 = true;
+    eq FArrayExpSubscripts.getFSubscript().canInlineConstant() = true;
+    eq FExternalStmt.getArg().canInlineConstant()              = false;
+    eq FFunctionCallLeft.getFExp().canInlineConstant()         = false;
+    eq InstExternalCall.getArg().canInlineConstant()           = false;
     
     inh boolean FArray.canInlineConstant();
     inh boolean CommonAccessExp.canInlineConstant();
@@ -319,12 +327,14 @@ aspect FlatteningFunctionConstant {
         return false;
     }
     
-    syn lazy boolean FArraySubscripts.hasUnknownIndices() {
+    syn boolean FArraySubscripts.hasUnknownIndices();
+    syn lazy boolean FArrayExpSubscripts.hasUnknownIndices() {
         for (FSubscript fs : getFSubscripts())
             if (fs.isUnknownIndex())
                 return true;
         return false;
     }
+    eq FArrayLitSubscripts.hasUnknownIndices() = false;
     
     // TODO: this doesn't seem to cover colon subscripts to arrays of unknown size
     syn boolean FSubscript.isUnknownIndex() = false;

@@ -422,7 +422,9 @@ FStringComment : BaseNode ::= <Comment:String>;
 /**
  * Array subscripts used in FAccesss.
  */
-FArraySubscripts : BaseNode ::= FSubscript*;
+abstract FArraySubscripts : BaseNode;
+FArrayExpSubscripts : FArraySubscripts ::= FSubscript*;
+FArrayLitSubscripts : FArraySubscripts;
 
 /**
  * Base class for array subscripts.
@@ -635,8 +637,7 @@ FReturnStmt : FStatement;
 /**
  * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FAccessExp;
-
+FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/;
 /**
  * Class for derivated array initalization statements.
  */
@@ -1000,6 +1001,11 @@ FComponentExp : FExp ::= FExp <Name:String>;
 abstract CommonAccessExp : FAssignableExp;
 
 FAccessExp : CommonAccessExp ::= FAccess <OriginalVariable:String>;
+
+/**
+ * Access expression to global variable
+ */
+FGlobalAccessExp : FAccessExp;
 
 /**
  * A reference to a dynamic state. These are the states that are introduced by

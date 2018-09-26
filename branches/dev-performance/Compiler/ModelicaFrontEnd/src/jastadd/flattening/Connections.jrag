@@ -1246,7 +1246,7 @@ aspect Connections {
         FArraySubscripts fas = getFArraySubscripts();
         if (fas == null)
             return false;
-        for (FSubscript s : fas.getFSubscripts())
+        for (Subscript s : fas.subscripts())
             if (s.ndims() > 0)
                 return false;
         return true;
@@ -2832,11 +2832,11 @@ aspect ExpandableConnectors {
                         // Calculate local size
                         Size ts = target.size();
                         if (fas != null) {
-                            MutableSize ms = new MutableSize(fas.getNumFSubscript());
+                            MutableSize ms = new MutableSize(fas.ndims());
                             fixed = new boolean[ms.ndims()];
                             int tspos = 0;
                             for (int i = 0; i < fixed.length; i++) {
-                                FSubscript sub = fas.getFSubscript(i);
+                                Subscript sub = fas.subscript(i);
                                 int len = (tspos < ts.ndims()) ? ts.get(tspos) : 1;
                                 if (!sub.calculateExpandableConnectorSize(ms, i, len)) 
                                     localError();
@@ -2872,8 +2872,8 @@ aspect ExpandableConnectors {
                         if (fas == null || other.fas == null)
                             return true;
                         for (int dim = 0; dim < Math.min(fas.ndims(), other.fas.ndims()); dim++) {
-                            if (!fas.getFSubscript(dim).type().scalarType().typeCompatible(
-                                    other.fas.getFSubscript(dim).type().scalarType())) {
+                            if (!fas.subscript(dim).type().scalarType().typeCompatible(
+                                    other.fas.subscript(dim).type().scalarType())) {
                                 error("Array index type of component introduced to external connector does not match other"
                                         + " connections to same name in connection set");
                                 return false;
@@ -3046,6 +3046,11 @@ aspect ExpandableConnectors {
     
     public boolean FIntegerSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len) {
         s.set(i, getValue());
+        return true;
+    }
+    
+    public boolean IntegerSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len) {
+        s.set(i, value);
         return true;
     }
     

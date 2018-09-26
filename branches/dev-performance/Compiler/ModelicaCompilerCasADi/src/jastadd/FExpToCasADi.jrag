@@ -393,15 +393,18 @@ aspect FExpToCasADi {
      */
     int FArraySubscripts.computeFlattenedIndexBasedOnSizeData(Size size) {
         int flattenedIndex = 0;
-        List<FSubscript> subs = getFSubscripts();
-        int nbrOfSizeDimsZeroBased = subs.getNumChild() - 1;
+        ArrayList<Subscript> subs = new ArrayList<>(numSubscript());
+        for (Subscript sub : subscripts()) {
+            subs.add(sub);
+        }
+        int nbrOfSizeDimsZeroBased = subs.size() - 1;
         
         try {
-            flattenedIndex += subs.getChild(nbrOfSizeDimsZeroBased).value() - 1;
+            flattenedIndex += subs.get(nbrOfSizeDimsZeroBased).value() - 1;
             int base = 1;
             for (int i = nbrOfSizeDimsZeroBased; i > 0 ; --i) {
                 base*=size.get(i);
-                flattenedIndex +=  base*(subs.getChild(i - 1).value() - 1);
+                flattenedIndex +=  base*(subs.get(i - 1).value() - 1);
             }
             return flattenedIndex;
         } catch (ConstantEvaluationException exp) {

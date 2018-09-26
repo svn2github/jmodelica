@@ -1061,7 +1061,8 @@ aspect Slices {
         return l.get(last).isSlice();
     }
     
-    syn boolean FArraySubscripts.isSlice() {
+    syn boolean FArraySubscripts.isSlice() = ndims() > 0;
+    eq FArrayExpSubscripts.isSlice() {
         for (FSubscript fs : getFSubscripts()) {
             if (fs.isSlice()) {
                 return true;
@@ -1096,8 +1097,8 @@ aspect Slices {
     	for (int i = 0; i < n; i++) {
     		FAccessPart part = getFAccessPart(i);
     		if (part.hasFArraySubscripts())
-    			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts())
-    				if (fs.ndims() > 0)
+    			for (Subscript s : part.getFArraySubscripts().subscripts())
+    				if (s.ndims() > 0)
     					return true;
     	}
 		FAccessPart part = getFAccessPart(n);

@@ -27,6 +27,7 @@ aspect AccessSizes {
     eq FExpSubscript.size()     = getFExp().size();
     eq FColonSubscript.size()   = inSubscriptedExp() ? mySize() : accessContextSize();
     eq FIntegerSubscript.size() = Size.SCALAR;
+    public Size IntegerSubscript.size() { return Size.SCALAR; }
 
     inh boolean FSubscript.inSubscriptedExp();
     eq FSubscriptedExp.getFArraySubscripts().inSubscriptedExp()        = true;
@@ -44,7 +45,7 @@ aspect AccessSizes {
     inh Size FSubscript.mySize();
     inh Size FArraySubscripts.mySize();
     eq Root.getChild().mySize()                       = Size.SCALAR;
-    eq FArraySubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
+    eq FArrayExpSubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
     eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
     eq InstNamedAccess.getChild().mySize()            = declarationSize();
     
@@ -233,22 +234,23 @@ aspect AccessSizes {
     syn FArraySubscripts FAccessPart.accessContextFAS() = null;
     eq FAccessPartArray.accessContextFAS() = getFArraySubscripts().buildAccessContext();
     
-    syn FArraySubscripts FArraySubscripts.buildAccessContext() {
-        FArraySubscripts res = new FArraySubscripts();
+    syn FArraySubscripts FArraySubscripts.buildAccessContext() = treeCopy();
+    eq FArrayExpSubscripts.buildAccessContext() {
+        List<FSubscript> list = new List<FSubscript>();
         for (FSubscript fs : getFSubscripts()) {
-            res.addFSubscript(fs.buildAccessContext());
+            list.add(fs.buildAccessContext());
         }
-        return res;
+        return FArraySubscripts.createFArraySubscripts(list);
     }
     
     syn FSubscript FSubscript.buildAccessContext() = treeCopy();
     eq FColonSubscript.buildAccessContext()   = new FIntegerSubscript(1);
     eq FExpSubscript.buildAccessContext()     = getFExp().isArray() ? 
-            new FExpSubscript(getFExp().createFirstIndexExp()) : super.buildAccessContext();
+            getFExp().createFirstIndexExp().createFSubscript() : super.buildAccessContext();
     
     syn FExp FExp.createFirstIndexExp() {
-        FArraySubscripts fas = new FArraySubscripts();
-        fas.addFSubscript(new FIntegerSubscript(1));
+        FArraySubscripts fas = new FArrayLitSubscripts();
+        fas.addFSubscript(1);
         return new FSubscriptedExp(treeCopy(), fas);
     }
     
@@ -269,7 +271,7 @@ aspect FunctionCallSizes {
         return newSize;
     }
     @Override
-    public void FArrayType.setSize(Size size) {}
+    public void FArrayType.setSize(Size size) {throw new InternalCompilerError("FArrayType does not support setSize()");}
     
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
     eq CommonFunctionCall.sizeOfOutput(int i)          = typeOfOutput(i).size();
@@ -579,11 +581,18 @@ aspect SizesUtil {
     eq FDeferExp.cell(Index i)  = getFExp().cell(i);
 
     public FArraySubscripts FArraySubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
-        FArraySubscripts res = new FArraySubscripts();
+        return treeCopy();
+    }
+    public FArraySubscripts FArrayExpSubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
+        List<FSubscript> list = new List<>();
         for (FSubscript f : getFSubscripts()) {
-            res.addFSubscript(f.copyReplaceAccess(crp));
+            list.add(f.copyReplaceAccess(crp));
         }
-        return res;
+        return FArraySubscripts.createFArraySubscripts(list);
+    }
+    
+    public FArraySubscripts FArrayLitSubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return treeCopy();
     }
     
     public FSubscript FSubscript.copyReplaceAccess(FExp.ContextReplacer crp) {
@@ -591,7 +600,7 @@ aspect SizesUtil {
     }
     
     public FSubscript FExpSubscript.copyReplaceAccess(FExp.ContextReplacer crp) {
-        return new FExpSubscript(getFExp().copyReplaceAccess(crp));
+        return getFExp().copyReplaceAccess(crp).createFSubscript();
     }
     
     /**

@@ -38,7 +38,7 @@ aspect CCodeGenGlobals {
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
                     block.genSetupNodeDecls_C(p, str, indent);
                 }
-                for (FVariable fv : fclass.getFGlobalVariables()) {
+                for (FGlobalVariable fv : fclass.getFGlobalVariables()) {
                     fv.genGlobalVariableDecl_C(p, str, indent);
                 }
             }
@@ -280,28 +280,21 @@ aspect CCodeGenGlobalVariables {
                 String indent = "";
                 String next = p.indent(indent);
                 
-                ArrayList<FVariable> globals = new ArrayList<FVariable>();
-                for (FVariable fv : fclass.getFGlobalVariables()) {
+                ArrayList<FGlobalVariable> globals = new ArrayList<>();
+                for (FGlobalVariable fv : fclass.getFGlobalVariables()) {
+                    fv.getBindingExp().genGlobalVariableInitFunc_C(p, str, indent, false);
                     globals.add(fv);
                 }
                 
-                CodeSplitter<FVariable> splitter = new CodeSplitter<FVariable>(p, str, next, false,
+                CodeSplitter<FGlobalVariable> splitter = new CodeSplitter<FGlobalVariable>(p, str, next, false,
                         "jmi_set_globals_start_", fclass.myOptions(), globals) {
                     @Override
-                    public void genDecl(FVariable element) {
-                        element.genGlobalVariableInitDecl_C(p, str, indent);
+                    public void genDecl(FGlobalVariable element) {
+                        
                     }
                     @Override
-                    public void gen(FVariable element) {
-                        element.genGlobalVariableInit_C(p, str, indent);
-                    }
-                    @Override
-                    public void genPre() {
-                        str.print(indent, "JMI_GLOBALS_INIT()\n");
-                    }
-                    @Override
-                    public void genPost() {
-                        str.print(indent, "JMI_GLOBALS_FREE()\n");
+                    public void gen(FGlobalVariable element) {
+                        element.genGlobalVariableInitCall_C(p, str, indent);
                     }
                 };
                 splitter.genFuncImpls();
@@ -315,25 +308,153 @@ aspect CCodeGenGlobalVariables {
         }
     }
 
-    public void FVariable.genGlobalVariableDecl_C(CodePrinter p, CodeStream str, String indent) {
+    public void FGlobalVariable.genGlobalVariableDecl_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent, type().type_C(p), " ", nameUnderscore(), ";\n");
     }
 
-    public void FVariable.genGlobalVariableInitDecl_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-            p.print(getBindingExp(), indent, type(), p.createDeclPrinter(str).forceDynamic());
-        }
+    public void FGlobalVariable.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent) {
+        getBindingExp().genGlobalVariableInitCall_C(p, str, indent, FExp.global_C(nameUnderscore()), false);
     }
 
-    public void FVariable.genGlobalVariableInit_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-            p.print(getBindingExp(), indent, type(), p.createInitPrinter(str).forceDynamic());
-            p.printTempInputAssigns(str, indent, getBindingExp());
+    public void FExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent, boolean inArray) {
+        if (!type().isExternalObject()) {
+            for (FExp arg : childFExps()) {
+                arg.genGlobalVariableInitFunc_C(p, str, indent, isArray());
+            }
+            if (inArray || !isComposite()) {
+                return;
+            }
         }
         
-        str.print(indent, FExp.global_C(nameUnderscore()), " = ");
-        p.printIOExec(getBindingExp(), str, indent);
+        String next = p.indent(indent);
+        String returnType = isArray() ? type().nameArray_C(p) : type().nameScalar_C(p);
+        if (!type().isExternalObject()) {
+            returnType = returnType + "*";
+        }
+        str.print(indent, returnType, " jmi_global_", tempName_C(), "(jmi_t* jmi) {\n");
+        str.print(next, "JMI_DYNAMIC_INIT()\n");
+        
+        genGlobalVariableInitFuncDecl_C(p, str, next);
+        
+        str.print(next, "JMI_GLOBALS_INIT()\n");
+        
+        genGlobalVariableInitFuncInit_C(p, str, next);
+        
+        str.print(next, "JMI_GLOBALS_FREE()\n");
+        str.print(next, "JMI_DYNAMIC_FREE()\n");
+        str.print(next, "return ", tempName_C(), ";\n");
+        str.print(indent, "}\n\n");
+    }
+
+    public void CommonAccessExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent, boolean inArray) {
+        
+    }
+
+    public void FExp.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, type().nameScalar_C(p), " ", tempName_C(), ";\n");
+        p.printVarDecls(this, str, indent);
+    }
+
+    public void FExp.genGlobalVariableInitFuncInit_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(this, str, indent);
+        str.print(indent, tempName_C(), " = ");
+        p.print(this, str, indent);
+        p.printPostSteps(this, str, indent);
         str.print(";\n");
     }
 
+    @Override
+    public void FRecordConstructor.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, type().nameScalar_C(p), "* ", tempName_C(), ";\n");
+    }
+
+    @Override
+    public void FRecordConstructor.genGlobalVariableInitFuncInit_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, tempName_C(), " = jmi_dynamic_function_pool_alloc(&dyn_mem, 1*sizeof(", type().nameScalar_C(p), "), TRUE);\n");
+        genGlobalVariableInitCall_C(p, str, indent, tempName_C(), true);
+    }
+
+    @Override
+    public void FArray.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, "JMI_ARR(",
+                "DYNA", ", ", 
+                type().nameScalar_C(p, false), ", ",
+                type().nameArray_C(p, false), ", ",
+                tempName_C(), ", ");
+        type().size().printNumElements_C(p, str, indent, this);
+        str.print(", ");
+        str.print(type().ndims());
+        str.print(")\n");
+    }
+
+    @Override
+    public void FArray.genGlobalVariableInitFuncInit_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(indent, "JMI_ARRAY_INIT_", ndims(), "(",
+                "DYNA", ", ", 
+                type().nameScalar_C(p, false), ", ",
+                type().nameArray_C(p, false), ", ",
+                tempName_C(), ", ");
+        type().size().printNumElements_C(p, str, indent, this);
+        str.print(", ");
+        str.print(type().ndims());
+        str.print(", ");
+        type().size().printDimensions_C(p, str, indent, this);
+        str.print(")\n");
+        
+        String name = tempName_C();
+        String type = type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+        String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+        for (Index i : indices()) {
+            String cellName = pre + i.toUnclosedString() + ")";
+            FExp cellExp = fArrayCell(i, 0);
+            cellExp.genGlobalVariableInitCall_C(p, str, indent, cellName, true);
+        }
+        
+    }
+
+    public void FExp.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent, String name, boolean expand) {
+        if (!isLiteralZero()) {;
+            str.print(indent, name, " = ");
+            p.print(this, str, indent);
+            str.print(";\n");
+        }
+    }
+
+    public void FFunctionCall.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent, String name, boolean expand) {
+        str.print(indent, name, " = jmi_global_", tempName_C(), "(jmi);\n");
+    }
+
+    public void FArray.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent, String name, boolean expand) {
+        str.print(indent, name, " = jmi_global_", tempName_C(), "(jmi);\n");
+    }
+
+    public void FRecordConstructor.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent, String name, boolean expand) {
+        if (expand) {
+            for (FRecordComponentType comp : getRecord().recordType().getComponents()) {
+                String compName = name + "->" + comp.getName();
+                FExp compExp = component(comp.getName());
+                compExp.genGlobalVariableInitCall_C(p, str, indent, compName, false);
+            }
+        } else {
+            str.print(indent, name, " = jmi_global_", tempName_C(), "(jmi);\n");
+        }
+    }
+    
+    @Override
+    public void FGlobalVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
+        getBindingExp().genDestructorCall_C(p, str, indent, this);
+    }
+    
+    public void FExp.genDestructorCall_C(CodePrinter p, CodeStream str, String indent, FGlobalVariable v) {
+    
+    }
+    
+    @Override
+    public void FFunctionCall.genDestructorCall_C(CodePrinter p, CodeStream str, String indent, FGlobalVariable v) {
+        if (isConstructorCall()) {
+            String strName = v.type().name() + ".destructor";
+            FCallable c = getName().lookupFCallable(strName);
+            str.print(indent, c.funcNameUnderscore(C_SUFFIX_DEF), "(", FExp.global_C(v.nameUnderscore()), ");\n");
+        }
+    }
 }

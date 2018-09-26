@@ -44,6 +44,11 @@ aspect CCodeGenExpressions {
     }
 
     @Override
+    public void FInitArrayStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(type(), str, indent);
+    }
+
+    @Override
     public void FAssert.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(getTest(), str, indent);
 		prettyPrint_C(p, str, indent);
@@ -695,12 +700,27 @@ aspect CCodeGenExpressions {
     eq FAccess.toString_C(CodePrinter p) = toString_C(p.getExecStep());
 
     syn String FAccess.toString_C(CodePrinter.ExecuteCodePrinter p) {
-        String type = myFV().funcArrayType(isAssignUse());
-        if (myFV().inRecord() && inFunction()) {
-            return genRecordUse_C(p, myOutermostFV(), type);
-        } else {
-            return myFV().genUse_C(p, getFArraySubscripts(), type);
+        return myFV().genUse_C(p, getFArraySubscripts(), myFV().funcArrayType(isAssignUse()));
+    }
+
+    syn String FAccessFull.toString_C(CodePrinter.ExecuteCodePrinter p) {
+        if (getNumFAccessPart() < 2) {
+            return super.toString_C(p);
         }
+        
+        String type = myFV().funcArrayType(isAssignUse());
+        FAccessPart part = getFAccessPart(0);
+        FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
+        String res = myOutermostFV().genUse_C(p, fas, C_ARRAY_RECORD);
+        for (int i = 1, n = getNumFAccessPart(); i < n; i++) {
+            part = getFAccessPart(i);
+            res = res + "->" + part.getName();
+            if (part.hasFArraySubscripts()) {
+                String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
+                res = part.getFArraySubscripts().genFunctionArrayUse_C(p.codePrinter(), res, curType);
+            }
+        }
+        return res;
     }
 
     /**
@@ -720,40 +740,23 @@ aspect CCodeGenExpressions {
     public String FArraySubscripts.genFunctionArrayUse_C(CodePrinter p, String name, String type) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         CodeStream str = new CodeStream(os);
-        str.print("jmi_array_", type, "_", getNumFSubscript(), "(", name, ", ");
+        str.print("jmi_array_", type, "_", numSubscript(), "(", name, ", ");
         p.print(this, str, "");
         str.print(")");
         return os.toString();
     }
 
-    public void FArraySubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+    public void FArrayExpSubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
     }
 
-    /**
-     * Helper, generates an record variable use
-     */
-    public String FAccess.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Helper, generates an record variable use
-     */
-    @Override
-    public String FAccessFull.genRecordUse_C(CodePrinter.ExecuteCodePrinter p, FAbstractVariable fv, String type) {
-        FAccessPart part = getFAccessPart(0);
-        FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
-        String res = fv.genUse_C(p, fas, C_ARRAY_RECORD);
-        for (int i = 1, n = getNumFAccessPart(); i < n; i++) {
-            part = getFAccessPart(i);
-            res = res + "->" + part.getName();
-            if (part.hasFArraySubscripts()) {
-                String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
-                res = part.getFArraySubscripts().genFunctionArrayUse_C(p.codePrinter(), res, curType);
+    public void FArrayLitSubscripts.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        for (int i = 0; i < subscripts.length; i++) {
+            if (i != 0) {
+                str.print(", ");
             }
+            str.print(subscripts[i]);
         }
-        return res;
     }
 
     /*=========================================================================
@@ -1598,8 +1601,8 @@ aspect CCodeGenExpressions {
         str.print(")");
         str.print("[(int)(");
         Size s = fas.mySize();
-        for (int i = fas.getNumFSubscript() - 1; i >= 0; i--) {
-            p.codePrinter().print(fas.getFSubscript(i), str, indent);
+        for (int i = fas.numSubscript() - 1; i >= 0; i--) {
+            fas.subscript(i).prettyPrint(p.codePrinter(), str, indent);
             str.print(" - 1");
             if (i > 0) {
                 str.print(" + ");
@@ -1607,7 +1610,7 @@ aspect CCodeGenExpressions {
                 str.print(" * (");
             }
         }
-        for (int i = 0; i < fas.getNumFSubscript() - 1; i++) {
+        for (int i = 0; i < fas.numSubscript() - 1; i++) {
             str.print(")");
         }
         str.print(")]");
