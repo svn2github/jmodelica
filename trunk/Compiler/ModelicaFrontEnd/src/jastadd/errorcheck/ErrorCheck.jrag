@@ -1197,7 +1197,13 @@ aspect InstanceErrorCheck {
 	}
 
     public void FArrayLitSubscripts.collectErrors(ErrorCheckType checkType) {
-        // TODO
+        /*
+         * Does not need implementation since error checking is done in the instance tree,
+         * and there should not be any FArrayLitSubscripts there.
+         * The reason for that is information necessary for error printing (line and column number)
+         * is not saved in FArrayLitSubscripts.
+         */
+        throw new UnsupportedOperationException();
     }
 
     public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
