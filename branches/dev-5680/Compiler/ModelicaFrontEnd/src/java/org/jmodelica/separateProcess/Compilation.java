@@ -124,7 +124,7 @@ public final class Compilation
                         if (exception == null)
                             exception = ((ThrowableLoggingUnit) o).getException();
                     } else if (o instanceof LoggingUnit) {
-                        exception = new RuntimeException(((LoggingUnit) o).print(Level.ERROR));
+                        // Ignore these... E.g. sometimes we get StringLoggingUnits here...
                     } else {
                         throw new SeparateProcessException("Unknown object type '" + o.getClass().getName() + "' received on compiler log");
                     }
