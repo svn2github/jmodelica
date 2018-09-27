@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.logging.IllegalLogStringException;
+import org.jmodelica.util.Arguments;
 import org.jmodelica.util.StringUtil;
 
 /**
@@ -237,7 +238,7 @@ public class CompilerInstance {
             args.add("-platform=" + platform);
         }
         if (outputPath != null) {
-            args.add("-out=\"" + outputPath + "\"");
+            args.add("-out=" + StringUtil.quote(outputPath));
         }
         args.add(sourceFiles == null ? "," : join(",", sourceFiles));
         args.add(modelName);
