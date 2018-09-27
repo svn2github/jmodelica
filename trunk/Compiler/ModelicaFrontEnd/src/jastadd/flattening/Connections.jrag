@@ -80,7 +80,7 @@ aspect Connections {
 
     protected FExp FInStream.expandInStreamExp() {
         // Always create expression from the connection set where the variable is an inside connector. 
-        String name = ((FIdUseExp) getFExp()).getCommonAccess().name();
+        String name = getFExp().asCommonAccess().name();
         ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
         return cs.expandInStreamExp(name);
     }
@@ -165,8 +165,8 @@ aspect Connections {
         String name = calcGeneratedVarName(varType);
         TypePrefixVariability v = variability().combine(Variability.FIXEDPARAMETER);
         myFClass().addFVariable(type().createTempFVariable(new FAccessString(name), variability()));
-        myFClass().equationList(v).add(new FEquation(new FIdUseExp(name), exp));
-        return new FIdUseExp(name);
+        myFClass().equationList(v).add(new FEquation(new FAccessExp(name), exp));
+        return new FAccessExp(name);
     }
     
     /**
@@ -342,7 +342,7 @@ aspect Connections {
      * multiplicands is an access to v.
      */
     syn boolean FExp.isMultiplicationOf(FVariable v) = false;
-    eq FIdUseExp.isMultiplicationOf(FVariable v)     = v == myFV();
+    eq FAccessExp.isMultiplicationOf(FVariable v)    = v == myFV();
     eq FNegExp.isMultiplicationOf(FVariable v)       = getFExp().isMultiplicationOf(v);
     eq FDotMulExp.isMultiplicationOf(FVariable v)    = 
         getLeft().isMultiplicationOf(v) || getRight().isMultiplicationOf(v);
@@ -350,7 +350,7 @@ aspect Connections {
     rewrite FActualStream {
         when (rewriteStreams) to FExp {
             // Get the stream variable name prefix
-            FAccess varName = ((FIdUseExp) getFExp()).getCommonAccess().asFAccess();
+            FAccess varName = getFExp().asFAccessExp().getFAccess();
             FAccess prefix = varName.copyPrefix();
             ArrayList<ConnectionSetEntry> cses = 
                 myFClass().getConnectionSetManager().getFlowVariables(prefix.name());
@@ -383,13 +383,13 @@ aspect Connections {
                 FExp res = null, elseExp = null;
                 FInStream thenExp = null;
                 if (thenValid) {
-                    res = thenExp = new FInStream(var.createUseExp());
+                    res = thenExp = new FInStream(var.createAccessExp());
                     thenExp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
                 }
                 if (elseValid) 
-                    res = elseExp = var.createUseExp();
+                    res = elseExp = var.createAccessExp();
                 if (thenValid && elseValid) {
-                    FExp guard = new FGtExp(flowVar.createUseExp(), new FRealLitExp(0.0));
+                    FExp guard = new FGtExp(flowVar.createAccessExp(), new FRealLitExp(0.0));
                     res = new FIfExp(guard, thenExp, elseExp);
                     if (multFlow)
                         res = new FSmoothExp(0, res);
@@ -565,7 +565,7 @@ aspect Connections {
             }
             for (ConnectionSetEntry e : this) {
                 if (e.isOutside()) {
-                    FExp left = e.createFIdUseExp();
+                    FExp left = e.createFAccessExp();
                     FExp right = expandInStreamExp(e, null, e.createZeroExp());
                     f.addNormalEquation(new FEquation(left, right));
                 }
@@ -579,7 +579,7 @@ aspect Connections {
          */
         public FExp expandInStreamExp(String name) {
             ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            FExp exp = expandInStreamExp(e, name, new FIdUseExp(name));
+            FExp exp = expandInStreamExp(e, name, new FAccessExp(name));
             exp.enableStreamsRewrite();
             return exp;
         }
@@ -599,10 +599,10 @@ aspect Connections {
             List<FExp> vars = new List<FExp>();
             for (ConnectionSetEntry e : this) {
                 if (cse != e) {
-                    stream = (name == null) ? e.createFIdUseExp() : e.createFIdUseExp(name, cse);
+                    stream = (name == null) ? e.createFAccessExp() : e.createCommonAccessExp(name, cse);
                     if (e.isOutside()) 
                         stream = new FInStream(stream);
-                    vars.add(e.createFlowFIdUseExp());
+                    vars.add(e.createFlowCommonAccessExp());
                     vars.add(stream);
                     vars.add(FBooleanLitExp.create(e.isOutside()));
                 }
@@ -654,7 +654,7 @@ aspect Connections {
             } else {
                 FExp e1 = null;
                 for (ConnectionSetEntry cse : this) {
-                    FExp e2 = cse.createFIdUseExp();
+                    FExp e2 = cse.createFAccessExp();
                     if (e1 != null) {
                         f.addNormalEquation(new FEquation(e1, e2));
                     }
@@ -868,24 +868,24 @@ aspect Connections {
 
         private InstComponentDecl cd;
         private boolean outside;
-        private FAccess fqName;
+        private FAccess access;
         private String prefix;
         private String str;
         private String[] scalarNames;
 
-        public static ConnectionSetEntry create(InstComponentDecl cd, boolean outside, FAccess fqName) {
+        public static ConnectionSetEntry create(InstComponentDecl cd, boolean outside, FAccess access) {
             if (cd.isFlow()) 
-                return new FlowConnectionSetEntry(cd, outside, fqName);
+                return new FlowConnectionSetEntry(cd, outside, access);
             if (cd.isStream()) 
-                return new StreamConnectionSetEntry(cd, outside, fqName);
-            return new ConnectionSetEntry(cd, outside, fqName);
+                return new StreamConnectionSetEntry(cd, outside, access);
+            return new ConnectionSetEntry(cd, outside, access);
         }
 
-        private ConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
+        private ConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess access) {
             //log.debug("Created ConnectionSetEntry: " + cd.name());
             this.cd = cd;
             this.outside = outside;
-            this.fqName = fqName;
+            this.access = access;
             prefix = null;
         }
 
@@ -914,7 +914,7 @@ aspect Connections {
         }
 
         public String name() {
-           return fqName.name();
+           return access.name();
         }
         
         public String[] names() {
@@ -926,7 +926,7 @@ aspect Connections {
 
         public String prefix() {
             if (prefix == null) 
-                prefix = fqName.copyPrefix().name();
+                prefix = access.copyPrefix().name();
             return prefix;
         }
 
@@ -945,30 +945,30 @@ aspect Connections {
 
         public String toString() {
             if (str == null)
-                str = fqName + (outside ? " (o)" : " (i)");
+                str = access + (outside ? " (o)" : " (i)");
             return str;
         }
 
         public FAccess getFAccess() {
-            return fqName;
+            return access;
         }
 
-        public FExp createFIdUseExp() {
-            return new FIdUseExp(fqName.treeCopy());
+        public FAccessExp createFAccessExp() {
+            return new FAccessExp(access.treeCopy());
         }
 
         /**
-         * Create an FIdUseExp that is an access to a variable in this entry, that is connected to 
+         * Create an FAccessExp that is an access to a variable in this entry, that is connected to 
          * the variable named <code>name</code> in <code>other</code>.
          */
-        public FExp createFIdUseExp(String name, ConnectionSetEntry other) {
+        public FAccessExp createCommonAccessExp(String name, ConnectionSetEntry other) {
             if (other == this)
-                return new FIdUseExp(name); 
+                return new FAccessExp(name); 
             if (scalarNames == null || other.scalarNames == null)
-                return createFIdUseExp();
+                return createFAccessExp();
             int i;
             for (i = 0; i < other.scalarNames.length && !other.scalarNames[i].equals(name); i++);
-            return (i < scalarNames.length) ? new FIdUseExp(scalarNames[i]) : createFIdUseExp();
+            return (i < scalarNames.length) ? new FAccessExp(scalarNames[i]) : createFAccessExp();
         }
 
         /**
@@ -976,7 +976,7 @@ aspect Connections {
          */
         public FExp createZeroExp() {
             FType t = cd.type();
-            if (fqName.hasFArraySubscripts() && fqName.getFArraySubscripts().accessNdims() == 0) {
+            if (access.hasFArraySubscripts() && access.getFArraySubscripts().accessNdims() == 0) {
                 t = t.scalarType();
             }
             return t.flattenZeroLiteral();
@@ -986,7 +986,7 @@ aspect Connections {
          * Create an equation setting the variable of this entry to zero.
          */
         public FAbstractEquation createZeroEquation() {
-            return new FEquation(createFIdUseExp(), createZeroExp());
+            return new FEquation(createFAccessExp(), createZeroExp());
         }
 
         /**
@@ -995,7 +995,7 @@ aspect Connections {
          * Used to build up flow equations.
          */
         public FExp buildFlow(FExp e) {
-            return createFIdUseExp().appendSum(e, outside, cd.type());
+            return createFAccessExp().appendSum(e, outside, cd.type());
         }
 
         public int hashCode() {
@@ -1025,7 +1025,7 @@ aspect Connections {
          * 
          * Only valid for stream connection entries.
          */
-        public FExp createFlowFIdUseExp() {
+        public FExp createFlowCommonAccessExp() {
             throw new UnsupportedOperationException("Only supported for stream connection sets");
         }
 
@@ -1050,8 +1050,8 @@ aspect Connections {
 
         private static class FlowConnectionSetEntry extends ConnectionSetEntry {
 
-            public FlowConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
-                super(cd, outside, fqName);
+            public FlowConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess access) {
+                super(cd, outside, access);
             }
 
             public boolean isFlow() {
@@ -1066,10 +1066,10 @@ aspect Connections {
             private double nominal = 1;
             private boolean contribute = true;
 
-            public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess fqName) {
-                super(cd, outside, fqName);
+            public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FAccess access) {
+                super(cd, outside, access);
                 InstComponentDecl flow = cd.myFlowVar();
-                flowExp = new FIdUseExp(flow.getFAccess().treeCopy());
+                flowExp = new FAccessExp(flow.getFAccess().treeCopy());
                 try {
                     CValue cval = flow.nominalAttributeCValue();
                     if (cval.hasRealValue()) {
@@ -1089,7 +1089,7 @@ aspect Connections {
                 return true;
             }
 
-            public FExp createFlowFIdUseExp() {
+            public FExp createFlowCommonAccessExp() {
                 return flowExp.fullCopy();
             }
 
@@ -1332,10 +1332,10 @@ aspect Connections {
 
     public void InstComponentDecl.buildConnectionSetsAsPrimitive(FAccess prefix, ConnectionSetManager csm, boolean connect) {
         if (useInFlattening() && (isFlow() || isStream())) {
-            FAccess fqn = getFAccess(Index.NULL);
-            csm.addFlowVar(this, false, fqn);
+            FAccess access = getFAccess(Index.NULL);
+            csm.addFlowVar(this, false, access);
             if (inExpandableConnector()) {
-                csm.addFlowVar(this, true, fqn);
+                csm.addFlowVar(this, true, access);
             }
         }
     }
@@ -1418,7 +1418,7 @@ aspect OverconstrainedConnections {
 	/**
 	 * Get the variable referenced by child A.
 	 * 
-     * Assumes A is an FIdUseExp.
+     * Assumes A is an InstAccessExp.
 	 */
 	syn InstComponentDecl FConnectionsOp.variableA() = 
             getA().asInstAccess().myInstComponentDecl();
@@ -1450,8 +1450,8 @@ aspect OverconstrainedConnections {
 			Size s = func.myOutputs().get(0).size();
 			FFunctionCall right = new FFunctionCall();
 			right.setName(new FAccessString(func.qualifiedName()));
-            right.addArg(cse1.createFIdUseExp());
-            right.addArg(cse2.createFIdUseExp());
+            right.addArg(cse1.createFAccessExp());
+            right.addArg(cse2.createFAccessExp());
             right.setFType(func.functionType().flatten(Flattener.expressionFlattener(), null, true));
 			FAbstractEquation eqn;
 			if (!s.isUnknown() && s.numElements() == 0) 
@@ -1764,7 +1764,7 @@ aspect OverconstrainedConnections {
 		 */
 		public OpsResult ops(FExp e) {
 			OpsResult res = null;
-            CommonAccess u = ((FIdUseExp) e).getCommonAccess();
+            CommonAccess u = e.asCommonAccess();
 			if (u.isInstAccess()) {
                 InstComponentDecl var = u.asInstAccess().myInstComponentDecl();
 				Node n = getNode(var);
@@ -3223,10 +3223,9 @@ aspect Cardinality {
     syn int FExp.cardinalityValue() {
         throw new UnsupportedOperationException();
     }
-    eq FIdUseExp.cardinalityValue()      = getCommonAccess().cardinalityValue();
+    eq InstAccessExp.cardinalityValue() = 1;
+    eq FAccessExp.cardinalityValue()    = getFAccess().cardinalityValue();
 
-    syn int CommonAccess.cardinalityValue();
-    eq FAccess.cardinalityValue()     = myFClass().getConnectionSetManager().getCardinality(scalarName());
-    eq InstAccess.cardinalityValue() = 1;
+    syn int FAccess.cardinalityValue() = myFClass().getConnectionSetManager().getCardinality(scalarName());
 
 }

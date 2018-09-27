@@ -57,7 +57,8 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.FFunctionCallLeft
   org.jmodelica.modelica.compiler.FExp
   org.jmodelica.modelica.compiler.CommonAccess
-  org.jmodelica.modelica.compiler.FIdUseExp
+  org.jmodelica.modelica.compiler.FAccess
+  org.jmodelica.modelica.compiler.CommonAccessExp
   org.jmodelica.modelica.compiler.FVariable
   org.jmodelica.modelica.compiler.FRealVariable
   org.jmodelica.modelica.compiler.FDerivativeVariable
@@ -102,7 +103,8 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FFunctionCallLeft
   org.jmodelica.optimica.compiler.FExp
   org.jmodelica.optimica.compiler.CommonAccess
-  org.jmodelica.optimica.compiler.FIdUseExp
+  org.jmodelica.optimica.compiler.FAccess
+  org.jmodelica.optimica.compiler.CommonAccessExp
   org.jmodelica.optimica.compiler.FVariable
   org.jmodelica.optimica.compiler.FRealVariable
   org.jmodelica.optimica.compiler.FDerivativeVariable

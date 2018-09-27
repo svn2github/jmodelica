@@ -42,7 +42,7 @@ aspect AlgorithmScalarization {
             FType t = left.size().isUnknown() ? left.type() : right.type();
             if (extractTemp()) {
                 s.addTempVar(this);
-                FIdUseExp temp = getRight().tempExp(tempVarName());
+                CommonAccessExp temp = getRight().tempExp(tempVarName());
                 t.scalarizeAssignment(s, temp, right);
                 right = temp;
             }
@@ -147,7 +147,7 @@ aspect AlgorithmScalarization {
     @Override
     public void FInitArrayStmt.scalarize(Scalarizer.Algorithm s) {
         flushAttrCache();
-        getFIdUseExp().myFV().type().scalarizeInitArray(s, null);
+        getFAccessExp().myFV().type().scalarizeInitArray(s, null);
         type();
         
         super.scalarize(s);

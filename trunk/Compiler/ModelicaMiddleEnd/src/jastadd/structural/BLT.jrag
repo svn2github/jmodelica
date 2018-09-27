@@ -505,25 +505,25 @@ aspect BLT{
         return new HomotopyBlock(producer, mergedComponent.computeBlockDependency(), homotopySubBlock, simplifiedBLT);
     }
 
-    public class HomotopySimplifiedVarUseLookupVisitor implements FIdUseExpLookupVisitor {
-        public static final FIdUseExpLookupVisitor instance = new HomotopySimplifiedVarUseLookupVisitor();
+    public class HomotopySimplifiedVarUseLookupVisitor extends FAccessExpLookupVisitor {
+        public static final HomotopySimplifiedVarUseLookupVisitor instance = new HomotopySimplifiedVarUseLookupVisitor();
         
         @Override
-        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FAccessExp> set) {
             node.homotopySimplifiedVarUseLookupVisitor(set, this);
         }
     }
 
-    public Set<FIdUseExp> ASTNode.homotopySimplifiedVarUseLookupVisitor() {
-        return findFIdUseExpsInTree(HomotopySimplifiedVarUseLookupVisitor.instance);
+    public Set<FAccessExp> ASTNode.homotopySimplifiedVarUseLookupVisitor() {
+        return findCommonAccessExpsInTree(HomotopySimplifiedVarUseLookupVisitor.instance);
     }
 
-    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
-        findFIdUseExpsInTree(set, visitor);
+    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
+        findCommonAccessExpsInTree(set, visitor);
     }
 
     @Override
-    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FAccessExp> set, CommonAccessExpLookupVisitor<FAccessExp> visitor) {
         visitor.visit(getSimplified(), set);
     }
 
@@ -3102,7 +3102,7 @@ aspect BLTPrettyPrinting {
     @Override
     public void SolvedScalarEquationBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
         str.print(indent);
-        p.print(solution().dynamicFExp(fv.createUseExp()), str, indent);
+        p.print(solution().dynamicFExp(fv.createAccessExp()), str, indent);
         str.print(" := ");
         p.print(solution(), str, indent);
         equation().getFAttributeList().prettyPrintFAnnotationAttributeList(str, p);
@@ -3675,7 +3675,7 @@ aspect StartValueDependency {
                 if (startExp == null) {
                     return res;
                 }
-                for (V depVar : graph.lookupVars(startExp.findFIdUseExpsInTree())) {
+                for (V depVar : graph.lookupVars(startExp.findFAccessExpsInTree())) {
                     // This is only some optimization so that we don't create a million of empty lists!
                     if (res.isEmpty()) {
                         res = new ArrayList<E>();

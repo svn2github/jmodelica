@@ -38,7 +38,7 @@ aspect FunctionScalarization {
     /**
      * Post processing FFunctionDecls after scalarization.
      * Clear the scalarized flag for all FAccesss.
-     * Rewrite FIdTempExp to FIdUseExp
+     * Rewrite FTempAccessExp to FAccessExp
      */
     public void ASTNode.clearScalarized() {
         for (ASTNode node : this)
@@ -49,14 +49,14 @@ aspect FunctionScalarization {
         scalarized = false;
     }
     
-    private boolean FIdTempExp.clearScalarized = false;
-    public void FIdTempExp.clearScalarized() {
+    private boolean FTempAccessExp.clearScalarized = false;
+    public void FTempAccessExp.clearScalarized() {
         super.clearScalarized();
         clearScalarized = true;
     }
     
-    rewrite FIdTempExp {
-        when (clearScalarized) to FIdUseExp new FIdUseExp(getCommonAccess());
+    rewrite FTempAccessExp {
+        when (clearScalarized) to FAccessExp new FAccessExp(getFAccess());
     }
     
     /**
@@ -64,7 +64,7 @@ aspect FunctionScalarization {
      */
     syn boolean FExp.extractTemp()          = 
         (size().isUnknown() && isComposite() && isFunctionCallIO()) || extractForIndexTemp();
-    eq FIdUseExp.extractTemp()              = super.extractTemp() && isSlice();
+    eq FAccessExp.extractTemp()              = super.extractTemp() && isSlice();
     eq FMulExp.extractTemp()                = !isElementWise() && extractAsUnknown() || isForIndexExp();
     eq FReductionExp.extractTemp()          = getFExp().size().isUnknown() || isForIndexExp();
     eq FMinMaxExp.extractTemp()             = getX().size().isUnknown() || isForIndexExp();
@@ -76,7 +76,7 @@ aspect FunctionScalarization {
     eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon(this);
     eq FVectorExp.extractTemp()             = extractTempArrayCon(getFExp());
     eq FMatrixExp.extractTemp()             = extractTempArrayCon(getFExp());
-    eq FIdTempExp.extractTemp()             = false;
+    eq FTempAccessExp.extractTemp()         = false;
     eq FIfExp.extractTemp()                 = false;
     
     syn boolean FExp.extractForIndexTemp() = isForIndexExp();
@@ -155,7 +155,7 @@ aspect FunctionScalarization {
         }
     }
     
-    public void FIdUseExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
+    public void FAccessExp.usesInScalarizedExp(Set<FAbstractVariable> res) {
         res.add(myFV());
     }
     
@@ -227,7 +227,7 @@ aspect FunctionScalarization {
                 s.add(new FIfStmt(cl, elseClauses));
             } else {
                 for (FAbstractVariable fv : thenVars) {
-                    elseClauses.add(new FEquation(fv.createUseExp(), fv.type().zeroLiteral()));
+                    elseClauses.add(new FEquation(fv.createAccessExp(), fv.type().zeroLiteral()));
                 }
                 FElseEquation elseClause = new FElseEquation(EquationType.NORMAL, elseClauses);
                 FIfEquation equation = new FIfEquation(EquationType.NORMAL, thenClauses, ifExp, new Opt<FIfWhenElseEquation>(elseClause));
@@ -358,10 +358,10 @@ aspect FunctionScalarization {
         boolean writeBack = inFunctionCallLeft();
         if (!writeBack || s.getWriteBack()) {
             ASTNode owner = myExtractedTempOwner();
-            FIdUseExp left = tempExp();
+            FAccessExp left = tempExp();
             FExp right = owner.enterExtractedTempScalarization(this);
             if (writeBack) {
-                FIdUseExp temp = (FIdUseExp) right;
+                FAccessExp temp = right.asFAccessExp();
                 right = left;
                 left  = temp;
             }
@@ -412,7 +412,7 @@ aspect FunctionScalarization {
         names.fillLayer(this);
 
         List<FStatement> firstLoop = new List<FStatement>();
-        FIdUseExp funcLeft = tempExp(names.createFArraySubscripts(1));
+        FAccessExp funcLeft = tempExp(names.createFArraySubscripts(1));
 
         for (int i = 0; i < getNumArg(); ++i) {
             FExp arg = getArg(i);
@@ -429,7 +429,7 @@ aspect FunctionScalarization {
                     names.fillLayer(arg);
                     
                     String tempName = arg.calcTempVarName();
-                    FIdUseExp tempExp = new FIdUseExp(new FAccessString(tempName));
+                    FAccessExp tempExp = new FAccessExp(new FAccessString(tempName));
 
                     FType tempType = arg.type().arrayType(arg.size().contract(1));
                     s.block(firstLoop).addTempVar(tempType, tempName);
@@ -467,7 +467,7 @@ aspect FunctionScalarization {
             List<FStatement> inner = new List<FStatement>();
             List<FStatement> outer = s.getClauses();
             FExp right = getFExp(i);
-            FIdUseExp left;
+            FAccessExp left;
             if (iter) {
                 left = tempExp(names.createFArraySubscripts());
                 getFExp(0).editNamesIter(s);
@@ -492,7 +492,7 @@ aspect FunctionScalarization {
     
     public void FMulExp.unknownFunctionArrayTemporaries(Scalarizer s) {
         ForNames names = s.getNames();
-        FIdUseExp sum = new FIdUseExp(calcTempVarName());
+        FAccessExp sum = new FAccessExp(calcTempVarName());
         s.addTempVar(type().scalarType(), sum.name());
         
         names.addLayer(ndims());
@@ -577,7 +577,7 @@ aspect FunctionScalarization {
         getFExp().addArrayUsesToIndexMap(s);
         
         FIfExp right = new FIfExp(
-                new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
+                new FEqExp(new FAccessExp(names.get(0)), new FAccessExp(names.get(1))),
                 scalarizeDiagonalElement(s),
                 new FIntegerLitExp(0)
         );
@@ -599,7 +599,7 @@ aspect FunctionScalarization {
         
         FExp ind = null;
         for (int i = 0; i < names.size(); i++) {
-            FIdUseExp u = new FIdUseExp(names.get(i));
+            FAccessExp u = new FAccessExp(names.get(i));
             FSubExp u1 = new FSubExp(u, new FIntegerLitExp(1));
             if (ind != null) {
                 ind = new FMulExp(ind, getFExp().size().createFExp(i));
@@ -741,7 +741,7 @@ aspect FunctionScalarization {
         
     }
     
-    public void FIdUseExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FAccessExp.addArrayUsesToIndexMap(FExp[] names) {
         if (!hasFArraySubscripts() && isArray())
             indexNames = names;
         super.addArrayUsesToIndexMap(names);
@@ -769,7 +769,7 @@ aspect FunctionScalarization {
         return i;
     }
 
-    public void FIdTempExp.addArrayUsesToIndexMap(FExp[] names) {
+    public void FTempAccessExp.addArrayUsesToIndexMap(FExp[] names) {
         indexNames = names;
     }
 
@@ -1045,7 +1045,7 @@ aspect FunctionScalarizationHelpers {
             FArrayExpSubscripts fas = new FArrayExpSubscripts();
             for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
-                    fas.addFSubscript(new FExpSubscript(new FIdTempExp(new FAccessFull(topLayer()[i]))));
+                    fas.addFSubscript(new FExpSubscript(new FTempAccessExp(new FAccessFull(topLayer()[i]))));
                 else
                     fas.addFSubscript(new FIntegerSubscript(1));
             }
@@ -1073,7 +1073,7 @@ aspect FunctionScalarizationHelpers {
             FExp[] subs = new FExp[topLayer().length];
             int i = 0;
             for (String s : topLayer()) {
-                subs[i++] = new FIdUseExp(s);
+                subs[i++] = new FAccessExp(s);
             }
             return subs;
         }

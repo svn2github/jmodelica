@@ -711,11 +711,11 @@ aspect FlatTypeCheck {
         super.typeError(checkType);
     }
 
-    public void CommonAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
-        use.typeError(checkType);
+    public void CommonAccess.typeError(ErrorCheckType checkType, CommonAccessExp access) {
+        access.typeError(checkType);
     }
 
-    public void InstAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
+    public void InstAccess.typeError(ErrorCheckType checkType, CommonAccessExp access) {
         typeError();
     }
 
@@ -790,9 +790,9 @@ aspect FlatTypeCheck {
         }
     }
 
-  public void FIdUseExp.typeCheck(ErrorCheckType checkType) {
-	  if (!getCommonAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
-            getCommonAccess().typeError(checkType, this);
+  public void CommonAccessExp.typeCheck(ErrorCheckType checkType) {
+	  if (!getAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
+            getAccess().typeError(checkType, this);
   }
   
 	public void CommonAccess.typeCheck(ErrorCheckType checkType) {
@@ -809,7 +809,7 @@ aspect FlatTypeCheck {
         }
 	}
 
-  inh boolean FIdUseExp.accessToModelOK();
+  inh boolean CommonAccessExp.accessToModelOK();
   inh boolean InstFunctionArgument.accessToModelOK();
   eq BaseNode.getChild().accessToModelOK()             = false;
   eq InstFunctionArgument.getChild().accessToModelOK() = accessToModelOK();
@@ -850,24 +850,31 @@ aspect FlatTypeCheck {
   }
   
   syn boolean FExp.isAccess()  = false;
-  eq FIdUseExp.isAccess()      = true;
+  eq CommonAccessExp.isAccess()= true;
   syn CommonAccess FExp.asCommonAccess() {
 	  throw new UnsupportedOperationException("asCommonAccess() is not supported for class type " + getClass().getSimpleName());
   }
-  eq FIdUseExp.asCommonAccess() = getCommonAccess();
+  eq CommonAccessExp.asCommonAccess() = getAccess();
   
-  syn FIdUseExp FExp.asFIdUseExp() {
-      throw new UnsupportedOperationException("asFIdUseExp() is not supported for class type " + getClass().getSimpleName());
+  syn CommonAccessExp FExp.asCommonAccessExp() {
+      throw new UnsupportedOperationException("asCommonAccessExp() is not supported for class type " + getClass().getSimpleName());
   }
-  eq FIdUseExp.asFIdUseExp() = this;
+  eq CommonAccessExp.asCommonAccessExp() = this;
+  
+  syn FAccessExp FExp.asFAccessExp() {
+      throw new UnsupportedOperationException("asFAccessExp() is not supported for class type " + getClass().getSimpleName());
+  }
+  eq FAccessExp.asFAccessExp() = this;
   
     syn boolean CommonAccess.isInstAccess() = false;
-    eq InstAccess.isInstAccess()      = true;
+    eq InstAccess.isInstAccess() = true;
+    syn boolean CommonAccess.isFAccess() = false;
+    eq FAccess.isFAccess() = true;
     
 	syn InstAccess FExp.asInstAccess() {
 		throw new UnsupportedOperationException();
 	}
-    eq FIdUseExp.asInstAccess() = getCommonAccess().asInstAccess();
+    eq InstAccessExp.asInstAccess() = getInstAccess();
     
     syn InstAccess CommonAccess.asInstAccess() {
         throw new UnsupportedOperationException();
@@ -875,7 +882,7 @@ aspect FlatTypeCheck {
     eq InstAccess.asInstAccess() = this;
     
   syn boolean FExp.isAccessToStream()  = false;
-  eq FIdUseExp.isAccessToStream()      = getCommonAccess().isAccessToStream();
+  eq CommonAccessExp.isAccessToStream()= getAccess().isAccessToStream();
   
   syn boolean CommonAccess.isAccessToStream() = false;
   eq InstAccess.isAccessToStream()      = myInstComponentDecl().isStream();
@@ -1055,7 +1062,7 @@ aspect FlatTypeCheck {
   eq InstRoot.getChild().inUnknownAccess()                = false;
   
   syn boolean FExp.canBeComponentSize()  = type().isInteger();
-  eq FIdUseExp.canBeComponentSize()      = type().isInteger() || getCommonAccess().isComponentSizeClass();
+  eq CommonAccessExp.canBeComponentSize()= type().isInteger() || getAccess().isComponentSizeClass();
   
   syn boolean FSubscript.canBeComponentSize() = true;
   eq FExpSubscript.canBeComponentSize() = getFExp().canBeComponentSize();
@@ -1067,17 +1074,17 @@ aspect FlatTypeCheck {
   eq InstEnumClassDecl.isComponentSizeClass()      = true;
   
   inh boolean InstClassAccess.isInstComponentSize();
-    inh boolean FIdUseExp.isInstComponentSize();
+    inh boolean CommonAccessExp.isInstComponentSize();
   inh boolean FSubscript.isInstComponentSize();
   inh boolean FArraySubscripts.isInstComponentSize();
   eq InstComponentDecl.getLocalFArraySubscripts().isInstComponentSize() = true;
   eq InstComponentDecl.getFArraySubscripts().isInstComponentSize()      = true;
   eq InstShortClassDecl.getFArraySubscripts().isInstComponentSize()     = true;
   eq InstAccess.getChild().isInstComponentSize()                        = false;
-  eq FAccessPart.getChild().isInstComponentSize()                        = false;
-  eq CommonAccess.getChild().isInstComponentSize()                            = false;
+  eq FAccessPart.getChild().isInstComponentSize()                       = false;
+  eq CommonAccess.getChild().isInstComponentSize()                      = false;
   eq FExp.getChild().isInstComponentSize()                              = false;
-    eq FIdUseExp.getChild().isInstComponentSize()                         = isInstComponentSize();
+    eq CommonAccessExp.getChild().isInstComponentSize()                 = isInstComponentSize();
   eq FAbstractVariable.getChild().isInstComponentSize()                 = false;
   eq FAbstractEquation.getChild().isInstComponentSize()                 = false;
   eq InstNode.getChild().isInstComponentSize()                          = false;
@@ -1414,7 +1421,7 @@ aspect FlatTypeCheck {
 
     public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
         if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
-            if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
+            if (getFExp() instanceof CommonAccessExp) {  // Should never be false - add check? 
                 CommonAccess use = getFExp().asCommonAccess();
                 FType useType = getFExp().type();
                 FType outType = type();
@@ -1746,7 +1753,7 @@ aspect FlatTypeCheck {
    * Only valid in instance tree.
    */
   syn boolean FExp.isComponentReference(Criteria<InstComponentDecl> criteria)  = false;
-    eq FIdUseExp.isComponentReference(Criteria<InstComponentDecl> criteria) = getCommonAccess().isComponentReference(criteria);
+    eq CommonAccessExp.isComponentReference(Criteria<InstComponentDecl> criteria) = getAccess().isComponentReference(criteria);
     
     syn boolean CommonAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = false;
     eq InstAccess.isComponentReference(Criteria<InstComponentDecl> criteria) = 
@@ -1835,7 +1842,7 @@ aspect VariabilityCheck {
     }
     
     public void FPreExp.checkDiscreteOperations() {
-        if (instanceTreeSource != null && getCommonAccess().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
+        if (instanceTreeSource != null && getFAccess().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
             instanceTreeSource.discreteArgError();
         instanceTreeSource = null;
     }

@@ -359,7 +359,7 @@ aspect Variability {
      */
     public void FExp.makeContinuousVariablesDiscrete() {}
     
-    public void FIdUseExp.makeContinuousVariablesDiscrete() {
+    public void FAccessExp.makeContinuousVariablesDiscrete() {
         myFV().makeContinuousVariableDiscrete();
     }
     
@@ -400,7 +400,7 @@ aspect Variability {
      * If this is an flat tree access, return set containing accessed var, otherwise empty set.
      */
     syn FAbstractVariable FExp.assignedFV() = null;
-    eq FIdUseExp.assignedFV()               = myFV();
+    eq FAccessExp.assignedFV()              = myFV();
 
 
     syn TypePrefixVariability FAbstractVariable.variability();
@@ -539,9 +539,9 @@ aspect Variability {
 
     eq FDelayExp.expVariability() = getFExp().variability();
 
-    eq FIdUseExp.expVariability() = getCommonAccess().variability();
+    eq CommonAccessExp.expVariability() = getAccess().variability();
     eq FAbstractDerExp.expVariability() = 
-        getCommonAccess().variability().discreteOrLess() ? Variability.CONSTANT : getCommonAccess().variability();
+        getFAccess().variability().discreteOrLess() ? Variability.CONSTANT : getFAccess().variability();
     eq FPreExp.expVariability() = super.expVariability().combineDown(Variability.DISCRETE);
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.DISCRETE);
 
@@ -689,14 +689,14 @@ aspect Variability {
         throw new UnsupportedOperationException();
     }
     eq FSubscriptedExp.indexVariability() = getFArraySubscripts().variability();
-    eq FIdUseExp.indexVariability()       = getCommonAccess().indexVariability();
+    eq CommonAccessExp.indexVariability() = getAccess().indexVariability();
 
-    syn TypePrefixVariability CommonAccess.indexVariability() {
-        FAccess fqn = asFAccess();
+    syn TypePrefixVariability CommonAccess.indexVariability();
+    eq FAccess.indexVariability() {
         TypePrefixVariability variability = Variability.CONSTANT;
-        if (fqn.isSimple())
+        if (isSimple())
             return variability;
-        for (FAccessPart part : fqn.asFAccessFull().getFAccessParts())
+        for (FAccessPart part : asFAccessFull().getFAccessParts())
             if (part.hasFArraySubscripts())
                 variability = variability.combine(part.getFArraySubscripts().variability());
         return variability;

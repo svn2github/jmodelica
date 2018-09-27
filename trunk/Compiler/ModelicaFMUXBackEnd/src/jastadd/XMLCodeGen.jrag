@@ -190,22 +190,16 @@ aspect XMLCodeGen {
 	}
 	
 	
-	public void FIdUseExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {	
-		p.print(getCommonAccess(), str, p.indent(indent));
+	public void FAccessExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {	
+		p.print(getFAccess(), str, p.indent(indent));
 	}
 	
 	public void FDerExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {	
 		open_XML(str, indent);
-		p.print(getCommonAccess(), str, p.indent(indent));
+		p.print(getFAccess(), str, p.indent(indent));
 		close_XML(str, indent);
 	}
 	
-	
-	public void CommonAccess.prettyPrint_XML(Printer p, CodeStream str, String indent) {
-		open_XML(str, indent);
-		p.print(asFAccess(), str, p.indent(indent));
-		close_XML(str, indent);
-	}
 
 	public void FEnumLitExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		open_XML(str, indent);
@@ -654,7 +648,7 @@ aspect XMLTagBinding{
        
         //literals and identifiers
         eq CommonAccess.xmlTag() = "Identifier";
-        eq FIdUseExp.xmlTag() = "Identifier";
+        eq CommonAccessExp.xmlTag() = "Identifier";
         eq FEnumLitExp.xmlTag() = "Identifier";	
         eq FIntegerLitExp.xmlTag() = "IntegerLiteral";
         eq FRealLitExp.xmlTag() = "RealLiteral";

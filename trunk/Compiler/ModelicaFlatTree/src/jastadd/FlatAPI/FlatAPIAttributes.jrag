@@ -271,8 +271,8 @@ aspect FlatAPIAttributes {
     eq FIntegerLitExp.minRealValue() = getValue();
     eq FNegExp.maxRealValue()        = -getFExp().minRealValue();
     eq FNegExp.minRealValue()        = -getFExp().maxRealValue();
-    eq FIdUseExp.maxRealValue()      = myFV().maxRealValue();
-    eq FIdUseExp.minRealValue()      = myFV().minRealValue();
+    eq FAccessExp.maxRealValue()     = myFV().maxRealValue();
+    eq FAccessExp.minRealValue()     = myFV().minRealValue();
 
     /**
      * Return the maximum numeric value that this variable can take.

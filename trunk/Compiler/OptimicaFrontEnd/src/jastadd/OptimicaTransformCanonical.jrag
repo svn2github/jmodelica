@@ -25,9 +25,9 @@ aspect OptimicaTransformCanonical {
 		if (myOptions().getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
 			for (FVariable fv : freeDependentParameters()) {
 				fv.setTypePrefixVariability(Variability.CONTINUOUS);
-                for (FIdUseExp use : fv.uses())
+                for (FAccessExp use : fv.uses())
                     if (use.inObjective())
-                        use.replaceMe(new FTimedVariable(use.getCommonAccess().fullCopy(), new FStartTimeExp()));
+                        use.replaceMe(new FTimedVariable(use.getFAccess().treeCopy(), new FStartTimeExp()));
 			}
 		}
 
@@ -188,7 +188,7 @@ aspect OptimicaTransformCanonical {
 	}
 
     public FExp FTimedVariable.scalarizeExp(Scalarizer s) { 
-        return new FTimedVariable(getName().asFAccess().scalarize(s, null), getArg().scalarize(s));  
+        return new FTimedVariable(getName().scalarize(s, null), getArg().scalarize(s));  
     }
 
     eq FOptClass.indexReductionErrorsAsWarnings() = true;
@@ -212,8 +212,8 @@ aspect NormalizeFinalTimeProblems {
 	boolean FDerExp.rewritten = false;
 	
 	rewrite FDerExp {when (rewriteStartAndFinalTime && !rewritten) to FExp {
-			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FAccessString("finalTime")),
-					new FIdUseExp(new FAccessString("startTime"))));
+			FDivExp e = new FDivExp(this,new FSubExp(new FAccessExp(new FAccessString("finalTime")),
+					new FAccessExp(new FAccessString("startTime"))));
 			rewritten = true;
 			return e;
 		}

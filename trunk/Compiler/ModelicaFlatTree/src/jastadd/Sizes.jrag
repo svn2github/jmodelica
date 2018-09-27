@@ -132,8 +132,8 @@ aspect AccessSizes {
             }
             
             @Override
-            public FExp copyReplaceAccess(FIdUseExp use) {
-                return use.getCommonAccess().buildAccessContextSizeExp(this);
+            public FExp copyReplaceAccess(CommonAccessExp access) {
+                return access.getAccess().buildAccessContextSizeExp(this);
             }
             
             @Override
@@ -147,11 +147,13 @@ aspect AccessSizes {
         }
     }
     
-    public FExp CommonAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        return new FIdUseExp(treeCopy());
+    public abstract CommonAccessExp CommonAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp);
+    
+    public FAccessExp FAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+        return new FAccessExp(treeCopy());
     }
     
-    public FIdUseExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+    public InstAccessExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         List<InstAccess> res = crp.buildContext();
         for (InstAccess part : allParts()) {
             if (hasFArraySubscripts()) {
@@ -161,17 +163,17 @@ aspect AccessSizes {
             }
             res.addChild(part);
         }
-        return new FIdUseExp(new InstDot(res));
+        return new InstAccessExp(new InstDot(res));
     }
     
-    inh FIdUseExp FSubscript.buildAccessContextSizeExp();
+    inh CommonAccessExp FSubscript.buildAccessContextSizeExp();
     eq Root.getChild().buildAccessContextSizeExp()   = null;
     eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new InstDot(buildAccessContext(name(), null)));
+            new InstAccessExp(new InstDot(buildAccessContext(name(), null)));
     eq FAccessPart.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FAccessFull(buildAccessContext(name(), null)));
-    eq CommonAccess.getChild().buildAccessContextSizeExp() =
-            new FIdUseExp(new FAccessFull(asFAccess().buildAccessContext()));
+            new FAccessExp(new FAccessFull(buildAccessContext(name(), null)));
+    eq FAccess.getChild().buildAccessContextSizeExp() =
+            new FAccessExp(new FAccessFull(buildAccessContext()));
     
     syn List<FAccessPart> FAccess.buildAccessContext() = null;
     eq FAccessString.buildAccessContext() {
@@ -372,7 +374,7 @@ aspect FunctionCallSizes {
     }
     
     public FExp FColonSizeExp.createSizeFExp() {
-        return new FSizeExp(getVariable().createUseExp(), getDim());
+        return new FSizeExp(getVariable().createAccessExp(), getDim());
     }
     
     
@@ -422,7 +424,7 @@ aspect SizesUtil {
     
     class FExp {
         public interface ContextReplacer {
-            public FExp copyReplaceAccess(FIdUseExp use);
+            public FExp copyReplaceAccess(CommonAccessExp access);
             public FExp copyReplaceAccess(FSizeExp exp);
         }
 
@@ -433,10 +435,10 @@ aspect SizesUtil {
             }
             
             @Override
-            public FExp copyReplaceAccess(FIdUseExp use) {
-                FExp res = use.asInstAccess().copyReplaceAccess(this);
+            public FExp copyReplaceAccess(CommonAccessExp access) {
+                FExp res = access.asInstAccess().copyReplaceAccess(this);
                 if (res == null) {
-                    return new FDeferExp(use);
+                    return new FDeferExp(access);
                 }
                 return res;
             }
@@ -532,7 +534,7 @@ aspect SizesUtil {
         return new InstNamedArgument(getFExp().copyReplaceAccess(crp), getName().fullCopy());
     }
     
-    public FExp FIdUseExp.copyReplaceAccess(FExp.ContextReplacer crp) {
+    public FExp CommonAccessExp.copyReplaceAccess(FExp.ContextReplacer crp) {
         return crp.copyReplaceAccess(this);
     }
 

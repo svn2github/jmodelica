@@ -130,11 +130,11 @@ aspect ExtractEventGeneratingExpressions {
         /*
          *  Create the when statement.
          */
-        FPreExp preExp = new FPreExp(indexVariable().createCommonAccess());
+        FPreExp preExp = new FPreExp(indexVariable().createFAccess());
         FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
         FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
 
-        FAbstractEquation assign = new FEquation(indexVariable().createUseExp(),
+        FAbstractEquation assign = new FEquation(indexVariable().createAccessExp(),
                 new FAddExp(preExp, new FIntegerLitExp(1)));
         FAbstractEquation when = new FWhenEquation(EquationType.NORMAL, new List<FAbstractEquation>(assign),
                 var.treeCopyNoTransform(), new Opt<FIfWhenElseEquation>());
@@ -168,7 +168,7 @@ aspect ExtractEventGeneratingExpressions {
 
         FExp guards = new FLtExp(new FTimeExp(), offset.treeCopyNoTransform());
         FIfExp ifExp = new FIfExp(guards, new FIntegerLitExp(0), eval);
-        eqns.add(new FEquation(indexVariable().createUseExp(), ifExp));
+        eqns.add(new FEquation(indexVariable().createAccessExp(), ifExp));
         return eqns;
     }
 
@@ -180,11 +180,11 @@ aspect ExtractEventGeneratingExpressions {
         /*
          *  Create the when statement.
          */
-        FPreExp preExp = new FPreExp(indexVariable().createCommonAccess());
+        FPreExp preExp = new FPreExp(indexVariable().createFAccess());
         FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
         FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
 
-        FStatement assignStmt = new FAssignStmt(indexVariable().createUseExp(),
+        FStatement assignStmt = new FAssignStmt(indexVariable().createAccessExp(),
                 new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)));
         FStatement when = new FWhenStmt(new List<FIfWhenClause>(new FWhenClause(
                 var.treeCopyNoTransform(), new List<FStatement>(assignStmt))));
@@ -225,7 +225,7 @@ aspect ExtractEventGeneratingExpressions {
     // Use TreeCopyNoTransform
     syn FExp FExp.eventTempExpCalc()    = null;
     eq FSampleExp.eventTempExpCalc() {
-        FExp preExp = new FPreExp(indexVariable().createCommonAccess());
+        FExp preExp = new FPreExp(indexVariable().createFAccess());
         FExp mulExp = new FMulExp(preExp, getInterval().treeCopyNoTransform());
         FExp addExp = new FAddExp(getOffset().treeCopyNoTransform(), mulExp);
         FExp notInitial = new FNotExp(new FInitialExp());

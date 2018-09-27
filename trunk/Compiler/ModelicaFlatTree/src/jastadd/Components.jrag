@@ -59,7 +59,7 @@ aspect Components {
         if (!isComposite() || fc == null) {
             return super.component(name);
         }
-        return dynamicFExp(dynamicFExp(new FIdUseExp(tempVarName())).component(name));
+        return dynamicFExp(dynamicFExp(new FAccessExp(tempVarName())).component(name));
     }
     
     /**
@@ -73,17 +73,21 @@ aspect Components {
         return new FComponentExp(treeCopy(), suffix);
     }
     
-    public FExp FIdUseExp.extractRecordFExp(String suffix) {
-        return new FIdUseExp(getCommonAccess().extractRecordFExp(suffix));
+    public InstAccessExp InstAccessExp.extractRecordFExp(String suffix) {
+        return new InstAccessExp(getInstAccess().extractRecordFExp(suffix));
+    }
+    
+    public FAccessExp FAccessExp.extractRecordFExp(String suffix) {
+        return new FAccessExp(getFAccess().extractRecordFExp(suffix));
     }
     
     public abstract CommonAccess CommonAccess.extractRecordFExp(String suffix);
     
-    public CommonAccess FAccess.extractRecordFExp(String suffix) {
+    public FAccess FAccess.extractRecordFExp(String suffix) {
         return copyAsFAccessFull().append(suffix);
     }
     
-    public CommonAccess InstAccess.extractRecordFExp(String suffix) {
+    public InstAccess InstAccess.extractRecordFExp(String suffix) {
         return copyAndAppend(suffix);
     }
     

@@ -16,22 +16,24 @@
 
 aspect FlatteningAccess {
 
-    public FExp FIdUseExp.flatten(Flattener f) {
+    public FExp CommonAccessExp.flatten(Flattener f) {
         return setLocationOf(flatten(f, 0));
     }
 
-    public FExp FIdUseExp.flatten(Flattener f, int order) {
-        if (!getCommonAccess().isInstAccess()) {
-            return treeCopy();
-        }
-        
-        InstAccess ia = asInstAccess();
+    public abstract FExp CommonAccessExp.flatten(Flattener f, int order);
+    
+    public FExp FAccessExp.flatten(Flattener f, int order) {
+        return treeCopy();
+    }
+    
+    public FExp InstAccessExp.flatten(Flattener f, int order) {
+        InstAccess ia = getInstAccess();
         InstComponentDecl var = ia.myInstComponentDecl();
         if (!inFunction()) {
             if (ia.isNonAssignableArray()) {
                 return getArrayExp().buildFlattened(f, this, order);
             } else if (!ia.indexVariability().indexParameterOrLess()) {
-                FIdUseExp copy = (FIdUseExp) dynamicFExp(treeCopy());
+                CommonAccessExp copy = dynamicFExp(treeCopy()).asCommonAccessExp();
                 List<FSubscript> sub = new List<FSubscript>();
                 copy.asInstAccess().extractNonParameterIndices(sub, ia.myInstComponentDecl().variability());
                 FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArrayExpSubscripts(sub)));
@@ -64,18 +66,18 @@ aspect FlatteningAccess {
     /**
      * Flatten an access expression to this component.
      */
-    public FExp InstComponentDecl.flattenAccess(Flattener f, FIdUseExp exp, int order) {
-        return createFIdUseExp(exp.asInstAccess().flatten(), order);
+    public FExp InstComponentDecl.flattenAccess(Flattener f, CommonAccessExp access, int order) {
+        return createCommonAccessExp(access.asInstAccess().flatten(), order);
     }
 
-    public FExp InstAssignable.flattenAccess(Flattener f, FIdUseExp iae, int order) {
+    public FExp InstAssignable.flattenAccess(Flattener f, CommonAccessExp access, int order) {
         if (variability().indexParameterOrLess()) {
-            FExp res = flattenAccessToConst(f, iae);
+            FExp res = flattenAccessToConst(f, access);
             if (res != null) {
                 return res;
             }
         }
-        return super.flattenAccess(f, iae, order);
+        return super.flattenAccess(f, access, order);
     }
 
     /**
@@ -162,7 +164,7 @@ aspect FlatteningAccess {
     eq FExternalStmt.getChild().flattenFASContext()        = false;
     eq InstDot.getInstAccess(int i).flattenFASContext()    = i != getNumInstAccess() - 1 || flattenFASContext();
     eq FIfExp.getChild().flattenFASContext()               = flattenFASContext();
-    eq FIdUseExp.getChild().flattenFASContext()            = flattenFASContext() || isSlice();
+    eq CommonAccessExp.getChild().flattenFASContext()            = flattenFASContext() || isSlice();
     
     eq InstFunctionArgument.getChild().flattenFASContext() = !inFunction();
     eq FFunctionCallLeft.getFExp().flattenFASContext()     = !inFunction();
@@ -225,15 +227,15 @@ aspect FlatteningFAccesss {
 
 
 aspect FlatteningFunctionConstant {
-    public FExp InstAssignable.flattenAccessToConst(Flattener f, FIdUseExp iae) {
-        FType t = iae.type();
+    public FExp InstAssignable.flattenAccessToConst(Flattener f, CommonAccessExp access) {
+        FType t = access.type();
         if (t.isEmpty()) {
             return t.createEmptyExp();
         }
-        InstAccess ia = iae.asInstAccess();
-        if (iae.canInlineConstant() && !ia.hasUnknownIndices()) {
+        InstAccess ia = access.asInstAccess();
+        if (access.canInlineConstant() && !ia.hasUnknownIndices()) {
             try {
-                CValue cval = iae.ceval();
+                CValue cval = access.ceval();
                 if (isReal() && cval.hasConvertReal()) {
                     cval = cval.convertReal();
                 }
@@ -249,8 +251,7 @@ aspect FlatteningFunctionConstant {
             if (!f.isFlattenedGlobalVariable(top)) {
                 top.flatten(f, FlattenBindingExp.ALL, 0, true);
             }
-            return new FGlobalAccessExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()), (String)null);
-        }
+            return new FGlobalAccessExp(ia.flatten().copyAndPrepend(top.surroundingInstClass().qualifiedName()), (String)null);        }
         return null;
     }
 
@@ -273,7 +274,7 @@ aspect FlatteningFunctionConstant {
     eq InstExternalCall.getArg().canInlineConstant()           = false;
     
     inh boolean FArray.canInlineConstant();
-    inh boolean FIdUseExp.canInlineConstant();
+    inh boolean CommonAccessExp.canInlineConstant();
     inh boolean FRecordConstructor.canInlineConstant();
     inh boolean FSizeExp.canInlineConstant();
     inh boolean InstFunctionArgument.canInlineConstant();

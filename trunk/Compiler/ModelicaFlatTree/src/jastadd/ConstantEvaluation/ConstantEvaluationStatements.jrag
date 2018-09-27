@@ -102,13 +102,13 @@ aspect ConstantEvaluationStatements {
      * @param right     the CValue to assign
      */
     @Override
-    public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType) {
+    public void CommonAccessExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FType rightType) {
         CValue ceval = ceval(evaluator);
         if (!ceval.isPartlyUnknown() && !right.isPartlyUnknown() && !ceval.typeMatches(right)) {
             throw new ConstantEvaluationException(null, "Mismatching types when evaluating assignment,"
                     + " type of left-hand side is "+type().printStructure()+", and type of right-hand side is "+rightType.printStructure()+" " + errorLocation());
         }
-        getCommonAccess().assignToInFuncEval(evaluator, right);
+        getAccess().assignToInFuncEval(evaluator, right);
     }
     
     @Override
@@ -316,7 +316,7 @@ aspect ConstantEvaluationStatements {
 
     @Override
     public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
-        getFIdUseExp().assignToInFuncEval(evaluator, type().zeroCValue(), type());
+        getFAccessExp().assignToInFuncEval(evaluator, type().zeroCValue(), type());
         return EVAL_CONT;
     }
 

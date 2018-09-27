@@ -637,8 +637,7 @@ FReturnStmt : FStatement;
 /**
  * Class for array initalization statements.
  */
-FInitArrayStmt : FStatement ::= FIdUseExp /Type:FType/;
-
+FInitArrayStmt : FStatement ::= FAccessExp /Type:FType/;
 /**
  * Class for derivated array initalization statements.
  */
@@ -690,7 +689,7 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
  *
  * LibTopPackagePath is the file path of the package file of the library that this external statement originated from.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp* <LibTopPackagePath>;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:CommonAccessExp] <Name> Arg:FExp* <LibTopPackagePath>;
 
 /**
  * A language specification for an external function.
@@ -999,18 +998,20 @@ FComponentExp : FExp ::= FExp <Name:String>;
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= CommonAccess <OriginalVariable:String>;
+abstract CommonAccessExp : FAssignableExp;
+
+FAccessExp : CommonAccessExp ::= FAccess <OriginalVariable:String>;
 
 /**
  * Access expression to global variable
  */
-FGlobalAccessExp : FIdUseExp;
+FGlobalAccessExp : FAccessExp;
 
 /**
  * A reference to a dynamic state. These are the states that are introduced by
  * the compiler and exposed as state in the FMU.
  */
-FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FIdUseExp*/ Org:FIdUseExp;
+FDSRefExp : FVarRefExp ::= <SetId:int> /Use:FAccessExp*/ Org:FAccessExp;
 
 /**
  * A reference to a dynamic derivative, similar to FDSRefExp but the derivative
@@ -1021,7 +1022,7 @@ FDSDerExp : FVarRefExp ::= <SetId:int> <Number:int> /Use:FExp*/;
 /**
  * Identifier of temporary variable, used during scalarization
  */
-FIdTempExp : FIdUseExp;
+FTempAccessExp : FAccessExp;
 
 /**
  * The built-in function der in the instance tree.
@@ -1031,7 +1032,7 @@ InstDerExp : FUnaryExp;
 /**
  * Abstract super class for all der related expressions.
  */
-abstract FAbstractDerExp : FIdUseExp ::= <Order:int>;
+abstract FAbstractDerExp : FAccessExp ::= <Order:int>;
 
 /**
  * The built-in function der.
@@ -1059,7 +1060,7 @@ InstPreExp : FUnaryBuiltIn;
 /**
  * Pre built-in function.
  */
-FPreExp : FIdUseExp;
+FPreExp : FAccessExp;
 
 /**
  * Higher order derivatives occurring as a result of index reduction.
@@ -1686,7 +1687,7 @@ DynamicStateManager : BaseNode ::= Set:DynamicStateSet*;
 /**
  * A set of dynamic states
  */
-DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FIdUseExp* Coefficient:DynamicStateCoefficient* <StateVars:FDynamicStateVariable[]> <AlgebraicVars:FDynamicAlgebraicVariable[]>;
+DynamicStateSet : BaseNode ::= <SetId:Integer> <NumAlgebraics:Integer> Var:FAccessExp* Coefficient:DynamicStateCoefficient* <StateVars:FDynamicStateVariable[]> <AlgebraicVars:FDynamicAlgebraicVariable[]>;
 
 /**
  * Node that contains the coefficient incidence for a specific dynamic state

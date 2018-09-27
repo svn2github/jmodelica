@@ -266,32 +266,32 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Constructs a flat FIdUseExp that refers to the variable with the given CommonAccess.
+	 * Constructs an FAccessExp that refers to the variable with the given FAccess.
 	 */
-	public FIdUseExp.FIdUseExp(CommonAccess name) {
+	public FAccessExp.FAccessExp(FAccess name) {
 		this(name, (String)null);
 	}
 	
 	/**
-	 * Constructs a flat FIdUseExp that refers to the variable with the given name.
+	 * Constructs an FAccessExp that refers to the variable with the given name.
 	 */
-	public FIdUseExp.FIdUseExp(String name) {
+	public FAccessExp.FAccessExp(String name) {
 		this(new FAccessString(name));
 	}
 	
 	/**
-	 * Constructs an FIdUseExp that refers to a cell of the variable with the given name.
+	 * Constructs an FAccessExp that refers to a cell of the variable with the given name.
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
-	public FIdUseExp.FIdUseExp(String name, FArraySubscripts fas) {
+	public FAccessExp.FAccessExp(String name, FArraySubscripts fas) {
 		this(new FAccessFull(name, fas));
 	}
 
     /**
-     * Constructs an FDerExp that refers to the variable with the given CommonAccess and order.
+     * Constructs an FDerExp that refers to the variable with the given FAccess and order.
      */
-    public FDerExp.FDerExp(CommonAccess name, int order) {
+    public FDerExp.FDerExp(FAccess name, int order) {
         this(name, (String)null, order);
     }
 
@@ -303,23 +303,16 @@ aspect Constructors {
     }
 
     /**
-     * Constructs an FDerExp of order that refers to the variable with the given name.
+     * Constructs an FPreExp that refers to the variable with the given FAccess.
      */
-    public FDerExp.FDerExp(CommonAccess name) {
-        this(name, 1);
-    }
-
-    /**
-     * Constructs an FPreExp that refers to the variable with the given CommonAccess.
-     */
-    public FPreExp.FPreExp(CommonAccess name) {
+    public FPreExp.FPreExp(FAccess name) {
         this(name, (String)null);
     }
     
     /**
-     * Constructs an FIdTempExp that refers to the variable with the given CommonAccess.
+     * Constructs an FTempAccessExp that refers to the variable with the given FAccess.
      */
-    public FIdTempExp.FIdTempExp(CommonAccess name) {
+    public FTempAccessExp.FTempAccessExp(FAccess name) {
         this(name, (String)null);
     }
 
@@ -382,7 +375,7 @@ aspect Constructors {
 	 * Constructs an FSizeExp giving the size in the given dimension for the given variable.
 	 */
 	public FSizeExp.FSizeExp(FAccess var, int dim) {
-		this(new FIdUseExp(var), dim);
+		this(new FAccessExp(var), dim);
 	}
 	
 	/**
@@ -973,16 +966,18 @@ aspect InheritedFactoryMethods {
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
 
     // Identifier expressions
-    public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
+    public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
+    public InstAccessExp  InstAccessExp.createEmptyNode()  { return new InstAccessExp();  }
     public FGlobalAccessExp FGlobalAccessExp.createEmptyNode() { return new FGlobalAccessExp(); }
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
+    public FAccessExp     FAccessExp.createEmptyNode()     { return new FAccessExp();     }
     public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
     public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
     public FDynamicDerExp FDynamicDerExp.createEmptyNode() { return new FDynamicDerExp(); }
     public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
     public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
     public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
-    public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
+    public FTempAccessExp FTempAccessExp.createEmptyNode() { return new FTempAccessExp(); }
     public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
     public FDSDerExp      FDSDerExp.createEmptyNode()      { return new FDSDerExp();      }
     public abstract FAbstractDerExp FAbstractDerExp.createEmptyNode();
@@ -1097,19 +1092,26 @@ aspect InheritedFactoryMethods {
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
-	public FIdUseExp FIdUseExp.createNode(CommonAccess use) {
-		FIdUseExp node = createEmptyNode();
-		node.setCommonAccess(use);
+	public InstAccessExp InstAccessExp.createNode(InstAccess use) {
+		InstAccessExp node = createEmptyNode();
+		node.setInstAccess(use);
 		node.setLocationNoTree(this);
 		return node;
 	}
 
+    public FAccessExp FAccessExp.createNode(FAccess use) {
+        FAccessExp node = createEmptyNode();
+        node.setFAccess(use);
+        node.setLocationNoTree(this);
+        return node;
+    }
+
     /**
      * Create new node of same class as this, with the specified children.
      */
-    public FIdUseExp FAbstractDerExp.createNode(CommonAccess use) {
+    public FAbstractDerExp FAbstractDerExp.createNode(FAccess use) {
         FAbstractDerExp node = createEmptyNode();
-        node.setCommonAccess(use);
+        node.setFAccess(use);
         node.setOrder(order());
         node.setLocationNoTree(this);
         return node;

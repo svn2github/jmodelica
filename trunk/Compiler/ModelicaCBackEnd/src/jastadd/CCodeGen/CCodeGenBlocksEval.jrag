@@ -70,10 +70,10 @@ aspect CCodeGenBlocksEval {
     public void FAlgorithm.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         boolean firstVisit = visited == null || !visited.contains(this);
-        boolean sideEffect = forVariables == null || forVariables.size() == uniqueFIdUseExpsInLHS().size();
+        boolean sideEffect = forVariables == null || forVariables.size() == uniqueFAccessExpsInLHS().size();
         genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
         if (!sideEffect && (!firstVisit || !forVariables.iterator().next().isReal())) {
-            for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+            for (FAccessExp use : uniqueFAccessExpsInLHS())
                 p.printWriteBackAssignment(str, indent, use.myFV(), this, forVariables);
         }
     }
@@ -82,7 +82,7 @@ aspect CCodeGenBlocksEval {
     public void FAlgorithm.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         boolean firstVisit = visited == null || visited.add(this);
-        boolean sideEffect = forVariables == null || forVariables.size() == uniqueFIdUseExpsInLHS().size();
+        boolean sideEffect = forVariables == null || forVariables.size() == uniqueFAccessExpsInLHS().size();
         if (firstVisit) {
             if (sideEffect) {
                 p.print(this, str, indent);

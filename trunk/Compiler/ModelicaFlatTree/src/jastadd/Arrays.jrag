@@ -341,7 +341,7 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn int CommonAccess.ndims();
-    eq FIdUseExp.ndims() = getCommonAccess().ndims();
+    eq CommonAccessExp.ndims() = getAccess().ndims();
     
 	eq FAccess.ndims() {
 		// Notice here the use of accessNdims. Also, if the access has
@@ -352,7 +352,7 @@ aspect Arrays {
 		// This is because if scalarization is in progress, 
 		// then this node will be hanging without a proper AST.
 		int n = 0;
-		if (!asFAccess().isScalarized())
+		if (!isScalarized())
 			for (FArraySubscripts fas : allFArraySubscripts())
 				n += fas.accessNdims();
 		return n;
@@ -448,9 +448,9 @@ aspect Arrays {
 
     public ArrayList<FArraySubscripts> FAccessFull.createFArraySubscriptsList() {
         ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>();
-        for (FAccessPart fqnp : getFAccessParts()) {
-            if (fqnp.hasFArraySubscripts()) {
-                res.add(fqnp.getFArraySubscripts());
+        for (FAccessPart accessPart : getFAccessParts()) {
+            if (accessPart.hasFArraySubscripts()) {
+                res.add(accessPart.getFArraySubscripts());
             }
         }
         return res;
@@ -561,8 +561,8 @@ aspect Arrays {
 	syn int FAccess.accessNdims() = 0;
 	eq FAccessFull.accessNdims() {
         int res = 0;
-        for (FAccessPart fqnp : getFAccessParts()) {
-            res = res + fqnp.accessNdims();
+        for (FAccessPart accessPart : getFAccessParts()) {
+            res = res + accessPart.accessNdims();
         }
         return res;
     }
@@ -1076,7 +1076,7 @@ aspect Arrays {
 					size.append(sub.size());
 		return size;
 	}
-	eq FIdUseExp.size() = getCommonAccess().size();
+	eq CommonAccessExp.size() = getAccess().size();
 	
     /**
      * Get the array sizes. 
@@ -1274,7 +1274,7 @@ aspect Arrays {
 		return this;
 	}
     
-	protected ASTNode FIdUseExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
+	protected ASTNode CommonAccessExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		FExp res = indexMap.get(name());
 		return (res == null) ? this : res;
 	}
@@ -1916,17 +1916,26 @@ aspect Arrays {
         return arr;
     }
 
-	eq FIdUseExp.getArrayExp() {
+	eq CommonAccessExp.getArrayExp() {
 		/*
 		 * Based on an array access, say x, corresponding to the declaration
 		 * Real x[2], the array {x[1],x[2]} is generated. 
 		 */
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) 
-			array.set(i, createNode(getCommonAccess().specify(i, false)));
+			array.set(i, createSpecifiedNode(i, false));
 		return array;
 	}
 	
+
+    public abstract FExp CommonAccessExp.createSpecifiedNode(Index i, boolean scalarize);
+    public FExp InstAccessExp.createSpecifiedNode(Index i, boolean scalarize) {
+        return createNode(getInstAccess().specify(i, scalarize));
+    }
+    public FExp FAccessExp.createSpecifiedNode(Index i, boolean scalarize) {
+        return createNode(getFAccess().specify(i, scalarize));
+    }
+
 	/**
 	 * Returns a scalar CommonAccess, as specified by an index.
 	 * 
@@ -1962,9 +1971,9 @@ aspect Arrays {
 	 * @param scalarize  <code>true</code> if the FAccess should be marked as scalarized 
 	 */
 	public FAccess FAccess.specify(Index i, boolean scalarize) {
-		FAccess fqn = copyAndAddFas(i.createFArraySubscripts());
-		fqn.scalarized = scalarize;
-		return fqn;
+		FAccess access = copyAndAddFas(i.createFArraySubscripts());
+		access.scalarized = scalarize;
+		return access;
 	}
 	
 	public FAccess FAccessFull.specify(Index i, boolean scalarize) {
@@ -2174,7 +2183,7 @@ aspect Arrays {
 	 */
 	syn Indices FExp.indices()                   = Indices.create(size());
 	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
-	eq FIdUseExp.indices()                       = getCommonAccess().indices();
+	eq CommonAccessExp.indices()                 = getAccess().indices();
 	eq FDimensionConvert.indices() {
 		int n = getFExp().ndims();
 		if (n == 0) {

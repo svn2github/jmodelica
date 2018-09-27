@@ -205,7 +205,7 @@ aspect Scalarization {
                                 new FFunctionVariable(type, name);
                         add(v);
                         if (type.isArray()) {
-                            FInitArrayStmt stmt = new FInitArrayStmt(new FIdUseExp(name));
+                            FInitArrayStmt stmt = new FInitArrayStmt(new FAccessExp(name));
                             add(stmt);
                             type.scalarizeInitArray(this, stmt);
                         }
@@ -429,7 +429,7 @@ aspect Scalarization {
             if (keepBExp(variability(), getBindingExp())) {
                 fv.setBindingExp(bexp);
             } else {
-                s.select(variability()).add(setLocationOf(new FIdUseExp(scalarizeVariableUse(i))), bexp);
+                s.select(variability()).add(setLocationOf(new FAccessExp(scalarizeVariableUse(i))), bexp);
             }
         }
 
@@ -701,7 +701,7 @@ aspect Scalarization {
                 if (comp.keepBExp(variability, bExp)) {
                     fv.setBindingExp(bExp);
                 } else {
-                    se.add(new FIdUseExp(name), bExp);
+                    se.add(new FAccessExp(name), bExp);
                     fv.setBindingExpOpt(new Opt());
                 }
             } else {
@@ -868,11 +868,11 @@ aspect Scalarization {
     /*
      * Attributes for creating FTempIdExps and function temps.
      */
-    syn FIdUseExp FExp.tempExp() = tempExp(indexNames);
-    syn FIdUseExp FExp.tempExp(String name)          = tempExp(name, (FArraySubscripts)null);
-    syn FIdUseExp FExp.tempExp(Index i)              = tempExp(tempVarName(), i);
-    syn FIdUseExp FExp.tempExp(FArraySubscripts fas) = tempExp(tempVarName(), fas);
-    syn FIdUseExp FExp.tempExp(FExp[] subs) {
+    syn FTempAccessExp FExp.tempExp() = tempExp(indexNames);
+    syn FTempAccessExp FExp.tempExp(String name)          = tempExp(name, (FArraySubscripts)null);
+    syn FTempAccessExp FExp.tempExp(Index i)              = tempExp(tempVarName(), i);
+    syn FTempAccessExp FExp.tempExp(FArraySubscripts fas) = tempExp(tempVarName(), fas);
+    syn FTempAccessExp FExp.tempExp(FExp[] subs) {
         FArraySubscripts fas = null;
         if (subs != null && subs.length > 0) {
             List<FSubscript> l = new List<FSubscript>();
@@ -884,28 +884,28 @@ aspect Scalarization {
         return tempExp(tempVarName(), fas);
     }
 
-    public FIdUseExp FExp.tempExp(String name, Index i) {
-        FIdUseExp res;
+    public FTempAccessExp FExp.tempExp(String name, Index i) {
+        FTempAccessExp res;
         if (inFunction()) {
-            res = new FIdTempExp(new FAccessFull(name, i.createFArraySubscripts()));
+            res = new FTempAccessExp(new FAccessFull(name, i.createFArraySubscripts()));
         } else {
-            res = new FIdTempExp(new FAccessString(name + i));
+            res = new FTempAccessExp(new FAccessString(name + i));
         }
-        return (FIdUseExp) dynamicFExp(res);
+        return (FTempAccessExp) dynamicFExp(res);
     }
 
-    public FIdUseExp FExp.tempExp(String name, FArraySubscripts fas) {
-        FIdUseExp res;
+    public FTempAccessExp FExp.tempExp(String name, FArraySubscripts fas) {
+        FTempAccessExp res;
         if (inFunction()) {
-            res = new FIdTempExp(new FAccessFull(name, fas));
+            res = new FTempAccessExp(new FAccessFull(name, fas));
         } else {
             if (fas == null) {
-                res = new FIdTempExp(new FAccessString(name));
+                res = new FTempAccessExp(new FAccessString(name));
             } else {
-                res = new FIdTempExp(new FAccessString(name + fas));
+                res = new FTempAccessExp(new FAccessString(name + fas));
             }
         }
-        return (FIdUseExp) dynamicFExp(res);
+        return (FTempAccessExp) dynamicFExp(res);
     }
 
     /**
@@ -914,15 +914,15 @@ aspect Scalarization {
     public FExp[] FExp.indexNames = null;
     public FExp FColonSubscript.indexName = null;
     
-    public FIdUseExp FIdUseExp.createUseFas(String name) {
+    public CommonAccessExp CommonAccessExp.createUseFas(String name) {
         if (indexNames != null && indexNames.length > 0) {
-            return new FIdUseExp(name, createIndexNameFas());
+            return new FAccessExp(name, createIndexNameFas());
         } else {
-            return new FIdUseExp(name);
+            return new FAccessExp(name);
         }
     }
     
-    public FArraySubscripts FIdUseExp.createIndexNameFas() {
+    public FArraySubscripts CommonAccessExp.createIndexNameFas() {
         List<FSubscript> l = new List<FSubscript>();
         for (FExp e : indexNames) {
             l.add(e.treeCopy().createFSubscript());
@@ -1072,14 +1072,14 @@ aspect Scalarization {
         return res;
     }
 
-    public FExp FIdUseExp.scalarRecordFExp(Scalarizer s, FAccess suffix) {
-      FAccess fqn = getCommonAccess().asFAccess();
+    public FExp FAccessExp.scalarRecordFExp(Scalarizer s, FAccess suffix) {
+      FAccess access = getFAccess();
       if (indexNames != null) {
-          fqn = fqn.copyAndAddFas(createIndexNameFas());
+          access = access.copyAndAddFas(createIndexNameFas());
       }
-      fqn = fqn.asFAccessFull().treeCopy().append(suffix);
-      fqn.scalarized = false;
-      FExp res = createNode(fqn);
+      access = access.asFAccessFull().treeCopy().append(suffix);
+      access.scalarized = false;
+      FExp res = createNode(access);
       res = dynamicFExp(res).scalarize(s);
       res.setLocation(this);
       return res;
@@ -1157,12 +1157,12 @@ aspect Scalarization {
         return dynamicFExp(scalarize(s));
     }
 
-    public FExp FIdUseExp.extractArrayCell(Scalarizer s, Index i) {
-        return dynamicFExp(createNode(getCommonAccess().specify(i, true)));
+    public FExp CommonAccessExp.extractArrayCell(Scalarizer s, Index i) {
+        return dynamicFExp(createSpecifiedNode(i, true));
     }
 
-    public FExp FIdTempExp.extractArrayCell(Scalarizer s, Index i) {
-        return dynamicFExp(createNode(getCommonAccess().asFAccess().copyAndAddFas(i)));
+    public FExp FTempAccessExp.extractArrayCell(Scalarizer s, Index i) {
+        return dynamicFExp(createNode(getFAccess().copyAndAddFas(i)));
     }
 
     public FExp FIfExp.extractArrayCell(Scalarizer s, Index i) {
@@ -1279,7 +1279,7 @@ aspect Scalarization {
             for (Index i : indices()) 
                 scalar.addDummyEqnsForTemp(l, name + i);
         } else {
-            l.add(new FEquation(new FIdUseExp(name), zeroLiteral()));
+            l.add(new FEquation(new FAccessExp(name), zeroLiteral()));
         }
     }
     
@@ -1396,7 +1396,7 @@ aspect Scalarization {
 		for (FRecordComponentType comp : getComponents()) {
              FExp next = exp.scalarRecordFExp(s, comp.getName());
              if (exp.type().isUnknown() || exp.useTempVar) {
-                 // Work around for expanding FIdTempExp which doesnt know its type
+                 // Work around for expanding FTempAccessExp which doesnt know its type
                  next = comp.getFType().createRecordConstructor(s, exp.dynamicFExp(next));
              }
              rc.addArg(next);
@@ -1432,7 +1432,7 @@ aspect Scalarization {
 
     syn boolean FExp.scalarizeExpanded()       = 
         isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
-    eq FIdUseExp.scalarizeExpanded()           = (!inFunction() || isSlice()) && super.scalarizeExpanded();
+    eq CommonAccessExp.scalarizeExpanded()     = (!inFunction() || isSlice()) && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FIfExp.scalarizeExpanded()              = super.scalarizeExpanded() && !isFunctionCallIO()
             && !type().isRecord(); /* Workaround for test RecordScalarize52 */
@@ -1456,39 +1456,39 @@ aspect Scalarization {
 		return res;
 	}
 
-    public FExp FIdUseExp.scalarizeExp(Scalarizer s) {
+    public FExp FAccessExp.scalarizeExp(Scalarizer s) {
         String fin = myFV().myForIndexName();
         if (fin != null) {
             return setLocationOf(createNode(new FAccessString(fin)));
         }
-        return setLocationOf(createNode(getCommonAccess().asFAccess().scalarize(s, indexNames)));
+        return setLocationOf(createNode(getFAccess().scalarize(s, indexNames)));
     }
 
-    public FExp FIdTempExp.scalarizeExp(Scalarizer s) {
+    public FExp FTempAccessExp.scalarizeExp(Scalarizer s) {
         if (indexNames != null) {
-            FAccess fqn = getCommonAccess().asFAccess().scalarize(s);
-            fqn = fqn.asFAccessFull().addFArraySubscripts(createIndexNameFas());
-            return setLocationOf(new FIdUseExp(fqn));
+            FAccess access = getFAccess().scalarize(s);
+            access = access.asFAccessFull().addFArraySubscripts(createIndexNameFas());
+            return setLocationOf(new FAccessExp(access));
         }
         return super.scalarizeExp(s);
     }
 
     @Override
     public FExp FDerExp.scalarizeExp(Scalarizer s) {
-        return new FDerExp(getCommonAccess().asFAccess().scalarize(s, indexNames), order());
+        return new FDerExp(getFAccess().scalarize(s, indexNames), order());
     }
     
     @Override
     public FExp FPreExp.scalarizeExp(Scalarizer s) {
-        return new FPreExp(getCommonAccess().asFAccess().scalarize(s, indexNames));
+        return new FPreExp(getFAccess().scalarize(s, indexNames));
     }
 
     public FAccess FAccess.scalarize(Scalarizer s, FExp[] indexNames) {
-        FAccess fqn = scalarize(s);
+        FAccess access = scalarize(s);
         if (indexNames != null) {
-            fqn = fqn.asFAccessFull().addFArraySubscripts(getExpandedSubscripts().scalarize(s));
+            access = access.asFAccessFull().addFArraySubscripts(getExpandedSubscripts().scalarize(s));
         }
-        return fqn;
+        return access;
     }
 
 	public abstract FAccess FAccess.scalarize(Scalarizer s);
@@ -1515,10 +1515,10 @@ aspect Scalarization {
             }
             return new FAccessString(name.toString());
         } else {
-            FAccessFull fqn = new FAccessFull(new List());
-            for (FAccessPart fqnp : getFAccessParts()) 
-                fqn.addFAccessPart(fqnp.scalarize(s));
-            return fqn;
+            FAccessFull access = new FAccessFull(new List());
+            for (FAccessPart accessp : getFAccessParts()) 
+                access.addFAccessPart(accessp.scalarize(s));
+            return access;
         }
     }
 
@@ -1633,7 +1633,7 @@ aspect Scalarization {
         }
         FArraySubscripts fas = getFArraySubscripts().scalarize(s);
         if (inFunction()) {
-            return new FIdUseExp(getFExp().tempVarName(), fas);
+            return new FAccessExp(getFExp().tempVarName(), fas);
         } else {
             FSubscriptedExp res = createEmptyNode();
             res.setFExp(getFExp().scalarize(s));
@@ -1961,15 +1961,15 @@ aspect Scalarization {
 	}
 	
 	public void ConnectionSetEntry.scalarize() {
-		if (fqName.accessNdims() == 0) {
+		if (access.accessNdims() == 0) {
 			// Can't use FAccess.scalarize(), since it relies on rewrites
-			fqName = new FAccessString(fqName.scalarName());
+			access = new FAccessString(access.scalarName());
 		} else {
-			Indices ind = Indices.createFromFas(fqName.getFArraySubscripts());
+			Indices ind = Indices.createFromFas(access.getFArraySubscripts());
 			scalarNames = new String[ind.numElements()];
 			int j = 0;
 			for (Index i : ind)
-				scalarNames[j++] = fqName.copyAndAddFas(i.createFArraySubscripts()).scalarName();
+				scalarNames[j++] = access.copyAndAddFas(i.createFArraySubscripts()).scalarName();
 		}
 	}
 

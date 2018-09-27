@@ -31,7 +31,7 @@ aspect FlatStatements {
             }
             res = (hasBroken = stmt.flatten(f, toList)) || res;
             if (prevList != null) {
-                prevList.add(FStatement.breakBlock(toList, new FIdUseExp(stmt.breakCondName())));
+                prevList.add(FStatement.breakBlock(toList, new FAccessExp(stmt.breakCondName())));
                 toList = prevList;
                 prevList = null;
             }
@@ -186,7 +186,7 @@ aspect FlatStatements {
                 if (hasBreak) {
                     tempVar = new FBooleanVariable(VisibilityType.TEMPORARY, Variability.DISCRETE, new FAccessString(myTempVarName()));
                     f.addFVariable(tempVar);
-                    sl.add(new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()));
+                    sl.add(new FAssignStmt(tempVar.createAccessExp(), new FBooleanLitExpTrue()));
                 }
                 
                 List<FStatement> inner = sl;
@@ -198,7 +198,7 @@ aspect FlatStatements {
                     getForStmts().flushAllRecursive();
                     FStatement.flattenFStatementList(f, getForStmts(), inner);
                     if (hasBreak) {
-                        sl.add(FStatement.breakBlock(inner, tempVar.createUseExp()));
+                        sl.add(FStatement.breakBlock(inner, tempVar.createAccessExp()));
                     }
                 }
                 for (InstForIndex ifi : getInstForIndexs()) {
@@ -237,7 +237,7 @@ aspect FlatStatements {
 
     public boolean FBreakStmt.flatten(Flattener f, List<FStatement> sl){
         if (!inFunction() && enclosingLoop() instanceof InstForStmt) {
-            sl.add(new FAssignStmt(new FIdUseExp(new FAccessString(breakCondName())), new FBooleanLitExpFalse()));
+            sl.add(new FAssignStmt(new FAccessExp(new FAccessString(breakCondName())), new FBooleanLitExpFalse()));
             return true;
         }
         sl.add(new FBreakStmt());

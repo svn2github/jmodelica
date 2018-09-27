@@ -297,7 +297,7 @@ aspect FunctionInlining {
             if (noEvent)
                 value = value.preventEvents();
             value.resetOriginalReferences();
-            FEquation eqn = new FEquation(var.createUseExp(), value);
+            FEquation eqn = new FEquation(var.createAccessExp(), value);
             addEquation(eqn, variability);
         }
 
@@ -362,7 +362,7 @@ aspect FunctionInlining {
                     new FAccessString(n);
             FVariable var = addVar(name, variability, type);
             setTypeOf(oldName, type);
-            replMap.put(oldName, var.createUseExp());
+            replMap.put(oldName, var.createAccessExp());
             return var;
         }
         
@@ -515,7 +515,7 @@ aspect FunctionInlining {
             public FExp build(String suffix, FType type) {
                 String tempName = temp + suffix;
                 String oldName = old + suffix;
-                FExp e = src.dynamicFExp(new FIdUseExp(tempName));
+                FExp e = src.dynamicFExp(new FAccessExp(tempName));
                 TypePrefixVariability v = fi.contextVariability(src);
                 fi.addVarAndEqn(oldName, e, noEvent, type, v);
                 fi.addVar(new FAccessString(tempName), v, type);
@@ -543,14 +543,14 @@ aspect FunctionInlining {
         return null;
     }
 
-    public FExp FIdUseExp.createInlineVars(
+    public FExp FAccessExp.createInlineVars(
             AbstractFunctionInliner fi, FExp bExp, TypePrefixVariability variability) {
         FVariable var = fi.addVar(scalarName(), variability, type());
         if (bExp != null) {
             var.setBindingExp(bExp);
             fi.setReplacementExp(scalarName(), bExp);
         }
-        return var.createUseExp();
+        return var.createAccessExp();
     }
 
     public FExp FArray.createInlineVars(
@@ -604,8 +604,8 @@ aspect FunctionInlining {
         return this;
     }
 
-    public FExp FIdUseExp.preventEvents() {
-        getCommonAccess().asFAccess().preventEvents();
+    public FExp FAccessExp.preventEvents() {
+        getFAccess().preventEvents();
         return this;
     }
 
@@ -659,7 +659,7 @@ aspect FunctionInlining {
         return false;
     }
     eq FNoEventExp.generatesEvents() = false;
-    eq FIdUseExp.generatesEvents()   = getCommonAccess().asFAccess().generatesEvents();
+    eq FAccessExp.generatesEvents()   = getFAccess().generatesEvents();
     eq FSmoothExp.generatesEvents()  = super.generatesEvents() && !(order() == 0 && myOptions().getBooleanOption("disable_smooth_events"));
 
     syn boolean FAccess.generatesEvents() = false;
@@ -725,8 +725,8 @@ aspect FunctionInlining {
     }
     eq FFunctionCall.hasInlinableFunctions(AbstractFunctionInliner fi) =
         isInlinableFunctionCall(fi) || super.hasInlinableFunctions(fi);
-    eq FIdUseExp.hasInlinableFunctions(AbstractFunctionInliner fi)     = 
-        getCommonAccess().asFAccess().hasInlinableFunctions(fi);
+    eq FAccessExp.hasInlinableFunctions(AbstractFunctionInliner fi)     = 
+        getFAccess().hasInlinableFunctions(fi);
     eq FSubscriptedExp.hasInlinableFunctions(AbstractFunctionInliner fi) {
         return getFArraySubscripts().hasInlinableFunctions(fi) || super.hasInlinableFunctions(fi);
     }
@@ -920,8 +920,8 @@ aspect FunctionInlining {
      }
     
 
-    public void FIdUseExp.inlineFunctions(AbstractFunctionInliner fi) {
-        getCommonAccess().asFAccess().inlineFunctions(fi);
+    public void FAccessExp.inlineFunctions(AbstractFunctionInliner fi) {
+        getFAccess().inlineFunctions(fi);
     }
     
     public void FSubscriptedExp.inlineFunctions(AbstractFunctionInliner fi) {
@@ -1067,8 +1067,8 @@ aspect FunctionInlining {
                 return false;
         for (FFunctionVariable out : myOutputs()) {
             TrivialInlineCheck chk = out.createTrivialInlineCheck();
-            for (FIdUseExp use : out.assigningUses()) 
-                chk.check(use.getCommonAccess());
+            for (FAccessExp use : out.assigningUses()) 
+                chk.check(use.getFAccess());
             if (!chk.isOk())
                 return false;
         }
@@ -1079,12 +1079,12 @@ aspect FunctionInlining {
      * All uses of this variable that are the left-hand side of an assignment or 
      * function call statement. 
      */
-    coll HashSet<FIdUseExp> FFunctionVariable.assigningUses() [new HashSet<FIdUseExp>()] 
+    coll HashSet<FAccessExp> FFunctionVariable.assigningUses() [new HashSet<>()] 
         with add root FFunctionDecl;
-    FIdUseExp contributes this when isAssignedTo() && myFuncFV() != null
+    FAccessExp contributes this when isAssignedTo() && myFuncFV() != null
         to FFunctionVariable.assigningUses() for myFuncFV();
 
-    syn FFunctionVariable FIdUseExp.myFuncFV() = getCommonAccess().asFAccess().myFuncFV();
+    syn FFunctionVariable FAccessExp.myFuncFV() = getFAccess().myFuncFV();
     syn FFunctionVariable FAccess.myFuncFV()    = (FFunctionVariable) myOutermostFV();
 
     syn boolean FFunctionVariable.isTrivialInlinable(boolean late, FFunctionCall call) = false;
@@ -1119,8 +1119,11 @@ aspect FunctionInlining {
     }
     
     syn boolean FAssignableExp.isOkTrivialInlineInFor();
-    eq FIdUseExp.isOkTrivialInlineInFor() = myFV().size().isUnknown();
+    eq FAccessExp.isOkTrivialInlineInFor() = myFV().size().isUnknown();
     eq FSubscriptedExp.isOkTrivialInlineInFor() = false;
+    eq InstAccessExp.isOkTrivialInlineInFor() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Create a TrivialInlineCheck object for this variable.
@@ -1148,16 +1151,16 @@ aspect FunctionInlining {
      * containing arrays of unknown size are not supported.
      */
     public abstract class TrivialInlineCheck {
-        protected abstract void check(CommonAccess use, int i);
-        protected abstract void checkAll(CommonAccess use);
+        protected abstract void check(FAccess use, int i);
+        protected abstract void checkAll(FAccess use);
         public abstract boolean isOk();
 
-        public void check(CommonAccess use) { check(use, 1); }
+        public void check(FAccess use) { check(use, 1); }
 
         public static class Scalar extends TrivialInlineCheck {
             protected int n = 0;
-            protected void check(CommonAccess use, int i) { n++; }
-            protected void checkAll(CommonAccess use)     { n++; }
+            protected void check(FAccess use, int i) { n++; }
+            protected void checkAll(FAccess use)     { n++; }
             public boolean isOk()                   { return n == 1; }
         }
 
@@ -1165,15 +1168,15 @@ aspect FunctionInlining {
             // TODO: check that each cell is assigned?
             protected int size;
             public KnownArray(int nElems)           { size = nElems; };
-            protected void check(CommonAccess use, int i) { n += use.isArray() ? size : 1; }
-            protected void checkAll(CommonAccess use)     { n += size; }
+            protected void check(FAccess use, int i) { n += use.isArray() ? size : 1; }
+            protected void checkAll(FAccess use)     { n += size; }
             public boolean isOk()                   { return n == size; }
         }
 
         public static class UnknownArray extends Scalar {
             // TODO: check sizes, and how loop indices are used?
-            protected void check(CommonAccess use, int i) { n += use.inForLoop() ? 1 : 2; }
-            protected void checkAll(CommonAccess use)     { n++; }
+            protected void check(FAccess use, int i) { n += use.inForLoop() ? 1 : 2; }
+            protected void checkAll(FAccess use)     { n++; }
         }
 
         public static class Record extends TrivialInlineCheck {
@@ -1187,9 +1190,9 @@ aspect FunctionInlining {
                     parts.put(v.name(), v.createTrivialInlineCheck());
             }
 
-            protected void check(CommonAccess use, int i) {
-                if (i < use.asFAccess().numParts()) {
-                    TrivialInlineCheck part = parts.get(use.asFAccess().partName(i));
+            protected void check(FAccess use, int i) {
+                if (i < use.numParts()) {
+                    TrivialInlineCheck part = parts.get(use.partName(i));
                     if (part != null)
                         part.check(use, i + 1);
                     else
@@ -1199,7 +1202,7 @@ aspect FunctionInlining {
                 }
             }
 
-            protected void checkAll(CommonAccess use) {
+            protected void checkAll(FAccess use) {
                 for (TrivialInlineCheck part : parts.values())
                     part.checkAll(use);
             }
@@ -1213,8 +1216,8 @@ aspect FunctionInlining {
         }
 
         public static class Unsupported extends TrivialInlineCheck {
-            protected void check(CommonAccess use, int i) { }
-            protected void checkAll(CommonAccess use)     { }
+            protected void check(FAccess use, int i) { }
+            protected void checkAll(FAccess use)     { }
             public boolean isOk()                   { return false; }
         }
 
@@ -1322,10 +1325,10 @@ aspect FunctionInlining {
     public void FStatement.inline(AbstractFunctionInliner fi) {}
 
     public void FAssignStmt.inline(AbstractFunctionInliner fi) {
-        FExp right = getRight().fullCopy();
+        FExp right = getRight().treeCopy();
         right = getRight().dynamicFExp(right);
         right = right.replaceReferences(fi);
-        FIdUseExp left = (FIdUseExp)getLeft().dynamicFExp(getLeft().fullCopy());
+        FAccessExp left = getLeft().dynamicFExp(getLeft().treeCopy()).asFAccessExp();
         left.replaceReferencesInSubscripts(fi);
         right.addInliningVarsAndEqns(fi, left.scalarName(), true);
     }
@@ -1352,9 +1355,9 @@ aspect FunctionInlining {
     }
 
     public void FInitArrayStmt.inline(AbstractFunctionInliner fi) {
-        FAbstractVariable fv = getFIdUseExp().myFV();
+        FAbstractVariable fv = getFAccessExp().myFV();
         FType t = type().copyAndReplaceReferences(fi);
-        t.setParent(getFIdUseExp());
+        t.setParent(getFAccessExp());
         fi.setTypeOf(fv.name(), t);
         fv.cacheFunctionInliner(fi);
         fv.flushCache();
@@ -1451,7 +1454,7 @@ aspect FunctionInlining {
         FExp loopExp = getIndex().getFExp();
         loopExp = loopExp.dynamicFExp(loopExp.fullCopy()).replaceReferences(fi);
         for (FExp e : loopExp.getArray().iterable()) {
-            stmts.add(new FAssignStmt(index.createUseExp(), e.fullCopy()));
+            stmts.add(new FAssignStmt(index.createAccessExp(), e.fullCopy()));
             for (FStatement stmt : newStmts)
                 stmts.add(stmt.fullCopy());
         }
@@ -1550,16 +1553,16 @@ aspect FunctionInlining {
         return this;
     }
 
-    public FExp FIdUseExp.replaceReferences(AbstractFunctionInliner fi) {
+    public FExp FAccessExp.replaceReferences(AbstractFunctionInliner fi) {
         replaceReferencesInSubscripts(fi);
         if (fi.isReplacementVar(name())) {
             return this;
         }
         FExp exp = null;
-        if (getCommonAccess().hasNonLiteralSubscripts()) {
+        if (getFAccess().hasNonLiteralSubscripts()) {
             exp = dynamicFExp(copyWithNonLiteralSubscriptsAsColon());
             exp = exp.getArray().buildWithReplacedReferences(fi, this);
-            exp = new FSubscriptedExp(exp, getCommonAccess().copyNonLiteralSubscripts());
+            exp = new FSubscriptedExp(exp, getFAccess().copyNonLiteralSubscripts());
         } else {
             exp = fi.getReplacementExp(scalarName());
             if (exp != null) {
@@ -1587,8 +1590,8 @@ aspect FunctionInlining {
         return this;
     }
 
-    public FIdUseExp FIdUseExp.copyWithNonLiteralSubscriptsAsColon() {
-        return createNode(getCommonAccess().copyWithNonLiteralSubscriptsAsColon());
+    public FAccessExp FAccessExp.copyWithNonLiteralSubscriptsAsColon() {
+        return createNode(getFAccess().copyWithNonLiteralSubscriptsAsColon());
     }
 
     public CommonAccess CommonAccess.copyWithNonLiteralSubscriptsAsColon() {
@@ -1635,8 +1638,8 @@ aspect FunctionInlining {
     }
 
 
-    public FArraySubscripts FIdUseExp.copyNonLiteralSubscripts() {
-        return getCommonAccess().copyNonLiteralSubscripts();
+    public FArraySubscripts FAccessExp.copyNonLiteralSubscripts() {
+        return getFAccess().copyNonLiteralSubscripts();
     }
 
     public FArraySubscripts CommonAccess.copyNonLiteralSubscripts() {
@@ -1784,7 +1787,7 @@ aspect FunctionInlining {
      * We want to be able to scalarize all expressions (except size exps) fully during inlining.
      */
     refine Scalarization eq FExp.scalarizeExpanded()      = duringFunctionInlining() ? isComposite() : refined();
-    refine Scalarization eq FIdUseExp.scalarizeExpanded() = duringFunctionInlining() ? isComposite() : refined();
+    refine Scalarization eq CommonAccessExp.scalarizeExpanded() = duringFunctionInlining() ? isComposite() : refined();
     
     inh boolean FFunctionCallLeft.duringFunctionInlining();
     inh boolean FExp.duringFunctionInlining();

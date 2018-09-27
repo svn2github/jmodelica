@@ -79,7 +79,7 @@ aspect FlatTypeAnalysis {
     }
 
     syn boolean FExp.isConstructorTypeArg() = false;
-    eq FIdUseExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
+    eq CommonAccessExp.isConstructorTypeArg()     = !myCommonVarDecl().isOutput();
     eq FSizeExp.isConstructorTypeArg()      = true;
 
     // TODO: Reduce code duplication here
@@ -125,8 +125,7 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallStmt.type()      = getCall().type();
     eq FInitArrayStmt.type()         = getType();
     
-    syn FType FInitArrayStmt.getType() = getFIdUseExp().myFV().type().treeCopy();
-    
+    syn FType FInitArrayStmt.getType() = getFAccessExp().myFV().type().treeCopy();    
     /**
      * True if this equation exclusively equates real types.
      */
@@ -589,7 +588,7 @@ aspect FlatTypeAnalysis {
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
-    eq FIdUseExp.type() = getCommonAccess().type();
+    eq CommonAccessExp.type() = getAccess().type();
     
     eq FDSRefExp.type() = getOrg().type();
 
@@ -1360,7 +1359,7 @@ aspect ExternalObjectTypes {
         if (hasBindingExp()) {
             return getBindingExp().isConstructorCall();
         } else {
-            for (FIdUseExp use : uses()) {
+            for (FAccessExp use : uses()) {
                 if (use.isConstructorAssign()) {
                     return true;
                 }
@@ -1370,7 +1369,7 @@ aspect ExternalObjectTypes {
         
     }
 
-    inh boolean FIdUseExp.isConstructorAssign();
+    inh boolean CommonAccessExp.isConstructorAssign();
     eq BaseNode.getChild().isConstructorAssign() = false;
     eq FEquation.getLeft().isConstructorAssign() = getRight().isConstructorCall();
 

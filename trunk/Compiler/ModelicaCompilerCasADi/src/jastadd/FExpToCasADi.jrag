@@ -247,7 +247,7 @@ aspect FExpToCasADi {
     /********* Expressions **********
      * Expressions are transformed to MX expressions recursively. 
      * The transformation of expressions to MX produces several MX
-     * for some expressions, such as some function calls and FIdUseExps.
+     * for some expressions, such as some function calls and FAccessExps.
      */
       
     /**
@@ -262,7 +262,7 @@ aspect FExpToCasADi {
     /**
      * Returns this expression as A MX. Note that this might
      * not make sense for some expressions, e.g. function calls with
-     * several outputs and FIdUseExp for FFunctionArray.
+     * several outputs and FAccessExp for FFunctionArray.
      * @return A MX
      */
     syn MX FExp.toMX() {
@@ -353,14 +353,14 @@ aspect FExpToCasADi {
     /**
      * Connects the use of a variable in an expression with
      * the symbolic and lazy MX for that variable. 
-     * Note that sometimes FIdUseExp points to a whole
+     * Note that sometimes FAccessExp points to a whole
      * matrices or record, and these should be transformed to vectors
      * of MX instead. 
      * @return A MX
      */
-    eq FIdUseExp.toMX() {
+    eq FAccessExp.toMX() {
         if (myFV().inRecord()) {
-            return getParent().getMXVariableFromRecordHashMap(getCommonAccess().asFAccess().toString());
+            return getParent().getMXVariableFromRecordHashMap(getFAccess().toString());
         } else if (hasFArraySubscripts() && inFunction()) {
             int flatIndex = getFArraySubscripts().computeFlattenedIndexBasedOnSizeData(myFV().size());
             return myFV().asMXVector().get(flatIndex);
@@ -372,12 +372,12 @@ aspect FExpToCasADi {
     /**
      * Connects the use of a variable in an expression with
      * the symbolic and lazy MX for that variable. 
-     * Note that this function can handle the case when the FIdUseExp
+     * Note that this function can handle the case when the FAccessExp
      * points to whole matrices or records, e.g. as outputs of 
      * function calls inside functions. 
      * @return A MX
      */
-    eq FIdUseExp.toMXVector() {
+    eq FAccessExp.toMXVector() {
         if (inFunction() && (size().numElements() > 1 || type().isRecord())) {
             return myFV().asMXVector();
         } else {
