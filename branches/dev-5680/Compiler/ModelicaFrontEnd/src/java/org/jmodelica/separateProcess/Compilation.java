@@ -30,7 +30,6 @@ import org.jmodelica.api.problemHandling.ProblemSeverity;
 import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Criteria;
 import org.jmodelica.util.collections.FilteredIterator;
-import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.ObjectStreamLogger;
 import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
@@ -47,9 +46,6 @@ public final class Compilation
     
     protected Compilation(List<String> args, String jmodelicaHome) throws IOException {
         ProcessBuilder builder = new ProcessBuilder(args);
-        System.out.println("========= Compilation args separate process ======");
-        System.out.println(args);
-        System.out.println("===================================");
         builder.environment().put("JMODELICA_HOME", jmodelicaHome);
         
         process = builder.start();
