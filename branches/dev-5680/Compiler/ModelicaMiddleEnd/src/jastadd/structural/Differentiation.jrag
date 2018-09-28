@@ -106,7 +106,7 @@ aspect Derivatives {
             if (diffedCall.isLiteralZero()) {
                 Collection<FAbstractEquation> res = new ArrayList<FAbstractEquation>();
                 for (FFunctionCallLeft left : getLefts())
-                    for (FIdUseExp use : FIdUseExpsInLHS())
+                    for (FAccessExp use : FAccessExpsInLHS())
                         res.add(dynamicFAbstractEquation(new FEquation(use.diff(name), use.type().sizedZeroLiteral())));
                 return res;
             } else {
@@ -425,7 +425,7 @@ aspect Derivatives {
     }
 
     @Override
-    protected FExp FIdUseExp.diffExp(String name) {
+    protected FExp CommonAccessExp.diffExp(String name) {
         return diffUseOrDerExp(name, name());
     }
 
@@ -549,7 +549,7 @@ aspect Derivatives {
         }
     }
 
-    syn int FIdUseExp.order()              = 0;
+    syn int CommonAccessExp.order()        = 0;
     eq FAbstractDerExp.order()             = getOrder();
     syn int InstDerExp.order()             = 1;
     eq InstHDerExp.order()                 = getOrder();
@@ -557,19 +557,18 @@ aspect Derivatives {
     eq FAbstractDerivativeVariable.order() = getOrder();
 
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
-    eq FIdUseExp.createDerExp(int order) {
-        FExp exp = getCommonAccess().createDerExp(order() + order);
-        if (exp instanceof FIdUseExp) {
-            ((FIdUseExp)exp).setOriginalVariable(getOriginalVariable());
-        }
+    eq FAccessExp.createDerExp(int order) {
+        FDerExp exp = getFAccess().createDerExp(order() + order);
+        exp.setOriginalVariable(getOriginalVariable());
         return exp;
     }
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
+    eq InstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order() + order);
 
-    syn FExp CommonAccess.createDerExp(int order) = new FDerExp(fullCopy(), order);
+    syn FDerExp FAccess.createDerExp(int order) = new FDerExp(fullCopy(), order);
     
     syn InstDerExp InstAccess.createDerExp(int order) {
-        FExp use = new FIdUseExp(fullCopy());
+        FExp use = new InstAccessExp(treeCopy());
         return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
     }
     
@@ -914,7 +913,7 @@ aspect AlgorithmDifferentiation{
     
     public FFunctionDecl FFunctionDecl.createAndAddDerivativeFunction(AnnotationNode derNode) {
         FAccess name = getFAccess().createDerPrefixedName(1);
-        derNode.setValue(new FIdUseExp(name));
+        derNode.setValue(new FAccessExp(name));
         derNode.forPath("order").setValue(new FIntegerLitExp(order() + 1));
         
         Collection<FFunctionVariable> inputs = new ArrayList<FFunctionVariable>();
@@ -966,7 +965,7 @@ aspect AlgorithmDifferentiation{
     @Override
     public void FAssignStmt.diff(List<FStatement> diffed) {
         if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
-            diffed.add(new FDerivativeAssignStmt(getLeft().createDerExp(1).asFIdUseExp(), getRight().diff("time"), order() + 1));
+            diffed.add(new FDerivativeAssignStmt(getLeft().createDerExp(1).asFAccessExp(), getRight().diff("time"), order() + 1));
         diffed.add(fullCopy());
     }
    
@@ -1025,7 +1024,7 @@ aspect AlgorithmDifferentiation{
     public void FInitArrayStmt.diff(List<FStatement> diffed) {
         diffed.add(fullCopy());
         if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
-            diffed.add(new FDerivatedInitArrayStmt(getFIdUseExp().createDerExp(1).asFIdUseExp(), order() + 1));
+            diffed.add(new FDerivatedInitArrayStmt(getFAccessExp().createDerExp(1).asFAccessExp(), order() + 1));
         }
     }
     
@@ -1048,8 +1047,8 @@ aspect AlgorithmDifferentiation{
     }
     
     rewrite FDerExp {
-        when (inFunction()) to FIdUseExp 
-        new FIdUseExp(getCommonAccess().asFAccess().createDerPrefixedFunctionName(order()));
+        when (inFunction()) to CommonAccessExp 
+        new FAccessExp(getFAccess().createDerPrefixedFunctionName(order()));
     }
     
     

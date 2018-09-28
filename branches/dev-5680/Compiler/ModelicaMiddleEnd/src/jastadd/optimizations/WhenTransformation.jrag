@@ -65,7 +65,7 @@ aspect WhenClauses{
         } else {
             ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
             for (FVariable fv : referencedFVariablesInLHS()) {
-                l.add(new FEquation(fv.createUseExp(), fv.createFPreExp()));
+                l.add(new FEquation(fv.createAccessExp(), fv.createFPreExp()));
             }
             e.setElse(new FElseEquation(getType(), new List<FAbstractEquation>(l)));
         }
@@ -113,7 +113,7 @@ aspect WhenClauses{
      */
     syn boolean FExp.shouldExtractGuard() = true;
     eq FInitialExp.shouldExtractGuard() = false;
-    eq FIdUseExp.shouldExtractGuard() = false;
+    eq CommonAccessExp.shouldExtractGuard() = false;
     eq FPreExp.shouldExtractGuard() = true;
     eq FDerExp.shouldExtractGuard() = true;
     eq FDummyDerExp.shouldExtractGuard() = true;
@@ -163,10 +163,10 @@ aspect WhenClauses{
         return fullCopy();
     }
     
-    public FExp FIdUseExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
+    public FExp FAccessExp.asGuard(Collection<FAbstractEquation> outerEqnList, Collection<FStatement> stmtList, FClass fclass) {
         if (shouldExtractGuard())
             return super.asGuard(outerEqnList, stmtList, fclass);
         else
-            return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getCommonAccess().fullCopy())));
+            return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFAccess().fullCopy())));
     }
 }

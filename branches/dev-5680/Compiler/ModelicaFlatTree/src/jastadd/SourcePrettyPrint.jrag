@@ -65,19 +65,19 @@ aspect SourcePrettyPrint {
 	}
 
 	
-	public void FIdUseExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+	public void CommonAccessExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		//if(this.fName==null){
 		if(this.fName == null)
 			log.debug(this.toString() + " " + this.getClass().toString() + "----Source file: " + this.fName);
-		log.debug("FIdUseExp----Source position: L" + Symbol.getLine(this.start) + ":" + Symbol.getColumn(this.start) + 
+		log.debug("CommonAccessExp----Source position: L" + Symbol.getLine(this.start) + ":" + Symbol.getColumn(this.start) + 
 				" - L" + Symbol.getLine(this.end) + ":" + Symbol.getColumn(this.end));
-		log.debug("FIdUseExp----Source file: " + this.fName);
+		log.debug("CommonAccessExp----Source file: " + this.fName);
 	//	str.print(" [p: " + this.start + " " + this.end + "] ");
 	//	}
 
 		prettyPrint(p, str, indent);
 		
-		//str.println("FIdUseExp----Source file: " + this.fName);
+		//str.println("CommonAccessExp----Source file: " + this.fName);
 		
 	}
 	

@@ -1024,8 +1024,8 @@ aspect DerivativeRewriting {
     public void FEquation.propagateDerivativeBindings() {
         if (!isDerivativeBindingEquation())
             return;
-        FAbstractVariable right = getRight().asFIdUseExp().myFV();
-        FAbstractVariable left = getLeft().asFIdUseExp().myFV();
+        FAbstractVariable right = getRight().asFAccessExp().myFV();
+        FAbstractVariable left = getLeft().asFAccessExp().myFV();
         if (!left.isFVariable() || !right.isFVariable())
             return;
         if (left.isTemporary() || right.isTemporary())

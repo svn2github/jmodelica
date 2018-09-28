@@ -69,7 +69,7 @@ aspect ConstantFolding {
 
     public void FPreExp.constantFolding(VariableEvaluator evaluator) {
         if (!variability().knownParameterOrLess() && variability().parameterOrLess()) {
-            replaceMe(new FIdUseExp(getCommonAccess().fullCopy()));
+            replaceMe(new FAccessExp(getFAccess().fullCopy()));
         } else {
             super.constantFolding(evaluator);
         }

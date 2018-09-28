@@ -78,29 +78,29 @@ aspect DynamicStateSelect{
     eq FDynamicAlgebraicVariable.asFDynamicAlgebraicVariable() = this;
     
     syn boolean FVarRefExp.isDynamicState() = false;
-    eq FIdUseExp.isDynamicState() = myFV().isDynamicState();
+    eq FAccessExp.isDynamicState() = myFV().isDynamicState();
     eq FDSRefExp.isDynamicState() = true;
 
     eq FDynamicAlgebraicVariable.bltDependencyVars() = getSet().fVarsColl();
 
-    inh boolean FIdUseExp.shouldRewriteToDSRef();
+    inh boolean FAccessExp.shouldRewriteToDSRef();
     eq BaseNode.getChild().shouldRewriteToDSRef()        = true;
     eq DynamicStateSet.getChild().shouldRewriteToDSRef() = false;
     eq FDSRefExp.getChild().shouldRewriteToDSRef()       = false;
 
-    private boolean FIdUseExp.dynamicStateRewriteEnabled = false;
+    private boolean FAccessExp.dynamicStateRewriteEnabled = false;
     public void ASTNode.enableDynamicStateRewrite() {
         for (ASTNode n : this)
             n.enableDynamicStateRewrite();
     }
 
     @Override
-    public void FIdUseExp.enableDynamicStateRewrite() {
+    public void FAccessExp.enableDynamicStateRewrite() {
         super.enableDynamicStateRewrite();
         dynamicStateRewriteEnabled = true;
     }
 
-    rewrite FIdUseExp {
+    rewrite FAccessExp {
         when (dynamicStateRewriteEnabled && isDynamicState() && shouldRewriteToDSRef()) to FDSRefExp {
             dynamicStateRewriteEnabled = false;
             return new FDSRefExp(myFV().dynamicStateSet().id(), this);
@@ -110,31 +110,31 @@ aspect DynamicStateSelect{
     syn DynamicStateSet FDSRefExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId() - 1);
     syn DynamicStateSet FDSDerExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId() - 1);
 
-    syn List<FIdUseExp> FDSRefExp.getUseList() {
+    syn List<FAccessExp> FDSRefExp.getUseList() {
         DynamicStateSet set = mySet();
-        List<FIdUseExp> list = new List<FIdUseExp>();
+        List<FAccessExp> list = new List<>();
         for (int i = 1; i <= set.numAlgebraics(); i++)
-            list.add(new FIdUseExp("_ds." + set.id() + ".a" + i));
+            list.add(new FAccessExp("_ds." + set.id() + ".a" + i));
         return list;
     }
 
     @Override
-    public void FDSRefExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
-        for (FIdUseExp exp : getUses())
-            set.add(exp);
+    public <T extends CommonAccessExp> void FDSRefExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
+        for (FAccessExp exp : getUses())
+            visitor.visit(exp, set);
         visitor.visit(getOrg(), set);
     }
 
     syn List<FExp> FDSDerExp.getUseList() {
         DynamicStateSet set = mySet();
         List<FExp> list = new List<FExp>();
-        for (FIdUseExp var : set.getVars())
+        for (FAccessExp var : set.getVars())
             list.add(var.diff(TIME));
         return list;
     }
 
     @Override
-    public void FDSDerExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+    public <T extends CommonAccessExp> void FDSDerExp.findCommonAccessExpsInTree(Set<T> set, CommonAccessExpLookupVisitor<T> visitor) {
         for (FExp exp : getUses())
             visitor.visit(exp, set);
     }
@@ -218,13 +218,13 @@ aspect DynamicStateSelect{
         }
         DynamicStateManager manager = getDynamicStateManager();
         for (IndexReductionBiPGraph.DSSet resSet : result.getDSSets()) {
-            List<FIdUseExp> varList = new List<FIdUseExp>();
+            List<FAccessExp> varList = new List<>();
             for (IndexReductionVar var : resSet.vars) {
                 FVariable fVar = var.getVariable();
                 if (fVar.order() == 1)
-                    varList.add(fVar.getMeIntegrated().createUseExp());
+                    varList.add(fVar.getMeIntegrated().createAccessExp());
                 else
-                    varList.add(new FIdUseExp(fVar.getFAccess().createDerPrefixedName(fVar.order() - 1)));
+                    varList.add(new FAccessExp(fVar.getFAccess().createDerPrefixedName(fVar.order() - 1)));
             }
             List<DynamicStateCoefficient> coffList = new List<DynamicStateCoefficient>();
             for (int eqn = 0; eqn < resSet.coefficients.length; eqn++) {
@@ -246,7 +246,7 @@ aspect DynamicStateSelect{
                 FDynamicStateVariable var = new FDynamicStateVariable(set, i);
                 stateVars[i - 1] = var;
                 addFVariable(var);
-                addFEquation(new FEquation(new FDerExp(var.createCommonAccess()), new FDSDerExp(set.id(), i)));
+                addFEquation(new FEquation(new FDerExp(var.createFAccess()), new FDSDerExp(set.id(), i)));
             }
             set.setStateVars(stateVars);
             manager.addSet(set);
@@ -256,7 +256,7 @@ aspect DynamicStateSelect{
     
     rewrite FDerExp {
         when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
-            return new FDynamicDerExp(getCommonAccess(), getOriginalVariable(), order());
+            return new FDynamicDerExp(getFAccess(), getOriginalVariable(), order());
         }
     }
     
@@ -542,7 +542,7 @@ aspect DynamicStateSelect{
         if (var.getVariable().stateSelection() == FVariable.StateSelect.ALWAYS) {
             return FVariable.StateSelect.ALWAYS;
         }
-        for (FIdUseExp exp : eq.getEquation().findFIdUseExpsInTree()) {
+        for (FAccessExp exp : eq.getEquation().findFAccessExpsInTree()) {
             if (getVariable(exp.name()) == var && !exp.getOriginalVariable().isEmpty()) {
                 return exp.myOriginalFV().stateSelection();
             }
