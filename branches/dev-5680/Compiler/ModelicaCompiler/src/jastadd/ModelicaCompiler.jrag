@@ -1473,7 +1473,7 @@ public class ModelicaCompiler implements LogContainer {
         String[] files = splitFiles(programarguments.libraryPath());
         String className = programarguments.className();
         String compileTo = programarguments.out();
-        System.out.println("compileTo: " + compileTo);
+        
         // Compile model
         try {
             String targetType = programarguments.get("target");
