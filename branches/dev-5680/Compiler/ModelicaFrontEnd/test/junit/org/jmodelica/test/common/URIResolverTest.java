@@ -51,7 +51,9 @@ public class URIResolverTest {
     public void testResolvePathCorrect() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String path = URIResolverMock.absolutePath("pack/subpath");
+        System.out.println("testResolvePathCorrect path: " + path);
         String res = URIResolver.DEFAULT.resolve(n, path);
+        System.out.println("testResolvePathCorrect res: " + res);
         assertTrue(n.hasError());
         assertEquals("URI resolver paths not equal.", path, res);
     }
@@ -60,7 +62,9 @@ public class URIResolverTest {
     public void testResolvePathMissing() {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String path = URIResolverMock.absolutePath("pack/subpath/missing");
+        System.out.println("ttestResolvePathMissing path: " + path);
         String res = URIResolver.DEFAULT.resolve(n, path);
+        System.out.println("testResolvePathMissing res: " + res);
         assertTrue(n.hasError());
         assertEquals("URI resolver paths not equal.", path, res);
     }

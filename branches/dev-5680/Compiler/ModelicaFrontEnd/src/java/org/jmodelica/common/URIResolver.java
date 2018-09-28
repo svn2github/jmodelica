@@ -62,6 +62,7 @@ public class URIResolver {
         try {
             URI uri = new URI(str);
             String scheme = scheme(uri);
+            System.out.println("resolveURI scheme: "+ scheme);
             if (scheme != null) {
                 if (scheme.equalsIgnoreCase("file")) {
                     String auth = uri.getAuthority();
