@@ -75,6 +75,8 @@ public class URIResolver {
                 } else if (error) {
                     n.error("Unsupported URI scheme '%s'.", scheme.toLowerCase());
                 }
+            } else {
+                n.error("URI '%s' has undefined URI scheme ", str);
             }
         } catch (URISyntaxException e) {
             throw new URIException( e.getMessage());
