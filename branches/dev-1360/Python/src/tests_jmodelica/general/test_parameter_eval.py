@@ -48,4 +48,4 @@ class TestParameterEvalDependentStart:
         assert model.get('x') == 4
         model.set('p', 4)
         assert model.get('pd') == 5
-        assert model.get('x') == 4 # Evaluated on first get of variable, not reevaluated
+        assert model.get('x') == 5
