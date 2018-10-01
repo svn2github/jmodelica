@@ -2993,12 +2993,12 @@ equation
             description="",
             variability_propagation=false,
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_parameters$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _z1_8 = (5);
@@ -3008,29 +3008,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_start_values_1_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (_myEO3_2 != NULL) {
@@ -3159,28 +3137,16 @@ model TestExtObject7
             description="Test that constructor and destructor calls are generated for external objects in records.",
             variability_propagation=false,
             template="
-$C_set_start_values$
+$C_model_init_eval_independent_start$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _r_eo_0 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
     _r_eos_1_1 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
     _r_eos_2_2 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    model_init_eval_parameters(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -3228,12 +3194,12 @@ model TestExtObject8
             description="Test that constructor and destructor calls are generated for external objects in records.",
             variability_propagation=false,
             template="
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_dependent_parameters$
 $C_destruct_external_object$
 ",
             generatedCode="
 
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (_eo_1 != NULL) {
@@ -3283,14 +3249,14 @@ model TestExtObject9
             name="TestExtObject9",
             description="",
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 $C_ode_initialization$
 $C_dae_init_blocks_residual_functions$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_1_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _eo_1 = (NULL);
@@ -3298,26 +3264,12 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     return ef;
 }
 
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
@@ -3358,7 +3310,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_variable_aliases$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_dependent_parameters$
 $C_functions$
 ",
         generatedCode="
@@ -3369,7 +3321,7 @@ $C_functions$
 #define _myEOs_2_1 ((jmi->ext_objs)[1])
 
 
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1)
