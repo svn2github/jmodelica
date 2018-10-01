@@ -54,6 +54,7 @@ public class URIResolverTest {
         System.out.println("testResolvePathCorrect path: " + path);
         String res = URIResolver.DEFAULT.resolve(n, path);
         System.out.println("testResolvePathCorrect res: " + res);
+        assertTrue(n.hasError());
         assertEquals("URI resolver paths not equal.", path, res);
     }
 
@@ -64,6 +65,7 @@ public class URIResolverTest {
         System.out.println("ttestResolvePathMissing path: " + path);
         String res = URIResolver.DEFAULT.resolve(n, path);
         System.out.println("testResolvePathMissing res: " + res);
+        assertTrue(n.hasError());
         assertEquals("URI resolver paths not equal.", path, res);
     }
 
