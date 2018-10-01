@@ -366,15 +366,12 @@ aspect AliasElimination {
         when (rewriteAlias) to FExp {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
-                FAccessExp new_exp = fv.alias().createAccessExp();
-                new_exp.setLocationNoTree(this);
-                new_exp.addLocation(fv);
-                new_exp.setOriginalVariable(this, fv);
-                new_exp.rewriteAlias = true;
-                if (fv.isNegated()) 
-                    return new FNegExp(new_exp);
-                else
-                    return new_exp;
+                FAccessExp newExp = fv.alias().createAccessExp();
+                newExp.setLocationNoTree(this);
+                newExp.addLocation(fv);
+                newExp.setOriginalVariable(this, fv);
+                newExp.rewriteAlias = true;
+                return fv.aliasNegatedWrap(this, newExp);
             }
             FAbstractEquation eqn = myFEquation();
             if (eqn != null && !eqn.potentialAliasEquation()
@@ -398,12 +395,9 @@ aspect AliasElimination {
         when (rewriteAlias) to FExp {
             if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
                 FVariable fv = (FVariable) myNonPreFV();
-                FPreExp new_exp = fv.alias().createFPreExp();
-                new_exp.setOriginalVariable(this, fv);
-                if (fv.isNegated()) 
-                    return new FNegExp(new_exp);
-                else
-                    return new_exp;
+                FPreExp newExp = fv.alias().createFPreExp();
+                newExp.setOriginalVariable(this, fv);
+                return fv.aliasNegatedWrap(this, newExp);
             } else {
                 rewriteAlias = false;
                 return this;
@@ -419,8 +413,7 @@ aspect AliasElimination {
                 FAccessExp exp = fv.alias().createAccessExp();
                 setLeft(exp);
                 exp.setOriginalVariable(left, fv);
-                if (fv.isNegated()) 
-                    setRight(new FNegExp(getRight()));
+                setRight(fv.aliasNegatedWrap(getRight(), getRight()));
                 return this;
             } else {
                 rewriteAlias = false;
@@ -442,24 +435,31 @@ aspect AliasElimination {
         when (rewriteAlias && getFAccess().myFV().isFVariable() && (myFV().isAlias() || getFAccess().myFV().isAlias())) to FExp {
             if (myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
-                FAccessExp new_exp = fv.alias().createAccessExp();
-                new_exp.setOriginalVariable(this, fv);
-                if (myFV().isNegated()) 
-                    return new FNegExp(new_exp);
-                else
-                    return new_exp;
+                FAccessExp newExp = fv.alias().createAccessExp();
+                newExp.setOriginalVariable(this, fv);
+                return myFV().aliasNegatedWrap(this, newExp);
             } else {
-                FAccess new_name = ((FVariable)getFAccess().myFV()).alias().getFAccess().treeCopy();
-                FAbstractDerExp new_exp = createEmptyNode();
-                new_exp.setFAccess(new_name);
-                new_exp.setOrder(order());
-                new_exp.setOriginalVariable(this, getFAccess().myFV());
-                if (getFAccess().myFV().isNegated())
-                    return new FNegExp(new_exp);
-                else
-                    return new_exp;
+                FAccess newName = ((FVariable)getFAccess().myFV()).alias().getFAccess().treeCopy();
+                FAbstractDerExp newExp = createEmptyNode();
+                newExp.setFAccess(newName);
+                newExp.setOrder(order());
+                newExp.setOriginalVariable(this, getFAccess().myFV());
+                return getFAccess().myFV().aliasNegatedWrap(this, newExp);
             }
         }
+    }
+
+    public FExp FAbstractVariable.aliasNegatedWrap(FExp oldExp, FExp newExp) {
+        if (isAliasNegated(oldExp)) {
+            return new FNegExp(newExp);
+        } else {
+            return newExp;
+        }
+    }
+    
+    public boolean FAbstractVariable.isAliasNegated(FExp oldExp) {
+        // Hook to facilitate extensions
+        return isNegated();
     }
 
     public void FAccessExp.setOriginalVariable(FAccessExp oldExp, FAbstractVariable var) {
