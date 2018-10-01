@@ -165,7 +165,7 @@ aspect CCodeGenTypes {
         }
         return res;
     }
-    eq FIdUseExp.alias_C(CodePrinter p, CodeGenContext cgc) {
+    eq CommonAccessExp.alias_C(CodePrinter p, CodeGenContext cgc) {
         String res = cgc.alias(myCommonVarDecl());
         if (res == null) {
             res = super.alias_C(p, cgc);

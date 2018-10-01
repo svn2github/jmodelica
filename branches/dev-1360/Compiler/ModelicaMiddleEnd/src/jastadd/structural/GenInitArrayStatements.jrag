@@ -108,7 +108,7 @@ aspect GenInitArrayStatements {
     syn lazy Set<String> FStatement.sortingAssignedNames() = Collections.<String>emptySet();
     eq FAssignStmt.sortingAssignedNames()      = getLeft().sortingAssignedNames();
     eq FInitArrayStmt.sortingAssignedNames()   = 
-        Collections.singleton("size(" + getFIdUseExp().name() + ")");
+        Collections.singleton("size(" + getFAccessExp().name() + ")");
     eq FForStmt.sortingAssignedNames()         = sortingAssignedNames(getForStmts());
     eq FWhileStmt.sortingAssignedNames()       = sortingAssignedNames(getWhileStmts());
     eq FFunctionCallStmt.sortingAssignedNames() {
@@ -137,10 +137,10 @@ aspect GenInitArrayStatements {
     }
     
     syn Set<String> FAssignableExp.sortingAssignedNames();
-    eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
+    eq CommonAccessExp.sortingAssignedNames() = Collections.singleton(name());
     eq FSubscriptedExp.sortingAssignedNames() {
         Set<String> res = new LinkedHashSet<String>();
-        for (FIdUseExp use : findFIdUseExpsInTree()) {
+        for (FAccessExp use : findFAccessExpsInTree()) {
             res.add(use.name());
         }
         return res;

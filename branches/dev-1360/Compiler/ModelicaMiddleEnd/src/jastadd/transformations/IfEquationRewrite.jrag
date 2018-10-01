@@ -266,7 +266,7 @@ aspect IfEquationRewrite {
             FExp left = assignmentEquationMap().get(v).assignmentExp().fullCopy();
             FExp right = getElse().assignmentEquationMap().get(v).assignmentExp().fullCopy();
             FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
-            FEquation e = new FEquation(getType(), v.createUseExp(), ifExp);
+            FEquation e = new FEquation(getType(), v.createAccessExp(), ifExp);
             if (isWhen()) {
                 ifExp.setWhen();
                 e.setWhen();

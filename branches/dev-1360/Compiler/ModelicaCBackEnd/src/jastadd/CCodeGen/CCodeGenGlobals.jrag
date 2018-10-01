@@ -346,7 +346,7 @@ aspect CCodeGenGlobalVariables {
         str.print(indent, "}\n\n");
     }
 
-    public void FIdUseExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent, boolean inArray) {
+    public void CommonAccessExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent, boolean inArray) {
         
     }
 

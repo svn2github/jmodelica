@@ -53,7 +53,7 @@ aspect CCodeGenAlgorithms {
     }
 
     syn String ASTNode.assignMacroType(FType type) = type.macroType();
-    eq FIdUseExp.assignMacroType(FType type)       = myFV().assignMacroType(type);
+    eq FAccessExp.assignMacroType(FType type)       = myFV().assignMacroType(type);
     eq FVariable.assignMacroType(FType type)       = isString() && !inRecord() ? "STR_Z" : super.assignMacroType(type);
 
     /*
@@ -102,8 +102,8 @@ aspect CCodeGenAlgorithms {
         boolean first = visited == null || visited.add(this);
         if (first) {
             p.printVarDecls(this, str, indent);
-            if (!solved || (forVariables != null && forVariables.size() != uniqueFIdUseExpsInLHS().size())) {
-                for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+            if (!solved || (forVariables != null && forVariables.size() != uniqueFAccessExpsInLHS().size())) {
+                for (FAccessExp use : uniqueFAccessExpsInLHS()) {
                     if (!solved || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
                         p.printTempInputDecl(use.myFV(), this, str, indent);
                     }
@@ -192,7 +192,7 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.printInit(getFIdUseExp().getCommonAccess().asFAccess().myTopFV(), str, indent, type());
+        p.printInit(getFAccessExp().getFAccess().myTopFV(), str, indent, type());
     }
 
     @Override
@@ -298,12 +298,12 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%sjmi_int_t %se;\n", indent, name);
-        str.format("%sjmi_int_t %sn;\n", indent, name);
+        str.print(indent, "jmi_int_t ", name, "e;\n");
+        str.print(indent, "jmi_int_t ", name, "n;\n");
     }
 
     @Override
-    public void FIdUseExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
+    public void FAccessExp.genForIndexExtraVarDecls_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%sint %si;\n", indent, name);
     }
 
@@ -315,21 +315,23 @@ aspect CCodeGenAlgorithms {
 
     @Override
     public void FRangeExp.printForIndexInit_C(CodePrinter p, CodeStream str, String indent, String name) {
-        str.format("%s%sn = 0;\n", indent, name);
-        boolean hasStep = hasStep();
+        str.print(indent, name, "n = 0;\n");
         
+        boolean hasStep = hasStep();
         FExp start = getFExp(0);
         FExp end = getFExp(hasStep ? 2 : 1);
         FExp step = hasStep ? getFExp(1) : null;
         
-        str.format("%s%se = floor(", indent, name);
+        str.print(indent, name, "e = floor(");
         if (hasStep) {
             str.print("(");
         }
 
+        str.print("(");
         p.print(end, str, indent);
-        str.print(" - ");
+        str.print(") - (");
         p.print(start, str, indent);
+        str.print(")");
 
         if (hasStep) {
             str.print(") / (");
@@ -359,9 +361,9 @@ aspect CCodeGenAlgorithms {
     }
 
     @Override
-    public void FIdUseExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
+    public void FAccessExp.printForIndex_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%1$si = 0; %1$si < jmi_array_size(%2$s, 0); %1$si++", 
-                name, getCommonAccess().toString_C(p));
+                name, getFAccess().toString_C(p));
     }
 
     @Override
@@ -369,22 +371,25 @@ aspect CCodeGenAlgorithms {
         FExp start = getFExp(0);
         FExp step = getFExp(1);
 
+        String nameE = name + "e";
+        String nameN = name + "n";
+
         /*
          * Initial expression.
          */
-        str.format("%s = ", name);
+        str.print(name, " = ");
         p.print(start, str, indent);
-        str.print(";");
+        str.print("; ");
 
         /*
          * Conditional expression.
          */
-        str.format(" %sn <= %se; ", name, name);
+        str.print(nameN, " <= ", nameE, "; ");
 
         /*
          * Iteration expression.
          */
-        str.format("%s = ", name);
+        str.print(name, " = ");
         p.print(start, str, indent);
         str.print(" + ");
         if (hasStep()) {
@@ -392,7 +397,7 @@ aspect CCodeGenAlgorithms {
             p.print(step, str, indent);
             str.print(") * ");
         }
-        str.format("(++%sn)", name);
+        str.print("(++", nameN, ")");
     }
 
     public void FForIndex.printForIndexNext_C(CodePrinter p, CodeStream str, String indent) {
@@ -403,9 +408,9 @@ aspect CCodeGenAlgorithms {
     }
 
     @Override
-    public void FIdUseExp.printForIndexNext_C(CodePrinter p, CodeStream str, String indent, String name) {
+    public void FAccessExp.printForIndexNext_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.format("%1$s%2$s = jmi_array_val_1(%3$s, %2$si);\n", 
-                indent, name, getCommonAccess().toString_C(p));
+                indent, name, getFAccess().toString_C(p));
     }
 
 
@@ -437,7 +442,7 @@ aspect CCodeGenAlgorithms {
             if (name == null) {
                 name = getReturnVar().type().isRecord() ?
                     "*"+getReturnVar().tempName_C() :
-                    getReturnVar().getCommonAccess().name_C();
+                    getReturnVar().getAccess().name_C();
             }
             str.print(name);
             str.print(" = ");
