@@ -470,7 +470,7 @@ aspect CCodeGen {
     @Override
     public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
+        FAccessExp left = getLeft().stripNegations().asFAccessExp();
         FVariable fv = (FVariable)left.myFV();
         if (fv.isExternalObject()) {
             fv.genDestructorCall_C(p, str, indent);
@@ -498,7 +498,7 @@ aspect CCodeGen {
         String strName = type().name() + ".destructor";
         FAccess name = new FAccessString(strName);
         List<FExp> args = new List<FExp>();
-        args.add(createUseExp());
+        args.add(createAccessExp());
         FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }

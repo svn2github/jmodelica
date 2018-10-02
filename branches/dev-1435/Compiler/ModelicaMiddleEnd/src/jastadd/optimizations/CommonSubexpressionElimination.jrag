@@ -138,7 +138,7 @@ aspect CommonSubexpressionElimination {
                         variablesMap().addVariable(var);
                     }
 
-                    repl = var.createUseExp();
+                    repl = var.createAccessExp();
                     merge(0, repl);
                     return repl;
                 }

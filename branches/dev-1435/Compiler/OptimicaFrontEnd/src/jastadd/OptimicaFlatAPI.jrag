@@ -818,7 +818,7 @@ aspect OptimicaFlatAPI {
     eq FOptClass.getChild().inOptimization() = true;
     eq Root.getChild().inOptimization()      = false; 
     
-    inh boolean FIdUseExp.inObjective();
+    inh boolean CommonAccessExp.inObjective();
     eq FAttribute.getValue().inObjective() = isObjective();
     eq Root.getChild().inObjective()       = false;
     
@@ -855,7 +855,7 @@ aspect OptimicaLinearVariables {
 		if (variability().fixedParameterOrLess() && !(isOptParameter() | isDependentFreeParameter())) {
 			return true;
 		} 
-		for (FIdUseExp e : uses()) {
+		for (CommonAccessExp e : uses()) {
 			if (!e.isLinear()) {
 				return false;
 			}
@@ -1101,7 +1101,7 @@ aspect OptimicaFreeParameters {
 	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveFreeParameters() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+	FAccessExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
 		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
 		myFV().isFreeParameter() to 
 		FAbstractEquation.retrieveFreeParameters() for myFEquation();
