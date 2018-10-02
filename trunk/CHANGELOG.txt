@@ -1,5 +1,8 @@
 ================= Unreleased ==================
-;Fixed; Minor ; Compiler ; #5676
+; Fixed ; Minor ; Runtime ; #5684
+Fixed segfault when calling free directly after a reset on CS FMUs.
+
+; Fixed ; Minor ; Compiler ; #5676
 Fixed a problem causing incorrect annotation trees to be created in some cases.
 
 ; Fixed ; Major ; Build system ; #5671
