@@ -50,14 +50,16 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 return failedEval(ext, "Missing ModelicaCompiler", false);
             }
             try {
+                long time = System.currentTimeMillis();
                 String executable = mc.compileExternal(ext);
                 if (ext.shouldCacheProcess()) {
                     ef = new MappedExternalFunction(ext, executable);
                 } else {
                     ef = new CompiledExternalFunction(ext, executable);
                 }
+                time = System.currentTimeMillis() - time;
                 mc.log().debug("Succesfully compiled external function '" + ext.getName() + "' to executable '"
-                        + executable + "' code for evaluation");
+                        + executable + "' code for evaluation, time: " + time + "ms");
             } catch (FileNotFoundException e) {
                 ef = failedEval(ext, "c-code generation failed '" + e.getMessage() + "'", true);
                 mc.log().debug(ef.getMessage());
@@ -328,7 +330,10 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
                 log().debug("Evaluating live external function: " + ext.getName());
                 try {
                     ready(ext, values, timeout);
+                    long time = System.currentTimeMillis();
                     MappedExternalFunction.this.evaluate(ext, values, timeout, com);
+                    time = System.currentTimeMillis() - time;
+                    log().debug("Finished evaluating live external function, time: " + time + "ms");
                 } catch (ProcessCommunicator.AbortConstantEvaluationException e) {
 
                 } catch (ConstantEvaluationException e) {
@@ -346,11 +351,16 @@ public class ExternalProcessCacheImpl<K extends Variable<V, T>, V extends Value,
              */
             protected void ready(External<K> ext, Map<K, V> values, int timeout) throws IOException {
                 if (com == null) {
+                    long time1 = System.currentTimeMillis();
                     // Start process if not live.
                     com = createProcessCommunicator(ext);
+                    long time2 = System.currentTimeMillis();
                     // Send external object constructor inputs
                     MappedExternalFunction.this.setup(ext, values, timeout, com);
-                    log().debug("Setup live external function: " + ext.getName());
+                    long time3 = System.currentTimeMillis();
+                    log().debug("Setup live external function: " + ext.getName()
+                              + ", createProcessCommunicator() time: " + (time2 - time1)
+                              + "ms, setup time: " + (time3 - time2) + "ms");
                 }
 
                 // Mark as most recently used
