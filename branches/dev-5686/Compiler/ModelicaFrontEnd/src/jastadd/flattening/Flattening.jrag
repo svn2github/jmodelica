@@ -1792,9 +1792,8 @@ aspect Flattening {
                 if (cval.hasBuildLiteral()) {
                     FExp t = dynamicFExp(cval.buildInstLiteral());
                     t.flattenUsedFuncsAndEnums(f);
-                    FExp res = t.flatten(f);
                     clearDynamicFExp();
-                    return res;
+                    return cval.buildLiteral();
                 }
             }
         } catch (ConstantEvaluationException e) {}
