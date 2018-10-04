@@ -53,19 +53,19 @@ endif
 install_casadi: casadi
 	cd $(abs_builddir)/ThirdParty/CasADi; \
 	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
-	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
+	mkdir -p "$(DESTDIR)"$(prefix)/Python/
+	cp -r $(abs_builddir)/casadi_install/casadi "$(DESTDIR)"$(prefix)/Python/
 	## temp fix
-	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
+	cp $(abs_builddir)/casadi_build/swig/casadi_core.py "$(DESTDIR)"$(prefix)/Python/casadi
 if COMPILE_WITH_IPOPT64  
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME);  
 	cd $(abs_builddir)/ThirdParty/CasADi; \
 	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR64)" "IPOPT_HOME=$(IPOPT64_HOME)"
-	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cp -r $(abs_builddir)/casadi_install64/casadi $(DESTDIR)$(prefix)/Python_64/
+	mkdir -p "$(DESTDIR)"$(prefix)/Python/
+	cp -r $(abs_builddir)/casadi_install64/casadi "$(DESTDIR)"$(prefix)/Python_64/
 	## temp fix
-	cp $(abs_builddir)/casadi_build64/swig/casadi_core.py $(DESTDIR)$(prefix)/Python_64/casadi
+	cp $(abs_builddir)/casadi_build64/swig/casadi_core.py "$(DESTDIR)"$(prefix)/Python_64/casadi
 	export PYTHONHOME=$(ORIG_PYTHON_HOME); \
 	export PATH="$(ORIG_PATH)";
 endif
@@ -88,8 +88,8 @@ MC_BUILD=$(abs_builddir)/ModelicaCasADiInterfaceBuild
 MC_BUILD64=$(abs_builddir)/ModelicaCasADiInterfaceBuild64
 # Jars from the modified modelica and optimica compilers are put into the JModelica folder
 MC_COMPILERS_DIR=$(MC_BUILD)/JModelica.org
-MC_LIB=$(DESTDIR)$(prefix)/lib/casadi_interface
-MC_LIB64=$(DESTDIR)$(prefix)/lib/casadi_interface64
+MC_LIB="$(DESTDIR)"$(prefix)/lib/casadi_interface
+MC_LIB64="$(DESTDIR)"$(prefix)/lib/casadi_interface64
 
 CASADI_BUILD_DIR=$(abs_builddir)/casadi_build
 CASADI_BUILD_DIR64=$(abs_builddir)/casadi_build64
@@ -108,8 +108,8 @@ CMAKE_CASADI_COMPILER_ARGS64=-m64 -fpermissive
 
 casadi_interface: install_casadi_interface
 build_casadi_interface: casadi modelicacasadi_wrapper
-install_casadi_interface: install_casadi $(MC_LIB) $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
-	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+install_casadi_interface: install_casadi $(MC_LIB) "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/__init__.py "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper/__init__.py "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
+	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" ""$(DESTDIR)"$(prefix)"; fi
 
 ifcasadi: casadi
 	mkdir -p $(MC_BUILD)/ifcasadi; \
@@ -207,41 +207,41 @@ if COMPILE_WITH_IPOPT64
 	export PATH="$(ORIG_PATH)";
 endif
 
- $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py: install_modelicacasadi_transfer
- $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py: install_modelicacasadi_transfer
+ "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/__init__.py: install_modelicacasadi_transfer
+ "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py: install_modelicacasadi_transfer
  
- $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py: install_modelicacasadi_wrapper
+ "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper/__init__.py: install_modelicacasadi_wrapper
  
  install_modelicacasadi_wrapper: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py
-	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
-	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
-	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
-	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
-	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	mkdir -p "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper
+	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper 
+	rm -f "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	touch "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	echo "from modelicacasadi_wrapper import *" >> "$(DESTDIR)"$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 if COMPILE_WITH_IPOPT64
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
 	export PYTHONHOME=$(PYTHON64_HOME);
-	mkdir -p $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper
-	cp $(MC_BUILD64)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper 
-	rm -f $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
-	touch $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
-	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
+	mkdir -p "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_wrapper
+	cp $(MC_BUILD64)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_wrapper 
+	rm -f "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
+	touch "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
+	echo "from modelicacasadi_wrapper import *" >> "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_wrapper/__init__.py
 	export PYTHONHOME=$(ORIG_PYTHON_HOME)
 	export PATH="$(ORIG_PATH)"
 endif
 
  install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
-	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
-	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
-	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
-	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+	mkdir -p "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer
+	rm -f "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	touch "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	echo "from modelica_casadi_transfer_wrapper import *" >> "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer
 if COMPILE_WITH_IPOPT64    
-	mkdir -p $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
-	rm -f $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
-	touch $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
-	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
-	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python_64/modelicacasadi_transfer
+	mkdir -p "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_transfer
+	rm -f "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
+	touch "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
+	echo "from modelica_casadi_transfer_wrapper import *" >> "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_transfer/__init__.py
+	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py "$(DESTDIR)"$(prefix)/Python_64/modelicacasadi_transfer
 endif
         
 if NUMPY_NO_MSVCR
@@ -366,15 +366,15 @@ if WITH_PYTHON64
 endif
 endif
 install-python-packages: build-python-packages
-	mkdir -p $(DESTDIR)$(prefix)/Python
-	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
-	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
+	mkdir -p "$(DESTDIR)"$(prefix)/Python
+	cp $(abs_top_srcdir)/Python/src/startup.py "$(DESTDIR)"$(prefix)/
+	cp Python/src/required_defaults.py "$(DESTDIR)"$(prefix)/Python/
+	[ $(abs_top_srcdir) == "$(DESTDIR)"$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE "$(DESTDIR)"$(prefix)/Python
 if JM_WIN64
 if WITH_PYTHON64
-	mkdir -p $(DESTDIR)$(prefix)/Python_64
-	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python_64/
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python_64
+	mkdir -p "$(DESTDIR)"$(prefix)/Python_64
+	cp Python/src/required_defaults.py "$(DESTDIR)"$(prefix)/Python_64/
+	[ $(abs_top_srcdir) == "$(DESTDIR)"$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE "$(DESTDIR)"$(prefix)/Python_64
 endif
 endif
 if WITH_SUNDIALS
@@ -382,7 +382,7 @@ if WITH_SUNDIALS
 	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(assimulo_install_dir)/$${pkgdir}/site-packages/; \
-	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python; \
 	fi; \
 	done
 endif 
@@ -390,33 +390,33 @@ endif
 	if [ -e $(pymodelica_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pymodelica_install_dir)/$${pkgdir}/site-packages/; \
-	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python; \
 	fi; \
 	done
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(pyjmi_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyjmi_install_dir)/$${pkgdir}/site-packages/; \
-	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python; \
 	fi; \
 	done
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(pyfmi_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyfmi_install_dir)/$${pkgdir}/site-packages/; \
-	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python; \
 	fi; \
 	done
 	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-	mkdir -p $(DESTDIR)$(prefix)/Python/tests_jmodelica; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/tests_jmodelica
+	mkdir -p "$(DESTDIR)"$(prefix)/Python/tests_jmodelica; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python/tests_jmodelica
 if JM_WIN64
 if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(assimulo_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(assimulo_install_dir64)/$${pkgdir}/site-packages/; \
-	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python_64; \
 	fi; \
 	done
 endif
@@ -424,41 +424,41 @@ endif
 	if [ -e $(pymodelica_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pymodelica_install_dir64)/$${pkgdir}/site-packages/; \
-	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	find pymodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python_64; \
 	fi; \
 	done
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(pyjmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyjmi_install_dir64)/$${pkgdir}/site-packages/; \
-	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	find pyjmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python_64; \
 	fi; \
 	done
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
 	if [ -e $(pyfmi_install_dir64)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(pyfmi_install_dir64)/$${pkgdir}/site-packages/; \
-	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64; \
+	find pyfmi -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python_64; \
 	fi; \
 	done
 if WITH_PYTHON64 
 	cd $(abs_top_srcdir)/Python/src/tests_jmodelica/; \
-	mkdir -p $(DESTDIR)$(prefix)/Python_64/tests_jmodelica; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python_64/tests_jmodelica
-	rm -rf $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
-	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
-	rm -f $(DESTDIR)$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
+	mkdir -p "$(DESTDIR)"$(prefix)/Python_64/tests_jmodelica; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)"$(prefix)/Python_64/tests_jmodelica
+	rm -rf "$(DESTDIR)"$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/src
+	rm -f "$(DESTDIR)"$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+	rm -f "$(DESTDIR)"$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.am
+	rm -f "$(DESTDIR)"$(prefix)/Python_64/tests_jmodelica/files/Modelica/Resources/Makefile.in
 endif
 endif
-	rm -rf $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
-	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
-	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
-	rm -f $(DESTDIR)$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
-	mkdir -p $(DESTDIR)$(prefix)/bin
-	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
-	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
-	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
+	rm -rf "$(DESTDIR)"$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/src
+	rm -f "$(DESTDIR)"$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/CMakeLists.txt
+	rm -f "$(DESTDIR)"$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.am
+	rm -f "$(DESTDIR)"$(prefix)/Python/tests_jmodelica/files/Modelica/Resources/Makefile.in
+	mkdir -p "$(DESTDIR)"$(prefix)/bin
+	[ -e "$(DESTDIR)"$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh "$(DESTDIR)"$(prefix)/bin/jm_python.sh
+	[ -e "$(DESTDIR)"$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh "$(DESTDIR)"$(prefix)/bin/jm_ipython.sh
+	chmod ugo+x "$(DESTDIR)"$(prefix)/bin/jm_*.sh
 
 # Hooks for extra build or install actions. Must be empty or the path of a shell script to execute. 
 # Both scripts will get the source directory as the first argument and the install directory as the second.
@@ -479,7 +479,7 @@ JAVA_EXEC_CP=$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/ut
 
 all-local: build-python-packages build-compiler
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
-	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" ""$(DESTDIR)"$(prefix)"; fi
 
 build-compiler:
 if HAVE_ANT
@@ -493,100 +493,100 @@ endif
 
 install-exec-local: install-python-packages
 if HAVE_ANT
-	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar "$(DESTDIR)"$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/util.jar "$(DESTDIR)"$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar "$(DESTDIR)"$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/separateProcess.jar "$(DESTDIR)"$(prefix)/lib/
 endif
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
-	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/include/
-	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL $(DESTDIR)$(prefix)/include/
-	mkdir -p $(DESTDIR)$(prefix)/Makefiles
-	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
+	[ $(abs_top_srcdir) == "$(DESTDIR)"$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE "$(DESTDIR)"$(prefix)/ 
+	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL "$(DESTDIR)"$(prefix)/lib/
+	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL "$(DESTDIR)"$(prefix)/lib/
+	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL "$(DESTDIR)"$(prefix)/include/
+	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_CPL "$(DESTDIR)"$(prefix)/include/
+	mkdir -p "$(DESTDIR)"$(prefix)/Makefiles
+	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL "$(DESTDIR)"$(prefix)/Makefiles/LICENSE
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile && \
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/include && \
-	cp $(abs_builddir)/winpthreads_build/COPYING $(DESTDIR)$(prefix)/ThirdParty/winpthreads && \
-	cp $(abs_builddir)/winpthreads_build/.libs/libwinpthread.a $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
-	cp $(abs_builddir)/winpthreads_build/include/*.h $(DESTDIR)$(prefix)/ThirdParty/winpthreads/include ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.windows "$(DESTDIR)"$(prefix)/Makefiles/MakeFile && \
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads/include && \
+	cp $(abs_builddir)/winpthreads_build/COPYING "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads && \
+	cp $(abs_builddir)/winpthreads_build/.libs/libwinpthread.a "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads/lib/winpthreads && \
+	cp $(abs_builddir)/winpthreads_build/include/*.h "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads/include ;; \
 	*-apple*) \
-	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.macosx "$(DESTDIR)"$(prefix)/Makefiles/MakeFile ;; \
 	*) \
-	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux "$(DESTDIR)"$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
 if COPY_PTHREADS_LIB
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
-	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
-	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/pthreads/lib
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/pthreads/include
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a "$(DESTDIR)"$(prefix)/ThirdParty/pthreads/lib
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h "$(DESTDIR)"$(prefix)/ThirdParty/pthreads/include
 endif
 
-	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials
-	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
-	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	cp $(abs_builddir)/DefaultOptions.xml "$(DESTDIR)"$(prefix)/DefaultOptions.xml
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/Beaver
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE "$(DESTDIR)"$(prefix)/ThirdParty/Beaver/
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/Beaver/lib
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar "$(DESTDIR)"$(prefix)/ThirdParty/Beaver/lib/ 
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/Sundials
+	cp -r $(SUNDIALS_HOME)/* "$(DESTDIR)"$(prefix)/ThirdParty/Sundials
+	cp $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.7.0/LICENSE "$(DESTDIR)"$(prefix)/ThirdParty/Sundials
 if JM_WIN64
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
-	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads64
-	cp $(abs_builddir)/winpthreads_build64/.libs/libwinpthread.a $(DESTDIR)$(prefix)/ThirdParty/winpthreads/lib/winpthreads64
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/Sundials/lib64
+	cp -r $(SUNDIALS_HOME)64/lib/* "$(DESTDIR)"$(prefix)/ThirdParty/Sundials/lib64
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads/lib/winpthreads64
+	cp $(abs_builddir)/winpthreads_build64/.libs/libwinpthread.a "$(DESTDIR)"$(prefix)/ThirdParty/winpthreads/lib/winpthreads64
 endif
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
-	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
-	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
-	if [ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ]; then \
+	mkdir -p "$(DESTDIR)"$(prefix)/ThirdParty/Minpack	
+	cp -r $(MINPACK_HOME)/* "$(DESTDIR)"$(prefix)/ThirdParty/Minpack
+	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt "$(DESTDIR)"$(prefix)/ThirdParty/Minpack
+	if [ $(abs_top_srcdir) == "$(DESTDIR)"$(prefix) ]; then \
 	  echo "Installing in dist directory, don't copy MSL"; \
 	else \
-	  mkdir -p "$(DESTDIR)$(prefix)/ThirdParty/MSL/Modelica"; \
-	  mkdir -p "$(DESTDIR)$(prefix)/ThirdParty/MSL/ModelicaServices"; \
-	  cd "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	  mkdir -p ""$(DESTDIR)"$(prefix)/ThirdParty/MSL/Modelica"; \
+	  mkdir -p ""$(DESTDIR)"$(prefix)/ThirdParty/MSL/ModelicaServices"; \
+	  cd ""$(DESTDIR)"$(prefix)/ThirdParty/MSL"; \
 	  find . -depth -print0 | while read -d $$'\0' -r f ; do if [ ! -e "$(abs_top_srcdir)/ThirdParty/MSL/$${f}" ]; then rm -rf "$${f}"; fi; done; \
 	  cd "$(abs_top_srcdir)/ThirdParty/MSL/Modelica"; \
-	  find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)$(prefix)/ThirdParty/MSL/Modelica"; \
+	  find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C ""$(DESTDIR)"$(prefix)/ThirdParty/MSL/Modelica"; \
 	  cd "$(abs_top_srcdir)/ThirdParty/MSL/ModelicaServices"; \
-	  find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C "$(DESTDIR)$(prefix)/ThirdParty/MSL/ModelicaServices"; \
+	  find * -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C ""$(DESTDIR)"$(prefix)/ThirdParty/MSL/ModelicaServices"; \
 	  cd "$(abs_top_srcdir)/ThirdParty/MSL"; \
-	  $(CP) Complex.mo "$(DESTDIR)$(prefix)/ThirdParty/MSL"; \
+	  $(CP) Complex.mo ""$(DESTDIR)"$(prefix)/ThirdParty/MSL"; \
 	fi
-	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
-	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates/FMIBase
-	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
-	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/*.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/FMIBase/*.c $(DESTDIR)$(prefix)/CodeGenTemplates/FMIBase
-	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/FMIBase/*.h $(DESTDIR)$(prefix)/CodeGenTemplates/FMIBase
-	cp  $(abs_top_srcdir)/Compiler/ModelicaFMUXBackEnd/templates/*.tpl $(DESTDIR)$(prefix)/CodeGenTemplates
-	mkdir -p $(DESTDIR)$(prefix)/XML
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
-	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
+	mkdir -p "$(DESTDIR)"$(prefix)/CodeGenTemplates
+	mkdir -p "$(DESTDIR)"$(prefix)/CodeGenTemplates/FMIBase
+	cp $(abs_top_srcdir)/RuntimeLibrary/LICENSE_GPL "$(DESTDIR)"$(prefix)/CodeGenTemplates/LICENSE
+	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/*.c "$(DESTDIR)"$(prefix)/CodeGenTemplates
+	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/FMIBase/*.c "$(DESTDIR)"$(prefix)/CodeGenTemplates/FMIBase
+	cp -r $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/FMIBase/*.h "$(DESTDIR)"$(prefix)/CodeGenTemplates/FMIBase
+	cp  $(abs_top_srcdir)/Compiler/ModelicaFMUXBackEnd/templates/*.tpl "$(DESTDIR)"$(prefix)/CodeGenTemplates
+	mkdir -p "$(DESTDIR)"$(prefix)/XML
+	[ $(abs_top_srcdir) == "$(DESTDIR)"$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd "$(DESTDIR)"$(prefix)/XML
+	[ $(abs_top_srcdir) == "$(DESTDIR)"$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE "$(DESTDIR)"$(prefix)/XML
+	cp  $(abs_builddir)/version.txt "$(DESTDIR)"$(prefix)
 	chmod ugo+x jm_tests
-	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
-	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+	cp -p jm_tests "$(DESTDIR)"$(prefix)/jm_tests
+	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" ""$(DESTDIR)"$(prefix)"; fi
 
 bindistdir: install
 	rm -rf $(bindistdir)
 	mkdir -p $(bindistdir)
-	cp $(DESTDIR)$(prefix)/LICENSE $(bindistdir)
-	cp $(DESTDIR)$(prefix)/startup.py $(bindistdir)
-	cp $(DESTDIR)$(prefix)/version.txt $(bindistdir)
-	cp $(DESTDIR)$(prefix)/DefaultOptions.xml $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/CodeGenTemplates $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/Makefiles $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/Python $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/ThirdParty $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/XML $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/include $(bindistdir)
-	cp -r $(DESTDIR)$(prefix)/lib $(bindistdir)
+	cp "$(DESTDIR)"$(prefix)/LICENSE $(bindistdir)
+	cp "$(DESTDIR)"$(prefix)/startup.py $(bindistdir)
+	cp "$(DESTDIR)"$(prefix)/version.txt $(bindistdir)
+	cp "$(DESTDIR)"$(prefix)/DefaultOptions.xml $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/CodeGenTemplates $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/Makefiles $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/Python $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/ThirdParty $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/XML $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/include $(bindistdir)
+	cp -r "$(DESTDIR)"$(prefix)/lib $(bindistdir)
 if COMPILE_WITH_IPOPT	
 	mkdir -p $(bindistdir)/ThirdParty/Ipopt
 # Copy files
@@ -617,8 +617,8 @@ clean-local: clean-frontends clean-python-packages clean-casadi-interface
 clean-casadi-interface: 
 	rm -rf $(MC_BUILD)
 	rm -rf $(MC_BUILD64)
-#	rm -rf $(DESTDIR)$(prefix)/Python/casadi
-#	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+#	rm -rf "$(DESTDIR)"$(prefix)/Python/casadi
+#	rm -rf "$(DESTDIR)"$(prefix)/Python/modelicacasadi_transfer
 if HAVE_ANT
 	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
 	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/java-generated/ifcasadi 
