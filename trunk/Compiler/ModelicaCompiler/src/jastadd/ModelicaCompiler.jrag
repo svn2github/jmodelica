@@ -1472,7 +1472,7 @@ public class ModelicaCompiler implements LogContainer {
         // TODO: move this into arguments class
         String[] files = splitFiles(programarguments.libraryPath());
         String className = programarguments.className();
-        String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
+        String compileTo = programarguments.out();
         
         // Compile model
         try {
