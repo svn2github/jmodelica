@@ -701,8 +701,12 @@ aspect FunctionInlining {
     syn boolean FAbstractEquation.hasInlinableFunctions(AbstractFunctionInliner fi) = false;
     eq FFunctionCallEquation.hasInlinableFunctions(AbstractFunctionInliner fi)      = 
         getCall().hasInlinableFunctions(fi);
-    eq FEquation.hasInlinableFunctions(AbstractFunctionInliner fi)                  =
-        getLeft().hasInlinableFunctions(fi) || getRight().hasInlinableFunctions(fi);
+    eq FEquation.hasInlinableFunctions(AbstractFunctionInliner fi) {
+    	if (isWhen()) {
+    		return false;
+    	}
+    	return getLeft().hasInlinableFunctions(fi) || getRight().hasInlinableFunctions(fi);
+    }
     eq FIfEquation.hasInlinableFunctions(AbstractFunctionInliner fi)                = 
         super.hasInlinableFunctions(fi) || (hasElse() && getElse().hasInlinableFunctions(fi));
     eq FIfWhenElseEquation.hasInlinableFunctions(AbstractFunctionInliner fi) {

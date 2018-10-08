@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5687
+Don't allow any inlining of equations in when loops.
+
 ; Fixed ; Minor ; Runtime ; #5684
 Fixed segfault when calling free directly after a reset on CS FMUs.
 

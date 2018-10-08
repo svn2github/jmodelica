@@ -185,7 +185,7 @@ aspect SrcAnnotations {
      *  SrcModifications   
      ******************/
     SrcModification implements SrcAnnotationProvider;
-
+    
     syn String SrcModification.annotationName() = parentAnnotationName();
     eq SrcNamedModification.annotationName() = getName().name();
 
@@ -317,6 +317,7 @@ aspect SrcAnnotations {
     public SrcAnnotationProvider SrcModification.addAnnotationSubNode(String name) {
         return null;
     }
+    
     @Override
     public SrcAnnotationProvider SrcClassModification.addAnnotationSubNode(String name) {
         SrcComponentModification cm = new SrcComponentModification(false, false, new SrcNamedAccess(name),
