@@ -243,14 +243,12 @@ aspect SrcAnnotations {
 
     /**
      * Move the ValueModification into a CompleteModification when
-     * sub modifiers are needed to the modifier
+     * sub modifiers are needed to the modifier. The modification is then returned. 
      */
-    private void SrcComponentModification.moveValueModIntoCompleteMod() {
-        SrcValueModification oldValueModification = (SrcValueModification) getSrcModification();
-        SrcCompleteModification completeModification = new SrcCompleteModification(new SrcClassModification(),
-            new Opt<SrcValueModification>(oldValueModification));   
-        setSrcModification(completeModification);
-                        
+    public SrcModification SrcModification.moveValueModIntoCompleteMod() {
+        SrcValueModification oldValueModification = (SrcValueModification) this;
+        return new SrcCompleteModification(new SrcClassModification(),
+            new Opt<SrcValueModification>(oldValueModification));
     }
 
     /**
@@ -335,7 +333,7 @@ aspect SrcAnnotations {
             setSrcModification(new SrcCompleteModification(new SrcClassModification()));
         
         }else if (getSrcModification().isValueModification()){
-            moveValueModIntoCompleteMod();
+            setSrcModification(getSrcModification().moveValueModIntoCompleteMod());
         }
         return getSrcModification().addAnnotationSubNode(name);
     }
@@ -543,6 +541,16 @@ aspect SrcAnnotations {
                 } else {
                     owningNode.setSrcModification(new SrcValueModification(newValue));
                 }
+            }
+            
+            @Override
+            public SrcAnnotationProvider addAnnotationSubNode(String name) {
+                if (!hasProvider()) {
+                    createProvider();
+                }else if (owningNode.getSrcModification().isValueModification()) {
+                    setSrcModification(owningNode.getSrcModification().moveValueModIntoCompleteMod());
+                }
+                return getProvider().addAnnotationSubNode(name);
             }
         };
     }
