@@ -227,7 +227,7 @@ aspect GlobalsCleanup {
     @Override
     public void FGlobalAccessExp.markUsedGlobals(Global.UseType type) {
         super.markUsedGlobals(type);
-        getCommonAccess().asFAccess().myTopFV().markUsedGlobalVariable(type);
+        getFAccess().myTopFV().markUsedGlobalVariable(type);
     }
     
     public void FAbstractVariable.markUsedGlobalVariable(Global.UseType type) {}

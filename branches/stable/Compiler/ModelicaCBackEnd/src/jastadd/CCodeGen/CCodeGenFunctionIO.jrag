@@ -31,11 +31,11 @@ aspect CCodeGenFunctionIO {
         }
     }
     
-    syn boolean FIdUseExp.alsoInRHS() {
+    syn boolean FAccessExp.alsoInRHS() {
         FAbstractFunctionCall call = myFunctionCall();
         FAbstractVariable var = myFV();
         for (FExp exp : call.childFExps()) {
-            if (exp.isAccess() && exp.asFIdUseExp().myFV() == var) {
+            if (exp.isAccess() && exp.asFAccessExp().myFV() == var) {
                 return true;
             }
         }
@@ -144,8 +144,8 @@ aspect CodeFuncCallInOutArgPrinters {
      */
     public abstract class CodeFuncCallInOutArgPrinter {
         private final boolean useMemcpy;
-        FIdUseExp firstUse; // First use in component
-        FIdUseExp prevUse;  // Last consecutive use in component;
+        FAccessExp firstUse; // First use in component
+        FAccessExp prevUse;  // Last consecutive use in component;
         String firstName;   // Name to read from into firstUse
         int n;              // Number of consecutive elements in component
         
@@ -159,13 +159,13 @@ aspect CodeFuncCallInOutArgPrinters {
         }
         
         public abstract void printCellExp(CodeStream str, String indent, String name, FExp exp);
-        public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
+        public void printCellUse(CodeStream str, String indent, String name, FAccessExp use) {
             printCellExp(str, indent, name, use);
         }
-        protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
+        protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FAccessExp firstUse, int n) {
             throw new UnsupportedOperationException("printCellMemcpyUse() is not implemented for the subtype " + getClass().getSimpleName() + ". This is required if useMemcpy=true");
         }
-        public boolean shouldPrint(FIdUseExp use) {
+        public boolean shouldPrint(FAccessExp use) {
             return true;
         }
         
@@ -188,7 +188,7 @@ aspect CodeFuncCallInOutArgPrinters {
             n = 0;
         }
         
-        public final void printUse(CodeStream str, String indent, String name, FIdUseExp use) {
+        public final void printUse(CodeStream str, String indent, String name, FAccessExp use) {
             if (!useMemcpy || use.type().isString()) {
                 printCellUse(str, indent, name, use);
                 return;
@@ -215,7 +215,7 @@ aspect CodeFuncCallInOutArgPrinters {
             n++;
         }
 
-        private void init(FIdUseExp use, String name) {
+        private void init(FAccessExp use, String name) {
             firstUse = use;
             prevUse = use;
             firstName = name;
@@ -245,7 +245,7 @@ aspect CodeFuncCallInOutArgPrinters {
             }
 
             @Override
-            protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
+            protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FAccessExp firstUse, int n) {
                 firstUse.genTempInputCellAssignsMemcpy_C(str, indent, firstName, n);
             }
             
@@ -301,7 +301,7 @@ aspect CodeFuncCallInOutArgPrinters {
             }
 
             @Override
-            public abstract void printCellUse(CodeStream str, String indent, String name, FIdUseExp exp);
+            public abstract void printCellUse(CodeStream str, String indent, String name, FAccessExp exp);
             
             public void printAssign(CodeStream str, String indent, String name, FExp exp) {
                 str.print(indent, "JMI_ASG(", exp.type().macroType(), ", ");
@@ -332,7 +332,7 @@ aspect CodeFuncCallInOutArgPrinters {
             }
 
             @Override
-            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
+            public void printCellUse(CodeStream str, String indent, String name, FAccessExp use) {
                 use.myFV().genWriteBackResidual(ASTNode.printer_C.ExecStep, str, indent, use, name, enumerator, forIndices, indexCounter);
             }
             
@@ -389,17 +389,17 @@ aspect CodeFuncCallInOutArgPrinters {
             }
 
             @Override
-            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
+            public void printCellUse(CodeStream str, String indent, String name, FAccessExp use) {
                 use.myFV().genWriteBackAssignment(ASTNode.printer_C.ExecStep, str, indent, use, name, forVariables);
             }
 
             @Override
-            public boolean shouldPrint(FIdUseExp use) {
+            public boolean shouldPrint(FAccessExp use) {
                 return forVariables == null || forVariables.contains(use.myFV());
             }
 
             @Override
-            protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
+            protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FAccessExp firstUse, int n) {
                 firstUse.genArrayWriteBackAssignment_C(CodePrinter.this, str, indent, firstName, n);
             }
        }
@@ -453,7 +453,7 @@ aspect CodeFuncCallInOutArg {
     }
     
     syn boolean FExp.genAssignMacro() = false;
-    eq FIdUseExp.genAssignMacro()     = true;
+    eq FAccessExp.genAssignMacro()     = true;
     
     @Override
     public void FNoType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
@@ -487,7 +487,7 @@ aspect CodeFuncCallInOutArg {
     }
 
     @Override
-    public void FIdUseExp.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
+    public void FAccessExp.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
         p.printUse(str, indent, name, this);
     }
     
@@ -497,7 +497,7 @@ aspect CodeFuncCallInOutArg {
         str.print(";\n");
     }
     
-    public void FIdUseExp.genTempInputCellAssignsMemcpy_C(CodeStream str, String indent, String name, int n) {
+    public void FAccessExp.genTempInputCellAssignsMemcpy_C(CodeStream str, String indent, String name, int n) {
         str.print(indent);
         str.print("memcpy(&");
         str.print(name);
@@ -527,7 +527,7 @@ aspect CodeFuncCallInOutArg {
     FFunctionCallLeft implements FCompositeWriteBackNode;
     FSubscriptedExp implements FCompositeWriteBackNode;
     
-    public void FIdUseExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
+    public void FAccessExp.genArrayWriteBackAssignment_C(CodePrinter p, CodeStream str, String indent, String name, int n) {
         str.print(indent);
         str.print("memcpy(&");
         genAssignedRef(p.ExecStep, str, indent);
@@ -543,7 +543,7 @@ aspect CodeFuncCallInOutArg {
         public void genAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
         public void genScaledAssignedRef(FAbstractVariable v, CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent);
     }
-    FIdUseExp implements WriteBackContext;
+    FAccessExp implements WriteBackContext;
     FAlgorithm implements WriteBackContext;
     
     public void FAbstractVariable.genWriteBackAssignment(CodePrinter.ExecuteCodePrinter p, CodeStream str, String indent, WriteBackContext ctx, String name,

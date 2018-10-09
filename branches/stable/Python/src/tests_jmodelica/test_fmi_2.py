@@ -368,6 +368,15 @@ class Test_FMUModelCS2:
         
         bounce.setup_experiment()
         bounce.initialize()
+    
+    @testattr(stddist_full = True)
+    def test_reset_free_slave(self):
+        bounce = load_fmu(self.bouncing_name)
+        res = bounce.simulate()
+        
+        bounce.reset()
+        bounce.terminate()
+        bounce.free_instance()
         
     @testattr(stddist_full = True)
     def test_terminate(self):

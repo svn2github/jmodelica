@@ -53,7 +53,7 @@ aspect BlockFunctionExtraction {
                 newVars.put(fCall.toString(), funcRepVariable);
                 // Create new equation "temp = funcCall()" and add it to the equation list and list for BiPGraph
                 
-                FEquation newEq = new FEquation(funcRepVariable.createUseExp(), fCall.fullCopy());
+                FEquation newEq = new FEquation(funcRepVariable.createAccessExp(), fCall.fullCopy());
                 if (!fCall.variability().parameterOrLess()) {
                     addFEquation(newEq);
                     newEqs.add(newEq);
@@ -62,7 +62,7 @@ aspect BlockFunctionExtraction {
                 }
             }
             // Replace the functionCall with a use of the corresponding temp variable
-            fCall.replaceMe(funcRepVariable.createUseExp());
+            fCall.replaceMe(funcRepVariable.createAccessExp());
         }
         // Add the equations to the BiPGraph and make new matchings
         root().flushAllRecursive();
@@ -163,7 +163,7 @@ aspect BlockFunctionExtraction {
         return false;
     }
     
-    public boolean FIdUseExp.dependsOnBlock(AbstractEquationBlock block) {
+    public boolean FAccessExp.dependsOnBlock(AbstractEquationBlock block) {
         return block.allVariables().contains(myFV());
     }
 

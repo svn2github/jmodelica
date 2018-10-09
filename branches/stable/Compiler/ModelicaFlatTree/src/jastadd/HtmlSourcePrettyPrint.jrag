@@ -215,7 +215,7 @@ aspect HtmlSourcePrettyPrint {
 	
 	syn String BaseNode.htmlSourceNodeClass() = null;
 	eq TypePrefixVariability.htmlSourceNodeClass() = "variabilityPrefix";
-	eq FIdUseExp.htmlSourceNodeClass() = variability().htmlSourceVarUseClass();
+	eq CommonAccessExp.htmlSourceNodeClass() = variability().htmlSourceVarUseClass();
 	
 	public String TypePrefixVariability.htmlSourceVarUseClass() { 
 	    return null;

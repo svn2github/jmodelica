@@ -177,6 +177,7 @@ InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
 FDeferExpSubscript : FExpSubscript ::= <Defer:FExpSubscript>;
 FDeferExp : FExp ::= <FExp:FExp>;
 
+InstAccessExp : CommonAccessExp ::= InstAccess;
 
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.
