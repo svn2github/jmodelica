@@ -13147,29 +13147,29 @@ model FuncColonSubscript
             input Real[:] x;
             output Real[g(x)] y;
         algorithm
-            y := zeros(0);
+            y := zeros(size(y,1));
         end f;
         
         function h
             input Real[:,:] x;
-            Real[10] t;
+            Real[1] t;
             output Real y;
         algorithm
-            t := f(x[:,1]);
+            t := time*f(x[:,1]);
             y := sum(t);
         end h;
         
-        Real y = h({{time}});
+        Real y = h({{1}});
 
 annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
         name="FuncColonSubscript",
-        description="",
+        description="tests scalarization, covers #5675",
         flatModel="
 fclass FunctionTests.FuncColonSubscript
- Real y;
-equation
- y = FunctionTests.FuncColonSubscript.h({{time}});
+ parameter Real y;
+parameter equation
+ y = FunctionTests.FuncColonSubscript.h({{1}});
 
 public
  function FunctionTests.FuncColonSubscript.h
@@ -13179,23 +13179,33 @@ public
   Real[:] temp_1;
   Real[:] temp_2;
   Real[:] temp_3;
+  Real[:] temp_4;
+  Real[:] temp_5;
  algorithm
-  init t as Real[10];
+  init t as Real[1];
   init temp_1 as Real[size(x, 1)];
   for i1 in 1:size(x, 1) loop
    temp_1[i1] := x[i1,1];
   end for;
-  assert(FunctionTests.FuncColonSubscript.g(temp_1) == 10, \"Mismatching sizes in FunctionTests.FuncColonSubscript.h\");
-  init temp_2 as Real[size(x, 1)];
-  for i1 in 1:size(x, 1) loop
-   temp_2[i1] := x[i1,1];
-  end for;
+  assert(FunctionTests.FuncColonSubscript.g(temp_1) == 1, \"Mismatching sizes in FunctionTests.FuncColonSubscript.h\");
+  init temp_2 as Real[FunctionTests.FuncColonSubscript.g(temp_3)];
   init temp_3 as Real[size(x, 1)];
   for i1 in 1:size(x, 1) loop
    temp_3[i1] := x[i1,1];
   end for;
-  (t) := FunctionTests.FuncColonSubscript.f(temp_2);
-  y := t[1] + t[2] + t[3] + (t[4] + t[5]) + (t[6] + t[7] + t[8] + (t[9] + t[10]));
+  init temp_4 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_4[i1] := x[i1,1];
+  end for;
+  init temp_5 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_5[i1] := x[i1,1];
+  end for;
+  (temp_2) := FunctionTests.FuncColonSubscript.f(temp_4);
+  for i1 in 1:FunctionTests.FuncColonSubscript.g(temp_5) loop
+   t[i1] := time * temp_2[i1];
+  end for;
+  y := t[1];
   return;
  end FunctionTests.FuncColonSubscript.h;
 
@@ -13204,8 +13214,7 @@ public
   output Real[:] y;
  algorithm
   init y as Real[FunctionTests.FuncColonSubscript.g(x)];
-  assert(FunctionTests.FuncColonSubscript.g(x) == 0, \"Mismatching sizes in FunctionTests.FuncColonSubscript.f\");
-  for i1 in 1:0 loop
+  for i1 in 1:size(y, 1) loop
    y[i1] := 0;
   end for;
   return;
