@@ -1853,7 +1853,16 @@ aspect Flattening {
      * Will not create new nodes unless necessary.
      */
     syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
-    eq FArray.splitArrayExp(int index)         = isIterArray() ? getFExp(0).splitArrayExp(index) : getFExp(index - 1);
+    eq FArray.splitArrayExp(int index)         {
+        if (isIterArray()) {
+            return getFExp(0).splitArrayExp(index);
+        }
+        
+        if (getNumFExp() >= index ) {
+            return getFExp(index - 1);
+        }
+        return null;
+    }
     eq FAccessExp.splitArrayExp(int index)     = createNode(getFAccess().splitArrayAccess(index));
     eq InstAccessExp.splitArrayExp(int index)  = createNode(getInstAccess().splitArrayAccess(index));
     eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));

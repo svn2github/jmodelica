@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5688
+Fixed that binding expression splitting doesn't check bounds.
+
 ; Fixed ; Minor ; Compiler ; #5687
 Don't allow any inlining of equations in when loops.
 
