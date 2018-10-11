@@ -199,4 +199,28 @@ public final class StringUtil {
         return SystemUtil.isLinux() ? string.replaceAll("\\\\", "/") : string.replace("/", "\\");
     }
 
+    /**
+     * Surrounds a string with quote characters
+     * @param string a string
+     * @return {@code string} surrounded with quote characters
+     */
+    public static String quote(String string) {
+        return "\"" + string + "\"";
+    }
+
+    /**
+     * If given a quoted string, returns a version without the outer quotes. If given an unquoted string it is returned as-is.
+     * @param quoted the string to be unquoted
+     * @return returns a version without the outer quotes if {@code quoted} is a quoted string. If an unquoted string it is returned as-is.
+     */
+    public static String unquote(String quoted) {
+        String QUOTE = "\"";
+        boolean isQuoted = quoted.startsWith(QUOTE) && quoted.endsWith(QUOTE);
+        if (isQuoted) {
+            return quoted.substring(1,quoted.length()-1);
+        } else {
+            return quoted;
+        }
+    }
+
 }

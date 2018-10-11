@@ -180,7 +180,7 @@ int jmi_realtime_solver_solve(jmi_block_solver_t *block) {
                                      "Realtime solver invoked for <block:%s>", block->label);
         jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
         if((block->callbacks->log_options.log_level >= 6)) {
-        jmi_log_real_matrix(block->log, destnode, logInfo, "LU", solver->factorization, block->n, block->n);
+            jmi_log_real_matrix(block->log, destnode, logInfo, "LU", solver->factorization, block->n, block->n);
         }
     }
     

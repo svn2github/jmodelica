@@ -237,7 +237,7 @@ public class CompilerInstance {
             args.add("-platform=" + platform);
         }
         if (outputPath != null) {
-            args.add("-out=\"" + outputPath + "\"");
+            args.add("-out=" + StringUtil.quote(outputPath));
         }
         args.add(sourceFiles == null ? "," : join(",", sourceFiles));
         args.add(modelName);

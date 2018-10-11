@@ -980,6 +980,9 @@ aspect PrettyPrint {
 
 aspect TypeStructurePrint {
 
+    /**
+     * Returns what is printed by {@link #printStructure(CodeStream)} as a String.
+     */
     public String FType.printStructure() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         CodeStream str = new NotNullCodeStream(os);
@@ -987,6 +990,15 @@ aspect TypeStructurePrint {
         return os.toString();
     }
 
+    /**
+     * Prints a string representation of the structure of this type. The
+     * representation for scalar types is its name. The representation for composite
+     * types its name and size, and the name and size of any components. This can be
+     * used to provide more informative error messages for composite types.
+     * 
+     * @param str
+     *            the stream that is printed to.
+     */
     public void FType.printStructure(CodeStream str) {
         str.print(toString());
     }
