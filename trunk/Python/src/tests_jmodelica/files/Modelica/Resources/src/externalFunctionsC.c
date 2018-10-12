@@ -100,6 +100,9 @@ int fStrlen(const char *str)
 int get_time()
 {
     time_t seconds;
+    clock_t count = clock () + CLOCKS_PER_SEC;
+    while (clock() < count){} /* Wait one second so that we are sure that two calls return different results (which is what we want to use in our testing */
+    
     seconds = time(NULL);
     return seconds; 
 }
