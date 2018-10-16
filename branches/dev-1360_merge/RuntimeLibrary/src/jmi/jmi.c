@@ -589,7 +589,7 @@ int jmi_init_eval_independent(jmi_t* jmi) {
                             &jmi->recompute_init_independent, 
                             jmi->model->init_eval_independent, 
                             "SetStartValuesFailed",
-                            "Error evaluating independent start values");
+                            "Error evaluating independent parameters and start values");
 }
 
 void jmi_init_eval_dependent_set_dirty(jmi_t* jmi) {
@@ -602,7 +602,7 @@ int jmi_init_eval_dependent(jmi_t* jmi) {
                             &jmi->recompute_init_dependent, 
                             jmi->model->init_eval_dependent, 
                             "DependentParametersEvaluationFailed",
-                            "Error evaluating dependent start values");
+                            "Error evaluating dependent parameters and start values");
 }
 
 int jmi_destruct_external_objects(jmi_t* jmi) {
