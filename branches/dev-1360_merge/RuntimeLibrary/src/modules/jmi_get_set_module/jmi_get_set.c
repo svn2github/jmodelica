@@ -64,8 +64,6 @@ int jmi_set_precheck(jmi_t* jmi, int index, int offset, int* needRecomputeVars, 
     *needRecomputeVars = 1;
     if (index < offset) {
         *needParameterUpdate = 1;
-    } else {
-        jmi_init_eval_independent(jmi);
     }
     return 0;
 }
