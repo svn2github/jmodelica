@@ -1041,9 +1041,6 @@ aspect BuiltInFlatTypes {
     public static final FStringType  FStringType.SCALAR                 = new FStringType(Size.SCALAR);
     public static final FUnknownType FUnknownType.SCALAR                = new FUnknownType(Size.SCALAR);
     public static final FNoType      FNoType.SCALAR                     = new FNoType(Size.SCALAR);
-    public static final FRecordType         FRecordType.SCALAR          = new FRecordType(Size.SCALAR, "scalar", new List(), null);
-    public static final FEnumType           FEnumType.SCALAR            = new FEnumType(Size.SCALAR, "scalar", new List());
-    public static final FExternalObjectType FExternalObjectType.SCALAR  = new FExternalObjectType(Size.SCALAR, "scalar", null, null);
 
     syn boolean FType.isReal()                  = false;
     eq FArrayType.isReal()                      = getFPrimitiveType().isReal();
@@ -1126,9 +1123,6 @@ aspect BuiltInFlatTypes {
     syn boolean FType.containsReal()           = containsType(FRealType.SCALAR);
     syn boolean FType.containsInteger()        = containsType(FIntegerType.SCALAR);
     syn boolean FType.containsBoolean()        = containsType(FBooleanType.SCALAR);
-    syn boolean FType.containsRecord()         = containsType(FRecordType.SCALAR);
-    syn boolean FType.containsEnum()           = containsType(FEnumType.SCALAR);
-    syn boolean FType.containsExternalObject() = containsType(FExternalObjectType.SCALAR);
 
     // For type comparisons ending with "or records of such types"
     public abstract class FType {
@@ -1178,15 +1172,9 @@ aspect BuiltInFlatTypes {
             return this;
         FType copy = (FType) fullCopy();
         copy.setSize(Size.SCALAR);
-        copy.setParent(parent);
         return copy;
     }
-    eq FArrayType.scalarType() {
-        FType copy = (FType) getFPrimitiveType().fullCopy();
-        copy.setSize(Size.SCALAR);
-        copy.setParent(parent);
-        return copy;
-    }
+    eq FArrayType.scalarType()          = getFPrimitiveType();
     eq FUnknownType.scalarType()        = this;
     eq FNoType.scalarType()             = this;
     eq FRealType.scalarType()           = FRealType.SCALAR;
@@ -1224,17 +1212,9 @@ aspect BuiltInFlatTypes {
             return this;
         FType copy = (FType) fullCopy();
         copy.setSize(size);
-        copy.setParent(parent);
         return copy;
     }
-    eq FArrayType.arrayType(Size size) {
-        if (size == size())
-            return this;
-        FType copy = (FType) getFPrimitiveType().fullCopy();
-        copy.setSize(size);
-        copy.setParent(parent);
-        return copy;
-    }
+    eq FArrayType.arrayType(Size size) = getFPrimitiveType().arrayType(size);
     eq FUnknownType.arrayType(Size size)        = this;
 
     /**

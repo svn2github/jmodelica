@@ -339,6 +339,7 @@ fmi2Status fmi2_reset(fmi2Component c) {
     /* Clear the ode_solver in case of CoSimulation */
     if (fmi2_me->fmu_type == fmi2CoSimulation) {
         jmi_free_ode_solver(((fmi2_cs_t *)c)->ode_problem->ode_solver);
+        ((fmi2_cs_t *)c)->ode_problem->ode_solver = NULL;
     }
     
     /* Save some information from the jmi struct */

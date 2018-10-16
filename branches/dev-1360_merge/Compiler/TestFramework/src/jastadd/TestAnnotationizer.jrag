@@ -614,10 +614,22 @@ abstract public class TestAnnotationizerHelper {
         out.println(")})));");
     }
 
+    /**
+     * Returns {@link #testClassName(String)} where the parameter {@code String} is
+     * set to the {@link Class#getSimpleName()} of this class.
+     */
     protected String testClassName() {
         return testClassName(getClass().getSimpleName());
     }
 
+    /**
+     * Maps the class name of a subclass of {@link TestAnnotationizerHelper} named
+     * by the parameter {@code name} to the class name of the associated subclass of
+     * {@link TestCase}.
+     * 
+     * @param name
+     *            the class name of a subclass of TestAnnotationizerHelper.
+     */
     protected static String testClassName(String name) {
         return name.replace("Helper", "");
     }

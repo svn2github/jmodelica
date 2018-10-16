@@ -430,6 +430,16 @@ class Test_FMUModelCS1:
         res2 = rlc_square.simulate()
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
+    
+    @testattr(stddist_full = True)
+    def test_simulation_with_reset_cs_4(self):
+        rlc_square = load_fmu(Test_FMUModelCS1.rlc_circuit_square)
+        res1 = rlc_square.simulate()
+        
+        rlc_square.reset()
+        rlc_square.terminate()
+        rlc_square.free_instance()
+
 
     @testattr(stddist_full = True)
     def test_simulation_using_euler(self):

@@ -52,7 +52,6 @@ public class URIResolverTest {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String path = URIResolverMock.absolutePath("pack/subpath");
         String res = URIResolver.DEFAULT.resolve(n, path);
-        assertTrue(n.hasError());
         assertEquals(path, res);
     }
 
@@ -61,7 +60,6 @@ public class URIResolverTest {
         URIResolverPackageNodeMock n = new URIResolverPackageNodeMock();
         String path = URIResolverMock.absolutePath("pack/subpath/missing");
         String res = URIResolver.DEFAULT.resolve(n, path);
-        assertTrue(n.hasError());
         assertEquals(path, res);
     }
 
