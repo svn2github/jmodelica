@@ -31,9 +31,17 @@ aspect AnnotationAPI {
     /**
      * Get the annotation node for this AST node's annotation, if any.
      * 
+     * This should be overridden for all nodes that can have annotations and need a 
+     * non-default evaluator.
+     */
+    syn AnnotationNode ASTNode.annotation() = annotation(AnnotationNode.DEFAULT_EVALUATOR);
+
+    /**
+     * Get the annotation node for this AST node's annotation, if any.
+     * 
      * This should be overridden for all nodes that can have annotations.
      */
-    syn AnnotationNode ASTNode.annotation() = AnnotationNode.NO_ANNOTATION;
+    syn AnnotationNode ASTNode.annotation(SrcExpEvaluator eval) = AnnotationNode.NO_ANNOTATION;
 
     /**
      * Get the annotation node for a sub-node of this AST node's annotation, if any.
@@ -46,28 +54,26 @@ aspect AnnotationAPI {
      */
     syn AnnotationNode ASTNode.annotation(String path) = annotation().forPath(path);
     
-    syn AnnotationNode ASTNode.annotationOfChild(Opt n) = 
-            (n.getNumChild() > 0) ? n.getChild(0).annotation() : createNullAnnotationNode();
+    syn AnnotationNode ASTNode.annotationOfChild(Opt n, SrcExpEvaluator eval) = 
+            (n.getNumChild() > 0) ? n.getChild(0).annotation(eval) : createNullAnnotationNode(eval);
 
-    eq SrcComment.annotation()         = annotationOfChild(getSrcAnnotationOpt());
-    eq SrcParseAnnotation.annotation() = getSrcClassModification().annotationNode();
-    eq SrcModification.annotation()    = annotationNode();
+    eq SrcComment.annotation(SrcExpEvaluator eval)         = annotationOfChild(getSrcAnnotationOpt(), eval);
+    eq SrcParseAnnotation.annotation(SrcExpEvaluator eval) = getSrcClassModification().annotationNode(eval);
+    eq SrcModification.annotation(SrcExpEvaluator eval)    = annotationNode(eval);
 
-    eq SrcExternalClause.annotation() = annotationOfChild(getSrcAnnotationOpt());
-    eq InstExternal.annotation()   = getSrcExternalClause().annotation();
+    eq SrcExternalClause.annotation(SrcExpEvaluator eval) = annotationOfChild(getSrcAnnotationOpt(), eval);
+    eq InstExternal.annotation(SrcExpEvaluator eval)      = getSrcExternalClause().annotation(eval);
 
-    eq SrcFullClassDecl.annotation()            = annotationOfChild(getSrcAnnotationOpt());
-    eq InstClassDecl.annotation()            = getSrcClassDecl().annotation();
-    eq SrcShortClassDecl.annotation()           = getSrcExtendsClauseShortClass().annotation();
-    eq SrcLibNode.annotation()                  = myClass().annotation();
-    eq SrcExtendsClauseShortClass.annotation()  = getSrcComment().annotation();
-    eq InstShortClassDecl.annotation()       = getSrcClassDecl().annotation();
-    eq InstSimpleShortClassDecl.annotation() = getSrcClassDecl().annotation();
+    eq SrcFullClassDecl.annotation(SrcExpEvaluator eval)           = annotationOfChild(getSrcAnnotationOpt(), eval);
+    eq InstClassDecl.annotation(SrcExpEvaluator eval)              = getSrcClassDecl().annotation(eval);
+    eq SrcShortClassDecl.annotation(SrcExpEvaluator eval)          = getSrcExtendsClauseShortClass().annotation(eval);
+    eq SrcLibNode.annotation(SrcExpEvaluator eval)                 = myClass().annotation(eval);
+    eq SrcExtendsClauseShortClass.annotation(SrcExpEvaluator eval) = getSrcComment().annotation(eval);
 
-    eq SrcAbstractEquation.annotation() = getSrcComment().annotation();
+    eq SrcAbstractEquation.annotation(SrcExpEvaluator eval) = getSrcComment().annotation(eval);
 
-    eq SrcComponentDecl.annotation()     = getSrcComment().annotation();
-    eq InstComponentDecl.annotation() = getSrcComponentDecl().annotation();
+    eq SrcComponentDecl.annotation(SrcExpEvaluator eval)  = getSrcComment().annotation(eval);
+    eq InstComponentDecl.annotation(SrcExpEvaluator eval) = getSrcComponentDecl().annotation(eval);
 
     public class FFunctionDecl     implements FAttributeListAnnotationNode.FAttributeList {}
     public class FVariable         implements FAttributeListAnnotationNode.FAttributeList {}
@@ -75,10 +81,45 @@ aspect AnnotationAPI {
     public class FClass            implements FAttributeListAnnotationNode.FAttributeList {}
     public class FAttribute        implements FAttributeListAnnotationNode.FAttributeList {}
     
-    eq FFunctionDecl.annotation()     = new FAttributeListAnnotationNode(this);
-    eq FVariable.annotation()         = new FAttributeListAnnotationNode(this);
-    eq FAbstractEquation.annotation() = new FAttributeListAnnotationNode(this);
-    eq FClass.annotation()            = new FAttributeListAnnotationNode(this);
+    eq FFunctionDecl.annotation(SrcExpEvaluator eval)     = new FAttributeListAnnotationNode(this, eval);
+    eq FVariable.annotation(SrcExpEvaluator eval)         = new FAttributeListAnnotationNode(this, eval);
+    eq FAbstractEquation.annotation(SrcExpEvaluator eval) = new FAttributeListAnnotationNode(this, eval);
+    eq FClass.annotation(SrcExpEvaluator eval)            = new FAttributeListAnnotationNode(this, eval);
+
+    eq InstNode.annotation() = annotation(annotationExpEvaluator());
+
+    syn SrcExpEvaluator InstNode         .annotationExpEvaluator() = parentExpEvaluator();
+    eq                  InstFullClassDecl.annotationExpEvaluator() = this;
+
+    inh SrcExpEvaluator InstNode.parentExpEvaluator();
+    eq InstNode.getChild().parentExpEvaluator() = this;
+
+    /**
+     * Evaluate exp in the scope of this node.
+     */
+    public CValue InstNode.ceval(SrcExp exp) {
+        return looseExp(exp).ceval();
+    }
+
+    syn nta List<FExp> InstNode.getLooseExps() = new List<>();
+
+    private Map<SrcExp,FExp> InstNode.looseExpMap = null;
+
+    /**
+     * Instantiates exp and inserts it into tree in the scope of this node, unless already done.
+     */
+    public FExp InstNode.looseExp(SrcExp exp) {
+        if (looseExpMap == null) {
+            looseExpMap = new HashMap<>();
+        }
+        FExp instExp = looseExpMap.get(exp);
+        if (instExp == null) {
+            instExp = exp.instantiate();
+            looseExpMap.put(exp, instExp);
+            getLooseExps().add(instExp);
+        }
+        return instExp;
+    }
 
     syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
 
@@ -90,24 +131,46 @@ aspect AnnotationAPI {
     syn AnnotationNode SrcComponentDecl.modificationAnnotation() = annotationOfChild(getSrcModificationOpt());
     eq SrcExtendsClause.modificationAnnotation() = annotationOfChild(getSrcClassModificationOpt());
 
-    syn AnnotationNode ASTNode.createNullAnnotationNode() = AnnotationNode.NO_ANNOTATION;
-    eq SrcComment.createNullAnnotationNode()                 = new CommentAnnotationNode(this);
-    eq SrcFullClassDecl.createNullAnnotationNode()           = new FullClassDeclAnnotationNode(this);
+    syn AnnotationNode ASTNode         .createNullAnnotationNode(SrcExpEvaluator eval) = 
+        AnnotationNode.NO_ANNOTATION;
+    eq                 SrcComment      .createNullAnnotationNode(SrcExpEvaluator eval) = 
+        new CommentAnnotationNode(this, eval);
+    eq                 SrcFullClassDecl.createNullAnnotationNode(SrcExpEvaluator eval) = 
+        new FullClassDeclAnnotationNode(this, eval);
 
     /**
      * Get the annotation node that represents this node when used as an annotation, if 
      * applicable.
      */
-    syn AnnotationNode ASTNode.annotationNode()            = createNullAnnotationNode();
-    syn lazy AnnotationNode SrcModification.annotationNode()  = createNullAnnotationNode();
-    eq SrcClassModification.annotationNode()                  = new ClassModAnnotationNode(this);
-    eq SrcValueModification.annotationNode()                  = new ValueModAnnotationNode(this);
-    eq SrcCompleteModification.annotationNode()               = new CompleteModAnnotationNode(this);
-    eq SrcComponentModification.annotationNode()              = new ComponentModAnnotationNode(this);
-    syn lazy AnnotationNode SrcExp.annotationNode()           = new EAnnotationNode(this);
-    eq SrcFunctionCall.annotationNode()                       = new FCAnnotationNode(this);
-    syn lazy AnnotationNode SrcNamedArgument.annotationNode() = new NAAnnotationNode(this);
-    eq FAttribute.annotationNode()                         = new FAttributeAnnotationNode(this);
+    syn      AnnotationNode ASTNode         .annotationNode(SrcExpEvaluator eval);
+    syn lazy AnnotationNode SrcModification .annotationNode(SrcExpEvaluator eval);
+    syn lazy AnnotationNode SrcExp          .annotationNode(SrcExpEvaluator eval);
+    syn lazy AnnotationNode SrcNamedArgument.annotationNode(SrcExpEvaluator eval);
+    eq ASTNode                 .annotationNode(SrcExpEvaluator eval) = createNullAnnotationNode(eval);
+    eq SrcModification         .annotationNode(SrcExpEvaluator eval) = createNullAnnotationNode(eval);
+    eq SrcClassModification    .annotationNode(SrcExpEvaluator eval) = 
+        new ClassModAnnotationNode    (this, eval);
+    eq SrcValueModification    .annotationNode(SrcExpEvaluator eval) = 
+        new ValueModAnnotationNode    (this, eval);
+    eq SrcCompleteModification .annotationNode(SrcExpEvaluator eval) = 
+        new CompleteModAnnotationNode (this, eval);
+    eq SrcComponentModification.annotationNode(SrcExpEvaluator eval) = 
+        new ComponentModAnnotationNode(this, eval);
+    eq SrcExp                  .annotationNode(SrcExpEvaluator eval) = 
+        new EAnnotationNode           (this, eval);
+    eq SrcFunctionCall         .annotationNode(SrcExpEvaluator eval) = 
+        new FCAnnotationNode          (this, eval);
+    eq SrcNamedArgument        .annotationNode(SrcExpEvaluator eval) = 
+        new NAAnnotationNode          (this, eval);
+    eq FAttribute              .annotationNode(SrcExpEvaluator eval) = 
+        new FAttributeAnnotationNode  (this, eval);
+
+    /**
+     * Proxy object for evaluating an expression from the source tree.
+     */
+    public interface SrcExpEvaluator {
+        public CValue ceval(SrcExp exp);
+    }
 
     /**
      * Describes a node in the tree formed by an annotation.
@@ -125,6 +188,15 @@ aspect AnnotationAPI {
          * Represents an annotation that does not exist.
          */
         public static final AnnotationNode NO_ANNOTATION = new NullAnnotationNode();
+
+        /**
+         * Proxy object for evaluating simple expressions in the source tree.
+         */
+        public static final SrcExpEvaluator DEFAULT_EVALUATOR = new SrcExpEvaluator() {
+            public CValue ceval(SrcExp exp) {
+                return exp.ceval();
+            }
+        };
 
         /**
          * Finds an annotation node at the given path below this one.
