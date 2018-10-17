@@ -922,6 +922,11 @@ aspect CCodeGen {
 
     syn FExp FVariable.startValueExp() = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 
+    syn boolean FVariable.hasDependentStartValue() {
+        FExp exp = startValueExp();
+        return exp != null && !exp.variability().constantVariability();
+    }
+
     public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right,
             boolean neg) {
         str.print(indent);
