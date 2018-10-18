@@ -1,8 +1,4 @@
 ================= Unreleased ==================
-; Fixed ; Major ; Compiler ; #5634
-Updated calculation order of start values and dependent parameters to reduce
-number of evaluations.
-
 ; Fixed ; Minor ; Compiler ; #5688
 Fixed that binding expression splitting doesn't check bounds.
 

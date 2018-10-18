@@ -934,10 +934,31 @@ algorithm
             name="Algorithm5",
             description="Parameter algorithm code generation",
             template="
-$C_model_init_eval_dependent_parameters$
+$C_set_start_values$
+$C_DAE_initial_dependent_parameter_assignments$
 ",
             generatedCode="
-int model_init_eval_dependent_parameters(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_1 = _p_0;

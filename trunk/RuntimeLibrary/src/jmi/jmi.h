@@ -218,8 +218,7 @@ int jmi_delete(jmi_t* jmi);
  * @param model_ode_derivatives A function pointer to the ODE RHS function.
  * @param model_ode_event_indicators A function pointer to the ODE event indicators.
  * @param model_ode_initialize A function pointer to the ODE initialization function.
- * @param model_init_eval_dependent   A function pointer for evaluating the independent parameters.
- * @param model_init_eval_independent A function pointer for evaluating the dependent parameters.
+ * @param model_init_eval_parameters A function pointer for evaluating the calculated parameters.
  * @param model_ode_next_time_event A function pointer for evaluating the next time event.
  */
 void jmi_model_init(jmi_t* jmi,
@@ -227,8 +226,7 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_derivatives,
                     jmi_residual_func_t model_ode_event_indicators,
                     jmi_generic_func_t model_ode_initialize,
-                    jmi_generic_func_t model_init_eval_independent,
-                    jmi_generic_func_t model_init_eval_dependent,
+                    jmi_generic_func_t model_init_eval_parameters,
                     jmi_next_time_event_func_t model_ode_next_time_event);
 
 /**
@@ -447,9 +445,6 @@ struct jmi_t {
     jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
-    jmi_int_t recompute_init_independent;/**< \brief Dirty flag indicating when independent parameters should be reevaluated */
-    jmi_int_t recompute_init_dependent;  /**< \brief Dirty flag indicating when dependent parameters should be reevaluated */
-    jmi_int_t recompute_init_variables;  /**< \brief Dirty flag indicating when start values for variables should be reevaluated */
     jmi_int_t updated_states;            /**< \brief Flag indicating if the dynamic set of states has been updated. */
 
     jmi_real_t* real_x_work;             /**< \brief Work array for the real x variables */
@@ -487,8 +482,7 @@ struct jmi_model_t {
     jmi_generic_func_t ode_derivatives;              /**< \brief A function for evaluating the ODE derivatives. */
     jmi_generic_func_t ode_derivatives_dir_der;      /**< \brief A function for evaluating the ODE directional derivative. */
     jmi_generic_func_t ode_initialize;               /**< \brief A function for initializing the ODE. */
-    jmi_generic_func_t init_eval_independent;        /**< \brief A function for initial evaluation of independent parameters. */
-    jmi_generic_func_t init_eval_dependent;          /**< \brief A function for initial evaluation of dependent   parameters. */
+    jmi_generic_func_t init_eval_parameters;         /**< \brief A function for initial evaluation of calculated parameters. */
     jmi_next_time_event_func_t ode_next_time_event;  /**< \brief A function for computing the next time event instant. */
 };
 
@@ -585,32 +579,12 @@ int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
 int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res);
 
 /**
- * \brief Mark independent parameters as dirty, triggering reevaluation 
- * on the next call to jmi_init_eval_independent.
- */
-void jmi_init_eval_independent_set_dirty(jmi_t* jmi);
-
-/**
- * \brief Reevaluate the independent parameters if necessary.
+ * \brief Evaluate the dependent parameters.
  *
  * @param jmi A jmi_t struct.
  * @return Error code.
  */
-int jmi_init_eval_independent(jmi_t* jmi);
-
-/**
- * \brief Mark dependent parameters as dirty, triggering reevaluation 
- * on the next call to jmi_init_eval_dependent.
- */
-void jmi_init_eval_dependent_set_dirty(jmi_t* jmi);
-
-/**
- * \brief Reevaluate the dependent parameters if necessary.
- *
- * @param jmi A jmi_t struct.
- * @return Error code.
- */
-int jmi_init_eval_dependent(jmi_t* jmi);
+int jmi_init_eval_parameters(jmi_t* jmi);
 
 /* @} */
 
@@ -619,6 +593,15 @@ int jmi_init_eval_dependent(jmi_t* jmi);
  * \brief Miscanellous functions.
  */
 /* @{ */
+
+/**
+ * \brief Set start values for all non alias variables.
+ *  
+ * @param jmi A jmi_t struct.
+ */
+int jmi_set_start_values(jmi_t *jmi);
+
+int jmi_set_globals_start(jmi_t *jmi);
 
 /* Initialize delay interface 
  * Called when initializing jmi struct */

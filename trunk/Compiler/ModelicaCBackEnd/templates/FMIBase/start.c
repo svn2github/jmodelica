@@ -15,12 +15,10 @@
 
 $C_enum_strings$
 
-$C_model_init_eval_dependent_parameters$
+$C_set_globals_start$
 
-$C_model_init_eval_dependent_variables$
+$C_set_start_values$
 
-int model_init_eval_dependent(jmi_t* jmi) {
-    model_init_eval_dependent_parameters(jmi);
-    model_init_eval_dependent_variables(jmi);
-    return 0;
+int jmi_set_start_values(jmi_t* jmi) {
+    return jmi_set_start_values_base(jmi);
 }

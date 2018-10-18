@@ -475,7 +475,7 @@ aspect Variability {
         return res;
     }
     eq FUnknownSizeExp.expVariability() = Variability.FIXEDPARAMETER.combine(getDim().variability());
-
+    
     public TypePrefixVariability Size.variability() {
         TypePrefixVariability res = Variability.CONSTANT;
         for (int i = 0; i < ndims(); i++) {

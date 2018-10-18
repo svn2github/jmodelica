@@ -33,8 +33,7 @@ initial equation
             template="
 $C_variable_aliases$
 $C_z_offsets_strings$
-$C_model_init_eval_independent_start$
-$C_model_init_eval_dependent_variables$
+$C_set_start_values$
 
 $C_dae_init_blocks_residual_functions$
 $C_ode_initialization$
@@ -71,19 +70,33 @@ z->offs.wp = 3;
 z->nums.wp = 0;
 z->n = 3;
 
-int model_init_eval_independent_start(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_pi_s0_0, (\"\"));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_pd_s1_2, (\"\"));
     JMI_ASG(STR_Z, _s_pd_s2_3, (\"\"));
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
-int model_init_eval_dependent_variables(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
+int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -126,8 +139,7 @@ equation
             template="
 $C_variable_aliases$
 $C_z_offsets_strings$
-$C_model_init_eval_independent_start$
-$C_model_init_eval_dependent_variables$
+$C_set_start_values$
 $C_dae_init_blocks_residual_functions$
 $C_ode_initialization$
 $C_dae_blocks_residual_functions$
@@ -162,10 +174,17 @@ z->offs.wp = 3;
 z->nums.wp = 2;
 z->n = 5;
 
-int model_init_eval_independent_start(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_pi_s0_0, (\"\"));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ASG(STR_Z, _s_w_s1_1, (\"\"));
     JMI_ASG(STR_Z, _s_w_s2_2, (\"\"));
     JMI_ASG(STR_Z, pre_s1_1, (\"\"));
@@ -174,9 +193,16 @@ int model_init_eval_independent_start(jmi_t* jmi) {
     return ef;
 }
 
-int model_init_eval_dependent_variables(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
+int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }

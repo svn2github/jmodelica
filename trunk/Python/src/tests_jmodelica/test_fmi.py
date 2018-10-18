@@ -1268,8 +1268,7 @@ class Test_DependentParameterEvaluationError:
         nose.tools.assert_almost_equal( self.m.get('pd'),0.5) # test value after instantiate
         self.m.set('p',0.6)
         nose.tools.assert_almost_equal( self.m.get('pd'),0.6) # test value propagation
-        self.m.set('p',5)
-        nose.tools.assert_raises(FMUException,self.m.get, 'pd') # test that assert triggers
+        nose.tools.assert_raises(FMUException,self.m.set, 'p', 5) # test that assert triggers
 
 class Test_StructuralParameterError:
     """

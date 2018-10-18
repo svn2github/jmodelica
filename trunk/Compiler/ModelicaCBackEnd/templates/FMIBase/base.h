@@ -32,8 +32,8 @@ int model_ode_event_indicators(jmi_t* jmi, jmi_real_t** res);
 int model_init_R0(jmi_t* jmi, jmi_real_t** res);
 void model_add_blocks(jmi_t** jmi);
 void model_init_add_blocks(jmi_t** jmi);
-int model_init_eval_independent(jmi_t* jmi);
-int model_init_eval_dependent(jmi_t* jmi);
+int model_init_eval_parameters(jmi_t* jmi);
+int jmi_set_start_values(jmi_t* jmi);
 int model_ode_guards(jmi_t* jmi);
 int model_ode_guards_init(jmi_t* jmi);
 

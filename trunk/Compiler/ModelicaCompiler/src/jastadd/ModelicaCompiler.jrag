@@ -2442,7 +2442,7 @@ private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLA
         @Override
         public void addTemplates(Templates templates, OptionRegistry options) {
             templates.addCHeaderTemplates("base");
-            templates.addCSourceTemplates("base", "init_independent", "init_dependent", "equ_init", "equ", "funcs");
+            templates.addCSourceTemplates("base", "start", "param", "equ_init", "equ", "funcs");
         }
     });
 
