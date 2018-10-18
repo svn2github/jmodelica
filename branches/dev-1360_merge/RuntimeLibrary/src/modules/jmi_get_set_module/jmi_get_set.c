@@ -60,12 +60,11 @@ jmi_get_set_module_destroy(jmi_t *jmi)
 }
 
 /* Local helper for doing evaluations before we set a value and check what needs to be marked as dirty */
-int jmi_set_precheck(jmi_t* jmi, int index, int offset, int* needRecomputeVars, int* needParameterUpdate) {
+void jmi_set_recompute(jmi_t* jmi, int index, int offset, int* needRecomputeVars, int* needParameterUpdate) {
     *needRecomputeVars = 1;
     if (index < offset) {
         *needParameterUpdate = 1;
     }
-    return 0;
 }
 
 /* Local helper for updating variables after one is set */
@@ -86,20 +85,11 @@ int jmi_set_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_real_t* z = jmi_get_z(jmi);
     int needParameterUpdate = 0;
     int needRecomputeVars = 0;
-
-    for (i = 0; i < nvr; i = i + 1) {
-        index = jmi_get_index_from_value_ref(vr[i]);
-        if(z[index] != value[i]) {
-            int retval = jmi_set_precheck(jmi, index, jmi->offs_real_dx, &needRecomputeVars, &needParameterUpdate);
-            if (retval != 0) {
-                return retval;
-            }
-        }
-    }
     
     for (i = 0; i < nvr; i = i + 1) {
         index = jmi_get_index_from_value_ref(vr[i]);
         if(z[index] != value[i]) {
+            jmi_set_recompute(jmi, index, jmi->offs_real_dx, &needRecomputeVars, &needParameterUpdate);
             z[index] = value[i];
         }
     }
@@ -114,20 +104,11 @@ int jmi_set_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_real_t* z = jmi_get_z(jmi);
     int needParameterUpdate = 0;
     int needRecomputeVars = 0;
-
-    for (i = 0; i < nvr; i = i + 1) {
-        index = jmi_get_index_from_value_ref(vr[i]);
-        if(z[index] != value[i]) {
-            int retval = jmi_set_precheck(jmi, index, jmi->offs_real_dx, &needRecomputeVars, &needParameterUpdate);
-            if (retval != 0) {
-                return retval;
-            }
-        }
-    }
     
     for (i = 0; i < nvr; i = i + 1) {
         index = jmi_get_index_from_value_ref(vr[i]);
         if(z[index] != value[i]) {
+            jmi_set_recompute(jmi, index, jmi->offs_real_dx, &needRecomputeVars, &needParameterUpdate);
             z[index] = value[i];
         }
     }
@@ -142,20 +123,11 @@ int jmi_set_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_real_t* z = jmi_get_z(jmi);
     int needParameterUpdate = 0;
     int needRecomputeVars = 0;
-
-    for (i = 0; i < nvr; i = i + 1) {
-        index = jmi_get_index_from_value_ref(vr[i]);
-        if(z[index] != value[i]) {
-            int retval = jmi_set_precheck(jmi, index, jmi->offs_real_dx, &needRecomputeVars, &needParameterUpdate);
-            if (retval != 0) {
-                return retval;
-            }
-        }
-    }
     
     for (i = 0; i < nvr; i = i + 1) {
         index = jmi_get_index_from_value_ref(vr[i]);
         if(z[index] != value[i]) {
+            jmi_set_recompute(jmi, index, jmi->offs_real_dx, &needRecomputeVars, &needParameterUpdate);
             z[index] = value[i];
         }
     }
@@ -178,22 +150,12 @@ int jmi_set_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
             return -1;
         }
     }
-
-    for (i = 0; i < nvr; i = i + 1) {
-        index = jmi_get_index_from_value_ref(vr[i]);
-        len = strlen(z[index]);
-        if(len != strlen(value[i]) || strncmp(z[index], value[i], len) != 0) {
-            int retval = jmi_set_precheck(jmi, index, jmi->z_t.strings.offs.w, &needRecomputeVars, &needParameterUpdate);
-            if (retval != 0) {
-                return retval;
-            }
-        }
-    }
     
     for (i = 0; i < nvr; i = i + 1) {
         index = jmi_get_index_from_value_ref(vr[i]);
         len = strlen(z[index]);
         if(len != strlen(value[i]) || strncmp(z[index], value[i], len) != 0) {
+            jmi_set_recompute(jmi, index, jmi->z_t.strings.offs.w, &needRecomputeVars, &needParameterUpdate);
             JMI_ASG_STR_Z(z[index], value[i]);
         }
     }
