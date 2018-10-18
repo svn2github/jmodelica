@@ -177,6 +177,9 @@ aspect AnnotationAPI {
      */
     public abstract class AnnotationNode implements Iterable<AnnotationNode> {
 
+
+    	
+    	
 		/**
 		 * Returns the value for a node that represents a list of strings.
 		 */
@@ -854,7 +857,6 @@ aspect AnnotationAPI {
      * support lookup of sub nodes.
      */
     public abstract class RootAnnotationNode extends AnnotationNode {
-        
     }
 
     /**
@@ -863,18 +865,19 @@ aspect AnnotationAPI {
     public class CommentAnnotationNode extends RootAnnotationNode {
         
         private SrcComment comment;
-        
+        private SrcExpEvaluator eval;
         /**
          * Constructs an instance with the comment <code>comment</code>.
          */
-        public CommentAnnotationNode(SrcComment comment) {
+        public CommentAnnotationNode(SrcComment comment, SrcExpEvaluator eval) {
+        	this.eval = eval;
             this.comment = comment;
         }
         
         @Override
         protected AnnotationNode lookup(String path) {
             if (comment.hasSrcAnnotation()) {
-                return comment.getSrcAnnotation().annotationNode().lookup(path);
+                return comment.getSrcAnnotation().annotationNode(eval).lookup(path);
             } else {
                 return null;
             }
@@ -886,7 +889,7 @@ aspect AnnotationAPI {
                 SrcClassModification cm = new SrcClassModification();
                 comment.setSrcAnnotation(new SrcParseAnnotation(cm));
             }
-            return comment.getSrcAnnotation().annotationNode().addNode(path);
+            return comment.getSrcAnnotation().annotationNode(eval).addNode(path);
         }
 
         @Override
@@ -902,12 +905,22 @@ aspect AnnotationAPI {
     public class FullClassDeclAnnotationNode extends RootAnnotationNode {
  
         private SrcFullClassDecl fullClassDecl;
-
+        private SrcExpEvaluator eval;
+        
         /**
          * Constructs an instance with the SrcFullClassDecl <code>fullClassDecl</code>.
          */  
         public FullClassDeclAnnotationNode(SrcFullClassDecl fullClassDecl) {
             this.fullClassDecl = fullClassDecl;
+        }
+        
+        /**
+         * Constructs an instance with the SrcFullClassDecl <code>fullClassDecl</code> with 
+         * evaluation support.
+         */  
+        public FullClassDeclAnnotationNode(SrcFullClassDecl fullClassDecl, SrcExpEvaluator eval) {
+        	this.fullClassDecl = fullClassDecl;
+        	this.eval = eval;
         }
 
         @Override
@@ -918,7 +931,7 @@ aspect AnnotationAPI {
         @Override
         protected AnnotationNode lookup(String path) {
             if (fullClassDecl.hasSrcAnnotation()) {
-                return fullClassDecl.getSrcAnnotation().annotationNode().lookup(path);
+                return fullClassDecl.getSrcAnnotation().annotationNode(eval).lookup(path);
             } else {
                 return null;
             }
@@ -930,7 +943,7 @@ aspect AnnotationAPI {
                 SrcClassModification cm = new SrcClassModification();
                 fullClassDecl.setSrcAnnotation(new SrcParseAnnotation(cm));
             }
-            return fullClassDecl.getSrcAnnotation().annotationNode().addNode(path);
+            return fullClassDecl.getSrcAnnotation().annotationNode(eval).addNode(path);
         }
     }
 	/**
@@ -939,8 +952,10 @@ aspect AnnotationAPI {
 	public class ClassModAnnotationNode extends AnnotationNode {
 		
 		private SrcClassModification mod;
+		public SrcExpEvaluator eval;
 		
-		public ClassModAnnotationNode(SrcClassModification cm) {
+		public ClassModAnnotationNode(SrcClassModification cm, SrcExpEvaluator eval) {
+        	this.eval = eval;
 			mod = cm;
 		}
 
@@ -960,7 +975,7 @@ aspect AnnotationAPI {
         protected AnnotationNode lookup(String path) {
             for (SrcArgument arg : mod.getSrcArguments()) 
                 if (arg.matches(path))
-                    return arg.annotationNode();
+                    return arg.annotationNode(eval);
             return null;
         }
 
@@ -968,7 +983,7 @@ aspect AnnotationAPI {
         public AnnotationNode addNode(String path) {
             SrcComponentModification cm = new SrcComponentModification(new SrcNamedAccess(path), new SrcCompleteModification(new SrcClassModification()));
             mod.addSrcArgument(cm);
-            return cm.annotationNode();
+            return cm.annotationNode(eval);
         }
 
 	}
@@ -980,7 +995,7 @@ aspect AnnotationAPI {
 		
 		private SrcFunctionCall call;
 		
-		public FCAnnotationNode(SrcFunctionCall fc) {
+		public FCAnnotationNode(SrcFunctionCall fc, SrcExpEvaluator eval) {
 			call = fc;
 		}
 
@@ -1011,7 +1026,12 @@ aspect AnnotationAPI {
 		
 		public abstract SrcExp exp();
 		protected abstract void setSrcExp(SrcExp exp);
-
+		public SrcExpEvaluator eval;
+		
+		public ExpAnnotationNode (SrcExpEvaluator eval, SrcExpEvaluator eval) {
+        	this.eval = eval;
+		}
+		
 		public boolean isValue() {
 			if (exp() == null)
 				return super.isValue();
@@ -1034,7 +1054,7 @@ aspect AnnotationAPI {
         @Override
         public CValue ceval() {
             try {
-                return exp() == null ? super.ceval() : exp().ceval();
+                return exp() == null ? super.ceval() : exp().ceval(eval);
             } catch (ConstantEvaluationException e) {
                 return CValue.UNKNOWN;
             }
@@ -1056,7 +1076,8 @@ aspect AnnotationAPI {
 		
 		private SrcValueModification mod;
 		
-		public ValueModAnnotationNode(SrcValueModification vm) {
+		public ValueModAnnotationNode(SrcValueModification vm, SrcExpEvaluator eval) {
+			super(eval);
 			mod = vm;
 		}
 		
@@ -1085,14 +1106,15 @@ aspect AnnotationAPI {
 		
 		private SrcComponentModification mod;
 		
-		public ComponentModAnnotationNode(SrcComponentModification mod) {
+		public ComponentModAnnotationNode(SrcComponentModification mod, SrcExpEvaluator eval) {
+			super(eval);
 			this.mod = mod;
 		}
 		
 		@Override
 		public SrcExp exp() {
-			if (mod.hasSrcModification() && mod.getSrcModification().annotationNode() instanceof ExpAnnotationNode)
-				return ((ExpAnnotationNode) mod.getSrcModification().annotationNode()).exp();
+			if (mod.hasSrcModification() && mod.getSrcModification().annotationNode(eval) instanceof ExpAnnotationNode)
+				return ((ExpAnnotationNode) mod.getSrcModification().annotationNode(eval)).exp();
 			else
 				return null;
 		}
@@ -1100,7 +1122,7 @@ aspect AnnotationAPI {
 		@Override
 		protected void setSrcExp(SrcExp exp) {
 			if (mod.hasSrcModification())
-				mod.getSrcModification().annotationNode().setValue(exp);
+				mod.getSrcModification().annotationNode(eval).setValue(exp);
 			else
 			    throw new UnsupportedOperationException();
 		}
@@ -1118,7 +1140,7 @@ aspect AnnotationAPI {
 		@Override
 		public boolean isValue() {
 			if (mod.hasSrcModification())
-				return mod.getSrcModification().annotationNode().isValue();
+				return mod.getSrcModification().annotationNode(eval).isValue();
 			else
 				return false;
 		}
@@ -1126,7 +1148,7 @@ aspect AnnotationAPI {
 		@Override
 		public Iterator<AnnotationNode> attributeIterator() {
 			if (mod.hasSrcModification())
-				return mod.getSrcModification().annotationNode().attributeIterator();
+				return mod.getSrcModification().annotationNode(eval).attributeIterator();
 			else
 				return super.attributeIterator();
 		}
@@ -1134,7 +1156,7 @@ aspect AnnotationAPI {
 		@Override
 		protected AnnotationNode lookup(String path) {
 		    if (mod.hasSrcModification())
-		        return mod.getSrcModification().annotationNode().lookup(path);
+		        return mod.getSrcModification().annotationNode(eval).lookup(path);
 		    else
 				return NO_ANNOTATION;
 		}
@@ -1158,7 +1180,8 @@ aspect AnnotationAPI {
 		
 		private SrcCompleteModification mod;
 		
-		public CompleteModAnnotationNode(SrcCompleteModification mod) {
+		public CompleteModAnnotationNode(SrcCompleteModification mod, SrcExpEvaluator eval) {
+			super(eval);
 			this.mod = mod;
 		}
 		
@@ -1173,7 +1196,7 @@ aspect AnnotationAPI {
 		@Override
 		protected void setSrcExp(SrcExp exp) {
 			if (mod.hasSrcValueModification())
-				mod.getSrcValueModification().annotationNode().setValue(exp);
+				mod.getSrcValueModification().annotationNode(eval).setValue(exp);
 			else
 				mod.setSrcValueModification(new SrcValueModification(exp));
 		}
@@ -1191,24 +1214,24 @@ aspect AnnotationAPI {
 		@Override
 		public boolean isValue() {
 			if (mod.hasSrcValueModification())
-				return mod.getSrcValueModification().annotationNode().isValue();
+				return mod.getSrcValueModification().annotationNode(eval).isValue();
 			else
 				return false;
 		}
 		
         @Override
         public Iterator<AnnotationNode> attributeIterator() {
-            return mod.getSrcClassModification().annotationNode().iterator();
+            return mod.getSrcClassModification().annotationNode(eval).iterator();
         }
 
         @Override
         protected AnnotationNode lookup(String path) {
-            return mod.getSrcClassModification().annotationNode().lookup(path);
+            return mod.getSrcClassModification().annotationNode(eval).lookup(path);
         }
 
         @Override
         public AnnotationNode addNode(String path) {
-            return mod.getSrcClassModification().annotationNode().addNode(path);
+            return mod.getSrcClassModification().annotationNode(eval).addNode(path);
         }
 		
 	}
@@ -1220,7 +1243,8 @@ aspect AnnotationAPI {
 		
 		private SrcNamedArgument arg;
 		
-		public NAAnnotationNode(SrcNamedArgument na) {
+		public NAAnnotationNode(SrcNamedArgument na, SrcExpEvaluator eval) {
+			super(eval);
 			arg = na;
 		}
 		
@@ -1250,7 +1274,8 @@ aspect AnnotationAPI {
 		
 		private SrcExp e;
 		
-		public EAnnotationNode(SrcExp exp) {
+		public EAnnotationNode(SrcExp exp, SrcExpEvaluator eval) {
+			super(eval);
 			e = exp;
 		}
 		
@@ -1301,10 +1326,13 @@ aspect AnnotationAPI {
     public class FAttributeAnnotationNode extends FExpAnnotationNode {
         
         private final FAttribute attr;
+        private SrcExpEvaluator eval;
         
-        public FAttributeAnnotationNode(FAttribute attr) {
+        public FAttributeAnnotationNode(FAttribute attr, SrcExpEvaluator eval) {
             this.attr = attr;
+            this.eval = eval;
         }
+
         
         @Override
         public FExp fExp() {
@@ -1345,7 +1373,7 @@ aspect AnnotationAPI {
         protected AnnotationNode lookup(String path) {
             for (FAttribute attr : this.attr.getFAttributes())
                 if (attr.matches(path))
-                    return attr.annotationNode();
+                    return attr.annotationNode(eval);
             return null;
         }
 
@@ -1353,7 +1381,7 @@ aspect AnnotationAPI {
         public AnnotationNode addNode(String path) {
             FAttribute attr = new FAnnotationAttribute(path);
             this.attr.addFAttribute(attr);
-            return new FAttributeAnnotationNode(attr);
+            return new FAttributeAnnotationNode(attr, eval);
         }
 
         @Override
@@ -1392,9 +1420,11 @@ aspect AnnotationAPI {
         }
         
         private final FAttributeList attrs;
+        private final SrcExpEvaluator eval;
         
-        public FAttributeListAnnotationNode(FAttributeList attrs) {
+        public FAttributeListAnnotationNode(FAttributeList attrs, SrcExpEvaluator eval) {
             this.attrs = attrs;
+            this.eval = eval;
         }
         
         @Override
@@ -1411,7 +1441,7 @@ aspect AnnotationAPI {
         protected AnnotationNode lookup(String path) {
             for (FAttribute attr : attrs.getFAttributeList())
                 if (attr.matches(path)) 
-                    return attr.annotationNode();
+                    return attr.annotationNode(eval);
             return null;
         }
 
@@ -1419,7 +1449,7 @@ aspect AnnotationAPI {
         public AnnotationNode addNode(String path) {
             FAttribute attr = new FAnnotationAttribute(path);
             attrs.addFAttribute(attr);
-            return new FAttributeAnnotationNode(attr);
+            return new FAttributeAnnotationNode(attr, eval);
         }
     }
     
