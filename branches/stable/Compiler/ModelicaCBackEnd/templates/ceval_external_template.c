@@ -67,7 +67,7 @@ char* JMCEVAL_parseString() {
 }
 
 void JMCEVAL_printString(const char* str) {
-    printf("%d\n%s\n", strlen(str), str);
+    printf("%u\n%s\n", (unsigned)strlen(str), str);
     fflush(stdout);
 }
 
@@ -138,8 +138,7 @@ int JMCEVAL_cont(const char* word) {
 }
 
 void JMCEVAL_check(const char* str) {
-    printf(str);
-    printf("\n");
+    printf("%s\n",str);
     fflush(stdout);
 }
 
