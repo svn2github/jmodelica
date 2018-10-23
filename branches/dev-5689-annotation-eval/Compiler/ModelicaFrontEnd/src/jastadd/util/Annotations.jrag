@@ -86,6 +86,11 @@ aspect AnnotationAPI {
     eq FAbstractEquation.annotation(SrcExpEvaluator eval) = new FAttributeListAnnotationNode(this, eval);
     eq FClass.annotation(SrcExpEvaluator eval)            = new FAttributeListAnnotationNode(this, eval);
 
+    /**
+     * Support limited SrcExp evaluation in the scope of this instance node in the instance tree.
+     */
+    InstNode implements SrcExpEvaluator;
+    
     eq InstNode.annotation() = annotation(annotationExpEvaluator());
 
     syn SrcExpEvaluator InstNode         .annotationExpEvaluator() = parentExpEvaluator();
@@ -128,8 +133,9 @@ aspect AnnotationAPI {
      */
 
     syn AnnotationNode SrcElement.modificationAnnotation() = AnnotationNode.NO_ANNOTATION;
-    syn AnnotationNode SrcComponentDecl.modificationAnnotation() = annotationOfChild(getSrcModificationOpt());
-    eq SrcExtendsClause.modificationAnnotation() = annotationOfChild(getSrcClassModificationOpt());
+    syn AnnotationNode SrcComponentDecl.modificationAnnotation() = annotationOfChild(getSrcModificationOpt(), 
+    		AnnotationNode.DEFAULT_EVALUATOR);
+    eq SrcExtendsClause.modificationAnnotation() = annotationOfChild(getSrcClassModificationOpt(), AnnotationNode.DEFAULT_EVALUATOR);
 
     syn AnnotationNode ASTNode         .createNullAnnotationNode(SrcExpEvaluator eval) = 
         AnnotationNode.NO_ANNOTATION;
@@ -708,7 +714,7 @@ aspect AnnotationAPI {
 			private void update() {
 				next = NO_ANNOTATION;
 				while (it.hasNext() && !next.exists()) 
-					next = it.next().annotationNode();
+					next = it.next().annotationNode(DEFAULT_EVALUATOR);
 			}
 		}
 		
@@ -994,9 +1000,11 @@ aspect AnnotationAPI {
 	public class FCAnnotationNode extends AnnotationNode {
 		
 		private SrcFunctionCall call;
+		private SrcExpEvaluator eval;
 		
 		public FCAnnotationNode(SrcFunctionCall fc, SrcExpEvaluator eval) {
 			call = fc;
+			this.eval = eval;
 		}
 
         public Iterator<AnnotationNode> attributeIterator() {
@@ -1017,7 +1025,7 @@ aspect AnnotationAPI {
         protected AnnotationNode lookup(String path) {
             for (SrcNamedArgument arg : call.getSrcFunctionArguments().getSrcNamedArguments()) 
                 if (arg.matches(path)) 
-                    return arg.annotationNode();
+                    return arg.annotationNode(eval);
             return null;
         }
 	}
@@ -1028,7 +1036,7 @@ aspect AnnotationAPI {
 		protected abstract void setSrcExp(SrcExp exp);
 		public SrcExpEvaluator eval;
 		
-		public ExpAnnotationNode (SrcExpEvaluator eval, SrcExpEvaluator eval) {
+		public ExpAnnotationNode (SrcExpEvaluator eval) {
         	this.eval = eval;
 		}
 		
