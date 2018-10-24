@@ -1654,47 +1654,87 @@ aspect NodeSearch {
 
 
 aspect Strings {
-	
-	/**
-	 * Get the value of this string literal with all escape sequences 
-	 *        replaced with their actual meaning.
-	 */
-	syn String SrcStringLitExp.unEscape() = unEscape(getSTRING());
-	
-	/**
-	 * Replace all escape sequences with their actual meaning.
-	 */
-	public static String ASTNode.unEscape(String str) {
-		StringBuffer buf = new StringBuffer();
-		Matcher m = ESCAPE_PATTERN.matcher(str);
-		Map<String,String> repl = escapeReplacements();
-		while (m.find())
-			m.appendReplacement(buf, repl.get(m.group(1)));
-		m.appendTail(buf);
-		return buf.toString();
-	}
-	
-	private static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
-	
-	private static Map<String,String> ASTNode.escapeReplacements() {
-		if (ESCAPE_REPLACEMENTS == null) {
-			ESCAPE_REPLACEMENTS = new HashMap<String,String>();
-			ESCAPE_REPLACEMENTS.put("'", "'");
-			ESCAPE_REPLACEMENTS.put("\"", "\"");
-			ESCAPE_REPLACEMENTS.put("?", "?");
-			ESCAPE_REPLACEMENTS.put("\\", Matcher.quoteReplacement("\\"));
-			ESCAPE_REPLACEMENTS.put("a", "\007");
-			ESCAPE_REPLACEMENTS.put("b", "\b");
-			ESCAPE_REPLACEMENTS.put("f", "\f");
-			ESCAPE_REPLACEMENTS.put("n", "\n");
-			ESCAPE_REPLACEMENTS.put("r", "\r");
-			ESCAPE_REPLACEMENTS.put("v", "\013");
-			ESCAPE_REPLACEMENTS.put("t", "\t");
-		}
-		return ESCAPE_REPLACEMENTS;
-	}
 
-	private static Map<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+    /**
+     * Get the value of this string literal with all escape sequences 
+     *        replaced with their actual meaning.
+     */
+    syn String SrcStringLitExp.unEscape() = unEscape(getSTRING());
+
+    /**
+     * Get the value of this string literal with all escape sequences 
+     *        replaced with their actual meaning.
+     */
+    syn String FStringLitExp.unEscape() = unEscape(getString());
+
+    /**
+     * Replace all escape sequences with their actual meaning.
+     */
+    public static String ASTNode.unEscape(String str) {
+        return patternedReplace(str, UN_ESCAPE_PATTERN, unEscapeReplacements());
+    }
+
+    /**
+     * Replace all characters that should be escaped in a Modelica String with 
+     * their escape sequences.
+     */
+    public static String ASTNode.escape(String str) {
+        return patternedReplace(str, ESCAPE_PATTERN, escapeReplacements());
+    }
+
+    private static final Pattern ASTNode.UN_ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
+
+    private static Map<String,String> ASTNode.unEscapeReplacements() {
+        if (UN_ESCAPE_REPLACEMENTS == null) {
+            UN_ESCAPE_REPLACEMENTS = new HashMap<String,String>();
+            UN_ESCAPE_REPLACEMENTS.put("'", "'");
+            UN_ESCAPE_REPLACEMENTS.put("\"", "\"");
+            UN_ESCAPE_REPLACEMENTS.put("?", "?");
+            UN_ESCAPE_REPLACEMENTS.put("\\", Matcher.quoteReplacement("\\"));
+            UN_ESCAPE_REPLACEMENTS.put("a", "\007");
+            UN_ESCAPE_REPLACEMENTS.put("b", "\b");
+            UN_ESCAPE_REPLACEMENTS.put("f", "\f");
+            UN_ESCAPE_REPLACEMENTS.put("n", "\n");
+            UN_ESCAPE_REPLACEMENTS.put("r", "\r");
+            UN_ESCAPE_REPLACEMENTS.put("v", "\013");
+            UN_ESCAPE_REPLACEMENTS.put("t", "\t");
+        }
+        return UN_ESCAPE_REPLACEMENTS;
+    }
+
+    private static Map<String,String> ASTNode.UN_ESCAPE_REPLACEMENTS = null;
+
+    private static final Pattern ASTNode.ESCAPE_PATTERN = 
+            Pattern.compile("([\"'\\\\\007\b\f\n\r\013\t])");
+
+    private static Map<String,String> ASTNode.escapeReplacements() {
+        if (ESCAPE_REPLACEMENTS == null) {
+            ESCAPE_REPLACEMENTS = new HashMap<String,String>();
+            ESCAPE_REPLACEMENTS.put("'",    Matcher.quoteReplacement("\\'"));
+            ESCAPE_REPLACEMENTS.put("\"",   Matcher.quoteReplacement("\\\""));
+            ESCAPE_REPLACEMENTS.put("\\",   Matcher.quoteReplacement("\\\\"));
+            ESCAPE_REPLACEMENTS.put("\007", Matcher.quoteReplacement("\\a"));
+            ESCAPE_REPLACEMENTS.put("\b",   Matcher.quoteReplacement("\\b"));
+            ESCAPE_REPLACEMENTS.put("\f",   Matcher.quoteReplacement("\\f"));
+            ESCAPE_REPLACEMENTS.put("\n",   Matcher.quoteReplacement("\\n"));
+            ESCAPE_REPLACEMENTS.put("\r",   Matcher.quoteReplacement("\\r"));
+            ESCAPE_REPLACEMENTS.put("\013", Matcher.quoteReplacement("\\v"));
+            ESCAPE_REPLACEMENTS.put("\t",   Matcher.quoteReplacement("\\t"));
+        }
+        return ESCAPE_REPLACEMENTS;
+    }
+
+    private static Map<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+
+    private static String ASTNode.patternedReplace(
+            String str, Pattern pattern, Map<String,String> repl) {
+        StringBuffer buf = new StringBuffer();
+        Matcher m = pattern.matcher(str);
+        while (m.find())
+            m.appendReplacement(buf, repl.get(m.group(1)));
+        m.appendTail(buf);
+        return buf.toString();
+    }
 
 }
 

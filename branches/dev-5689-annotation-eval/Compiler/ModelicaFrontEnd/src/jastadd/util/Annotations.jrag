@@ -86,12 +86,15 @@ aspect AnnotationAPI {
     eq FAbstractEquation.annotation(SrcExpEvaluator eval) = new FAttributeListAnnotationNode(this, eval);
     eq FClass.annotation(SrcExpEvaluator eval)            = new FAttributeListAnnotationNode(this, eval);
 
-    eq InstNode.annotation() = annotation(annotationExpEvaluator());
+    eq InstExternal.annotation() = annotation(annotationExpEvaluator());
+    eq InstNode    .annotation() = annotation(annotationExpEvaluator());
 
+    syn SrcExpEvaluator InstExternal     .annotationExpEvaluator() = parentExpEvaluator();
     syn SrcExpEvaluator InstNode         .annotationExpEvaluator() = parentExpEvaluator();
     eq                  InstFullClassDecl.annotationExpEvaluator() = this;
 
-    inh SrcExpEvaluator InstNode.parentExpEvaluator();
+    inh SrcExpEvaluator InstExternal.parentExpEvaluator();
+    inh SrcExpEvaluator InstNode    .parentExpEvaluator();
     eq InstNode.getChild().parentExpEvaluator() = this;
 
     /**
@@ -119,6 +122,7 @@ aspect AnnotationAPI {
     syn InstLookupResult<InstClassDecl> InstAccess.lookupInstClassIfAccess();
     eq InstAccess     .lookupInstClassIfAccess() = myInstLookupClass();
     eq InstClassAccess.lookupInstClassIfAccess() = myInstLookup();
+    eq InstDot        .lookupInstClassIfAccess() = getLastInstAccess().lookupInstClassIfAccess();
 
     /**
      * If exp is an access, try to look it up as a component in the scope of this node, 
@@ -138,11 +142,20 @@ aspect AnnotationAPI {
     syn InstLookupResult<InstComponentDecl> InstAccess.lookupInstComponentIfAccess();
     eq InstAccess         .lookupInstComponentIfAccess() = myInstLookupComponent();
     eq InstComponentAccess.lookupInstComponentIfAccess() = myInstLookup();
+    eq InstDot            .lookupInstComponentIfAccess() = 
+        getLastInstAccess().lookupInstComponentIfAccess();
 
 
-    syn nta List<FExp> InstNode.getLooseExps() = new List<>();
+    syn lazy List<FExp> InstNode.getLooseExpList() = new List<FExp>(new FNoExp());
 
-    private Map<SrcExp,FExp> InstNode.looseExpMap = null;
+    eq InstReplacingFullClassDecl       .getLooseExp().lookupInstClass(String name) = 
+        getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingShortClassDecl      .getLooseExp().lookupInstClass(String name) = 
+        getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getLooseExp().lookupInstClass(String name) = 
+        getInstClassRedeclare().lookupInstClass(name);
+
+    private Map<SrcExp,Integer> InstNode.looseExpMap = null;
 
     /**
      * Instantiates exp and inserts it into tree in the scope of this node, unless already done.
@@ -151,13 +164,17 @@ aspect AnnotationAPI {
         if (looseExpMap == null) {
             looseExpMap = new HashMap<>();
         }
-        FExp instExp = looseExpMap.get(exp);
-        if (instExp == null) {
-            instExp = exp.instantiate();
-            looseExpMap.put(exp, instExp);
-            getLooseExps().add(instExp);
+        List<FExp> list = getLooseExps();
+        int i;
+        if (looseExpMap.containsKey(exp)) {
+            i = looseExpMap.get(exp);
+        } else {
+            i = list.getNumChild();
+            looseExpMap.put(exp, i);
+            FExp instExp = exp.instantiate();
+            list.add(instExp);
         }
-        return instExp;
+        return list.getChild(i);
     }
 
     syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
@@ -424,6 +441,13 @@ aspect AnnotationAPI {
             } catch (ConstantEvaluationException e) {
                 return false;
             }
+        }
+
+        /**
+         * Check if this node represents a value modification that is an access.
+         */
+        public boolean isAccess() {
+            return false;
         }
 
         /**
@@ -857,11 +881,20 @@ aspect AnnotationAPI {
                 return super.ceval();
         }
 
+        @Override
         public String valueToString() {
             if (exists())
                 return realNode().valueToString();
             else
                 return super.valueToString();
+        }
+
+        @Override
+        public boolean isAccess() {
+            if (exists())
+                return realNode().isAccess();
+            else
+                return super.isAccess();
         }
 
         @Override
@@ -910,7 +943,7 @@ aspect AnnotationAPI {
             else
                 return super.isFinal();
         }
-        
+
         @Override
         public int level() {
             if (exists())
@@ -1172,8 +1205,14 @@ aspect AnnotationAPI {
             }
         }
 
+        @Override
         public String valueToString() {
             return exp().toString();
+        }
+
+        @Override
+        public final boolean isAccess() {
+            return exp() != null && exp().isAccess();
         }
 
         @Override

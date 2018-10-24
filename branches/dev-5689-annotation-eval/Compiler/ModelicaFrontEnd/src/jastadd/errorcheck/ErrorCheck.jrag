@@ -791,14 +791,14 @@ aspect InstanceErrorCheck {
         Set<String> noAndZeroDerivatives = new HashSet<String>();
         for (AnnotationNode attrNode : derivative) {
             if ("noDerivative".equals(attrNode.name()) || "zeroDerivative".equals(attrNode.name())) {
-                if (!attrNode.isStringValue()) {
+                InstLookupResult<InstComponentDecl> res = attrNode.lookupInstComponent();
+                if (res == null) {
                     attrNode.ast().error("Expecting variable reference for " + attrNode.name() + " annotation");
                     continue;
                 }
-                String varName = attrNode.string();
+                String varName = attrNode.valueToString();
                 if (!noAndZeroDerivatives.add(varName))
                     attrNode.ast().error("Multiple noDerivative or zeroDerivative declarations for " + varName);
-                InstLookupResult<InstComponentDecl> res = genericLookupInstComponent(varName);
                 if (res.isNotFound())
                     attrNode.ast().error("Unable to find " + varName);
                 else if (!res.target().isInput())
