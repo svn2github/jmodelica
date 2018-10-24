@@ -547,6 +547,48 @@ model ExternalFuncLibs8
  )})));
 end ExternalFuncLibs8;
 
+model ExternalFuncLibs9
+ constant String LIBS[:] = { "foo", "bar", "m" };
+ 
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(Library=LIBS[1]);
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Library=LIBS[2]);
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external annotation(Library=LIBS[2:3]);
+ end f3;
+ 
+ function f4
+  input Real x;
+  output Real y;
+ external;
+ end f4;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+ Real x4 = f4(4);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExternalFuncLibs9",
+            description="External function annotations, Library, using constants",
+            variability_propagation=false,
+            methodName="externalLibraries",
+            methodResult="[foo, bar, m]"
+ )})));
+end ExternalFuncLibs9;
+
 model InvalidAnnotation1
  function f
   input Real x;

@@ -16943,6 +16943,41 @@ end FunctionTests.AnnotationFlattening1;
 ")})));
 end AnnotationFlattening1;
 
+model AnnotationFlattening2
+    function F
+        input Real i1;
+        input Integer i2;
+        output Real o1;
+    protected
+        Real x = i1;
+    algorithm
+        o1 := x * i2 + x;
+    annotation(Inline=false, derivative=F_der_wrong, smoothOrder=2);
+    end F;
+    
+    function F_der
+        input Real i1;
+        input Integer i2;
+        input Real i1_der;
+        output Real o1_der;
+    algorithm
+        o1_der := i1_der * i2 + i1_der;
+    annotation(Inline=false);
+    end F_der;
+    
+    model B
+        replaceable function func = F(i2=2);
+        Real x,y;
+    equation
+        x = func(y);
+        der(x) * der(y) = 1;
+    end B;
+    
+    model C = B(redeclare function func = F(i2=3));
+    
+    C c;
+end AnnotationFlattening2;
+
 model ConstantInFunction1
     function f
         constant input Real x = 0;
