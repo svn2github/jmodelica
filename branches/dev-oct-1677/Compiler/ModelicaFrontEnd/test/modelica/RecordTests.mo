@@ -2368,6 +2368,57 @@ end RecordTests.RecordArray8;
 end RecordArray8;
 
 
+model RecordArray9
+    record R
+        parameter Integer n;
+        parameter S x[n];
+    end R;
+    
+    record S
+        parameter Real a;
+        parameter Real b;
+    end S;
+    
+    model M
+        R r;
+    end M;
+    
+    S s[5] = { S(i, i+1) for i in 1:2:9 };
+    R r1 = R(2, {s[1], s[2]});
+    R r2 = R(3, {s[3], s[4], s[5]});
+    M m1[2](r = {r1, r2});
+    M m2[2](r = m1.r);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray9",
+            description="Tests type checking of an array of records where the elements in the array have different sizes",
+            flatModel="
+fclass RecordTests.RecordArray9
+ parameter RecordTests.RecordArray9.S s[5] = {RecordTests.RecordArray9.S(1, 1 + 1), RecordTests.RecordArray9.S(3, 3 + 1), RecordTests.RecordArray9.S(5, 5 + 1), RecordTests.RecordArray9.S(7, 7 + 1), RecordTests.RecordArray9.S(9, 9 + 1)} /* { RecordTests.RecordArray9.S(1, 2), RecordTests.RecordArray9.S(3, 4), RecordTests.RecordArray9.S(5, 6), RecordTests.RecordArray9.S(7, 8), RecordTests.RecordArray9.S(9, 10) } */;
+ parameter RecordTests.RecordArray9.R r1(x(size() = {2})) = RecordTests.RecordArray9.R(2, {s[1], s[2]});
+ parameter RecordTests.RecordArray9.R r2(x(size() = {3})) = RecordTests.RecordArray9.R(3, {s[3], s[4], s[5]});
+ parameter RecordTests.RecordArray9.R m1[1].r(x(size() = {2})) = r1;
+ parameter RecordTests.RecordArray9.R m1[2].r(x(size() = {3})) = r2;
+ parameter RecordTests.RecordArray9.R m2[1].r(x(size() = {2})) = m1[1].r;
+ parameter RecordTests.RecordArray9.R m2[2].r(x(size() = {3})) = m1[2].r;
+
+public
+ record RecordTests.RecordArray9.S
+  parameter Real a;
+  parameter Real b;
+ end RecordTests.RecordArray9.S;
+
+ record RecordTests.RecordArray9.R
+  parameter Integer n;
+  parameter RecordTests.RecordArray9.S x[n];
+ end RecordTests.RecordArray9.R;
+
+end RecordTests.RecordArray9;
+")})));
+end RecordArray9;
+
+
 
 model RecordConstructor1
  record A
@@ -3379,14 +3430,15 @@ In component c:
 end RecordConstructor30;
 
 model RecordConstructor31
-// Should give two errors #4908
+// Should give two errors #4908, one for each constructor call.
+// Should not give the error about 'binding expression of the variable r' since it is a secondary fault.
 record R
     Real[size(x,1)] y = 1:5;
     Real[:] x = {1,2,3};
 end R;
 
 model M
-    R[:] r = R();
+    R[:] r = {R()};
 end M;
 
 M m(r={R(x={1},y=1:2),R(x={2,3})});
@@ -3398,7 +3450,10 @@ M m(r={R(x={1},y=1:2),R(x={2,3})});
             errorMessage="
 1 errors found:
 
-Error at line 12, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
+Error at line 13, column 7, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable r does not match the declared type of the variable
+
+Error at line 13, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for R: types of named argument y and input y are not compatible
     type of '1:2' is Integer[2]
     expected type is Real[1]

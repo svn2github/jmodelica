@@ -216,28 +216,28 @@ aspect FlatTypeCheck {
         }
         if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && checkType.checkTypes()) {
             InstValueModification ivm = myInstValueMod();
-            FType expectedBT = bindingType();
-            FType actualBT = bexp.type();
-            if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
-                InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
-                if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-                    BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
-                } else if (needsEach != null) {
-                    ASSUMING_EACH.invoke(needsEach, needsEach);
-                } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
-                    InstModification parIM = ivm.parentInstModification();
-                    IGNORING_EACH.invoke(parIM, parIM);
+            Index arrayIndex = indexInModification();
+            
+            FType expectedBT = type().sizedType(ivm.expectedSize());
+            FlatType actualBT = bexp.type().isRecord() && bexp.size().equals(bexp.getArray().size())
+                    ? ExpArrayType.create(bexp) : bexp.type();
+            
+            if (expectedBT.size().equals(actualBT.size())) {
+                if (expectedBT.size().isEmpty()) {
+                    typeCheckCell(expectedBT.scalarType(), actualBT.scalarType(), bexp, unknownAllowed, expectedBT.size(), actualBT.size());
                 } else {
-                    ErrorProducerUnlessDisabled reporter;
-                    if (ivm.myInstNode() == this) {
-                        reporter = ARRAY_SIZE_MISMATCH_IN_DECLARATION;
-                    } else if (ivm.hasEach()) {
-                        reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH;
-                    } else {
-                        reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION;
+                    Size arraySize = expectedBT.size().contractLeft(expectedBT.ndims() - arrayIndex.ndims());
+                    for (Index index : Indices.create(arraySize)) {
+                        index = arrayIndex.expand(index);
+                        FType expected = expectedBT.cell(index);
+                        FlatType actual = actualBT.cell(index);
+                        
+                        typeCheckCell(expected, actual, bexp, unknownAllowed, expectedBT.size(), actualBT.size());
+                        break; // Currently necessary because expected type might be incorrect after first index.
                     }
-                    reporter.invokeWithCondition(bexp, expectedBT.ndims() == actualBT.ndims(), name(), expectedBT.size(), actualBT.size());
                 }
+            } else {
+                typeCheckCell(expectedBT, actualBT, bexp, unknownAllowed, expectedBT.size(), actualBT.size());
             }
         }
         
@@ -258,6 +258,32 @@ aspect FlatTypeCheck {
         
         typeCheckAttributes();
         super.typeCheck(checkType);
+    }
+    
+    private void InstAssignable.typeCheckCell(FType expectedBT, FlatType actualBT, FExp bexp, boolean unknownAllowed, Size expectedSize, Size actualSize) {
+        InstValueModification ivm = myInstValueMod();
+        
+        if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
+            InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
+            if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
+            } else if (needsEach != null) {
+                ASSUMING_EACH.invoke(needsEach, needsEach);
+            } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
+                InstModification parIM = ivm.parentInstModification();
+                IGNORING_EACH.invoke(parIM, parIM);
+            } else {
+                ErrorProducerUnlessDisabled reporter;
+                if (ivm.myInstNode() == this) {
+                    reporter = ARRAY_SIZE_MISMATCH_IN_DECLARATION;
+                } else if (ivm.hasEach()) {
+                    reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH;
+                } else {
+                    reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION;
+                }
+                reporter.invokeWithCondition(bexp, expectedBT.ndims() == actualBT.ndims(), name(), expectedSize, actualSize);
+            }
+        }
     }
 
     inh InstModification InstModification.parentInstModification();

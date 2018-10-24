@@ -26,6 +26,98 @@ import java.util.Iterator;
 import org.jmodelica.util.collections.ParallelIterable;
 
 
+aspect FlatTypeInterface {
+
+    public interface FlatType {
+        public FlatType cell(Index index);
+        public FlatType scalarType();
+        public FlatType arrayType(Size size);
+//        public boolean typeCompatible(FlatType type, boolean unknownAllowed);
+        public boolean isUnknown();
+        public Size size();
+        public int ndims();
+        
+        public boolean isBoolean();
+        public boolean isInteger();
+        public boolean isReal();
+        public boolean isNumeric();
+        public boolean isString();
+        public boolean isEnum();
+        public boolean isRecord();
+        public boolean isFunction();
+        public boolean isExternalObject();
+        
+    }
+    
+    FType implements FlatType;
+    
+    public class ExpArrayType implements FlatType {
+        
+        private Indices indices;
+        private Map<Index, FExp> exps;
+        private FlatType scalarType;
+        
+        public static ExpArrayType create(FExp exp) {
+            Array array = exp.getArray();
+            Indices indices = exp.indices();
+            Map<Index, FExp> exps = new HashMap<>();
+            for (Index i : indices) {
+                exps.put(i.clone(), array.get(i));
+            }
+            return new ExpArrayType(indices, exps, exp.type().scalarType());
+        }
+        
+        protected ExpArrayType(Indices indices, Map<Index, FExp> exps, FlatType scalarType) {
+            this.indices = indices;
+            this.exps = exps;
+            this.scalarType = scalarType;
+        }
+        
+        public FlatType cell(Index index) {
+            if (indices.isValid(index)) {
+                return exps.get(index).type();
+            }
+            return FUnknownType.SCALAR;
+        }
+        
+        public FlatType scalarType() {
+            return scalarType;
+        }
+        
+        public FlatType arrayType(Size size) {
+            return scalarType().arrayType(size); // Not perfect, but will do for now.
+        }
+        
+        public boolean isUnknown() {
+            for (FExp exp : exps.values()) {
+                if (exp.type().isUnknown()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public Size size() {
+            return indices.size();
+        }
+        
+        public int ndims() {
+            return indices.ndims();
+        }
+        
+        public boolean isBoolean() { return scalarType().isBoolean(); }
+        public boolean isInteger() { return scalarType().isInteger(); }
+        public boolean isReal() { return scalarType().isReal(); }
+        public boolean isNumeric() { return scalarType().isNumeric(); }
+        public boolean isString() { return scalarType().isString(); }
+        public boolean isEnum() { return scalarType().isEnum(); }
+        public boolean isRecord() { return scalarType().isRecord(); }
+        public boolean isFunction() { return scalarType().isFunction(); }
+        public boolean isExternalObject() { return scalarType().isExternalObject(); }
+    }
+
+}
+
 aspect FlatTypeAnalysis {
 
     syn lazy FType FAbstractVariable.type();
@@ -596,7 +688,7 @@ aspect FlatTypeAnalysis {
     
     eq FAccess.type() = myFV().type().sizedType(size());
 
-    syn FType InstAccess.type() {
+    eq InstAccess.type() {
         if (myInstComponentDecl().isAssignable()) {
             InstAssignable ip = (InstAssignable) myInstComponentDecl();
             FType t = ip.type().scalarType();
@@ -680,6 +772,18 @@ aspect FlatTypeAnalysis {
                 return frct.getFType().lookupHierarchical(name, part + 1, last);
         return null;
     }
+    
+    syn FType FType.cell(Index index) {
+        if (index.ndims() == 0) {
+            return this;
+        }
+        if (indices().isValid(index)) {
+            return scalarType();
+        }
+        return FUnknownType.SCALAR;
+    }
+
+
 }
 
 
@@ -899,29 +1003,29 @@ aspect TypePromotion {
 
 aspect FTypeCompatibility {
 
-    syn boolean FType.typeCompatible(FType type) = typeCompatible(type, false);
+    syn boolean FType.typeCompatible(FlatType type) = typeCompatible(type, false);
 
-    syn boolean FType.typeCompatible(FType type, boolean allowUnknown) = false;
-    eq FRealType.typeCompatible(FType type, boolean allowUnknown) = 
+    syn boolean FType.typeCompatible(FlatType type, boolean allowUnknown) = false;
+    eq FRealType.typeCompatible(FlatType type, boolean allowUnknown) = 
         (type.isReal() || type.isInteger()) && dimensionCompatible(type, allowUnknown);
-    eq FIntegerType.typeCompatible(FType type, boolean allowUnknown) = 
+    eq FIntegerType.typeCompatible(FlatType type, boolean allowUnknown) = 
         type.isInteger() && dimensionCompatible(type, allowUnknown);
-    eq FBooleanType.typeCompatible(FType type, boolean allowUnknown) = 
+    eq FBooleanType.typeCompatible(FlatType type, boolean allowUnknown) = 
         type.isBoolean() && dimensionCompatible(type, allowUnknown);
-    eq FStringType.typeCompatible(FType type, boolean allowUnknown) = 
+    eq FStringType.typeCompatible(FlatType type, boolean allowUnknown) = 
         type.isString() && dimensionCompatible(type, allowUnknown);
-    eq FRecordType.typeCompatible(FType type, boolean allowUnknown) = 
+    eq FRecordType.typeCompatible(FlatType type, boolean allowUnknown) = 
         typeMatches(type, true, allowUnknown);
-    eq FEnumType.typeCompatible(FType type, boolean allowUnknown) = 
+    eq FEnumType.typeCompatible(FlatType type, boolean allowUnknown) = 
         typeMatches(type, true, allowUnknown);
-    eq FExternalObjectType.typeCompatible(FType type, boolean allowUnknown) = 
+    eq FExternalObjectType.typeCompatible(FlatType type, boolean allowUnknown) = 
         typeMatches(type, true, allowUnknown);
-    eq FFunctionType.typeCompatible(FType type, boolean allowUnknown) =
+    eq FFunctionType.typeCompatible(FlatType type, boolean allowUnknown) =
         typeMatches(type, true, allowUnknown);
     
-    syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
+    syn boolean FType.typeMatches(FlatType type, boolean compatible, boolean allowUnknown) =
         compatible ? typeCompatible(type, allowUnknown) : equivalentTo(type, allowUnknown);
-    eq FRecordType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+    eq FRecordType.typeMatches(FlatType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isRecord())
             return false;
         FRecordType rec = (FRecordType) type;
@@ -929,7 +1033,7 @@ aspect FTypeCompatibility {
             return false;
         return typeMatches(componentTreeSet(), rec.componentTreeSet(), compatible, true);
     }
-    eq FExternalObjectType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+    eq FExternalObjectType.typeMatches(FlatType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isExternalObject())
             return false;
         FExternalObjectType obj = (FExternalObjectType) type;
@@ -937,7 +1041,7 @@ aspect FTypeCompatibility {
             return true;
         return false;
     }
-    eq FEnumType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+    eq FEnumType.typeMatches(FlatType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isEnum())
             return false;
         FEnumType enu = (FEnumType) type;
@@ -952,7 +1056,7 @@ aspect FTypeCompatibility {
                 return false;
         return true;
     }
-    eq FFunctionType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+    eq FFunctionType.typeMatches(FlatType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isFunction())
             return false;
         FFunctionType obj = (FFunctionType) type;
@@ -982,8 +1086,8 @@ aspect FTypeCompatibility {
         return getName().equals(type.getName()) && getFType().typeMatches(type.getFType(), compatible, allowUnknown);
     }
     
-    syn boolean FType.dimensionCompatible(FType type) = dimensionCompatible(type, false);
-    syn boolean FType.dimensionCompatible(FType type, boolean allowUnknown) = 
+    syn boolean FType.dimensionCompatible(FlatType type) = dimensionCompatible(type, false);
+    syn boolean FType.dimensionCompatible(FlatType type, boolean allowUnknown) = 
         size().equivalent(type.size(), allowUnknown);
 
     syn boolean FType.looslyDimensionCompatible(FType type, boolean allowUnknown) = 
@@ -1005,22 +1109,22 @@ aspect FTypeEquivalent {
      * x=0
      * where x is declared as Real is ok.
      */
-    syn boolean FType.equivalentTo(FType type) = equivalentTo(type, false);
+    syn boolean FType.equivalentTo(FlatType type) = equivalentTo(type, false);
 
-    syn boolean FType.equivalentTo(FType type, boolean allowUnknown) = false;
-    eq FPrimitiveNumericType.equivalentTo(FType type, boolean allowUnknown) = 
+    syn boolean FType.equivalentTo(FlatType type, boolean allowUnknown) = false;
+    eq FPrimitiveNumericType.equivalentTo(FlatType type, boolean allowUnknown) = 
         type.isNumeric() && dimensionCompatible(type, allowUnknown);
-    eq FBooleanType.equivalentTo(FType type, boolean allowUnknown) = 
+    eq FBooleanType.equivalentTo(FlatType type, boolean allowUnknown) = 
         type.isBoolean() && dimensionCompatible(type, allowUnknown);
-    eq FStringType.equivalentTo(FType type, boolean allowUnknown) = 
+    eq FStringType.equivalentTo(FlatType type, boolean allowUnknown) = 
         type.isString() && dimensionCompatible(type, allowUnknown);
-    eq FRecordType.equivalentTo(FType type, boolean allowUnknown) = 
+    eq FRecordType.equivalentTo(FlatType type, boolean allowUnknown) = 
         typeMatches(type, false, allowUnknown);
-    eq FEnumType.equivalentTo(FType type, boolean allowUnknown) = 
+    eq FEnumType.equivalentTo(FlatType type, boolean allowUnknown) = 
         typeMatches(type, false, allowUnknown);
-    eq FExternalObjectType.equivalentTo(FType type, boolean allowUnknown) = 
+    eq FExternalObjectType.equivalentTo(FlatType type, boolean allowUnknown) = 
         typeMatches(type, false, allowUnknown);
-    eq FFunctionType.equivalentTo(FType type, boolean allowUnknown) =
+    eq FFunctionType.equivalentTo(FlatType type, boolean allowUnknown) =
         typeMatches(type, false, allowUnknown);
 
     /**
@@ -1095,9 +1199,9 @@ aspect BuiltInFlatTypes {
     syn boolean FType.isExternalObjectScalar()  = isScalar() && isExternalObject();
     syn boolean FType.isExternalObjectArray()   = isExternalObject() && isArray();
 
-    public abstract boolean FType.isType(FType type);
-    syn boolean FArrayType.isType(FType type) = getFPrimitiveType().isType(type);
-    syn boolean FCellType.isType(FType type) {
+    syn boolean FType.isType(FType type);
+    eq FArrayType.isType(FType type) = getFPrimitiveType().isType(type);
+    eq FCellType.isType(FType type) {
         throw new UnsupportedOperationException("isType() is not supported for class type " + getClass().getSimpleName());
     }
     eq FRealType.isType(FType type) = type.isReal();
