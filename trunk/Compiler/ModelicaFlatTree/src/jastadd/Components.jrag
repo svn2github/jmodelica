@@ -128,7 +128,7 @@ aspect Components {
     }
 
     public FExp FIfExp.extractRecordFExp(String suffix) {
-        return new FIfExp(getIfExp().treeCopy(),
+        return createNode(getIfExp().treeCopy(),
                 getThenExp().extractRecordFExp(suffix),
                 getElseExp().extractRecordFExp(suffix));
     }
