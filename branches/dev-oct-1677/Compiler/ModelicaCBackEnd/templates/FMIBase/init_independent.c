@@ -15,8 +15,12 @@
 
 $C_enum_strings$
 
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_globals$
 
-int model_init_eval_parameters(jmi_t* jmi) {
-    return model_init_eval_parameters_base(jmi);
+$C_model_init_eval_independent_start$
+
+int model_init_eval_independent(jmi_t* jmi) {
+    model_init_eval_independent_globals(jmi);
+    model_init_eval_independent_start(jmi);
+    return 0;
 }

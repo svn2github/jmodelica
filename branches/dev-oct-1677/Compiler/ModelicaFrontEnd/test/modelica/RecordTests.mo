@@ -534,6 +534,28 @@ end RecordTests.RecordFlat14;
 ")})));
 end RecordFlat14;
 
+model RecordFlat15
+    record R
+        parameter Integer n = 1 annotation(Evaluate=true);
+        Real[n] x = 1:n;
+    end R;
+    
+    R r1 = R(n=2);
+    R r2 = r1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFlat15",
+            description="#5692",
+            flatModel="
+fclass RecordTests.RecordFlat15
+ eval parameter Integer r1.n = 2 /* 2 */;
+ constant Real r2.x[1] = 1;
+ constant Real r2.x[2] = 2;
+end RecordTests.RecordFlat15;
+")})));
+end RecordFlat15;
+
 model EquivalentRecords1
  record A
   Real a;

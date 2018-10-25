@@ -438,7 +438,7 @@ aspect CCodeGenAlgorithms {
         str.print(indent);
         // return variable?
         if(hasReturnVar()) {
-            String name = getCodeGenContext().alias(getReturnVar().myCommonVarDecl());
+            String name = getCodeGenContext().alias(getReturnVar().externalArgument());
             if (name == null) {
                 name = getReturnVar().type().isRecord() ?
                     "*"+getReturnVar().tempName_C() :

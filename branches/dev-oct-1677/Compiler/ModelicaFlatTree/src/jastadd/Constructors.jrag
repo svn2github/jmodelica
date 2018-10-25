@@ -947,6 +947,7 @@ aspect InheritedFactoryMethods {
 	
 	// Misc expressions
 	public FIfExp          FIfExp.createEmptyNode()          { return new FIfExp();          }
+    public InstIfExp       InstIfExp.createEmptyNode()       { return new InstIfExp();       }
 	public FTimeExp        FTimeExp.createEmptyNode()        { return new FTimeExp();        }
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
@@ -1078,7 +1079,15 @@ aspect InheritedFactoryMethods {
 		node.setLocationNoTree(this);
 		return node;
 	}
-	
+
+    public FIfExp FIfExp.createNode(FExp ifExp, FExp thenExp, FExp elseExp) {
+        FIfExp node = createEmptyNode();
+        node.setIfExp(ifExp);
+        node.setThenExp(thenExp);
+        node.setElseExp(elseExp);
+        return node;
+    }
+
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */

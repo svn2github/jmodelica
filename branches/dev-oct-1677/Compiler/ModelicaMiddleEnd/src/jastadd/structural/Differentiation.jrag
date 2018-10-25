@@ -416,7 +416,7 @@ aspect Derivatives {
             return new FRealLitExp(0.0);
         } 
         FExp e = getIfExp().copySymbolic();
-        return new FIfExp(e, td, ed);
+        return createNode(e, td, ed);
     }
     
     @Override
