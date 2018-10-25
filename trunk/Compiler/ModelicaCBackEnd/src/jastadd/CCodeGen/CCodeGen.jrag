@@ -278,8 +278,8 @@ aspect CCodeGen {
 
 	syn lazy String FAbstractVariable.name_C() = null;
 	eq FVariable.name_C()           = isForIndex() ? 
-										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
-										name_C(""); 
+										name_C(null, variableIndex() + C_SUFFIX_INDEX) :
+										name_C("");
     eq FStringVariable.name_C()     = name_C("_s_" + variabilityCausality_C());
 	eq FPreRealVariable.name_C()    = preName_C();
 	eq FPreBooleanVariable.name_C() = preName_C();
