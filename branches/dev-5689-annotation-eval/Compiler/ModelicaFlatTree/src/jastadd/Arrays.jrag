@@ -1911,7 +1911,7 @@ aspect Arrays {
         Array elseArr = getElseExp().getArray();
         for (Index i : arr.indices()) {
             FExp ifExp = getIfExp().fullCopy();
-            arr.set(i, new FIfExp(ifExp, thenArr.get(i), elseArr.get(i)));
+            arr.set(i, createNode(ifExp, thenArr.get(i), elseArr.get(i)));
         }
         return arr;
     }
