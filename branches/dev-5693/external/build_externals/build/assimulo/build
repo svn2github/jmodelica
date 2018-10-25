@@ -1,0 +1,18 @@
+# source default config
+. ./default_config
+
+# source user config
+. $1
+
+
+Assimulo: Python, lapack, blas, Sundials, SuperLU(?)
+
+Python:
+
+Lapack: C-compiler
+
+Blas: C-compiler
+
+Sundials: ?
+
+SuperLU: ?

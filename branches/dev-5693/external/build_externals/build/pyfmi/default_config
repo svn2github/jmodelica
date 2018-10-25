@@ -1,0 +1,18 @@
+PLATFORM="ubuntu"
+DIST_VERSION="18.04"
+PYTHON_VERSION="3.5.5"
+BUILD_TARGET="PyFMI"
+DOCKER_ENV="1"
+
+
+# Required variables
+#FMIL_HOME=""
+#BUILD_ENVIRONMENT=""
+#BUILD_EXTERNALS_DIR=""
+#DOCKER_UTILS_DIR=""
+
+
+# Optional variables
+
+#USER_CONFIG: Is sourced and overrides default variables, is set to path to config
+USER_CONFIG="path/to/your/config"
