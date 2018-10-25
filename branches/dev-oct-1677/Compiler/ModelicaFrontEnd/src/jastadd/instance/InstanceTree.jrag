@@ -2599,8 +2599,6 @@ aspect InstArrays {
      */
     inh Index InstComponentDecl.parentTotalIndex();
     eq InstProgramRoot.getChild().parentTotalIndex()        = Index.NULL;
-//    eq InstNode.getChild().parentTotalIndex()               = Index.NULL;
-//    eq InstRecordConstructor.getChild().parentTotalIndex()  = Index.NULL;
     eq InstComponentDecl.getChild().parentTotalIndex()      = parentTotalIndex();
     eq InstArrayComponentDecl.getChild().parentTotalIndex() = isBottomDimension() ? myTotalIndex() : myTotalIndex();
 

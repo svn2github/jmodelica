@@ -1866,6 +1866,8 @@ aspect Arrays {
                     return arr;
                 }
             } catch (ConstantEvaluationException r) {
+                // Constant evaluation may fail even if variability is known parameter or less.
+                // If so we want to do the same thing we would do if variability was higher.
             }
         }
         return super.getArrayExp();
