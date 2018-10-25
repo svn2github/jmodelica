@@ -1487,8 +1487,17 @@ aspect AnnotationAPI {
             }
         }
 
+        @Override
+        public boolean isAccess() {
+            FExp e = fExp();
+            return e instanceof CommonAccessExp 
+                    || e instanceof InstIdDeclExp 
+                    || e instanceof FIdDeclExp;
+        }
+
         public String valueToString() {
-            return fExp().toString();
+            FExp e = fExp();
+            return (e == null) ? null : e.toString();
         }
 
     }
@@ -1512,10 +1521,6 @@ aspect AnnotationAPI {
         @Override
         public CValue ceval() {
             return attr.hasValue() ? attr.getValue().ceval() : super.ceval();
-        }
-
-        public String valueToString() {
-            return attr.getValue().toString();
         }
 
         @Override
