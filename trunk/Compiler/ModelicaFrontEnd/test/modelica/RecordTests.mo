@@ -536,12 +536,13 @@ end RecordFlat14;
 
 model RecordFlat15
     record R
-        parameter Integer n = 1 annotation(Evaluate=true);
-        Real[n] x = 1:n;
+        Real[:] values;
     end R;
     
-    R r1 = R(n=2);
-    R r2 = r1;
+    R a(values={0, 0.1, 0.2, 5});
+    R b(values={1, 2.1, 6});
+    
+    R r = if 1 > 2 then a else b;
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -549,9 +550,13 @@ model RecordFlat15
             description="#5692",
             flatModel="
 fclass RecordTests.RecordFlat15
- eval parameter Integer r1.n = 2 /* 2 */;
- constant Real r2.x[1] = 1;
- constant Real r2.x[2] = 2;
+ constant Real a.values[1] = 0;
+ constant Real a.values[2] = 0.1;
+ constant Real a.values[3] = 0.2;
+ constant Real a.values[4] = 5;
+ constant Real r.values[1] = 1;
+ constant Real r.values[2] = 2.1;
+ constant Real r.values[3] = 6;
 end RecordTests.RecordFlat15;
 ")})));
 end RecordFlat15;
