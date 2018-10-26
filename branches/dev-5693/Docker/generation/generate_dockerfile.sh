@@ -47,4 +47,4 @@ ENV BUILD_DIR=/tmp/build_scripts
 RUN echo "TODO: Add cleanup script"
 EOF
 
-TODO: Fix COPY since it DOES NOT COPY TOP LEVEL
+#TODO: Fix COPY since it DOES NOT COPY TOP LEVEL
