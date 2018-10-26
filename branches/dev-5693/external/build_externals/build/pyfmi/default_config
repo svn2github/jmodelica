@@ -6,6 +6,7 @@ DOCKER_ENV="1"
 BITNESS="64"
 
 # Required variables
+JM_HOME="/tmp/jm_home"
 FMIL_HOME="$JM_HOME\src\external\FMILibrary"
 BUILD_ENVIRONMENT="$JM_HOME\build_environment"
 BUILD_EXTERNALS_DIR="$JM_HOME\external\build_externals"
