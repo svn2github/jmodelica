@@ -1,0 +1,9 @@
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+include $(mkfile_dir)/win
+BITNESS="32"
+
+# Required variables
+FMIL_HOME="${SDK_HOME}/build/FMIL_install"
+# Optional variables
+PYTHONHOME=${SDK_HOME}/Python27/Python_32/

@@ -1,0 +1,13 @@
+#SHELL := /bin/bash
+#rule:
+PLATFORM="windows"
+DIST_VERSION=""
+PYTHON_VERSION="2.7.13"
+BUILD_TARGET="PyFMI"
+DOCKER_ENV="0"
+
+JM_HOME="/C/OCT-SDK-1.3.1/src"
+BUILD_ENVIRONMENT="$JM_HOME/build_environment"
+BUILD_EXTERNALS_DIR="$JM_HOME/external/build_externals"
+DOCKER_UTILS_DIR="$JM_HOME/Docker"
+PYFMI_SRC=${JM_HOME}/external/PyFMI

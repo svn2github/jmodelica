@@ -5,8 +5,9 @@
 include ./default_config
 #. ./default_config
 
+USER_CONFIG=""
 # TODO: this can be improved, some issues with sourcing
-include ./robin_config
+include $(USER_CONFIG)
 
 
 # check for invalid entries (file does not exist yet)
@@ -19,11 +20,12 @@ pyfmi_docker: docker_image
 	$(docker run -it -v $JM_HOME:$JM_HOME_DOCKER $DOCKER_ID sh -c $JM_HOME_DOCKER/external/build_externals/build/pyfmi/make "pyfmi_docker_build")
 
 pyfmi_docker_build: docker_environment, fmil, install-python
-	$(python setup.py bdist_wheel --fmil-home=$FMIL_HOME)
-
-pyfmi: dependencies
-	$(python setup.py bdist_wheel --fmil-home=$FMIL_HOME)
-
+	$(python setup.py sdist bdist_wheel --fmil-home=$FMIL_HOME)
+	
+pyfmi:
+	cd $(PYFMI_SRC); \
+	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME)
+	
 c-compiler: 
 	$BUILD_ENVIRONMENT/platforms/$PLATFORM/install_gcc.sh
 
@@ -50,3 +52,5 @@ local_environment:
 
 cmake:
 	$BUILD_ENVIRONMENT/platforms/$PLATFORM/install_cmake.sh
+
+.PHONY: pyfmi
