@@ -2669,7 +2669,7 @@ model ExternalObjectConstant1
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="ExternalObjectConstant1",
-            description="",
+            description="Test behavior when variability propagation tries to evaluate an equation with global constant external object reference",
             flatModel="
             
 fclass VariabilityPropagationTests.ExternalObjectConstant1
@@ -2743,7 +2743,7 @@ model ExternalObjectConstant2
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="ExternalObjectConstant2",
-            description="",
+            description="Test behavior when variability propagation tries to evaluate an equation with global constant external object reference",
             flatModel="
 fclass VariabilityPropagationTests.ExternalObjectConstant2
  constant Real x = 1;
