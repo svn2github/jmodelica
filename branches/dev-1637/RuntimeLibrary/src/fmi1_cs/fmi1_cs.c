@@ -333,6 +333,8 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     if (retval != fmiOK){ return fmiError; }
     
     jmi_free_ode_solver(ode_problem->ode_solver);
+    ode_problem->ode_solver = NULL;
+    
     fmi1_me_free_model_instance(cs_data->fmix_me);
     fmi1_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name,
                                         fmi1_cs->GUID, fmi1_cs->me_callback_functions,

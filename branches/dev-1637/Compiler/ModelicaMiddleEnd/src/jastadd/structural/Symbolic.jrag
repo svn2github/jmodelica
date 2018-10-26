@@ -337,7 +337,7 @@ aspect EquationSolve {
 		return n;
 	}
 	
-	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	eq CommonAccessExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	eq FPreExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	
@@ -539,10 +539,10 @@ aspect ExpressionSimplification {
         return super.equals(other);
     }
 
-    eq FIdUseExp.equalsSymbolic(FExp other) {
-        if (!(other instanceof FIdUseExp))
+    eq CommonAccessExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof CommonAccessExp))
             return false;
-        FIdUseExp o = (FIdUseExp) other;
+        CommonAccessExp o = other.asCommonAccessExp();
         return toString().equals(o.toString());
     }
 

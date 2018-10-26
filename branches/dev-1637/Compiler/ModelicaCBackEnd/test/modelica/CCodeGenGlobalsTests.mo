@@ -1410,7 +1410,7 @@ model GlobalConstantScalar1
             variability_propagation=false,
             template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_function_headers$
 $C_functions$
 ",
@@ -1442,7 +1442,7 @@ jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
     return tmp_2;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantScalar1_f1_c) = 3;
@@ -1453,12 +1453,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1522,7 +1522,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 ",
         generatedCode="
@@ -1540,7 +1540,7 @@ jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     return tmp_1;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantArray1_c) = jmi_global_tmp_1(jmi);
@@ -1548,12 +1548,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1603,7 +1603,7 @@ annotation(__JModelica(UnitTesting(tests={
         template="
 $C_records$
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 ",
         generatedCode="
@@ -1658,7 +1658,7 @@ R2_1_r* jmi_global_tmp_3(jmi_t* jmi) {
     return tmp_3;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordScalar1_f_r2) = jmi_global_tmp_3(jmi);
@@ -1666,12 +1666,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1716,7 +1716,7 @@ annotation(__JModelica(UnitTesting(tests={
         variability_propagation=false,
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 ",
         generatedCode="
@@ -1758,7 +1758,7 @@ R_0_ra* jmi_global_tmp_3(jmi_t* jmi) {
     return tmp_3;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray1_f_c) = jmi_global_tmp_3(jmi);
@@ -1766,12 +1766,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -1823,7 +1823,7 @@ annotation(__JModelica(UnitTesting(tests={
         variability_propagation=false,
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 ",
         generatedCode="
@@ -1909,7 +1909,7 @@ R3_2_ra* jmi_global_tmp_7(jmi_t* jmi) {
     return tmp_7;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRecordArray2_f_c) = jmi_global_tmp_7(jmi);
@@ -1917,12 +1917,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -2031,7 +2031,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 ",
         generatedCode="
@@ -2060,7 +2060,7 @@ R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
     return tmp_2;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef1_P_r2) = jmi_global_tmp_2(jmi);
@@ -2068,12 +2068,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -2130,7 +2130,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 ",
         generatedCode="
@@ -2159,7 +2159,7 @@ R1_0_r* jmi_global_tmp_2(jmi_t* jmi) {
     return tmp_2;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef2_P_r2) = jmi_global_tmp_2(jmi);
@@ -2167,12 +2167,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -2214,7 +2214,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 $C_ode_derivatives$
 ",
@@ -2232,7 +2232,7 @@ R1_0_ra* jmi_global_tmp_1(jmi_t* jmi) {
     return tmp_1;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantRef3_r) = jmi_global_tmp_1(jmi);
@@ -2240,12 +2240,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -2310,7 +2310,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_global_temps$
-$C_set_globals_start$
+$C_model_init_eval_independent_globals$
 $C_functions$
 $C_destruct_external_object$
 ",
@@ -2331,7 +2331,7 @@ jmi_extobj_t jmi_global_tmp_1(jmi_t* jmi) {
     return tmp_1;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi) {
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_GLOBAL(CCodeGenGlobalsTests_GlobalVariables_GlobalConstantExternalObject1_P_eo) = jmi_global_tmp_1(jmi);
@@ -2340,12 +2340,12 @@ int jmi_set_globals_start_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_globals_start_0(jmi_t* jmi);
+int model_init_eval_independent_globals_0(jmi_t* jmi);
 
-int jmi_set_globals_start(jmi_t* jmi) {
+int model_init_eval_independent_globals(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    ef |= jmi_set_globals_start_0(jmi);
+    ef |= model_init_eval_independent_globals_0(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }

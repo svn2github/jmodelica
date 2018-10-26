@@ -29,13 +29,13 @@ aspect OptimicaExpressions {
 		 }
 	}
 	/*
-	rewrite FIdUseExp {
+	rewrite CommonAccessExp {
 		when (name().equals("startTime") && !rewritten) to FStartTimeExp {
 			return new FStartTimeExp();
 		}
 	}
 
-	rewrite FIdUseExp {
+	rewrite CommonAccessExp {
 		when (name().equals("finalTime") && !rewritten) to FFinalTimeExp {
 			return new FFinalTimeExp();
 		}
@@ -197,8 +197,8 @@ aspect OptimicaArrays {
 	syn lazy ArrayExp FTimedVariable.getArrayExp() {
 		ArrayExp array = new ArrayExp(indices());
 		for (Index i : array.indices()) {
-			CommonAccess name = getName().specify(i, true);
-			FExp arg = getArg().fullCopy();
+			FAccess name = getName().specify(i, true);
+			FExp arg = getArg().treeCopy();
 			array.set(i, new FTimedVariable(name, arg));
 		}
 		return array;

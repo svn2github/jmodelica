@@ -1472,7 +1472,7 @@ public class ModelicaCompiler implements LogContainer {
         // TODO: move this into arguments class
         String[] files = splitFiles(programarguments.libraryPath());
         String className = programarguments.className();
-        String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
+        String compileTo = programarguments.out();
         
         // Compile model
         try {
@@ -2087,7 +2087,7 @@ public class ModelicaCompiler implements LogContainer {
      * @param dir   the directory to put the output file in
      * @param name  the name of the output file
      */
-    void ModelicaCompiler.generateFile(String tmpl, AbstractGenerator gen, File dir, String name, String header) 
+    SplitFilesCodeStream ModelicaCompiler.generateFile(String tmpl, AbstractGenerator gen, File dir, String name, String header) 
             throws FileNotFoundException {
 
         if (tmpl != null || gen instanceof GenericXMLGenerator) {
@@ -2095,9 +2095,14 @@ public class ModelicaCompiler implements LogContainer {
             hookCodeGeneratorCreated(gen);
             File outFile = new File(dir, name);
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
-            gen.generate(tmpl, new SplitFilesCodeStream(outFile, debugGen, header), header);
-            log.debug("Generated file '" + outFile + "'.");
+            SplitFilesCodeStream stream = new SplitFilesCodeStream(outFile, debugGen, header);
+            gen.generate(tmpl, stream, header);
+            for (File file : stream.files()) {
+                log.debug("Generated file '" + file + "'.");
+            }
+            return stream;
         }
+        return null;
     }
 
     /**
@@ -2437,7 +2442,7 @@ private static final Templates.TemplateContributor ModelicaCompiler.BASIC_TEMPLA
         @Override
         public void addTemplates(Templates templates, OptionRegistry options) {
             templates.addCHeaderTemplates("base");
-            templates.addCSourceTemplates("base", "start", "param", "equ_init", "equ", "funcs");
+            templates.addCSourceTemplates("base", "init_independent", "init_dependent", "equ_init", "equ", "funcs");
         }
     });
 

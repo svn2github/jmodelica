@@ -63,8 +63,11 @@ public class ErrorTestCase extends TestCase {
     private static Map<Pattern, String> createResultFilters() {
         Map<Pattern, String> m = new LinkedHashMap<Pattern, String>();
         m.put(Pattern.compile("^\\s*[0-9]+.+:"), "");
-        m.put(Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.)+'([:,])"), "in $1 '...'$3");
+        m.put(Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.|/.)+'([:,])"), "in $1 '...'$3");
+        m.put(Pattern.compile("in file '([^'\\\\]|\\\\.|/.)+'"), "in file '...'");
+        m.put(Pattern.compile("Resolved path: '([^'\\\\]|\\\\.|/.)+'"), "Resolved path: '...'");
         m.put(Pattern.compile("'[a-zA-Z]:\\\\([^\\\\^']+\\\\)*([^']+)'"), "'$2'");
+        m.put(Pattern.compile("\\\\"),"/");
         return m;
     }
 

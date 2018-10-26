@@ -107,7 +107,7 @@ aspect CCodeGenBlocksResidual {
             p.printPostSteps(this, str, indent);
         }
         Enumerator indexCounter = new Enumerator();
-        for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+        for (FAccessExp use : uniqueFAccessExpsInLHS()) {
             p.printWriteBackResidual(str, indent, use.myFV(), this, enumerator, forIndices, indexCounter);
         }
     }
@@ -118,14 +118,14 @@ aspect CCodeGenBlocksResidual {
      * and statements which put the new values in temporaries.
      */
     public void FAlgorithm.prettyPrintNoSideEffect_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables) {
-        Collection<FIdUseExp> lhs = uniqueFIdUseExpsInLHS();
-        for (FIdUseExp use : lhs) {
+        Collection<FAccessExp> lhs = uniqueFAccessExpsInLHS();
+        for (FAccessExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
                 p.printTempInputAssigns(str, indent, this, use.myFV());
             }
         }
         p.print(this, str, indent);
-        for (FIdUseExp use : lhs) {
+        for (FAccessExp use : lhs) {
             if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
                 p.printTempSwap(use.myFV(), this, str, indent);
             }

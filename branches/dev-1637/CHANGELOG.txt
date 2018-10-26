@@ -1,5 +1,22 @@
 ================= Unreleased ==================
-;Fixed; Minor ; Compiler ; #5676
+; Fixed ; Minor ; Compiler ; #5692
+Fixed exception from specific combination of record with array of unknown 
+size in if expression in binding expression.
+
+; Fixed ; Major ; Compiler ; #5634
+Updated calculation order of start values and dependent parameters to reduce
+number of evaluations.
+
+; Fixed ; Minor ; Compiler ; #5688
+Fixed that binding expression splitting doesn't check bounds.
+
+; Fixed ; Minor ; Compiler ; #5687
+Don't allow any inlining of equations in when loops.
+
+; Fixed ; Minor ; Runtime ; #5684
+Fixed segfault when calling free directly after a reset on CS FMUs.
+
+; Fixed ; Minor ; Compiler ; #5676
 Fixed a problem causing incorrect annotation trees to be created in some cases.
 
 ; Fixed ; Major ; Build system ; #5671

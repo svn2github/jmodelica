@@ -147,7 +147,7 @@ aspect VariabilityPropagation {
 		}
 		return true;
 	}
-	eq FIdUseExp.canPropagate() {
+	eq FAccessExp.canPropagate() {
 		return myFV().canPropagate();
 	}
 	syn boolean FAbstractVariable.canPropagate() = false;
@@ -354,7 +354,7 @@ aspect VariabilityPropagation {
         }
 
         if (!solutionVariability.knownParameterOrLess()) {
-            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
+            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createAccessExp()), solution)));
         }
         
         this.taggedByVProp = true;
@@ -499,7 +499,7 @@ aspect VariabilityPropagation {
     }
     
     @Override
-    public boolean FIdUseExp.variabilityPropagation(
+    public boolean FAccessExp.variabilityPropagation(
             FClass.VariabilityPropagator propagator,
             CValue value,
             TypePrefixVariability variability) {
@@ -562,7 +562,7 @@ aspect VariabilityPropagation {
         }
         
         // Uses
-        for (FIdUseExp use : uses()) {
+        for (FAccessExp use : uses()) {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 equation.variables().remove(this);
@@ -571,8 +571,8 @@ aspect VariabilityPropagation {
                     // Adjust variable set for special case y = 0 * z
                     FExp topFactorExp = use.myTopFactorFExp();
                     if (topFactorExp != null) {
-                        Set<FIdUseExp> usesInEq = equation.findFIdUseExpsInTree();
-                        Set<FIdUseExp> usesInTop = topFactorExp.findFIdUseExpsInTree();
+                        Set<FAccessExp> usesInEq = equation.findFAccessExpsInTree();
+                        Set<FAccessExp> usesInTop = topFactorExp.findFAccessExpsInTree();
                         usesInEq.removeAll(usesInTop);
                         Set<FVariable> fvsInEq = lookupFVariablesInSet(usesInEq);
                         Set<FVariable> fvsInTop = lookupFVariablesInSet(usesInTop);
@@ -622,7 +622,7 @@ aspect VariabilityPropagation {
                     if (variability.knownParameterOrLess()) {
                         fv.setBindingExp(bindingExp.negated(neg));
                     } else if (unAlias && variability.parameterVariability() && !fv.isTemporary()) {
-                        propagator.addEquation(variability, new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
+                        propagator.addEquation(variability, new FEquation(fv.createAccessExp(), createAccessExp().negated(neg)));
                     }
                 }
             }

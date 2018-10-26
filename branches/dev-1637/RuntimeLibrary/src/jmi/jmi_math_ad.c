@@ -20,6 +20,7 @@
 #include "jmi.h"
 #include "jmi_math.h"
 #include "jmi_math_ad.h"
+#include <float.h>
 
 /*
 * FDotDivExp / FSqrtExp / FAcosExp / FAsinExp / FAtan2Exp / FDotPowExp /
@@ -35,8 +36,26 @@ void jmi_ad_divide_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t y, jmi_real_t d
 }
 
 void jmi_ad_divide(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t y, jmi_real_t dx, jmi_real_t dy, jmi_real_t *v, jmi_real_t *d, const char msg[]) {
+    jmi_real_t num = 0.0;
     *v = jmi_divide(jmi, func_name, x, y, msg);
-    *d = jmi_divide(jmi, func_name, (dx*y - x*dy), (y*y), msg);
+    if (dx == 0.0) {
+        num = (-x * dy);
+    } else if (dy == 0.0) {
+        num = (dx*y);
+    } else if (dx == 0.0 && dy == 0.0) {
+        *d = 0.0;
+        return;
+    } else {
+        num = (dx*y - x * dy);
+    }
+    
+    *d = jmi_divide(jmi, func_name, num, (y*y), msg);
+
+    if (*d != *d) {
+        if (JMI_ABS(y) > DBL_MAX && num == num) {
+            *d = 0.0;
+        }
+    }
 }
 
 void jmi_ad_sqrt_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
@@ -145,7 +164,12 @@ void jmi_ad_exp_equation(jmi_t *jmi, jmi_real_t x, jmi_real_t dx, jmi_real_t* v,
 
 void jmi_ad_exp(jmi_t *jmi, const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {
     *v = jmi_exp(jmi, func_name, x, msg);
-    *d = dx * (*v);
+
+    if (dx == 0.0) {
+        *d = 0.0;
+    } else {
+        *d = dx * (*v);
+    }
 }
 
 void jmi_ad_log_function(const char func_name[], jmi_real_t x, jmi_real_t dx, jmi_real_t* v, jmi_real_t* d, const char msg[]) {

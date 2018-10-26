@@ -562,13 +562,12 @@ aspect ContentCheck {
      * If this is an instance tree access, return set containing accessed var, otherwise empty set.
      */
     syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
-    eq FIdUseExp.accessedVarSet()                    = getCommonAccess().accessedVarSet();
+    eq InstAccessExp.accessedVarSet()                = getInstAccess().accessedVarSet();
 
     /**
      * If this is an instance tree access, return set containing accessed var, otherwise empty set.
      */
-    syn Set<InstComponentDecl> CommonAccess.accessedVarSet() = Collections.emptySet();
-    eq InstAccess.accessedVarSet() = Collections.singleton(myInstComponentDecl());
+    syn Set<InstComponentDecl> InstAccess.accessedVarSet() = Collections.singleton(myInstComponentDecl());
 
 
     inh boolean FIfEquation.isTopWhenIfEquation();
@@ -793,9 +792,7 @@ aspect ContentCheck {
     }
     
     syn boolean FType.externalValid() = externalValid(false);
-    public abstract boolean FType.externalValid(boolean rec);
-    syn boolean FArrayType.externalValid(boolean rec) = getFPrimitiveType().externalValid(rec);
-    syn boolean FCellType.externalValid(boolean rec)  = false;
+    syn boolean FType.externalValid(boolean rec)  = false;
     eq FExternalObjectType.externalValid(boolean rec) = !rec || !isArray();
     eq FPrimitiveType.externalValid(boolean rec)      = !rec || !isArray();
     eq FRecordType.externalValid(boolean rec) {
@@ -863,7 +860,8 @@ aspect ForceVariability {
         }
     }
 
-    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
+    public void FArraySubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {}
+    public void FArrayExpSubscripts.forceVariability(ErrorCheckType checkType,  TypePrefixVariability v) {
         for (FSubscript s : getFSubscripts()) {
             s.forceVariability(checkType, v);
         }

@@ -278,8 +278,8 @@ aspect CCodeGen {
 
 	syn lazy String FAbstractVariable.name_C() = null;
 	eq FVariable.name_C()           = isForIndex() ? 
-										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
-										name_C(""); 
+										name_C(null, variableIndex() + C_SUFFIX_INDEX) :
+										name_C("");
     eq FStringVariable.name_C()     = name_C("_s_" + variabilityCausality_C());
 	eq FPreRealVariable.name_C()    = preName_C();
 	eq FPreBooleanVariable.name_C() = preName_C();
@@ -470,7 +470,7 @@ aspect CCodeGen {
     @Override
     public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-        FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
+        FAccessExp left = getLeft().stripNegations().asFAccessExp();
         FVariable fv = (FVariable)left.myFV();
         if (fv.isExternalObject()) {
             fv.genDestructorCall_C(p, str, indent);
@@ -498,7 +498,7 @@ aspect CCodeGen {
         String strName = type().name() + ".destructor";
         FAccess name = new FAccessString(strName);
         List<FExp> args = new List<FExp>();
-        args.add(createUseExp());
+        args.add(createAccessExp());
         FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }
@@ -921,6 +921,11 @@ aspect CCodeGen {
     }
 
     syn FExp FVariable.startValueExp() = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
+
+    syn boolean FVariable.hasDependentStartValue() {
+        FExp exp = startValueExp();
+        return exp != null && !exp.variability().constantVariability();
+    }
 
     public void FVariable.genAssignment_C(CodePrinter p, CodeStream str, String indent, String name, FExp right,
             boolean neg) {

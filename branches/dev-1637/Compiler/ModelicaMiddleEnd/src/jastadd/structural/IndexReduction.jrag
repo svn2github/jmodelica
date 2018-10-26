@@ -148,14 +148,14 @@ aspect IndexReduction {
                 } else if (fv.order() > 1) {
                     // Convert higher order derivative variables into
                     // first order derivatives, generating variables for each step
-                    FAccess fqnPrev = fv.getFAccess().fullCopy();
+                    FAccess accessPrev = fv.getFAccess().treeCopy();
                     for (int i = 1; i < fv.order(); i++) {
-                        FAccess fqn = fv.getFAccess().createDerPrefixedName(i);
+                        FAccess access = fv.getFAccess().createDerPrefixedName(i);
                         l.add(new FRealVariable(VisibilityType.PUBLIC,
-                                fv.getTypePrefixVariability(), fqn.fullCopy()));
+                                fv.getTypePrefixVariability(), access.fullCopy()));
                         // Derivative variable is added later
-                        addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
-                        fqnPrev = fqn;
+                        addFEquation(new FEquation(new FAccessExp(access), new FDerExp(accessPrev.treeCopy())));
+                        accessPrev = access;
                     }
                 }
             } else {
@@ -398,11 +398,11 @@ aspect IndexReduction {
             }
             
             for (FAbstractEquation eqn : new ChainedIterable<FAbstractEquation>(mainEqns, extraEquations)) {
-                for (FIdUseExp use : eqn.referencedFIdUseExps()) {
-                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(use.name());
+                for (FAccessExp access : eqn.referencedCommonAccessExps()) {
+                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(access.name());
                     if (eqnList == null) {
                         eqnList = new HashSet<FAbstractEquation>();
-                        varToEqnMap.put(use.name(), eqnList);
+                        varToEqnMap.put(access.name(), eqnList);
                     }
                     eqnList.add(eqn);
                 }
@@ -420,11 +420,11 @@ aspect IndexReduction {
                 if (currentNonDiffValue != null && (!currentNonDiffValue || nonDiff))
                     continue;
                 eqnNonDiffMap.put(eqn, nonDiff);
-                for (FIdUseExp use : eqn.referencedFIdUseExps()) {
-                    Boolean oldValue = varNonDiffMap.get(use.name());
-                    boolean value = (oldValue == null || oldValue) && (nonDiff || use.inNonDiffArg());
-                    varNonDiffMap.put(use.name(), value);
-                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(use.name());
+                for (FAccessExp access : eqn.referencedCommonAccessExps()) {
+                    Boolean oldValue = varNonDiffMap.get(access.name());
+                    boolean value = (oldValue == null || oldValue) && (nonDiff || access.inNonDiffArg());
+                    varNonDiffMap.put(access.name(), value);
+                    Collection<FAbstractEquation> eqnList = varToEqnMap.get(access.name());
                     if (eqnList == null)
                         continue;
                     for (FAbstractEquation otherEqn : eqnList)
@@ -667,21 +667,21 @@ aspect IndexReduction {
                 extraEqMap = new HashMap<String, AssignmentIncidenceMap>();
                 for (FAbstractEquation equation : equations) {
                     AssignmentIncidenceMap incidenceMap = equation.assignmentIncidenceMap(IndexReductionBiPGraph.this, null, this);
-                    for (FIdUseExp lhs : incidenceMap.assigned()) {
+                    for (CommonAccessExp lhs : incidenceMap.assigned()) {
                         extraEqMap.put(lhs.name(), incidenceMap);
                     }
                 }
             }
             
             @Override
-            public Set<IndexReductionVar> lookupVars(Iterable<FIdUseExp> set) {
+            public Set<IndexReductionVar> lookupVars(Iterable<FAccessExp> set) {
                 Set<IndexReductionVar> res = new LinkedHashSet<IndexReductionVar>();
                 lookupVars(set, res);
                 return res;
             }
     
-            private void lookupVars(Iterable<FIdUseExp> set, Set<IndexReductionVar> resolvedVars) {
-                for (FIdUseExp use : set) {
+            private void lookupVars(Iterable<FAccessExp> set, Set<IndexReductionVar> resolvedVars) {
+                for (FAccessExp use : set) {
                     String varName = use.name();
                     IndexReductionVar var = getVariable(varName);
                     if (var != null) {
@@ -783,8 +783,8 @@ aspect IndexReduction {
                 inlineStack.push(fEqn);
             else if (!originalDiffedFEqns.contains(fEqn))
                 newExtraEquations.add(fEqn);
-            for (FIdUseExp use : fEqn.findFIdUseExpsInTree()) {
-                String baseName = use.getCommonAccess().name();
+            for (FAccessExp use : fEqn.findFAccessExpsInTree()) {
+                String baseName = use.getAccess().name();
                 FVariable topTempDerivative = temporaryVarsMap.get(baseName);
                 if (topTempDerivative == null)
                     continue;

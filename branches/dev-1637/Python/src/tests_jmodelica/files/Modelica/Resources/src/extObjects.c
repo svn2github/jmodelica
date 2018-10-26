@@ -27,6 +27,15 @@ void* constructor_modelica_msg(const char* str) {
     return res;
 }
 
+void* constructor_error_multiple_calls(const char* str) {
+    static int count = 0;
+    if (count > 0) {
+        ModelicaError("Constructor called more than once");
+    }
+    count = count + 1;
+    return constructor_modelica_msg(str);
+}
+
 double constant_extobj_func(void* o) {
     return 1.0;
 }

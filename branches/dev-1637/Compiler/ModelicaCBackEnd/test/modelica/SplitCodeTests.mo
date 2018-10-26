@@ -245,8 +245,6 @@ end BlockSetupSplit2;
 model SplitCodeTest1
   parameter Real[:] p = {1,2};
   Real[:] x = p .+ time;
-  initialequation
-    x = {1.0, 1.0}
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -254,13 +252,13 @@ model SplitCodeTest1
             description="Test negative split options",
             cc_split_element_limit=0,
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p_1_0 = (1);
@@ -269,31 +267,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_start_values_1_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_1_2 = (1.0);
-    _x_2_3 = (1.0);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
 
-int jmi_set_start_values_0_0(jmi_t* jmi);
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
@@ -325,8 +300,6 @@ end SplitCodeTest1;
 model SplitCodeTest2
   parameter Real[:] p = {1,2};
   Real[:] x = p .+ time;
-  initialequation
-    x = {1.0, 1.0}
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -335,13 +308,13 @@ model SplitCodeTest2
             cc_split_element_limit=1,
             cc_split_function_limit=-1,
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 $C_ode_derivatives$
 $C_ode_initialization$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p_1_0 = (1);
@@ -349,7 +322,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_start_values_0_1(jmi_t* jmi) {
+int model_init_eval_independent_start_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _p_2_1 = (2);
@@ -357,42 +330,21 @@ int jmi_set_start_values_0_1(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_start_values_1_0(jmi_t* jmi) {
+
+int model_init_eval_independent_start_0(jmi_t* jmi);
+int model_init_eval_independent_start_1(jmi_t* jmi);
+
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_1_2 = (1.0);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_1_1(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_2_3 = (1.0);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-int jmi_set_start_values_0_1(jmi_t* jmi);
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-int jmi_set_start_values_1_1(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    ef |= jmi_set_start_values_0_1(jmi);
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    ef |= jmi_set_start_values_1_1(jmi);
+    ef |= model_init_eval_independent_start_0(jmi);
+    ef |= model_init_eval_independent_start_1(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
 
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
@@ -786,121 +738,43 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 end SplitCodeTestSubscriptedExp1;
 
 model SplitCodeTestStartValueZero
-  parameter Real[:] p = {1,2};
-  Real[:] x = p .+ time;
+  parameter Real[:] p1 = {1,0};
+  parameter Real[:] p2 = {3,4};
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="SplitCodeTestStartValueZero",
-            description="Test negative split options with start values that are zero",
-            cc_split_element_limit=1,
-            cc_split_function_limit=-1,
+            description="Test split with start values that are zero",
+            cc_split_element_limit=2,
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
-$C_ode_derivatives$
-$C_ode_initialization$
+$C_model_init_eval_independent_start$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _p_1_0 = (1);
+    _p1_1_0 = (1);
+    _p2_1_2 = (3);
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
-int jmi_set_start_values_0_1(jmi_t* jmi) {
+int model_init_eval_independent_start_1(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _p_2_1 = (2);
+    _p2_2_3 = (4);
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
-int jmi_set_start_values_1_0(jmi_t* jmi) {
+int model_init_eval_independent_start_0(jmi_t* jmi);
+int model_init_eval_independent_start_1(jmi_t* jmi);
+
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-int jmi_set_start_values_0_1(jmi_t* jmi);
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    ef |= jmi_set_start_values_0_1(jmi);
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_ode_derivatives_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_1_2 = _p_1_0 + _time;
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_ode_derivatives_1(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_2_3 = _p_2_1 + _time;
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_ode_derivatives_0(jmi_t* jmi);
-int model_ode_derivatives_1(jmi_t* jmi);
-
-int model_ode_derivatives_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= model_ode_derivatives_0(jmi);
-    ef |= model_ode_derivatives_1(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_ode_initialize_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_1_2 = _p_1_0 + _time;
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_ode_initialize_1(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _x_2_3 = _p_2_1 + _time;
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int model_ode_initialize_0(jmi_t* jmi);
-int model_ode_initialize_1(jmi_t* jmi);
-
-int model_ode_initialize_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= model_ode_initialize_0(jmi);
-    ef |= model_ode_initialize_1(jmi);
+    ef |= model_init_eval_independent_start_0(jmi);
+    ef |= model_init_eval_independent_start_1(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }

@@ -4916,6 +4916,81 @@ end FunctionInlining.InputAsIndex4;
 ")})));
 end InputAsIndex4;
 
+model DontInlineFEquationInWhenLoop
+    model Functions
+        function toInline
+                input Real x;
+                output Boolean y;
+            algorithm
+                y := problem(if x >= 0 then 1 - exp(x ^ 3) else 0);
+                return;
+            annotation(Inline = true);
+        end toInline;
+    
+        function problem
+                input Real p;
+                output Boolean y;
+            algorithm
+                y := p < 1;
+                return;
+        end problem;
+    end Functions;
+    
+    Real x "Time-varying input";
+    discrete output Real y "Output";
+    initial equation
+        y = 0;
+    equation
+        x = time;
+        when sample(0, 0.1) then
+            if Functions.toInline(x) then
+            y = 1;
+        else
+            y = 0;
+        end if;
+    end when;
+        annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DontInlineFEquationInWhenLoop",
+            description="",
+            flatModel="
+fclass FunctionInlining.DontInlineFEquationInWhenLoop
+ Real x \"Time-varying input\";
+ discrete output Real y \"Output\";
+ discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
+initial equation
+ y = 0;
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / 0.1);
+equation
+ x = time;
+ y = if temp_1 and not pre(temp_1) then if FunctionInlining.DontInlineFEquationInWhenLoop.Functions.toInline(x) then 1 else 0 else pre(y);
+ temp_1 = not initial() and time >= pre(_sampleItr_1) * 0.1;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * 0.1, \"Too long time steps relative to sample interval.\");
+
+public
+ function FunctionInlining.DontInlineFEquationInWhenLoop.Functions.toInline
+  input Real x;
+  output Boolean y;
+ algorithm
+  y := FunctionInlining.DontInlineFEquationInWhenLoop.Functions.problem(if x >= 0 then 1 - exp(x ^ 3) else 0);
+  return;
+ annotation(Inline = true);
+ end FunctionInlining.DontInlineFEquationInWhenLoop.Functions.toInline;
+
+ function FunctionInlining.DontInlineFEquationInWhenLoop.Functions.problem
+  input Real p;
+  output Boolean y;
+ algorithm
+  y := p < 1;
+  return;
+ end FunctionInlining.DontInlineFEquationInWhenLoop.Functions.problem;
+
+end FunctionInlining.DontInlineFEquationInWhenLoop;
+")})));
+end DontInlineFEquationInWhenLoop;
 
 model SizeParam1
     function f

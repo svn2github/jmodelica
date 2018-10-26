@@ -25,7 +25,7 @@ FConstraintGeq : FRelationConstraint;
 
 InstForClauseC : FConstraint ::= InstForIndex* FConstraint*;
 
-FTimedVariable : FExp ::= Name:CommonAccess Arg:FExp /ArrayExp/;
+FTimedVariable : FExp ::= Name:FAccess Arg:FExp /ArrayExp/;
 InstTimedVariable : FExp ::= Name:InstAccess Arg:FExp /ArrayExp/;
 
 FStartTimeExp : FExp;

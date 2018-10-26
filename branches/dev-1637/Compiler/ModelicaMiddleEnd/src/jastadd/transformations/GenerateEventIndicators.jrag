@@ -576,7 +576,7 @@ aspect GenerateEventIndicators {
     eq FRelExp.getIndicator().isIndicator() = true;
 
     syn boolean FVariable.isIndicator() {
-        for (FIdUseExp use : uses()) {
+        for (FAccessExp use : uses()) {
             if (use.isIndicator()) {
                 return true;
             }
@@ -592,12 +592,12 @@ aspect GenerateEventIndicators {
     /**
      * Creates an assign statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), indicatorExp());
+    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().asFAccessExp().fullCopy(), indicatorExp());
 
     /**
      * Creates an initialization statement for the indicator.
      */
-    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().asFIdUseExp().fullCopy(), new FIntegerLitExp(1));
+    syn FStatement FRelExp.indicatorInitStmt() = new FAssignStmt(getIndicator().asFAccessExp().fullCopy(), new FIntegerLitExp(1));
 
     /**
      * Checks whether or not an expression depends on any variable in a collection of them.
@@ -606,7 +606,7 @@ aspect GenerateEventIndicators {
      *          The {@link FVariable}s to which to check for dependency.
      */
     syn boolean FExp.dependsOn(Collection<FVariable> fvs) {
-        for (FVariable fv : lookupFVariablesInSet(findFIdUseExpsInTree())) {
+        for (FVariable fv : lookupFVariablesInSet(findFAccessExpsInTree())) {
             if (fvs.contains(fv)) {
                 return true;
             }
@@ -627,7 +627,7 @@ aspect GenerateEventIndicators {
         }
 
         myFClass().addFVariable(v);
-        setIndicator(v.createUseExp());
+        setIndicator(v.createAccessExp());
         setIndicatorVarName(variableName);
     }
 

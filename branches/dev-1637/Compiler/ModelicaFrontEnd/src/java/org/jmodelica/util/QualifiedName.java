@@ -18,6 +18,7 @@ package org.jmodelica.util;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jmodelica.util.exceptions.NameFormatException;
 
 /**
