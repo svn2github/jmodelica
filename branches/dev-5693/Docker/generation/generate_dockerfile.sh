@@ -13,15 +13,12 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-# We begin by sourcing a config to write parameter values
-. $1
-CONFIG_DIR=$2   # location of directory with configs (TODO: REMOVE?)
-PLATFORM_DIR=$3 # location of directory with platform specific scripts
+# variables are sourced already in build system
 
 cat <<EOF> $(dirname "$0")/Dockerfile
-ARG LINUX_DIST=${LINUX_DIST}
-ARG DIST_VER=${DIST_VER}
-ARG PYTHON_VER=${PYTHON_VER}
+ARG LINUX_DIST=${PLATFORM}
+ARG DIST_VER=${DIST_VERSION}
+ARG PYTHON_VER=${PYTHON_VERSION}
 ARG BUILD_TARGET=${BUILD_TARGET}
 
 # starting linux environment
@@ -32,21 +29,19 @@ LABEL maintainer="Modelon AB"
 ENV BUILD_DIR=/tmp/build_scripts
 
 # copy or (svn checkout) build scripts to directory (docker doesnt allow COPY dir)
-RUN mkdir -p \${BUILD_DIR} \${BUILD_DIR}/configurations
-RUN mkdir -p \${BUILD_DIR}/platforms/\${LINUX_DIST} \${BUILD_DIR}/platforms/non-specific
-COPY build.sh \${BUILD_DIR}
-COPY ${PLATFORM_DIR} \${BUILD_DIR}/platforms/\${LINUX_DIST}
-COPY ${CONFIG_DIR} \${BUILD_DIR}/configurations
-
-RUN echo \${CONFIG_FILES}
+#RUN mkdir -p \${BUILD_DIR} \${BUILD_DIR}/configurations
+#RUN mkdir -p \${BUILD_DIR}/platforms/\${LINUX_DIST} \${BUILD_DIR}/platforms/non-specific
+#COPY build.sh \${BUILD_DIR}
+#COPY ${PLATFORM_DIR} \${BUILD_DIR}/platforms/\${LINUX_DIST}
+#COPY ${CONFIG_DIR} \${BUILD_DIR}/configurations
 
 # fix executive rights on all shell scripts
-RUN chmod -R +x \${BUILD_DIR}/*.sh
+#RUN chmod -R +x \${BUILD_DIR}/*.sh
 
 # run build
-RUN build.sh inputarguments
-RUN echo "Installing requirements && \${BUILD_DIR}/docker_setup.sh "\${BUILD_DIR}/configurations/docker_config"
-RUN echo "Installing Python" && ${BUILD_DIR}/platforms/${LINUX_DIST}/install_python.sh ${PYTHON_VER}
+#RUN build.sh inputarguments
+#RUN echo "Installing requirements && \${BUILD_DIR}/docker_setup.sh "\${BUILD_DIR}/configurations/docker_config"
+#RUN echo "Installing Python" && ${BUILD_DIR}/platforms/${LINUX_DIST}/install_python.sh ${PYTHON_VER}
 
 # cleanup
 RUN echo "TODO: Add cleanup script"

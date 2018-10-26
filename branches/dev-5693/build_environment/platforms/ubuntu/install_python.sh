@@ -2,23 +2,23 @@
 
 set -e
 
-PYTHON_VER=$1
+PYTHON_VERSION=$1
 # If we install python version X.Y.Z we get directory pythonX.Y, so we extract first two digits
-SHORT_VER=${PYTHON_VER:0:3}
+SHORT_VER=${PYTHON_VERSION:0:3}
 
 # build python 
-URL="https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tgz"
+URL="https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
 cd /usr/src/
 echo "Trying to access ${URL}"
 wget "${URL}"
 if [[ "$?" != 0 ]]; then
-    echo "Error downloading Python ${PYTHON_VER}"
+    echo "Error downloading Python ${PYTHON_VERSION}"
     exit 1
 else
-    echo "Successfully downloaded Python ${PYTHON_VER}"
+    echo "Successfully downloaded Python ${PYTHON_VERSION}"
 fi
-tar xzf Python-${PYTHON_VER}.tgz
-cd Python-${PYTHON_VER}
+tar xzf Python-${PYTHON_VERSION}.tgz
+cd Python-${PYTHON_VERSION}
 
 #TODO check configure installation path
 ./configure

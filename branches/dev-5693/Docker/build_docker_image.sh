@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 
 #    Copyright (C) 2018 Modelon AB
 #
@@ -33,5 +33,7 @@ else
     CONFIG_DIR="${BASE_DIR}/configurations"
     . ${BASE_DIR}/generate_dockerfile.sh ${CONFIG} ${CONFIG_DIR} ${PLATFORM_DIR}
     docker build -t "${LINUX_DIST}:${HASH_GEN_TAG}" --no-cache .
-    echo "Built image with target ${BUILD_TARGET}, tagged with ${HASH_GEN_TAG}"
+    echo "Built image with target ${BUILD_TARGET}"
+    DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk "{print $3}")
+    printf "Tag: ${HASH_GEN_TAG}\nId: ${DOCKER_ID}"
 fi
