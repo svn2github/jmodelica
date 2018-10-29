@@ -613,19 +613,18 @@ aspect Flattening {
 
     private void InstBaseClassDecl.copyDerivativeAnnotations(Flattener f, AnnotationNode src, AnnotationNode dest) {
         for (AnnotationNode derSrcNode : src.allFor("derivative")) {
-            String derName = derSrcNode.string();
-            InstClassDecl fd_decl = lookupDerivativeFunction(derName).target();
+            InstClassDecl fd_decl = derSrcNode.lookupInstClass().target();
             AnnotationNode derDestNode = dest.addNode("derivative");
             fd_decl.flattenFunction(f);
             FExp derNameExp = new FAccessExp(new FAccessString(fd_decl.qualifiedName()));
             derDestNode.setValue(derNameExp);
             for (AnnotationNode attrSrcNode : derSrcNode) {
-                if ("noDerivative".equals(attrSrcNode.name()) && attrSrcNode.isStringValue()) {
+                if ("noDerivative".equals(attrSrcNode.name()) && attrSrcNode.isAccess()) {
                     AnnotationNode noDer = derDestNode.addNode("noDerivative");
-                    noDer.setValue(new FAccessExp(attrSrcNode.string()));
-                } else if ("zeroDerivative".equals(attrSrcNode.name()) && attrSrcNode.isStringValue()) {
+                    noDer.setValue(new FAccessExp(attrSrcNode.valueToString()));
+                } else if ("zeroDerivative".equals(attrSrcNode.name()) && attrSrcNode.isAccess()) {
                     AnnotationNode zeroDer = derDestNode.addNode("zeroDerivative");
-                    zeroDer.setValue(new FAccessExp(attrSrcNode.string()));
+                    zeroDer.setValue(new FAccessExp(attrSrcNode.valueToString()));
                 } else if ("order".equals(attrSrcNode.name()) && attrSrcNode.isIntegerValue()) {
                     AnnotationNode order = derDestNode.addNode("order");
                     order.setValue(new FIntegerLitExp(attrSrcNode.integer()));
