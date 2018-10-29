@@ -2441,6 +2441,88 @@ end RecordTests.RecordArray9;
 end RecordArray9;
 
 
+model RecordArray10
+    record R
+        parameter Integer n;
+        parameter S x[n];
+    end R;
+    
+    record S
+        parameter Real a;
+        parameter Real b;
+    end S;
+    
+    model M
+        R[2] r;
+    end M;
+    
+    S s[:] = { S(i, i+1) for i in 1:10 };
+    R r1 = R(1, {s[1]});
+    R r2 = R(2, {s[2], s[3]});
+    R r3 = R(3, {s[4], s[5], s[6]});
+    R r4 = R(4, {s[7], s[8], s[9], s[10]});
+    M m1[2](r = {{r1, r2}, {r3, r4}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray10",
+            description="Tests type checking of an array of records where the elements in the array have different sizes",
+            flatModel="
+fclass RecordTests.RecordArray10
+ parameter RecordTests.RecordArray10.S s[10] = {RecordTests.RecordArray10.S(1, 1 + 1), RecordTests.RecordArray10.S(2, 2 + 1), RecordTests.RecordArray10.S(3, 3 + 1), RecordTests.RecordArray10.S(4, 4 + 1), RecordTests.RecordArray10.S(5, 5 + 1), RecordTests.RecordArray10.S(6, 6 + 1), RecordTests.RecordArray10.S(7, 7 + 1), RecordTests.RecordArray10.S(8, 8 + 1), RecordTests.RecordArray10.S(9, 9 + 1), RecordTests.RecordArray10.S(10, 10 + 1)} /* { RecordTests.RecordArray10.S(1, 2), RecordTests.RecordArray10.S(2, 3), RecordTests.RecordArray10.S(3, 4), RecordTests.RecordArray10.S(4, 5), RecordTests.RecordArray10.S(5, 6), RecordTests.RecordArray10.S(6, 7), RecordTests.RecordArray10.S(7, 8), RecordTests.RecordArray10.S(8, 9), RecordTests.RecordArray10.S(9, 10), RecordTests.RecordArray10.S(10, 11) } */;
+ parameter RecordTests.RecordArray10.R r1(x(size() = {1})) = RecordTests.RecordArray10.R(1, {s[1]});
+ parameter RecordTests.RecordArray10.R r2(x(size() = {2})) = RecordTests.RecordArray10.R(2, {s[2], s[3]});
+ parameter RecordTests.RecordArray10.R r3(x(size() = {3})) = RecordTests.RecordArray10.R(3, {s[4], s[5], s[6]});
+ parameter RecordTests.RecordArray10.R r4(x(size() = {4})) = RecordTests.RecordArray10.R(4, {s[7], s[8], s[9], s[10]});
+ parameter RecordTests.RecordArray10.R m1[1].r[2](x(size() = {{1}, {2}})) = {r1, r2};
+ parameter RecordTests.RecordArray10.R m1[2].r[2](x(size() = {{3}, {4}})) = {r3, r4};
+
+public
+ record RecordTests.RecordArray10.S
+  parameter Real a;
+  parameter Real b;
+ end RecordTests.RecordArray10.S;
+
+ record RecordTests.RecordArray10.R
+  parameter Integer n;
+  parameter RecordTests.RecordArray10.S x[n];
+ end RecordTests.RecordArray10.R;
+
+end RecordTests.RecordArray10;
+")})));
+end RecordArray10;
+
+
+model RecordArray11
+    record A
+        parameter Integer n;
+        parameter Real x[1];
+    end A;
+
+    record B
+        parameter Integer n;
+        parameter Real x[n];
+    end B;
+ 
+    A a = A(1, {0.0});
+    B b = B(2, {0.5, 1.0});
+    A[2] r1 = {a, b};
+    B[2] r2 = {a, b};
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordArray11",
+            description="Array with incompatible record at index [2]",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 14, column 15, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable r1 does not match the declared type of the variable
+")})));
+end RecordArray11;
+
+
 
 model RecordConstructor1
  record A

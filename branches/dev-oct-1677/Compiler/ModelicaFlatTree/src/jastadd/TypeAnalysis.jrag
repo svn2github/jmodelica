@@ -32,7 +32,8 @@ aspect FlatTypeInterface {
         public FlatType cell(Index index);
         public FlatType scalarType();
         public FlatType arrayType(Size size);
-//        public boolean typeCompatible(FlatType type, boolean unknownAllowed);
+        public boolean typeCompatible(FlatType type);
+        public boolean typeCompatible(FlatType type, boolean unknownAllowed);
         public boolean isUnknown();
         public Size size();
         public int ndims();
@@ -46,36 +47,37 @@ aspect FlatTypeInterface {
         public boolean isRecord();
         public boolean isFunction();
         public boolean isExternalObject();
-        
     }
     
     FType implements FlatType;
     
-    public class ExpArrayType implements FlatType {
+    public class ArrayType<T extends HasType> implements FlatType {
         
         private Indices indices;
-        private Map<Index, FExp> exps;
+        private Map<Index, T> cells;
         private FlatType scalarType;
         
-        public static ExpArrayType create(FExp exp) {
-            Array array = exp.getArray();
-            Indices indices = exp.indices();
-            Map<Index, FExp> exps = new HashMap<>();
-            for (Index i : indices) {
-                exps.put(i.clone(), array.get(i));
-            }
-            return new ExpArrayType(indices, exps, exp.type().scalarType());
+        public ArrayType(Indices indices, Map<Index, T> cells, FlatType scalarType) {
+            this.indices = indices;
+            this.cells = cells;
+            this.scalarType = scalarType;
         }
         
-        protected ExpArrayType(Indices indices, Map<Index, FExp> exps, FlatType scalarType) {
-            this.indices = indices;
-            this.exps = exps;
-            this.scalarType = scalarType;
+        public FlatType expand(Size size) {
+            Map<Index, T> expandedCells = new HashMap<>();
+            for (Map.Entry<Index, T> entry : cells.entrySet()) {
+                for (Index index : Indices.create(size)) {
+                    expandedCells.put(index.expand(entry.getKey()).clone(), entry.getValue());
+                }
+            }
+            cells = expandedCells;
+            indices = Indices.create(indices.size().expand(size));
+            return this;
         }
         
         public FlatType cell(Index index) {
             if (indices.isValid(index)) {
-                return exps.get(index).type();
+                return cells.get(index).type().scalarType();
             }
             return FUnknownType.SCALAR;
         }
@@ -88,9 +90,25 @@ aspect FlatTypeInterface {
             return scalarType().arrayType(size); // Not perfect, but will do for now.
         }
         
+        public boolean typeCompatible(FlatType type) {
+            return typeCompatible(type, false);
+        }
+        
+        public boolean typeCompatible(FlatType type, boolean unknownAllowed) {
+            if (!indices.size().equivalent(type.size(), unknownAllowed)) {
+                return false;
+            }
+            for (Index i : indices) {
+                if (!cell(i).typeCompatible(type.cell(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         public boolean isUnknown() {
-            for (FExp exp : exps.values()) {
-                if (exp.type().isUnknown()) {
+            for (T cell : cells.values()) {
+                if (cell.type().isUnknown()) {
                     return true;
                 }
             }
@@ -381,7 +399,11 @@ aspect FlatTypeAnalysis {
     public FType FRecordType.forConstructor(List<? extends HasType> args) {
         FRecordType frt = treeCopy();
         for (int i = 0; i < frt.getNumComponent(); i++) {
-            frt.getComponent(i).getFType().transferSizes(args.getChild(i).type());
+            if (frt.getComponent(i).getFType().isRecord() && args.getChild(i).type().isRecord()) {
+                frt.setComponent(new FRecordComponentType(frt.getComponent(i).getName(), args.getChild(i).type().treeCopy()), i);
+            } else {
+                frt.getComponent(i).getFType().transferSizes(args.getChild(i).type());
+            }
         }
         return frt;
     }
@@ -392,6 +414,7 @@ aspect FlatTypeAnalysis {
 
     FExp implements HasType;
     InstFunctionArgument implements HasType;
+    InstComponentDecl implements HasType;
 
     syn FType InstFunctionArgument.type() = getFExp().type();
 
