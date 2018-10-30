@@ -2086,7 +2086,7 @@ fclass RecordTests.UnmodifiableComponent5
  constant Real r[2].x = 2;
  Real w;
  discrete Integer i;
-package constant
+global variables
  constant RecordTests.UnmodifiableComponent5.R RecordTests.UnmodifiableComponent5.r[2] = {RecordTests.UnmodifiableComponent5.R(1), RecordTests.UnmodifiableComponent5.R(2)};
 initial equation
  pre(i) = 0;

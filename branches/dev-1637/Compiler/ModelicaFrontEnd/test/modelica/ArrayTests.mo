@@ -9008,7 +9008,7 @@ fclass ArrayTests.Other.ArrayConst3
  constant Real c[1] = 2;
  constant Real c[2] = 3;
  Real x;
-package constant
+global variables
  constant Real ArrayTests.Other.ArrayConst3.c[2] = {2, 3};
 equation
  x = ArrayTests.Other.ArrayConst3.f(1);

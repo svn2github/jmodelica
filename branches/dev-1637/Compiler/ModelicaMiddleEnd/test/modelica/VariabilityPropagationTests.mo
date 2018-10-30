@@ -2675,7 +2675,7 @@ model ExternalObjectConstant1
 fclass VariabilityPropagationTests.ExternalObjectConstant1
  constant Real x = 1;
  parameter Real y;
-package constant
+global variables
  constant VariabilityPropagationTests.ExternalObjectConstant1.EO VariabilityPropagationTests.ExternalObjectConstant1.eo = VariabilityPropagationTests.ExternalObjectConstant1.EO.constructor(1.0);
 parameter equation
  y = VariabilityPropagationTests.ExternalObjectConstant1.f(global(VariabilityPropagationTests.ExternalObjectConstant1.eo));
@@ -2748,7 +2748,7 @@ model ExternalObjectConstant2
 fclass VariabilityPropagationTests.ExternalObjectConstant2
  constant Real x = 1;
  parameter Real y;
-package constant
+global variables
  constant VariabilityPropagationTests.ExternalObjectConstant2.EO VariabilityPropagationTests.ExternalObjectConstant2.eo = VariabilityPropagationTests.ExternalObjectConstant2.EO.constructor(1.0);
 parameter equation
  y = VariabilityPropagationTests.ExternalObjectConstant2.f(VariabilityPropagationTests.ExternalObjectConstant2.g(global(VariabilityPropagationTests.ExternalObjectConstant2.eo)));
