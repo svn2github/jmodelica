@@ -2,17 +2,22 @@ package org.jmodelica.common;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class GUIDManager {
@@ -20,17 +25,37 @@ public class GUIDManager {
     private static final String GUID_TOKEN = "$GUID_TOKEN$";
     private static final String GUID_TOKEN_REGEX = GUID_TOKEN.replace("$", "\\$");
 
-    private final List<File> dependentFiles = new ArrayList<>();
-    private final File source;
+    private static final String DATE_TOKEN = "$DATE_TOKEN$";
+    private static final String DATE_TOKEN_REGEX = DATE_TOKEN.replace("$", "\\$");
+    private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+    private final List<Openable> dependentFiles = new ArrayList<>();
+    private Openable source;
     private String guid = null;
+    private String date = null;
 
+    public String getGuidToken() {
+        return GUID_TOKEN;
+    }
 
-    public GUIDManager(File source) {
-        this.source = source;
+    public String getDateToken() {
+        return DATE_TOKEN;
+    }
+
+    public void setSourceFile(File source) {
+        this.source = new FileOpenable(source);
+    }
+
+    public void setSourceString(String source) {
+        this.source = new StringOpenable(source, null);
     }
 
     public void addDependentFile(File dependentFile) {
-        dependentFiles.add(dependentFile);
+        dependentFiles.add(new FileOpenable(dependentFile));
+    }
+
+    public void addDependentString(String input, StringBuilder output) {
+        dependentFiles.add(new StringOpenable(input, output));
     }
 
     private String getGuid() {
@@ -38,15 +63,21 @@ public class GUIDManager {
             try {
                 final MessageDigest md5 = MessageDigest.getInstance("MD5");
 
-                try (final BufferedReader reader = new BufferedReader(new FileReader(source))) {
-                    boolean foundFirstToken = false;
+                try (final BufferedReader reader = new BufferedReader(source.openInput())) {
+                    boolean foundFirstGuid = false;
+                    boolean foundFirstDate = false;
 
                     String line = reader.readLine();
                     while (line != null) {
-                        if (!foundFirstToken && line.contains(GUID_TOKEN)) {
+                        if (!foundFirstGuid && line.contains(GUID_TOKEN)) {
                             // Replace the first occurrence of the GUID token 
-                            foundFirstToken = true;
+                            foundFirstGuid = true;
                             line = line.replaceFirst(GUID_TOKEN_REGEX, "");
+                        }
+                        if (!foundFirstDate && line.contains(DATE_TOKEN)) {
+                            // Replace the first occurrence of the date token 
+                            foundFirstDate = true;
+                            line = line.replaceFirst(DATE_TOKEN_REGEX, "");
                         }
 
                         // A naive implementation that is expected to create a digest different from what a command
@@ -66,28 +97,46 @@ public class GUIDManager {
         return guid;
     }
 
-    public void processDependentFiles() throws IOException {
-        for (final File file : dependentFiles) {
+    private String getDate() {
+        if (date == null) {
+            date = dateformat.format(new Date());
+        }
+        return date;
+    }
 
-            final File tmpFile = new File (file.getAbsolutePath() + ".tmp");
-            processFiles(file, tmpFile);
+    public void processDependentFiles() {
+        for (final Openable openable : dependentFiles) {
+            try {
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                try (final Writer tmp = new OutputStreamWriter(os)) {
+                    processFiles(openable.openInput(), tmp);
+                }
 
-            final Path temporaryFilePath = tmpFile.toPath();
-            Files.move(temporaryFilePath, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            Files.deleteIfExists(temporaryFilePath);
+                try (BufferedWriter writer = new BufferedWriter(openable.openOutput())) {
+                    writer.append(os.toString());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    private void processFiles(File source, File destination) throws IOException {
-        try (final BufferedReader reader = new BufferedReader(new FileReader(source));
-                final BufferedWriter writer = new BufferedWriter(new FileWriter(destination))) {
-            boolean foundFirstToken = false;
+    private void processFiles(Reader source, Writer destination) throws IOException {
+        try (final BufferedReader reader = new BufferedReader(source);
+                final BufferedWriter writer = new BufferedWriter(destination)) {
+            boolean foundFirstGuid = false;
+            boolean foundFirstDate = false;
 
             String line =  reader.readLine();
             while (line != null) {
-                if (!foundFirstToken && line.contains(GUID_TOKEN)) {
-                    foundFirstToken = true;
+                if (!foundFirstGuid && line.contains(GUID_TOKEN)) {
+                    foundFirstGuid = true;
                     line = line.replaceFirst(GUID_TOKEN_REGEX, getGuid());
+                }
+
+                if (!foundFirstDate && line.contains(DATE_TOKEN)) {
+                    foundFirstDate = true;
+                    line = line.replaceFirst(DATE_TOKEN_REGEX, getDate());
                 }
 
                 writer.write(line);
@@ -97,11 +146,69 @@ public class GUIDManager {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        final GUIDManager guidManager = new GUIDManager(new File("c:/tmp/model.txt"));
-
-        guidManager.addDependentFile(new File("c:/tmp/test.txt"));
-        guidManager.addDependentFile(new File("c:/tmp/test-2.txt"));
-        guidManager.processDependentFiles();
+    private interface Openable {
+        public Reader openInput();
+        public Writer openOutput();
+    }
+    
+    private class FileOpenable implements Openable{
+        private File file;
+        
+        public FileOpenable(File file) {
+            this.file = file;
+        }
+        
+        @Override
+        public Reader openInput() {
+            try {
+                return new FileReader(file);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        @Override
+        public Writer openOutput() {
+            try {
+                return new FileWriter(file);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    
+    private class StringOpenable implements Openable {
+        
+        private String input;
+        private StringBuilder output;
+        
+        public StringOpenable(String input, StringBuilder output) {
+            this.input = input;
+            this.output = output;
+        }
+        
+        @Override
+        public Reader openInput() {
+            return new StringReader(input);
+        }
+        
+        @Override
+        public Writer openOutput() {
+            return new Writer() {
+                
+                @Override
+                public void write(char[] cbuf, int off, int len) throws IOException {
+                    output.append(cbuf, off, len);
+                }
+                
+                @Override
+                public void flush() throws IOException {
+                }
+                
+                @Override
+                public void close() throws IOException {
+                }
+            };
+        }
     }
 }

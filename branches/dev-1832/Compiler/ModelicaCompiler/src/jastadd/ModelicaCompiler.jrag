@@ -1332,6 +1332,9 @@ public class ModelicaCompiler implements LogContainer {
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
         
+        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
+        fc.guidManager().processDependentFiles();
+        
         hookCodeGenerated(outDir);
         log.debug("... code generated.");
         ASTNode.endStep("generateCode()");
@@ -2087,7 +2090,7 @@ public class ModelicaCompiler implements LogContainer {
      * @param dir   the directory to put the output file in
      * @param name  the name of the output file
      */
-    SplitFilesCodeStream ModelicaCompiler.generateFile(String tmpl, AbstractGenerator gen, File dir, String name, String header) 
+    SplitFilesCodeStream ModelicaCompiler.generateFile(FClass fc, String tmpl, AbstractGenerator gen, File dir, String name, String header) 
             throws FileNotFoundException {
 
         if (tmpl != null || gen instanceof GenericXMLGenerator) {
@@ -2099,6 +2102,9 @@ public class ModelicaCompiler implements LogContainer {
             gen.generate(tmpl, stream, header);
             for (File file : stream.files()) {
                 log.debug("Generated file '" + file + "'.");
+                if (fc != null) {
+                    fc.guidManager().addDependentFile(file);
+                }
             }
             return stream;
         }
@@ -2322,7 +2328,7 @@ public class Templates {
     
     public void generateXMLFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
             throws FileNotFoundException {
-        mc.generateFile(templatePath(getXMLTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".xml", "");
+        mc.generateFile(fc, templatePath(getXMLTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".xml", "");
     }
     
     public void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
@@ -2345,7 +2351,7 @@ public class Templates {
                     String filename = tpl + ".h";
                     String path = new File("FMIBase", filename).toString();
                     
-                    mc.generateFile(templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, "");
+                    mc.generateFile(fc, templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, "");
                 }
             }
 
@@ -2354,7 +2360,7 @@ public class Templates {
                     String filename = tpl + ".c";
                     String path = new File("FMIBase", filename).toString();
                     
-                    mc.generateFile(templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, header);
+                    mc.generateFile(fc, templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, header);
                 }
             }
         }
@@ -2383,7 +2389,7 @@ public class Templates {
     
     private void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
             throws FileNotFoundException {
-        mc.generateFile(templatePath(getCTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".c", header);
+        mc.generateFile(fc, templatePath(getCTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".c", header);
     }
    
     private static ArrayList<TemplateContributor> CONTRIBUTORS;
