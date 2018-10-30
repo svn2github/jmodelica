@@ -26,13 +26,24 @@ pyfmi_docker: docker_image
 	#docker run -t -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi/make pyfmi_docker_build"
 	#docker run -t ${DOCKER_ID} sh -c "awk -F= '/^NAME/{print $2}' /etc/os-release"
 
-pyfmi_docker_build: docker_environment, fmil, install-python
-	$(python setup.py sdist bdist_wheel --fmil-home=$FMIL_HOME)
-	
-pyfmi:
-	cd $(PYFMI_SRC); \
-	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME)
-	
+pyfmi_docker_build: docker_environment, fmil, install-python, pyfmi
+
+pyfmi_wheel: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_WHEELBUILD_$(BITNESS)
+pyfmi_wheel:
+	mkdir -p ${LOCAL_BUILD_DIR}; \
+	cd $(PYFMI_SRC)/../; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
+	cd $(LOCAL_BUILD_DIR)/PyFMI; \
+	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS)
+
+pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
+pyfmi_folder:
+	mkdir -p ${LOCAL_BUILD_DIR}; \
+	cd $(PYFMI_SRC)/../; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
+	cd $(LOCAL_BUILD_DIR)/PyFMI; \
+	$(PYTHONHOME)python setup.py sdist --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS)
+
 c-compiler:
 	${BUILD_ENVIRONMENT}/platforms/$PLATFORM/install_gcc.sh
 
