@@ -1,12 +1,13 @@
-PLATFORM="ubuntu"
-DIST_VERSION="18.04"
-PYTHON_VERSION="3.5.5"
-BUILD_TARGET="PyFMI"
-DOCKER_ENV="1"
-BITNESS="64"
+PLATFORM=ubuntu
+DIST_VERSION=18.04
+PYTHON_VERSION=3.5.5
+BUILD_TARGET=PyFMI
+DOCKER_ENV=1
+BITNESS=64
 
 # Required variables
 JM_HOME="/tmp/jm_home"
+JM_HOME_IN_DOCKER=/tmp/jm_home
 FMIL_HOME="${JM_HOME}/src/external/FMILibrary"
 BUILD_ENVIRONMENT="${JM_HOME}/build_environment"
 BUILD_EXTERNALS_DIR="${JM_HOME}/external/build_externals"
@@ -14,3 +15,6 @@ DOCKER_UTILS_DIR="${JM_HOME}/Docker"
 PYFMI_SRC="${JM_HOME}/external/PyFMI"
 
 # Optional variables
+
+#USER_CONFIG: Is sourced and overrides default variables, is set to path to config
+USER_CONFIG=C:/OCT-SDK-1.3/src/external/build_externals/build/pyfmi/robin_config

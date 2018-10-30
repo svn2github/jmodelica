@@ -13,12 +13,14 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+source $1
 BASE_DIR=$(dirname "$0")
-CONFIG="${BASE_DIR}/configurations/docker_config"
-. "${CONFIG}"
+#CONFIG="${BASE_DIR}/configurations/docker_config"
+#. "${CONFIG}"
 
 # check if docker image with given config already exists
-HASH_GEN_TAG="$(echo -n $LINUX_DIST $DIST_VER $PYTHON_VER $BUILD_TARGET | md5sum | awk '{print $1}')"
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $PYTHON_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"
+
 if docker images | grep -q "$HASH_GEN_TAG"; then
     DOCKER_IMAGE_EXISTS=1
 else
@@ -26,14 +28,9 @@ else
 fi
 
 if [ "$DOCKER_IMAGE_EXISTS" = "1" ]; then
-    echo "Image already exists, please refer to image with tag ${HASH_GEN_TAG}"
+    DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 else
-    echo "Creating new image"
-    PLATFORM_DIR="${BASE_DIR}/platforms/${LINUX_DIST}"
-    CONFIG_DIR="${BASE_DIR}/configurations"
-    . ${BASE_DIR}/generate_dockerfile.sh ${CONFIG} ${CONFIG_DIR} ${PLATFORM_DIR}
-    docker build -t "${LINUX_DIST}:${HASH_GEN_TAG}" --no-cache .
-    echo "Built image with target ${BUILD_TARGET}"
-    DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk "{print $3}")
-    printf "Tag: ${HASH_GEN_TAG}\nId: ${DOCKER_ID}"
+    cp $BASE_DIR/generation/Dockerfile .
+    docker build -t "${PLATFORM}:${HASH_GEN_TAG}" .
+    DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 fi
