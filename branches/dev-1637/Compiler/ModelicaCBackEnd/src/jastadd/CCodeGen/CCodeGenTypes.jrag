@@ -194,7 +194,6 @@ aspect CCodeGenTypes {
         protected TypePrintable_C src;
         protected boolean external = false;
         protected boolean subDecls = false; // Used in CAD
-        boolean forceDynamic = false;
         
         private Stack<Level> levels   = new Stack<Level>();
         
@@ -206,11 +205,6 @@ aspect CCodeGenTypes {
         public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, TypePrintable_C src, Size s, boolean external) {
             this(p, str);
             reset(name, src, s, external, indent);
-        }
-        
-        public TypePrinter_C forceDynamic() {
-            forceDynamic = true;
-            return this;
         }
         
         public void reset(String name, TypePrintable_C src, Size s, boolean external, String indent) {
@@ -260,7 +254,7 @@ aspect CCodeGenTypes {
         
         
         protected String dynStr(FType type) {
-            return (forceDynamic || dynamic() ? "DYNA" : "STAT");
+            return (dynamic() ? "DYNA" : "STAT");
         }
         
         public void print(FType type) {
