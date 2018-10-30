@@ -37,12 +37,15 @@ pyfmi_wheel:
 	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS)
 
 pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
+pyfmi_folder: INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
+pyfmi_folder: PYTHONPATH=$(INSTALL_DIR)/Lib/site-packages
 pyfmi_folder:
 	mkdir -p ${LOCAL_BUILD_DIR}; \
 	cd $(PYFMI_SRC)/../; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
-	$(PYTHONHOME)python setup.py sdist --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS)
+	mkdir -p $(INSTALL_DIR)/Lib/site-packages; \
+	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(INSTALL_DIR); \
 
 c-compiler:
 	${BUILD_ENVIRONMENT}/platforms/$PLATFORM/install_gcc.sh

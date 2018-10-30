@@ -2,9 +2,9 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 BITNESS=32
-EXTRA_SETUP_ARGS="--force-32bit=\"true\" --no-msvcr=\"true\" --extra-c-flags=\"-mincoming-stack-boundary=2\""
+EXTRA_SETUP_ARGS=--force-32bit=true --no-msvcr=true --extra-c-flags=-mincoming-stack-boundary=2
 
 # Required variables
-FMIL_HOME="${SDK_HOME}/build/FMIL_install"
+FMIL_HOME=${SDK_HOME}/build/FMIL_install
 # Optional variables
 PYTHONHOME=${SDK_HOME}/Python27/Python_32/
