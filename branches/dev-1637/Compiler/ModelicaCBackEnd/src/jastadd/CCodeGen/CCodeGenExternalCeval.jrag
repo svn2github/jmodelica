@@ -245,9 +245,6 @@ aspect CCodeGenExternalCeval {
      * when evaluating an external function.
      */
     syn Collection<ExternalArgument> FExternalStmt.varsToSerialize() {
-        if (!hasArg() && !hasReturnVar())
-            return new ArrayList<ExternalArgument>(myCommonVarDecls());
-        
         Collection<ExternalArgument> res = new LinkedHashSet<>();
         if (hasReturnVar()) {
             res.add(getReturnVar().externalArgument());
@@ -304,24 +301,6 @@ aspect CCodeGenExternalCeval {
             }
         }
         return res;
-    }
-    
-    /**
-     * CommonVariableDecls from enclosing function
-     */
-    private ArrayList<CommonVariableDecl> FExternalStmt.myCommonVarDecls() {
-        FFunctionDecl decl = containingFFunctionDecl();
-        if (decl != null) {
-            return new ArrayList<CommonVariableDecl>(decl.getFFunctionVariables().toArrayList());
-        } else {
-            ArrayList<CommonVariableDecl> res = new ArrayList<>();
-            for (CommonVariableDecl cvd : enclosingInstClassDecl().allInstComponentDecls()) {
-                if (!cvd.variability().constantVariability()) {
-                    res.add(cvd);
-                }
-            }
-            return res;
-        }
     }
 
     /**

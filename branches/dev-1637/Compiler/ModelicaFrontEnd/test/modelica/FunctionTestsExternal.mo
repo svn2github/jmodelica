@@ -17,6 +17,33 @@
 
 package FunctionTestsExternal
 
+model ExternalFuncEmpty1
+ function f
+ external;
+ end f;
+equation
+ f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalFuncEmpty1",
+            description="External functions: No IO",
+            flatModel="
+fclass FunctionTestsExternal.ExternalFuncEmpty1
+equation
+ FunctionTestsExternal.ExternalFuncEmpty1.f();
+
+public
+ function FunctionTestsExternal.ExternalFuncEmpty1.f
+ algorithm
+  external \"C\" f();
+  return;
+ end FunctionTestsExternal.ExternalFuncEmpty1.f;
+
+end FunctionTestsExternal.ExternalFuncEmpty1;
+")})));
+end ExternalFuncEmpty1;
+
 model ExternalFunc1
  function f
   input Real x;
