@@ -24,7 +24,7 @@ ARG BUILD_TARGET=${BUILD_TARGET}
 # starting linux environment
 FROM \$LINUX_DIST:\$DIST_VER
 LABEL maintainer="Modelon AB"
-
+#TODO add script to get rid of "if..."
 RUN if [ ${PLATFORM} = "ubuntu" ]; then apt-get update && apt-get install -y make; else echo "Currently on CentOS"; fi
 
 # cleanup

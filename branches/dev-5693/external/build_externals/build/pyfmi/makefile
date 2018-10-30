@@ -9,21 +9,21 @@ export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 #TODO add layer squashing
 
+#TODO control environment (if using msys or git bash) 
+
 # check for invalid entries (file does not exist yet)
 #. check_configuration.sh
 
 .EXPORT_ALL_VARIABLES:
 
 .PHONY: pyfmi_docker, dockerfile, pyfmi
-
+#TODO test building docker configurations (generating different docker_id), and test that we get the correct ID
 
 # Please see section 6.11 https://www.gnu.org/software/make/manual/make.html#Target_002dspecific
 pyfmi_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
 pyfmi_docker: docker_image
 	@echo "Starting docker with id ${DOCKER_ID}"
-	@docker run -t ${DOCKER_ID} sh -c "awk -F= '/^NAME/{print $2}' /etc/os-release"
-	@docker rmi -f ${DOCKER_ID}
-	#docker run -t -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi/make pyfmi_docker_build"
+	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make --version && make pyfmi_docker_build"
 	#docker run -t ${DOCKER_ID} sh -c "awk -F= '/^NAME/{print $2}' /etc/os-release"
 
 pyfmi_docker_build: docker_environment, fmil, install-python, pyfmi
@@ -48,7 +48,7 @@ pyfmi_folder:
 	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(INSTALL_DIR); \
 
 c-compiler:
-	${BUILD_ENVIRONMENT}/platforms/$PLATFORM/install_gcc.sh
+	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_gcc.sh
 
 docker_image: dockerfile
 	@echo "Building docker image"
@@ -67,10 +67,10 @@ fmil: cmake
 	# TODO: Maybe call fmil makefile
 
 install-python: c-compiler
-	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_python.sh $PYTHON_VERSION
+	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_python.sh ${PYTHON_VERSION}
 
 local_environment:
-	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/check_python_version.sh $PYTHON_VERSION
+	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/check_python_version.sh ${PYTHON_VERSION}
 
 cmake:
 	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_cmake.sh
