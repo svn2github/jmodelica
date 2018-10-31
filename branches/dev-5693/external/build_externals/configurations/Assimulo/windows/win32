@@ -1,0 +1,9 @@
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+include $(mkfile_dir)/win
+BITNESS=32
+EXTRA_SETUP_ARGS=--no-msvcr=true --force-32bit=true --extra-c-flags=-mincoming-stack-boundary=2
+
+INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python
+# Optional variables
+PYTHONHOME=${SDK_HOME}/Python27/Python_32/

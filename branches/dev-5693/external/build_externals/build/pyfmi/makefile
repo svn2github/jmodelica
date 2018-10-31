@@ -43,7 +43,7 @@ pyfmi_wheel:
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
 	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS); \
-	find -type f -name *.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
+	find -type f -name PyFMI*.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
 
 pyfmi_folder: fmil
 pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
