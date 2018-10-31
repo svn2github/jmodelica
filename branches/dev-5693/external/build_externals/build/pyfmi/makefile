@@ -25,8 +25,9 @@ pyfmi_docker: docker_image
 	@echo "Starting docker with id ${DOCKER_ID}"
 	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make pyfmi_docker_build"
 	#docker run -t ${DOCKER_ID} sh -c "awk -F= '/^NAME/{print $2}' /etc/os-release"
+	#docker commit $(docker ps -lq) jmodelica:pyfmi
 
-pyfmi_docker_build: docker_environment fmil install-python python_packages
+pyfmi_docker_build: docker_environment cmake fmil install-python python_packages
 	@echo "pyfmi build placeholder"
 
 python_packages: install-python
