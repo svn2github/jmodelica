@@ -228,6 +228,22 @@ aspect InstTypeAnalysis {
         myInstClass().finalClass().primitiveName().equals("BooleanType");
     eq InstBuiltIn.isString() = 
         myInstClass().finalClass().primitiveName().equals("StringType");
+
+    syn FlatType InstAssignable.flatType() = type();
+    
+    eq InstRecord.flatType() {
+        Map<Index, InstComponentDecl> decls = new HashMap<>();
+        for (Index index : indices()) {
+            InstComponentDecl decl = this;
+            for (int i = 0; i < index.ndims(); i++) {
+                if (decl.hasInstComponentDecl()) {
+                    decl = decl.getInstComponentDecl(index.get(i) - 1);
+                }
+            }
+            decls.put(index.clone(), decl);
+        }
+        return new ArrayType(indices(), decls, type().scalarType());
+    }
 }
 
 
@@ -235,21 +251,13 @@ aspect InstBindingType {
 
     syn FlatType InstAssignable.expectedBindingType() {
         InstValueModification ivm = myInstValueMod();
-        if (type().isRecord()) {
-            Map<Index, InstComponentDecl> decls = new HashMap<>();
-            for (Index index : indices()) {
-                InstComponentDecl decl = this;
-                for (int i = 0; i < index.ndims(); i++) {
-                    if (decl.hasInstComponentDecl()) {
-                        decl = decl.getInstComponentDecl(index.get(i) - 1);
-                    }
-                }
-                decls.put(index.clone(), decl);
-            }
-            ArrayType type = new ArrayType(indices(), decls, type().scalarType());
-            return type.expand(ivm.expectedSize().contractRight(indexInModification().ndims()));
-        }
         return type().sizedType(ivm.expectedSize());
+    }
+    
+    eq InstRecord.expectedBindingType() {
+        InstValueModification ivm = myInstValueMod();
+        Size arraySize = ivm.expectedSize().contractRight(indexInModification().ndims());
+        return flatType().expand(arraySize);
     }
 
     syn FlatType InstAssignable.actualBindingType() {

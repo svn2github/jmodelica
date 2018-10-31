@@ -30,6 +30,7 @@ aspect FlatTypeInterface {
 
     public interface FlatType {
         public FlatType cell(Index index);
+        public FlatType expand(Size size);
         public FlatType scalarType();
         public FlatType arrayType(Size size);
         public boolean typeCompatible(FlatType type);
@@ -37,6 +38,7 @@ aspect FlatTypeInterface {
         public boolean isUnknown();
         public Size size();
         public int ndims();
+        public FType asFType();
         
         public boolean isBoolean();
         public boolean isInteger();
@@ -50,6 +52,8 @@ aspect FlatTypeInterface {
     }
     
     FType implements FlatType;
+    syn FType FType.asFType() = this;
+    syn FType FType.expand(Size size) = arrayType(size().expand(size));
     
     public class ArrayType<T extends HasType> implements FlatType {
         
@@ -78,6 +82,9 @@ aspect FlatTypeInterface {
         public FlatType cell(Index index) {
             if (indices.isValid(index)) {
                 return cells.get(index).type().scalarType();
+            }
+            if (index.ndims() == 0) {
+                return this;
             }
             return FUnknownType.SCALAR;
         }
@@ -122,6 +129,10 @@ aspect FlatTypeInterface {
         public int ndims() {
             return indices.ndims();
         }
+        
+        public FType asFType() {
+            return scalarType().asFType().sizedType(size());
+        };
         
         public boolean isBoolean() { return scalarType().isBoolean(); }
         public boolean isInteger() { return scalarType().isInteger(); }
@@ -714,8 +725,17 @@ aspect FlatTypeAnalysis {
     eq InstAccess.type() {
         if (myInstComponentDecl().isAssignable()) {
             InstAssignable ip = (InstAssignable) myInstComponentDecl();
-            FType t = ip.type().scalarType();
-            return isArray() ? t.arrayType(size()) : t;
+            if (ip.type().isRecord()) {
+                FlatType t = ip.flatType();
+                try {
+                    t = t.cell(index()).asFType();
+                } catch (ConstantEvaluationException e) {
+                    t = ndims() > 0 ? t.arrayType(size()) : t.scalarType();
+                }
+                return t.asFType();
+            } else {
+                return ip.type().sizedType(size());
+            }
         } else if (myInstClassDecl().isEnum()) {
             return myInstClassDecl().enumType();
         } else if (myInstClassDecl().isBoolean()) {

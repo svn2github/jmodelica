@@ -2523,6 +2523,34 @@ Error at line 14, column 15, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
 end RecordArray11;
 
 
+model RecordArray12
+    
+    record R
+        parameter Real[:] z = {1, 2, 3};
+    end R;
+    
+    R[2] array = {R(z={1}), R(z={1, 2})};
+    R scalar = array[2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray12",
+            description="Tests type checking of subscripted access in array of records.",
+            flatModel="
+fclass RecordTests.RecordArray12
+ parameter RecordTests.RecordArray12.R array[2](z(size() = {{1}, {2}})) = {RecordTests.RecordArray12.R({1}), RecordTests.RecordArray12.R({1, 2})} /* { RecordTests.RecordArray12.R({ 1 }), RecordTests.RecordArray12.R({ 1, 2 }) } */;
+ parameter RecordTests.RecordArray12.R scalar(z(size() = {2})) = array[2];
+
+public
+ record RecordTests.RecordArray12.R
+  parameter Real z[:];
+ end RecordTests.RecordArray12.R;
+
+end RecordTests.RecordArray12;
+")})));
+end RecordArray12;
+
+
 
 model RecordConstructor1
  record A
