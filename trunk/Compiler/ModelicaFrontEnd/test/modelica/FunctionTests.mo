@@ -481,7 +481,7 @@ fclass FunctionTests.FunctionFlatten9
  constant Real a[3] = 3;
  Real z[1];
  Real z[2];
-package constant
+global variables
  constant Real FunctionTests.FunctionFlatten9.a[3] = {1, 2, 3};
 equation
  ({z[1], z[2]}) = FunctionTests.FunctionFlatten9.f({3, 4}, 1);
@@ -1001,7 +1001,7 @@ model FunctionFlatten21
             flatModel="
 fclass FunctionTests.FunctionFlatten21
  Real x = FunctionTests.FunctionFlatten21.f();
-package constant
+global variables
  constant Real FunctionTests.FunctionFlatten21.f.x; // TODO: Compilation error?
 
 public
@@ -1080,7 +1080,7 @@ model FunctionFlatten23
             flatModel="
 fclass FunctionTests.FunctionFlatten23
  Real y;
-package constant
+global variables
  constant FunctionTests.FunctionFlatten23.R FunctionTests.FunctionFlatten23.f.r = FunctionTests.FunctionFlatten23.R(1, {3.14});
 equation
  y = FunctionTests.FunctionFlatten23.f(time);
@@ -10301,7 +10301,7 @@ fclass FunctionTests.UnknownArray29
  constant Real a[2] = 2;
  constant Real a[3] = 3;
  Real x;
-package constant
+global variables
  constant Real FunctionTests.UnknownArray29.a[3] = {1, 2, 3};
 equation
  x = FunctionTests.UnknownArray29.f1(1);
@@ -12480,7 +12480,7 @@ model ExtendFunc2
 fclass FunctionTests.ExtendFunc2
  constant Real d[2] = {1, 2};
  Real x = FunctionTests.ExtendFunc2.f2(1, 2);
-package constant
+global variables
  constant Real FunctionTests.ExtendFunc2.d[2] = {1, 2};
 
 public

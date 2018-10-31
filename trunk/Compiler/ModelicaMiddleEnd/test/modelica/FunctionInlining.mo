@@ -5125,7 +5125,7 @@ model GlobalConst2
 fclass FunctionInlining.GlobalConst2
  parameter Integer temp_2;
  parameter Real y.x;
-package constant
+global variables
  constant FunctionInlining.GlobalConst2.R2 FunctionInlining.GlobalConst2.f.a = FunctionInlining.GlobalConst2.R2({FunctionInlining.GlobalConst2.R1(2), FunctionInlining.GlobalConst2.R1(3)});
 parameter equation
  temp_2 = integer(time);
@@ -5167,7 +5167,7 @@ fclass FunctionInlining.GlobalConst3
  constant Real r[1].x = 2;
  Real y;
  discrete Integer temp_1;
-package constant
+global variables
  constant FunctionInlining.GlobalConst3.R1 FunctionInlining.GlobalConst3.r[1] = {FunctionInlining.GlobalConst3.R1(2)};
 initial equation
  pre(temp_1) = 0;
@@ -5228,7 +5228,7 @@ model GlobalConstExtObj1
             flatModel="
 fclass FunctionInlining.GlobalConstExtObj1
  Real y;
-package constant
+global variables
  constant FunctionInlining.GlobalConstExtObj1.P.EO FunctionInlining.GlobalConstExtObj1.P.eo = FunctionInlining.GlobalConstExtObj1.P.EO.constructor({1.0});
  constant FunctionInlining.GlobalConstExtObj1.P.EO FunctionInlining.GlobalConstExtObj1.P.eo1 = global(FunctionInlining.GlobalConstExtObj1.P.eo);
 equation
