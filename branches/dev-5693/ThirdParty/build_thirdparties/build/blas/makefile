@@ -16,18 +16,21 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-mkfile_dir := $(dir $(mkfile_path))
-include $(mkfile_dir)/win
-BITNESS=64
-FORCE_32_BIT=false
-EXTRA_C_FLAGS=
-EXTRA_SETUP_ARGS=--no-msvcr=true
+#!make
+#SHELL := /bin/bash
 
-INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_64
-SUPERLU_HOME=$(BUILD_DIR)/superlu_build64
-SUNDIALS_HOME=$(BUILD_DIR)/sundials_install64
-BLAS_HOME=$(BUILD_DIR)/blas_install64
-LAPACK_HOME=$(BUILD_DIR)/lapack_install64
-INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_64
-PYTHONHOME=$(SDK_HOME)/Python27/Python_64/
+include default_config
+export $(shell sed 's/=.*//' default_config)
+
+include $(USER_CONFIG)
+export $(shell sed 's/=.*//' $(USER_CONFIG))
+
+.PHONY: install
+
+install: $(BLAS_BUILD_DIR)
+	cd $(BLAS_BUILD_DIR) && make install DESTDIR=
+
+$(BLAS_BUILD_DIR):
+	mkdir -p $(BLAS_BUILD_DIR); \
+	cd $(BLAS_BUILD_DIR); \
+	cmake $(GENERATOR) -DCMAKE_Fortran_FLAGS=$(FORTRAN_FLAGS) -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(EXTRA_CMAKE_BLAS_FLAGS) $(BLAS_SRC_DIR)
