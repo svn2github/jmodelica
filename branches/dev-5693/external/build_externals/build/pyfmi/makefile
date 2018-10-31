@@ -16,7 +16,7 @@ export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 .EXPORT_ALL_VARIABLES:
 
-.PHONY: docker_environment install-python c-compiler fmil pyfmi_docker dockerfile
+.PHONY: docker_environment install-python c-compiler fmil pyfmi_docker dockerfile pyfmi_folder pyfmi_wheel
 #TODO test building docker configurations (generating different docker_id), and test that we get the correct ID
 
 # Please see section 6.11 https://www.gnu.org/software/make/manual/make.html#Target_002dspecific
@@ -40,18 +40,23 @@ pyfmi_wheel:
 	cd $(PYFMI_SRC)/../; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
-	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS)
+	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS); \
+	find -type f -name *.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
 
+pyfmi_folder: fmil
 pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
-pyfmi_folder: INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
-pyfmi_folder: PYTHONPATH=$(INSTALL_DIR)/Lib/site-packages
+pyfmi_folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
+pyfmi_folder: PYTHONPATH=$(LOCAL_INSTALL_DIR)/Lib/site-packages
 pyfmi_folder:
 	mkdir -p ${LOCAL_BUILD_DIR}; \
 	cd $(PYFMI_SRC)/../; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
-	mkdir -p $(INSTALL_DIR)/Lib/site-packages; \
-	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(INSTALL_DIR); \
+	mkdir -p $(LOCAL_INSTALL_DIR)/Lib/site-packages; \
+	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(LOCAL_INSTALL_DIR); \
+	cd $(LOCAL_INSTALL_DIR)/Lib/site-packages; \
+	mkdir -p $(INSTALL_DIR_FOLDER); \
+	find -type d -name pyfmi -exec cp -r {} $(INSTALL_DIR_FOLDER) \;
 
 c-compiler:
 	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_gcc.sh
@@ -63,10 +68,9 @@ dockerfile:
 	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh
 	# TODO: use dockerfile hash or include information in dockerfile
 
-fmil: cmake
-	@echo "FMIL build placeholder"
-	cd $FMIL_HOME && cmake something
-	# TODO: Maybe call fmil makefile
+fmil: 
+	cd $(BUILD_EXTERNALS_DIR)/build/fmil; \
+	make install BUILD_EXTERNALS_DIR=$(BUILD_EXTERNALS_DIR) FMIL_HOME=$(FMIL_HOME) BUILD_DIR=$(BUILD_DIR) USER_CONFIG=$(FMIL_CONFIG)
 
 install-python: docker_environment c-compiler
 	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_python.sh ${PYTHON_VERSION}

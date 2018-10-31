@@ -6,7 +6,9 @@ FORCE_32_BIT=false
 EXTRA_C_FLAGS=
 EXTRA_SETUP_ARGS=--no-msvcr=true
 
+INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_64
 # Required variables
 FMIL_HOME=$(SDK_HOME)/build/FMIL_install64
+FMIL_CONFIG=$(mkfile_dir)/../../FMILibrary/windows/win64
 # Optional variables
 PYTHONHOME=$(SDK_HOME)/Python27/Python_64/

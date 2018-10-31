@@ -1,0 +1,2 @@
+GENERATOR=-G "MSYS Makefiles"
+# BUILD_DIR=${SDK_HOME}/build
