@@ -217,8 +217,8 @@ aspect FlatTypeCheck {
         if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && checkType.checkTypes()) {
             Index arrayIndex = indexInModification();
             
-            FlatType expectedBT = expectedBindingType();
-            FlatType actualBT = actualBindingType();
+            CommonType expectedBT = expectedBindingType();
+            CommonType actualBT = actualBindingType();
             
             if (expectedBT.size().equals(actualBT.size())) {
                 if (expectedBT.size().isEmpty()) {
@@ -227,8 +227,8 @@ aspect FlatTypeCheck {
                     Size arraySize = expectedBT.size().contractLeft(expectedBT.ndims() - arrayIndex.ndims());
                     for (Index index : Indices.create(arraySize)) {
                         index = arrayIndex.expand(index);
-                        FlatType expected = expectedBT.cell(index);
-                        FlatType actual = actualBT.cell(index);
+                        CommonType expected = expectedBT.cell(index);
+                        CommonType actual = actualBT.cell(index);
                         
                         typeCheckCell(expected, actual, bexp, unknownAllowed, expectedBT.size(), actualBT.size());
                     }
@@ -257,7 +257,7 @@ aspect FlatTypeCheck {
         super.typeCheck(checkType);
     }
     
-    private void InstAssignable.typeCheckCell(FlatType expectedBT, FlatType actualBT, FExp bexp, boolean unknownAllowed, Size expectedSize, Size actualSize) {
+    private void InstAssignable.typeCheckCell(CommonType expectedBT, CommonType actualBT, FExp bexp, boolean unknownAllowed, Size expectedSize, Size actualSize) {
         InstValueModification ivm = myInstValueMod();
         
         if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {

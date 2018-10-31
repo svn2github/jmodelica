@@ -229,9 +229,9 @@ aspect InstTypeAnalysis {
     eq InstBuiltIn.isString() = 
         myInstClass().finalClass().primitiveName().equals("StringType");
 
-    syn FlatType InstAssignable.flatType() = type();
+    syn CommonType InstAssignable.commonType() = type();
     
-    eq InstRecord.flatType() {
+    eq InstRecord.commonType() {
         Map<Index, InstComponentDecl> decls = new HashMap<>();
         for (Index index : indices()) {
             InstComponentDecl decl = this;
@@ -249,7 +249,7 @@ aspect InstTypeAnalysis {
 
 aspect InstBindingType {
 
-    syn FlatType InstAssignable.expectedBindingType() {
+    syn CommonType InstAssignable.expectedBindingType() {
         InstValueModification ivm = myInstValueMod();
         return type().sizedType(ivm.expectedSize());
     }
@@ -257,10 +257,10 @@ aspect InstBindingType {
     eq InstRecord.expectedBindingType() {
         InstValueModification ivm = myInstValueMod();
         Size arraySize = ivm.expectedSize().contractRight(indexInModification().ndims());
-        return flatType().expand(arraySize);
+        return commonType().expand(arraySize);
     }
 
-    syn FlatType InstAssignable.actualBindingType() {
+    syn CommonType InstAssignable.actualBindingType() {
         FExp bexp = myBindingInstExp();
         if (bexp.type().isRecord() && bexp.size().equals(bexp.getArray().size())) {
             Array array = bexp.getArray();
