@@ -30,5 +30,5 @@ class TestGuid:
         mo_file = os.path.join(get_files_path(), 'Modelica', "BouncingBall.mo")
         fmu = load_fmu(compile_fmu("BouncingBall", [mo_file]))
         guid = fmu.get_guid()
-        assert(guid == "8acdabcc34fceff19609c26b14f34ed7")
+        assert guid == "e78566267bbdd256d5ac8b1db5cb1c08", "GUID was " + fmu.get_guid()
        
