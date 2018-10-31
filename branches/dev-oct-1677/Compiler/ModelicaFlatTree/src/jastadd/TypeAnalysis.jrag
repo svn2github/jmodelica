@@ -134,6 +134,10 @@ aspect FlatTypeInterface {
             return scalarType().asFType().sizedType(size());
         };
         
+        public String toString() {
+            return scalarType.toString() + size();
+        };
+        
         public boolean isBoolean() { return scalarType().isBoolean(); }
         public boolean isInteger() { return scalarType().isInteger(); }
         public boolean isReal() { return scalarType().isReal(); }
@@ -410,13 +414,17 @@ aspect FlatTypeAnalysis {
     public FType FRecordType.forConstructor(List<? extends HasType> args) {
         FRecordType frt = treeCopy();
         for (int i = 0; i < frt.getNumComponent(); i++) {
-            if (frt.getComponent(i).getFType().isRecord() && args.getChild(i).type().isRecord()) {
-                frt.setComponent(new FRecordComponentType(frt.getComponent(i).getName(), args.getChild(i).type().treeCopy()), i);
-            } else {
-                frt.getComponent(i).getFType().transferSizes(args.getChild(i).type());
-            }
+            frt.updateComponent(args.getChild(i).type(), i);
         }
         return frt;
+    }
+    
+    private void FRecordType.updateComponent(FType type, int i) {
+        if (getComponent(i).getFType().isRecord() && type.isRecord()) {
+            getComponent(i).setFType(type.treeCopy());
+        } else {
+            getComponent(i).getFType().transferSizes(type);
+        }
     }
 
     public interface HasType {

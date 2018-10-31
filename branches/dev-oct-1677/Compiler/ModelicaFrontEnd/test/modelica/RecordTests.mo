@@ -2466,7 +2466,7 @@ model RecordArray10
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RecordArray10",
-            description="Tests type checking of an array of records where the elements in the array have different sizes",
+            description="Tests type checking of an array of arrays of records where the elements have different sizes",
             flatModel="
 fclass RecordTests.RecordArray10
  parameter RecordTests.RecordArray10.S s[10] = {RecordTests.RecordArray10.S(1, 1 + 1), RecordTests.RecordArray10.S(2, 2 + 1), RecordTests.RecordArray10.S(3, 3 + 1), RecordTests.RecordArray10.S(4, 4 + 1), RecordTests.RecordArray10.S(5, 5 + 1), RecordTests.RecordArray10.S(6, 6 + 1), RecordTests.RecordArray10.S(7, 7 + 1), RecordTests.RecordArray10.S(8, 8 + 1), RecordTests.RecordArray10.S(9, 9 + 1), RecordTests.RecordArray10.S(10, 10 + 1)} /* { RecordTests.RecordArray10.S(1, 2), RecordTests.RecordArray10.S(2, 3), RecordTests.RecordArray10.S(3, 4), RecordTests.RecordArray10.S(4, 5), RecordTests.RecordArray10.S(5, 6), RecordTests.RecordArray10.S(6, 7), RecordTests.RecordArray10.S(7, 8), RecordTests.RecordArray10.S(8, 9), RecordTests.RecordArray10.S(9, 10), RecordTests.RecordArray10.S(10, 11) } */;
