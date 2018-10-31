@@ -34,6 +34,7 @@ python_packages: install-python
 docker_environment:
 	${BUILD_EXTERNALS_DIR}/docker/platforms/${PLATFORM}/install_dependencies.sh
 
+pyfmi_wheel: fmil
 pyfmi_wheel: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_WHEELBUILD_$(BITNESS)
 pyfmi_wheel:
 	mkdir -p ${LOCAL_BUILD_DIR}; \

@@ -2,4 +2,6 @@ JM_HOME="/tmp/jm_home"
 JM_HOME_IN_DOCKER=/tmp/jm_home
 BUILD_ENVIRONMENT="${JM_HOME}/build_environment"
 BUILD_EXTERNALS_DIR="${JM_HOME}/external/build_externals"
-BUILD_DIR_FMIL=${SDK_HOME}/build/fmil
+BUILD_DIR=${SDK_HOME}/build
+BUILD_DIR_FMIL=${BUILD_DIR}/fmil
+FMIL_HOME=${BUILD_DIR}/fmil_install

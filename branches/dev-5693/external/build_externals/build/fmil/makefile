@@ -14,7 +14,7 @@ export $(shell sed 's/=.*//' $(USER_CONFIG))
 .PHONY: install 
 
 install:
-	mkdir -p $(BUILD_DIR) && \
-	cd $(BUILD_DIR) && \
+	mkdir -p $(BUILD_DIR_FMIL) && \
+	cd $(BUILD_DIR_FMIL) && \
 	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_HOME) $(BUILD_EXTERNALS_DIR)/../FMILibrary/FMILibrary/; \
-	cd $(BUILD_DIR)/FMIL_build && make install DESTDIR=
+	cd $(BUILD_DIR_FMIL) && make install DESTDIR=
