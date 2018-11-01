@@ -25,10 +25,40 @@ export $(shell sed 's/=.*//' default_config)
 include $(USER_CONFIG)
 export $(shell sed 's/=.*//' $(USER_CONFIG))
 
-.PHONY: install 
+.PHONY: install fmil_docker_build
 
 install:
 	mkdir -p $(BUILD_DIR_FMIL) && \
 	cd $(BUILD_DIR_FMIL) && \
 	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_HOME) $(BUILD_EXTERNALS_DIR)/../FMILibrary/FMILibrary/; \
 	cd $(BUILD_DIR_FMIL) && make install DESTDIR=
+
+fmil_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
+fmil_docker: docker_image
+	@echo "Starting docker with id ${DOCKER_ID} in fmil makefile"
+	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make fmil_docker_build"
+	@docker rmi -f ${DOCKER_ID}
+
+fmil_docker_build: docker_environment c-compiler cmake install
+	@echo "Finished building FMIL"
+
+docker_environment:
+	${BUILD_EXTERNALS_DIR}/docker/platforms/${PLATFORM}/install_dependencies.sh
+
+c-compiler:
+	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_gcc.sh
+
+# TODO: SHOULD CONFIG PATH BE A VARIABLE OR SHOULD PLATFORM INFO BE IN ALL CONFIGS?
+docker_image: dockerfile
+	${DOCKER_UTILS_DIR}/build_docker_image.sh ./default_config
+
+dockerfile:
+	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh
+
+cmake:
+	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_cmake.sh
+
+clean: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
+clean:
+	@docker rmi -f ${DOCKER_ID}
+

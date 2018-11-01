@@ -2,6 +2,8 @@
 
 set -e
 
+#TODO add check if compiled python version is already available on artifactory
+
 PYTHON_VERSION=$1
 # If we install python version X.Y.Z we get directory pythonX.Y, so we extract first two digits
 SHORT_VER=${PYTHON_VERSION:0:3}

@@ -15,8 +15,6 @@
 
 source $1
 BASE_DIR=$(dirname "$0")
-#CONFIG="${BASE_DIR}/configurations/docker_config"
-#. "${CONFIG}"
 
 # check if docker image with given config already exists
 HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $PYTHON_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"

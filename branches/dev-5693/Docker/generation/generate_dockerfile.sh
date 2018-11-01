@@ -14,7 +14,23 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
 # variables are sourced already in build system
+# The X is just to allow empty strings
+if [[ X"$1" = X"PYFMI_BASE" ]]; then
+cat <<EOF> $(dirname     "$0")/Dockerfile
+ARG LINUX_DIST=${PLATFORM}
+ARG DIST_VER=${DIST_VERSION}
+ARG PYTHON_VER=${PYTHON_VERSION}
+ARG BUILD_TARGET=${BUILD_TARGET}
 
+# starting linux environment
+FROM \$LINUX_DIST:\$DIST_VER
+LABEL maintainer="Modelon AB"
+RUN mkdir -p fmil
+COPY FMILibrary/ /fmil
+# cleanup
+RUN echo "TODO: Add cleanup script"
+EOF
+else
 cat <<EOF> $(dirname     "$0")/Dockerfile
 ARG LINUX_DIST=${PLATFORM}
 ARG DIST_VER=${DIST_VERSION}
@@ -30,3 +46,4 @@ RUN if [ ${PLATFORM} = "ubuntu" ]; then apt-get update && apt-get install -y mak
 # cleanup
 RUN echo "TODO: Add cleanup script"
 EOF
+fi

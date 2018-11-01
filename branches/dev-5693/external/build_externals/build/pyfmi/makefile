@@ -37,19 +37,27 @@ export $(shell sed 's/=.*//' $(USER_CONFIG))
 .PHONY: docker_environment install-python c-compiler fmil pyfmi_docker dockerfile pyfmi_folder pyfmi_wheel
 #TODO test building docker configurations (generating different docker_id), and test that we get the correct ID
 
+
+pyfmi_base_image:
+	cd $(BUILD_EXTERNALS_DIR_LOCAL)/build/fmil && make fmil_docker
+	cd $(FMIL_BIN) && \
+	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh "PYFMI_BASE"; \
+	${DOCKER_UTILS_DIR}/build_docker_image.sh
+	@echo "Finished building pyfmi base image"
+
 # Please see section 6.11 https://www.gnu.org/software/make/manual/make.html#Target_002dspecific
 pyfmi_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
 pyfmi_docker: docker_image
 	@echo "Starting docker with id ${DOCKER_ID}"
 	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make pyfmi_docker_build"
-	#docker run -t ${DOCKER_ID} sh -c "awk -F= '/^NAME/{print $2}' /etc/os-release"
-	#docker commit $(docker ps -lq) jmodelica:pyfmi
+	#@docker rmi -f ${DOCKER_ID}
 
 pyfmi_docker_build: docker_environment cmake fmil install-python python_packages
 	@echo "pyfmi build placeholder"
 
 python_packages: install-python
 	${BUILD_EXTERNALS_DIR}/docker/platforms/non-specific/install_python_packages.sh
+
 docker_environment:
 	${BUILD_EXTERNALS_DIR}/docker/platforms/${PLATFORM}/install_dependencies.sh
 
@@ -86,8 +94,8 @@ docker_image: dockerfile
 
 dockerfile:
 	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh
-	# TODO: use dockerfile hash or include information in dockerfile
 
+# TODO: Ask Agnes why we have to cd then run make, instead of running make from here
 fmil: 
 	cd $(BUILD_EXTERNALS_DIR)/build/fmil; \
 	make install BUILD_EXTERNALS_DIR=$(BUILD_EXTERNALS_DIR) FMIL_HOME=$(FMIL_HOME) BUILD_DIR=$(BUILD_DIR) USER_CONFIG=$(FMIL_CONFIG)
