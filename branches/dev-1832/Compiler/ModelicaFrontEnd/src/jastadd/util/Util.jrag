@@ -1923,12 +1923,16 @@ aspect UtilInterface {
         private OptionRegistry options;
         private IErrorHandler eh;
         private ExternalFunctionCache efc;
+        private GUIDManager guidManager;
+        private File path;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File path) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
             this.efc = efc;
+            this.path = path;
+            guidManager = new GUIDManager();
         }
         
         public ModelicaCompiler getModelicaCompiler() {
@@ -1946,6 +1950,18 @@ aspect UtilInterface {
         public ExternalFunctionCache getExternalFunctionCache() {
             return efc;
         }
+        
+        public GUIDManager getGuidManager() {
+            return guidManager;
+        }
+        
+        public File getPath() {
+            return path;
+        }
+        
+        public void setPath(File path) {
+            this.path = path;
+        }
     }
     
     UtilInterface ModelicaCompiler.createUtilInterface() {
@@ -1953,25 +1969,25 @@ aspect UtilInterface {
     }
     
     public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
-        return create(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache());
+        return create(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache(), null);
     }
     
     public static UtilInterface UtilInterface.create(UtilInterface other) {
         return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), 
-                other.getErrorHandler(), other.getExternalFunctionCache());
+                other.getErrorHandler(), other.getExternalFunctionCache(), other.getPath());
     }
     
     public static UtilInterface UtilInterface.create(OptionRegistry options) {
-        return create(null, options, new DefaultErrorHandler(), null);
+        return create(null, options, new DefaultErrorHandler(), null, null);
     }
     
     public static UtilInterface UtilInterface.create(OptionRegistry options, IErrorHandler eh) {
-        return create(null, options, eh, null);
+        return create(null, options, eh, null, null);
     }
     
     private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
-            IErrorHandler eh, ExternalFunctionCache efc) {
-        return new UtilInterface(mc, options, eh, efc);
+            IErrorHandler eh, ExternalFunctionCache efc, File path) {
+        return new UtilInterface(mc, options, eh, efc, path);
     }
     
     public void Root.transferRoot(Root other) {

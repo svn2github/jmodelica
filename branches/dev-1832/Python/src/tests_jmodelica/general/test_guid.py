@@ -17,9 +17,11 @@
 """
 Module for testing GUID generation.
 """
+import os
+
 import nose
 
-from tests_jmodelica import testattr
+from tests_jmodelica import testattr, get_files_path
 
 class TestGuid:
     
