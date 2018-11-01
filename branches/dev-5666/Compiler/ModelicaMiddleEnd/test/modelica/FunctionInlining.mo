@@ -4916,6 +4916,81 @@ end FunctionInlining.InputAsIndex4;
 ")})));
 end InputAsIndex4;
 
+model DontInlineFEquationInWhenLoop
+    model Functions
+        function toInline
+                input Real x;
+                output Boolean y;
+            algorithm
+                y := problem(if x >= 0 then 1 - exp(x ^ 3) else 0);
+                return;
+            annotation(Inline = true);
+        end toInline;
+    
+        function problem
+                input Real p;
+                output Boolean y;
+            algorithm
+                y := p < 1;
+                return;
+        end problem;
+    end Functions;
+    
+    Real x "Time-varying input";
+    discrete output Real y "Output";
+    initial equation
+        y = 0;
+    equation
+        x = time;
+        when sample(0, 0.1) then
+            if Functions.toInline(x) then
+            y = 1;
+        else
+            y = 0;
+        end if;
+    end when;
+        annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DontInlineFEquationInWhenLoop",
+            description="",
+            flatModel="
+fclass FunctionInlining.DontInlineFEquationInWhenLoop
+ Real x \"Time-varying input\";
+ discrete output Real y \"Output\";
+ discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
+initial equation
+ y = 0;
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time / 0.1);
+equation
+ x = time;
+ y = if temp_1 and not pre(temp_1) then if FunctionInlining.DontInlineFEquationInWhenLoop.Functions.toInline(x) then 1 else 0 else pre(y);
+ temp_1 = not initial() and time >= pre(_sampleItr_1) * 0.1;
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < (pre(_sampleItr_1) + 1) * 0.1, \"Too long time steps relative to sample interval.\");
+
+public
+ function FunctionInlining.DontInlineFEquationInWhenLoop.Functions.toInline
+  input Real x;
+  output Boolean y;
+ algorithm
+  y := FunctionInlining.DontInlineFEquationInWhenLoop.Functions.problem(if x >= 0 then 1 - exp(x ^ 3) else 0);
+  return;
+ annotation(Inline = true);
+ end FunctionInlining.DontInlineFEquationInWhenLoop.Functions.toInline;
+
+ function FunctionInlining.DontInlineFEquationInWhenLoop.Functions.problem
+  input Real p;
+  output Boolean y;
+ algorithm
+  y := p < 1;
+  return;
+ end FunctionInlining.DontInlineFEquationInWhenLoop.Functions.problem;
+
+end FunctionInlining.DontInlineFEquationInWhenLoop;
+")})));
+end DontInlineFEquationInWhenLoop;
 
 model SizeParam1
     function f
@@ -4996,5 +5071,196 @@ equation
 end FunctionInlining.EqType1;
 ")})));
 end EqType1;
+
+model GlobalConst1
+    constant Real[:] c = {2,3};
+
+    function f
+        input Real i;
+        output Real o;
+    algorithm
+        o := c[integer(i)];
+    end f;
+
+    Real x = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConst1",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConst1
+ constant Real c[1] = 2;
+ constant Real c[2] = 3;
+ Real x;
+equation
+ x = 2.0;
+end FunctionInlining.GlobalConst1;
+")})));
+end GlobalConst1;
+
+model GlobalConst2
+    record R1
+        parameter Real x;
+    end R1;
+    record R2
+        parameter R1[2] r1;
+    end R2;
+    function f
+        input Integer i;
+        constant R2 a = R2({R1(2),R1(3)});
+        output R1 y = a.r1[i];
+    algorithm
+    end f;
+    
+    R1 y = f(integer(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConst2",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConst2
+ parameter Integer temp_2;
+ parameter Real y.x;
+global variables
+ constant FunctionInlining.GlobalConst2.R2 FunctionInlining.GlobalConst2.f.a = FunctionInlining.GlobalConst2.R2({FunctionInlining.GlobalConst2.R1(2), FunctionInlining.GlobalConst2.R1(3)});
+parameter equation
+ temp_2 = integer(time);
+ y.x = global(FunctionInlining.GlobalConst2.f.a.r1[temp_2].x);
+
+public
+ record FunctionInlining.GlobalConst2.R1
+  parameter Real x;
+ end FunctionInlining.GlobalConst2.R1;
+
+ record FunctionInlining.GlobalConst2.R2
+  parameter FunctionInlining.GlobalConst2.R1 r1[2];
+ end FunctionInlining.GlobalConst2.R2;
+
+end FunctionInlining.GlobalConst2;
+")})));
+end GlobalConst2;
+
+model GlobalConst3
+    constant R1[1] r = {R1(2)};
+    record R1
+        parameter Real x;
+    end R1;
+    function f
+        input Integer i;
+        output Real y = 1 + r[i].x;
+    algorithm
+    end f;
+    
+    Real y = f(integer(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConst3",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConst3
+ constant Real r[1].x = 2;
+ Real y;
+ discrete Integer temp_1;
+global variables
+ constant FunctionInlining.GlobalConst3.R1 FunctionInlining.GlobalConst3.r[1] = {FunctionInlining.GlobalConst3.R1(2)};
+initial equation
+ pre(temp_1) = 0;
+equation
+ y = 1 + global(FunctionInlining.GlobalConst3.r[temp_1].x);
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+
+public
+ record FunctionInlining.GlobalConst3.R1
+  parameter Real x;
+ end FunctionInlining.GlobalConst3.R1;
+
+end FunctionInlining.GlobalConst3;
+")})));
+end GlobalConst3;
+
+model GlobalConstExtObj1
+    package P
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Real[:] x;
+                output EO eo;
+                external;
+            end constructor;
+            function destructor
+                input EO eo;
+                external;
+            end destructor;
+        end EO;
+        
+        function f
+            input EO eo;
+            output Real y;
+            external;
+        end f;
+        
+        constant Real x = 1;
+        constant EO eo = EO({x});
+        constant EO eo1 = eo;
+    end P;
+    
+    function f
+        input Real x;
+        input P.EO eo;
+        output Real y = x + P.f(eo);
+    algorithm
+    end f;
+
+    Real y = f(time, P.eo1);
+
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="GlobalConstExtObj1",
+            description="Inlining global constant",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionInlining.GlobalConstExtObj1
+ Real y;
+global variables
+ constant FunctionInlining.GlobalConstExtObj1.P.EO FunctionInlining.GlobalConstExtObj1.P.eo = FunctionInlining.GlobalConstExtObj1.P.EO.constructor({1.0});
+ constant FunctionInlining.GlobalConstExtObj1.P.EO FunctionInlining.GlobalConstExtObj1.P.eo1 = global(FunctionInlining.GlobalConstExtObj1.P.eo);
+equation
+ y = time + FunctionInlining.GlobalConstExtObj1.P.f(global(FunctionInlining.GlobalConstExtObj1.P.eo1));
+
+public
+ function FunctionInlining.GlobalConstExtObj1.P.EO.destructor
+  input FunctionInlining.GlobalConstExtObj1.P.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end FunctionInlining.GlobalConstExtObj1.P.EO.destructor;
+
+ function FunctionInlining.GlobalConstExtObj1.P.EO.constructor
+  input Real[:] x;
+  output FunctionInlining.GlobalConstExtObj1.P.EO eo;
+ algorithm
+  external \"C\" eo = constructor(x, size(x, 1));
+  return;
+ end FunctionInlining.GlobalConstExtObj1.P.EO.constructor;
+
+ function FunctionInlining.GlobalConstExtObj1.P.f
+  input FunctionInlining.GlobalConstExtObj1.P.EO eo;
+  output Real y;
+ algorithm
+  external \"C\" y = f(eo);
+  return;
+ end FunctionInlining.GlobalConstExtObj1.P.f;
+
+ type FunctionInlining.GlobalConstExtObj1.P.EO = ExternalObject;
+end FunctionInlining.GlobalConstExtObj1;
+")})));
+end GlobalConstExtObj1;
 
 end FunctionInlining;

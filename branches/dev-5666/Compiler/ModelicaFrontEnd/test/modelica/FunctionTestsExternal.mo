@@ -17,6 +17,33 @@
 
 package FunctionTestsExternal
 
+model ExternalFuncEmpty1
+ function f
+ external;
+ end f;
+equation
+ f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ExternalFuncEmpty1",
+            description="External functions: No IO",
+            flatModel="
+fclass FunctionTestsExternal.ExternalFuncEmpty1
+equation
+ FunctionTestsExternal.ExternalFuncEmpty1.f();
+
+public
+ function FunctionTestsExternal.ExternalFuncEmpty1.f
+ algorithm
+  external \"C\" f();
+  return;
+ end FunctionTestsExternal.ExternalFuncEmpty1.f;
+
+end FunctionTestsExternal.ExternalFuncEmpty1;
+")})));
+end ExternalFuncEmpty1;
+
 model ExternalFunc1
  function f
   input Real x;
@@ -546,6 +573,48 @@ model ExternalFuncLibs8
             methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
  )})));
 end ExternalFuncLibs8;
+
+model ExternalFuncLibs9
+ constant String LIBS[:] = { "foo", "bar", "m" };
+ 
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(Library=LIBS[1]);
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Library=LIBS[2]);
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external annotation(Library=LIBS[2:3]);
+ end f3;
+ 
+ function f4
+  input Real x;
+  output Real y;
+ external;
+ end f4;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+ Real x4 = f4(4);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ExternalFuncLibs9",
+            description="External function annotations, Library, using constants",
+            variability_propagation=false,
+            methodName="externalLibraries",
+            methodResult="[foo, bar, m]"
+ )})));
+end ExternalFuncLibs9;
 
 model InvalidAnnotation1
  function f

@@ -1135,85 +1135,6 @@ jmi_real_t func_CCodeGenExternalTests_ExternalLiteral3_f_exp0() {
 ")})));
 end ExternalLiteral3;
 
-model ExternalConstant1
-    function f1
-        input Real x;
-        output Real y;
-        constant Real c = 3;
-        constant Real[1] d = {3};
-        external "C" y = f(x,c,d);
-    end f1;
-    function f2
-        input Real x;
-        output Real y;
-        constant Real c = 3;
-        constant Real[1] d = {3};
-        external "C";
-    end f2;
-    
-    Real y = f1(time) + f2(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="ExternalConstant1",
-            description="Constants in external calls",
-            variability_propagation=false,
-            template="
-$C_function_headers$
-$C_functions$
-",
-            generatedCode="
-void func_CCodeGenExternalTests_ExternalConstant1_f1_def0(jmi_real_t x_v, jmi_real_t* y_o);
-jmi_real_t func_CCodeGenExternalTests_ExternalConstant1_f1_exp0(jmi_real_t x_v);
-void func_CCodeGenExternalTests_ExternalConstant1_f2_def1(jmi_real_t x_v, jmi_real_t* y_o);
-jmi_real_t func_CCodeGenExternalTests_ExternalConstant1_f2_exp1(jmi_real_t x_v);
-
-void func_CCodeGenExternalTests_ExternalConstant1_f1_def0(jmi_real_t x_v, jmi_real_t* y_o) {
-    JMI_DYNAMIC_INIT()
-    JMI_DEF(REA, c_v)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, d_a, 1, 1)
-    JMI_DEF(REA, y_v)
-    extern double f(double, double, double*);
-    c_v = 3;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, d_a, 1, 1, 1)
-    jmi_array_ref_1(d_a, 1) = 3;
-    y_v = f(x_v, c_v, d_a->var);
-    JMI_RET(GEN, y_o, y_v)
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_real_t func_CCodeGenExternalTests_ExternalConstant1_f1_exp0(jmi_real_t x_v) {
-    JMI_DEF(REA, y_v)
-    func_CCodeGenExternalTests_ExternalConstant1_f1_def0(x_v, &y_v);
-    return y_v;
-}
-
-void func_CCodeGenExternalTests_ExternalConstant1_f2_def1(jmi_real_t x_v, jmi_real_t* y_o) {
-    JMI_DYNAMIC_INIT()
-    JMI_DEF(REA, c_v)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, d_a, 1, 1)
-    JMI_DEF(REA, y_v)
-    extern double f2(double, double, double*, size_t);
-    c_v = 3;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, d_a, 1, 1, 1)
-    jmi_array_ref_1(d_a, 1) = 3;
-    y_v = f2(x_v, c_v, d_a->var, jmi_array_size(d_a, 0));
-    JMI_RET(GEN, y_o, y_v)
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_real_t func_CCodeGenExternalTests_ExternalConstant1_f2_exp1(jmi_real_t x_v) {
-    JMI_DEF(REA, y_v)
-    func_CCodeGenExternalTests_ExternalConstant1_f2_def1(x_v, &y_v);
-    return y_v;
-}
-
-
-")})));
-end ExternalConstant1;
-
 model ExternalArray1
     Real a_in[2]={1,1};
     Real b_out;
@@ -2318,9 +2239,11 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, Awork_a, -1, 2)
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, work_a, -1, 1)
     jmi_real_t i1_0i;
-    jmi_real_t i1_0ie;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
     jmi_real_t i2_1i;
-    jmi_real_t i2_1ie;
+    jmi_int_t i2_1ie;
+    jmi_int_t i2_1in;
     JMI_DEF(STR_EXT, tmp_1)
     JMI_DEF(STR_EXT, tmp_2)
     JMI_DEF(INT_EXT, tmp_3)
@@ -2348,10 +2271,12 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     n_v = jmi_array_size(A_a, 0);
     lwork_v = 12 * n_v;
     JMI_ARRAY_INIT_2(DYNA, jmi_real_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
-    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
-        i2_1ie = jmi_array_size(A_a, 1) + 1 / 2.0;
-        for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
+    i1_0in = 0;
+    i1_0ie = floor((jmi_array_size(A_a, 0)) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        i2_1in = 0;
+        i2_1ie = floor((jmi_array_size(A_a, 1)) - (1));
+        for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
     }
@@ -2369,7 +2294,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     jmi_matrix_to_fortran_real(eigenVectors_a, eigenVectors_a->var, tmp_8->var);
     tmp_9 = (int)n_v;
     tmp_10 = (int)info_v;
-    dgeev_(tmp_1, tmp_2, &tmp_3, tmp_4->var, &tmp_5, eigenReal_a->var, eigenImag_a->var, tmp_6->var, &tmp_7, tmp_8->var, &tmp_9, work_a->var, &jmi_array_size(work_a, 0), &tmp_10);
+    dgeev_(tmp_1, tmp_2, &tmp_9, tmp_4->var, &tmp_9, eigenReal_a->var, eigenImag_a->var, tmp_6->var, &tmp_7, tmp_8->var, &tmp_9, work_a->var, &jmi_array_size(work_a, 0), &tmp_10);
     jmi_matrix_from_fortran_real(eigenVectors_a, tmp_8->var, eigenVectors_a->var);
     info_v = tmp_10;
     JMI_RET(GEN, info_o, info_v)
@@ -3068,12 +2993,12 @@ equation
             description="",
             variability_propagation=false,
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_parameters$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _z1_8 = (5);
@@ -3083,33 +3008,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_start_values_1_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    _y1_4 = (0.0);
-    _y2_5 = (0.0);
-    _y3_6 = (0.0);
-    _y4_7 = (0.0);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (_myEO3_2 != NULL) {
@@ -3238,28 +3137,16 @@ model TestExtObject7
             description="Test that constructor and destructor calls are generated for external objects in records.",
             variability_propagation=false,
             template="
-$C_set_start_values$
+$C_model_init_eval_independent_start$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _r_eo_0 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
     _r_eos_1_1 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
     _r_eos_2_2 = (func_CCodeGenExternalTests_ExtObject_constructor_exp1());
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    model_init_eval_parameters(jmi);
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -3307,12 +3194,12 @@ model TestExtObject8
             description="Test that constructor and destructor calls are generated for external objects in records.",
             variability_propagation=false,
             template="
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_dependent_parameters$
 $C_destruct_external_object$
 ",
             generatedCode="
 
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (_eo_1 != NULL) {
@@ -3362,43 +3249,27 @@ model TestExtObject9
             name="TestExtObject9",
             description="",
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_independent_start$
+$C_model_init_eval_dependent_variables$
 $C_ode_initialization$
 $C_dae_init_blocks_residual_functions$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_1_0(jmi_t* jmi) {
+int model_init_eval_independent_start(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _x_0 = (0.0);
-    _y_2 = (0.0);
     _eo_1 = (NULL);
     JMI_DYNAMIC_FREE()
     return ef;
 }
 
-
-int jmi_set_start_values_1_0(jmi_t* jmi);
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    model_init_eval_parameters(jmi);
-    ef |= jmi_set_start_values_1_0(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_variables(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
@@ -3439,7 +3310,7 @@ annotation(__JModelica(UnitTesting(tests={
         description="",
         template="
 $C_variable_aliases$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_dependent_parameters$
 $C_functions$
 ",
         generatedCode="
@@ -3450,7 +3321,7 @@ $C_functions$
 #define _myEOs_2_1 ((jmi->ext_objs)[1])
 
 
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_extobj_t, jmi_extobj_array_t, tmp_1, 2, 1)

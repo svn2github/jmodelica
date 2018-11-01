@@ -464,6 +464,7 @@ model FunctionFlatten9
         output Real[2] y;
     algorithm
         y := x .+ a[i] .+ a[i+1];
+        annotation(Inline=false);
     end f;
     
     Real[2] z = f({3,4}, 1);
@@ -480,24 +481,22 @@ fclass FunctionTests.FunctionFlatten9
  constant Real a[3] = 3;
  Real z[1];
  Real z[2];
+global variables
+ constant Real FunctionTests.FunctionFlatten9.a[3] = {1, 2, 3};
 equation
  ({z[1], z[2]}) = FunctionTests.FunctionFlatten9.f({3, 4}, 1);
 
 public
  function FunctionTests.FunctionFlatten9.f
-  Real[:] a;
   input Real[:] x;
   input Integer i;
   output Real[:] y;
  algorithm
-  init a as Real[3];
-  a[1] := 1;
-  a[2] := 2;
-  a[3] := 3;
   init y as Real[2];
-  y[1] := x[1] .+ a[i] .+ a[i + 1];
-  y[2] := x[2] .+ a[i] .+ a[i + 1];
+  y[1] := x[1] .+ global(FunctionTests.FunctionFlatten9.a[i]) .+ global(FunctionTests.FunctionFlatten9.a[i + 1]);
+  y[2] := x[2] .+ global(FunctionTests.FunctionFlatten9.a[i]) .+ global(FunctionTests.FunctionFlatten9.a[i + 1]);
   return;
+ annotation(Inline = false);
  end FunctionTests.FunctionFlatten9.f;
 
 end FunctionTests.FunctionFlatten9;
@@ -1002,13 +1001,14 @@ model FunctionFlatten21
             flatModel="
 fclass FunctionTests.FunctionFlatten21
  Real x = FunctionTests.FunctionFlatten21.f();
+global variables
+ constant Real FunctionTests.FunctionFlatten21.f.x; // TODO: Compilation error?
 
 public
  function FunctionTests.FunctionFlatten21.f
-  Real x;
   output Real y;
  algorithm
-  y := x;
+  y := global(FunctionTests.FunctionFlatten21.f.x);
   return;
  end FunctionTests.FunctionFlatten21.f;
 
@@ -1080,19 +1080,18 @@ model FunctionFlatten23
             flatModel="
 fclass FunctionTests.FunctionFlatten23
  Real y;
+global variables
+ constant FunctionTests.FunctionFlatten23.R FunctionTests.FunctionFlatten23.f.r = FunctionTests.FunctionFlatten23.R(1, {3.14});
 equation
  y = FunctionTests.FunctionFlatten23.f(time);
 
 public
  function FunctionTests.FunctionFlatten23.f
-  FunctionTests.FunctionFlatten23.R r;
   input Real x;
   output Real y;
  algorithm
-  r.n := 1;
-  r.a[1] := 3.14;
   for i in 1:1 loop
-   y := r.a[i] * x;
+   y := global(FunctionTests.FunctionFlatten23.f.r.a[i]) * x;
   end for;
   return;
  end FunctionTests.FunctionFlatten23.f;
@@ -10279,12 +10278,14 @@ model UnknownArray29
         output Real y1;
     algorithm
       y1 := f2({a[i], a[i+1]});
+        annotation(Inline=false);
     end f1;
     
     function f2
         input Real x2[:];
         output Real y2 = sum(x2);
     algorithm
+        annotation(Inline=false);
     end f2;
     
     Real x = f1(1);
@@ -10300,21 +10301,19 @@ fclass FunctionTests.UnknownArray29
  constant Real a[2] = 2;
  constant Real a[3] = 3;
  Real x;
+global variables
+ constant Real FunctionTests.UnknownArray29.a[3] = {1, 2, 3};
 equation
  x = FunctionTests.UnknownArray29.f1(1);
 
 public
  function FunctionTests.UnknownArray29.f1
-  Real[:] a;
   input Integer i;
   output Real y1;
  algorithm
-  init a as Real[3];
-  a[1] := 1;
-  a[2] := 2;
-  a[3] := 3;
-  y1 := FunctionTests.UnknownArray29.f2({a[i], a[i + 1]});
+  y1 := FunctionTests.UnknownArray29.f2({global(FunctionTests.UnknownArray29.a[i]), global(FunctionTests.UnknownArray29.a[i + 1])});
   return;
+ annotation(Inline = false);
  end FunctionTests.UnknownArray29.f1;
 
  function FunctionTests.UnknownArray29.f2
@@ -10328,6 +10327,7 @@ public
   end for;
   y2 := temp_1;
   return;
+ annotation(Inline = false);
  end FunctionTests.UnknownArray29.f2;
 
 end FunctionTests.UnknownArray29;
@@ -12480,18 +12480,17 @@ model ExtendFunc2
 fclass FunctionTests.ExtendFunc2
  constant Real d[2] = {1, 2};
  Real x = FunctionTests.ExtendFunc2.f2(1, 2);
+global variables
+ constant Real FunctionTests.ExtendFunc2.d[2] = {1, 2};
 
 public
  function FunctionTests.ExtendFunc2.f2
-  Real[:] d;
   input Real a;
   output Real b;
   input Integer c;
   Real f;
  algorithm
-  init d as Real[2];
-  d := {1, 2};
-  f := a + d[c];
+  f := a + global(FunctionTests.ExtendFunc2.d[c]);
   b := f;
   return;
  end FunctionTests.ExtendFunc2.f2;
@@ -13136,6 +13135,107 @@ public
 end FunctionTests.InputAsArraySize17;
 ")})));
 end InputAsArraySize17;
+
+model FuncColonSubscript
+        function g
+            input Real[:] x;
+            output Integer y = integer(sum(x));
+        algorithm
+        end g;
+    
+        function f
+            input Real[:] x;
+            output Real[g(x)] y;
+        algorithm
+            y := zeros(size(y,1));
+        end f;
+        
+        function h
+            input Real[:,:] x;
+            Real[1] t;
+            output Real y;
+        algorithm
+            t := time*f(x[:,1]);
+            y := sum(t);
+        end h;
+        
+        Real y = h({{1}});
+
+annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+        name="FuncColonSubscript",
+        description="tests scalarization, covers #5675",
+        flatModel="
+fclass FunctionTests.FuncColonSubscript
+ parameter Real y;
+parameter equation
+ y = FunctionTests.FuncColonSubscript.h({{1}});
+
+public
+ function FunctionTests.FuncColonSubscript.h
+  input Real[:,:] x;
+  Real[:] t;
+  output Real y;
+  Real[:] temp_1;
+  Real[:] temp_2;
+  Real[:] temp_3;
+  Real[:] temp_4;
+  Real[:] temp_5;
+ algorithm
+  init t as Real[1];
+  init temp_1 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_1[i1] := x[i1,1];
+  end for;
+  assert(FunctionTests.FuncColonSubscript.g(temp_1) == 1, \"Mismatching sizes in FunctionTests.FuncColonSubscript.h\");
+  init temp_2 as Real[FunctionTests.FuncColonSubscript.g(temp_3)];
+  init temp_3 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_3[i1] := x[i1,1];
+  end for;
+  init temp_4 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_4[i1] := x[i1,1];
+  end for;
+  init temp_5 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_5[i1] := x[i1,1];
+  end for;
+  (temp_2) := FunctionTests.FuncColonSubscript.f(temp_4);
+  for i1 in 1:FunctionTests.FuncColonSubscript.g(temp_5) loop
+   t[i1] := time * temp_2[i1];
+  end for;
+  y := t[1];
+  return;
+ end FunctionTests.FuncColonSubscript.h;
+
+ function FunctionTests.FuncColonSubscript.f
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[FunctionTests.FuncColonSubscript.g(x)];
+  for i1 in 1:size(y, 1) loop
+   y[i1] := 0;
+  end for;
+  return;
+ end FunctionTests.FuncColonSubscript.f;
+
+ function FunctionTests.FuncColonSubscript.g
+  input Real[:] x;
+  output Integer y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x, 1) loop
+   temp_1 := temp_1 + x[i1];
+  end for;
+  y := integer(temp_1);
+  return;
+ end FunctionTests.FuncColonSubscript.g;
+
+end FunctionTests.FuncColonSubscript;
+")})));
+end FuncColonSubscript;
 
 model Lapack_dgeqpf
   Real A[2,2] = {{1,2},{3,4}};
@@ -13830,7 +13930,6 @@ end FunctionTests.ComponentFunc8;
 ")})));
 end ComponentFunc8;
 
-
 model MinOnInput1
     function F
         input Real x(min=0) = 3.14;
@@ -13966,6 +14065,7 @@ public
   output Real[:] y;
   Integer[:] temp_1;
   Integer[:] temp_2;
+  Integer[:] temp_3;
  algorithm
   init y as Real[2];
   init temp_1 as Integer[2];
@@ -13974,6 +14074,8 @@ public
   temp_2[1] := 2;
   temp_2[2] := 3;
   assert(temp_1[1] * 2 + temp_1[2] * 3 == 2, \"Mismatching sizes in FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f\");
+  init temp_3 as Integer[2];
+  (temp_3) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
   (y) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g(x);
   return;
  end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f;
@@ -16841,6 +16943,41 @@ end FunctionTests.AnnotationFlattening1;
 ")})));
 end AnnotationFlattening1;
 
+model AnnotationFlattening2
+    function F
+        input Real i1;
+        input Integer i2;
+        output Real o1;
+    protected
+        Real x = i1;
+    algorithm
+        o1 := x * i2 + x;
+    annotation(Inline=false, derivative=F_der_wrong, smoothOrder=2);
+    end F;
+    
+    function F_der
+        input Real i1;
+        input Integer i2;
+        input Real i1_der;
+        output Real o1_der;
+    algorithm
+        o1_der := i1_der * i2 + i1_der;
+    annotation(Inline=false);
+    end F_der;
+    
+    model B
+        replaceable function func = F(i2=2);
+        Real x,y;
+    equation
+        x = func(y);
+        der(x) * der(y) = 1;
+    end B;
+    
+    model C = B(redeclare function func = F(i2=3));
+    
+    C c;
+end AnnotationFlattening2;
+
 model ConstantInFunction1
     function f
         constant input Real x = 0;
@@ -17029,5 +17166,167 @@ parameter equation
 end FunctionTests.ArrayWithIfInput;
 ")})));
 end ArrayWithIfInput;
+
+
+model AssignmentSizeCheck1
+  function f
+      input Integer n;
+      output Real[n] y;
+    algorithm
+      y := zeros(0);
+  end f;
+
+  constant Real[:] p1 = f(1);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck1",
+        description="Verify that array size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 9, column 25, in file '...':
+  Could not evaluate binding expression for constant 'p1': 'f(1)'
+    in function 'FunctionTests.AssignmentSizeCheck1.f'
+    Mismatching types when evaluating assignment, type of left-hand side is Real[1], and type of right-hand side is Integer[0] at line 6, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck1;
+
+model AssignmentSizeCheck2
+  function f
+      input Integer m;
+      input Integer n;
+      output Real[m, n] y;
+    algorithm
+      y := { { 1, 2 }, { 3, 4 } };
+  end f;
+
+  constant Real[:, :] p1 = f(1, 2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck2",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 10, column 28, in file '...':
+  Could not evaluate binding expression for constant 'p1': 'f(1, 2)'
+    in function 'FunctionTests.AssignmentSizeCheck2.f'
+    Mismatching types when evaluating assignment, type of left-hand side is Real[1, 2], and type of right-hand side is Integer[2, 2] at line 7, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck2;
+
+model AssignmentSizeCheck3
+    record R
+        Real[:] x;
+    end R;
+
+  function f
+      input Integer n;
+      output R r(x={1});
+    algorithm
+      r := R(1:n);
+  end f;
+
+  constant R r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck3",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 13, column 18, in file '...':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck3.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[1]), and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[2]) at line 10, column 7, in file 'FunctionTests.mo'
+
+Error at line 13, column 18, in file '...':
+  Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
+    in function 'FunctionTests.AssignmentSizeCheck3.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[1]), and type of right-hand side is FunctionTests.AssignmentSizeCheck3.R(Real[2]) at line 10, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck3;
+
+model AssignmentSizeCheck4
+    record R
+        Real x;
+    end R;
+
+  function f
+      input Integer n;
+      output R[1] r(x={1});
+    algorithm
+      r := {R(i) for i in 1:n};
+  end f;
+
+  constant R[:] r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck4",
+        description="Verify that matrix size mismatches are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 13, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck4.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
+
+Error at line 13, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r[1].x': '((f(2)).x)[1]'
+    in function 'FunctionTests.AssignmentSizeCheck4.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck4;
+
+model AssignmentSizeCheck5
+    record R1
+        Real x;
+        Real y;
+    end R1;
+
+    record R2
+        Real x;
+    end R2;
+
+    function f
+        input Integer n;
+        output R1 r;
+    algorithm
+        r := R2(1);
+    end f;
+
+    constant R1 r = f(2);
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="AssignmentSizeCheck5",
+        description="Verify that record with mismatching number of components are found during evaluation; #5654.",
+        errorMessage="
+
+
+Error at line 15, column 9, in file '...':
+  The right and left expression types of assignment are not compatible, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1, and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2
+
+Error at line 18, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r': 'f(2)'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
+
+Error at line 18, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r.x': '(f(2)).x'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
+
+Error at line 18, column 21, in file '...':
+  Could not evaluate binding expression for constant 'r.y': '(f(2)).y'
+    in function 'FunctionTests.AssignmentSizeCheck5.f'
+    Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck5.R1(Real, Real), and type of right-hand side is FunctionTests.AssignmentSizeCheck5.R2(Real) at line 15, column 9, in file 'FunctionTests.mo'
+")})));
+end AssignmentSizeCheck5;
 
 end FunctionTests;

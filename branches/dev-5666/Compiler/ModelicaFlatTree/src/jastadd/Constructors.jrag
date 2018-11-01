@@ -77,7 +77,7 @@ aspect Constructors {
      * Construcs a connect clause without any residual.
      */
     public FConnectClause.FConnectClause(EquationType type, SrcConnectClause connectClause,
-            FIdUseInstAccess left, FIdUseInstAccess right) {
+            InstAccess left, InstAccess right) {
         this(type, new List<FAttribute>(), new Opt<FStringComment>(), connectClause, left, right);
     }
 
@@ -220,29 +220,13 @@ aspect Constructors {
 	public FEnumLitExp.FEnumLitExp(String name, String val) {
 		this(name, val, new Opt());
 	}
-	
-	/**
-	 * Constructs an FIdUse that refers to the variable with the given name.
-	 */
-	public FIdUse.FIdUse(String name) {
-		this(new FQNameString(name));
-	}
     
     /**
      * Constructs an FIdDecl with the given name.
      */
     public FIdDecl.FIdDecl(String name) {
-        this(new FQNameString(name));
+        this(new FAccessString(name));
     }
-	
-	/**
-	 * Constructs an FIdUse that refers to a cell of the variable with the given name.
-	 *
-	 * @param fas  the array subscripts to set for the last name part
-	 */
-	public FIdUse.FIdUse(String name, FArraySubscripts fas) {
-		this(new FQNameFull(name, fas));
-	}
 
     /**
      * Constructs an if equation.
@@ -252,115 +236,85 @@ aspect Constructors {
     }
 
 	/**
-	 * Constructs an FQName with the given name parts (without any subscripts).
+	 * Constructs an FAccess with the given name parts (without any subscripts).
 	 * 
 	 * Does <em>not</em> parse array subscripts.
 	 */
-    public FQNameFull.FQNameFull(String... name) {
+    public FAccessFull.FAccessFull(String... name) {
         this(new List());
         for (String part : name)
-            addFQNamePart(part);
+            addFAccessPart(part);
     }
     
     /**
-     * Creates and adds a new FQNamePart without array subscripts.
+     * Creates and adds a new FAccessPart without array subscripts.
      */
-    public void FQNameFull.addFQNamePart(String name) {
-    	addFQNamePart(new FQNamePart(name));
+    public void FAccessFull.addFAccessPart(String name) {
+    	addFAccessPart(new FAccessPart(name));
     }
 	
 	/**
-	 * Constructs an FQName by splitting the given name into name parts and adding array subscripts.
+	 * Constructs an FAccess by splitting the given name into name parts and adding array subscripts.
 	 * 
 	 * Does <em>not</em> parse array subscripts.
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
-	public FQNameFull.FQNameFull(String name, FArraySubscripts fas) {
+	public FAccessFull.FAccessFull(String name, FArraySubscripts fas) {
 		this(name);
 		addFArraySubscripts(fas);
 	}
 	
 	/**
-	 * Constructs a flat FIdUseExp that refers to the variable with the given FIdUse.
+	 * Constructs an FAccessExp that refers to the variable with the given FAccess.
 	 */
-	public FIdUseExp.FIdUseExp(FIdUse name) {
+	public FAccessExp.FAccessExp(FAccess name) {
 		this(name, (String)null);
 	}
 	
 	/**
-	 * Constructs a flat FIdUseExp that refers to the variable with the given name.
+	 * Constructs an FAccessExp that refers to the variable with the given name.
 	 */
-	public FIdUseExp.FIdUseExp(String name) {
-		this(new FIdUse(name));
+	public FAccessExp.FAccessExp(String name) {
+		this(new FAccessString(name));
 	}
 	
 	/**
-	 * Constructs an FIdUseExp that refers to the variable with the given name.
-	 */
-	public FIdUseExp.FIdUseExp(FQName name) {
-		this(new FIdUse(name));
-	}
-	
-	/**
-	 * Constructs an FIdUseExp that refers to a cell of the variable with the given name.
+	 * Constructs an FAccessExp that refers to a cell of the variable with the given name.
 	 *
 	 * @param fas  the array subscripts to set for the last name part
 	 */
-	public FIdUseExp.FIdUseExp(String name, FArraySubscripts fas) {
-		this(new FIdUse(name, fas));
+	public FAccessExp.FAccessExp(String name, FArraySubscripts fas) {
+		this(new FAccessFull(name, fas));
 	}
 
     /**
-     * Constructs an FDerExp that refers to the variable with the given FIdUse and order.
+     * Constructs an FDerExp that refers to the variable with the given FAccess and order.
      */
-    public FDerExp.FDerExp(FIdUse name, int order) {
+    public FDerExp.FDerExp(FAccess name, int order) {
         this(name, (String)null, order);
-    }
-    
-    /**
-     * Constructs an FDerExp that refers to the variable with the given name.
-     */
-    public FDerExp.FDerExp(FQName name, int order) {
-        this(new FIdUse(name), order);
     }
 
     /**
      * Constructs an FDerExp of order one that refers to the variable with the given name.
      */
-    public FDerExp.FDerExp(FQName name) {
-        this(new FIdUse(name), 1);
-    }
-
-    /**
-     * Constructs an FDerExp of order that refers to the variable with the given name.
-     */
-    public FDerExp.FDerExp(FIdUse name) {
+    public FDerExp.FDerExp(FAccess name) {
         this(name, 1);
     }
 
     /**
-     * Constructs an FPreExp that refers to the variable with the given FIdUse.
+     * Constructs an FPreExp that refers to the variable with the given FAccess.
      */
-    public FPreExp.FPreExp(FIdUse name) {
+    public FPreExp.FPreExp(FAccess name) {
         this(name, (String)null);
     }
     
     /**
-     * Constructs an FIdTempExp that refers to the variable with the given FIdUse.
+     * Constructs an FTempAccessExp that refers to the variable with the given FAccess.
      */
-    public FIdTempExp.FIdTempExp(FIdUse name) {
+    public FTempAccessExp.FTempAccessExp(FAccess name) {
         this(name, (String)null);
     }
-    
-	/**
-	 * Constructs an FIdUseInstAccess with an empty FQName.
-	 * 
-	 * Note: the FQName of an FIdUseInstAccess should always be empty.
-	 */
-	public FIdUseInstAccess.FIdUseInstAccess(InstAccess ia) {
-		this(new FQNameEmpty(), ia);
-	}
 
     /**
      * Constructs an unsuported equation.
@@ -402,7 +356,7 @@ aspect Constructors {
 		this();
 		setFExp(new FRangeExp(new FIntegerLitExp(1), end));
 		setFVariable(new FIntegerVariable(VisibilityType.TEMPORARY, 
-				Variability.FIXEDPARAMETER, new FQNameString(name)));
+				Variability.FIXEDPARAMETER, new FAccessString(name)));
 	}
 	
 	/**
@@ -413,15 +367,15 @@ aspect Constructors {
 	 * @param var   the name of the variable to loop over
 	 * @param dim   the dimension to loop over
 	 */
-	public FForIndex.FForIndex(String name, FQName var, int dim) {
+	public FForIndex.FForIndex(String name, FAccess var, int dim) {
 		this(name, new FSizeExp(var, dim));
 	}
 	
 	/**
 	 * Constructs an FSizeExp giving the size in the given dimension for the given variable.
 	 */
-	public FSizeExp.FSizeExp(FQName var, int dim) {
-		this(new FIdUseExp(var), dim);
+	public FSizeExp.FSizeExp(FAccess var, int dim) {
+		this(new FAccessExp(var), dim);
 	}
 	
 	/**
@@ -528,10 +482,10 @@ aspect Constructors {
      * Constructs an FRecordConstructor for a record with the given name and no arguments.
      */
     public FRecordConstructor.FRecordConstructor(String name) {
-        this(new FIdUse(name), new List<FExp>());
+        this(new FRecordAccess(name), new List<FExp>());
     }
     
-    public FRecordConstructor.FRecordConstructor(FIdUse name, List<FExp> args) {
+    public FRecordConstructor.FRecordConstructor(FRecordAccess name, List<FExp> args) {
         this(new List<InstFunctionArgument>(), name, args);
     }
 
@@ -539,7 +493,7 @@ aspect Constructors {
 	 * Create a real variable with only the required children.
 	 */
 	public FRealVariable.FRealVariable(VisibilityType vt, 
-			TypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FAccess name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -547,7 +501,7 @@ aspect Constructors {
      * Create a derivative variable with only the required children.
      */
     public FDerivativeVariable.FDerivativeVariable(VisibilityType vt, 
-            TypePrefixVariability variability, FQName name, int order) {
+            TypePrefixVariability variability, FAccess name, int order) {
         this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
@@ -555,7 +509,7 @@ aspect Constructors {
      * Create a derivative variable with only the required children.
      */
     public FDummyDerivativeVariable.FDummyDerivativeVariable(VisibilityType vt, 
-            TypePrefixVariability variability, FQName name, int order) {
+            TypePrefixVariability variability, FAccess name, int order) {
         this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, order);
     }
 
@@ -565,14 +519,14 @@ aspect Constructors {
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
 	/**
 	 * Create a integer variable with only the required children.
 	 */
 	public FIntegerVariable.FIntegerVariable(VisibilityType vt, 
-			TypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FAccess name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -582,14 +536,14 @@ aspect Constructors {
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
 	/**
 	 * Create a enum variable with only the required children.
 	 */
 	public FEnumVariable.FEnumVariable(VisibilityType vt, 
-			TypePrefixVariability variability, FQName name, FQName enumName) {
+			TypePrefixVariability variability, FAccess name, FAccess enumName) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, enumName);
 	}
 	
@@ -599,14 +553,14 @@ aspect Constructors {
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getEnum().fullCopy());
+				new Opt(), new Opt(), fv.getFAccess().fullCopy(), fv.getEnum().fullCopy());
 	}
 	
 	/**
 	 * Create a boolean variable with only the required children.
 	 */
 	public FBooleanVariable.FBooleanVariable(VisibilityType vt, 
-			TypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FAccess name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -616,14 +570,14 @@ aspect Constructors {
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
 	/**
 	 * Create a string variable with only the required children.
 	 */
 	public FStringVariable.FStringVariable(VisibilityType vt, 
-			TypePrefixVariability variability, FQName name) {
+			TypePrefixVariability variability, FAccess name) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
@@ -633,14 +587,14 @@ aspect Constructors {
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getVisibilityType(), fv.getTypePrefixVariability(),
 				TypePrefixInputOutput.NONE, (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy());
+				new Opt(), new Opt(), fv.getFAccess().fullCopy());
 	}
 	
 	/**
 	 * Create a record variable with only the required children.
 	 */
 	public FRecordVariable.FRecordVariable(VisibilityType vt, 
-			TypePrefixVariability variability, FQName name, FQName record) {
+			TypePrefixVariability variability, FAccess name, FRecordAccess record) {
 		this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 	
@@ -648,7 +602,7 @@ aspect Constructors {
      * Create an external object variable with only the required children.
      */
     public FExternalObjectVariable.FExternalObjectVariable(VisibilityType vt, 
-            TypePrefixVariability variability, FQName name, FIdUse constructorName) {
+            TypePrefixVariability variability, FAccess name, CommonAccess constructorName) {
         this(vt, variability, TypePrefixInputOutput.NONE, new List(), (String) null, new Opt(), new Opt(), name, constructorName);
     }
 
@@ -656,14 +610,14 @@ aspect Constructors {
      * Constructs a new dynamic state variable
      */
     public FDynamicStateVariable.FDynamicStateVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".s" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".s" + number), set, number);
     }
 
     /**
      * Constructs a new dynamic state variable
      */
     public FDynamicAlgebraicVariable.FDynamicAlgebraicVariable(DynamicStateSet set, int number) {
-        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FQNameFull("_ds." + set.id() + ".a" + number), set, number);
+        this(VisibilityType.PUBLIC, Variability.CONTINUOUS, TypePrefixInputOutput.NONE, new List(), (String)null, new Opt(), new Opt(), new FAccessFull("_ds." + set.id() + ".a" + number), set, number);
     }
     
 	/**
@@ -671,7 +625,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name) {
-	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+	    this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(), 
 	            true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
 	}
 	
@@ -680,7 +634,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String name, int level) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+        this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(), 
                 true, level, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -689,7 +643,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
-		this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt(value), 
+		this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt(value), 
 				true, 0, new Opt(), new Opt(), new List());
 	}
 	
@@ -698,7 +652,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp exp, boolean eachKey) {
-	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+	    this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(exp), 
 	            true, Integer.MAX_VALUE, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
 	}
 	
@@ -707,7 +661,7 @@ aspect Constructors {
 	 *        valid for them.
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp exp, int level, boolean eachKey) {
-	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+	    this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(exp), 
 	            true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
 	}
 	
@@ -716,7 +670,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String name, int level, boolean eachKey) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+        this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(), 
                 true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -725,7 +679,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FInternalAttribute.FInternalAttribute(String type, String name, FExp exp, int level) {
-        this(new FIdUse(type), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+        this(new FAccessString(type), new FIdDecl(new FAccessString(name)), new Opt<FExp>(exp), 
                 true, level, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -734,7 +688,7 @@ aspect Constructors {
      *        valid for them.
      */
     public FAnnotationAttribute.FAnnotationAttribute(String name) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+        this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(), 
                 true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
@@ -743,14 +697,14 @@ aspect Constructors {
      *        valid for them.
      */
     public FAnnotationAttribute.FAnnotationAttribute(String name, FExp exp, int level, boolean eachKey) {
-        this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+        this(new FAccessEmpty(), new FIdDecl(new FAccessString(name)), new Opt<FExp>(exp), 
                 true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
     }
     
 	/**
 	 * Create an attribute with only the required children.
 	 */
-	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet, int level) {
+	public FAttribute.FAttribute(CommonAccess typeName, FIdDecl name, boolean isSet, int level) {
 		this(typeName, name, new Opt(), isSet, level, new Opt(), new Opt(), new List());
 	}
     
@@ -758,7 +712,7 @@ aspect Constructors {
      * Create an attribute with only the required children.
      */
     public FAttribute.FAttribute(String typeName, String name, boolean isSet, int level) {
-        this(new FIdUse(typeName), new FIdDecl(name), isSet, level);
+        this(new FAccessString(typeName), new FIdDecl(name), isSet, level);
     }
 	
 	/**
@@ -766,7 +720,7 @@ aspect Constructors {
 	 * 
 	 * The value may be <code>null</code>, then no value is set.
 	 */
-	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, FExp value, boolean isSet, int level) {
+	public FAttribute.FAttribute(CommonAccess typeName, FIdDecl name, FExp value, boolean isSet, int level) {
 		this(typeName, name, 
 				(value == null ? new Opt() : new Opt(value)), 
 				isSet, level, new Opt(), new Opt(), new List());
@@ -778,7 +732,7 @@ aspect Constructors {
      * The value may be <code>null</code>, then no value is set.
      */
     public FAttribute.FAttribute(String typeName, String name, FExp value, boolean isSet, int level) {
-        this(new FIdUse(typeName), new FIdDecl(name), value, isSet, level);
+        this(new FAccessString(typeName), new FIdDecl(name), value, isSet, level);
     }
 	
 	/**
@@ -786,34 +740,34 @@ aspect Constructors {
 	 *        Extracts array subscripts from type.
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
-        this(TypePrefixInputOutput.NONE, type, new Opt(), new FQNameFull(name));
+        this(TypePrefixInputOutput.NONE, type, new Opt(), new FAccessFull(name));
 	}
 	
 	/**
 	 * Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FQNameString(name), 0);
+		this(TypePrefixInputOutput.NONE, new List<FAttribute>(), type, new Opt(), new FAccessString(name), 0);
 	}
 	
     /**
      * Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
     public FFunctionVariable.FFunctionVariable(FType type, String name, TypePrefixInputOutput inputOutput) {
-        this(inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FQNameString(name), 0);
+        this(inputOutput, new List<FAttribute>(), type, new Opt<FExp>(), new FAccessString(name), 0);
     }
     
     /**
      * Create an FFunctionVariable with everything but order and attributes given.
      */
-    public FFunctionVariable.FFunctionVariable(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+    public FFunctionVariable.FFunctionVariable(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
         this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
     /**
      * Create an FFunctionArray with everything but order and attributes given.
      */
-    public FFunctionArray.FFunctionArray(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+    public FFunctionArray.FFunctionArray(TypePrefixInputOutput inputOutput, FType type, Opt<FExp> bindingExp, FAccess name) {
         this(inputOutput, new List<FAttribute>(), type, bindingExp, name, 0);
     }
     
@@ -836,25 +790,34 @@ aspect Constructors {
 	 * Create a new FArraySubscripts <code>n</code> literal subscripts from 
 	 *        <code>i</code>, starting at <code>j</code>.
 	 */
-	public FArraySubscripts.FArraySubscripts(Index i, int j, int n) {
+	public FArrayLitSubscripts.FArrayLitSubscripts(Index i, int j, int n) {
 		this();
-		for (int k = j; k < n+j; k++)
-			addFSubscript(i.get(k));
+		subscripts = new int[n];
+		for (int k = 0; k < n; k++)
+			subscripts[k] = i.get(k+j);
 	}
 	
-	/**
-	 * Add a new use expression subscript to the list of FSubscripts.
-	 */
-	public void FArraySubscripts.addFSubscript(FExp e) {
-		addFSubscript(new FExpSubscript(e));
-	}
-	
+    public FArrayLitSubscripts.FArrayLitSubscripts(int... subscripts) {
+        this();
+        this.subscripts = Arrays.copyOf(subscripts, subscripts.length);
+    }
+
+
+
 	/**
 	 * Add a new integer literal subscript to the list of FSubscripts.
 	 */
-	public void FArraySubscripts.addFSubscript(int i) {
-		addFSubscript(new FIntegerSubscript(i));
-	}
+    public abstract void FArraySubscripts.addFSubscript(int i);
+
+    public void FArrayExpSubscripts.addFSubscript(int i) {
+        addFSubscript(new FIntegerSubscript(i));
+    }
+
+    public void FArrayLitSubscripts.addFSubscript(int i) {
+        int length = subscripts.length;
+        subscripts = Arrays.copyOf(subscripts, length + 1);
+        subscripts[length] = i;
+    }
 	
 	/**
 	 * Add new integer literal subscripts for each index to the list of FSubscripts.
@@ -863,6 +826,12 @@ aspect Constructors {
 		for (int i : index)
 			addFSubscript(i);
 	}
+
+    public void FArrayLitSubscripts.addFSubscripts(int[] index) {
+        int length = subscripts.length;
+        subscripts = Arrays.copyOf(subscripts, length + index.length);
+        System.arraycopy(index, 0, subscripts, length, index.length);
+    }
 	
 	/**
 	 * Add new integer literal subscripts for each index to the list of FSubscripts.
@@ -878,29 +847,33 @@ aspect Constructors {
 		List<FSubscript> l = new List<FSubscript>();
 		for (int i = 0; i < n; i++)
 			l.add(new FColonSubscript());
-		return new FArraySubscripts(l);
-	}
-	
-	/**
-	 * Create a new FArraySubscripts containing an integer literal.
-	 */
-	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int i) {
-		List<FSubscript> l = new List<FSubscript>();
-		l.add(new FIntegerSubscript(i));
-		return new FArraySubscripts(l);
-	}
-	
-	/**
-	 * Create a new FArraySubscripts containing integer literals.
-	 */
-	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
-		FArraySubscripts fas = new FArraySubscripts();
-		fas.addFSubscripts(index);
-		return fas;
+		return new FArrayExpSubscripts(l);
 	}
 
+    public static FArraySubscripts FArraySubscripts.createFArraySubscripts(List<FSubscript> list) {
+        for (FSubscript fs : list) {
+            if (!fs.isIntegerSubscript()) {
+                return new FArrayExpSubscripts(list);
+            }
+        }
+        int[] subscripts = new int[list.getNumChildNoTransform()];
+        for (int i = 0; i < subscripts.length; i++) {
+            subscripts[i] = list.getChildNoTransform(i).value();
+        }
+        return new FArrayLitSubscripts(subscripts);
+    }
+
+    public FSubscript FExp.createFSubscript() {
+        return new FExpSubscript(this);
+    }
+
+    public FIntegerSubscript FIntegerLitExp.createFSubscript() {
+        return new FIntegerSubscript(getValue());
+    }
+
+
     public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
-        this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new List<FAttribute>());
+        this(new FAccessString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new List<FAttribute>());
     }
 
 }
@@ -974,6 +947,7 @@ aspect InheritedFactoryMethods {
 	
 	// Misc expressions
 	public FIfExp          FIfExp.createEmptyNode()          { return new FIfExp();          }
+    public InstIfExp       InstIfExp.createEmptyNode()       { return new InstIfExp();       }
 	public FTimeExp        FTimeExp.createEmptyNode()        { return new FTimeExp();        }
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
@@ -993,15 +967,18 @@ aspect InheritedFactoryMethods {
     public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
 
     // Identifier expressions
-    public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
+    public abstract CommonAccessExp CommonAccessExp.createEmptyNode();
+    public InstAccessExp  InstAccessExp.createEmptyNode()  { return new InstAccessExp();  }
+    public FGlobalAccessExp FGlobalAccessExp.createEmptyNode() { return new FGlobalAccessExp(); }
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }
+    public FAccessExp     FAccessExp.createEmptyNode()     { return new FAccessExp();     }
     public FDerExp        FDerExp.createEmptyNode()        { return new FDerExp();        }
     public FDummyDerExp   FDummyDerExp.createEmptyNode()   { return new FDummyDerExp();   }
     public FDynamicDerExp FDynamicDerExp.createEmptyNode() { return new FDynamicDerExp(); }
     public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
     public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();        }
     public InstPreExp     InstPreExp.createEmptyNode()     { return new InstPreExp();     }
-    public FIdTempExp     FIdTempExp.createEmptyNode()     { return new FIdTempExp();     }
+    public FTempAccessExp FTempAccessExp.createEmptyNode() { return new FTempAccessExp(); }
     public FDSRefExp      FDSRefExp.createEmptyNode()      { return new FDSRefExp();      }
     public FDSDerExp      FDSDerExp.createEmptyNode()      { return new FDSDerExp();      }
     public abstract FAbstractDerExp FAbstractDerExp.createEmptyNode();
@@ -1102,7 +1079,15 @@ aspect InheritedFactoryMethods {
 		node.setLocationNoTree(this);
 		return node;
 	}
-	
+
+    public FIfExp FIfExp.createNode(FExp ifExp, FExp thenExp, FExp elseExp) {
+        FIfExp node = createEmptyNode();
+        node.setIfExp(ifExp);
+        node.setThenExp(thenExp);
+        node.setElseExp(elseExp);
+        return node;
+    }
+
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
@@ -1116,19 +1101,26 @@ aspect InheritedFactoryMethods {
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
-	public FIdUseExp FIdUseExp.createNode(FIdUse use) {
-		FIdUseExp node = createEmptyNode();
-		node.setFIdUse(use);
+	public InstAccessExp InstAccessExp.createNode(InstAccess use) {
+		InstAccessExp node = createEmptyNode();
+		node.setInstAccess(use);
 		node.setLocationNoTree(this);
 		return node;
 	}
 
+    public FAccessExp FAccessExp.createNode(FAccess use) {
+        FAccessExp node = createEmptyNode();
+        node.setFAccess(use);
+        node.setLocationNoTree(this);
+        return node;
+    }
+
     /**
      * Create new node of same class as this, with the specified children.
      */
-    public FIdUseExp FAbstractDerExp.createNode(FIdUse use) {
+    public FAbstractDerExp FAbstractDerExp.createNode(FAccess use) {
         FAbstractDerExp node = createEmptyNode();
-        node.setFIdUse(use);
+        node.setFAccess(use);
         node.setOrder(order());
         node.setLocationNoTree(this);
         return node;
@@ -1316,6 +1308,7 @@ aspect InheritedFactoryMethods {
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
 	
 	public abstract FVariable FVariable.createEmptyNode();
+    public FGlobalVariable  FGlobalVariable.createEmptyNode()                   { return new FGlobalVariable(); }
 	public FRealVariable    FRealVariable.createEmptyNode()    					{ return new FRealVariable(); }
 	public FIntegerVariable FIntegerVariable.createEmptyNode() 					{ return new FIntegerVariable(); }
 	public FBooleanVariable FBooleanVariable.createEmptyNode() 					{ return new FBooleanVariable(); }
@@ -1332,12 +1325,12 @@ aspect InheritedFactoryMethods {
     /**
      * Create new node of same class as this, with the specified children.
      */
-    public FFunctionVariable FFunctionVariable.createNode(TypePrefixInputOutput prefix, FType type, Opt<FExp> bindingExp, FQName name, int order) {
+    public FFunctionVariable FFunctionVariable.createNode(TypePrefixInputOutput prefix, FType type, Opt<FExp> bindingExp, FAccess name, int order) {
         FFunctionVariable node = createEmptyNode();
         node.setTypePrefixInputOutput(prefix);
         node.setType(type);
         node.setBindingExpOpt(bindingExp);
-        node.setFQName(name);
+        node.setFAccess(name);
         node.setOrder(order);
         return node;
     }

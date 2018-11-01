@@ -185,7 +185,7 @@ aspect SrcAnnotations {
      *  SrcModifications   
      ******************/
     SrcModification implements SrcAnnotationProvider;
-
+    
     syn String SrcModification.annotationName() = parentAnnotationName();
     eq SrcNamedModification.annotationName() = getName().name();
 
@@ -242,6 +242,16 @@ aspect SrcAnnotations {
     }
 
     /**
+     * Move the ValueModification into a CompleteModification when
+     * sub modifiers are needed to the modifier. The modification is then returned. 
+     */
+    public SrcModification SrcModification.moveValueModIntoCompleteMod() {
+        SrcValueModification oldValueModification = (SrcValueModification) this;
+        return new SrcCompleteModification(new SrcClassModification(),
+            new Opt<SrcValueModification>(oldValueModification));
+    }
+
+    /**
      * Remove this ASTNode from the AST.
      *
      * The ASTNode is removed and the AST state is then cleaned up using cleanUpAfterRemove.
@@ -273,7 +283,8 @@ aspect SrcAnnotations {
     @Override
     public void SrcComponentModification.setAnnotationValue(SrcExp newValue) throws FailedToSetAnnotationValueException {
         if (!hasSrcModification()) {
-            setSrcModification(new SrcCompleteModification(new SrcClassModification()));
+            setSrcModification(new SrcValueModification(newValue));
+            return;
         }
         getSrcModification().setAnnotationValue(newValue);
     }
@@ -289,11 +300,22 @@ aspect SrcAnnotations {
             setSrcValueModification(new SrcValueModification(newValue));
         }
     }
+    
+    /**
+    * Check if the modification is a value modification (which can't have submodifers) or not. 
+    */
+    public boolean SrcModification.isValueModification(){
+        return false;
+    }
+    public boolean SrcValueModification.isValueModification(){
+        return true;
+    } 
 
     @Override
     public SrcAnnotationProvider SrcModification.addAnnotationSubNode(String name) {
         return null;
     }
+    
     @Override
     public SrcAnnotationProvider SrcClassModification.addAnnotationSubNode(String name) {
         SrcComponentModification cm = new SrcComponentModification(false, false, new SrcNamedAccess(name),
@@ -309,6 +331,9 @@ aspect SrcAnnotations {
     public SrcAnnotationProvider SrcComponentModification.addAnnotationSubNode(String name) {
         if (!hasSrcModification()) {
             setSrcModification(new SrcCompleteModification(new SrcClassModification()));
+        
+        }else if (getSrcModification().isValueModification()){
+            setSrcModification(getSrcModification().moveValueModIntoCompleteMod());
         }
         return getSrcModification().addAnnotationSubNode(name);
     }
@@ -516,6 +541,16 @@ aspect SrcAnnotations {
                 } else {
                     owningNode.setSrcModification(new SrcValueModification(newValue));
                 }
+            }
+            
+            @Override
+            public SrcAnnotationProvider addAnnotationSubNode(String name) {
+                if (!hasProvider()) {
+                    createProvider();
+                }else if (owningNode.getSrcModification().isValueModification()) {
+                    setSrcModification(owningNode.getSrcModification().moveValueModIntoCompleteMod());
+                }
+                return getProvider().addAnnotationSubNode(name);
             }
         };
     }

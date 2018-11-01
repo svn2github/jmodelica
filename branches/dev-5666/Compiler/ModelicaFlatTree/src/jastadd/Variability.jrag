@@ -359,7 +359,7 @@ aspect Variability {
      */
     public void FExp.makeContinuousVariablesDiscrete() {}
     
-    public void FIdUseExp.makeContinuousVariablesDiscrete() {
+    public void FAccessExp.makeContinuousVariablesDiscrete() {
         myFV().makeContinuousVariableDiscrete();
     }
     
@@ -400,13 +400,14 @@ aspect Variability {
      * If this is an flat tree access, return set containing accessed var, otherwise empty set.
      */
     syn FAbstractVariable FExp.assignedFV() = null;
-    eq FIdUseExp.assignedFV()               = myFV();
+    eq FAccessExp.assignedFV()              = myFV();
 
 
-    syn TypePrefixVariability FAbstractVariable.variability() {
-        throw new UnsupportedOperationException("Unable to get variability of FAbstractVariable type " + getClass().getSimpleName());
-    }
-    eq FVariable.variability() = getTypePrefixVariability();
+    syn TypePrefixVariability FAbstractVariable.variability();
+    eq FVariable        .variability() = getTypePrefixVariability();
+    eq FFunctionVariable.variability() = Variability.CONTINUOUS;
+    eq FEnumLiteral     .variability() = Variability.CONTINUOUS;
+    eq UnknownFVariable .variability() = Variability.CONTINUOUS;
     
     syn boolean FExp.isConstantExp()   = variability().constantVariability();
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();
@@ -474,7 +475,7 @@ aspect Variability {
         return res;
     }
     eq FUnknownSizeExp.expVariability() = Variability.FIXEDPARAMETER.combine(getDim().variability());
-    
+
     public TypePrefixVariability Size.variability() {
         TypePrefixVariability res = Variability.CONSTANT;
         for (int i = 0; i < ndims(); i++) {
@@ -538,26 +539,32 @@ aspect Variability {
 
     eq FDelayExp.expVariability() = getFExp().variability();
 
-    eq FIdUseExp.expVariability() = getFIdUse().variability();
+    eq CommonAccessExp.expVariability() = getAccess().variability();
     eq FAbstractDerExp.expVariability() = 
-        getFIdUse().variability().discreteOrLess() ? Variability.CONSTANT : getFIdUse().variability();
+        getFAccess().variability().discreteOrLess() ? Variability.CONSTANT : getFAccess().variability();
     eq FPreExp.expVariability() = super.expVariability().combineDown(Variability.DISCRETE);
     eq InstPreExp.expVariability() = getFExp().variability().combineDown(Variability.DISCRETE);
 
-    syn TypePrefixVariability FIdUse.variability() {
-        FAbstractVariable variable = myFV();
-        if (variable instanceof FVariable) {
-            FVariable fVariable = (FVariable) variable;
-            return(fVariable.variability());
-        } else {
-            return (Variability.CONTINUOUS);
+    syn TypePrefixVariability CommonAccess.variability();
+    eq FAccess.variability()     = myFV()   .variability()                   .combine(indexVariability());
+    eq FAccessFull.variability() = myTopFV().variabilityHierarchical(this, 1).combine(indexVariability());
+
+    syn TypePrefixVariability FAbstractVariable.variabilityHierarchical(FAccessFull name, int i) {
+        TypePrefixVariability res = variability();
+        if (i < name.getNumFAccessPart()) {
+            FAccessPart part = name.getFAccessPart(i);
+            res = res.combine().combineDown(myFRecordDecl().lookupFV(part.getName()).variabilityHierarchical(name, i + 1));
         }
+        return res;
     }
+    eq FFunctionVariable.variabilityHierarchical(FAccessFull name, int i) = variability();
 
     syn TypePrefixVariability FSubscript.variability() = Variability.CONSTANT;
 	eq FExpSubscript.variability() = getFExp().variability();
+	public TypePrefixVariability IntegerSubscript.variability() { return Variability.CONSTANT; }
 	
-	syn TypePrefixVariability FArraySubscripts.variability() {
+	syn TypePrefixVariability FArraySubscripts.variability() = Variability.CONSTANT;
+	eq FArrayExpSubscripts.variability() {
 		TypePrefixVariability total = Variability.CONSTANT;
 		for (FSubscript arg : getFSubscripts()) 
 			total = total.combine(arg.variability());
@@ -682,14 +689,14 @@ aspect Variability {
         throw new UnsupportedOperationException();
     }
     eq FSubscriptedExp.indexVariability() = getFArraySubscripts().variability();
-    eq FIdUseExp.indexVariability()       = getFIdUse().indexVariability();
+    eq CommonAccessExp.indexVariability() = getAccess().indexVariability();
 
-    syn TypePrefixVariability FIdUse.indexVariability() {
-        FQName fqn = getFQName();
+    syn TypePrefixVariability CommonAccess.indexVariability();
+    eq FAccess.indexVariability() {
         TypePrefixVariability variability = Variability.CONSTANT;
-        if (fqn.isSimple())
+        if (isSimple())
             return variability;
-        for (FQNamePart part : fqn.asFQNameFull().getFQNameParts())
+        for (FAccessPart part : asFAccessFull().getFAccessParts())
             if (part.hasFArraySubscripts())
                 variability = variability.combine(part.getFArraySubscripts().variability());
         return variability;

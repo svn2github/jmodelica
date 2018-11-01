@@ -319,7 +319,7 @@ aspect NodeMethods {
 		collector.addLocation(this);
 	}
 	
-	public void FIdUseExp.collectLocations(BaseNode collector){
+	public void FAccessExp.collectLocations(BaseNode collector){
 		FAbstractVariable fv = myFV();
 		if(fv.hasBindingExp()){
     		collector.addLocation(((FVariable)fv).getBindingExp());
@@ -784,9 +784,9 @@ aspect Names {
     eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
     eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
 
-    eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
-    eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFQName());
-    eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FQNameEmpty());
+    eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFAccessPrefix());
+    eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFAccess());
+    eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FAccessEmpty());
     eq InstProgramRoot.getChild().calcInstanceName() {
         throw new UnsupportedOperationException("Missing equation for inh calcInstanceName().");
     }
@@ -794,7 +794,7 @@ aspect Names {
     /**
      * Create an instance name from a class declaration and a suffix.
      */
-    syn String InstNode.buildInstanceName(InstClassDecl cls, FQName suffix) =
+    syn String InstNode.buildInstanceName(InstClassDecl cls, FAccess suffix) =
         (suffix.numParts() == 0) ? cls.name() : cls.name() + '.' + suffix.name();
 
   inh String InstExternal.packageName();
@@ -966,6 +966,8 @@ aspect Names {
     eq SrcDot.getChild().retrieveTopAccess(SrcAccess pre)          = retrieveTopAccess(this);
     eq SrcGlobalAccess.getChild().retrieveTopAccess(SrcAccess pre) = retrieveTopAccess(this);
     
+    syn boolean InstAccess.isTopInstAccess() = this == getTopInstAccess();
+    
     /**
      * Get the top node in an access (possibly qualified).
      */
@@ -1044,13 +1046,11 @@ aspect Slices {
      * Check if this is a slice operation.
      */
     syn boolean FExp.isSlice() = true;
-    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    eq CommonAccessExp.isSlice() = isArray() && getAccess().isSlice();
     eq FSubscriptedExp.isSlice() = isArray();
     
-    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
-    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
-    
-    syn boolean InstAccess.isSlice() {
+    syn boolean CommonAccess.isSlice();
+    eq InstAccess.isSlice() {
         java.util.List<FArraySubscripts> l = allFArraySubscripts();
         int last = l.size() - 1;
         for (int i = 0; i < last; i++) {
@@ -1061,7 +1061,8 @@ aspect Slices {
         return l.get(last).isSlice();
     }
     
-    syn boolean FArraySubscripts.isSlice() {
+    syn boolean FArraySubscripts.isSlice() = ndims() > 0;
+    eq FArrayExpSubscripts.isSlice() {
         for (FSubscript fs : getFSubscripts()) {
             if (fs.isSlice()) {
                 return true;
@@ -1090,17 +1091,17 @@ aspect Slices {
     /**
      * Check if this is a slice operation.
      */
-    syn boolean FQName.isSlice() = false;
-    eq FQNameFull.isSlice() {
-    	int n = getNumFQNamePart() - 1;
+    eq FAccess.isSlice() = false;
+    eq FAccessFull.isSlice() {
+    	int n = getNumFAccessPart() - 1;
     	for (int i = 0; i < n; i++) {
-    		FQNamePart part = getFQNamePart(i);
+    		FAccessPart part = getFAccessPart(i);
     		if (part.hasFArraySubscripts())
-    			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts())
-    				if (fs.ndims() > 0)
+    			for (Subscript s : part.getFArraySubscripts().subscripts())
+    				if (s.ndims() > 0)
     					return true;
     	}
-		FQNamePart part = getFQNamePart(n);
+		FAccessPart part = getFAccessPart(n);
         return part.hasFArraySubscripts() && part.getFArraySubscripts().isSlice();
     }
 }
@@ -1129,7 +1130,7 @@ aspect DebugHelpers {
     public String FStringLitExp.toString()       { return "\"" + getString() + "\""; }
     public String FEnumLitExp.toString()         { return getEnum() + "." + getValue(); }
 
-    public String FQNameString.toString()        { return getName(); }
+    public String FAccessString.toString()        { return getName(); }
 
 }
 
@@ -1450,7 +1451,6 @@ aspect ComponentDeclMethods {
         return false;
     }
     
-    syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
     eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
     eq InstComponentArrayAccess.isDisabled() = myInstComponentDecl().isDisabled();
@@ -1654,47 +1654,87 @@ aspect NodeSearch {
 
 
 aspect Strings {
-	
-	/**
-	 * Get the value of this string literal with all escape sequences 
-	 *        replaced with their actual meaning.
-	 */
-	syn String SrcStringLitExp.unEscape() = unEscape(getSTRING());
-	
-	/**
-	 * Replace all escape sequences with their actual meaning.
-	 */
-	public static String ASTNode.unEscape(String str) {
-		StringBuffer buf = new StringBuffer();
-		Matcher m = ESCAPE_PATTERN.matcher(str);
-		Map<String,String> repl = escapeReplacements();
-		while (m.find())
-			m.appendReplacement(buf, repl.get(m.group(1)));
-		m.appendTail(buf);
-		return buf.toString();
-	}
-	
-	private static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
-	
-	private static Map<String,String> ASTNode.escapeReplacements() {
-		if (ESCAPE_REPLACEMENTS == null) {
-			ESCAPE_REPLACEMENTS = new HashMap<String,String>();
-			ESCAPE_REPLACEMENTS.put("'", "'");
-			ESCAPE_REPLACEMENTS.put("\"", "\"");
-			ESCAPE_REPLACEMENTS.put("?", "?");
-			ESCAPE_REPLACEMENTS.put("\\", Matcher.quoteReplacement("\\"));
-			ESCAPE_REPLACEMENTS.put("a", "\007");
-			ESCAPE_REPLACEMENTS.put("b", "\b");
-			ESCAPE_REPLACEMENTS.put("f", "\f");
-			ESCAPE_REPLACEMENTS.put("n", "\n");
-			ESCAPE_REPLACEMENTS.put("r", "\r");
-			ESCAPE_REPLACEMENTS.put("v", "\013");
-			ESCAPE_REPLACEMENTS.put("t", "\t");
-		}
-		return ESCAPE_REPLACEMENTS;
-	}
 
-	private static Map<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+    /**
+     * Get the value of this string literal with all escape sequences 
+     *        replaced with their actual meaning.
+     */
+    syn String SrcStringLitExp.unEscape() = unEscape(getSTRING());
+
+    /**
+     * Get the value of this string literal with all escape sequences 
+     *        replaced with their actual meaning.
+     */
+    syn String FStringLitExp.unEscape() = unEscape(getString());
+
+    /**
+     * Replace all escape sequences with their actual meaning.
+     */
+    public static String ASTNode.unEscape(String str) {
+        return patternedReplace(str, UN_ESCAPE_PATTERN, unEscapeReplacements());
+    }
+
+    /**
+     * Replace all characters that should be escaped in a Modelica String with 
+     * their escape sequences.
+     */
+    public static String ASTNode.escape(String str) {
+        return patternedReplace(str, ESCAPE_PATTERN, escapeReplacements());
+    }
+
+    private static final Pattern ASTNode.UN_ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
+
+    private static Map<String,String> ASTNode.unEscapeReplacements() {
+        if (UN_ESCAPE_REPLACEMENTS == null) {
+            UN_ESCAPE_REPLACEMENTS = new HashMap<String,String>();
+            UN_ESCAPE_REPLACEMENTS.put("'", "'");
+            UN_ESCAPE_REPLACEMENTS.put("\"", "\"");
+            UN_ESCAPE_REPLACEMENTS.put("?", "?");
+            UN_ESCAPE_REPLACEMENTS.put("\\", Matcher.quoteReplacement("\\"));
+            UN_ESCAPE_REPLACEMENTS.put("a", "\007");
+            UN_ESCAPE_REPLACEMENTS.put("b", "\b");
+            UN_ESCAPE_REPLACEMENTS.put("f", "\f");
+            UN_ESCAPE_REPLACEMENTS.put("n", "\n");
+            UN_ESCAPE_REPLACEMENTS.put("r", "\r");
+            UN_ESCAPE_REPLACEMENTS.put("v", "\013");
+            UN_ESCAPE_REPLACEMENTS.put("t", "\t");
+        }
+        return UN_ESCAPE_REPLACEMENTS;
+    }
+
+    private static Map<String,String> ASTNode.UN_ESCAPE_REPLACEMENTS = null;
+
+    private static final Pattern ASTNode.ESCAPE_PATTERN = 
+            Pattern.compile("([\"'\\\\\007\b\f\n\r\013\t])");
+
+    private static Map<String,String> ASTNode.escapeReplacements() {
+        if (ESCAPE_REPLACEMENTS == null) {
+            ESCAPE_REPLACEMENTS = new HashMap<String,String>();
+            ESCAPE_REPLACEMENTS.put("'",    Matcher.quoteReplacement("\\'"));
+            ESCAPE_REPLACEMENTS.put("\"",   Matcher.quoteReplacement("\\\""));
+            ESCAPE_REPLACEMENTS.put("\\",   Matcher.quoteReplacement("\\\\"));
+            ESCAPE_REPLACEMENTS.put("\007", Matcher.quoteReplacement("\\a"));
+            ESCAPE_REPLACEMENTS.put("\b",   Matcher.quoteReplacement("\\b"));
+            ESCAPE_REPLACEMENTS.put("\f",   Matcher.quoteReplacement("\\f"));
+            ESCAPE_REPLACEMENTS.put("\n",   Matcher.quoteReplacement("\\n"));
+            ESCAPE_REPLACEMENTS.put("\r",   Matcher.quoteReplacement("\\r"));
+            ESCAPE_REPLACEMENTS.put("\013", Matcher.quoteReplacement("\\v"));
+            ESCAPE_REPLACEMENTS.put("\t",   Matcher.quoteReplacement("\\t"));
+        }
+        return ESCAPE_REPLACEMENTS;
+    }
+
+    private static Map<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+
+    private static String ASTNode.patternedReplace(
+            String str, Pattern pattern, Map<String,String> repl) {
+        StringBuffer buf = new StringBuffer();
+        Matcher m = pattern.matcher(str);
+        while (m.find())
+            m.appendReplacement(buf, repl.get(m.group(1)));
+        m.appendTail(buf);
+        return buf.toString();
+    }
 
 }
 

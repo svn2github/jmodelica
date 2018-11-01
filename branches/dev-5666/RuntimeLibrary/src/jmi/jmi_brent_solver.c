@@ -86,10 +86,8 @@ int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
         
     if (block->dF) {
         /* utilize directional derivatives to calculate Jacobian */
-        block->x[0] = y;
-        
         block->dx[0] = 1;
-        ret = block->dF(block->problem_data,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+        ret = block->dF(block->problem_data,&y,block->dx,&f,block->dres,JMI_BLOCK_EVALUATE);
         *df = block->dres[0];
         block->dx[0] = 0;
         

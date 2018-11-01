@@ -426,6 +426,7 @@ aspect ErrorCheck {
     // TODO: find way to move side-effects out from inh attr
     inh boolean FExp.lockBranch(ErrorCheckType checkType);
     inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+    inh boolean FIntegerSubscript.lockBranch(ErrorCheckType checkType);
     inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
     inh boolean FStatement.lockBranch(ErrorCheckType checkType);
     inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
@@ -593,7 +594,7 @@ aspect ErrorCheck {
 
     syn String ASTNode.errorComponentName() {
         InstComponentDecl parent = errorEnclosingComponent();
-        return parent == null ? null : parent.getFQName().scalarName(false);
+        return parent == null ? null : parent.getFAccess().scalarName(false);
     }
 
 }
@@ -769,21 +770,20 @@ aspect InstanceErrorCheck {
             derivative.ast().error("Function name is missing in derivative annotation declaration");
             return;
         }
-        String name = derivative.string();
-        if (name == null) {
+        InstLookupResult<InstClassDecl> lr = derivative.lookupInstClass();
+        if (lr == null) {
             derivative.ast().error("Invalid derivative function reference");
             return;
         }
-        InstLookupResult<InstClassDecl> lr = lookupDerivativeFunction(name);
         if (lr.isProblem()) {
-            lr.problem(derivative.ast(), "function", name);
+            lr.problem(derivative.ast(), "function", derivative.valueToString());
             if (lr.isError()) {
                 return;
             }
         }
         InstClassDecl icd = lr.target().actualInstClass();
         if (!icd.isFunction()) {
-            derivative.ast().error("The class " + name + " is not a function");
+            derivative.ast().error("The class " + derivative.valueToString() + " is not a function");
             return;
         }
         icd.collectErrors(checkType);
@@ -791,14 +791,14 @@ aspect InstanceErrorCheck {
         Set<String> noAndZeroDerivatives = new HashSet<String>();
         for (AnnotationNode attrNode : derivative) {
             if ("noDerivative".equals(attrNode.name()) || "zeroDerivative".equals(attrNode.name())) {
-                if (!attrNode.isStringValue()) {
+                InstLookupResult<InstComponentDecl> res = attrNode.lookupInstComponent();
+                if (res == null) {
                     attrNode.ast().error("Expecting variable reference for " + attrNode.name() + " annotation");
                     continue;
                 }
-                String varName = attrNode.string();
+                String varName = attrNode.valueToString();
                 if (!noAndZeroDerivatives.add(varName))
                     attrNode.ast().error("Multiple noDerivative or zeroDerivative declarations for " + varName);
-                InstLookupResult<InstComponentDecl> res = genericLookupInstComponent(varName);
                 if (res.isNotFound())
                     attrNode.ast().error("Unable to find " + varName);
                 else if (!res.target().isInput())
@@ -814,11 +814,6 @@ aspect InstanceErrorCheck {
             }
         }
     }
-
-    syn InstLookupResult<InstClassDecl> InstBaseClassDecl.lookupDerivativeFunction(String name)  = lookupInstClassQualified(name);
-    eq InstReplacingFullClassDecl.lookupDerivativeFunction(String name)        = getInstClassRedeclare().lookupInstClassQualified(name);
-    eq InstReplacingShortClassDecl.lookupDerivativeFunction(String name)       = getInstClassRedeclare().lookupInstClassQualified(name);
-    eq InstReplacingSimpleShortClassDecl.lookupDerivativeFunction(String name) = getInstClassRedeclare().lookupInstClassQualified(name);
 
     public void InstSimpleShortClassDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
@@ -1180,7 +1175,7 @@ aspect InstanceErrorCheck {
 	eq Root.getChild().myAccessExists()       = false;
 	eq InstAccess.getChild().myAccessExists() = !myInstComponentDecl().isUnknown();
 	
-	public void FArraySubscripts.collectErrors(ErrorCheckType checkType) {
+	public void FArrayExpSubscripts.collectErrors(ErrorCheckType checkType) {
 		// Should this check be in the access instead?
         int ndims = myDims();
 		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
@@ -1194,6 +1189,16 @@ aspect InstanceErrorCheck {
     		super.collectErrors(checkType);
 		}
 	}
+
+    public void FArrayLitSubscripts.collectErrors(ErrorCheckType checkType) {
+        /*
+         * Does not need implementation since error checking is done in the instance tree,
+         * and there should not be any FArrayLitSubscripts there.
+         * The reason for that is information necessary for error printing (line and column number)
+         * is not saved in FArrayLitSubscripts.
+         */
+        throw new UnsupportedOperationException();
+    }
 
     public void FBreakStmt.collectErrors(ErrorCheckType checkType) {
         if (enclosingLoop() == null)

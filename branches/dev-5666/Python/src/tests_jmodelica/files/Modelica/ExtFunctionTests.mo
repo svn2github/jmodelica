@@ -212,6 +212,32 @@ equation
     z = get_y(myEOs);  
 end ExternalObjectTests2;
 
+class ConstructorSingleCall
+    extends ExternalObject;
+    
+    function constructor
+        input String name;
+        output ConstructorSingleCall out;
+        external "C" out = constructor_error_multiple_calls(name) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end constructor;
+    
+    function destructor
+        input ConstructorSingleCall obj;
+        external "C" destructor(obj) 
+            annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+    end destructor; 
+end ConstructorSingleCall;
+
+model ConstructorSingleCallTest
+    ConstructorSingleCall obj = ConstructorSingleCall("test_ext_object.marker");
+end ConstructorSingleCallTest;
+
+model ConstructorSingleCallDepTest
+    parameter String s = "test_ext_object.marker";
+    ConstructorSingleCall obj = ConstructorSingleCall(s);
+end ConstructorSingleCallDepTest;
+
 model ExternalInfinityTest
 function whileTrue
     input Real a;
@@ -420,6 +446,20 @@ package CEval
         function f4 = f3(x(max=2));
         constant Real a1 = f1(1) + f2(2) + f3(3) + f4(4);
     end ShortClass;
+    
+    model PackageConstantTest
+      constant Real[2] c = {4,5};
+      
+      function f
+        output Real[2] x_out;
+      external "C" fRealArray(c, size(c,1), x_out, size(x_out,1)) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end f;
+    
+      constant Real[2] x  = f();
+    end PackageConstantTest;
+    
   end C;
   
   package Fortran
@@ -993,5 +1033,22 @@ model ExternalObjectTests3
     ModelicaMsgOnDelete obj = ModelicaMsgOnDelete("test_ext_object.marker");
     Real x = use_MMOD(obj);
 end ExternalObjectTests3;
+
+model MultiUse1
+    function f1
+        input Real x;
+        output Real y;
+        external "C" y = add(x,1) annotation(Library="addNumbers",
+                                           Include="#include \"addNumbers.h\"");
+    end f1;
+    function f2
+        input Real x;
+        output Real y;
+        external "C" y = add(x,2) annotation(Library="addNumbers",
+                                           Include="#include \"addNumbers.h\"");
+    end f2;
+    
+    Real y = f1(1) + f2(1);
+end MultiUse1;
 
 end ExtFunctionTests;

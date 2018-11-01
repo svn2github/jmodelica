@@ -1,4 +1,35 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5689
+Enabled evaluation of non-literal expressions in annotations.
+
+; Fixed ; Minor ; Compiler ; #5692
+Fixed exception from specific combination of record with array of unknown 
+size in if expression in binding expression.
+
+; Fixed ; Major ; Compiler ; #5634
+Updated calculation order of start values and dependent parameters to reduce
+number of evaluations.
+
+; Fixed ; Minor ; Compiler ; #5688
+Fixed that binding expression splitting doesn't check bounds.
+
+; Fixed ; Minor ; Compiler ; #5687
+Don't allow any inlining of equations in when loops.
+
+; Fixed ; Minor ; Runtime ; #5684
+Fixed segfault when calling free directly after a reset on CS FMUs.
+
+; Fixed ; Minor ; Compiler ; #5676
+Fixed a problem causing incorrect annotation trees to be created in some cases.
+
+; Fixed ; Major ; Build system ; #5671
+Fixed an issue where gcc compiled FMUs did not work on Windows 10 together
+with a VS2017 compiled software.
+
+; Changed ; Minor ; Compiler ; #5670
+Update handling of constants, and accesses to package constants, in functions
+for improved compilation and simulation performance.
+
 ; Fixed ; Minor ; PyFMI ; #5668
 Fixed issue with reusing the PyFMI computed FD Jacobian.
 
@@ -11,7 +42,6 @@ loadResource on directories now always leads to compile time evaluation of path.
 
 ; Fixed ; Minor ; Compiler ; #5642
 Improved and added tests for SimpleLookup. Now supports Quoted names.
-JavaDoc has also been added.
 
 ; Fixed ; Minor ; Compiler ; #5640 
 Fixed a problem where functions had to restrictive visibility.

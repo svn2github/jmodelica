@@ -117,10 +117,8 @@ aspect InstanceNameCheck {
     eq BaseNode.getChild().isExpandableConnectorMemberInConnect()          = false;
 
     inh boolean InstAccess.inConnectWithExistingComponent();
-    inh boolean FIdUseInstAccess.inConnectWithExistingComponent();
-    eq FIdUseInstAccess.getInstAccess().inConnectWithExistingComponent() = inConnectWithExistingComponent();
-    eq FConnectClause.getConnector1().inConnectWithExistingComponent()   = !getConnector2().getInstAccess().isExpandableConnectorPart();
-    eq FConnectClause.getConnector2().inConnectWithExistingComponent()   = !getConnector1().getInstAccess().isExpandableConnectorPart();
+    eq FConnectClause.getConnector1().inConnectWithExistingComponent()   = !getConnector2().isExpandableConnectorPart();
+    eq FConnectClause.getConnector2().inConnectWithExistingComponent()   = !getConnector1().isExpandableConnectorPart();
     eq BaseNode.getChild().inConnectWithExistingComponent()              = false;
 
 }

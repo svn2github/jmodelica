@@ -476,7 +476,7 @@ int i;
         str.print(result);
         
         /* Print "0" for the inputs we don't set, and "1, value" for those we do set */
-        Iterator<FIdUse> it = getArgNames().iterator();
+        Iterator<CommonAccess> it = getArgNames().iterator();
         Iterator<FFunctionVariable> it2 = fc.myInputs().iterator();
         for (FExp arg : getArgs()) {
             String name = it.next().name();

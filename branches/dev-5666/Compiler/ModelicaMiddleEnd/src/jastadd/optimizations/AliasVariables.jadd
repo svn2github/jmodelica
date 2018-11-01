@@ -588,13 +588,7 @@ aspect AliasVariables {
 				buf.append(fv.displayName());
 				if (withStart && fv.startAttributeSet()) {
 					buf.append("(start=");
-					CValue start;
-					try {
-						start = fv.startAttributeCValue();
-					} catch (ConstantEvaluationException e) {
-						start = CValue.UNKNOWN;
-					}
-					buf.append(start);
+                    buf.append(fv.startAttributeExp().toString());
 					buf.append(")");
 				}
 				return buf.toString();
@@ -913,7 +907,7 @@ aspect AliasVariables {
                 protected void negate(FAttribute sel) {
                     super.negate(sel);
                     String name = sel.name().equals(FAttribute.MIN) ? FAttribute.MAX : FAttribute.MIN;
-                    sel.getName().setFQName(new FQNameString(name));
+                    sel.getName().setFAccess(new FAccessString(name));
                 }
                 
             }
@@ -990,7 +984,7 @@ aspect AliasVariables {
 
         // Distance to user
         score *= 1000;
-        score += 999 - Math.min(getFQName().numDots(), 999);
+        score += 999 - Math.min(getFAccess().numDots(), 999);
 
         // Number of differentiation steps in dummy derivative
         score *= 10;
@@ -1024,8 +1018,8 @@ aspect DerivativeRewriting {
     public void FEquation.propagateDerivativeBindings() {
         if (!isDerivativeBindingEquation())
             return;
-        FAbstractVariable right = getRight().asFIdUseExp().myFV();
-        FAbstractVariable left = getLeft().asFIdUseExp().myFV();
+        FAbstractVariable right = getRight().asFAccessExp().myFV();
+        FAbstractVariable left = getLeft().asFAccessExp().myFV();
         if (!left.isFVariable() || !right.isFVariable())
             return;
         if (left.isTemporary() || right.isTemporary())

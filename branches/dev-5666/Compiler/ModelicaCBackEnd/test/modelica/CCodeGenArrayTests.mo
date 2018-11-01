@@ -17,6 +17,52 @@
 
 package CCodeGenArrayTests
 
+model VectorLength1
+    function f
+        input Real x[:];
+        output Real y;
+      algorithm
+        y := sqrt(x*x);
+        annotation(Inline=false);
+    end f;
+
+    Real y = f({time});
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="VectorLength1",
+        description="",
+        template="$C_functions$",
+        generatedCode="
+void func_CCodeGenArrayTests_VectorLength1_f_def0(jmi_array_t* x_a, jmi_real_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
+    JMI_DEF(REA, temp_2_v)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
+    temp_2_v = 0.0;
+    i1_0in = 0;
+    i1_0ie = floor((jmi_array_size(x_a, 0)) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        temp_2_v = temp_2_v + jmi_array_val_1(x_a, i1_0i) * jmi_array_val_1(x_a, i1_0i);
+    }
+    temp_1_v = temp_2_v;
+    y_v = sqrt(temp_1_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_real_t func_CCodeGenArrayTests_VectorLength1_f_exp0(jmi_array_t* x_a) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenArrayTests_VectorLength1_f_def0(x_a, &y_v);
+    return y_v;
+}
+
+")})));
+end VectorLength1;
+
 model UnknownSizeInEquation1
     function mysum
         input Real[:] x;
@@ -161,10 +207,10 @@ annotation(__JModelica(UnitTesting(tests={
         name="UnknownSizeInEquation4",
         description="",
         inline_functions="none",
-        template="$C_DAE_initial_dependent_parameter_assignments$",
+        template="$C_model_init_eval_dependent_parameters$",
         generatedCode="
 
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, -1, 1)
@@ -747,14 +793,18 @@ void func_CCodeGenArrayTests_RecordArray10_f_def1(R_0_ra* r_a, jmi_real_t* y_o) 
     JMI_DEF(REA, y_v)
     JMI_DEF(REA, temp_1_v)
     jmi_real_t i_0i;
-    jmi_real_t i_0ie;
+    jmi_int_t i_0ie;
+    jmi_int_t i_0in;
     jmi_real_t i1_1i;
-    jmi_real_t i1_1ie;
-    i_0ie = jmi_array_size(r_a, 0) + 1 / 2.0;
-    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
+    i_0in = 0;
+    i_0ie = floor((jmi_array_size(r_a, 0)) - (1));
+    for (i_0i = 1; i_0in <= i_0ie; i_0i = 1 + (++i_0in)) {
         temp_1_v = 0.0;
-        i1_1ie = jmi_array_size(jmi_array_rec_1(r_a, i_0i)->x, 0) + 1 / 2.0;
-        for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        i1_1in = 0;
+        i1_1ie = floor((jmi_array_size(jmi_array_rec_1(r_a, i_0i)->x, 0)) - (1));
+        for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
             temp_1_v = temp_1_v + jmi_array_val_1(jmi_array_rec_1(r_a, i_0i)->x, i1_1i);
         }
         y_v = y_v + temp_1_v;
