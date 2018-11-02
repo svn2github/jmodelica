@@ -1,0 +1,33 @@
+// Extract branch info from url variable (this assumes that this Jenkinsfile
+// has been checked out directly by Jenkins as part of pipeline build).
+#(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
+
+def JM_SVN_PATH="https://svn.jmodelica.org/branches/dev-5693"
+
+// Set build name:
+currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.TRIGGER_CAUSE) + ")"
+
+// Set discard policy
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
+
+node ('docker') {
+    stage("Checkout JModelica.org") {
+        checkout([
+            $class: 'SubversionSCM',
+            locations: [
+                [local: 'JModelica', remote: "https://svn.jmodelica.org/${JM_SVN_PATH}"],
+            ],
+            workspaceUpdater: [$class: 'UpdateWithCleanUpdater'],
+            quietOperation: true,
+        ])
+    }
+    stage('Build') {
+        if ("${JOB_NAME}".toLowerCase().contains("pyfmi") && "${JOB_NAME}".toLowerCase().contains("base")) {
+            sh 'echo "hello, building pyfmi base"'
+        }
+            echo "BUILDING UBUNTU FULL IMAGE"
+        } else {
+            echo "BUILDING NOTHING FOR CURRENT JOB"
+        }
+    }
+}
