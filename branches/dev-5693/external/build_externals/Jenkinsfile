@@ -1,6 +1,6 @@
 // Extract branch info from url variable (this assumes that this Jenkinsfile
 // has been checked out directly by Jenkins as part of pipeline build).
-#(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
+//(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
 
 def JM_SVN_PATH="https://svn.jmodelica.org/branches/dev-5693"
 
