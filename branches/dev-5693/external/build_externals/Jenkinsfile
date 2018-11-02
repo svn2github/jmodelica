@@ -24,8 +24,6 @@ node ('docker') {
     stage('Build') {
         if ("${JOB_NAME}".toLowerCase().contains("pyfmi") && "${JOB_NAME}".toLowerCase().contains("base")) {
             sh 'echo "hello, building pyfmi base"'
-        }
-            echo "BUILDING UBUNTU FULL IMAGE"
         } else {
             echo "BUILDING NOTHING FOR CURRENT JOB"
         }
