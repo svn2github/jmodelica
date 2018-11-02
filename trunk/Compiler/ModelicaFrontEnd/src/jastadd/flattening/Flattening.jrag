@@ -613,7 +613,7 @@ aspect Flattening {
 
     private void InstBaseClassDecl.copyDerivativeAnnotations(Flattener f, AnnotationNode src, AnnotationNode dest) {
         for (AnnotationNode derSrcNode : src.allFor("derivative")) {
-            InstClassDecl fd_decl = derSrcNode.lookupInstClass().target();
+            InstClassDecl fd_decl = derSrcNode.lookupInstClass().target().actualInstClass();
             AnnotationNode derDestNode = dest.addNode("derivative");
             fd_decl.flattenFunction(f);
             FExp derNameExp = new FAccessExp(new FAccessString(fd_decl.qualifiedName()));
