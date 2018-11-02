@@ -740,7 +740,8 @@ aspect FlatTypeAnalysis {
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();
 
-    eq CommonAccessExp.type() = getAccess().type();
+    eq CommonAccessExp.type() = getAccess().type(); // When converting to the new type interface, this should compute 
+                                                    // type for every element in getArray() for arrays of records.
     
     eq FDSRefExp.type() = getOrg().type();
 
@@ -753,6 +754,10 @@ aspect FlatTypeAnalysis {
             InstAssignable ip = (InstAssignable) myInstComponentDecl();
             if (ip.type().isRecord()) {
                 CommonType t = ip.commonType();
+                int ndimsWithoutFAS = ndims() + (hasFArraySubscripts() ? getFArraySubscripts().ndims() - getFArraySubscripts().accessNdims() : 0);
+                // Using expand here is insufficient for record arrays where the elements have different sizes.
+                // Very difficult to fix here, should be fixed in CommonAccessExp.type() instead.
+                t = t.expand(size().contractRight(ndimsWithoutFAS - ip.ndims()));
                 try {
                     t = t.cell(index()).asFType();
                 } catch (ConstantEvaluationException e) {

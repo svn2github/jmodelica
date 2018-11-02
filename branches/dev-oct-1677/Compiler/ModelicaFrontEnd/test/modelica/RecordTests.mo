@@ -2612,6 +2612,43 @@ Error at line 14, column 21, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
 end RecordArray14;
 
 
+model RecordArray15
+    record R1
+    end R1;
+    
+    record R2
+        R1 r;
+    end R2;
+    
+    R1[3] a;
+    R2[3] b;
+equation
+    a = b.r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordArray15",
+            description="Tests type checking of component access in array of records.",
+            flatModel="
+fclass RecordTests.RecordArray15
+ constant RecordTests.RecordArray15.R1 a[3] = {RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1()};
+ constant RecordTests.RecordArray15.R2 b[3] = {RecordTests.RecordArray15.R2(RecordTests.RecordArray15.R1()), RecordTests.RecordArray15.R2(RecordTests.RecordArray15.R1()), RecordTests.RecordArray15.R2(RecordTests.RecordArray15.R1())};
+equation
+ {RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1()} = {RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1(), RecordTests.RecordArray15.R1()};
+
+public
+ record RecordTests.RecordArray15.R1
+ end RecordTests.RecordArray15.R1;
+
+ record RecordTests.RecordArray15.R2
+  constant RecordTests.RecordArray15.R1 r;
+ end RecordTests.RecordArray15.R2;
+
+end RecordTests.RecordArray15;
+")})));
+end RecordArray15;
+
+
 
 model RecordConstructor1
  record A
