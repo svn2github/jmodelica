@@ -249,14 +249,17 @@ aspect InstTypeAnalysis {
 
 aspect InstBindingType {
 
-    syn CommonType InstAssignable.expectedBindingType() {
+    syn CommonType InstAssignable.expectedBindingType() = expectedBindingType(true);
+    syn CommonType InstAssignable.expectedBindingTypeNoEach() = expectedBindingType(false);
+
+    syn CommonType InstAssignable.expectedBindingType(boolean useEach) {
         InstValueModification ivm = myInstValueMod();
-        return type().sizedType(ivm.expectedSize());
+        return type().sizedType(ivm.expectedSize(useEach));
     }
     
-    eq InstRecord.expectedBindingType() {
+    eq InstRecord.expectedBindingType(boolean useEach) {
         InstValueModification ivm = myInstValueMod();
-        Size arraySize = ivm.expectedSize().contractRight(indexInModification().ndims());
+        Size arraySize = ivm.expectedSize(useEach).contractRight(indexInModification(useEach).ndims());
         return commonType().expand(arraySize);
     }
 
@@ -276,8 +279,11 @@ aspect InstBindingType {
     /**
      * If this assignable is in a modification on an array, return the index for this instance.
      */
-    syn Index InstAssignable.indexInModification() {
-        int ndims = myInstValueMod().expectedSize().ndims() - size().ndims();
+    syn Index InstAssignable.indexInModification() = indexInModification(true);
+    syn Index InstAssignable.indexInModificationNoEach() = indexInModification(false);
+
+    syn Index InstAssignable.indexInModification(boolean useEach) {
+        int ndims = myInstValueMod().expectedSize(useEach).ndims() - size().ndims();
         Index arrayIndex = parentTotalIndex();
         return arrayIndex.subIndex(arrayIndex.ndims() - ndims);
     }

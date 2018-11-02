@@ -31,8 +31,10 @@ aspect FlatTypeInterface {
     public interface CommonType {
         public CommonType cell(Index index);
         public CommonType expand(Size size);
+        public CommonType contract(int ndims);
         public CommonType scalarType();
         public CommonType arrayType(Size size);
+        public CommonType sizedType(Size size);
         public boolean typeCompatible(CommonType type);
         public boolean typeCompatible(CommonType type, boolean unknownAllowed);
         public boolean isUnknown();
@@ -53,7 +55,8 @@ aspect FlatTypeInterface {
     
     FType implements CommonType;
     syn FType FType.asFType() = this;
-    syn FType FType.expand(Size size) = arrayType(size().expand(size));
+    syn FType FType.expand(Size size) = sizedType(size().expand(size));
+    syn FType FType.contract(int ndims) = sizedType(size().contractLeft(ndims));
     
     public class ArrayType<T extends HasType> implements CommonType {
         
@@ -79,6 +82,17 @@ aspect FlatTypeInterface {
             return this;
         }
         
+        public CommonType contract(int ndims) {
+            int ndimsDiff = ndims() - ndims;
+            Indices newIndices = Indices.create(size().contractLeft(ndims));
+            Map<Index, T> newCells = new HashMap<>();
+            
+            for (Index index : indices) {
+                newCells.put(index.subIndex(ndimsDiff), cells.get(index));
+            }
+            return new ArrayType(newIndices, newCells, scalarType);
+        }
+        
         public CommonType cell(Index index) {
             if (indices.isValid(index)) {
                 return cells.get(index).type().scalarType();
@@ -95,6 +109,10 @@ aspect FlatTypeInterface {
         
         public CommonType arrayType(Size size) {
             return scalarType().arrayType(size); // Not perfect, but will do for now.
+        }
+        
+        public CommonType sizedType(Size size) {
+            return size.ndims() > 0 ? arrayType(size) : scalarType();
         }
         
         public boolean typeCompatible(CommonType type) {
@@ -135,7 +153,7 @@ aspect FlatTypeInterface {
         };
         
         public String toString() {
-            return scalarType.toString() + size();
+            return scalarType.toString() + (ndims() > 0 ? size() : "");
         };
         
         public boolean isBoolean() { return scalarType().isBoolean(); }

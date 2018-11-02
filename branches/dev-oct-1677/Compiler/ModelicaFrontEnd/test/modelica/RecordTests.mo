@@ -2550,6 +2550,67 @@ end RecordTests.RecordArray12;
 ")})));
 end RecordArray12;
 
+model RecordArray13
+    record R
+        Real[:] x = {1};
+    end R;
+    
+    record R2
+        Integer i = 0;
+    end R2;
+    
+    function f
+        input Integer x;
+        output R[2] y;
+    protected
+        R[:] array = fill(R2(), x);
+    algorithm
+        y := array;
+    end f;
+    
+    R[2] z = f(2);
+    annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="RecordArray13",
+        description="Array of unknown size and with incompatible records",
+        variability_propagation=false,
+        errorMessage="
+1 errors found:
+
+Error at line 14, column 22, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable array does not match the declared type of the variable
+")})));
+end RecordArray13;
+
+
+model RecordArray14
+    record R1
+        Real[1] z = {1};
+    end R1;
+    
+    record R2
+        Real[2] z = {1, 2};
+    end R2;
+    
+    record R
+        R1 x;
+    end R;
+    
+    R[2] r(each x = {R1(), R2()});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordArray14",
+            description="Array with incorrect each and incompatible record at index [2]",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 14, column 21, in file '...', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end RecordArray14;
+
 
 
 model RecordConstructor1

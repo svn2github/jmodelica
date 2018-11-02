@@ -220,9 +220,38 @@ aspect FlatTypeCheck {
             CommonType expectedBT = expectedBindingType();
             CommonType actualBT = actualBindingType();
             
-            if (expectedBT.size().equals(actualBT.size())) {
-                if (expectedBT.size().isEmpty()) {
-                    typeCheckCell(expectedBT.scalarType(), actualBT.scalarType(), bexp, unknownAllowed, expectedBT.size(), actualBT.size());
+            boolean reportedError = false;
+            if (!expectedBT.size().equals(actualBT.size())) {
+                InstValueModification ivm = myInstValueMod();
+                InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
+                if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                    BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
+                    reportedError = true;
+                } else if (needsEach != null) {
+                    ASSUMING_EACH.invoke(needsEach, needsEach);
+                    actualBT = actualBT.expand(expectedBT.size().contractLeft(expectedBT.ndims() - actualBT.ndims()));
+                } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
+                    InstModification parIM = ivm.parentInstModification();
+                    IGNORING_EACH.invoke(parIM, parIM);
+                    expectedBT = expectedBindingTypeNoEach();
+                    arrayIndex = indexInModificationNoEach();
+                } else {
+                    ErrorProducerUnlessDisabled reporter;
+                    if (ivm.myInstNode() == this) {
+                        reporter = ARRAY_SIZE_MISMATCH_IN_DECLARATION;
+                    } else if (ivm.hasEach()) {
+                        reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH;
+                    } else {
+                        reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION;
+                    }
+                    reporter.invokeWithCondition(bexp, expectedBT.ndims() == actualBT.ndims(), name(), expectedBT.size(), actualBT.size());
+                    reportedError = true;
+                }
+            }
+            
+            if (!reportedError) {
+                if (expectedBT.size().isEmpty() || expectedBT.size().isUnknown() || actualBT.size().isUnknown()) {
+                    typeCheckCell(expectedBT.scalarType(), actualBT.scalarType(), bexp, unknownAllowed);
                 } else {
                     Size arraySize = expectedBT.size().contractLeft(expectedBT.ndims() - arrayIndex.ndims());
                     for (Index index : Indices.create(arraySize)) {
@@ -230,11 +259,9 @@ aspect FlatTypeCheck {
                         CommonType expected = expectedBT.cell(index);
                         CommonType actual = actualBT.cell(index);
                         
-                        typeCheckCell(expected, actual, bexp, unknownAllowed, expectedBT.size(), actualBT.size());
+                        typeCheckCell(expected, actual, bexp, unknownAllowed);
                     }
                 }
-            } else {
-                typeCheckCell(expectedBT, actualBT, bexp, unknownAllowed, expectedBT.size(), actualBT.size());
             }
         }
         
@@ -257,28 +284,10 @@ aspect FlatTypeCheck {
         super.typeCheck(checkType);
     }
     
-    private void InstAssignable.typeCheckCell(CommonType expectedBT, CommonType actualBT, FExp bexp, boolean unknownAllowed, Size expectedSize, Size actualSize) {
-        InstValueModification ivm = myInstValueMod();
-        
+    private void InstAssignable.typeCheckCell(CommonType expectedBT, CommonType actualBT, FExp bexp, boolean unknownAllowed) {
         if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
-            InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
             if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
                 BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
-            } else if (needsEach != null) {
-                ASSUMING_EACH.invoke(needsEach, needsEach);
-            } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
-                InstModification parIM = ivm.parentInstModification();
-                IGNORING_EACH.invoke(parIM, parIM);
-            } else {
-                ErrorProducerUnlessDisabled reporter;
-                if (ivm.myInstNode() == this) {
-                    reporter = ARRAY_SIZE_MISMATCH_IN_DECLARATION;
-                } else if (ivm.hasEach()) {
-                    reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH;
-                } else {
-                    reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION;
-                }
-                reporter.invokeWithCondition(bexp, expectedBT.ndims() == actualBT.ndims(), name(), expectedSize, actualSize);
             }
         }
     }
