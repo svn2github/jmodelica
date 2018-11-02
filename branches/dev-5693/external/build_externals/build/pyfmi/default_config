@@ -25,16 +25,16 @@ BITNESS=64
 
 # Required variables
 # Local Variables
-JM_HOME=C:/OCT-SDK-1.3/src/
+JM_HOME=C:/Users/x-robin.andersson/dev-5693
 JM_HOME_IN_DOCKER=/tmp/jm_home
 BUILD_EXTERNALS_DIR_LOCAL=${JM_HOME}/external/build_externals
 FMIL_HOME=${JM_HOME}/src/external/FMILibrary
 BUILD_ENVIRONMENT=${JM_HOME}/build_environment
 BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
 DOCKER_UTILS_DIR=${JM_HOME}/Docker
-PYFMI_SRC="${JM_HOME}/external/PyFMI"
+PYFMI_SRC=${JM_HOME}/external/PyFMI
 
 # Optional variables
 
 #USER_CONFIG: Is sourced and overrides default variables, is set to path to config
-USER_CONFIG=
+USER_CONFIG=C:/Users/x-robin.andersson/dev-5693/external/build_externals/build/pyfmi/robin_config

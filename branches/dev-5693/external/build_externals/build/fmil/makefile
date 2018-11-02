@@ -22,24 +22,30 @@
 include default_config
 export $(shell sed 's/=.*//' default_config)
 
-include $(USER_CONFIG)
-export $(shell sed 's/=.*//' $(USER_CONFIG))
+#include $(USER_CONFIG)
+#export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 .PHONY: install fmil_docker_build
 
+show_environment:
+	@echo BUILD_EXTERNALS_DIR=$(BUILD_EXTERNALS_DIR)
+	@echo FMIL_INSTALL=$(FMIL_INSTALL)
+	@echo JM_HOME=$(JM_HOME)
+	@echo JM_HOME_IN_DOCKER=$(JM_HOME_IN_DOCKER)
+
 install:
-	mkdir -p $(BUILD_DIR_FMIL) && \
-	cd $(BUILD_DIR_FMIL) && \
-	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_HOME) $(BUILD_EXTERNALS_DIR)/../FMILibrary/FMILibrary/; \
-	cd $(BUILD_DIR_FMIL) && make install DESTDIR=
+	mkdir -p $(FMIL_BUILD_DIR) && \
+	cd $(FMIL_BUILD_DIR) && \
+	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_INSTALL) $(BUILD_EXTERNALS_DIR)/../FMILibrary/FMILibrary/; \
+	cd $(FMIL_BUILD_DIR) && make install DESTDIR=
 
 fmil_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
-fmil_docker: docker_image
+fmil_docker: docker_image show_environment
 	@echo "Starting docker with id ${DOCKER_ID} in fmil makefile"
-	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make fmil_docker_build"
+	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/fmil && make fmil_docker_build"
 	@docker rmi -f ${DOCKER_ID}
 
-fmil_docker_build: docker_environment c-compiler cmake install
+fmil_docker_build: show_environment docker_environment c-compiler cmake install
 	@echo "Finished building FMIL"
 
 docker_environment:

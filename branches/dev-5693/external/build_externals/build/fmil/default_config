@@ -16,10 +16,23 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-JM_HOME="/tmp/jm_home"
+PLATFORM=ubuntu
+DIST_VERSION=18.04
+PYTHON_VERSION=3.5.5
+BUILD_TARGET=PyFMI
+DOCKER_ENV=1
+BITNESS=64
+
+JM_HOME=C:/Users/x-robin.andersson/dev-5693
 JM_HOME_IN_DOCKER=/tmp/jm_home
-BUILD_ENVIRONMENT="${JM_HOME}/build_environment"
-BUILD_EXTERNALS_DIR="${JM_HOME}/external/build_externals"
-BUILD_DIR=${SDK_HOME}/build
-BUILD_DIR_FMIL=${BUILD_DIR}/fmil
-FMIL_HOME=${BUILD_DIR}/fmil_install
+BUILD_ENVIRONMENT=${JM_HOME}/build_environment
+BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
+BUILD_DIR=${JM_HOME}/build
+FMIL_BUILD_DIR=${BUILD_DIR}/fmil
+FMIL_INSTALL=${BUILD_DIR}/fmil_install
+
+# TO BUILD WITH DOCKER YOU NEED TO USE THE VARIABLES BELOW
+#BUILD_ENVIRONMENT=${JM_HOME_IN_DOCKER}/build_environment
+#BUILD_EXTERNALS_DIR=${JM_HOME_IN_DOCKER}/external/build_externals
+#FMIL_BUILD_DIR=${JM_HOME_IN_DOCKER}/fmil_build
+#FMIL_INSTALL=${JM_HOME_IN_DOCKER}/fmil_install
