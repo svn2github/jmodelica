@@ -101,7 +101,7 @@ BOOLEAN eliminate_alias_variables compiler uncommon true
 "If enabled, then alias variables are eliminated from the model."
 
 ********************************************************************************
-BOOLEAN eliminate_alias_parameters compiler uncommon false
+BOOLEAN eliminate_alias_parameters compiler uncommon true false
 
 "If enabled, then alias parameters are eliminated from the model."
 
