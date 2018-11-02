@@ -2,7 +2,7 @@
 // has been checked out directly by Jenkins as part of pipeline build).
 //(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
 
-def JM_SVN_PATH="https://svn.jmodelica.org/branches/dev-5693"
+def JM_SVN_PATH="branches/dev-5693"
 
 // Set build name:
 currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.TRIGGER_CAUSE) + ")"
