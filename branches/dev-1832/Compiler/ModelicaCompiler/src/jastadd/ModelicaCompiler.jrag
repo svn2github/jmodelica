@@ -1975,8 +1975,10 @@ public class ModelicaCompiler implements LogContainer {
             // compute instance tree
             InstClassDecl icl = instantiateModel(name, cl, target);
             
-            File unitFile = makePackagingDirs(cl, new File(compileTo), target);
-            icl.root().getUtilInterface().setPath(unitFile);
+            if (compileTo != null) {
+                File unitFile = makePackagingDirs(cl, new File(compileTo), target);
+                icl.root().getUtilInterface().setPath(unitFile);
+            }
             
             // flattening
             // Throw away source and instance trees when they are not needed any more
