@@ -1,0 +1,4 @@
+BUILD_DIR=${SDK_HOME}/build
+JM_HOME=${SDK_HOME}/src
+SUPERLU_BUILD_DIR=${BUILD_DIR}/build_superlu
+SUPERLU_SRC_DIR=${JM_HOME}/ThirdParty/SuperLU

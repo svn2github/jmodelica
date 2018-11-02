@@ -16,21 +16,9 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-#!make
-#SHELL := /bin/bash
-
-include default_config
-export $(shell sed 's/=.*//' default_config)
-
-include $(USER_CONFIG)
-export $(shell sed 's/=.*//' $(USER_CONFIG))
-
-.PHONY: install
-
-install: $(LAPACK_BUILD_DIR)
-	cd $(LAPACK_BUILD_DIR) && make install DESTDIR=
-
-$(LAPACK_BUILD_DIR):
-	mkdir -p $(LAPACK_BUILD_DIR); \
-	cd $(LAPACK_BUILD_DIR); \
-	cmake $(GENERATOR) -DCMAKE_Fortran_FLAGS=$(FORTRAN_FLAGS) -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(EXTRA_CMAKE_LAPACK_FLAGS) $(LAPACK_SRC_DIR)
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+include $(mkfile_dir)/win
+FORTRAN_FLAGS="-fPIC -O2 -m64"
+BLAS_INSTALL_DIR=${BUILD_DIR/blas_install64
+BLAS_BUILD_DIR=${BUILD_DIR}/build_blas64
