@@ -122,7 +122,7 @@ aspect AnnotationAPI {
      */
     syn InstLookupResult<InstClassDecl> FExp.lookupInstClassIfAccess();
     eq FExp         .lookupInstClassIfAccess() = null;
-    eq InstAccessExp.lookupInstClassIfAccess() = asInstAccess().lookupInstClassIfAccess();
+    eq InstAccessExp.lookupInstClassIfAccess() = getInstAccess().lookupInstClassIfAccess();
     
     syn InstLookupResult<InstClassDecl> InstAccess.lookupInstClassIfAccess();
     eq InstAccess     .lookupInstClassIfAccess() = myInstLookupClass();
@@ -142,7 +142,7 @@ aspect AnnotationAPI {
      */
     syn InstLookupResult<InstComponentDecl> FExp.lookupInstComponentIfAccess();
     eq FExp         .lookupInstComponentIfAccess() = null;
-    eq InstAccessExp.lookupInstComponentIfAccess() = asInstAccess().lookupInstComponentIfAccess();
+    eq InstAccessExp.lookupInstComponentIfAccess() = getInstAccess().lookupInstComponentIfAccess();
     
     syn InstLookupResult<InstComponentDecl> InstAccess.lookupInstComponentIfAccess();
     eq InstAccess         .lookupInstComponentIfAccess() = myInstLookupComponent();
