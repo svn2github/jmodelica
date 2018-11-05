@@ -765,25 +765,23 @@ aspect FlatTypeCheck {
 	  getInstAccess().typeError(top);
   }
   
-  protected void InstComponentAccess.typeError(InstAccess top) {
-	  InstComponentDecl icd = myInstComponentDecl();
-	  if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-		  if (icd.isOrExtendsPrimitive() || icd.isRecord())
-			  top.error("Could not calculate type of " + top.name());
-		  else
-			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
-	  }
-  }
+    protected void InstComponentAccess.typeError(InstAccess top) {
+        InstComponentDecl icd = myInstComponentDecl();
+        if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
+            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+                top.error("Accesses to composite components other than records are not allowed: " + top.name());
+            }
+        }
+    }
   
-  protected void InstComponentArrayAccess.typeError(InstAccess top) {
-	  InstComponentDecl icd = myInstComponentDecl();
-      if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-          if (icd.isOrExtendsPrimitive() || icd.isRecord())
-			  top.error("Could not calculate type of " + top.name());
-		  else
-			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
-	  }
-  }
+    protected void InstComponentArrayAccess.typeError(InstAccess top) {
+        InstComponentDecl icd = myInstComponentDecl();
+        if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
+            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+                top.error("Accesses to composite components other than records are not allowed: " + top.name());
+            }
+        }
+    }
   
   inh boolean InstAccess.inCardinality();
   eq FCardinality.getChild().inCardinality() = true;
