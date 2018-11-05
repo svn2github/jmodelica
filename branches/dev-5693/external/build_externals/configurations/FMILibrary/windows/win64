@@ -20,5 +20,5 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 EXTRA_CMAKE_FLAGS=-DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_CXX_FLAGS="-m64 -fPIC" -DCMAKE_SHARED_LINKER_FLAGS="-m64 -fPIC" -DCMAKE_EXE_LINKER_FLAGS="-m64 -fPIC"
-BUILD_DIR_FMIL=${BUILD_DIR}/fmil64
-FMIL_HOME=${BUILD_DIR}/fmil_install64
+FMIL_BUILD_DIR=${BUILD_DIR}/fmil64
+FMIL_INSTALL=${BUILD_DIR}/fmil_install64
