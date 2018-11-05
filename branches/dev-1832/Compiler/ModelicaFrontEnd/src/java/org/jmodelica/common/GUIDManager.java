@@ -216,6 +216,11 @@ public class GUIDManager {
                 throw new RuntimeException(e);
             }
         }
+        
+        @Override
+        public String toString() {
+            return file.toString();
+        }
     }
     
     private class StringOpenable implements Openable {
