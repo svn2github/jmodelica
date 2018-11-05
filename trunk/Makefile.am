@@ -519,13 +519,6 @@ endif
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
-if COPY_PTHREADS_LIB
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
-	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
-	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
-endif
-
 	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
