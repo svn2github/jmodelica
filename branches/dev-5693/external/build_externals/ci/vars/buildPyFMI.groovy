@@ -1,8 +1,8 @@
 def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"], FMIL_HOME_BASE, stash=false, archive=true) {
-    if (! JM_CHECKOUT_PATH) {
+    if (JM_CHECKOUT_PATH != null) {
         checkoutJM(${JM_BRANCH})
     }
-    if (! FMIL_HOME_BASE) {
+    if (FMIL_HOME_BASE != null) {
         FMIL_HOME_BASE="${INSTALL_PATH}/fmil_install"
     }
     for (bit in bitness) {

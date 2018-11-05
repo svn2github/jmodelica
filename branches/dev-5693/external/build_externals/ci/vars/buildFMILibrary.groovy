@@ -1,5 +1,5 @@
 def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, bitness=["32", "64"], stash=false, archive=true) {
-    if (! JM_CHECKOUT_PATH) {
+    if (JM_CHECKOUT_PATH != null) {
         checkoutJM(${JM_BRANCH})
     }
     for (bit in bitness) {
