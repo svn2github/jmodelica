@@ -1,8 +1,15 @@
+// This loads the Jenkins pipeline library found in the ci folder.
+def url = scm.getLocations()[0].remote
+def base_url = url - "external/build_externals"
+echo base_url
+library identifier: 'build_externals@ci', retriever: modernSCM([$class: 'SubversionSCMSource', remoteBase: url, credentialsId: ''])
+library identifier: 'JModelica@ci', retriever: modernSCM([$class: 'SubversionSCMSource', remoteBase: base_url, credentialsId: ''])
+
 // Extract branch info from url variable (this assumes that this Jenkinsfile
 // has been checked out directly by Jenkins as part of pipeline build).
-//(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", url)
+(JM_SVN_PATH, JM_SVN_TYPE, JM_SVN_NAME) = extractBranchInfo("https://svn.jmodelica.org", base_url)
 
-def JM_SVN_PATH="branches/dev-5693"
+//def JM_SVN_PATH="branches/dev-5693"
 
 // Set build name:
 currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.TRIGGER_CAUSE) + ")"
@@ -10,17 +17,13 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 // Set discard policy
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
 
+node("${resolveSDK()}") {
+    checkoutJM("${JM_SVN_PATH}")
+}
+
+
 node ('docker') {
-    stage("Checkout JModelica.org") {
-        checkout([
-            $class: 'SubversionSCM',
-            locations: [
-                [local: 'JModelica', remote: "https://svn.jmodelica.org/${JM_SVN_PATH}"],
-            ],
-            workspaceUpdater: [$class: 'UpdateWithCleanUpdater'],
-            quietOperation: true,
-        ])
-    }
+    checkoutJM("${JM_SVN_PATH}")
     stage('Build') {
         if ("${JOB_NAME}".toLowerCase().contains("pyfmi") && "${JOB_NAME}".toLowerCase().contains("base")) {
             sh 'echo "hello, building pyfmi base"'
