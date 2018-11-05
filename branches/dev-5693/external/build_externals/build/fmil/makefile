@@ -64,7 +64,7 @@ dockerfile:
 cmake:
 	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_cmake.sh
 
-clean: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
-clean:
+clean_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
+clean_docker:
 	@docker rmi -f ${DOCKER_ID}
 
