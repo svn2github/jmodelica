@@ -22,24 +22,31 @@ import java.util.List;
 
 public class GUIDManager {
 
-    private static final String GUID_TOKEN = "$GUID_TOKEN$";
-    private static final String GUID_TOKEN_REGEX = GUID_TOKEN.replace("$", "\\$");
+    private final Token guidToken = new Token("$GUID_TOKEN$");
+    private final Token dateToken = new Token("$DATE_TOKEN$");
+    private final Token versionToken = new Token("$COMPILER_VERSION$");
 
-    private static final String DATE_TOKEN = "$DATE_TOKEN$";
-    private static final String DATE_TOKEN_REGEX = DATE_TOKEN.replace("$", "\\$");
+    private final Token[] tokens = {guidToken, dateToken, versionToken};
     private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     private final List<Openable> dependentFiles = new ArrayList<>();
     private Openable source;
-    private String guid = null;
-    private String date = null;
+
+
+    public GUIDManager(String compilerVersion) {
+        versionToken.setValue(compilerVersion);
+    }
 
     public String getGuidToken() {
-        return GUID_TOKEN;
+        return guidToken.getString();
     }
 
     public String getDateToken() {
-        return DATE_TOKEN;
+        return dateToken.getString();
+    }
+    
+    public String getCompilerVersionToken() {
+        return versionToken.getString();
     }
 
     public void setSourceFile(File source) {
@@ -59,52 +66,48 @@ public class GUIDManager {
     }
 
     private String getGuid() {
-        if (guid == null) {
-            try {
-                final MessageDigest md5 = MessageDigest.getInstance("MD5");
+        String guid;
+        try {
+            final MessageDigest md5 = MessageDigest.getInstance("MD5");
 
-                try (final BufferedReader reader = new BufferedReader(source.openInput())) {
-                    boolean foundFirstGuid = false;
-                    boolean foundFirstDate = false;
-
-                    String line = reader.readLine();
-                    while (line != null) {
-                        if (!foundFirstGuid && line.contains(GUID_TOKEN)) {
-                            // Replace the first occurrence of the GUID token 
-                            foundFirstGuid = true;
-                            line = line.replaceFirst(GUID_TOKEN_REGEX, "");
+            try (final BufferedReader reader = new BufferedReader(source.openInput())) {
+                String line = reader.readLine();
+                while (line != null) {
+                    for (Token token : tokens) {
+                        if (!token.hasfoundFirst() && line.contains(token.getString())) {
+                            // Replace the first occurrence of the token 
+                            token.foundFirst();
+                            line = line.replaceFirst(token.getRegex(), "");
                         }
-                        if (!foundFirstDate && line.contains(DATE_TOKEN)) {
-                            // Replace the first occurrence of the date token 
-                            foundFirstDate = true;
-                            line = line.replaceFirst(DATE_TOKEN_REGEX, "");
-                        }
-
-                        // A naive implementation that is expected to create a digest different from what a command
-                        // line tool would create. No lines breaks are included in the digest, and no
-                        // character encodings are specified.
-                        md5.update(line.getBytes());
-                        line = reader.readLine();
                     }
-                }
 
-                guid = new BigInteger(1,md5.digest()).toString(16);
-            }  catch (IOException | NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
+                    // A naive implementation that is expected to create a digest different from what a command
+                    // line tool would create. No lines breaks are included in the digest, and no
+                    // character encodings are specified.
+                    md5.update(line.getBytes());
+                    line = reader.readLine();
+                }
             }
+
+            guid = new BigInteger(1,md5.digest()).toString(16);
+        }  catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        for (Token token : tokens) {
+            token.resetFoundFirst();
         }
 
         return guid;
     }
 
     private String getDate() {
-        if (date == null) {
-            date = dateformat.format(new Date());
-        }
-        return date;
+        return dateformat.format(new Date());
     }
 
     public void processDependentFiles() {
+        guidToken.setValue(getGuid());
+        dateToken.setValue(getDate());
+        
         for (final Openable openable : dependentFiles) {
             try {
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -124,25 +127,63 @@ public class GUIDManager {
     private void processFiles(Reader source, Writer destination) throws IOException {
         try (final BufferedReader reader = new BufferedReader(source);
                 final BufferedWriter writer = new BufferedWriter(destination)) {
-            boolean foundFirstGuid = false;
-            boolean foundFirstDate = false;
 
             String line =  reader.readLine();
             while (line != null) {
-                if (!foundFirstGuid && line.contains(GUID_TOKEN)) {
-                    foundFirstGuid = true;
-                    line = line.replaceFirst(GUID_TOKEN_REGEX, getGuid());
-                }
-
-                if (!foundFirstDate && line.contains(DATE_TOKEN)) {
-                    foundFirstDate = true;
-                    line = line.replaceFirst(DATE_TOKEN_REGEX, getDate());
+                for (Token token : tokens) {
+                    if (!token.hasfoundFirst() && line.contains(token.getString())) {
+                        token.foundFirst();
+                        line = line.replaceFirst(token.getRegex(), token.getValue());
+                    }
                 }
 
                 writer.write(line);
                 writer.write('\n');
                 line = reader.readLine();
             }
+        }
+        for (Token token : tokens) {
+            token.resetFoundFirst();
+        }
+    }
+
+    private class Token {
+        private String string;
+        private String regex;
+        private String value;
+        private boolean foundFirst;
+        
+        public Token(String string) {
+            this.string = string;
+            regex = string.replace("$", "\\$");
+        }
+        
+        public String getString() {
+            return string;
+        }
+        
+        public String getRegex() {
+            return regex;
+        }
+        
+        public String getValue() {
+            return value;
+        }
+        
+        public void setValue(String value) {
+            this.value = value;
+        }
+        
+        public boolean hasfoundFirst() {
+            return foundFirst;
+        }
+        
+        public void foundFirst() {
+            foundFirst = true;
+        }
+        
+        public void resetFoundFirst() {
+            foundFirst = false;
         }
     }
 

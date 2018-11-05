@@ -1332,8 +1332,8 @@ public class ModelicaCompiler implements LogContainer {
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
         
-        fc.root().getUtilInterface().getGuidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
-        fc.root().getUtilInterface().getGuidManager().processDependentFiles();
+        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
+        fc.guidManager().processDependentFiles();
         
         hookCodeGenerated(outDir);
         log.debug("... code generated.");
@@ -1977,7 +1977,7 @@ public class ModelicaCompiler implements LogContainer {
             
             if (compileTo != null) {
                 File unitFile = makePackagingDirs(cl, new File(compileTo), target);
-                icl.root().getUtilInterface().setPath(unitFile);
+                icl.root().getUtilInterface().setCompilationOutputPath(unitFile);
             }
             
             // flattening
@@ -2108,7 +2108,7 @@ public class ModelicaCompiler implements LogContainer {
             for (File file : stream.files()) {
                 log.debug("Generated file '" + file + "'.");
                 if (fc != null) {
-                    fc.root().getUtilInterface().getGuidManager().addDependentFile(file);
+                    fc.guidManager().addDependentFile(file);
                 }
             }
             return stream;
@@ -2122,7 +2122,7 @@ public class ModelicaCompiler implements LogContainer {
     protected File ModelicaCompiler.packUnit(String className,
             TargetObject target, FClass fClass) throws PackingFailedException {
 
-        File unitFile = fClass.root().getUtilInterface().getPath();
+        File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
 
         try {
             hookCheckAbort();

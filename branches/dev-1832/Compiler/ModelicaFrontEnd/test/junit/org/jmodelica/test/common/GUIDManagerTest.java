@@ -14,7 +14,7 @@ public class GUIDManagerTest {
     
     @Before
     public void setup() {
-        guidManager = new GUIDManager();
+        guidManager = new GUIDManager("1.0");
     }
     
     private void test(String source, String[] dependent, String[] expected) {
@@ -54,6 +54,14 @@ public class GUIDManagerTest {
         assertFalse(input.equals(actual));
         actual = actual.substring(expected.length() + 2);
         assertTrue(actual + " does not match date pattern", actual.trim().matches("date=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"));
+    }
+    
+    @Test
+    public void testCompilerVersion() {
+        String[] dependent = {"guid=" + guidManager.getGuidToken() + ", cv=" + guidManager.getCompilerVersionToken()};
+        String[] expected = {"guid=7215ee9c7d9dc229d2921a40e899ec5f, cv=1.0"};
+        test(guidManager.getGuidToken() + " " + guidManager.getCompilerVersionToken(),
+                dependent, expected);
     }
     
     @Test

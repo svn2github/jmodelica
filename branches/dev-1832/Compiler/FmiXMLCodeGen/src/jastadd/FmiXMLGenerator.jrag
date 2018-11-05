@@ -378,7 +378,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
         
         public String annotationValue() {
-            return fclass.myOptions().getStringOption("compiler_version");
+            return getFClass().guidManager().getCompilerVersionToken();
         }
     }
 
@@ -632,9 +632,9 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
-            generateAttribute("guid",                     fclass.root().getUtilInterface().getGuidManager().getGuidToken(),     genPrinter);
+            generateAttribute("guid",                     fclass.guidManager().getGuidToken(),     genPrinter);
             generateAttribute("generationTool",           ASTNode.vendorName(),                    genPrinter);
-            generateAttribute("generationDateAndTime",    fclass.root().getUtilInterface().getGuidManager().getDateToken(),     genPrinter);
+            generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(),     genPrinter);
             generateAttribute("variableNamingConvention", "structured",                            genPrinter);
             generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),         genPrinter);
@@ -1058,9 +1058,9 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         public void generateAttributes(CodeStream genPrinter) {
             generateAttribute("fmiVersion",               "2.0",                               genPrinter);
             generateAttribute("modelName",                fclass.name(),                       genPrinter);
-            generateAttribute("guid",                     fclass.root().getUtilInterface().getGuidManager().getGuidToken(), genPrinter);
+            generateAttribute("guid",                     fclass.guidManager().getGuidToken(), genPrinter);
             generateAttribute("generationTool",           ASTNode.vendorName(),                genPrinter);
-            generateAttribute("generationDateAndTime",    fclass.root().getUtilInterface().getGuidManager().getDateToken(), genPrinter);
+            generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(), genPrinter);
             generateAttribute("variableNamingConvention", "structured",                        genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),     genPrinter);
         }

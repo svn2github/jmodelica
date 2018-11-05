@@ -1924,15 +1924,15 @@ aspect UtilInterface {
         private IErrorHandler eh;
         private ExternalFunctionCache efc;
         private GUIDManager guidManager;
-        private File path;
+        private File compilationOutputPath;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File path) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc, File compilationOutputPath) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
             this.efc = efc;
-            this.path = path;
-            guidManager = new GUIDManager();
+            this.compilationOutputPath = compilationOutputPath;
+            guidManager = new GUIDManager(options.getStringOption("compiler_version"));
         }
         
         public ModelicaCompiler getModelicaCompiler() {
@@ -1955,12 +1955,12 @@ aspect UtilInterface {
             return guidManager;
         }
         
-        public File getPath() {
-            return path;
+        public File getCompilationOutputPath() {
+            return compilationOutputPath;
         }
         
-        public void setPath(File path) {
-            this.path = path;
+        public void setCompilationOutputPath(File compilationOutputPath) {
+            this.compilationOutputPath = compilationOutputPath;
         }
     }
     
@@ -1974,7 +1974,7 @@ aspect UtilInterface {
     
     public static UtilInterface UtilInterface.create(UtilInterface other) {
         return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), 
-                other.getErrorHandler(), other.getExternalFunctionCache(), other.getPath());
+                other.getErrorHandler(), other.getExternalFunctionCache(), other.getCompilationOutputPath());
     }
     
     public static UtilInterface UtilInterface.create(OptionRegistry options) {

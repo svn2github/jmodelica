@@ -2710,6 +2710,7 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
     syn boolean FVariable.isAlgebraicContinousRealVariable()    = zCategory() == FClass.ZOrdinaryCategory.CONTINUOUS;
 
+    syn GUIDManager FClass.guidManager() = root().getUtilInterface().getGuidManager();
 
     // TODO: This should be handled with a local map when needed, e.g. during
     // index reduction!
