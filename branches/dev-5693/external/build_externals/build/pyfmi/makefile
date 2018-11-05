@@ -68,7 +68,6 @@ python_packages: install-python
 docker_environment:
 	${BUILD_EXTERNALS_DIR}/docker/platforms/${PLATFORM}/install_dependencies.sh
 
-pyfmi_wheel: fmil
 pyfmi_wheel: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_WHEELBUILD_$(BITNESS)
 pyfmi_wheel:
 	mkdir -p ${LOCAL_BUILD_DIR}; \
@@ -78,7 +77,6 @@ pyfmi_wheel:
 	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS); \
 	find -type f -name PyFMI*.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
 
-pyfmi_folder: fmil
 pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
 pyfmi_folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
 pyfmi_folder: PYTHONPATH=$(LOCAL_INSTALL_DIR)/Lib/site-packages
