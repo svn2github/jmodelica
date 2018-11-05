@@ -22,8 +22,8 @@
 include default_config
 export $(shell sed 's/=.*//' default_config)
 
-#include $(USER_CONFIG)
-#export $(shell sed 's/=.*//' $(USER_CONFIG))
+include $(USER_CONFIG)
+export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 .PHONY: install fmil_docker_build
 
