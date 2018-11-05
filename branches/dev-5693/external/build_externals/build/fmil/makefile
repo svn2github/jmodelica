@@ -33,10 +33,12 @@ show_environment:
 	@echo JM_HOME=$(JM_HOME)
 	@echo JM_HOME_IN_DOCKER=$(JM_HOME_IN_DOCKER)
 
-install:
+$(FMIL_BUILD_DIR):
 	mkdir -p $(FMIL_BUILD_DIR) && \
 	cd $(FMIL_BUILD_DIR) && \
-	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_INSTALL) $(BUILD_EXTERNALS_DIR)/../FMILibrary/FMILibrary/; \
+	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_INSTALL) $(BUILD_EXTERNALS_DIR)/../FMILibrary/FMILibrary/
+
+install: $(FMIL_BUILD_DIR)
 	cd $(FMIL_BUILD_DIR) && make install DESTDIR=
 
 fmil_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
@@ -68,3 +70,7 @@ clean_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default
 clean_docker:
 	@docker rmi -f ${DOCKER_ID}
 
+clean:
+	rm -rf $(FMIL_BUILD_DIR)
+
+clean_install: clean install
