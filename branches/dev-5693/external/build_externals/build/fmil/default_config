@@ -23,7 +23,6 @@ BUILD_TARGET=PyFMI
 DOCKER_ENV=1
 BITNESS=64
 
-JM_HOME=C:/Users/x-robin.andersson/dev-5693
 JM_HOME_IN_DOCKER=/tmp/jm_home
 BUILD_ENVIRONMENT=${JM_HOME}/build_environment
 BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
