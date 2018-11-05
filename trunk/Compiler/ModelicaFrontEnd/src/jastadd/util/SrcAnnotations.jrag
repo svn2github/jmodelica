@@ -99,6 +99,10 @@ aspect SrcAnnotations {
      *    Java Stuff    
      ******************/
 
+    /**
+     * Represent an Annotation in the Source tree. Wrapps an 
+     * SrcAnnotationProvider which corresponds to the actual annotation/s in the AST.
+     */
     public class SrcAnnotationNode extends GenericAnnotationNode<SrcAnnotationNode, SrcAnnotationProvider, SrcExp> {
         
         public static final SrcAnnotationNode AMBIGUOUS_ANNOTATION =  new SrcAnnotationNode(null, null, null,
@@ -177,7 +181,17 @@ aspect SrcAnnotations {
         }
     }
 
+    /**
+     * AnnotationProvider for modifications and annotations in the SourceTree.
+	 * Implemented by SrcModification and SrcAnnotation directly. SrcComponent and SrcClassDecl provides 
+	 * providers which obtain their annotations and modifiers.
+     */
     public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {}
+    
+    /**
+     * immutable AnnotationProvider type used in among other SrcComponentDecl,SrcShortClassDecl and extendClaus
+     * to obtain their annotations.  
+     */
     public interface SrcIterableAnnotationProvider extends
             IterableAnnotationProvider<SrcAnnotationProvider, SrcExp>, SrcAnnotationProvider {}
 
@@ -434,6 +448,11 @@ aspect SrcAnnotations {
     SrcExtendsClause implements ASTNodeWithAnnotation;
     SrcComment implements ASTNodeWithAnnotation;
 
+    /**
+     * Bridge provider for classes & components and extendsClauses which aren't annotations & modifications
+     * them selves but can have annotations/modifications.
+     * Methods are delegated to the actual annotation. Implemented typically as an anonymous inner class.
+     */
     public abstract class RootAnnotationProviderProxy<T extends ASTNode, S extends ASTNode & SrcAnnotationProvider> implements SrcAnnotationProvider {
         protected final T owningNode;
 
@@ -764,6 +783,15 @@ aspect SrcAnnotations {
     /*******************
      *     Helpers      
      ******************/
+    
+    /**
+     * A immutable provider which wrapps another potentially mutable provider.
+     * Makes the provider immutable if not already.
+     * 
+     * Is used for among other things for SrcExp and Arguments which can't 
+     * be providers them self without complications or undesired result.
+     * See comment on SrcExp.asAnnotationProvider() for the argument.
+     */
     public class SrcSingeltonProvider implements SrcAnnotationProvider {
 
         private final SrcAnnotationProvider provider;
@@ -810,6 +838,10 @@ aspect SrcAnnotations {
         }
     }
 
+    /**
+     * Represents an fixed array of annotations which can be iterated. 
+     * The array is not mutable. 
+     */
     public class SrcAnnotationsIteratorProvider implements SrcIterableAnnotationProvider {
 
         private java.util.List<SrcAnnotationProvider> providers;
