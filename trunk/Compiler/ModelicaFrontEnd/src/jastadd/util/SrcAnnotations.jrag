@@ -183,14 +183,13 @@ aspect SrcAnnotations {
 
     /**
      * AnnotationProvider for modifications and annotations in the SourceTree.
-	 * Implemented by SrcModification and SrcAnnotation directly. SrcComponent and SrcClassDecl provides 
-	 * providers which obtain their annotations and modifiers.
-     */
+     * See overview on AnnotationProvider for more info.
+     */ 
     public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, SrcExp> {}
     
     /**
-     * immutable AnnotationProvider type used in among other SrcComponentDecl,SrcShortClassDecl and extendClaus
-     * to obtain their annotations.  
+     * immutable AnnotationProvider used to obtain the annotations from elements which can have annotations. 
+     * See overview on AnnotationProvider for more info.
      */
     public interface SrcIterableAnnotationProvider extends
             IterableAnnotationProvider<SrcAnnotationProvider, SrcExp>, SrcAnnotationProvider {}
@@ -449,9 +448,10 @@ aspect SrcAnnotations {
     SrcComment implements ASTNodeWithAnnotation;
 
     /**
-     * Bridge provider for classes & components and extendsClauses which aren't annotations & modifications
-     * them selves but can have annotations/modifications.
+     * Bridge provider for elements which aren't annotations & modifications
+     * themselves but can have annotations/modifications.
      * Methods are delegated to the actual annotation. Implemented typically as an anonymous inner class.
+     *  See overview on AnnotationProvider for more info.
      */
     public abstract class RootAnnotationProviderProxy<T extends ASTNode, S extends ASTNode & SrcAnnotationProvider> implements SrcAnnotationProvider {
         protected final T owningNode;
@@ -788,9 +788,9 @@ aspect SrcAnnotations {
      * A immutable provider which wrapps another potentially mutable provider.
      * Makes the provider immutable if not already.
      * 
-     * Is used for among other things for SrcExp and Arguments which can't 
-     * be providers them self without complications or undesired result.
-     * See comment on SrcExp.asAnnotationProvider() for the argument.
+     * Is used for among other things when it inconvienient for the value to 
+     * a provider itself.
+     * See overview on AnnotationProvider for more info.
      */
     public class SrcSingeltonProvider implements SrcAnnotationProvider {
 
@@ -840,7 +840,8 @@ aspect SrcAnnotations {
 
     /**
      * Represents an fixed array of annotations which can be iterated. 
-     * The array is not mutable. 
+     * The array is not mutable.
+     * See overview on AnnotationProvider for more info.
      */
     public class SrcAnnotationsIteratorProvider implements SrcIterableAnnotationProvider {
 

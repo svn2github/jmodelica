@@ -65,8 +65,7 @@ aspect FlatAnnotations {
     }
 
     /**
-     * AnnotationProvider for the Flat tree used for navigating and working with Fattributes & FAttributeList.
-     * Implemented in FlatAnnotation as private class (ListAnnotationProvider)) in to work with FAttributeLists.
+     * AnnotationProvider for the attributes in the Flat tree. See overview on AnnotationProvider for more info.
      */
     public interface FlatAnnotationProvider extends AnnotationProvider<FlatAnnotationProvider, FExp> {
     }
