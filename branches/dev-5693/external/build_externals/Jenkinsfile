@@ -17,7 +17,7 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 // Set discard policy
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
 
-node("JMODELICA-SDK-1.3") {
+node("JMODELICA-SDK-1.13") {
     checkoutJM("${JM_SVN_PATH}")
     buildFMILibrary(null, null, "${pwd()}/install", )
 }
