@@ -16,7 +16,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, bitness=["32", "64"], stash=
                         stash includes: "fmil_install${bit}/**", name: "fmil_install${bit}"
                     }
                     if (archive) {
-                        archiveArtifact: "fmil_install${bit}/**"
+                        archiveArtifacts artifacts: "fmil_install${bit}/**", fingerprint: false
                     }
                 }
             }

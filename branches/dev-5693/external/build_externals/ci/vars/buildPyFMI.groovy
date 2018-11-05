@@ -18,7 +18,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
                     stash includes: "Python_${bit}/**", name: "Python_${bit}_pyfmi_${TARGET}"
                 }
                 if (archive) {
-                    archiveArtifact: "Python_${bit}/**"
+                    archiveArtifacts artifacts: "Python_${bit}/**", fingerprint: false
                 }
             }
         }
