@@ -3,7 +3,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
         checkoutJM(${JM_BRANCH})
     }
     INSTALL_PATH_UNIX=unixpath("${INSTALL_PATH}")
-    if (FMIL_HOME_BASE != null) {
+    if (FMIL_HOME_BASE == null) {
         FMIL_HOME_BASE="${INSTALL_PATH_UNIX}/fmil_install"
     }
     for (bit in bitness) {
