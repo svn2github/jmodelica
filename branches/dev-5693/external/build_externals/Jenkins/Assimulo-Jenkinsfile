@@ -16,23 +16,11 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 // Set discard policy
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
 
-node("JMODELICA-SDK-1.13") {
+node("JMODELICA-SDK-1.13.2") {
     checkoutJM("${JM_SVN_PATH}")
     for (module in ["blas", "lapack", "superlu", "sundials"]) {
         buildThirdPartyFromMake(null, null, "${pwd()}/install", module)
     }
     buildAssimulo(null, null, "${pwd()}/install", "assimulo_folder")
     buildAssimulo(null, null, "${pwd()}/install", "assimulo_wheel")
-}
-
-
-node ('docker') {
-    checkoutJM("${JM_SVN_PATH}")
-    stage('Build') {
-        if ("${JOB_NAME}".toLowerCase().contains("pyfmi") && "${JOB_NAME}".toLowerCase().contains("base")) {
-            sh 'echo "hello, building pyfmi base"'
-        } else {
-            echo "BUILDING NOTHING FOR CURRENT JOB"
-        }
-    }
 }
