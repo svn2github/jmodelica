@@ -12,7 +12,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
         JENKINS_BUILD_DIR="\$(pwd)/build"
         cd \${JM_HOME}/external/build_externals/build/pyfmi
         make clean BUILD_DIR=\${JENKINS_BUILD_DIR} BITNESS=${bit}
-        make ${TARGET} USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/PyFMI/windows/win${bit} BUILD_DIR=\${JENKINS_BUILD_DIR} FMIL_INSTALL=${FMIL_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${TARGET}/Python_${bit}
+        make ${TARGET} USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/PyFMI/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} FMIL_INSTALL=${FMIL_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${TARGET}/Python_${bit}
         """);
         if (stash || archive) {
             dir("${INSTALL_PATH}/${TARGET}") {
