@@ -3,13 +3,14 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, module,bitness=["32", "64"],
         checkoutJM(${JM_BRANCH})
     }
     INSTALL_PATH_UNIX=unixpath("${INSTALL_PATH}")
+    UPPERCASE_MODULE = "${module}".toUpperCase()
     for (bit in bitness) {
         stage ("${module} ${bit} bit") {
             runMSYSWithEnv("""\
             export JM_HOME="\$(pwd)/JModelica/"
             JENKINS_BUILD_DIR="\$(pwd)/build"
             cd \${JM_HOME}/ThirdParty/build_thirdparties/build/${module}
-            make clean_install USER_CONFIG=\${JM_HOME}/ThirdParty/build_thirdparties/configurations/${module}/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} BLAS_INSTALL_DIR=${INSTALL_PATH_UNIX}/${module}_install${bit}
+            make clean_install USER_CONFIG=\${JM_HOME}/ThirdParty/build_thirdparties/configurations/${module}/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} ${UPPERCASE_MODULE}}_INSTALL_DIR=${INSTALL_PATH_UNIX}/${module}_install${bit}
             """);
             if (stash || archive) {
                 dir("${INSTALL_PATH}") {
