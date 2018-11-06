@@ -34,3 +34,8 @@ $(BLAS_BUILD_DIR):
 	mkdir -p $(BLAS_BUILD_DIR); \
 	cd $(BLAS_BUILD_DIR); \
 	cmake $(GENERATOR) -DCMAKE_Fortran_FLAGS=$(FORTRAN_FLAGS) -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(EXTRA_CMAKE_BLAS_FLAGS) $(BLAS_SRC_DIR)
+
+clean: 
+	rm -rf $(BLAS_BUILD_DIR)
+
+clean_install: clean install

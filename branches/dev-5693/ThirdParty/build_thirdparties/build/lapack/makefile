@@ -34,3 +34,8 @@ $(LAPACK_BUILD_DIR):
 	mkdir -p $(LAPACK_BUILD_DIR); \
 	cd $(LAPACK_BUILD_DIR); \
 	cmake $(GENERATOR) -DCMAKE_Fortran_FLAGS=$(FORTRAN_FLAGS) -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR) $(EXTRA_CMAKE_LAPACK_FLAGS) $(LAPACK_SRC_DIR)
+
+clean: 
+	rm -rf $(LAPACK_BUILD_DIR)
+
+clean_install: clean install
