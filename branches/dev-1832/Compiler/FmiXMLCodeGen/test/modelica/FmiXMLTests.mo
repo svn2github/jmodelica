@@ -2198,9 +2198,10 @@ annotation(__JModelica(UnitTesting(tests={
         description="VendorAnnotations for FMI 1.0",
         fmi_version="1.0",
         template="$vendorAnnotations$",
+        regexp="/Tool name=\"[^\"]+\"/Tool name=\"\"/",
         generatedCode="
 <VendorAnnotations>
-	<Tool name=\"Optimica Compiler Toolkit\">
+	<Tool name=\"\">
 		<Annotation name=\"CompilerVersion\" value=\"$COMPILER_VERSION$\" />
 	</Tool>
 </VendorAnnotations>
@@ -2217,9 +2218,10 @@ annotation(__JModelica(UnitTesting(tests={
         description="VendorAnnotations for FMI 2.0",
         fmi_version="2.0",
         template="$vendorAnnotations$",
+        regexp="/Tool name=\"[^\"]+\"/Tool name=\"\"/",
         generatedCode="
 <VendorAnnotations>
-	<Tool name=\"Optimica Compiler Toolkit\">
+	<Tool name=\"\">
 		<Annotations>
 			<Annotation name=\"CompilerVersion\" value=\"$COMPILER_VERSION$\" />
 		</Annotations>
