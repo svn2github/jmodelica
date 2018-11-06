@@ -1,4 +1,10 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Documentation ; #5698
+Add more javadoc for how the AnnotationProvider framework works.
+
+; Fixed ; Minor ; Compiler ; #5689
+Enabled evaluation of non-literal expressions in annotations.
+
 ; Fixed ; Minor ; Compiler ; #5692
 Fixed exception from specific combination of record with array of unknown 
 size in if expression in binding expression.

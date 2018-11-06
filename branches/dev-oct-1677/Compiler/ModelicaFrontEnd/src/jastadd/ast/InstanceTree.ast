@@ -20,7 +20,8 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
                                  /InstImport*/ 
                                  /RedeclaredInstClassDecl:InstClassDecl*/
                                  /FAbstractEquation*/ 
-                                 /ElementInstModification:InstModification*/;
+                                 /ElementInstModification:InstModification*/
+                                 /LooseExp:FExp*/;
 
 DynamicOpt : Opt;
 

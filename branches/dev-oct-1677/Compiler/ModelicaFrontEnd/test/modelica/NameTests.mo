@@ -1710,7 +1710,7 @@ model ConstantLookup32
 fclass NameTests.ConstantLookup32
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup32.f(j);
-package constant
+global variables
  constant NameTests.ConstantLookup32.A NameTests.ConstantLookup32.C.d[2] = {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
 
 public
@@ -1767,7 +1767,7 @@ model ConstantLookup33
 fclass NameTests.ConstantLookup33
  parameter Integer j = 1 /* 1 */;
  Real y = NameTests.ConstantLookup33.f(j);
-package constant
+global variables
  constant NameTests.ConstantLookup33.D.A NameTests.ConstantLookup33.C.d[2] = {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
 
 public
@@ -1816,7 +1816,7 @@ model ConstantLookup34
 fclass NameTests.ConstantLookup34
  parameter Integer j = 1 /* 1 */;
  parameter Real z;
-package constant
+global variables
  constant NameTests.ConstantLookup34.A.B NameTests.ConstantLookup34.A.x[2] = {NameTests.ConstantLookup34.A.B({1, 2}), NameTests.ConstantLookup34.A.B({3, 4})};
 parameter equation
  z = NameTests.ConstantLookup34.f(j);
@@ -1898,7 +1898,7 @@ model ConstantLookup35
 fclass NameTests.ConstantLookup35
  parameter Integer b.j = 1 /* 1 */;
  parameter Real b.z;
-package constant
+global variables
  constant Real NameTests.ConstantLookup35.L.a[2] = {1, 2};
 parameter equation
  b.z = NameTests.ConstantLookup35.J.f1(b.j);
@@ -1945,7 +1945,7 @@ model ConstantLookup36
 fclass NameTests.ConstantLookup36
  parameter Integer j = 1 /* 1 */;
  parameter Real z;
-package constant
+global variables
  constant NameTests.ConstantLookup36.B NameTests.ConstantLookup36.f.a[2] = {NameTests.ConstantLookup36.B({1, 2}), NameTests.ConstantLookup36.B({3, 4})};
 parameter equation
  z = NameTests.ConstantLookup36.f(j);
