@@ -18,10 +18,9 @@ properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKe
 
 node("JMODELICA-SDK-1.13") {
     checkoutJM("${JM_SVN_PATH}")
-    buildBlas(null, null, "${pwd()}/install")
-    buildLapack(null, null, "${pwd()}/install")
-    buildSuperLU(null, null, "${pwd()}/install")
-    buildSundials(null, null, "${pwd()}/install")
+    for (module in ["blas", "lapack", "superlu", "sundials"]) {
+        buildThirdPartyFromMake(null, null, "${pwd()}/install", module)
+    }
     buildAssimulo(null, null, "${pwd()}/install", "assimulo_folder")
     buildAssimulo(null, null, "${pwd()}/install", "assimulo_wheel")
 }
