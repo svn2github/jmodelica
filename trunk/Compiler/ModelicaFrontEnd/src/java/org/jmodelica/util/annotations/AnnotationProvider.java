@@ -28,7 +28,7 @@ import org.jmodelica.util.values.Evaluable;
  * 
  * Overview: 
  * FlatAnnotationProvider: 
- *     AnnotationProvider for the Flat tree used for navigating and working with Fattributes & FAttributeList.
+ *     AnnotationProvider for the Flat tree used for navigating and working with FAttributes & FAttributeList.
  *     Implemented in FlatAnnotation as private class (ListAnnotationProvider)) 
  *     in order to work with FAttributeLists.
  *
@@ -43,19 +43,27 @@ import org.jmodelica.util.values.Evaluable;
  *
  *RootAnnotationProvider:
  *     Bridge provider for elements (classes & components and extendsClauses)
- *     which aren't annotations & modifications themselves but can have annotations/modifications.
+ *     which aren't modifications themselves but can have modifications.
  *     Methods are delegated to the actual annotation. Implemented typically as an anonymous inner class.
  *
+ *ASTAnnotationAnnotationProvider:
+ *     Bridge provider for elements (classes & components and extendsClauses)
+ *     which aren't annotations themselves but can have annotations.
+ *
  *SrcSingletonProvider:
- *     A immutable provider which wrapps another potentially mutable provider.
+ *     A immutable provider which wraps another potentially mutable provider.
  *     Makes the provider immutable if not already.
  *
  *     Is used for among other things for SrcExp and Arguments which can't
  *     be providers them self without complications or undesired result.
- *     See comment on SrcExp.asAnnotationProvider() for the argument.
+ *
  *SrcAnnotationIteratorProvider:
  *     Represents an fixed array of annotations which can be iterated.
  *     The array is not mutable.
+ *
+ *ExpValueProvider:     
+ *     For navigating expressions (SrcExp). 
+ *     Avoiding having expressions being providers themselves which is inconvenient.
  */
 public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extends Evaluable> {
     public Iterable<SubNodePair<N>> annotationSubNodes();

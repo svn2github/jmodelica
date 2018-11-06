@@ -593,7 +593,11 @@ aspect SrcAnnotations {
         }
     };
 }
-
+    /**
+     *     Bridge provider for elements (classes & components and extendsClauses)
+     *     which aren't annotations themselves but can have annotations.
+     *     See overview on AnnotationProvider for more info.
+     */
     class ASTAnnotationAnnotationProvider<T extends ASTNode & ASTNodeWithAnnotation> extends RootAnnotationProviderProxy<T, SrcAnnotation> {
 
         public ASTAnnotationAnnotationProvider(T owningNode) {
@@ -901,7 +905,11 @@ aspect SrcAnnotations {
 
     }
 
-
+    /**
+     * For navigating expressions (SrcExp). 
+     * Avoiding having expressions beeing providers themselves which is inconvienient.
+     * See overview on AnnotationProvider for more info.
+     */
     public class ExpValueProvider implements SrcAnnotationProvider {
 
         private final SrcExp exp;
