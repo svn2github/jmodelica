@@ -20,7 +20,7 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 SUNDIALS_C_FLAGS="-m32 -mincoming-stack-boundary=2 -fPIC"
-SUNDIALS_INSTALL_DIR=${BUILD_DIR/sundials_install32
+SUNDIALS_INSTALL_DIR=${BUILD_DIR}/sundials_install32
 SUNDIALS_BUILD_DIR=${BUILD_DIR}/build_sundials32
 
 SUPERLU_BUILD=${BUILD_DIR}/superlu_build32

@@ -20,5 +20,5 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 FORTRAN_FLAGS="-fPIC -O2 -m64"
-BLAS_INSTALL_DIR=${BUILD_DIR/blas_install64
+BLAS_INSTALL_DIR=${BUILD_DIR}/blas_install64
 BLAS_BUILD_DIR=${BUILD_DIR}/build_blas64
