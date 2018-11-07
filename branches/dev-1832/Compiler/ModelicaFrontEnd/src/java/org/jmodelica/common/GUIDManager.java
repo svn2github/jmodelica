@@ -73,14 +73,6 @@ public class GUIDManager {
             try (final BufferedReader reader = new BufferedReader(source.openInput())) {
                 String line = reader.readLine();
                 while (line != null) {
-                    for (Token token : tokens) {
-                        if (!token.hasfoundFirst() && line.contains(token.getString())) {
-                            // Replace the first occurrence of the token 
-                            token.foundFirst();
-                            line = line.replaceFirst(token.getRegex(), "");
-                        }
-                    }
-
                     // A naive implementation that is expected to create a digest different from what a command
                     // line tool would create. No lines breaks are included in the digest, and no
                     // character encodings are specified.

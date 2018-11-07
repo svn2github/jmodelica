@@ -31,7 +31,7 @@ public class GUIDManagerTest {
     }
     
     private String ignoreWhitespace(String string) {
-        return string.trim().replaceAll("\\s", " ");
+        return string.trim();
     }
     
     @Test
@@ -44,7 +44,7 @@ public class GUIDManagerTest {
     @Test
     public void testDate() {
         String input = "guid=" + guidManager.getGuidToken() + ", date=" + guidManager.getDateToken();
-        String expected = "guid=dd4396b82020aef1ea5c015eb67ce94";
+        String expected = "guid=277efff8e9f33c422aa6e3fecb8b592";
         guidManager.setSourceString(input);
         StringBuilder output = new StringBuilder();
         guidManager.addDependentString(input, output);
@@ -59,23 +59,23 @@ public class GUIDManagerTest {
     @Test
     public void testCompilerVersion() {
         String[] dependent = {"guid=" + guidManager.getGuidToken() + ", cv=" + guidManager.getCompilerVersionToken()};
-        String[] expected = {"guid=7215ee9c7d9dc229d2921a40e899ec5f, cv=1.0"};
+        String[] expected = {"guid=529d037245bb851e67db9a7df5a048e1, cv=1.0"};
         test(guidManager.getGuidToken() + " " + guidManager.getCompilerVersionToken(),
                 dependent, expected);
     }
     
     @Test
     public void twoGuidSameLine() {
-        test(guidManager.getGuidToken() + " " + guidManager.getGuidToken(),
-                new String[]{guidManager.getGuidToken() + " " + guidManager.getGuidToken()},
-                new String[]{"e177d94705dcb794cd9aa8c0ffdbbd99" + " " + guidManager.getGuidToken()});
+        String source = guidManager.getGuidToken() + " " + guidManager.getGuidToken();
+        String expected = "2b84c9f19d607e5ecae42d8ac40f5c48" + " " + guidManager.getGuidToken();
+        test(source, new String[]{source}, new String[]{expected});
     }
     
     @Test
     public void twoGuidDifferentLines() {
-        test(guidManager.getGuidToken() + "\n" + guidManager.getGuidToken(),
-                new String[]{guidManager.getGuidToken() + "\n" + guidManager.getGuidToken()},
-                new String[]{"c3436849d689f4c7c964c3893f62315b" + "\n" + guidManager.getGuidToken()});
+        String source = guidManager.getGuidToken() + "\n" + guidManager.getGuidToken();
+        String expected = "a68b2a2d03d772bafedb0fa15febaf08" + "\n" + guidManager.getGuidToken();
+        test(source, new String[]{source}, new String[]{expected});
     }
     
     @Test
@@ -83,6 +83,15 @@ public class GUIDManagerTest {
         test("Test string",
                 new String[]{guidManager.getGuidToken(), "guid: " + guidManager.getGuidToken()},
                 new String[]{"fd3dbec9730101bff92acc820befc34", "guid: fd3dbec9730101bff92acc820befc34"});
+    }
+    
+    @Test
+    public void guidLineBreaks() {
+        String[] dependent = {guidManager.getGuidToken()};
+        String[] expected = {"de471a9016ad61d89970490da698ac3"};
+        test("Teststring", dependent, expected);
+        test("Test\nstring", dependent, expected);
+        test("Test\r\nstring", dependent, expected);
     }
 
 }
