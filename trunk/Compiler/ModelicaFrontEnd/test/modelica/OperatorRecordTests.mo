@@ -2658,6 +2658,14 @@ Error at line 17, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/Op
             algorithm
                z := A(x.x * y.x);
             end '*';
+            
+            encapsulated operator function '+' // This function should be included in flat code
+                input A x;
+                input A y;
+                output A z;
+            algorithm
+                z := A(x.x + y.x);
+            end '+';
         end A;
         
         parameter Integer n = 2;
@@ -2674,7 +2682,7 @@ fclass OperatorRecordTests.OperatorLimitations24
  structural parameter Integer n = 2 /* 2 */;
  OperatorRecordTests.OperatorLimitations24.A a[2,2] = fill(OperatorRecordTests.OperatorLimitations24.A(time), 2, 2);
  OperatorRecordTests.OperatorLimitations24.A b[2,2] = fill(OperatorRecordTests.OperatorLimitations24.A(time + 1), 2, 2);
- OperatorRecordTests.OperatorLimitations24.A c[2,2] = {{OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,1]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,2]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,2])}, {OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,1]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,2]) + OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,2])}};
+ OperatorRecordTests.OperatorLimitations24.A c[2,2] = {{OperatorRecordTests.OperatorLimitations24.A.'+'(OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,1])), OperatorRecordTests.OperatorLimitations24.A.'+'(OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,1], b[1,2]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[1,2], b[2,2]))}, {OperatorRecordTests.OperatorLimitations24.A.'+'(OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,1]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,1])), OperatorRecordTests.OperatorLimitations24.A.'+'(OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,1], b[1,2]), OperatorRecordTests.OperatorLimitations24.A.'*'(a[2,2], b[2,2]))}};
 
 public
  function OperatorRecordTests.OperatorLimitations24.A.'*'
