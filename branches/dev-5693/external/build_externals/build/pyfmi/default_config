@@ -37,4 +37,3 @@ PYFMI_SRC=${JM_HOME}/external/PyFMI
 # Optional variables
 
 #USER_CONFIG: Is sourced and overrides default variables, is set to path to config
-USER_CONFIG=C:/Users/x-robin.andersson/dev-5693/external/build_externals/build/pyfmi/robin_config
