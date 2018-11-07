@@ -50,6 +50,7 @@ assimulo_wheel:
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/Assimulo; \
 	$(PYTHONHOME)python setup.py bdist_wheel --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS); \
+	mkdir -p $(INSTALL_DIR_FOLDER); \
 	find -type f -name Assimulo*.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
 
 clean:
