@@ -19,5 +19,5 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
-SUPERLU_EXTRA_CFLAGS=-EXTRA_CFLAGS=-m64
+SUPERLU_EXTRA_CFLAGS=EXTRA_CFLAGS=-m64
 SUPERLU_BUILD=${BUILD_DIR}/superlu_build64
