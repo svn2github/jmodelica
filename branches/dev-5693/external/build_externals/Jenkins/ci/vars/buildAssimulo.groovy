@@ -19,20 +19,22 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
         SUNDIALS_HOME_BASE="${INSTALL_PATH_UNIX}/sundials_install"
     }
     for (bit in bitness) {
-        runMSYSWithEnv("""\
-        export JM_HOME="\$(pwd)/JModelica/"
-        JENKINS_BUILD_DIR="\$(pwd)/build"
-        cd \${JM_HOME}/external/build_externals/build/assimulo
-        make clean BUILD_DIR=\${JENKINS_BUILD_DIR} BITNESS=${bit}
-        make ${TARGET} USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/Assimulo/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} BLAS_HOME=${BLAS_HOME_BASE}${bit} BLAS_HOME=${BLAS_HOME_BASE}${bit} SUNDIALS_HOME=${SUNDIALS_HOME_BASE}${bit} LAPACK_HOME=${LAPACK_HOME_BASE}${bit} SUPERLU_HOME=${SUPERLU_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${TARGET}/Python_${bit}
-        """);
-        if (stash || archive) {
-            dir("${INSTALL_PATH}/${TARGET}") {
-                if (stash) {
-                    stash includes: "Python_${bit}/**", name: "Python_${bit}_assimulo_${TARGET}"
-                }
-                if (archive) {
-                    archiveArtifacts artifacts: "Python_${bit}/**", fingerprint: false
+        stage ("${TARGET} ${bit} bit") {
+            runMSYSWithEnv("""\
+            export JM_HOME="\$(pwd)/JModelica/"
+            JENKINS_BUILD_DIR="\$(pwd)/build"
+            cd \${JM_HOME}/external/build_externals/build/assimulo
+            make clean BUILD_DIR=\${JENKINS_BUILD_DIR} BITNESS=${bit}
+            make ${TARGET} USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/Assimulo/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} BLAS_HOME=${BLAS_HOME_BASE}${bit} BLAS_HOME=${BLAS_HOME_BASE}${bit} SUNDIALS_HOME=${SUNDIALS_HOME_BASE}${bit} LAPACK_HOME=${LAPACK_HOME_BASE}${bit} SUPERLU_HOME=${SUPERLU_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${TARGET}/Python_${bit}
+            """);
+            if (stash || archive) {
+                dir("${INSTALL_PATH}/${TARGET}") {
+                    if (stash) {
+                        stash includes: "Python_${bit}/**", name: "Python_${bit}_assimulo_${TARGET}"
+                    }
+                    if (archive) {
+                        archiveArtifacts artifacts: "Python_${bit}/**", fingerprint: false
+                    }
                 }
             }
         }
