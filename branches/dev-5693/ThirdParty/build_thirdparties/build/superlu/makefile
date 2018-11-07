@@ -29,6 +29,7 @@ export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 install: $(SUPERLU_BUILD_DIR)
 	cd $(SUPERLU_BUILD_DIR) && make blaslib $(SUPERLU_EXTRA_CFLAGS) DESTDIR= && make superlulib $(SUPERLU_EXTRA_CFLAGS) DESTDIR=; \
+	mkdir -p $(SUPERLU_INSTALL_DIR); \
 	cp -r $(SUPERLU_BUILD_DIR)/* $(SUPERLU_INSTALL_DIR)/
 
 $(SUPERLU_BUILD_DIR):
