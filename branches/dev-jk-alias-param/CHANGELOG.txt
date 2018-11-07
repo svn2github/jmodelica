@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Documentation ; #5698
+Add more javadoc for how the AnnotationProvider framework works.
+
 ; Fixed ; Minor ; Compiler ; #5689
 Enabled evaluation of non-literal expressions in annotations.
 
