@@ -28,7 +28,8 @@ export $(shell sed 's/=.*//' $(USER_CONFIG))
 .PHONY: install
 
 install: $(SUPERLU_BUILD_DIR)
-	cd $(SUPERLU_BUILD_DIR) && make blaslib $(SUPERLU_EXTRA_CFLAGS) DESTDIR= && make superlulib $(SUPERLU_EXTRA_CFLAGS) DESTDIR=
+	cd $(SUPERLU_BUILD_DIR) && make blaslib $(SUPERLU_EXTRA_CFLAGS) DESTDIR= && make superlulib $(SUPERLU_EXTRA_CFLAGS) DESTDIR=; \
+	cp -r $(SUPERLU_BUILD_DIR)/* $(SUPERLU_INSTALL_DIR)/
 
 $(SUPERLU_BUILD_DIR):
 	mkdir -p $(SUPERLU_BUILD_DIR); \
