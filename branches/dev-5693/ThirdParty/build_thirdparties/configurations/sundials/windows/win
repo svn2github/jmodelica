@@ -18,4 +18,4 @@
 
 GENERATOR=-G "MSYS Makefiles"
 BUILD_DIR=${SDK_HOME}/build
-SUNDIALS_SRC_DIR=${JM_HOME}/ThirdParty/Sundials
+SUNDIALS_SRC_DIR=${JM_HOME}/ThirdParty/Sundials/sundials-2.7.0
