@@ -74,7 +74,7 @@ pyfmi_wheel:
 	cd $(PYFMI_SRC)/../; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
-	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS);
+	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS); \
 	mkdir -p $(INSTALL_DIR_FOLDER); \
 	find -type f -name PyFMI*.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
 
