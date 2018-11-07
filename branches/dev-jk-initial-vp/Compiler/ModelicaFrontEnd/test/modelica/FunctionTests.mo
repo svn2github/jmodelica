@@ -16779,6 +16779,66 @@ end FunctionTests.DerivativeAnnotation.ExtendsTest1;
 ")})));
     end ExtendsTest1;
 
+    model Local1
+        function f
+            input Real x;
+            output Real y;
+            function my_der = f_der;
+        algorithm
+            y := x;
+            annotation(Inline=false, derivative=my_der);
+        end f;
+        
+        function f_der
+            input Real x;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+            annotation(Inline=false);
+        end f_der;
+        
+        Real x, y;
+    equation
+        x = f(time);
+        der(x) * der(y) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DerivativeAnnotation_Local1",
+            description="Ensure that derivative function is found also within the function",
+            flatModel="
+fclass FunctionTests.DerivativeAnnotation.Local1
+ Real x;
+ Real y;
+equation
+ x = FunctionTests.DerivativeAnnotation.Local1.f(time);
+ der(x) * der(y) = 1;
+
+public
+ function FunctionTests.DerivativeAnnotation.Local1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ annotation(derivative = FunctionTests.DerivativeAnnotation.Local1.f_der,Inline = false);
+ end FunctionTests.DerivativeAnnotation.Local1.f;
+
+ function FunctionTests.DerivativeAnnotation.Local1.f_der
+  input Real x;
+  input Real x_der;
+  output Real y_der;
+ algorithm
+  y_der := x_der;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.DerivativeAnnotation.Local1.f_der;
+
+end FunctionTests.DerivativeAnnotation.Local1;
+")})));
+    end Local1;
+
 end DerivativeAnnotation;
 
 

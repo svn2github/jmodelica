@@ -33,7 +33,8 @@ import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.Evaluable;
 
 /**
- * Generic class for handling traversal over different types of annotations.
+ * Generic class for handling traversal over different types 
+ * of annotations but also other tree structures.
  * Mainly in the source and flat tree.
  * 
  * In several places in the code we have to upcast a variable in order to

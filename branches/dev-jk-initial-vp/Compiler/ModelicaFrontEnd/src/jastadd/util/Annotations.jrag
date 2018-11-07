@@ -159,6 +159,8 @@ aspect AnnotationAPI {
         getInstClassRedeclare().lookupInstClass(name);
     eq InstReplacingSimpleShortClassDecl.getLooseExp().lookupInstClass(String name) = 
         getInstClassRedeclare().lookupInstClass(name);
+    eq InstNode                         .getLooseExp().lookupInstClass(String name) = 
+        genericLookupInstClass(name);
 
     private Map<SrcExp,Integer> InstNode.looseExpMap = null;
 
