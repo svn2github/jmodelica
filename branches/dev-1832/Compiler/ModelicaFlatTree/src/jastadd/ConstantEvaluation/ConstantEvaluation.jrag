@@ -686,7 +686,7 @@ aspect ConstantEvaluation {
          * @return FStringLitExp AST node.
          */
         public FLitExp buildLiteral() { 
-            return new FStringLitExp(value); 
+            return new FStringLitExp(ASTNode.escape(value)); 
         }
 
         @Override
@@ -2386,7 +2386,7 @@ aspect ConstantEvaluation {
     eq FIntegerLitExp.cevalCalc(VariableEvaluator evaluator)      = new CValueInteger(getValue());
     eq FBooleanLitExpTrue.cevalCalc(VariableEvaluator evaluator)  = new CValueBoolean(true);
     eq FBooleanLitExpFalse.cevalCalc(VariableEvaluator evaluator) = new CValueBoolean(false);
-    eq FStringLitExp.cevalCalc(VariableEvaluator evaluator)       = new CValueString(getString());
+    eq FStringLitExp.cevalCalc(VariableEvaluator evaluator)       = new CValueString(unEscape());
     eq FEnumLitExp.cevalCalc(VariableEvaluator evaluator)         = new CValueEnum(type(), getValue());
 
     syn CValue CommonAccess.ceval(VariableEvaluator evaluator);

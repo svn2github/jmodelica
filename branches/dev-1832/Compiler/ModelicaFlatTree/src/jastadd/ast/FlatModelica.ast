@@ -133,6 +133,11 @@ FDerivedType : BaseNode ::= <Name> BaseType:FType FAttribute*;
  */
 abstract FTypePrefix : BaseNode;
 
+/**
+ * Variables accessed in a global scope separate from the normal lookup scope 
+ * (in the flat tree). Can be looked up from functions and equations. For example 
+ * package constants that can't be inlined during flattening. Referenced by FGlobalAccessExp.
+ */
 FGlobalVariable : FVariable ::= FType;
 
 /**

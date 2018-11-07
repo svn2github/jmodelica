@@ -88,10 +88,8 @@ void* jmi_tls_get_value(void *handle) {
 #define _MULTI_THREADED
 #ifdef _WIN32 /* MinGW only: define use static lib and specific include */
 #define PTW32_STATIC_LIB
-#include <pthread-2-9-1.h>
-#else
-#include <pthread.h>
 #endif
+#include <pthread.h>
 /**
  * \brief Handle to thread-specific storage.
  */
