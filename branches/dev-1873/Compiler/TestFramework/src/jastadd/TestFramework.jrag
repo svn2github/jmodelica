@@ -107,7 +107,7 @@ aspect TestFramework {
                     String methodName = isOpt ? null : 
                         "set" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
                     
-                    Object value = attr.ceval().objectValue();
+                    Object value = attr.isAccess() ? attr.valueToString() : attr.ceval().objectValue();
                     Class type = TestCase.unwrapClass(value.getClass());
                     if (isOpt) {
                         Method m = cl.getMethod("setOption", String.class, type);
