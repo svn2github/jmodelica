@@ -80,13 +80,11 @@ pyfmi_wheel:
 
 pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
 pyfmi_folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
-pyfmi_folder: PYTHONPATH=$(LOCAL_INSTALL_DIR)/Lib/site-packages
 pyfmi_folder:
 	mkdir -p ${LOCAL_BUILD_DIR}; \
 	cd $(PYFMI_SRC)/../; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
-	mkdir -p $(LOCAL_INSTALL_DIR)/Lib/site-packages; \
 	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(LOCAL_INSTALL_DIR); \
 	cd $(LOCAL_INSTALL_DIR)/Lib/site-packages; \
 	mkdir -p $(INSTALL_DIR_FOLDER); \
