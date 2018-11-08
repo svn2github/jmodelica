@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -76,7 +77,7 @@ public class GUIDManager {
                     // A naive implementation that is expected to create a digest different from what a command
                     // line tool would create. No lines breaks are included in the digest, and no
                     // character encodings are specified.
-                    md5.update(line.getBytes());
+                    md5.update(line.getBytes(Charset.forName("UTF-8")));
                     line = reader.readLine();
                 }
             }
@@ -139,7 +140,7 @@ public class GUIDManager {
         }
     }
 
-    private class Token {
+    private static class Token {
         private String string;
         private String regex;
         private String value;
@@ -179,12 +180,12 @@ public class GUIDManager {
         }
     }
 
-    private interface Openable {
+    private static interface Openable {
         public Reader openInput();
         public Writer openOutput();
     }
     
-    private class FileOpenable implements Openable{
+    private static class FileOpenable implements Openable{
         private File file;
         
         public FileOpenable(File file) {
@@ -215,7 +216,7 @@ public class GUIDManager {
         }
     }
     
-    private class StringOpenable implements Openable {
+    private static class StringOpenable implements Openable {
         
         private String input;
         private StringBuilder output;
