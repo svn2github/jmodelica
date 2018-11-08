@@ -1064,7 +1064,6 @@ build-python-packages:
 	cd $(abs_top_srcdir)/external; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir); \
 	cd $(pyfmi_build_dir)/PyFMI; \
-	PYTHONPATH=$(pyfmi_install_dir)\Lib\site-packages; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
@@ -1079,7 +1078,6 @@ build-python-packages:
 @JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir64); \
 @JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	cd $(pyfmi_build_dir64)/PyFMI; \
 @JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-@JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	PYTHONPATH=$(pyfmi_install_dir64)\Lib\site-packages; \
 @JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	export PYTHONHOME=$(PYTHON64_HOME); \
 @JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install64/ $(NUMPY_NO_MSVCR_ARG) --prefix=$(pyfmi_install_dir64); \
 @JM_WIN64_TRUE@@WITH_PYTHON64_TRUE@	export PATH="$(ORIG_PATH)"; \

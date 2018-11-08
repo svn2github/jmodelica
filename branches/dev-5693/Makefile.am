@@ -328,8 +328,6 @@ endif
 	cd $(abs_top_srcdir)/external; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir); \
 	cd $(pyfmi_build_dir)/PyFMI; \
-	PYTHONPATH=$(pyfmi_install_dir)\Lib\site-packages; \
-	mkdir -p $(pyfmi_install_dir)\Lib\site-packages; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
@@ -346,8 +344,6 @@ if WITH_PYTHON64
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir64); \
 	cd $(pyfmi_build_dir64)/PyFMI; \
 	export PATH=$(PYTHON64_HOME):$(PYTHON64_HOME)/Scripts:$(PYTHON64_HOME)/Lib:"${PATH}"; \
-	PYTHONPATH=$(pyfmi_install_dir64)\Lib\site-packages; \
-	mkdir -p $(pyfmi_install_dir64)\Lib\site-packages; \
 	export PYTHONHOME=$(PYTHON64_HOME); \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install64/ $(NUMPY_NO_MSVCR_ARG) --prefix=$(pyfmi_install_dir64); \
 	export PATH="$(ORIG_PATH)"; \
