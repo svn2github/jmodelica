@@ -106,7 +106,7 @@ aspect AnnotationAPI {
      * Evaluate exp in the scope of this node.
      */
     public CValue InstNode.ceval(SrcExp exp) {
-        return looseExp(exp).ceval();
+        return annotationExp(exp).ceval();
     }
 
     /**
@@ -114,7 +114,7 @@ aspect AnnotationAPI {
      * otherwise return null.
      */
     public InstLookupResult<InstClassDecl> InstNode.lookupInstClass(SrcExp exp) {
-        return looseExp(exp).lookupInstClassIfAccess();
+        return annotationExp(exp).lookupInstClassIfAccess();
     }
 
     /**
@@ -134,7 +134,7 @@ aspect AnnotationAPI {
      * otherwise return null.
      */
     public InstLookupResult<InstComponentDecl> InstNode.lookupInstComponent(SrcExp exp) {
-        return looseExp(exp).lookupInstComponentIfAccess();
+        return annotationExp(exp).lookupInstComponentIfAccess();
     }
 
     /**
@@ -151,35 +151,83 @@ aspect AnnotationAPI {
         getLastInstAccess().lookupInstComponentIfAccess();
 
 
-    syn lazy List<FExp> InstNode.getLooseExpList() = new List<FExp>(new FNoExp());
+    syn ArrayList<SrcExp> ASTNode.exps() = collectExps(new ArrayList<SrcExp>());
+    
+    syn ArrayList<SrcExp> ASTNode.collectExps(ArrayList<SrcExp> list) {
+        for (ASTNode node : this) {
+            node.collectExps(list);
+        }
+        return list;
+    }
+    eq SrcExp.collectExps(ArrayList<SrcExp> list) {
+        list.add(this);
+        return list;
+    }
+    
+    public void ASTNode.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {}
+    public void List.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
+        for (ASTNode child : this) {
+            child.addAnnotationToEvaluator(list, evaluator);
+        }
+    }
+    public void Opt.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
+        if (hasChild()) {
+            getChild().addAnnotationToEvaluator(list, evaluator);
+        }
+    }
+    public void InstNode.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
+        if (annotationExpEvaluator().equals(evaluator)) {
+            list.add(annotation());
+        }
+    }
+    
+    syn ArrayList<AnnotationNode> InstNode.annotations() {
+        ArrayList<AnnotationNode> list = new ArrayList<>();
+        getInstComponentDecls().addAnnotationToEvaluator(list, this);
+        getInstComponentDecls().addAnnotationToEvaluator(list, this);
+        getRedeclaredInstClassDecls().addAnnotationToEvaluator(list, this);
+        return list;
+    }
+    eq InstFullClassDecl.annotations() {
+        ArrayList<AnnotationNode> list = super.annotations();
+        this.addAnnotationToEvaluator(list, this);
+        getInstExternalOpt().addAnnotationToEvaluator(list, this);
+        return list;
+    }
+    
+    private Map<SrcExp,Integer> InstNode.annotationExpMap = new HashMap<>();
 
-    eq InstReplacingFullClassDecl       .getLooseExp().lookupInstClass(String name) = 
-        getInstClassRedeclare().lookupInstClass(name);
-    eq InstReplacingShortClassDecl      .getLooseExp().lookupInstClass(String name) = 
-        getInstClassRedeclare().lookupInstClass(name);
-    eq InstReplacingSimpleShortClassDecl.getLooseExp().lookupInstClass(String name) = 
-        getInstClassRedeclare().lookupInstClass(name);
+    syn lazy List<FExp> InstNode.getAnnotationExpList() {
+        ArrayList<SrcExp> exps = new ArrayList<>();
+        for (AnnotationNode annotation : annotations()) {
+            exps.addAll(annotation.ast().exps());
+        }
+        ArrayList<FExp> instExps = new ArrayList<>();
+        for (int i = 0; i < exps.size(); i++) {
+            SrcExp exp = exps.get(i);
+            annotationExpMap.put(exp, i);
+            FExp instExp = exp.instantiate();
+            instExps.add(instExp);
+        }
+        return new List(instExps);
+    }
 
-    private Map<SrcExp,Integer> InstNode.looseExpMap = null;
+    eq InstReplacingFullClassDecl       .getAnnotationExp().lookupInstClass(String name) = 
+        getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingShortClassDecl      .getAnnotationExp().lookupInstClass(String name) = 
+        getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getAnnotationExp().lookupInstClass(String name) = 
+        getInstClassRedeclare().lookupInstClass(name);
 
     /**
-     * Instantiates exp and inserts it into tree in the scope of this node, unless already done.
+     * Returns the instantiated exp corresponding to argument
      */
-    public FExp InstNode.looseExp(SrcExp exp) {
-        if (looseExpMap == null) {
-            looseExpMap = new HashMap<>();
+    public FExp InstNode.annotationExp(SrcExp exp) {
+        List<FExp> list = getAnnotationExps();
+        if (annotationExpMap.containsKey(exp)) {
+            return list.getChild(annotationExpMap.get(exp));
         }
-        List<FExp> list = getLooseExps();
-        int i;
-        if (looseExpMap.containsKey(exp)) {
-            i = looseExpMap.get(exp);
-        } else {
-            i = list.getNumChild();
-            looseExpMap.put(exp, i);
-            FExp instExp = exp.instantiate();
-            list.add(instExp);
-        }
-        return list.getChild(i);
+        throw new IllegalArgumentException();
     }
 
     syn AnnotationNode InstNode.classAnnotation() = myInstClass().annotation();
