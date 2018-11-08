@@ -2,29 +2,10 @@
 
 set -e
 
-#TODO add check if compiled python version is already available on artifactory
-
-PYTHON_VERSION=$1
-# If we install python version X.Y.Z we get directory pythonX.Y, so we extract first two digits
-SHORT_VER=${PYTHON_VERSION:0:3}
-
-# build python 
-URL="https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
-cd /usr/src/
-echo "Trying to access ${URL}"
-wget "${URL}"
-if [[ "$?" != 0 ]]; then
-    echo "Error downloading Python ${PYTHON_VERSION}"
-    exit 1
-else
-    echo "Successfully downloaded Python ${PYTHON_VERSION}"
-fi
-tar xzf Python-${PYTHON_VERSION}.tgz
-cd Python-${PYTHON_VERSION}
-
-#TODO check configure installation path
-./configure
-make altinstall
-python${SHORT_VER} --version
+SHORT_VER=3.6
+# We install python3-pip, it installs al the required tools and Python 3.6
+apt-get update # We update to find the repository with python3-pip
+apt-get install -y python3-pip && echo "Installing numpy" && pip3 install numpy && pip3 install Cython
 echo "alias python=python${SHORT_VER}" >> ~/.bashrc
 source ~/.bashrc
+. ~/.bashrc
