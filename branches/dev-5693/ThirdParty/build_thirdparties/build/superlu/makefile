@@ -34,8 +34,8 @@ install: $(SUPERLU_BUILD_DIR)
 
 $(SUPERLU_BUILD_DIR):
 	mkdir -p $(SUPERLU_BUILD_DIR); \
-	cd $(SUPERLU_BUILD_DIR); \
-	cp -r $(SUPERLU_SRC_DIR)/superlu_mt_3.1/* $(SUPERLU_BUILD_DIR)/
+	cd $(SUPERLU_SRC_DIR)/superlu_mt_3.1; \
+	tar -c --exclude .svn . | tar x -C $(SUPERLU_BUILD_DIR)
 
 clean: 
 	rm -rf $(SUPERLU_BUILD_DIR)
