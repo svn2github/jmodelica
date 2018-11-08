@@ -151,17 +151,13 @@ aspect AnnotationAPI {
         getLastInstAccess().lookupInstComponentIfAccess();
 
 
-    syn ArrayList<SrcExp> ASTNode.exps() = collectExps(new ArrayList<SrcExp>());
-    
-    syn ArrayList<SrcExp> ASTNode.collectExps(ArrayList<SrcExp> list) {
+    public void ASTNode.collectExps(ArrayList<SrcExp> list) {
         for (ASTNode node : this) {
             node.collectExps(list);
         }
-        return list;
     }
-    eq SrcExp.collectExps(ArrayList<SrcExp> list) {
+    public void SrcExp.collectExps(ArrayList<SrcExp> list) {
         list.add(this);
-        return list;
     }
     
     public void ASTNode.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {}
@@ -176,7 +172,12 @@ aspect AnnotationAPI {
         }
     }
     public void InstNode.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
-        if (annotationExpEvaluator().equals(evaluator)) {
+        if (annotationExpEvaluator().equals(evaluator) && annotation().exists()) {
+            list.add(annotation());
+        }
+    }
+    public void InstExternal.addAnnotationToEvaluator(ArrayList<AnnotationNode> list, InstNode evaluator) {
+        if (annotation().exists()) {
             list.add(annotation());
         }
     }
@@ -184,7 +185,8 @@ aspect AnnotationAPI {
     syn ArrayList<AnnotationNode> InstNode.annotations() {
         ArrayList<AnnotationNode> list = new ArrayList<>();
         getInstComponentDecls().addAnnotationToEvaluator(list, this);
-        getInstComponentDecls().addAnnotationToEvaluator(list, this);
+        getInstClassDecls().addAnnotationToEvaluator(list, this);
+        getInstExtendss().addAnnotationToEvaluator(list, this);
         getRedeclaredInstClassDecls().addAnnotationToEvaluator(list, this);
         return list;
     }
@@ -200,7 +202,7 @@ aspect AnnotationAPI {
     syn lazy List<FExp> InstNode.getAnnotationExpList() {
         ArrayList<SrcExp> exps = new ArrayList<>();
         for (AnnotationNode annotation : annotations()) {
-            exps.addAll(annotation.ast().exps());
+            annotation.ast().collectExps(exps);
         }
         ArrayList<FExp> instExps = new ArrayList<>();
         for (int i = 0; i < exps.size(); i++) {
