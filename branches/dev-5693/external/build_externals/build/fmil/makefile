@@ -20,18 +20,18 @@
 #SHELL := /bin/bash
 
 include default_config
-export $(shell sed 's/=.*//' default_config)
 
 include $(USER_CONFIG)
-export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 .PHONY: install fmil_docker_build
 
 show_environment:
+	@echo "makefile fmil"
 	@echo BUILD_EXTERNALS_DIR=$(BUILD_EXTERNALS_DIR)
 	@echo FMIL_INSTALL=$(FMIL_INSTALL)
 	@echo JM_HOME=$(JM_HOME)
 	@echo JM_HOME_IN_DOCKER=$(JM_HOME_IN_DOCKER)
+	@echo PLATFORM=$(PLATFORM)
 
 $(FMIL_BUILD_DIR):
 	mkdir -p $(FMIL_BUILD_DIR) && \
@@ -41,10 +41,11 @@ $(FMIL_BUILD_DIR):
 install: $(FMIL_BUILD_DIR)
 	cd $(FMIL_BUILD_DIR) && make install DESTDIR=
 
-fmil_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
+fmil_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config $(USER_CONFIG))
 fmil_docker: docker_image show_environment
 	@echo "Starting docker with id ${DOCKER_ID} in fmil makefile"
-	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/fmil && make fmil_docker_build"
+	@docker run -v /$(PATH_TO_MOUNT):\\$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
+	"cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/fmil && make fmil_docker_build JM_HOME=\\$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@docker rmi -f ${DOCKER_ID}
 
 fmil_docker_build: show_environment docker_environment c-compiler cmake install
@@ -56,9 +57,8 @@ docker_environment:
 c-compiler:
 	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_gcc.sh
 
-# TODO: SHOULD CONFIG PATH BE A VARIABLE OR SHOULD PLATFORM INFO BE IN ALL CONFIGS?
 docker_image: dockerfile
-	${DOCKER_UTILS_DIR}/build_docker_image.sh ./default_config
+	${DOCKER_UTILS_DIR}/build_docker_image.sh default_config $(USER_CONFIG) $(PLATFORM) $(PLATFORM)_$(DIST_VERSION)
 
 dockerfile:
 	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh
