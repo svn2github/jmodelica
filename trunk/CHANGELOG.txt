@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5663
+Fixed type checking of array sizes for elements in arrays of records.
+
 ; Fixed ; Minor ; Compiler ; #5699
 Made sure to release the package.order file after reading.
 
