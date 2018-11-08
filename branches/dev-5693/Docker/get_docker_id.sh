@@ -14,6 +14,7 @@
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
 source $1
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $PYTHON_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"
+[[ -e $2 ]] && source $2
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"
 DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 echo "${DOCKER_ID}"
