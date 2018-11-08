@@ -934,31 +934,10 @@ algorithm
             name="Algorithm5",
             description="Parameter algorithm code generation",
             template="
-$C_set_start_values$
-$C_DAE_initial_dependent_parameter_assignments$
+$C_model_init_eval_dependent_parameters$
 ",
             generatedCode="
-int jmi_set_start_values_0_0(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-int jmi_set_start_values_0_0(jmi_t* jmi);
-
-
-int jmi_set_start_values_base(jmi_t* jmi) {
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    ef |= jmi_set_start_values_0_0(jmi);
-    model_init_eval_parameters(jmi);
-    JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-
-int model_init_eval_parameters_base(jmi_t* jmi) {
+int model_init_eval_dependent_parameters(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_1 = _p_0;
@@ -2690,13 +2669,13 @@ model ExternalObjectConstant1
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="ExternalObjectConstant1",
-            description="",
+            description="Test behavior when variability propagation tries to evaluate an equation with global constant external object reference",
             flatModel="
             
 fclass VariabilityPropagationTests.ExternalObjectConstant1
  constant Real x = 1;
  parameter Real y;
-package constant
+global variables
  constant VariabilityPropagationTests.ExternalObjectConstant1.EO VariabilityPropagationTests.ExternalObjectConstant1.eo = VariabilityPropagationTests.ExternalObjectConstant1.EO.constructor(1.0);
 parameter equation
  y = VariabilityPropagationTests.ExternalObjectConstant1.f(global(VariabilityPropagationTests.ExternalObjectConstant1.eo));
@@ -2764,12 +2743,12 @@ model ExternalObjectConstant2
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="ExternalObjectConstant2",
-            description="",
+            description="Test behavior when variability propagation tries to evaluate an equation with global constant external object reference",
             flatModel="
 fclass VariabilityPropagationTests.ExternalObjectConstant2
  constant Real x = 1;
  parameter Real y;
-package constant
+global variables
  constant VariabilityPropagationTests.ExternalObjectConstant2.EO VariabilityPropagationTests.ExternalObjectConstant2.eo = VariabilityPropagationTests.ExternalObjectConstant2.EO.constructor(1.0);
 parameter equation
  y = VariabilityPropagationTests.ExternalObjectConstant2.f(VariabilityPropagationTests.ExternalObjectConstant2.g(global(VariabilityPropagationTests.ExternalObjectConstant2.eo)));

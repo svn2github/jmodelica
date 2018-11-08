@@ -1210,7 +1210,7 @@ model ExternalObjectConstant1
 fclass VariabilityTests.ExternalObjectConstant1
  constant Real x = 1;
  Real y = VariabilityTests.ExternalObjectConstant1.f(global(VariabilityTests.ExternalObjectConstant1.eo1));
-package constant
+global variables
  constant VariabilityTests.ExternalObjectConstant1.EO VariabilityTests.ExternalObjectConstant1.eo = VariabilityTests.ExternalObjectConstant1.EO.constructor(1.0);
  constant VariabilityTests.ExternalObjectConstant1.EO VariabilityTests.ExternalObjectConstant1.eo1 = global(VariabilityTests.ExternalObjectConstant1.eo);
 
@@ -1284,7 +1284,7 @@ model ExternalObjectConstant2
 fclass VariabilityTests.ExternalObjectConstant2
  constant Real x = 1;
  Real y = VariabilityTests.ExternalObjectConstant2.f(global(VariabilityTests.ExternalObjectConstant2.eo1));
-package constant
+global variables
  constant VariabilityTests.ExternalObjectConstant2.EO VariabilityTests.ExternalObjectConstant2.eo = VariabilityTests.ExternalObjectConstant2.EO.constructor(1.0);
  constant VariabilityTests.ExternalObjectConstant2.EO VariabilityTests.ExternalObjectConstant2.eo1 = VariabilityTests.ExternalObjectConstant2.g(global(VariabilityTests.ExternalObjectConstant2.eo));
 
@@ -1367,7 +1367,7 @@ model ExternalObjectGlobalConstant1
             flatModel="
 fclass VariabilityTests.ExternalObjectGlobalConstant1
  Real y = VariabilityTests.ExternalObjectGlobalConstant1.f(time);
-package constant
+global variables
  constant VariabilityTests.ExternalObjectGlobalConstant1.P.EO VariabilityTests.ExternalObjectGlobalConstant1.P.eo = VariabilityTests.ExternalObjectGlobalConstant1.P.EO.constructor(1.0);
  constant VariabilityTests.ExternalObjectGlobalConstant1.P.EO VariabilityTests.ExternalObjectGlobalConstant1.P.eo1 = global(VariabilityTests.ExternalObjectGlobalConstant1.P.eo);
 

@@ -268,10 +268,10 @@ aspect CCodeGenGlobalsReinit {
 aspect CCodeGenGlobalVariables {
 
     public class CGenerator {
-        public class DAETag_C_set_globals_start extends DAETag {
+        public class DAETag_C_model_init_eval_independent_globals extends DAETag {
             
-            public DAETag_C_set_globals_start(AbstractGenerator myGenerator, FClass fclass) {
-                super("C_set_globals_start", myGenerator, fclass);
+            public DAETag_C_model_init_eval_independent_globals(AbstractGenerator myGenerator, FClass fclass) {
+                super("C_model_init_eval_independent_globals", myGenerator, fclass);
             }
             
             
@@ -287,7 +287,7 @@ aspect CCodeGenGlobalVariables {
                 }
                 
                 CodeSplitter<FGlobalVariable> splitter = new CodeSplitter<FGlobalVariable>(p, str, next, false,
-                        "jmi_set_globals_start_", fclass.myOptions(), globals) {
+                        "model_init_eval_independent_globals", fclass.myOptions(), globals) {
                     @Override
                     public void genDecl(FGlobalVariable element) {
                         
@@ -299,7 +299,7 @@ aspect CCodeGenGlobalVariables {
                 };
                 splitter.genFuncImpls();
                 splitter.genFuncHeads();
-                str.print("int jmi_set_globals_start(jmi_t* jmi) {\n");
+                str.print("int model_init_eval_independent_globals(jmi_t* jmi) {\n");
                 splitter.printStatusDecl();
                 splitter.genFuncCalls();
                 splitter.printStatusReturn();

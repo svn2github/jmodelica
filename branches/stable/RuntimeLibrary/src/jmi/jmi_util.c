@@ -561,7 +561,7 @@ int jmi_evaluate_directional_derivative(jmi_t* jmi, jmi_directional_derivative_c
     jmi_real_t* output_nominal = work_array + 3*n_input;
     jmi_real_t* output_temp = work_array + 3*n_input+n_output;
     jmi_int_t* error_indicator = jmi_get_int_work_array(jmi->int_work, JMI_MAX(n_output, n_input));
-    jmi_log_node_t log_node;
+    jmi_log_node_t log_node={0};
     int log_level_limit = 5;
 
     /* Setup max/min/nominal values for the inputs */

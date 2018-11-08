@@ -649,8 +649,6 @@ USE_TDM_GCC_FALSE
 USE_TDM_GCC_TRUE
 NUMPY_NO_MSVCR_FALSE
 NUMPY_NO_MSVCR_TRUE
-COPY_PTHREADS_LIB_FALSE
-COPY_PTHREADS_LIB_TRUE
 WITH_MINGW_FALSE
 WITH_MINGW_TRUE
 ECLIPSE_HOME
@@ -19393,14 +19391,6 @@ $as_echo "$with_tdm" >&6; }
 
 fi
 
- if test "$with_mingw" != no -a "$with_tdm" = no; then
-  COPY_PTHREADS_LIB_TRUE=
-  COPY_PTHREADS_LIB_FALSE='#'
-else
-  COPY_PTHREADS_LIB_TRUE='#'
-  COPY_PTHREADS_LIB_FALSE=
-fi
-
  if test "$with_mingw" != no -a "$with_tdm" = yes; then
   NUMPY_NO_MSVCR_TRUE=
   NUMPY_NO_MSVCR_FALSE='#'
@@ -20110,10 +20100,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_MINGW_TRUE}" && test -z "${WITH_MINGW_FALSE}"; then
   as_fn_error $? "conditional \"WITH_MINGW\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${COPY_PTHREADS_LIB_TRUE}" && test -z "${COPY_PTHREADS_LIB_FALSE}"; then
-  as_fn_error $? "conditional \"COPY_PTHREADS_LIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NUMPY_NO_MSVCR_TRUE}" && test -z "${NUMPY_NO_MSVCR_FALSE}"; then

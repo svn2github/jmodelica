@@ -183,11 +183,19 @@ public class Arguments {
     }
 
     private String argError() throws InvalidArgumentException {
-        return argError("");
+        return argError(null);
     }
 
     private String argError(String pref) throws InvalidArgumentException {
-        throw new InvalidArgumentException(pref + tooltip());
+        throw new InvalidArgumentException(argErrorMsg(pref));
+    }
+
+    private String argErrorMsg(String pref) {
+        if (pref == null || pref.isEmpty()) {
+            return tooltip();
+        } else {
+            return pref + " " + tooltip();
+        }
     }
 
     private String tooltip() {

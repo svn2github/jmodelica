@@ -15,7 +15,9 @@
 */
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -97,17 +99,7 @@ aspect Library {
                 ll.addLibraryDirectory(dirName, getReason());
 
                 SrcLibClassDecl lcd = new SrcLibClassDecl(fcd, ll.createLibNodeList());
-                
-                File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
-                if (orderFile.isFile()) {
-                    BufferedReader in = new BufferedReader(util.getParserHandler().fileReader(util, orderFile));
-                    java.util.List<String> order = new ArrayList<String>();
-                    String line;
-                    while ((line = in.readLine()) != null)
-                        order.add(line);
-                    lcd.setOrder(order);
-                }
-                
+                lcd.readOrderFile(baseDir, util);
                 entity.setSrcClassDecl(lcd, 0);
             }
             return entity;
@@ -123,6 +115,31 @@ aspect Library {
             log.debug(e);
             return createErrorStoredDefinition();
         } 
+    }
+
+    public void SrcLibClassDecl.readOrderFile(File baseDir, UtilInterface util) {
+        File orderFile = new File(baseDir, SrcLibNode.PACKAGE_ORDER_FILE);
+        if (orderFile.isFile()) {
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(util.getParserHandler().fileReader(util, orderFile));
+                java.util.List<String> order = new ArrayList<String>();
+                String line;
+                while ((line = in.readLine()) != null)
+                    order.add(line);
+                setOrder(order);
+            } catch (IOException e) {
+                // TODO: Add a warning about failing to load package.order
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        // No action, nothing constructive to do here.
+                    }
+                }
+            }
+        }
     }
 
     private SrcClassDecl SrcLibNode.extractClassDecl(SrcStoredDefinition entity, String name) {

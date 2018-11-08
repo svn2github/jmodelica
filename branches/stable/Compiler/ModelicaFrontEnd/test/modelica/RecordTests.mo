@@ -534,6 +534,33 @@ end RecordTests.RecordFlat14;
 ")})));
 end RecordFlat14;
 
+model RecordFlat15
+    record R
+        Real[:] values;
+    end R;
+    
+    R a(values={0, 0.1, 0.2, 5});
+    R b(values={1, 2.1, 6});
+    
+    R r = if 1 > 2 then a else b;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFlat15",
+            description="#5692",
+            flatModel="
+fclass RecordTests.RecordFlat15
+ constant Real a.values[1] = 0;
+ constant Real a.values[2] = 0.1;
+ constant Real a.values[3] = 0.2;
+ constant Real a.values[4] = 5;
+ constant Real r.values[1] = 1;
+ constant Real r.values[2] = 2.1;
+ constant Real r.values[3] = 6;
+end RecordTests.RecordFlat15;
+")})));
+end RecordFlat15;
+
 model EquivalentRecords1
  record A
   Real a;
@@ -2059,7 +2086,7 @@ fclass RecordTests.UnmodifiableComponent5
  constant Real r[2].x = 2;
  Real w;
  discrete Integer i;
-package constant
+global variables
  constant RecordTests.UnmodifiableComponent5.R RecordTests.UnmodifiableComponent5.r[2] = {RecordTests.UnmodifiableComponent5.R(1), RecordTests.UnmodifiableComponent5.R(2)};
 initial equation
  pre(i) = 0;

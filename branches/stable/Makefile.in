@@ -1214,11 +1214,6 @@ install-exec-local: install-python-packages
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
-@COPY_PTHREADS_LIB_TRUE@	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
-@COPY_PTHREADS_LIB_TRUE@	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
-@COPY_PTHREADS_LIB_TRUE@	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
-@COPY_PTHREADS_LIB_TRUE@	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
-
 	cp $(abs_builddir)/DefaultOptions.xml $(DESTDIR)$(prefix)/DefaultOptions.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
