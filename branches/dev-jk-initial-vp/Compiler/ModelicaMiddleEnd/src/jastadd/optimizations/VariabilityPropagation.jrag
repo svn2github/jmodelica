@@ -197,6 +197,16 @@ aspect VariabilityPropagation {
                     variables(equation, newVariability).add(fv);
                 }
             }
+            
+            public boolean moveEquation(TypePrefixVariability variability, FAbstractEquation equation) {
+                if (equation.isInitial() ? variability.fixedParameterVariability() : variability.parameterVariability()) {
+                    addEquation(variability, equation);
+                    equation.taggedByVProp = variability;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         }
     }
 
@@ -368,22 +378,17 @@ aspect VariabilityPropagation {
             taggedByVProp = Variability.CONSTANT;
         } else {
             variability = variability.combine(Variability.FIXEDPARAMETER);
-            if (variability.parameterVariability()) {
-                propagator.addEquation(variability, this);
-                taggedByVProp = variability;
-            }
+            propagator.moveEquation(variability, this);
         }
         taggedForCleanup = true;
     }
 
     public void FAlgorithm.variabilityPropagation(FClass.VariabilityPropagator propagator) {
         TypePrefixVariability variability = variabilityRHS();
-        if (variability.parameterVariability()) {
+        if (propagator.moveEquation(variability, this)) {
             for (FVariable fv : referencedFVariablesInLHS()) {
                 fv.variabilityPropagation(propagator, variability, null);
             }
-            propagator.addEquation(variability, this);
-            taggedByVProp = variability;
         }
     }
 

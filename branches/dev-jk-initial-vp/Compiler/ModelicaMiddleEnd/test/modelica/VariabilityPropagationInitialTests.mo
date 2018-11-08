@@ -476,6 +476,55 @@ end VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropa
 ")})));
 end InitialSystemPropagateParameter4;
 
+model InitialSystemPropagateParameter5
+    parameter Real p1(fixed=false);
+    parameter Real p2(fixed=false);
+initial equation
+    p2 = p1 + 1;
+initial algorithm
+    p1 := p2 * 23;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemPropagateParameter5",
+            description="Test propagation of fixed false parameters, algorithm, no propagation",
+            variability_propagation_initial=true,
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter5
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2(fixed = false);
+initial equation
+ p2 = p1 + 1;
+ algorithm
+  p1 := p2 * 23;
+;
+end VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter5;
+")})));
+end InitialSystemPropagateParameter5;
+
+model InitialSystemPropagateParameter6
+    parameter Real p1(fixed=false);
+    parameter Real p2(fixed=false);
+initial algorithm
+    p1 := p2 * 23;
+    p2 := p1 + 1;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemPropagateParameter6",
+            description="Test propagation of fixed false parameters, algorithm, no propagation",
+            variability_propagation_initial=true,
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter6
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2(fixed = false);
+initial equation
+ algorithm
+  p1 := p2 * 23;
+  p2 := p1 + 1;
+;
+end VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter6;
+")})));
+end InitialSystemPropagateParameter6;
+
 end InitialSystemPropagate;
 
 package MixedSystemPropagate
@@ -769,5 +818,48 @@ end VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagate
 end MixedSystemPropagatePartial2;
 
 end MixedSystemPropagate;
+
+model FailedInitialPartialEval1
+    function f
+        input Real x1;
+        input Real x2;
+        output Real y1;
+        output Real y2;
+    algorithm
+        assert(false, "");
+    end f;
+    
+    parameter Real y1(fixed=false);
+    parameter Real y2(fixed=false);
+initial equation
+    (y1,y2) = f(1, y1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FailedInitialPartialEval1",
+            description="Failed partial evaluation in initial system",
+            variability_propagation_initial=true,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass VariabilityPropagationInitialTests.FailedInitialPartialEval1
+ initial parameter Real y1(fixed = false);
+ initial parameter Real y2(fixed = false);
+initial equation
+ (y1, y2) = VariabilityPropagationInitialTests.FailedInitialPartialEval1.f(1, y1);
+
+public
+ function VariabilityPropagationInitialTests.FailedInitialPartialEval1.f
+  input Real x1;
+  input Real x2;
+  output Real y1;
+  output Real y2;
+ algorithm
+  assert(false, \"\");
+  return;
+ end VariabilityPropagationInitialTests.FailedInitialPartialEval1.f;
+
+end VariabilityPropagationInitialTests.FailedInitialPartialEval1;
+")})));
+end FailedInitialPartialEval1;
 
 end VariabilityPropagationInitialTests;
