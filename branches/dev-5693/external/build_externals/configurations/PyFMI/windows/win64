@@ -20,13 +20,10 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 BITNESS=64
-FORCE_32_BIT=false
-EXTRA_C_FLAGS=
 EXTRA_SETUP_ARGS=--no-msvcr=true
 
-INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_64
+INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_${BITNESS}
 # Required variables
-FMIL_INSTALL=$(SDK_HOME)/build/FMIL_install64
-FMIL_CONFIG=$(mkfile_dir)/../../FMILibrary/windows/win64
+FMIL_INSTALL=$(SDK_HOME)/build/FMIL_install{BITNESS}
 # Optional variables
-PYTHONHOME=$(SDK_HOME)/Python27/Python_64/
+PYTHONHOME=$(SDK_HOME)/Python27/Python_${BITNESS}/

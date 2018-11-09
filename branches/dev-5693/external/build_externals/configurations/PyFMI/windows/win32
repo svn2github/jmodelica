@@ -24,7 +24,6 @@ EXTRA_SETUP_ARGS=--force-32bit=true --no-msvcr=true --extra-c-flags=-mincoming-s
 
 INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python
 # Required variables
-FMIL_INSTALL=${SDK_HOME}/build/FMIL_install
-FMIL_CONFIG=$(mkfile_dir)/../../FMILibrary/windows/win64
+FMIL_INSTALL=${SDK_HOME}/build/FMIL_install${BITNESS}
 # Optional variables
-PYTHONHOME=${SDK_HOME}/Python27/Python_32/
+PYTHONHOME=${SDK_HOME}/Python27/Python_${BITNESS}/
