@@ -525,6 +525,44 @@ end VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropa
 ")})));
 end InitialSystemPropagateParameter6;
 
+model InitialSystemPropagateParameter7
+    function f
+        input Real x1;
+        input Real x2;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    parameter Real p1 = 0;
+    parameter Real p2(fixed=false);
+initial equation
+    f(p1, p2);
+    p2 = 1;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemPropagateParameter7",
+            description="Test propagation of fixed false parameters, function call equation, no propagation",
+            variability_propagation_initial=true,
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter7
+ parameter Real p1 = 0 /* 0 */;
+ constant Real p2(fixed = true) = 1;
+initial equation
+ VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter7.f(p1, 1.0);
+
+public
+ function VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter7.f
+  input Real x1;
+  input Real x2;
+ algorithm
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter7.f;
+
+end VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter7;
+")})));
+end InitialSystemPropagateParameter7;
+
+
 end InitialSystemPropagate;
 
 package MixedSystemPropagate

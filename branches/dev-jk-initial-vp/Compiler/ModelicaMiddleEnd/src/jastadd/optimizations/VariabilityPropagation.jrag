@@ -548,7 +548,8 @@ aspect VariabilityPropagation {
                 propagator.addWorkEq(equation);
                 if (equation.inInitialEquationSection() 
                         && equation.variables().isEmpty()
-                        && equation.initialParameters().isEmpty()) {
+                        && equation.initialParameters().isEmpty()
+                        && equation.parameters().isEmpty()) {
                     // Remove empty initial equation
                     equation.taggedByVProp = Variability.CONSTANT;
                 }
