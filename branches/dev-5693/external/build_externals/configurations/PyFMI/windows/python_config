@@ -16,16 +16,5 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-PLATFORM=ubuntu
-DIST_VERSION=18.04
-BUILD_TARGET=PyFMI
-DOCKER_ENV=1
-BITNESS=64
 
-# Path to build scripts
-BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
-BUILD_DIR=${JM_HOME}/${PLATFORM}_${DIST_VERSION}/build
-DOCKER_UTILS_DIR=${JM_HOME}/Docker
-
-# Path to PyFMI source code
-PYFMI_SRC=${JM_HOME}/external/PyFMI
+# Windows

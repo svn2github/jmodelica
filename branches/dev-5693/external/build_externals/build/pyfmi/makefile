@@ -20,60 +20,76 @@
 #SHELL := /bin/bash
 
 include default_config
-export $(shell sed 's/=.*//' default_config)
+#export $(shell sed 's/=.*//' default_config)
 
 include $(USER_CONFIG)
-export $(shell sed 's/=.*//' $(USER_CONFIG))
+#export $(shell sed 's/=.*//' $(USER_CONFIG))
 
-#TODO add layer squashing
+PYTHON_CONFIG := $(BUILD_EXTERNALS_DIR)/configurations/PyFMI/$(PLATFORM)/python_config
+include $(PYTHON_CONFIG)
+#export $(shell sed 's/=.*//' $(PYTHON_CONFIG))
 
-#TODO control environment (if using msys or git bash) 
+# TODO: Add layer squashing
 
-# check for invalid entries (file does not exist yet)
+# TODO: Check for invalid entries (file does not exist yet)
 #. check_configuration.sh
 
 .EXPORT_ALL_VARIABLES:
 
-.PHONY: docker_environment install-python c-compiler fmil pyfmi_docker dockerfile pyfmi_folder pyfmi_wheel
-#TODO test building docker configurations (generating different docker_id), and test that we get the correct ID
+.PHONY: fmil dockerfile pyfmi pyfmi_wheel
+# TODO: Test building docker configurations (generating different docker_id), and test that we get the correct ID
 
-#TODOTRY OVERRIDE JM_HOME FROM PYFMI_BASE_IMAGE SUCH THAT WE DONT NEED ANY EXTERNAL DOCKER PATHS
-export FMIL_INSTALL_DIR=$(JM_HOME)/fmil_install
+# TODO: Try OVERRIDE JM_HOME FROM PYFMI_BASE_IMAGE SUCH THAT WE DONT NEED ANY EXTERNAL DOCKER PATHS
+#export FMIL_INSTALL_DIR=$(JM_HOME)/$(PLATFORM)_$(DIST_VERSION)/fmil_install
 
-pyfmi_base_image: make_fmil_docker
+# TODO: Add shell script for docker to commit itself and kill itself for debugging purpose
+
+# TODO: Make one target for pyfmi install folder and create PYTHONPATH & PYTHONHOME through script?
+
+# Builds FMIL, starts new container, installs Python + packages and puts FMIL in image
+python_fmil: make_fmil_docker
 	cd $(JM_HOME) && \
 	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh "PYFMI_BASE" && \
-	${DOCKER_UTILS_DIR}/build_docker_image.sh
+	${DOCKER_UTILS_DIR}/build_docker_image.sh default_config $(USER_CONFIG) jmodelica/$(PLATFORM)_python_fmil $(PLATFORM)_$(DIST_VERSION)
 	@echo "Finished building pyfmi base image"
 
-# mount, RUN install_python.sh in new docker
+python_fmil_dockerhub:
+	@echo "Pulling from dockerhub"
+	#@docker pull jmodelica/pyfmi_base_$(PLATFORM)
+
+# Note: To build pyfmi_full_image you need to run pyfmi_base_image until its up on dockerhub
+pyfmi_full_image: DOCKER_ID = $(shell docker images | grep '$(PLATFORM)_python_fmil' | awk '{print $$3}')
+pyfmi_full_image: python_fmil_dockerhub
+	@echo "Building full PyFMI full_image with id ${DOCKER_ID}"
+	@docker run -v $(PATH_TO_MOUNT):\\$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
+	"cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make pyfmi_linux JM_HOME=/$(JM_HOME_IN_DOCKER) INSTALL_DIR=/$(JM_HOME_IN_DOCKER)/$(PLATFORM)_$(DIST_VERSION)/pyfmi_install FMIL_INSTALL=/fmil USER_CONFIG=$(USER_CONFIG)"
+
+# TODO: Move this into pyfmi_base_image
 make_fmil_docker:
-	cd $(BUILD_EXTERNALS_DIR_LOCAL)/build/fmil && make fmil_docker FMIL_INSTALL=$(FMIL_INSTALL_DIR)
-	cd $(FMIL_BIN)
+	[[ -e $(USER_CONFIG) ]] && cp $(USER_CONFIG) $(BUILD_EXTERNALS_DIR)/build/fmil
+	cd $(BUILD_EXTERNALS_DIR)/build/fmil && make fmil_docker USER_CONFIG=$(USER_CONFIG)
 
-# Please see section 6.11 https://www.gnu.org/software/make/manual/make.html#Target_002dspecific
-pyfmi_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
-pyfmi_docker: docker_image
-	@echo "Starting docker with id ${DOCKER_ID}"
-	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/pyfmi && make pyfmi_docker_build"
-	@docker run -v ${PATH_TO_MOUNT}:${JM_HOME_IN_DOCKER} ${DOCKER_ID} sh -c "command 2"
-	#@docker rmi -f ${DOCKER_ID}
-
-pyfmi_docker_build: docker_environment cmake fmil install-python python_packages
-	@echo "pyfmi build placeholder"
-
-python_packages: install-python
-	${BUILD_EXTERNALS_DIR}/docker/platforms/non-specific/install_python_packages.sh
-
-docker_environment:
-	${BUILD_EXTERNALS_DIR}/docker/platforms/${PLATFORM}/install_dependencies.sh
-
-pyfmi_wheel: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_WHEELBUILD_$(BITNESS)
-pyfmi_wheel:
-	mkdir -p ${LOCAL_BUILD_DIR}; \
+# TODO: Fix one unified target for windows/linux because PYTHONPATH is different
+#       and cant override PYTHONHOME in CentOS, then it wont work
+pyfmi_linux: PYFMI_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
+pyfmi_linux: PYFMI_INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
+pyfmi_linux:
+	mkdir -p ${PYFMI_BUILD_DIR}; \
 	cd $(PYFMI_SRC)/../; \
-	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
-	cd $(LOCAL_BUILD_DIR)/PyFMI; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(PYFMI_BUILD_DIR); \
+	cd $(PYFMI_BUILD_DIR)/PyFMI; \
+	mkdir -p $(PYTHONPATH); \
+	$(PYTHON_BIN) setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(PYFMI_INSTALL_DIR); \
+	cd $(PYTHONPATH); \
+	mkdir -p $(INSTALL_DIR); \
+	find -type d -name pyfmi -exec cp -r {} $(INSTALL_DIR) \;
+
+pyfmi_wheel: PYFMI_BUILD_DIR=$(BUILD_DIR)/PYFMI_WHEELBUILD_$(BITNESS)
+pyfmi_wheel:
+	mkdir -p ${PYFMI_BUILD_DIR}; \
+	cd $(PYFMI_SRC)/../; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(PYFMI_BUILD_DIR); \
+	cd $(PYFMI_BUILD_DIR)/PyFMI; \
 	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS); \
 	mkdir -p $(INSTALL_DIR_FOLDER); \
 	find -type f -name PyFMI*.whl -exec cp {} $(INSTALL_DIR_FOLDER) \;
@@ -81,7 +97,7 @@ pyfmi_wheel:
 pyfmi_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/PYFMI_FOLDERBUILD_$(BITNESS)
 pyfmi_folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/PYFMI_FOLDERINSTALL_$(BITNESS)
 pyfmi_folder:
-	mkdir -p ${LOCAL_BUILD_DIR}; \
+	mkdir -p ${PYFMI_BUILD_DIR}; \
 	cd $(PYFMI_SRC)/../; \
 	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
 	cd $(LOCAL_BUILD_DIR)/PyFMI; \
@@ -90,28 +106,9 @@ pyfmi_folder:
 	mkdir -p $(INSTALL_DIR_FOLDER); \
 	find -type d -name pyfmi -exec cp -r {} $(INSTALL_DIR_FOLDER) \;
 
-c-compiler:
-	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_gcc.sh
-
-docker_image: dockerfile
-	${DOCKER_UTILS_DIR}/build_docker_image.sh ./default_config
-
-dockerfile:
-	${DOCKER_UTILS_DIR}/generation/generate_dockerfile.sh
-
-# TODO: Ask Agnes why we have to cd then run make, instead of running make from here
 fmil: 
 	cd $(BUILD_EXTERNALS_DIR)/build/fmil; \
 	make install BUILD_EXTERNALS_DIR=$(BUILD_EXTERNALS_DIR) FMIL_INSTALL=$(FMIL_INSTALL) BUILD_DIR=$(BUILD_DIR) USER_CONFIG=$(FMIL_CONFIG)
-
-install-python: docker_environment c-compiler
-	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_python.sh ${PYTHON_VERSION}
-
-local_environment:
-	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/check_python_version.sh ${PYTHON_VERSION}
-
-cmake:
-	${BUILD_ENVIRONMENT}/platforms/${PLATFORM}/install_cmake.sh
 
 clean_docker: DOCKER_ID = $(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh ./default_config)
 clean_docker:
