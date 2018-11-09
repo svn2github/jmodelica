@@ -7037,32 +7037,6 @@ model ModelIdentifierTest
  )})));
 end ModelIdentifierTest;
 
-model GUIDTest1
-	Real r = 1.0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="GUIDTest1",
-            description="",
-            variability_propagation=false,
-            template="$C_guid$",
-            generatedCode="\"c143b522ea1fdf6db1132a647457c83a\""
- )})));
-end GUIDTest1;
-
-model GUIDTest2
-	Real r = 2.0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="GUIDTest2",
-            description="",
-            variability_propagation=false,
-            template="$C_guid$",
-            generatedCode="\"ff13c7197701d1a1e9559970770f01f0\""
- )})));
-end GUIDTest2;
-
 model DependentParametersWithScalingTest1
   record R
     Real x = 1;
