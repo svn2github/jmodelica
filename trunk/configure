@@ -641,8 +641,6 @@ HAVE_ANT_FALSE
 HAVE_ANT_TRUE
 ANT_OPTS
 ANT
-jmilib
-ipoptlib
 _JAVA_HOME_
 MINGW_HOME
 USE_TDM_GCC_FALSE
@@ -651,16 +649,7 @@ NUMPY_NO_MSVCR_FALSE
 NUMPY_NO_MSVCR_TRUE
 WITH_MINGW_FALSE
 WITH_MINGW_TRUE
-ECLIPSE_HOME
-WITH_ECLIPSE_FALSE
-WITH_ECLIPSE_TRUE
-SUPERLU_HOME
-WITH_SUPERLU_FALSE
-WITH_SUPERLU_TRUE
 MINPACK_HOME
-WITH_SUNDIALS_FALSE
-WITH_SUNDIALS_TRUE
-WITH_SUNDIALS
 SUNDIALS_HOME
 CASADI_HOME
 WITH_CASADI
@@ -817,9 +806,6 @@ enable_libtool_lock
 with_ipopt
 with_ipopt64
 with_casadi
-with_sundials
-with_superlu
-with_eclipse
 with_mingw
 '
       ac_precious_vars='build_alias
@@ -1480,9 +1466,6 @@ Optional Packages:
   --with-ipopt64          IPOPT installation directory [default=check]
   --with-casadi           CasADI Python-interface installation directory
                           [default=check]
-  --with-sundials         SUNDIALS installation directory [default=check]
-  --with-superlu          SuperLU installation directory [default=check]
-  --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
 
 Some influential environment variables:
@@ -18820,14 +18803,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# By default, we want to install bin, lib, and include
-# in the directory where configure is run.
 
-
-
-#AS_IF([test "x$JMODELICA_HOME" = x],
-# 	AC_PREFIX_DEFAULT([`pwd`]),
-#        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
 
 if test "x$F77" != x; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: gfortran seems to be working" >&5
@@ -19199,126 +19175,12 @@ else
   WITH_CASADI="false"
 fi
 
-
-# Checks for libraries.
-# SUNDIALS
-
-# Check whether --with-sundials was given.
-if test "${with_sundials+set}" = set; then :
-  withval=$with_sundials; sundials=$withval
-else
-  with_sundials=no
-fi
-
-
-if test "x$with_sundials" = xno; then :
-  sundials="$CURR_DIR/sundials_install"
-fi
-
-if test "x$with_sundials" = xno; then :
-  with_sundials=automatic
-fi
-
 # Set output variables to be exported to the Makefiles
 
-
-
- if test "x$with_sundials" != xno; then
-  WITH_SUNDIALS_TRUE=
-  WITH_SUNDIALS_FALSE='#'
-else
-  WITH_SUNDIALS_TRUE='#'
-  WITH_SUNDIALS_FALSE=
-fi
-
-
-
-SUNDIALS_HOME=$sundials
+SUNDIALS_HOME="$CURR_DIR/sundials_install"
 
 
 MINPACK_HOME="$CURR_DIR/minpack_install"
-
-
-# Check whether --with-superlu was given.
-if test "${with_superlu+set}" = set; then :
-  withval=$with_superlu; superlu=$withval
-else
-  with_superlu=no
-fi
-
-
-if test "x$with_superlu" = xno; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: SuperLU installation not specified." >&5
-$as_echo "SuperLU installation not specified." >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: SuperLU installation specified." >&5
-$as_echo "SuperLU installation specified." >&6; }
-fi
-
- if test "x$with_superlu" != xno; then
-  WITH_SUPERLU_TRUE=
-  WITH_SUPERLU_FALSE='#'
-else
-  WITH_SUPERLU_TRUE='#'
-  WITH_SUPERLU_FALSE=
-fi
-
-
-
-SUPERLU_HOME=$superlu
-
-
-# Check whether --with-eclipse was given.
-if test "${with_eclipse+set}" = set; then :
-  withval=$with_eclipse; eclipse=$withval
-else
-  with_eclipse=no
-fi
-
-
-if test "x$with_eclipse" = xno; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Eclipse installation not specified." >&5
-$as_echo "Eclipse installation not specified." >&6; }
-else
-  as_ac_File=`$as_echo "ac_cv_file_$eclipse/eclipse" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $eclipse/eclipse" >&5
-$as_echo_n "checking for $eclipse/eclipse... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$eclipse/eclipse"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Eclipse installation specifed, but seems to be corrupt!
-See \`config.log' for more details" "$LINENO" 5 ; }
-fi
-
-fi
-
- if test "x$with_eclipse" != xno; then
-  WITH_ECLIPSE_TRUE=
-  WITH_ECLIPSE_FALSE='#'
-else
-  WITH_ECLIPSE_TRUE='#'
-  WITH_ECLIPSE_FALSE=
-fi
-
-
-
-ECLIPSE_HOME=$eclipse
 
 # Checks for mingw.
 
@@ -19416,8 +19278,6 @@ MINGW_HOME=$mingw
 # Detect Java home directory
 
 
-
-
 case $build in
   *-mingw*)
     # The SDK installer sets the environment variable JAVA_HOME, so there we don't need _JAVA_HOME_
@@ -19427,36 +19287,6 @@ case $build in
 	_JAVA_HOME_=`$(dirname $0)/run_java.sh org.jmodelica.util.GetJavaHome`
     ;;
 esac
-
-
-case $build in
-  *-cygwin*)
-    ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
-    ;;
-  *-mingw*)
-    ipoptlib="-L$ipopt/lib -lipopt -lm \
-       -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt \
-       -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++"
-    ;;
-  *-apple*)
-        ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"
-    ;;
-  *)
-    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran -lpthread"
-    ;;
-esac
-
-#AC_SUBST(JMALLLIBS)
-#JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
-
-# Used in examples
-#jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
-if test "x$with_ipopt" != xno; then :
-  jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm -ljmi_solver"
-else
-  jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"
-fi
-
 
 # Extract the first word of "ant", so it can be a program name with args.
 set dummy ant; ac_word=$2
@@ -20084,18 +19914,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_WITH_IPOPT64_TRUE}" && test -z "${COMPILE_WITH_IPOPT64_FALSE}"; then
   as_fn_error $? "conditional \"COMPILE_WITH_IPOPT64\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_SUNDIALS_TRUE}" && test -z "${WITH_SUNDIALS_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_SUNDIALS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_SUPERLU_TRUE}" && test -z "${WITH_SUPERLU_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_SUPERLU\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_ECLIPSE_TRUE}" && test -z "${WITH_ECLIPSE_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_ECLIPSE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_MINGW_TRUE}" && test -z "${WITH_MINGW_FALSE}"; then
