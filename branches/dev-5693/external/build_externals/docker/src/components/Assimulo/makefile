@@ -38,7 +38,7 @@ assimulo: assimulo_dependencies
 assimulo_dependencies:
 	@echo "Check if base exists else use docker pull or rebuild"
 
-docker_assimulo_dependencies: docker_environment sundials blas lapack
+docker_assimulo_dependencies: clean sundials blas lapack
 
 sundials: superlu
 	@echo "Building sundials"
@@ -84,7 +84,7 @@ clean_docker:
 	@docker rmi -f ${DOCKER_ID}
 
 clean:
-	@echo "TODO: Fix removal of files"
+	@ rm -rf $(JM_HOME)/$(PLATFORM)_$(DIST_VERSION)
 
 
 .PHONY:
