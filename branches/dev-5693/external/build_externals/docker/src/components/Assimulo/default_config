@@ -1,0 +1,11 @@
+PLATFORM=ubuntu
+DIST_VERSION=18.04
+BUILD_TARGET=assimulo
+DOCKER_ENV=1
+BITNESS=64
+
+# Path to build scripts
+BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
+BUILD_THIRDPARTY_DIR=${JM_HOME}/ThirdParty/build_thirdparties/build
+DOCKER_UTILS_DIR=${JM_HOME}/Docker
+BUILD_DIR=${DOCKER_UTILS_DIR}/${PLATFORM}_${DIST_VERSION}/build

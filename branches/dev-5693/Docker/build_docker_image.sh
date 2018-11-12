@@ -13,17 +13,16 @@
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
+BASE_DIR=$(dirname "$0")
 CONFIG=$1
 USER_CONFIG=$2
 TAG_NAME=$3
 DOCKERFILE_DIR=$4
 
 echo "Building docker image..."
-echo " using CONFIG $CONFIG USER_CONFIG $USER_CONFIG and TAG_NAME $TAG_NAME"
-echo "Current working directory is ${PWD} with contents: "
+echo -e "\tusing CONFIG $CONFIG USER_CONFIG $USER_CONFIG and TAG_NAME $TAG_NAME"
+echo -e "\tCurrent working directory is ${PWD} with contents: "
 ls -la
-
-BASE_DIR=$(dirname "$0")
 
 [[ -e "$CONFIG" ]] && source $CONFIG || echo "build_docker_image: No such config $CONFIG"
 [[ -e "$USER_CONFIG" ]] && source $USER_CONFIG || echo "build_docker_image: No such user config $USER_CONFIG"
@@ -31,17 +30,11 @@ BASE_DIR=$(dirname "$0")
 # check if docker image with given config already exists
 HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"
 
-if docker images | grep -q "$HASH_GEN_TAG"; then
-    DOCKER_IMAGE_EXISTS=1
-else
-    DOCKER_IMAGE_FALSE=0
-fi
-
-if [ "$DOCKER_IMAGE_EXISTS" = "1" ]; then
-    DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
-else
+# build image if not found among images
+if ! docker images | grep -q "$HASH_GEN_TAG" ; then
     mkdir -p $DOCKERFILE_DIR
     cp $BASE_DIR/generation/Dockerfile $DOCKERFILE_DIR
     docker build -t "${TAG_NAME}:${HASH_GEN_TAG}" -f $DOCKERFILE_DIR/Dockerfile .
-    DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 fi
+
+DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
