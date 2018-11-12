@@ -43,6 +43,8 @@ import org.jmodelica.util.formatting.DefaultFormattingRecorder;
 import org.jmodelica.util.logging.StreamingLogger;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.AbstractModelicaScanner;
+import org.jmodelica.util.collections.ChainedIterable;
+import org.jmodelica.util.collections.TransformerIterable;
 
 import org.jmodelica.common.URIResolver;
 
@@ -456,32 +458,69 @@ aspect NodeMethods {
     protected boolean BaseNode.isChildOfHelper(BaseNode parent) {
         return parent == this;
     }
-    
+
     /**
      * Returns an iterable, that has an iterator that iterates over all direct FExp children.
      * 
      * The iterator passes through Lists and Opts.
      */
     public Iterable<FExp> FExp.childFExps() {
-        return new ChildFExpIterable();
+        return new ChildTypedIterable(FExp.class);
     }
-    
-    public class FExp {
+
+    /**
+     * Returns an iterable, that has an iterator that iterates over all direct SrcExp children.
+     * 
+     * The iterator passes through Lists and Opts.
+     */
+    public Iterable<SrcExp> SrcExp.childSrcExps() {
+        return new ChildTypedIterable(SrcExp.class);
+    }
+    public Iterable<SrcExp> SrcArrayConstructor.childSrcExps() {
+        return getSrcFunctionArguments().childSrcExps();
+    }
+
+    /**
+     * Returns an iterable, that has an iterator that iterates over the SrcExps 
+     * that comprise this set of arguments.
+     * 
+     * Note that this is different from the function with the same name on SrcExp.
+     */
+    public Iterable<SrcExp> SrcFunctionArguments.childSrcExps() {
+        Iterable<SrcExp> namedPart = 
+                new TransformerIterable<SrcNamedArgument, SrcExp>(getSrcNamedArguments())
+            {
+                protected SrcExp transform(SrcNamedArgument a) {
+                    return a.getSrcExp();
+                }
+            };
+        return new ChainedIterable(getSrcExps(), namedPart);
+    }
+
+    public class ASTNode {
         
-        private class ChildFExpIterable implements Iterable<FExp> {
-            public Iterator<FExp> iterator() {
-                return new ChildFExpIterator();
+        protected class ChildTypedIterable<S extends ASTNode<?>> implements Iterable<S> {
+            private Class<S> type;
+            
+            public ChildTypedIterable(Class<S> type) {
+                this.type = type;
+            }
+            
+            public Iterator<S> iterator() {
+                return new ChildTypedIterator(type);
             }
         }
         
         
-        private class ChildFExpIterator implements Iterator<FExp> {
+        private class ChildTypedIterator<S extends ASTNode<?>> implements Iterator<S> {
             
-            Iterator<ASTNode> it1;
-            Iterator<ASTNode> it2;
-            FExp next = null;
-
-            public ChildFExpIterator() {
+            private Iterator<T> it1;
+            private Iterator<ASTNode> it2;
+            private S next = null;
+            private Class<S> type;
+            
+            public ChildTypedIterator(Class<S> type) {
+                this.type = type;
                 it1 = iterator();
                 it2 = null;
                 update();
@@ -505,18 +544,18 @@ aspect NodeMethods {
                         else 
                             it2 = null;
                     }
-                    if (node instanceof FExp) 
+                    if (type.isInstance(node)) 
                         cont = false;
                 }
-                next = (FExp) node;
+                next = (S) node;
             }
 
             public boolean hasNext() {
                 return next != null;
             }
 
-            public FExp next() {
-                FExp res = next;
+            public S next() {
+                S res = next;
                 update();
                 return res;
             }
