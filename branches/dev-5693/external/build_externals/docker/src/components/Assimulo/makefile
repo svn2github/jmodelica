@@ -75,7 +75,7 @@ docker_assimulo_base: docker_base
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT):\\$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
-	"cd ${BUILD_HOME_DIR} && make docker_assimulo_dependencies JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	"ls -la && ls -la /tmp && cd ${BUILD_HOME_DIR} && make docker_assimulo_dependencies JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@echo "Start new docker image with a Dockerfile that COPIES all the artifacts into a clean image"
 	@echo "Finished building assimulo base image"
 
