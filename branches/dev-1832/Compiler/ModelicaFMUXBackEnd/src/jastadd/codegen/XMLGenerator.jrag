@@ -83,7 +83,7 @@ public class XMLGenerator extends GenericXMLGenerator {
             generateAttribute("modelName", fclass.name(), genPrinter);
             generateAttribute("modelIdentifier", fclass.nameUnderscore(), genPrinter);
             generateAttribute("guid", fclass.guidManager().getGuidToken(), genPrinter);
-            generateAttribute("generationTool", ASTNode.vendorName(), genPrinter);
+            generateAttribute("generationTool", fclass.guidManager().getGenerationToolToken(), genPrinter);
             // Todays date for now
             generateAttribute("generationDateAndTime", fclass.guidManager().getDateToken(), genPrinter);
             generateAttribute("variableNamingConvention", "structured", genPrinter);

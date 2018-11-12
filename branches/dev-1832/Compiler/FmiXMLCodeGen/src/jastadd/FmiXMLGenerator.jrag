@@ -312,7 +312,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     public class XMLTag_vendorAnnotations_tool extends XMLTag_tool {
         
         public XMLTag_vendorAnnotations_tool(AbstractGenerator myGenerator, FClass fclass) {
-            super(VENDOR_ANNOTATIONS_TOOL_MAIN, ASTNode.vendorName(), myGenerator, fclass);
+            super(VENDOR_ANNOTATIONS_TOOL_MAIN, fclass.guidManager().getToolNameToken(), myGenerator, fclass);
         }
 
         public String[] children() {
@@ -633,7 +633,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
             generateAttribute("guid",                     fclass.guidManager().getGuidToken(),     genPrinter);
-            generateAttribute("generationTool",           ASTNode.vendorName(),                    genPrinter);
+            generateAttribute("generationTool",     fclass.guidManager().getGenerationToolToken(), genPrinter);
             generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(),     genPrinter);
             generateAttribute("variableNamingConvention", "structured",                            genPrinter);
             generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
@@ -1059,7 +1059,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             generateAttribute("fmiVersion",               "2.0",                               genPrinter);
             generateAttribute("modelName",                fclass.name(),                       genPrinter);
             generateAttribute("guid",                     fclass.guidManager().getGuidToken(), genPrinter);
-            generateAttribute("generationTool",           ASTNode.vendorName(),                genPrinter);
+            generateAttribute("generationTool", fclass.guidManager().getGenerationToolToken(), genPrinter);
             generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(), genPrinter);
             generateAttribute("variableNamingConvention", "structured",                        genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),     genPrinter);

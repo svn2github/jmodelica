@@ -25,16 +25,20 @@ public class GUIDManager {
 
     private final Token guidToken = new Token("$GUID_TOKEN$");
     private final Token dateToken = new Token("$DATE_TOKEN$");
+    private final Token generationToolToken = new Token("$GENERATION_TOOL$");
+    private final Token toolNameToken = new Token("$TOOL_NAME$");
     private final Token versionToken = new Token("$COMPILER_VERSION$");
 
-    private final Token[] tokens = {guidToken, dateToken, versionToken};
+    private final Token[] tokens = {guidToken, dateToken, generationToolToken, toolNameToken, versionToken};
     private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     private final List<Openable> dependentFiles = new ArrayList<>();
     private Openable source;
 
 
-    public GUIDManager(String compilerVersion) {
+    public GUIDManager(String vendorName, String compilerVersion) {
+        generationToolToken.setValue(vendorName);
+        toolNameToken.setValue(vendorName);
         versionToken.setValue(compilerVersion);
     }
 
@@ -44,6 +48,14 @@ public class GUIDManager {
 
     public String getDateToken() {
         return dateToken.getString();
+    }
+
+    public String getGenerationToolToken() {
+        return generationToolToken.getString();
+    }
+
+    public String getToolNameToken() {
+        return toolNameToken.getString();
     }
     
     public String getCompilerVersionToken() {

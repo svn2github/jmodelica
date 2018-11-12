@@ -1972,7 +1972,7 @@ aspect UtilInterface {
             this.eh = eh;
             this.efc = efc;
             this.compilationOutputPath = compilationOutputPath;
-            guidManager = new GUIDManager(options.getStringOption("compiler_version"));
+            guidManager = new GUIDManager(ASTNode.vendorName(), options.getStringOption("compiler_version"));
         }
         
         public ModelicaCompiler getModelicaCompiler() {

@@ -14,7 +14,7 @@ public class GUIDManagerTest {
     
     @Before
     public void setup() {
-        guidManager = new GUIDManager("1.0");
+        guidManager = new GUIDManager("GUID_Tester", "1.0");
     }
     
     private void test(String source, String[] dependent, String[] expected) {
@@ -62,6 +62,14 @@ public class GUIDManagerTest {
         String[] expected = {"guid=529d037245bb851e67db9a7df5a048e1, cv=1.0"};
         test(guidManager.getGuidToken() + " " + guidManager.getCompilerVersionToken(),
                 dependent, expected);
+    }
+    
+    @Test
+    public void testTwoToolTokens() {
+        String[] dependent = {"generationTool=" + guidManager.getGenerationToolToken()
+                + "\nTool name=" + guidManager.getToolNameToken()};
+        String[] expected = {"generationTool=GUID_Tester\nTool name=GUID_Tester"};
+        test("", dependent, expected);
     }
     
     @Test
