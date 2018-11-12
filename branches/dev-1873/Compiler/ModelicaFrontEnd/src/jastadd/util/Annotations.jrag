@@ -27,12 +27,6 @@ import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.Criteria;
 
 aspect AnnotationAPI {
-	/**
-	 * Interface for Expression which can be interpreted as some form of Access.
-	 */
-	public interface AccessLikeExp {}  
-	CommonAccessExp implements AccessLikeExp;
-
     /**
      * Get the annotation node for this AST node's annotation, if any.
      * 
@@ -1657,8 +1651,8 @@ aspect AnnotationAPI {
 
         @Override
         public boolean isAccess() {
-            FExp e = fExp();
-            return e instanceof AccessLikeExp;
+            final FExp e = fExp();
+            return (e == null) ? false : e.isAccessLikeExp();
         }
 
         public String valueToString() {

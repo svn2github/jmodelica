@@ -23,6 +23,9 @@ aspect SrcUtil {
     eq SrcRealLitExp.isLiteral()    = true;
     eq SrcStringLitExp.isLiteral()  = true;
 
+    syn boolean SrcExp.isBooleanLiteral()  = false;
+    eq SrcBooleanLitExp.isBooleanLiteral() = true;
+
     /**
      * Returns the class declaration which surrounds this element. Null if no
      * such declaration can be found.
