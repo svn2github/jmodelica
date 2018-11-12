@@ -2202,7 +2202,7 @@ annotation(__JModelica(UnitTesting(tests={
         generatedCode="
 <VendorAnnotations>
 	<Tool name=\"\">
-		<Annotation name=\"CompilerVersion\" value=\"$COMPILER_VERSION$\" />
+		<Annotation name=\"CompilerVersion\" value=\"compiler_version_file_not_read\" />
 	</Tool>
 </VendorAnnotations>
 ")})));
@@ -2223,7 +2223,7 @@ annotation(__JModelica(UnitTesting(tests={
 <VendorAnnotations>
 	<Tool name=\"\">
 		<Annotations>
-			<Annotation name=\"CompilerVersion\" value=\"$COMPILER_VERSION$\" />
+			<Annotation name=\"CompilerVersion\" value=\"compiler_version_file_not_read\" />
 		</Annotations>
 	</Tool>
 </VendorAnnotations>
