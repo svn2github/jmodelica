@@ -378,7 +378,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
         
         public String annotationValue() {
-            return getFClass().guidManager().getCompilerVersionToken();
+            return fclass.myOptions().getStringOption("compiler_version");
         }
     }
 
@@ -619,6 +619,8 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 	 */
 	public class XMLTag_fmiModelDescription extends XMLTag {
 		
+		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		
 		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
 			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
 		}
@@ -632,9 +634,9 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
-            generateAttribute("guid",                     fclass.guidManager().getGuidToken(),     genPrinter);
+            generateAttribute("guid",                     fclass.guid(),                           genPrinter);
             generateAttribute("generationTool",           ASTNode.vendorName(),                    genPrinter);
-            generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(),     genPrinter);
+            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),           genPrinter);
             generateAttribute("variableNamingConvention", "structured",                            genPrinter);
             generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),         genPrinter);
@@ -1045,6 +1047,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 	 */
 	public class XMLTag_fmiModelDescription extends XMLTag {
 		
+		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		
 		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
 			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
 		}
@@ -1056,13 +1060,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         }
 
         public void generateAttributes(CodeStream genPrinter) {
-            generateAttribute("fmiVersion",               "2.0",                               genPrinter);
-            generateAttribute("modelName",                fclass.name(),                       genPrinter);
-            generateAttribute("guid",                     fclass.guidManager().getGuidToken(), genPrinter);
-            generateAttribute("generationTool",           ASTNode.vendorName(),                genPrinter);
-            generateAttribute("generationDateAndTime",    fclass.guidManager().getDateToken(), genPrinter);
-            generateAttribute("variableNamingConvention", "structured",                        genPrinter);
-            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass),     genPrinter);
+            generateAttribute("fmiVersion",               "2.0",                           genPrinter);
+            generateAttribute("modelName",                fclass.name(),                   genPrinter);
+            generateAttribute("guid",                     fclass.guid(),                   genPrinter);
+            generateAttribute("generationTool",           ASTNode.vendorName(),            genPrinter);
+            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),   genPrinter);
+            generateAttribute("variableNamingConvention", "structured",                    genPrinter);
+            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass), genPrinter);
         }
 	}
 	

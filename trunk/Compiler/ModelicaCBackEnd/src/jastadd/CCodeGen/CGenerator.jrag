@@ -1043,7 +1043,7 @@ public class CGenerator extends GenericGenerator {
         }
 
         public void generate(CodeStream genPrinter) {
-            genPrinter.print("\""+fclass.guidManager().getGuidToken()+"\"");
+            genPrinter.print("\""+fclass.guid()+"\"");
         }
     }
 

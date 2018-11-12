@@ -808,7 +808,7 @@ public class ModelicaCompiler implements LogContainer {
                 if (i > 0)
                     flatName = flatName.substring(0, i);
             }
-            FClass fc = compileModel(fileName, className, target, flatName, compileTo);
+            FClass fc = compileModel(fileName, className, target, flatName);
 
             if (!target.getCodeGenFlag()) {
                 /*
@@ -827,7 +827,7 @@ public class ModelicaCompiler implements LogContainer {
              * Package unit.
              */
             ASTNode.beginStep("packUnit()");
-            File unitPath = packUnit(className, target, fc);
+            File unitPath = packUnit(className, compileTo, target, fc);
             unit = log.logCompiledUnit(unitPath, warnings, fc.numberOfComponents());
             ASTNode.endStep("packUnit()");
 
@@ -1331,9 +1331,6 @@ public class ModelicaCompiler implements LogContainer {
     
         templates.generateCFiles(this, fc, createCGenerator(fc), sourceDir, name);
         templates.generateXMLFiles(this, fc, target.getXMLGenerator(fc), outDir, "modelDescription");
-        
-        fc.guidManager().setSourceFile(new File(outDir, "modelDescription.xml"));
-        fc.guidManager().processDependentFiles();
         
         hookCodeGenerated(outDir);
         log.debug("... code generated.");
@@ -1940,18 +1937,18 @@ public class ModelicaCompiler implements LogContainer {
      *             found.
      * 
      */
-    public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
+    public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         boolean doTearDown = true;
         try {
             doTearDown = trySetUp();
-            return doCompileModel(name, cl, target, flatName, compileTo);
+            return doCompileModel(name, cl, target, flatName);
         } finally {
             tryTearDown(doTearDown);
         }
     }
     
-    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName, String compileTo)
+    public FClass ModelicaCompiler.doCompileModel(String name[], String cl, TargetObject target, String flatName)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
         if (target.equals(TargetObject.PARSE)) {
             parseFiles(name);
@@ -1974,11 +1971,6 @@ public class ModelicaCompiler implements LogContainer {
         try {
             // compute instance tree
             InstClassDecl icl = instantiateModel(name, cl, target);
-            
-            if (compileTo != null) {
-                File unitFile = makePackagingDirs(cl, new File(compileTo), target);
-                icl.root().getUtilInterface().setCompilationOutputPath(unitFile);
-            }
             
             // flattening
             // Throw away source and instance trees when they are not needed any more
@@ -2095,7 +2087,7 @@ public class ModelicaCompiler implements LogContainer {
      * @param dir   the directory to put the output file in
      * @param name  the name of the output file
      */
-    SplitFilesCodeStream ModelicaCompiler.generateFile(FClass fc, String tmpl, AbstractGenerator gen, File dir, String name, String header) 
+    SplitFilesCodeStream ModelicaCompiler.generateFile(String tmpl, AbstractGenerator gen, File dir, String name, String header) 
             throws FileNotFoundException {
 
         if (tmpl != null || gen instanceof GenericXMLGenerator) {
@@ -2107,9 +2099,6 @@ public class ModelicaCompiler implements LogContainer {
             gen.generate(tmpl, stream, header);
             for (File file : stream.files()) {
                 log.debug("Generated file '" + file + "'.");
-                if (fc != null) {
-                    fc.guidManager().addDependentFile(file);
-                }
             }
             return stream;
         }
@@ -2118,11 +2107,17 @@ public class ModelicaCompiler implements LogContainer {
 
     /**
      * Packs a FMU (helper function for {@link #compileUnit()}).
+     * 
+     * @param className             the qualified name of the class for which to create an FMU.
+     * @param destination           the path where to put the packed FMU.
+     * @param target                a {@link TargetObject} containing information about the target.
+     * @param externalLibraries     external libraries used for the unit.
+     * @return                      the path to the packaged unit.
      */
-    protected File ModelicaCompiler.packUnit(String className,
+    protected File ModelicaCompiler.packUnit(String className, String path,
             TargetObject target, FClass fClass) throws PackingFailedException {
 
-        File unitFile = fClass.root().getUtilInterface().getCompilationOutputPath();
+        File unitFile = makePackagingDirs(className, new File(path), target);
 
         try {
             hookCheckAbort();
@@ -2327,7 +2322,7 @@ public class Templates {
     
     public void generateXMLFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
             throws FileNotFoundException {
-        mc.generateFile(fc, templatePath(getXMLTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".xml", "");
+        mc.generateFile(templatePath(getXMLTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".xml", "");
     }
     
     public void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name)
@@ -2350,7 +2345,7 @@ public class Templates {
                     String filename = tpl + ".h";
                     String path = new File("FMIBase", filename).toString();
                     
-                    mc.generateFile(fc, templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, "");
+                    mc.generateFile(templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, "");
                 }
             }
 
@@ -2359,7 +2354,7 @@ public class Templates {
                     String filename = tpl + ".c";
                     String path = new File("FMIBase", filename).toString();
                     
-                    mc.generateFile(fc, templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, header);
+                    mc.generateFile(templatePath(path, mc.debugSrcIsHome), gen, sourceDir, name + "_" + filename, header);
                 }
             }
         }
@@ -2388,7 +2383,7 @@ public class Templates {
     
     private void generateCFiles(ModelicaCompiler mc, FClass fc, AbstractGenerator gen, File sourceDir, String name, String header)
             throws FileNotFoundException {
-        mc.generateFile(fc, templatePath(getCTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".c", header);
+        mc.generateFile(templatePath(getCTemplateName(fc), mc.debugSrcIsHome), gen, sourceDir, name + ".c", header);
     }
    
     private static ArrayList<TemplateContributor> CONTRIBUTORS;

@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-; Change ; Minor ; Compiler ; #5694
-Reworked GUID generation to only depend on modelDescription.xml.
-
 ; Fixed ; Minor ; Compiler ; #5663
 Fixed type checking of array sizes for elements in arrays of records.
 

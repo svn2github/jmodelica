@@ -441,7 +441,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         	Object val = value();
             if (val != null)
                 generateAttribute(xml, val, printer);
-            else if (hasActiveChildren())
+            else if (childTags().length != 0)
                 generateNode(xml, printer);
             else
                 generateClosed(xml, printer);
