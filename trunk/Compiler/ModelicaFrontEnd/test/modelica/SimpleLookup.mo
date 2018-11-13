@@ -131,7 +131,7 @@ model ClassLookup
                 "SimpleLookup.ClassLookup", "SimpleLookup.ClassLookup",
                 "SimpleLookup.ClassLookup", ".SimpleLookup.ClassLookup.Extended",
                 "SimpleLookup.ClassLookup", "Extended",
-                "SimpleLookup.ClassLookup.WithComponent", '!quoted!'.'#//symbol%',
+                "SimpleLookup.ClassLookup.WithComponent", "'!quoted!'.'#//symbol%'",
                 "SimpleLookup.ClassLookup.WithComponent.'!quoted!'",
                      ".SimpleLookup.ClassLookup.WithComponent.'!quoted!'",
                 
