@@ -94,7 +94,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             subNodesNameMap_cache = Collections.emptyMap();
         }
 
-        if(!exists() || isAmbiguous()) {
+        if(!nodeExists() || isAmbiguous()) {
             return;
         }
 
@@ -313,7 +313,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
             @Override
             public boolean test(T elem) {
-                return elem.exists();
+                return elem.nodeExists();
             }
 
         });
@@ -413,7 +413,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the value of this node, if it has one, otherwise null
      */
     public V value() {
-        if (!exists() || isAmbiguous()) {
+        if (!nodeExists() || isAmbiguous()) {
             return null;
         }
         return node.annotationValue();
@@ -447,7 +447,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             valueAnnotation_cacheComputed = true;
             if (isAmbiguous()) {
                 valueAnnotation_cache = ambiguousNode();
-            } else if (exists()) {
+            } else if (nodeExists()) {
                 N annotationNode = valueAsProvider();
                 if (hasValue() && annotationNode == null) {
                     valueAnnotation_cache = null;
@@ -528,7 +528,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * 
      * @return true if this node does exist.
      */
-    public boolean exists() {
+    public boolean nodeExists() {
         if(parent() != null) {
             asGeneric(parent()).computeSubNodesCache();
         }

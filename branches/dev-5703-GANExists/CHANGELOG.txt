@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Compiler ; #5703
+Renamed the exists method on GenericAnnotationNode.
+
 ; Fixed ; Minor ; Compiler ; #5663
 Fixed type checking of array sizes for elements in arrays of records.
 
