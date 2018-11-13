@@ -10,3 +10,5 @@ yum install -y python-pip
 pip install wheel Cython # Cython version is 0.29
 
 yum install -y python-devel # For headers such as Python.h
+
+yum install -y numpy-f2py # For assimulo setup.py

@@ -25,7 +25,7 @@ export $(shell sed 's/=.*//' default_config)
 include $(USER_CONFIG)
 export $(shell sed 's/=.*//' $(USER_CONFIG))
 
-.PHONY: install
+.PHONY: install clean clean_install
 
 install: $(SUNDIALS_BUILD_DIR)
 	cd $(SUNDIALS_BUILD_DIR) && make install DESTDIR=

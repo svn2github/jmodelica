@@ -18,6 +18,7 @@ CONFIG=$1
 USER_CONFIG=$2
 TAG_NAME=$3
 DOCKERFILE_DIR=$4
+OVERRIDE_TARGET=$5
 
 echo "Building docker image..."
 echo -e "\tusing CONFIG $CONFIG USER_CONFIG $USER_CONFIG and TAG_NAME $TAG_NAME"
@@ -27,8 +28,9 @@ ls -la
 [[ -e "$CONFIG" ]] && source $CONFIG || echo "build_docker_image: No such config $CONFIG"
 [[ -e "$USER_CONFIG" ]] && source $USER_CONFIG || echo "build_docker_image: No such user config $USER_CONFIG"
 
+
 # check if docker image with given config already exists
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
 
 # build image if not found among images
 if ! docker images | grep -q "$HASH_GEN_TAG" ; then

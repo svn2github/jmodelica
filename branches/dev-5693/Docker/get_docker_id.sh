@@ -15,6 +15,7 @@
 
 source $1
 [[ -e $2 ]] && source $2
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET | md5sum | awk '{print $1}')"
+OVERRIDE_TARGET=$3
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
 DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 echo "${DOCKER_ID}"
