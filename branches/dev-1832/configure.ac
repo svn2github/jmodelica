@@ -157,14 +157,7 @@ case $build in
 esac
 AC_PROG_LIBTOOL
 
-# By default, we want to install bin, lib, and include
-# in the directory where configure is run.
-
 AC_PREFIX_DEFAULT(["/usr/local/jmodelica"])
-
-#AS_IF([test "x$JMODELICA_HOME" = x],
-# 	AC_PREFIX_DEFAULT([`pwd`]),
-#        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
 
 AS_IF([test "x$F77" != x],
       [AC_MSG_RESULT([gfortran seems to be working])],
@@ -247,64 +240,12 @@ AS_IF([test "x$with_ipopt" != xno],
       [WITH_CASADI="true"],
       [WITH_CASADI="false"]) 
 
-
-# Checks for libraries.
-# SUNDIALS
-AC_ARG_WITH([sundials],
-   [AS_HELP_STRING([--with-sundials],
-     [SUNDIALS installation directory @<:@default=check@:>@])],
-   [sundials=$withval],
-   [with_sundials=no])
-
-AS_IF([test "x$with_sundials" = xno],
-      [sundials="$CURR_DIR/sundials_install"])
-
-AS_IF([test "x$with_sundials" = xno],
-      [with_sundials=automatic])
-
 # Set output variables to be exported to the Makefiles
 AC_SUBST(SUNDIALS_HOME)
-AC_SUBST(WITH_SUNDIALS)
-
-AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
-
-AC_SUBST(SUNDIALS_HOME)
-SUNDIALS_HOME=$sundials
+SUNDIALS_HOME="$CURR_DIR/sundials_install"
 
 AC_SUBST(MINPACK_HOME)
 MINPACK_HOME="$CURR_DIR/minpack_install"
-
-AC_ARG_WITH([superlu],
-  [AS_HELP_STRING([--with-superlu],
-    [SuperLU installation directory @<:@default=check@:>@])],
-  [superlu=$withval],
-  [with_superlu=no])
-
-AS_IF([test "x$with_superlu" = xno],
-     [AC_MSG_RESULT([SuperLU installation not specified.])],
-     [AC_MSG_RESULT([SuperLU installation specified.])])
-
-AM_CONDITIONAL([WITH_SUPERLU],[test "x$with_superlu" != xno])
-
-AC_SUBST(SUPERLU_HOME)
-SUPERLU_HOME=$superlu
-
-AC_ARG_WITH([eclipse],
-   [AS_HELP_STRING([--with-eclipse],
-     [Eclipse installation directory @<:@default=no@:>@])],
-   [eclipse=$withval],
-   [with_eclipse=no])
-
-AS_IF([test "x$with_eclipse" = xno],
-      [AC_MSG_RESULT([Eclipse installation not specified.])],
-      [AC_CHECK_FILE($eclipse/eclipse,
-                     [],
-                     [AC_MSG_FAILURE([Eclipse installation specifed, but seems to be corrupt!])])])
-
-AM_CONDITIONAL([WITH_ECLIPSE],[test "x$with_eclipse" != xno])
-
-AC_SUBST(ECLIPSE_HOME)
-ECLIPSE_HOME=$eclipse
 
 # Checks for mingw.
 AC_ARG_WITH([mingw],
@@ -346,8 +287,6 @@ MINGW_HOME=$mingw
 # Detect Java home directory
 AC_SUBST(_JAVA_HOME_)
 
-
-
 case $build in
   *-mingw*)
     # The SDK installer sets the environment variable JAVA_HOME, so there we don't need _JAVA_HOME_
@@ -357,34 +296,6 @@ case $build in
 	_JAVA_HOME_=`$(dirname $0)/run_java.sh org.jmodelica.util.GetJavaHome`
     ;;  
 esac
-
-AC_SUBST(ipoptlib)
-case $build in
-  *-cygwin*)
-    ipoptlib="-L$ipopt/lib -lipopt -lg2c -ldl"
-    ;;
-  *-mingw*)
-    ipoptlib="-L$ipopt/lib -lipopt -lm \
-       -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt \
-       -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++"
-    ;;
-  *-apple*)
-        ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortran"
-    ;;
-  *)
-    ipoptlib="-L$ipopt/lib -lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran -lpthread"
-    ;;  
-esac
-
-#AC_SUBST(JMALLLIBS)
-#JMALLLIBS="../ModelInterface/libmodelinterface.la ../OptimicaInterface/liboptimica.la"
-
-# Used in examples
-#jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm";
-AS_IF([test "x$with_ipopt" != xno],
-      [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm -ljmi_solver"], 
-      [jmilib="-L\$(JMILIBDIR) -ljmi -ljmi_algorithm"])  
-AC_SUBST(jmilib)
 
 AC_PATH_PROG([ANT], [ant], [])
 AC_SUBST(ANT_OPTS)

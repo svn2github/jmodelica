@@ -215,18 +215,26 @@ aspect FlatTypeCheck {
             }
         }
         if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && checkType.checkTypes()) {
-            InstValueModification ivm = myInstValueMod();
-            FType expectedBT = bindingType();
-            FType actualBT = bexp.type();
-            if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
+            Index arrayIndex = indexInModification();
+            
+            CommonType expectedBT = expectedBindingType();
+            CommonType actualBT = actualBindingType();
+            
+            boolean reportedError = false;
+            if (!expectedBT.size().equals(actualBT.size())) {
+                InstValueModification ivm = myInstValueMod();
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
                 if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
                     BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
+                    reportedError = true;
                 } else if (needsEach != null) {
                     ASSUMING_EACH.invoke(needsEach, needsEach);
+                    actualBT = actualBT.expand(expectedBT.size().contractLeft(expectedBT.ndims() - actualBT.ndims()));
                 } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
                     InstModification parIM = ivm.parentInstModification();
                     IGNORING_EACH.invoke(parIM, parIM);
+                    expectedBT = expectedBindingTypeNoEach();
+                    arrayIndex = indexInModificationNoEach();
                 } else {
                     ErrorProducerUnlessDisabled reporter;
                     if (ivm.myInstNode() == this) {
@@ -237,6 +245,22 @@ aspect FlatTypeCheck {
                         reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION;
                     }
                     reporter.invokeWithCondition(bexp, expectedBT.ndims() == actualBT.ndims(), name(), expectedBT.size(), actualBT.size());
+                    reportedError = true;
+                }
+            }
+            
+            if (!reportedError) {
+                if (expectedBT.size().isEmpty() || expectedBT.size().isUnknown() || actualBT.size().isUnknown()) {
+                    typeCheckCell(expectedBT.scalarType(), actualBT.scalarType(), bexp, unknownAllowed);
+                } else {
+                    Size arraySize = expectedBT.size().contractLeft(expectedBT.ndims() - arrayIndex.ndims());
+                    for (Index index : Indices.create(arraySize)) {
+                        index = arrayIndex.expand(index);
+                        CommonType expected = expectedBT.cell(index);
+                        CommonType actual = actualBT.cell(index);
+                        
+                        typeCheckCell(expected, actual, bexp, unknownAllowed);
+                    }
                 }
             }
         }
@@ -258,6 +282,14 @@ aspect FlatTypeCheck {
         
         typeCheckAttributes();
         super.typeCheck(checkType);
+    }
+    
+    private void InstAssignable.typeCheckCell(CommonType expectedBT, CommonType actualBT, FExp bexp, boolean unknownAllowed) {
+        if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
+            if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
+            }
+        }
     }
 
     inh InstModification InstModification.parentInstModification();
@@ -733,25 +765,23 @@ aspect FlatTypeCheck {
 	  getInstAccess().typeError(top);
   }
   
-  protected void InstComponentAccess.typeError(InstAccess top) {
-	  InstComponentDecl icd = myInstComponentDecl();
-	  if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-		  if (icd.isOrExtendsPrimitive() || icd.isRecord())
-			  top.error("Could not calculate type of " + top.name());
-		  else
-			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
-	  }
-  }
+    protected void InstComponentAccess.typeError(InstAccess top) {
+        InstComponentDecl icd = myInstComponentDecl();
+        if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
+            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+                top.error("Accesses to composite components other than records are not allowed: " + top.name());
+            }
+        }
+    }
   
-  protected void InstComponentArrayAccess.typeError(InstAccess top) {
-	  InstComponentDecl icd = myInstComponentDecl();
-      if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
-          if (icd.isOrExtendsPrimitive() || icd.isRecord())
-			  top.error("Could not calculate type of " + top.name());
-		  else
-			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
-	  }
-  }
+    protected void InstComponentArrayAccess.typeError(InstAccess top) {
+        InstComponentDecl icd = myInstComponentDecl();
+        if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
+            if (!icd.isOrExtendsPrimitive() && !icd.isRecord()) {
+                top.error("Accesses to composite components other than records are not allowed: " + top.name());
+            }
+        }
+    }
   
   inh boolean InstAccess.inCardinality();
   eq FCardinality.getChild().inCardinality() = true;

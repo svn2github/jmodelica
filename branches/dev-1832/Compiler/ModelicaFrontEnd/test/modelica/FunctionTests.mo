@@ -17337,7 +17337,7 @@ Error at line 13, column 21, in file '...':
     Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
 
 Error at line 13, column 21, in file '...':
-  Could not evaluate binding expression for constant 'r[1].x': '((f(2)).x)[1]'
+  Could not evaluate binding expression for constant 'r[1].x': '((f(2))[1]).x'
     in function 'FunctionTests.AssignmentSizeCheck4.f'
     Mismatching types when evaluating assignment, type of left-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[1], and type of right-hand side is FunctionTests.AssignmentSizeCheck4.R(Real)[2] at line 10, column 7, in file 'FunctionTests.mo'
 ")})));

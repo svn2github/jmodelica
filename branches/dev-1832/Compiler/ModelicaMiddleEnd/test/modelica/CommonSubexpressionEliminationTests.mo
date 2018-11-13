@@ -750,4 +750,93 @@ end Log10;
 
 end Math;
 
+model IfExp1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x = time;
+    Real y = if f(time) > x then f(time) else f(time) + 1;
+    Real z = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExp1",
+            description="",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.IfExp1
+ Real x;
+ Real y;
+ Real z;
+equation
+ x = time;
+ y = if z > x then CommonSubexpressionEliminationTests.IfExp1.f(time) else CommonSubexpressionEliminationTests.IfExp1.f(time) + 1;
+ z = CommonSubexpressionEliminationTests.IfExp1.f(time);
+
+public
+ function CommonSubexpressionEliminationTests.IfExp1.f
+  input Real x;
+  output Real y;
+ algorithm
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.IfExp1.f;
+
+end CommonSubexpressionEliminationTests.IfExp1;
+")})));
+end IfExp1;
+
+model WhenExp1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x = time;
+    Real y;
+    Real z = f(time);
+equation
+    when f(time) > x then 
+        y = f(time);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenExp1",
+            description="",
+            common_subexp_elim=true,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.WhenExp1
+ Real x;
+ discrete Real y;
+ Real z;
+ discrete Boolean temp_1;
+initial equation
+ pre(y) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = z > x;
+ y = if temp_1 and not pre(temp_1) then CommonSubexpressionEliminationTests.WhenExp1.f(time) else pre(y);
+ x = time;
+ z = CommonSubexpressionEliminationTests.WhenExp1.f(time);
+
+public
+ function CommonSubexpressionEliminationTests.WhenExp1.f
+  input Real x;
+  output Real y;
+ algorithm
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.WhenExp1.f;
+
+end CommonSubexpressionEliminationTests.WhenExp1;
+")})));
+end WhenExp1;
+
 end CommonSubexpressionEliminationTests;
