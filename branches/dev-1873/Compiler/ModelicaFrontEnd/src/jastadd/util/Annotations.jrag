@@ -191,17 +191,29 @@ aspect AnnotationAPI {
         return list;
     }
     
-    private Map<SrcExp,Integer> InstNode.annotationExpMap = new HashMap<>();
-
-    syn lazy List<FExp> InstNode.getAnnotationExpList() {
+    syn ArrayList<SrcExp> InstNode.annotationExps() {
         ArrayList<SrcExp> exps = new ArrayList<>();
         for (AnnotationNode annotation : annotations()) {
             annotation.ast().collectExps(exps);
         }
+        return exps;
+    }
+    
+    syn lazy Map<SrcExp,Integer> InstNode.annotationExpMap() {
+        ArrayList<SrcExp> exps = annotationExps();
+        Map<SrcExp, Integer> map = new HashMap<>();
+        for (int i = 0; i < exps.size(); i++) {
+            SrcExp exp = exps.get(i);
+            map.put(exp, i);
+        }
+        return map;
+    }
+
+    syn lazy List<FExp> InstNode.getAnnotationExpList() {
+        ArrayList<SrcExp> exps = annotationExps();
         ArrayList<FExp> instExps = new ArrayList<>();
         for (int i = 0; i < exps.size(); i++) {
             SrcExp exp = exps.get(i);
-            annotationExpMap.put(exp, i);
             FExp instExp = exp.instantiate();
             instExps.add(instExp);
         }
@@ -225,6 +237,7 @@ aspect AnnotationAPI {
             return annotationExp(exp.parentExp()).equivalentChildFExp(exp);
         } else {
             List<FExp> list = getAnnotationExps();
+            Map<SrcExp, Integer> annotationExpMap = annotationExpMap();
             if (annotationExpMap.containsKey(exp)) {
                 return list.getChild(annotationExpMap.get(exp));
             } else {
