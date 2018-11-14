@@ -4,6 +4,7 @@ PYTHON_VERSION=2.7
 BUILD_TARGET=assimulo
 DOCKER_ENV=1
 BITNESS=64
+OS=${PLATFORM}_${DIST_VERSION}
 
 # Path to build scripts
 JM_HOME_IN_DOCKER=/tmp/jm_home

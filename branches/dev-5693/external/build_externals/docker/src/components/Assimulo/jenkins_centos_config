@@ -3,6 +3,7 @@ DIST_VERSION=7.4.1708
 PYTHON_VERSION=2.7
 BUILD_TARGET=assimulo
 BITNESS=64
+OS=${PLATFORM}_${DIST_VERSION}
 
 # PATH_TO_MOUNT is the path needed to mount JModelica into the Docker
 # Note you need to have double slash in the beginning

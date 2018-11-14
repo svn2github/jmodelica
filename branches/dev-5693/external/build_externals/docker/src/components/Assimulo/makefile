@@ -18,31 +18,17 @@
 
 
 include default_config
-
 include $(USER_CONFIG)
-
-
-# TODO: python_config should not be located in .../PyFMI/...
-PYTHON_CONFIG := $(BUILD_EXTERNALS)/configurations/PyFMI/$(PLATFORM)/python_config
-include $(PYTHON_CONFIG)
-
 
 artifact_list:
 	@echo $(OS)/assimulo_wheel/*.whl, $(OS)/assimulo_folder/assimulo > $@ 
 
-assimulo_wheel:
+assimulo_folder assimulo_wheel:
 	@echo "Building $@"
-	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/build/assimulo/ && cd $(BUILD_EXTERNALS)/build/assimulo && \
-	make assimulo_wheel USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(JM_HOME_IN_DOCKER)/$(OS) JM_HOME=//$(JM_HOME_IN_DOCKER) \
-	INSTALL_DIR_FOLDER=//tmp/jm_home/$(OS)/assimulo_wheel
-	@echo "Finished building $@"
-
-assimulo_folder:
-	@echo "Building $@"
-	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/build/assimulo/ && \
-	cd $(BUILD_EXTERNALS)/build/assimulo && \
-	make assimulo_folder USER_CONFIG=$(USER_CONFIG) BUILD_DIR=//tmp/jm_home/$(OS) JM_HOME=//$(JM_HOME_IN_DOCKER) \
-	INSTALL_DIR_FOLDER=//tmp/jm_home/$(OS)/assimulo_folder
+	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/build/assimulo/
+	cd $(BUILD_EXTERNALS)/build/assimulo
+	make $@ USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(JM_HOME_IN_DOCKER)/$(OS) JM_HOME=//$(JM_HOME_IN_DOCKER) \
+	    INSTALL_DIR_FOLDER=//tmp/jm_home/$(OS)/$@
 	@echo "Finished building $@"
 
 docker_assimulo_folder: build_assimulo_base_image
@@ -50,7 +36,7 @@ docker_assimulo_folder: build_assimulo_base_image
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) BASE))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	"cd ${CONFIG_HOME_DOCKER} && make assimulo_folder JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	    "cd ${CONFIG_HOME_DOCKER} && make assimulo_folder JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@echo "Finished building $@"
 
 docker_assimulo_wheel: build_assimulo_base_image
@@ -58,13 +44,13 @@ docker_assimulo_wheel: build_assimulo_base_image
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) BASE))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	"cd ${CONFIG_HOME_DOCKER} && make assimulo_wheel JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	    "cd ${CONFIG_HOME_DOCKER} && make assimulo_wheel JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@echo "Finished building $@"
 
 build_assimulo_base_image: docker_assimulo_dependencies
 	@echo "Building $@"
-	cp $(CONFIG_HOME)/default_config $(JM_HOME)/$(OS) && \
-	cp $(CONFIG_HOME)/$(USER_CONFIG) $(JM_HOME)/$(OS) && \
+	cp $(CONFIG_HOME)/default_config $(JM_HOME)/$(OS)
+	cp $(CONFIG_HOME)/$(USER_CONFIG) $(JM_HOME)/$(OS)
 	cd $(JM_HOME) && \
 	${DOCKER_UTILS}/generation/generate_dockerfile.sh "ASSIMULO_BASE" $(INSTALL_DEPENDENCIES) $(OS)/default_config $(OS)/$(USER_CONFIG) && \
 	${DOCKER_UTILS}/build_docker_image.sh $(OS)/default_config $(OS)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_base $(OS) BASE
