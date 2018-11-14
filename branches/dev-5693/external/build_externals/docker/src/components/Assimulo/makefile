@@ -32,7 +32,7 @@ include $(PYTHON_CONFIG)
 assimulo_wheel:
 	@echo "Building $@"
 	cp $(USER_CONFIG) $(BUILD_EXTERNALS_DIR)/build/assimulo/ && cd $(BUILD_EXTERNALS_DIR)/build/assimulo && \
-	pip3 install setuptools && make assimulo_wheel USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(JM_HOME_IN_DOCKER)/$(PLATFORM)_$(DIST_VERSION) JM_HOME=//$(JM_HOME_IN_DOCKER) \
+	make assimulo_wheel USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(JM_HOME_IN_DOCKER)/$(PLATFORM)_$(DIST_VERSION) JM_HOME=//$(JM_HOME_IN_DOCKER) \
 	INSTALL_DIR_FOLDER=//tmp/jm_home/$(PLATFORM)_$(DIST_VERSION)/assimulo_wheel
 	@echo "Finished building $@"
 
