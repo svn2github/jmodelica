@@ -21,6 +21,7 @@
     <section><title>Compiler Changes</title>
     <para>Important changes to the compiler:</para>
     <itemizedlist>
+        <listitem>Updated the GUID calculation in FMUs to only be dependent on the generated model description XML.</listitem>
         <listitem>Updated calculation order of start values and dependent parameters to reduce number of evaluations.</listitem>
         <listitem>Fixed that binding expression splitting doesn't check bounds.</listitem>
         <listitem>Don't allow any inlining of equations in when loops.</listitem>
