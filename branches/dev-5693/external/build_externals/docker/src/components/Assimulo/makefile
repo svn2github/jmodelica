@@ -99,7 +99,7 @@ docker_assimulo_dependencies: docker_base
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS_DIR}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	"cd ${BUILD_HOME_DIR_DOCKER} && make assimulo_dependencies JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	"cd ${BUILD_HOME_DIR_DOCKER} && ls && pwd && make assimulo_dependencies JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@echo "Finished building assimulo base image"
 
 clean_in_docker:
