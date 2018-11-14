@@ -18,4 +18,4 @@ BUILD_HOME_DIR_LOCAL=${JM_HOME}/external/build_externals/docker/src/components/A
 BUILD_HOME_DIR_DOCKER=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
 
 DEPENDENCY_BASE_COMMAND='yum install -y make cmake gcc gcc-gfortran gcc-c++'
-PLATFORM_SITE_PACKAGES=lib/python2.7/site-packages
+PLATFORM_SITE_PACKAGES=lib64/python2.7/site-packages
