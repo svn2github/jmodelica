@@ -11,12 +11,8 @@ BITNESS=64
 # make make_my_target PATH_TO_MOUNT=//my/custom/path/to/mount
 
 PATH_TO_MOUNT=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelica
-ASSIMULO_INSTALL=${JM_HOME}/${PLATFORM}_${DIST_VERSION}/assimulo_install
 
 JM_HOME=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelica
-JM_HOME_IN_DOCKER=/tmp/jm_home
-BUILD_HOME_DIR_LOCAL=${JM_HOME}/external/build_externals/docker/src/components/Assimulo
-BUILD_HOME_DIR_DOCKER=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
 
-DEPENDENCY_BASE_COMMAND='yum install -y make cmake gcc gcc-gfortran gcc-c++'
+INSTALL_DEPENDENCIES='yum install -y make cmake gcc gcc-gfortran gcc-c++'
 PLATFORM_SITE_PACKAGES=lib64/python2.7/site-packages

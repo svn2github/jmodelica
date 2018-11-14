@@ -6,8 +6,10 @@ DOCKER_ENV=1
 BITNESS=64
 
 # Path to build scripts
-BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
-BUILD_THIRDPARTY_DIR=${JM_HOME}/ThirdParty/build_thirdparties/build
-DOCKER_UTILS_DIR=${JM_HOME}/Docker
+JM_HOME_IN_DOCKER=/tmp/jm_home
+BUILD_EXTERNALS=${JM_HOME}/external/build_externals
+BUILD_THIRDPARTY=${JM_HOME}/ThirdParty/build_thirdparties/build
+DOCKER_UTILS=${JM_HOME}/Docker
 BUILD_DIR=${JM_HOME}/${PLATFORM}_${DIST_VERSION}
-
+CONFIG_HOME=${JM_HOME}/external/build_externals/docker/src/components/Assimulo
+CONFIG_HOME_DOCKER=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
