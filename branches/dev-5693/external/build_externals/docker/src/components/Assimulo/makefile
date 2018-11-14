@@ -20,13 +20,17 @@
 include default_config
 include $(USER_CONFIG)
 
+docker_test_this:
+	@$(eval NEWVAR=$(shell ${$@:6}))
+	@echo $(NEWVAR)
 artifact_list:
 	@echo $(OS)/assimulo_wheel/*.whl, $(OS)/assimulo_folder/assimulo > $@ 
+
 
 assimulo_folder assimulo_wheel:
 	@echo "Building $@"
 	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/build/assimulo/
-	cd $(BUILD_EXTERNALS)/build/assimulo
+	cd $(BUILD_EXTERNALS)/build/assimulo && \
 	make $@ USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(JM_HOME_IN_DOCKER)/$(OS) JM_HOME=//$(JM_HOME_IN_DOCKER) \
 	    INSTALL_DIR_FOLDER=//tmp/jm_home/$(OS)/$@
 	@echo "Finished building $@"
