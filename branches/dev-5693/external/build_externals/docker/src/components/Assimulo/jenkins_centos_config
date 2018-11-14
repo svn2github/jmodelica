@@ -14,7 +14,8 @@ ASSIMULO_INSTALL=${JM_HOME}/${PLATFORM}_${DIST_VERSION}/assimulo_install
 
 JM_HOME=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelica
 JM_HOME_IN_DOCKER=/tmp/jm_home
-BUILD_HOME_DIR=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
+BUILD_HOME_DIR_LOCAL=${JM_HOME}/external/build_externals/docker/src/components/Assimulo
+BUILD_HOME_DIR_DOCKER=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
 
 DEPENDENCY_BASE_COMMAND='yum install -y make cmake gcc gcc-gfortran gcc-c++'
 PLATFORM_SITE_PACKAGES=lib/python2.7/site-packages
