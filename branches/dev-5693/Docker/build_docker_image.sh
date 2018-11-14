@@ -30,7 +30,7 @@ ls -la
 
 
 # check if docker image with given config already exists
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $PYTHON_VERSION $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
 
 # build image if not found among images
 if ! docker images | grep -q "$HASH_GEN_TAG" ; then
@@ -38,5 +38,4 @@ if ! docker images | grep -q "$HASH_GEN_TAG" ; then
     cp $BASE_DIR/generation/Dockerfile $DOCKERFILE_DIR
     docker build -t "${TAG_NAME}:${HASH_GEN_TAG}" -f $DOCKERFILE_DIR/Dockerfile .
 fi
-
 DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')

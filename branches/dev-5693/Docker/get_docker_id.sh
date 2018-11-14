@@ -12,10 +12,13 @@
 #    You should have received a copy of the Common Public License
 #    along with this program.  If not, see
 #     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
-
-source $1
-[[ -e $2 ]] && source $2
+CONFIG=$1
+USER_CONFIG=$2
 OVERRIDE_TARGET=$3
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
+
+[[ -e $CONFIG ]] && source $CONFIG
+[[ -e $USER_CONFIG ]] && source $USER_CONFIG
+
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $PYTHON_VERSION $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
 DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 echo "${DOCKER_ID}"

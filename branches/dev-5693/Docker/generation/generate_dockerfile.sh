@@ -40,7 +40,7 @@ COPY ${PLATFORM}_${DIST_VERSION}/fmil_install /fmil
 COPY build_environment/platforms/${PLATFORM}/*.sh build_scripts/
 RUN if [ ${PLATFORM} = "ubuntu" ]; then apt-get update && apt-get install -y make gcc; else yum install -y make gcc; fi
 
-RUN build_scripts/install_python${PYTHON_VERSION}.sh
+RUN build_scripts/install_python.sh
 
 # cleanup
 RUN rm -rf build_scripts
