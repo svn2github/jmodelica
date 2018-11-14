@@ -879,6 +879,12 @@ aspect FlatTypeCheck {
 		  error("Argument of " + builtInName() + "() must be a stream variable");
   }
   
+  /**
+   * Returns true if this expression can be interpreted as some form of Access
+   */
+  syn boolean FExp.isAccessLikeExp() = false;
+  eq CommonAccessExp.isAccessLikeExp() = true;
+  
   syn boolean FExp.isAccess()  = false;
   eq CommonAccessExp.isAccess()= true;
   syn CommonAccess FExp.asCommonAccess() {

@@ -41,7 +41,14 @@ public abstract class CodeGenTestCase extends TestCase {
         generator.generate(createTemplateReader(), new UnitTestCodeStream(ps));
         String test = os.toString();
         String correct = filter(getGeneratedCode());
-        compareResult("Generated code does not match expected.", correct, test);
+        
+        GUIDManager guidManager = fc.guidManager();
+        StringBuilder actual = new StringBuilder();
+        guidManager.setSourceString(test);
+        guidManager.addDependentString(test, actual);
+        guidManager.processDependentFiles();
+        
+        compareResult("Generated code does not match expected.", correct, actual.toString());
         return true;
     }
 
