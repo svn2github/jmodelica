@@ -26,8 +26,9 @@ include $(USER_CONFIG)
 PYTHON_CONFIG := $(BUILD_EXTERNALS_DIR)/configurations/PyFMI/$(PLATFORM)/python_config
 include $(PYTHON_CONFIG)
 
-# TODO: Remove this, it affects build_docker_image.sh
-#.EXPORT_ALL_VARIABLES:
+
+artifact_list:
+	@echo $(PLATFORM)_$(DIST_VERSION)/assimulo_wheel/*.whl $(PLATFORM)_$(DIST_VERSION)/assimulo_folder/assimulo > $@ 
 
 assimulo_wheel:
 	@echo "Building $@"
