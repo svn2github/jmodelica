@@ -16,4 +16,4 @@ PATH_TO_MOUNT=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JM
 JM_HOME=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelica
 
 INSTALL_DEPENDENCIES='yum install -y make cmake gcc gcc-gfortran gcc-c++'
-PLATFORM_SITE_PACKAGES=lib64/python2.7/site-packages
+PLATFORM_SITE_PACKAGES=lib64/python${PYTHON_VERSION}/site-packages

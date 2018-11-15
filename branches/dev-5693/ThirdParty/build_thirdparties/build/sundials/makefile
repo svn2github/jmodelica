@@ -16,14 +16,8 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-#!make
-#SHELL := /bin/bash
-
 include default_config
-export $(shell sed 's/=.*//' default_config)
-
 include $(USER_CONFIG)
-export $(shell sed 's/=.*//' $(USER_CONFIG))
 
 .PHONY: install clean clean_install
 

@@ -1,17 +1,8 @@
 #!/bin/bash
-# 
-#    Copyright (C) 2018 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the Common Public License as published by
-#    IBM, version 1.0 of the License.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
-#
-#    You should have received a copy of the Common Public License
-#    along with this program.  If not, see
-#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+# Creates a dockerfile where the contents are based upon the given configs,
+# it is a basic dockerfile used to set up an environment without having to
+# have multiple dockerfiles checked in for multiple platforms.
 
 BASE_TYPE=$1
 INSTALL_BASE_DEPENDENCIES=$2
@@ -104,3 +95,18 @@ RUN if [ ${PLATFORM} = "ubuntu" ]; then apt-get update && apt-get install -y mak
 RUN echo "TODO: Add cleanup script"
 EOF
 fi
+
+
+# 
+#    Copyright (C) 2018 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the Common Public License as published by
+#    IBM, version 1.0 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+#
+#    You should have received a copy of the Common Public License
+#    along with this program.  If not, see
+#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.

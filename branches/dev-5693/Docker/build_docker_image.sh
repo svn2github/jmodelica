@@ -1,17 +1,8 @@
 #!/bin/bash
-# 
-#    Copyright (C) 2018 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the Common Public License as published by
-#    IBM, version 1.0 of the License.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
-#
-#    You should have received a copy of the Common Public License
-#    along with this program.  If not, see
-#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+# This script is used with generate_dockerfile because it builds what generate_dockerfile
+# generated. Before running docker build it also checks for the hash corresponding to given
+# config and, if it already exists locally it will not build the docker image.
 
 BASE_DIR=$(dirname "$0")
 CONFIG=$1
@@ -39,3 +30,18 @@ if ! docker images | grep -q "$HASH_GEN_TAG" ; then
     docker build -t "${TAG_NAME}:${HASH_GEN_TAG}" -f $DOCKERFILE_DIR/Dockerfile .
 fi
 DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
+
+
+# 
+#    Copyright (C) 2018 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the Common Public License as published by
+#    IBM, version 1.0 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+#
+#    You should have received a copy of the Common Public License
+#    along with this program.  If not, see
+#     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
