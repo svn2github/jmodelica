@@ -384,12 +384,22 @@ aspect SimpleClassLookup {
     */
     public String SourceRoot.testFindMyClassDecl(String whichClass) {
         StringBuilder sb = new StringBuilder();
+        SrcClassDecl scd = testLookupSrcClassQualified(whichClass);
+        testLookupAllClassDecls(sb, scd);
+        return sb.toString();
+    }
+
+    /**
+     * Test the lookup of a class.
+     * 
+     * @param name  a qualified name, for example 'A.B.C'
+     */
+    public SrcClassDecl SourceRoot.testLookupSrcClassQualified(String whichClass) {
         SrcClassDecl scd = getProgram().simpleLookupClass(whichClass);
         if (scd.isUnknown()) {
             throw new AssertionError("The test class " + whichClass + "can't be found using simple lookup.");
         }
-        testLookupAllClassDecls(sb, scd);
-        return sb.toString();
+        return scd;
     }
 
     /**
