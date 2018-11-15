@@ -176,8 +176,7 @@ public class SourceMethodTestCase extends MethodTestCase {
      * @return  <code>true</code> if test case should stop after this method
      */
     protected boolean testSource(SourceRoot sr) {
-        SrcClassDecl scd = sr.testLookupSrcClassQualified(getClassName());
-        testMethod(scd);
+        testMethod(sr);
         return true;
     }
 }
