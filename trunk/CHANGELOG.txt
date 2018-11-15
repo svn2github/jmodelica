@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5706
+Added checks on the nominal values.
+
 ; Feature ; Minor ; Compiler ; #5515
 Expanded variability propagation to also work on initial system. 
 Controlled with experimental option, default off.

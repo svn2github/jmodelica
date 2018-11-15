@@ -32,4 +32,12 @@ equation
     x9 = 9 * time;
 end NominalTest3;
 
+model NominalTest4
+    Real x(nominal=-2, start=1.0);
+    Real y(nominal=0.0, start=1.0);
+equation
+    der(x) = -1;
+    der(y) = -1;
+end NominalTest4;
+
 end NominalTests;
