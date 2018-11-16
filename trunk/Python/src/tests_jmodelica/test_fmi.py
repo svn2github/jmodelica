@@ -79,6 +79,14 @@ class Test_FMUModelBase:
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=1.0)
         cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'), version=1.0)
 
+    @testattr(windows_full = True)
+    def test_get_erronous_nominals(self):
+        
+        model = load_fmu("NominalTest4.fmu",path_to_fmus_me1)
+        
+        nose.tools.assert_almost_equal(model.get_variable_nominal("x"), 2.0)
+        nose.tools.assert_almost_equal(model.get_variable_nominal("y"), 1.0)
+
     @testattr(stddist_full = True)
     def test_version(self):
         negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
