@@ -15,3 +15,4 @@ BUILD_DIR=${JM_HOME}/${OS}
 DOCKER_BUILD_DIR=${JM_HOME_IN_DOCKER}/${OS}
 CONFIG_HOME=${JM_HOME}/external/build_externals/docker/src/components/Assimulo
 DOCKER_CONFIG_HOME=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
+ARTIFACT_FILE=${JM_HOME}/${OS}/artifacts_${BUILD_TARGET}
