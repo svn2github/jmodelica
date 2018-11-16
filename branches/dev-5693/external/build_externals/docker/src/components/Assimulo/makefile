@@ -21,10 +21,8 @@ docker_assimulo_folder docker_assimulo_wheel: assimulo_base_image
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
 	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-
-$(ARTIFACT_FILE):
 	@echo $(OS)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
-
+	
 # builds either assimulo install folder or wheel as it is inside a docker environment
 assimulo_folder assimulo_wheel:
 	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/assimulo/
