@@ -254,4 +254,65 @@ equation
 end OverdeterminedInitialSystem.HighIndex1;
 ")})));
     end HighIndex1;
+    
+    model AliasEliminateStructuralParameter
+        Real x;
+        Real y;
+        Real z;
+        
+        parameter Real p1 = 3;
+        parameter Real p2 = p1;
+        parameter Real p3 = p2;
+    initial equation
+        x = p2 - 1;
+        y = p2;
+    equation
+        x + 1 = y;
+        der(x) = time;
+        z = p3 + time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="AliasEliminateStructuralParameter",
+            fmi_version="2.0",
+            description="Test that all parameters in the alias set are changed to structural parameters.",
+            eliminate_alias_constants=true,
+            eliminate_alias_parameters=true,
+            eliminate_alias_variables=true,
+            template="
+$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <!-- Variable with index #1 -->
+    <ScalarVariable name=\"p1\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
+    </ScalarVariable>
+    <!-- Variable with index #2 -->
+    <ScalarVariable name=\"p2\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <!-- Variable with index #3 -->
+    <ScalarVariable name=\"p3\" valueReference=\"1\" causality=\"local\" variability=\"constant\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <!-- Variable with index #4 -->
+    <ScalarVariable name=\"x\" valueReference=\"3\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <!-- Variable with index #5 -->
+    <ScalarVariable name=\"der(x)\" valueReference=\"2\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" derivative=\"4\" />
+    </ScalarVariable>
+    <!-- Variable with index #6 -->
+    <ScalarVariable name=\"y\" valueReference=\"4\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <!-- Variable with index #7 -->
+    <ScalarVariable name=\"z\" valueReference=\"5\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+    end AliasEliminateStructuralParameter;
+
 end OverdeterminedInitialSystem;
