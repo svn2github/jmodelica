@@ -16,11 +16,21 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 // Set discard policy
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
 
+
+node ('docker') {
+    checkoutJM("${JM_SVN_PATH}")
+    buildAssimuloDocker("centos", "wheel",  "jenkins_centos_config")
+    buildAssimuloDocker("centos", "folder", "jenkins_centos_config")
+    buildAssimuloDocker("ubuntu", "wheel",  "jenkins_ubuntu_config")
+    buildAssimuloDocker("ubuntu", "folder", "jenkins_ubuntu_config")
+}
 node("JMODELICA-SDK-1.13.2") {
     checkoutJM("${JM_SVN_PATH}")
-    for (module in ["blas", "lapack", "superlu", "sundials"]) {
+    for (module in ["superlu", "blas", "lapack", "sundials"]) {
         buildThirdPartyFromMake(null, null, "${pwd()}/build", module)
     }
     buildAssimulo(null, null, "${pwd()}/build", "assimulo_folder")
     buildAssimulo(null, null, "${pwd()}/build", "assimulo_wheel")
 }
+
+
