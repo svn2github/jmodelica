@@ -2,12 +2,27 @@
 include default_config
 include $(USER_CONFIG)
 
+#
+docker_test_assimulo_folder docker_test_assimulo_wheel:
+	@echo "Building docker image containing assimulo"
+	@mkdir -p $(BUILD_DIR)_test
+	cp $(CONFIG_HOME)/default_config $(BUILD_DIR)_test
+	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)_test
+	cd $(JM_HOME) && \
+	${DOCKER_UTILS}/generation/generate_dockerfile.sh "$(subst docker_test_,,$@)" "no_dep" $(BUILD_DIR)_test/default_config $(BUILD_DIR)_test/$(USER_CONFIG) && \
+	${DOCKER_UTILS}/build_docker_image.sh $(OS)/default_config $(OS)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_test $(BUILD_DIR)_test test
+
+test_assimulo_folder:
+	@echo "Running tests in docker environment"
+
 # starts a docker instance to build either assimulo install folder or wheel
 docker_assimulo_folder docker_assimulo_wheel: assimulo_base_image
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) BASE))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
 	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	@mkdir -p $(OS)
+	$(OS)/$(subst docker_,,$@)/* > $(OS)/artifacts_$(subst docker_,,$@)
 
 # builds either assimulo install folder or wheel as it is inside a docker environment
 assimulo_folder assimulo_wheel:
@@ -53,10 +68,6 @@ modify_permissions:
 	@chmod +x $(JM_HOME)/Docker/build_docker_image.sh
 	@chmod +x $(JM_HOME)/Docker/get_docker_id.sh
 	@chmod +x $(JM_HOME)/build_environment/platforms/$(PLATFORM)/install_python$(PYTHON_VERSION).sh
-
-# used by CI for archiving artifacts
-artifact_list:
-	@echo $(OS)/assimulo_wheel/*.whl, $(OS)/assimulo_folder/assimulo > $(BUILD_DIR)/$@ 
 
 # builds assimulo dependencies, called upon in a docker environment
 assimulo_dependencies: sundials blas lapack
