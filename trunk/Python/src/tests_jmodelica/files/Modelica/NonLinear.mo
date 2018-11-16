@@ -897,6 +897,13 @@ y = x_start;
 z = x^2;
 end NonLinear7;
 
+model NonLinear8
+    Real x(start=1.5, min=1, max=2);
+    parameter Real p=4;
+equation
+    (x-0.1)^2=p;
+end NonLinear8;
+
 model RealTimeSolver1
     Real x(start=0.9);
 equation
