@@ -79,28 +79,7 @@ class Test_FMUModelBase2:
         cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
         cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         cls.enumeration4 = compile_fmu("Enumerations.Enumeration4",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
-        cls.nonlinear8 = compile_fmu("NonLinear.NonLinear8",os.path.join(path_to_mofiles,"NonLinear.mo"), version=2.0)
-        
-    @testattr(stddist_full = True)
-    def test_brent_failure_message(self):
-        
-        model = load_fmu(Test_FMUModelBase2.nonlinear8)
-        
-        try:
-            model.initialize()
-        except FMUException:
-            pass
-        
-        err_msg = ""
-        for line in model.get_log():
-            if "BrentBracketFailed" in line:
-                err_msg = line
-                break
-        
-        #Check that certain key attributes are in the error message
-        assert "variable" in err_msg
-        assert "min" in err_msg
-        assert "max" in err_msg
+        #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
     
     @testattr(stddist_full = True)
     def test_get_scalar_variable(self):

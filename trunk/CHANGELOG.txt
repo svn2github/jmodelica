@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-; Fixed ; Minor ; Runtime ; #5708
-Updated the error message when Brent fails to backet a root.
-
 ; Fixed ; Minor ; PyFMI ; #5706
 Added checks on the nominal values.
 
