@@ -744,7 +744,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
                     return JMI_BRENT_SUCCESS;
                 }
-                jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
+                jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Iteration variable <variable:#r%d#>, search interval bounds: <min: %g>, <max: %g>.", block->label, block->value_references[0], block->min[0], block->max[0]);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
                 /* Write initial guess back to model. */ 
                 block->x[0] = init;
