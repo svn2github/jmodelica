@@ -1387,6 +1387,7 @@ Alias sets:
         parameter String s2 = s1;
         parameter String s3 = "string" annotation(Evaluate=true);
         parameter String s4 = "string" annotation(Evaluate=true);
+        parameter String s5 = s2;
 
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
@@ -1396,7 +1397,7 @@ Alias sets:
             eliminate_alias_parameters=true,
             methodResult="
 Alias sets:
-{s1, s2}
+{s5, s2}
 {s3, s4}
 2 variables can be eliminated
 ")})));

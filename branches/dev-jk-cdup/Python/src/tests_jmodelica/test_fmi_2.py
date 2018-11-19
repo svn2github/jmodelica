@@ -207,14 +207,6 @@ class Test_FMUModelBase2:
         model.set_additional_logger(my_custom_logger)
         model.simulate()
         assert(len(messages) > 0)
-        
-    @testattr(windows_full = True)
-    def test_get_erronous_nominals(self):
-        
-        model = load_fmu("NominalTest4.fmu",path_to_fmus_me2)
-        
-        nose.tools.assert_almost_equal(model.get_variable_nominal("x"), 2.0)
-        nose.tools.assert_almost_equal(model.get_variable_nominal("y"), 1.0)
 
 class Test_FMUModelCS2:
     """
