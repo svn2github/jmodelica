@@ -4555,6 +4555,7 @@ aspect AritmeticTransformations {
 aspect SourceCeval {
     syn CValue SrcExp.ceval()        = CValue.UNKNOWN;
     eq SrcStringLitExp.ceval()       = new CValueString(unEscape());
+    eq SrcAccessExp.ceval()          = new CValueString(getSrcAccess().name());
     eq SrcBooleanLitExpTrue.ceval()  = CValueBoolean.TRUE;
     eq SrcBooleanLitExpFalse.ceval() = CValueBoolean.FALSE;
     eq SrcIntegerLitExp.ceval()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
