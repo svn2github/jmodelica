@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Feature ; Minor ; Compiler ; #5696
+Enabled parameter alias elimination by default.
+
 ; Fixed ; Minor ; PyFMI ; #5706
 Added checks on the nominal values.
 
