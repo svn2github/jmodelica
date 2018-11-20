@@ -17,7 +17,6 @@
     <itemizedlist>
         <listitem>Fixed type checking of array sizes for elements in arrays of records.</listitem>
         <listitem>Made sure to release the package.order file after reading.</listitem>
-        <listitem>Add more javadoc for how the AnnotationProvider framework works.</listitem>
     </itemizedlist>
     </section>
     </section>
