@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5708
+Updated the error message when Brent fails to backet a root.
+
 ; Feature ; Minor ; Compiler ; #5696
 Enabled parameter alias elimination by default.
 
