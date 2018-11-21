@@ -1,4 +1,8 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5709
+Fixed issue with the absolute tolerance not being set when only the
+relative tolerance has been provided.
+
 ; Fixed ; Minor ; Runtime ; #5708
 Updated the error message when Brent fails to backet a root.
 

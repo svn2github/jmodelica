@@ -669,6 +669,28 @@ class Test_FMUModelME2:
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
         cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
+        cls.linear2 = compile_fmu("LinearTest.Linear2", os.path.join(path_to_mofiles,"Linear.mo"), target="me", version="2.0")
+        
+    
+    @testattr(stddist_full = True)
+    def test_relative_tolerance(self):
+        model = load_fmu(self.linear2)
+        
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-8
+        
+        res = model.simulate(options=opts)
+        
+        assert res.options["CVode_options"]["atol"] == 1e-10
+        
+        model = load_fmu(self.no_state_name)
+        
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-8
+        
+        res = model.simulate(options=opts)
+        
+        assert res.options["CVode_options"]["atol"] == 1e-10
     
     @testattr(stddist_full = True)
     def test_get_time_varying_variables(self):
