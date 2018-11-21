@@ -23,6 +23,17 @@ include $(USER_CONFIG)
 #. check_configuration.sh
 .PHONY: assimulo_folder assimulo_wheel
 
+test:
+	nosetests tests/*.pyc tests/solvers/*.pyc
+
+test_wheel:
+	@echo -e "\e[33m" "Got WHEEL_INSTALL_DIR=$(WHEEL_INSTALL_DIR)" "\e[0m"
+	nosetests $(WHEEL_INSTALL_DIR)/tests/*.pyc $(WHEEL_INSTALL_DIR)/tests/solvers/*.pyc
+
+test_folder:
+	@echo  -e "\e[33m" "Got FOLDER_INSTALL_DIR=$(FOLDER_INSTALL_DIR)" "\e[0m"
+	nosetests $(FOLDER_INSTALL_DIR)/tests/*.pyc $(FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
+
 assimulo_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/ASSIMULO_FOLDERBUILD_$(BITNESS)
 assimulo_folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/ASSIMULO_FOLDERINSTALL_$(BITNESS)
 assimulo_folder:

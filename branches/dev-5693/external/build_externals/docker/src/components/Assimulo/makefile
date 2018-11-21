@@ -2,18 +2,30 @@
 include default_config
 include $(USER_CONFIG)
 
-#
-docker_test_assimulo_folder docker_test_assimulo_wheel:
-	@echo "Building docker image containing assimulo"
+# Start docker image with built docker environment for testing
+docker_test_assimulo_wheel docker_test_assimulo_folder: %:  %_image
+	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) test))
+	@echo "Starting docker container with ID=$(DOCKER_ID) for testing assimulo"
+	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	@[ ! -z "$$(docker images | grep -E '$(PLATFORM)_assimulo_test|none')" ] && \
+	    docker rmi -f $$(docker images | grep -E '$(PLATFORM)_assimulo_test|none' | awk '{print $$3}') || echo true
+
+# Create docker image containing environment for testing
+docker_test_assimulo_wheel_image docker_test_assimulo_folder_image:
 	@mkdir -p $(BUILD_DIR)_test
 	cp $(CONFIG_HOME)/default_config $(BUILD_DIR)_test
 	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)_test
 	cd $(JM_HOME) && \
-	${DOCKER_UTILS}/generation/generate_dockerfile.sh "$(subst docker_test_,,$@)" "no_dep" $(BUILD_DIR)_test/default_config $(BUILD_DIR)_test/$(USER_CONFIG) && \
-	${DOCKER_UTILS}/build_docker_image.sh $(OS)/default_config $(OS)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_test $(BUILD_DIR)_test test
+	${DOCKER_UTILS}/generation/generate_dockerfile.sh "$(subst _image,,$(subst docker_test_,,$@))" "no_dep" $(BUILD_DIR)_test/default_config $(BUILD_DIR)_test/$(USER_CONFIG) && \
+	${DOCKER_UTILS}/build_docker_image.sh $(OS)/default_config $(OS)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_test $(BUILD_DIR)_test test 
 
-test_assimulo_folder:
-	@echo "Running tests in docker environment"
+# Running asssimulo tests using assimulo build system
+test_assimulo_wheel test_assimulo_folder:
+	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_EXTERNALS)/assimulo/
+	@cd $(BUILD_EXTERNALS)/assimulo && \
+	make $(subst assimulo_,,$@) USER_CONFIG=$(USER_CONFIG)
+	
 
 # starts a docker instance to build either assimulo install folder or wheel
 docker_assimulo_folder docker_assimulo_wheel: assimulo_base_image

@@ -9,10 +9,16 @@ INSTALL_BASE_DEPENDENCIES=$2
 CONFIG=$3
 USER_CONFIG=$4
 
+RESET="\e[0m"
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+BLUE="\e[94m"
+
 
 [[ -e "$CONFIG" ]] && source $CONFIG || echo "generate_dockerfile: No such config $CONFIG"
 [[ -e "$USER_CONFIG" ]] && source $USER_CONFIG || echo "generate_dockerfile: No such user config $USER_CONFIG"
-
+echo -e $YELLOW "\tgenerate_dockerfile: BASE_TYPE=${BASE_TYPE}" $RESET
 # variables are sourced already in build system
 # The X is just to allow empty strings
 if [[ X"$BASE_TYPE" = X"PYFMI_BASE" ]]; then
@@ -97,13 +103,13 @@ LABEL maintainer="Modelon AB"
 
 COPY /${PLATFORM}_${DIST_VERSION}/${ASSIMULO_TYPE}/ /usr/bin/assimulo/
 COPY build_environment/platforms/${PLATFORM}/*.sh build_scripts/
+COPY external/build_externals/docker/platforms/${PLATFORM}/*.sh build_scripts/
 
 RUN build_scripts/install_python${PYTHON_VERSION}.sh
-RUN pip install --upgrade setuptools
-RUN pip install scipy
-RUN yum install -y python-matplotlib
-RUN sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")
-RUN cd /usr/bin/assimulo && mv *.whl Assimulo-1.0.0.-cp27-cp27mu-linux_x86_64.whl
+RUN build_scripts/install_test_dependencies.sh
+RUN cd /usr/bin/assimulo && mv *.whl Assimulo-1.0.0.-cp27-cp27mu-linux_x86_64.whl && pip install *.whl
+
+
 
 RUN rm -rf build_scripts
 
