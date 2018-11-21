@@ -79,6 +79,7 @@ modify_permissions:
 	@chmod +x $(JM_HOME)/Docker/build_docker_image.sh
 	@chmod +x $(JM_HOME)/Docker/get_docker_id.sh
 	@chmod +x $(JM_HOME)/build_environment/platforms/$(PLATFORM)/install_python$(PYTHON_VERSION).sh
+	@chmod +x $(JM_HOME)/external/build_externals/docker/platforms/${PLATFORM}/*.sh
 
 # builds assimulo dependencies, called upon in a docker environment
 assimulo_dependencies: sundials blas lapack
