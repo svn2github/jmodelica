@@ -80,6 +80,20 @@ class Test_FMUModelBase2:
         cls.enumeration3 = compile_fmu("Enumerations.Enumeration3",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         cls.enumeration4 = compile_fmu("Enumerations.Enumeration4",os.path.join(path_to_mofiles,"Enumerations.mo"), version=2.0)
         cls.nonlinear8 = compile_fmu("NonLinear.NonLinear8",os.path.join(path_to_mofiles,"NonLinear.mo"), version=2.0)
+        cls.brentEnforce = compile_fmu("TestBrent.Bounds", os.path.join(path_to_mofiles,"TestBrent.mo"), version=2.0)
+    
+    @testattr(stddist_full = True)
+    def test_enforce_bounds_brent(self):
+        
+        model = load_fmu(self.brentEnforce)
+
+        model.set("_enforce_bounds", True)
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+        model = load_fmu(self.brentEnforce)
+        
+        model.set("_enforce_bounds", False)
+        model.initialize()
         
     @testattr(stddist_full = True)
     def test_brent_failure_message(self):
