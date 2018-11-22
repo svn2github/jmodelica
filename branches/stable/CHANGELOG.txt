@@ -1,4 +1,27 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5709
+Fixed issue with the absolute tolerance not being set when only the
+relative tolerance has been provided.
+
+; Fixed ; Minor ; Runtime ; #5708
+Updated the error message when Brent fails to backet a root.
+
+; Feature ; Minor ; Compiler ; #5696
+Enabled parameter alias elimination by default.
+
+; Fixed ; Minor ; PyFMI ; #5706
+Added checks on the nominal values.
+
+; Feature ; Minor ; Compiler ; #5515
+Expanded variability propagation to also work on initial system. 
+Controlled with experimental option, default off.
+
+; Change ; Minor ; Compiler ; #5694
+Reworked GUID generation to only depend on modelDescription.xml.
+
+; Fixed ; Minor ; Compiler ; #5663
+Fixed type checking of array sizes for elements in arrays of records.
+
 ; Fixed ; Minor ; Compiler ; #5699
 Made sure to release the package.order file after reading.
 

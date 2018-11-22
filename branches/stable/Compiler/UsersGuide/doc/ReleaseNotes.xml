@@ -10,6 +10,28 @@
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
     <section>
+    <title>Release notes for JModelica.org version 2.5</title>    
+    <section><title>Python Packages Improvements</title>
+    <para>Important changes to Python packages:</para>
+    <itemizedlist>
+        <listitem>Fixed issue with reusing the PyFMI computed FD Jacobian.</listitem>
+    </itemizedlist>
+    </section>
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Updated the GUID calculation in FMUs to only be dependent on the generated model description XML.</listitem>
+        <listitem>Updated calculation order of start values and dependent parameters to reduce number of evaluations.</listitem>
+        <listitem>Fixed that binding expression splitting doesn't check bounds.</listitem>
+        <listitem>Don't allow any inlining of equations in when loops.</listitem>
+        <listitem>Fixed exception from specific combination of record with array of unknown size in if expression in binding expression.</listitem>
+        <listitem>Enabled evaluation of non-literal expressions in annotations.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+    
+    <section>
     <title>Release notes for JModelica.org version 2.4</title>    
     <section><title>Runtime Changes</title>
     <para>Important changes to Runtime:</para>

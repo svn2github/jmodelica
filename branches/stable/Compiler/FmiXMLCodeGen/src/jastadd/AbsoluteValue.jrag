@@ -46,7 +46,9 @@ aspect AbsoluteValue {
             if (!isPrimitiveType()) {
                 ASTNode.ABSOLUTE_VALUE_LOCATION.invoke(an.ast());
             }
-            if (!(an.exp() instanceof SrcBooleanLitExp)) {
+
+            final SrcExp srcExp = an.exp();
+            if (srcExp == null || !srcExp.isBooleanLiteral()) {
                 ASTNode.ABSOLUTE_VALUE.invoke(an.ast());
             }
         }
