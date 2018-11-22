@@ -32,7 +32,7 @@ test_wheel:
 
 test_folder:
 	@echo  -e "\e[33m" "Got FOLDER_INSTALL_DIR=$(FOLDER_INSTALL_DIR)" "\e[0m"
-	nosetests $(FOLDER_INSTALL_DIR)/tests/*.pyc $(FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
+	nosetests $(FOLDER_INSTALL_DIR)/assimulo/tests/*.pyc $(FOLDER_INSTALL_DIR)/assimulo/tests/solvers/*.pyc
 
 assimulo_folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/ASSIMULO_FOLDERBUILD_$(BITNESS)
 assimulo_folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/ASSIMULO_FOLDERINSTALL_$(BITNESS)

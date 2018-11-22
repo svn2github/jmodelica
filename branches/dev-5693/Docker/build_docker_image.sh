@@ -13,6 +13,7 @@ OVERRIDE_TARGET=$5
 
 RED="\e[31m"
 GREEN="\e[32m"
+RESET="\e[0m"
 
 echo -e $GREEN "\tbuild_docker_image: Building docker image..." $RESET
 echo -e $GREEN "\tbuild_docker_image: using CONFIG $CONFIG USER_CONFIG $USER_CONFIG and TAG_NAME $TAG_NAME" $RESET

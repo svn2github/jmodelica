@@ -101,15 +101,14 @@ ARG BUILD_TARGET=${BUILD_TARGET}
 FROM \$LINUX_DIST:\$DIST_VERSION
 LABEL maintainer="Modelon AB"
 
-COPY /${PLATFORM}_${DIST_VERSION}/${ASSIMULO_TYPE}/ /usr/bin/assimulo/
+COPY /${PLATFORM}_${DIST_VERSION}/${ASSIMULO_TYPE}/ ${ASSIMULO_TMP_DIR}
 COPY build_environment/platforms/${PLATFORM}/*.sh build_scripts/
 COPY external/build_externals/docker/platforms/${PLATFORM}/*.sh build_scripts/
 
 RUN build_scripts/install_python${PYTHON_VERSION}.sh
 RUN build_scripts/install_test_dependencies.sh
-RUN cd /usr/bin/assimulo && mv *.whl Assimulo-1.0.0.-cp27-cp27mu-linux_x86_64.whl && pip install *.whl
 
-
+RUN if [ X"${BASE_TYPE}" = X"assimulo_wheel" ]; then cd ${ASSIMULO_TMP_DIR} && mv *.whl Assimulo-1.0.0-cp27-cp27mu-linux_x86_64.whl && pip install *.whl; fi
 
 RUN rm -rf build_scripts
 

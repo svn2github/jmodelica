@@ -18,5 +18,9 @@ JM_HOME=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelic
 INSTALL_DEPENDENCIES='apt-get update && apt-get install -y make cmake gcc g++ gfortran'
 PLATFORM_SITE_PACKAGES=lib/python2.7/site-packages
 
-WHEEL_INSTALL_DIR=/usr/lib/python${PYTHON_VERSION}/site-packages/assimulo
-FOLDER_INSTALL_DIR=TODO-setthispath-in-centos-config
+# used by assimulo makefile
+WHEEL_INSTALL_DIR=/usr/local/lib/python${PYTHON_VERSION}/dist-packages/assimulo
+FOLDER_INSTALL_DIR=/usr/bin/assimulo
+
+# used by generate_dockerfile.sh
+ASSIMULO_TMP_DIR=/usr/bin/assimulo
