@@ -11,9 +11,13 @@ OS=${PLATFORM}_${DIST_VERSION}
 # Also note you can override this from command line by writing:
 # make make_my_target PATH_TO_MOUNT=//my/custom/path/to/mount
 
-PATH_TO_MOUNT=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelica
+ifndef PATH_TO_MOUNT
+$(error Variable PATH_TO_MOUNT is not set)
+endif
 
-JM_HOME=/home/jenkins/internal/workspace/OCTTeam/Assimulo_standalone_AR/JModelica
+ifndef JM_HOME
+$(error Variable JM_HOME is not set)
+endif
 
 INSTALL_DEPENDENCIES='apt-get update && apt-get install -y make cmake gcc g++ gfortran'
 PLATFORM_SITE_PACKAGES=lib/python2.7/site-packages
