@@ -31,5 +31,11 @@ package LinearTest
         b2[2] = y[1] + 2 * y[3];
         b2[3] = 2 * y[2] + y[3];
     end TwoTornSystems1;
+    
+    model Linear2
+        Real x(start=1);
+    equation
+        der(x) = -1;
+    end Linear2;
 
 end package;

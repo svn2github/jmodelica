@@ -207,6 +207,14 @@ class Test_FMUModelBase2:
         model.set_additional_logger(my_custom_logger)
         model.simulate()
         assert(len(messages) > 0)
+        
+    @testattr(windows_full = True)
+    def test_get_erronous_nominals(self):
+        
+        model = load_fmu("NominalTest4.fmu",path_to_fmus_me2)
+        
+        nose.tools.assert_almost_equal(model.get_variable_nominal("x"), 2.0)
+        nose.tools.assert_almost_equal(model.get_variable_nominal("y"), 1.0)
 
 class Test_FMUModelCS2:
     """
@@ -640,6 +648,28 @@ class Test_FMUModelME2:
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
         cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
         cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
+        cls.linear2 = compile_fmu("LinearTest.Linear2", os.path.join(path_to_mofiles,"Linear.mo"), target="me", version="2.0")
+        
+    
+    @testattr(stddist_full = True)
+    def test_relative_tolerance(self):
+        model = load_fmu(self.linear2)
+        
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-8
+        
+        res = model.simulate(options=opts)
+        
+        assert res.options["CVode_options"]["atol"] == 1e-10
+        
+        model = load_fmu(self.no_state_name)
+        
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-8
+        
+        res = model.simulate(options=opts)
+        
+        assert res.options["CVode_options"]["atol"] == 1e-10
     
     @testattr(stddist_full = True)
     def test_get_time_varying_variables(self):

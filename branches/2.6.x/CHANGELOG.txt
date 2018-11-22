@@ -1,4 +1,11 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; PyFMI ; #5709
+Fixed issue with the absolute tolerance not being set when only the
+relative tolerance has been provided.
+
+; Fixed ; Minor ; PyFMI ; #5706
+Added checks on the nominal values.
+
 ; Change ; Minor ; Compiler ; #5694
 Reworked GUID generation to only depend on modelDescription.xml.
 
