@@ -16,7 +16,7 @@ docker_test_assimulo_wheel docker_test_assimulo_folder: %:  %_image
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) test_$(subst docker_test_,,$@)))
 	@echo "Starting docker container with ID=$(DOCKER_ID) for testing assimulo"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) PATH_TO_MOUNT="" JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) PATH_TO_MOUNT="notused" JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	#@[ ! -z "$$(docker images | grep -E '$(PLATFORM)_$(subst _image,,$(subst docker_test_,,$@))_test|none')" ] && \
 	#    docker rmi -f $$(docker images | grep -E '$(PLATFORM)_$(subst _image,,$(subst docker_test_,,$@))_test|none' | awk '{print $$3}') || echo true
 
@@ -45,7 +45,7 @@ docker_assimulo_folder docker_assimulo_wheel: assimulo_base_image
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) BASE))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) PATH_TO_MOUNT="" JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) PATH_TO_MOUNT="notused" JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@echo $(OS)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
 	
 # builds either assimulo install folder or wheel as it is inside a docker environment
@@ -68,7 +68,7 @@ docker_assimulo_dependencies: base_dependency
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) PATH_TO_MOUNT="" JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) PATH_TO_MOUNT="notused" JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 
 # builds an image used later as a platform to build dependencies
 base_dependency: modify_permissions
