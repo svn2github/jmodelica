@@ -3,7 +3,7 @@
 # Creates a dockerfile where the contents are based upon the given configs,
 # it is a basic dockerfile used to set up an environment without having to
 # have multiple dockerfiles checked in for multiple platforms.
-
+set -e
 BASE_TYPE=$1
 INSTALL_BASE_DEPENDENCIES=$2
 CONFIG=$3

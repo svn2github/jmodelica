@@ -3,6 +3,7 @@
 # This script is used with generate_dockerfile because it builds what generate_dockerfile
 # generated. Before running docker build it also checks for the hash corresponding to given
 # config and, if it already exists locally it will not build the docker image.
+set -e 
 
 BASE_DIR=$(dirname "$0")
 CONFIG=$1
