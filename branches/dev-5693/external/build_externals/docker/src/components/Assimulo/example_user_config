@@ -1,30 +1,30 @@
-PLATFORM=ubuntu
-DIST_VERSION=18.04
-PYTHON_VERSION=2.7
-BITNESS=64
+PLATFORM=# set to ubuntu or centos
+DIST_VERSION=# set to distribution platform, example 18.04 for ubuntu, 7.4.1708 for centos
+PYTHON_VERSION=# set to 2.7, currently we only support 2.7
+BITNESS=# set to 64, we only support 64 for linux environments
 
 
 # PATH_TO_MOUNT is the path needed to mount JModelica into the Docker.
 # Note you need to have double slash in the beginning.
 # Set to your local checkout of JModelica
-#PATH_TO_MOUNT=# does not need to be set on jenkins, is set in groovy
+PATH_TO_MOUNT=# modify this //c/Users/your-username/name-of-branch
 
 
 # Set JM_HOME to your local checkout of JModelica
-#JM_HOME=# does not need to be set on jenkins, is set in groovy
+JM_HOME=C:/Users/your-username/name-of-branch
 
 
 #   for CentOS set to (including the ' ') 'yum install -y make cmake gcc gcc-gfortran gcc-c++'
 #   for Ubuntu set to (including the ' ') 'apt-get update && apt-get install -y make cmake gcc g++ gfortran'
-INSTALL_DEPENDENCIES='apt-get update && apt-get install -y make cmake gcc g++ gfortran'
+INSTALL_DEPENDENCIES=# see above
 
 #   for CentOS set to lib64/python${PYTHON_VERSION}/site-packages
 #   for Ubuntu set to lib/python${PYTHON_VERSION}/site-packages
-PLATFORM_SITE_PACKAGES=lib/python${PYTHON_VERSION}/site-packages
+PLATFORM_SITE_PACKAGES=# see above
 
 #   for CentOS set to /usr/lib64/python${PYTHON_VERSION}/site-packages/assimulo
 #   for Ubuntu set to /usr/local/lib/python${PYTHON_VERSION}/dist-packages/assimulo
-WHEEL_INSTALL_DIR=/usr/local/lib/python${PYTHON_VERSION}/dist-packages/assimulo
+WHEEL_INSTALL_DIR=# see above
 
 
 # Dont modify the variables below

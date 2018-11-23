@@ -2,17 +2,16 @@ PLATFORM=ubuntu
 DIST_VERSION=18.04
 PYTHON_VERSION=2.7
 BUILD_TARGET=assimulo
-DOCKER_ENV=1
 BITNESS=64
-OS=${PLATFORM}_${DIST_VERSION}
+DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
 
 # Path to build scripts
 JM_HOME_IN_DOCKER=/tmp/jm_home
 BUILD_EXTERNALS=${JM_HOME}/external/build_externals/build
 BUILD_THIRDPARTY=${JM_HOME}/ThirdParty/build_thirdparties/build
 DOCKER_UTILS=${JM_HOME}/Docker
-BUILD_DIR=${JM_HOME}/${OS}
-DOCKER_BUILD_DIR=${JM_HOME_IN_DOCKER}/${OS}
+BUILD_DIR=${JM_HOME}/${DISTRO}
+DOCKER_BUILD_DIR=${JM_HOME_IN_DOCKER}/${DISTRO}
 CONFIG_HOME=${JM_HOME}/external/build_externals/docker/src/components/Assimulo
 DOCKER_CONFIG_HOME=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/Assimulo
-ARTIFACT_FILE=${JM_HOME}/${OS}/artifacts_${BUILD_TARGET}
+ARTIFACT_FILE=${JM_HOME}/${DISTRO}/artifacts_${BUILD_TARGET}

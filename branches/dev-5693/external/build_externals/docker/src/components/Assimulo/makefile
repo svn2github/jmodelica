@@ -4,8 +4,8 @@ include $(USER_CONFIG)
 
 # Start docker image with built docker environment for testing
 check_variables:
-	@if [ -z "$$JM_HOME" ]; then echo -e "\e[31m" "JM_HOME is not set!" "\e[0m"&& false; fi
-	@if [ -z "$$PATH_TO_MOUNT" ]; then echo -e "\e[31m" "PATH_TO_MOUNT is not set!" "\e[0m"&& false; fi
+	@JM_HOME=$(JM_HOME) && if [ -z $$JM_HOME ]; then echo -e "\e[33;41m" "JM_HOME is not set!" "\e[0m"&& false; fi
+	@PATH_TO_MOUNT=$(PATH_TO_MOUNT) && if [ -z $$PATH_TO_MOUNT ]; then echo -e "\e[31m" "PATH_TO_MOUNT is not set!" "\e[0m"&& false; fi
 
 docker_test_assimulo_wheel docker_test_assimulo_folder: %:  check_variables %_image
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) test_$(subst docker_test_,,$@)))
@@ -23,8 +23,8 @@ docker_test_assimulo_wheel_image docker_test_assimulo_folder_image:
 	cd $(JM_HOME) && \
 	${DOCKER_UTILS}/generation/generate_dockerfile.sh "$(subst _image,,$(subst docker_test_,,$@))" "no_dep" $(BUILD_DIR)_test/default_config $(BUILD_DIR)_test/$(USER_CONFIG) && \
 	${DOCKER_UTILS}/build_docker_image.sh \
-	    $(OS)/default_config \
-	    $(OS)/$(USER_CONFIG) \
+	    $(DISTRO)/default_config \
+	    $(DISTRO)/$(USER_CONFIG) \
 	    $(PLATFORM)_$@ \
 	    $(BUILD_DIR)_test test_$(subst _image,,$(subst docker_test_,,$@))
 
@@ -41,22 +41,22 @@ docker_assimulo_folder docker_assimulo_wheel: assimulo_base_image
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
 	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
 	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	@echo $(OS)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
+	@echo $(DISTRO)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
 	
 # builds either assimulo install folder or wheel as it is inside a docker environment
 assimulo_folder assimulo_wheel:
 	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/assimulo/
 	cd $(BUILD_EXTERNALS)/assimulo && \
 	make $@ USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=//$(JM_HOME_IN_DOCKER) \
-	    INSTALL_DIR_FOLDER=//tmp/jm_home/$(OS)/$@
+	    INSTALL_DIR_FOLDER=$(DOCKER_BUILD_DIR)/$@
 
 # builds assimulo base image, contains python & other dependencies
 assimulo_base_image: docker_assimulo_dependencies
 	cp $(CONFIG_HOME)/default_config $(BUILD_DIR)
 	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)
 	cd $(JM_HOME) && \
-	${DOCKER_UTILS}/generation/generate_dockerfile.sh "ASSIMULO_BASE" $(INSTALL_DEPENDENCIES) $(OS)/default_config $(OS)/$(USER_CONFIG) && \
-	${DOCKER_UTILS}/build_docker_image.sh $(OS)/default_config $(OS)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_base $(OS) BASE
+	${DOCKER_UTILS}/generation/generate_dockerfile.sh "ASSIMULO_BASE" $(INSTALL_DEPENDENCIES) $(DISTRO)/default_config $(DISTRO)/$(USER_CONFIG) && \
+	${DOCKER_UTILS}/build_docker_image.sh $(DISTRO)/default_config $(DISTRO)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_base $(DISTRO) BASE
 
 # builds the dependencies to assimulo
 docker_assimulo_dependencies: base_dependency
@@ -69,7 +69,7 @@ docker_assimulo_dependencies: base_dependency
 base_dependency: modify_permissions
 	@mkdir -p $(BUILD_DIR)
 	$(DOCKER_UTILS)/generation/generate_dockerfile.sh "BASE" $(INSTALL_DEPENDENCIES) default_config $(USER_CONFIG) && \
-	$(DOCKER_UTILS)/build_docker_image.sh default_config $(USER_CONFIG) jmodelica/$(PLATFORM)_$(BUILD_TARGET)_dep $(OS)
+	$(DOCKER_UTILS)/build_docker_image.sh default_config $(USER_CONFIG) jmodelica/$(PLATFORM)_$(BUILD_TARGET)_dep $(DISTRO)
 
 clean:
 	@ rm -rf $(BUILD_DIR)

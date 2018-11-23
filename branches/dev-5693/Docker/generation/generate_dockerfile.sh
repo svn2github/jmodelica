@@ -73,10 +73,10 @@ ARG BUILD_TARGET=${BUILD_TARGET}
 FROM \$LINUX_DIST:\$DIST_VERSION
 LABEL maintainer="Modelon AB"
 
-COPY ${PLATFORM}_${DIST_VERSION}/sundials_install ${BUILD_DIR}/sundials_install
-COPY ${PLATFORM}_${DIST_VERSION}/superlu_install ${BUILD_DIR}/superlu_install
-COPY ${PLATFORM}_${DIST_VERSION}/blas_install ${BUILD_DIR}/blas_install
-COPY ${PLATFORM}_${DIST_VERSION}/lapack_install ${BUILD_DIR}/lapack_install
+COPY ${DISTRO}/sundials_install ${BUILD_DIR}/sundials_install
+COPY ${DISTRO}/superlu_install ${BUILD_DIR}/superlu_install
+COPY ${DISTRO}/blas_install ${BUILD_DIR}/blas_install
+COPY ${DISTRO}/lapack_install ${BUILD_DIR}/lapack_install
 COPY build_environment/platforms/${PLATFORM}/*.sh build_scripts/
 
 RUN ${INSTALL_BASE_DEPENDENCIES}
@@ -101,7 +101,7 @@ ARG BUILD_TARGET=${BUILD_TARGET}
 FROM \$LINUX_DIST:\$DIST_VERSION
 LABEL maintainer="Modelon AB"
 
-COPY /${PLATFORM}_${DIST_VERSION}/${ASSIMULO_TYPE}/ ${ASSIMULO_TMP_DIR}
+COPY /${DISTRO}/${ASSIMULO_TYPE}/ ${ASSIMULO_TMP_DIR}
 COPY build_environment/platforms/${PLATFORM}/*.sh build_scripts/
 COPY external/build_externals/docker/platforms/${PLATFORM}/*.sh build_scripts/
 
