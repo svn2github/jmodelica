@@ -94,7 +94,7 @@ model TestBrent
   end NegativeNominal;
     
   model Bounds
-    Real x(start=1, min=0, max=2);
+    Real x(start=1.2, min=1, max=2);
   equation
     sin(x)^2=0.5;
   end Bounds;
