@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Modelon AB
+Copyright (C) 2016-2018 Modelon AB
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -178,13 +178,9 @@ aspect CCodeGenBlocks {
                 if (equation().isMixed()) {
                     equation().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
                 }
-                if (equation().shouldProduceNonRealGuard_C(forVariables)) {
-                    str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
-                    p.genSolved(equation(), str, p.indent(indent), visited, forVariables, forIndices);
-                    str.format("%s}\n", indent);
-                } else {
-                    p.genSolved(equation(), str, indent, visited, forVariables, forIndices);
-                }
+                str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
+                p.genSolved(equation(), str, p.indent(indent), visited, forVariables, forIndices);
+                str.format("%s}\n", indent);
             } else {
                 p.genSolved(equation(), str, indent, visited, forVariables, forIndices);
             }
@@ -199,22 +195,6 @@ aspect CCodeGenBlocks {
         } else {
             throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName());
         }
-    }
-
-    /**
-     * Helper method which determines if a guard is needed for the non real
-     * equation.
-     */
-    syn boolean FAbstractEquation.shouldProduceNonRealGuard_C(Collection<FVariable> fvs) {
-        if (isSampleEquation()) {
-            return false;
-        }
-        for (FVariable fv : fvs) {
-            if (!fv.isTemporary()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
