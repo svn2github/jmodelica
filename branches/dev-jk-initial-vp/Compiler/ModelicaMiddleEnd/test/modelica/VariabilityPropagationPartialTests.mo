@@ -972,4 +972,45 @@ end VariabilityPropagationPartialTests.PartiallyKnownComposite12;
 ")})));
     end PartiallyKnownComposite12;
 
+    model PartiallyKnownDiscrete1
+       function f
+           input Real x1,x2,x3;
+           output Real y1,y2;
+       algorithm
+           y1 := x1;
+           y2 := x2;
+           annotation(Inline=false);
+       end f;
+    
+        Real y1,y2,y4;
+        Integer y3;
+    equation
+        (y1,y2) = f(1,y3,y4);
+        when time > 1 then
+            y4 = time;
+        end when;
+        y3 = 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownDiscrete1",
+            description="Partial evaluation of discrete function call",
+            flatModel="
+fclass VariabilityPropagationPartialTests.PartiallyKnownDiscrete1
+ constant Real y1 = 1;
+ constant Real y2 = 2;
+ discrete Real y4;
+ constant Integer y3 = 2;
+ discrete Boolean temp_1;
+initial equation
+ pre(y4) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+ y4 = if temp_1 and not pre(temp_1) then time else pre(y4);
+end VariabilityPropagationPartialTests.PartiallyKnownDiscrete1;
+")})));
+    end PartiallyKnownDiscrete1;
+
+
 end VariabilityPropagationPartialTests;

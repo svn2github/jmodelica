@@ -513,7 +513,7 @@ aspect VariabilityPropagation {
             TypePrefixVariability variability,
             FExp bindingExp) {
         
-        if (variability().lessOrEqual(variability)) {
+        if (variability().lessOrEqual(variability) || !variability.parameterOrLess()) {
             return;
         }
         
