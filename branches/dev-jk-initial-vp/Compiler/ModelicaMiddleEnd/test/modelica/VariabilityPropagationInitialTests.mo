@@ -920,7 +920,7 @@ initial equation
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="InitialSystemPropagatePartial1",
-            description="Test infinite loop bug due to partial propagation in initial system",
+            description="Test infinite loop bug during partial propagation in initial system",
             variability_propagation_initial=true,
             eliminate_alias_variables=false,
             flatModel="
