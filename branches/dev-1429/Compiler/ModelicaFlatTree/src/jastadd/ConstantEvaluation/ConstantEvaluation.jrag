@@ -942,6 +942,14 @@ aspect ConstantEvaluation {
         }
 
         @Override
+        public boolean isUnknownAccess() {
+            boolean res = true;
+            for (CValue cvalue : values)
+                res &= cvalue.isUnknownAccess();
+            return res;
+        }
+
+        @Override
         public int[] intVector() {
             int[] vector = new int[values.length];
             for (int i = 0; i < values.length; i++)
