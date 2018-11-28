@@ -459,6 +459,7 @@ initial equation
             name="InitialSystemPropagateParameter4",
             description="Test propagation of initial equations, algorithm",
             variability_propagation_initial=true,
+            variability_propagation_algorithms=true,
             eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter4
