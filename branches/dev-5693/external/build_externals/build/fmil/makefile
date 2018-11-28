@@ -46,7 +46,7 @@ fmil_docker: docker_image show_environment
 	@echo "Starting docker with id ${DOCKER_ID} in fmil makefile"
 	@docker run -v /$(PATH_TO_MOUNT):\\$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
 	"cd ${JM_HOME_IN_DOCKER}/external/build_externals/build/fmil && make fmil_docker_build JM_HOME=\\$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	@docker rmi -f ${DOCKER_ID}
+	#@docker rmi -f ${DOCKER_ID}
 
 fmil_docker_build: show_environment docker_environment c-compiler cmake install
 	@echo "Finished building FMIL"

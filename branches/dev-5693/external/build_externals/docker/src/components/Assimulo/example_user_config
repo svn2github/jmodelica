@@ -29,8 +29,4 @@ WHEEL_INSTALL_DIR=# see above
 
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
-BUILD_TARGET=assimulo
-ASSIMULO_FOLDER_INSTALL_DIR=/usr/bin/assimulo
-
-# used by generate_dockerfile.sh
-ASSIMULO_TMP_DIR=/usr/bin/assimulo
+ASSIMULO_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo/folder/assimulo

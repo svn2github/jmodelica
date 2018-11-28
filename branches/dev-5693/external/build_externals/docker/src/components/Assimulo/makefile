@@ -2,74 +2,67 @@
 include default_config
 include $(USER_CONFIG)
 
-# Start docker image with built docker environment for testing
-check_variables:
-	@JM_HOME=$(JM_HOME) && if [ -z $$JM_HOME ]; then echo -e "\e[33;41m" "JM_HOME is not set!" "\e[0m"&& false; fi
-	@PATH_TO_MOUNT=$(PATH_TO_MOUNT) && if [ -z $$PATH_TO_MOUNT ]; then echo -e "\e[31m" "PATH_TO_MOUNT is not set!" "\e[0m"&& false; fi
-
-docker_test_assimulo_wheel docker_test_assimulo_folder: %:  check_variables %_image
-	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) test_$(subst docker_test_,,$@)))
-	@echo "Starting docker container with ID=$(DOCKER_ID) for testing assimulo"
-	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	#@[ ! -z "$$(docker images | grep -E '$(PLATFORM)_$(subst _image,,$(subst docker_test_,,$@))_test|none')" ] && \
-	#    docker rmi -f $$(docker images | grep -E '$(PLATFORM)_$(subst _image,,$(subst docker_test_,,$@))_test|none' | awk '{print $$3}') || echo true
-
-# Create docker image containing environment for testing
-docker_test_assimulo_wheel_image docker_test_assimulo_folder_image:
-	@mkdir -p $(BUILD_DIR)_test
-	cp $(CONFIG_HOME)/default_config $(BUILD_DIR)_test
-	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)_test
-	cd $(JM_HOME) && \
-	${DOCKER_UTILS}/generation/generate_dockerfile.sh "$(subst _image,,$(subst docker_test_,,$@))" "no_dep" $(BUILD_DIR)_test/default_config $(BUILD_DIR)_test/$(USER_CONFIG) && \
-	${DOCKER_UTILS}/build_docker_image.sh \
-	    $(DISTRO)/default_config \
-	    $(DISTRO)/$(USER_CONFIG) \
-	    $(PLATFORM)_$@ \
-	    $(BUILD_DIR)_test test_$(subst _image,,$(subst docker_test_,,$@))
-
-# Running asssimulo tests using assimulo build system
-test_assimulo_wheel test_assimulo_folder:
-	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_EXTERNALS)/assimulo/
-	@cd $(BUILD_EXTERNALS)/assimulo && \
-	make $(subst assimulo_,,$@) USER_CONFIG=$(USER_CONFIG)
-	
+docker_test_wheel docker_test_folder: setup
+	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
+	@echo "Starting docker container with ID=$(DOCKER_ID) for testing $(TARGET)"
+	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 
 # starts a docker instance to build either assimulo install folder or wheel
-docker_assimulo_folder docker_assimulo_wheel: assimulo_base_image
-	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG) BASE))
-	@echo "Starting docker container with ID=$(DOCKER_ID)"
-	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	@echo $(DISTRO)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
-	
-# builds either assimulo install folder or wheel as it is inside a docker environment
-assimulo_folder assimulo_wheel:
-	cp $(USER_CONFIG) $(BUILD_EXTERNALS)/assimulo/
-	cd $(BUILD_EXTERNALS)/assimulo && \
-	make $@ USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=//$(JM_HOME_IN_DOCKER) \
-	    INSTALL_DIR_FOLDER=$(DOCKER_BUILD_DIR)/$@
-
-# builds assimulo base image, contains python & other dependencies
-assimulo_base_image: docker_assimulo_dependencies
-	cp $(CONFIG_HOME)/default_config $(BUILD_DIR)
-	cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)
-	cd $(JM_HOME) && \
-	${DOCKER_UTILS}/generation/generate_dockerfile.sh "ASSIMULO_BASE" $(INSTALL_DEPENDENCIES) $(DISTRO)/default_config $(DISTRO)/$(USER_CONFIG) && \
-	${DOCKER_UTILS}/build_docker_image.sh $(DISTRO)/default_config $(DISTRO)/$(USER_CONFIG) jmodelica/$(PLATFORM)_assimulo_base $(DISTRO) BASE
-
-# builds the dependencies to assimulo
-docker_assimulo_dependencies: base_dependency
+docker_wheel docker_folder: docker_$(TARGET)_dependencies
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
-	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	@echo $(DISTRO)/$(TARGET)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
 
-# builds an image used later as a platform to build dependencies
-base_dependency: modify_permissions
+wheel folder test_wheel test_folder:
+	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
+	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) INSTALL_DIR_FOLDER=$(DOCKER_BUILD_DIR)/$(TARGET)
+
+docker_$(TARGET)_dependencies: docker_base_$(TARGET)
+	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
+	@echo "Starting docker container with ID=$(DOCKER_ID)"
+	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+
+docker_base_$(TARGET): setup
+	BASE_TYPE="BASE" \
+	    INSTALL_BASE_DEPENDENCIES=$(INSTALL_DEPENDENCIES) \
+	    CONFIG=$(BUILD_DIR)/default_config \
+	    USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) \
+	    INSTALL_PYTHON=1 \
+	    $(DOCKER_UTILS)/generation/generate_dockerfile.sh
+	
+	cd $(JM_HOME) && \
+	    BASE_DIR= \
+	    CONFIG=$(BUILD_DIR)/default_config \
+	    USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) \
+	    TAG_NAME=base_$(TARGET)$(DOCKER_NAME_SUFFIX) \
+	    DOCKERFILE_DIR=$(DISTRO) \
+	    $(DOCKER_UTILS)/build_docker_image.sh 
+
+# builds assimulo dependencies, called upon in a docker environment
+assimulo_dependencies: blas lapack sundials
+
+sundials: superlu
+
+lapack blas sundials superlu: 
+	cd $(BUILD_THIRDPARTY)/$@ && \
+	make install USER_CONFIG=$(DOCKER_CONFIG_HOME)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=$(JM_HOME_IN_DOCKER)
+
+setup:
+	test -n "${JM_HOME}" # $$JM_HOME
+	test -n "${PATH_TO_MOUNT}" # $$PATH_TO_MOUNT
 	@mkdir -p $(BUILD_DIR)
-	$(DOCKER_UTILS)/generation/generate_dockerfile.sh "BASE" $(INSTALL_DEPENDENCIES) default_config $(USER_CONFIG) && \
-	$(DOCKER_UTILS)/build_docker_image.sh default_config $(USER_CONFIG) jmodelica/$(PLATFORM)_$(BUILD_TARGET)_dep $(DISTRO)
+	@cp $(CONFIG_HOME)/default_config $(BUILD_DIR)
+	@cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)
+	@chmod +x \
+	    $(JM_HOME)/Docker/generation/generate_dockerfile.sh \
+	    $(JM_HOME)/Docker/build_docker_image.sh \
+	    $(JM_HOME)/Docker/get_docker_id.sh \
+	    $(JM_HOME)/build_environment/platforms/$(PLATFORM)/install_python$(PYTHON_VERSION).sh \
+	    $(JM_HOME)/external/build_externals/docker/platforms/${PLATFORM}/*.sh
 
 clean:
 	@ rm -rf $(BUILD_DIR)
@@ -78,35 +71,9 @@ clean:
 clean_in_docker:
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID)"
-	@docker run -v $(PATH_TO_MOUNT)://tmp/jm_home ${DOCKER_ID} sh -c \
-	"cd ${DOCKER_CONFIG_HOME} && make clean JM_HOME=/$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
+	"cd ${DOCKER_CONFIG_HOME} && make clean JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 
-# make build scripts executable for CI
-modify_permissions:
-	@chmod +x $(JM_HOME)/Docker/generation/generate_dockerfile.sh
-	@chmod +x $(JM_HOME)/Docker/build_docker_image.sh
-	@chmod +x $(JM_HOME)/Docker/get_docker_id.sh
-	@chmod +x $(JM_HOME)/build_environment/platforms/$(PLATFORM)/install_python$(PYTHON_VERSION).sh
-	@chmod +x $(JM_HOME)/external/build_externals/docker/platforms/${PLATFORM}/*.sh
-
-# builds assimulo dependencies, called upon in a docker environment
-assimulo_dependencies: sundials blas lapack
-
-sundials: superlu
-	cp $(USER_CONFIG) $(BUILD_THIRDPARTY)/sundials/ && cd $(BUILD_THIRDPARTY)/sundials && \
-	make install USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=//$(JM_HOME_IN_DOCKER)
-
-superlu: 
-	cp $(USER_CONFIG) $(BUILD_THIRDPARTY)/superlu/ && cd $(BUILD_THIRDPARTY)/superlu && \
-	make install USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=//$(JM_HOME_IN_DOCKER)
-
-blas:
-	cp $(USER_CONFIG) $(BUILD_THIRDPARTY)/blas/ && cd $(BUILD_THIRDPARTY)/blas && \
-	make install USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=//$(JM_HOME_IN_DOCKER)
-
-lapack:
-	cp $(USER_CONFIG) $(BUILD_THIRDPARTY)/lapack/ && cd $(BUILD_THIRDPARTY)/lapack && \
-	make install USER_CONFIG=$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=//$(JM_HOME_IN_DOCKER)
 
 .PHONY:
 

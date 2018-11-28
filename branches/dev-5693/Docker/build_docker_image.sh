@@ -5,13 +5,6 @@
 # config and, if it already exists locally it will not build the docker image.
 set -e 
 
-BASE_DIR=$(dirname "$0")
-CONFIG=$1
-USER_CONFIG=$2
-TAG_NAME=$3
-DOCKERFILE_DIR=$4
-OVERRIDE_TARGET=$5
-
 RED="\e[31m"
 GREEN="\e[32m"
 RESET="\e[0m"
@@ -24,20 +17,19 @@ echo -e $GREEN "\tbuild_docker_image: Current working directory is ${PWD}" $RESE
 [[ -e "$USER_CONFIG" ]] && source $USER_CONFIG || echo -e $RED "build_docker_image: No such user config $USER_CONFIG" $RESET
 
 echo -e "\tbuild_docker_image: Generating hash..."
-# check if docker image with given config already exists
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $PYTHON_VERSION $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
+IMAGE_HASH="$(echo -n $PLATFORM $DIST_VERSION $TARGET $PYTHON_VERSION $DOCKER_NAME_SUFFIX | md5sum | awk '{print $1}')"
 
 # build image if not found among images
-if ! docker images | grep -q "$HASH_GEN_TAG" ; then
+if ! docker images | grep -q "$IMAGE_HASH" ; then
     mkdir -p $DOCKERFILE_DIR
-    cp $BASE_DIR/generation/Dockerfile $DOCKERFILE_DIR
+    cp $(dirname "$0")/generation/Dockerfile $DOCKERFILE_DIR
     echo -e $GREEN "\tbuild_docker_image: Running docker build with Dockerfile located in $DOCKERFILE_DIR..." $RESET
-    echo -e $GREEN "\tbuild_docker_image: Tagging image with ${TAG_NAME}:${HASH_GEN_TAG}" $RESET
-    docker build -t "${TAG_NAME}:${HASH_GEN_TAG}" -f $DOCKERFILE_DIR/Dockerfile .
+    echo -e $GREEN "\tbuild_docker_image: Tagging image with ${TAG_NAME}:${IMAGE_HASH}" $RESET
+    docker build -t "${TAG_NAME}:${IMAGE_HASH}" -f $DOCKERFILE_DIR/Dockerfile .
 else
-    echo -e $GREEN "\tbuild_docker_image: Used cached image tagged with ${TAG_NAME}:${HASH_GEN_TAG}" $RESET
+    echo -e $GREEN "\tbuild_docker_image: Used cached image tagged with ${TAG_NAME}:${IMAGE_HASH}" $RESET
 fi
-DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
+DOCKER_ID=$(docker images | grep "$IMAGE_HASH" | awk '{print $3}')
 echo -e $GREEN "\tDocker build finished and found DOCKER_ID=${DOCKER_ID}" $RESET
 
 # 

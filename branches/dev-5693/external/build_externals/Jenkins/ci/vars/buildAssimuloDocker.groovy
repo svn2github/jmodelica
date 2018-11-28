@@ -6,13 +6,13 @@ def call(PLATFORM, TARGET, USER_CONFIG) {
         
         dir ('JModelica/external/build_externals/docker/src/components/Assimulo') {
             try{
-                sh "make docker_assimulo_${TARGET} ${MAKE_ARGS}"
+                sh "make docker_${TARGET} ${MAKE_ARGS}"
                 dir("${WORKSPACE}/JModelica") {
                     artifact_list = sh returnStdout: true, script: "cat ${ARTIFACT_FILE}"
                     archiveArtifacts artifacts: artifact_list, fingerprint: false
                     sh "rm ${ARTIFACT_FILE}"
                 }
-                sh "make docker_test_assimulo_${TARGET} ${MAKE_ARGS}"
+                sh "make docker_test_${TARGET} ${MAKE_ARGS}"
             } finally {
                 sh "make clean_in_docker ${MAKE_ARGS}"
             }

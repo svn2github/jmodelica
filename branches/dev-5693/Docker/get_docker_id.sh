@@ -6,12 +6,11 @@
 set -e
 CONFIG=$1
 USER_CONFIG=$2
-OVERRIDE_TARGET=$3
 
 [[ -e $CONFIG ]] && source $CONFIG
 [[ -e $USER_CONFIG ]] && source $USER_CONFIG
 
-HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $BUILD_TARGET $PYTHON_VERSION $OVERRIDE_TARGET | md5sum | awk '{print $1}')"
+HASH_GEN_TAG="$(echo -n $PLATFORM $DIST_VERSION $TARGET $PYTHON_VERSION $DOCKER_NAME_SUFFIX | md5sum | awk '{print $1}')"
 DOCKER_ID=$(docker images | grep "$HASH_GEN_TAG" | awk '{print $3}')
 echo "${DOCKER_ID}"
 
