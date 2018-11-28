@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-; Feature ; Major ; Compiler ; #5515
-Turned on initial variability propagation by default.
-
 ; Fixed ; Minor ; Runtime ; #5710
 Fixed so that the flag "enforce_bounds" is taken into account in Brent.
 

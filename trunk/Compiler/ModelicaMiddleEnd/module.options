@@ -9,7 +9,7 @@ and reduces variables to constants and parameters where applicable."
 
 *******************************************************************************
 
-BOOLEAN variability_propagation_initial compiler experimental true false
+BOOLEAN variability_propagation_initial compiler experimental false
 
 "If enabled, the compiler performs a global analysis on the initial equation 
 system and reduces initial parameters to constants and parameters where 
