@@ -13,11 +13,6 @@ PATH_TO_MOUNT=# modify this //c/Users/your-username/name-of-branch
 # Set JM_HOME to your local checkout of JModelica
 JM_HOME=C:/Users/your-username/name-of-branch
 
-
-#   for CentOS set to (including the ' ') 'yum install -y make cmake gcc gcc-gfortran gcc-c++'
-#   for Ubuntu set to (including the ' ') 'apt-get update && apt-get install -y make cmake gcc g++ gfortran'
-INSTALL_DEPENDENCIES=# see above
-
 #   for CentOS set to lib64/python${PYTHON_VERSION}/site-packages
 #   for Ubuntu set to lib/python${PYTHON_VERSION}/site-packages
 PLATFORM_SITE_PACKAGES=# see above

@@ -2,18 +2,15 @@
 include default_config
 include $(USER_CONFIG)
 
-docker_test_wheel docker_test_folder: setup
+docker_test_wheel docker_test_folder: $(setup test_,,$@)
+
+docker_wheel docker_folder: docker_$(TARGET)_dependencies
+
+docker_wheel docker_folder docker_test_wheel docker_test_folder: setup
 	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
 	@echo "Starting docker container with ID=$(DOCKER_ID) for testing $(TARGET)"
 	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-
-# starts a docker instance to build either assimulo install folder or wheel
-docker_wheel docker_folder: docker_$(TARGET)_dependencies
-	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
-	@echo "Starting docker container with ID=$(DOCKER_ID)"
-	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
+	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) OS=$(OS) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 	@echo $(DISTRO)/$(TARGET)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
 
 wheel folder test_wheel test_folder:
@@ -26,13 +23,12 @@ docker_$(TARGET)_dependencies: docker_base_$(TARGET)
 	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
 	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 
-docker_base_$(TARGET): setup
+docker_base_$(TARGET):
 	BASE_TYPE="BASE" \
-	    INSTALL_BASE_DEPENDENCIES=$(INSTALL_DEPENDENCIES) \
 	    CONFIG=$(BUILD_DIR)/default_config \
 	    USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) \
 	    INSTALL_PYTHON=1 \
-	    $(DOCKER_UTILS)/generation/generate_dockerfile.sh
+	    $(DOCKER_UTILS)/generate_dockerfile.sh
 	
 	cd $(JM_HOME) && \
 	    BASE_DIR= \
@@ -57,12 +53,9 @@ setup:
 	@mkdir -p $(BUILD_DIR)
 	@cp $(CONFIG_HOME)/default_config $(BUILD_DIR)
 	@cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)
-	@chmod +x \
-	    $(JM_HOME)/Docker/generation/generate_dockerfile.sh \
-	    $(JM_HOME)/Docker/build_docker_image.sh \
-	    $(JM_HOME)/Docker/get_docker_id.sh \
-	    $(JM_HOME)/build_environment/platforms/$(PLATFORM)/install_python$(PYTHON_VERSION).sh \
-	    $(JM_HOME)/external/build_externals/docker/platforms/${PLATFORM}/*.sh
+	@chmod +x -R \
+	    $(DOCKER_UTILS) \
+	    $(JM_HOME)/build_environment/platforms/$(PLATFORM)/*.sh \
 
 clean:
 	@ rm -rf $(BUILD_DIR)

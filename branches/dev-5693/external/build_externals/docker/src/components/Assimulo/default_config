@@ -1,3 +1,4 @@
+OS=linux
 PLATFORM=ubuntu
 DIST_VERSION=18.04
 PYTHON_VERSION=2.7
@@ -12,7 +13,7 @@ DOCKER_NAME_SUFFIX=""
 JM_HOME_IN_DOCKER=//tmp/jm_home
 BUILD_EXTERNALS=${JM_HOME}/external/build_externals/build
 BUILD_THIRDPARTY=${JM_HOME}/ThirdParty/build_thirdparties/build
-DOCKER_UTILS=${JM_HOME}/Docker
+DOCKER_UTILS=${JM_HOME}/Docker/generation
 BUILD_DIR=${JM_HOME}/${DISTRO}
 DOCKER_BUILD_DIR=//${JM_HOME_IN_DOCKER}/${DISTRO}
 CONFIG_HOME=${JM_HOME}/external/build_externals/docker/src/components/Assimulo

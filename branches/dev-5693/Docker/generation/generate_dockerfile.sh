@@ -25,9 +25,8 @@ cat <<-EOF > ${GENERATED_DOCKERFILE}
 	LABEL maintainer="Modelon AB"
 
 	COPY build_environment/platforms/${PLATFORM}/*.sh build_scripts/
-	COPY external/build_externals/docker/platforms/${PLATFORM}/*.sh build_scripts/
-	RUN ${INSTALL_BASE_DEPENDENCIES}
 
+	RUN build_scripts/install_dependencies.sh
 	RUN build_scripts/install_python${PYTHON_VERSION}.sh
 	RUN build_scripts/install_test_dependencies.sh
 	RUN rm -rf build_scripts

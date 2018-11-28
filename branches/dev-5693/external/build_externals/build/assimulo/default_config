@@ -1,3 +1,4 @@
+OS=win
 BUILD_DIR=${SDK_HOME}/build
 JM_HOME=${SDK_HOME}/src
 ASSIMULO_SRC=$(JM_HOME)/external/Assimulo
