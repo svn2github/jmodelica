@@ -17,6 +17,13 @@ applicable."
 
 *******************************************************************************
 
+BOOLEAN variability_propagation_initial_partial compiler uncommon false
+
+"If enabled, the compiler allows partial constant evaluation of function 
+calls in initial equations during variability propagation."
+
+*******************************************************************************
+
 BOOLEAN variability_propagation_external compiler uncommon true
 
 "If enabled, the compiler allows external constant evaluation during 

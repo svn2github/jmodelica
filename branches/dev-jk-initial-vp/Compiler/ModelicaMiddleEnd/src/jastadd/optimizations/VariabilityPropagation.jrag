@@ -115,6 +115,7 @@ aspect VariabilityPropagation {
                     && myOptions().getBooleanOption("eliminate_alias_constants"));
             private boolean propagateInitial     = myOptions().getBooleanOption("variability_propagation_initial");
             private boolean propagateAlgorithms  = myOptions().getBooleanOption("variability_propagation_algorithms");
+            private boolean propagateInitialPartial = myOptions().getBooleanOption("variability_propagation_initial_partial");
             
             private VariableEvaluator evaluator       = 
                     new VariableEvaluator(
@@ -165,6 +166,10 @@ aspect VariabilityPropagation {
             
             public boolean propagateInitial() {
                 return propagateInitial;
+            }
+            
+            public boolean propagateInitialPartial() {
+                return propagateInitialPartial;
             }
             
             public boolean propagateAlgorithms() {
@@ -355,7 +360,9 @@ aspect VariabilityPropagation {
                 break;
             }
         }
-        boolean eval = potentialPartialVariability().knownParameterOrLess();
+        boolean eval = variability.knownParameterOrLess() || 
+                (potentialPartialVariability().knownParameterOrLess() && 
+                    (!isInitial() || propagator.propagateInitialPartial()));
         
         CValue[] val = null;
         if (eval) {
