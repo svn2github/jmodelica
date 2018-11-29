@@ -188,6 +188,9 @@ aspect CodePrinter {
         public abstract void genSolved(FAbstractEquation node, CodeStream str, String indent,
                 Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices);
 
+        public abstract void genSolvedNonReal(FAbstractEquation node, CodeStream str, String indent,
+                Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices);
+
         /**
          * Produce c-statements that forms an residual for the equation in
          * question.

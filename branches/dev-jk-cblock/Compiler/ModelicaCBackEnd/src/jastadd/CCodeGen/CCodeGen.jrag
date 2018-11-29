@@ -109,6 +109,18 @@ aspect CCodeGen {
         }
 
         @Override
+        public void genSolvedNonReal(FAbstractEquation node, CodeStream str, String indent,
+                Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+            if (node.shouldProduceNonRealGuard_C(forVariables)) {
+                str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
+                genSolved(node, str, indent(indent), visited, forVariables, forIndices);
+                str.format("%s}\n", indent);
+            } else {
+                genSolved(node, str, indent, visited, forVariables, forIndices);
+            }
+        }
+
+        @Override
         public void genResidual(FAbstractEquation node, CodeStream str, String indent, Enumerator enumerator,
                 Set<FAbstractEquation> visited, Set<Integer> forIndices) {
             node.genResidual_C(this, str, indent, enumerator, visited, forIndices);
