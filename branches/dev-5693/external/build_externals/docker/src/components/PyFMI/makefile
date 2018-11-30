@@ -3,7 +3,7 @@ include default_config
 include $(USER_CONFIG)
 include ../utils/docker_targets.mk
 
-$(TARGET)_dependencies: setup fmil
+$(TARGET)_dependencies: fmil
 
 fmil:
 	@echo "building fmil"
