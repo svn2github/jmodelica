@@ -22,11 +22,11 @@ $(INSTALL_DIR_FOLDER)/folder:
 	@$(eval TARGET_INSTALL_DIR=$(BUILD_DIR)/folder_install)
 	mkdir -p $(TARGET_INSTALL_DIR)
 	mkdir -p $@
-	
+
 	cd $(PYFMI_SRC) && \
 	find . -type f | grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
-	$(PYTHONHOME)python setup.py install --fmil-home=$(INSTALL_DIR_FOLDER)/fmil_install $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
+	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
 
 	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES); \
 	find -type d -name pyfmi -exec cp -r {} $@/ \;
