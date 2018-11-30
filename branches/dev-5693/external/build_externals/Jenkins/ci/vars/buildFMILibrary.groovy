@@ -8,7 +8,9 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, bitness=["32", "64"], stash=
             runMSYSWithEnv("""\
             export JM_HOME="\$(pwd)/JModelica/"
             JENKINS_BUILD_DIR="\$(pwd)/build"
-            cd \${JM_HOME}/external/build_externals/build/fmil
+            cd \${JM_HOME}/external/build_externals/build/fmil && ls -la
+            rm -rf ${INSTALL_PATH_UNIX}/folder
+            rm -rf ${INSTALL_PATH_UNIX}/wheel
             make clean_install USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/FMILibrary/windows/win${bit} BUILD_DIR=\${JENKINS_BUILD_DIR} FMIL_INSTALL=${INSTALL_PATH_UNIX}/fmil_install${bit}
             """);
             if (stash || archive) {
