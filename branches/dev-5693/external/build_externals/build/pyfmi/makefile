@@ -7,11 +7,12 @@ include $(USER_CONFIG)
 test:
 	nosetests tests/*.pyc
 
-test_wheel:
-	@pip install $(INSTALL_DIR_FOLDER)/*.whl
+test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
+	@pip install $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)/*.whl
 	nosetests $(WHEEL_INSTALL_DIR)/tests/*.py
 
-test_folder:
+test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
+	@pip install lxml
 	nosetests $(PYFMI_FOLDER_INSTALL_DIR)/tests/*.pyc
 
 folder: $(INSTALL_DIR_FOLDER)/folder
@@ -24,12 +25,12 @@ $(INSTALL_DIR_FOLDER)/folder:
 	mkdir -p $@
 
 	cd $(PYFMI_SRC) && \
-	find . -type f | grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
-	cd $(TARGET_BUILD_DIR); \
-	$(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
+	    find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
+	cd $(TARGET_BUILD_DIR) && \
+	    $(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
 
-	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES); \
-	find -type d -name pyfmi -exec cp -r {} $@/ \;
+	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES) && \
+	    find -type d -name pyfmi -exec cp -r {} $@/ \;
 	rm -rf $(TARGET_BUILD_DIR) $(TARGET_INSTALL_DIR)
 
 wheel: $(INSTALL_DIR_FOLDER)/wheel
@@ -39,10 +40,10 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	mkdir -p $(TARGET_BUILD_DIR)
 	mkdir -p $@
 	cd $(PYFMI_SRC) && \
-	find . -type f | grep -v /.svn | grep -v .pyc | grep -v ~ | tar c -T - | tar x -C $(TARGET_BUILD_DIR)
-	cd $(TARGET_BUILD_DIR); \
-	$(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(INSTALL_DIR_FOLDER)/fmil_install $(EXTRA_SETUP_ARGS); \
-	find -type f -name PyFMI*.whl -exec cp {} $@/ \;
+	    find . -type f | grep -v -E '/.svn|.pyc' | tar c -T - | tar x -C $(TARGET_BUILD_DIR)
+	cd $(TARGET_BUILD_DIR) && \
+	    $(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS); \
+	    find -type f -name PyFMI*.whl -exec cp {} $@/ \;
 	rm -rf $(TARGET_BUILD_DIR)
 
 clean:
