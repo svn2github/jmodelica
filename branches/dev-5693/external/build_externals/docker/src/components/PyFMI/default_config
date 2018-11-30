@@ -2,7 +2,7 @@ OS=linux
 PLATFORM=ubuntu
 DIST_VERSION=18.04
 PYTHON_VERSION=2.7
-TARGET=assimulo
+TARGET=pyfmi
 BITNESS=64
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
 
@@ -14,7 +14,7 @@ JM_HOME_IN_DOCKER=//tmp/jm_home
 BUILD_EXTERNALS=${JM_HOME}/external/build_externals/build
 BUILD_THIRDPARTY=${JM_HOME}/ThirdParty/build_thirdparties/build
 DOCKER_UTILS=${JM_HOME}/Docker/generation
-BUILD_DIR=${JM_HOME}/${DISTRO}/${TARGET}${BITNESS}
+BUILD_DIR=${JM_HOME}/${DISTRO}
 DOCKER_BUILD_DIR=//${JM_HOME_IN_DOCKER}/${DISTRO}/${TARGET}${BITNESS}
 CONFIG_HOME=${JM_HOME}/external/build_externals/docker/src/components/${TARGET}
 DOCKER_CONFIG_HOME=${JM_HOME_IN_DOCKER}/external/build_externals/docker/src/components/${TARGET}

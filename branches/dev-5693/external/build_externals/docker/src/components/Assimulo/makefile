@@ -2,44 +2,9 @@
 include default_config
 include $(USER_CONFIG)
 
-docker_test_wheel docker_test_folder: $(setup test_,,$@)
+include ../utils/docker_targets.mk
 
-docker_wheel docker_folder: docker_$(TARGET)_dependencies
-
-docker_wheel docker_folder docker_test_wheel docker_test_folder: setup
-	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
-	@echo "Starting docker container with ID=$(DOCKER_ID) for testing $(TARGET)"
-	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) OS=$(OS) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-	@echo $(DISTRO)/$(TARGET)/$(subst docker_,,$@)/** > $(ARTIFACT_FILE)
-
-wheel folder test_wheel test_folder:
-	@cd $(BUILD_EXTERNALS)/$(TARGET) && \
-	make $@ USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) INSTALL_DIR_FOLDER=$(DOCKER_BUILD_DIR)/$(TARGET)
-
-docker_$(TARGET)_dependencies: docker_base_$(TARGET)
-	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
-	@echo "Starting docker container with ID=$(DOCKER_ID)"
-	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
-	    "cd ${DOCKER_CONFIG_HOME} && make $(subst docker_,,$@) JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
-
-docker_base_$(TARGET):
-	BASE_TYPE="BASE" \
-	    CONFIG=$(BUILD_DIR)/default_config \
-	    USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) \
-	    INSTALL_PYTHON=1 \
-	    $(DOCKER_UTILS)/generate_dockerfile.sh
-	
-	cd $(JM_HOME) && \
-	    BASE_DIR= \
-	    CONFIG=$(BUILD_DIR)/default_config \
-	    USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) \
-	    TAG_NAME=base_$(TARGET)$(DOCKER_NAME_SUFFIX) \
-	    DOCKERFILE_DIR=$(DISTRO) \
-	    $(DOCKER_UTILS)/build_docker_image.sh 
-
-# builds assimulo dependencies, called upon in a docker environment
-assimulo_dependencies: blas lapack sundials
+$(TARGET)_dependencies: blas lapack sundials
 
 sundials: superlu
 
@@ -53,19 +18,9 @@ setup:
 	@mkdir -p $(BUILD_DIR)
 	@cp $(CONFIG_HOME)/default_config $(BUILD_DIR)
 	@cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)
-	@chmod +x -R \
-	    $(DOCKER_UTILS) \
-	    $(JM_HOME)/build_environment/platforms/$(PLATFORM)/*.sh \
 
 clean:
 	@ rm -rf $(BUILD_DIR)
-
-# starts a docker process to remove files created by the build system
-clean_in_docker:
-	@$(eval DOCKER_ID=$(shell ${DOCKER_UTILS}/get_docker_id.sh default_config $(USER_CONFIG)))
-	@echo "Starting docker container with ID=$(DOCKER_ID)"
-	@docker run -v $(PATH_TO_MOUNT):$(JM_HOME_IN_DOCKER) ${DOCKER_ID} sh -c \
-	"cd ${DOCKER_CONFIG_HOME} && make clean JM_HOME=$(JM_HOME_IN_DOCKER) USER_CONFIG=$(USER_CONFIG)"
 
 
 .PHONY:

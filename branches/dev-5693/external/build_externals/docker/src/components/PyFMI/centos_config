@@ -1,0 +1,26 @@
+PLATFORM=centos
+DIST_VERSION=7.4.1708
+PYTHON_VERSION=2.7
+BITNESS=64
+DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
+
+EXTRA_SETUP_ARGS="--no-msvcr=true"
+
+
+# PATH_TO_MOUNT is the path needed to mount JModelica into the Docker
+# Note you need to have double slash in the beginning
+
+# Also note you can override this from command line by writing:
+# make make_my_target PATH_TO_MOUNT=//my/custom/path/to/mount
+
+PATH_TO_MOUNT=//c/Users/x-robin.andersson/dev-5693
+
+JM_HOME=C:/Users/x-robin.andersson/dev-5693
+
+PLATFORM_SITE_PACKAGES=lib64/python2.7/site-packages
+
+# used by assimulo makefile
+WHEEL_INSTALL_DIR=/usr/lib64/python${PYTHON_VERSION}/site-packages/${TARGET}
+PYFMI_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/${TARGET}${BITNESS}/folder
+
+PYFMI_BUILD_DIR=

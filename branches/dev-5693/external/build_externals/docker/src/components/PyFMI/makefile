@@ -1,3 +1,28 @@
+
+include default_config
+include $(USER_CONFIG)
+include ../utils/docker_targets.mk
+
+$(TARGET)_dependencies: setup fmil
+
+fmil:
+	@echo "building fmil"
+	cd $(BUILD_EXTERNALS)/$@ && make install USER_CONFIG=$(DOCKER_CONFIG_HOME)/$(USER_CONFIG) BUILD_DIR=$(DOCKER_BUILD_DIR) JM_HOME=$(JM_HOME_IN_DOCKER)
+
+setup:
+	test -n "${JM_HOME}" # $$JM_HOME
+	test -n "${PATH_TO_MOUNT}" # $$PATH_TO_MOUNT
+	@mkdir -p $(BUILD_DIR)
+	@cp $(CONFIG_HOME)/default_config $(BUILD_DIR)
+	@cp $(CONFIG_HOME)/$(USER_CONFIG) $(BUILD_DIR)
+
+clean:
+	@ rm -rf $(BUILD_DIR)
+
+
+.PHONY:
+
+
 #
 #	Copyright (C) 2018 Modelon AB
 #
@@ -15,23 +40,3 @@
 #	and the Common Public License along with this program.  If not, 
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
-
-include default_config
-include $(USER_CONFIG)
-
-.PHONY: install
-
-#TODO: add dependency for libfmilib_shared.so
-
-$(FMIL_BUILD_DIR): 
-	mkdir -p $(FMIL_BUILD_DIR) && \
-	cd $(FMIL_BUILD_DIR) && \
-	cmake $(GENERATOR) $(EXTRA_CMAKE_FLAGS) -DFMILIB_INSTALL_PREFIX:PATH=$(FMIL_INSTALL) $(BUILD_EXTERNALS)/../FMILibrary/FMILibrary/
-
-install: $(FMIL_BUILD_DIR)
-	cd $(FMIL_BUILD_DIR) && make install DESTDIR=
-
-clean:
-	rm -rf $(FMIL_BUILD_DIR)
-
-clean_install: clean install

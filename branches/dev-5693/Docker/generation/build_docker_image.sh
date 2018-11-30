@@ -22,10 +22,12 @@ IMAGE_HASH="$(echo -n $PLATFORM $DIST_VERSION $TARGET $PYTHON_VERSION $DOCKER_NA
 # build image if not found among images
 if ! docker images | grep -q "$IMAGE_HASH" ; then
     mkdir -p $DOCKERFILE_DIR
-    cp $(dirname "$0")/generation/Dockerfile $DOCKERFILE_DIR
+    cp $(dirname "$0")/Dockerfile $DOCKERFILE_DIR
     echo -e $GREEN "\tbuild_docker_image: Running docker build with Dockerfile located in $DOCKERFILE_DIR..." $RESET
     echo -e $GREEN "\tbuild_docker_image: Tagging image with ${TAG_NAME}:${IMAGE_HASH}" $RESET
-    docker build -t "${TAG_NAME}:${IMAGE_HASH}" -f $DOCKERFILE_DIR/Dockerfile .
+    DOCKER_TAG_LOWERCASE=$(echo "${TAG_NAME}" | tr '[:upper:]' '[:lower:]')
+    echo ${DOCKER_TAG_LOWERCASE}
+    docker build -t "${DOCKER_TAG_LOWERCASE}:${IMAGE_HASH}" -f $DOCKERFILE_DIR/Dockerfile .
 else
     echo -e $GREEN "\tbuild_docker_image: Used cached image tagged with ${TAG_NAME}:${IMAGE_HASH}" $RESET
 fi

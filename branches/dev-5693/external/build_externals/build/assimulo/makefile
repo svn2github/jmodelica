@@ -1,3 +1,53 @@
+
+include default_config
+include $(USER_CONFIG)
+
+.PHONY: wheel folder
+
+test:
+	nosetests tests/*.pyc tests/solvers/*.pyc
+
+test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
+	@pip install $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)/*.whl
+	nosetests $(WHEEL_INSTALL_DIR)/tests/*.pyc $(WHEEL_INSTALL_DIR)/tests/solvers/*.pyc
+
+test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
+	nosetests $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/*.pyc $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
+
+folder: $(INSTALL_DIR_FOLDER)/folder
+
+$(INSTALL_DIR_FOLDER)/folder: 
+	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/folder_build)
+	mkdir -p $(TARGET_BUILD_DIR)
+	@$(eval TARGET_INSTALL_DIR=$(BUILD_DIR)/folder_install)
+	mkdir -p $(TARGET_INSTALL_DIR)
+	mkdir -p $@
+
+	cd $(ASSIMULO_SRC) && \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
+	cd $(TARGET_BUILD_DIR); \
+	$(PYTHONHOME)python setup.py install --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
+	
+	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES); \
+	find $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES) -type d -name assimulo -exec cp -r {} $@/ \;
+	rm -rf $(TARGET_BUILD_DIR) $(TARGET_INSTALL_DIR)
+
+wheel: $(INSTALL_DIR_FOLDER)/wheel
+
+$(INSTALL_DIR_FOLDER)/wheel:
+	@$(eval TARGET_BUILD_DIR=$(BUILD_DIR)/wheel_build)
+	mkdir -p $(TARGET_BUILD_DIR)
+	mkdir -p $@
+	cd $(ASSIMULO_SRC) && \
+	find . -type f | grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(TARGET_BUILD_DIR)
+	cd $(TARGET_BUILD_DIR); \
+	$(PYTHONHOME)python setup.py bdist_wheel --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS); \
+	find -type f -name Assimulo*.whl -exec cp {} $@/Assimulo-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;
+	rm -rf $(TARGET_BUILD_DIR)
+
+clean:
+	rm -rf $(BUILD_DIR)
+
 #
 #	Copyright (C) 2018 Modelon AB
 #
@@ -15,54 +65,3 @@
 #	and the Common Public License along with this program.  If not, 
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
-
-include default_config
-include $(USER_CONFIG)
-
-# check for invalid entries (file does not exist yet)
-#. check_configuration.sh
-.PHONY: folder wheel
-
-test:
-	nosetests tests/*.pyc tests/solvers/*.pyc
-
-test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
-	@echo -e "\e[33m" "Got WHEEL_INSTALL_DIR=$(WHEEL_INSTALL_DIR)" "\e[0m"
-	@pip install $(INSTALL_DIR_FOLDER)/$(TARGET)/$(subst test_,,$@)/*.whl
-	nosetests $(WHEEL_INSTALL_DIR)/tests/*.pyc $(WHEEL_INSTALL_DIR)/tests/solvers/*.pyc
-
-
-test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
-	@echo  -e "\e[33m" "Got ASSIMULO_FOLDER_INSTALL_DIR=$(ASSIMULO_FOLDER_INSTALL_DIR)" "\e[0m"
-	nosetests $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/*.pyc $(ASSIMULO_FOLDER_INSTALL_DIR)/tests/solvers/*.pyc
-
-folder: $(INSTALL_DIR_FOLDER)/folder
-
-$(INSTALL_DIR_FOLDER)/folder: LOCAL_BUILD_DIR=$(BUILD_DIR)/ASSIMULO_FOLDERBUILD_$(BITNESS)
-$(INSTALL_DIR_FOLDER)/folder: LOCAL_INSTALL_DIR=$(BUILD_DIR)/ASSIMULO_FOLDERINSTALL_$(BITNESS)
-$(INSTALL_DIR_FOLDER)/folder: 
-	mkdir -p ${LOCAL_BUILD_DIR}; \
-	mkdir -p ${LOCAL_INSTALL_DIR}; \
-	cd $(ASSIMULO_SRC)/../; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR); \
-	cd $(LOCAL_BUILD_DIR)/Assimulo; \
-	$(PYTHONHOME)python setup.py install --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(LOCAL_INSTALL_DIR)
-	cd $(LOCAL_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES); \
-	mkdir -p $@
-	find $(LOCAL_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES) -type d -name assimulo -exec cp -r {} $@ \;
-
-wheel: $(INSTALL_DIR_FOLDER)/wheel
-
-$(INSTALL_DIR_FOLDER)/wheel: LOCAL_BUILD_DIR=$(BUILD_DIR)/ASSIMULO_WHEELBUILD_$(BITNESS)
-$(INSTALL_DIR_FOLDER)/wheel:
-	mkdir -p ${LOCAL_BUILD_DIR}
-	cd $(ASSIMULO_SRC)/../; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(LOCAL_BUILD_DIR)
-	cd $(LOCAL_BUILD_DIR)/Assimulo; \
-	$(PYTHONHOME)python setup.py bdist_wheel --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS)
-	mkdir -p $@
-	find $(LOCAL_BUILD_DIR)/Assimulo -type f -name Assimulo*.whl -exec cp {} $@/Assimulo-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;
-
-clean:
-	rm -rf $(BUILD_DIR)/ASSIMULO_WHEELBUILD_$(BITNESS)
-	rm -rf $(BUILD_DIR)/ASSIMULO_FOLDERBUILD_$(BITNESS)

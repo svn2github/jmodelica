@@ -16,17 +16,10 @@
 #	see <http://www.gnu.org/licenses/> or 
 #	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 
-PLATFORM=ubuntu
-DIST_VERSION=18.04
-BUILD_TARGET=PyFMI_Docker
-DOCKER_ENV=1
 BITNESS=64
-
-#JM_HOME=C:/Users/x-robin.andersson/dev-5693
-#JM_HOME_IN_DOCKER=/tmp/jm_home
-BUILD_ENVIRONMENT=${JM_HOME}/build_environment
-BUILD_EXTERNALS_DIR=${JM_HOME}/external/build_externals
-BUILD_DIR=${JM_HOME}/${PLATFORM}_${DIST_VERSION}/build
-FMIL_BUILD_DIR=${BUILD_DIR}/fmil
+EXTRA_CMAKE_FLAGS=-DCMAKE_C_FLAGS="-m${BITNESS}" -DCMAKE_CXX_FLAGS="-m${BITNESS}" -DCMAKE_SHARED_LINKER_FLAGS="-m${BITNESS}" -DCMAKE_EXE_LINKER_FLAGS="-m${BITNESS}"
+BUILD_EXTERNALS=${JM_HOME}/external/build_externals
+BUILD_DIR=${DISTRO}/build
+FMIL_BUILD_DIR=${BUILD_DIR}/build_fmil
 FMIL_INSTALL=${BUILD_DIR}/fmil_install
 
