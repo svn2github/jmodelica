@@ -26,3 +26,4 @@ WHEEL_INSTALL_DIR=/usr/local/lib/python${PYTHON_VERSION}/dist-packages/pyfmi
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
 PYFMMI_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/pyfmi${BITNESS}/folder/pyfmi
+FMIL_INSTALL=${JM_HOME}/${DISTRO}/${TARGET}${BITNESS}/fmil_install
