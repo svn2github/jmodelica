@@ -18,6 +18,6 @@ properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKe
 node("JMODELICA-SDK-1.13.2") {
     checkoutJM("${JM_SVN_PATH}")
     buildFMILibrary(null, null, "${pwd()}/install")
-    buildPyFMI(null, null, "${pwd()}/install", "pyfmi_folder")
-    buildPyFMI(null, null, "${pwd()}/install", "pyfmi_wheel")
+    buildPyFMI(null, null, "${pwd()}/install", "folder")
+    buildPyFMI(null, null, "${pwd()}/install", "wheel")
 }

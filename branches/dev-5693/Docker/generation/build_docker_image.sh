@@ -23,6 +23,7 @@ IMAGE_HASH="$(echo -n $PLATFORM $DIST_VERSION $TARGET $PYTHON_VERSION $DOCKER_NA
 if ! docker images | grep -q "$IMAGE_HASH" ; then
     mkdir -p $DOCKERFILE_DIR
     cp $(dirname "$0")/Dockerfile $DOCKERFILE_DIR
+
     echo -e $GREEN "\tbuild_docker_image: Running docker build with Dockerfile located in $DOCKERFILE_DIR..." $RESET
     echo -e $GREEN "\tbuild_docker_image: Tagging image with ${TAG_NAME}:${IMAGE_HASH}" $RESET
     DOCKER_TAG_LOWERCASE=$(echo "${TAG_NAME}" | tr '[:upper:]' '[:lower:]')

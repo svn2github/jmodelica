@@ -1,6 +1,6 @@
 OS=linux
-PLATFORM=centos
-DIST_VERSION=7.4.1708
+PLATFORM=ubuntu
+DIST_VERSION=18.04
 PYTHON_VERSION=2.7
 BITNESS=64
 
@@ -16,13 +16,13 @@ BITNESS=64
 
 #   for CentOS set to lib64/python${PYTHON_VERSION}/site-packages
 #   for Ubuntu set to lib/python${PYTHON_VERSION}/site-packages
-PLATFORM_SITE_PACKAGES=lib64/python${PYTHON_VERSION}/site-packages
+PLATFORM_SITE_PACKAGES=lib/python${PYTHON_VERSION}/site-packages
 
-#   for CentOS set to /usr/lib64/python${PYTHON_VERSION}/site-packages/assimulo
-#   for Ubuntu set to /usr/local/lib/python${PYTHON_VERSION}/dist-packages/assimulo
-WHEEL_INSTALL_DIR=/usr/lib64/python${PYTHON_VERSION}/site-packages/assimulo
+#   for CentOS set to /usr/lib64/python${PYTHON_VERSION}/site-packages/pyfmi
+#   for Ubuntu set to /usr/local/lib/python${PYTHON_VERSION}/dist-packages/pyfmi
+WHEEL_INSTALL_DIR=/usr/local/lib/python${PYTHON_VERSION}/dist-packages/pyfmi
 
 
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
-ASSIMULO_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo${BITNESS}/folder/assimulo
+PYFMMI_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/pyfmi${BITNESS}/folder/pyfmi

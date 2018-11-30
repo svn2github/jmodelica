@@ -1,3 +1,4 @@
+OS=linux
 PLATFORM=centos
 DIST_VERSION=7.4.1708
 PYTHON_VERSION=2.7
@@ -22,4 +23,4 @@ PLATFORM_SITE_PACKAGES=lib64/python2.7/site-packages
 FMIL_INSTALL=${JM_HOME}/${DISTRO}/${TARGET}${BITNESS}/fmil_install
 
 WHEEL_INSTALL_DIR=/usr/lib64/python${PYTHON_VERSION}/site-packages/${TARGET}
-PYFMI_FOLDER_INSTALL_DIR="set this path when implementing test"
+PYFMI_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/pyfmi${BITNESS}/folder/pyfmi

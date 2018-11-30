@@ -33,7 +33,7 @@ docker_base_$(TARGET):
 	    CONFIG=$(BUILD_DIR)/default_config \
 	    USER_CONFIG=$(BUILD_DIR)/$(USER_CONFIG) \
 	    TAG_NAME=base_$(TARGET)$(DOCKER_NAME_SUFFIX) \
-	    DOCKERFILE_DIR=$(DOCKER_BUILD_DIR) \
+	    DOCKERFILE_DIR=$(BUILD_DIR) \
 	    $(DOCKER_UTILS)/build_docker_image.sh 
 
 docker_setup:

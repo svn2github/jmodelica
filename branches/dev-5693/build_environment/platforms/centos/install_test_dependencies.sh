@@ -4,7 +4,7 @@ set -e
 
 
 pip install --upgrade setuptools
-pip install scipy
+pip install scipy lxml
 yum install -y python-matplotlib
 yum install -y libgomp
 sed -i "/^backend/c\\backend:Agg" $(python -c "import matplotlib;print(matplotlib.matplotlib_fname())")

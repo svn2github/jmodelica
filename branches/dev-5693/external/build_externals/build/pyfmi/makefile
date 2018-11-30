@@ -30,7 +30,7 @@ $(INSTALL_DIR_FOLDER)/folder:
 	    $(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
 
 	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES) && \
-	    find -type d -name pyfmi -exec cp -r {} $@/ \;
+	    find -type d -name pyfmi -exec cp -r {} $@/PyFMI-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;
 	rm -rf $(TARGET_BUILD_DIR) $(TARGET_INSTALL_DIR)
 
 wheel: $(INSTALL_DIR_FOLDER)/wheel

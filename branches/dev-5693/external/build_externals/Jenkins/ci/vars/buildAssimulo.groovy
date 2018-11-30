@@ -25,7 +25,7 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             JENKINS_BUILD_DIR="\$(pwd)/build"
             cd \${JM_HOME}/external/build_externals/build/assimulo
             
-            make clean BUILD_DIR=\${JENKINS_BUILD_DIR} BITNESS=${bit}
+            make clean BUILD_DIR=\${JENKINS_BUILD_DIR}/assimulo* BITNESS=${bit}
             make ${TARGET} USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/Assimulo/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} BLAS_HOME=${BLAS_HOME_BASE}${bit} SUNDIALS_HOME=${SUNDIALS_HOME_BASE}${bit} LAPACK_HOME=${LAPACK_HOME_BASE}${bit} SUPERLU_HOME=${SUPERLU_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/assimulo/${TARGET}/Python_${bit}
             """);
             if (stash || archive) {

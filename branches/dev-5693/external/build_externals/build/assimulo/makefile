@@ -24,7 +24,7 @@ $(INSTALL_DIR_FOLDER)/folder:
 	mkdir -p $@
 
 	cd $(ASSIMULO_SRC) && \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
+	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
 	$(PYTHONHOME)python setup.py install --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
 	
@@ -39,7 +39,7 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	mkdir -p $(TARGET_BUILD_DIR)
 	mkdir -p $@
 	cd $(ASSIMULO_SRC) && \
-	find . -type f | grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(TARGET_BUILD_DIR)
+	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - -f - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
 	$(PYTHONHOME)python setup.py bdist_wheel --with_openmp=True --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS); \
 	find -type f -name Assimulo*.whl -exec cp {} $@/Assimulo-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;

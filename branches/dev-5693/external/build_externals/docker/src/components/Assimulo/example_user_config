@@ -1,3 +1,4 @@
+OS=linux
 PLATFORM=# set to ubuntu or centos
 DIST_VERSION=# set to distribution platform, example 18.04 for ubuntu, 7.4.1708 for centos
 PYTHON_VERSION=# set to 2.7, currently we only support 2.7
