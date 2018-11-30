@@ -24,4 +24,4 @@ WHEEL_INSTALL_DIR=/usr/lib64/python${PYTHON_VERSION}/site-packages/assimulo
 
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
-ASSIMULO_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo/folder/assimulo
+ASSIMULO_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo${BITNESS}/folder/assimulo
