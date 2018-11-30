@@ -2,6 +2,7 @@ OS=linux
 PLATFORM=ubuntu
 DIST_VERSION=18.04
 PYTHON_VERSION=2.7
+TARGET=pyfmi
 BITNESS=64
 
 
@@ -25,5 +26,5 @@ WHEEL_INSTALL_DIR=/usr/local/lib/python${PYTHON_VERSION}/dist-packages/pyfmi
 
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
-PYFMMI_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/pyfmi${BITNESS}/folder/pyfmi
+PYFMI_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/pyfmi${BITNESS}/folder/pyfmi
 FMIL_INSTALL=${JM_HOME}/${DISTRO}/${TARGET}${BITNESS}/fmil_install
