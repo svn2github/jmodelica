@@ -14,7 +14,14 @@ currentBuild.displayName += " (" + (env.TRIGGER_CAUSE == null ? "MANUAL" : env.T
 
 // Set discard policy
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: ''))])
-
+node ('docker') {
+    sh 'docker run -v /home/jenkins/internal/workspace/OCTTeam/PyFMI_standalone/JModelica:/tmp/jm_home centos:7.4.1708 sh -c "rm -rf /tmp/jm_home/centos*"'
+    checkoutJM("${JM_SVN_PATH}")
+    buildPyFMIDocker("centos", "wheel",  "jenkins_centos_config")
+    buildPyFMIDocker("centos", "folder", "jenkins_centos_config")
+    buildPyFMIDocker("ubuntu", "wheel",  "jenkins_ubuntu_config")
+    buildPyFMIDocker("ubuntu", "folder", "jenkins_ubuntu_config")
+}
 node("JMODELICA-SDK-1.13.2") {
     checkoutJM("${JM_SVN_PATH}")
     buildFMILibrary(null, null, "${pwd()}/install")
