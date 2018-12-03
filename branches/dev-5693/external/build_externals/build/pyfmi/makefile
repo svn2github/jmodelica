@@ -12,7 +12,6 @@ test_wheel: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
 	nosetests $(WHEEL_INSTALL_DIR)/tests/*.py
 
 test_folder: $(INSTALL_DIR_FOLDER)/$(subst test_,,$@)
-	@pip install lxml
 	nosetests $(PYFMI_FOLDER_INSTALL_DIR)/tests/*.pyc
 
 folder: $(INSTALL_DIR_FOLDER)/folder
@@ -30,7 +29,7 @@ $(INSTALL_DIR_FOLDER)/folder:
 	    $(PYTHONHOME)python setup.py install --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --prefix=$(TARGET_INSTALL_DIR)
 
 	cd $(TARGET_INSTALL_DIR)/$(PLATFORM_SITE_PACKAGES) && \
-	    find -type d -name pyfmi -exec cp -r {} $@/PyFMI-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;
+	    find -type d -name pyfmi -exec cp -r {} $@/ \;
 	rm -rf $(TARGET_BUILD_DIR) $(TARGET_INSTALL_DIR)
 
 wheel: $(INSTALL_DIR_FOLDER)/wheel
