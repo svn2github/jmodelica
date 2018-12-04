@@ -26,3 +26,4 @@ WHEEL_INSTALL_DIR=/usr/local/lib/python${PYTHON_VERSION}/dist-packages/assimulo
 # Dont modify the variables below
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
 ASSIMULO_FOLDER_INSTALL_DIR=${JM_HOME}/${DISTRO}/assimulo${BITNESS}/folder/assimulo
+EXTRA_SETUP_ARGS=--with_openmp=True

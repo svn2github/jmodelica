@@ -20,7 +20,7 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 BITNESS=32
-EXTRA_SETUP_ARGS=--no-msvcr=true --force-32bit=true --extra-c-flags=-mincoming-stack-boundary=2
+EXTRA_SETUP_ARGS=--with_openmp=True --no-msvcr=true --force-32bit=true --extra-c-flags=-mincoming-stack-boundary=2
 
 SUPERLU_HOME=$(BUILD_DIR)/superlu_install32
 SUNDIALS_HOME=$(BUILD_DIR)/sundials_install32

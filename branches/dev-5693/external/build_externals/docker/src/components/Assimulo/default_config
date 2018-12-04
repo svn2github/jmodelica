@@ -5,6 +5,7 @@ PYTHON_VERSION=2.7
 TARGET=assimulo
 BITNESS=64
 DISTRO=${PLATFORM}_${DIST_VERSION}_${PYTHON_VERSION}
+EXTRA_SETUP_ARGS=--with_openmp=True
 
 # used to be able to parallelize jobs with CI by overriding this
 DOCKER_NAME_SUFFIX=""

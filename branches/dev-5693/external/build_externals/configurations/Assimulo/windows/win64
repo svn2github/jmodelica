@@ -21,7 +21,7 @@ mkfile_dir := $(dir $(mkfile_path))
 include $(mkfile_dir)/win
 BITNESS=64
 FORCE_32_BIT=false
-EXTRA_SETUP_ARGS=--no-msvcr=true
+EXTRA_SETUP_ARGS=--no-msvcr=true --with_openmp=False
 
 INSTALL_DIR_FOLDER=${SDK_HOME}/install/Python_64
 SUPERLU_HOME=$(BUILD_DIR)/superlu_install64
