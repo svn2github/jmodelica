@@ -437,39 +437,7 @@ aspect CCodeGenFunctionCall {
     @Override
     public void FunctionCallParameterComputation.print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
             String indent, ArrayList<FFunctionVariable> variables, ArrayList<FFunctionCallLeft> args) {
-        if(call.functionCallIsExp()) {
-            //TODO: this has the same structure as the ParameterComputation in prettyPrintWrapped, except we pass along an extra FExp parameter 'call' to print
-            int i = 0;
-            for (FFunctionVariable v : variables) {
-                if (i>0 && v.isOutput()){
-                    str.print(sep);
-                    str.print("NULL");
-                } else {
-                    p.print(v, call, str, indent, this);
-                }
-                sep = ", ";
-                i++;
-            }
-        } else {
-           //TODO this branch is similar to prettyPrintOutputs
-            int i = 0;
-            for (FFunctionCallLeft arg : args) {
-                p.print(variables.get(i), arg, str, indent, this);
-                sep = ", ";
-                i++;
-            }
-            while (i<variables.size()) {
-                FFunctionVariable v = variables.get(i);
-                if (i==0 && args.isEmpty() && call.isFunctionCallArg() && v.isOutput()) {
-                    p.print(v, call, str, indent, this);
-                } else {
-                    str.print(sep);
-                    str.print("NULL");
-                }
-                sep = ", ";
-                i++;
-            }
-        }
+        printGeneric(p, str, indent, variables, args, call);
     }
 
     public void HeadComputation.print(FFunctionVariable v, FFunctionCallLeft arg, 
@@ -508,22 +476,39 @@ aspect CCodeGenFunctionCall {
             @Override
             public void print(CodePrinter.ExecuteCodePrinter p, CodeStream str,
                     String indent, ArrayList<FFunctionVariable> variables) {
-                //TODO very similar to prettyPrintCallOutputs_C
-                int i = 0;
-                for (FFunctionVariable v : variables) {
-                    if (i>0 && v.isOutput()){
-                        str.print(sep);
-                        str.print("NULL");
-                    } else {
-                        p.print(v, str, indent, this);
-                    }
-                    sep = ", ";
-                    i++;
-                }
+                printGeneric(p, str, indent, variables);
             }
         }
         .prettyPrintHead(this, p, str, indent, C_SUFFIX_DEF, myOutputs().size() > 0);
         str.print(";\n");
     }
 
+    public void ParameterComputation.printGeneric(CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            String indent, ArrayList<FFunctionVariable> variables) {
+        printGeneric(p, str, indent, variables, Collections.<FFunctionCallLeft>emptySet(), null);
+    }
+
+    public void ParameterComputation.printGeneric(CodePrinter.ExecuteCodePrinter p, CodeStream str,
+            String indent, ArrayList<FFunctionVariable> variables, Collection<FFunctionCallLeft> args, 
+            FFunctionCall call) {
+        int i = 0;
+        for (FFunctionCallLeft arg : args) {
+            p.print(variables.get(i), arg, str, indent, this);
+            sep = ", ";
+            i++;
+        }
+        boolean empty = call != null && !call.functionCallIsExp() && !call.isFunctionCallArg();
+        while (i < variables.size()) {
+            FFunctionVariable v = variables.get(i);
+            if (empty || (i > 0 && v.isOutput())) {
+                p.printEmptyOutput(v, str, indent, sep);
+            } else if (call != null) {
+                p.print(v, call, str, indent, this);
+            } else {
+                p.print(v, str, indent, this);
+            }
+            sep = ", ";
+            i++;
+        }
+    }
 }
