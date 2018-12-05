@@ -15,6 +15,12 @@ def call(JM_CHECKOUT_PATH, JM_BRANCH, INSTALL_PATH, TARGET, bitness=["32", "64"]
             make clean BUILD_DIR=\${JENKINS_BUILD_DIR} BITNESS=${bit}
             make ${TARGET} USER_CONFIG=\${JM_HOME}/external/build_externals/configurations/PyFMI/windows/win${bit} JM_HOME=\${JM_HOME} BUILD_DIR=\${JENKINS_BUILD_DIR} FMIL_INSTALL=${FMIL_HOME_BASE}${bit} INSTALL_DIR_FOLDER=${INSTALL_PATH_UNIX}/${TARGET}/Python_${bit}
             """);
+            if ("${TARGET}" == "folder") {
+               runMSYSWithEnv("""\
+                export JM_HOME="\$(pwd)/JModelica/"
+                nosetests \$(pwd)/install/folder/Python_${bit}/folder/pyfmi/tests/*.py
+                ""","", false, bit); 
+            }
             if (stash || archive) {
                 dir("${INSTALL_PATH}/${TARGET}") {
                     if (stash) {
