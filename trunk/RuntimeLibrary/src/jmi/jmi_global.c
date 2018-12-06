@@ -52,18 +52,11 @@ DWORD jmi_tls_handle;
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
     switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
+        /* TODO: Handle failure. */
         jmi_tls_handle = TlsAlloc();
-        if (jmi_tls_handle == TLS_OUT_OF_INDEXES) {
-            DWORD error_id = GetLastError();
-            fprintf(stderr, "FATAL: Failed to get a thread-local storage id (errno: %d)\n", error_id);
-            return FALSE;
-        }
         break;
     case DLL_PROCESS_DETACH:
-        if (jmi_tls_handle != TLS_OUT_OF_INDEXES && TlsFree(jmi_tls_handle) == 0) {
-            DWORD error_id = GetLastError();
-            fprintf(stderr, "Failed to release a thread-local storage id (handle: %d) (errno: %d)\n", jmi_tls_handle, error_id);
-        }
+        TlsFree(jmi_tls_handle);
         break;
     default:
         break;
