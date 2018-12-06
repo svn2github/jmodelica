@@ -41,8 +41,8 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	cd $(ASSIMULO_SRC) && \
 	find . -type f | grep -v -E '/.svn|.pyc' |tar c -T - -f - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR); \
-	$(PYTHONHOME)python setup.py bdist_wheel --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS); \
-	find -type f -name Assimulo*.whl -exec cp {} $@/Assimulo-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;
+	$(PYTHONHOME)python setup.py bdist_wheel --version=$(WHEEL_VERSION_NUMBER) --superlu-home=$(SUPERLU_HOME) --sundials-home=$(SUNDIALS_HOME) --sundials-with-superlu=True --blas-home=$(BLAS_HOME) --lapack-home=$(LAPACK_HOME) $(EXTRA_SETUP_ARGS); \
+	find -type f -name Assimulo*.whl -exec cp {} $@/ \;
 	rm -rf $(TARGET_BUILD_DIR)
 
 clean:
