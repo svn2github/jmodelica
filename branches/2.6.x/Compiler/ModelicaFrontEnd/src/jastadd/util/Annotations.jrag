@@ -103,12 +103,20 @@ aspect AnnotationAPI {
         return annotationExp(exp).ceval();
     }
 
+    public CValue InstExternal.ceval(SrcExp exp) {
+      return surroundingInstClass().ceval(exp);
+    }
+
     /**
      * If exp is an access, try to look it up as a class in the scope of this node, 
      * otherwise return null.
      */
     public InstLookupResult<InstClassDecl> InstNode.lookupInstClass(SrcExp exp) {
         return annotationExp(exp).lookupInstClassIfAccess();
+    }
+
+    public InstLookupResult<InstClassDecl> InstExternal.lookupInstClass(SrcExp exp) {
+        return surroundingInstClass().lookupInstClass(exp);
     }
 
     /**
@@ -129,6 +137,10 @@ aspect AnnotationAPI {
      */
     public InstLookupResult<InstComponentDecl> InstNode.lookupInstComponent(SrcExp exp) {
         return annotationExp(exp).lookupInstComponentIfAccess();
+    }
+
+    public InstLookupResult<InstComponentDecl> InstExternal.lookupInstComponent(SrcExp exp) {
+        return surroundingInstClass().lookupInstComponent(exp);
     }
 
     /**
@@ -402,12 +414,14 @@ aspect AnnotationAPI {
      * Proxy object for evaluating an expression from the source tree.
      */
     public interface InstContext {
-        public CValue ceval(SrcExp exp);
-        public InstLookupResult<InstClassDecl>     lookupInstClass(SrcExp exp);
-        public InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp);
+        CValue ceval(SrcExp exp);
+        InstLookupResult<InstClassDecl>     lookupInstClass(SrcExp exp);
+        InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp);
+        FExp dynamicFExp(FExp exp);
     }
 
     InstNode implements InstContext;
+    InstExternal implements InstContext;
 
     /**
      * Describes a node in the tree formed by an annotation.
@@ -442,6 +456,10 @@ aspect AnnotationAPI {
             }
 
             public InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp) {
+                return null;
+            }
+            
+            public FExp dynamicFExp(FExp exp) {
                 return null;
             }
         };
