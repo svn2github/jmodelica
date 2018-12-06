@@ -65,9 +65,27 @@ aspect FlatStatements {
 
     public boolean FAssignStmt.flatten(Flattener f, List<FStatement> sl) {
         addForIndexRangeAsserts(f, sl);
-        sl.add(new FAssignStmt((FAssignableExp)getLeft().flatten(f), getRight().flatten(f)));
+        if (scalarizedAsFFunctionCallStmt()) {
+            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+            lefts.add(new FFunctionCallLeft(new Opt<FExp>(getLeft().flatten(f))));
+            sl.add(new FFunctionCallStmt(lefts, (FAbstractFunctionCall) getRight().flatten(f)));
+        } else {
+            sl.add(new FAssignStmt((FAssignableExp)getLeft().flatten(f), getRight().flatten(f)));
+        }
         return false;
     }
+
+    syn boolean FAssignStmt.scalarizedAsFFunctionCallStmt() =
+            getRight().isNonVectorizedFunctionCall() && getLeft().type().isComposite() && 
+            inFunction() && !getLeft().isSlice();
+    syn boolean InstAssignable.scalarizedAsFFunctionCallStmt() = 
+            getBindingFExp().isNonVectorizedFunctionCall() && type().isComposite();
+    
+    syn boolean FExp.isNonVectorizedFunctionCall()          = false;
+    eq InstFunctionCall.isNonVectorizedFunctionCall()       = true;
+    eq InstVectorFunctionCall.isNonVectorizedFunctionCall() = false;
+    eq FFunctionCall.isNonVectorizedFunctionCall()          = true;
+    eq FVectorFunctionCall.isNonVectorizedFunctionCall()    = false;
 
     public boolean FInitArrayStmt.flatten(Flattener f, List<FStatement> sl){
         throw new UnsupportedOperationException();

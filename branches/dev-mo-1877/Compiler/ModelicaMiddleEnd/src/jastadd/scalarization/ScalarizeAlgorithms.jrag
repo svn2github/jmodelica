@@ -34,46 +34,25 @@ aspect AlgorithmScalarization {
         FAssignableExp left = getLeft();
         FExp right = getRight();
         
-        if (scalarizedAsFFunctionCallStmt()) {
-            // Special case, Function call stmt
-            FFunctionCall call = (FFunctionCall) right;
-            s.createScalarizedFunctionCallClause(left, call);
-        } else {
-            FType t = left.size().isUnknown() ? left.type() : right.type();
-            if (extractTemp()) {
-                s.addTempVar(this);
-                CommonAccessExp temp = getRight().tempExp(tempVarName());
-                t.scalarizeAssignment(s, temp, right);
-                right = temp;
-            }
-            t.scalarizeAssignment(s, left, right);
+        FType t = left.size().isUnknown() ? left.type() : right.type();
+        if (extractTemp()) {
+            s.addTempVar(this);
+            CommonAccessExp temp = getRight().tempExp(tempVarName());
+            t.scalarizeAssignment(s, temp, right);
+            right = temp;
         }
+        t.scalarizeAssignment(s, left, right);
     }
-    
-    
-    syn boolean FAssignStmt.scalarizedAsFFunctionCallStmt() = 
-            getRight().isNonVectorizedFunctionCall() && getLeft().type().isComposite() && 
-            inFunction() && !getLeft().isSlice();
-    
-    syn boolean FExp.isNonVectorizedFunctionCall()          = false;
-    eq InstFunctionCall.isNonVectorizedFunctionCall()       = true;
-    eq InstVectorFunctionCall.isNonVectorizedFunctionCall() = false;
-    eq FFunctionCall.isNonVectorizedFunctionCall()          = true;
-    eq FVectorFunctionCall.isNonVectorizedFunctionCall()    = false;
     
     @Override
     public void FFunctionCallStmt.scalarize(Scalarizer.Algorithm s) {
-        FFunctionCallStmt stmt = new FFunctionCallStmt();
-        getCall().createArrayTemporaries(s);
-        getLefts().createArrayTemporaries(s);
-        s.add(stmt);
-        s.setWriteBack(true);
-        getLefts().createArrayTemporaries(s);
-        s.setWriteBack(false);
-        for (FFunctionCallLeft left : getLefts()) {
-            stmt.addLeft(left.scalarize(s));
+        if (getCall().isOperatorWithoutOutputs()) {
+            createArrayTemporaries(s);
+            getCall().scalarizeOperatorWithoutOutputs(s);
+        } else {
+            getCall().createArrayTemporaries(s);
+            getLefts().createArrayTemporaries(s);
         }
-        stmt.setCall((FAbstractFunctionCall) getCall().scalarizeExp(s));
     }
     
     @Override
@@ -137,9 +116,7 @@ aspect AlgorithmScalarization {
         stmt.setTest(getTest().scalarize(s));
         Scalarizer.Algorithm sb = s.block(l);
         FStatement.scalarizeStmtList(sb, getWhileStmts());
-        sb.setWriteBack(true);
         getTest().createArrayTemporaries(sb);
-        sb.setWriteBack(false);
         stmt.setWhileStmtList(l);
         s.add(stmt);
     }

@@ -1067,9 +1067,6 @@ annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="Algorithm10",
         description="C code generation of slices in function call assignments",
-        algorithms_as_functions=false,
-        generate_ode=true,
-        equation_sorting=true,
         inline_functions="none",
         variability_propagation=false,
         eliminate_alias_variables=false,
@@ -1082,8 +1079,8 @@ void func_CCodeGenAlgorithmTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_real_
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, o_an, 5, 1)
     JMI_DEF(REA, dummy_v)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, o_an, 5, 1, 5)
         o_a = o_an;
@@ -1092,13 +1089,13 @@ void func_CCodeGenAlgorithmTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_real_
     jmi_array_ref_1(o_a, 1) = 1;
     jmi_array_ref_1(o_a, 3) = 1;
     jmi_array_ref_1(o_a, 5) = 1;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = jmi_array_val_1(o_a, 3);
-    jmi_array_ref_1(tmp_2, 2) = jmi_array_val_1(o_a, 5);
-    func_CCodeGenAlgorithmTests_Algorithm10_f_def1(tmp_2, tmp_1, NULL);
-    jmi_array_ref_1(o_a, 2) = (jmi_array_val_1(tmp_1, 1));
-    jmi_array_ref_1(o_a, 4) = (jmi_array_val_1(tmp_1, 2));
+    jmi_array_ref_1(tmp_1, 1) = jmi_array_val_1(o_a, 3);
+    jmi_array_ref_1(tmp_1, 2) = jmi_array_val_1(o_a, 5);
+    func_CCodeGenAlgorithmTests_Algorithm10_f_def1(tmp_1, temp_1_a, NULL);
+    jmi_array_ref_1(o_a, 2) = jmi_array_val_1(temp_1_a, 1);
+    jmi_array_ref_1(o_a, 4) = jmi_array_val_1(temp_1_a, 2);
     JMI_RET(GEN, dummy_o, dummy_v)
     JMI_DYNAMIC_FREE()
     return;

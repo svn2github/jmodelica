@@ -935,19 +935,19 @@ public
   Real[:] a;
   output Real y;
   Real[:] temp_1;
-  Real[:] temp_2;
-  Integer[:] temp_3;
+  Integer[:] temp_2;
+  Real[:] temp_3;
  algorithm
   init a as Real[d];
   init temp_1 as Real[d];
-  init temp_2 as Real[d];
-  init temp_3 as Integer[d];
+  init temp_2 as Integer[d];
   for i2 in 1:d loop
-   temp_3[i2] := 1;
+   temp_2[i2] := 1;
   end for;
-  (temp_2) := VectorizedFunctionTests.Nested.f(temp_3);
+  init temp_3 as Real[d];
+  (temp_3) := VectorizedFunctionTests.Nested.f(temp_2);
   for i1 in 1:d loop
-   temp_1[i1] := VectorizedFunctionTests.Nested.g(temp_2[i1]);
+   temp_1[i1] := VectorizedFunctionTests.Nested.g(temp_3[i1]);
   end for;
   for i1 in 1:d loop
    a[i1] := temp_1[i1];
@@ -1013,19 +1013,19 @@ public
   Real[:] a;
   output Real y;
   Real[:] temp_1;
-  Real[:] temp_2;
-  Integer[:] temp_3;
+  Integer[:] temp_2;
+  Real[:] temp_3;
  algorithm
   init a as Real[d];
   init temp_1 as Real[d];
-  init temp_2 as Real[d];
-  init temp_3 as Integer[d];
+  init temp_2 as Integer[d];
   for i2 in 1:d loop
-   temp_3[i2] := 1;
+   temp_2[i2] := 1;
   end for;
-  (temp_2) := VectorizedFunctionTests.Nested.f(temp_3);
+  init temp_3 as Real[d];
+  (temp_3) := VectorizedFunctionTests.Nested.f(temp_2);
   for i1 in 1:d loop
-   temp_1[i1] := VectorizedFunctionTests.Nested.g(temp_2[i1]);
+   temp_1[i1] := VectorizedFunctionTests.Nested.g(temp_3[i1]);
   end for;
   (a) := VectorizedFunctionTests.Nested.f(temp_1);
   y := 1;
@@ -1090,23 +1090,23 @@ public
   output Real y;
   Real[:] temp_1;
   Real[:] temp_2;
-  Real[:] temp_3;
-  Integer[:] temp_4;
+  Integer[:] temp_3;
+  Real[:] temp_4;
  algorithm
   init a as Real[d];
   init temp_1 as Real[d];
   init temp_2 as Real[d];
-  init temp_3 as Real[d];
-  init temp_4 as Integer[d];
+  init temp_3 as Integer[d];
   for i3 in 1:d loop
-   temp_4[i3] := 1;
+   temp_3[i3] := 1;
   end for;
   for i2 in 1:d loop
-   temp_3[i2] := VectorizedFunctionTests.Nested.g(temp_4[i2]);
+   temp_2[i2] := VectorizedFunctionTests.Nested.g(temp_3[i2]);
   end for;
-  (temp_2) := VectorizedFunctionTests.Nested.f(temp_3);
+  init temp_4 as Real[d];
+  (temp_4) := VectorizedFunctionTests.Nested.f(temp_2);
   for i1 in 1:d loop
-   temp_1[i1] := VectorizedFunctionTests.Nested.g(temp_2[i1]);
+   temp_1[i1] := VectorizedFunctionTests.Nested.g(temp_4[i1]);
   end for;
   for i1 in 1:d loop
    a[i1] := temp_1[i1];

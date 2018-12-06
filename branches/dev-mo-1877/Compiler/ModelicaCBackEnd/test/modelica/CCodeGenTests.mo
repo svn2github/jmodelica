@@ -17452,7 +17452,6 @@ void func_CCodeGenTests_FuncInitOrder_h_def0(jmi_array_t* x_a, jmi_real_t* y_o) 
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_2_a, -1, 1)
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_3_a, -1, 1)
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_4_a, -1, 1)
-    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, temp_5_a, -1, 1)
     jmi_real_t i2_0i;
     jmi_int_t i2_0ie;
     jmi_int_t i2_0in;
@@ -17465,31 +17464,31 @@ void func_CCodeGenTests_FuncInitOrder_h_def0(jmi_array_t* x_a, jmi_real_t* y_o) 
     jmi_real_t i1_3i;
     jmi_int_t i1_3ie;
     jmi_int_t i1_3in;
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_2_a, func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a), 1, func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a))
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_3_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_2_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
     i2_0in = 0;
     i2_0ie = floor((jmi_array_size(x_a, 0)) - (1));
     for (i2_0i = 1; i2_0in <= i2_0ie; i2_0i = 1 + (++i2_0in)) {
-        jmi_array_ref_1(temp_3_a, i2_0i) = jmi_array_val_2(x_a, i2_0i, 1);
+        jmi_array_ref_1(temp_2_a, i2_0i) = jmi_array_val_2(x_a, i2_0i, 1);
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_4_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_3_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
     i2_1in = 0;
     i2_1ie = floor((jmi_array_size(x_a, 0)) - (1));
     for (i2_1i = 1; i2_1in <= i2_1ie; i2_1i = 1 + (++i2_1in)) {
-        jmi_array_ref_1(temp_4_a, i2_1i) = jmi_array_val_2(x_a, i2_1i, 1);
+        jmi_array_ref_1(temp_3_a, i2_1i) = jmi_array_val_2(x_a, i2_1i, 1);
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_5_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_4_a, func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a), 1, func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a))
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, temp_3_a, jmi_array_size(x_a, 0), 1, jmi_array_size(x_a, 0))
     i2_2in = 0;
     i2_2ie = floor((jmi_array_size(x_a, 0)) - (1));
     for (i2_2i = 1; i2_2in <= i2_2ie; i2_2i = 1 + (++i2_2in)) {
-        jmi_array_ref_1(temp_5_a, i2_2i) = jmi_array_val_2(x_a, i2_2i, 1);
+        jmi_array_ref_1(temp_3_a, i2_2i) = jmi_array_val_2(x_a, i2_2i, 1);
     }
-    func_CCodeGenTests_FuncInitOrder_f_def1(temp_4_a, temp_2_a);
+    func_CCodeGenTests_FuncInitOrder_f_def1(temp_2_a, temp_4_a);
     temp_1_v = 0.0;
     i1_3in = 0;
-    i1_3ie = floor((func_CCodeGenTests_FuncInitOrder_g_exp2(temp_5_a)) - (1));
+    i1_3ie = floor((func_CCodeGenTests_FuncInitOrder_g_exp2(temp_3_a)) - (1));
     for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
-        temp_1_v = temp_1_v + jmi_array_val_1(temp_2_a, i1_3i);
+        temp_1_v = temp_1_v + jmi_array_val_1(temp_4_a, i1_3i);
     }
     y_v = temp_1_v;
     JMI_RET(GEN, y_o, y_v)

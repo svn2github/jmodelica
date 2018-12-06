@@ -7639,6 +7639,7 @@ equation
             name="Slices_SliceTest4",
             description="Slice operations: test with vector indices",
             eliminate_alias_variables=false,
+            variability_propagation=false,
             flatModel="
 fclass ArrayTests.Slices.SliceTest4
  Real a[1];
@@ -7646,12 +7647,12 @@ fclass ArrayTests.Slices.SliceTest4
  Real a[3];
  Real a[4];
  Real a[5];
- parameter Real ae[5];
- parameter Real ae[4];
- parameter Real ae[3];
- parameter Real ae[2];
- parameter Real ae[1];
-parameter equation
+ Real ae[1];
+ Real ae[2];
+ Real ae[3];
+ Real ae[4];
+ Real ae[5];
+equation
  ({ae[5], ae[4], ae[3], ae[2], ae[1]}, ) = ArrayTests.Slices.SliceTest4.fw();
 algorithm
  ({a[2], a[4]}, ) := ArrayTests.Slices.SliceTest4.f({1, 1});
@@ -7661,13 +7662,17 @@ public
  function ArrayTests.Slices.SliceTest4.fw
   output Real[:] o;
   output Real dummy;
+  Real[:] temp_1;
  algorithm
   init o as Real[5];
   dummy := 1;
   o[1] := 1;
   o[3] := 1;
   o[5] := 1;
-  ({o[2], o[4]}, ) := ArrayTests.Slices.SliceTest4.f({o[3], o[5]});
+  init temp_1 as Real[2];
+  (temp_1, ) := ArrayTests.Slices.SliceTest4.f({o[3], o[5]});
+  o[2] := temp_1[1];
+  o[4] := temp_1[2];
   return;
  end ArrayTests.Slices.SliceTest4.fw;
 

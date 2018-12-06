@@ -5830,14 +5830,14 @@ public
   Real[:] temp_2;
  algorithm
   init o as Real[size(in1, 1)];
-  init temp_1 as Real[size(in1, 1)];
-  init temp_2 as Real[size(in2, 1)];
+  init temp_1 as Real[size(in2, 1)];
   for i1 in 1:size(in2, 1) loop
-   temp_2[i1] := o_in[in2[i1]];
+   temp_1[i1] := o_in[in2[i1]];
   end for;
-  (temp_1) := FunctionTests.ArrayExpInFunc24.f(in1, in2, temp_2);
+  init temp_2 as Real[size(in1, 1)];
+  (temp_2) := FunctionTests.ArrayExpInFunc24.f(in1, in2, temp_1);
   for i1 in 1:size(in1, 1) loop
-   o[in1[i1]] := temp_1[i1];
+   o[in1[i1]] := temp_2[i1];
   end for;
   return;
  end FunctionTests.ArrayExpInFunc24.f;
@@ -7034,18 +7034,18 @@ public
   input Integer n;
   output Real s;
   Real temp_1;
-  Real[:] temp_2;
-  Integer[:] temp_3;
+  Integer[:] temp_2;
+  Real[:] temp_3;
  algorithm
-  init temp_2 as Real[max(n, 0)];
-  init temp_3 as Integer[max(n, 0)];
+  init temp_2 as Integer[max(n, 0)];
   for i2 in 1:max(n, 0) loop
-   temp_3[i2] := i2;
+   temp_2[i2] := i2;
   end for;
-  (temp_2) := FunctionTests.ArrayExpInFunc45.f1(temp_3);
+  init temp_3 as Real[max(n, 0)];
+  (temp_3) := FunctionTests.ArrayExpInFunc45.f1(temp_2);
   temp_1 := 0.0;
   for i1 in 1:max(n, 0) loop
-   temp_1 := temp_1 + temp_2[i1];
+   temp_1 := temp_1 + temp_3[i1];
   end for;
   s := temp_1;
   return;
@@ -8012,6 +8012,7 @@ public
   (temp_1) := FunctionTests.ArrayOutputScalarization10.f1();
   while x < temp_1[1] + temp_1[2] loop
    x := x + 1;
+   init temp_1 as Real[2];
    (temp_1) := FunctionTests.ArrayOutputScalarization10.f1();
   end while;
   return;
@@ -11458,13 +11459,13 @@ public
  algorithm
   init y as Real[size(x, 1)];
   init temp_1 as Real[size(x, 1)];
-  init temp_2 as Real[size(x, 1)];
   for i1 in 1:size(x, 1) loop
-   temp_2[i1] := x[i1] + x[i1];
+   temp_1[i1] := x[i1] + x[i1];
   end for;
-  (temp_1) := FunctionTests.UnknownArray47.f2(temp_2);
+  init temp_2 as Real[size(x, 1)];
+  (temp_2) := FunctionTests.UnknownArray47.f2(temp_1);
   for i1 in 1:size(x, 1) loop
-   y[i1] := temp_1[i1] + x[i1];
+   y[i1] := temp_2[i1] + x[i1];
   end for;
   return;
  annotation(Inline = false);
@@ -13137,6 +13138,10 @@ end FunctionTests.InputAsArraySize17;
 end InputAsArraySize17;
 
 model FuncColonSubscript
+        // We generate multiple init/calculations for a single temp here.
+        // The second one is redundant and will probably be removed
+        // once we fix the type representation for function calls.
+        
         function g
             input Real[:] x;
             output Integer y = integer(sum(x));
@@ -13165,10 +13170,11 @@ annotation(__JModelica(UnitTesting(tests={
     TransformCanonicalTestCase(
         name="FuncColonSubscript",
         description="tests scalarization, covers #5675",
+        variability_propagation=false,
         flatModel="
 fclass FunctionTests.FuncColonSubscript
- parameter Real y;
-parameter equation
+ Real y;
+equation
  y = FunctionTests.FuncColonSubscript.h({{1}});
 
 public
@@ -13180,7 +13186,6 @@ public
   Real[:] temp_2;
   Real[:] temp_3;
   Real[:] temp_4;
-  Real[:] temp_5;
  algorithm
   init t as Real[1];
   init temp_1 as Real[size(x, 1)];
@@ -13188,22 +13193,22 @@ public
    temp_1[i1] := x[i1,1];
   end for;
   assert(FunctionTests.FuncColonSubscript.g(temp_1) == 1, \"Mismatching sizes in FunctionTests.FuncColonSubscript.h\");
-  init temp_2 as Real[FunctionTests.FuncColonSubscript.g(temp_3)];
+  init temp_2 as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   temp_2[i1] := x[i1,1];
+  end for;
   init temp_3 as Real[size(x, 1)];
   for i1 in 1:size(x, 1) loop
    temp_3[i1] := x[i1,1];
   end for;
-  init temp_4 as Real[size(x, 1)];
+  init temp_4 as Real[FunctionTests.FuncColonSubscript.g(temp_3)];
+  init temp_3 as Real[size(x, 1)];
   for i1 in 1:size(x, 1) loop
-   temp_4[i1] := x[i1,1];
+   temp_3[i1] := x[i1,1];
   end for;
-  init temp_5 as Real[size(x, 1)];
-  for i1 in 1:size(x, 1) loop
-   temp_5[i1] := x[i1,1];
-  end for;
-  (temp_2) := FunctionTests.FuncColonSubscript.f(temp_4);
-  for i1 in 1:FunctionTests.FuncColonSubscript.g(temp_5) loop
-   t[i1] := time * temp_2[i1];
+  (temp_4) := FunctionTests.FuncColonSubscript.f(temp_2);
+  for i1 in 1:FunctionTests.FuncColonSubscript.g(temp_3) loop
+   t[i1] := time * temp_4[i1];
   end for;
   y := t[1];
   return;
@@ -14065,17 +14070,13 @@ public
   output Real[:] y;
   Integer[:] temp_1;
   Integer[:] temp_2;
-  Integer[:] temp_3;
  algorithm
   init y as Real[2];
   init temp_1 as Integer[2];
   (temp_1) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
-  init temp_2 as Integer[2];
-  temp_2[1] := 2;
-  temp_2[2] := 3;
   assert(temp_1[1] * 2 + temp_1[2] * 3 == 2, \"Mismatching sizes in FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f\");
-  init temp_3 as Integer[2];
-  (temp_3) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
+  init temp_2 as Integer[2];
+  (temp_2) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.s(x);
   (y) := FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.g(x);
   return;
  end FunctionTests.UnknownSize.FuncCallInSize.WithTemporary.f;
