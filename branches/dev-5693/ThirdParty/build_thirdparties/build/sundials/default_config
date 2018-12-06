@@ -1,7 +1,7 @@
 BUILD_DIR=${SDK_HOME}/build
 JM_HOME=${SDK_HOME}/src
 SUNDIALS_BUILD_DIR=${BUILD_DIR}/build_sundials
-SUNDIALS_C_FLAGS="-fPIC"
+SUNDIALS_C_FLAGS="-m64 -fPIC"
 SUNDIALS_INSTALL_DIR=${BUILD_DIR}/sundials_install
 SUNDIALS_SRC_DIR=${JM_HOME}/ThirdParty/Sundials/sundials-2.7.0
 
