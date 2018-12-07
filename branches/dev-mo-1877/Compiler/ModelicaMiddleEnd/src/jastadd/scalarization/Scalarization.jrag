@@ -1010,8 +1010,13 @@ aspect Scalarization {
     @Override
     public void FRecordType.scalarRecordClauses(Scalarizer s, FAccess suffix, FExp left, FExp right) {
         for (FRecordComponentType comp : getComponents()) {
-            FAccess next = suffix.copyAndAppend(comp.getName()).asFAccessFull();
-            comp.getFType().scalarRecordComponentClauses(s, next, left, right);
+            if (!isArray() && left.inFunction() && suffix.isEmpty()) {
+                String name = comp.getName();
+                comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, left.component(name).asCommonAccessExp(), right.component(name), false);
+            } else {
+                FAccess next = suffix.copyAndAppend(comp.getName()).asFAccessFull();
+                comp.getFType().scalarRecordComponentClauses(s, next, left, right);
+            }
         }
     }
     
@@ -1097,9 +1102,12 @@ aspect Scalarization {
     }
 
     public FExp FArray.scalarRecordFExp(Scalarizer s, FAccess suffix) {
-        FArray res = createEmptyNode();
+        if (useTempVar) {
+            return tempExp().scalarRecordFExp(s, suffix);
+        }
         if (isIterArray())
             return super.scalarRecordFExp(s, suffix);
+        FArray res = createEmptyNode();
         for (FExp e : getFExps())
             res.addFExp(e.scalarRecordFExp(s, suffix));
         return res;
@@ -1125,7 +1133,11 @@ aspect Scalarization {
         FAccessPart first = getFAccessPart(0);
         FExp arg = con.component(first.getName());
         if (first.hasFArraySubscripts()) {
-            arg = arg.extractArrayCell(s, first.getFArraySubscripts().createIndex());
+            if (arg.useTempVar()) {
+                arg = arg.tempExp(first.getFArraySubscripts());
+            } else {
+                arg = arg.extractArrayCell(s, first.getFArraySubscripts().createIndex());
+            }
         }
         return copySuffix().scalarRecordFExp(s, arg);
     }
@@ -1418,9 +1430,15 @@ aspect Scalarization {
             return exp.scalarizeExp(s);
         }
     }
+    
+    public FExp FFunctionCall.scalarize(Scalarizer s) {
+        FExp exp = super.scalarize(s);
+        indexNames = null;
+        return exp;
+    }
 
     syn boolean FExp.scalarizeExpanded()       = 
-        isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
+        isComposite() && indexNames == null && !inFunction() && !(useTempVar && isForIndexExp());
     eq CommonAccessExp.scalarizeExpanded()     = (!inFunction() || isSlice()) && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FIfExp.scalarizeExpanded()              = super.scalarizeExpanded() && !isFunctionCallIO()

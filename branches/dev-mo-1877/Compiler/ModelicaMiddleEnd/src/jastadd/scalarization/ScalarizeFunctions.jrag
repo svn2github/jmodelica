@@ -63,28 +63,29 @@ aspect FunctionScalarization {
      * Should this expression be extracted into its own statement?
      */
     syn boolean FExp.extractTemp()          = 
-        (size().isUnknown() && isComposite() && isFunctionCallIO()) || extractForIndexTemp();
+        (inFunction() && isComposite() && isFunctionCallIO()) || extractForIndexTemp();
     eq FAccessExp.extractTemp()             = super.extractTemp() && isSlice() && !isFunctionCallLeft();
-    eq FMulExp.extractTemp()                = !isElementWise() && extractAsUnknown() || isForIndexExp();
-    eq FReductionExp.extractTemp()          = getFExp().size().isUnknown() || isForIndexExp();
-    eq FMinMaxExp.extractTemp()             = getX().size().isUnknown() || isForIndexExp();
+    eq FMulExp.extractTemp()                = !isElementWise() && inFunction() || isForIndexExp();
+    eq FReductionExp.extractTemp()          = (getFExp().inFunction() && getFExp().isArray()) || isForIndexExp();
+    eq FMinMaxExp.extractTemp()             = (getX().inFunction() && getX().isArray()) || isForIndexExp();
     eq FFunctionCall.extractTemp()          = isFunctionCallClause() || 
         ((isFVectorFunctionCallArg() || !isFunctionCallIO()) &&
             (isComposite() || isForIndexExp()));
     eq FSpatialDistExp.extractTemp()        = isFunctionCallClause() || super.extractTemp();
     eq FVectorFunctionCall.extractTemp()    = true;
     eq FArray.extractTemp()                 = extractTempArrayCon(this);
+    eq FSizeExp.extractTemp()               = extractTempArrayCon(this);
     eq FAbstractCat.extractTemp()           = extractTempArrayCon(this);
     eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon(this);
-    eq FVectorExp.extractTemp()             = extractTempArrayCon(getFExp());
-    eq FMatrixExp.extractTemp()             = extractTempArrayCon(getFExp());
+    eq FVectorExp.extractTemp()             = extractTempArrayCon(this);
+    eq FMatrixExp.extractTemp()             = extractTempArrayCon(this);
     eq FTempAccessExp.extractTemp()         = false;
     eq FIfExp.extractTemp()                 = false;
     
     syn boolean FExp.extractForIndexTemp() = isForIndexExp();
     eq FRangeExp.extractForIndexTemp()     = false;
     
-    syn boolean FExp.extractTempArrayCon(FExp e) = e.size().isUnknown() || inUnknownSize() || isForIndexExp();
+    syn boolean FExp.extractTempArrayCon(FExp e) = (e.inFunction() && e.isArray()) || isForIndexExp();
     
     inh boolean FExp.isFunctionCallIO();
     eq BaseNode.getChild().isFunctionCallIO()         = false;
@@ -108,27 +109,8 @@ aspect FunctionScalarization {
     eq BaseNode.getChild().isFVectorFunctionCallArg()          = false;
     eq FVectorFunctionCall.getArg().isFVectorFunctionCallArg() = true;
     
-    syn boolean FExp.extractAsUnknown() = size().isUnknown();
-    eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
-    eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
-    eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FAbstractDiagonal.extractAsUnknown() = size().isUnknown();
-    eq FVectorExp.extractAsUnknown()    = getFExp().size().isUnknown();
-    eq FMatrixExp.extractAsUnknown()    = getFExp().size().isUnknown();
-    
-    inh boolean FExp.inUnknownSize();
-    eq Root.getChild().inUnknownSize()               = false;
-    eq FStatement.getChild().inUnknownSize()         = false;
-    eq FEquation.getChild().inUnknownSize()          = false;
-    eq FFunctionCall.getChild().inUnknownSize()      = false;
-    eq FRecordConstructor.getChild().inUnknownSize() = false;
-    eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) ||
-            inUnknownSize();
-    eq FAbstractVariable.getChild().inUnknownSize()  = false;
-    
     syn boolean FAssignStmt.extractTemp() {
-        if (type().size().isUnknown() || type().isArray()) {
+        if (type().isArray()) {
             Set<FAbstractVariable> left = getLeft().usesInScalarizedExp();
             Set<FAbstractVariable> right = getRight().usesInScalarizedExp();
             for (FAbstractVariable fv : left) {
@@ -184,7 +166,7 @@ aspect FunctionScalarization {
      */
     public void FExp.createArrayTemporaries(Scalarizer s) {
         if (extractTemp()) {
-            if (extractAsUnknown()) {
+            if (inFunction()) {
                 unknownFunctionArrayTemporaries(s);
                 useTempVar = true;
             } else {
@@ -285,11 +267,17 @@ aspect FunctionScalarization {
     
     public void FSizeExp.createArrayTemporaries(Scalarizer s) {
         boolean b = !extractTemp();
-        if (b)
+        if (b) {
             s.getNames().addLayer(0);
-        super.createArrayTemporaries(s);
-        if (b)
+        }
+        if (extractTemp()) {
+            knownArrayTemporaries(s);
+        } else {
+            createArrayTemporariesInChildren(s);
+        }
+        if (b) {
             s.getNames().removeLayer();
+        }
     }
     
     public void FSizeExp.createArrayTemporariesInChildren(Scalarizer s) {
@@ -387,9 +375,10 @@ aspect FunctionScalarization {
     @Override
     public void FFunctionCallLeft.createArrayTemporaries(Scalarizer s) {
         if (hasFExp()) {
-            getFExp().createArrayTemporaries(s);
             if (getFExp().isSlice() && getFExp().inFunction()) {
                 type().scalarizeAssignment((Scalarizer.Algorithm)s, (FAssignableExp)getFExp(), getFExp().tempExp());
+            } else {
+                getFExp().createArrayTemporaries(s);
             }
         }
     }
@@ -792,7 +781,9 @@ aspect FunctionScalarization {
     }
     
     public void FSizeExp.addArrayUsesToIndexMap(FExp[] names) {
-        
+        if (useTempVar() && isArray()) {
+            indexNames = names;
+        }
     }
     
     public void FAccessExp.addArrayUsesToIndexMap(FExp[] names) {
