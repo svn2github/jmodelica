@@ -2496,13 +2496,12 @@ public
  algorithm
   init w as Real[3];
   init z as Real[4];
-  w[1] := x[1];
-  w[2] := x[2];
-  w[3] := x[3];
-  z[1] := y[1];
-  z[2] := y[2];
-  z[3] := y[3];
-  z[4] := y[4];
+  for i1 in 1:3 loop
+   w[i1] := x[i1];
+  end for;
+  for i1 in 1:4 loop
+   z[i1] := y[i1];
+  end for;
   return;
  end TransformCanonicalTests.f2;
 
@@ -2532,7 +2531,7 @@ fclass TransformCanonicalTests.InitialEqTest10
  Real y[2];
  Real y[3];
  Real y[4];
-initial equation 
+initial equation
  ({x[1], x[2], x[3]}, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
  der(x[1]) = - x[1];
@@ -2552,13 +2551,12 @@ public
  algorithm
   init w as Real[3];
   init z as Real[4];
-  w[1] := x[1];
-  w[2] := x[2];
-  w[3] := x[3];
-  z[1] := y[1];
-  z[2] := y[2];
-  z[3] := y[3];
-  z[4] := y[4];
+  for i1 in 1:3 loop
+   w[i1] := x[i1];
+  end for;
+  for i1 in 1:4 loop
+   z[i1] := y[i1];
+  end for;
   return;
  end TransformCanonicalTests.f2;
 
@@ -2589,7 +2587,7 @@ fclass TransformCanonicalTests.InitialEqTest11
  Real y[2];
  Real y[3];
  Real y[4];
-initial equation 
+initial equation
  ({x[1], x[2], x[3]}, ) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
  der(x[1]) = - x[1];
@@ -2606,13 +2604,12 @@ public
  algorithm
   init w as Real[3];
   init z as Real[4];
-  w[1] := x[1];
-  w[2] := x[2];
-  w[3] := x[3];
-  z[1] := y[1];
-  z[2] := y[2];
-  z[3] := y[3];
-  z[4] := y[4];
+  for i1 in 1:3 loop
+   w[i1] := x[i1];
+  end for;
+  for i1 in 1:4 loop
+   z[i1] := y[i1];
+  end for;
   return;
  end TransformCanonicalTests.f2;
 
@@ -2640,7 +2637,7 @@ fclass TransformCanonicalTests.InitialEqTest12
  Real y[2];
  Real y[3];
  Real y[4];
-initial equation 
+initial equation
  x[1] = 3;
  x[2] = 3;
  x[3] = 3;
@@ -2648,10 +2645,26 @@ equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
- y[1] = 1;
- y[2] = 1;
- y[3] = 1;
- y[4] = 1;
+ (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
+
+public
+ function TransformCanonicalTests.f2
+  input Real[:] x;
+  input Real[:] y;
+  output Real[:] w;
+  output Real[:] z;
+ algorithm
+  init w as Real[3];
+  init z as Real[4];
+  for i1 in 1:3 loop
+   w[i1] := x[i1];
+  end for;
+  for i1 in 1:4 loop
+   z[i1] := y[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest12;
 ")})));
   end InitialEqTest12;
@@ -4599,8 +4612,9 @@ public
   output Real[:] y;
  algorithm
   init y as Real[2];
-  u[1] := 2 * y[1];
-  u[2] := 2 * y[2];
+  for i1 in 1:2 loop
+   u[i1] := 2 * y[i1];
+  end for;
   return;
  end TransformCanonicalTests.IfEqu22.f;
 
@@ -8274,10 +8288,24 @@ initial equation
  x[1] = 0.0;
  x[2] = 0.0;
 equation
- y[1] = x[1] .+ 1;
- der(x[1]) = x[2] .+ 1;
+ ({y[1], y[2]}, ) = TransformCanonicalTests.FunctionWithZeroSizeOutput2.f({x[1], x[2]});
  der(x[1]) = y[2];
  der(x[2]) = time;
+
+public
+ function TransformCanonicalTests.FunctionWithZeroSizeOutput2.f
+  input Real[:] x;
+  output Real[:] y;
+  output Real[:] z;
+ algorithm
+  init y as Real[2];
+  init z as Real[0];
+  for i1 in 1:2 loop
+   y[i1] := x[i1] .+ 1;
+  end for;
+  return;
+ end TransformCanonicalTests.FunctionWithZeroSizeOutput2.f;
+ 
 end TransformCanonicalTests.FunctionWithZeroSizeOutput2;
 ")})));
 end FunctionWithZeroSizeOutput2;

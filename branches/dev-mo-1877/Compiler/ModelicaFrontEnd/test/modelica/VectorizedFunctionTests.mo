@@ -539,9 +539,25 @@ equation
  d[1] = time;
  d[2] = 2 * time;
  d[3] = 3 * time;
- e[1] = d[1] * 4 + d[1] * 5;
- e[2] = d[2] * 4 + d[2] * 5;
- e[3] = d[3] * 4 + d[3] * 5;
+ e[1] = VectorizedFunctionTests.Basic.VectorizedCall7.f(d[1], {4, 5});
+ e[2] = VectorizedFunctionTests.Basic.VectorizedCall7.f(d[2], {4, 5});
+ e[3] = VectorizedFunctionTests.Basic.VectorizedCall7.f(d[3], {4, 5});
+
+public
+ function VectorizedFunctionTests.Basic.VectorizedCall7.f
+  input Real a;
+  input Real[:] b;
+  output Real c;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:2 loop
+   temp_1 := temp_1 + a * b[i1];
+  end for;
+  c := temp_1;
+  return;
+ end VectorizedFunctionTests.Basic.VectorizedCall7.f;
+
 end VectorizedFunctionTests.Basic.VectorizedCall7;
 ")})));
 end VectorizedCall7;
@@ -575,9 +591,16 @@ public
  function VectorizedFunctionTests.Basic.VectorizedCall8.f
   input Real[:] x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[1];
-  y[1] := VectorizedFunctionTests.Basic.VectorizedCall8.fv(x[1]);
+  init temp_1 as Real[1];
+  for i1 in 1:1 loop
+   temp_1[i1] := VectorizedFunctionTests.Basic.VectorizedCall8.fv(x[i1]);
+  end for;
+  for i1 in 1:1 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  annotation(Inline = false);
  end VectorizedFunctionTests.Basic.VectorizedCall8.f;

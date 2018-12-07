@@ -694,11 +694,16 @@ public
  function AlgorithmTests.TempAssign4.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[3];
-  y[1] := x;
-  y[2] := x;
-  y[3] := x;
+  init temp_1 as Real[3];
+  temp_1[1] := x;
+  temp_1[2] := x;
+  temp_1[3] := x;
+  for i1 in 1:3 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end AlgorithmTests.TempAssign4.f;
 

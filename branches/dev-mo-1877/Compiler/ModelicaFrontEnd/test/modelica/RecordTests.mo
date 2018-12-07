@@ -804,8 +804,13 @@ public
  function RecordTests.EquivalentRecords6.f
   input RecordTests.EquivalentRecords6.A[:] a;
   output Real x;
+  Real temp_1;
  algorithm
-  x := a[1].x + a[2].x;
+  temp_1 := 0.0;
+  for i1 in 1:2 loop
+   temp_1 := temp_1 + a[i1].x;
+  end for;
+  x := temp_1;
   x := x + 1;
   return;
  end RecordTests.EquivalentRecords6.f;
@@ -4707,10 +4712,15 @@ public
  function RecordTests.RecordScalarize22.f2
   input Real o;
   output RecordTests.RecordScalarize22.A x;
+  RecordTests.RecordScalarize22.B[:] temp_1;
  algorithm
+  init temp_1 as RecordTests.RecordScalarize22.B[2];
+  temp_1[1].c := o + 1;
+  temp_1[2].c := o + 2;
   x.a := o;
-  x.b[1].c := o + 1;
-  x.b[2].c := o + 2;
+  for i1 in 1:2 loop
+   x.b[i1].c := temp_1[i1].c;
+  end for;
   return;
  end RecordTests.RecordScalarize22.f2;
 
@@ -4936,8 +4946,9 @@ public
  function RecordTests.RecordScalarize29.f
   output RecordTests.RecordScalarize29.R r;
  algorithm
-  r.x[1] := 1;
-  r.x[2] := 2;
+  for i1 in 1:2 loop
+   r.x[i1] := i1;
+  end for;
   return;
  end RecordTests.RecordScalarize29.f;
 
@@ -5875,10 +5886,8 @@ model RecordScalarize52
             flatModel="
 fclass RecordTests.RecordScalarize52
  Real r.x[1];
- Real temp_1.x[1];
 equation
- temp_1.x[1] = if not time > 1 then 2 else 0.0;
- r.x[1] = if time > 1 then 1 else temp_1.x[1];
+ r.x[1] = if time > 1 then 1 else 2.0;
 end RecordTests.RecordScalarize52;
 ")})));
 end RecordScalarize52;
@@ -6329,8 +6338,9 @@ public
  algorithm
   z.x[1] := ix;
   z.x[2] := iy;
-  w.x[1] := z.x[1];
-  w.x[2] := z.x[2];
+  for i1 in 1:2 loop
+   w.x[i1] := z.x[i1];
+  end for;
   o := w.x[1] * w.x[2];
   return;
  end RecordTests.RecordFunc5.f;
@@ -6378,9 +6388,14 @@ public
   input Real iy;
   output Real o;
   RecordTests.RecordFunc6.A z;
+  Real[:] temp_1;
  algorithm
-  z.x[1] := ix;
-  z.x[2] := iy;
+  init temp_1 as Real[2];
+  temp_1[1] := ix;
+  temp_1[2] := iy;
+  for i1 in 1:2 loop
+   z.x[i1] := temp_1[i1];
+  end for;
   o := z.x[1] * z.x[2];
   return;
  end RecordTests.RecordFunc6.f;
@@ -6494,10 +6509,10 @@ public
   z[1].y := iy;
   z[2].x := ix;
   z[2].y := iy;
-  w[1].x := z[1].x;
-  w[1].y := z[1].y;
-  w[2].x := z[2].x;
-  w[2].y := z[2].y;
+  for i1 in 1:2 loop
+   w[i1].x := z[i1].x;
+   w[i1].y := z[i1].y;
+  end for;
   o := w[1].x * w[2].x;
   return;
  end RecordTests.RecordFunc8.f;
@@ -6547,12 +6562,18 @@ public
   input Real iy;
   output Real o;
   RecordTests.RecordFunc9.A[:] z;
+  RecordTests.RecordFunc9.A[:] temp_1;
  algorithm
   init z as RecordTests.RecordFunc9.A[2];
-  z[1].x := ix;
-  z[1].y := iy;
-  z[2].x := ix + 2;
-  z[2].y := iy + 2;
+  init temp_1 as RecordTests.RecordFunc9.A[2];
+  temp_1[1].x := ix;
+  temp_1[1].y := iy;
+  temp_1[2].x := ix + 2;
+  temp_1[2].y := iy + 2;
+  for i1 in 1:2 loop
+   z[i1].x := temp_1[i1].x;
+   z[i1].y := temp_1[i1].y;
+  end for;
   o := z[1].x * z[2].x;
   return;
  end RecordTests.RecordFunc9.f;
@@ -6565,6 +6586,116 @@ public
 end RecordTests.RecordFunc9;
 ")})));
 end RecordFunc9;
+
+
+model RecordFunc10
+ record A
+  Real[2] x;
+ end A;
+ 
+ function f
+  input A[1] x;
+  output A[1] y;
+ algorithm
+  x := y;
+ end f;
+ 
+ A[1] a1 = {A(1:2)};
+ A[1] a2 = f(a1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFunc10",
+            description="Scalarization of records in functions: array of records with array of reals.",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordFunc10
+ Real a1[1].x[1];
+ Real a1[1].x[2];
+ Real a2[1].x[1];
+ Real a2[1].x[2];
+equation
+ a1[1].x[1] = 1;
+ a1[1].x[2] = 2;
+ ({RecordTests.RecordFunc10.A({a2[1].x[1], a2[1].x[2]})}) = RecordTests.RecordFunc10.f({RecordTests.RecordFunc10.A({a1[1].x[1], a1[1].x[2]})});
+
+public
+ function RecordTests.RecordFunc10.f
+  input RecordTests.RecordFunc10.A[:] x;
+  output RecordTests.RecordFunc10.A[:] y;
+ algorithm
+  init y as RecordTests.RecordFunc10.A[1];
+  for i1 in 1:1 loop
+   assert(2 == size(x[i1].x, 1), \"Mismatching sizes in function 'RecordTests.RecordFunc10.f', component 'x[i1].x', dimension '1'\");
+  end for;
+  for i1 in 1:1 loop
+   x[i1].x[1] := y[i1].x[1];
+   x[i1].x[2] := y[i1].x[2];
+  end for;
+  return;
+ end RecordTests.RecordFunc10.f;
+
+ record RecordTests.RecordFunc10.A
+  Real x[2];
+ end RecordTests.RecordFunc10.A;
+
+end RecordTests.RecordFunc10;
+")})));
+end RecordFunc10;
+
+
+model RecordFunc11
+ record A
+  Real[2] x;
+ end A;
+ 
+ function f
+  input A[1] x;
+  output A y;
+ algorithm
+  y := x[1];
+ end f;
+ 
+ A[1] a1 = {A(1:2)};
+ A a2 = f(a1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFunc11",
+            description="Scalarization of records in functions: array of records with array of reals.",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordFunc11
+ Real a1[1].x[1];
+ Real a1[1].x[2];
+ Real a2.x[1];
+ Real a2.x[2];
+equation
+ a1[1].x[1] = 1;
+ a1[1].x[2] = 2;
+ (RecordTests.RecordFunc11.A({a2.x[1], a2.x[2]})) = RecordTests.RecordFunc11.f({RecordTests.RecordFunc11.A({a1[1].x[1], a1[1].x[2]})});
+
+public
+ function RecordTests.RecordFunc11.f
+  input RecordTests.RecordFunc11.A[:] x;
+  output RecordTests.RecordFunc11.A y;
+ algorithm
+  for i1 in 1:1 loop
+   assert(2 == size(x[i1].x, 1), \"Mismatching sizes in function 'RecordTests.RecordFunc11.f', component 'x[i1].x', dimension '1'\");
+  end for;
+  for i1 in 1:2 loop
+   y.x[i1] := x[1].x[i1];
+  end for;
+  return;
+ end RecordTests.RecordFunc11.f;
+
+ record RecordTests.RecordFunc11.A
+  Real x[2];
+ end RecordTests.RecordFunc11.A;
+
+end RecordTests.RecordFunc11;
+")})));
+end RecordFunc11;
 
 
 
@@ -6644,12 +6775,18 @@ equation
 public
  function RecordTests.RecordOutput2.f
   output RecordTests.RecordOutput2.A[:] o;
+  RecordTests.RecordOutput2.A[:] temp_1;
  algorithm
   init o as RecordTests.RecordOutput2.A[2];
-  o[1].x := 1;
-  o[1].y := 2;
-  o[2].x := 3;
-  o[2].y := 4;
+  init temp_1 as RecordTests.RecordOutput2.A[2];
+  temp_1[1].x := 1;
+  temp_1[1].y := 2;
+  temp_1[2].x := 3;
+  temp_1[2].y := 4;
+  for i1 in 1:2 loop
+   o[i1].x := temp_1[i1].x;
+   o[i1].y := temp_1[i1].y;
+  end for;
   return;
  end RecordTests.RecordOutput2.f;
 
@@ -6695,12 +6832,22 @@ equation
 public
  function RecordTests.RecordOutput3.f
   output RecordTests.RecordOutput3.A o;
+  Integer[:] temp_1;
+  Integer[:] temp_2;
  algorithm
-  o.x[1] := 1;
-  o.x[2] := 2;
-  o.y[1] := 3;
-  o.y[2] := 4;
-  o.y[3] := 5;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  init temp_2 as Integer[3];
+  temp_2[1] := 3;
+  temp_2[2] := 4;
+  temp_2[3] := 5;
+  for i1 in 1:2 loop
+   o.x[i1] := temp_1[i1];
+  end for;
+  for i1 in 1:3 loop
+   o.y[i1] := temp_2[i1];
+  end for;
   return;
  end RecordTests.RecordOutput3.f;
 
@@ -7469,20 +7616,9 @@ fclass RecordTests.RecordWithColonArray4
  Real r.x[2];
  Real r.x[3];
 equation
- (RecordTests.RecordWithColonArray4.R({r.x[1], r.x[2], r.x[3]})) = RecordTests.RecordWithColonArray4.f(3);
-
-public
- function RecordTests.RecordWithColonArray4.f
-  input Integer n;
-  output RecordTests.RecordWithColonArray4.R r;
- algorithm
-  return;
- end RecordTests.RecordWithColonArray4.f;
-
- record RecordTests.RecordWithColonArray4.R
-  Real x[:];
- end RecordTests.RecordWithColonArray4.R;
-
+ r.x[1] = 1; // TODO Investigate function inlining
+ r.x[2] = 2;
+ r.x[3] = 3;
 end RecordTests.RecordWithColonArray4;
 ")})));
 end RecordWithColonArray4;
@@ -7695,10 +7831,15 @@ public
  function RecordTests.RecordParam3.f
   input Real i;
   output Real[:] o;
+  Real[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := i;
-  o[2] := - i;
+  init temp_1 as Real[2];
+  temp_1[1] := i;
+  temp_1[2] := - i;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end RecordTests.RecordParam3.f;
 
@@ -7804,10 +7945,15 @@ parameter equation
 public
  function RecordTests.RecordParam6.f
   output Real[:] o;
+  Integer[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := 1;
-  o[2] := 2;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end RecordTests.RecordParam6.f;
 
