@@ -744,6 +744,22 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public String[] valueAsStringVector() throws ConstantEvaluationException {
         return getAndCheckConstValue(ValueType.STRING, ValueSize.VECTOR, true).stringVector();
     }
+    
+    public boolean isUnknownAccess() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.SCALAR) != null;
+    }
+    
+    public boolean isUnknownAccessVector() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.VECTOR) != null;
+    }
+    
+    public String unknownAccessAsString() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.SCALAR).access();
+    }
+    
+    public String[] unknownAccessVectorAsStringVector() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.VECTOR).accessVector();
+    }
 
     /*****************************************
      * Value checkers and retrieves helpers
@@ -766,6 +782,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             public boolean check(ConstValue value) {
                 return value.isString() || value.isEnum();
             }
+        },
+        UNKNOWN_ACCESS {
+          @Override
+        public boolean check(ConstValue value) {
+            return value.isUnknownAccess();
+        }  
         },
         REAL {
             @Override
