@@ -41,8 +41,8 @@ $(INSTALL_DIR_FOLDER)/wheel:
 	cd $(PYFMI_SRC) && \
 	    find . -type f | grep -v -E '/.svn|.pyc' | tar c -T - | tar x -C $(TARGET_BUILD_DIR)
 	cd $(TARGET_BUILD_DIR) && \
-	    $(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS); \
-	    find -type f -name PyFMI*.whl -exec cp {} $@/PyFMI-1.0.0-cp27-cp27mu-$(OS)_x86_$(BITNESS).whl \;
+	    $(PYTHONHOME)python setup.py bdist_wheel --fmil-home=$(FMIL_INSTALL) $(EXTRA_SETUP_ARGS) --version=$(WHEEL_VERSION_NUMBER); \
+	    find -type f -name PyFMI*.whl -exec cp {} $@/ \;
 	rm -rf $(TARGET_BUILD_DIR)
 
 clean:
