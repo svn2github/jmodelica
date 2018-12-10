@@ -1,4 +1,7 @@
 ================= Unreleased ==================
+; Fixed ; Minor ; Runtime ; #5710
+Fixed so that the flag "enforce_bounds" is taken into account in Brent.
+
 ; Fixed ; Minor ; PyFMI ; #5709
 Fixed issue with the absolute tolerance not being set when only the
 relative tolerance has been provided.

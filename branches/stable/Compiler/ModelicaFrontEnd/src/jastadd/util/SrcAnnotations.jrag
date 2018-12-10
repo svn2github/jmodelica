@@ -25,6 +25,14 @@ import org.jmodelica.util.values.Evaluator;
 
 aspect SrcAnnotations {
 
+    public SrcAnnotationNode InstComponentDecl.srcClassAnnotation(String ... path) {
+        return myInstClass().getSrcClassDecl().srcAnnotation(new SrcAnnotationNode.InstEvaluator(this), path);
+    }
+
+    public SrcAnnotationNode InstExtends.srcClassAnnotation(String ... path) {
+        return myInstClass().getSrcClassDecl().srcAnnotation(new SrcAnnotationNode.InstEvaluator(this), path);
+    }
+
     public SrcAnnotationNode SrcClassDecl.srcAnnotation(String ... path) { 
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
@@ -85,14 +93,6 @@ aspect SrcAnnotations {
     public SrcAnnotationNode SrcComment.srcAnnotation(Evaluator<SrcExp> evaluator, String ... path) {
         return SrcAnnotationNode.createFor(this, evaluator, path);
     }
-
-
-
-    class InstClassDecl     implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstComponentDecl implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstExtends       implements SrcAnnotationNode.InstEvaluator.Context {}
-    class InstExternal      implements SrcAnnotationNode.InstEvaluator.Context {}
-
 
 
     /*******************
@@ -163,9 +163,9 @@ aspect SrcAnnotations {
 
         public static class InstEvaluator implements Evaluator<SrcExp> {
             
-            private Context context;
+            private InstContext context;
             
-            public InstEvaluator(Context context) {
+            public InstEvaluator(InstContext context) {
                 this.context = context;
             }
             
@@ -175,9 +175,6 @@ aspect SrcAnnotations {
                 return fexp.evaluateValue();
             }
             
-            public interface Context {
-                public FExp dynamicFExp(FExp exp);
-            }
         }
     }
 

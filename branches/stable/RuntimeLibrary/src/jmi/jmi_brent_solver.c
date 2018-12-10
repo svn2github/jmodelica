@@ -104,7 +104,7 @@ int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
         inc = JMI_MAX(JMI_ABS(y), block->nominal[0])*sign*1e-8;
         y += inc;
         /* make sure we're inside bounds*/
-        if((y > block->max[0]) || (y < block->min[0])) {
+        if(block->options->enforce_bounds_flag && ((y > block->max[0]) || (y < block->min[0]))) {
             inc = -inc;
             y = y0 + inc;
         }
@@ -115,7 +115,7 @@ int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
         if (ret) {
             inc = -inc;
             y = y0 + inc;
-            if ((y <= block->max[0]) && (y >= block->min[0])) {
+            if (block->options->enforce_bounds_flag && ((y <= block->max[0]) && (y >= block->min[0]))) {
                 ret = brentf(y, &ftemp, block);
             }
         }
@@ -306,13 +306,13 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
         x_tmp = x - delta;
         
         /* Clamping */
-        if (x_tmp < block->min[0]) {
+        if (block->options->enforce_bounds_flag && x_tmp < block->min[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to minimum, <min: %f>",
                     x_tmp,block->min[0]);
             }
             x_tmp = block->min[0];
-        } else if (x_tmp > block->max[0]) {
+        } else if (block->options->enforce_bounds_flag && x_tmp > block->max[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to maximum, <max: %f>",
                     x_tmp,block->max[0]);
@@ -628,8 +628,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
         /* Introduce to avoid IllegalIterationVariableInput warnings */
-        double bracketMin = JMI_MAX(block->min[0], -block->nominal[0]*JMI_LIMIT_VALUE);
-        double bracketMax = JMI_MIN(block->max[0], block->nominal[0]*JMI_LIMIT_VALUE);
+        double bracketMin = JMI_MAX(block->options->enforce_bounds_flag ? block->min[0] : -BIG_REAL, -block->nominal[0]*JMI_LIMIT_VALUE);
+        double bracketMax = JMI_MIN(block->options->enforce_bounds_flag ? block->max[0] : BIG_REAL, block->nominal[0]*JMI_LIMIT_VALUE);
 
         double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
         double initialStepStaticSmall = initialStepStatic*BRENT_INITIAL_STEP_FACTOR;

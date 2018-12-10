@@ -900,4 +900,55 @@ end VariabilityPropagationInitialTests.FailedInitialPartialEval1;
 ")})));
 end FailedInitialPartialEval1;
 
+model InitialSystemPropagatePartial1
+    function f
+        input Real x1;
+        input Real x2;
+        output Real y1 = x1 + 1;
+        output Real y2 = x2 + 1;
+        algorithm
+        annotation(Inline=false);
+    end f;
+    
+    parameter Real p1 = 1;
+    parameter Real p2(fixed=false);
+    parameter Real p3(fixed=false);
+    parameter Real x1(fixed=false);
+initial equation
+    (p1,p2) = f(x1, p3);
+    p3 = p1;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemPropagatePartial1",
+            description="Test infinite loop bug during partial propagation in initial system",
+            variability_propagation_initial=true,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass VariabilityPropagationInitialTests.InitialSystemPropagatePartial1
+ parameter Real p1 = 1 /* 1 */;
+ initial parameter Real p2(fixed = false);
+ parameter Real p3(fixed = true);
+ initial parameter Real x1(fixed = false);
+initial equation
+ (p1, p2) = VariabilityPropagationInitialTests.InitialSystemPropagatePartial1.f(x1, p3);
+parameter equation
+ p3 = p1;
+
+public
+ function VariabilityPropagationInitialTests.InitialSystemPropagatePartial1.f
+  input Real x1;
+  input Real x2;
+  output Real y1;
+  output Real y2;
+ algorithm
+  y1 := x1 + 1;
+  y2 := x2 + 1;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationInitialTests.InitialSystemPropagatePartial1.f;
+
+end VariabilityPropagationInitialTests.InitialSystemPropagatePartial1;
+")})));
+end InitialSystemPropagatePartial1;
+
 end VariabilityPropagationInitialTests;

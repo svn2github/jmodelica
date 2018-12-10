@@ -493,10 +493,7 @@ aspect VariabilityPropagation {
             variability = variability.combine(Variability.FIXEDPARAMETER);
         }
         
-        if (variability.parameterOrLess()) {
-            myFV().variabilityPropagation(propagator, variability, bexp);
-        }
-        
+        myFV().variabilityPropagation(propagator, variability, bexp);
         taggedByVProp = variability.knownParameterOrLess();
         return taggedByVProp;
     }
@@ -515,6 +512,10 @@ aspect VariabilityPropagation {
             FClass.VariabilityPropagator propagator,
             TypePrefixVariability variability,
             FExp bindingExp) {
+        
+        if (variability().lessOrEqual(variability) || !variability.parameterOrLess()) {
+            return;
+        }
         
         FAbstractEquation equation;
         boolean isZero = variability.constantVariability() && bindingExp.isLiteralZero();
