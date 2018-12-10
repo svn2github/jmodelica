@@ -9,7 +9,7 @@ and reduces variables to constants and parameters where applicable."
 
 *******************************************************************************
 
-BOOLEAN variability_propagation_initial compiler experimental false
+BOOLEAN variability_propagation_initial compiler uncommon false
 
 "If enabled, the compiler performs a global analysis on the initial equation 
 system and reduces initial parameters to constants and parameters where 
@@ -17,10 +17,24 @@ applicable."
 
 *******************************************************************************
 
+BOOLEAN variability_propagation_initial_partial compiler uncommon false
+
+"If enabled, the compiler allows partial constant evaluation of function 
+calls in initial equations during variability propagation."
+
+*******************************************************************************
+
 BOOLEAN variability_propagation_external compiler uncommon true
 
 "If enabled, the compiler allows external constant evaluation during 
 variability propagation."
+
+*******************************************************************************
+
+BOOLEAN variability_propagation_algorithms compiler uncommon false
+
+"If enabled, the compiler includes modelica algorithms in variability 
+propagation."
 
 *******************************************************************************
 

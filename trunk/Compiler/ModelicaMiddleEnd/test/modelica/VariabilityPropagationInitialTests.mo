@@ -459,6 +459,7 @@ initial equation
             name="InitialSystemPropagateParameter4",
             description="Test propagation of initial equations, algorithm",
             variability_propagation_initial=true,
+            variability_propagation_algorithms=true,
             eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationInitialTests.InitialSystemPropagate.InitialSystemPropagateParameter4
@@ -780,6 +781,7 @@ equation
             name="MixedSystemPropagatePartial1",
             description="Test propagation of initial equations, interleaving partial evaluation",
             variability_propagation_initial=true,
+            variability_propagation_initial_partial=true,
             eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1
@@ -793,6 +795,67 @@ fclass VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropag
 end VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1;
 ")})));
 end MixedSystemPropagatePartial1;
+
+model MixedSystemPropagatePartial1_b
+    function f
+        input Real x1;
+        input Real x2;
+        input Real x3;
+        output Real y1 = x1 + 1;
+        output Real y2 = x2 + 1;
+        output Real y3 = x3 + 1;
+        algorithm
+        annotation(Inline=false);
+    end f;
+    
+    parameter Real p1(fixed=false);
+    parameter Real p2(fixed=false);
+    parameter Real p3(fixed=false);
+    Real x1,x2,x3,x4;
+initial equation
+    (p1,p2,p3) = f(x1, x2, x3);
+equation
+    (x1,x2,x3) = f(x4, p1, p2);
+    x4 = 1;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MixedSystemPropagatePartial1_b",
+            description="Test propagation of initial equations, partial evaluation disabled",
+            variability_propagation_initial=true,
+            variability_propagation_initial_partial=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1_b
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2(fixed = false);
+ initial parameter Real p3(fixed = false);
+ constant Real x1 = 2.0;
+ initial parameter Real x2;
+ initial parameter Real x3;
+ constant Real x4 = 1;
+initial equation
+ (p1, p2, p3) = VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1_b.f(2.0, x2, x3);
+ (, x2, x3) = VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1_b.f(1.0, p1, p2);
+
+public
+ function VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1_b.f
+  input Real x1;
+  input Real x2;
+  input Real x3;
+  output Real y1;
+  output Real y2;
+  output Real y3;
+ algorithm
+  y1 := x1 + 1;
+  y2 := x2 + 1;
+  y3 := x3 + 1;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1_b.f;
+
+end VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial1_b;
+")})));
+end MixedSystemPropagatePartial1_b;
 
 model MixedSystemPropagatePartial2
     function f
@@ -820,6 +883,7 @@ equation
             name="MixedSystemPropagatePartial2",
             description="Test propagation of initial equations, interleaving partial evaluation",
             variability_propagation_initial=true,
+            variability_propagation_initial_partial=true,
             eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationInitialTests.MixedSystemPropagate.MixedSystemPropagatePartial2
