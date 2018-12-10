@@ -1417,9 +1417,10 @@ equation
          description="",
          flatModel="
 fclass TransformCanonicalTests.AliasVisibility1
- Real a(start = 1);
+protected
+ Real b(start = 1);
 equation
- a = time;
+ b = time;
 end TransformCanonicalTests.AliasVisibility1;
 ")})));
 end AliasVisibility1;

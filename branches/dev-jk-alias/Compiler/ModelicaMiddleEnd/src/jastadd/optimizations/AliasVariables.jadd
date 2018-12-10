@@ -923,7 +923,12 @@ aspect AliasVariables {
     syn long FVariable.aliasHeuristicScore() {
         long score = 0;
         
-        score += getVisibilityType().ordinal();
+        VisibilityType t = getVisibilityType();
+        if (t.isProtected()) {
+            // Some models fail to simulate without this
+            t = VisibilityType.PUBLIC;
+        }
+        score += t.ordinal();
         
         // Parameter
         score *= 10;
