@@ -164,7 +164,7 @@ class UnknownOptionError(JError):
     """
     pass
 
-class InvalidOptionError(JError):
+class InvalidOptionValueError(JError):
     """ 
     Class for error thrown when trying to access invalid compiler option. 
     """
