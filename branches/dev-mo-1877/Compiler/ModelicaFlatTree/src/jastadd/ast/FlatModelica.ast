@@ -682,7 +682,7 @@ FWhenClause : FIfWhenClause;
 /**
  * Flattened for statement.
  */
-FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement*;
+FForStmt : FStatement ::= Index:FForIndex ForStmt:FStatement* /UnrolledForStmt:FStatement*/;
 
 /**
  * Flattened while statement.

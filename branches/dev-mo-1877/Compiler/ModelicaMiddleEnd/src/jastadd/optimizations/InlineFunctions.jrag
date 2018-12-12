@@ -1448,6 +1448,7 @@ aspect FunctionInlining {
 
     public void FForStmt.inlinePrepare(AbstractFunctionInliner fi, List<FStatement> stmts) {
         List<FStatement> oldStmts = getForStmts();
+        FForIndex oldIndex = getIndex();
         
         // Prepare contents
         List<FStatement> newStmts = new List<FStatement>();
@@ -1456,15 +1457,14 @@ aspect FunctionInlining {
         setForStmtList((List) newStmts);
         
         // Unroll loop
-        FVariable index = getIndex().getFVariable();
-        FExp loopExp = getIndex().getFExp();
-        loopExp = loopExp.dynamicFExp(loopExp.fullCopy()).replaceReferences(fi);
-        for (FExp e : loopExp.getArray().iterable()) {
-            stmts.add(new FAssignStmt(index.createAccessExp(), e.fullCopy()));
-            for (FStatement stmt : newStmts)
-                stmts.add(stmt.fullCopy());
-        }
+        FExp loopExp = oldIndex.getFExp();
+        loopExp = loopExp.dynamicFExp(loopExp.treeCopy()).replaceReferences(fi);
+        FForIndex newIndex = new FForIndex(oldIndex.getFVariable(), loopExp);
+        setIndex(newIndex);
+        getUnrolledForStmtList_reset();
+        stmts.addAll(getUnrolledForStmts());
         setForStmtList(oldStmts);
+        setIndex(oldIndex);
     }
 
     /**
