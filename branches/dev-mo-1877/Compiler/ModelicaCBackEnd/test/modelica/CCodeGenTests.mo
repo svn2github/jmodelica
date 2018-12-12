@@ -4561,6 +4561,9 @@ void func_CCodeGenTests_CArrayInput7_f1_def0(jmi_real_t* out_o) {
     jmi_real_t i1_1i;
     jmi_int_t i1_1ie;
     jmi_int_t i1_1in;
+    jmi_real_t i1_2i;
+    jmi_int_t i1_2ie;
+    jmi_int_t i1_2in;
     out_v = 1.0;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 3, 1, 3)
     i1_0in = 0;
@@ -4576,6 +4579,12 @@ void func_CCodeGenTests_CArrayInput7_f1_def0(jmi_real_t* out_o) {
             jmi_array_ref_1(temp_2_a, i1_1i) = 4 + (i1_1i - 1);
         }
         out_v = func_CCodeGenTests_CArrayInput7_f2_exp1(temp_2_a);
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 3, 1, 3)
+        i1_2in = 0;
+        i1_2ie = floor((3) - (1));
+        for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
+            jmi_array_ref_1(temp_1_a, i1_2i) = i1_2i;
+        }
     }
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -4592,14 +4601,14 @@ void func_CCodeGenTests_CArrayInput7_f2_def1(jmi_array_t* inp_a, jmi_real_t* out
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, out_v)
     JMI_DEF(REA, temp_1_v)
-    jmi_real_t i1_2i;
-    jmi_int_t i1_2ie;
-    jmi_int_t i1_2in;
+    jmi_real_t i1_3i;
+    jmi_int_t i1_3ie;
+    jmi_int_t i1_3in;
     temp_1_v = 0.0;
-    i1_2in = 0;
-    i1_2ie = floor((3) - (1));
-    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
-        temp_1_v = temp_1_v + jmi_array_val_1(inp_a, i1_2i);
+    i1_3in = 0;
+    i1_3ie = floor((3) - (1));
+    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
+        temp_1_v = temp_1_v + jmi_array_val_1(inp_a, i1_3i);
     }
     out_v = temp_1_v;
     JMI_RET(GEN, out_o, out_v)

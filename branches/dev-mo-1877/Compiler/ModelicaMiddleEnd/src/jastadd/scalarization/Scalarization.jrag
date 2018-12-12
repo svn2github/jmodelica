@@ -1012,7 +1012,7 @@ aspect Scalarization {
         for (FRecordComponentType comp : getComponents()) {
             if (!isArray() && left.inFunction() && suffix.isEmpty()) {
                 String name = comp.getName();
-                comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, left.component(name).asCommonAccessExp(), right.component(name), false);
+                comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, left.component(name).asCommonAccessExp(), right.component(name));
             } else {
                 FAccess next = suffix.copyAndAppend(comp.getName()).asFAccessFull();
                 comp.getFType().scalarRecordComponentClauses(s, next, left, right);

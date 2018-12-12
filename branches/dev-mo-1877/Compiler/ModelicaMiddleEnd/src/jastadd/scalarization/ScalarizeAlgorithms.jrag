@@ -34,6 +34,9 @@ aspect AlgorithmScalarization {
         FAssignableExp left = getLeft();
         FExp right = getRight();
         
+        left.createArrayTemporaries(s);
+        right.createArrayTemporaries(s);
+        
         FType t = left.size().isUnknown() ? left.type() : right.type();
         if (extractTemp()) {
             s.addTempVar(this);
@@ -164,18 +167,9 @@ aspect AssignmentScalarization {
      * Scalarize an assignment and put the resulting statements in the list of statements. 
      */
     public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        scalarizeAssignment(s, left, right, true);
-    }
-    
-    public void FType.scalarizeAssignment(Scalarizer.Algorithm s, FAssignableExp left, FExp right, boolean extractTemps) {
         
         FExp expInAst = right.type().isUnknown() ? left : right;
         
-        if (extractTemps) {
-            left.createArrayTemporaries(s);
-            right.createArrayTemporaries(s);
-        }
-
         if (left.inFunction() && isArray()) {
             ForNames names = s.getNames();
             names.addLayer(ndims());
