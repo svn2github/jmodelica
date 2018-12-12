@@ -7855,6 +7855,176 @@ end TransformCanonicalTests.ScalarizeIfInLoop4;
 ")})));
 end ScalarizeIfInLoop4;
 
+model ScalarizeCrossInFunction
+    function f
+        input Real[3] a;
+        input Real[3] b;
+        output Real[3] c;
+    algorithm
+        c := cross(a, g(b));
+    end f;
+    
+    function g
+        input Real[3] a;
+        output Real[3] b;
+    algorithm
+        b := -a;
+    end g;
+    
+    Real[3] a = {0.5,0.5,0};
+    Real[3] b = {0.5,-.5,0};
+    Real[3] c = f(a, b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeCrossInFunction",
+            description="Test scalarization of cross in a function",
+            variability_propagation=false,
+            eliminate_alias_constants=false,
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeCrossInFunction
+ Real a[1];
+ Real a[2];
+ Real a[3];
+ Real b[1];
+ Real b[2];
+ Real b[3];
+ Real c[1];
+ Real c[2];
+ Real c[3];
+equation
+ a[1] = 0.5;
+ a[2] = 0.5;
+ a[3] = 0;
+ b[1] = 0.5;
+ b[2] = -0.5;
+ b[3] = 0;
+ ({c[1], c[2], c[3]}) = TransformCanonicalTests.ScalarizeCrossInFunction.f({a[1], a[2], a[3]}, {b[1], b[2], b[3]});
+
+public
+ function TransformCanonicalTests.ScalarizeCrossInFunction.f
+  input Real[:] a;
+  input Real[:] b;
+  output Real[:] c;
+  Real[:] temp_1;
+  Real[:] temp_2;
+ algorithm
+  init c as Real[3];
+  init temp_1 as Real[3];
+  init temp_2 as Real[3];
+  (temp_2) := TransformCanonicalTests.ScalarizeCrossInFunction.g(b);
+  temp_1[1] := a[2] * temp_2[3] - a[3] * temp_2[2];
+  temp_1[2] := a[3] * temp_2[1] - a[1] * temp_2[3];
+  temp_1[3] := a[1] * temp_2[2] - a[2] * temp_2[1];
+  for i1 in 1:3 loop
+   c[i1] := temp_1[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.ScalarizeCrossInFunction.f;
+
+ function TransformCanonicalTests.ScalarizeCrossInFunction.g
+  input Real[:] a;
+  output Real[:] b;
+ algorithm
+  init b as Real[3];
+  for i1 in 1:3 loop
+   b[i1] := - a[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.ScalarizeCrossInFunction.g;
+
+end TransformCanonicalTests.ScalarizeCrossInFunction;
+")})));
+end ScalarizeCrossInFunction;
+
+model ScalarizeSkewInFunction
+    function f
+        input Real[3] a;
+        output Real[3, 3] b;
+    algorithm
+        b := skew(g(a));
+    end f;
+    
+    function g
+        input Real[3] a;
+        output Real[3] b;
+    algorithm
+        b := -a;
+    end g;
+    
+    Real[3] a = {0.5,0.5,0};
+    Real[3, 3] b = f(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeSkewInFunction",
+            description="Test scalarization of skew in a function",
+            variability_propagation=false,
+            eliminate_alias_constants=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeSkewInFunction
+ Real a[1];
+ Real a[2];
+ Real a[3];
+ Real b[1,1];
+ Real b[1,2];
+ Real b[1,3];
+ Real b[2,1];
+ Real b[2,2];
+ Real b[2,3];
+ Real b[3,1];
+ Real b[3,2];
+ Real b[3,3];
+equation
+ a[1] = 0.5;
+ a[2] = 0.5;
+ a[3] = 0;
+ ({{b[1,1], b[1,2], b[1,3]}, {b[2,1], b[2,2], b[2,3]}, {b[3,1], b[3,2], b[3,3]}}) = TransformCanonicalTests.ScalarizeSkewInFunction.f({a[1], a[2], a[3]});
+
+public
+ function TransformCanonicalTests.ScalarizeSkewInFunction.f
+  input Real[:] a;
+  output Real[:,:] b;
+  Real[:,:] temp_1;
+  Real[:] temp_2;
+ algorithm
+  init b as Real[3, 3];
+  init temp_1 as Real[3, 3];
+  init temp_2 as Real[3];
+  (temp_2) := TransformCanonicalTests.ScalarizeSkewInFunction.g(a);
+  temp_1[1,1] := 0;
+  temp_1[1,2] := - temp_2[3];
+  temp_1[1,3] := temp_2[2];
+  temp_1[2,1] := temp_2[3];
+  temp_1[2,2] := 0;
+  temp_1[2,3] := - temp_2[1];
+  temp_1[3,1] := - temp_2[2];
+  temp_1[3,2] := temp_2[1];
+  temp_1[3,3] := 0;
+  for i1 in 1:3 loop
+   for i2 in 1:3 loop
+    b[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end TransformCanonicalTests.ScalarizeSkewInFunction.f;
+
+ function TransformCanonicalTests.ScalarizeSkewInFunction.g
+  input Real[:] a;
+  output Real[:] b;
+ algorithm
+  init b as Real[3];
+  for i1 in 1:3 loop
+   b[i1] := - a[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.ScalarizeSkewInFunction.g;
+
+end TransformCanonicalTests.ScalarizeSkewInFunction;
+")})));
+end ScalarizeSkewInFunction;
+
 
 model ForOfUnknownSize1
     function f

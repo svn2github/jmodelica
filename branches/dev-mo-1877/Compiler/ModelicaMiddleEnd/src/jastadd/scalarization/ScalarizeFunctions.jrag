@@ -79,6 +79,8 @@ aspect FunctionScalarization {
     eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon(this);
     eq FVectorExp.extractTemp()             = extractTempArrayCon(this);
     eq FMatrixExp.extractTemp()             = extractTempArrayCon(this);
+    eq FCross.extractTemp()                 = extractTempArrayCon(this);
+    eq FSkew.extractTemp()                 = extractTempArrayCon(this);
     eq FTempAccessExp.extractTemp()         = false;
     eq FIfExp.extractTemp()                 = false;
     
@@ -643,6 +645,55 @@ aspect FunctionScalarization {
     public void FMinMaxExp.unknownFunctionArrayTemporaries(Scalarizer s) {
         s.addTempVar(this);
         unknownReductionSub(s, getX());
+    }
+
+    public void FCross.unknownFunctionArrayTemporaries(Scalarizer s) {
+        s.addTempVar(this);
+        createArrayTemporariesInChildren(s);
+        FExp x = getX();
+        FExp y = getY();
+        for (Index i : indices()) {
+            int j = i.first() % 3 + 1;
+            int k = j % 3 + 1;
+            x.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
+            y.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(k)});
+            FExp m1 = new FMulExp(x.scalarize(s), y.scalarize(s));
+            x.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(k)});
+            y.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
+            FExp m2 = new FMulExp(x.scalarize(s), y.scalarize(s));
+            s.add(tempExp(i), new FSubExp(m1, m2));
+        }
+    }
+
+    public void FSkew.unknownFunctionArrayTemporaries(Scalarizer s) {
+        s.addTempVar(this);
+        createArrayTemporariesInChildren(s);
+        
+        FExp inner = getFExp();
+        for (Index i : indices()) {
+            /* Result is:
+             * [    0, -x[3],  x[2];
+             *   x[3],     0, -x[1];
+             *  -x[2],  x[1],     0 ]
+             */
+            FExp cell = null;
+            int j = 6 - i.get(0) - i.get(1);
+            switch ((i.get(0) - i.get(1) + 2) % 3) {
+            case 0:
+                inner.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
+                cell = inner.scalarize(s);
+                break;
+            case 1:
+                inner.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
+                cell = inner.scalarize(s);
+                cell = new FNegExp(cell);
+                break;
+            case 2:
+                cell = new FIntegerLitExp(0);
+                break;
+            }
+            s.add(tempExp(i), cell);
+        }
     }
     
     syn FAssignableExp FBuiltInFunctionCall.reducerTempExp(Scalarizer s) = type().isArray() ? 
