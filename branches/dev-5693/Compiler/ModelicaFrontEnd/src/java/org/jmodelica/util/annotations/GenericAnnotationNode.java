@@ -94,7 +94,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             subNodesNameMap_cache = Collections.emptyMap();
         }
 
-        if(!exists() || isAmbiguous()) {
+        if(!nodeExists() || isAmbiguous()) {
             return;
         }
 
@@ -313,7 +313,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
             @Override
             public boolean test(T elem) {
-                return elem.exists();
+                return elem.nodeExists();
             }
 
         });
@@ -413,7 +413,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @return the value of this node, if it has one, otherwise null
      */
     public V value() {
-        if (!exists() || isAmbiguous()) {
+        if (!nodeExists() || isAmbiguous()) {
             return null;
         }
         return node.annotationValue();
@@ -447,7 +447,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             valueAnnotation_cacheComputed = true;
             if (isAmbiguous()) {
                 valueAnnotation_cache = ambiguousNode();
-            } else if (exists()) {
+            } else if (nodeExists()) {
                 N annotationNode = valueAsProvider();
                 if (hasValue() && annotationNode == null) {
                     valueAnnotation_cache = null;
@@ -528,7 +528,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * 
      * @return true if this node does exist.
      */
-    public boolean exists() {
+    public boolean nodeExists() {
         if(parent() != null) {
             asGeneric(parent()).computeSubNodesCache();
         }
@@ -744,6 +744,22 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public String[] valueAsStringVector() throws ConstantEvaluationException {
         return getAndCheckConstValue(ValueType.STRING, ValueSize.VECTOR, true).stringVector();
     }
+    
+    public boolean isUnknownAccess() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.SCALAR) != null;
+    }
+    
+    public boolean isUnknownAccessVector() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.VECTOR) != null;
+    }
+    
+    public String unknownAccessAsString() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.SCALAR).access();
+    }
+    
+    public String[] unknownAccessVectorAsStringVector() {
+        return getAndCheckConstValue(ValueType.UNKNOWN_ACCESS, ValueSize.VECTOR).accessVector();
+    }
 
     /*****************************************
      * Value checkers and retrieves helpers
@@ -766,6 +782,12 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             public boolean check(ConstValue value) {
                 return value.isString() || value.isEnum();
             }
+        },
+        UNKNOWN_ACCESS {
+          @Override
+        public boolean check(ConstValue value) {
+            return value.isUnknownAccess();
+        }  
         },
         REAL {
             @Override

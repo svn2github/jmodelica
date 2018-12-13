@@ -92,6 +92,11 @@ aspect StepPrinter {
                 ioc.print(v, arg, this, str, indent);
             }
 
+            public void printEmptyOutput(FFunctionVariable v, CodeStream str, String indent, String sep) {
+                str.print(sep);
+                str.print("NULL");
+            }
+
             public String returnName(FFunctionVariable v) {
                 return v.nameReturn_C();
             }

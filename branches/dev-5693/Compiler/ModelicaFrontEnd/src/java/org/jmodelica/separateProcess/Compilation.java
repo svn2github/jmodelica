@@ -63,6 +63,7 @@ public final class Compilation
 
     public boolean join(boolean throwException) throws Throwable, InterruptedException {
         process.waitFor();
+        receiver.join();
         if (exception != null) {
             if (throwException)
                 throw exception;

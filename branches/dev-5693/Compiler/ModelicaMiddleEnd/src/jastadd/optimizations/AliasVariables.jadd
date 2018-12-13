@@ -922,25 +922,14 @@ aspect AliasVariables {
      */
     syn long FVariable.aliasHeuristicScore() {
         long score = 0;
-
-        if (!getVisibilityType().isHidden()) {
-            score += 1;
+        
+        VisibilityType t = getVisibilityType();
+        if (t.isProtected()) {
+            // Some models fail to simulate without this
+            t = VisibilityType.PUBLIC;
         }
-
-        // Temporary variables added during transformations or in expandable connectors.
-        score *= 10;
-        if (isFromExpandableConnector()) {
-            score += 1;
-        } else if (!isTemporary()) {
-            score += 2;
-        }
-
-        // Input
-        score *= 10;
-        if (isInput()) {
-            score += 1;
-        }
-
+        score += t.ordinal();
+        
         // Parameter
         score *= 10;
         if (variability().parameterOrLess()) {

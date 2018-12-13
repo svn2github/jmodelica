@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
 
+import org.jmodelica.common.GUIDManager;
 import org.jmodelica.util.streams.StreamGobbler;
 
 aspect FlatAPI {
@@ -2709,28 +2710,7 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
     syn boolean FVariable.isAlgebraicContinousRealVariable()    = zCategory() == FClass.ZOrdinaryCategory.CONTINUOUS;
 
-    private String FClass.guid = null;
-    public String FClass.guid() {
-        if (guid == null) {
-            try {
-                PipedInputStream in = new PipedInputStream();
-                PipedOutputStream out = new PipedOutputStream(in);
-
-                MessageDigest md5 = MessageDigest.getInstance("MD5");
-                new StreamGobbler(in).start();
-                prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
-                out.close();
-
-                guid = new BigInteger(1,md5.digest()).toString(16);
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return guid;
-    }
+    syn GUIDManager FClass.guidManager() = root().getUtilInterface().getGuidManager();
 
     // TODO: This should be handled with a local map when needed, e.g. during
     // index reduction!

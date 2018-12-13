@@ -166,6 +166,12 @@ aspect CommonSubexpressionElimination {
         
     }
     
+    public void FIfExp.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {
+        getIfExp().collectFunctionCalls(m);
+        /* In the branches we would have to consider the conditions (if expression) before we extract
+         * to a new equation. We also also have to consider the variability (is this a when-clause?). */
+    }
+    
     public void FFunctionCall.collectFunctionCalls(FClass.commonSubexpressionEliminationIfSet m) {
         /* We dont try to eliminate nested function call expressions to avoid some complicated cases */
         m.add(this);

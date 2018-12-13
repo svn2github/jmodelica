@@ -2588,6 +2588,19 @@ aspect InstArrays {
     eq InstRecordConstructor.getChild().parentIndex()  = null;
     eq InstComponentDecl.getChild().parentIndex()      = new Index(new int[ndims()]);
     eq InstArrayComponentDecl.getChild().parentIndex() = myIndex();
+    
+    /**
+     * Get an Index to my cell for the concatenation of all surrounding array indices.
+     */
+    syn Index InstArrayComponentDecl.myTotalIndex() = parentTotalIndex().expand(myIndex());
+    
+    /**
+     * For internal use only - returns an incomplete Index. See {@link #myTotalIndex()}.
+     */
+    inh Index InstComponentDecl.parentTotalIndex();
+    eq InstProgramRoot.getChild().parentTotalIndex()        = Index.NULL;
+    eq InstComponentDecl.getChild().parentTotalIndex()      = parentTotalIndex();
+    eq InstArrayComponentDecl.getChild().parentTotalIndex() = isBottomDimension() ? myTotalIndex() : myTotalIndex();
 
     /**
      * The top level component for the array.
