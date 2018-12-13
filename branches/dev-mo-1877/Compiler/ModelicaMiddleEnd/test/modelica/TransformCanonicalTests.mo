@@ -8025,6 +8025,83 @@ end TransformCanonicalTests.ScalarizeSkewInFunction;
 ")})));
 end ScalarizeSkewInFunction;
 
+model ScalarizeSymmetricInFunction
+    function f
+        input  Real[2,2] a;
+        output Real[2,2] b;
+    algorithm
+        b := symmetric(g(a));
+    end f;
+    
+    function g
+        input  Real[:,:] a;
+        output Real[size(a, 1), size(a, 2)] b;
+    algorithm
+        b := -a;
+    end g;
+    
+    Real[2, 2] a = [1,2;3,4];
+    Real[2, 2] b = f(a);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeSymmetricInFunction",
+            description="Test scalarization of symmetric in a function",
+            eliminate_alias_constants=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeSymmetricInFunction
+ constant Real a[1,1] = 1;
+ constant Real a[1,2] = 2;
+ constant Real a[2,1] = 3;
+ constant Real a[2,2] = 4;
+ constant Real b[1,1] = -1.0;
+ constant Real b[1,2] = -2.0;
+ constant Real b[2,1] = -2.0;
+ constant Real b[2,2] = -4.0;
+end TransformCanonicalTests.ScalarizeSymmetricInFunction;
+")})));
+end ScalarizeSymmetricInFunction;
+
+model ScalarizeOuterProductInFunction
+    function f
+        input  Real[2] v1;
+        input  Real[2] v2;
+        output Real[2,2] o;
+    algorithm
+        o := outerProduct(v1, g(v2));
+    end f;
+    
+    function g
+        input Real[:] a;
+        output Real[size(a, 1)] b;
+    algorithm
+        b := -a;
+    end g;
+    
+    Real[2] a = {1,2};
+    Real[2] b = {3,4};
+    Real[2,2] c = f(a, b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeOuterProductInFunction",
+            description="Test scalarization of symmetric in a function",
+            eliminate_alias_constants=false,
+            eliminate_alias_variables=false,
+            flatModel="fclass TransformCanonicalTests.ScalarizeOuterProductInFunction
+ constant Real a[1] = 1;
+ constant Real a[2] = 2;
+ constant Real b[1] = 3;
+ constant Real b[2] = 4;
+ constant Real c[1,1] = -3.0;
+ constant Real c[1,2] = -4.0;
+ constant Real c[2,1] = -6.0;
+ constant Real c[2,2] = -8.0;
+end TransformCanonicalTests.ScalarizeOuterProductInFunction;
+")})));
+end ScalarizeOuterProductInFunction;
+
 
 model ForOfUnknownSize1
     function f

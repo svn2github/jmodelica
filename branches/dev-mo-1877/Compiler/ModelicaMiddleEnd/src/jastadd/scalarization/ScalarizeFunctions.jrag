@@ -73,21 +73,23 @@ aspect FunctionScalarization {
             (isComposite() || isForIndexExp()));
     eq FSpatialDistExp.extractTemp()        = isFunctionCallClause() || super.extractTemp();
     eq FVectorFunctionCall.extractTemp()    = true;
-    eq FArray.extractTemp()                 = extractTempArrayCon(this);
-    eq FSizeExp.extractTemp()               = extractTempArrayCon(this);
-    eq FAbstractCat.extractTemp()           = extractTempArrayCon(this);
-    eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon(this);
-    eq FVectorExp.extractTemp()             = extractTempArrayCon(this);
-    eq FMatrixExp.extractTemp()             = extractTempArrayCon(this);
-    eq FCross.extractTemp()                 = extractTempArrayCon(this);
-    eq FSkew.extractTemp()                 = extractTempArrayCon(this);
+    eq FArray.extractTemp()                 = extractTempArrayCon();
+    eq FSizeExp.extractTemp()               = extractTempArrayCon();
+    eq FAbstractCat.extractTemp()           = extractTempArrayCon();
+    eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon();
+    eq FVectorExp.extractTemp()             = extractTempArrayCon();
+    eq FMatrixExp.extractTemp()             = extractTempArrayCon();
+    eq FCross.extractTemp()                 = extractTempArrayCon();
+    eq FSkew.extractTemp()                  = extractTempArrayCon();
+    eq FSymmetric.extractTemp()             = extractTempArrayCon();
+    eq FOuterProduct.extractTemp()          = extractTempArrayCon();
     eq FTempAccessExp.extractTemp()         = false;
     eq FIfExp.extractTemp()                 = false;
     
     syn boolean FExp.extractForIndexTemp() = isForIndexExp();
     eq FRangeExp.extractForIndexTemp()     = false;
     
-    syn boolean FExp.extractTempArrayCon(FExp e) = (e.inFunction() && e.isArray()) || isForIndexExp();
+    syn boolean FExp.extractTempArrayCon() = (inFunction() && isArray()) || isForIndexExp();
     
     inh boolean FExp.isFunctionCallIO();
     eq BaseNode.getChild().isFunctionCallIO()         = false;
@@ -655,12 +657,8 @@ aspect FunctionScalarization {
         for (Index i : indices()) {
             int j = i.first() % 3 + 1;
             int k = j % 3 + 1;
-            x.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
-            y.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(k)});
-            FExp m1 = new FMulExp(x.scalarize(s), y.scalarize(s));
-            x.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(k)});
-            y.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
-            FExp m2 = new FMulExp(x.scalarize(s), y.scalarize(s));
+            FExp m1 = new FMulExp(x.extractArrayCell(s, j), y.extractArrayCell(s, k));
+            FExp m2 = new FMulExp(x.extractArrayCell(s, k), y.extractArrayCell(s, j));
             s.add(tempExp(i), new FSubExp(m1, m2));
         }
     }
@@ -680,12 +678,10 @@ aspect FunctionScalarization {
             int j = 6 - i.get(0) - i.get(1);
             switch ((i.get(0) - i.get(1) + 2) % 3) {
             case 0:
-                inner.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
-                cell = inner.scalarize(s);
+                cell = inner.extractArrayCell(s, j);
                 break;
             case 1:
-                inner.addArrayUsesToIndexMap(new FExp[]{new FIntegerLitExp(j)});
-                cell = inner.scalarize(s);
+                cell = inner.extractArrayCell(s, j);
                 cell = new FNegExp(cell);
                 break;
             case 2:
@@ -694,6 +690,51 @@ aspect FunctionScalarization {
             }
             s.add(tempExp(i), cell);
         }
+    }
+
+    public void FSymmetric.unknownFunctionArrayTemporaries(Scalarizer s) {
+        s.addTempVar(this);
+        createArrayTemporariesInChildren(s);
+        FExp exp = getFExp();
+        
+        ForNames names = s.getNames();
+        names.addLayer(2);
+        names.fillLayer(this);
+        
+        FAccessExp left = tempExp(names.createFArraySubscripts());
+        FExp[] ijs = names.createFExpArray();
+        FExp expIJ = exp.extractArrayCell(s, ijs);
+        names.createTransposedLayer();
+        FExp expJI = exp.extractArrayCell(s, names.createFExpArray());
+        names.removeLayer();
+        FExp right = new FIfExp(new FLeqExp(ijs[0], ijs[1]), expIJ, expJI);
+        
+        List<FStatement> inner = new List<FStatement>();
+        right = dynamicFExp(right);
+        type().scalarizeAssignment_sub((Scalarizer.Algorithm)s.block(inner), left, right);
+        s.createForLoops(inner, exp);
+        names.removeLayer();
+    }
+
+    public void FOuterProduct.unknownFunctionArrayTemporaries(Scalarizer s) {
+        s.addTempVar(this);
+        createArrayTemporariesInChildren(s);
+        
+        ForNames names = s.getNames();
+        names.addLayer(2);
+        names.fillLayer(this);
+        
+        FAccessExp left = tempExp(names.createFArraySubscripts());
+        FExp[] ijs = names.createFExpArray();
+        FExp x = getX().extractArrayCell(s, ijs[0]);
+        FExp y = getY().extractArrayCell(s, ijs[1]);
+        FExp right = new FMulExp(x, y);
+        
+        List<FStatement> inner = new List<FStatement>();
+        right = dynamicFExp(right);
+        type().scalarizeAssignment_sub((Scalarizer.Algorithm)s.block(inner), left, right);
+        s.createForLoops(inner, this);
+        names.removeLayer();
     }
     
     syn FAssignableExp FBuiltInFunctionCall.reducerTempExp(Scalarizer s) = type().isArray() ? 

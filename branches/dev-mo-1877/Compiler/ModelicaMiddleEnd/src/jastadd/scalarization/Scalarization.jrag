@@ -1162,6 +1162,10 @@ aspect Scalarization {
     }
 
 
+    public FExp FExp.extractArrayCell(Scalarizer s, int... index) {
+        return extractArrayCell(s, new Index(index));
+    }
+
     public FExp FExp.extractArrayCell(Scalarizer s, Index i) {
         if (type().isUnknown() || size().isUnknown()) {
             int[] ind = i.index();
@@ -1175,7 +1179,7 @@ aspect Scalarization {
         }
     }
 
-    public FExp FExp.extractArrayCell(Scalarizer s, FExp[] subs) {
+    public FExp FExp.extractArrayCell(Scalarizer s, FExp... subs) {
         addArrayUsesToIndexMap(subs);
         return dynamicFExp(scalarize(s));
     }
