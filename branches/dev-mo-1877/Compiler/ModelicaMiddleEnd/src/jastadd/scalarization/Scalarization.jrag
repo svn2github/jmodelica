@@ -1986,12 +1986,11 @@ aspect Scalarization {
 
     syn lazy List<FStatement> FForStmt.getUnrolledForStmtList() {
         List<FStatement> unrolledForStmts = new List<>();
-        UnrollingScalarizer s = new UnrollingScalarizer(unrolledForStmts);
         
         FVariable index = getIndex().getFVariable();
         FExp loopExp = getIndex().getFExp();
         for (FExp e : loopExp.getArray().iterable()) {
-            s.setForStmtIndex(index, e);
+            UnrollingScalarizer s = new UnrollingScalarizer(unrolledForStmts, index, e);
             scalarizeStmtList(s, getForStmts());
         }
         return unrolledForStmts;
@@ -2000,29 +1999,31 @@ aspect Scalarization {
     public class FForStmt {
         private class UnrollingScalarizer extends Scalarizer.Algorithm {
             
-            private Map<FAbstractVariable, FExp> indexMap = new HashMap<>();
+            private FAbstractVariable indexVariable;
+            private FExp indexValue;
             
-            public UnrollingScalarizer(List<FStatement> stmts) {
+            public UnrollingScalarizer(List<FStatement> stmts, FAbstractVariable indexVariable, FExp indexValue) {
                 super(new List<FFunctionVariable>(), stmts, new ForNames(), true, Variability.DISCRETE);
+                this.indexVariable = indexVariable;
+                this.indexValue = indexValue;
             }
             
             @Override
             public FExp scalarizeAccessExp(FAccessExp accessExp) {
-                if (indexMap.containsKey(accessExp.myFV())) {
-                    return accessExp.setLocationOf(indexMap.get(accessExp.myFV()).treeCopy());
+                if (indexVariable.equals(accessExp.myFV())) {
+                    return accessExp.setLocationOf(indexValue);
                 }
-                String fin = accessExp.myFV().myForIndexName();
-                FAccess access;
-                if (fin != null) {
-                    access = new FAccessString(fin);
-                } else {
-                    access = accessExp.getFAccess().scalarize(this, accessExp.indexNames);
-                }
-                return setLocationOf(accessExp.createNode(access));
+                return super.scalarizeAccessExp(accessExp);
             }
             
-            public void setForStmtIndex(FAbstractVariable indexVar, FExp value) {
-                indexMap.put(indexVar, value);
+            @Override
+            public Algorithm block(List clauses) {
+                return new UnrollingScalarizer(clauses, indexVariable, indexValue);
+            }
+            
+            @Override
+            public Algorithm block(List vars, List clauses) {
+                return new UnrollingScalarizer(clauses, indexVariable, indexValue);
             }
         }
     }
