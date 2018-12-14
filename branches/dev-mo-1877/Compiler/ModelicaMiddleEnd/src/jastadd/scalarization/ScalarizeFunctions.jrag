@@ -65,7 +65,8 @@ aspect FunctionScalarization {
     syn boolean FExp.extractTemp()          = 
         (inFunction() && isComposite() && isFunctionCallIO()) || extractForIndexTemp();
     eq FAccessExp.extractTemp()             = super.extractTemp() && isSlice() && !isFunctionCallLeft();
-    eq FMulExp.extractTemp()                = !isElementWise() && inFunction() || isForIndexExp();
+    eq FMulExp.extractTemp()                = 
+            inFunction() && (!isElementWise() || isArray() && isFunctionCallIO()) || isForIndexExp();
     eq FReductionExp.extractTemp()          = (getFExp().inFunction() && getFExp().isArray()) || isForIndexExp();
     eq FMinMaxExp.extractTemp()             = (getX().inFunction() && getX().isArray()) || isForIndexExp();
     eq FFunctionCall.extractTemp()          = isFunctionCallClause() || 
@@ -495,6 +496,14 @@ aspect FunctionScalarization {
     
     public void FMulExp.unknownFunctionArrayTemporaries(Scalarizer s) {
         s.addTempVar(this);
+        if (isElementWise()) {
+            unknownFunctionArrayTemporariesElementWise(s);
+        } else {
+            unknownFunctionArrayTemporariesMatrix(s);
+        }
+    }
+    
+    public void FMulExp.unknownFunctionArrayTemporariesMatrix(Scalarizer s) {
         ForNames names = s.getNames();
         FAccessExp sum = new FAccessExp(calcTempVarName());
         s.addTempVar(type().scalarType(), sum.name(), true);
@@ -542,6 +551,33 @@ aspect FunctionScalarization {
         outer.add(new FAssignStmt(tempExp(names.createFArraySubscripts()), sum.fullCopy()));
         
         s.createForLoops(outer, this);
+        
+        names.removeLayer();
+    }
+    
+    public void FMulExp.unknownFunctionArrayTemporariesElementWise(Scalarizer s) {
+        ForNames names = s.getNames();
+        FAccessExp sum = new FAccessExp(calcTempVarName());
+        s.addTempVar(type().scalarType(), sum.name(), true);
+        
+        names.addLayer(ndims());
+        names.fillLayer(this);
+        
+        FExp left = getLeft();
+        left.createArrayTemporaries(s);
+        left.addArrayUsesToIndexMap(s);
+        left = left.scalarize(s);
+        
+        FExp right = getRight();
+        right.createArrayTemporaries(s);
+        right.addArrayUsesToIndexMap(s);
+        right = right.scalarize(s);
+        
+        List<FStatement> inner = new List<>();
+        FAccessExp temp = tempExp(names.createFArraySubscripts());
+        FExp mul = dynamicFExp(new FMulExp(left, right));
+        type().scalarizeAssignment_sub((Scalarizer.Algorithm)s.block(inner), temp, mul);
+        s.createForLoops(inner, this);
         
         names.removeLayer();
     }

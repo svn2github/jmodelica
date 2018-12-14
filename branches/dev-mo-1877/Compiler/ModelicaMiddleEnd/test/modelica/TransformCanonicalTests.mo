@@ -8102,6 +8102,41 @@ end TransformCanonicalTests.ScalarizeOuterProductInFunction;
 ")})));
 end ScalarizeOuterProductInFunction;
 
+model ScalarizeMulExpArrayArgumentInFunction
+    function f
+        input  Real[3] x;
+        output Real[2] y;
+    algorithm
+        y := g(3 * x[1:2]);
+    end f;
+    
+    function g
+        input Real[:] a;
+        output Real[size(a, 1)] b;
+    algorithm
+        b := -a;
+    end g;
+    
+    Real[:] a = {1,2,3};
+    Real[:] z = f(a);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeMulExpArrayArgumentInFunction",
+            description="Test scalarization of symmetric in a function",
+            eliminate_alias_constants=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeMulExpArrayArgumentInFunction
+ constant Real a[1] = 1;
+ constant Real a[2] = 2;
+ constant Real a[3] = 3;
+ constant Real z[1] = -3.0;
+ constant Real z[2] = -6.0;
+end TransformCanonicalTests.ScalarizeMulExpArrayArgumentInFunction;
+")})));
+end ScalarizeMulExpArrayArgumentInFunction;
+
 
 model ForOfUnknownSize1
     function f
