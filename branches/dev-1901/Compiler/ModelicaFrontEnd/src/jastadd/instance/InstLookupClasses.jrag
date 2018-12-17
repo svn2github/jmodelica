@@ -78,20 +78,23 @@ aspect InstLookupClasses {
 
     // The lexical scope of modifiers in short classes is the "outer" scope, although
     // the short class declaration is modeled as containing an extends clause
-    eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)         = getLookupNode().lookupInstClass(name);
-    eq InstExtendsShortClass.getClassName().lookupInstClass(String name)                     = lookupInstClassInChain(name);
-    eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)            = lookupInstClassInChain(name);
-    eq InstShortClassDecl.getChild().lookupInstClass(String name)                            = lookupInstClass(name);
-    eq InstSimpleShortClassDecl.getChild().lookupInstClass(String name)                      = lookupInstClass(name);
-    eq InstLibNode.getChild().lookupInstClass(String name)                                   = lookupInstClass(name);
-    eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)                   = getInstClassRedeclare().lookupInstClass(name);
-    eq InstReplacingSimpleShortClassDecl.getChild().lookupInstClass(String name)             = getInstClassRedeclare().lookupInstClass(name);
-    eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name)       = lookupInstClass(name);
-    eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
-    eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name)        = lookupInstClass(name);
-    eq InstConstrainingComponent.getChild().lookupInstClass(String name)                     = 
+    eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)             = getLookupNode().lookupInstClass(name);
+    eq InstExtendsShortClass.getClassName().lookupInstClass(String name)                         = lookupInstClassInChain(name);
+    eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)                = lookupInstClassInChain(name);
+    eq InstShortClassDecl.getChild().lookupInstClass(String name)                                = lookupInstClass(name);
+    eq InstSimpleShortClassDecl.getChild().lookupInstClass(String name)                          = lookupInstClass(name);
+    eq InstLibNode.getChild().lookupInstClass(String name)                                       = lookupInstClass(name);
+    eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)                       = getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getChild().lookupInstClass(String name)                 = getInstClassRedeclare().lookupInstClass(name);
+    eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name)           = lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().lookupInstClass(String name)     = lookupInstClass(name);
+    eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name)            = lookupInstClass(name);
+    eq InstReplacingShortClassDecl.getInstConstrainingClass().lookupInstClass(String name)       = lookupInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.getInstConstrainingClass().lookupInstClass(String name) = lookupInstClass(name);
+    eq InstReplacingFullClassDecl.getInstConstrainingClass().lookupInstClass(String name)        = lookupInstClass(name);
+    eq InstConstrainingComponent.getChild().lookupInstClass(String name)                         = 
         (getInstRedeclare() != null) ? getInstRedeclare().lookupInstClass(name) : lookupInstClass(name);
-    eq InstConstrainingClass.getChild().lookupInstClass(String name)                         = 
+    eq InstConstrainingClass.getChild().lookupInstClass(String name)                             = 
         (getInstRedeclare() != null) ? getInstRedeclare().lookupInstClass(name) : lookupInstClass(name);
 
     eq InstReplacingRecord.getOriginalInstComponent().lookupInstClass(String name)    = lookupInstClass(name);

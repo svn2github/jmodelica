@@ -1403,6 +1403,28 @@ Alias sets:
 ")})));
     end AliasTest36;
 
+model AliasVisibility1
+    Real a;
+protected
+    Real b(start=1);
+equation
+    a = b;
+    a = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+         name="AliasVisibility1",
+         description="",
+         flatModel="
+fclass TransformCanonicalTests.AliasVisibility1
+protected
+ Real b(start = 1);
+equation
+ b = time;
+end TransformCanonicalTests.AliasVisibility1;
+")})));
+end AliasVisibility1;
+
 model AliasFuncTest1
     function f
         input Real a;

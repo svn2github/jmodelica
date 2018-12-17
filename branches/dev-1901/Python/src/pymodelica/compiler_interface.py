@@ -54,6 +54,9 @@ OptionRegistryInterface = org.jmodelica.common.options.OptionRegistry
 UnknownOptionException = jpype.JClass(
     'org.jmodelica.common.options.OptionRegistry$UnknownOptionException')
     
+InvalidOptionValueException = jpype.JClass(
+    'org.jmodelica.common.options.OptionRegistry$InvalidOptionValueException')
+
 IllegalLogStringException = org.jmodelica.util.logging.IllegalLogStringException
 
 CompilerException = org.jmodelica.util.exceptions.CompilerException

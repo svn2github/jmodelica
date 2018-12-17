@@ -10,6 +10,29 @@
           xmlns:db="http://docbook.org/ns/docbook">
   <title>Release Notes</title>
     <section>
+    <title>Release notes for JModelica.org version 2.6.1</title>    
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Fixed lookup of constraining class of redeclared class.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+    
+    <section>
+    <title>Release notes for JModelica.org version 2.6</title>    
+    
+    <section><title>Compiler Changes</title>
+    <para>Important changes to the compiler:</para>
+    <itemizedlist>
+        <listitem>Fixed type checking of array sizes for elements in arrays of records.</listitem>
+        <listitem>Made sure to release the package.order file after reading.</listitem>
+    </itemizedlist>
+    </section>
+    </section>
+    
+    <section>
     <title>Release notes for JModelica.org version 2.5</title>    
     <section><title>Python Packages Improvements</title>
     <para>Important changes to Python packages:</para>

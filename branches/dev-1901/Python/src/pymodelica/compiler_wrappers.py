@@ -587,6 +587,11 @@ class ModelicaCompiler(object):
             raise UnknownOptionError(
                 ex.message().encode('utf-8')+'\nStacktrace: '+\
                     ex.stacktrace().encode('utf-8'))
+
+        if ex.javaClass() is InvalidOptionValueException:
+            raise InvalidOptionValueError(
+                ex.message().encode('utf-8')+'\nStacktrace: '+\
+                    ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.Exception:
             raise Exception(
