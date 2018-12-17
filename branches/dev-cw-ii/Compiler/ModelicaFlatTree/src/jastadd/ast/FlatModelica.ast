@@ -33,6 +33,7 @@ FClass : BaseNode ::= FAccess
                       FGlobalVariable*
                       FInitialEquation:FAbstractEquation*
                       ParameterEquation:FAbstractEquation*
+                      FStageEquation:FAbstractEquation*
                       FAbstractEquation*
                       FFunctionDecl*
                       FRecordDecl*
