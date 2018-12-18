@@ -229,7 +229,8 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_initialize,
                     jmi_generic_func_t model_init_eval_independent,
                     jmi_generic_func_t model_init_eval_dependent,
-                    jmi_next_time_event_func_t model_ode_next_time_event);
+                    jmi_next_time_event_func_t model_ode_next_time_event,
+                    jmi_generic_func_t model_ode_update_old);
 
 /**
  * \brief Dallocates the jmi_model_t struct in jmi if it is not NULL.
@@ -473,6 +474,7 @@ struct jmi_t {
 
     jmi_dynamic_function_memory_t* dyn_fcn_mem;
     jmi_dynamic_function_memory_t* dyn_fcn_mem_globals;
+    jmi_generic_func_t ode_update_old;
     
     void* globals;                       /**< \brief Global temporaries used in generated code */
 };
@@ -642,6 +644,7 @@ int jmi_destruct_external_objects(jmi_t* jmi);
  * Called after each completed integrator step and event iteration.
  * Expects event mode set with jmi_delay_set_event_mode */
 int jmi_sample_delay_blocks(jmi_t* jmi);
+int jmi_ode_update_old(jmi_t* jmi);
 
 /**
  * \brief Notifies the internal blocks that an integrator step is complete.
