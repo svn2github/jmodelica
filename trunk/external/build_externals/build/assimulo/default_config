@@ -1,7 +1,7 @@
 OS=win
 TARGET=assimulo
 BUILD_DIR=${SDK_HOME}/build
-WHEEL_VERSION_NUMBER=3.0.0.stable
+
 JM_HOME=${SDK_HOME}/src
 ASSIMULO_SRC=$(JM_HOME)/external/Assimulo
 SUPERLU_HOME=$(BUILD_DIR)/superlu_install
