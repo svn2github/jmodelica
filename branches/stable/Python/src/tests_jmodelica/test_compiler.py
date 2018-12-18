@@ -201,6 +201,15 @@ class Test_Compiler:
         nose.tools.assert_raises(pym.compiler_exceptions.UnknownOptionError, Test_Compiler.mc.get_integer_option, option) 
 
     @testattr(stddist_full = True)
+    def test_setget_integer_option_value_error(self):
+        """ Test that integer option setter raises the proper error. """
+        #try to set to an invalid value
+        option = 'log_level'
+        invalid_value = 30
+        nose.tools.assert_raises(pym.compiler_exceptions.InvalidOptionValueError, Test_Compiler.mc.set_integer_option, option, invalid_value)
+
+
+    @testattr(stddist_full = True)
     def test_setget_real_option(self):
         """ Test real option setter and getter. """
         option = 'events_tol_factor'

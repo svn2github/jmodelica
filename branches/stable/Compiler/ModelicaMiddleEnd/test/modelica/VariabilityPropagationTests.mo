@@ -836,6 +836,7 @@ algorithm
         TransformCanonicalTestCase(
             name="Algorithm1",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm1
  parameter Real p;
@@ -848,6 +849,27 @@ end VariabilityPropagationTests.Algorithm1;
 ")})));
 end Algorithm1;
 
+model Algorithm1_b
+    parameter Real p;
+    Real y;
+algorithm
+    y := p;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm1_b",
+            description="Test algorithm propagation off",
+            variability_propagation_algorithms=false,
+            flatModel="
+fclass VariabilityPropagationTests.Algorithm1_b
+ parameter Real p;
+ Real y;
+algorithm
+ y := p;
+end VariabilityPropagationTests.Algorithm1_b;
+")})));
+end Algorithm1_b;
+
 model Algorithm2
     parameter Real p;
     Real y;
@@ -858,6 +880,7 @@ algorithm
         TransformCanonicalTestCase(
             name="Algorithm2",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm2
  parameter Real p;
@@ -881,6 +904,7 @@ equation
         TransformCanonicalTestCase(
             name="Algorithm3",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm3
  parameter Real p;
@@ -907,6 +931,7 @@ algorithm
         TransformCanonicalTestCase(
             name="Algorithm4",
             description="",
+            variability_propagation_algorithms=true,
             flatModel="
 fclass VariabilityPropagationTests.Algorithm4
  parameter Real p;
@@ -933,6 +958,7 @@ algorithm
         CCodeGenTestCase(
             name="Algorithm5",
             description="Parameter algorithm code generation",
+            variability_propagation_algorithms=true,
             template="
 $C_model_init_eval_dependent_parameters$
 ",

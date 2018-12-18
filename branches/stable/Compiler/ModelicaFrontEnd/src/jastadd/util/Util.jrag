@@ -1206,6 +1206,9 @@ aspect Visibility {
     syn boolean FAbstractVariable.isTemporary() = false;
     eq FVariable.isTemporary()                  = getVisibilityType().isTemporary();
 
+    syn boolean FAbstractVariable.isInterface() = false;
+    eq FVariable.isInterface()                  = getVisibilityType().isInterface();
+
     syn boolean FAbstractVariable.isFromExpandableConnector() = false;
     eq FVariable.isFromExpandableConnector()                  = 
         getVisibilityType().isFromExpandableConnector();
