@@ -170,7 +170,7 @@ aspect AssignmentScalarization {
         
         FExp expInAst = right.type().isUnknown() ? left : right;
         
-        if (left.inFunction() && isArray()) {
+        if (left.inFunction() && left.myFClass().noUnrollingInFunctions() && isArray() || size().isUnknown()) {
             ForNames names = s.getNames();
             names.addLayer(ndims());
             names.fillLayer(expInAst);
@@ -189,7 +189,7 @@ aspect AssignmentScalarization {
     }
     
     public void FType.scalarizeAssignment_sub(Scalarizer.Algorithm s, FAssignableExp left, FExp right) {
-        if (left.inFunction() || !isArray()) {
+        if ((left.inFunction() && left.myFClass().noUnrollingInFunctions()) || !isArray() || size().isUnknown()) {
             scalarizeScalarAssignment(s, left, right);
         } else {
             Indices ind = size().isUnknown() ? right.indices() : indices();
