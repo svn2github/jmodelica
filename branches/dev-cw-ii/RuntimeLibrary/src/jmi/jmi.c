@@ -46,7 +46,8 @@ void jmi_model_init(jmi_t* jmi,
                     jmi_generic_func_t model_ode_initialize,
                     jmi_generic_func_t model_init_eval_independent,
                     jmi_generic_func_t model_init_eval_dependent,
-                    jmi_next_time_event_func_t model_ode_next_time_event) {
+                    jmi_next_time_event_func_t model_ode_next_time_event,
+                    jmi_generic_func_t model_ode_update_old) {
     
     /* Create jmi_model_t struct */
     jmi_model_t* model = (jmi_model_t*)calloc(1, sizeof(jmi_model_t));
@@ -59,6 +60,7 @@ void jmi_model_init(jmi_t* jmi,
     jmi->model->ode_event_indicators = model_ode_event_indicators;
     jmi->model->init_eval_independent = model_init_eval_independent;
     jmi->model->init_eval_dependent   = model_init_eval_dependent;
+    jmi->model->ode_update_old = model_ode_update_old;
 }
 
 void jmi_model_delete(jmi_t* jmi) {
@@ -471,6 +473,14 @@ int jmi_ode_derivatives_dir_der(jmi_t* jmi) {
     return return_status;
 }
 
+int jmi_ode_update_old(jmi_t* jmi) {
+    int return_status;
+    jmi->block_level = 0; /* to recover from errors */
+    
+    return_status = jmi_generic_func(jmi, jmi->model->ode_update_old);
+
+    return return_status;
+}
 
 int jmi_ode_initialize(jmi_t* jmi) {
 

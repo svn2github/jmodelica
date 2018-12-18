@@ -465,6 +465,8 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     jmi_block_completed_integrator_step(jmi);
     /* Chattering completed step */
     jmi_chattering_completed_integrator_step(jmi);
+    /* Updates of 'old' values */
+    jmi_ode_update_old(jmi);
     
     /* Verify the choice of dynamic states */
     retval = jmi_dynamic_state_verify_choice(jmi);

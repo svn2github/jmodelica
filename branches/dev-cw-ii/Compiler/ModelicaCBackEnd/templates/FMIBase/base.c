@@ -98,6 +98,11 @@ $C_dynamic_state_coefficients$
 
 $C_enum_strings$
 
+int model_ode_update_old(jmi_t *jmi) {
+$C_ode_update_old$
+    return 0;
+}
+
 int model_ode_guards(jmi_t* jmi) {
 $C_ode_guards$
     return 0;
@@ -172,7 +177,8 @@ $C_dynamic_state_add_call$
                    *model_ode_initialize,
                    *model_init_eval_independent,
                    *model_init_eval_dependent,
-                   *model_ode_next_time_event);
+                   model_ode_next_time_event,
+                   *model_ode_update_old);
     
     /* Initialize the delay interface */
     jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay,
