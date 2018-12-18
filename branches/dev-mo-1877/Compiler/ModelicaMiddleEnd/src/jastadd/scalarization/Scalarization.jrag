@@ -1025,7 +1025,7 @@ aspect Scalarization {
     @Override
     public void FRecordType.scalarRecordClauses(Scalarizer s, FAccess suffix, FExp left, FExp right) {
         for (FRecordComponentType comp : getComponents()) {
-            if (!isArray() && left.inFunction() && suffix.isEmpty() && left.myFClass().noUnrollingInFunctions() || comp.getFType().size().isUnknown()) {
+            if (!isArray() && left.inFunction() && suffix.isEmpty() && left.myFClass().noUnrollingInFunctions()) {
                 String name = comp.getName();
                 comp.getFType().scalarizeAssignment((Scalarizer.Algorithm) s, left.component(name).asCommonAccessExp(), right.component(name));
             } else {
