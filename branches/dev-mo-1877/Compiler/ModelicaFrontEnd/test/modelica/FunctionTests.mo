@@ -13594,7 +13594,7 @@ model FuncColonSubscript
             Real[1] t;
             output Real y;
         algorithm
-            t := time*f(x[:,1]);
+            t := f(x[:,1]);
             y := sum(t);
         end h;
         
@@ -13619,8 +13619,7 @@ public
   Real[:] temp_1;
   Real[:] temp_2;
   Real[:] temp_3;
-  Real[:] temp_4;
-  Real temp_5;
+  Real temp_4;
  algorithm
   init t as Real[1];
   init temp_1 as Real[size(x, 1)];
@@ -13636,20 +13635,12 @@ public
   for i1 in 1:size(x, 1) loop
    temp_3[i1] := x[i1,1];
   end for;
-  init temp_4 as Real[FunctionTests.FuncColonSubscript.g(temp_3)];
-  init temp_3 as Real[size(x, 1)];
-  for i1 in 1:size(x, 1) loop
-   temp_3[i1] := x[i1,1];
-  end for;
-  (temp_4) := FunctionTests.FuncColonSubscript.f(temp_2);
-  for i1 in 1:FunctionTests.FuncColonSubscript.g(temp_3) loop
-   t[i1] := time * temp_4[i1];
-  end for;
-  temp_5 := 0.0;
+  (t) := FunctionTests.FuncColonSubscript.f(temp_2);
+  temp_4 := 0.0;
   for i1 in 1:1 loop
-   temp_5 := temp_5 + t[i1];
+   temp_4 := temp_4 + t[i1];
   end for;
-  y := temp_5;
+  y := temp_4;
   return;
  end FunctionTests.FuncColonSubscript.h;
 
