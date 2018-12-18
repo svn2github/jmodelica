@@ -474,7 +474,6 @@ struct jmi_t {
 
     jmi_dynamic_function_memory_t* dyn_fcn_mem;
     jmi_dynamic_function_memory_t* dyn_fcn_mem_globals;
-    jmi_generic_func_t ode_update_old;
     
     void* globals;                       /**< \brief Global temporaries used in generated code */
 };
@@ -492,6 +491,7 @@ struct jmi_model_t {
     jmi_generic_func_t init_eval_independent;        /**< \brief A function for initial evaluation of independent parameters. */
     jmi_generic_func_t init_eval_dependent;          /**< \brief A function for initial evaluation of dependent   parameters. */
     jmi_next_time_event_func_t ode_next_time_event;  /**< \brief A function for computing the next time event instant. */
+    jmi_generic_func_t ode_update_old;
 };
 
 /**
