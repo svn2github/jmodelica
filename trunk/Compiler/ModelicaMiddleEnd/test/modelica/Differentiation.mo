@@ -1538,8 +1538,9 @@ public
   output Real[:] y;
  algorithm
   init y as Real[2];
-  y[1] := x[1];
-  y[2] := x[2];
+  for i1 in 1:2 loop
+   y[i1] := x[i1];
+  end for;
   return;
  annotation(Inline = false);
  end Differentiation.Expressions.ConstantFunctionCallArray.f;
@@ -1988,8 +1989,25 @@ public
   input Real[:] x;
   input Real[:,:] A;
   output Real y;
+  Real temp_1;
+  Real temp_2;
+  Real[:] temp_3;
+  Real temp_4;
  algorithm
-  y := (x[1] * A[1,1] + x[2] * A[2,1]) * x[1] + (x[1] * A[1,2] + x[2] * A[2,2]) * x[2];
+  init temp_3 as Real[2];
+  for i2 in 1:2 loop
+   temp_4 := 0.0;
+   for i3 in 1:2 loop
+    temp_4 := temp_4 + x[i3] * A[i3,i2];
+   end for;
+   temp_3[i2] := temp_4;
+  end for;
+  temp_2 := 0.0;
+  for i1 in 1:2 loop
+   temp_2 := temp_2 + temp_3[i1] * x[i1];
+  end for;
+  temp_1 := temp_2;
+  y := temp_1;
   return;
  annotation(derivative = Differentiation.DerivativeAnnotation.Test2.f_der);
  end Differentiation.DerivativeAnnotation.Test2.f;
@@ -2000,8 +2018,42 @@ public
   input Real[:] der_x;
   input Real[:,:] der_A;
   output Real der_y;
+  Real temp_1;
+  Real temp_2;
+  Real[:] temp_3;
+  Real temp_4;
+  Real temp_5;
+  Real temp_6;
+  Real[:] temp_7;
+  Real temp_8;
  algorithm
-  der_y := (2 * x[1] * A[1,1] + 2 * x[2] * A[2,1]) * der_x[1] + (2 * x[1] * A[1,2] + 2 * x[2] * A[2,2]) * der_x[2] + ((x[1] * der_A[1,1] + x[2] * der_A[2,1]) * x[1] + (x[1] * der_A[1,2] + x[2] * der_A[2,2]) * x[2]);
+  init temp_3 as Real[2];
+  for i2 in 1:2 loop
+   temp_4 := 0.0;
+   for i3 in 1:2 loop
+    temp_4 := temp_4 + 2 * x[i3] * A[i3,i2];
+   end for;
+   temp_3[i2] := temp_4;
+  end for;
+  temp_2 := 0.0;
+  for i1 in 1:2 loop
+   temp_2 := temp_2 + temp_3[i1] * der_x[i1];
+  end for;
+  temp_1 := temp_2;
+  init temp_7 as Real[2];
+  for i2 in 1:2 loop
+   temp_8 := 0.0;
+   for i3 in 1:2 loop
+    temp_8 := temp_8 + x[i3] * der_A[i3,i2];
+   end for;
+   temp_7[i2] := temp_8;
+  end for;
+  temp_6 := 0.0;
+  for i1 in 1:2 loop
+   temp_6 := temp_6 + temp_7[i1] * x[i1];
+  end for;
+  temp_5 := temp_6;
+  der_y := temp_1 + temp_5;
   return;
  end Differentiation.DerivativeAnnotation.Test2.f_der;
 
@@ -3058,11 +3110,18 @@ end Differentiation.AlgorithmDifferentiation.InitArray;
 void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_a, R_0_ra* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
     if (y_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 1, 1, 1)
         y_a = y_an;
     }
-    jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
+    i1_0in = 0;
+    i1_0ie = floor((1) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        jmi_array_rec_1(y_a, i1_0i)->x = jmi_array_rec_1(x_a, i1_0i)->x;
+    }
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -3071,13 +3130,20 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_r
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1)
     JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
+    jmi_real_t i1_1i;
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
     JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
     if (_der_y_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
         _der_y_a = _der_y_an;
     }
-    jmi_array_rec_1(_der_y_a, 1)->x = jmi_array_rec_1(_der_x_a, 1)->x;
-    jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
+    i1_1in = 0;
+    i1_1ie = floor((1) - (1));
+    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
+        jmi_array_rec_1(_der_y_a, i1_1i)->x = jmi_array_rec_1(_der_x_a, i1_1i)->x;
+        jmi_array_rec_1(y_a, i1_1i)->x = jmi_array_rec_1(x_a, i1_1i)->x;
+    }
     JMI_DYNAMIC_FREE()
     return;
 }

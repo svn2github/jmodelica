@@ -517,8 +517,8 @@ public
   input AlgorithmTests.TempAssign2.R[:] x;
   output AlgorithmTests.TempAssign2.R[:] y;
   Integer t;
-  AlgorithmTests.TempAssign2.R[:] temp_1;
-  Integer[:] temp_2;
+  Integer[:] temp_1;
+  AlgorithmTests.TempAssign2.R[:] temp_2;
  algorithm
   init y as AlgorithmTests.TempAssign2.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
@@ -526,18 +526,18 @@ public
    y[i1].b := x[i1].b;
   end for;
   t := size(x, 1);
-  init temp_1 as AlgorithmTests.TempAssign2.R[max(t, 0)];
-  init temp_2 as Integer[max(t, 0)];
+  init temp_1 as Integer[max(t, 0)];
   for i1 in 1:max(t, 0) loop
-   temp_2[i1] := t + 1 - i1;
+   temp_1[i1] := t + 1 - i1;
+  end for;
+  init temp_2 as AlgorithmTests.TempAssign2.R[max(t, 0)];
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1].a := y[temp_1[i1]].a;
+   temp_2[i1].b := y[temp_1[i1]].b;
   end for;
   for i1 in 1:max(t, 0) loop
-   temp_1[i1].a := y[temp_2[i1]].a;
-   temp_1[i1].b := y[temp_2[i1]].b;
-  end for;
-  for i1 in 1:max(t, 0) loop
-   y[i1].a := temp_1[i1].a;
-   y[i1].b := temp_1[i1].b;
+   y[i1].a := temp_2[i1].a;
+   y[i1].b := temp_2[i1].b;
   end for;
   return;
  end AlgorithmTests.TempAssign2.f;
@@ -615,8 +615,8 @@ public
   input AlgorithmTests.TempAssign3.R[:] x;
   output AlgorithmTests.TempAssign3.R[:] y;
   Integer t;
-  AlgorithmTests.TempAssign3.R[:] temp_1;
-  Integer[:] temp_2;
+  Integer[:] temp_1;
+  AlgorithmTests.TempAssign3.R[:] temp_2;
  algorithm
   init y as AlgorithmTests.TempAssign3.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
@@ -627,18 +627,18 @@ public
   for i1 in 1:size(x, 1) loop
    assert(2 == size(x[i1].a, 1), \"Mismatching sizes in function 'AlgorithmTests.TempAssign3.f', component 'x[i1].a', dimension '1'\");
   end for;
-  init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
-  init temp_2 as Integer[max(t, 0)];
+  init temp_1 as Integer[max(t, 0)];
   for i1 in 1:max(t, 0) loop
-   temp_2[i1] := t + 1 - i1;
+   temp_1[i1] := t + 1 - i1;
+  end for;
+  init temp_2 as AlgorithmTests.TempAssign3.R[max(t, 0)];
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1].a[1] := y[temp_1[i1]].a[1];
+   temp_2[i1].a[2] := y[temp_1[i1]].a[2];
   end for;
   for i1 in 1:max(t, 0) loop
-   temp_1[i1].a[1] := y[temp_2[i1]].a[1];
-   temp_1[i1].a[2] := y[temp_2[i1]].a[2];
-  end for;
-  for i1 in 1:max(t, 0) loop
-   y[i1].a[1] := temp_1[i1].a[1];
-   y[i1].a[2] := temp_1[i1].a[2];
+   y[i1].a[1] := temp_2[i1].a[1];
+   y[i1].a[2] := temp_2[i1].a[2];
   end for;
   return;
  end AlgorithmTests.TempAssign3.f;
@@ -694,11 +694,16 @@ public
  function AlgorithmTests.TempAssign4.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[3];
-  y[1] := x;
-  y[2] := x;
-  y[3] := x;
+  init temp_1 as Real[3];
+  temp_1[1] := x;
+  temp_1[2] := x;
+  temp_1[3] := x;
+  for i1 in 1:3 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end AlgorithmTests.TempAssign4.f;
 

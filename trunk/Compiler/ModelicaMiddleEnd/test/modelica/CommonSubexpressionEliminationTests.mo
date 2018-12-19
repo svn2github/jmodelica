@@ -236,11 +236,28 @@ public
   input Real x;
   output Real y;
   output CommonSubexpressionEliminationTests.FunctionCall6.R r;
+  Real[:,:] temp_1;
+  Real[:] temp_2;
+  Real[:] temp_3;
  algorithm
   y := x;
+  init temp_1 as Real[2, 1];
+  init temp_2 as Real[1];
+  temp_2[1] := x;
+  for i1 in 1:1 loop
+   temp_1[1,i1] := temp_2[i1];
+  end for;
+  init temp_3 as Real[1];
+  temp_3[1] := x;
+  for i1 in 1:1 loop
+   temp_1[2,i1] := temp_3[i1];
+  end for;
   r.x := x;
-  r.y[1,1] := x;
-  r.y[2,1] := x;
+  for i1 in 1:2 loop
+   for i2 in 1:1 loop
+    r.y[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
   return;
  annotation(Inline = false);
  end CommonSubexpressionEliminationTests.FunctionCall6.f2;

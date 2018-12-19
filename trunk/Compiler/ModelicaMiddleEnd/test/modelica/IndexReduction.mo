@@ -491,10 +491,21 @@ public
   input Real[:] x;
   input Real[:,:] A;
   output Real[:] y;
+  Real[:] temp_1;
+  Real temp_2;
  algorithm
   init y as Real[2];
-  y[1] := A[1,1] * x[1] + A[1,2] * x[2];
-  y[2] := A[2,1] * x[1] + A[2,2] * x[2];
+  init temp_1 as Real[2];
+  for i1 in 1:2 loop
+   temp_2 := 0.0;
+   for i2 in 1:2 loop
+    temp_2 := temp_2 + A[i1,i2] * x[i2];
+   end for;
+   temp_1[i1] := temp_2;
+  end for;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  annotation(derivative = IndexReduction.IndexReduction27_DerFunc.f_der);
  end IndexReduction.IndexReduction27_DerFunc.f;
@@ -505,10 +516,21 @@ public
   input Real[:] der_x;
   input Real[:,:] der_A;
   output Real[:] der_y;
+  Real[:] temp_1;
+  Real temp_2;
  algorithm
   init der_y as Real[2];
-  der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
-  der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
+  init temp_1 as Real[2];
+  for i1 in 1:2 loop
+   temp_2 := 0.0;
+   for i2 in 1:2 loop
+    temp_2 := temp_2 + A[i1,i2] * der_x[i2];
+   end for;
+   temp_1[i1] := temp_2;
+  end for;
+  for i1 in 1:2 loop
+   der_y[i1] := temp_1[i1];
+  end for;
   return;
  end IndexReduction.IndexReduction27_DerFunc.f_der;
 
@@ -589,9 +611,20 @@ public
   input Real[:] x;
   input Real[:,:] A;
   output IndexReduction.IndexReduction28_Record.R y;
+  Real[:] temp_1;
+  Real temp_2;
  algorithm
-  y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
-  y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
+  init temp_1 as Real[2];
+  for i1 in 1:2 loop
+   temp_2 := 0.0;
+   for i2 in 1:2 loop
+    temp_2 := temp_2 + A[i1,i2] * x[i2];
+   end for;
+   temp_1[i1] := temp_2;
+  end for;
+  for i1 in 1:2 loop
+   y.a[i1] := temp_1[i1];
+  end for;
   return;
  annotation(derivative = IndexReduction.IndexReduction28_Record.f_der);
  end IndexReduction.IndexReduction28_Record.f;
@@ -602,9 +635,20 @@ public
   input Real[:] der_x;
   input Real[:,:] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
+  Real[:] temp_1;
+  Real temp_2;
  algorithm
-  der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
-  der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
+  init temp_1 as Real[2];
+  for i1 in 1:2 loop
+   temp_2 := 0.0;
+   for i2 in 1:2 loop
+    temp_2 := temp_2 + A[i1,i2] * der_x[i2];
+   end for;
+   temp_1[i1] := temp_2;
+  end for;
+  for i1 in 1:2 loop
+   der_y.a[i1] := temp_1[i1];
+  end for;
   return;
  end IndexReduction.IndexReduction28_Record.f_der;
 
@@ -1901,8 +1945,13 @@ public
   input Real x;
   input Real[:] a;
   output Real y;
+  Real temp_1;
  algorithm
-  y := x + (a[1] + a[2]);
+  temp_1 := 0.0;
+  for i1 in 1:2 loop
+   temp_1 := temp_1 + a[i1];
+  end for;
+  y := x + temp_1;
   return;
  annotation(derivative(noDerivative = a) = IndexReduction.FunctionAttributeScalarization2.F1_der,Inline = false);
  end IndexReduction.FunctionAttributeScalarization2.F1;

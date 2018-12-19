@@ -215,7 +215,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -260,7 +260,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'-'.sub;
 
@@ -302,7 +302,7 @@ public
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'-'.neg;
 
@@ -367,7 +367,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -412,7 +412,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -457,7 +457,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -502,7 +502,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -526,7 +526,7 @@ end OperatorRecordTests.OperatorOverload8;
                 input Op b;
                 output Op c;
             algorithm
-                c := Op(a.x * b.x, a.y * b.y);
+                (c) := Op(a.x * b.x, a.y * b.y);
             end '*';
         end Op;
         
@@ -601,7 +601,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   return;
  end OperatorRecordTests.Cplx.'*'.mul;
 
@@ -648,7 +648,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -695,7 +695,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -741,7 +741,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -796,7 +796,7 @@ public
   assert(size(a, 1) == size(b, 1), \"Mismatching sizes in function 'OperatorRecordTests.Cplx.'*'.prod', component 'b', dimension '1'\");
   for i1 in 1:size(b, 1) loop
   end for;
-  c := Complex.'constructor'.fromReal(0, 0);
+  (c) := Complex.'constructor'.fromReal(0, 0);
   for i in 1:size(a, 1) loop
    c := OperatorRecordTests.Cplx.'+'(c, OperatorRecordTests.Cplx.'*'.mul(a[i], b[i]));
   end for;
@@ -819,7 +819,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   return;
  end OperatorRecordTests.Cplx.'*'.mul;
 
@@ -828,7 +828,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -928,7 +928,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re / b.re, a.im / b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re / b.re, a.im / b.im);
   return;
  end OperatorRecordTests.Cplx.'/';
 
@@ -973,7 +973,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re ^ b.re, a.im ^ b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re ^ b.re, a.im ^ b.im);
   return;
  end OperatorRecordTests.Cplx.'^';
 
@@ -1288,7 +1288,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'and';
 
@@ -1333,7 +1333,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'or';
 
@@ -1375,7 +1375,7 @@ public
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re, - a.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'not';
 
@@ -1456,7 +1456,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   return;
  end OperatorRecordTests.Cplx.'*'.mul;
 
@@ -1502,7 +1502,7 @@ public
  function OperatorRecordTests.Cplx.'0'
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(0, 0);
+  (c) := OperatorRecordTests.Cplx.'constructor'(0, 0);
   return;
  end OperatorRecordTests.Cplx.'0';
 
@@ -1520,7 +1520,7 @@ public
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'-'.neg;
 
@@ -1529,7 +1529,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'-'.sub;
 
@@ -1538,7 +1538,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -1591,7 +1591,7 @@ public
  function OperatorRecordTests.Cplx.'0'
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(0, 0);
+  (c) := OperatorRecordTests.Cplx.'constructor'(0, 0);
   return;
  end OperatorRecordTests.Cplx.'0';
 
@@ -1609,7 +1609,7 @@ public
   input OperatorRecordTests.Cplx a;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(- a.re, - a.im);
   return;
  end OperatorRecordTests.Cplx.'-'.neg;
 
@@ -1618,7 +1618,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re - b.re, a.im - b.im);
   return;
  end OperatorRecordTests.Cplx.'-'.sub;
 
@@ -1627,7 +1627,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -1668,7 +1668,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -1718,7 +1718,7 @@ public
  function OperatorRecordTests.Cplx.'0'
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(0, 0);
+  (c) := OperatorRecordTests.Cplx.'constructor'(0, 0);
   return;
  end OperatorRecordTests.Cplx.'0';
 
@@ -2326,7 +2326,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -2378,7 +2378,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -3237,7 +3237,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   return;
  end OperatorRecordTests.Cplx.'*'.mul;
 
@@ -3283,7 +3283,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
@@ -3335,7 +3335,7 @@ public
   input OperatorRecordTests.Cplx b;
   output OperatorRecordTests.Cplx c;
  algorithm
-  c := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
+  (c) := OperatorRecordTests.Cplx.'constructor'(a.re + b.re, a.im + b.im);
   return;
  end OperatorRecordTests.Cplx.'+';
 
