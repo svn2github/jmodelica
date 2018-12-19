@@ -387,11 +387,11 @@ aspect FunctionScalarization {
         if (isSlice() && (s.inFunction() && myFClass().noUnrollingInFunctions() || extractAsUnknown())) {
             s.addTempVar(exp);
             exp = exp.tempExp();
-        }
-        if (s.inFunction()) {
             exp = exp.scalarizeExp(s);
-        } else {
+        } else if (!s.inFunction() || isSlice()) {
             exp = type().createRecordConstructor(s, exp);
+        } else {
+            exp = exp.scalarizeExp(s);
         }
         return new FFunctionCallLeft(new Opt<FExp>(exp));
     }

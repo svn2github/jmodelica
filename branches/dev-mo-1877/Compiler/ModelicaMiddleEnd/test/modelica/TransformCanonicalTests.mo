@@ -8137,6 +8137,72 @@ end TransformCanonicalTests.ScalarizeMulExpArrayArgumentInFunction;
 ")})));
 end ScalarizeMulExpArrayArgumentInFunction;
 
+model ScalarizeSliceInFunctionCallLeftInFunction
+    function f
+        input  Real[3] x;
+        output Real[1,3] y;
+    algorithm
+        (y[1,:]) := g(x);
+    end f;
+    
+    function g
+        input Real[:] a;
+        output Real[size(a, 1)] b;
+    algorithm
+        b := -a;
+    end g;
+    
+    Real[:] a = {1,2,3};
+    Real[1,:] z = f(a);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeSliceInFunctionCallLeftInFunction",
+            description="Test scalarization of slice in a function call left",
+            eliminate_alias_constants=false,
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            inline_functions=none,
+            no_loop_unrolling_in_functions=false,
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction
+ Real a[1];
+ Real a[2];
+ Real a[3];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[1,3];
+equation
+ a[1] = 1;
+ a[2] = 2;
+ a[3] = 3;
+ ({{z[1,1], z[1,2], z[1,3]}}) = TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.f({a[1], a[2], a[3]});
+
+public
+ function TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.f
+  input Real[:] x;
+  output Real[:,:] y;
+ algorithm
+  init y as Real[1, 3];
+  ({y[1,1], y[1,2], y[1,3]}) := TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.g(x);
+  return;
+ end TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.f;
+
+ function TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.g
+  input Real[:] a;
+  output Real[:] b;
+ algorithm
+  init b as Real[size(a, 1)];
+  for i1 in 1:size(a, 1) loop
+   b[i1] := - a[i1];
+  end for;
+  return;
+ end TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction.g;
+
+end TransformCanonicalTests.ScalarizeSliceInFunctionCallLeftInFunction;
+")})));
+end ScalarizeSliceInFunctionCallLeftInFunction;
+
 
 model ForOfUnknownSize1
     function f
