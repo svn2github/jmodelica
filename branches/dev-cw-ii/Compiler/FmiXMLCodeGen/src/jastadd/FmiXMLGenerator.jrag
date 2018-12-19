@@ -1522,7 +1522,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 if (lowerOrderVar.isFVariable()) {
                     return fclass.xmlVariableIndexMap().get(lowerOrderVar.asFVariable().generateXMLName());
                 } else {
-                    throw new InternalCompilerError("Unable to find lower order variable for derivative variable " + var.displayName());
+                    //throw new InternalCompilerError("Unable to find lower order variable for derivative variable " + var.displayName());
+                    return 0; //TODO: This should not be needed! Fix upstream.
                 }
             }
 
