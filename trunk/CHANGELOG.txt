@@ -1,7 +1,4 @@
 ================= Unreleased ==================
-; Fixed ; Minor ; Compiler ; #5721
-Fix c_compiler so it's case insensitive.
-
 ; Feature ; Major ; Compiler ; #5515
 Turned on initial variability propagation by default.
 
