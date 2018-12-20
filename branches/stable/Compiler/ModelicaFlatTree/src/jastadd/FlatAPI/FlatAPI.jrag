@@ -2321,6 +2321,7 @@ aspect FlatAPI {
     inh FClass FAlgorithm.myFClass();
     inh FClass FAbstractEquation.myFClass();
     inh FClass FStatement.myFClass();
+    inh FClass FFunctionCallLeft.myFClass();
     inh lazy FClass FExternalStmt.myFClass();
     eq FClass.getChild().myFClass() = this;
     eq Root.getChild().myFClass() = null; 
@@ -3300,16 +3301,6 @@ aspect FVariableUses {
                     res.add(use);
             return res;
         }
-    }
-    
-    /**
-     * Check if this variable is used on the left hand side of a function call equation or statement.
-     */
-    syn lazy boolean FAbstractVariable.usedAsFunctionCallLeft() {
-        for (FExp e : definingUses()) 
-            if (e.inFunctionCallLeft())
-                return true;
-        return false;
     }
     
     inh boolean FExp.inFunctionCallLeft();

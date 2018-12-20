@@ -481,6 +481,12 @@ aspect FlatNames {
      */
     syn boolean FAccess.isSimple() = true;
     eq FAccessFull.isSimple()      = false;
+    
+    /**
+     * Checks if this access is empty.
+     */
+    syn boolean FAccess.isEmpty() = false;
+    eq FAccessEmpty.isEmpty()     = true;
 
     /**
      * Check if this use has any expression or colon array subscripts. 

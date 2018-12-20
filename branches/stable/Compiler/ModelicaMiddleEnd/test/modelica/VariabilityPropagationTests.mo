@@ -1022,10 +1022,15 @@ parameter equation
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
   output Real[:] o;
+  Integer[:] temp_1;
  algorithm
   init o as Real[2];
-  o[1] := 1;
-  o[2] := 2;
+  init temp_1 as Integer[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  for i1 in 1:2 loop
+   o[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.ConstantStartFunc1.f;
 
@@ -1350,9 +1355,14 @@ parameter equation
 public
  function VariabilityPropagationTests.EvalFail2.f
   output Real[:] y;
+  Integer[:] temp_1;
  algorithm
   init y as Real[1];
-  y[1] := 1;
+  init temp_1 as Integer[1];
+  temp_1[1] := 1;
+  for i1 in 1:1 loop
+   y[i1] := temp_1[i1];
+  end for;
   assert(false, \"nope\");
   return;
  end VariabilityPropagationTests.EvalFail2.f;
@@ -1493,10 +1503,15 @@ public
  function VariabilityPropagationTests.IfEquationTemp1.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.IfEquationTemp1.f;
 
@@ -1535,10 +1550,15 @@ public
  function VariabilityPropagationTests.IfEquationTemp2.f
   input Real x;
   output Real[:] y;
+  Real[:] temp_1;
  algorithm
   init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
+  init temp_1 as Real[2];
+  temp_1[1] := x;
+  temp_1[2] := x + 1;
+  for i1 in 1:2 loop
+   y[i1] := temp_1[i1];
+  end for;
   return;
  end VariabilityPropagationTests.IfEquationTemp2.f;
 

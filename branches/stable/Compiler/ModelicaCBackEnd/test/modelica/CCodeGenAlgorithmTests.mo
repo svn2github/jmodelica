@@ -961,12 +961,22 @@ $C_ode_derivatives$
 void func_CCodeGenAlgorithmTests_Algorithm9_f_def0(jmi_array_t* o_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, o_an, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, o_an, 2, 1, 2)
         o_a = o_an;
     }
-    jmi_array_ref_1(o_a, 1) = 1;
-    jmi_array_ref_1(o_a, 2) = 1;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1, 2)
+    jmi_array_ref_1(temp_1_a, 1) = 1;
+    jmi_array_ref_1(temp_1_a, 2) = 1;
+    i1_0in = 0;
+    i1_0ie = floor((2) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        jmi_array_ref_1(o_a, i1_0i) = jmi_array_val_1(temp_1_a, i1_0i);
+    }
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -979,6 +989,15 @@ void func_CCodeGenAlgorithmTests_Algorithm9_fw_def1(R_0_r* r_v) {
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 3, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1)
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_2_a, 2, 1)
+    jmi_real_t i1_1i;
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
+    jmi_real_t i1_2i;
+    jmi_int_t i1_2ie;
+    jmi_int_t i1_2in;
+    jmi_real_t i1_3i;
+    jmi_int_t i1_3ie;
+    jmi_int_t i1_3in;
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 3, 1, 3)
     r__v->a = tmp_1;
     if (r_v == NULL) {
@@ -988,15 +1007,23 @@ void func_CCodeGenAlgorithmTests_Algorithm9_fw_def1(R_0_r* r_v) {
     }
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1, 2)
     func_CCodeGenAlgorithmTests_Algorithm9_f_def0(temp_1_a);
-    jmi_array_ref_1(r_v->a, 1) = 2 * jmi_array_val_1(temp_1_a, 1);
-    jmi_array_ref_1(r_v->a, 2) = 2 * jmi_array_val_1(temp_1_a, 2);
+    i1_1in = 0;
+    i1_1ie = floor((2) - (1));
+    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
+        jmi_array_ref_1(r_v->a, i1_1i) = 2 * jmi_array_val_1(temp_1_a, i1_1i);
+    }
     JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_2_a, 2, 1, 2)
     func_CCodeGenAlgorithmTests_Algorithm9_f_def0(temp_2_a);
-    jmi_array_ref_1(r_v->a, 2) = jmi_array_val_1(temp_2_a, 1);
-    jmi_array_ref_1(r_v->a, 3) = jmi_array_val_1(temp_2_a, 2);
-    jmi_array_ref_1(r__v->a, 1) = jmi_array_val_1(r_v->a, 1);
-    jmi_array_ref_1(r__v->a, 2) = jmi_array_val_1(r_v->a, 2);
-    jmi_array_ref_1(r__v->a, 3) = jmi_array_val_1(r_v->a, 3);
+    i1_2in = 0;
+    i1_2ie = floor((2) - (1));
+    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
+        jmi_array_ref_1(r_v->a, 2 + (i1_2i - 1)) = jmi_array_val_1(temp_2_a, i1_2i);
+    }
+    i1_3in = 0;
+    i1_3ie = floor((3) - (1));
+    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
+        jmi_array_ref_1(r__v->a, i1_3i) = jmi_array_val_1(r_v->a, i1_3i);
+    }
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -1067,9 +1094,6 @@ annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="Algorithm10",
         description="C code generation of slices in function call assignments",
-        algorithms_as_functions=false,
-        generate_ode=true,
-        equation_sorting=true,
         inline_functions="none",
         variability_propagation=false,
         eliminate_alias_variables=false,
@@ -1082,23 +1106,58 @@ void func_CCodeGenAlgorithmTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_real_
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, o_an, 5, 1)
     JMI_DEF(REA, dummy_v)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 3, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_2_a, 3, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_3_a, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_4_a, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_5_a, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_6_a, 2, 1)
+    jmi_real_t i1_0i;
+    jmi_int_t i1_0ie;
+    jmi_int_t i1_0in;
+    jmi_real_t i1_1i;
+    jmi_int_t i1_1ie;
+    jmi_int_t i1_1in;
+    jmi_real_t i1_2i;
+    jmi_int_t i1_2ie;
+    jmi_int_t i1_2in;
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, o_an, 5, 1, 5)
         o_a = o_an;
     }
     dummy_v = 1;
-    jmi_array_ref_1(o_a, 1) = 1;
-    jmi_array_ref_1(o_a, 3) = 1;
-    jmi_array_ref_1(o_a, 5) = 1;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = jmi_array_val_1(o_a, 3);
-    jmi_array_ref_1(tmp_2, 2) = jmi_array_val_1(o_a, 5);
-    func_CCodeGenAlgorithmTests_Algorithm10_f_def1(tmp_2, tmp_1, NULL);
-    jmi_array_ref_1(o_a, 2) = (jmi_array_val_1(tmp_1, 1));
-    jmi_array_ref_1(o_a, 4) = (jmi_array_val_1(tmp_1, 2));
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 3, 1, 3)
+    jmi_array_ref_1(temp_1_a, 1) = 1;
+    jmi_array_ref_1(temp_1_a, 2) = 3;
+    jmi_array_ref_1(temp_1_a, 3) = 5;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_2_a, 3, 1, 3)
+    jmi_array_ref_1(temp_2_a, 1) = 1;
+    jmi_array_ref_1(temp_2_a, 2) = 1;
+    jmi_array_ref_1(temp_2_a, 3) = 1;
+    i1_0in = 0;
+    i1_0ie = floor((3) - (1));
+    for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
+        jmi_array_ref_1(o_a, jmi_array_ref_1(temp_1_a, i1_0i)) = jmi_array_val_1(temp_2_a, i1_0i);
+    }
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_3_a, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_4_a, 2, 1, 2)
+    jmi_array_ref_1(temp_4_a, 1) = 3;
+    jmi_array_ref_1(temp_4_a, 2) = 5;
+    i1_1in = 0;
+    i1_1ie = floor((2) - (1));
+    for (i1_1i = 1; i1_1in <= i1_1ie; i1_1i = 1 + (++i1_1in)) {
+        jmi_array_ref_1(temp_3_a, i1_1i) = jmi_array_val_1(o_a, jmi_array_val_1(temp_4_a, i1_1i));
+    }
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_5_a, 2, 1, 2)
+    func_CCodeGenAlgorithmTests_Algorithm10_f_def1(temp_3_a, temp_5_a, NULL);
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_6_a, 2, 1, 2)
+    jmi_array_ref_1(temp_6_a, 1) = 2;
+    jmi_array_ref_1(temp_6_a, 2) = 4;
+    i1_2in = 0;
+    i1_2ie = floor((2) - (1));
+    for (i1_2i = 1; i1_2in <= i1_2ie; i1_2i = 1 + (++i1_2in)) {
+        jmi_array_ref_1(o_a, jmi_array_ref_1(temp_6_a, i1_2i)) = jmi_array_val_1(temp_5_a, i1_2i);
+    }
     JMI_RET(GEN, dummy_o, dummy_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -1108,13 +1167,19 @@ void func_CCodeGenAlgorithmTests_Algorithm10_f_def1(jmi_array_t* i_a, jmi_array_
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_real_t, jmi_array_t, o_an, 2, 1)
     JMI_DEF(REA, dummy_v)
+    jmi_real_t i1_3i;
+    jmi_int_t i1_3ie;
+    jmi_int_t i1_3in;
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, o_an, 2, 1, 2)
         o_a = o_an;
     }
     dummy_v = 1;
-    jmi_array_ref_1(o_a, 1) = jmi_array_val_1(i_a, 1);
-    jmi_array_ref_1(o_a, 2) = jmi_array_val_1(i_a, 2);
+    i1_3in = 0;
+    i1_3ie = floor((2) - (1));
+    for (i1_3i = 1; i1_3in <= i1_3ie; i1_3i = 1 + (++i1_3in)) {
+        jmi_array_ref_1(o_a, i1_3i) = jmi_array_val_1(i_a, i1_3i);
+    }
     JMI_RET(GEN, dummy_o, dummy_v)
     JMI_DYNAMIC_FREE()
     return;

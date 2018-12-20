@@ -931,7 +931,15 @@ aspect Flattening {
     
     public void InstAssignable.addBindingAssignments(Flattener f, List<FStatement> l) {
         if (hasBindingFExp()) {
-            FStatement stmt = new FAssignStmt(setLocationOf(new FAccessExp(expandedFAccessCalc())), getBindingFExp().flatten(f));
+            FAssignableExp left = setLocationOf(new FAccessExp(expandedFAccessCalc()));
+            FStatement stmt;
+            if (scalarizedAsFFunctionCallStmt()) {
+                List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+                lefts.add(new FFunctionCallLeft(new Opt<FExp>(left)));
+                stmt = new FFunctionCallStmt(lefts, (FAbstractFunctionCall) getBindingFExp().flatten(f));
+            } else {
+                stmt = new FAssignStmt(left, getBindingFExp().flatten(f));
+            }
             stmt.shouldBeSorted = true;
             l.add(stmt);
         } else {

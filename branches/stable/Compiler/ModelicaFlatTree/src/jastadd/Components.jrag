@@ -78,7 +78,7 @@ aspect Components {
     }
     
     public FAccessExp FAccessExp.extractRecordFExp(String suffix) {
-        return new FAccessExp(getFAccess().extractRecordFExp(suffix));
+        return createNode(getFAccess().extractRecordFExp(suffix));
     }
     
     public abstract CommonAccess CommonAccess.extractRecordFExp(String suffix);

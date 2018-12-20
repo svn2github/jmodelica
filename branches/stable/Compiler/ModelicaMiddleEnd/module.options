@@ -44,3 +44,10 @@ BOOLEAN generate_runtime_option_parameters compiler uncommon true false
 for normal compilation."
 
 *******************************************************************************
+
+BOOLEAN no_loop_unrolling_in_functions compiler experimental false true
+
+"Feature option. If enabled, loops in functions are not unrolled. Better 
+compilation speed for assignments of large arrays."
+
+*******************************************************************************
