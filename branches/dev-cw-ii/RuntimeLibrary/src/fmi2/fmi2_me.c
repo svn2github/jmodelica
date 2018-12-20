@@ -273,7 +273,11 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
         
         /* These options for the solver need to be found in a better way. */
         options = jmi_ode_solver_default_options();
-        options.method                  = jmi->options.cs_solver;
+        if (ode_problem->sizes.states > 0) {
+            options.method                  = jmi->options.cs_solver;
+        } else {
+            options.method                  = JMI_ODE_NO_STATE;
+        }
         options.euler_options.step_size = jmi->options.cs_step_size;
         options.cvode_options.rel_tol   = jmi->options.cs_rel_tol;
         options.experimental_mode       = jmi->options.cs_experimental_mode;

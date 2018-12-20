@@ -259,11 +259,9 @@ int fmi2_cs_rhs_fcn(jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs, jmi_ode_sizes_
     }
     
     /* Evaluate the derivatives */
-    if (sizes.states > 0) {
-        retval = fmi2_get_derivatives(cs_data->fmix_me, rhs, sizes.states);
-        if (retval != fmi2OK) {
-            return -1;
-        }
+    retval = fmi2_get_derivatives(cs_data->fmix_me, rhs, sizes.states);
+    if (retval != fmi2OK) {
+        return -1;
     }
     
     return 0;

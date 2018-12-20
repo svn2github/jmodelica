@@ -38,7 +38,8 @@ typedef enum {
 /** \brief Integrator methods the solver can use */
 typedef enum {
     JMI_ODE_CVODE,
-    JMI_ODE_EULER
+    JMI_ODE_EULER,
+    JMI_ODE_NO_STATE
 } jmi_ode_method_t;
 
 /** \brief Solver options specific for the cvode integrator */

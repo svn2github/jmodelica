@@ -21,6 +21,7 @@
 #include "jmi_ode_problem.h"
 #include "jmi_ode_euler.h"
 #include "jmi_ode_cvode.h"
+#include "jmi_ode_no_state.h"
 #include "jmi_math.h"
 
 jmi_ode_solver_options_t jmi_ode_solver_default_options(void) {
@@ -74,6 +75,14 @@ jmi_ode_solver_t* jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_solver_
         solver->integrator = integrator;
         solver->solve = jmi_ode_euler_solve;
         solver->delete_solver = jmi_ode_euler_delete;
+    }
+        break;
+    case JMI_ODE_NO_STATE: {
+        jmi_ode_no_state_t* integrator;    
+        flag = jmi_ode_no_state_new(&integrator, solver);
+        solver->integrator = integrator;
+        solver->solve = jmi_ode_no_state_solve;
+        solver->delete_solver = jmi_ode_no_state_delete;
     }
         break;
 

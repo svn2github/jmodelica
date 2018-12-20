@@ -67,12 +67,14 @@ set(JMIBlockSourcesPartial
 set(JMIODESolverSourcesPartial
     jmi_ode_cvode.h
     jmi_ode_euler.h
+    jmi_ode_no_state.h
     jmi_ode_solver.h
     jmi_ode_solver_impl.h
     jmi_ode_problem.h
     
     jmi_ode_cvode.c
     jmi_ode_euler.c
+    jmi_ode_no_state.c
     jmi_ode_solver.c
     jmi_ode_problem.c
 )
