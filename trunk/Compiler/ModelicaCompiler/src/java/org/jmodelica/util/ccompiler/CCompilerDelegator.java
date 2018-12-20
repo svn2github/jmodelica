@@ -81,9 +81,14 @@ public abstract class CCompilerDelegator {
     
     /**
      * Create a C compiler delegator for the given set of options.
+     * Not case sensitive. Comparation is done in lower case.
      */
     public static CCompilerDelegator delegatorFor(String c_compiler) {
-        return creators.get(c_compiler).create();
+        Creator c = creators.get(c_compiler.toLowerCase());
+        if (c == null) {
+            throw new IllegalArgumentException("c_compiler doesn't support option " + c_compiler);
+        }
+        return c.create();
     }
     
     public static void addCompilerOptionValues(OptionRegistry opt) {
