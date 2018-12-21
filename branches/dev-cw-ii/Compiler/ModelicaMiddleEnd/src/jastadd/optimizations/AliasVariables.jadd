@@ -51,7 +51,7 @@ aspect AliasVariables {
      */
     syn FVariable FAbstractVariable.alias() = null;
 
-    syn lazy FVariable FVariable.alias() {
+    syn FVariable FVariable.alias() {
         AliasManager.AliasSet aliasSet = aliasSet();
         if (aliasSet == null || inRecord()) {
             return null;
