@@ -20,7 +20,7 @@ merge_path() {
 # ====== Variables to set ======
 
 # Memory allocation for the ant process
-ANT_OPTS="-Xmx1g"
+ANT_OPTS="-Xmx2g"
 
 # Default tests - run if no tests are chosen
 # Possible values: modelica, optimica, python or combination (e.g. "modelica optimica")
