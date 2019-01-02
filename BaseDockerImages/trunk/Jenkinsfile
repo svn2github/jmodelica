@@ -15,15 +15,26 @@
 def ubuntuImage18_04
 def centosImage7_4
 def centosImage7_2
-def buildBaseImage(targetName, linuxDist, distTag) {
-    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag .")
+def centosImage6
+def buildBaseImage(targetName, linuxDist, distTag, gccInstallType) {
+    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag --build-arg GCC_INSTALL_TYPE=$gccInstallType .")
 }
 stage ('Building') {
     parallel Ubuntu: {
         node('docker') {
             checkout scm
-            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04")
+            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_GCC")
             ubuntuImage18_04.inside {
+                sh 'whoami'
+            }
+        }
+    },
+    CentOS6: {
+        node('docker') {
+            checkout scm
+            centosImage6 = buildBaseImage("centos_base", "centos", "6", "CENTOS6_GCC")
+            centosImage6.inside {
+                sh 'echo Built version: && cat /etc/centos-release'
                 sh 'whoami'
             }
         }
@@ -31,7 +42,7 @@ stage ('Building') {
     CentOS7_4: {
         node('docker') {
             checkout scm
-            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708")
+            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS7_GCC")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
                 sh 'whoami'
@@ -41,7 +52,7 @@ stage ('Building') {
     CentOS7_2: {
         node('docker') {
             checkout scm
-            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511")
+            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511", "CENTOS7_GCC")
             centosImage7_2.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
                 sh 'whoami'
@@ -54,9 +65,11 @@ node('docker'){
         //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
         //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage18_04.push("18.04")
-            centosImage7_4.push("7.4")
-            centosImage7_2.push("7.2")
+            // disable push stage for this commit
+            //add push for image centos 6
+            //ubuntuImage18_04.push("18.04")
+            //centosImage7_4.push("7.4")
+            //centosImage7_2.push("7.2")
         }
     }
 }
