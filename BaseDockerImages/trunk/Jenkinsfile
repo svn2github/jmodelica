@@ -25,7 +25,6 @@ stage ('Building') {
             checkout scm
             ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_DEFAULT")
             ubuntuImage18_04.inside {
-                sh 'whoami'
             }
         }
     },
@@ -35,7 +34,6 @@ stage ('Building') {
             centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS6")
             centosImage6_1.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
-                sh 'whoami'
             }
         }
     },
@@ -45,7 +43,6 @@ stage ('Building') {
             centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS_DEFAULT")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
-                sh 'whoami'
             }
         }
     },
@@ -55,7 +52,6 @@ stage ('Building') {
             centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511", "CENTOS_DEFAULT")
             centosImage7_2.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
-                sh 'whoami'
             }
         }
     }

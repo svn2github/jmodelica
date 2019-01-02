@@ -68,13 +68,9 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
 fi
 
 
-if [ "$LINUX_DISTRIBUTION" = "CENTOS" ];
+if [ -f /etc/centos-release ] && [ "$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)" -eq "6" ];
 then
-    MAJOR_VERSION=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
-    if [ $MAJOR_VERSION -eq "6" ];
-    then
-        echo "Not installing python packages on CentOS 6"
-    fi
+    echo "Not installing python packages on CentOS 6"
 else
     pip install $BUILD_PYTHON_PIP_PACKAGES
 fi
