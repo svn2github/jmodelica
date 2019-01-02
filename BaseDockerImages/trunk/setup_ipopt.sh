@@ -15,6 +15,7 @@
 set -e
 
 . ${USR_PATH}/Docker/build/settings.sh 
+source ~/.bashrc 
 
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
 

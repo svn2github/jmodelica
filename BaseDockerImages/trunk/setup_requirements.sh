@@ -66,7 +66,18 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing extra python packages with pip on Ubuntu"
     pip install numpy==1.14.4 
 fi
-pip install $BUILD_PYTHON_PIP_PACKAGES
+
+
+if [ "$LINUX_DISTRIBUTION" = "CENTOS" ];
+then
+    MAJOR_VERSION=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
+    if [ $MAJOR_VERSION -eq "6" ];
+    then
+        echo "Not installing python packages on CentOS 6"
+    fi
+else
+    pip install $BUILD_PYTHON_PIP_PACKAGES
+fi
 
 echo "=== installed python packages ==="
 pip list 

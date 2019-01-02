@@ -15,7 +15,7 @@
 def ubuntuImage18_04
 def centosImage7_4
 def centosImage7_2
-def centosImage6
+def centosImage6_1
 def buildBaseImage(targetName, linuxDist, distTag, gccInstallType) {
     return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag --build-arg GCC_INSTALL_TYPE=$gccInstallType .")
 }
@@ -23,7 +23,7 @@ stage ('Building') {
     parallel Ubuntu: {
         node('docker') {
             checkout scm
-            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_GCC")
+            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_DEFAULT")
             ubuntuImage18_04.inside {
                 sh 'whoami'
             }
@@ -32,8 +32,8 @@ stage ('Building') {
     CentOS6: {
         node('docker') {
             checkout scm
-            centosImage6 = buildBaseImage("centos_base", "centos", "6", "CENTOS6_GCC")
-            centosImage6.inside {
+            centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS6")
+            centosImage6_1.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
                 sh 'whoami'
             }
@@ -42,7 +42,7 @@ stage ('Building') {
     CentOS7_4: {
         node('docker') {
             checkout scm
-            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS7_GCC")
+            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS7_DEFAULT")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
                 sh 'whoami'
@@ -66,10 +66,11 @@ node('docker'){
         //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
             // disable push stage for this commit
-            //add push for image centos 6
-            //ubuntuImage18_04.push("18.04")
-            //centosImage7_4.push("7.4")
-            //centosImage7_2.push("7.2")
+            add push for image centos 6
+            ubuntuImage18_04.push("18.04")
+            centosImage7_4.push("7.4")
+            centosImage7_2.push("7.2")
+            centosImage6_1.push("6.1")
         }
     }
 }
