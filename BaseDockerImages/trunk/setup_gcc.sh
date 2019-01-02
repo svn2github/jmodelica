@@ -16,12 +16,14 @@ set -e
 
 . ${USR_PATH}/Docker/build/settings.sh 
 
-GCC_INSTALL_TYPE=$1
+INSTALL_TYPE=$1
 
-if [ "$GCC_INSTALL_TYPE" = "CENTOS7_GCC" ]
+echo "INSTALL_TYPE=$INSTALL_TYPE"
+
+if [ "$INSTALL_TYPE" = "CENTOS7_GCC" ]
 then
     yum install -y gcc-c++ gcc-gfortran
-elif [ "$GCC_INSTALL_TYPE" = "CENTOS6_GCC" ]
+elif [ "$INSTALL_TYPE" = "CENTOS6_GCC" ]
 then
     yum install -y wget
 
@@ -34,10 +36,10 @@ then
     yum install -y devtoolset-2-li‌‌bquadmath-devel.i686 devtoolset-2-libstdc++-devel.i686 devtoolset-2-memstomp.i686
     # Enable the environment
     scl enable devtoolset-2 bash
-elif [ "$GCC_INSTALL_TYPE" = "UBUNTU_GCC" ]
+elif [ "$INSTALL_TYPE" = "UBUNTU_GCC" ]
 then
     apt get -y install g++ gfortran
 else
-    echo "NO GCC INSTALLATION TYPE SPECIFIED"
+    echo "NO VALID GCC INSTALLATION TYPE SPECIFIED, GOT INSTALL_TYPE="$INSTALL_TYPE
     false
 fi

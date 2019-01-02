@@ -46,7 +46,7 @@ pckinstall $BUILD_PKGS_JM
 
 # Install GCC, input argument is defined in Dockerfile
 echo "--------------- INSTALLING GCC ---------------"
-. ${USR_PATH}/Docker/build/setup_gcc.sh $GCC_INSTALL_TYPE
+. ${USR_PATH}/Docker/build/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
 
 #pip install --upgrade pip #Dont update now it wont update any other packages then
 
