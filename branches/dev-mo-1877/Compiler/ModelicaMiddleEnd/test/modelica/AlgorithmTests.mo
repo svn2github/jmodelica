@@ -385,6 +385,7 @@ model TempAssign1
         TransformCanonicalTestCase(
             name="TempAssign1",
             description="Scalarizing assignment temp generation",
+            no_loop_unrolling_in_functions=false,
             flatModel="
 fclass AlgorithmTests.TempAssign1
  Real x[1,1];
