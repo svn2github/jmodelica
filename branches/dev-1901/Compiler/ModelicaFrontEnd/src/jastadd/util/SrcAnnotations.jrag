@@ -171,9 +171,9 @@ aspect SrcAnnotations {
             
             @Override
             public ConstValue evaluate(SrcExp evaluable) {
-//                return context.ceval(evaluable);
-                FExp fexp = context.dynamicFExp(evaluable.instantiate());
-                return fexp.evaluateValue();
+                return context.ceval(evaluable);
+//                FExp fexp = context.dynamicFExp(evaluable.instantiate());
+//                return fexp.evaluateValue();
             }
             
         }
