@@ -31,7 +31,7 @@ stage ('Building') {
     CentOS6: {
         node('docker') {
             checkout scm
-            centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS6")
+            centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS_GCCv482")
             centosImage6_1.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
             }

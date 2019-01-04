@@ -21,7 +21,7 @@ echo "GCC_INSTALLATION_TYPE="${GCC_INSTALLATION_TYPE}
 if [ ${GCC_INSTALLATION_TYPE} = "CENTOS_DEFAULT" ]
 then
     yum install -y gcc-c++ gcc-gfortran
-elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS6" ]
+elif [ ${GCC_INSTALLATION_TYPE} = "CENTOS_GCCv482" ]
 then
     yum install -y wget
 
