@@ -1,0 +1,70 @@
+// 
+//    Copyright (C) 2018 Modelon AB
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the Common Public License as published by
+//    IBM, version 1.0 of the License.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY. See the Common Public License for more details.
+//
+//    You should have received a copy of the Common Public License
+//    along with this program.  If not, see
+//     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
+
+def ubuntuImage18_04
+def centosImage7_4
+def centosImage7_2
+def centosImage6_1
+def buildBaseImage(targetName, linuxDist, distTag, gccInstallType) {
+    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag --build-arg GCC_INSTALL_TYPE=$gccInstallType .")
+}
+stage ('Building') {
+    parallel Ubuntu: {
+        node('docker') {
+            checkout scm
+            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_DEFAULT")
+            ubuntuImage18_04.inside {
+            }
+        }
+    },
+    CentOS6: {
+        node('docker') {
+            checkout scm
+            centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS_GCCv482")
+            centosImage6_1.inside {
+                sh 'echo Built version: && cat /etc/centos-release'
+            }
+        }
+    },
+    CentOS7_4: {
+        node('docker') {
+            checkout scm
+            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS_DEFAULT")
+            centosImage7_4.inside {
+                sh 'echo Built version: && cat /etc/centos-release'
+            }
+        }
+    },
+    CentOS7_2: {
+        node('docker') {
+            checkout scm
+            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511", "CENTOS_DEFAULT")
+            centosImage7_2.inside {
+                sh 'echo Built version: && cat /etc/centos-release'
+            }
+        }
+    }
+}
+node('docker'){
+    stage ('Push') {
+        //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
+        //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
+        docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
+            ubuntuImage18_04.push("18.04")
+            centosImage7_4.push("7.4")
+            centosImage7_2.push("7.2")
+            centosImage6_1.push("6.1")
+        }
+    }
+}
