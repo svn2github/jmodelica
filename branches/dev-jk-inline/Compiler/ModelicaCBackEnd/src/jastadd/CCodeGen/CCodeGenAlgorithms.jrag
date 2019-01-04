@@ -78,11 +78,13 @@ aspect CCodeGenAlgorithms {
             String next = p.codePrinter().indent(indent);
             String iniName = name + C_SUFFIX_NULL;
             str.print(indent + "if (" + name + " == NULL) {\n");
+            p.codePrinter().printPreSteps(type, str, next);
             tp.reset(iniName, this, type.size(), false, next);
             type.print(tp);
             str.print(next + name + " = " + iniName + ";\n");
             str.print(indent + "}\n");
         } else {
+            p.codePrinter().printPreSteps(type, str, indent);
             tp.reset(name, this, type.size(), false, indent);
             type.print(tp);
         }

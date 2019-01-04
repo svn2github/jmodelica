@@ -2650,6 +2650,7 @@ end TransformCanonicalTests.InitialEqTest11;
 			name="InitialEqTest12",
 			description="Test algorithm for adding additional initial equations.",
             variability_propagation=false,
+            inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest12
  Real x[1](start = 3);
@@ -7903,6 +7904,7 @@ model ScalarizeCrossInFunction
             description="Test scalarization of cross in a function",
             variability_propagation=false,
             eliminate_alias_constants=false,
+            inline_functions="none",
             flatModel="
 fclass TransformCanonicalTests.ScalarizeCrossInFunction
  Real a[1];
@@ -7984,6 +7986,7 @@ model ScalarizeSkewInFunction
             variability_propagation=false,
             eliminate_alias_constants=false,
             eliminate_alias_variables=false,
+            inline_functions="none",
             flatModel="
 fclass TransformCanonicalTests.ScalarizeSkewInFunction
  Real a[1];
@@ -8648,6 +8651,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionWithZeroSizeOutput2",
             description="",
+            inline_functions="none",
             flatModel="
 fclass TransformCanonicalTests.FunctionWithZeroSizeOutput2
  Real x[1];

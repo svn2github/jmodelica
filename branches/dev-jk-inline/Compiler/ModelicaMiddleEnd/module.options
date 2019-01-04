@@ -45,7 +45,7 @@ for normal compilation."
 
 *******************************************************************************
 
-BOOLEAN no_loop_unrolling_in_functions compiler experimental false true
+BOOLEAN no_loop_unrolling_in_functions compiler experimental true true
 
 "Feature option. If enabled, loops in functions are not unrolled. Better 
 compilation speed for assignments of large arrays."

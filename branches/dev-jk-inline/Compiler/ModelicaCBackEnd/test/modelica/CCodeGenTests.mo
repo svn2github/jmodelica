@@ -3532,27 +3532,31 @@ annotation(__JModelica(UnitTesting(tests={
 void func_CCodeGenTests_FuncWithArray_F_def0(jmi_real_t x_v, jmi_array_t* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, y_an, -1, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1)
-    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_2_a, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1)
     jmi_real_t i1_0i;
     jmi_int_t i1_0ie;
     jmi_int_t i1_0in;
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 2, 1, 2)
-    jmi_array_ref_1(temp_1_a, 1) = x_v;
-    jmi_array_ref_1(temp_1_a, 2) = x_v;
     if (y_a == NULL) {
-        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncWithArray_g_exp1(temp_1_a), 1, func_CCodeGenTests_FuncWithArray_g_exp1(temp_1_a))
+        JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_1, 2, 1, 2)
+        jmi_array_ref_1(tmp_1, 1) = x_v;
+        jmi_array_ref_1(tmp_1, 2) = x_v;
+        JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, y_an, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1), 1, func_CCodeGenTests_FuncWithArray_g_exp1(tmp_1))
         y_a = y_an;
     }
-    if (COND_EXP_EQ(func_CCodeGenTests_FuncWithArray_g_exp1(temp_1_a), AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, tmp_2, 2, 1, 2)
+    jmi_array_ref_1(tmp_2, 1) = x_v;
+    jmi_array_ref_1(tmp_2, 2) = x_v;
+    if (COND_EXP_EQ(func_CCodeGenTests_FuncWithArray_g_exp1(tmp_2), AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
         jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.FuncWithArray.F\", JMI_ASSERT_ERROR);
     }
-    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_2_a, 1, 1, 1)
-    jmi_array_ref_1(temp_2_a, 1) = x_v;
+    JMI_ARRAY_INIT_1(STAT, jmi_real_t, jmi_array_t, temp_1_a, 1, 1, 1)
+    jmi_array_ref_1(temp_1_a, 1) = x_v;
     i1_0in = 0;
     i1_0ie = floor((1) - (1));
     for (i1_0i = 1; i1_0in <= i1_0ie; i1_0i = 1 + (++i1_0in)) {
-        jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_2_a, i1_0i);
+        jmi_array_ref_1(y_a, i1_0i) = jmi_array_val_1(temp_1_a, i1_0i);
     }
     JMI_DYNAMIC_FREE()
     return;

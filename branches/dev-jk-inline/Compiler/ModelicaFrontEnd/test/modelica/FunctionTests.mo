@@ -8652,14 +8652,10 @@ public
  function FunctionTests.ArrayOutputScalarization17.f1
   output Real o;
   Real[:] y;
-  Integer[:] temp_1;
  algorithm
   o := 2;
   init y as Real[2];
-  init temp_1 as Integer[2];
-  temp_1[1] := 1;
-  temp_1[2] := 2;
-  (y) := FunctionTests.ArrayOutputScalarization17.f2(FunctionTests.ArrayOutputScalarization17.f2(temp_1));
+  (y) := FunctionTests.ArrayOutputScalarization17.f2(FunctionTests.ArrayOutputScalarization17.f2({1, 2}));
   return;
  end FunctionTests.ArrayOutputScalarization17.f1;
 
@@ -10687,12 +10683,8 @@ public
  function FunctionTests.UnknownArray29.f1
   input Integer i;
   output Real y1;
-  Real[:] temp_1;
  algorithm
-  init temp_1 as Real[2];
-  temp_1[1] := global(FunctionTests.UnknownArray29.a[i]);
-  temp_1[2] := global(FunctionTests.UnknownArray29.a[i + 1]);
-  y1 := FunctionTests.UnknownArray29.f2(temp_1);
+  y1 := FunctionTests.UnknownArray29.f2({global(FunctionTests.UnknownArray29.a[i]), global(FunctionTests.UnknownArray29.a[i + 1])});
   return;
  annotation(Inline = false);
  end FunctionTests.UnknownArray29.f1;

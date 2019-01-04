@@ -1064,8 +1064,11 @@ aspect FunctionInlining {
             return isInlinable(late, call);
         if (!late && call.derivativeAnnotation().exists())
             return false;
-        if (myProtected().size() > 0)
-            return false;
+        for (FFunctionVariable ffv : myProtected()) {
+            if (!ffv.name().startsWith("temp_")) {
+                return false;
+            }
+        }
         if (!hasInlinableIO())
             return false;
         for (FStatement stmt : getFAlgorithm().getFStatements())
@@ -1125,7 +1128,7 @@ aspect FunctionInlining {
     }
     
     syn boolean FAssignableExp.isOkTrivialInlineInFor();
-    eq FAccessExp.isOkTrivialInlineInFor() = myFV().size().isUnknown();
+    eq FAccessExp.isOkTrivialInlineInFor() = myFV().isArray();
     eq FSubscriptedExp.isOkTrivialInlineInFor() = false;
     eq InstAccessExp.isOkTrivialInlineInFor() {
         throw new UnsupportedOperationException();
@@ -1174,7 +1177,7 @@ aspect FunctionInlining {
             // TODO: check that each cell is assigned?
             protected int size;
             public KnownArray(int nElems)           { size = nElems; };
-            protected void check(FAccess use, int i) { n += use.isArray() ? size : 1; }
+            protected void check(FAccess use, int i) { n += (use.isArray() || use.inForLoop()) ? size : 1; }
             protected void checkAll(FAccess use)     { n += size; }
             public boolean isOk()                   { return n == size; }
         }

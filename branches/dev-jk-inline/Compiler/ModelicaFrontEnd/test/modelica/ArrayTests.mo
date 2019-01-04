@@ -6616,6 +6616,7 @@ model ArrayIterTestUnknown1
 		input Integer a;
 		output Real x[:] = { i^2 for i in 1:a/2 };
     algorithm
+        annotation(Inline=false);
     end f;
     
 	Real x[3] = f(6);
@@ -6648,6 +6649,7 @@ public
    x[i1] := temp_1[i1];
   end for;
   return;
+ annotation(Inline = false);
  end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f;
 
 end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1;

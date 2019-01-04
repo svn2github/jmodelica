@@ -80,7 +80,7 @@ aspect FunctionScalarization {
             (isComposite() || isForIndexExp()));
     eq FSpatialDistExp.extractTemp()        = isFunctionCallClause() || super.extractTemp();
     eq FVectorFunctionCall.extractTemp()    = true;
-    eq FArray.extractTemp()                 = extractTempArrayCon();
+    eq FArray.extractTemp()                 = extractTempArrayCon() && !keepSimple();
     eq FSizeExp.extractTemp()               = (inFunction() && myFClass().noUnrollingInFunctions() && isArray()) || isForIndexExp();
     eq FAbstractCat.extractTemp()           = extractTempArrayCon();
     eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon();
@@ -95,6 +95,9 @@ aspect FunctionScalarization {
     
     syn boolean FExp.extractForIndexTemp() = isForIndexExp();
     eq FRangeExp.extractForIndexTemp()     = false;
+    
+    syn boolean FArray.keepSimple() = isFunctionCallIO() && !isFVectorFunctionCallArg()
+                && ndims() == 1 && !isIterArray() && type().isPrimitive();
     
     syn boolean FExp.extractTempArrayCon() =
             (inFunction() && myFClass().noUnrollingInFunctions() && isArray()) || isForIndexExp()
