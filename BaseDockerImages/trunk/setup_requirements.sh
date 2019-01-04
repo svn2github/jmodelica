@@ -18,10 +18,10 @@ set -e
 . ${USR_PATH}/Docker/build/settings.sh
 
 BUILD_PKGS_JM_COMMON="vim sudo cmake swig ant wget tar patch"
-BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion gcc-c++ gcc-gfortran java-1.8.0-openjdk python-devel python-jpype zlib-devel boost-devel"
-BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion g++ gfortran openjdk-8-jdk python-dev python-jpype zlib1g-dev libboost-dev"
+BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion java-1.8.0-openjdk python-devel python-jpype zlib-devel boost-devel"
+BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion openjdk-8-jdk python-dev python-jpype zlib1g-dev libboost-dev"
 
-BUILD_PYTHON_PIP_PACKAGES="jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7"
+BUILD_PYTHON_PIP_PACKAGES="jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7 ipykernel==4.6.1"
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
@@ -44,7 +44,11 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
-#pip install --upgrade pip #Dont update now it wont update any other packages then
+# Install GCC, input argument is defined in Dockerfile
+echo "--------------- INSTALLING GCC ---------------"
+. ${USR_PATH}/Docker/build/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
+
+
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
     echo "Installing extra python packages with pip on CentOS"
@@ -62,7 +66,14 @@ elif [ "$LINUX_DISTRIBUTION" = "DEBIAN" ]; then
     echo "Installing extra python packages with pip on Ubuntu"
     pip install numpy==1.14.4 
 fi
-pip install $BUILD_PYTHON_PIP_PACKAGES
+
+
+if [ -f /etc/centos-release ] && [ "$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)" -eq "6" ];
+then
+    echo "Not installing python packages on CentOS 6"
+else
+    pip install $BUILD_PYTHON_PIP_PACKAGES
+fi
 
 echo "=== installed python packages ==="
 pip list 

@@ -15,36 +15,43 @@
 def ubuntuImage18_04
 def centosImage7_4
 def centosImage7_2
-def buildBaseImage(targetName, linuxDist, distTag) {
-    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag .")
+def centosImage6_1
+def buildBaseImage(targetName, linuxDist, distTag, gccInstallType) {
+    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag --build-arg GCC_INSTALL_TYPE=$gccInstallType .")
 }
 stage ('Building') {
     parallel Ubuntu: {
         node('docker') {
             checkout scm
-            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04")
+            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_DEFAULT")
             ubuntuImage18_04.inside {
-                sh 'whoami'
+            }
+        }
+    },
+    CentOS6: {
+        node('docker') {
+            checkout scm
+            centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS_GCCv482")
+            centosImage6_1.inside {
+                sh 'echo Built version: && cat /etc/centos-release'
             }
         }
     },
     CentOS7_4: {
         node('docker') {
             checkout scm
-            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708")
+            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS_DEFAULT")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
-                sh 'whoami'
             }
         }
     },
     CentOS7_2: {
         node('docker') {
             checkout scm
-            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511")
+            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511", "CENTOS_DEFAULT")
             centosImage7_2.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
-                sh 'whoami'
             }
         }
     }
@@ -57,6 +64,7 @@ node('docker'){
             ubuntuImage18_04.push("18.04")
             centosImage7_4.push("7.4")
             centosImage7_2.push("7.2")
+            centosImage6_1.push("6.1")
         }
     }
 }
