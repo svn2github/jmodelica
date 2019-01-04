@@ -23,7 +23,7 @@ stage ('Building') {
     parallel Ubuntu: {
         node('docker') {
             checkout scm
-            ubuntuImage18_04 = buildBaseImage("ubuntu_base_experimental", "ubuntu", "18.04", "UBUNTU_DEFAULT")
+            ubuntuImage18_04 = buildBaseImage("experimental_ubuntu", "ubuntu", "18.04", "UBUNTU_DEFAULT")
             ubuntuImage18_04.inside {
             }
         }
@@ -31,7 +31,7 @@ stage ('Building') {
     CentOS6: {
         node('docker') {
             checkout scm
-            centosImage6_1 = buildBaseImage("centos_base_experimental", "centos", "6", "CENTOS_GCCv482")
+            centosImage6_1 = buildBaseImage("experimental_centos", "centos", "6", "CENTOS_GCCv482")
             centosImage6_1.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
             }
@@ -40,7 +40,7 @@ stage ('Building') {
     CentOS7_4: {
         node('docker') {
             checkout scm
-            centosImage7_4 = buildBaseImage("centos_base_experimental", "centos", "7.4.1708", "CENTOS_DEFAULT")
+            centosImage7_4 = buildBaseImage("experimental_centos", "centos", "7.4.1708", "CENTOS_DEFAULT")
             centosImage7_4.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
             }
@@ -49,7 +49,7 @@ stage ('Building') {
     CentOS7_2: {
         node('docker') {
             checkout scm
-            centosImage7_2 = buildBaseImage("centos_base_experimental", "centos", "7.2.1511", "CENTOS_DEFAULT")
+            centosImage7_2 = buildBaseImage("experimental_centos", "centos", "7.2.1511", "CENTOS_DEFAULT")
             centosImage7_2.inside {
                 sh 'echo Built version: && cat /etc/centos-release'
             }
