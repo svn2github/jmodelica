@@ -1,0 +1,292 @@
+Index: jcc/cpp.py
+===================================================================
+--- jcc/cpp.py	(revision 1797166)
++++ jcc/cpp.py	(working copy)
+@@ -740,42 +740,23 @@
+            listedMethodOrFieldNames, _dll_export):
+ 
+     names = cls.getName().split('.')
+-    superCls = cls.getSuperclass()
+-    declares = set([cls.getClass()])
++    (superCls, interfaces, declares) = \
++        inheritance_information(cls, typeset, packages, excludes, generics)
+ 
+-    interfaces = []
+-    if generics:
+-        for interface in cls.getGenericInterfaces():
+-            if Class.instance_(interface):
+-                pt = None
+-                interface = Class.cast_(interface)
+-            elif ParameterizedType.instance_(interface):
+-                pt = ParameterizedType.cast_(interface)
+-                interface = Class.cast_(pt.getRawType())
+-            else:
+-                raise NotImplementedError, repr(interface)
+-            if superCls and interface.isAssignableFrom(superCls):
+-                continue
+-            if known(interface, typeset, declares, packages, excludes, False):
+-                interfaces.append(interface)
+-                if pt is not None:
+-                    for ta in pt.getActualTypeArguments():
+-                        addRequiredTypes(ta, typeset, True)
+-    else:
+-        for interface in cls.getInterfaces():
+-            if superCls and interface.isAssignableFrom(superCls):
+-                continue
+-            if known(interface, typeset, declares, packages, excludes, False):
+-                interfaces.append(interface)
+-
+     if cls.isInterface():
+         if interfaces:
+-            superCls = interfaces.pop(0)
++            superCls = interfaces
++            interfaces = []
+         else:
+-            superCls = findClass('java/lang/Object')
+-        superClsName = superCls.getName()
++            superCls = [findClass('java/lang/Object')]
++            # Shouldn't this be as for default case below instead? I.e.:
++            #superCls = []
++            #superClsName = ['JObject']
++            # Or possibly the other way around?
++        superClsName = [s.getName() for s in superCls]
+     elif superCls:
+-        superClsName = superCls.getName()
++        superClsName = [superCls.getName()]
++        superCls = [superCls]
+         if generics:
+             for clsParam in getTypeParameters(cls):
+                 if Class.instance_(clsParam):
+@@ -782,7 +763,8 @@
+                     addRequiredTypes(clsParam, typeset, True)
+                     known(clsParam, typeset, declares, packages, excludes, True)
+     else:
+-        superClsName = 'JObject'
++        superCls = []
++        superClsName = ['JObject']
+ 
+     constructors = []
+     for constructor in cls.getDeclaredConstructors():
+@@ -896,14 +878,15 @@
+     sort(instanceFields, key=lambda x: x.getName())
+ 
+     line(out)
+-    superNames = superClsName.split('.')
+-    line(out, 0, '#include "%s.h"', '/'.join(superNames))
++    superNames = [n.split('.') for n in superClsName]
++    for n in superNames:
++        line(out, 0, '#include "%s.h"', '/'.join(n))
+ 
+     line(out, 0)
+     namespaces = {}
+     for declare in declares:
+         namespace = namespaces
+-        if declare not in (cls, superCls):
++        if declare != cls and declare not in superCls:
+             declareNames = declare.getName().split('.')
+             for declareName in declareNames[:-1]:
+                 namespace = namespace.setdefault(declareName, {})
+@@ -918,12 +901,15 @@
+         indent += 1
+ 
+     line(out)
+-    if superClsName == 'JObject':
++    if superClsName == ['JObject']:
+         line(out, indent, 'class %s%s : public JObject {',
+              _dll_export, cppname(names[-1]))
+     else:
+-        line(out, indent, 'class %s%s : public %s {',
+-             _dll_export, cppname(names[-1]), absname(cppnames(superNames)))
++        superPrefix = 'public virtual' if cls.isInterface() else 'public'
++        superClauses = ', '.join(['%s %s' % 
++                (superPrefix, absname(cppnames(n))) for n in superNames])
++        line(out, indent, 'class %s%s : %s {',
++             _dll_export, cppname(names[-1]), superClauses)
+         
+     line(out, indent, 'public:')
+     indent += 1
+@@ -959,14 +945,19 @@
+     line(out, indent, 'static jclass initializeClass(bool);');
+     line(out)
+ 
+-    line(out, indent, 'explicit %s(jobject obj) : %s(obj) {',
+-         cppname(names[-1]), absname(cppnames(superNames)))
++    if superCls and superCls[0].isInterface():
++        supersToCall = collect_virtual_supers(superCls, typeset, packages, 
++                                              excludes, generics)
++    else:
++        supersToCall = superNames
++    superCalls = ', '.join(['%s(obj)' % (absname(cppnames(n))) for n in supersToCall])
++    line(out, indent, 'explicit %s(jobject obj) : %s {',
++         cppname(names[-1]), superCalls)
+     line(out, indent + 1, 'if (obj != NULL)');
+     line(out, indent + 2, 'env->getClass(initializeClass);')
+     line(out, indent, '}')
+-    line(out, indent, '%s(const %s& obj) : %s(obj) {}',
+-         cppname(names[-1]), cppname(names[-1]),
+-         absname(cppnames(superNames)))
++    line(out, indent, '%s(const %s& obj) : %s {}',
++         cppname(names[-1]), cppname(names[-1]), superCalls)
+ 
+     if fields:
+         line(out)
+@@ -1030,6 +1021,61 @@
+             methodNames, fields, instanceFields, declares)
+ 
+ 
++def inheritance_information(cls, typeset, packages, excludes, generics):
++    superCls = cls.getSuperclass()
++    declares = set([cls.getClass()])
++
++    interfaces = []
++    if generics:
++        for interface in cls.getGenericInterfaces():
++            if Class.instance_(interface):
++                pt = None
++                interface = Class.cast_(interface)
++            elif ParameterizedType.instance_(interface):
++                pt = ParameterizedType.cast_(interface)
++                interface = Class.cast_(pt.getRawType())
++            else:
++                raise NotImplementedError, repr(interface)
++            if superCls and interface.isAssignableFrom(superCls):
++                continue
++            if known(interface, typeset, declares, packages, excludes, False):
++                interfaces.append(interface)
++                if pt is not None:
++                    for ta in pt.getActualTypeArguments():
++                        addRequiredTypes(ta, typeset, True)
++    else:
++        for interface in cls.getInterfaces():
++            if superCls and interface.isAssignableFrom(superCls):
++                continue
++            if known(interface, typeset, declares, packages, excludes, False):
++                interfaces.append(interface)
++    
++    return (superCls, interfaces, declares)
++
++
++def collect_virtual_supers(superCls, typeset, packages, excludes, generics):
++    return collect_virtual_supers_internal(
++            superCls, typeset, packages, excludes, generics, 
++            [['java','lang','Object']], set())
++
++
++def collect_virtual_supers_internal(superCls, typeset, packages, 
++        excludes, generics, names, included):
++    for superCl in superCls:
++        name = superCl.getName()
++        if not name in included:
++            names.append(name.split('.'))
++            included.add(name)
++            if superCl.isInterface():
++                (tmp1, interfaces, tmp2) = \
++                    inheritance_information(
++                        superCl, typeset, packages, excludes, generics)
++                collect_virtual_supers_internal(
++                    interfaces, typeset, packages, excludes, 
++                    generics, names, included)
++    return names
++
++
+ def code(env, out, cls, superCls, constructors, methods, protectedMethods,
+          methodNames, fields, instanceFields, declares, typeset):
+ 
+@@ -1037,16 +1083,16 @@
+     names = className.split('.')
+ 
+     if superCls:
+-        superClsName = superCls.getName()
++        superClsName = [s.getName() for s in superCls]
+     else:
+-        superClsName = 'JObject'
+-    superNames = superClsName.split('.')
++        superClsName = ['JObject']
++    superNames = [n.split('.') for n in superClsName]
+ 
+     line(out, 0, '#include <jni.h>')
+     line(out, 0, '#include "JCCEnv.h"')
+     line(out, 0, '#include "%s.h"', className.replace('.', '/'))
+     for declare in declares:
+-        if declare not in (cls, superCls):
++        if declare != cls and declare not in superCls:
+             line(out, 0, '#include "%s.h"', declare.getName().replace('.', '/'))
+     line(out, 0, '#include "JArray.h"')
+ 
+@@ -1158,9 +1204,11 @@
+         sig = signature(constructor)
+         decls, args = argnames(constructor.getParameterTypes(), cls)
+ 
++        # Only using first super class, since there can only be multiple 
++        # super classes for interfaces, and they can't have constructors.
+         line(out, indent, "%s::%s(%s) : %s(env->newObject(initializeClass, &mids$, mid_init$_%s%s)) {}",
+              cppname(names[-1]), cppname(names[-1]), decls,
+-             absname(cppnames(superNames)),
++             absname(cppnames(superNames[0])),
+              env.strhash(sig), args)
+ 
+     for method in methods:
+@@ -1173,7 +1221,11 @@
+ 
+         if (isExtension and not isStatic and superCls and
+             Modifier.isNative(modifiers)):
+-            superMethod = find_method(superCls, methodName, params)
++            for superCl in superCls:
++                superMethod = find_method(superCl, methodName, params)
++                if superMethod is not None:
++                    superMethodClNames = superCl.getName().split('.')
++                    break
+             if superMethod is None:
+                 continue
+ 
+@@ -1187,7 +1239,7 @@
+             isStatic = False
+             if superMethod is not None:
+                 qualifier = 'Nonvirtual'
+-                this = 'this$, (jclass) %s::class$->this$' %(absname(cppnames(superNames)))
++                this = 'this$, (jclass) %s::class$->this$' %(absname(cppnames(superMethodClNames)))
+                 declaringClass = superMethod.getDeclaringClass()
+                 midns = '%s::' %(typename(declaringClass, cls, False))
+                 sig = signature(superMethod)
+Index: jcc/python.py
+===================================================================
+--- jcc/python.py	(revision 1797166)
++++ jcc/python.py	(working copy)
+@@ -656,8 +656,7 @@
+         constructorName = 'abstract_init'
+ 
+     if superCls:
+-        superMethods = set([method.getName()
+-                            for method in superCls.getMethods()])
++        superMethods = set([method.getName() for superCl in superCls for method in superCl.getMethods()])
+     else:
+         superMethods = ()
+ 
+@@ -675,7 +674,10 @@
+             isStatic = Modifier.isStatic(modifiers)
+ 
+             if (isExtension and not isStatic and superCls and isNative):
+-                superMethod = find_method(superCls, name, params)
++                for superCl in superCls:
++                    superMethod = find_method(superCl, name, params)
++                    if superMethod is not None:
++                        break
+ 
+             if isExtension and isNative and not isStatic:
+                 extMethods.setdefault(name, []).append(method)
+@@ -1006,10 +1008,12 @@
+     else:
+         tp_as_sequence = '0'
+ 
+-    if len(superNames) > 1:
+-        base = '::'.join((absname(cppnames(superNames[:-1])), superNames[-1]))
++    # TODO: Allowing multiple super classes (for interfaces) here seems to be a lot 
++    #       more work, assuming only one for now here.
++    if len(superNames[0]) > 1:
++        base = '::'.join((absname(cppnames(superNames[0][:-1])), superNames[0][-1]))
+     else:
+-        base = superNames[-1]
++        base = superNames[0][-1]
+     line(out)
+     line(out, indent, 'DECLARE_TYPE(%s, t_%s, %s, %s, %s, %s, %s, %s, %s, %s);',
+          names[-1], names[-1], base, cppname(names[-1]), constructorName,

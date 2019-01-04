@@ -1,4 +1,3 @@
-#!/bin/sh
 # 
 #    Copyright (C) 2018 Modelon AB
 #
@@ -15,9 +14,21 @@
 
 set -e
 
-echo "STAGE 1/3: SETTING UP REQUIREMENTS"
-. ${USR_PATH}/Docker/build/setup_requirements.sh
-echo "STAGE 2/3: SETTING UP IPOPT"
-. ${USR_PATH}/Docker/build/setup_ipopt.sh
-echo "STAGE 3/3: SETTING UP JCC"
-. ${USR_PATH}/Docker/build/setup_jcc.sh
+# find Java location containing jni.h, variable JCC_JDK needs to be set to install jcc
+export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5)
+
+lines=$(echo $JCC_JDK | wc -l)
+if [ $lines -eq 0 ];
+then
+    echo -e "\e[31m" "setup_jcc: Could not find jni.h" "\e[0m"
+    exit 1
+fi
+
+pip install jcc==2.23
+
+JCC_INSTALL_DIR=$(find /usr -type d -name jcc)
+cp ${USR_PATH}/Docker/build/jcc.patch ${JCC_INSTALL_DIR}
+cd ${JCC_INSTALL_DIR}
+patch < jcc.patch
+
+rm jcc.patch
