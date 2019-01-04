@@ -6616,6 +6616,7 @@ model ArrayIterTestUnknown1
 		input Integer a;
 		output Real x[:] = { i^2 for i in 1:a/2 };
     algorithm
+        annotation(Inline=false);
     end f;
     
 	Real x[3] = f(6);
@@ -6639,20 +6640,83 @@ public
   output Real[:] x;
   Real[:] temp_1;
  algorithm
-  init x as Real[max(a / 2, 0)];
-  init temp_1 as Real[max(a / 2, 0)];
-  for i1 in 1:max(a / 2, 0) loop
+  init x as Real[max(integer(a / 2), 0)];
+  init temp_1 as Real[max(integer(a / 2), 0)];
+  for i1 in 1:max(integer(a / 2), 0) loop
    temp_1[i1] := i1 ^ 2;
   end for;
-  for i1 in 1:max(a / 2, 0) loop
+  for i1 in 1:max(integer(a / 2), 0) loop
    x[i1] := temp_1[i1];
   end for;
   return;
+ annotation(Inline = false);
  end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f;
 
 end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1;
 ")})));
 end ArrayIterTestUnknown1;
+
+model ArrayIterTestUnknown2
+    function f
+        input Integer a;
+        output Real x1[:] = { i^2 for i in 2:0.5:a/2 };
+        output Real x2[:] = { i for i in 2:0.5:a/2 };
+        output Real x3[:] = 2:0.5:a/2;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real x[3] = f(6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTestUnknown2",
+            description="",
+            variability_propagation=false,
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1], x[2], x[3]}) = ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2.f(6);
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2.f
+  input Integer a;
+  output Real[:] x1;
+  output Real[:] x2;
+  output Real[:] x3;
+  Real[:] temp_1;
+  Integer[:] temp_2;
+ algorithm
+  init x1 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  init temp_1 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   temp_1[i1] := (2 + (i1 - 1) * 0.5) ^ 2;
+  end for;
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   x1[i1] := temp_1[i1];
+  end for;
+  init x2 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  init temp_2 as Integer[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   temp_2[i1] := 2 + (i1 - 1) * 0.5;
+  end for;
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   x2[i1] := temp_2[i1];
+  end for;
+  init x3 as Real[max(integer((a / 2 - 2) / 0.5) + 1, 0)];
+  for i1 in 1:max(integer((a / 2 - 2) / 0.5) + 1, 0) loop
+   x3[i1] := 2 + (i1 - 1) * 0.5;
+  end for;
+  return;
+ annotation(Inline = false);
+ end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2.f;
+
+end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown2;
+")})));
+end ArrayIterTestUnknown2;
 
 end Iterators;
 
