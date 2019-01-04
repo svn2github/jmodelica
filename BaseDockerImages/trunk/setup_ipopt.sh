@@ -14,13 +14,7 @@
 
 set -e
 
-. ${USR_PATH}/Docker/build/settings.sh
-if [ -f /etc/centos-release ] && [ "$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)" -eq "6" ];
-then
-    # need to source bashrc on CentOS 6 due to other GCC version
-    source ~/.bashrc 
-fi
-
+. ${USR_PATH}/Docker/build/settings.sh 
 
 wget https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VERSION}.tgz
 
