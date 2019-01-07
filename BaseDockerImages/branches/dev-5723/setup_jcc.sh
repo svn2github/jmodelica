@@ -15,10 +15,17 @@
 set -e
 
 # find Java location containing jni.h, variable JCC_JDK needs to be set to install jcc
-# also grep for 1.8.0 in case we find multiple versions
-export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5 | grep "1.8.0")
+# also grep for the installed java jdk package
+if [ -f /etc/centos-release ];
+then
+    export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5 | grep "1.8.0")
+else
+    export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5 | grep "java-8")
+fi
 
+echo "GOT JCC_JDK="$JCC_JDK
 lines=$(echo $JCC_JDK | wc -l)
+
 if [ $lines -eq 0 ];
 then
     echo -e "\e[31m" "setup_jcc: Could not find jni.h" "\e[0m"
