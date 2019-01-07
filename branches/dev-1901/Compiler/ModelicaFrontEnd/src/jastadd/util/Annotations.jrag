@@ -437,7 +437,6 @@ aspect AnnotationAPI {
         CValue ceval(SrcExp exp);
         InstLookupResult<InstClassDecl>     lookupInstClass(SrcExp exp);
         InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp);
-        FExp dynamicFExp(FExp exp);
     }
 
     InstNode implements InstContext;
@@ -476,10 +475,6 @@ aspect AnnotationAPI {
             }
 
             public InstLookupResult<InstComponentDecl> lookupInstComponent(SrcExp exp) {
-                return null;
-            }
-            
-            public FExp dynamicFExp(FExp exp) {
                 return null;
             }
         };
