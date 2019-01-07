@@ -15,7 +15,8 @@
 set -e
 
 # find Java location containing jni.h, variable JCC_JDK needs to be set to install jcc
-export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5)
+# also grep for 1.8.0 in case we find multiple versions
+export JCC_JDK=$(find /usr -type f -name "jni.h" | cut -d '/' -f-5 | grep "1.8.0")
 
 lines=$(echo $JCC_JDK | wc -l)
 if [ $lines -eq 0 ];
