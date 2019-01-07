@@ -218,7 +218,8 @@ aspect AnnotationAPI {
     }
     eq InstAbstractShortClassDecl.annotations() {
         ArrayList<AnnotationNode> list = new ArrayList<>();
-        myInstClass().addAnnotationToEvaluator(list, this);
+        addAnnotationToEvaluator(list, this);
+        myTargetInstClassDecl().addAnnotationToEvaluator(list, this);
         return list;
     }
 

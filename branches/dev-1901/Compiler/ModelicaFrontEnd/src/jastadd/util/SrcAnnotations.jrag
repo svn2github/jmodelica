@@ -44,7 +44,7 @@ aspect SrcAnnotations {
         return srcAnnotation(SrcAnnotationNode.defaultEvaluator(), path);
     }
     public SrcAnnotationNode InstComponentDecl.srcAnnotation(String ... path) {
-        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(this), path);
+        return SrcAnnotationNode.createFor(srcAnnotationProvider(), new SrcAnnotationNode.InstEvaluator(enclosingInstClassDecl()), path);
     }
 
     public SrcAnnotationNode SrcExtendsClause.srcAnnotation(String ... path) {
