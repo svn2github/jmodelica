@@ -74,6 +74,9 @@ aspect AnnotationAPI {
     eq SrcComponentDecl.annotation(InstContext instContext)  = getSrcComment().annotation(instContext);
     eq InstComponentDecl.annotation(InstContext instContext) = getSrcComponentDecl().annotation(instContext);
 
+    eq InstExtends.annotation(InstContext instContext)      = getSrcExtendsClause().annotation(instContext);
+    eq SrcExtendsClause.annotation(InstContext instContext) = annotationOfChild(getSrcAnnotationOpt(), instContext);
+    
     public class FFunctionDecl     implements FAttributeListAnnotationNode.FAttributeList {}
     public class FVariable         implements FAttributeListAnnotationNode.FAttributeList {}
     public class FAbstractEquation implements FAttributeListAnnotationNode.FAttributeList {}
@@ -198,7 +201,7 @@ aspect AnnotationAPI {
     }
     eq InstFullClassDecl.annotations() {
         ArrayList<AnnotationNode> list = super.annotations();
-        this.addAnnotationToEvaluator(list, this);
+        addAnnotationToEvaluator(list, this);
         getInstExternalOpt().addAnnotationToEvaluator(list, this);
         return list;
     }
@@ -209,6 +212,7 @@ aspect AnnotationAPI {
     }
     eq InstExtends.annotations() {
         ArrayList<AnnotationNode> list = super.annotations();
+        addAnnotationToEvaluator(list, this);
         myInstClass().addAnnotationToEvaluator(list, this);
         return list;
     }
