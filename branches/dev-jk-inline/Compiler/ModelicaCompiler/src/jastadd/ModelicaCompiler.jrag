@@ -1777,6 +1777,7 @@ public class ModelicaCompiler implements LogContainer {
                                     options.setBooleanOption("generate_runtime_option_parameters", false);
                                     options.setBooleanOption("equation_sorting", false);
                                     options.setBooleanOption("automatic_tearing", false);
+                                    options.setBooleanOption("no_loop_unrolling_in_functions", false);
                                     break;
                                 default:
                                     break;
