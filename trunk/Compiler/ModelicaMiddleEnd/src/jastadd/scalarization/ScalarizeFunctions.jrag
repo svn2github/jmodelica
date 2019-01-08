@@ -134,7 +134,7 @@ aspect FunctionScalarization {
     eq FVectorFunctionCall.getArg().isFVectorFunctionCallArg() = true;
     
     syn boolean FAssignStmt.extractTemp() {
-        if (type().isArray() && myFClass().noUnrollingInFunctions() || getLeft().size().isUnknown() || getRight().size().isUnknown()) {
+        if (type().isArray()) {
             Set<FAbstractVariable> left = getLeft().usesInScalarizedExp();
             Set<FAbstractVariable> right = getRight().usesInScalarizedExp();
             for (FAbstractVariable fv : left) {
