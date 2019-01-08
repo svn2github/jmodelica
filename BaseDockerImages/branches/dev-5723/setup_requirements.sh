@@ -44,6 +44,12 @@ fi
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
 
+# Install font packages
+if [-f /etc/centos-release ]
+then
+    yum install -y libXfont lyx-fonts
+fi
+
 # Install GCC, input argument is defined in Dockerfile
 echo "--------------- INSTALLING GCC ---------------"
 . ${USR_PATH}/Docker/build/setup_gcc.sh ${GCC_INSTALLATION_TYPE}
