@@ -452,20 +452,16 @@ end ModTest16;
 
 record ModTest17
 
-    partial record Base
-        parameter Real flowScheme[:, :]=[1,2;2,3];
-    end Base;
-
-    record Test
-        extends Base(flowScheme=[1,2,3]);
-    end Test;
+    partial record R
+        parameter Real a[:, :]=[1,2;2,3];
+    end R;
     
-    extends Base(flowScheme=[1,2,3]);
+    extends R(a=[1,2,3]);
 
     annotation(__JModelica(UnitTesting(tests={
         NoWarningsTestCase(
             name="ModTest17",
-            description=""
+            description="Tests that no warning is produced for erroneous each on modifier, #5724"
     )})));
 end ModTest17;
 
