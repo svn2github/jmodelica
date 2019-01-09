@@ -281,12 +281,32 @@ aspect CCodeGenGlobalVariables {
                 String next = p.indent(indent);
                 
                 ArrayList<FGlobalVariable> globals = new ArrayList<>();
+                ArrayList<FExp> elements = new ArrayList<>();
                 for (FGlobalVariable fv : fclass.getFGlobalVariables()) {
-                    fv.getBindingExp().genGlobalVariableInitFunc_C(p, str, indent, false);
                     globals.add(fv);
+                    fv.getBindingExp().collectElementsForGenGlobalVariableInitFunc_C(elements, false);
                 }
                 
-                CodeSplitter<FGlobalVariable> splitter = new CodeSplitter<FGlobalVariable>(p, str, next, false,
+                CodeSplitter<FExp> splitter1 = new CodeSplitter<FExp>(p, str, indent, false, "", fclass.myOptions(), elements) {
+                    @Override
+                    protected void genFuncImpl(ArrayList<FExp> element, int split) {
+                        gen(element);
+                    }
+                    @Override
+                    protected int numScalars(FExp element) {
+                        return itemLimit + 1;
+                    }
+                    @Override
+                    public void genDecl(FExp element) {
+                    }
+                    @Override
+                    public void gen(FExp element) {
+                        element.genGlobalVariableInitFunc_C(p, str, indent, false);
+                    }
+                };
+                splitter1.genFuncImpls();
+                
+                CodeSplitter<FGlobalVariable> splitter2 = new CodeSplitter<FGlobalVariable>(p, str, next, false,
                         "model_init_eval_independent_globals", fclass.myOptions(), globals) {
                     @Override
                     public void genDecl(FGlobalVariable element) {
@@ -297,12 +317,13 @@ aspect CCodeGenGlobalVariables {
                         element.genGlobalVariableInitCall_C(p, str, indent);
                     }
                 };
-                splitter.genFuncImpls();
-                splitter.genFuncHeads();
+                splitter2.setInitialSplit(splitter1);
+                splitter2.genFuncImpls();
+                splitter2.genFuncHeads();
                 str.print("int model_init_eval_independent_globals(jmi_t* jmi) {\n");
-                splitter.printStatusDecl();
-                splitter.genFuncCalls();
-                splitter.printStatusReturn();
+                splitter2.printStatusDecl();
+                splitter2.genFuncCalls();
+                splitter2.printStatusReturn();
                 str.print("}\n");
             }
         }
@@ -316,16 +337,23 @@ aspect CCodeGenGlobalVariables {
         getBindingExp().genGlobalVariableInitCall_C(p, str, indent, FExp.global_C(nameUnderscore()), false);
     }
 
-    public void FExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent, boolean inArray) {
+    public void FExp.collectElementsForGenGlobalVariableInitFunc_C(ArrayList<FExp> list, boolean inArray) {
         if (!type().isExternalObject()) {
             for (FExp arg : childFExps()) {
-                arg.genGlobalVariableInitFunc_C(p, str, indent, isArray());
+                arg.collectElementsForGenGlobalVariableInitFunc_C(list, isArray());
             }
             if (inArray || !isComposite()) {
                 return;
             }
         }
         
+        list.add(this);
+    }
+
+    public void CommonAccessExp.collectElementsForGenGlobalVariableInitFunc_C(ArrayList<FExp> list, boolean inArray) {
+    }
+
+    public void FExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent, boolean inArray) {
         String next = p.indent(indent);
         String returnType = isArray() ? type().nameArray_C(p) : type().nameScalar_C(p);
         if (!type().isExternalObject()) {
@@ -409,11 +437,10 @@ aspect CCodeGenGlobalVariables {
             FExp cellExp = fArrayCell(i, 0);
             cellExp.genGlobalVariableInitCall_C(p, str, indent, cellName, true);
         }
-        
     }
 
     public void FExp.genGlobalVariableInitCall_C(CodePrinter p, CodeStream str, String indent, String name, boolean expand) {
-        if (!isLiteralZero()) {;
+        if (!isLiteralZero()) {
             str.print(indent, name, " = ");
             p.print(this, str, indent);
             str.print(";\n");
