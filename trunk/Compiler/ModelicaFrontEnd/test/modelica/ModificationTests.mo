@@ -450,6 +450,26 @@ end ModificationTests.ModTest16;
 end ModTest16;
 
 
+record ModTest17
+
+    partial record Base
+        parameter Real flowScheme[:, :]=[1,2;2,3];
+    end Base;
+
+    record Test
+        extends Base(flowScheme=[1,2,3]);
+    end Test;
+    
+    extends Base(flowScheme=[1,2,3]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        NoWarningsTestCase(
+            name="ModTest17",
+            description=""
+    )})));
+end ModTest17;
+
+
 
 model ShortClassDeclModTest1
   model A

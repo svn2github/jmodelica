@@ -221,7 +221,7 @@ aspect FlatTypeCheck {
             CommonType actualBT = actualBindingType();
             
             boolean reportedError = false;
-            if (!expectedBT.size().equals(actualBT.size())) {
+            if (!expectedBT.size().equivalent(actualBT.size(), unknownAllowed)) {
                 InstValueModification ivm = myInstValueMod();
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
                 if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
