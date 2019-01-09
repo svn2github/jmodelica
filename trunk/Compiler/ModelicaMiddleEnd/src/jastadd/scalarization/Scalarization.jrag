@@ -70,14 +70,11 @@ aspect Scalarization {
         }
         
         public FExp scalarizeAccessExp(FAccessExp accessExp) {
-            String fin = accessExp.myFV().myForIndexName();
-            FAccess access;
-            if (fin != null) {
-                access = new FAccessString(fin);
-            } else {
-                access = accessExp.getFAccess().scalarize(this, accessExp.indexNames);
+            FExp res = accessExp.myFV().scalarizeIterIndex(this);
+            if (res == null) {
+                res = accessExp.createNode(accessExp.getFAccess().scalarize(this, accessExp.indexNames));
             }
-            return accessExp.setLocationOf(accessExp.createNode(access));
+            return accessExp.setLocationOf(res);
         }
         
         public abstract void add(FExp left, FExp right);
@@ -1611,15 +1608,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FRangeExp.scalarizeExp(Scalarizer s) {
-        FExp res = indexNames[0].fullCopy();
-		boolean startIsOne = getFExp(0).isIntegerLiteral(1);
-		if (!startIsOne || hasStep()) {
-			res = new FSubExp(res, new FIntegerLitExp(1));
-			if (hasStep())
-				res = new FMulExp(res, getFExp(1).fullCopy());
-			res = new FAddExp(getFExp(0).fullCopy(), res);
-		}
-		return res;
+        return scalarizeWithIndex(s, indexNames[0].treeCopy());
 	}
 	
     public FExp FLinspace.scalarizeExp(Scalarizer s) {

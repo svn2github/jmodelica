@@ -866,7 +866,26 @@ aspect FunctionScalarization {
     eq ASTNode.getChild().myForIndexName()       = null;
     eq FForIndex.getFVariable().myForIndexName() = indexName;
 
-    
+    inh FExp FAbstractVariable.scalarizeIterIndex(Scalarizer s);
+    eq FForIndex.getFVariable().scalarizeIterIndex(Scalarizer s) = 
+        indexName == null ? null : getFExp().scalarizeWithIndex(s, new FAccessExp(indexName));
+    eq ASTNode  .getChild()    .scalarizeIterIndex(Scalarizer s) = null;
+
+    public FExp FExp.scalarizeWithIndex(Scalarizer s, FExp res) {
+        return null;
+    }
+
+    public FExp FRangeExp.scalarizeWithIndex(Scalarizer s, FExp res) {
+        boolean startIsOne = getFExp(0).isIntegerLiteral(1);
+        if (!startIsOne || hasStep()) {
+            res = new FSubExp(res, new FIntegerLitExp(1));
+            if (hasStep())
+                res = new FMulExp(res, getFExp(1).scalarize(s));
+            res = new FAddExp(getFExp(0).scalarize(s), res);
+        }
+        return res;
+    }
+
     /**
      * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(FExp[] names)}.
      */
