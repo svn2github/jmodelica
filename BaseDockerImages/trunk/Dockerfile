@@ -24,6 +24,7 @@ ENV USR_PATH=${DOCKER_USR_PATH}
 ENV GCC_INSTALLATION_TYPE=${GCC_INSTALL_TYPE}
 
 COPY *.sh ${USR_PATH}/Docker/build/
+COPY jcc.patch ${USR_PATH}/Docker/build/
 RUN chmod +x ${USR_PATH}/Docker/build/*.sh
 
 RUN ${USR_PATH}/Docker/build/setup.sh

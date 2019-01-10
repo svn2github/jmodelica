@@ -17,11 +17,11 @@ set -e
 
 . ${USR_PATH}/Docker/build/settings.sh
 
-BUILD_PKGS_JM_COMMON="vim sudo cmake swig ant wget tar patch"
-BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion java-1.8.0-openjdk python-devel python-jpype zlib-devel boost-devel"
-BUILD_PKGS_JM_DEBIAN="dos2unix dc jcc python-lucene subversion openjdk-8-jdk python-dev python-jpype zlib1g-dev libboost-dev"
+BUILD_PKGS_JM_COMMON="vim sudo cmake swig wget tar patch"
+BUILD_PKGS_JM_REDHAT="redhat-lsb ant-junit dos2unix python-pip bc make lucene which subversion java-1.8.0-openjdk-devel python-devel python-jpype zlib-devel boost-devel"
+BUILD_PKGS_JM_DEBIAN="dos2unix dc ant python-lucene subversion openjdk-8-jdk python-dev python-jpype zlib1g-dev libboost-dev"
 
-BUILD_PYTHON_PIP_PACKAGES="jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7 ipykernel==4.6.1"
+BUILD_PYTHON_PIP_PACKAGES="html5lib jupyter colorama nbformat Jinja2 openpyxl mock natsort six MarkupSafe lxml>=4.0.0 matplotlib==2.0.2 scipy cython nose ipython==5.7 ipykernel==4.10.0"
 
 if [ "$LINUX_DISTRIBUTION" = "CENTOS" ]; then
 	BUILD_PKGS_JM=$BUILD_PKGS_JM_REDHAT
@@ -43,6 +43,12 @@ fi
 
 pckinstall $BUILD_PKGS_JM_COMMON
 pckinstall $BUILD_PKGS_JM
+
+# Install font packages
+if [-f /etc/centos-release ]
+then
+    yum install -y libXfont lyx-fonts
+fi
 
 # Install GCC, input argument is defined in Dockerfile
 echo "--------------- INSTALLING GCC ---------------"
