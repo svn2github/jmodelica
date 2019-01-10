@@ -19,6 +19,8 @@ public class NoWarningsTestCase extends TestCase {
     /**
      * Perform tests on a set of semantic problems.
      * 
+     * Tests that no warnings or errors are reported.
+     * 
      * @return  <code>true</code> if test case shoule stop after this method
      */
     protected boolean testProblems(Collection<Problem> problems) {
