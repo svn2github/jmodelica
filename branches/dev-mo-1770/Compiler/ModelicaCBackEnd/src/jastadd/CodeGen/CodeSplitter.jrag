@@ -72,17 +72,13 @@ aspect CodeSplitter {
         }
         
         public void add(T element) {
-            int n = numScalars(element);
+            int n = element.numScalars_C();
             if (elements.size() == 0 || itemSplitCount + n > itemLimit) {
                 elements.add(new ArrayList<T>());
                 itemSplitCount = 0;
             }
             itemSplitCount += n;
             elements.get(elements.size() - 1).add(element);
-        }
-        
-        protected int numScalars(T element) {
-            return element.numScalars_C();
         }
         
         public void setInitialSplit(CodeSplitter other) {

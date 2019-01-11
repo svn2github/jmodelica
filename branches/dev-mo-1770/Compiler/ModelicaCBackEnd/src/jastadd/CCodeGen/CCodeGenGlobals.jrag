@@ -400,10 +400,6 @@ aspect CCodeGenGlobalVariables {
         str.print(indent, "}\n");
         return splitter;
     }
-
-    public void CommonAccessExp.genGlobalVariableInitFunc_C(CodePrinter p, CodeStream str, String indent) {
-        
-    }
     
     public void FExp.collectSubElementsForGenGlobalVariableInitFuncInit_C(ArrayList<GlobalVariableCodeSplitterElement> list) {
         list.add(new GlobalVariableCodeSplitterElement() {
