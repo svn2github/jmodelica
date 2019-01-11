@@ -12,59 +12,87 @@
 //    along with this program.  If not, see
 //     <http://www.ibm.com/developerworks/library/os-cpl.html/>.
 
-def ubuntuImage18_04
-def centosImage7_4
-def centosImage7_2
-def centosImage6_1
-def buildBaseImage(targetName, linuxDist, distTag, gccInstallType) {
-    return docker.build("jmodelica/$targetName", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$linuxDist --build-arg DOCKER_DIST_TAG=$distTag --build-arg GCC_INSTALL_TYPE=$gccInstallType .")
+
+def repoName="jmodelica"
+
+def imageName
+def platformVersion
+def pushTag
+
+def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_install_type) {
+    return docker.build("${repo_name}/$image_name", "--no-cache --pull --build-arg DOCKER_LINUX_DIST=$platform --build-arg DOCKER_DIST_TAG=$platform_version --build-arg GCC_INSTALL_TYPE=$gcc_install_type .")
 }
-stage ('Building') {
-    parallel Ubuntu: {
-        node('docker') {
-            checkout scm
-            ubuntuImage18_04 = buildBaseImage("ubuntu_base", "ubuntu", "18.04", "UBUNTU_DEFAULT")
-            ubuntuImage18_04.inside {
-            }
+
+def pushImage(docker_image, repo_name, image_name, push_tag) {
+    stage ("Push ${image_name}:${push_tag}") {
+        note we push to registry.hub.docker, it doesn't work otherwise, please read link below
+        https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
+        docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
+            docker_image.push("${push_tag}")
         }
-    },
-    CentOS6: {
-        node('docker') {
-            checkout scm
-            centosImage6_1 = buildBaseImage("centos_base", "centos", "6", "CENTOS_GCCv482")
-            centosImage6_1.inside {
-                sh 'echo Built version: && cat /etc/centos-release'
-            }
-        }
-    },
-    CentOS7_4: {
-        node('docker') {
-            checkout scm
-            centosImage7_4 = buildBaseImage("centos_base", "centos", "7.4.1708", "CENTOS_DEFAULT")
-            centosImage7_4.inside {
-                sh 'echo Built version: && cat /etc/centos-release'
-            }
-        }
-    },
-    CentOS7_2: {
-        node('docker') {
-            checkout scm
-            centosImage7_2 = buildBaseImage("centos_base", "centos", "7.2.1511", "CENTOS_DEFAULT")
-            centosImage7_2.inside {
-                sh 'echo Built version: && cat /etc/centos-release'
-            }
-        }
+        // delete all the variants
+        sh "docker 2>/dev/null 1>&2 rm -f ${repo_name}/${image_name}:${push_tag} || true"
+        sh "docker 2>/dev/null 1>&2 rm -f ${repo_name}/${image_name}:latest || true"
+        sh "docker 2>/dev/null 1>&2 rm -f registry.hub.docker.com/${repo_name}/${image_name}:latest || true"
+        sh "docker 2>/dev/null 1>&2 rmi -f ${repo_name}/${image_name}:${push_tag} || true"
+        sh "docker 2>/dev/null 1>&2 rmi -f ${repo_name}/${image_name}:latest || true"
+        sh "docker 2>/dev/null 1>&2 rmi -f registry.hub.docker.com/${repo_name}/${image_name}:${push_tag} || true"
     }
 }
-node('docker'){
-    stage ('Push') {
-        //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
-        //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
-        docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
-            ubuntuImage18_04.push("18.04")
-            centosImage7_4.push("7.4")
-            centosImage7_2.push("7.2")
-            centosImage6_1.push("6.1")
+
+// ---------------------------------------------------------------------------------------------------------------
+// The images are no longer built in parallel due to images with same name obtains identical IMAGE ID
+// even if they have different tags. This causes issues when pushing the images, therefore we now build in series.
+// ---------------------------------------------------------------------------------------------------------------
+
+node('docker') {
+    
+    imageName = "ubuntu_base"
+    platformVersion = "18.04"
+    pushTag = "18.04"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "ubuntu", "${platformVersion}", "UBUNTU_DEFAULT")
+        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_base"
+    platformVersion = "6"
+    pushTag = "6"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_GCCv482")
+        dockerImageRef.inside {
+            sh 'echo Built version: && cat /etc/centos-release'
         }
+        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_base"
+    platformVersion = "7.4.1708"
+    pushTag = "7.4"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
+        dockerImageRef.inside {
+            sh 'echo Built version: && cat /etc/centos-release'
+        }
+        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
+    }
+    
+    imageName = "centos_base"
+    platformVersion = "7.2.1511"
+    pushTag = "7.2"
+    
+    stage ("Building ${imageName} ${platformVersion}") {
+        checkout scm
+        def dockerImageRef = buildBaseImage("${imageName}", "${repoName}", "centos", "${platformVersion}", "CENTOS_DEFAULT")
+        dockerImageRef.inside {
+            sh 'echo Built version: && cat /etc/centos-release'
+        }
+        pushImage(dockerImageRef, "${repoName}", "${imageName}", "${pushTag}")
     }
 }
