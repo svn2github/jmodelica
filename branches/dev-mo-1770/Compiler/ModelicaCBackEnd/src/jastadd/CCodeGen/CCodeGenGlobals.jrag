@@ -384,9 +384,7 @@ aspect CCodeGenGlobalVariables {
                 element.gen(p, str, indent);
             }
         };
-        if (oldSplitter != null) {
-            splitter.setInitialSplit(oldSplitter);
-        }
+        splitter.setInitialSplit(oldSplitter);
         splitter.genFuncImpls();
         splitter.genFuncHeads();
         str.print(indent, returnType, " jmi_global_", tempName_C(), "(jmi_t* jmi) {\n");

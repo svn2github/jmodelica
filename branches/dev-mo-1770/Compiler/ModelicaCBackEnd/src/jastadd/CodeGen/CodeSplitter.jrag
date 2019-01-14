@@ -82,7 +82,9 @@ aspect CodeSplitter {
         }
         
         public void setInitialSplit(CodeSplitter other) {
-            chunkSplitCount = other.chunkSplitCount;
+            if (other != null) {
+                chunkSplitCount = other.chunkSplitCount;
+            }
         }
         
         private int numSplits() {
