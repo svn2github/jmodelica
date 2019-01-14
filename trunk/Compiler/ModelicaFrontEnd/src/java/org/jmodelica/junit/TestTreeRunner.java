@@ -131,21 +131,25 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
             runners.get(test.getName()).run(note);
         } else {
             Description d = caseDesc.get(test.getName());
-            note.fireTestStarted(d);
-            try {
-                ((GenericTestCase) test).testMe(spec.asserter());
-            } catch (Throwable e) {
-                note.fireTestFailure(new Failure(d, e));
-                if(outputFailing) {
-                    try(PrintWriter pw = new PrintWriter(new FileOutputStream(new File(outputFailingFile), appendMode))) {
-                        pw.println(testFile.getAbsolutePath()+","+modelNames.get(test.getName()));
-                        appendMode = true;
-                    } catch (FileNotFoundException e1) {
-                        e1.printStackTrace();
+            if(((GenericTestCase) test).shouldBeIgnored()) {
+                note.fireTestIgnored(d);
+            } else {
+                note.fireTestStarted(d);
+                try {
+                    ((GenericTestCase) test).testMe(spec.asserter());
+                } catch (Throwable e) {
+                    note.fireTestFailure(new Failure(d, e));
+                    if(outputFailing) {
+                        try(PrintWriter pw = new PrintWriter(new FileOutputStream(new File(outputFailingFile), appendMode))) {
+                            pw.println(testFile.getAbsolutePath()+","+modelNames.get(test.getName()));
+                            appendMode = true;
+                        } catch (FileNotFoundException e1) {
+                            e1.printStackTrace();
+                        }
                     }
                 }
+                note.fireTestFinished(d);
             }
-            note.fireTestFinished(d);
         }
     }
 
