@@ -25,25 +25,21 @@ def buildBaseImage(image_name, repo_name, platform, platform_version, gcc_instal
 
 def pushImage(docker_image, repo_name, image_name, push_tag) {
     stage ("Push ${image_name}:${push_tag}") {
-        note we push to registry.hub.docker, it doesn't work otherwise, please read link below
-        https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
+        //note we push to registry.hub.docker, it doesn't work otherwise, please read link below
+        //https://getintodevops.com/blog/building-your-first-docker-image-with-jenkins-2-guide-for-developers
         docker.withRegistry('https://registry.hub.docker.com', 'jmodelica-dockerhub') {
             docker_image.push("${push_tag}")
         }
-        // delete all the variants
+        sh 'docker images'
         sh "docker 2>/dev/null 1>&2 rm -f ${repo_name}/${image_name}:${push_tag} || true"
         sh "docker 2>/dev/null 1>&2 rm -f ${repo_name}/${image_name}:latest || true"
         sh "docker 2>/dev/null 1>&2 rm -f registry.hub.docker.com/${repo_name}/${image_name}:latest || true"
         sh "docker 2>/dev/null 1>&2 rmi -f ${repo_name}/${image_name}:${push_tag} || true"
         sh "docker 2>/dev/null 1>&2 rmi -f ${repo_name}/${image_name}:latest || true"
         sh "docker 2>/dev/null 1>&2 rmi -f registry.hub.docker.com/${repo_name}/${image_name}:${push_tag} || true"
+        sh 'docker images'
     }
 }
-
-// ---------------------------------------------------------------------------------------------------------------
-// The images are no longer built in parallel due to images with same name obtains identical IMAGE ID
-// even if they have different tags. This causes issues when pushing the images, therefore we now build in series.
-// ---------------------------------------------------------------------------------------------------------------
 
 node('docker') {
     
