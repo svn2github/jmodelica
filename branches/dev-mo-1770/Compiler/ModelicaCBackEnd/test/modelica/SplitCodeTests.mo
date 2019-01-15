@@ -899,15 +899,14 @@ model SplitCodeTestGlobals2
 annotation(__JModelica(UnitTesting(tests={
     CCodeGenTestCase(
         name="SplitCodeTestGlobals2",
-        description="Test code splitting of globals, splitting functions",
+        description="Test code splitting of globals, splitting arrays into multiple functions",
         cc_split_function_limit=2,
-        cc_split_element_limit=3,
+        cc_split_element_limit=2,
         template="$C_model_init_eval_independent_globals$",
         generatedCode="
 int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
     jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     JMI_DYNAMIC_FREE()
@@ -932,6 +931,7 @@ jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
     JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
     jmi_global_tmp_1_0(jmi, tmp_1);
     jmi_global_tmp_1_1(jmi, tmp_1);
     JMI_GLOBALS_FREE()

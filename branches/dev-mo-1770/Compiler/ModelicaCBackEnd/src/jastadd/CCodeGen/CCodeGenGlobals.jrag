@@ -267,7 +267,7 @@ aspect CCodeGenGlobalsReinit {
 
 aspect CCodeGenGlobalVariables {
 
-    public interface GlobalVariableCodeSplitterElement extends CodeSplitter.Item {
+    public interface GlobalVariableArrayElement extends CodeSplitter.Item {
         void gen(CodePrinter p, CodeStream str, String indent);
     }
 
@@ -289,7 +289,7 @@ aspect CCodeGenGlobalVariables {
                 
                 for (FGlobalVariable fv : fclass.getFGlobalVariables()) {
                     globals.add(fv);
-                    fv.getBindingExp().collectElementsForGenGlobalVariableInitFunc_C(elements, false);
+                    fv.getBindingExp().collectExpsForGlobalVariableInitFunc_C(elements, false);
                 }
                 
                 CodeSplitter oldSplitter = null;
@@ -329,10 +329,10 @@ aspect CCodeGenGlobalVariables {
         getBindingExp().genGlobalVariableInitCall_C(p, str, indent, FExp.global_C(nameUnderscore()), false);
     }
 
-    public void FExp.collectElementsForGenGlobalVariableInitFunc_C(ArrayList<FExp> list, boolean inArray) {
+    public void FExp.collectExpsForGlobalVariableInitFunc_C(ArrayList<FExp> list, boolean inArray) {
         if (!type().isExternalObject()) {
             for (FExp arg : childFExps()) {
-                arg.collectElementsForGenGlobalVariableInitFunc_C(list, isArray());
+                arg.collectExpsForGlobalVariableInitFunc_C(list, isArray());
             }
             if (inArray || !isComposite()) {
                 return;
@@ -342,7 +342,7 @@ aspect CCodeGenGlobalVariables {
         list.add(this);
     }
 
-    public void CommonAccessExp.collectElementsForGenGlobalVariableInitFunc_C(ArrayList<FExp> list, boolean inArray) {
+    public void CommonAccessExp.collectExpsForGlobalVariableInitFunc_C(ArrayList<FExp> list, boolean inArray) {
     }
 
     public void FExp.genGlobalVariableInitHead_C(CodePrinter p, CodeStream str, String indent) {
@@ -356,11 +356,11 @@ aspect CCodeGenGlobalVariables {
         String next = p.indent(indent);
         final String returnType = typeReturn_C(p);
         
-        ArrayList<GlobalVariableCodeSplitterElement> elements = new ArrayList<>();
-        collectSubElementsForGenGlobalVariableInitFuncInit_C(elements);
+        ArrayList<GlobalVariableArrayElement> elements = new ArrayList<>();
+        collectArrayElementsForGenGlobalVariableInitFunc_C(elements);
         
-        final CodeSplitter<GlobalVariableCodeSplitterElement> splitter = 
-                new CodeSplitter<GlobalVariableCodeSplitterElement>(p, str, next, true, "jmi_global_" + tempName_C(),
+        final CodeSplitter<GlobalVariableArrayElement> splitter = 
+                new CodeSplitter<GlobalVariableArrayElement>(p, str, next, true, "jmi_global_" + tempName_C(),
                 myFClass().myOptions(), elements) {
             @Override
             protected void printFunctionHeader(int split) {
@@ -377,10 +377,10 @@ aspect CCodeGenGlobalVariables {
                 }
             }
             @Override
-            public void genDecl(GlobalVariableCodeSplitterElement element) {
+            public void genDecl(GlobalVariableArrayElement element) {
             }
             @Override
-            public void gen(GlobalVariableCodeSplitterElement element) {
+            public void gen(GlobalVariableArrayElement element) {
                 element.gen(p, str, indent);
             }
         };
@@ -391,6 +391,7 @@ aspect CCodeGenGlobalVariables {
         str.print(next, "JMI_DYNAMIC_INIT()\n");
         genGlobalVariableInitFuncDecl_C(p, str, next);
         str.print(next, "JMI_GLOBALS_INIT()\n");
+        genGlobalVariableInitFuncInit_C(p, str, next);
         splitter.genFuncCalls();
         str.print(next, "JMI_GLOBALS_FREE()\n");
         str.print(next, "JMI_DYNAMIC_FREE()\n");
@@ -399,26 +400,17 @@ aspect CCodeGenGlobalVariables {
         return splitter;
     }
     
-    public void FExp.collectSubElementsForGenGlobalVariableInitFuncInit_C(ArrayList<GlobalVariableCodeSplitterElement> list) {
-        list.add(new GlobalVariableCodeSplitterElement() {
-            public void gen(CodePrinter p, CodeStream str, String indent) {
-                FExp.this.genGlobalVariableInitFuncInit_C(p, str, indent);
-            }
-            public int numScalars_C() {
-                return FExp.this.numScalarsGlobals_C();
-            }
-        });
+    public void FExp.collectArrayElementsForGenGlobalVariableInitFunc_C(ArrayList<GlobalVariableArrayElement> list) {
     }
     
-    public void FArray.collectSubElementsForGenGlobalVariableInitFuncInit_C(ArrayList<GlobalVariableCodeSplitterElement> list) {
-        super.collectSubElementsForGenGlobalVariableInitFuncInit_C(list);
+    public void FArray.collectArrayElementsForGenGlobalVariableInitFunc_C(ArrayList<GlobalVariableArrayElement> list) {
         String name = tempName_C();
         String type = type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
         String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
         for (Index i : indices()) {
             final String cellName = pre + i.toUnclosedString() + ")";
             final FExp cellExp = fArrayCell(i, 0);
-            list.add(new GlobalVariableCodeSplitterElement() {
+            list.add(new GlobalVariableArrayElement() {
                 public void gen(CodePrinter p, CodeStream str, String indent) {
                     cellExp.genGlobalVariableInitCall_C(p, str, indent, cellName, true);
                 }
@@ -429,8 +421,10 @@ aspect CCodeGenGlobalVariables {
         }
     }
 
-    syn int FExp.numScalarsGlobals_C() = 1;
-    eq FRecordConstructor.numScalarsGlobals_C() = 1 + getRecord().recordType().getComponents().getNumChild();
+    syn int FExp.numScalarsGlobals_C() = isLiteralZero() ? 0 : 1;
+    eq FFunctionCall.numScalarsGlobals_C() = 1;
+    eq FArray.numScalarsGlobals_C() = 1;
+    eq FRecordConstructor.numScalarsGlobals_C() = getRecord().recordType().getComponents().getNumChild();
 
     public void FExp.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
         str.print(indent, type().nameScalar_C(p), " ", tempName_C(), ";\n");
