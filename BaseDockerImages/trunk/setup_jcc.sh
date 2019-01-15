@@ -39,4 +39,4 @@ cp ${USR_PATH}/Docker/build/jcc.patch ${JCC_INSTALL_DIR}
 cd ${JCC_INSTALL_DIR}
 patch < jcc.patch
 
-rm jcc.patch
+rm -i jcc.patch

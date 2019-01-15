@@ -36,6 +36,8 @@ then
     # Enable the environment
     echo 'source /opt/rh/devtoolset-2/enable' >> ~/.bashrc
     source ~/.bashrc
+    echo 'source /opt/rh/devtoolset-2/enable' >> /home/baseuser/.bashrc
+    source /home/baseuser/.bashrc
 
 elif [ ${GCC_INSTALLATION_TYPE} = "UBUNTU_DEFAULT" ]
 then
