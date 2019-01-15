@@ -758,9 +758,12 @@ aspect Arrays {
             if (hasStep())
                 exp = new FDivExp(exp, getFExp(1).treeCopy());
             exp = new FAddExp(new FIntegerFuncExp(exp), new FIntegerLitExp(1));
+        } else if (promoteTypeForFExpList(getFExps()).isReal()) {
+            exp = new FIntegerFuncExp(exp);
         }
-        if (!(exp instanceof FSizeExp))
+        if (!(exp instanceof FSizeExp)) {
             exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
+        }
         s.append(dynamicFExp(exp));
         return s;
     }

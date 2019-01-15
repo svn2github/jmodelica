@@ -450,6 +450,22 @@ end ModificationTests.ModTest16;
 end ModTest16;
 
 
+record ModTest17
+
+    partial record R
+        parameter Real a[:, :]=[1,2;2,3];
+    end R;
+    
+    extends R(a=[1,2,3]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        NoWarningsTestCase(
+            name="ModTest17",
+            description="Tests that no warning is produced for erroneous each on modifier, #5724"
+    )})));
+end ModTest17;
+
+
 
 model ShortClassDeclModTest1
   model A
