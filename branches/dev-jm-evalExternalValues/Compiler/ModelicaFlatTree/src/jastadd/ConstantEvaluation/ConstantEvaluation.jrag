@@ -3254,6 +3254,7 @@ aspect ConstantEvaluation {
         public CValue ceval(VariableEvaluator evaluator);
         public CValue ceval(VariableEvaluator evaluator, Index i);
         public String name();
+        public String qualifiedName();
         public Size size();
         public TypePrefixVariability variability();
 

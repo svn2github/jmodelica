@@ -259,7 +259,7 @@ aspect CCodeGenExternalCeval {
     eq FExp           .externalArgument() = this;
     eq CommonAccessExp.externalArgument() = myCommonVarDecl().externalArgument(this);
 
-    interface CommonVariableDecl {
+    public interface CommonVariableDecl {
         ExternalArgument externalArgument(FExp exp);
     }
 

@@ -333,6 +333,7 @@ aspect FlatNames {
     
     syn String FFunctionDecl.qualifiedName()     = name();
     syn String FFunctionVariable.qualifiedName() = name();
+    syn String FAbstractVariable.qualifiedName() = name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()      = getNameNoTransform().name();
