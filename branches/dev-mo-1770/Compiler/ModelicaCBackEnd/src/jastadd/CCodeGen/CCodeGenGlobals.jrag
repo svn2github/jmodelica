@@ -422,8 +422,6 @@ aspect CCodeGenGlobalVariables {
     }
 
     syn int FExp.numScalarsGlobals_C() = isLiteralZero() ? 0 : 1;
-    eq FFunctionCall.numScalarsGlobals_C() = 1;
-    eq FArray.numScalarsGlobals_C() = 1;
     eq FRecordConstructor.numScalarsGlobals_C() = getRecord().recordType().getComponents().getNumChild();
 
     public void FExp.genGlobalVariableInitFuncDecl_C(CodePrinter p, CodeStream str, String indent) {
