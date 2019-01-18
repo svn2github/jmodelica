@@ -8549,7 +8549,7 @@ public
    for i3 in 1:max(p_i, 0) loop
     temp_6 := temp_6 + nrows_p[i3];
    end for;
-   temp_2[i2] := vf[i2] * nrow[i2];
+   temp_2[i2] := vf[temp_5 + 1 + (i2 - 1)] * nrow[temp_5 + 1 + (i2 - 1)];
   end for;
   temp_1 := 0.0;
   for i1 in 1:max(integer(temp_3 - (temp_4 + 1)) + 1, 0) loop

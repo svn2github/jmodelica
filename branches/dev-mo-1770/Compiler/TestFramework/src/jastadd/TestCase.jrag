@@ -16,8 +16,10 @@
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -54,6 +56,7 @@ abstract public class TestCase implements GenericTestCase {
 
     private String name = null;
     private String description = null;
+    private String platform = null;
     private String sourceFileName = null;
     private String className = null;
     private int beginLine = -1;
@@ -225,6 +228,39 @@ abstract public class TestCase implements GenericTestCase {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	/**
+	 * platform is an optional annotation that allows to specify for which platforms the test should be run or skipped.
+	 * see {@code org.jmodelica.util.Arguments#tooltip()} for possible platforms.
+	 * 
+	 * Assume that the system platform is win64.
+	 * Example 1 (only excluded platforms):
+	 *   annotation(
+	 *     platform="!linux64")
+	 * Here, win64 is included, because it is not listed as an excluded platform.
+	 * 
+	 * Example 2 (both included and excluded platforms):
+	 *   annotation(
+	 *     platform="win32 !linux64")
+	 * Here, win64 is excluded, because the list of platforms includes included platforms, 
+	 * and win64 is not listed as an included platform.
+	 * 
+	 * Example 3 (no platform annotation):
+	 *   annotation(
+	 *     )
+	 * When the platform annotation is omitted, win64 is included, because it is not listed as an excluded platform. 
+	 * @return the platform
+	 */
+	public String getPlatform() {
+		return platform;
+	}
+
+	/**
+	 * @param platform the platform to set
+	 */
+	public void setPlatform(String platform) {
+		this.platform = platform;
 	}
 
 	/**
@@ -465,6 +501,47 @@ abstract public class TestCase implements GenericTestCase {
 		fail("Exception caught in test case: " + out.toString());
 	}
 	
+	public boolean shouldBeIgnored() {
+	    String platforms = getPlatform();
+        PlatformSet platformSet = PlatformSet.parse(platforms);
+        String systemPlatform = EnvironmentUtils.getSystemPlatform();
+        return platformSet.isPlatformExcluded(systemPlatform);
+	}
+
+    public static class PlatformSet {
+        private static PlatformSet EMPTY_PLATFORMSET = new PlatformSet(Collections.<String>emptySet(), Collections.<String>emptySet());
+        private Set<String> includedPlatforms;
+        private Set<String> excludedPlatforms;
+        private PlatformSet(Set<String> includedPlatforms, Set<String> excludedPlatforms) {
+            this.includedPlatforms = includedPlatforms;
+            this.excludedPlatforms = excludedPlatforms;
+        }
+        /**
+         * parses a string of the form "win32 !linux64" and returns a PlatformSet.
+         * See {@code TestCase.getPlatform()} for usage.
+         */
+        public static PlatformSet parse(String string) {
+            if(string == null || string.equals("")) {
+                return EMPTY_PLATFORMSET;
+            }
+            Set<String> includedPlatforms = new HashSet<>();
+            Set<String> excludedPlatforms = new HashSet<>();
+            String[] words = string.split(" ");
+            for(String word : words) {
+                if(word.startsWith("!")) {
+                    excludedPlatforms.add(word.substring(1));
+                } else {
+                    includedPlatforms.add(word);
+                }
+            }
+            return new PlatformSet(includedPlatforms, excludedPlatforms);
+        }
+        
+       boolean isPlatformExcluded(String platform) {
+           return excludedPlatforms.contains(platform) || !includedPlatforms.isEmpty() && !includedPlatforms.contains(platform);
+       }
+    }
+
 	public void testMe(Assert a) {
 		try {
 			asserter = a;
