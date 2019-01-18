@@ -23,6 +23,14 @@ aspect CCodeGenTypes {
     eq FFunctionArray.typeReturn_C(CodePrinter p)            = type_C(p);
 
 
+    syn String FExp.typeReturn_C(CodePrinter p) {
+        String type = isArray() ? type().nameArray_C(p) : type().nameScalar_C(p);
+        if (!type().isExternalObject()) {
+            type = type + "*";
+        }
+        return type;
+    }
+
     syn String FType.type_C(CodePrinter p) = isArray() ? arrayType_C(p) : scalarType_C(p);
 
     syn String FType.scalarType_C(CodePrinter p)         = nameScalar_C(p);

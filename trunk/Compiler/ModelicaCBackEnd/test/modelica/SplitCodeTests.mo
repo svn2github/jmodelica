@@ -477,6 +477,8 @@ int model_ode_derivatives_5(jmi_t* jmi) {
     return ef;
 }
 
+/*** SPLIT FILE ***/
+
 int model_ode_derivatives_0(jmi_t* jmi);
 int model_ode_derivatives_1(jmi_t* jmi);
 int model_ode_derivatives_2(jmi_t* jmi);
@@ -780,5 +782,279 @@ int model_init_eval_independent_start(jmi_t* jmi) {
 }
 ")})));
 end SplitCodeTestStartValueZero;
+
+model SplitCodeTestGlobals1
+    record R
+        Real[4] a;
+    end R;
+    
+    constant R[2] c = {R(1:4), R(5:8)};
+    
+    function f
+        input Real x;
+        input Integer i;
+        output Real y = x + c[i].a[i];
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time, 1);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SplitCodeTestGlobals1",
+        description="Test code splitting of globals, splitting files between functions",
+        cc_split_function_limit=2,
+        template="$C_model_init_eval_independent_globals$",
+        generatedCode="
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_val_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_val_1(tmp_1, 4) = AD_WRAP_LITERAL(4);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+jmi_array_t* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_2, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_2, 4, 1, 4)
+    jmi_array_val_1(tmp_2, 1) = AD_WRAP_LITERAL(5);
+    jmi_array_val_1(tmp_2, 2) = AD_WRAP_LITERAL(6);
+    jmi_array_val_1(tmp_2, 3) = AD_WRAP_LITERAL(7);
+    jmi_array_val_1(tmp_2, 4) = AD_WRAP_LITERAL(8);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+/*** SPLIT FILE ***/
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
+jmi_array_t* jmi_global_tmp_2(jmi_t* jmi);
+
+R_0_ra* jmi_global_tmp_3(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_3, 2, 1, 2)
+    jmi_array_rec_1(tmp_3, 1)->a = jmi_global_tmp_1(jmi);
+    jmi_array_rec_1(tmp_3, 2)->a = jmi_global_tmp_2(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_3;
+}
+
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(SplitCodeTests_SplitCodeTestGlobals1_c) = jmi_global_tmp_3(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+/*** SPLIT FILE ***/
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
+jmi_array_t* jmi_global_tmp_2(jmi_t* jmi);
+R_0_ra* jmi_global_tmp_3(jmi_t* jmi);
+
+int model_init_eval_independent_globals_0(jmi_t* jmi);
+
+int model_init_eval_independent_globals(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= model_init_eval_independent_globals_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end SplitCodeTestGlobals1;
+
+model SplitCodeTestGlobals2
+    record R
+        Real[4] a;
+    end R;
+    
+    constant R[1] c = {R(1:4)};
+    
+    function f
+        input Real x;
+        input Integer i;
+        output Real y = x + c[i].a[i];
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time, 1);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SplitCodeTestGlobals2",
+        description="Test code splitting of globals, splitting arrays into multiple functions",
+        cc_split_function_limit=2,
+        cc_split_element_limit=2,
+        template="$C_model_init_eval_independent_globals$",
+        generatedCode="
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_val_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_val_1(tmp_1, 4) = AD_WRAP_LITERAL(4);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+/*** SPLIT FILE ***/
+
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1);
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1);
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    jmi_global_tmp_1_0(jmi, tmp_1);
+    jmi_global_tmp_1_1(jmi, tmp_1);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+
+R_0_ra* jmi_global_tmp_2(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, R_0_r, R_0_ra, tmp_2, 1, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, R_0_r, R_0_ra, tmp_2, 1, 1, 1)
+    jmi_array_rec_1(tmp_2, 1)->a = jmi_global_tmp_1(jmi);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_2;
+}
+
+/*** SPLIT FILE ***/
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi);
+R_0_ra* jmi_global_tmp_2(jmi_t* jmi);
+
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(SplitCodeTests_SplitCodeTestGlobals2_c) = jmi_global_tmp_2(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_init_eval_independent_globals_0(jmi_t* jmi);
+
+int model_init_eval_independent_globals(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= model_init_eval_independent_globals_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end SplitCodeTestGlobals2;
+
+model SplitCodeTestGlobals3
+    
+    constant Real[4] c = 0:3;
+    
+    function f
+        input Real x;
+        input Integer i;
+        output Real y = x + c[i];
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(time, 1);
+
+annotation(__JModelica(UnitTesting(tests={
+    CCodeGenTestCase(
+        name="SplitCodeTestGlobals3",
+        description="Test code splitting of globals, splitting array with a zero",
+        cc_split_element_limit=1,
+        template="$C_model_init_eval_independent_globals$",
+        generatedCode="
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 2) = 1;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 3) = 2;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_2(jmi_t* jmi, jmi_array_t* tmp_1) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_array_val_1(tmp_1, 4) = 3;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int jmi_global_tmp_1_0(jmi_t* jmi, jmi_array_t* tmp_1);
+int jmi_global_tmp_1_1(jmi_t* jmi, jmi_array_t* tmp_1);
+int jmi_global_tmp_1_2(jmi_t* jmi, jmi_array_t* tmp_1);
+
+jmi_array_t* jmi_global_tmp_1(jmi_t* jmi) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1)
+    JMI_GLOBALS_INIT()
+    JMI_ARRAY_INIT_1(DYNA, jmi_real_t, jmi_array_t, tmp_1, 4, 1, 4)
+    jmi_global_tmp_1_0(jmi, tmp_1);
+    jmi_global_tmp_1_1(jmi, tmp_1);
+    jmi_global_tmp_1_2(jmi, tmp_1);
+    JMI_GLOBALS_FREE()
+    JMI_DYNAMIC_FREE()
+    return tmp_1;
+}
+int model_init_eval_independent_globals_0(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_GLOBAL(SplitCodeTests_SplitCodeTestGlobals3_c) = jmi_global_tmp_1(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+int model_init_eval_independent_globals_0(jmi_t* jmi);
+
+int model_init_eval_independent_globals(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    ef |= model_init_eval_independent_globals_0(jmi);
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end SplitCodeTestGlobals3;
 
 end SplitCodeTests;

@@ -19,6 +19,9 @@ $C_model_init_eval_independent_globals$
 
 $C_model_init_eval_independent_start$
 
+int model_init_eval_independent_globals(jmi_t* jmi);
+int model_init_eval_independent_start(jmi_t* jmi);
+
 int model_init_eval_independent(jmi_t* jmi) {
     model_init_eval_independent_globals(jmi);
     model_init_eval_independent_start(jmi);

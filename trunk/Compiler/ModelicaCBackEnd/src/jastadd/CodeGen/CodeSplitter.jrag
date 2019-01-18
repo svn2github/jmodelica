@@ -22,16 +22,17 @@ aspect CodeSplitter {
             public int numScalars_C();
         }
         
-        private int itemLimit;
-        private int chunkLimit;
-        private int splitCount = 0;
-        private String funcName;
-        protected CodeStream str;
-        protected CodePrinter p;
-        protected String indent;
-        protected boolean allowDirect;
+        protected final int itemLimit;
+        protected final int chunkLimit;
+        protected final String funcName;
+        protected final CodeStream str;
+        protected final CodePrinter p;
+        protected final String indent;
+        protected final boolean allowDirect;
         
         private ArrayList<ArrayList<T>> elements = new ArrayList<ArrayList<T>>();
+        private int itemSplitCount = 0;
+        private int chunkSplitCount = 0;
         
         public CodeSplitter(CodePrinter p, CodeStream str, String indent,
                 boolean allowDirect, String funcName, OptionRegistry or) {
@@ -72,12 +73,18 @@ aspect CodeSplitter {
         
         public void add(T element) {
             int n = element.numScalars_C();
-            if (elements.size() == 0 || splitCount + n > itemLimit) {
+            if (elements.size() == 0 || itemSplitCount + n > itemLimit) {
                 elements.add(new ArrayList<T>());
-                splitCount = 0;
+                itemSplitCount = 0;
             }
-            splitCount += n;
+            itemSplitCount += n;
             elements.get(elements.size() - 1).add(element);
+        }
+        
+        public void setInitialSplit(CodeSplitter other) {
+            if (other != null) {
+                chunkSplitCount = other.chunkSplitCount;
+            }
         }
         
         private int numSplits() {
@@ -96,25 +103,41 @@ aspect CodeSplitter {
             ASTNode.genFunctionEnd(str, indent);
         }
         
+        protected void printFunctionHeader(int split) {
+            str.print("int ", funcName, "_", split, "(jmi_t* jmi)");
+        }
+        
         public void genFuncHeads() {
             for (int split = 0; split < numSplits(); split++) {
-                str.print("int ", funcName, "_", split, "(jmi_t* jmi);\n");
+                printFunctionHeader(split);
+                str.print(";\n");
             }
             str.print("\n");
         }
         
         public void genFuncImpls() {
-            for (int split = 0; split < numSplits(); split++) {
-                if (split > 0 && split % chunkLimit == 0) {
+            for (int split = 0; split < numSplits(); split++, chunkSplitCount++) {
+                if (chunkSplitCount > 0 && chunkSplitCount % chunkLimit == 0) {
                     str.splitFile();
+                    genAtNewFile();
                 }
-                str.print("int ", funcName, "_", split, "(jmi_t* jmi) {\n");
-                printStatusDecl();
-                int n = Math.min(itemLimit, elements.size() - split * itemLimit);
-                gen(elements.get(split));
-                printStatusReturn();
-                str.print("}\n\n");
+                genFuncImpl(elements.get(split), split);
             }
+
+            if (chunkSplitCount > 0 && chunkSplitCount % chunkLimit == 0) {
+                str.splitFile();
+                genAtNewFile();
+            }
+            chunkSplitCount++;
+        }
+        
+        protected void genFuncImpl(ArrayList<T> element, int split) {
+            printFunctionHeader(split);
+            str.print(" {\n");
+            printStatusDecl();
+            gen(element);
+            printStatusReturn();
+            str.print("}\n\n");
         }
         
         public void genFuncCalls() {
@@ -125,8 +148,12 @@ aspect CodeSplitter {
                 }
             }
             for (int split = 0; split < n; split++) {
-                str.print(indent, "ef |= ", funcName, "_", split, "(jmi);\n");
+                genFuncCall(split);
             }
+        }
+        
+        protected void genFuncCall(int split) {
+            str.print(indent, "ef |= ", funcName, "_", split, "(jmi);\n");
         }
         
         protected void gen(ArrayList<T> splitElements) {
@@ -146,6 +173,7 @@ aspect CodeSplitter {
             genPost();
         }
         
+        public void genAtNewFile() {}
         public abstract void genDecl(T element);
         public void genPre(T element) {}
         public abstract void gen(T element);
